@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -137,7 +138,7 @@ void DeboneProcess::Execute( aiScene* pScene)
                     const aiString *find = newMeshes[b].second?&newMeshes[b].second->mName:0;
 
                     aiNode *theNode = find?pScene->mRootNode->FindNode(*find):0;
-                    std::pair<unsigned int,aiNode*> push_pair(meshes.size(),theNode);
+                    std::pair<unsigned int,aiNode*> push_pair(static_cast<unsigned int>(meshes.size()),theNode);
 
                     mSubMeshIndices[a].push_back(push_pair);
                     meshes.push_back(newMeshes[b].first);
@@ -147,7 +148,7 @@ void DeboneProcess::Execute( aiScene* pScene)
 
                 if(!DefaultLogger::isNullLogger()) {
                     char buffer[1024];
-                    ::sprintf(buffer,"Removed %u bones. Input bones: %u. Output bones: %u",in-out,in,out);
+                    ::ai_snprintf(buffer,1024,"Removed %u bones. Input bones: %u. Output bones: %u",in-out,in,out);
                     DefaultLogger::get()->info(buffer);
                 }
 
@@ -156,13 +157,13 @@ void DeboneProcess::Execute( aiScene* pScene)
             }
             else    {
                 // Mesh is kept unchanged - store it's new place in the mesh array
-                mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(meshes.size(),(aiNode*)0));
+                mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(static_cast<unsigned int>(meshes.size()),(aiNode*)0));
                 meshes.push_back(srcMesh);
             }
         }
 
         // rebuild the scene's mesh array
-        pScene->mNumMeshes = meshes.size();
+        pScene->mNumMeshes = static_cast<unsigned int>(meshes.size());
         delete [] pScene->mMeshes;
         pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
         std::copy( meshes.begin(), meshes.end(), pScene->mMeshes);
@@ -382,7 +383,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
 
     // this will require two passes
 
-    unsigned int m = pNode->mNumMeshes, n = mSubMeshIndices.size();
+    unsigned int m = static_cast<unsigned int>(pNode->mNumMeshes), n = static_cast<unsigned int>(mSubMeshIndices.size());
 
     // first pass, look for meshes which have not moved
 
@@ -390,7 +391,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
 
         unsigned int srcIndex = pNode->mMeshes[a];
         const std::vector< std::pair< unsigned int,aiNode* > > &subMeshes = mSubMeshIndices[srcIndex];
-        unsigned int nSubmeshes = subMeshes.size();
+        unsigned int nSubmeshes = static_cast<unsigned int>(subMeshes.size());
 
         for(unsigned int b=0;b<nSubmeshes;b++) {
             if(!subMeshes[b].second) {
@@ -404,7 +405,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
     for(unsigned int a=0;a<n;a++)
     {
         const std::vector< std::pair< unsigned int,aiNode* > > &subMeshes = mSubMeshIndices[a];
-        unsigned int nSubmeshes = subMeshes.size();
+        unsigned int nSubmeshes = static_cast<unsigned int>(subMeshes.size());
 
         for(unsigned int b=0;b<nSubmeshes;b++) {
             if(subMeshes[b].second == pNode)    {
@@ -417,7 +418,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
         delete [] pNode->mMeshes; pNode->mMeshes = NULL;
     }
 
-    pNode->mNumMeshes = newMeshList.size();
+    pNode->mNumMeshes = static_cast<unsigned int>(newMeshList.size());
 
     if(pNode->mNumMeshes)   {
         pNode->mMeshes = new unsigned int[pNode->mNumMeshes];

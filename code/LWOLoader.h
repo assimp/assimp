@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,12 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_LWOLOADER_H_INCLUDED
 #define AI_LWOLOADER_H_INCLUDED
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/types.h>
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include "LWOFileData.h"
 #include "BaseImporter.h"
+
+#include <map>
 
 struct aiTexture;
 struct aiNode;

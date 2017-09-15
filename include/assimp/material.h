@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file material.h
  *  @brief Defines the material system of the library
  */
-
+#pragma once
 #ifndef AI_MATERIAL_H_INC
 #define AI_MATERIAL_H_INC
 
@@ -103,7 +104,7 @@ enum aiTextureOp
 // ---------------------------------------------------------------------------
 /** @brief Defines how UV coordinates outside the [0...1] range are handled.
  *
- *  Commonly refered to as 'wrapping mode'.
+ *  Commonly referred to as 'wrapping mode'.
  */
 enum aiTextureMapMode
 {
@@ -413,7 +414,7 @@ enum aiTextureFlags
  *    SourceColor * SourceBlend + DestColor * DestBlend
  *  @endcode
  *  where DestColor is the previous color in the framebuffer at this
- *  position and SourceColor is the material colro before the transparency
+ *  position and SourceColor is the material color before the transparency
  *  calculation.<br>
  *  This corresponds to the #AI_MATKEY_BLEND_FUNC property.
 */
@@ -477,13 +478,14 @@ struct aiUVTransform
      *  rotation center is 0.5f|0.5f. The default value
      *  0.f.
      */
-    float mRotation;
+    ai_real mRotation;
 
 
 #ifdef __cplusplus
     aiUVTransform()
-        :   mScaling    (1.f,1.f)
-        ,   mRotation   (0.f)
+        :   mTranslation (0.0,0.0)
+        ,   mScaling    (1.0,1.0)
+        ,   mRotation   (0.0)
     {
         // nothing to be done here ...
     }
@@ -507,6 +509,14 @@ enum aiPropertyTypeInfo
      *  The material system performs the type conversion automatically.
     */
     aiPTI_Float   = 0x1,
+
+    /** Array of double-precision (64 Bit) floats
+     *
+     *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API
+     *  aiMaterial::Get()) to query properties stored in floating-point format.
+     *  The material system performs the type conversion automatically.
+    */
+    aiPTI_Double   = 0x2,
 
     /** The material property is an aiString.
      *
@@ -660,7 +670,7 @@ public:
         unsigned int idx, int* pOut, unsigned int* pMax) const;
 
     aiReturn Get(const char* pKey,unsigned int type,
-        unsigned int idx, float* pOut, unsigned int* pMax) const;
+        unsigned int idx, ai_real* pOut, unsigned int* pMax) const;
 
     // -------------------------------------------------------------------
     /** @brief Retrieve a Type value with a specific key
@@ -681,7 +691,7 @@ public:
         unsigned int idx, int& pOut) const;
 
     aiReturn Get(const char* pKey,unsigned int type,
-        unsigned int idx, float& pOut) const;
+        unsigned int idx, ai_real& pOut) const;
 
     aiReturn Get(const char* pKey,unsigned int type,
         unsigned int idx, aiString& pOut) const;
@@ -705,37 +715,40 @@ public:
     // -------------------------------------------------------------------
     /** Helper function to get all parameters pertaining to a
      *  particular texture slot from a material.
-    *
-    *  This function is provided just for convenience, you could also
-    *  read the single material properties manually.
-    *  @param type Specifies the type of the texture to be retrieved (
-    *    e.g. diffuse, specular, height map ...)
-    *  @param index Index of the texture to be retrieved. The function fails
-    *    if there is no texture of that type with this index.
-    *    #GetTextureCount() can be used to determine the number of textures
-    *    per texture type.
-    *  @param path Receives the path to the texture.
-    *    NULL is a valid value.
-   *  @param mapping The texture mapping.
-   *        NULL is allowed as value.
-    *  @param uvindex Receives the UV index of the texture.
-    *    NULL is a valid value.
-    *  @param blend Receives the blend factor for the texture
-    *    NULL is a valid value.
-    *  @param op Receives the texture operation to be performed between
-    *    this texture and the previous texture. NULL is allowed as value.
-    *  @param mapmode Receives the mapping modes to be used for the texture.
-    *    The parameter may be NULL but if it is a valid pointer it MUST
-    *    point to an array of 3 aiTextureMapMode's (one for each
-    *    axis: UVW order (=XYZ)).
-    */
+     *
+     *  This function is provided just for convenience, you could also
+     *  read the single material properties manually.
+     *  @param type Specifies the type of the texture to be retrieved (
+     *    e.g. diffuse, specular, height map ...)
+     *  @param index Index of the texture to be retrieved. The function fails
+     *    if there is no texture of that type with this index.
+     *    #GetTextureCount() can be used to determine the number of textures
+     *    per texture type.
+     *  @param path Receives the path to the texture.
+     *    If the texture is embedded, receives a '*' followed by the id of
+     *    the texture (for the textures stored in the corresponding scene) which
+     *    can be converted to an int using a function like atoi.
+     *    NULL is a valid value.
+     *  @param mapping The texture mapping.
+     *    NULL is allowed as value.
+     *  @param uvindex Receives the UV index of the texture.
+     *    NULL is a valid value.
+     *  @param blend Receives the blend factor for the texture
+     *    NULL is a valid value.
+     *  @param op Receives the texture operation to be performed between
+     *    this texture and the previous texture. NULL is allowed as value.
+     *  @param mapmode Receives the mapping modes to be used for the texture.
+     *    The parameter may be NULL but if it is a valid pointer it MUST
+     *    point to an array of 3 aiTextureMapMode's (one for each
+     *    axis: UVW order (=XYZ)).
+     */
     // -------------------------------------------------------------------
     aiReturn GetTexture(aiTextureType type,
         unsigned int  index,
         C_STRUCT aiString* path,
         aiTextureMapping* mapping   = NULL,
         unsigned int* uvindex       = NULL,
-        float* blend                = NULL,
+        ai_real* blend              = NULL,
         aiTextureOp* op             = NULL,
         aiTextureMapMode* mapmode   = NULL) const;
 
@@ -812,6 +825,12 @@ public:
         unsigned int index = 0);
 
     aiReturn AddProperty (const float* pInput,
+        unsigned int pNumValues,
+        const char* pKey,
+        unsigned int type  = 0,
+        unsigned int index = 0);
+
+    aiReturn AddProperty (const double* pInput,
         unsigned int pNumValues,
         const char* pKey,
         unsigned int type  = 0,
@@ -1311,9 +1330,9 @@ extern "C" {
  *        structure or NULL if the key has not been found. */
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
-     const C_STRUCT aiMaterial* pMat,
+    const C_STRUCT aiMaterial* pMat,
     const char* pKey,
-     unsigned int type,
+    unsigned int type,
     unsigned int  index,
     const C_STRUCT aiMaterialProperty** pPropOut);
 
@@ -1348,7 +1367,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
     const char* pKey,
     unsigned int type,
     unsigned int index,
-    float* pOut,
+    ai_real* pOut,
     unsigned int* pMax);
 
 
@@ -1377,7 +1396,7 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
-    float* pOut)
+    ai_real* pOut)
 {
     return aiGetMaterialFloatArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
 }
@@ -1414,7 +1433,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* 
 inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
-   unsigned int index,
+    unsigned int index,
     int* pOut)
 {
     return aiGetMaterialIntegerArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
@@ -1491,7 +1510,10 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMa
  *     #aiGetMaterialTextureCount() can be used to determine the number of
  *     textures in a particular texture stack.
  *  @param[out] path Receives the output path
- *      This parameter must be non-null.
+ *     If the texture is embedded, receives a '*' followed by the id of
+ *     the texture (for the textures stored in the corresponding scene) which
+ *     can be converted to an int using a function like atoi.
+ *     This parameter must be non-null.
  *  @param mapping The texture mapping mode to be used.
  *      Pass NULL if you're not interested in this information.
  *  @param[out] uvindex For UV-mapped textures: receives the index of the UV
@@ -1516,7 +1538,7 @@ ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     aiString* path,
     aiTextureMapping* mapping   = NULL,
     unsigned int* uvindex       = NULL,
-    float* blend                = NULL,
+    ai_real* blend              = NULL,
     aiTextureOp* op             = NULL,
     aiTextureMapMode* mapmode   = NULL,
     unsigned int* flags         = NULL);
@@ -1527,7 +1549,7 @@ C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_STRUCT aiString* path,
     C_ENUM aiTextureMapping* mapping    /*= NULL*/,
     unsigned int* uvindex               /*= NULL*/,
-    float* blend                        /*= NULL*/,
+    ai_real* blend                      /*= NULL*/,
     C_ENUM aiTextureOp* op              /*= NULL*/,
     C_ENUM aiTextureMapMode* mapmode    /*= NULL*/,
     unsigned int* flags                 /*= NULL*/);

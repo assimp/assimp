@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,16 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "3DSExporter.h"
 #include "3DSLoader.h"
-#include "SceneCombiner.h"
+#include "3DSHelper.h"
+#include <assimp/SceneCombiner.h>
 #include "SplitLargeMeshes.h"
 #include "StringComparison.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Exporter.hpp>
 #include <memory>
 
 using namespace Assimp;
 namespace Assimp    {
+using namespace D3DS;
 
 namespace {
 
@@ -85,7 +88,7 @@ namespace {
             const std::size_t chunk_size = head_pos - chunk_start_pos;
 
             writer.SetCurrentPos(chunk_start_pos + SIZE_OFFSET);
-            writer.PutU4(chunk_size);
+            writer.PutU4(static_cast<uint32_t>(chunk_size));
             writer.SetCurrentPos(head_pos);
         }
 
@@ -150,7 +153,7 @@ namespace {
 // Worker function for exporting a scene to 3DS. Prototyped and registered in Exporter.cpp
 void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-    boost::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
+    std::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
     if(!outfile) {
         throw DeadlyExportError("Could not open output .3ds file: " + std::string(pFile));
     }
@@ -164,7 +167,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
     // in |Exporter::ExportFormatEntry|.
     aiScene* scenecopy_tmp;
     SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
-    std::auto_ptr<aiScene> scenecopy(scenecopy_tmp);
+    std::unique_ptr<aiScene> scenecopy(scenecopy_tmp);
 
     SplitLargeMeshesProcess_Triangle tri_splitter;
     tri_splitter.SetLimit(0xffff);
@@ -181,7 +184,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
 } // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* scene)
+Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* scene)
 : scene(scene)
 , writer(outfile)
 {
@@ -365,7 +368,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type
     aiTextureMapMode map_mode[2] = {
         aiTextureMapMode_Wrap, aiTextureMapMode_Wrap
     };
-    float blend = 1.0f;
+    ai_real blend = 1.0;
     if (mat.GetTexture(type, 0, &path, NULL, NULL, &blend, NULL, map_mode) != AI_SUCCESS || !path.length) {
         return;
     }
@@ -558,6 +561,12 @@ void Discreet3DSExporter::WriteColor(const aiColor3D& color) {
 void Discreet3DSExporter::WritePercentChunk(float f) {
     ChunkWriter chunk(writer, Discreet3DS::CHUNK_PERCENTF);
     writer.PutF4(f);
+}
+
+// ------------------------------------------------------------------------------------------------
+void Discreet3DSExporter::WritePercentChunk(double f) {
+    ChunkWriter chunk(writer, Discreet3DS::CHUNK_PERCENTD);
+    writer.PutF8(f);
 }
 
 

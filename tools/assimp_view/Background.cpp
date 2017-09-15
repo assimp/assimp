@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "assimp_view.h"
+#include "StringUtils.h"
 
 namespace AssimpView {
 
@@ -385,7 +386,7 @@ void CBackgroundPainter::RecreateNativeResource()
             if (!szEnd)szEnd = szPath.c_str()-1;
 
             char szTemp[1024];
-            sprintf(szTemp,"[ERROR] Unable to load background cubemap %s",szEnd+1);
+			ai_snprintf(szTemp,1024,"[ERROR] Unable to load background cubemap %s",szEnd+1);
 
             CLogDisplay::Instance().AddEntry(szTemp,
                 D3DCOLOR_ARGB(0xFF,0xFF,0,0));
@@ -419,7 +420,7 @@ void CBackgroundPainter::RecreateNativeResource()
             if (!szEnd)szEnd = szPath.c_str()-1;
 
             char szTemp[1024];
-            sprintf(szTemp,"[ERROR] Unable to load background texture %s",szEnd+1);
+			ai_snprintf(szTemp,1024,"[ERROR] Unable to load background texture %s",szEnd+1);
 
             CLogDisplay::Instance().AddEntry(szTemp,
                 D3DCOLOR_ARGB(0xFF,0xFF,0,0));

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,16 +42,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  ASSXML exporter main code
  */
 #include <stdarg.h>
-#include "./../include/assimp/version.h"
+#include <assimp/version.h>
 #include "ProcessHelper.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #   include <zlib.h>
 #else
-#   include "../contrib/zlib/zlib.h"
+#   include <contrib/zlib/zlib.h>
 #endif
 
 #include <time.h>
@@ -65,13 +66,20 @@ namespace Assimp    {
 
 namespace AssxmlExport  {
 
-int ioprintf( IOStream * io, const char * format, ... )
-{
-    char sz[4096];
+// -----------------------------------------------------------------------------------
+static int ioprintf( IOStream * io, const char *format, ... ) {
+	using namespace std;
+    if ( nullptr == io ) {
+        return -1;
+    }
+
+    static const int Size = 4096;
+    char sz[ Size ];
+    ::memset( sz, '\0', Size );
     va_list va;
     va_start( va, format );
-    int nSize = vsnprintf( sz, 4096, format, va );
-  ai_assert( nSize < 4096 );
+    const unsigned int nSize = vsnprintf( sz, Size-1, format, va );
+    ai_assert( nSize < Size );
     va_end( va );
 
     io->Write( sz, sizeof(char), nSize );
@@ -81,8 +89,7 @@ int ioprintf( IOStream * io, const char * format, ... )
 
 // -----------------------------------------------------------------------------------
 // Convert a name to standard XML format
-void ConvertName(aiString& out, const aiString& in)
-{
+static void ConvertName(aiString& out, const aiString& in) {
     out.length = 0;
     for (unsigned int i = 0; i < in.length; ++i)  {
         switch (in.data[i]) {
@@ -105,8 +112,7 @@ void ConvertName(aiString& out, const aiString& in)
 
 // -----------------------------------------------------------------------------------
 // Write a single node as text dump
-void WriteNode(const aiNode* node, IOStream * io, unsigned int depth)
-{
+static void WriteNode(const aiNode* node, IOStream * io, unsigned int depth) {
     char prefix[512];
     for (unsigned int i = 0; i < depth;++i)
         prefix[i] = '\t';
@@ -156,47 +162,46 @@ void WriteNode(const aiNode* node, IOStream * io, unsigned int depth)
 // Some chuncks of text will need to be encoded for XML
 // http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377
 static std::string encodeXML(const std::string& data) {
-        std::string buffer;
-        buffer.reserve(data.size());
-        for(size_t pos = 0; pos != data.size(); ++pos) {
-                switch(data[pos]) {
-                        case '&':  buffer.append("&amp;");              break;
-                        case '\"': buffer.append("&quot;");             break;
-                        case '\'': buffer.append("&apos;");             break;
-                        case '<':  buffer.append("&lt;");                   break;
-                        case '>':  buffer.append("&gt;");                   break;
-                        default:   buffer.append(&data[pos], 1);    break;
-                }
-        }
-        return buffer;
+    std::string buffer;
+    buffer.reserve(data.size());
+    for(size_t pos = 0; pos != data.size(); ++pos) {
+            switch(data[pos]) {
+                    case '&':  buffer.append("&amp;");              break;
+                    case '\"': buffer.append("&quot;");             break;
+                    case '\'': buffer.append("&apos;");             break;
+                    case '<':  buffer.append("&lt;");                   break;
+                    case '>':  buffer.append("&gt;");                   break;
+                    default:   buffer.append(&data[pos], 1);    break;
+            }
+    }
+    return buffer;
 }
-
-
 
 // -----------------------------------------------------------------------------------
 // Write a text model dump
-void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
-{
-    time_t tt = ::time(NULL);
-    tm* p     = ::gmtime(&tt);
-
-    aiString name;
+static
+void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
+    time_t tt = ::time( NULL );
+    tm* p     = ::gmtime( &tt );
+    ai_assert( nullptr != p );
 
     // write header
-    ioprintf(io,
+    std::string header(
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
         "<ASSIMP format_id=\"1\">\n\n"
-
         "<!-- XML Model dump produced by assimp dump\n"
         "  Library version: %i.%i.%i\n"
         "  %s\n"
         "-->"
         " \n\n"
-        "<Scene flags=\"%i\" postprocessing=\"%i\">\n",
+        "<Scene flags=\"%d\" postprocessing=\"%i\">\n"
+    );
 
-        aiGetVersionMajor(),aiGetVersionMinor(),aiGetVersionRevision(),asctime(p),
-        scene->mFlags,
-        0 /*globalImporter->GetEffectivePostProcessing()*/);
+    const unsigned int majorVersion( aiGetVersionMajor() );
+    const unsigned int minorVersion( aiGetVersionMinor() );
+    const unsigned int rev( aiGetVersionRevision() );
+    const char *curtime( asctime( p ) );
+    ioprintf( io, header.c_str(), majorVersion, minorVersion, rev, curtime, scene->mFlags, 0 );
 
     // write the node graph
     WriteNode(scene->mRootNode, io, 0);
@@ -266,6 +271,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
         ioprintf(io,"\t</Light>\n");
     }
 #endif
+    aiString name;
 
     // write textures
     if (scene->mNumTextures) {
@@ -294,16 +300,17 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
             else if (!shortened){
                 ioprintf(io,"\t\t<Data length=\"%i\"> \n",tex->mWidth*tex->mHeight*4);
 
-                // const unsigned int width = (unsigned int)log10((double)std::max(tex->mHeight,tex->mWidth))+1;
+                // const unsigned int width = (unsigned int)std::log10((double)std::max(tex->mHeight,tex->mWidth))+1;
                 for (unsigned int y = 0; y < tex->mHeight;++y) {
                     for (unsigned int x = 0; x < tex->mWidth;++x) {
                         aiTexel* tx = tex->pcData + y*tex->mWidth+x;
                         unsigned int r = tx->r,g=tx->g,b=tx->b,a=tx->a;
                         ioprintf(io,"\t\t\t%2x %2x %2x %2x",r,g,b,a);
 
-                        // group by four for readibility
-                        if (0 == (x+y*tex->mWidth) % 4)
-                            ioprintf(io,"\n");
+                        // group by four for readability
+                        if ( 0 == ( x + y*tex->mWidth ) % 4 ) {
+                            ioprintf( io, "\n" );
+                        }
                     }
                 }
             }
@@ -451,7 +458,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
         ioprintf(io,"<MeshList num=\"%i\">\n",scene->mNumMeshes);
         for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
             aiMesh* mesh = scene->mMeshes[i];
-            // const unsigned int width = (unsigned int)log10((double)mesh->mNumVertices)+1;
+            // const unsigned int width = (unsigned int)std::log10((double)mesh->mNumVertices)+1;
 
             // mesh header
             ioprintf(io,"\t<Mesh types=\"%s %s %s %s\" material_index=\"%i\">\n",

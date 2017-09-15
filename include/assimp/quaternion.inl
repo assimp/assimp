@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  quaternion.inl
  *  @brief Inline implementation of aiQuaterniont<TReal> operators
  */
+#pragma once
 #ifndef AI_QUATERNION_INL_INC
 #define AI_QUATERNION_INL_INC
 
@@ -280,4 +282,4 @@ inline aiVector3t<TReal> aiQuaterniont<TReal>::Rotate (const aiVector3t<TReal>& 
 }
 
 #endif
-#endif
+#endif // AI_QUATERNION_INL_INC

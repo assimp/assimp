@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,14 +45,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exceptional.h"
 
-#include <string>
-#include <map>
 #include <vector>
 #include <set>
-#include "../include/assimp/types.h"
-#include "../include/assimp/ProgressHandler.hpp"
+#include <assimp/types.h>
+#include <assimp/ProgressHandler.hpp>
 
 struct aiScene;
+struct aiImporterDesc;
 
 namespace Assimp    {
 
@@ -60,7 +60,6 @@ class IOSystem;
 class BaseProcess;
 class SharedPostProcessInfo;
 class IOStream;
-
 
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
@@ -176,8 +175,8 @@ public:
         );
 
     // -------------------------------------------------------------------
-    /** Returns the error description of the last error that occured.
-     * @return A description of the last error that occured. An empty
+    /** Returns the error description of the last error that occurred.
+     * @return A description of the last error that occurred. An empty
      * string if there was no error.
      */
     const std::string& GetErrorText() const {
@@ -194,13 +193,10 @@ public:
         const Importer* pImp
         );
 
-
     // -------------------------------------------------------------------
     /** Called by #Importer::GetImporterInfo to get a description of
      *  some loader features. Importers must provide this information. */
     virtual const aiImporterDesc* GetInfo() const = 0;
-
-
 
     // -------------------------------------------------------------------
     /** Called by #Importer::GetExtensionList for each loaded importer.
@@ -317,7 +313,7 @@ public: // static utilities
      *  @param Size of one token, in bytes. Maximally 16 bytes.
      *  @return true if one of the given tokens was found
      *
-     *  @note For convinence, the check is also performed for the
+     *  @note For convenience, the check is also performed for the
      *  byte-swapped variant of all tokens (big endian). Only for
      *  tokens of size 2,4.
      */
@@ -348,16 +344,25 @@ public: // static utilities
         std::string& data);
 
     // -------------------------------------------------------------------
+    /// @brief  Enum to define, if empty files are ok or not.
+    enum TextFileMode { 
+        ALLOW_EMPTY,
+        FORBID_EMPTY 
+    };
+
+    // -------------------------------------------------------------------
     /** Utility for text file loaders which copies the contents of the
      *  file into a memory buffer and converts it to our UTF8
      *  representation.
      *  @param stream Stream to read from.
      *  @param data Output buffer to be resized and filled with the
      *   converted text file data. The buffer is terminated with
-     *   a binary 0. */
+     *   a binary 0.
+     *  @param mode Whether it is OK to load empty text files. */
     static void TextFileToBuffer(
         IOStream* stream,
-        std::vector<char>& data);
+        std::vector<char>& data,
+        TextFileMode mode = FORBID_EMPTY);
 
     // -------------------------------------------------------------------
     /** Utility function to move a std::vector into a aiScene array
@@ -371,21 +376,17 @@ public: // static utilities
         T*& out,
         unsigned int& outLength)
     {
-        outLength = vec.size();
+        outLength = unsigned(vec.size());
         if (outLength) {
             out = new T[outLength];
             std::swap_ranges(vec.begin(), vec.end(), out);
         }
     }
 
-    
-
 protected:
-
-    /** Error description in case there was one. */
+    /// Error description in case there was one.
     std::string m_ErrorText;
-
-    /** Currently set progress handler */
+    /// Currently set progress handler.
     ProgressHandler* m_progress;
 };
 

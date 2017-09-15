@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,9 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "LimitBoneWeightsProcess.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include "StringUtils.h"
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 #include <stdio.h>
 
 using namespace Assimp;
@@ -128,9 +130,9 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
         std::sort( vit->begin(), vit->end());
 
         // now kill everything beyond the maximum count
-        unsigned int m = vit->size();
+        unsigned int m = static_cast<unsigned int>(vit->size());
         vit->erase( vit->begin() + mMaxWeights, vit->end());
-        removed += m-vit->size();
+        removed += static_cast<unsigned int>(m-vit->size());
 
         // and renormalize the weights
         float sum = 0.0f;
@@ -193,7 +195,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 
         if (!DefaultLogger::isNullLogger()) {
             char buffer[1024];
-            ::sprintf(buffer,"Removed %u weights. Input bones: %u. Output bones: %u",removed,old_bones,pMesh->mNumBones);
+            ai_snprintf(buffer,1024,"Removed %u weights. Input bones: %u. Output bones: %u",removed,old_bones,pMesh->mNumBones);
             DefaultLogger::get()->info(buffer);
         }
     }

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,14 +45,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "OgreImporter.h"
 #include "TinyFormatter.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include "fast_atof.h"
 
 #include <vector>
 #include <sstream>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace std;
 
@@ -77,7 +78,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
             aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
             if (material)
             {
-                submesh->materialIndex = materials.size();
+                submesh->materialIndex = static_cast<int>(materials.size());
                 materials.push_back(material);
             }
         }
@@ -93,13 +94,13 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
     // Create materials that can be found and parsed via the IOSystem.
     for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
     {
-        SubMeshXml *submesh = mesh->GetSubMesh(i);
+        SubMeshXml *submesh = mesh->GetSubMesh( static_cast<uint16_t>(i));
         if (submesh && !submesh->materialRef.empty())
         {
             aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
             if (material)
             {
-                submesh->materialIndex = materials.size();
+                submesh->materialIndex = static_cast<int>(materials.size());
                 materials.push_back(material);
             }
         }
@@ -110,7 +111,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
 
 void OgreImporter::AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials)
 {
-    pScene->mNumMaterials = materials.size();
+    pScene->mNumMaterials = static_cast<unsigned int>(materials.size());
     if (pScene->mNumMaterials > 0)
     {
         pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
@@ -181,7 +182,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
             return 0;
         }
 
-        boost::scoped_ptr<IOStream> stream(materialFile);
+        std::unique_ptr<IOStream> stream(materialFile);
         if (stream->FileSize() == 0)
         {
             DefaultLogger::get()->warn(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");

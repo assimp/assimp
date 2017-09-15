@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 #include "fast_atof.h"
 #include <vector>
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
     namespace DXF {
@@ -66,6 +67,8 @@ public:
     LineReader(StreamReaderLE& reader)
          // do NOT skip empty lines. In DXF files, they count as valid data.
         : splitter(reader,false,true)
+        , groupcode( 0 )
+        , value()
         , end()
     {
     }
@@ -211,7 +214,7 @@ struct InsertBlock
 // keeps track of all geometry in a single BLOCK.
 struct Block
 {
-    std::vector< boost::shared_ptr<PolyLine> > lines;
+    std::vector< std::shared_ptr<PolyLine> > lines;
     std::vector<InsertBlock> insertions;
 
     std::string name;

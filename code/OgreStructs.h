@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "MemoryIOWrapper.h"
-#include <boost/shared_ptr.hpp>
-#include "../include/assimp/mesh.h"
+#include <memory>
+#include <assimp/mesh.h>
 #include <map>
 #include <vector>
 #include <set>
@@ -76,7 +77,7 @@ class Skeleton;
 
 // Typedefs
 typedef Assimp::MemoryIOStream MemoryStream;
-typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
+typedef std::shared_ptr<MemoryStream> MemoryStreamPtr;
 typedef std::map<uint16_t, MemoryStreamPtr> VertexBufferBindings;
 
 // Ogre Vertex Element
@@ -568,7 +569,10 @@ typedef std::vector<SubMesh*> SubMeshList;
 class Mesh
 {
 public:
+    /// Constructor.
     Mesh();
+
+    /// Destructor.
     ~Mesh();
 
     /// Releases all memory that this data structure owns.
@@ -578,7 +582,7 @@ public:
     size_t NumSubMeshes() const;
 
     /// Returns submesh for @c index.
-    SubMesh *GetSubMesh(uint16_t index) const;
+    SubMesh *GetSubMesh( size_t index) const;
 
     /// Convert mesh to Assimp scene.
     void ConvertToAssimpScene(aiScene* dest);

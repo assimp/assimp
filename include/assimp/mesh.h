@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -43,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Declares the data structures in which the imported geometry is
     returned by ASSIMP: aiMesh, aiFace and aiBone data structures.
  */
-#ifndef INCLUDED_AI_MESH_H
-#define INCLUDED_AI_MESH_H
+#pragma once
+#ifndef AI_MESH_H_INC
+#define AI_MESH_H_INC
 
 #include "types.h"
 
@@ -54,7 +55,7 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 // Limits. These values are required to match the settings Assimp was
-// compiled against. Therfore, do not redefine them unless you build the
+// compiled against. Therefore, do not redefine them unless you build the
 // library from source using the same definitions.
 // ---------------------------------------------------------------------------
 
@@ -249,7 +250,8 @@ struct aiBone
 
     //! Default constructor
     aiBone()
-      : mNumWeights( 0 )
+        : mName()
+        , mNumWeights( 0 )
       , mWeights( NULL )
     {
     }
@@ -375,6 +377,11 @@ struct aiAnimMesh
      * from language bindings.
      */
     unsigned int mNumVertices;
+    
+    /** 
+     * Weight of the AnimMesh. 
+     */
+    float mWeight;
 
 #ifdef __cplusplus
 
@@ -384,6 +391,7 @@ struct aiAnimMesh
         , mTangents( NULL )
         , mBitangents( NULL )
         , mNumVertices( 0 )
+        , mWeight( 0.0f )
     {
         // fixme consider moving this to the ctor initializer list as well
         for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++){
@@ -444,6 +452,27 @@ struct aiAnimMesh
 #endif
 };
 
+// ---------------------------------------------------------------------------
+/** @brief Enumerates the methods of mesh morphing supported by Assimp.
+ */
+enum aiMorphingMethod
+{
+    /** Interpolation between morph targets */
+    aiMorphingMethod_VERTEX_BLEND       = 0x1,
+
+    /** Normalized morphing between morph targets  */
+    aiMorphingMethod_MORPH_NORMALIZED   = 0x2,
+
+    /** Relative morphing between morph targets  */
+    aiMorphingMethod_MORPH_RELATIVE     = 0x3,
+
+    /** This value is not used. It is just here to force the
+     *  compiler to map this enum to a 32 Bit integer.
+     */
+#ifndef SWIG
+    _aiMorphingMethod_Force32Bit = INT_MAX
+#endif
+}; //! enum aiMorphingMethod
 
 // ---------------------------------------------------------------------------
 /** @brief A mesh represents a geometry or model with a single material.
@@ -521,7 +550,7 @@ struct aiMesh
     * mixed primitive types (i.e. lines and triangles) may have
     * normals, but the normals for vertices that are only referenced by
     * point or line primitives are undefined and set to qNaN.  See
-    * the #mNormals member for a detailled discussion of qNaNs.
+    * the #mNormals member for a detailed discussion of qNaNs.
     * @note If the mesh contains tangents, it automatically also
     * contains bitangents.
     */
@@ -578,7 +607,7 @@ struct aiMesh
     C_STRUCT aiBone** mBones;
 
     /** The material used by this mesh.
-     * A mesh does use only a single material. If an imported model uses
+     * A mesh uses only a single material. If an imported model uses
      * multiple materials, the import splits up the mesh. Use this value
      * as index into the scene's material list.
      */
@@ -598,15 +627,20 @@ struct aiMesh
     C_STRUCT aiString mName;
 
 
-    /** NOT CURRENTLY IN USE. The number of attachment meshes */
+    /** The number of attachment meshes. Note! Currently only works with Collada loader. */
     unsigned int mNumAnimMeshes;
 
-    /** NOT CURRENTLY IN USE. Attachment meshes for this mesh, for vertex-based animation.
+    /** Attachment meshes for this mesh, for vertex-based animation.
      *  Attachment meshes carry replacement data for some of the
-     *  mesh'es vertex components (usually positions, normals). */
+     *  mesh'es vertex components (usually positions, normals).
+     *  Note! Currently only works with Collada loader.*/
     C_STRUCT aiAnimMesh** mAnimMeshes;
 
-
+    /** 
+     *  Method of morphing when animeshes are specified. 
+     */
+    unsigned int mMethod;
+	
 #ifdef __cplusplus
 
     //! Default constructor. Initializes all members to 0
@@ -624,6 +658,7 @@ struct aiMesh
         , mMaterialIndex( 0 )
         , mNumAnimMeshes( 0 )
         , mAnimMeshes( NULL )
+        , mMethod( 0 )
     {
         for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
         {
@@ -731,9 +766,8 @@ struct aiMesh
 #endif // __cplusplus
 };
 
-
 #ifdef __cplusplus
 }
 #endif //! extern "C"
-#endif // __AI_MESH_H_INC
+#endif // AI_MESH_H_INC
 

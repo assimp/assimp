@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_LWSLOADER_H_INCLUDED
 
 #include "LWOFileData.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "BaseImporter.h"
 
 struct aiImporterDesc;

@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file FileSystemFilter.h
  *  Implements a filter system to filter calls to Exists() and Open()
- *  in order to improve the sucess rate of file opening ...
+ *  in order to improve the success rate of file opening ...
  */
 #ifndef AI_FILESYSTEMFILTER_H_INC
 #define AI_FILESYSTEMFILTER_H_INC

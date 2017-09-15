@@ -59,10 +59,13 @@ endmacro(clear_if_changed)
 
 # Try to get some hints from pkg-config, if available
 macro(use_pkgconfig PREFIX PKGNAME)
-  find_package(PkgConfig)
-  if (PKG_CONFIG_FOUND)
-    pkg_check_modules(${PREFIX} ${PKGNAME})
-  endif ()
+  # Android does not support PKG_CONFIG so we disable it
+  IF ( NOT ANDROID )
+    find_package(PkgConfig)
+    if (PKG_CONFIG_FOUND)
+      pkg_check_modules(${PREFIX} ${PKGNAME})
+    endif ()
+  ENDIF ( NOT ANDROID )
 endmacro (use_pkgconfig)
 
 # Couple a set of release AND debug libraries (or frameworks)
@@ -85,7 +88,7 @@ macro(get_debug_names PREFIX)
   endforeach(i)
 endmacro(get_debug_names)
 
-# Add the parent dir from DIR to VAR 
+# Add the parent dir from DIR to VAR
 macro(add_parent_dir VAR DIR)
   get_filename_component(${DIR}_TEMP "${${DIR}}/.." ABSOLUTE)
   set(${VAR} ${${VAR}} ${${DIR}_TEMP})
@@ -127,6 +130,7 @@ MACRO(findpkg_framework fwk)
       /System/Library/Frameworks
       /Network/Library/Frameworks
       /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.0.sdk/System/Library/Frameworks/
+      /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.0.sdk/System/Library/Frameworks/
     )
     FOREACH(dir ${${fwk}_FRAMEWORK_PATH})
       SET(fwkpath ${dir}/${fwk}.framework)

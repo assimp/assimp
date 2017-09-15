@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreParsingUtils.h"
 
 #include "TinyFormatter.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include <boost/scoped_ptr.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <memory>
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
@@ -453,7 +454,7 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
         }
         else if (uvs > 0 && m_currentNodeName == nnTexCoord)
         {
-            for(size_t i=0, len=dest->uvs.size(); i<len; ++i)
+            for(auto &uvs : dest->uvs)
             {
                 if (m_currentNodeName != nnTexCoord) {
                     throw DeadlyImportError("Vertex buffer declared more UVs than can be found in a vertex");
@@ -462,7 +463,7 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
                 aiVector3D uv;
                 uv.x = ReadAttribute<float>("u");
                 uv.y = (ReadAttribute<float>("v") * -1) + 1; // Flip UV from Ogre to Assimp form
-                dest->uvs[i].push_back(uv);
+                uvs.push_back(uv);
 
                 NextNode();
             }
@@ -623,7 +624,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
             SkipCurrentNode();
     }
 
-    submesh->index = mesh->subMeshes.size();
+    submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
     mesh->subMeshes.push_back(submesh);
 }
 
@@ -654,13 +655,11 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
     }
 
     /** Normalize bone weights.
-        Some exporters wont care if the sum of all bone weights
+        Some exporters won't care if the sum of all bone weights
         for a single vertex equals 1 or not, so validate here. */
     const float epsilon = 0.05f;
-    for(std::set<uint32_t>::const_iterator iter=influencedVertices.begin(), end=influencedVertices.end(); iter != end; ++iter)
+    for (const uint32_t vertexIndex : influencedVertices)
     {
-        const uint32_t vertexIndex = (*iter);
-
         float sum = 0.0f;
         for (VertexBoneAssignmentList::const_iterator baIter=dest->boneAssignments.begin(), baEnd=dest->boneAssignments.end(); baIter != baEnd; ++baIter)
         {
@@ -669,10 +668,10 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
         }
         if ((sum < (1.0f - epsilon)) || (sum > (1.0f + epsilon)))
         {
-            for (VertexBoneAssignmentList::iterator baIter=dest->boneAssignments.begin(), baEnd=dest->boneAssignments.end(); baIter != baEnd; ++baIter)
+            for (auto &boneAssign : dest->boneAssignments)
             {
-                if (baIter->vertexIndex == vertexIndex)
-                    baIter->weight /= sum;
+                if (boneAssign.vertexIndex == vertexIndex)
+                    boneAssign.weight /= sum;
             }
         }
     }
@@ -742,12 +741,12 @@ XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const s
         return XmlReaderPtr();
     }
 
-    boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
+    std::unique_ptr<IOStream> file(pIOHandler->Open(filename));
     if (!file.get()) {
         throw DeadlyImportError("Failed to open skeleton file " + filename);
     }
 
-    boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
+    std::unique_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
     XmlReaderPtr reader = XmlReaderPtr(irr::io::createIrrXMLReader(stream.get()));
     if (!reader.get()) {
         throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_VTADJACENCY_H_INC
 
 #include "BaseProcess.h"
-#include "../include/assimp/types.h"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/types.h>
+#include <assimp/ai_assert.h>
 
 struct aiMesh;
 struct aiFace;

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "STEPFileEncoding.h"
 #include "TinyFormatter.h"
 #include "fast_atof.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 
 using namespace Assimp;
@@ -85,10 +86,10 @@ STEP::TypeError::TypeError (const std::string& s,uint64_t entity /* = ENTITY_NOT
 
 
 // ------------------------------------------------------------------------------------------------
-STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
+STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream)
 {
-    boost::shared_ptr<StreamReaderLE> reader = boost::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
-    std::auto_ptr<STEP::DB> db = std::auto_ptr<STEP::DB>(new STEP::DB(reader));
+    std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+    std::unique_ptr<STEP::DB> db = std::unique_ptr<STEP::DB>(new STEP::DB(reader));
 
     LineSplitter& splitter = db->GetSplitter();
     if (!splitter || *splitter != "ISO-10303-21;") {
@@ -110,7 +111,7 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
         if (s.substr(0,11) == "FILE_SCHEMA") {
             const char* sz = s.c_str()+11;
             SkipSpaces(sz,&sz);
-            boost::shared_ptr< const EXPRESS::DataType > schema = EXPRESS::DataType::Parse(sz);
+            std::shared_ptr< const EXPRESS::DataType > schema = EXPRESS::DataType::Parse(sz);
 
             // the file schema should be a regular list entity, although it usually contains exactly one entry
             // since the list itself is contained in a regular parameter list, we actually have
@@ -126,7 +127,7 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
                 if (list->GetSize() > 1)    {
                     DefaultLogger::get()->warn(AddLineNumber("multiple schemas currently not supported",line));
                 }
-                const EXPRESS::STRING* string;
+                const EXPRESS::STRING* string( nullptr );
                 if (!list->GetSize() || !(string=dynamic_cast<const EXPRESS::STRING*>( (*list)[0].get() ))) {
                     throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal",line);
                 }
@@ -300,7 +301,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 }
 
 // ------------------------------------------------------------------------------------------------
-boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
+std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
 {
     const char* cur = inout;
     SkipSpaces(&cur);
@@ -321,7 +322,7 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
                 std::transform(s.begin(),s.end(),s.begin(),&ToLower<char> );
                 if (schema->IsKnownToken(s)) {
                     for(cur = t+1;*cur++ != '(';);
-                    const boost::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
+                    const std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
                     inout = *cur ? cur+1 : cur;
                     return dt;
                 }
@@ -335,11 +336,11 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
 
     if (*cur == '*' ) {
         inout = cur+1;
-        return boost::make_shared<EXPRESS::ISDERIVED>();
+        return std::make_shared<EXPRESS::ISDERIVED>();
     }
     else if (*cur == '$' ) {
         inout = cur+1;
-        return boost::make_shared<EXPRESS::UNSET>();
+        return std::make_shared<EXPRESS::UNSET>();
     }
     else if (*cur == '(' ) {
         // start of an aggregate, further parsing is done by the LIST factory constructor
@@ -355,11 +356,11 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
             }
         }
         inout = cur+1;
-        return boost::make_shared<EXPRESS::ENUMERATION>(std::string(start, static_cast<size_t>(cur-start) ));
+        return std::make_shared<EXPRESS::ENUMERATION>(std::string(start, static_cast<size_t>(cur-start) ));
     }
     else if (*cur == '#' ) {
         // object reference
-        return boost::make_shared<EXPRESS::ENTITY>(strtoul10_64(++cur,&inout));
+        return std::make_shared<EXPRESS::ENTITY>(strtoul10_64(++cur,&inout));
     }
     else if (*cur == '\'' ) {
         // string literal
@@ -393,7 +394,7 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
             DefaultLogger::get()->error("an error occurred reading escape sequences in ASCII text");
         }
 
-        return boost::make_shared<EXPRESS::STRING>(stemp);
+        return std::make_shared<EXPRESS::STRING>(stemp);
     }
     else if (*cur == '\"' ) {
         throw STEP::SyntaxError("binary data not supported yet",line);
@@ -406,7 +407,7 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
         if (*cur == '.') {
             double f;
             inout = fast_atoreal_move<double>(start,f);
-            return boost::make_shared<EXPRESS::REAL>(f);
+            return std::make_shared<EXPRESS::REAL>(f);
         }
     }
 
@@ -419,14 +420,14 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
         ++start;
     }
     int64_t num = static_cast<int64_t>( strtoul10_64(start,&inout) );
-    return boost::make_shared<EXPRESS::INTEGER>(neg?-num:num);
+    return std::make_shared<EXPRESS::INTEGER>(neg?-num:num);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-boost::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
+std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
 {
-    const boost::shared_ptr<EXPRESS::LIST> list = boost::make_shared<EXPRESS::LIST>();
+    const std::shared_ptr<EXPRESS::LIST> list = std::make_shared<EXPRESS::LIST>();
     EXPRESS::LIST::MemberList& members = list->members;
 
     const char* cur = inout;
@@ -522,7 +523,7 @@ void STEP::LazyObject::LazyInit() const
     }
 
     const char* acopy = args;
-    boost::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy,STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
+    std::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy,STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
     delete[] args;
     args = NULL;
 

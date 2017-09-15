@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,13 +47,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BVHLoader.h"
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
-#include "../include/assimp/Importer.hpp"
-#include <boost/scoped_ptr.hpp>
-#include <boost/format.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/Importer.hpp>
+#include <memory>
+#include "TinyFormatter.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 static const aiImporterDesc desc = {
     "BVH Importer (MoCap)",
@@ -118,7 +121,7 @@ void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSys
     mFileName = pFile;
 
     // read file into memory
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
     if( file.get() == NULL)
         throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
@@ -179,12 +182,12 @@ aiNode* BVHLoader::ReadNode()
     // first token is name
     std::string nodeName = GetNextToken();
     if( nodeName.empty() || nodeName == "{")
-        ThrowException( boost::str( boost::format( "Expected node name, but found \"%s\".") % nodeName));
+        ThrowException( format() << "Expected node name, but found \"" << nodeName << "\"." );
 
     // then an opening brace should follow
     std::string openBrace = GetNextToken();
     if( openBrace != "{")
-        ThrowException( boost::str( boost::format( "Expected opening brace \"{\", but found \"%s\".") % openBrace));
+        ThrowException( format() << "Expected opening brace \"{\", but found \"" << openBrace << "\"." );
 
     // Create a node
     aiNode* node = new aiNode( nodeName);
@@ -216,7 +219,7 @@ aiNode* BVHLoader::ReadNode()
             // The real symbol is "End Site". Second part comes in a separate token
             std::string siteToken = GetNextToken();
             if( siteToken != "Site")
-                ThrowException( boost::str( boost::format( "Expected \"End Site\" keyword, but found \"%s %s\".") % token % siteToken));
+                ThrowException( format() << "Expected \"End Site\" keyword, but found \"" << token << " " << siteToken << "\"." );
 
             aiNode* child = ReadEndSite( nodeName);
             child->mParent = node;
@@ -229,14 +232,14 @@ aiNode* BVHLoader::ReadNode()
         } else
         {
             // everything else is a parse error
-            ThrowException( boost::str( boost::format( "Unknown keyword \"%s\".") % token));
+            ThrowException( format() << "Unknown keyword \"" << token << "\"." );
         }
     }
 
     // add the child nodes if there are any
     if( childNodes.size() > 0)
     {
-        node->mNumChildren = childNodes.size();
+        node->mNumChildren = static_cast<unsigned int>(childNodes.size());
         node->mChildren = new aiNode*[node->mNumChildren];
         std::copy( childNodes.begin(), childNodes.end(), node->mChildren);
     }
@@ -252,7 +255,7 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
     // check opening brace
     std::string openBrace = GetNextToken();
     if( openBrace != "{")
-        ThrowException( boost::str( boost::format( "Expected opening brace \"{\", but found \"%s\".") % openBrace));
+        ThrowException( format() << "Expected opening brace \"{\", but found \"" << openBrace << "\".");
 
     // Create a node
     aiNode* node = new aiNode( "EndSite_" + pParentName);
@@ -274,7 +277,7 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
         } else
         {
             // everything else is a parse error
-            ThrowException( boost::str( boost::format( "Unknown keyword \"%s\".") % token));
+            ThrowException( format() << "Unknown keyword \"" << token << "\"." );
         }
     }
 
@@ -321,7 +324,7 @@ void BVHLoader::ReadNodeChannels( BVHLoader::Node& pNode)
         else if( channelToken == "Zrotation")
             pNode.mChannels.push_back( Channel_RotationZ);
         else
-            ThrowException( boost::str( boost::format( "Invalid channel specifier \"%s\".") % channelToken));
+            ThrowException( format() << "Invalid channel specifier \"" << channelToken << "\"." );
     }
 }
 
@@ -332,7 +335,7 @@ void BVHLoader::ReadMotion( aiScene* /*pScene*/)
     // Read number of frames
     std::string tokenFrames = GetNextToken();
     if( tokenFrames != "Frames:")
-        ThrowException( boost::str( boost::format( "Expected frame count \"Frames:\", but found \"%s\".") % tokenFrames));
+        ThrowException( format() << "Expected frame count \"Frames:\", but found \"" << tokenFrames << "\".");
 
     float numFramesFloat = GetNextTokenAsFloat();
     mAnimNumFrames = (unsigned int) numFramesFloat;
@@ -341,7 +344,7 @@ void BVHLoader::ReadMotion( aiScene* /*pScene*/)
     std::string tokenDuration1 = GetNextToken();
     std::string tokenDuration2 = GetNextToken();
     if( tokenDuration1 != "Frame" || tokenDuration2 != "Time:")
-        ThrowException( boost::str( boost::format( "Expected frame duration \"Frame Time:\", but found \"%s %s\".") % tokenDuration1 % tokenDuration2));
+        ThrowException( format() << "Expected frame duration \"Frame Time:\", but found \"" << tokenDuration1 << " " << tokenDuration2 << "\"." );
 
     mAnimTickDuration = GetNextTokenAsFloat();
 
@@ -368,7 +371,7 @@ void BVHLoader::ReadMotion( aiScene* /*pScene*/)
 // Retrieves the next token
 std::string BVHLoader::GetNextToken()
 {
-    // skip any preceeding whitespace
+    // skip any preceding whitespace
     while( mReader != mBuffer.end())
     {
         if( !isspace( *mReader))
@@ -414,7 +417,7 @@ float BVHLoader::GetNextTokenAsFloat()
     ctoken = fast_atoreal_move<float>( ctoken, result);
 
     if( ctoken != token.c_str() + token.length())
-        ThrowException( boost::str( boost::format( "Expected a floating point number, but found \"%s\".") % token));
+        ThrowException( format() << "Expected a floating point number, but found \"" << token << "\"." );
 
     return result;
 }
@@ -423,7 +426,7 @@ float BVHLoader::GetNextTokenAsFloat()
 // Aborts the file reading with an exception
 AI_WONT_RETURN void BVHLoader::ThrowException( const std::string& pError)
 {
-    throw DeadlyImportError( boost::str( boost::format( "%s:%d - %s") % mFileName % mLine % pError));
+    throw DeadlyImportError( format() << mFileName << ":" << mLine << " - " << pError);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -442,7 +445,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
     anim->mDuration = double( mAnimNumFrames - 1);
 
     // now generate the tracks for all nodes
-    anim->mNumChannels = mNodes.size();
+    anim->mNumChannels = static_cast<unsigned int>(mNodes.size());
     anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
 
     // FIX: set the array elements to NULL to ensure proper deletion if an exception is thrown

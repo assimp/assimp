@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,11 +50,11 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 #ifndef AI_MDCFILEHELPER_H_INC
 #define AI_MDCFILEHELPER_H_INC
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
 
-#include "./../include/assimp/Compiler/pushpack1.h"
+#include <assimp/Compiler/pushpack1.h>
 #include <stdint.h>
 
 namespace Assimp {
@@ -156,7 +157,7 @@ struct Frame
 
     //! Name of the frame
     char name [ 16 ] ;
-} PACK_STRUCT;
+} /*PACK_STRUCT*/;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a MDC triangle
@@ -202,7 +203,7 @@ struct Shader
 
 } PACK_STRUCT;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 
 // ---------------------------------------------------------------------------

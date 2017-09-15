@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,15 +52,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   include "../contrib/zlib/zlib.h"
 #endif
 
-
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
 #include "FBXUtil.h"
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include <boost/foreach.hpp>
 #include "ByteSwapper.h"
+
+#include <iostream>
 
 using namespace Assimp;
 using namespace Assimp::FBX;
@@ -125,13 +126,20 @@ Element::Element(const Token& key_token, Parser& parser)
 
         if (n->Type() == TokenType_DATA) {
             tokens.push_back(n);
-
+			TokenPtr prev = n;
             n = parser.AdvanceToNextToken();
             if(!n) {
                 ParseError("unexpected end of file, expected bracket, comma or key",parser.LastToken());
             }
 
-            const TokenType ty = n->Type();
+			const TokenType ty = n->Type();
+
+			// some exporters are missing a comma on the next line
+			if (ty == TokenType_DATA && prev->Type() == TokenType_DATA && (n->Line() == prev->Line() + 1)) {
+				tokens.push_back(n);
+				continue;
+			}
+
             if (ty != TokenType_OPEN_BRACKET && ty != TokenType_CLOSE_BRACKET && ty != TokenType_COMMA && ty != TokenType_KEY) {
                 ParseError("unexpected token; expected bracket, comma or key",n);
             }
@@ -199,7 +207,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 // ------------------------------------------------------------------------------------------------
 Scope::~Scope()
 {
-    BOOST_FOREACH(ElementMap::value_type& v, elements) {
+    for(ElementMap::value_type& v : elements) {
         delete v.second;
     }
 }
@@ -216,12 +224,11 @@ Parser::Parser (const TokenList& tokens, bool is_binary)
     root.reset(new Scope(*this,true));
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Parser::~Parser()
 {
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 TokenPtr Parser::AdvanceToNextToken()
@@ -229,13 +236,11 @@ TokenPtr Parser::AdvanceToNextToken()
     last = current;
     if (cursor == tokens.end()) {
         current = NULL;
-    }
-    else {
+    } else {
         current = *cursor++;
     }
     return current;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 TokenPtr Parser::CurrentToken() const
@@ -243,13 +248,11 @@ TokenPtr Parser::CurrentToken() const
     return current;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 TokenPtr Parser::LastToken() const
 {
     return last;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
@@ -287,7 +290,6 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 
     return id;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 size_t ParseTokenAsDim(const Token& t, const char*& err_out)
@@ -575,7 +577,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
         zstream.avail_in  = comp_len;
 
-        zstream.avail_out = buff.size();
+        zstream.avail_out = static_cast<uInt>(buff.size());
         zstream.next_out = reinterpret_cast<Bytef*>(&*buff.begin());
         const int ret = inflate(&zstream, Z_FINISH);
 
@@ -604,7 +606,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
 // read an array of float3 tuples
 void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
 
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -646,6 +648,13 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
                     static_cast<float>(d[1]),
                     static_cast<float>(d[2])));
             }
+            // for debugging
+            /*for ( size_t i = 0; i < out.size(); i++ ) {
+                aiVector3D vec3( out[ i ] );
+                std::stringstream stream;
+                stream << " vec3.x = " << vec3.x << " vec3.y = " << vec3.y << " vec3.z = " << vec3.z << std::endl;
+                DefaultLogger::get()->info( stream.str() );
+            }*/
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
@@ -685,7 +694,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 // read an array of color4 tuples
 void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -764,7 +773,7 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 // read an array of float2 tuples
 void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -840,7 +849,7 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 // read an array of ints
 void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -898,7 +907,7 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 // read an array of floats
 void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -960,7 +969,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 // read an array of uints
 void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -1025,7 +1034,7 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 // read an array of uint64_ts
 void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -1083,7 +1092,7 @@ void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 // read an array of int64_ts
 void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if (tok.empty()) {
         ParseError("unexpected empty element", &el);

@@ -30,9 +30,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #ifndef _WIN32
 #  include <inttypes.h>
-#endif 
+#endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined( OPENDDL_STATIC_LIBARY )
+
 #   define TAG_DLL_EXPORT __declspec(dllexport)
 #   define TAG_DLL_IMPORT __declspec(dllimport )
 #   ifdef OPENDDLPARSER_BUILD
@@ -56,9 +57,15 @@ BEGIN_ODDLPARSER_NS
 #ifndef OPENDDL_NO_USE_CPP11
     // All C++11 constructs
 #   define ddl_nullptr nullptr
+#   define ddl_override override
+#   define ddl_final final
+#   define ddl_no_copy = delete
 #else
     // Fall-back for older compilers
 #   define ddl_nullptr NULL
+#   define ddl_override
+#   define ddl_final
+#   define ddl_no_copy
 #endif // OPENDDL_NO_USE_CPP11
 
 // Forward declarations
@@ -92,7 +99,7 @@ typedef uint64_impl       uint64;  ///< Unsigned integer, 8 byte
 
 ///	@brief  Stores a text.
 ///
-/// A text is stored in a simple character buffer. Texts buffer can be 
+/// A text is stored in a simple character buffer. Texts buffer can be
 /// greater than the number of stored characters in them.
 struct DLL_ODDLPARSER_EXPORT Text {
     size_t m_capacity;  ///< The capacity of the text.
@@ -122,33 +129,8 @@ struct DLL_ODDLPARSER_EXPORT Text {
     bool operator == ( const Text &rhs ) const;
 
 private:
-    Text( const Text & );
-    Text &operator = ( const Text & );
-};
-
-///	@brief  Stores an OpenDDL-specific identifier type.
-struct DLL_ODDLPARSER_EXPORT Identifier {
-    Text m_text;    ///< The text element.
-
-    ///	@brief  The constructor with a sized buffer full of characters.
-    ///	@param  buffer  [in] The identifier buffer.
-    ///	@param  len     [in] The length of the buffer
-    Identifier( const char buffer[], size_t len );
-
-    ///	@brief  The constructor with a buffer full of characters.
-    ///	@param  buffer  [in] The identifier buffer.
-    /// @remark Buffer must be null-terminated.
-    Identifier( const char buffer[] );
-
-    ///	@brief  The destructor.
-    ~Identifier();
-    
-    ///	@brief  The compare operator.
-    bool operator == ( const Identifier &rhs ) const;
-
-private:
-    Identifier( const Identifier & );
-    Identifier &operator = ( const Identifier & );
+    Text( const Text & ) ddl_no_copy;
+    Text &operator = ( const Text & ) ddl_no_copy;
 };
 
 ///	@brief  Description of the type of a name.
@@ -160,19 +142,19 @@ enum NameType {
 ///	@brief  Stores an OpenDDL-specific name
 struct DLL_ODDLPARSER_EXPORT Name {
     NameType    m_type; ///< The type of the name ( @see NameType ).
-    Identifier *m_id;   ///< The id.
+    Text        *m_id;  ///< The id.
 
     ///	@brief  The constructor with the type and the id.
     ///	@param  type    [in] The name type.
     ///	@param  id      [in] The id.
-    Name( NameType type, Identifier *id );
-
+    Name( NameType type, Text *id );
+    Name( const Name &name );
     ///	@brief  The destructor.
     ~Name();
 
 private:
-    Name( const Name & );
-    Name &operator = ( const Name& );
+
+    Name &operator = ( const Name& ) ddl_no_copy;
 };
 
 ///	@brief  Stores a bundle of references.
@@ -182,7 +164,7 @@ struct DLL_ODDLPARSER_EXPORT Reference {
 
     ///	@brief  The default constructor.
     Reference();
-     
+    Reference( const Reference &ref );
     ///	@brief  The constructor with an array of ref names.
     /// @param  numrefs     [in] The number of ref names.
     /// @param  names       [in] The ref names.
@@ -191,14 +173,17 @@ struct DLL_ODDLPARSER_EXPORT Reference {
     ///	@brief  The destructor.
     ~Reference();
 
+    /// @brief  Returns the size in bytes to store one deep reference copy.
+    /// @return The size on bytes.
+    size_t sizeInBytes();
+
 private:
-    Reference( const Reference & );
-    Reference &operator = ( const Reference & );
+    Reference &operator = ( const Reference & ) ddl_no_copy;
 };
 
 ///	@brief  Stores a property list.
 struct DLL_ODDLPARSER_EXPORT Property {
-    Identifier *m_key;      ///< The identifier / key of the property.
+    Text       *m_key;      ///< The identifier / key of the property.
     Value      *m_value;    ///< The value assigned to its key / id ( ddl_nullptr if none ).
     Reference  *m_ref;      ///< References assigned to its key / id ( ddl_nullptr if none ).
     Property   *m_next;     ///< The next property ( ddl_nullptr if none ).
@@ -208,21 +193,23 @@ struct DLL_ODDLPARSER_EXPORT Property {
 
     ///	@brief  The constructor for initialization.
     /// @param  id      [in] The identifier
-    Property( Identifier *id );
+    Property( Text *id );
 
     ///	@brief  The destructor.
     ~Property();
 
 private:
-    Property( const Property & );
-    Property &operator = ( const Property & );
+    Property( const Property & ) ddl_no_copy;
+    Property &operator = ( const Property & ) ddl_no_copy;
 };
 
 ///	@brief  Stores a data array list.
 struct DLL_ODDLPARSER_EXPORT DataArrayList {
     size_t         m_numItems;  ///< The number of items in the list.
-    Value         *m_dataList;  ///< The data list ( ee Value ).
+    Value         *m_dataList;  ///< The data list ( a Value ).
     DataArrayList *m_next;      ///< The next data array list ( ddl_nullptr if last ).
+    Reference     *m_refs;
+    size_t         m_numRefs;
 
     ///	@brief  The default constructor for initialization.
     DataArrayList();
@@ -230,9 +217,12 @@ struct DLL_ODDLPARSER_EXPORT DataArrayList {
     ///	@brief  The destructor.
     ~DataArrayList();
 
+    /// @brief  Gets the length of the array
+    size_t size();
+
 private:
-    DataArrayList( const DataArrayList & ); 
-    DataArrayList &operator = ( const DataArrayList & );
+    DataArrayList( const DataArrayList & ) ddl_no_copy;
+    DataArrayList &operator = ( const DataArrayList & ) ddl_no_copy;
 };
 
 ///	@brief  Stores the context of a parsed OpenDDL declaration.
@@ -249,8 +239,8 @@ struct DLL_ODDLPARSER_EXPORT Context {
     void clear();
 
 private:
-    Context( const Context & );
-    Context &operator = ( const Context & );
+    Context( const Context & ) ddl_no_copy;
+    Context &operator = ( const Context & ) ddl_no_copy;
 };
 
 END_ODDLPARSER_NS

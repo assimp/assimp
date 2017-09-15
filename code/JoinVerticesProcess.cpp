@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Vertex.h"
 #include "TinyFormatter.h"
 #include <stdio.h>
-#include <boost/static_assert.hpp>
 
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
         } else
         {
             char szBuff[128]; // should be sufficiently large in every case
-            sprintf(szBuff,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
+            ::ai_snprintf(szBuff,128,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
                 iNumOldVertices,
                 iNumVertices,
                 ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f);
@@ -117,8 +117,8 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 // Unites identical vertices in the given mesh
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
-    BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_COLOR_SETS    == 8);
-    BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8);
+    static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");
+	static_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8, "AI_MAX_NUMBER_OF_TEXTURECOORDS == 8");
 
     // Return early if we don't have any positions
     if (!pMesh->HasPositions() || !pMesh->HasFaces()) {
@@ -134,7 +134,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     //  whether a new vertex was created for the index (true) or if it was replaced by an existing
     //  unique vertex (false). This saves an additional std::vector<bool> and greatly enhances
     //  branching performance.
-    BOOST_STATIC_ASSERT(AI_MAX_VERTICES == 0x7fffffff);
+    static_assert(AI_MAX_VERTICES == 0x7fffffff, "AI_MAX_VERTICES == 0x7fffffff");
     std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
 
     // A little helper to find locally close vertices faster.
@@ -193,8 +193,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             // Position mismatch is impossible - the vertex finder already discarded all non-matching positions
 
             // We just test the other attributes even if they're not present in the mesh.
-            // In this case they're initialized to 0 so the comparision succeeds.
-            // By this method the non-present attributes are effectively ignored in the comparision.
+            // In this case they're initialized to 0 so the comparison succeeds.
+            // By this method the non-present attributes are effectively ignored in the comparison.
             if( (uv.normal - v.normal).SquareLength() > squareEpsilon)
                 continue;
             if( (uv.texcoords[0] - v.texcoords[0]).SquareLength() > squareEpsilon)
@@ -266,7 +266,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         }
         else
         {
-            // no unique vertex matches it upto now -> so add it
+            // no unique vertex matches it up to now -> so add it
             replaceIndex[a] = (unsigned int)uniqueVertices.size();
             uniqueVertices.push_back( v);
         }
@@ -357,23 +357,24 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     // adjust bone vertex weights.
-    for( int a = 0; a < (int)pMesh->mNumBones; a++)
-    {
+    for( int a = 0; a < (int)pMesh->mNumBones; a++) {
         aiBone* bone = pMesh->mBones[a];
         std::vector<aiVertexWeight> newWeights;
         newWeights.reserve( bone->mNumWeights);
 
-        for( unsigned int b = 0; b < bone->mNumWeights; b++)
-        {
-            const aiVertexWeight& ow = bone->mWeights[b];
-            // if the vertex is a unique one, translate it
-            if( !(replaceIndex[ow.mVertexId] & 0x80000000))
-            {
-                aiVertexWeight nw;
-                nw.mVertexId = replaceIndex[ow.mVertexId];
-                nw.mWeight = ow.mWeight;
-                newWeights.push_back( nw);
+        if ( NULL != bone->mWeights ) {
+            for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
+                const aiVertexWeight& ow = bone->mWeights[ b ];
+                // if the vertex is a unique one, translate it
+                if ( !( replaceIndex[ ow.mVertexId ] & 0x80000000 ) ) {
+                    aiVertexWeight nw;
+                    nw.mVertexId = replaceIndex[ ow.mVertexId ];
+                    nw.mWeight = ow.mWeight;
+                    newWeights.push_back( nw );
+                }
             }
+        } else {
+            DefaultLogger::get()->error( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
         }
 
         if (newWeights.size() > 0) {

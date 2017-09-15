@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IFCUtil.h"
 #include "PolyTools.h"
 #include "ProcessHelper.h"
-#include "Defines.h"
+#include <assimp/Defines.h>
 
 namespace Assimp {
     namespace IFC {
@@ -75,7 +76,7 @@ aiMesh* TempMesh::ToMesh()
         return NULL;
     }
 
-    std::auto_ptr<aiMesh> mesh(new aiMesh());
+    std::unique_ptr<aiMesh> mesh(new aiMesh());
 
     // copy vertices
     mesh->mNumVertices = static_cast<unsigned int>(verts.size());
@@ -115,7 +116,7 @@ void TempMesh::Clear()
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Transform(const IfcMatrix4& mat)
 {
-    BOOST_FOREACH(IfcVector3& v, verts) {
+    for(IfcVector3& v : verts) {
         v *= mat;
     }
 }
@@ -180,7 +181,7 @@ IfcVector3 TempMesh::ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bo
     }
 
     IfcVector3 nor;
-    NewellNormal<3, 3, 3>(nor, cnt, &temp[0], &temp[1], &temp[2]);
+    NewellNormal<3, 3, 3>(nor, static_cast<int>(cnt), &temp[0], &temp[1], &temp[2]);
     return normalize ? nor.Normalize() : nor;
 }
 
@@ -222,7 +223,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
     }
 
     if(normalize) {
-        BOOST_FOREACH(IfcVector3& n, normals) {
+        for(IfcVector3& n : normals) {
             n.Normalize();
         }
     }
@@ -383,7 +384,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 
     bool drop = false;
     std::vector<IfcVector3>::iterator base = verts.begin();
-    BOOST_FOREACH(unsigned int& cnt, vertcnt) {
+    for(unsigned int& cnt : vertcnt) {
         if (cnt < 2){
             base += cnt;
             continue;
@@ -548,7 +549,7 @@ void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in)
 {
     out = IfcVector3();
     for(size_t i = 0; i < in.Coordinates.size(); ++i) {
-        out[i] = in.Coordinates[i];
+        out[static_cast<unsigned int>(i)] = in.Coordinates[i];
     }
 }
 
@@ -564,7 +565,7 @@ void ConvertDirection(IfcVector3& out, const IfcDirection& in)
 {
     out = IfcVector3();
     for(size_t i = 0; i < in.DirectionRatios.size(); ++i) {
-        out[i] = in.DirectionRatios[i];
+        out[static_cast<unsigned int>(i)] = in.DirectionRatios[i];
     }
     const IfcFloat len = out.Length();
     if (len<1e-6) {

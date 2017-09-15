@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,9 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_IRRLOADER_H_INCLUDED
 
 #include "IRRShared.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "Importer.h"
-#include "../include/assimp/anim.h"
+#include "StringUtils.h"
+#include <assimp/anim.h>
 
 namespace Assimp    {
 
@@ -115,10 +117,10 @@ private:
 
         explicit Animator(AT t = UNKNOWN)
             : type              (t)
-            , speed             (0.001f)
-            , direction         (0.f,1.f,0.f)
-            , circleRadius      (1.f)
-            , tightness         (0.5f)
+            , speed             ( ai_real( 0.001 ) )
+            , direction         ( ai_real( 0.0 ), ai_real( 1.0 ), ai_real( 0.0 ) )
+            , circleRadius      ( ai_real( 1.0) )
+            , tightness         ( ai_real( 0.5 ) )
             , loop              (true)
             , timeForWay        (100)
         {
@@ -126,15 +128,15 @@ private:
 
 
         // common parameters
-        float speed;
+        ai_real speed;
         aiVector3D direction;
 
         // FLY_CIRCLE
         aiVector3D circleCenter;
-        float circleRadius;
+        ai_real circleRadius;
 
         // FOLLOW_SPLINE
-        float tightness;
+        ai_real tightness;
         std::vector<aiVectorKey> splineKeys;
 
         // ROTATION (angles given in direction)
@@ -165,11 +167,11 @@ private:
 
         explicit Node(ET t)
             :   type                (t)
-            ,   scaling             (1.f,1.f,1.f) // assume uniform scaling by default
+            ,   scaling             (1.0,1.0,1.0) // assume uniform scaling by default
             ,   parent()
-            ,   framesPerSecond     (0.f)
+            ,   framesPerSecond     (0.0)
             ,   id()
-            ,   sphereRadius        (1.f)
+            ,   sphereRadius        (1.0)
             ,   spherePolyCountX    (100)
             ,   spherePolyCountY    (100)
         {
@@ -177,7 +179,7 @@ private:
             // Generate a default name for the node
             char buffer[128];
             static int cnt;
-            ::sprintf(buffer,"IrrNode_%i",cnt++);
+            ai_snprintf(buffer, 128, "IrrNode_%i",cnt++);
             name = std::string(buffer);
 
             // reserve space for up to 5 materials
@@ -201,7 +203,7 @@ private:
 
         // Animated meshes: frames per second
         // 0.f if not specified
-        float framesPerSecond;
+        ai_real framesPerSecond;
 
         // Meshes: path to the mesh to be loaded
         std::string meshPath;
@@ -212,7 +214,7 @@ private:
         std::vector< std::pair<aiMaterial*, unsigned int> > materials;
 
         // Spheres: radius of the sphere to be generates
-        float sphereRadius;
+        ai_real sphereRadius;
 
         // Spheres: Number of polygons in the x,y direction
         unsigned int spherePolyCountX,spherePolyCountY;
@@ -229,13 +231,13 @@ private:
         {}
 
         //! Construction from single vertex components
-        SkyboxVertex(float px, float py, float pz,
-            float nx, float ny, float nz,
-            float uvx, float uvy)
+        SkyboxVertex(ai_real px, ai_real py, ai_real pz,
+            ai_real nx, ai_real ny, ai_real nz,
+            ai_real uvx, ai_real uvy)
 
             :   position    (px,py,pz)
             ,   normal      (nx,ny,nz)
-            ,   uv          (uvx,uvy,0.f)
+            ,   uv          (uvx,uvy,0.0)
         {}
 
         aiVector3D position, normal, uv;

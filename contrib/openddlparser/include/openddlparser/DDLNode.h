@@ -29,6 +29,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+// Forward declarations
+class IOStreamBase;
 class Value;
 class OpenDDLParser;
 
@@ -52,6 +54,9 @@ public:
 
     /// @brief  The child-node-list type.
     typedef std::vector<DDLNode*> DllNodeList;
+
+    /// @brief  The child-node-list iterator.
+    typedef std::vector<DDLNode*>::iterator DDLNodeIt;
 
 public:
     ///	@brief  The class destructor.
@@ -81,7 +86,7 @@ public:
     const std::string &getType() const;
 
     /// Set the name of the DDLNode instance.
-    /// @param  type    [in] The name.
+    /// @param  name        [in] The name.
     void setName( const std::string &name );
 
     /// @brief  Returns the name of the DDLNode instance.
@@ -89,7 +94,7 @@ public:
     const std::string &getName() const;
 
     /// @brief  Set a new property set.
-    ///	@param  prop    [in] The first element of the property set.
+    ///	@param  prop        [in] The first element of the property set.
     void setProperties( Property *prop );
 
     ///	@brief  Returns the first element of the assigned property set.
@@ -97,7 +102,7 @@ public:
     Property *getProperties() const;
 
     ///	@brief  Looks for a given property.
-    /// @param  name    [in] The name for the property to look for.
+    /// @param  name        [in] The name for the property to look for.
     /// @return true, if a corresponding property is assigned to the node, false if not.
     bool hasProperty( const std::string &name );
 
@@ -106,12 +111,12 @@ public:
     bool hasProperties() const;
 
     ///	@brief  Search for a given property and returns it. Will return ddl_nullptr if no property was found.
-    /// @param  name    [in] The name for the property to look for.
+    /// @param  name        [in] The name for the property to look for.
     /// @return The property or ddl_nullptr if no property was found.
     Property *findPropertyByName( const std::string &name );
     
     /// @brief  Set a new value set.
-    /// @param  val     [in] The first value instance of the value set.
+    /// @param  val         [in] The first value instance of the value set.
     void setValue( Value *val );
 
     ///	@brief  Returns the first element of the assigned value set.
@@ -119,7 +124,7 @@ public:
     Value *getValue() const;
 
     /// @brief  Set a new DataArrayList.
-    /// @param  val     [in] The DataArrayList instance.
+    /// @param  dtArrayList [in] The DataArrayList instance.
     void setDataArrayList( DataArrayList *dtArrayList );
 
     ///	@brief  Returns the DataArrayList.
@@ -127,25 +132,29 @@ public:
     DataArrayList *getDataArrayList() const;
 
     /// @brief  Set a new Reference set.
-    /// @param  val     [in] The first value instance of the Reference set.
+    /// @param  refs        [in] The first value instance of the Reference set.
     void setReferences( Reference  *refs );
 
     ///	@brief  Returns the first element of the assigned Reference set.
     ///	@return The first property of the assigned Reference set.
     Reference *getReferences() const;
 
+    /// @brief  Will dump the node into the stream.
+    /// @param  stream      [in] The stream to write to.
+    void dump(IOStreamBase &stream);
+
     ///	@brief  The creation method.
-    /// @param  type    [in] The DDLNode type.
-    ///	@param  name    [in] The name for the new DDLNode instance.
-    /// @param  parent  [in] The parent node instance or ddl_nullptr if no parent node is there.
+    /// @param  type        [in] The DDLNode type.
+    ///	@param  name        [in] The name for the new DDLNode instance.
+    /// @param  parent      [in] The parent node instance or ddl_nullptr if no parent node is there.
     /// @return The new created node instance.
     static DDLNode *create( const std::string &type, const std::string &name, DDLNode *parent = ddl_nullptr );
 
 private:
     DDLNode( const std::string &type, const std::string &name, size_t idx, DDLNode *parent = ddl_nullptr );
     DDLNode();
-    DDLNode( const DDLNode & );
-    DDLNode &operator = ( const DDLNode & );
+    DDLNode( const DDLNode & ) ddl_no_copy;
+    DDLNode &operator = ( const DDLNode & ) ddl_no_copy;
     static void releaseNodes();
 
 private:

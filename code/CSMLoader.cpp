@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,13 +52,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SkeletonMeshBuilder.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include "../include/assimp/Importer.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
-
+#include <assimp/Importer.hpp>
+#include <memory>
+#include <assimp/IOSystem.hpp>
+#include <assimp/anim.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -122,7 +123,7 @@ void CSMImporter::SetupProperties(const Importer* pImp)
 void CSMImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {
@@ -179,7 +180,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     nda->mNodeName.length = (size_t)(ot-nda->mNodeName.data);
                 }
 
-                anim->mNumChannels = anims_temp.size();
+                anim->mNumChannels = static_cast<unsigned int>(anims_temp.size());
                 if (!anim->mNumChannels)
                     throw DeadlyImportError("CSM: Empty $order section");
 
@@ -227,7 +228,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
                         // read x,y,z
                         if(!SkipSpacesAndLineEnd(&buffer))
-                            throw DeadlyImportError("CSM: Unexpected EOF occured reading sample x coord");
+                            throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample x coord");
 
                         if (TokenMatchI(buffer, "DROPOUT", 7))  {
                             // seems this is invalid marker data; at least the doc says it's possible
@@ -239,11 +240,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                             buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.x);
 
                             if(!SkipSpacesAndLineEnd(&buffer))
-                                throw DeadlyImportError("CSM: Unexpected EOF occured reading sample y coord");
+                                throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample y coord");
                             buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.y);
 
                             if(!SkipSpacesAndLineEnd(&buffer))
-                                throw DeadlyImportError("CSM: Unexpected EOF occured reading sample z coord");
+                                throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample z coord");
                             buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.z);
 
                             ++s->mNumPositionKeys;

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -58,7 +59,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindInvalidDataProcess::FindInvalidDataProcess()
-    : configEpsilon(0.0f)
+    : configEpsilon(0.0)
 {
     // nothing to do here
 }
@@ -221,16 +222,16 @@ inline bool ProcessArray(T*& in, unsigned int num,const char* name,
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-AI_FORCE_INLINE bool EpsilonCompare(const T& n, const T& s, float epsilon);
+AI_FORCE_INLINE bool EpsilonCompare(const T& n, const T& s, ai_real epsilon);
 
 // ------------------------------------------------------------------------------------------------
-AI_FORCE_INLINE bool EpsilonCompare(float n, float s, float epsilon) {
+AI_FORCE_INLINE bool EpsilonCompare(ai_real n, ai_real s, ai_real epsilon) {
     return std::fabs(n-s)>epsilon;
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
-bool EpsilonCompare<aiVectorKey>(const aiVectorKey& n, const aiVectorKey& s, float epsilon) {
+bool EpsilonCompare<aiVectorKey>(const aiVectorKey& n, const aiVectorKey& s, ai_real epsilon) {
     return
         EpsilonCompare(n.mValue.x,s.mValue.x,epsilon) &&
         EpsilonCompare(n.mValue.y,s.mValue.y,epsilon) &&
@@ -239,7 +240,7 @@ bool EpsilonCompare<aiVectorKey>(const aiVectorKey& n, const aiVectorKey& s, flo
 
 // ------------------------------------------------------------------------------------------------
 template <>
-bool EpsilonCompare<aiQuatKey>(const aiQuatKey& n, const aiQuatKey& s, float epsilon)   {
+bool EpsilonCompare<aiQuatKey>(const aiQuatKey& n, const aiQuatKey& s, ai_real epsilon)   {
     return
         EpsilonCompare(n.mValue.x,s.mValue.x,epsilon) &&
         EpsilonCompare(n.mValue.y,s.mValue.y,epsilon) &&
@@ -249,7 +250,7 @@ bool EpsilonCompare<aiQuatKey>(const aiQuatKey& n, const aiQuatKey& s, float eps
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline bool AllIdentical(T* in, unsigned int num, float epsilon)
+inline bool AllIdentical(T* in, unsigned int num, ai_real epsilon)
 {
     if (num <= 1) {
         return true;

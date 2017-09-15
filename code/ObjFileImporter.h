@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -37,33 +38,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
-
 #ifndef OBJ_FILE_IMPORTER_H_INC
 #define OBJ_FILE_IMPORTER_H_INC
 
 #include "BaseImporter.h"
-#include "../include/assimp/material.h"
+#include <assimp/material.h>
 #include <vector>
 
 struct aiMesh;
 struct aiNode;
 
-namespace Assimp
-{
+namespace Assimp {
 
-namespace ObjFile
-{
-struct Object;
-struct Model;
+namespace ObjFile {
+    struct Object;
+    struct Model;
 }
 
 // ------------------------------------------------------------------------------------------------
 /// \class  ObjFileImporter
 /// \brief  Imports a waveform obj file
 // ------------------------------------------------------------------------------------------------
-class ObjFileImporter : public BaseImporter
-{
+class ObjFileImporter : public BaseImporter {
 public:
     /// \brief  Default constructor
     ObjFileImporter();
@@ -77,7 +73,6 @@ public:
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 private:
-
     //! \brief  Appends the supported extension.
     const aiImporterDesc* GetInfo () const;
 
@@ -106,7 +101,7 @@ private:
     void createMaterials(const ObjFile::Model* pModel, aiScene* pScene);
 
     /// @brief  Adds special property for the used texture mapping mode of the model.
-    void addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode = 1);
+    void addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode = 1, int index = 0);
 
     //! \brief  Appends a child node to a parent node and updates the data structures.
     void appendChildToParentNode(aiNode *pParent, aiNode *pChild);

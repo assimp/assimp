@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,17 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-#include <functional>
-
-#include "FBXParser.h"
 #include "FBXDocument.h"
+#include "FBXMeshGeometry.h"
+#include "FBXParser.h"
 #include "FBXUtil.h"
 #include "FBXImporter.h"
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
-#include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
+
+#include <memory>
+#include <functional>
+#include <map>
 
 namespace Assimp {
 namespace FBX {
@@ -68,13 +70,13 @@ LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc)
 , id(id)
 , flags()
 {
-
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 LazyObject::~LazyObject()
 {
-
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -135,6 +137,10 @@ const Object* LazyObject::Get(bool dieOnError)
         // so avoid constructing strings all the time.
         const char* obtype = key.begin();
         const size_t length = static_cast<size_t>(key.end()-key.begin());
+
+        // For debugging
+        //dumpObjectClassInfo( objtype, classtag );
+
         if (!strncmp(obtype,"Geometry",length)) {
             if (!strcmp(classtag.c_str(),"Mesh")) {
                 object.reset(new MeshGeometry(id,element,name,doc));
@@ -165,10 +171,10 @@ const Object* LazyObject::Get(bool dieOnError)
                 object.reset(new Skin(id,element,doc,name));
             }
         }
-        else if (!strncmp(obtype,"Model",length)) {
+        else if ( !strncmp( obtype, "Model", length ) ) {
             // FK and IK effectors are not supported
-            if (strcmp(classtag.c_str(),"IKEffector") && strcmp(classtag.c_str(),"FKEffector")) {
-                object.reset(new Model(id,element,doc,name));
+            if ( strcmp( classtag.c_str(), "IKEffector" ) && strcmp( classtag.c_str(), "FKEffector" ) ) {
+                object.reset( new Model( id, element, doc, name ) );
             }
         }
         else if (!strncmp(obtype,"Material",length)) {
@@ -226,31 +232,28 @@ Object::Object(uint64_t id, const Element& element, const std::string& name)
 , name(name)
 , id(id)
 {
-
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 Object::~Object()
 {
-
+    // empty
 }
 
-
 // ------------------------------------------------------------------------------------------------
-FileGlobalSettings::FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props)
+FileGlobalSettings::FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props)
 : props(props)
 , doc(doc)
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 FileGlobalSettings::~FileGlobalSettings()
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Document::Document(const Parser& parser, const ImportSettings& settings)
@@ -258,8 +261,8 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 , parser(parser)
 {
     // Cannot use array default initialization syntax because vc8 fails on it
-    for (unsigned int i = 0; i < sizeof(creationTimeStamp) / sizeof(creationTimeStamp[0]); ++i) {
-        creationTimeStamp[i] = 0;
+    for (auto &timeStamp : creationTimeStamp) {
+        timeStamp = 0;
     }
 
     ReadHeader();
@@ -274,24 +277,24 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
     ReadConnections();
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Document::~Document()
 {
-    BOOST_FOREACH(ObjectMap::value_type& v, objects) {
+    for(ObjectMap::value_type& v : objects) {
         delete v.second;
     }
 
-    BOOST_FOREACH(ConnectionMap::value_type& v, src_connections) {
+    for(ConnectionMap::value_type& v : src_connections) {
         delete v.second;
     }
     // |dest_connections| contain the same Connection objects as the |src_connections|
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void Document::ReadHeader()
-{
+static const unsigned int LowerSupportedVersion = 7100;
+static const unsigned int UpperSupportedVersion = 7400;
+
+void Document::ReadHeader() {
     // Read ID objects from "Objects" section
     const Scope& sc = parser.GetRootScope();
     const Element* const ehead = sc["FBXHeaderExtension"];
@@ -302,12 +305,12 @@ void Document::ReadHeader()
     const Scope& shead = *ehead->Compound();
     fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
 
-    // While we maye have some success with newer files, we don't support
+    // While we may have some success with newer files, we don't support
     // the older 6.n fbx format
-    if(fbxVersion < 7100) {
+    if(fbxVersion < LowerSupportedVersion ) {
         DOMError("unsupported, old format version, supported are only FBX 2011, FBX 2012 and FBX 2013");
     }
-    if(fbxVersion > 7300) {
+    if(fbxVersion > UpperSupportedVersion ) {
         if(Settings().strictMode) {
             DOMError("unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013"
                 " (turn off strict mode to try anyhow) ");
@@ -317,7 +320,6 @@ void Document::ReadHeader()
                 " trying to read it nevertheless");
         }
     }
-
 
     const Element* const ecreator = shead["Creator"];
     if(ecreator) {
@@ -345,11 +347,11 @@ void Document::ReadGlobalSettings()
     if(!ehead || !ehead->Compound()) {
         DOMWarning("no GlobalSettings dictionary found");
 
-        globals.reset(new FileGlobalSettings(*this, boost::make_shared<const PropertyTable>()));
+        globals.reset(new FileGlobalSettings(*this, std::make_shared<const PropertyTable>()));
         return;
     }
 
-    boost::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
+    std::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
 
     if(!props) {
         DOMError("GlobalSettings dictionary contains no property table");
@@ -357,7 +359,6 @@ void Document::ReadGlobalSettings()
 
     globals.reset(new FileGlobalSettings(*this, props));
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void Document::ReadObjects()
@@ -374,7 +375,7 @@ void Document::ReadObjects()
     objects[0] = new LazyObject(0L, *eobjects, *this);
 
     const Scope& sobjects = *eobjects->Compound();
-    BOOST_FOREACH(const ElementMap::value_type& el, sobjects.Elements()) {
+    for(const ElementMap::value_type& el : sobjects.Elements()) {
 
         // extract ID
         const TokenList& tok = el.second->Tokens();
@@ -384,7 +385,6 @@ void Document::ReadObjects()
         }
 
         const char* err;
-
         const uint64_t id = ParseTokenAsID(*tok[0], err);
         if(err) {
             DOMError(err,el.second);
@@ -407,7 +407,6 @@ void Document::ReadObjects()
         }
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void Document::ReadPropertyTemplates()
@@ -457,8 +456,8 @@ void Document::ReadPropertyTemplates()
 
             const Element* Properties70 = (*sc)["Properties70"];
             if(Properties70) {
-                boost::shared_ptr<const PropertyTable> props = boost::make_shared<const PropertyTable>(
-                    *Properties70,boost::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
+                std::shared_ptr<const PropertyTable> props = std::make_shared<const PropertyTable>(
+                    *Properties70,std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
                 );
 
                 templates[oname+"."+pname] = props;
@@ -466,8 +465,6 @@ void Document::ReadPropertyTemplates()
         }
     }
 }
-
-
 
 // ------------------------------------------------------------------------------------------------
 void Document::ReadConnections()
@@ -480,7 +477,6 @@ void Document::ReadConnections()
     }
 
     uint64_t insertionOrder = 0l;
-
     const Scope& sconns = *econns->Compound();
     const ElementCollection conns = sconns.GetCollection("C");
     for(ElementMap::const_iterator it = conns.first; it != conns.second; ++it) {
@@ -489,7 +485,9 @@ void Document::ReadConnections()
 
         // PP = property-property connection, ignored for now
         // (tokens: "PP", ID1, "Property1", ID2, "Property2")
-        if(type == "PP") continue;
+        if ( type == "PP" ) {
+            continue;
+        }
 
         const uint64_t src = ParseTokenAsID(GetRequiredToken(el,1));
         const uint64_t dest = ParseTokenAsID(GetRequiredToken(el,2));
@@ -516,16 +514,15 @@ void Document::ReadConnections()
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 const std::vector<const AnimationStack*>& Document::AnimationStacks() const
 {
-    if (!animationStacksResolved.empty() || !animationStacks.size()) {
+    if (!animationStacksResolved.empty() || animationStacks.empty()) {
         return animationStacksResolved;
     }
 
     animationStacksResolved.reserve(animationStacks.size());
-    BOOST_FOREACH(uint64_t id, animationStacks) {
+    for(uint64_t id : animationStacks) {
         LazyObject* const lazy = GetObject(id);
         const AnimationStack* stack;
         if(!lazy || !(stack = lazy->Get<AnimationStack>())) {
@@ -538,7 +535,6 @@ const std::vector<const AnimationStack*>& Document::AnimationStacks() const
     return animationStacksResolved;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 LazyObject* Document::GetObject(uint64_t id) const
 {
@@ -549,8 +545,7 @@ LazyObject* Document::GetObject(uint64_t id) const
 #define MAX_CLASSNAMES 6
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id,
-    const ConnectionMap& conns) const
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns) const
 {
     std::vector<const Connection*> temp;
 
@@ -562,11 +557,10 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id,
         temp.push_back((*it).second);
     }
 
-    std::sort(temp.begin(), temp.end(), std::mem_fun(&Connection::Compare));
+    std::sort(temp.begin(), temp.end(), std::mem_fn(&Connection::Compare));
 
     return temp; // NRVO should handle this
 }
-
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src,
@@ -576,17 +570,17 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
 
 {
     ai_assert(classnames);
-    ai_assert(count != 0 && count <= MAX_CLASSNAMES);
+    ai_assert( count != 0 );
+    ai_assert( count <= MAX_CLASSNAMES);
 
     size_t lenghts[MAX_CLASSNAMES];
 
     const size_t c = count;
     for (size_t i = 0; i < c; ++i) {
-        lenghts[i] = strlen(classnames[i]);
+        lenghts[ i ] = strlen(classnames[i]);
     }
 
     std::vector<const Connection*> temp;
-
     const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range =
         conns.equal_range(id);
 
@@ -614,10 +608,9 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
         temp.push_back((*it).second);
     }
 
-    std::sort(temp.begin(), temp.end(), std::mem_fun(&Connection::Compare));
+    std::sort(temp.begin(), temp.end(), std::mem_fn(&Connection::Compare));
     return temp; // NRVO should handle this
 }
-
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const
@@ -625,41 +618,33 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
     return GetConnectionsSequenced(source, ConnectionsBySource());
 }
 
-
-
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest,
-    const char* classname) const
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest, const char* classname) const
 {
     const char* arr[] = {classname};
     return GetConnectionsBySourceSequenced(dest, arr,1);
 }
 
-
-
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source,
-    const char* const* classnames, size_t count) const
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, 
+        const char* const* classnames, size_t count) const
 {
     return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
-    const char* classname) const
+        const char* classname) const
 {
     const char* arr[] = {classname};
     return GetConnectionsByDestinationSequenced(dest, arr,1);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest) const
 {
     return GetConnectionsSequenced(dest, ConnectionsByDestination());
 }
-
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
@@ -669,10 +654,9 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
     return GetConnectionsSequenced(dest, false, ConnectionsByDestination(),classnames, count);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop,
-    const Document& doc)
+        const Document& doc)
 
 : insertionOrder(insertionOrder)
 , prop(prop)
@@ -685,13 +669,11 @@ Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, co
     ai_assert(!dest || doc.Objects().find(dest) != doc.Objects().end());
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Connection::~Connection()
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 LazyObject& Connection::LazySourceObject() const
@@ -701,7 +683,6 @@ LazyObject& Connection::LazySourceObject() const
     return *lazy;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 LazyObject& Connection::LazyDestinationObject() const
 {
@@ -710,7 +691,6 @@ LazyObject& Connection::LazyDestinationObject() const
     return *lazy;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 const Object* Connection::SourceObject() const
 {
@@ -718,7 +698,6 @@ const Object* Connection::SourceObject() const
     ai_assert(lazy);
     return lazy->Get();
 }
-
 
 // ------------------------------------------------------------------------------------------------
 const Object* Connection::DestinationObject() const
@@ -732,4 +711,3 @@ const Object* Connection::DestinationObject() const
 } // !Assimp
 
 #endif
-

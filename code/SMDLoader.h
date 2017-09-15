@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  SMDLoader.h
- *  @brief Defintion of the Valve SMD file format
+ *  @brief Definition of the Valve SMD file format
  */
 
 #ifndef AI_SMDLOADER_H_INCLUDED
@@ -50,17 +51,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 
 // public Assimp headers
-#include "../include/assimp/types.h"
-#include "../include/assimp/texture.h"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/material.h"
+#include <assimp/types.h>
+#include <assimp/texture.h>
+#include <assimp/anim.h>
+#include <assimp/material.h>
+
 struct aiNode;
 
 // STL headers
 #include <vector>
 
 namespace Assimp    {
-
 
 namespace SMD   {
 
@@ -171,7 +172,7 @@ struct Bone
 // ---------------------------------------------------------------------------
 /** Used to load Half-life 1 and 2 SMD models
 */
-class SMDImporter : public BaseImporter
+class ASSIMP_API SMDImporter : public BaseImporter
 {
 public:
     SMDImporter();
@@ -372,7 +373,7 @@ private:
     unsigned int configFrameID;
 
     /** Buffer to hold the loaded file */
-    const char* mBuffer;
+    std::vector<char> mBuffer;
 
     /** Output scene to be filled
     */

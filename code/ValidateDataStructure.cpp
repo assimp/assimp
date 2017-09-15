@@ -1,9 +1,10 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "ProcessHelper.h"
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 // CRT headers
 #include <stdarg.h>
@@ -408,11 +409,12 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             // the MSB flag is temporarily used by the extra verbose
             // mode to tell us that the JoinVerticesProcess might have
             // been executed already.
-            if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && abRefList[face.mIndices[a]])
+			/*if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && !(this->mScene->mFlags & AI_SCENE_FLAGS_ALLOW_SHARED) &&
+				abRefList[face.mIndices[a]])
             {
                 ReportError("aiMesh::mVertices[%i] is referenced twice - second "
                     "time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
-            }
+            }*/
             abRefList[face.mIndices[a]] = true;
         }
     }
@@ -463,7 +465,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             ReportError("aiMesh::mBones is NULL (aiMesh::mNumBones is %i)",
                 pMesh->mNumBones);
         }
-        boost::scoped_array<float> afSum(NULL);
+        std::unique_ptr<float[]> afSum(nullptr);
         if (pMesh->mNumVertices)
         {
             afSum.reset(new float[pMesh->mNumVertices]);
@@ -719,7 +721,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
     }
 
     // make some more specific tests
-    float fTemp;
+    ai_real fTemp;
     int iShading;
     if (AI_SUCCESS == aiGetMaterialInteger( pMaterial,AI_MATKEY_SHADING_MODEL,&iShading))   {
         switch ((aiShadingMode)iShading)
@@ -741,7 +743,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
         };
     }
 
-    if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp) && (!fTemp || fTemp > 1.01f)) {
+    if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp) && (!fTemp || fTemp > 1.01)) {
         ReportWarning("Invalid opacity value (must be 0 < opacity < 1.0)");
     }
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -50,12 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SMDLoader.h"
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
-#include "../include/assimp/Importer.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
-
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
+#include <memory>
 
 using namespace Assimp;
 
@@ -75,20 +76,22 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter()
-    : configFrameID(),
-    mBuffer(),
-    pScene(),
-    iFileSize(),
-    iSmallestFrame(),
-    dLengthOfAnim(),
-    bHasUVs(),
-    iLineNumber()
-{}
+: configFrameID(),
+mBuffer(),
+pScene( nullptr ),
+iFileSize( 0 ),
+iSmallestFrame( -1 ),
+dLengthOfAnim( 0.0 ),
+bHasUVs(false ),
+iLineNumber(-1) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SMDImporter::~SMDImporter()
-{}
+SMDImporter::~SMDImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -122,7 +125,7 @@ void SMDImporter::SetupProperties(const Importer* pImp)
 // Imports the given file into the given scene structure.
 void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {
@@ -134,9 +137,8 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     // Allocate storage and copy the contents of the file to a memory buffer
     this->pScene = pScene;
 
-    std::vector<char> buff(iFileSize+1);
-    TextFileToBuffer(file.get(),buff);
-    mBuffer = &buff[0];
+    mBuffer.resize( iFileSize + 1 );
+    TextFileToBuffer(file.get(), mBuffer );
 
     iSmallestFrame = (1 << 31);
     bHasUVs = true;
@@ -216,7 +218,7 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 void SMDImporter::LogErrorNoThrow(const char* msg)
 {
     char szTemp[1024];
-    sprintf(szTemp,"Line %u: %s",iLineNumber,msg);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,msg);
     DefaultLogger::get()->error(szTemp);
 }
 
@@ -226,7 +228,7 @@ void SMDImporter::LogWarning(const char* msg)
 {
     char szTemp[1024];
     ai_assert(strlen(msg) < 1000);
-    sprintf(szTemp,"Line %u: %s",iLineNumber,msg);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,msg);
     DefaultLogger::get()->warn(szTemp);
 }
 
@@ -448,7 +450,9 @@ void SMDImporter::CreateOutputMeshes()
 // add bone child nodes
 void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 {
-    ai_assert(NULL != pcNode && 0 == pcNode->mNumChildren && NULL == pcNode->mChildren);
+    ai_assert( NULL != pcNode );
+    ai_assert( 0 == pcNode->mNumChildren );
+    ai_assert( NULL == pcNode->mChildren);
 
     // first count ...
     for (unsigned int i = 0; i < asBones.size();++i)
@@ -641,7 +645,7 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
         bone.mOffsetMatrix.Inverse();
     }
 }
-
+\
 // ------------------------------------------------------------------------------------------------
 // create output materials
 void SMDImporter::CreateOutputMaterials()
@@ -655,12 +659,12 @@ void SMDImporter::CreateOutputMaterials()
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;
-        szName.length = (size_t)::sprintf(szName.data,"Texture_%u",iMat);
+        szName.length = (size_t)ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat);
         pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
         if (aszTextures[iMat].length())
         {
-            ::strcpy(szName.data, aszTextures[iMat].c_str() );
+            ::strncpy(szName.data, aszTextures[iMat].c_str(),MAXLEN-1);
             szName.length = aszTextures[iMat].length();
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
@@ -695,14 +699,14 @@ void SMDImporter::CreateOutputMaterials()
 // Parse the file
 void SMDImporter::ParseFile()
 {
-    const char* szCurrent = mBuffer;
+    const char* szCurrent = &mBuffer[0];
 
     // read line per line ...
     for ( ;; )
     {
         if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
-        // "version <n> \n", <n> should be 1 for hl and hl� SMD files
+        // "version <n> \n", <n> should be 1 for hl and hl2 SMD files
         if (TokenMatch(szCurrent,"version",7))
         {
             if(!SkipSpaces(szCurrent,&szCurrent)) break;
@@ -1020,7 +1024,7 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 
     // read the texture file name
     const char* szLast = szCurrent;
-    while (!IsSpaceOrNewLine(*szCurrent++));
+    while (!IsSpaceOrNewLine(*++szCurrent));
 
     // ... and get the index that belongs to this file name
     face.iTexture = GetTextureIndex(std::string(szLast,(uintptr_t)szCurrent-(uintptr_t)szLast));

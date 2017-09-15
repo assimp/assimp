@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -55,17 +56,17 @@ void ProcessPolyLine(const IfcPolyline& def, TempMesh& meshout, ConversionData& 
 {
     // this won't produce a valid mesh, it just spits out a list of vertices
     IfcVector3 t;
-    BOOST_FOREACH(const IfcCartesianPoint& cp, def.Points) {
+    for(const IfcCartesianPoint& cp : def.Points) {
         ConvertCartesianPoint(t,cp);
         meshout.verts.push_back(t);
     }
-    meshout.vertcnt.push_back(meshout.verts.size());
+    meshout.vertcnt.push_back(static_cast<unsigned int>(meshout.verts.size()));
 }
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv)
 {
-    boost::scoped_ptr<const Curve> cv(Curve::Convert(curve,conv));
+    std::unique_ptr<const Curve> cv(Curve::Convert(curve,conv));
     if (!cv) {
         IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + curve.GetClassName());
         return false;
@@ -80,7 +81,7 @@ bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& con
             IFCImporter::LogError(cv.s+ " (error occurred while processing curve)");
             return false;
         }
-        meshout.vertcnt.push_back(meshout.verts.size());
+        meshout.vertcnt.push_back(static_cast<unsigned int>(meshout.verts.size()));
         return true;
     }
 
@@ -101,7 +102,7 @@ void ProcessOpenProfile(const IfcArbitraryOpenProfileDef& def, TempMesh& meshout
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& /*conv*/)
+void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
     if(const IfcRectangleProfileDef* const cprofile = def.ToPtr<IfcRectangleProfileDef>()) {
         const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
@@ -117,7 +118,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
         if(def.ToPtr<IfcCircleHollowProfileDef>()) {
             // TODO
         }
-        const size_t segments = 32;
+        const size_t segments = conv.settings.cylindricalTessellation;
         const IfcFloat delta = AI_MATH_TWO_PI_F/segments, radius = circle->Radius;
 
         meshout.verts.reserve(segments);
@@ -127,7 +128,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
             meshout.verts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
         }
 
-        meshout.vertcnt.push_back(segments);
+        meshout.vertcnt.push_back(static_cast<unsigned int>(segments));
     }
     else if( const IfcIShapeProfileDef* const ishape = def.ToPtr<IfcIShapeProfileDef>()) {
         // construct simplified IBeam shape

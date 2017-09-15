@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,15 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Assimp;
 
-class FindDegeneratesProcessTest : public ::testing::Test
-{
+class FindDegeneratesProcessTest : public ::testing::Test {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     aiMesh* mesh;
     FindDegeneratesProcess* process;
 };

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,16 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_PROPERTIES_H
 #define INCLUDED_AI_FBX_PROPERTIES_H
 
-#include <map>
-#include <string>
 #include "FBXCompileConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <string>
 
 namespace Assimp {
 namespace FBX {
 
-    class Element;
-
+// Forward declarations
+class Element;
 
 /** Represents a dynamic property. Type info added by deriving classes,
  *  see #TypedProperty.
@@ -61,39 +61,32 @@ namespace FBX {
  @verbatim
    P: "ShininessExponent", "double", "Number", "",0.5
  @endvebatim
-
 */
 class Property
 {
 protected:
-
     Property();
 
 public:
-
     virtual ~Property();
 
 public:
-
     template <typename T>
     const T* As() const {
         return dynamic_cast<const T*>(this);
     }
 };
 
-
 template<typename T>
 class TypedProperty : public Property
 {
 public:
-
     explicit TypedProperty(const T& value)
         : value(value)
     {
     }
 
 public:
-
     const T& Value() const {
         return value;
     }
@@ -103,23 +96,22 @@ private:
 };
 
 
-typedef std::fbx_unordered_map<std::string,boost::shared_ptr<Property> > DirectPropertyMap;
+typedef std::fbx_unordered_map<std::string,std::shared_ptr<Property> > DirectPropertyMap;
 typedef std::fbx_unordered_map<std::string,const Property*> PropertyMap;
 typedef std::fbx_unordered_map<std::string,const Element*> LazyPropertyMap;
 
-/** Represents a property table as can be found in the newer FBX files (Properties60, Properties70)*/
+/** 
+ *  Represents a property table as can be found in the newer FBX files (Properties60, Properties70)
+ */
 class PropertyTable
 {
 public:
-
     // in-memory property table with no source element
     PropertyTable();
-
-    PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps);
+    PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps);
     ~PropertyTable();
 
 public:
-
     const Property* Get(const std::string& name) const;
 
     // PropertyTable's need not be coupled with FBX elements so this can be NULL
@@ -134,48 +126,44 @@ public:
     DirectPropertyMap GetUnparsedProperties() const;
 
 private:
-
     LazyPropertyMap lazyProps;
     mutable PropertyMap props;
-    const boost::shared_ptr<const PropertyTable> templateProps;
+    const std::shared_ptr<const PropertyTable> templateProps;
     const Element* const element;
 };
 
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline T PropertyGet(const PropertyTable& in, const std::string& name,
-    const T& defaultValue)
-{
+inline 
+T PropertyGet(const PropertyTable& in, const std::string& name, const T& defaultValue) {
     const Property* const prop = in.Get(name);
-    if(!prop) {
+    if( nullptr == prop) {
         return defaultValue;
     }
 
     // strong typing, no need to be lenient
     const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
-    if(!tprop) {
+    if( nullptr == tprop) {
         return defaultValue;
     }
 
     return tprop->Value();
 }
 
-
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline T PropertyGet(const PropertyTable& in, const std::string& name,
-    bool& result)
-{
+inline 
+T PropertyGet(const PropertyTable& in, const std::string& name, bool& result) {
     const Property* const prop = in.Get(name);
-    if(!prop) {
+    if( nullptr == prop) {
         result = false;
         return T();
     }
 
     // strong typing, no need to be lenient
     const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
-    if(!tprop) {
+    if( nullptr == tprop) {
         result = false;
         return T();
     }
@@ -184,8 +172,7 @@ inline T PropertyGet(const PropertyTable& in, const std::string& name,
     return tprop->Value();
 }
 
-
 } //! FBX
 } //! Assimp
 
-#endif //
+#endif // INCLUDED_AI_FBX_PROPERTIES_H

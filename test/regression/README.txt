@@ -1,5 +1,5 @@
-Assimp Regression Test Suite
-============================
+Asset Importer Lib Regression Test Suite
+========================================
 
 1) How does it work?
 ---------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ makes it reasonably easy to locate the offending field.
 ---------------------------------------------------------------------------------
 As mentioned above, floating-point inaccuracies between differently optimized
 builds are not considered regressions and all float comparisons done by the test
-suite involve an epsilon to accomodate. However compiler settings that allow
+suite involve an epsilon to accommodate. However compiler settings that allow
 compilers to perform non-IEEE754 compliant optimizations can cause arbitrary
 failures in the test suite. Even if the compiler is configured to be IEE754
 comformant, there is lots of code in assimp that leaves the compiler a choice

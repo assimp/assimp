@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -44,8 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  blocks to find out how to customize _your_ Assimp build.
  */
 
-#ifndef INCLUDED_AI_DEFINES_H
-#define INCLUDED_AI_DEFINES_H
+#pragma once
+#ifndef AI_DEFINES_H_INC
+#define AI_DEFINES_H_INC
+
+#include <assimp/config.h>
 
     //////////////////////////////////////////////////////////////////////////
     /* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
@@ -209,30 +213,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
 #error Currently, Borland is unsupported. Feel free to port Assimp.
 
-// "W8059 Packgr��e der Struktur ge�ndert"
+// "W8059 Packgröße der Struktur geändert"
 
 #endif
-    //////////////////////////////////////////////////////////////////////////
-    /* Define 'ASSIMP_BUILD_BOOST_WORKAROUND' to compile assimp
-     * without boost. This is done by using a few workaround
-     * classes and brings some limitations (e.g. some logging won't be done,
-     * the library won't utilize threads or be threadsafe at all).
-     * This implies the 'ASSIMP_BUILD_SINGLETHREADED' setting. */
-     //////////////////////////////////////////////////////////////////////////
-#ifdef ASSIMP_BUILD_BOOST_WORKAROUND
 
-    // threading support requires boost
-#ifndef ASSIMP_BUILD_SINGLETHREADED
-#   define ASSIMP_BUILD_SINGLETHREADED
-#endif
-
-#endif // !! ASSIMP_BUILD_BOOST_WORKAROUND
 
     //////////////////////////////////////////////////////////////////////////
     /* Define ASSIMP_BUILD_SINGLETHREADED to compile assimp
      * without threading support. The library doesn't utilize
-     * threads then and is itself not threadsafe.
-     * If this flag is specified boost::threads is *not* required. */
+     * threads then and is itself not threadsafe. */
     //////////////////////////////////////////////////////////////////////////
 #ifndef ASSIMP_BUILD_SINGLETHREADED
 #   define ASSIMP_BUILD_SINGLETHREADED
@@ -241,6 +230,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(_DEBUG) || ! defined(NDEBUG)
 #   define ASSIMP_BUILD_DEBUG
 #endif
+
+    //////////////////////////////////////////////////////////////////////////
+    /* Define ASSIMP_DOUBLE_PRECISION to compile assimp
+     * with double precision support (64-bit). */
+    //////////////////////////////////////////////////////////////////////////
+
+#ifdef ASSIMP_DOUBLE_PRECISION
+    typedef double ai_real;
+    typedef signed long long int ai_int;
+    typedef unsigned long long int ai_uint;
+#else // ASSIMP_DOUBLE_PRECISION
+    typedef float ai_real;
+    typedef signed int ai_int;
+    typedef unsigned int ai_uint;
+#endif // ASSIMP_DOUBLE_PRECISION
 
     //////////////////////////////////////////////////////////////////////////
     /* Useful constants */
@@ -257,8 +261,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATH_HALF_PI_F   (AI_MATH_PI_F * 0.5f)
 
 /* Tiny macro to convert from radians to degrees and back */
-#define AI_DEG_TO_RAD(x) ((x)*0.0174532925f)
-#define AI_RAD_TO_DEG(x) ((x)*57.2957795f)
+#define AI_DEG_TO_RAD(x) ((x)*(ai_real)0.0174532925)
+#define AI_RAD_TO_DEG(x) ((x)*(ai_real)57.2957795)
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)
@@ -283,5 +287,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
 
-
-#endif // !! INCLUDED_AI_DEFINES_H
+#endif // !! AI_DEFINES_H_INC

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -48,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "LWOLoader.h"
 #include "ByteSwapper.h"
-#include <boost/static_assert.hpp>
 
 
 using namespace Assimp;
@@ -91,8 +91,8 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
     aiString s;
     bool ret = false;
 
-    for (TextureList::const_iterator it = in.begin(), end = in.end();it != end;++it)    {
-        if (!(*it).enabled || !(*it).bCanUse)
+    for (const auto &texture : in)    {
+        if (!texture.enabled || !texture.bCanUse)
             continue;
         ret = true;
 
@@ -101,7 +101,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
         // channels if they're not there.
 
         aiTextureMapping mapping;
-        switch ((*it).mapMode)
+        switch (texture.mapMode)
         {
             case LWO::Texture::Planar:
                 mapping = aiTextureMapping_PLANE;
@@ -121,13 +121,13 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
                 break;
             case LWO::Texture::UV:
                 {
-                    if( UINT_MAX == (*it).mRealUVIndex )    {
+                    if( UINT_MAX == texture.mRealUVIndex ) {
                         // We have no UV index for this texture, so we can't display it
                         continue;
                     }
 
                     // add the UV source index
-                    temp = (*it).mRealUVIndex;
+                    temp = texture.mRealUVIndex;
                     pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_UVWSRC(type,cur));
 
                     mapping = aiTextureMapping_UV;
@@ -140,15 +140,15 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
         if (mapping != aiTextureMapping_UV) {
             // Setup the main axis
             aiVector3D v;
-            switch ((*it).majorAxis)    {
+            switch (texture.majorAxis) {
                 case Texture::AXIS_X:
-                    v = aiVector3D(1.f,0.f,0.f);
+                    v = aiVector3D(1.0,0.0,0.0);
                     break;
                 case Texture::AXIS_Y:
-                    v = aiVector3D(0.f,1.f,0.f);
+                    v = aiVector3D(0.0,1.0,0.0);
                     break;
                 default: // case Texture::AXIS_Z:
-                    v = aiVector3D(0.f,0.f,1.f);
+                    v = aiVector3D(0.0,0.0,1.0);
                     break;
             }
 
@@ -157,10 +157,10 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
             // Setup UV scalings for cylindric and spherical projections
             if (mapping == aiTextureMapping_CYLINDER || mapping == aiTextureMapping_SPHERE) {
                 aiUVTransform trafo;
-                trafo.mScaling.x = (*it).wrapAmountW;
-                trafo.mScaling.y = (*it).wrapAmountH;
+                trafo.mScaling.x = texture.wrapAmountW;
+                trafo.mScaling.y = texture.wrapAmountH;
 
-                BOOST_STATIC_ASSERT(sizeof(aiUVTransform)/sizeof(float) == 5);
+                static_assert(sizeof(aiUVTransform)/sizeof(ai_real) == 5, "sizeof(aiUVTransform)/sizeof(ai_real) == 5");
                 pcMat->AddProperty(&trafo,1,AI_MATKEY_UVTRANSFORM(type,cur));
             }
             DefaultLogger::get()->debug("LWO2: Setting up non-UV mapping");
@@ -172,7 +172,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
             // find the corresponding clip (take the last one if multiple
             // share the same index)
             ClipList::iterator end = mClips.end(), candidate = end;
-            temp = (*it).mClipIdx;
+            temp = texture.mClipIdx;
             for (ClipList::iterator clip = mClips.begin(); clip != end; ++clip) {
                 if ((*clip).idx == temp) {
                     candidate = clip;
@@ -209,7 +209,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
         }
         else
         {
-            std::string ss = (*it).mFileName;
+            std::string ss = texture.mFileName;
             if (!ss.length()) {
                 DefaultLogger::get()->error("LWOB: Empty file name");
                 continue;
@@ -220,10 +220,10 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
         pcMat->AddProperty(&s,AI_MATKEY_TEXTURE(type,cur));
 
         // add the blend factor
-        pcMat->AddProperty<float>(&(*it).mStrength,1,AI_MATKEY_TEXBLEND(type,cur));
+        pcMat->AddProperty<float>(&texture.mStrength,1,AI_MATKEY_TEXBLEND(type,cur));
 
         // add the blend operation
-        switch ((*it).blendType)
+        switch (texture.blendType)
         {
             case LWO::Texture::Normal:
             case LWO::Texture::Multiply:
@@ -255,11 +255,11 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
         pcMat->AddProperty<int>((int*)&mapping,1,AI_MATKEY_MAPPING(type,cur));
 
         // add the u-wrapping
-        temp = (unsigned int)GetMapMode((*it).wrapModeWidth);
+        temp = (unsigned int)GetMapMode(texture.wrapModeWidth);
         pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_MAPPINGMODE_U(type,cur));
 
         // add the v-wrapping
-        temp = (unsigned int)GetMapMode((*it).wrapModeHeight);
+        temp = (unsigned int)GetMapMode(texture.wrapModeHeight);
         pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_MAPPINGMODE_V(type,cur));
 
         ++cur;
@@ -287,17 +287,17 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
     {
         float fGloss;
         if (mIsLWO2)    {
-            fGloss = std::pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
+            fGloss = std::pow( surf.mGlossiness*ai_real( 10.0 )+ ai_real( 2.0 ), ai_real( 2.0 ) );
         }
         else
         {
-            if (16.0f >= surf.mGlossiness)
-                fGloss = 6.0f;
-            else if (64.0f >= surf.mGlossiness)
-                fGloss = 20.0f;
-            else if (256.0f >= surf.mGlossiness)
-                fGloss = 50.0f;
-            else fGloss = 80.0f;
+            if (16.0 >= surf.mGlossiness)
+                fGloss = 6.0;
+            else if (64.0 >= surf.mGlossiness)
+                fGloss = 20.0;
+            else if (256.0 >= surf.mGlossiness)
+                fGloss = 50.0;
+            else fGloss = 80.0;
         }
 
         pcMat->AddProperty(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
@@ -307,17 +307,17 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
     else m = aiShadingMode_Gouraud;
 
     // specular color
-    aiColor3D clr = lerp( aiColor3D(1.f,1.f,1.f), surf.mColor, surf.mColorHighlights );
+    aiColor3D clr = lerp( aiColor3D(1.0,1.0,1.0), surf.mColor, surf.mColorHighlights );
     pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_SPECULAR);
     pcMat->AddProperty(&surf.mSpecularValue,1,AI_MATKEY_SHININESS_STRENGTH);
 
     // emissive color
     // luminosity is not really the same but it affects the surface in a similar way. Some scaling looks good.
-    clr.g = clr.b = clr.r = surf.mLuminosity*0.8f;
+    clr.g = clr.b = clr.r = surf.mLuminosity*ai_real( 0.8 );
     pcMat->AddProperty<aiColor3D>(&clr,1,AI_MATKEY_COLOR_EMISSIVE);
 
     // opacity ... either additive or default-blended, please
-    if (0.f != surf.mAdditiveTransparency)  {
+    if (0.0 != surf.mAdditiveTransparency)  {
 
         const int add = aiBlendMode_Additive;
         pcMat->AddProperty(&surf.mAdditiveTransparency,1,AI_MATKEY_OPACITY);
@@ -344,16 +344,14 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 
     // Now we need to know which shader to use .. iterate through the shader list of
     // the surface and  search for a name which we know ...
-    for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();it != end;++it)   {
-        //if (!(*it).enabled)continue;
-
-        if ((*it).functionName == "LW_SuperCelShader" || (*it).functionName == "AH_CelShader")  {
+    for (const auto &shader : surf.mShaders)   {
+        if (shader.functionName == "LW_SuperCelShader" || shader.functionName == "AH_CelShader")  {
             DefaultLogger::get()->info("LWO2: Mapping LW_SuperCelShader/AH_CelShader to aiShadingMode_Toon");
 
             m = aiShadingMode_Toon;
             break;
         }
-        else if ((*it).functionName == "LW_RealFresnel" || (*it).functionName == "LW_FastFresnel")  {
+        else if (shader.functionName == "LW_RealFresnel" || shader.functionName == "LW_FastFresnel")  {
             DefaultLogger::get()->info("LWO2: Mapping LW_RealFresnel/LW_FastFresnel to aiShadingMode_Fresnel");
 
             m = aiShadingMode_Fresnel;
@@ -361,16 +359,16 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
         }
         else
         {
-            DefaultLogger::get()->warn("LWO2: Unknown surface shader: " + (*it).functionName);
+            DefaultLogger::get()->warn("LWO2: Unknown surface shader: " + shader.functionName);
         }
     }
-    if (surf.mMaximumSmoothAngle <= 0.0f)
+    if (surf.mMaximumSmoothAngle <= 0.0)
         m = aiShadingMode_Flat;
     pcMat->AddProperty((int*)&m,1,AI_MATKEY_SHADING_MODEL);
 
     // (the diffuse value is just a scaling factor)
     // If a diffuse texture is set, we set this value to 1.0
-    clr = (b && false ? aiColor3D(1.f,1.f,1.f) : surf.mColor);
+    clr = (b && false ? aiColor3D(1.0,1.0,1.0) : surf.mColor);
     clr.r *= surf.mDiffuseValue;
     clr.g *= surf.mDiffuseValue;
     clr.b *= surf.mDiffuseValue;
@@ -382,20 +380,20 @@ char LWOImporter::FindUVChannels(LWO::TextureList& list,
     LWO::Layer& /*layer*/,LWO::UVChannel& uv, unsigned int next)
 {
     char ret = 0;
-    for (TextureList::iterator it = list.begin(), end = list.end();it != end;++it)  {
+    for (auto &texture : list)  {
 
         // Ignore textures with non-UV mappings for the moment.
-        if (!(*it).enabled || !(*it).bCanUse || (*it).mapMode != LWO::Texture::UV)  {
+        if (!texture.enabled || !texture.bCanUse || texture.mapMode != LWO::Texture::UV)  {
             continue;
         }
 
-        if ((*it).mUVChannelIndex == uv.name) {
+        if (texture.mUVChannelIndex == uv.name) {
             ret = 1;
 
             // got it.
-            if ((*it).mRealUVIndex == UINT_MAX || (*it).mRealUVIndex == next)
+            if (texture.mRealUVIndex == UINT_MAX || texture.mRealUVIndex == next)
             {
-                (*it).mRealUVIndex = next;
+                texture.mRealUVIndex = next;
             }
             else {
                 // channel mismatch. need to duplicate the material.
@@ -457,7 +455,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
                             ++extra;
                             out[next++] = i;
                         }
-                        // Bäh ... seems not to be used at all. Push to end if enough space is available.
+                        // Bah ... seems not to be used at all. Push to end if enough space is available.
                         else {
                             out[extra++] = i;
                             ++num_extra;
@@ -500,7 +498,7 @@ void LWOImporter::FindVCChannels(const LWO::Surface& surf, LWO::SortedRep& sorte
                 for (unsigned int n = 0; n < face.mNumIndices; ++n) {
                     unsigned int idx = face.mIndices[n];
 
-                    if (vc.abAssigned[idx] && ((aiColor4D*)&vc.rawData[0])[idx] != aiColor4D(0.f,0.f,0.f,1.f)) {
+                    if (vc.abAssigned[idx] && ((aiColor4D*)&vc.rawData[0])[idx] != aiColor4D(0.0,0.0,0.0,1.0)) {
                         if (next >= AI_MAX_NUMBER_OF_COLOR_SETS) {
 
                             DefaultLogger::get()->error("LWO: Maximum number of vertex color channels for "
@@ -854,7 +852,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
         case AI_LWO_SMAN:
             {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SMAN,4);
-                surf.mMaximumSmoothAngle = fabs( GetF4() );
+                surf.mMaximumSmoothAngle = std::fabs( GetF4() );
                 break;
             }
             // vertex color channel to be applied to the surface

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,19 +49,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "StreamReader.h"
 #include "fast_atof.h"
-#include <boost/foreach.hpp>
+#include "TinyFormatter.h"
 
 using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-#define for_each BOOST_FOREACH
-bool match4(StreamReaderAny& stream, const char* string) {
+static bool match4(StreamReaderAny& stream, const char* string) {
+    ai_assert( nullptr != string );
     char tmp[] = {
-        (stream).GetI1(),
-        (stream).GetI1(),
-        (stream).GetI1(),
-        (stream).GetI1()
+        (const char)(stream).GetI1(),
+        (const char)(stream).GetI1(),
+        (const char)(stream).GetI1(),
+        (const char)(stream).GetI1()
     };
     return (tmp[0]==string[0] && tmp[1]==string[1] && tmp[2]==string[2] && tmp[3]==string[3]);
 }
@@ -71,7 +72,7 @@ struct Type {
 };
 
 // ------------------------------------------------------------------------------------------------
-void DNAParser :: Parse ()
+void DNAParser::Parse ()
 {
     StreamReaderAny& stream = *db.reader.get();
     DNA& dna = db.dna;
@@ -86,7 +87,7 @@ void DNAParser :: Parse ()
     }
 
     std::vector<std::string> names (stream.GetI4());
-    for_each(std::string& s, names) {
+    for(std::string& s : names) {
         while (char c = stream.GetI1()) {
             s += c;
         }
@@ -99,7 +100,7 @@ void DNAParser :: Parse ()
     }
 
     std::vector<Type> types (stream.GetI4());
-    for_each(Type& s, types) {
+    for(Type& s : types) {
         while (char c = stream.GetI1()) {
             s.name += c;
         }
@@ -111,7 +112,7 @@ void DNAParser :: Parse ()
         throw DeadlyImportError("BlenderDNA: Expected TLEN field");
     }
 
-    for_each(Type& s, types) {
+    for(Type& s : types) {
         s.size = stream.GetI2();
     }
 
@@ -238,13 +239,15 @@ void DNA :: DumpToFile()
     f << "Field format: type name offset size" << "\n";
     f << "Structure format: name size" << "\n";
 
-    for_each(const Structure& s, structures) {
+    for(const Structure& s : structures) {
         f << s.name << " " << s.size << "\n\n";
-        for_each(const Field& ff, s.fields) {
-            f << "\t" << ff.type << " " << ff.name << " " << ff.offset << " " << ff.size << std::endl;
+        for(const Field& ff : s.fields) {
+            f << "\t" << ff.type << " " << ff.name << " " << ff.offset << " " << ff.size << "\n";
         }
-        f << std::endl;
+        f << "\n";
     }
+    f << std::flush;
+
     DefaultLogger::get()->info("BlenderDNA: Dumped dna to dna.txt");
 }
 #endif
@@ -270,17 +273,17 @@ void DNA :: DumpToFile()
 }
 
 // ------------------------------------------------------------------------------------------------
-boost::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
+std::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
     const Structure& structure,
     const FileDatabase& db
 ) const
 {
     std::map<std::string, FactoryPair >::const_iterator it = converters.find(structure.name);
     if (it == converters.end()) {
-        return boost::shared_ptr< ElemBase >();
+        return std::shared_ptr< ElemBase >();
     }
 
-    boost::shared_ptr< ElemBase > ret = (structure.*((*it).second.first))();
+    std::shared_ptr< ElemBase > ret = (structure.*((*it).second.first))();
     (structure.*((*it).second.second))(ret,db);
 
     return ret;
@@ -345,10 +348,10 @@ void SectionParser :: Next()
     stream.SetCurrentPos(current.start + current.size);
 
     const char tmp[] = {
-        stream.GetI1(),
-        stream.GetI1(),
-        stream.GetI1(),
-        stream.GetI1()
+        (const char)stream.GetI1(),
+        (const char)stream.GetI1(),
+        (const char)stream.GetI1(),
+        (const char)stream.GetI1()
     };
     current.id = std::string(tmp,tmp[3]?4:tmp[2]?3:tmp[1]?2:1);
 

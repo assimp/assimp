@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,11 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpatialSort.h"
 #include "SmoothingGroups.h"
+#include "StringUtils.h"
 #include "qnan.h"
-#include "./../include/assimp/material.h"
-#include "./../include/assimp/camera.h"
-#include "./../include/assimp/light.h"
-#include "./../include/assimp/anim.h"
+#include <assimp/material.h>
+#include <assimp/camera.h>
+#include <assimp/light.h>
+#include <assimp/anim.h>
 #include <stdio.h> //sprintf
 
 namespace Assimp    {
@@ -128,6 +130,7 @@ public:
 
         CHUNK_PERCENTW  = 0x0030,       // int2   percentage
         CHUNK_PERCENTF  = 0x0031,       // float4  percentage
+        CHUNK_PERCENTD  = 0x0032,       // float8  percentage
         // ********************************************************************
 
         // Prj master chunk
@@ -326,11 +329,11 @@ struct Texture
 {
     //! Default constructor
     Texture()
-        : mOffsetU  (0.0f)
-        , mOffsetV  (0.0f)
-        , mScaleU   (1.0f)
-        , mScaleV   (1.0f)
-        , mRotation (0.0f)
+        : mOffsetU  (0.0)
+        , mOffsetV  (0.0)
+        , mScaleU   (1.0)
+        , mScaleV   (1.0)
+        , mRotation (0.0)
         , mMapMode  (aiTextureMapMode_Wrap)
         , bPrivate()
         , iUVSrc    (0)
@@ -339,17 +342,17 @@ struct Texture
     }
 
     //! Specifies the blend factor for the texture
-    float mTextureBlend;
+    ai_real mTextureBlend;
 
     //! Specifies the filename of the texture
     std::string mMapName;
 
     //! Specifies texture coordinate offsets/scaling/rotations
-    float mOffsetU;
-    float mOffsetV;
-    float mScaleU;
-    float mScaleV;
-    float mRotation;
+    ai_real mOffsetU;
+    ai_real mOffsetV;
+    ai_real mScaleU;
+    ai_real mScaleV;
+    ai_real mRotation;
 
     //! Specifies the mapping mode to be used for the texture
     aiTextureMapMode mMapMode;
@@ -367,19 +370,18 @@ struct Material
 {
     //! Default constructor. Builds a default name for the material
     Material()
-        :
-    mDiffuse            (0.6f,0.6f,0.6f), // FIX ... we won't want object to be black
-    mSpecularExponent   (0.0f),
-    mShininessStrength  (1.0f),
-    mShading(Discreet3DS::Gouraud),
-    mTransparency       (1.0f),
-    mBumpHeight         (1.0f),
-    mTwoSided           (false)
+    : mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
+    , mSpecularExponent   ( ai_real( 0.0 ) )
+    , mShininessStrength  ( ai_real( 1.0 ) )
+    , mShading(Discreet3DS::Gouraud)
+    , mTransparency       ( ai_real( 1.0 ) )
+    , mBumpHeight         ( ai_real( 1.0 ) )
+    , mTwoSided           (false)
     {
         static int iCnt = 0;
 
         char szTemp[128];
-        sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -388,9 +390,9 @@ struct Material
     //! Diffuse color of the material
     aiColor3D mDiffuse;
     //! Specular exponent
-    float mSpecularExponent;
+    ai_real mSpecularExponent;
     //! Shininess strength, in percent
-    float mShininessStrength;
+    ai_real mShininessStrength;
     //! Specular color of the material
     aiColor3D mSpecular;
     //! Ambient color of the material
@@ -398,7 +400,7 @@ struct Material
     //! Shading type to be used
     Discreet3DS::shadetype3ds mShading;
     //! Opacity of the material
-    float mTransparency;
+    ai_real mTransparency;
     //! Diffuse texture channel
     Texture sTexDiffuse;
     //! Opacity texture channel
@@ -414,7 +416,7 @@ struct Material
     //! Shininess texture channel
     Texture sTexShininess;
     //! Scaling factor for the bump values
-    float mBumpHeight;
+    ai_real mBumpHeight;
     //! Emissive color
     aiColor3D mEmissive;
     //! Ambient texture channel
@@ -435,7 +437,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 
         // Generate a default name for the mesh
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -458,7 +460,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 struct aiFloatKey
 {
     double mTime;      ///< The time of this key
-    float mValue;   ///< The value of this key
+    ai_real mValue;   ///< The value of this key
 
 #ifdef __cplusplus
 
@@ -484,18 +486,18 @@ struct aiFloatKey
 /** Helper structure to represent a 3ds file node */
 struct Node
 {
-    Node()
-        : mParent()
-        , mInstanceNumber()
-        ,   mHierarchyPos       (0)
-        ,   mHierarchyIndex     (0)
-        ,   mInstanceCount      (1)
+    Node():
+    	mParent(NULL)
+		,	mInstanceNumber(0)
+		,	mHierarchyPos		(0)
+		,	mHierarchyIndex		(0)
+		,	mInstanceCount		(1)
     {
         static int iCnt = 0;
 
         // Generate a default name for the node
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
 
         aRotationKeys.reserve (20);

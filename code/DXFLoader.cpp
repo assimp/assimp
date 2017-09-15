@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,9 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 
 #include "DXFHelper.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include <boost/foreach.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
+
 #include <numeric>
 
 using namespace Assimp;
@@ -134,7 +136,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene,
     IOSystem* pIOHandler)
 {
-    boost::shared_ptr<IOStream> file = boost::shared_ptr<IOStream>( pIOHandler->Open( pFile) );
+    std::shared_ptr<IOStream> file = std::shared_ptr<IOStream>( pIOHandler->Open( pFile) );
 
     // Check whether we can read the file
     if( file.get() == NULL) {
@@ -175,7 +177,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
         }
 
         // skip unneeded sections entirely to avoid any problems with them
-        // alltogether.
+        // altogether.
         else if (reader.Is(2,"CLASSES") || reader.Is(2,"TABLES")) {
             SkipSection(reader);
             continue;
@@ -222,10 +224,10 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
     if (!DefaultLogger::isNullLogger()) {
 
         unsigned int vcount = 0, icount = 0;
-        BOOST_FOREACH (const DXF::Block& bl, output.blocks) {
-            BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, bl.lines) {
-                vcount += pl->positions.size();
-                icount += pl->counts.size();
+        for (const DXF::Block& bl : output.blocks) {
+            for (std::shared_ptr<const DXF::PolyLine> pl : bl.lines) {
+                vcount += static_cast<unsigned int>(pl->positions.size());
+                icount += static_cast<unsigned int>(pl->counts.size());
             }
         }
 
@@ -242,7 +244,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
     // index blocks by name
     DXF::BlockMap blocks_by_name;
-    BOOST_FOREACH (DXF::Block& bl, output.blocks) {
+    for (DXF::Block& bl : output.blocks) {
         blocks_by_name[bl.name] = &bl;
         if ( !entities && bl.name == AI_DXF_ENTITIES_MAGIC_BLOCK ) {
             entities = &bl;
@@ -263,7 +265,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
     ExpandBlockReferences(*entities,blocks_by_name);
 
     unsigned int cur = 0;
-    BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, entities->lines) {
+    for (std::shared_ptr<const DXF::PolyLine> pl : entities->lines) {
         if (pl->positions.size()) {
 
             std::map<std::string, unsigned int>::iterator it = layers.find(pl->layer);
@@ -289,15 +291,15 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ] ();
 
-    BOOST_FOREACH(const LayerMap::value_type& elem, layers){
+    for(const LayerMap::value_type& elem : layers){
         aiMesh* const mesh =  pScene->mMeshes[elem.second] = new aiMesh();
         mesh->mName.Set(elem.first);
 
         unsigned int cvert = 0,cface = 0;
-        BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
+        for(const DXF::PolyLine* pl : corr[elem.second]){
             // sum over all faces since we need to 'verbosify' them.
             cvert += std::accumulate(pl->counts.begin(),pl->counts.end(),0);
-            cface += pl->counts.size();
+            cface += static_cast<unsigned int>(pl->counts.size());
         }
 
         aiVector3D* verts = mesh->mVertices = new aiVector3D[cvert];
@@ -309,10 +311,10 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
         unsigned int prims = 0;
         unsigned int overall_indices = 0;
-        BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
+        for(const DXF::PolyLine* pl : corr[elem.second]){
 
             std::vector<unsigned int>::const_iterator it = pl->indices.begin();
-            BOOST_FOREACH(unsigned int facenumv,pl->counts) {
+            for(unsigned int facenumv : pl->counts) {
                 aiFace& face = *faces++;
                 face.mIndices = new unsigned int[face.mNumIndices = facenumv];
 
@@ -358,7 +360,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& blocks_by_name)
 {
-    BOOST_FOREACH (const DXF::InsertBlock& insert, bl.insertions) {
+    for (const DXF::InsertBlock& insert : bl.insertions) {
 
         // first check if the referenced blocks exists ...
         const DXF::BlockMap::const_iterator it = blocks_by_name.find(insert.name);
@@ -372,8 +374,8 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // XXX this would be the place to implement recursive expansion if needed.
         const DXF::Block& bl_src = *(*it).second;
 
-        BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl_in, bl_src.lines) {
-            boost::shared_ptr<DXF::PolyLine> pl_out = boost::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
+        for (std::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
+            std::shared_ptr<DXF::PolyLine> pl_out = std::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
             if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {
                 // manual coordinate system transformation
@@ -388,7 +390,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
                     DefaultLogger::get()->warn("DXF: BLOCK rotation not currently implemented");
                 }
 
-                BOOST_FOREACH (aiVector3D& v, pl_out->positions) {
+                for (aiVector3D& v : pl_out->positions) {
                     v *= trafo;
                 }
             }
@@ -618,7 +620,7 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 {
-    output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
+    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     unsigned int iguess = 0, vguess = 0;
@@ -706,7 +708,7 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 
         // closed polyline?
         if (line.flags & DXF_POLYLINE_FLAG_CLOSED) {
-            line.indices.push_back(line.positions.size()-1);
+            line.indices.push_back(static_cast<unsigned int>(line.positions.size()-1));
             line.indices.push_back(0);
             line.counts.push_back(2);
         }
@@ -800,7 +802,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
     // (note) this is also used for for parsing line entities, so we
     // must handle the vertex_count == 2 case as well.
 
-    output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
+    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     aiVector3D vip[4];
@@ -907,7 +909,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
     line.counts.push_back(cnt);
 
     for (unsigned int i = 0; i < cnt; ++i) {
-        line.indices.push_back(line.positions.size());
+        line.indices.push_back(static_cast<unsigned int>(line.positions.size()));
         line.positions.push_back(vip[i]);
         line.colors.push_back(clr);
     }

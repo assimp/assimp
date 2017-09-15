@@ -1,6 +1,0 @@
-The xcode project files in this directory are contributed by Andy Maloney and are not continuously updated.
-Currently, it's for Assimp r352. If you're using a newer revision, watch out for missing files/includes/...
-
-See Andy's description at
-http://sourceforge.net/tracker/index.php?func=detail&aid=2659135&group_id=226462&atid=1067634 (Tracker item 2659135)
-for more information.

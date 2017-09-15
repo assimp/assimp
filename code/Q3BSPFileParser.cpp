@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2008, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,15 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
 #include "Q3BSPFileParser.h"
-#include "DefaultIOSystem.h"
 #include "Q3BSPFileData.h"
 #include "Q3BSPZipArchive.h"
 #include <vector>
-#include "../include/assimp/ai_assert.h"
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/ai_assert.h>
 
-
-namespace Assimp
-{
+namespace Assimp {
 
 using namespace Q3BSP;
 

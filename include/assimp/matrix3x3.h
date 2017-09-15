@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,10 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file matrix3x3.h
  *  @brief Definition of a 3x3 matrix, including operators when compiling in C++
  */
-#ifndef AI_MATRIX3x3_H_INC
-#define AI_MATRIX3x3_H_INC
+#pragma once
+#ifndef AI_MATRIX3X3_H_INC
+#define AI_MATRIX3X3_H_INC
 
-#include "./Compiler/pushpack1.h"
+#include "defs.h"
 
 #ifdef __cplusplus
 
@@ -151,8 +153,8 @@ public:
     /** @brief A function for creating a rotation matrix that rotates a
      *  vector called "from" into another vector called "to".
      * Input : from[3], to[3] which both must be *normalized* non-zero vectors
-     * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
-     * Authors: Tomas Möller, John Hughes
+     * Output: mtx[3][3] -- a 3x3 matrix in column-major form
+     * Authors: Tomas MÃ¶ller, John Hughes
      *          "Efficiently Building a Matrix to Rotate One Vector to Another"
      *          Journal of Graphics Tools, 4(4):1-4, 1999
      */
@@ -160,26 +162,21 @@ public:
         const aiVector3t<TReal>& to, aiMatrix3x3t& out);
 
 public:
-
-
     TReal a1, a2, a3;
     TReal b1, b2, b3;
     TReal c1, c2, c3;
-} PACK_STRUCT;
+};
 
-typedef aiMatrix3x3t<float> aiMatrix3x3;
+typedef aiMatrix3x3t<ai_real> aiMatrix3x3;
 
 #else
 
 struct aiMatrix3x3 {
+    ai_real a1, a2, a3;
+    ai_real b1, b2, b3;
+    ai_real c1, c2, c3;
+};
 
-    float a1, a2, a3;
-    float b1, b2, b3;
-    float c1, c2, c3;
-} PACK_STRUCT;
+#endif // __cplusplus
 
-#endif
-
-#include "./Compiler/poppack1.h"
-
-#endif // AI_MATRIX3x3_H_INC
+#endif // AI_MATRIX3X3_H_INC

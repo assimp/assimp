@@ -178,7 +178,7 @@ namespace AssimpView
         // Convert a height map to a normal map if necessary
         //
         // The function tries to detect the type of a texture automatically.
-        // However, this wont work in every case.
+        // However, this won't work in every case.
         void HMtoNMIfNecessary( IDirect3DTexture9* piTexture,
             IDirect3DTexture9** piTextureOut,
             bool bWasOriginallyHM = true );

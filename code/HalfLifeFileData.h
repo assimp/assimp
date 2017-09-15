@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER2_H_INC
 #define AI_MDLFILEHELPER2_H_INC
 
-#include "MDLFileData.h"
 #include "./../include/assimp/Compiler/pushpack1.h"
 
 namespace Assimp    {
@@ -66,8 +66,7 @@ namespace MDL   {
  *  \brief Data structure for the HL2 main header
  */
 // ---------------------------------------------------------------------------
-struct Header_HL2
-{
+struct Header_HL2 {
     //! magic number: "IDST"/"IDSQ"
     char    ident[4];
 
@@ -139,7 +138,7 @@ struct Header_HL2
     //! Number of animation transitions
     int32_t         numtransitions;
     int32_t         transitionindex;
-} PACK_STRUCT;
+} /* PACK_STRUCT */;
 
 #include "./../include/assimp/Compiler/poppack1.h"
 

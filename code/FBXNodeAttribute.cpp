@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,18 +48,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXParser.h"
 #include "FBXDocument.h"
 #include "FBXImporter.h"
-#include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
-#include "FBXProperties.h"
 
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-    : Object(id,element,name)
+: Object(id,element,name)
+, props()
 {
     const Scope& sc = GetRequiredScope(element);
 
@@ -75,7 +75,7 @@ NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document
 // ------------------------------------------------------------------------------------------------
 NodeAttribute::~NodeAttribute()
 {
-
+    // empty
 }
 
 
@@ -101,33 +101,30 @@ CameraSwitcher::CameraSwitcher(uint64_t id, const Element& element, const Docume
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 CameraSwitcher::~CameraSwitcher()
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Camera::Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : NodeAttribute(id,element,doc,name)
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Camera::~Camera()
 {
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Light::Light(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : NodeAttribute(id,element,doc,name)
 {
-
+    // empty
 }
 
 

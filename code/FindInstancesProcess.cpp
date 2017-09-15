@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -45,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "FindInstancesProcess.h"
-#include <boost/scoped_array.hpp>
+#include <memory>
 #include <stdio.h>
 
 using namespace Assimp;
@@ -126,8 +127,8 @@ void FindInstancesProcess::Execute( aiScene* pScene)
         // have several thousand small meshes. That's too much for a brute
         // everyone-against-everyone check involving up to 10 comparisons
         // each.
-        boost::scoped_array<uint64_t> hashes (new uint64_t[pScene->mNumMeshes]);
-        boost::scoped_array<unsigned int> remapping (new unsigned int[pScene->mNumMeshes]);
+        std::unique_ptr<uint64_t[]> hashes (new uint64_t[pScene->mNumMeshes]);
+        std::unique_ptr<unsigned int[]> remapping (new unsigned int[pScene->mNumMeshes]);
 
         unsigned int numMeshesOut = 0;
         for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
@@ -219,8 +220,8 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 
                         // For completeness ... compare even the index buffers for equality
                         // face order & winding order doesn't care. Input data is in verbose format.
-                        boost::scoped_array<unsigned int> ftbl_orig(new unsigned int[orig->mNumVertices]);
-                        boost::scoped_array<unsigned int> ftbl_inst(new unsigned int[orig->mNumVertices]);
+                        std::unique_ptr<unsigned int[]> ftbl_orig(new unsigned int[orig->mNumVertices]);
+                        std::unique_ptr<unsigned int[]> ftbl_inst(new unsigned int[orig->mNumVertices]);
 
                         for (unsigned int tt = 0; tt < orig->mNumFaces;++tt) {
                             aiFace& f = orig->mFaces[tt];
@@ -267,7 +268,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
             if (!DefaultLogger::isNullLogger()) {
 
                 char buffer[512];
-                ::sprintf(buffer,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
+                ::ai_snprintf(buffer,512,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
                 DefaultLogger::get()->info(buffer);
             }
             pScene->mNumMeshes = numMeshesOut;

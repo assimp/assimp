@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -229,7 +230,7 @@ private:
 class CompositeCurve : public BoundedCurve
 {
 
-    typedef std::pair< boost::shared_ptr< BoundedCurve >, bool > CurveEntry;
+    typedef std::pair< std::shared_ptr< BoundedCurve >, bool > CurveEntry;
 
 public:
 
@@ -239,10 +240,10 @@ public:
         , total()
     {
         curves.reserve(entity.Segments.size());
-        BOOST_FOREACH(const IfcCompositeCurveSegment& curveSegment,entity.Segments) {
+        for(const IfcCompositeCurveSegment& curveSegment :entity.Segments) {
             // according to the specification, this must be a bounded curve
-            boost::shared_ptr< Curve > cv(Curve::Convert(curveSegment.ParentCurve,conv));
-            boost::shared_ptr< BoundedCurve > bc = boost::dynamic_pointer_cast<BoundedCurve>(cv);
+            std::shared_ptr< Curve > cv(Curve::Convert(curveSegment.ParentCurve,conv));
+            std::shared_ptr< BoundedCurve > bc = std::dynamic_pointer_cast<BoundedCurve>(cv);
 
             if (!bc) {
                 IFCImporter::LogError("expected segment of composite curve to be a bounded curve");
@@ -271,7 +272,7 @@ public:
         }
 
         IfcFloat acc = 0;
-        BOOST_FOREACH(const CurveEntry& entry, curves) {
+        for(const CurveEntry& entry : curves) {
             const ParamRange& range = entry.first->GetParametricRange();
             const IfcFloat delta = std::abs(range.second-range.first);
             if (u < acc+delta) {
@@ -290,7 +291,7 @@ public:
         size_t cnt = 0;
 
         IfcFloat acc = 0;
-        BOOST_FOREACH(const CurveEntry& entry, curves) {
+        for(const CurveEntry& entry : curves) {
             const ParamRange& range = entry.first->GetParametricRange();
             const IfcFloat delta = std::abs(range.second-range.first);
             if (a <= acc+delta && b >= acc) {
@@ -312,7 +313,7 @@ public:
         const size_t cnt = EstimateSampleCount(a,b);
         out.verts.reserve(out.verts.size() + cnt);
 
-        BOOST_FOREACH(const CurveEntry& entry, curves) {
+        for(const CurveEntry& entry : curves) {
             const size_t cnt = out.verts.size();
             entry.first->SampleDiscrete(out);
 
@@ -346,9 +347,9 @@ public:
     TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv)
         : BoundedCurve(entity,conv)
     {
-        base = boost::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
+        base = std::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
 
-        typedef boost::shared_ptr<const STEP::EXPRESS::DataType> Entry;
+        typedef std::shared_ptr<const STEP::EXPRESS::DataType> Entry;
 
         // for some reason, trimmed curves can either specify a parametric value
         // or a point on the curve, or both. And they can even specify which of the
@@ -357,7 +358,7 @@ public:
         // oh well.
         bool have_param = false, have_point = false;
         IfcVector3 point;
-        BOOST_FOREACH(const Entry sel,entity.Trim1) {
+        for(const Entry sel :entity.Trim1) {
             if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
                 range.first = *r;
                 have_param = true;
@@ -374,7 +375,7 @@ public:
             }
         }
         have_param = false, have_point = false;
-        BOOST_FOREACH(const Entry sel,entity.Trim2) {
+        for(const Entry sel :entity.Trim2) {
             if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
                 range.second = *r;
                 have_param = true;
@@ -446,7 +447,7 @@ private:
     IfcFloat maxval;
     bool agree_sense;
 
-    boost::shared_ptr<const Curve> base;
+    std::shared_ptr<const Curve> base;
 };
 
 
@@ -465,7 +466,7 @@ public:
         points.reserve(entity.Points.size());
 
         IfcVector3 t;
-        BOOST_FOREACH(const IfcCartesianPoint& cp, entity.Points) {
+        for(const IfcCartesianPoint& cp : entity.Points) {
             ConvertCartesianPoint(t,cp);
             points.push_back(t);
         }
@@ -547,8 +548,6 @@ bool Curve :: InRange(IfcFloat u) const
     const ParamRange range = GetParametricRange();
     if (IsClosed()) {
         return true;
-        //ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
-        //u = range.first + std::fmod(u-range.first,range.second-range.first);
     }
     const IfcFloat epsilon = 1e-5;
     return u - range.first > -epsilon && range.second - u > -epsilon;

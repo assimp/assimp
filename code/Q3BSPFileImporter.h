@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2008, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,30 +43,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 
+#include <map>
+
 struct aiMesh;
 struct aiNode;
 struct aiFace;
 struct aiMaterial;
 struct aiTexture;
 
-namespace Assimp
-{
-namespace Q3BSP
-{
-
-class Q3BSPZipArchive;
-struct Q3BSPModel;
-struct sQ3BSPFace;
-
+namespace Assimp {
+namespace Q3BSP {
+    class Q3BSPZipArchive;
+    struct Q3BSPModel;
+    struct sQ3BSPFace;
 }
+
 // ------------------------------------------------------------------------------------------------
 /** Loader to import BSP-levels from a PK3 archive or from a unpacked BSP-level.
  */
 // ------------------------------------------------------------------------------------------------
-class Q3BSPFileImporter : public BaseImporter
-{
+class Q3BSPFileImporter : public BaseImporter {
 public:
-
     /// @brief  Default constructor.
     Q3BSPFileImporter();
 

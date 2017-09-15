@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -112,7 +113,7 @@ void LWOImporter::LoadLWOBPolygons(unsigned int length)
     LE_NCONST uint16_t* const end   = (LE_NCONST uint16_t*)(mFileBuffer+length);
     LE_NCONST uint16_t* cursor      = (LE_NCONST uint16_t*)mFileBuffer;
 
-    // perform endianess conversions
+    // perform endianness conversions
 #ifndef AI_BUILD_BIG_ENDIAN
     while (cursor < end)ByteSwap::Swap2(cursor++);
     cursor = (LE_NCONST uint16_t*)mFileBuffer;
@@ -256,8 +257,8 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
     LWO::Texture* pTex = NULL;
 
     GetS0(surf.mName,size);
-    bool runnning = true;
-    while (runnning)    {
+    bool running = true;
+    while (running)    {
         if (mFileBuffer + 6 >= end)
             break;
 

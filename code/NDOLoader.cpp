@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,14 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
 #include "NDOLoader.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include "StreamReader.h"
-#include <boost/foreach.hpp>
+#include <map>
 
 using namespace Assimp;
-#define for_each BOOST_FOREACH
 
 static const aiImporterDesc desc = {
     "Nendo Mesh Importer",
@@ -241,7 +242,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
     std::vector<aiVector3D> vertices;
     std::vector<unsigned int> indices;
 
-    for_each(const Object& obj,objects) {
+    for(const Object& obj : objects) {
         aiNode* nd = *cc++ = new aiNode(obj.name);
         nd->mParent = root;
 
@@ -250,7 +251,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         FaceTable face_table;
 
         unsigned int n = 0;
-        for_each(const Edge& edge, obj.edges) {
+        for(const Edge& edge : obj.edges) {
 
             face_table[edge.edge[2]] = n;
             face_table[edge.edge[3]] = n;
@@ -259,11 +260,12 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         }
 
         aiMesh* mesh = new aiMesh();
-        aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces=face_table.size()];
+        mesh->mNumFaces=static_cast<unsigned int>(face_table.size());
+        aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
 
         vertices.clear();
-        vertices.reserve(4 * face_table.size()); // arbitrarily choosen
-        for_each(FaceTable::value_type& v, face_table) {
+        vertices.reserve(4 * face_table.size()); // arbitrarily chosen
+        for(FaceTable::value_type& v : face_table) {
             indices.clear();
 
             aiFace& f = *faces++;
@@ -280,7 +282,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
                     next_edge = obj.edges[cur_edge].edge[4];
                     next_vert = obj.edges[cur_edge].edge[0];
                 }
-                indices.push_back( vertices.size() );
+                indices.push_back( static_cast<unsigned int>(vertices.size()) );
                 vertices.push_back(obj.vertices[ next_vert ].val);
 
                 cur_edge = next_edge;
@@ -289,18 +291,19 @@ void NDOImporter::InternReadFile( const std::string& pFile,
                 }
             }
 
-            f.mIndices = new unsigned int[f.mNumIndices = indices.size()];
+            f.mIndices = new unsigned int[f.mNumIndices = static_cast<unsigned int>(indices.size())];
             std::copy(indices.begin(),indices.end(),f.mIndices);
         }
 
-        mesh->mVertices = new aiVector3D[mesh->mNumVertices = vertices.size()];
+        mesh->mVertices = new aiVector3D[mesh->mNumVertices = static_cast<unsigned int>(vertices.size())];
         std::copy(vertices.begin(),vertices.end(),mesh->mVertices);
 
         if (mesh->mNumVertices) {
             pScene->mMeshes[pScene->mNumMeshes] = mesh;
 
             (nd->mMeshes = new unsigned int[nd->mNumMeshes=1])[0]=pScene->mNumMeshes++;
-        }
+        }else
+            delete mesh;
     }
 }
 

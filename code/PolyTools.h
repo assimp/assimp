@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_POLYTOOLS_H_INCLUDED
 #define AI_POLYTOOLS_H_INCLUDED
 
-#include "../include/assimp/material.h"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/material.h>
+#include <assimp/ai_assert.h>
 
 namespace Assimp {
 

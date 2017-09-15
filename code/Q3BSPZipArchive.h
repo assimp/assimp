@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2008, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,10 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_Q3BSP_ZIPARCHIVE_H_INC
 #define AI_Q3BSP_ZIPARCHIVE_H_INC
 
-#include "../contrib/unzip/unzip.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include <string>
+#include <contrib/unzip/unzip.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
 #include <vector>
 #include <map>
 #include <cassert>
@@ -58,24 +58,15 @@ namespace Q3BSP {
 /// \brief
 // ------------------------------------------------------------------------------------------------
 class IOSystem2Unzip {
-
-    public:
-
-        static voidpf open(voidpf opaque, const char* filename, int mode);
-
-        static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
-
-        static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
-
-        static long tell(voidpf opaque, voidpf stream);
-
-        static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
-
-        static int close(voidpf opaque, voidpf stream);
-
-        static int testerror(voidpf opaque, voidpf stream);
-
-        static zlib_filefunc_def get(IOSystem* pIOHandler);
+public:
+    static voidpf open(voidpf opaque, const char* filename, int mode);
+    static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
+    static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
+    static long tell(voidpf opaque, voidpf stream);
+    static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
+    static int close(voidpf opaque, voidpf stream);
+    static int testerror(voidpf opaque, voidpf stream);
+    static zlib_filefunc_def get(IOSystem* pIOHandler);
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -85,32 +76,21 @@ class IOSystem2Unzip {
 /// \brief
 // ------------------------------------------------------------------------------------------------
 class ZipFile : public IOStream {
-
     friend class Q3BSPZipArchive;
 
-    public:
+public:
+    explicit ZipFile(size_t size);
+    ~ZipFile();
+    size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
+    size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
+    size_t FileSize() const;
+    aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
+    size_t Tell() const;
+    void Flush();
 
-        explicit ZipFile(size_t size);
-
-        ~ZipFile();
-
-        size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
-
-        size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
-
-        size_t FileSize() const;
-
-        aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
-
-        size_t Tell() const;
-
-        void Flush();
-
-    private:
-
-        void* m_Buffer;
-
-        size_t m_Size;
+private:
+    void* m_Buffer;
+    size_t m_Size;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -121,39 +101,25 @@ class ZipFile : public IOStream {
 /// from a P3K archive ( Quake level format ).
 // ------------------------------------------------------------------------------------------------
 class Q3BSPZipArchive : public Assimp::IOSystem {
+public:
+    static const unsigned int FileNameSize = 256;
 
-    public:
+public:
+    Q3BSPZipArchive(IOSystem* pIOHandler, const std::string & rFile);
+    ~Q3BSPZipArchive();
+    bool Exists(const char* pFile) const;
+    char getOsSeparator() const;
+    IOStream* Open(const char* pFile, const char* pMode = "rb");
+    void Close(IOStream* pFile);
+    bool isOpen() const;
+    void getFileList(std::vector<std::string> &rFileList);
 
-        static const unsigned int FileNameSize = 256;
+private:
+    bool mapArchive();
 
-    public:
-
-        Q3BSPZipArchive(IOSystem* pIOHandler, const std::string & rFile);
-
-        ~Q3BSPZipArchive();
-
-        bool Exists(const char* pFile) const;
-
-        char getOsSeparator() const;
-
-        IOStream* Open(const char* pFile, const char* pMode = "rb");
-
-        void Close(IOStream* pFile);
-
-        bool isOpen() const;
-
-        void getFileList(std::vector<std::string> &rFileList);
-
-    private:
-
-        bool mapArchive();
-
-    private:
-
-        unzFile m_ZipFileHandle;
-
-        std::map<std::string, ZipFile*> m_ArchiveMap;
-
+private:
+    unzFile m_ZipFileHandle;
+    std::map<std::string, ZipFile*> m_ArchiveMap;
 };
 
 // ------------------------------------------------------------------------------------------------

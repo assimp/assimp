@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,9 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ScenePreprocessor.h"
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 
 
 using namespace Assimp;
@@ -176,22 +177,22 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
         if (anim->mDuration == -1.) {
 
             // Position keys
-            for (unsigned int i = 0; i < channel->mNumPositionKeys;++i) {
-                aiVectorKey& key = channel->mPositionKeys[i];
+            for (unsigned int j = 0; j < channel->mNumPositionKeys;++j) {
+                aiVectorKey& key = channel->mPositionKeys[j];
                 first = std::min (first, key.mTime);
                 last  = std::max (last,  key.mTime);
             }
 
             // Scaling keys
-            for (unsigned int i = 0; i < channel->mNumScalingKeys;++i)  {
-                aiVectorKey& key = channel->mScalingKeys[i];
+            for (unsigned int j = 0; j < channel->mNumScalingKeys;++j )  {
+                aiVectorKey& key = channel->mScalingKeys[j];
                 first = std::min (first, key.mTime);
                 last  = std::max (last,  key.mTime);
             }
 
             // Rotation keys
-            for (unsigned int i = 0; i < channel->mNumRotationKeys;++i) {
-                aiQuatKey& key = channel->mRotationKeys[i];
+            for (unsigned int j = 0; j < channel->mNumRotationKeys;++j ) {
+                aiQuatKey& key = channel->mRotationKeys[ j ];
                 first = std::min (first, key.mTime);
                 last  = std::max (last,  key.mTime);
             }

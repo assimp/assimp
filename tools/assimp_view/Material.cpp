@@ -605,7 +605,7 @@ void CMaterialManager::HMtoNMIfNecessary(
     *piTextureOut = piTexture;
 
     // Lock the input texture and try to determine its type.
-    // Criterias:
+    // Criteria:
     // - If r,g,b channel are identical it MUST be a height map
     // - If one of the rgb channels is used and the others are empty it
     //   must be a height map, too.

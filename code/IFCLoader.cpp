@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <limits>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
-#   include "../contrib/unzip/unzip.h"
+#   include <contrib/unzip/unzip.h>
 #endif
 
 #include "IFCLoader.h"
@@ -58,10 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCUtil.h"
 
-#include "StreamReader.h"
 #include "MemoryIOWrapper.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
 
 
 namespace Assimp {
@@ -108,7 +109,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "ifc ifczip"
+    "ifc ifczip stp"
 };
 
 
@@ -128,11 +129,9 @@ IFCImporter::~IFCImporter()
 bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string& extension = GetExtension(pFile);
-    if (extension == "ifc" || extension == "ifczip") {
+    if (extension == "ifc" || extension == "ifczip" || extension == "stp" ) {
         return true;
-    }
-
-    else if ((!extension.length() || checkSig) && pIOHandler)   {
+    } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this is the common identification for STEP-encoded files, so
         // it is only unambiguous as long as we don't support any further
         // file formats with STEP as their encoding.
@@ -155,11 +154,10 @@ const aiImporterDesc* IFCImporter::GetInfo () const
 void IFCImporter::SetupProperties(const Importer* pImp)
 {
     settings.skipSpaceRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_SPACE_REPRESENTATIONS,true);
-    settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
     settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
-
-    settings.conicSamplingAngle = 10.f;
-    settings.skipAnnotations = true;
+    settings.conicSamplingAngle = std::min(std::max((float) pImp->GetPropertyFloat(AI_CONFIG_IMPORT_IFC_SMOOTHING_ANGLE, AI_IMPORT_IFC_DEFAULT_SMOOTHING_ANGLE), 5.0f), 120.0f);
+	settings.cylindricalTessellation = std::min(std::max(pImp->GetPropertyInteger(AI_CONFIG_IMPORT_IFC_CYLINDRICAL_TESSELLATION, AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION), 3), 180);
+	settings.skipAnnotations = true;
 }
 
 
@@ -168,7 +166,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 void IFCImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
+    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
     if (!stream) {
         ThrowException("Could not open file for reading");
     }
@@ -233,7 +231,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 #endif
     }
 
-    boost::scoped_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
+    std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
     const STEP::HeaderInfo& head = static_cast<const STEP::DB&>(*db).GetHeader();
 
     if(!head.fileSchema.size() || head.fileSchema.substr(0,3) != "IFC") {
@@ -383,7 +381,7 @@ void SetUnits(ConversionData& conv)
 void SetCoordinateSpace(ConversionData& conv)
 {
     const IfcRepresentationContext* fav = NULL;
-    BOOST_FOREACH(const IfcRepresentationContext& v, conv.proj.RepresentationContexts) {
+    for(const IfcRepresentationContext& v : conv.proj.RepresentationContexts) {
         fav = &v;
         // Model should be the most suitable type of context, hence ignore the others
         if (v.ContextType && v.ContextType.Get() == "Model") {
@@ -423,7 +421,7 @@ void ResolveObjectPlacement(aiMatrix4x4& m, const IfcObjectPlacement& place, Con
 bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, unsigned int matid, ConversionData& conv)
 {
     // insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
-    std::auto_ptr<aiNode> nd(new aiNode());
+    std::unique_ptr<aiNode> nd(new aiNode());
     nd->mName.Set("IfcMappedItem");
 
     // handle the Cartesian operator
@@ -440,7 +438,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
     if (conv.apply_openings) {
         IfcMatrix4 minv = msrc;
         minv.Inverse();
-        BOOST_FOREACH(TempOpening& open,*conv.apply_openings){
+        for(TempOpening& open :*conv.apply_openings){
             open.Transform(minv);
         }
     }
@@ -449,7 +447,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
     const IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
 
     bool got = false;
-    BOOST_FOREACH(const IfcRepresentationItem& item, repr.Items) {
+    for(const IfcRepresentationItem& item : repr.Items) {
         if(!ProcessRepresentationItem(item,localmatid,meshes,conv)) {
             IFCImporter::LogWarn("skipping mapped entity of type " + item.GetClassName() + ", no representations could be generated");
         }
@@ -564,9 +562,9 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
     std::vector<const IfcRepresentation*> repr_ordered(src.size());
     std::copy(src.begin(),src.end(),repr_ordered.begin());
     std::sort(repr_ordered.begin(),repr_ordered.end(),RateRepresentationPredicate());
-    BOOST_FOREACH(const IfcRepresentation* repr, repr_ordered) {
+    for(const IfcRepresentation* repr : repr_ordered) {
         bool res = false;
-        BOOST_FOREACH(const IfcRepresentationItem& item, repr->Items) {
+        for(const IfcRepresentationItem& item : repr->Items) {
             if(const IfcMappedItem* const geo = item.ToPtr<IfcMappedItem>()) {
                 res = ProcessMappedItem(*geo,nd,subnodes,matid,conv) || res;
             }
@@ -589,7 +587,7 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
     const std::string& prefix = "",
     unsigned int nest = 0)
 {
-    BOOST_FOREACH(const IfcProperty& property, set) {
+    for(const IfcProperty& property : set) {
         const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
         if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
             if (singleValue->NominalValue) {
@@ -615,7 +613,7 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
             std::stringstream ss;
             ss << "[";
             unsigned index=0;
-            BOOST_FOREACH(const IfcValue::Out& v, listValue->ListValues) {
+            for(const IfcValue::Out& v : listValue->ListValues) {
                 if (!v) continue;
                 if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
                     std::string value = static_cast<std::string>(*str);
@@ -684,7 +682,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
     }
 
     // add an output node for this spatial structure
-    std::auto_ptr<aiNode> nd(new aiNode());
+    std::unique_ptr<aiNode> nd(new aiNode());
     nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name.Get():"Unnamed")+"_"+el.GlobalId);
     nd->mParent = parent;
 
@@ -707,15 +705,11 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
         }
 
         if (!properties.empty()) {
-            aiMetadata* data = new aiMetadata();
-            data->mNumProperties = properties.size();
-            data->mKeys = new aiString[data->mNumProperties]();
-            data->mValues = new aiMetadataEntry[data->mNumProperties]();
-
-            unsigned int index = 0;
-            BOOST_FOREACH(const Metadata::value_type& kv, properties)
-                data->Set(index++, kv.first, aiString(kv.second));
-
+            aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(properties.size()) );
+            unsigned int index( 0 );
+            for ( const Metadata::value_type& kv : properties ) {
+                data->Set( index++, kv.first, aiString( kv.second ) );
+            }
             nd->mMetaData = data;
         }
     }
@@ -751,7 +745,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                 if(cont->RelatingStructure->GetID() != el.GetID()) {
                     continue;
                 }
-                BOOST_FOREACH(const IfcProduct& pro, cont->RelatedElements) {
+                for(const IfcProduct& pro : cont->RelatedElements) {
                     if(pro.ToPtr<IfcOpeningElement>()) {
                         // IfcOpeningElement is handled below. Sadly we can't use it here as is:
                         // The docs say that opening elements are USUALLY attached to building storey,
@@ -771,7 +765,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                     const IfcFeatureElementSubtraction& open = fills->RelatedOpeningElement;
 
                     // move opening elements to a separate node since they are semantically different than elements that are just 'contained'
-                    std::auto_ptr<aiNode> nd_aggr(new aiNode());
+                    std::unique_ptr<aiNode> nd_aggr(new aiNode());
                     nd_aggr->mName.Set("$RelVoidsElement");
                     nd_aggr->mParent = nd.get();
 
@@ -794,7 +788,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                             }
 
                             // we need all openings to be in the local space of *this* node, so transform them
-                            BOOST_FOREACH(TempOpening& op,openings_local) {
+                            for(TempOpening& op :openings_local) {
                                 op.Transform( myInv*nd_aggr->mChildren[0]->mTransformation);
                                 openings.push_back(op);
                             }
@@ -816,14 +810,14 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                 }
 
                 // move aggregate elements to a separate node since they are semantically different than elements that are just 'contained'
-                std::auto_ptr<aiNode> nd_aggr(new aiNode());
+                std::unique_ptr<aiNode> nd_aggr(new aiNode());
                 nd_aggr->mName.Set("$RelAggregates");
                 nd_aggr->mParent = nd.get();
 
                 nd_aggr->mTransformation = nd->mTransformation;
 
                 nd_aggr->mChildren = new aiNode*[aggr->RelatedObjects.size()]();
-                BOOST_FOREACH(const IfcObjectDefinition& def, aggr->RelatedObjects) {
+                for(const IfcObjectDefinition& def : aggr->RelatedObjects) {
                     if(const IfcProduct* const prod = def.ToPtr<IfcProduct>()) {
 
                         aiNode* const ndnew = ProcessSpatialStructure(nd_aggr.get(),*prod,conv,NULL);
@@ -849,7 +843,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 
         if (subnodes.size()) {
             nd->mChildren = new aiNode*[subnodes.size()]();
-            BOOST_FOREACH(aiNode* nd2, subnodes) {
+            for(aiNode* nd2 : subnodes) {
                 nd->mChildren[nd->mNumChildren++] = nd2;
                 nd2->mParent = nd.get();
             }
@@ -888,28 +882,28 @@ void ProcessSpatialStructures(ConversionData& conv)
         }
     }
 
+	std::vector<aiNode*> nodes;
 
-    BOOST_FOREACH(const STEP::LazyObject* lz, *range) {
+    for(const STEP::LazyObject* lz : *range) {
         const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
         if(!prod) {
             continue;
         }
         IFCImporter::LogDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`" + (prod->ObjectType? " which is of type " + prod->ObjectType.Get():""));
 
-        // the primary site is referenced by an IFCRELAGGREGATES element which assigns it to the IFCPRODUCT
+        // the primary sites are referenced by an IFCRELAGGREGATES element which assigns them to the IFCPRODUCT
         const STEP::DB::RefMap& refs = conv.db.GetRefs();
-        STEP::DB::RefMapRange range = refs.equal_range(conv.proj.GetID());
-        for(;range.first != range.second; ++range.first) {
-            if(const IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IfcRelAggregates>()) {
+        STEP::DB::RefMapRange ref_range = refs.equal_range(conv.proj.GetID());
+        for(; ref_range.first != ref_range.second; ++ref_range.first) {
+            if(const IfcRelAggregates* const aggr = conv.db.GetObject((*ref_range.first).second)->ToPtr<IfcRelAggregates>()) {
 
-                BOOST_FOREACH(const IfcObjectDefinition& def, aggr->RelatedObjects) {
+                for(const IfcObjectDefinition& def : aggr->RelatedObjects) {
                     // comparing pointer values is not sufficient, we would need to cast them to the same type first
                     // as there is multiple inheritance in the game.
                     if (def.GetID() == prod->GetID()) {
                         IFCImporter::LogDebug("selecting this spatial structure as root structure");
-                        // got it, this is the primary site.
-                        conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv,NULL);
-                        return;
+                        // got it, this is one primary site.
+						nodes.push_back(ProcessSpatialStructure(NULL, *prod, conv, NULL));
                     }
                 }
 
@@ -917,19 +911,42 @@ void ProcessSpatialStructures(ConversionData& conv)
         }
     }
 
+	size_t nb_nodes = nodes.size();
 
-    IFCImporter::LogWarn("failed to determine primary site element, taking the first IfcSite");
-    BOOST_FOREACH(const STEP::LazyObject* lz, *range) {
-        const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
-        if(!prod) {
-            continue;
-        }
+	if (nb_nodes == 0) {
+		IFCImporter::LogWarn("failed to determine primary site element, taking all the IfcSite");
+		for (const STEP::LazyObject* lz : *range) {
+			const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
+			if (!prod) {
+				continue;
+			}
 
-        conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv,NULL);
-        return;
-    }
+			nodes.push_back(ProcessSpatialStructure(NULL, *prod, conv, NULL));
+		}
 
-    IFCImporter::ThrowException("failed to determine primary site element");
+		nb_nodes = nodes.size();
+	}
+
+	if (nb_nodes == 1) {
+		conv.out->mRootNode = nodes[0];
+	}
+	else if (nb_nodes > 1) {
+		conv.out->mRootNode = new aiNode("Root");
+		conv.out->mRootNode->mParent = NULL;
+		conv.out->mRootNode->mNumChildren = static_cast<unsigned int>(nb_nodes);
+		conv.out->mRootNode->mChildren = new aiNode*[conv.out->mRootNode->mNumChildren];
+		
+		for (size_t i = 0; i < nb_nodes; ++i) {
+			aiNode* node = nodes[i];
+
+			node->mParent = conv.out->mRootNode;
+
+			conv.out->mRootNode->mChildren[i] = node;
+		}
+	}
+	else {
+		IFCImporter::ThrowException("failed to determine primary site element");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

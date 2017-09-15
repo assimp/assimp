@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,9 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file ProgressHandler.hpp
  *  @brief Abstract base class 'ProgressHandler'.
  */
-#ifndef INCLUDED_AI_PROGRESSHANDLER_H
-#define INCLUDED_AI_PROGRESSHANDLER_H
+#pragma once
+#ifndef AI_PROGRESSHANDLER_H_INC
+#define AI_PROGRESSHANDLER_H_INC
+
 #include "types.h"
+
 namespace Assimp    {
 
 // ------------------------------------------------------------------------------------
@@ -119,4 +123,4 @@ public:
 // ------------------------------------------------------------------------------------
 } // Namespace Assimp
 
-#endif
+#endif // AI_PROGRESSHANDLER_H_INC

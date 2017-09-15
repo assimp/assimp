@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,19 +45,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers of the post-processing framework
 #include "SplitByBoneCountProcess.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include <limits>
-#include <boost/format.hpp>
+#include "TinyFormatter.h"
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor
 SplitByBoneCountProcess::SplitByBoneCountProcess()
 {
-    // set default, might be overriden by importer config
+    // set default, might be overridden by importer config
     mMaxBoneCount = AI_SBBC_DEFAULT_MAX_BONES;
 }
 
@@ -89,13 +91,13 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
 
     // early out
     bool isNecessary = false;
-    for( size_t a = 0; a < pScene->mNumMeshes; ++a)
+    for( unsigned int a = 0; a < pScene->mNumMeshes; ++a)
         if( pScene->mMeshes[a]->mNumBones > mMaxBoneCount )
             isNecessary = true;
 
     if( !isNecessary )
     {
-        DefaultLogger::get()->debug( boost::str( boost::format( "SplitByBoneCountProcess early-out: no meshes with more than %d bones.") % mMaxBoneCount));
+        DefaultLogger::get()->debug( format() << "SplitByBoneCountProcess early-out: no meshes with more than " << mMaxBoneCount << " bones." );
         return;
     }
 
@@ -106,7 +108,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
     // build a new array of meshes for the scene
     std::vector<aiMesh*> meshes;
 
-    for( size_t a = 0; a < pScene->mNumMeshes; ++a)
+    for( unsigned int a = 0; a < pScene->mNumMeshes; ++a)
     {
         aiMesh* srcMesh = pScene->mMeshes[a];
 
@@ -117,9 +119,9 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
         if( !newMeshes.empty() )
         {
             // store new meshes and indices of the new meshes
-            for( size_t b = 0; b < newMeshes.size(); ++b)
+            for( unsigned int b = 0; b < newMeshes.size(); ++b)
             {
-                mSubMeshIndices[a].push_back( meshes.size());
+                mSubMeshIndices[a].push_back( static_cast<unsigned int>(meshes.size()));
                 meshes.push_back( newMeshes[b]);
             }
 
@@ -129,13 +131,13 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
         else
         {
             // Mesh is kept unchanged - store it's new place in the mesh array
-            mSubMeshIndices[a].push_back( meshes.size());
+            mSubMeshIndices[a].push_back( static_cast<unsigned int>(meshes.size()));
             meshes.push_back( srcMesh);
         }
     }
 
     // rebuild the scene's mesh array
-    pScene->mNumMeshes = meshes.size();
+    pScene->mNumMeshes = static_cast<unsigned int>(meshes.size());
     delete [] pScene->mMeshes;
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
     std::copy( meshes.begin(), meshes.end(), pScene->mMeshes);
@@ -143,7 +145,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
     // recurse through all nodes and translate the node's mesh indices to fit the new mesh array
     UpdateNode( pScene->mRootNode);
 
-    DefaultLogger::get()->debug( boost::str( boost::format( "SplitByBoneCountProcess end: split %d meshes into %d submeshes.") % mSubMeshIndices.size() % meshes.size()));
+    DefaultLogger::get()->debug( format() << "SplitByBoneCountProcess end: split " << mSubMeshIndices.size() << " meshes into " << meshes.size() << " submeshes." );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -156,33 +158,33 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 
     // necessary optimisation: build a list of all affecting bones for each vertex
     // TODO: (thom) maybe add a custom allocator here to avoid allocating tens of thousands of small arrays
-    typedef std::pair<size_t, float> BoneWeight;
+    typedef std::pair<unsigned int, float> BoneWeight;
     std::vector< std::vector<BoneWeight> > vertexBones( pMesh->mNumVertices);
-    for( size_t a = 0; a < pMesh->mNumBones; ++a)
+    for( unsigned int a = 0; a < pMesh->mNumBones; ++a)
     {
         const aiBone* bone = pMesh->mBones[a];
-        for( size_t b = 0; b < bone->mNumWeights; ++b)
+        for( unsigned int b = 0; b < bone->mNumWeights; ++b)
             vertexBones[ bone->mWeights[b].mVertexId ].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
     }
 
-    size_t numFacesHandled = 0;
+    unsigned int numFacesHandled = 0;
     std::vector<bool> isFaceHandled( pMesh->mNumFaces, false);
     while( numFacesHandled < pMesh->mNumFaces )
     {
         // which bones are used in the current submesh
-        size_t numBones = 0;
+        unsigned int numBones = 0;
         std::vector<bool> isBoneUsed( pMesh->mNumBones, false);
         // indices of the faces which are going to go into this submesh
-        std::vector<size_t> subMeshFaces;
+        std::vector<unsigned int> subMeshFaces;
         subMeshFaces.reserve( pMesh->mNumFaces);
         // accumulated vertex count of all the faces in this submesh
-        size_t numSubMeshVertices = 0;
+        unsigned int numSubMeshVertices = 0;
         // a small local array of new bones for the current face. State of all used bones for that face
         // can only be updated AFTER the face is completely analysed. Thanks to imre for the fix.
-        std::vector<size_t> newBonesAtCurrentFace;
+        std::vector<unsigned int> newBonesAtCurrentFace;
 
         // add faces to the new submesh as long as all bones affecting the faces' vertices fit in the limit
-        for( size_t a = 0; a < pMesh->mNumFaces; ++a)
+        for( unsigned int a = 0; a < pMesh->mNumFaces; ++a)
         {
             // skip if the face is already stored in a submesh
             if( isFaceHandled[a] )
@@ -190,12 +192,12 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 
             const aiFace& face = pMesh->mFaces[a];
             // check every vertex if its bones would still fit into the current submesh
-            for( size_t b = 0; b < face.mNumIndices; ++b )
+            for( unsigned int b = 0; b < face.mNumIndices; ++b )
             {
                 const std::vector<BoneWeight>& vb = vertexBones[face.mIndices[b]];
-                for( size_t c = 0; c < vb.size(); ++c)
+                for( unsigned int c = 0; c < vb.size(); ++c)
                 {
-                    size_t boneIndex = vb[c].first;
+                    unsigned int boneIndex = vb[c].first;
                     // if the bone is already used in this submesh, it's ok
                     if( isBoneUsed[boneIndex] )
                         continue;
@@ -213,7 +215,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             // mark all new bones as necessary
             while( !newBonesAtCurrentFace.empty() )
             {
-                size_t newIndex = newBonesAtCurrentFace.back();
+                unsigned int newIndex = newBonesAtCurrentFace.back();
                 newBonesAtCurrentFace.pop_back(); // this also avoids the deallocation which comes with a clear()
                 if( isBoneUsed[newIndex] )
                     continue;
@@ -234,14 +236,14 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         // create a new mesh to hold this subset of the source mesh
         aiMesh* newMesh = new aiMesh;
         if( pMesh->mName.length > 0 )
-            newMesh->mName.Set( boost::str( boost::format( "%s_sub%d") % pMesh->mName.data % poNewMeshes.size()));
+            newMesh->mName.Set( format() << pMesh->mName.data << "_sub" << poNewMeshes.size());
         newMesh->mMaterialIndex = pMesh->mMaterialIndex;
         newMesh->mPrimitiveTypes = pMesh->mPrimitiveTypes;
         poNewMeshes.push_back( newMesh);
 
         // create all the arrays for this mesh if the old mesh contained them
         newMesh->mNumVertices = numSubMeshVertices;
-        newMesh->mNumFaces = subMeshFaces.size();
+        newMesh->mNumFaces = static_cast<unsigned int>(subMeshFaces.size());
         newMesh->mVertices = new aiVector3D[newMesh->mNumVertices];
         if( pMesh->HasNormals() )
             newMesh->mNormals = new aiVector3D[newMesh->mNumVertices];
@@ -250,13 +252,13 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             newMesh->mTangents = new aiVector3D[newMesh->mNumVertices];
             newMesh->mBitangents = new aiVector3D[newMesh->mNumVertices];
         }
-        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
         {
             if( pMesh->HasTextureCoords( a) )
                 newMesh->mTextureCoords[a] = new aiVector3D[newMesh->mNumVertices];
             newMesh->mNumUVComponents[a] = pMesh->mNumUVComponents[a];
         }
-        for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
+        for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
         {
             if( pMesh->HasVertexColors( a) )
                 newMesh->mColors[a] = new aiColor4D[newMesh->mNumVertices];
@@ -264,9 +266,9 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 
         // and copy over the data, generating faces with linear indices along the way
         newMesh->mFaces = new aiFace[subMeshFaces.size()];
-        size_t nvi = 0; // next vertex index
-        std::vector<size_t> previousVertexIndices( numSubMeshVertices, std::numeric_limits<size_t>::max()); // per new vertex: its index in the source mesh
-        for( size_t a = 0; a < subMeshFaces.size(); ++a )
+        unsigned int nvi = 0; // next vertex index
+        std::vector<unsigned int> previousVertexIndices( numSubMeshVertices, std::numeric_limits<unsigned int>::max()); // per new vertex: its index in the source mesh
+        for( unsigned int a = 0; a < subMeshFaces.size(); ++a )
         {
             const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
             aiFace& dstFace = newMesh->mFaces[a];
@@ -274,9 +276,9 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             dstFace.mIndices = new unsigned int[dstFace.mNumIndices];
 
             // accumulate linearly all the vertices of the source face
-            for( size_t b = 0; b < dstFace.mNumIndices; ++b )
+            for( unsigned int b = 0; b < dstFace.mNumIndices; ++b )
             {
-                size_t srcIndex = srcFace.mIndices[b];
+                unsigned int srcIndex = srcFace.mIndices[b];
                 dstFace.mIndices[b] = nvi;
                 previousVertexIndices[nvi] = srcIndex;
 
@@ -288,12 +290,12 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
                     newMesh->mTangents[nvi] = pMesh->mTangents[srcIndex];
                     newMesh->mBitangents[nvi] = pMesh->mBitangents[srcIndex];
                 }
-                for( size_t c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++c )
+                for( unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++c )
                 {
                     if( pMesh->HasTextureCoords( c) )
                         newMesh->mTextureCoords[c][nvi] = pMesh->mTextureCoords[c][srcIndex];
                 }
-                for( size_t c = 0; c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c )
+                for( unsigned int c = 0; c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c )
                 {
                     if( pMesh->HasVertexColors( c) )
                         newMesh->mColors[c][nvi] = pMesh->mColors[c][srcIndex];
@@ -309,8 +311,8 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         newMesh->mNumBones = 0;
         newMesh->mBones = new aiBone*[numBones];
 
-        std::vector<size_t> mappedBoneIndex( pMesh->mNumBones, std::numeric_limits<size_t>::max());
-        for( size_t a = 0; a < pMesh->mNumBones; ++a )
+        std::vector<unsigned int> mappedBoneIndex( pMesh->mNumBones, std::numeric_limits<unsigned int>::max());
+        for( unsigned int a = 0; a < pMesh->mNumBones; ++a )
         {
             if( !isBoneUsed[a] )
                 continue;
@@ -328,21 +330,21 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         ai_assert( newMesh->mNumBones == numBones );
 
         // iterate over all new vertices and count which bones affected its old vertex in the source mesh
-        for( size_t a = 0; a < numSubMeshVertices; ++a )
+        for( unsigned int a = 0; a < numSubMeshVertices; ++a )
         {
-            size_t oldIndex = previousVertexIndices[a];
+            unsigned int oldIndex = previousVertexIndices[a];
             const std::vector<BoneWeight>& bonesOnThisVertex = vertexBones[oldIndex];
 
-            for( size_t b = 0; b < bonesOnThisVertex.size(); ++b )
+            for( unsigned int b = 0; b < bonesOnThisVertex.size(); ++b )
             {
-                size_t newBoneIndex = mappedBoneIndex[ bonesOnThisVertex[b].first ];
-                if( newBoneIndex != std::numeric_limits<size_t>::max() )
+                unsigned int newBoneIndex = mappedBoneIndex[ bonesOnThisVertex[b].first ];
+                if( newBoneIndex != std::numeric_limits<unsigned int>::max() )
                     newMesh->mBones[newBoneIndex]->mNumWeights++;
             }
         }
 
         // allocate all bone weight arrays accordingly
-        for( size_t a = 0; a < newMesh->mNumBones; ++a )
+        for( unsigned int a = 0; a < newMesh->mNumBones; ++a )
         {
             aiBone* bone = newMesh->mBones[a];
             ai_assert( bone->mNumWeights > 0 );
@@ -351,18 +353,18 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         }
 
         // now copy all the bone vertex weights for all the vertices which made it into the new submesh
-        for( size_t a = 0; a < numSubMeshVertices; ++a)
+        for( unsigned int a = 0; a < numSubMeshVertices; ++a)
         {
             // find the source vertex for it in the source mesh
-            size_t previousIndex = previousVertexIndices[a];
+            unsigned int previousIndex = previousVertexIndices[a];
             // these bones were affecting it
             const std::vector<BoneWeight>& bonesOnThisVertex = vertexBones[previousIndex];
             // all of the bones affecting it should be present in the new submesh, or else
             // the face it comprises shouldn't be present
-            for( size_t b = 0; b < bonesOnThisVertex.size(); ++b)
+            for( unsigned int b = 0; b < bonesOnThisVertex.size(); ++b)
             {
-                size_t newBoneIndex = mappedBoneIndex[ bonesOnThisVertex[b].first ];
-                ai_assert( newBoneIndex != std::numeric_limits<size_t>::max() );
+                unsigned int newBoneIndex = mappedBoneIndex[ bonesOnThisVertex[b].first ];
+                ai_assert( newBoneIndex != std::numeric_limits<unsigned int>::max() );
                 aiVertexWeight* dstWeight = newMesh->mBones[newBoneIndex]->mWeights + newMesh->mBones[newBoneIndex]->mNumWeights;
                 newMesh->mBones[newBoneIndex]->mNumWeights++;
 
@@ -382,22 +384,22 @@ void SplitByBoneCountProcess::UpdateNode( aiNode* pNode) const
     // rebuild the node's mesh index list
     if( pNode->mNumMeshes > 0 )
     {
-        std::vector<size_t> newMeshList;
-        for( size_t a = 0; a < pNode->mNumMeshes; ++a)
+        std::vector<unsigned int> newMeshList;
+        for( unsigned int a = 0; a < pNode->mNumMeshes; ++a)
         {
-            size_t srcIndex = pNode->mMeshes[a];
-            const std::vector<size_t>& replaceMeshes = mSubMeshIndices[srcIndex];
+            unsigned int srcIndex = pNode->mMeshes[a];
+            const std::vector<unsigned int>& replaceMeshes = mSubMeshIndices[srcIndex];
             newMeshList.insert( newMeshList.end(), replaceMeshes.begin(), replaceMeshes.end());
         }
 
         delete pNode->mMeshes;
-        pNode->mNumMeshes = newMeshList.size();
+        pNode->mNumMeshes = static_cast<unsigned int>(newMeshList.size());
         pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
         std::copy( newMeshList.begin(), newMeshList.end(), pNode->mMeshes);
     }
 
     // do that also recursively for all children
-    for( size_t a = 0; a < pNode->mNumChildren; ++a )
+    for( unsigned int a = 0; a < pNode->mNumChildren; ++a )
     {
         UpdateNode( pNode->mChildren[a]);
     }

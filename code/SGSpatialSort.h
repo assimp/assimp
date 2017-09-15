@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,12 +39,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** Small helper classes to optimise finding vertizes close to a given location
+/** Small helper classes to optimize finding vertices close to a given location
  */
 #ifndef AI_D3DSSPATIALSORT_H_INC
 #define AI_D3DSSPATIALSORT_H_INC
 
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
 #include <vector>
 #include <stdint.h>
 

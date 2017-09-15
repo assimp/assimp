@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,9 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OPENGEX_EXPORTER_H
 #define AI_OPENGEX_EXPORTER_H
 
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
 
-#ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
+#ifndef ASSIMP_BUILD_NO_OPENGEX_EXPORTER
 
 namespace Assimp {
 
@@ -50,16 +51,17 @@ struct aiScene;
 
 namespace OpenGEX {
 
-    class OpenGEXExporter {
-    public:
-        OpenGEXExporter();
-        ~OpenGEXExporter();
-        bool exportScene( const char *filename, const aiScene* pScene );
-    };
-} // Namespace openGEX
+class OpenGEXExporter {
+public:
+    OpenGEXExporter();
+    ~OpenGEXExporter();
+    bool exportScene( const char *filename, const aiScene* pScene );
+};
+
+} // Namespace OpenGEX
 } // Namespace Assimp
 
-#endif // ASSIMP_BUILD_NO_OPENGEX_IMPORTER
+#endif // ASSIMP_BUILD_NO_OPENGEX_EXPORTER
 
 #endif // AI_OPENGEX_EXPORTER_H
 

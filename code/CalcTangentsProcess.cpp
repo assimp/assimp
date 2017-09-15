@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -108,7 +109,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Calculates tangents and bitangents for the given mesh
+// Calculates tangents and bi-tangents for the given mesh
 bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
     // we assume that the mesh is still in the verbose vertex format where each face has its own set
@@ -256,7 +257,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
     std::vector<unsigned int> verticesFound;
 
-    const float fLimit = cosf(configMaxAngle);
+    const float fLimit = std::cos(configMaxAngle);
     std::vector<unsigned int> closeVertices;
 
     // in the second pass we now smooth out all tangents and bitangents at the same local position

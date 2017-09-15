@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,9 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "ImproveCacheLocality.h"
 #include "VertexTriangleAdjacency.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "StringUtils.h"
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include <stdio.h>
 #include <stack>
 
@@ -110,7 +112,7 @@ void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
     }
     if (!DefaultLogger::isNullLogger()) {
         char szBuff[128]; // should be sufficiently large in every case
-        ::sprintf(szBuff,"Cache relevant are %u meshes (%u faces). Average output ACMR is %f",
+        ai_snprintf(szBuff,128,"Cache relevant are %u meshes (%u faces). Average output ACMR is %f",
             numm,numf,out/numf);
 
         DefaultLogger::get()->info(szBuff);
@@ -182,7 +184,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             // the JoinIdenticalVertices process has not been executed on this
             // mesh, otherwise this value would normally be at least minimally
             // smaller than 3.0 ...
-            sprintf(szBuff,"Mesh %u: Not suitable for vcache optimization",meshNum);
+            ai_snprintf(szBuff,128,"Mesh %u: Not suitable for vcache optimization",meshNum);
             DefaultLogger::get()->warn(szBuff);
             return 0.f;
         }
@@ -361,7 +363,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
         if ( DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE) {
             char szBuff[128]; // should be sufficiently large in every case
 
-            ::sprintf(szBuff,"Mesh %u | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
+            ai_snprintf(szBuff,128,"Mesh %u | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
                 ((fACMR - fACMR2) / fACMR) * 100.f);
             DefaultLogger::get()->debug(szBuff);
         }

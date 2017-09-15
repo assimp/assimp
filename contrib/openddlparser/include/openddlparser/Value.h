@@ -28,7 +28,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+// Forward declarations
 struct ValueAllocator;
+
+class IOStreamBase;
 
 ///------------------------------------------------------------------------------------------------
 ///	@brief  This class implements a value.
@@ -42,8 +45,8 @@ class DLL_ODDLPARSER_EXPORT Value {
 
 public:
     ///	@brief  This class implements an iterator through a Value list.
-    ///	
-    /// When getting a new value you need to know how to iterate through it. The Value::Iterator 
+    ///
+    /// When getting a new value you need to know how to iterate through it. The Value::Iterator
     /// will help you here:
     ///	@code
     /// Value *val = node->getValue();
@@ -73,10 +76,10 @@ public:
         ///	@brief  Returns the next item and moves the iterator to it.
         ///	@return The next value, is ddl_nullptr in case of being the last item.
         Value *getNext();
-        
+
         ///	@brief  The post-increment operator.
         const Iterator operator++( int );
-        
+
         ///	@brief  The pre-increment operator.
         Iterator &operator++( );
 
@@ -109,43 +112,140 @@ public:
         ddl_unsigned_int16,     ///< Unsigned integer type, 16 bytes
         ddl_unsigned_int32,     ///< Unsigned integer type, 32 bytes
         ddl_unsigned_int64,     ///< Unsigned integer type, 64 bytes
-        ddl_half,               
-        ddl_float,
-        ddl_double,
-        ddl_string,
-        ddl_ref,
-        ddl_types_max
+        ddl_half,               ///< Half data type.
+        ddl_float,              ///< float data type
+        ddl_double,             ///< Double data type.
+        ddl_string,             ///< String data type.
+        ddl_ref,                ///< Reference, used to define references to other data definitions.
+        ddl_types_max           ///< Upper limit.
     };
 
+    ///	@brief  The class constructor.
+    /// @param  type        [in] The value type.
     Value( ValueType type );
+
+    ///	@brief  The class destructor.
     ~Value();
+
+    ///	@brief  Assigns a boolean to the value.
+    /// @param  value       [in9 The value.
     void setBool( bool value );
+
+    ///	@brief  Returns the boolean value.
+    /// @return The boolean value.
     bool getBool();
+
+    ///	@brief  Assigns a int8 to the value.
+    /// @param  value       [in] The value.
     void setInt8( int8 value );
+
+    ///	@brief  Returns the int8 value.
+    /// @return The int8 value.
     int8 getInt8();
+
+    ///	@brief  Assigns a int16 to the value.
+    /// @param  value       [in] The value.
     void setInt16( int16 value );
+
+    ///	@brief  Returns the int16 value.
+    /// @return The int16 value.
     int16 getInt16();
+
+    ///	@brief  Assigns a int32 to the value.
+    /// @param  value       [in] The value.
     void setInt32( int32 value );
+
+    ///	@brief  Returns the int16 value.
+    /// @return The int32 value.
     int32 getInt32();
+
+    ///	@brief  Assigns a int64 to the value.
+    /// @param  value       [in] The value.
     void setInt64( int64 value );
+
+    ///	@brief  Returns the int16 value.
+    /// @return The int64 value.
     int64 getInt64();
+
+    ///	@brief  Assigns a unsigned int8 to the value.
+    /// @param  value       [in] The value.
     void setUnsignedInt8( uint8 value );
+
+    ///	@brief  Returns the unsigned int8 value.
+    /// @return The unsigned int8 value.
     uint8 getUnsignedInt8() const;
+
+    ///	@brief  Assigns a unsigned int16 to the value.
+    /// @param  value       [in] The value.
     void setUnsignedInt16( uint16 value );
+
+    ///	@brief  Returns the unsigned int16 value.
+    /// @return The unsigned int16 value.
     uint16 getUnsignedInt16() const;
+
+    ///	@brief  Assigns a unsigned int32 to the value.
+    /// @param  value       [in] The value.
     void setUnsignedInt32( uint32 value );
+
+    ///	@brief  Returns the unsigned int8 value.
+    /// @return The unsigned int32 value.
     uint32 getUnsignedInt32() const;
+
+    ///	@brief  Assigns a unsigned int64 to the value.
+    /// @param  value       [in] The value.
     void setUnsignedInt64( uint64 value );
+
+    ///	@brief  Returns the unsigned int64 value.
+    /// @return The unsigned int64 value.
     uint64 getUnsignedInt64() const;
+
+    ///	@brief  Assigns a float to the value.
+    /// @param  value       [in] The value.
     void setFloat( float value );
+
+    ///	@brief  Returns the float value.
+    /// @return The float value.
     float getFloat() const;
+
+    ///	@brief  Assigns a double to the value.
+    /// @param  value       [in] The value.
     void setDouble( double value );
+
+    ///	@brief  Returns the double value.
+    /// @return The double value.
     double getDouble() const;
+
+    ///	@brief  Assigns a std::string to the value.
+    /// @param  str         [in] The value.
     void setString( const std::string &str );
+
+    ///	@brief  Returns the std::string value.
+    /// @return The std::string value.
     const char *getString() const;
-    void dump();
+
+    /// @brief  Set the reference.
+    /// @param  ref     [in] Pointer showing to the reference.
+    void setRef( Reference *ref );
+
+    /// @brief  Returns the pointer showing to the reference.
+    /// @return Pointer showing to the reference.
+    Reference *getRef() const;
+
+    ///	@brief  Dumps the value.
+    /// @param  stream  [in] The stream to write in.
+    void dump( IOStreamBase &stream );
+
+    ///	@brief  Assigns the next value.
+    ///	@param  next        [n] The next value.
     void setNext( Value *next );
+
+    ///	@brief  Returns the next value.
+    /// @return The next value.s
     Value *getNext() const;
+
+    /// @brief  Gets the length of the array.
+    /// @return The number of items in the array.
+    size_t size() const;
 
     ValueType m_type;
     size_t m_size;
@@ -153,8 +253,8 @@ public:
     Value *m_next;
 
 private:
-    Value &operator =( const Value & );
-    Value( const Value  & );
+    Value &operator =( const Value & ) ddl_no_copy;
+    Value( const Value  & ) ddl_no_copy;
 };
 
 ///------------------------------------------------------------------------------------------------
@@ -165,9 +265,9 @@ struct DLL_ODDLPARSER_EXPORT ValueAllocator {
     static void releasePrimData( Value **data );
 
 private:
-    ValueAllocator();
-    ValueAllocator( const ValueAllocator  & );
-    ValueAllocator &operator = ( const ValueAllocator & );
+    ValueAllocator() ddl_no_copy;
+    ValueAllocator( const ValueAllocator  & ) ddl_no_copy;
+    ValueAllocator &operator = ( const ValueAllocator & ) ddl_no_copy;
 };
 
 END_ODDLPARSER_NS

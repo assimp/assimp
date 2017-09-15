@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -49,12 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ColladaExportLight : public ::testing::Test {
 public:
-
     virtual void SetUp()
     {
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
-
     }
 
     virtual void TearDown()
@@ -64,8 +63,6 @@ public:
     }
 
 protected:
-
-
     Assimp::Exporter* ex;
     Assimp::Importer* im;
 };
@@ -73,14 +70,14 @@ protected:
 // ------------------------------------------------------------------------------------------------
 TEST_F(ColladaExportLight, testExportLight)
 {
-    const char* file = "cameraExp.dae";
+    const char* file = "lightsExp.dae";
 
     const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae",0);
     ASSERT_TRUE(pTest!=NULL);
     ASSERT_TRUE(pTest->HasLights());
 
     const unsigned int origNumLights( pTest->mNumLights );
-    aiLight *origLights = new aiLight[ origNumLights ];
+    std::unique_ptr<aiLight[]> origLights( new aiLight[ origNumLights ] );
     std::vector<std::string> origNames;
     for (size_t i = 0; i < origNumLights; i++) {
         origNames.push_back( pTest->mLights[ i ]->mName.C_Str() );
@@ -88,7 +85,6 @@ TEST_F(ColladaExportLight, testExportLight)
     }
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
-    EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada","lightsExp.dae"));
 
     const aiScene* imported = im->ReadFile(file,0);
 
@@ -96,14 +92,11 @@ TEST_F(ColladaExportLight, testExportLight)
 
     EXPECT_TRUE(imported->HasLights());
     EXPECT_EQ( origNumLights,imported->mNumLights );
-    for(size_t i=0; i< origNumLights; i++){
-
+    for(size_t i=0; i< origNumLights; i++) {
         const aiLight *orig = &origLights[ i ];
-        
         const aiLight *read = imported->mLights[i];
-
-        EXPECT_EQ(0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );
-        EXPECT_EQ(orig->mType,read->mType);
+        EXPECT_EQ( 0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );
+        EXPECT_EQ( orig->mType,read->mType);
         EXPECT_FLOAT_EQ(orig->mAttenuationConstant,read->mAttenuationConstant);
         EXPECT_FLOAT_EQ(orig->mAttenuationLinear,read->mAttenuationLinear);
         EXPECT_NEAR(orig->mAttenuationQuadratic,read->mAttenuationQuadratic, 0.001f);
@@ -123,10 +116,6 @@ TEST_F(ColladaExportLight, testExportLight)
         EXPECT_NEAR(orig->mAngleInnerCone,read->mAngleInnerCone,0.001);
         EXPECT_NEAR(orig->mAngleOuterCone,read->mAngleOuterCone,0.001);
     }
-    delete [] origLights;
 }
 
-
-#endif
-
-
+#endif // ASSIMP_BUILD_NO_EXPORT

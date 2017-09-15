@@ -607,7 +607,7 @@ extern ( C ) {
     *       <code>aiGetMaterialTextureCount()</code> can be used to determine
     *       the number of textures in a particular texture stack.
     *    path = Receives the output path. null is not a valid value.
-    *    mapping = Recieves the texture mapping mode to be used.
+    *    mapping = Receives the texture mapping mode to be used.
     *       Pass null if you are not interested in this information.
     *    uvindex = For UV-mapped textures: receives the index of the UV source
     *       channel. Unmodified otherwise. Pass null if you are not interested

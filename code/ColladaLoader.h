@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -117,6 +118,8 @@ protected:
     /** Builds meshes for the given node and references them */
     void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode,
         aiNode* pTarget);
+		
+    aiMesh *findMesh(std::string meshid);
 
     /** Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh */
     aiMesh* CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
@@ -190,7 +193,7 @@ protected:
      * @param pOffset Offset into the element, for multipart elements such as vectors or matrices
      * @return the specified value
      */
-    float ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const;
+    ai_real ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const;
 
     /** Reads a string value from an accessor and its data array.
      * @param pAccessor The accessor to use for reading
@@ -223,6 +226,9 @@ protected:
 
     /** Accumulated meshes for the target scene */
     std::vector<aiMesh*> mMeshes;
+	
+    /** Accumulated morph target meshes */
+    std::vector<aiMesh*> mTargetMeshes;
 
     /** Temporary material list */
     std::vector<std::pair<Collada::Effect*, aiMaterial*> > newMats;
@@ -241,7 +247,6 @@ protected:
 
     bool noSkeletonMesh;
     bool ignoreUpDirection;
-    bool invertTransparency;
 
     /** Used by FindNameForNode() to generate unique node names */
     unsigned int mNodeNameCounter;

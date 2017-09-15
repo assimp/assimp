@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -245,7 +246,7 @@ private:
     /** print our 'stack' */
     std::string print_hierarchy() {
         std::stringstream ss;
-        ss << std::endl;
+        ss << "\n";
 
         const char* last = history.back().first.c_str();
         std::string pad;
@@ -253,14 +254,16 @@ private:
         for(ChunkHistory::reverse_iterator rev = history.rbegin(),
             end = history.rend(); rev != end; ++rev, pad += "  ")
         {
-            ss << pad << (*rev).first << "(Index: " << (*rev).second[last] << ")" << std::endl;
+            ss << pad << (*rev).first << "(Index: " << (*rev).second[last] << ")" << "\n";
             last = (*rev).first.c_str();
         }
 
-        ss << std::endl << "Debug trace: "<< std::endl;
+        ss << std::endl << "Debug trace: "<< "\n";
         for (std::vector<std::string>::const_iterator it = debug_trace.begin(); it != debug_trace.end(); ++it) {
-            ss << *it << std::endl;
+            ss << *it << "\n";
         }
+        ss << std::flush;
+
         return ss.str();
     }
 

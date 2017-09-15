@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -58,7 +59,6 @@ const char* AICMD_MSG_DUMP_HELP =
 ;
 
 #include "../../code/assbin_chunks.h"
-#include <boost/static_assert.hpp>
 
 FILE* out = NULL;
 bool shortened = false;
@@ -151,7 +151,7 @@ inline uint32_t Write<uint16_t>(const uint16_t& w)
 template <>
 inline uint32_t Write<float>(const float& f)
 {
-	BOOST_STATIC_ASSERT(sizeof(float)==4);
+	static_assert(sizeof(float)==4, "sizeof(float)==4");
 	fwrite(&f,4,1,out);
 	return 4;
 }
@@ -161,7 +161,7 @@ inline uint32_t Write<float>(const float& f)
 template <>
 inline uint32_t Write<double>(const double& f)
 {
-	BOOST_STATIC_ASSERT(sizeof(double)==8);
+	static_assert(sizeof(double)==8, "sizeof(double)==8");
 	fwrite(&f,8,1,out);
 	return 8;
 }
@@ -293,14 +293,14 @@ uint32_t WriteBinaryTexture(const aiTexture* tex)
 
 	len += Write<unsigned int>(tex->mWidth);
 	len += Write<unsigned int>(tex->mHeight);
-	len += fwrite(tex->achFormatHint,1,4,out);
+	len += static_cast<uint32_t>(fwrite(tex->achFormatHint,1,4,out));
 
 	if(!shortened) {
 		if (!tex->mHeight) {
-			len += fwrite(tex->pcData,1,tex->mWidth,out);
+			len += static_cast<uint32_t>(fwrite(tex->pcData,1,tex->mWidth,out));
 		}
 		else {
-			len += fwrite(tex->pcData,1,tex->mWidth*tex->mHeight*4,out);
+			len += static_cast<uint32_t>(fwrite(tex->pcData,1,tex->mWidth*tex->mHeight*4,out));
 		}
 	}
 
@@ -322,7 +322,7 @@ uint32_t WriteBinaryBone(const aiBone* b)
 	if (shortened) {
 		len += WriteBounds(b->mWeights,b->mNumWeights);
 	} // else write as usual
-	else len += fwrite(b->mWeights,1,b->mNumWeights*sizeof(aiVertexWeight),out);
+	else len += static_cast<uint32_t>(fwrite(b->mWeights,1,b->mNumWeights*sizeof(aiVertexWeight),out));
 
 	ChangeInteger(old,len);
 	return len;
@@ -369,13 +369,13 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		if (shortened) {
 			len += WriteBounds(mesh->mVertices,mesh->mNumVertices);
 		} // else write as usual
-		else len += fwrite(mesh->mVertices,1,12*mesh->mNumVertices,out);
+		else len += static_cast<uint32_t>(fwrite(mesh->mVertices,1,12*mesh->mNumVertices,out));
 	}
 	if (mesh->mNormals) {
 		if (shortened) {
 			len += WriteBounds(mesh->mNormals,mesh->mNumVertices);
 		} // else write as usual
-		else len += fwrite(mesh->mNormals,1,12*mesh->mNumVertices,out);
+		else len += static_cast<uint32_t>(fwrite(mesh->mNormals,1,12*mesh->mNumVertices,out));
 	}
 	if (mesh->mTangents && mesh->mBitangents) {
 		if (shortened) {
@@ -383,8 +383,8 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 			len += WriteBounds(mesh->mBitangents,mesh->mNumVertices);
 		} // else write as usual
 		else {
-			len += fwrite(mesh->mTangents,1,12*mesh->mNumVertices,out);
-			len += fwrite(mesh->mBitangents,1,12*mesh->mNumVertices,out);
+			len += static_cast<uint32_t>(fwrite(mesh->mTangents,1,12*mesh->mNumVertices,out));
+			len += static_cast<uint32_t>(fwrite(mesh->mBitangents,1,12*mesh->mNumVertices,out));
 		}
 	}
 	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS;++n) {
@@ -394,7 +394,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		if (shortened) {
 			len += WriteBounds(mesh->mColors[n],mesh->mNumVertices);
 		} // else write as usual
-		else len += fwrite(mesh->mColors[n],16*mesh->mNumVertices,1,out);
+		else len += static_cast<uint32_t>(fwrite(mesh->mColors[n],16*mesh->mNumVertices,1,out));
 	}
 	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) {
 		if (!mesh->mTextureCoords[n])
@@ -406,7 +406,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		if (shortened) {
 			len += WriteBounds(mesh->mTextureCoords[n],mesh->mNumVertices);
 		} // else write as usual
-		else len += fwrite(mesh->mTextureCoords[n],12*mesh->mNumVertices,1,out);
+		else len += static_cast<uint32_t>(fwrite(mesh->mTextureCoords[n],12*mesh->mNumVertices,1,out));
 	}
 
 	// write faces. There are no floating-point calculations involved
@@ -424,7 +424,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 				uint32_t tmp = f.mNumIndices;
 				hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 				for (unsigned int i = 0; i < f.mNumIndices; ++i) {
-					BOOST_STATIC_ASSERT(AI_MAX_VERTICES <= 0xffffffff);
+					static_assert(AI_MAX_VERTICES <= 0xffffffff, "AI_MAX_VERTICES <= 0xffffffff");
 					tmp = static_cast<uint32_t>( f.mIndices[i] );
 					hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 				}
@@ -438,7 +438,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
 			const aiFace& f = mesh->mFaces[i];
 
-			BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
+			static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
 			len += Write<uint16_t>(f.mNumIndices);
 
 			for (unsigned int a = 0; a < f.mNumIndices;++a) {
@@ -473,7 +473,7 @@ uint32_t WriteBinaryMaterialProperty(const aiMaterialProperty* prop)
 
 	len += Write<unsigned int>(prop->mDataLength);
 	len += Write<unsigned int>((unsigned int)prop->mType);
-	len += fwrite(prop->mData,1,prop->mDataLength,out);
+	len += static_cast<uint32_t>(fwrite(prop->mData,1,prop->mDataLength,out));
 
 	ChangeInteger(old,len);
 	return len;
@@ -510,21 +510,21 @@ uint32_t WriteBinaryNodeAnim(const aiNodeAnim* nd)
 			len += WriteBounds(nd->mPositionKeys,nd->mNumPositionKeys);
 
 		} // else write as usual
-		else len += fwrite(nd->mPositionKeys,1,nd->mNumPositionKeys*sizeof(aiVectorKey),out);
+		else len += static_cast<uint32_t>(fwrite(nd->mPositionKeys,1,nd->mNumPositionKeys*sizeof(aiVectorKey),out));
 	}
 	if (nd->mRotationKeys) {
 		if (shortened) {
 			len += WriteBounds(nd->mRotationKeys,nd->mNumRotationKeys);
 
 		} // else write as usual
-		else len += fwrite(nd->mRotationKeys,1,nd->mNumRotationKeys*sizeof(aiQuatKey),out);
+		else len += static_cast<uint32_t>(fwrite(nd->mRotationKeys,1,nd->mNumRotationKeys*sizeof(aiQuatKey),out));
 	}
 	if (nd->mScalingKeys) {
 		if (shortened) {
 			len += WriteBounds(nd->mScalingKeys,nd->mNumScalingKeys);
 
 		} // else write as usual
-		else len += fwrite(nd->mScalingKeys,1,nd->mNumScalingKeys*sizeof(aiVectorKey),out);
+		else len += static_cast<uint32_t>(fwrite(nd->mScalingKeys,1,nd->mNumScalingKeys*sizeof(aiVectorKey),out));
 	}
 
 	ChangeInteger(old,len);

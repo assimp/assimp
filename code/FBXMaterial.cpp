@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 #include "ByteSwapper.h"
-#include <boost/foreach.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -96,7 +96,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     // resolve texture links
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-    BOOST_FOREACH(const Connection* con, conns) {
+    for(const Connection* con : conns) {
 
         // texture link to properties, not objects
         if (!con->PropertyName().length()) {
@@ -205,7 +205,7 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
     // resolve video links
     if(doc.Settings().readTextures) {
         const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-        BOOST_FOREACH(const Connection* con, conns) {
+        for(const Connection* con : conns) {
             const Object* const ob = con->SourceObject();
             if(!ob) {
                 DOMWarning("failed to read source object for texture link, ignoring",&element);
@@ -228,7 +228,6 @@ Texture::~Texture()
 
 LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& /*doc*/, const std::string& name)
 : Object(id,element,name)
-,texture(0)
 ,blendMode(BlendMode_Modulate)
 ,alpha(1)
 {
@@ -250,7 +249,7 @@ LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Docume
 
 LayeredTexture::~LayeredTexture()
 {
-
+    
 }
 
 void LayeredTexture::fillTexture(const Document& doc)
@@ -268,7 +267,7 @@ void LayeredTexture::fillTexture(const Document& doc)
 
         const Texture* const tex = dynamic_cast<const Texture*>(ob);
 
-        texture = tex;
+        textures.push_back(tex);
     }
 }
 
@@ -282,7 +281,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const Type = sc["Type"];
-    const Element* const FileName = sc["FileName"];
+    const Element* const FileName = sc.FindElementCaseInsensitive("FileName");  //some files retain the information as "Filename", others "FileName", who knows
     const Element* const RelativeFilename = sc["RelativeFilename"];
     const Element* const Content = sc["Content"];
 
@@ -292,35 +291,40 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
 
     if(FileName) {
         fileName = ParseTokenAsString(GetRequiredToken(*FileName,0));
-    }
+	}
 
     if(RelativeFilename) {
         relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
     }
 
     if(Content) {
-        const Token& token = GetRequiredToken(*Content, 0);
-        const char* data = token.begin();
-        if(!token.IsBinary()) {
-            DOMWarning("video content is not binary data, ignoring", &element);
-        }
-        else if(static_cast<size_t>(token.end() - data) < 5) {
-            DOMError("binary data array is too short, need five (5) bytes for type signature and element count", &element);
-        }
-        else if(*data != 'R') {
-            DOMWarning("video content is not raw binary data, ignoring", &element);
-        }
-        else {
-            // read number of elements
-            uint32_t len = 0;
-            ::memcpy(&len, data + 1, sizeof(len));
-            AI_SWAP4(len);
+		//this field is ommited when the embedded texture is already loaded, let's ignore if it´s not found
+		try {
+			const Token& token = GetRequiredToken(*Content, 0);
+			const char* data = token.begin();
+			if (!token.IsBinary()) {
+				DOMWarning("video content is not binary data, ignoring", &element);
+			}
+			else if (static_cast<size_t>(token.end() - data) < 5) {
+				DOMError("binary data array is too short, need five (5) bytes for type signature and element count", &element);
+			}
+			else if (*data != 'R') {
+				DOMWarning("video content is not raw binary data, ignoring", &element);
+			}
+			else {
+				// read number of elements
+				uint32_t len = 0;
+				::memcpy(&len, data + 1, sizeof(len));
+				AI_SWAP4(len);
 
-            contentLength = len;
+				contentLength = len;
 
-            content = new uint8_t[len];
-            ::memcpy(content, data + 5, len);
-        }
+				content = new uint8_t[len];
+				::memcpy(content, data + 5, len);
+			}
+		} catch (runtime_error runtimeError) {
+			//we don´t need the content data for contents that has already been loaded
+		}
     }
 
     props = GetPropertyTable(doc,"Video.FbxVideo",element,sc);

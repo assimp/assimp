@@ -140,7 +140,6 @@ enum ParseFlag {
     kParseIterativeFlag = 4,        //!< Iterative(constant complexity in terms of function call stack size) parsing.
     kParseStopWhenDoneFlag = 8,     //!< After parsing a complete JSON root from stream, stop further processing the rest of stream. When this flag is used, parser will not generate kParseErrorDocumentRootNotSingular error.
     kParseFullPrecisionFlag = 16,   //!< Parse number in full precision (but slower).
-    kParseCommentsFlag = 32,        //!< Allow one-line (//) and multi-line (/**/) comments.
     kParseDefaultFlags = RAPIDJSON_PARSE_DEFAULT_FLAGS  //!< Default parse flags. Can be customized by defining RAPIDJSON_PARSE_DEFAULT_FLAGS
 };
 
@@ -272,7 +271,7 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
 
     // The rest of string using SIMD
     static const char whitespace[16] = " \n\r\t";
-    const __m128i w = _mm_loadu_si128((const __m128i *)&whitespace[0]);
+    const __m128i w = _mm_load_si128((const __m128i *)&whitespace[0]);
 
     for (;; p += 16) {
         const __m128i s = _mm_load_si128((const __m128i *)p);
@@ -399,8 +398,7 @@ public:
 
         ClearStackOnExit scope(*this);
 
-        SkipWhitespaceAndComments<parseFlags>(is);
-        RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+        SkipWhitespace(is);
 
         if (is.Peek() == '\0') {
             RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorDocumentEmpty, is.Tell());
@@ -411,8 +409,7 @@ public:
             RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
 
             if (!(parseFlags & kParseStopWhenDoneFlag)) {
-                SkipWhitespaceAndComments<parseFlags>(is);
-                RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+                SkipWhitespace(is);
 
                 if (is.Peek() != '\0') {
                     RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorDocumentRootNotSingular, is.Tell());
@@ -465,40 +462,6 @@ private:
         ClearStackOnExit& operator=(const ClearStackOnExit&);
     };
 
-    template<unsigned parseFlags, typename InputStream>
-    void SkipWhitespaceAndComments(InputStream& is) {
-        SkipWhitespace(is);
-
-        if (parseFlags & kParseCommentsFlag) {
-            while (is.Peek() == '/') {
-                is.Take();
-
-                if (is.Peek() == '*') {
-                    is.Take();
-                    while (true) {
-                        if (is.Peek() == '\0')
-                            RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell());
-
-                        if (is.Take() == '*') {
-                            if (is.Peek() == '\0')
-                                RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell());
-
-                            if (is.Take() == '/')
-                                break;
-                        }
-                    }
-                } else if (is.Peek() == '/') {
-                    is.Take();
-                    while (is.Peek() != '\0' && is.Take() != '\n') { }
-                } else {
-                    RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell());
-                }
-
-                SkipWhitespace(is);
-            }
-        }
-    }
-
     // Parse object: { string : value, ... }
     template<unsigned parseFlags, typename InputStream, typename Handler>
     void ParseObject(InputStream& is, Handler& handler) {
@@ -508,8 +471,7 @@ private:
         if (!handler.StartObject())
             RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
 
-        SkipWhitespaceAndComments<parseFlags>(is);
-        RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+        SkipWhitespace(is);
 
         if (is.Peek() == '}') {
             is.Take();
@@ -525,35 +487,27 @@ private:
             ParseString<parseFlags>(is, handler, true);
             RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
 
-            SkipWhitespaceAndComments<parseFlags>(is);
-            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            SkipWhitespace(is);
 
             if (is.Take() != ':')
                 RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissColon, is.Tell());
 
-            SkipWhitespaceAndComments<parseFlags>(is);
-            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            SkipWhitespace(is);
 
             ParseValue<parseFlags>(is, handler);
             RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
 
-            SkipWhitespaceAndComments<parseFlags>(is);
-            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            SkipWhitespace(is);
 
             ++memberCount;
 
             switch (is.Take()) {
-                case ',':
-                    SkipWhitespaceAndComments<parseFlags>(is);
-                    RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
-                    break;
+                case ',': SkipWhitespace(is); break;
                 case '}': 
                     if (!handler.EndObject(memberCount))
                         RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
                     return;
-                default:  
-                    RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissCommaOrCurlyBracket, is.Tell());
-                    break;
+                default:  RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissCommaOrCurlyBracket, is.Tell());
             }
         }
     }
@@ -567,8 +521,7 @@ private:
         if (!handler.StartArray())
             RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
         
-        SkipWhitespaceAndComments<parseFlags>(is);
-        RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+        SkipWhitespace(is);
 
         if (is.Peek() == ']') {
             is.Take();
@@ -582,21 +535,15 @@ private:
             RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
 
             ++elementCount;
-            SkipWhitespaceAndComments<parseFlags>(is);
-            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            SkipWhitespace(is);
 
             switch (is.Take()) {
-                case ',':
-                    SkipWhitespaceAndComments<parseFlags>(is);
-                    RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
-                    break;
+                case ',': SkipWhitespace(is); break;
                 case ']': 
                     if (!handler.EndArray(elementCount))
                         RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
                     return;
-                default:  
-                    RAPIDJSON_PARSE_ERROR(kParseErrorArrayMissCommaOrSquareBracket, is.Tell());
-                    break;
+                default:  RAPIDJSON_PARSE_ERROR(kParseErrorArrayMissCommaOrSquareBracket, is.Tell());
             }
         }
     }
@@ -1020,13 +967,13 @@ private:
         else {
             if (use64bit) {
                 if (minus)
-                    cont = handler.Int64(static_cast<int64_t>(~i64 + 1));
+                    cont = handler.Int64(-(int64_t)i64);
                 else
                     cont = handler.Uint64(i64);
             }
             else {
                 if (minus)
-                    cont = handler.Int(static_cast<int32_t>(~i + 1));
+                    cont = handler.Int(-(int)i);
                 else
                     cont = handler.Uint(i);
             }
@@ -1045,10 +992,7 @@ private:
             case '"': ParseString<parseFlags>(is, handler); break;
             case '{': ParseObject<parseFlags>(is, handler); break;
             case '[': ParseArray <parseFlags>(is, handler); break;
-            default : 
-                      ParseNumber<parseFlags>(is, handler);
-                      break;
-                      
+            default : ParseNumber<parseFlags>(is, handler);
         }
     }
 
@@ -1443,14 +1387,14 @@ private:
         }
         
         switch (src) {
-        case IterativeParsingStartState:            RAPIDJSON_PARSE_ERROR(kParseErrorDocumentEmpty, is.Tell()); return;
-        case IterativeParsingFinishState:           RAPIDJSON_PARSE_ERROR(kParseErrorDocumentRootNotSingular, is.Tell()); return;
+        case IterativeParsingStartState:            RAPIDJSON_PARSE_ERROR(kParseErrorDocumentEmpty, is.Tell());
+        case IterativeParsingFinishState:           RAPIDJSON_PARSE_ERROR(kParseErrorDocumentRootNotSingular, is.Tell());
         case IterativeParsingObjectInitialState:
-        case IterativeParsingMemberDelimiterState:  RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissName, is.Tell()); return;
-        case IterativeParsingMemberKeyState:        RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissColon, is.Tell()); return;
-        case IterativeParsingMemberValueState:      RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissCommaOrCurlyBracket, is.Tell()); return;
-        case IterativeParsingElementState:          RAPIDJSON_PARSE_ERROR(kParseErrorArrayMissCommaOrSquareBracket, is.Tell()); return;
-        default:                                    RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell()); return;
+        case IterativeParsingMemberDelimiterState:  RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissName, is.Tell());
+        case IterativeParsingMemberKeyState:        RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissColon, is.Tell());
+        case IterativeParsingMemberValueState:      RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissCommaOrCurlyBracket, is.Tell());
+        case IterativeParsingElementState:          RAPIDJSON_PARSE_ERROR(kParseErrorArrayMissCommaOrSquareBracket, is.Tell());
+        default:                                    RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell());
         }       
     }
 
@@ -1460,8 +1404,7 @@ private:
         ClearStackOnExit scope(*this);
         IterativeParsingState state = IterativeParsingStartState;
 
-        SkipWhitespaceAndComments<parseFlags>(is);
-        RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+        SkipWhitespace(is);
         while (is.Peek() != '\0') {
             Token t = Tokenize(is.Peek());
             IterativeParsingState n = Predict(state, t);
@@ -1478,8 +1421,7 @@ private:
             if ((parseFlags & kParseStopWhenDoneFlag) && state == IterativeParsingFinishState)
                 break;
 
-            SkipWhitespaceAndComments<parseFlags>(is);
-            RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+            SkipWhitespace(is);
         }
 
         // Handle the end of file.

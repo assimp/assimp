@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -47,18 +48,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
+#include "TinyFormatter.h"
 #include "ConvertToLHProcess.h"
-#include "../include/assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include <boost/format.hpp>
-#include "Defines.h"
+#include <assimp/Defines.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
+
 #include <cctype>
-
-
+#include <memory>
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 static const aiImporterDesc desc = {
     "Direct3D XFile Importer",
@@ -111,7 +113,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // read file into memory
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
     if( file.get() == NULL)
         throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
@@ -235,8 +237,9 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 // Creates the meshes for the given node.
 void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vector<XFile::Mesh*>& pMeshes)
 {
-    if( pMeshes.size() == 0)
+    if (pMeshes.empty()) {
         return;
+    }
 
     // create a mesh for each mesh-material combination in the source node
     std::vector<aiMesh*> meshes;
@@ -285,7 +288,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
             // or referenced material, it should already have a valid index
             if( sourceMesh->mFaceMaterials.size() > 0)
             {
-        mesh->mMaterialIndex = sourceMesh->mMaterials[b].sceneIndex;
+                mesh->mMaterialIndex = static_cast<unsigned int>(sourceMesh->mMaterials[b].sceneIndex);
             } else
             {
                 mesh->mMaterialIndex = 0;
@@ -372,7 +375,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
             {
                 const XFile::Bone& obone = bones[c];
                 // set up a vertex-linear array of the weights for quick searching if a bone influences a vertex
-                std::vector<float> oldWeights( sourceMesh->mPositions.size(), 0.0f);
+                std::vector<ai_real> oldWeights( sourceMesh->mPositions.size(), 0.0);
                 for( unsigned int d = 0; d < obone.mWeights.size(); d++)
                     oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;
 
@@ -382,8 +385,8 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                 for( unsigned int d = 0; d < orgPoints.size(); d++)
                 {
                     // does the new vertex stem from an old vertex which was influenced by this bone?
-                    float w = oldWeights[orgPoints[d]];
-                    if( w > 0.0f)
+                    ai_real w = oldWeights[orgPoints[d]];
+                    if( w > 0.0)
                         newWeights.push_back( aiVertexWeight( d, w));
                 }
 
@@ -602,7 +605,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
       if( oldMat.sceneIndex == SIZE_MAX )
       {
-        DefaultLogger::get()->warn( boost::str( boost::format( "Could not resolve global material reference \"%s\"") % oldMat.mName));
+        DefaultLogger::get()->warn( format() << "Could not resolve global material reference \"" << oldMat.mName << "\"" );
         oldMat.sceneIndex = 0;
       }
 
@@ -668,7 +671,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
                     sz[sExt] = '\0';
                 }
 
-                // convert to lower case for easier comparision
+                // convert to lower case for easier comparison
                 for( unsigned int c = 0; c < sz.length(); c++)
                     if( isalpha( sz[c]))
                         sz[c] = tolower( sz[c]);
@@ -712,4 +715,3 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 }
 
 #endif // !! ASSIMP_BUILD_NO_X_IMPORTER
-

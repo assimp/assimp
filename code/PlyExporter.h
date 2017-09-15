@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,39 +51,37 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to a Stanford Ply file. */
 // ------------------------------------------------------------------------------------------------
-class PlyExporter
-{
+class PlyExporter {
 public:
-    /// Constructor for a specific scene to export
+    /// The class constructor for a specific scene to export
     PlyExporter(const char* filename, const aiScene* pScene, bool binary = false);
+    /// The class destructor, empty.
+    ~PlyExporter();
 
 public:
-
-    /// public stringstreams to write all output into
+    /// public string-streams to write all output into:
     std::ostringstream mOutput;
 
 private:
-
     void WriteMeshVerts(const aiMesh* m, unsigned int components);
     void WriteMeshIndices(const aiMesh* m, unsigned int ofs);
-
     void WriteMeshVertsBinary(const aiMesh* m, unsigned int components);
     void WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset);
 
 private:
+    const std::string filename;  // tHE FILENAME
+    const std::string endl;      // obviously, this endl() doesn't flush() the stream
 
-    const std::string filename;
-
-    // obviously, this endl() doesn't flush() the stream
-    const std::string endl;
+private:
+    PlyExporter( const PlyExporter & );
+    PlyExporter &operator = ( const PlyExporter & );
 };
 
-}
+} // Namespace Assimp
 
-#endif
+#endif // AI_PLYEXPORTER_H_INC

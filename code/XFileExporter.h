@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_XFILEEXPORTER_H_INC
 #define AI_XFILEEXPORTER_H_INC
 
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/matrix4x4.h"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/matrix4x4.h>
+#include <assimp/Exporter.hpp>
 #include <sstream>
 
 struct aiScene;
@@ -92,7 +93,10 @@ protected:
     void PushTag() { startstr.append( "  "); }
 
     /// Leaves an element, decreasing the indentation
-    void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
+    void PopTag() { 
+        ai_assert( startstr.length() > 1); 
+        startstr.erase( startstr.length() - 2); 
+    }
 
 public:
     /// Stringstream to write all output into
@@ -107,7 +111,7 @@ protected:
     const ExportProperties* mProperties;
 
     /// write a path
-    void writePath(aiString path);
+    void writePath(const aiString &path);
 
     /// The IOSystem for output
     IOSystem* mIOSystem;

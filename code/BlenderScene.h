@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 
 namespace Assimp    {
-    namespace Blender {
+namespace Blender {
 
 // Minor parts of this file are extracts from blender data structures,
 // declared in the ./source/blender/makesdna directory.
@@ -64,7 +65,7 @@ namespace Assimp    {
 // * C++ style comments only
 //
 // * Structures may include the primitive types char, int, short,
-//   float, double. Signedness specifiers are not allowed on
+//   float, double. Signed specifiers are not allowed on
 //   integers. Enum types are allowed, but they must have been
 //   defined in this header.
 //
@@ -73,7 +74,7 @@ namespace Assimp    {
 //
 // * Pointers to other structures or primitive types are allowed.
 //   No references or double pointers or arrays of pointers.
-//   A pointer to a T is normally written as boost::shared_ptr, while a
+//   A pointer to a T is normally written as std::shared_ptr, while a
 //   pointer to an array of elements is written as boost::
 //   shared_array. To avoid cyclic pointers, use raw pointers in
 //   one direction.
@@ -85,33 +86,44 @@ namespace Assimp    {
 //   provided they are neither pointers nor arrays.
 //
 // * One of WARN, FAIL can be appended to the declaration (
-//   prior to the semiolon to specifiy the error handling policy if
+//   prior to the semicolon to specify the error handling policy if
 //   this field is missing in the input DNA). If none of those
-//   is specified the default policy is to subtitute a default
+//   is specified the default policy is to substitute a default
 //   value for the field.
 //
 
-#define WARN // warn if field is missing, substitute default value
-#define FAIL // fail the import if the field does not exist
+// warn if field is missing, substitute default value
+#ifdef WARN
+#  undef WARN
+#endif
+#define WARN 
+
+// fail the import if the field does not exist
+#ifdef FAIL
+#  undef FAIL
+#endif
+#define FAIL 
 
 struct Object;
 struct MTex;
 struct Image;
 
+#include <memory>
+
 #define AI_BLEND_MESH_MAX_VERTS 2000000000L
+
+static const size_t MaxNameLen = 1024;
 
 // -------------------------------------------------------------------------------
 struct ID : ElemBase {
-
-    char name[1024] WARN;
+    char name[ MaxNameLen ] WARN;
     short flag;
 };
 
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
-
-    boost::shared_ptr<ElemBase> first;
-    boost::shared_ptr<ElemBase> last;
+    std::shared_ptr<ElemBase> first;
+    std::shared_ptr<ElemBase> last;
 };
 
 
@@ -119,14 +131,13 @@ struct ListBase : ElemBase {
 struct PackedFile : ElemBase {
      int size WARN;
      int seek WARN;
-     boost::shared_ptr< FileOffset > data WARN;
+     std::shared_ptr< FileOffset > data WARN;
 };
 
 // -------------------------------------------------------------------------------
 struct GroupObject : ElemBase {
-
-    boost::shared_ptr<GroupObject> prev,next FAIL;
-    boost::shared_ptr<Object> ob;
+    std::shared_ptr<GroupObject> prev,next FAIL;
+    std::shared_ptr<Object> ob;
 };
 
 // -------------------------------------------------------------------------------
@@ -134,13 +145,12 @@ struct Group : ElemBase {
     ID id FAIL;
     int layer;
 
-    boost::shared_ptr<GroupObject> gobject;
+    std::shared_ptr<GroupObject> gobject;
 };
 
 // -------------------------------------------------------------------------------
 struct World : ElemBase {
     ID id FAIL;
-
 };
 
 // -------------------------------------------------------------------------------
@@ -173,7 +183,7 @@ struct MLoopUV : ElemBase {
 // -------------------------------------------------------------------------------
 // Note that red and blue are not swapped, as with MCol
 struct MLoopCol : ElemBase {
-    char r, g, b, a;
+	unsigned char r, g, b, a;
 };
 
 // -------------------------------------------------------------------------------
@@ -215,14 +225,13 @@ struct TFace : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct MTFace : ElemBase {
-
     float uv[4][2] FAIL;
     char flag;
     short mode;
     short tile;
     short unwrap;
 
-    // boost::shared_ptr<Image> tpage;
+    // std::shared_ptr<Image> tpage;
 };
 
 // -------------------------------------------------------------------------------
@@ -233,12 +242,16 @@ struct MDeformWeight : ElemBase  {
 
 // -------------------------------------------------------------------------------
 struct MDeformVert : ElemBase  {
-
     vector<MDeformWeight> dw WARN;
     int totweight;
 };
 
 // -------------------------------------------------------------------------------
+#define MA_RAYMIRROR    0x40000
+#define MA_TRANSPARENCY 0x10000
+#define MA_RAYTRANSP    0x20000
+#define MA_ZTRANSP      0x00040
+
 struct Material : ElemBase {
     ID id FAIL;
 
@@ -248,19 +261,103 @@ struct Material : ElemBase {
     float ambr,ambg,ambb WARN;
     float mirr,mirg,mirb;
     float emit WARN;
+    float ray_mirror;
     float alpha WARN;
     float ref;
     float translucency;
+    int mode;
     float roughness;
     float darkness;
     float refrac;
 
-    boost::shared_ptr<Group> group;
+    float amb;
+    float ang;
+    float spectra;
+    float spec;
+    float zoffs;
+    float add;
+    float fresnel_mir;
+    float fresnel_mir_i;
+    float fresnel_tra;
+    float fresnel_tra_i;
+    float filter;
+    float tx_limit;
+    float tx_falloff;
+    float gloss_mir;
+    float gloss_tra;
+    float adapt_thresh_mir;
+    float adapt_thresh_tra;
+    float aniso_gloss_mir;
+    float dist_mir;
+    float hasize;
+    float flaresize;
+    float subsize;
+    float flareboost;
+    float strand_sta;
+    float strand_end;
+    float strand_ease;
+    float strand_surfnor;
+    float strand_min;
+    float strand_widthfade;
+    float sbias;
+    float lbias;
+    float shad_alpha;
+    float param;
+    float rms;
+    float rampfac_col;
+    float rampfac_spec;
+    float friction;
+    float fh;
+    float reflect;
+    float fhdist;
+    float xyfrict;
+    float sss_radius;
+    float sss_col;
+    float sss_error;
+    float sss_scale;
+    float sss_ior;
+    float sss_colfac;
+    float sss_texfac;
+    float sss_front;
+    float sss_back;
+
+    short material_type;
+    short flag;
+    short ray_depth;
+    short ray_depth_tra;
+    short samp_gloss_mir;
+    short samp_gloss_tra;
+    short fadeto_mir;
+    short shade_flag;
+    short flarec;
+    short starc;
+    short linec;
+    short ringc;
+    short pr_lamp;
+    short pr_texture;
+    short ml_flag;
+    short texco;
+    short mapto;
+    short ramp_show;
+    short pad3;
+    short dynamode;
+    short pad2;
+    short sss_flag;
+    short sss_preset;
+    short shadowonly_flag;
+    short index;
+    short vcol_alpha;
+    short pad4;
+
+    char seed1;
+    char seed2;
+
+    std::shared_ptr<Group> group;
 
     short diff_shader WARN;
     short spec_shader WARN;
 
-    boost::shared_ptr<MTex> mtex[18];
+    std::shared_ptr<MTex> mtex[18];
 };
 
 // -------------------------------------------------------------------------------
@@ -291,7 +388,7 @@ struct Mesh : ElemBase {
     vector<MDeformVert> dvert;
     vector<MCol> mcol;
 
-    vector< boost::shared_ptr<Material> > mat FAIL;
+    vector< std::shared_ptr<Material> > mat FAIL;
 };
 
 // -------------------------------------------------------------------------------
@@ -300,7 +397,7 @@ struct Library : ElemBase {
 
     char name[240] WARN;
     char filename[240] FAIL;
-    boost::shared_ptr<Library> parent WARN;
+    std::shared_ptr<Library> parent WARN;
 };
 
 // -------------------------------------------------------------------------------
@@ -312,18 +409,10 @@ struct Camera : ElemBase {
 
     ID id FAIL;
 
-    // struct AnimData *adt;
-
     Type type,flag WARN;
-    float angle WARN;
-    //float passepartalpha, angle;
-    //float clipsta, clipend;
-    //float lens, ortho_scale, drawsize;
-    //float shiftx, shifty;
-
-    //float YF_dofdist, YF_aperture;
-    //short YF_bkhtype, YF_bkhbias;
-    //float YF_bkhrot;
+    float lens WARN;
+    float sensor_x WARN;
+    float clipsta, clipend;
 };
 
 
@@ -373,8 +462,8 @@ struct Lamp : ElemBase {
 
       //short ray_samp, ray_sampy, ray_sampz;
       //short ray_samp_type;
-      //short area_shape;
-      //float area_size, area_sizey, area_sizez;
+      short area_shape;
+      float area_size, area_sizey, area_sizez;
       //float adapt_thresh;
       //short ray_samp_method;
 
@@ -448,8 +537,8 @@ struct ModifierData : ElemBase  {
       eModifierType_ShapeKey
     };
 
-    boost::shared_ptr<ElemBase> next WARN;
-    boost::shared_ptr<ElemBase> prev WARN;
+    std::shared_ptr<ElemBase> next WARN;
+    std::shared_ptr<ElemBase> prev WARN;
 
     int type, mode;
     char name[32];
@@ -493,7 +582,7 @@ struct MirrorModifierData : ElemBase {
 
     short axis, flag;
     float tolerance;
-    boost::shared_ptr<Object> mirror_ob;
+    std::shared_ptr<Object> mirror_ob;
 };
 
 // -------------------------------------------------------------------------------
@@ -521,34 +610,61 @@ struct Object : ElemBase  {
     char parsubstr[32] WARN;
 
     Object* parent WARN;
-    boost::shared_ptr<Object> track WARN;
+    std::shared_ptr<Object> track WARN;
 
-    boost::shared_ptr<Object> proxy,proxy_from,proxy_group WARN;
-    boost::shared_ptr<Group> dup_group WARN;
-    boost::shared_ptr<ElemBase> data FAIL;
+    std::shared_ptr<Object> proxy,proxy_from,proxy_group WARN;
+    std::shared_ptr<Group> dup_group WARN;
+    std::shared_ptr<ElemBase> data FAIL;
 
     ListBase modifiers;
+
+    Object()
+    : ElemBase()
+    , type( Type_EMPTY )
+    , parent( nullptr )
+    , track()
+    , proxy()
+    , proxy_from()
+    , data() {
+        // empty
+    }
 };
 
 
 // -------------------------------------------------------------------------------
 struct Base : ElemBase {
     Base* prev WARN;
-    boost::shared_ptr<Base> next WARN;
-    boost::shared_ptr<Object> object WARN;
+    std::shared_ptr<Base> next WARN;
+    std::shared_ptr<Object> object WARN;
+
+    Base() 
+    : ElemBase()
+    , prev( nullptr )
+    , next()
+    , object() {
+        // empty
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
 struct Scene : ElemBase {
     ID id FAIL;
 
-    boost::shared_ptr<Object> camera WARN;
-    boost::shared_ptr<World> world WARN;
-    boost::shared_ptr<Base> basact WARN;
+    std::shared_ptr<Object> camera WARN;
+    std::shared_ptr<World> world WARN;
+    std::shared_ptr<Base> basact WARN;
 
     ListBase base;
-};
 
+    Scene()
+    : ElemBase()
+    , camera()
+    , world()
+    , basact() {
+        // empty
+    }
+};
 
 // -------------------------------------------------------------------------------
 struct Image : ElemBase {
@@ -568,7 +684,7 @@ struct Image : ElemBase {
     //unsigned int bindcode;
     //unsigned int *repbind;
 
-    boost::shared_ptr<PackedFile> packedfile;
+    std::shared_ptr<PackedFile> packedfile;
     //struct PreviewImage * preview;
 
     float lastupdate;
@@ -576,6 +692,11 @@ struct Image : ElemBase {
     short animspeed;
 
     short gen_x, gen_y, gen_type;
+    
+    Image()
+    : ElemBase() {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -654,7 +775,7 @@ struct Tex : ElemBase {
 
     //bNodeTree *nodetree;
     //Ipo *ipo;
-    boost::shared_ptr<Image> ima WARN;
+    std::shared_ptr<Image> ima WARN;
     //PluginTex *plugin;
     //ColorBand *coba;
     //EnvMap *env;
@@ -663,6 +784,14 @@ struct Tex : ElemBase {
     //VoxelData *vd;
 
     //char use_nodes;
+
+    Tex()
+    : ElemBase()
+    , imaflag( ImageFlags_INTERPOL )
+    , type( Type_CLOUDS )
+    , ima() {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -721,8 +850,8 @@ struct MTex : ElemBase {
     MapType mapto;
 
     BlendType blendtype;
-    boost::shared_ptr<Object> object;
-    boost::shared_ptr<Tex> tex;
+    std::shared_ptr<Object> object;
+    std::shared_ptr<Tex> tex;
     char uvname[32];
 
     Projection projx,projy,projz;
@@ -751,9 +880,13 @@ struct MTex : ElemBase {
     //float lifefac, sizefac, ivelfac, pvelfac;
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
+
+    MTex()
+    : ElemBase() {
+        // empty
+    }
 };
 
-
-    }
+}
 }
 #endif

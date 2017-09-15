@@ -64,7 +64,7 @@ set( ASSIMP_LIBRARIES ${ASSIMP_LIBRARIES}@CMAKE_DEBUG_POSTFIX@)
 # the boost version assimp was compiled with
 set( ASSIMP_Boost_VERSION "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@")
 
-# for compatibility wiht pkg-config
+# for compatibility with pkg-config
 set(ASSIMP_CFLAGS_OTHER "${ASSIMP_CXX_FLAGS}")
 set(ASSIMP_LDFLAGS_OTHER "${ASSIMP_LINK_FLAGS}")
 

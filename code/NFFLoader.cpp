@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -48,13 +49,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NFFLoader.h"
 #include "ParsingUtils.h"
 #include "StandardShapes.h"
+#include "qnan.h"
 #include "fast_atof.h"
 #include "RemoveComments.h"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
-#include "qnan.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
+#include <memory>
 
 
 using namespace Assimp;
@@ -133,7 +135,7 @@ const aiImporterDesc* NFFImporter::GetInfo () const
 void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
     const std::string& path, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( path, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( path, "rb"));
 
     // Check whether we can read from the file
     if( !file.get())    {
@@ -235,7 +237,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 void NFFImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( !file.get())
@@ -673,12 +675,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 if ('t' == line[0])
                 {
                     currentMeshWithUVCoords = NULL;
-                    for (std::vector<MeshInfo>::iterator it = meshesWithUVCoords.begin(), end = meshesWithUVCoords.end();
-                        it != end;++it)
+                    for (auto &mesh : meshesWithUVCoords)
                     {
-                        if ((*it).shader == s)
+                        if (mesh.shader == s)
                         {
-                            currentMeshWithUVCoords = &(*it);
+                            currentMeshWithUVCoords = &mesh;
                             break;
                         }
                     }
@@ -695,12 +696,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 else if ('p' == line[1])
                 {
                     currentMeshWithNormals = NULL;
-                    for (std::vector<MeshInfo>::iterator it = meshesWithNormals.begin(), end = meshesWithNormals.end();
-                        it != end;++it)
+                    for (auto &mesh : meshesWithNormals)
                     {
-                        if ((*it).shader == s)
+                        if (mesh.shader == s)
                         {
-                            currentMeshWithNormals = &(*it);
+                            currentMeshWithNormals = &mesh;
                             break;
                         }
                     }
@@ -717,12 +717,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 else
                 {
                     currentMesh = NULL;
-                    for (std::vector<MeshInfo>::iterator it = meshes.begin(), end = meshes.end();
-                        it != end;++it)
+                    for (auto &mesh : meshes)
                     {
-                        if ((*it).shader == s)
+                        if (mesh.shader == s)
                         {
-                            currentMesh = &(*it);
+                            currentMesh = &mesh;
                             break;
                         }
                     }
@@ -862,7 +861,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"sphere_%i",sphere++);
+                ::ai_snprintf(currentMesh.name,128,"sphere_%i",sphere++);
             }
             // 'dod' - dodecahedron
             else if (TokenMatch(sz,"dod",3))
@@ -879,7 +878,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"dodecahedron_%i",dodecahedron++);
+                ::ai_snprintf(currentMesh.name,128,"dodecahedron_%i",dodecahedron++);
             }
 
             // 'oct' - octahedron
@@ -897,7 +896,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"octahedron_%i",octahedron++);
+                ::ai_snprintf(currentMesh.name,128,"octahedron_%i",octahedron++);
             }
 
             // 'tet' - tetrahedron
@@ -915,7 +914,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"tetrahedron_%i",tetrahedron++);
+                ::ai_snprintf(currentMesh.name,128,"tetrahedron_%i",tetrahedron++);
             }
 
             // 'hex' - hexahedron
@@ -933,7 +932,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"hexahedron_%i",hexahedron++);
+                ::ai_snprintf(currentMesh.name,128,"hexahedron_%i",hexahedron++);
             }
             // 'c' - cone
             else if (TokenMatch(sz,"c",1))
@@ -968,7 +967,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 // compute the center point of the cone/cylinder -
                 // it is its local transformation origin
                 currentMesh.dir    =  center2-center1;
-                currentMesh.center =  center1+currentMesh.dir/2.f;
+                currentMesh.center =  center1+currentMesh.dir/(ai_real)2.0;
 
                 float f;
                 if (( f = currentMesh.dir.Length()) < 10e-3f )
@@ -988,8 +987,8 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 // generate a name for the mesh. 'cone' if it a cone,
                 // 'cylinder' if it is a cylinder. Funny, isn't it?
                 if (radius1 != radius2)
-                    ::sprintf(currentMesh.name,"cone_%i",cone++);
-                else ::sprintf(currentMesh.name,"cylinder_%i",cylinder++);
+                    ::ai_snprintf(currentMesh.name,128,"cone_%i",cone++);
+                else ::ai_snprintf(currentMesh.name,128,"cylinder_%i",cylinder++);
             }
             // 'tess' - tesselation
             else if (TokenMatch(sz,"tess",4))
@@ -1115,7 +1114,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
             aiNode* nd = *ppcChildren  = new aiNode();
             nd->mParent = root;
 
-            nd->mName.length = ::sprintf(nd->mName.data,"<NFF_Light%u>",i);
+            nd->mName.length = ::ai_snprintf(nd->mName.data,1024,"<NFF_Light%u>",i);
 
             // allocate the light in the scene data structure
             aiLight* out = pScene->mLights[i] = new aiLight();
@@ -1139,8 +1138,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
         mesh->mNumFaces = (unsigned int)src.faces.size();
 
         // Generate sub nodes for named meshes
-        if (src.name[0])
-        {
+        if ( src.name[ 0 ] && NULL != ppcChildren  ) {
             aiNode* const node = *ppcChildren = new aiNode();
             node->mParent = root;
             node->mNumMeshes = 1;
@@ -1161,8 +1159,9 @@ void NFFImporter::InternReadFile( const std::string& pFile,
             mat.c4 = src.center.z;
 
             ++ppcChildren;
+        } else {
+            *pMeshes++ = m;
         }
-        else *pMeshes++ = m;
 
         // copy vertex positions
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];

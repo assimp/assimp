@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,12 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PROCESS_HELPER_H_INCLUDED
 #define AI_PROCESS_HELPER_H_INCLUDED
 
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/postprocess.h>
+#include <assimp/anim.h>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
 #include "SpatialSort.h"
 #include "BaseProcess.h"
@@ -231,7 +232,7 @@ inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
  * @param pColor1 First color
  * @param pColor2 second color
  * @return Quadratic color difference */
-inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2)
+inline ai_real GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2)
 {
     const aiColor4D c (pColor1.r - pColor2.r, pColor1.g - pColor2.g, pColor1.b - pColor2.b, pColor1.a - pColor2.a);
     return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
@@ -293,12 +294,12 @@ void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,const aiMatrix4x4&
 
 // -------------------------------------------------------------------------------
 // Compute a good epsilon value for position comparisons on a mesh
-float ComputePositionEpsilon(const aiMesh* pMesh);
+ai_real ComputePositionEpsilon(const aiMesh* pMesh);
 
 
 // -------------------------------------------------------------------------------
 // Compute a good epsilon value for position comparisons on a array of meshes
-float ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num);
+ai_real ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num);
 
 
 // -------------------------------------------------------------------------------
@@ -345,7 +346,7 @@ class ComputeSpatialSortProcess : public BaseProcess
 
     void Execute( aiScene* pScene)
     {
-        typedef std::pair<SpatialSort, float> _Type;
+        typedef std::pair<SpatialSort, ai_real> _Type;
         DefaultLogger::get()->debug("Generate spatially-sorted vertex cache");
 
         std::vector<_Type>* p = new std::vector<_Type>(pScene->mNumMeshes);

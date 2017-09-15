@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,19 +53,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
 #include "MD3Loader.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "GenericProperty.h"
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
 #include "Importer.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/material.h"
-#include "../include/assimp/scene.h"
+#include <assimp/DefaultLogger.hpp>
+#include <memory>
+#include <assimp/IOSystem.hpp>
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include <cctype>
-
-
 
 using namespace Assimp;
 
@@ -108,7 +108,7 @@ Q3Shader::BlendFunc StringToBlendFunc(const std::string& m)
 // Load a Quake 3 shader
 bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* io)
 {
-    boost::scoped_ptr<IOStream> file( io->Open( pFile, "rt"));
+    std::unique_ptr<IOStream> file( io->Open( pFile, "rt"));
     if (!file.get())
         return false; // if we can't access the file, don't worry and return
 
@@ -233,7 +233,7 @@ bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 // Load a Quake 3 skin
 bool Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 {
-    boost::scoped_ptr<IOStream> file( io->Open( pFile, "rt"));
+    std::unique_ptr<IOStream> file( io->Open( pFile, "rt"));
     if (!file.get())
         return false; // if we can't access the file, don't worry and return
 
@@ -405,6 +405,14 @@ void MD3Importer::ValidateHeaderOffsets()
     if (pcHeader->OFS_FRAMES >= fileSize || pcHeader->OFS_SURFACES >= fileSize ||
         pcHeader->OFS_EOF > fileSize) {
         throw DeadlyImportError("Invalid MD3 header: some offsets are outside the file");
+    }
+
+	if (pcHeader->NUM_SURFACES > AI_MAX_ALLOC(MD3::Surface)) {
+        throw DeadlyImportError("Invalid MD3 header: too many surfaces, would overflow");
+	}
+
+    if (pcHeader->OFS_SURFACES + pcHeader->NUM_SURFACES * sizeof(MD3::Surface) >= fileSize) {
+        throw DeadlyImportError("Invalid MD3 header: some surfaces are outside the file");
     }
 
     if (pcHeader->NUM_FRAMES <= configFrameID )
@@ -701,7 +709,7 @@ void MD3Importer::ConvertPath(const char* texture_name, const char* header_name,
             }
         }
         else len2 = std::min (len1, (size_t)(end2 - texture_name ));
-        if (!ASSIMP_strincmp(texture_name,header_name,len2)) {
+        if (!ASSIMP_strincmp(texture_name,header_name,static_cast<unsigned int>(len2))) {
             // Use the file name only
             out = end2+1;
             return;
@@ -737,7 +745,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
             return;
     }
 
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL)
@@ -755,7 +763,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
     pcHeader = (BE_NCONST MD3::Header*)mBuffer;
 
-    // Ensure correct endianess
+    // Ensure correct endianness
 #ifdef AI_BUILD_BIG_ENDIAN
 
     AI_SWAP4(pcHeader->VERSION);
@@ -824,7 +832,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
     unsigned int iNumMaterials = 0;
     while (iNum-- > 0)  {
 
-        // Ensure correct endianess
+        // Ensure correct endianness
 #ifdef AI_BUILD_BIG_ENDIAN
 
         AI_SWAP4(pcSurfaces->FLAGS);
@@ -957,7 +965,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
         pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
         pcMesh->mMaterialIndex = iNumMaterials++;
 
-            // Ensure correct endianess
+            // Ensure correct endianness
 #ifdef AI_BUILD_BIG_ENDIAN
 
         for (uint32_t i = 0; i < pcSurfaces->NUM_VERTICES;++i)  {
@@ -1000,13 +1008,17 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
                 // Read vertices
                 aiVector3D& vec = pcMesh->mVertices[iCurrent];
-                vec.x = pcVertices[ pcTriangles->INDEXES[c]].X*AI_MD3_XYZ_SCALE;
-                vec.y = pcVertices[ pcTriangles->INDEXES[c]].Y*AI_MD3_XYZ_SCALE;
-                vec.z = pcVertices[ pcTriangles->INDEXES[c]].Z*AI_MD3_XYZ_SCALE;
+                uint32_t index = pcTriangles->INDEXES[c];
+                if (index >= pcSurfaces->NUM_VERTICES) {
+                    throw DeadlyImportError( "MD3: Invalid vertex index");
+                }
+                vec.x = pcVertices[index].X*AI_MD3_XYZ_SCALE;
+                vec.y = pcVertices[index].Y*AI_MD3_XYZ_SCALE;
+                vec.z = pcVertices[index].Z*AI_MD3_XYZ_SCALE;
 
                 // Convert the normal vector to uncompressed float3 format
                 aiVector3D& nor = pcMesh->mNormals[iCurrent];
-                LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,(float*)&nor);
+                LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,(ai_real*)&nor);
 
                 // Read texture coordinates
                 pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;

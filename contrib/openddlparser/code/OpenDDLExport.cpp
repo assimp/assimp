@@ -29,42 +29,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
-IOStreamBase::IOStreamBase()
-: m_file( ddl_nullptr ) {
-    // empty
-}
-IOStreamBase::~IOStreamBase() {
-    // empty
-}
-
-bool IOStreamBase::open( const std::string &name ) {
-    m_file = ::fopen( name.c_str(), "a" );
-    if (m_file == ddl_nullptr) {
-        return false;
-    }
-    
-    return true;
-}
-
-bool IOStreamBase::close() {
-    if (ddl_nullptr == m_file) {
-        return false;
-    }
-
-    ::fclose( m_file );
-    m_file = ddl_nullptr;
-
-    return true;
-}
-
-void IOStreamBase::write( const std::string &statement ) {
-    if (ddl_nullptr == m_file) {
-        return;
-    }
-
-    ::fwrite( statement.c_str(), sizeof( char ), statement.size(), m_file );
-}
-
 struct DDLNodeIterator {
     const DDLNode::DllNodeList &m_childs;
     size_t m_idx;
@@ -88,6 +52,10 @@ struct DDLNodeIterator {
 
         return false;
     }
+
+private:
+    DDLNodeIterator() ddl_no_copy;
+    DDLNodeIterator &operator = ( const DDLNodeIterator & ) ddl_no_copy;
 };
 
 static void writeLineEnd( std::string &statement ) {
@@ -234,7 +202,7 @@ bool OpenDDLExport::writeProperties( DDLNode *node, std::string &statement ) {
             } else {
                 first = false;
             }
-            statement += std::string( prop->m_key->m_text.m_buffer );
+            statement += std::string( prop->m_key->m_buffer );
             statement += " = ";
             writeValue( prop->m_value, statement );
             prop = prop->m_next;
@@ -258,7 +226,7 @@ bool OpenDDLExport::writeValueType( Value::ValueType type, size_t numItems, std:
         statement += "[";
         char buffer[ 256 ];
         ::memset( buffer, '\0', 256 * sizeof( char ) );
-        sprintf( buffer, "%d", numItems );
+        sprintf( buffer, "%d", static_cast<int>( numItems ) );
         statement += buffer;
         statement += "]";
     }
@@ -312,7 +280,7 @@ bool OpenDDLExport::writeValue( Value *val, std::string &statement ) {
                 const int i = static_cast< int >( val->getInt64() );
                 stream << i;
                 statement += stream.str();
-        }
+            }
             break;
         case Value::ddl_unsigned_int8:
             {
@@ -356,6 +324,11 @@ bool OpenDDLExport::writeValue( Value *val, std::string &statement ) {
             }
             break;
         case Value::ddl_double:
+            {
+                std::stringstream stream;
+                stream << val->getDouble();
+                statement += stream.str();
+            }
             break;
         case Value::ddl_string:
             {
@@ -410,3 +383,4 @@ bool OpenDDLExport::writeValueArray( DataArrayList *al, std::string &statement )
 }
 
 END_ODDLPARSER_NS
+

@@ -39,6 +39,16 @@ struct Identifier;
 struct Reference;
 struct Property;
 
+template<class T>
+inline
+bool isEmbeddedCommentOpenTag( T *in, T *end ) {
+    if ( in == '/' && in+1 == '*' ) {
+        return true;
+    }
+
+    return false;
+}
+
 ///	@brief  Utility function to search for the next token or the end of the buffer.
 /// @param  in      [in] The start position in the buffer.
 /// @param  end     [in] The end position in the buffer.
@@ -47,7 +57,7 @@ struct Property;
 template<class T>
 inline
 T *lookForNextToken( T *in, T *end ) {
-    while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
+    while( ( in != end ) && ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) ) {
         in++;
     }
     return in;
@@ -63,9 +73,6 @@ inline
 T *getNextToken( T *in, T *end ) {
     T *tmp( in );
     in = lookForNextToken( in, end );
-    /*while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
-        in++;
-    }*/
     if( tmp == in ) {
         in++;
     }
@@ -103,7 +110,7 @@ public:
     ///	@brief  The class constructor.
     ///	@param  buffer      [in] The buffer
     ///	@param  len         [in] Size of the buffer
-    OpenDDLParser( char *buffer, size_t len );
+    OpenDDLParser( const char *buffer, size_t len );
 
     ///	@brief  The class destructor.
     ~OpenDDLParser();
@@ -119,7 +126,7 @@ public:
     ///	@brief  Assigns a new buffer to parse.
     ///	@param  buffer      [in] The buffer
     ///	@param  len         [in] Size of the buffer
-    void setBuffer( char *buffer, size_t len );
+    void setBuffer( const char *buffer, size_t len );
 
     ///	@brief  Assigns a new buffer to parse.
     /// @param  buffer      [in] The buffer as a std::vector.
@@ -128,11 +135,11 @@ public:
     ///	@brief  Returns the buffer pointer.
     /// @return The buffer pointer.
     const char *getBuffer() const;
-    
+
     /// @brief  Returns the size of the buffer.
     /// @return The buffer size.
     size_t getBufferSize() const;
-    
+
     ///	@brief  Clears all parser data, including buffer and active context.
     void clear();
 
@@ -161,22 +168,22 @@ public: // parser helpers
     DDLNode *top();
     static void normalizeBuffer( std::vector<char> &buffer );
     static char *parseName( char *in, char *end, Name **name );
-    static char *parseIdentifier( char *in, char *end, Identifier **id );
+    static char *parseIdentifier( char *in, char *end, Text **id );
     static char *parsePrimitiveDataType( char *in, char *end, Value::ValueType &type, size_t &len );
     static char *parseReference( char *in, char *end, std::vector<Name*> &names );
     static char *parseBooleanLiteral( char *in, char *end, Value **boolean );
     static char *parseIntegerLiteral( char *in, char *end, Value **integer, Value::ValueType integerType = Value::ddl_int32 );
-    static char *parseFloatingLiteral( char *in, char *end, Value **floating );
+    static char *parseFloatingLiteral( char *in, char *end, Value **floating, Value::ValueType floatType= Value::ddl_float );
     static char *parseStringLiteral( char *in, char *end, Value **stringData );
     static char *parseHexaLiteral( char *in, char *end, Value **data );
     static char *parseProperty( char *in, char *end, Property **prop );
     static char *parseDataList( char *in, char *end, Value::ValueType type, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
-    static char *parseDataArrayList( char *in, char *end, DataArrayList **dataList );
+    static char *parseDataArrayList( char *in, char *end, Value::ValueType type, DataArrayList **dataList );
     static const char *getVersion();
 
 private:
-    OpenDDLParser( const OpenDDLParser & );
-    OpenDDLParser &operator = ( const OpenDDLParser & );
+    OpenDDLParser( const OpenDDLParser & ) ddl_no_copy;
+    OpenDDLParser &operator = ( const OpenDDLParser & ) ddl_no_copy;
 
 private:
     logCallback m_logCallback;

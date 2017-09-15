@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -47,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char* AICMD_MSG_ABOUT = 
 "------------------------------------------------------ \n"
-"Open Asset Import Library (\"Assimp\", http://assimp.sourceforge.net) \n"
+"Open Asset Import Library (\"Assimp\", https://github.com/assimp/assimp) \n"
 " -- Commandline toolchain --\n"
 "------------------------------------------------------ \n\n"
 
@@ -291,7 +292,7 @@ const aiScene* ImportModel(
 		PrintHorBar();
 	}
 	if (!scene) {
-		printf("ERROR: Failed to load file\n");	
+		printf("ERROR: Failed to load file: %s\n", globalImporter->GetErrorString());
 		return NULL;
 	}
 
@@ -377,7 +378,6 @@ int ProcessStandardArguments(
 	// -fid    --find-invalid-data
 	// -fixn   --fix normals
 	// -tri    --triangulate
-	// -fi     --find-instances
 	// -fi     --find-instances
 	// -og     --optimize-graph
 	// -om     --optimize-meshes

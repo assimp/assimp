@@ -3,7 +3,7 @@
 // It takes a file name as command line parameter, loads it using standard
 // settings and displays it.
 //
-// If you intend to _use_ this code sample in your app, do yourself a favour 
+// If you intend to _use_ this code sample in your app, do yourself a favour
 // and replace immediate mode calls with VBOs ...
 //
 // The vc8 solution links against assimp-release-dll_win32 - be sure to
@@ -49,9 +49,9 @@ void reshape(int width, int height)
 }
 
 /* ---------------------------------------------------------------------------- */
-void get_bounding_box_for_node (const struct aiNode* nd, 
-	struct aiVector3D* min, 
-	struct aiVector3D* max, 
+void get_bounding_box_for_node (const struct aiNode* nd,
+	struct aiVector3D* min,
+	struct aiVector3D* max,
 	struct aiMatrix4x4* trafo
 ){
 	struct aiMatrix4x4 prev;
@@ -123,7 +123,7 @@ void apply_material(const struct aiMaterial *mtl)
 	struct aiColor4D specular;
 	struct aiColor4D ambient;
 	struct aiColor4D emission;
-	float shininess, strength;
+	ai_real shininess, strength;
 	int two_sided;
 	int wireframe;
 	unsigned int max;
@@ -174,7 +174,7 @@ void apply_material(const struct aiMaterial *mtl)
 	max = 1;
 	if((AI_SUCCESS == aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &two_sided, &max)) && two_sided)
 		glDisable(GL_CULL_FACE);
-	else 
+	else
 		glEnable(GL_CULL_FACE);
 }
 
@@ -219,7 +219,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 				int index = face->mIndices[i];
 				if(mesh->mColors[0] != NULL)
 					glColor4fv((GLfloat*)&mesh->mColors[0][index]);
-				if(mesh->mNormals != NULL) 
+				if(mesh->mNormals != NULL)
 					glNormal3fv(&mesh->mNormals[index].x);
 				glVertex3fv(&mesh->mVertices[index].x);
 			}
@@ -347,11 +347,11 @@ int main(int argc, char **argv)
 	aiAttachLogStream(&stream);
 
 	/* the model name can be specified on the command line. If none
-	  is specified, we try to locate one of the more expressive test 
-	  models from the repository (/models-nonbsd may be missing in 
+	  is specified, we try to locate one of the more expressive test
+	  models from the repository (/models-nonbsd may be missing in
 	  some distributions so we need a fallback from /models!). */
 	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models-nonbsd/X/dwarf.x")) {
-		if( argc != 1 || (0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X"))) { 
+		if( argc != 1 || (0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X"))) {
 			return -1;
 		}
 	}
@@ -367,7 +367,7 @@ int main(int argc, char **argv)
 	glEnable(GL_NORMALIZE);
 
 	/* XXX docs say all polygons are emitted CCW, but tests show that some aren't. */
-	if(getenv("MODEL_IS_BROKEN"))  
+	if(getenv("MODEL_IS_BROKEN"))
 		glFrontFace(GL_CW);
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
@@ -375,8 +375,8 @@ int main(int argc, char **argv)
 	glutGet(GLUT_ELAPSED_TIME);
 	glutMainLoop();
 
-	/* cleanup - calling 'aiReleaseImport' is important, as the library 
-	   keeps internal resources until the scene is freed again. Not 
+	/* cleanup - calling 'aiReleaseImport' is important, as the library
+	   keeps internal resources until the scene is freed again. Not
 	   doing so can cause severe resource leaking. */
 	aiReleaseImport(scene);
 
@@ -386,4 +386,3 @@ int main(int argc, char **argv)
 	aiDetachAllLogStreams();
 	return 0;
 }
-

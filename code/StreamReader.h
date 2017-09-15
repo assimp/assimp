@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -40,16 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the StreamReader class which reads data from
- *  a binary stream with a well-defined endianess. */
+ *  a binary stream with a well-defined endianness.
+ */
 
 #ifndef AI_STREAMREADER_H_INCLUDED
 #define AI_STREAMREADER_H_INCLUDED
 
 #include "ByteSwapper.h"
 #include "Exceptional.h"
-#include <boost/shared_ptr.hpp>
-#include "../include/assimp/IOStream.hpp"
-#include "Defines.h"
+#include <memory>
+#include <assimp/IOStream.hpp>
+#include <assimp/Defines.h>
 
 namespace Assimp {
 
@@ -57,18 +59,16 @@ namespace Assimp {
 /** Wrapper class around IOStream to allow for consistent reading of binary data in both
  *  little and big endian format. Don't attempt to instance the template directly. Use
  *  StreamReaderLE to read from a little-endian stream and StreamReaderBE to read from a
- *  BE stream. The class expects that the endianess of any input data is known at
+ *  BE stream. The class expects that the endianness of any input data is known at
  *  compile-time, which should usually be true (#BaseImporter::ConvertToUTF8 implements
- *  runtime endianess conversions for text files).
+ *  runtime endianness conversions for text files).
  *
  *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?*/
 // --------------------------------------------------------------------------------------------
 template <bool SwapEndianess = false, bool RuntimeSwitch = false>
 class StreamReader
 {
-
 public:
-
     // FIXME: use these data types throughout the whole library,
     // then change them to 64 bit values :-)
 
@@ -76,10 +76,8 @@ public:
     typedef unsigned int pos;
 
 public:
-
-
     // ---------------------------------------------------------------------
-    /** Construction from a given stream with a well-defined endianess.
+    /** Construction from a given stream with a well-defined endianness.
      *
      *  The StreamReader holds a permanent strong reference to the
      *  stream, which is released upon destruction.
@@ -88,9 +86,9 @@ public:
      *    reads from the current position to the end of the stream.
      *  @param le If @c RuntimeSwitch is true: specifies whether the
      *    stream is in little endian byte order. Otherwise the
-     *    endianess information is contained in the @c SwapEndianess
+     *    endianness information is contained in the @c SwapEndianess
      *    template parameter and this parameter is meaningless.  */
-    StreamReader(boost::shared_ptr<IOStream> stream, bool le = false)
+    StreamReader(std::shared_ptr<IOStream> stream, bool le = false)
         : stream(stream)
         , le(le)
     {
@@ -100,7 +98,7 @@ public:
 
     // ---------------------------------------------------------------------
     StreamReader(IOStream* stream, bool le = false)
-        : stream(boost::shared_ptr<IOStream>(stream))
+        : stream(std::shared_ptr<IOStream>(stream))
         , le(le)
     {
         ai_assert(stream);
@@ -178,13 +176,11 @@ public:
     }
 
 public:
-
     // ---------------------------------------------------------------------
-    /** Get the remaining stream size (to the end of the srream) */
+    /** Get the remaining stream size (to the end of the stream) */
     unsigned int GetRemainingSize() const {
         return (unsigned int)(end - current);
     }
-
 
     // ---------------------------------------------------------------------
     /** Get the remaining stream size (to the current read limit). The
@@ -193,7 +189,6 @@ public:
     unsigned int GetRemainingSizeToLimit() const {
         return (unsigned int)(limit - current);
     }
-
 
     // ---------------------------------------------------------------------
     /** Increase the file pointer (relative seeking)  */
@@ -210,7 +205,6 @@ public:
         return current;
     }
 
-
     // ---------------------------------------------------------------------
     /** Set current file pointer (Get it from #GetPtr). This is if you
      *  prefer to do pointer arithmetics on your own or want to copy
@@ -218,7 +212,6 @@ public:
      *  @param p The new pointer, which is validated against the size
      *    limit and buffer boundaries. */
     void SetPtr(int8_t* p)  {
-
         current = p;
         if (current > limit || current < buffer) {
             throw DeadlyImportError("End of file or read limit was reached");
@@ -230,13 +223,11 @@ public:
      *  @param out Destination for copying
      *  @param bytes Number of bytes to copy */
     void CopyAndAdvance(void* out, size_t bytes)    {
-
         int8_t* ur = GetPtr();
         SetPtr(ur+bytes); // fire exception if eof
 
-        memcpy(out,ur,bytes);
+        ::memcpy(out,ur,bytes);
     }
-
 
     // ---------------------------------------------------------------------
     /** Get the current offset from the beginning of the file */
@@ -253,30 +244,32 @@ public:
      *
      *  @param limit Maximum number of bytes to be read from
      *    the beginning of the file. Specifying UINT_MAX
-     *    resets the limit to the original end of the stream. */
-    void SetReadLimit(unsigned int _limit)  {
-
+     *    resets the limit to the original end of the stream.
+     *  Returns the previously set limit. */
+    unsigned int SetReadLimit(unsigned int _limit)  {
+        unsigned int prev = GetReadLimit();
         if (UINT_MAX == _limit) {
             limit = end;
-            return;
+            return prev;
         }
 
         limit = buffer + _limit;
         if (limit > end) {
             throw DeadlyImportError("StreamReader: Invalid read limit");
         }
+        return prev;
     }
 
     // ---------------------------------------------------------------------
     /** Get the current read limit in bytes. Reading over this limit
-     *  accidentially raises an exception.  */
-    int GetReadLimit() const    {
+     *  accidentally raises an exception.  */
+    unsigned int GetReadLimit() const    {
         return (unsigned int)(limit - buffer);
     }
 
     // ---------------------------------------------------------------------
     /** Skip to the read limit in bytes. Reading over this limit
-     *  accidentially raises an exception. */
+     *  accidentally raises an exception. */
     void SkipToReadLimit()  {
         current = limit;
     }
@@ -290,21 +283,20 @@ public:
     }
 
 private:
-
     // ---------------------------------------------------------------------
     /** Generic read method. ByteSwap::Swap(T*) *must* be defined */
     template <typename T>
     T Get() {
-        if (current + sizeof(T) > limit) {
+        if ( current + sizeof(T) > limit) {
             throw DeadlyImportError("End of file or stream limit was reached");
         }
 
-#ifdef __arm__
+///*#ifdef __arm__
         T f;
-        memcpy (&f, current, sizeof(T));
-#else
-        T f = *((const T*)current);
-#endif
+        ::memcpy (&f, current, sizeof(T));
+//#else*/
+//        T f = *((const T*)current);
+//#endif
         Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
 
         current += sizeof(T);
@@ -314,7 +306,7 @@ private:
     // ---------------------------------------------------------------------
     void InternBegin() {
         if (!stream) {
-            // incase someone wonders: StreamReader is frequently invoked with
+            // in case someone wonders: StreamReader is frequently invoked with
             // no prior validation whether the input stream is valid. Since
             // no one bothers changing the error message, this message here
             // is passed down to the caller and 'unable to open file'
@@ -335,13 +327,10 @@ private:
     }
 
 private:
-
-
-    boost::shared_ptr<IOStream> stream;
+    std::shared_ptr<IOStream> stream;
     int8_t *buffer, *current, *end, *limit;
     bool le;
 };
-
 
 // --------------------------------------------------------------------------------------------
 // `static` StreamReaders. Their byte order is fixed and they might be a little bit faster.

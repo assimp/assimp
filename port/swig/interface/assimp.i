@@ -10,7 +10,7 @@ namespace Assimp {
 %ignore Importer::GetExtensionList(std::string& szOut);
 %ignore Importer::IsExtensionSupported(const std::string& szExtension);
 
-// These are only neccessary for extending Assimp with custom importers or post
+// These are only necessary for extending Assimp with custom importers or post
 // processing steps, which would require wrapping the internal BaseImporter and
 // BaseProcess classes.
 %ignore Importer::RegisterLoader(BaseImporter* pImp);

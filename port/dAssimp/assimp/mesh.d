@@ -115,7 +115,7 @@ extern ( C ) {
       uint mNumIndices;
 
       /**
-       * Array of the indicies defining the face.
+       * Array of the indices defining the face.
        *
        * The size is given in <code>mNumIndices</code>.
        */
@@ -205,7 +205,7 @@ extern ( C ) {
        *
        * A triangle is a polygon, but in this context, polygon means
        * "all polygons that are not triangles". The <code>Triangulate</code>
-       * post processing step is provided for your convinience, it splits all
+       * post processing step is provided for your convenience, it splits all
        * polygons in triangles (which are much easier to handle).
        */
       POLYGON = 0x8
@@ -403,7 +403,7 @@ extern ( C ) {
       /**
        * The faces the mesh is contstructed from.
        *
-       * Each face referrs to a number of vertices by their indices.
+       * Each face refers to a number of vertices by their indices.
        * This array is always present in a mesh, its size is given
        * in <code>mNumFaces</code>. If the
        * <code>AI_SCENE_FLAGS_NON_VERBOSE_FORMAT</code> is <em>not</em> set,

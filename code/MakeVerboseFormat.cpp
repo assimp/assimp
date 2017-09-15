@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -43,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "MakeVerboseFormat.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 
 using namespace Assimp;
 
@@ -168,18 +169,22 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
         }
     }
 
+
+
     // build output vertex weights
     for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
     {
-        delete pcMesh->mBones[i]->mWeights;
-        if (!newWeights[i].empty())
-        {
+        delete [] pcMesh->mBones[i]->mWeights;
+        if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
-            memcpy(pcMesh->mBones[i]->mWeights,&newWeights[i][0],
+            aiVertexWeight *weightToCopy = &( newWeights[i][0] );
+            memcpy(pcMesh->mBones[i]->mWeights, weightToCopy,
                 sizeof(aiVertexWeight) * newWeights[i].size());
+        } else {
+            pcMesh->mBones[i]->mWeights = NULL;
         }
-        else pcMesh->mBones[i]->mWeights = NULL;
     }
+    delete[] newWeights;
 
     // delete the old members
     delete[] pcMesh->mVertices;

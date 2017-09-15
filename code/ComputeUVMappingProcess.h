@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,14 +45,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_COMPUTEUVMAPPING_H_INC
 
 #include "BaseProcess.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/types.h"
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+#include <assimp/types.h>
 
 class ComputeUVMappingTest;
 
-namespace Assimp
-    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** ComputeUVMappingProcess - converts special mappings, such as spherical,

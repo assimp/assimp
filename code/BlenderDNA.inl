@@ -2,11 +2,12 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,32 +24,33 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  BlenderDNA.inl
- *  @brief Blender `DNA` (file format specification embedded in 
+ *  @brief Blender `DNA` (file format specification embedded in
  *    blend file itself) loader.
  */
 #ifndef INCLUDED_AI_BLEND_DNA_INL
 #define INCLUDED_AI_BLEND_DNA_INL
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include "TinyFormatter.h"
 
 namespace Assimp {
-    namespace Blender {
+namespace Blender {
 
 //--------------------------------------------------------------------------------
 const Field& Structure :: operator [] (const std::string& ss) const
@@ -71,7 +73,7 @@ const Field* Structure :: Get (const std::string& ss) const
 }
 
 //--------------------------------------------------------------------------------
-const Field& Structure :: operator [] (const size_t i) const 
+const Field& Structure :: operator [] (const size_t i) const
 {
     if (i >= fields.size()) {
         throw Error((Formatter::format(),
@@ -83,15 +85,15 @@ const Field& Structure :: operator [] (const size_t i) const
 }
 
 //--------------------------------------------------------------------------------
-template <typename T> boost::shared_ptr<ElemBase> Structure :: Allocate() const 
+template <typename T> std::shared_ptr<ElemBase> Structure :: Allocate() const
 {
-    return boost::shared_ptr<T>(new T()); 
+    return std::shared_ptr<T>(new T());
 }
 
 //--------------------------------------------------------------------------------
 template <typename T> void Structure :: Convert(
-    boost::shared_ptr<ElemBase> in,
-    const FileDatabase& db) const 
+    std::shared_ptr<ElemBase> in,
+    const FileDatabase& db) const
 {
     Convert<T> (*static_cast<T*> ( in.get() ),db);
 }
@@ -226,7 +228,7 @@ bool Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabas
 
 //--------------------------------------------------------------------------------
 template <int error_policy, template <typename> class TOUT, typename T, size_t N>
-bool Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
+bool Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
     const FileDatabase& db) const
 {
     // XXX see if we can reduce this to call to the 'normal' ReadFieldPtr
@@ -306,12 +308,12 @@ void Structure :: ReadField(T& out, const char* name, const FileDatabase& db) co
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT, typename T>
-bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db, 
-    const Field& f, 
-    bool non_recursive /*= false*/) const 
+bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db,
+    const Field& f,
+    bool non_recursive /*= false*/) const
 {
     out.reset(); // ensure null pointers work
-    if (!ptrval.val) { 
+    if (!ptrval.val) {
         return false;
     }
     const Structure& s = db.dna[f.type];
@@ -328,7 +330,7 @@ bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
     }
 
     // try to retrieve the object from the cache
-    db.cache(out).get(s,out,ptrval); 
+    db.cache(out).get(s,out,ptrval);
     if (out) {
         return true;
     }
@@ -340,11 +342,11 @@ bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
     // I really ought to improve StreamReader to work with 64 bit indices exclusively.
 
     // continue conversion after allocating the required storage
-    size_t num = block->size / ss.size; 
+    size_t num = block->size / ss.size;
     T* o = _allocate(out,num);
 
     // cache the object before we convert it to avoid cyclic recursion.
-    db.cache(out).set(s,out,ptrval); 
+    db.cache(out).set(s,out,ptrval);
 
     // if the non_recursive flag is set, we don't do anything but leave
     // the cursor at the correct position to resolve the object.
@@ -366,45 +368,45 @@ bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 
 
 //--------------------------------------------------------------------------------
-inline bool Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
-    const FileDatabase& db, 
+inline bool Structure :: ResolvePointer( std::shared_ptr< FileOffset >& out, const Pointer & ptrval,
+    const FileDatabase& db,
     const Field&,
     bool) const
 {
     // Currently used exclusively by PackedFile::data to represent
-    // a simple offset into the mapped BLEND file. 
+    // a simple offset into the mapped BLEND file.
     out.reset();
-    if (!ptrval.val) { 
+    if (!ptrval.val) {
         return false;
     }
 
     // find the file block the pointer is pointing to
     const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
 
-    out =  boost::shared_ptr< FileOffset > (new FileOffset());
+    out =  std::shared_ptr< FileOffset > (new FileOffset());
     out->val = block->start+ static_cast<size_t>((ptrval.val - block->address.val) );
     return false;
 }
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT, typename T>
-bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
-    const FileDatabase& db, 
+bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
+    const FileDatabase& db,
     const Field& f,
-    bool) const 
+    bool) const
 {
     // This is a function overload, not a template specialization. According to
     // the partial ordering rules, it should be selected by the compiler
     // for array-of-pointer inputs, i.e. Object::mats.
 
     out.reset();
-    if (!ptrval.val) { 
+    if (!ptrval.val) {
         return false;
     }
 
     // find the file block the pointer is pointing to
     const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
-    const size_t num = block->size / (db.i64bit?8:4); 
+    const size_t num = block->size / (db.i64bit?8:4);
 
     // keep the old stream position
     const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
@@ -418,7 +420,7 @@ bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
         Convert(val,db);
 
         // and resolve the pointees
-        res = ResolvePointer(out[i],val,db,f) && res; 
+        res = ResolvePointer(out[i],val,db,f) && res;
     }
 
     db.reader->SetCurrentPos(pold);
@@ -426,18 +428,18 @@ bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 }
 
 //--------------------------------------------------------------------------------
-template <> bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
-    const Pointer & ptrval, 
-    const FileDatabase& db, 
+template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shared_ptr<ElemBase>& out,
+    const Pointer & ptrval,
+    const FileDatabase& db,
     const Field&,
     bool
-) const 
+) const
 {
     // Special case when the data type needs to be determined at runtime.
     // Less secure than in the `strongly-typed` case.
 
     out.reset();
-    if (!ptrval.val) { 
+    if (!ptrval.val) {
         return false;
     }
 
@@ -448,7 +450,7 @@ template <> bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
     const Structure& s = db.dna[block->dna_index];
 
     // try to retrieve the object from the cache
-    db.cache(out).get(s,out,ptrval); 
+    db.cache(out).get(s,out,ptrval);
     if (out) {
         return true;
     }
@@ -473,15 +475,15 @@ template <> bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 
     // allocate the object hull
     out = (s.*builders.first)();
-    
-    // cache the object immediately to prevent infinite recursion in a 
+
+    // cache the object immediately to prevent infinite recursion in a
     // circular list with a single element (i.e. a self-referencing element).
     db.cache(out).set(s,out,ptrval);
 
     // and do the actual conversion
     (s.*builders.second)(out,db);
     db.reader->SetCurrentPos(pold);
-    
+
     // store a pointer to the name string of the actual type
     // in the object itself. This allows the conversion code
     // to perform additional type checking.
@@ -495,10 +497,10 @@ template <> bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 }
 
 //--------------------------------------------------------------------------------
-const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrval, const FileDatabase& db) const 
+const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrval, const FileDatabase& db) const
 {
     // the file blocks appear in list sorted by
-    // with ascending base addresses so we can run a 
+    // with ascending base addresses so we can run a
     // binary search to locate the pointee quickly.
 
     // NOTE: Blender seems to distinguish between side-by-side
@@ -525,16 +527,16 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
 }
 
 // ------------------------------------------------------------------------------------------------
-// NOTE: The MSVC debugger keeps showing up this annoying `a cast to a smaller data type has 
+// NOTE: The MSVC debugger keeps showing up this annoying `a cast to a smaller data type has
 // caused a loss of data`-warning. Avoid this warning by a masking with an appropriate bitmask.
 
 template <typename T> struct signless;
 template <> struct signless<char> {typedef unsigned char type;};
 template <> struct signless<short> {typedef unsigned short type;};
 template <> struct signless<int> {typedef unsigned int type;};
-
+template <> struct signless<unsigned char> { typedef unsigned char type; };
 template <typename T>
-struct static_cast_silent { 
+struct static_cast_silent {
     template <typename V>
     T operator()(V in) {
         return static_cast<T>(in & static_cast<typename signless<T>::type>(-1));
@@ -554,7 +556,7 @@ template <> struct static_cast_silent<double> {
 };
 
 // ------------------------------------------------------------------------------------------------
-template <typename T> inline void ConvertDispatcher(T& out, const Structure& in,const FileDatabase& db) 
+template <typename T> inline void ConvertDispatcher(T& out, const Structure& in,const FileDatabase& db)
 {
     if (in.name == "int") {
         out = static_cast_silent<T>()(db.reader->GetU4());
@@ -613,6 +615,22 @@ template <> inline void Structure :: Convert<char>   (char& dest,const FileDatab
     }
     ConvertDispatcher(dest,*this,db);
 }
+
+// ------------------------------------------------------------------------------------------------
+template <> inline void Structure::Convert<unsigned char>(unsigned char& dest, const FileDatabase& db) const
+{
+	// automatic rescaling from char to float and vice versa (seems useful for RGB colors)
+	if (name == "float") {
+		dest = static_cast<unsigned char>(db.reader->GetF4() * 255.f);
+		return;
+	}
+	else if (name == "double") {
+		dest = static_cast<unsigned char>(db.reader->GetF8() * 255.f);
+		return;
+	}
+	ConvertDispatcher(dest, *this, db);
+}
+
 
 // ------------------------------------------------------------------------------------------------
 template <> inline void Structure :: Convert<float>  (float& dest,const FileDatabase& db) const
@@ -677,7 +695,7 @@ const Structure* DNA :: Get (const std::string& ss) const
 }
 
 //--------------------------------------------------------------------------------
-const Structure& DNA :: operator [] (const size_t i) const 
+const Structure& DNA :: operator [] (const size_t i) const
 {
     if (i >= structures.size()) {
         throw Error((Formatter::format(),
@@ -690,8 +708,8 @@ const Structure& DNA :: operator [] (const size_t i) const
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT> template <typename T> void ObjectCache<TOUT> :: get (
-    const Structure& s, 
-    TOUT<T>& out, 
+    const Structure& s,
+    TOUT<T>& out,
     const Pointer& ptr
 ) const {
 
@@ -703,7 +721,7 @@ template <template <typename> class TOUT> template <typename T> void ObjectCache
 
     typename StructureCache::const_iterator it = caches[s.cache_idx].find(ptr);
     if (it != caches[s.cache_idx].end()) {
-        out = boost::static_pointer_cast<T>( (*it).second );
+        out = std::static_pointer_cast<T>( (*it).second );
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
         ++db.stats().cache_hits;
@@ -715,7 +733,7 @@ template <template <typename> class TOUT> template <typename T> void ObjectCache
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT> template <typename T> void ObjectCache<TOUT> :: set (
-    const Structure& s, 
+    const Structure& s,
     const TOUT<T>& out,
     const Pointer& ptr
 ) {
@@ -723,7 +741,7 @@ template <template <typename> class TOUT> template <typename T> void ObjectCache
         s.cache_idx = db.next_cache_idx++;
         caches.resize(db.next_cache_idx);
     }
-    caches[s.cache_idx][ptr] = boost::static_pointer_cast<ElemBase>( out ); 
+    caches[s.cache_idx][ptr] = std::static_pointer_cast<ElemBase>( out );
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
     ++db.stats().cached_objects;

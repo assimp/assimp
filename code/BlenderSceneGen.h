@@ -2,7 +2,7 @@
 Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2010, ASSIMP Development Team
+Copyright (c) 2006-2016, ASSIMP Development Team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,8 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderScene.h"
 
 namespace Assimp    {
-    namespace Blender {
-
+namespace Blender {
 
 template <> void Structure :: Convert<Object> (
     Object& dest,

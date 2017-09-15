@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,9 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 
 #include "TextureTransform.h"
+#include "StringUtils.h"
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -107,7 +108,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
         {
             out -= rounded*(float)AI_MATH_PI;
 
-            sprintf(szTemp,"Texture coordinate rotation %f can be simplified to %f",info.mRotation,out);
+            ai_snprintf(szTemp, 512, "Texture coordinate rotation %f can be simplified to %f",info.mRotation,out);
             DefaultLogger::get()->info(szTemp);
         }
 
@@ -131,7 +132,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
         if (aiTextureMapMode_Wrap == info.mapU) {
             // Wrap - simple take the fraction of the field
             out = info.mTranslation.x-(float)rounded;
-            sprintf(szTemp,"[w] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
+			ai_snprintf(szTemp, 512, "[w] UV U offset %f can be simplified to %f", info.mTranslation.x, out);
         }
         else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)  {
             // Mirror
@@ -139,11 +140,11 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
                 rounded--;
             out = info.mTranslation.x-(float)rounded;
 
-            sprintf(szTemp,"[m/d] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
+            ai_snprintf(szTemp,512,"[m/d] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
         }
         else if (aiTextureMapMode_Clamp == info.mapU || aiTextureMapMode_Decal == info.mapU)    {
             // Clamp - translations beyond 1,1 are senseless
-            sprintf(szTemp,"[c] UV U offset %f can be clamped to 1.0f",info.mTranslation.x);
+            ai_snprintf(szTemp,512,"[c] UV U offset %f can be clamped to 1.0f",info.mTranslation.x);
 
             out = 1.f;
         }
@@ -164,7 +165,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
         if (aiTextureMapMode_Wrap == info.mapV) {
             // Wrap - simple take the fraction of the field
             out = info.mTranslation.y-(float)rounded;
-            sprintf(szTemp,"[w] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
+            ::ai_snprintf(szTemp,512,"[w] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
         }
         else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded) {
             // Mirror
@@ -172,11 +173,11 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
                 rounded--;
             out = info.mTranslation.x-(float)rounded;
 
-            sprintf(szTemp,"[m/d] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
+            ::ai_snprintf(szTemp,512,"[m/d] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
         }
         else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)    {
             // Clamp - translations beyond 1,1 are senseless
-            sprintf(szTemp,"[c] UV V offset %f canbe clamped to 1.0f",info.mTranslation.y);
+            ::ai_snprintf(szTemp,512,"[c] UV V offset %f canbe clamped to 1.0f",info.mTranslation.y);
 
             out = 1.f;
         }
@@ -447,7 +448,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
         if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
             if (!DefaultLogger::isNullLogger()) {
-                ::sprintf(buffer,"%u UV channels required but just %u available",
+                ::ai_snprintf(buffer,1024,"%u UV channels required but just %u available",
                     static_cast<unsigned int>(trafo.size()),AI_MAX_NUMBER_OF_TEXTURECOORDS);
 
                 DefaultLogger::get()->error(buffer);
@@ -475,7 +476,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
             // Write to the log
             if (!DefaultLogger::isNullLogger()) {
-                sprintf(buffer,"Mesh %u, channel %u: t(%.3f,%.3f), s(%.3f,%.3f), r(%.3f), %s%s",
+                ::ai_snprintf(buffer,1024,"Mesh %u, channel %u: t(%.3f,%.3f), s(%.3f,%.3f), r(%.3f), %s%s",
                     q,n,
                     (*it).mTranslation.x,
                     (*it).mTranslation.y,
@@ -554,11 +555,11 @@ void TextureTransformStep::Execute( aiScene* pScene)
         }
     }
 
-    // Print some detailled statistics into the log
+    // Print some detailed statistics into the log
     if (!DefaultLogger::isNullLogger()) {
 
         if (transformedChannels)    {
-            ::sprintf(buffer,"TransformUVCoordsProcess end: %u output channels (in: %u, modified: %u)",
+            ::ai_snprintf(buffer,1024,"TransformUVCoordsProcess end: %u output channels (in: %u, modified: %u)",
                 outChannels,inChannels,transformedChannels);
 
             DefaultLogger::get()->info(buffer);

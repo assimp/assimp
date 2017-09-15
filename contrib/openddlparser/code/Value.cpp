@@ -110,7 +110,17 @@ Value::Value( ValueType type )
 }
 
 Value::~Value() {
-    // empty
+    if(m_data!=ddl_nullptr) {
+        if (m_type == ddl_ref ) {
+            Reference *tmp = (Reference *) m_data;
+            if (tmp != ddl_nullptr)
+                delete tmp;
+        }else
+            delete[] m_data;
+
+    }
+    if(m_next!=ddl_nullptr)
+        delete m_next;
 }
 
 void Value::setBool( bool value ) {
@@ -240,10 +250,16 @@ void Value::setDouble( double value ) {
 }
 
 double Value::getDouble() const {
-    assert( ddl_double == m_type );
-    double v;
-    ::memcpy( &v, m_data, m_size );
-    return v;
+    if ( m_type == ddl_double ) {
+        double v;
+        ::memcpy( &v, m_data, m_size );
+        return ( float ) v;
+    }
+    else {
+        double tmp;
+        ::memcpy( &tmp, m_data, 4 );
+        return ( double ) tmp;
+    }
 }
 
 void Value::setString( const std::string &str ) {
@@ -251,60 +267,82 @@ void Value::setString( const std::string &str ) {
     ::memcpy( m_data, str.c_str(), str.size() );
     m_data[ str.size() ] = '\0';
 }
+
 const char *Value::getString() const {
     assert( ddl_string == m_type );
     return (const char*) m_data;
 }
 
-void Value::dump() {
+void Value::setRef( Reference *ref ) {
+    assert( ddl_ref == m_type );
+
+    if ( ddl_nullptr != ref ) {
+        const size_t sizeInBytes( ref->sizeInBytes() );
+        if ( sizeInBytes > 0 ) {
+            if ( ddl_nullptr != m_data ) {
+                delete [] m_data;
+            }
+
+            m_data = (unsigned char*) new Reference(*ref);
+        }
+    }
+}
+
+Reference *Value::getRef() const {
+    assert( ddl_ref == m_type );
+
+    return (Reference*) m_data;
+}
+
+void Value::dump( IOStreamBase &stream ) {
     switch( m_type ) {
-    case ddl_none:
-        std::cout << "None" << std::endl;
-        break;
-    case ddl_bool:
-        std::cout << getBool() << std::endl;
-        break;
-    case ddl_int8:
-        std::cout << getInt8() << std::endl;
-        break;
-    case ddl_int16:
-        std::cout << getInt16() << std::endl;
-        break;
-    case ddl_int32:
-        std::cout << getInt32() << std::endl;
-        break;
-    case ddl_int64:
-        std::cout << getInt64() << std::endl;
-        break;
-    case ddl_unsigned_int8:
-        std::cout << "Not supported" << std::endl;
-        break;
-    case ddl_unsigned_int16:
-        std::cout << "Not supported" << std::endl;
-        break;
-    case ddl_unsigned_int32:
-        std::cout << "Not supported" << std::endl;
-        break;
-    case ddl_unsigned_int64:
-        std::cout << "Not supported" << std::endl;
-        break;
-    case ddl_half:
-        std::cout << "Not supported" << std::endl;
-        break;
-    case ddl_float:
-        std::cout << getFloat() << std::endl;
-        break;
-    case ddl_double:
-        std::cout << getDouble() << std::endl;
-        break;
-    case ddl_string:
-        std::cout << "Not supported" << std::endl;
-        break;
-    case ddl_ref:
-        std::cout << "Not supported" << std::endl;
-        break;
-    default:
-        break;
+        case ddl_none:
+            std::cout << "None" << std::endl;
+            break;
+        case ddl_bool:
+            std::cout << getBool() << std::endl;
+            break;
+        case ddl_int8:
+            std::cout << getInt8() << std::endl;
+            break;
+        case ddl_int16:
+            std::cout << getInt16() << std::endl;
+            break;
+        case ddl_int32:
+            std::cout << getInt32() << std::endl;
+            break;
+        case ddl_int64:
+            std::cout << getInt64() << std::endl;
+            break;
+        case ddl_unsigned_int8:
+            std::cout << "Not supported" << std::endl;
+            break;
+        case ddl_unsigned_int16:
+            std::cout << "Not supported" << std::endl;
+            break;
+        case ddl_unsigned_int32:
+            std::cout << "Not supported" << std::endl;
+            break;
+        case ddl_unsigned_int64:
+            std::cout << "Not supported" << std::endl;
+            break;
+        case ddl_half:
+            std::cout << "Not supported" << std::endl;
+            break;
+        case ddl_float:
+            std::cout << getFloat() << std::endl;
+            break;
+        case ddl_double:
+            std::cout << getDouble() << std::endl;
+            break;
+        case ddl_string:
+            std::cout << getString() << std::endl;
+            break;
+        case ddl_ref:
+            std::cout << "Not supported" << std::endl;
+            break;
+        default:
+            break;
     }
 }
 
@@ -316,13 +354,22 @@ Value *Value::getNext() const {
     return m_next;
 }
 
+size_t Value::size() const{
+    size_t result=1;
+    Value *n=m_next;
+    while( n!=ddl_nullptr) {
+        result++;
+        n=n->m_next;
+    }
+    return result;
+}
+
 Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
     if( type == Value::ddl_none || Value::ddl_types_max == type ) {
         return ddl_nullptr;
     }
 
     Value *data = new Value( type );
-    data->m_type = type;
     switch( type ) {
         case Value::ddl_bool:
             data->m_size = sizeof( bool );
@@ -361,10 +408,10 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
             data->m_size = sizeof( double );
             break;
         case Value::ddl_string:
-            data->m_size = sizeof( char );
+            data->m_size = sizeof( char )*(len+1);
             break;
         case Value::ddl_ref:
-            data->m_size = sizeof( char );
+            data->m_size = 0;
             break;
         case Value::ddl_none:
         case Value::ddl_types_max:
@@ -373,12 +420,8 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
     }
 
     if( data->m_size ) {
-        size_t len1( len );
-        if( Value::ddl_string == type ) {
-            len1++;
-        }
-        data->m_size *= len1;
         data->m_data = new unsigned char[ data->m_size ];
+        ::memset(data->m_data,0,data->m_size);
     }
 
     return data;

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_QNAN_H_INCLUDED
 #define AI_QNAN_H_INCLUDED
 
-#include "../include/assimp/defs.h"
+#include <assimp/defs.h>
 #include <limits>
 #include <stdint.h>
 
@@ -68,7 +69,21 @@ union _IEEESingle
         uint32_t Exp  : 8;
         uint32_t Sign : 1;
     } IEEE;
-} ;
+};
+
+// ---------------------------------------------------------------------------
+/** Data structure to represent the bit pattern of a 64 Bit
+ *         IEEE 754 floating-point number. */
+union _IEEEDouble
+{
+    double Double;
+    struct
+    {
+        uint64_t Frac : 52;
+        uint64_t Exp  : 11;
+        uint64_t Sign : 1;
+    } IEEE;
+};
 
 // ---------------------------------------------------------------------------
 /** Check whether a given float is qNaN.
@@ -87,11 +102,19 @@ AI_FORCE_INLINE bool is_qnan(float in)
 }
 
 // ---------------------------------------------------------------------------
-/** Check whether a float is NOT qNaN.
+/** Check whether a given double is qNaN.
  *  @param in Input value */
-AI_FORCE_INLINE bool is_not_qnan(float in)
+AI_FORCE_INLINE bool is_qnan(double in)
 {
-    return !is_qnan(in);
+    // the straightforward solution does not work:
+    //   return (in != in);
+    // compiler generates code like this
+    //   load <in> to <register-with-different-width>
+    //   compare <register-with-different-width> against <in>
+
+    // FIXME: Use <float> stuff instead? I think fpclassify needs C99
+    return (reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Exp == (1u << 11)-1 &&
+        reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Frac);
 }
 
 // ---------------------------------------------------------------------------
@@ -105,10 +128,29 @@ AI_FORCE_INLINE bool is_special_float(float in)
 }
 
 // ---------------------------------------------------------------------------
-/** @brief Get a fresh qnan.  */
-AI_FORCE_INLINE float get_qnan()
+/** @brief check whether a double is either NaN or (+/-) INF.
+ *
+ *  Denorms return false, they're treated like normal values.
+ *  @param in Input value */
+AI_FORCE_INLINE bool is_special_float(double in)
 {
-    return std::numeric_limits<float>::quiet_NaN();
+    return (reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Exp == (1u << 11)-1);
+}
+
+// ---------------------------------------------------------------------------
+/** Check whether a float is NOT qNaN.
+ *  @param in Input value */
+template<class TReal>
+AI_FORCE_INLINE bool is_not_qnan(TReal in)
+{
+    return !is_qnan(in);
+}
+
+// ---------------------------------------------------------------------------
+/** @brief Get a fresh qnan.  */
+AI_FORCE_INLINE ai_real get_qnan()
+{
+    return std::numeric_limits<ai_real>::quiet_NaN();
 }
 
 #endif // !! AI_QNAN_H_INCLUDED

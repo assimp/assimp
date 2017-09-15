@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/defs.h"
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "FBXDocument.h"
 
 struct Token;
@@ -67,7 +67,7 @@ void DOMWarning(const std::string& message, const Element* element = NULL);
 
 
 // fetch a property table and the corresponding property template
-boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
+std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
     const std::string& templateName,
     const Element &element,
     const Scope& sc,

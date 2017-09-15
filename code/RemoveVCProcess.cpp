@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -44,13 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "RemoveVCProcess.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
-
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -283,7 +282,7 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
         if (!pMesh->mTextureCoords[i])break;
         if (configDeleteFlags & aiComponent_TEXCOORDSn(real) || b)
         {
-            delete pMesh->mTextureCoords[i];
+            delete [] pMesh->mTextureCoords[i];
             pMesh->mTextureCoords[i] = NULL;
             ret = true;
 
@@ -307,7 +306,7 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
         if (!pMesh->mColors[i])break;
         if (configDeleteFlags & aiComponent_COLORSn(i) || b)
         {
-            delete pMesh->mColors[i];
+            delete [] pMesh->mColors[i];
             pMesh->mColors[i] = NULL;
             ret = true;
 

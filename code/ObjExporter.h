@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,40 +54,35 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to an OBJ file. */
 // ------------------------------------------------------------------------------------------------
-class ObjExporter
-{
+class ObjExporter {
 public:
     /// Constructor for a specific scene to export
     ObjExporter(const char* filename, const aiScene* pScene);
-
-public:
-
+    ~ObjExporter();
     std::string GetMaterialLibName();
     std::string GetMaterialLibFileName();
-
-public:
-
-    /// public stringstreams to write all output into
+    
+    /// public string-streams to write all output into
     std::ostringstream mOutput, mOutputMat;
 
 private:
-
     // intermediate data structures
-    struct FaceVertex
-    {
+    struct FaceVertex {
         FaceVertex()
-            : vp(),vn(),vt()
-        {
+        : vp()
+        , vn()
+        , vt()
+        , vc() {
+            // empty
         }
 
         // one-based, 0 means: 'does not exist'
-        unsigned int vp,vn,vt;
+        unsigned int vp, vn, vt, vc;
     };
 
     struct Face {
@@ -95,33 +91,25 @@ private:
     };
 
     struct MeshInstance {
-
         std::string name, matname;
         std::vector<Face> faces;
     };
 
     void WriteHeader(std::ostringstream& out);
-
     void WriteMaterialFile();
     void WriteGeometryFile();
-
     std::string GetMaterialName(unsigned int index);
-
     void AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat);
     void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
 
 private:
-
-    const std::string filename;
+    std::string filename;
     const aiScene* const pScene;
-
     std::vector<aiVector3D> vp, vn, vt;
+    std::vector<aiColor4D> vc;
 
-
-    struct aiVectorCompare
-    {
-        bool operator() (const aiVector3D& a, const aiVector3D& b) const
-        {
+    struct aiVectorCompare {
+        bool operator() (const aiVector3D& a, const aiVector3D& b) const {
             if(a.x < b.x) return true;
             if(a.x > b.x) return false;
             if(a.y < b.y) return true;
@@ -131,21 +119,52 @@ private:
         }
     };
 
-    class vecIndexMap
-    {
+    struct aiColor4Compare {
+        bool operator() ( const aiColor4D& a, const aiColor4D& b ) const {
+            if ( a.r < b.r ) return true;
+            if ( a.r > b.r ) return false;
+            if ( a.g < b.g ) return true;
+            if ( a.g > b.g ) return false;
+            if ( a.b < b.b ) return true;
+            if ( a.b > b.b ) return false;
+            if ( a.a < b.a ) return true;
+            if ( a.a > b.a ) return false;
+            return false;
+        }
+    };
+
+    class vecIndexMap {
         int mNextIndex;
         typedef std::map<aiVector3D, int, aiVectorCompare> dataType;
         dataType vecMap;
+    
     public:
-
-        vecIndexMap():mNextIndex(1)
-        {}
+        vecIndexMap()
+        : mNextIndex(1) {
+            // empty
+        }
 
         int getIndex(const aiVector3D& vec);
         void getVectors( std::vector<aiVector3D>& vecs );
     };
 
+    class colIndexMap {
+        int mNextIndex;
+        typedef std::map<aiColor4D, int, aiColor4Compare> dataType;
+        dataType colMap;
+
+    public:
+        colIndexMap()
+        : mNextIndex( 1 ) {
+            // empty
+        }
+
+        int getIndex( const aiColor4D& col );
+        void getColors( std::vector<aiColor4D> &colors );
+    };
+
     vecIndexMap vpMap, vnMap, vtMap;
+    colIndexMap vcMap;
     std::vector<MeshInstance> meshes;
 
     // this endl() doesn't flush() the stream

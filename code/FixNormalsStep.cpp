@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -45,9 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "FixNormalsStep.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/scene.h"
+#include "StringUtils.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <stdio.h>
 
 
@@ -147,9 +149,9 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
     // Check whether this is a planar surface
     const float fDelta1_yz = fDelta1_y * fDelta1_z;
 
-    if (fDelta1_x < 0.05f * sqrtf( fDelta1_yz ))return false;
-    if (fDelta1_y < 0.05f * sqrtf( fDelta1_z * fDelta1_x ))return false;
-    if (fDelta1_z < 0.05f * sqrtf( fDelta1_y * fDelta1_x ))return false;
+    if (fDelta1_x < 0.05f * std::sqrt( fDelta1_yz ))return false;
+    if (fDelta1_y < 0.05f * std::sqrt( fDelta1_z * fDelta1_x ))return false;
+    if (fDelta1_z < 0.05f * std::sqrt( fDelta1_y * fDelta1_x ))return false;
 
     // now compare the volumes of the bounding boxes
     if (std::fabs(fDelta0_x * fDelta0_y * fDelta0_z) <
@@ -158,7 +160,7 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
         if (!DefaultLogger::isNullLogger())
         {
             char buffer[128]; // should be sufficiently large
-            ::sprintf(buffer,"Mesh %u: Normals are facing inwards (or the mesh is planar)",index);
+            ai_snprintf(buffer,128,"Mesh %u: Normals are facing inwards (or the mesh is planar)",index);
             DefaultLogger::get()->info(buffer);
         }
 

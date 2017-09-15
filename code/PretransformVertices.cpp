@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PretransformVertices.h"
 #include "ProcessHelper.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "Exceptional.h"
 
 using namespace Assimp;
@@ -159,6 +160,11 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
             unsigned int& num_ref = num_refs[pcNode->mMeshes[i]];
             ai_assert(0 != num_ref);
             --num_ref;
+            // Save the name of the last mesh
+            if (num_ref==0)
+            {
+                pcMeshOut->mName = pcMesh->mName;
+            }
 
             if (identity)   {
                 // copy positions without modifying them
@@ -397,7 +403,7 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in
 
                 out.push_back(ntz);
 
-                node->mMeshes[i] = numIn + out.size() - 1;
+                node->mMeshes[i] = static_cast<unsigned int>(numIn + out.size() - 1);
             }
         }
     }
@@ -483,7 +489,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             memcpy(npp,pScene->mMeshes,sizeof(aiMesh*)*pScene->mNumMeshes);
             memcpy(npp+pScene->mNumMeshes,&apcOutMeshes[0],sizeof(aiMesh*)*apcOutMeshes.size());
 
-            pScene->mNumMeshes  += apcOutMeshes.size();
+            pScene->mNumMeshes  += static_cast<unsigned int>(apcOutMeshes.size());
             delete[] pScene->mMeshes; pScene->mMeshes = npp;
         }
 
@@ -618,15 +624,17 @@ void PretransformVertices::Execute( aiScene* pScene)
         // transformation of the corresponding node
         l->mPosition   = nd->mTransformation * l->mPosition;
         l->mDirection  = aiMatrix3x3( nd->mTransformation ) * l->mDirection;
+        l->mUp         = aiMatrix3x3( nd->mTransformation ) * l->mUp;
     }
 
     if( !configKeepHierarchy ) {
 
         // now delete all nodes in the scene and build a new
         // flat node graph with a root node and some level 1 children
+        aiNode* newRoot = new aiNode();
+        newRoot->mName = pScene->mRootNode->mName;
         delete pScene->mRootNode;
         pScene->mRootNode = new aiNode();
-        pScene->mRootNode->mName.Set("<dummy_root>");
 
         if (1 == pScene->mNumMeshes && !pScene->mNumLights && !pScene->mNumCameras)
         {
@@ -644,7 +652,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"mesh_%u",i);
+                pcNode->mName = pScene->mMeshes[i]->mName;
 
                 // setup mesh indices
                 pcNode->mNumMeshes = 1;
@@ -656,7 +664,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"light_%u",i);
+                pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "light_%u",i);
                 pScene->mLights[i]->mName = pcNode->mName;
             }
             // generate camera nodes
@@ -664,7 +672,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"cam_%u",i);
+                pcNode->mName.length = ::ai_snprintf(pcNode->mName.data,MAXLEN,"cam_%u",i);
                 pScene->mCameras[i]->mName = pcNode->mName;
             }
         }
@@ -689,9 +697,9 @@ void PretransformVertices::Execute( aiScene* pScene)
 
         // find the dominant axis
         aiVector3D d = max-min;
-        const float div = std::max(d.x,std::max(d.y,d.z))*0.5f;
+        const ai_real div = std::max(d.x,std::max(d.y,d.z))*ai_real( 0.5);
 
-        d = min+d*0.5f;
+        d = min + d * (ai_real)0.5;
         for (unsigned int a = 0; a <  pScene->mNumMeshes; ++a) {
             aiMesh* m = pScene->mMeshes[a];
             for (unsigned int i = 0; i < m->mNumVertices;++i) {
@@ -707,17 +715,16 @@ void PretransformVertices::Execute( aiScene* pScene)
 
         DefaultLogger::get()->debug("PretransformVerticesProcess finished");
 
-        sprintf(buffer,"Removed %u nodes and %u animation channels (%u output nodes)",
+        ::ai_snprintf(buffer,4096,"Removed %u nodes and %u animation channels (%u output nodes)",
             iOldNodes,iOldAnimationChannels,CountNodes(pScene->mRootNode));
         DefaultLogger::get()->info(buffer);
 
-        sprintf(buffer,"Kept %u lights and %u cameras",
+        ai_snprintf(buffer, 4096,"Kept %u lights and %u cameras",
             pScene->mNumLights,pScene->mNumCameras);
         DefaultLogger::get()->info(buffer);
 
-        sprintf(buffer,"Moved %u meshes to WCS (number of output meshes: %u)",
+        ai_snprintf(buffer, 4096,"Moved %u meshes to WCS (number of output meshes: %u)",
             iOldMeshes,pScene->mNumMeshes);
         DefaultLogger::get()->info(buffer);
     }
 }
-

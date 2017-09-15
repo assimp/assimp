@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../contrib/poly2tri/poly2tri/poly2tri.h"
 #include "../contrib/clipper/clipper.hpp"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <iterator>
 
@@ -62,7 +62,7 @@ namespace Assimp {
 bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
 {
     size_t cnt = 0;
-    BOOST_FOREACH(const IfcCartesianPoint& c, loop.Polygon) {
+    for(const IfcCartesianPoint& c : loop.Polygon) {
         IfcVector3 tmp;
         ConvertCartesianPoint(tmp,c);
 
@@ -70,7 +70,7 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
         ++cnt;
     }
 
-    meshout.vertcnt.push_back(cnt);
+    meshout.vertcnt.push_back(static_cast<unsigned int>(cnt));
 
     // zero- or one- vertex polyloops simply ignored
     if (meshout.vertcnt.back() > 1) {
@@ -170,7 +170,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
         opening.extrusionDir = master_normal;
         opening.solid = NULL;
 
-        opening.profileMesh = boost::make_shared<TempMesh>();
+        opening.profileMesh = std::make_shared<TempMesh>();
         opening.profileMesh->verts.reserve(*iit);
         opening.profileMesh->vertcnt.push_back(*iit);
 
@@ -180,7 +180,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
     // fill a mesh with ONLY the main polygon
     TempMesh temp;
     temp.verts.reserve(outer_polygon_size);
-    temp.vertcnt.push_back(outer_polygon_size);
+    temp.vertcnt.push_back(static_cast<unsigned int>(outer_polygon_size));
     std::copy(outer_vit, outer_vit+outer_polygon_size,
         std::back_inserter(temp.verts));
 
@@ -191,10 +191,10 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 // ------------------------------------------------------------------------------------------------
 void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
-    BOOST_FOREACH(const IfcFace& face, fset.CfsFaces) {
+    for(const IfcFace& face : fset.CfsFaces) {
         // size_t ob = -1, cnt = 0;
         TempMesh meshout;
-        BOOST_FOREACH(const IfcFaceBound& bound, face.Bounds) {
+        for(const IfcFaceBound& bound : face.Bounds) {
 
             if(const IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IfcPolyLoop>()) {
                 if(ProcessPolyloop(*polyloop, meshout,conv)) {
@@ -219,7 +219,7 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 
             /*if(!IsTrue(bound.Orientation)) {
                 size_t c = 0;
-                BOOST_FOREACH(unsigned int& c, meshout.vertcnt) {
+                for(unsigned int& c : meshout.vertcnt) {
                     std::reverse(result.verts.begin() + cnt,result.verts.begin() + cnt + c);
                     cnt += c;
                 }
@@ -258,7 +258,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
         return;
     }
 
-    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(16 * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
+    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(conv.settings.cylindricalTessellation * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
     const IfcFloat delta = max_angle/cnt_segments;
 
     has_area = has_area && std::fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
@@ -282,7 +282,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
             const size_t next = (i+1)%size;
 
             result.vertcnt.push_back(4);
-            const IfcVector3& base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
+            const IfcVector3 base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
 
             out.push_back(base_0);
             out.push_back(base_1);
@@ -305,8 +305,8 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
         for(size_t i = 0; i < size; ++i ) {
             out.push_back(out[i*4]);
         }
-        result.vertcnt.push_back(size);
-        result.vertcnt.push_back(size);
+        result.vertcnt.push_back(static_cast<unsigned int>(size));
+        result.vertcnt.push_back(static_cast<unsigned int>(size));
     }
 
     IfcMatrix4 trafo;
@@ -327,7 +327,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
         return;
     }
 
-    const unsigned int cnt_segments = 16;
+    const unsigned int cnt_segments = conv.settings.cylindricalTessellation;
     const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
 
     const size_t samples = curve->EstimateSampleCount(solid.StartParam,solid.EndParam);
@@ -547,7 +547,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
 
     IfcVector3 vmin, vmax;
     MinMaxChooser<IfcVector3>()(vmin, vmax);
-    BOOST_FOREACH(IfcVector3& v, in) {
+    for(IfcVector3& v : in) {
         v *= trafo;
 
         vmin = std::min(vmin, v);
@@ -579,7 +579,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
         }
 
         nors.reserve(conv.apply_openings->size());
-        BOOST_FOREACH(TempOpening& t, *conv.apply_openings) {
+        for(TempOpening& t : *conv.apply_openings) {
             TempMesh& bounds = *t.profileMesh.get();
 
             if( bounds.verts.size() <= 2 ) {
@@ -617,7 +617,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
     }
 
     if( openings ) {
-        BOOST_FOREACH(TempOpening& opening, *conv.apply_openings) {
+        for(TempOpening& opening : *conv.apply_openings) {
             if( !opening.wallPoints.empty() ) {
                 IFCImporter::LogError("failed to generate all window caps");
             }
@@ -638,7 +638,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
                     out.push_back(in[i]);
             }
 
-            curmesh.vertcnt.push_back(in.size());
+            curmesh.vertcnt.push_back(static_cast<unsigned int>(in.size()));
             if( openings && in.size() > 2 ) {
                 if( GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
                     ++sides_with_v_openings;
@@ -660,12 +660,12 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
     // it was created from. Return an empty mesh to the caller.
     if( collect_openings && !result.IsEmpty() ) {
         ai_assert(conv.collect_openings);
-        boost::shared_ptr<TempMesh> profile = boost::shared_ptr<TempMesh>(new TempMesh());
+        std::shared_ptr<TempMesh> profile = std::shared_ptr<TempMesh>(new TempMesh());
         profile->Swap(result);
 
-        boost::shared_ptr<TempMesh> profile2D = boost::shared_ptr<TempMesh>(new TempMesh());
+        std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->verts.insert(profile2D->verts.end(), in.begin(), in.end());
-        profile2D->vertcnt.push_back(in.size());
+        profile2D->vertcnt.push_back(static_cast<unsigned int>(in.size()));
         conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
 
         ai_assert(result.IsEmpty());
@@ -697,7 +697,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
             std::vector<TempOpening>* oldCollectOpenings = conv.collect_openings;
             conv.collect_openings = &fisherPriceMyFirstOpenings;
 
-            BOOST_FOREACH(const IfcCurve* curve, cprofile->InnerCurves) {
+            for(const IfcCurve* curve : cprofile->InnerCurves) {
                 TempMesh curveMesh, tempMesh;
                 ProcessCurve(*curve, curveMesh, conv);
                 ProcessExtrudedArea(solid, curveMesh, dir, tempMesh, conv, true);
@@ -732,9 +732,9 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
     ConversionData& conv)
 {
     bool fix_orientation = false;
-    boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>();
+    std::shared_ptr< TempMesh > meshtmp = std::make_shared<TempMesh>();
     if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
-        BOOST_FOREACH(boost::shared_ptr<const IfcShell> shell,shellmod->SbsmBoundary) {
+        for(std::shared_ptr<const IfcShell> shell :shellmod->SbsmBoundary) {
             try {
                 const EXPRESS::ENTITY& e = shell->To<ENTITY>();
                 const IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<IfcConnectedFaceSet>();
@@ -762,7 +762,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
         fix_orientation = true;
     }
     else if(const IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IfcFaceBasedSurfaceModel>()) {
-        BOOST_FOREACH(const IfcConnectedFaceSet& fc, surf->FbsmFaces) {
+        for(const IfcConnectedFaceSet& fc : surf->FbsmFaces) {
             ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
         }
         fix_orientation = true;
@@ -791,7 +791,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
             conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),
                 IfcVector3(0,0,0),
                 meshtmp,
-                boost::shared_ptr<TempMesh>()));
+                std::shared_ptr<TempMesh>()));
         }
         return true;
     }
@@ -810,7 +810,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
     aiMesh* const mesh = meshtmp->ToMesh();
     if(mesh) {
         mesh->mMaterialIndex = matid;
-        mesh_indices.push_back(conv.meshes.size());
+        mesh_indices.push_back(static_cast<unsigned int>(conv.meshes.size()));
         conv.meshes.push_back(mesh);
         return true;
     }
@@ -827,9 +827,8 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
         std::sort(mesh_indices.begin(),mesh_indices.end());
         std::vector<unsigned int>::iterator it_end = std::unique(mesh_indices.begin(),mesh_indices.end());
 
-        const size_t size = std::distance(mesh_indices.begin(),it_end);
+        nd->mNumMeshes = static_cast<unsigned int>(std::distance(mesh_indices.begin(),it_end));
 
-        nd->mNumMeshes = size;
         nd->mMeshes = new unsigned int[nd->mNumMeshes];
         for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
             nd->mMeshes[i] = mesh_indices[i];

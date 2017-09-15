@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -56,14 +57,13 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 GenVertexNormalsProcess::GenVertexNormalsProcess()
-{
-    this->configMaxAngle = AI_DEG_TO_RAD(175.f);
+: configMaxAngle( AI_DEG_TO_RAD( 175.f ) ) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-GenVertexNormalsProcess::~GenVertexNormalsProcess()
-{
+GenVertexNormalsProcess::~GenVertexNormalsProcess() {
     // nothing to do here
 }
 
@@ -79,8 +79,8 @@ bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 void GenVertexNormalsProcess::SetupProperties(const Importer* pImp)
 {
     // Get the current value of the AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE property
-    configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,175.f);
-    configMaxAngle = AI_DEG_TO_RAD(std::max(std::min(configMaxAngle,175.0f),0.0f));
+    configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE,(ai_real)175.0);
+    configMaxAngle = AI_DEG_TO_RAD(std::max(std::min(configMaxAngle,(ai_real)175.0),(ai_real)0.0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
     }
 
     // Allocate the array to hold the output normals
-    const float qnan = std::numeric_limits<float>::quiet_NaN();
+    const float qnan = std::numeric_limits<ai_real>::quiet_NaN();
     pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
     // Compute per-face normals but store them per-vertex
@@ -155,13 +155,13 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
     // check whether we can reuse the SpatialSort of a previous step.
     SpatialSort* vertexFinder = NULL;
     SpatialSort  _vertexFinder;
-    float posEpsilon = 1e-5f;
+    ai_real posEpsilon = ai_real( 1e-5 );
     if (shared) {
-        std::vector<std::pair<SpatialSort,float> >* avf;
+        std::vector<std::pair<SpatialSort,ai_real> >* avf;
         shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
         if (avf)
         {
-            std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
+            std::pair<SpatialSort,ai_real>& blubb = avf->operator [] (meshIndex);
             vertexFinder = &blubb.first;
             posEpsilon = blubb.second;
         }
@@ -192,7 +192,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
                 const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
                 if (is_not_qnan(v.x))pcNor += v;
             }
-            pcNor.Normalize();
+            pcNor.NormalizeSafe();
 
             // Write the smoothed normal back to all affected normals
             for (unsigned int a = 0; a < verticesFound.size(); ++a)
@@ -206,13 +206,13 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
     // Slower code path if a smooth angle is set. There are many ways to achieve
     // the effect, this one is the most straightforward one.
     else    {
-        const float fLimit = std::cos(configMaxAngle);
+        const ai_real fLimit = std::cos(configMaxAngle);
         for (unsigned int i = 0; i < pMesh->mNumVertices;++i)   {
             // Get all vertices that share this one ...
             vertexFinder->FindPositions( pMesh->mVertices[i] , posEpsilon, verticesFound);
 
             aiVector3D vr = pMesh->mNormals[i];
-            float vrlen = vr.Length();
+            ai_real vrlen = vr.Length();
 
             aiVector3D pcNor;
             for (unsigned int a = 0; a < verticesFound.size(); ++a) {
@@ -225,7 +225,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
                 if (v * vr >= fLimit * vrlen * v.Length())
                     pcNor += v;
             }
-            pcNew[i] = pcNor.Normalize();
+            pcNew[i] = pcNor.NormalizeSafe();
         }
     }
 

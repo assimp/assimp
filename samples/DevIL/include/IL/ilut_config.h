@@ -7,7 +7,7 @@
 
 //
 // sorry just
-// cant get this one to work under windows
+// can't get this one to work under windows
 // have disabled for the now
 //
 // will look at it some more later

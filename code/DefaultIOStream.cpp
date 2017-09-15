@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -43,9 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 
-#include "../include/assimp/ai_assert.h"
-#include "DefaultIOStream.h"
-#include <boost/static_assert.hpp>
+#include <assimp/ai_assert.h>
+#include <assimp/DefaultIOStream.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -56,6 +56,7 @@ DefaultIOStream::~DefaultIOStream()
 {
     if (mFile) {
         ::fclose(mFile);
+        mFile = nullptr;
     }
 }
 
@@ -86,8 +87,9 @@ aiReturn DefaultIOStream::Seek(size_t pOffset,
     }
 
     // Just to check whether our enum maps one to one with the CRT constants
-    BOOST_STATIC_ASSERT(aiOrigin_CUR == SEEK_CUR &&
-        aiOrigin_END == SEEK_END && aiOrigin_SET == SEEK_SET);
+    static_assert(aiOrigin_CUR == SEEK_CUR &&
+        aiOrigin_END == SEEK_END && aiOrigin_SET == SEEK_SET, "aiOrigin_CUR == SEEK_CUR && \
+        aiOrigin_END == SEEK_END && aiOrigin_SET == SEEK_SET");
 
     // do the seek
     return (0 == ::fseek(mFile, (long)pOffset,(int)pOrigin) ? AI_SUCCESS : AI_FAILURE);
@@ -109,9 +111,9 @@ size_t DefaultIOStream::FileSize() const
         return 0;
     }
 
-    if (SIZE_MAX == cachedSize) {
+    if (SIZE_MAX == mCachedSize ) {
 
-        // Although fseek/ftell would allow us to reuse the exising file handle here,
+        // Although fseek/ftell would allow us to reuse the existing file handle here,
         // it is generally unsafe because:
         //  - For binary streams, it is not technically well-defined
         //  - For text files the results are meaningless
@@ -119,21 +121,24 @@ size_t DefaultIOStream::FileSize() const
         //
         // See here for details:
         // https://www.securecoding.cert.org/confluence/display/seccode/FIO19-C.+Do+not+use+fseek()+and+ftell()+to+compute+the+size+of+a+regular+file
-#if defined _WIN32 && !defined __GNUC__
+#if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
         struct __stat64 fileStat;
         int err = _stat64(  mFilename.c_str(), &fileStat );
         if (0 != err)
             return 0;
-        cachedSize = (size_t) (fileStat.st_size);
-#else
+        mCachedSize = (size_t) (fileStat.st_size);
+#elif defined __GNUC__ || defined __APPLE__ || defined __MACH__ || defined __FreeBSD__
         struct stat fileStat;
         int err = stat(mFilename.c_str(), &fileStat );
         if (0 != err)
             return 0;
-        cachedSize = (size_t) (fileStat.st_size);
+        const unsigned long long cachedSize = fileStat.st_size;
+        mCachedSize = static_cast< size_t >( cachedSize );
+#else
+#   error "Unknown platform"
 #endif
     }
-    return cachedSize;
+    return mCachedSize;
 }
 
 // ----------------------------------------------------------------------------------

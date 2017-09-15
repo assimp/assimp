@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -47,19 +48,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
-#include "../include/assimp/texture.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include "StringUtils.h"
+#include <assimp/texture.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
+#include <assimp/Defines.h>
 #include "qnan.h"
-#include "Defines.h"
 
 
 using namespace Assimp;
 static aiTexel* const bad_texel = reinterpret_cast<aiTexel*>(SIZE_MAX);
 
 // ------------------------------------------------------------------------------------------------
-// Find a suitable pallette file or take teh default one
+// Find a suitable pallette file or take the default one
 void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 {
     // now try to find the color map in the current directory
@@ -128,7 +130,7 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture* pcTexture)
 // Read a texture from a MDL3 file
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 {
-    const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
+    const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
 
     VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
         pcHeader->skinheight);
@@ -177,7 +179,7 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 {
     ai_assert(NULL != piSkip);
 
-    const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianess is allready corrected in the InternReadFile_3DGS_MDL345 function
+    const MDL::Header *pcHeader = (const MDL::Header*)mBuffer;  //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
 
     if (iType == 1 || iType > 3)
     {
@@ -487,7 +489,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     unsigned int iWidth,
     unsigned int iHeight)
 {
-    aiTexture* pcNew = NULL;
+    aiTexture* pcNew = nullptr;
 
     // get the type of the skin
     unsigned int iMasked = (unsigned int)(iType & 0xF);
@@ -521,7 +523,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         memcpy(pcNew->pcData,szCurrent,pcNew->mWidth);
         szCurrent += iWidth;
     }
-    if (0x7 == iMasked)
+    else if (0x7 == iMasked)
     {
         // ***** REFERENCE TO EXTERNAL FILE *****
         if (1 != iHeight)
@@ -544,7 +546,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     else if (iMasked || !iType || (iType && iWidth && iHeight))
     {
-        // ***** STANDARD COLOR TEXTURE *****
         pcNew = new aiTexture();
         if (!iHeight || !iWidth)
         {
@@ -656,7 +657,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         if (is_not_qnan(clrTexture.r)) {
             clrTemp.r *= clrTexture.a;
         }
-        pcMatOut->AddProperty<float>(&clrTemp.r,1,AI_MATKEY_OPACITY);
+        pcMatOut->AddProperty<ai_real>(&clrTemp.r,1,AI_MATKEY_OPACITY);
 
         // read phong power
         int iShadingMode = (int)aiShadingMode_Gouraud;
@@ -699,7 +700,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
         // place this as diffuse texture
         char szCurrent[5];
-        ::sprintf(szCurrent,"*%i",this->pScene->mNumTextures);
+        ai_snprintf(szCurrent,5,"*%i",this->pScene->mNumTextures);
 
         aiString szFile;
         const size_t iLen = strlen((const char*)szCurrent);
@@ -730,6 +731,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     VALIDATE_FILE_SIZE(szCurrent);
     *szCurrentOut = szCurrent;
+    if ( nullptr != pcNew ) {
+        delete pcNew;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

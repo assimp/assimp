@@ -119,7 +119,7 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
             {
                 vNormals += sMesh.mNormals[(*a)];
             }
-            vNormals.Normalize();
+            vNormals.NormalizeSafe();
 
             // write back into all affected normals
             for (std::vector<unsigned int>::const_iterator

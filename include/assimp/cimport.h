@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,10 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  cimport.h
  *  @brief Defines the C-API to the Open Asset Import Library.
  */
+#pragma once
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
-#include "types.h"
-#include <assimp/importerdesc.h>
+
+#include <assimp/types.h>
+#include "importerdesc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -334,7 +337,7 @@ ASSIMP_API void aiReleaseImport(
  * import process. NULL if there was no error. There can't be an error if you
  * got a non-NULL #aiScene from #aiImportFile/#aiImportFileEx/#aiApplyPostProcessing.
  */
-ASSIMP_API const char* aiGetErrorString();
+ASSIMP_API const char* aiGetErrorString(void);
 
 // --------------------------------------------------------------------------------
 /** Returns whether a given file extension is supported by ASSIMP
@@ -414,7 +417,7 @@ ASSIMP_API void aiSetImportPropertyInteger(
 ASSIMP_API void aiSetImportPropertyFloat(
     C_STRUCT aiPropertyStore* store,
     const char* szName,
-    float value);
+    ai_real value);
 
 // --------------------------------------------------------------------------------
 /** Set a string property.

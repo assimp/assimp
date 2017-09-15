@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,8 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef glTFAssetWriter_H_INC
-#define glTFAssetWriter_H_INC
+#ifndef GLTFASSETWRITER_H_INC
+#define GLTFASSETWRITER_H_INC
+
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFAsset.h"
 
@@ -58,7 +61,7 @@ using rapidjson::MemoryPoolAllocator;
 class AssetWriter
 {
     template<class T>
-    friend struct LazyDictWriter;
+    friend void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
 
 private:
 
@@ -79,6 +82,7 @@ public:
     AssetWriter(Asset& asset);
 
     void WriteFile(const char* path);
+    void WriteGLBFile(const char* path);
 };
 
 }
@@ -86,4 +90,6 @@ public:
 // Include the implementation of the methods
 #include "glTFAssetWriter.inl"
 
-#endif
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+#endif // GLTFASSETWRITER_H_INC

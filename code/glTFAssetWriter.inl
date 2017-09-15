@@ -1,8 +1,9 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -56,23 +57,32 @@ namespace glTF {
         inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
-            for (int i = 0; i < N; ++i) {
+            for (decltype(N) i = 0; i < N; ++i) {
                 val.PushBack(r[i], al);
             }
             return val;
-        };
+        }
+
+        inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
+            val.SetArray();
+            val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
+            for (unsigned int i = 0; i < r.size(); ++i) {
+                val.PushBack(r[i], al);
+            }
+            return val;
+        }
 
         template<class T>
         inline void AddRefsVector(Value& obj, const char* fieldId, std::vector< Ref<T> >& v, MemoryPoolAllocator<>& al) {
             if (v.empty()) return;
             Value lst;
             lst.SetArray();
-            lst.Reserve(v.size(), al);
+            lst.Reserve(unsigned(v.size()), al);
             for (size_t i = 0; i < v.size(); ++i) {
                 lst.PushBack(StringRef(v[i]->id), al);
             }
             obj.AddMember(StringRef(fieldId), lst, al);
-        };
+        }
 
 
     }
@@ -85,18 +95,77 @@ namespace glTF {
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+
+        Value vTmpMax, vTmpMin;
+        obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+        obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
     }
 
     inline void Write(Value& obj, Animation& a, AssetWriter& w)
     {
+        /****************** Channels *******************/
+        Value channels;
+        channels.SetArray();
+        channels.Reserve(unsigned(a.Channels.size()), w.mAl);
 
+        for (size_t i = 0; i < unsigned(a.Channels.size()); ++i) {
+            Animation::AnimChannel& c = a.Channels[i];
+            Value valChannel;
+            valChannel.SetObject();
+            {
+                valChannel.AddMember("sampler", c.sampler, w.mAl);
+
+                Value valTarget;
+                valTarget.SetObject();
+                {
+                    valTarget.AddMember("id", StringRef(c.target.id->id), w.mAl);
+                    valTarget.AddMember("path", c.target.path, w.mAl);
+                }
+                valChannel.AddMember("target", valTarget, w.mAl);
+            }
+            channels.PushBack(valChannel, w.mAl);
+        }
+        obj.AddMember("channels", channels, w.mAl);
+
+        /****************** Parameters *******************/
+        Value valParameters;
+        valParameters.SetObject();
+        {
+            if (a.Parameters.TIME) {
+                valParameters.AddMember("TIME", StringRef(a.Parameters.TIME->id), w.mAl);
+            }
+            if (a.Parameters.rotation) {
+                valParameters.AddMember("rotation", StringRef(a.Parameters.rotation->id), w.mAl);
+            }
+            if (a.Parameters.scale) {
+                valParameters.AddMember("scale", StringRef(a.Parameters.scale->id), w.mAl);
+            }
+            if (a.Parameters.translation) {
+                valParameters.AddMember("translation", StringRef(a.Parameters.translation->id), w.mAl);
+            }
+        }
+        obj.AddMember("parameters", valParameters, w.mAl);
+
+        /****************** Samplers *******************/
+        Value valSamplers;
+        valSamplers.SetObject();
+
+        for (size_t i = 0; i < unsigned(a.Samplers.size()); ++i) {
+            Animation::AnimSampler& s = a.Samplers[i];
+            Value valSampler;
+            valSampler.SetObject();
+            {
+                valSampler.AddMember("input", s.input, w.mAl);
+                valSampler.AddMember("interpolation", s.interpolation, w.mAl);
+                valSampler.AddMember("output", s.output, w.mAl);
+            }
+            valSamplers.AddMember(StringRef(s.id), valSampler, w.mAl);
+        }
+        obj.AddMember("samplers", valSamplers, w.mAl);
     }
 
     inline void Write(Value& obj, Buffer& b, AssetWriter& w)
     {
-        std::string dataURI = "data:application/octet-stream;base64,";
-        Util::EncodeBase64(b.GetPointer(), b.byteLength, dataURI);
-
         const char* type;
         switch (b.type) {
             case Buffer::Type_text:
@@ -105,16 +174,16 @@ namespace glTF {
                 type = "arraybuffer";
         }
 
-        obj.AddMember("byteLength", b.byteLength, w.mAl);
+        obj.AddMember("byteLength", static_cast<uint64_t>(b.byteLength), w.mAl);
         obj.AddMember("type", StringRef(type), w.mAl);
-        obj.AddMember("uri", Value(dataURI, w.mAl).Move(), w.mAl);
+        obj.AddMember("uri", Value(b.GetURI(), w.mAl).Move(), w.mAl);
     }
 
     inline void Write(Value& obj, BufferView& bv, AssetWriter& w)
     {
         obj.AddMember("buffer", Value(bv.buffer->id, w.mAl).Move(), w.mAl);
-        obj.AddMember("byteOffset", bv.byteOffset, w.mAl);
-        obj.AddMember("byteLength", bv.byteLength, w.mAl);
+        obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
+        obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
         obj.AddMember("target", int(bv.target), w.mAl);
     }
 
@@ -174,6 +243,9 @@ namespace glTF {
             WriteColorOrTex(v, m.specular, "specular", w.mAl);
             WriteColorOrTex(v, m.emission, "emission", w.mAl);
 
+            if (m.transparent)
+                v.AddMember("transparency", m.transparency, w.mAl);
+
             v.AddMember("shininess", m.shininess, w.mAl);
         }
         obj.AddMember("values", v, w.mAl);
@@ -190,7 +262,7 @@ namespace glTF {
             else {
                 for (size_t i = 0; i < lst.size(); ++i) {
                     char buffer[32];
-                    sprintf(buffer, "%s_%d", semantic, int(i));
+                    ai_snprintf(buffer, 32, "%s_%d", semantic, int(i));
                     attrs.AddMember(Value(buffer, w.mAl).Move(), Value(lst[i]->id, w.mAl).Move(), w.mAl);
                 }
             }
@@ -199,9 +271,63 @@ namespace glTF {
 
     inline void Write(Value& obj, Mesh& m, AssetWriter& w)
     {
+		/********************* Name **********************/
+		obj.AddMember("name", m.name, w.mAl);
+
+		/**************** Mesh extensions ****************/
+		if(m.Extension.size() > 0)
+		{
+			Value json_extensions;
+
+			json_extensions.SetObject();
+			for(Mesh::SExtension* ptr_ext : m.Extension)
+			{
+				switch(ptr_ext->Type)
+				{
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+					case Mesh::SExtension::EType::Compression_Open3DGC:
+						{
+							Value json_comp_data;
+							Mesh::SCompression_Open3DGC* ptr_ext_comp = (Mesh::SCompression_Open3DGC*)ptr_ext;
+
+							// filling object "compressedData"
+							json_comp_data.SetObject();
+							json_comp_data.AddMember("buffer", ptr_ext_comp->Buffer, w.mAl);
+							json_comp_data.AddMember("byteOffset", ptr_ext_comp->Offset, w.mAl);
+							json_comp_data.AddMember("componentType", 5121, w.mAl);
+							json_comp_data.AddMember("type", "SCALAR", w.mAl);
+							json_comp_data.AddMember("count", ptr_ext_comp->Count, w.mAl);
+							if(ptr_ext_comp->Binary)
+								json_comp_data.AddMember("mode", "binary", w.mAl);
+							else
+								json_comp_data.AddMember("mode", "ascii", w.mAl);
+
+							json_comp_data.AddMember("indicesCount", ptr_ext_comp->IndicesCount, w.mAl);
+							json_comp_data.AddMember("verticesCount", ptr_ext_comp->VerticesCount, w.mAl);
+							// filling object "Open3DGC-compression"
+							Value json_o3dgc;
+
+							json_o3dgc.SetObject();
+							json_o3dgc.AddMember("compressedData", json_comp_data, w.mAl);
+							// add member to object "extensions"
+							json_extensions.AddMember("Open3DGC-compression", json_o3dgc, w.mAl);
+						}
+
+						break;
+#endif
+					default:
+						throw DeadlyImportError("GLTF: Can not write mesh: unknown mesh extension, only Open3DGC is supported.");
+				}// switch(ptr_ext->Type)
+			}// for(Mesh::SExtension* ptr_ext : m.Extension)
+
+			// Add extensions to mesh
+			obj.AddMember("extensions", json_extensions, w.mAl);
+		}// if(m.Extension.size() > 0)
+
+		/****************** Primitives *******************/
         Value primitives;
         primitives.SetArray();
-        primitives.Reserve(m.primitives.size(), w.mAl);
+        primitives.Reserve(unsigned(m.primitives.size()), w.mAl);
 
         for (size_t i = 0; i < m.primitives.size(); ++i) {
             Mesh::Primitive& p = m.primitives[i];
@@ -231,7 +357,7 @@ namespace glTF {
             }
             primitives.PushBack(prim, w.mAl);
         }
-    
+
         obj.AddMember("primitives", primitives, w.mAl);
     }
 
@@ -260,6 +386,16 @@ namespace glTF {
         AddRefsVector(obj, "children", n.children, w.mAl);
 
         AddRefsVector(obj, "meshes", n.meshes, w.mAl);
+
+        AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
+
+        if (n.skin) {
+            obj.AddMember("skin", Value(n.skin->id, w.mAl).Move(), w.mAl);
+        }
+
+        if (!n.jointName.empty()) {
+          obj.AddMember("jointName", n.jointName, w.mAl);
+        }
     }
 
     inline void Write(Value& obj, Program& b, AssetWriter& w)
@@ -269,7 +405,18 @@ namespace glTF {
 
     inline void Write(Value& obj, Sampler& b, AssetWriter& w)
     {
-
+        if (b.wrapS) {
+            obj.AddMember("wrapS", b.wrapS, w.mAl);
+        }
+        if (b.wrapT) {
+            obj.AddMember("wrapT", b.wrapT, w.mAl);
+        }
+        if (b.magFilter) {
+            obj.AddMember("magFilter", b.magFilter, w.mAl);
+        }
+        if (b.minFilter) {
+            obj.AddMember("minFilter", b.minFilter, w.mAl);
+        }
     }
 
     inline void Write(Value& scene, Scene& s, AssetWriter& w)
@@ -284,6 +431,24 @@ namespace glTF {
 
     inline void Write(Value& obj, Skin& b, AssetWriter& w)
     {
+        /****************** jointNames *******************/
+        Value vJointNames;
+        vJointNames.SetArray();
+        vJointNames.Reserve(unsigned(b.jointNames.size()), w.mAl);
+
+        for (size_t i = 0; i < unsigned(b.jointNames.size()); ++i) {
+            vJointNames.PushBack(StringRef(b.jointNames[i]->jointName), w.mAl);
+        }
+        obj.AddMember("jointNames", vJointNames, w.mAl);
+
+        if (b.bindShapeMatrix.isPresent) {
+            Value val;
+            obj.AddMember("bindShapeMatrix", MakeValue(val, b.bindShapeMatrix.value, w.mAl).Move(), w.mAl);
+        }
+
+        if (b.inverseBindMatrices) {
+            obj.AddMember("inverseBindMatrices", Value(b.inverseBindMatrices->id, w.mAl).Move(), w.mAl);
+        }
 
     }
 
@@ -297,6 +462,9 @@ namespace glTF {
         if (tex.source) {
             obj.AddMember("source", Value(tex.source->id, w.mAl).Move(), w.mAl);
         }
+        if (tex.sampler) {
+            obj.AddMember("sampler", Value(tex.sampler->id, w.mAl).Move(), w.mAl);
+        }
     }
 
     inline void Write(Value& obj, Light& b, AssetWriter& w)
@@ -305,7 +473,7 @@ namespace glTF {
     }
 
 
-    AssetWriter::AssetWriter(Asset& a)
+    inline AssetWriter::AssetWriter(Asset& a)
         : mDoc()
         , mAsset(a)
         , mAl(mDoc.GetAllocator())
@@ -326,44 +494,66 @@ namespace glTF {
         }
     }
 
-    void AssetWriter::WriteFile(const char* path)
+    inline void AssetWriter::WriteFile(const char* path)
     {
-        bool isBinary = mAsset.extensionsUsed.KHR_binary_glTF;
+        std::unique_ptr<IOStream> jsonOutFile(mAsset.OpenFile(path, "wt", true));
 
-        boost::scoped_ptr<IOStream> outfile
-            (mAsset.OpenFile(path, isBinary ? "wb" : "wt", true));
+        if (jsonOutFile == 0) {
+            throw DeadlyExportError("Could not open output file: " + std::string(path));
+        }
+
+        StringBuffer docBuffer;
+
+        PrettyWriter<StringBuffer> writer(docBuffer);
+        mDoc.Accept(writer);
+
+        if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
+
+        // Write buffer data to separate .bin files
+        for (unsigned int i = 0; i < mAsset.buffers.Size(); ++i) {
+            Ref<Buffer> b = mAsset.buffers.Get(i);
+
+            std::string binPath = b->GetURI();
+
+            std::unique_ptr<IOStream> binOutFile(mAsset.OpenFile(binPath, "wb", true));
+
+            if (binOutFile == 0) {
+                throw DeadlyExportError("Could not open output file: " + binPath);
+            }
+
+            if (b->byteLength > 0) {
+                if (binOutFile->Write(b->GetPointer(), b->byteLength, 1) != 1) {
+                    throw DeadlyExportError("Failed to write binary file: " + binPath);
+                }
+            }
+        }
+    }
+
+    inline void AssetWriter::WriteGLBFile(const char* path)
+    {
+        std::unique_ptr<IOStream> outfile(mAsset.OpenFile(path, "wb", true));
 
         if (outfile == 0) {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
-        if (isBinary) {
-            // we will write the header later, skip its size
-            outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
-        }
+        // we will write the header later, skip its size
+        outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
 
         StringBuffer docBuffer;
-
-        bool pretty = true; 
-        if (!isBinary && pretty) {
-            PrettyWriter<StringBuffer> writer(docBuffer);
-            mDoc.Accept(writer);
-        }
-        else {
-            Writer<StringBuffer> writer(docBuffer);
-            mDoc.Accept(writer);
-        }
+        Writer<StringBuffer> writer(docBuffer);
+        mDoc.Accept(writer);
 
         if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
-            throw DeadlyExportError("Failed to write scene data!"); 
+            throw DeadlyExportError("Failed to write scene data!");
         }
 
-        if (isBinary) {
-            WriteBinaryData(outfile.get(), docBuffer.GetSize());
-        }
+        WriteBinaryData(outfile.get(), docBuffer.GetSize());
     }
 
-    void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
+    inline void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
     {
         //
         // write the body data
@@ -385,7 +575,6 @@ namespace glTF {
             }
         }
 
-
         //
         // write the header
         //
@@ -396,10 +585,10 @@ namespace glTF {
         header.version = 1;
         AI_SWAP4(header.version);
 
-        header.length = sizeof(header) + sceneLength + bodyLength;
+        header.length = uint32_t(sizeof(header) + sceneLength + bodyLength);
         AI_SWAP4(header.length);
 
-        header.sceneLength = sceneLength;
+        header.sceneLength = uint32_t(sceneLength);
         AI_SWAP4(header.sceneLength);
 
         header.sceneFormat = SceneFormat_JSON;
@@ -412,20 +601,17 @@ namespace glTF {
         }
     }
 
-    
-    void AssetWriter::WriteMetadata()
+
+    inline void AssetWriter::WriteMetadata()
     {
         Value asset;
         asset.SetObject();
-        {
-            asset.AddMember("version", mAsset.asset.version, mAl);
-
-            asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
-        }
+        asset.AddMember("version", Value(mAsset.asset.version, mAl).Move(), mAl);
+        asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
         mDoc.AddMember("asset", asset, mAl);
     }
 
-    void AssetWriter::WriteExtensionsUsed()
+    inline void AssetWriter::WriteExtensionsUsed()
     {
         Value exts;
         exts.SetArray();
@@ -484,13 +670,10 @@ namespace glTF {
     }
 
     template<class T>
-    struct LazyDictWriter< LazyDict<T> >
+    void WriteLazyDict(LazyDict<T>& d, AssetWriter& w)
     {
-        static void Write(LazyDict<T>& d, AssetWriter& w)
-        {
-            w.WriteObjects(d);
-        }
-    };
+        w.WriteObjects(d);
+    }
 
 }
 

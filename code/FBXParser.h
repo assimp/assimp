@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,15 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_PARSER_H
 #define INCLUDED_AI_FBX_PARSER_H
 
-#include <vector>
-#include <map>
-#include <string>
-#include <utility>
 #include <stdint.h>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <map>
+#include <memory>
 #include "LogAux.h"
+#include "fast_atof.h"
 
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"
@@ -60,15 +57,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    class Scope;
-    class Parser;
-    class Element;
+class Scope;
+class Parser;
+class Element;
 
-    // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-    typedef std::vector< Scope* > ScopeList;
-    typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+typedef std::vector< Scope* > ScopeList;
+typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
-    typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
 #   define new_Scope new Scope
 #   define new_Element new Element
@@ -88,11 +85,8 @@ namespace FBX {
 class Element
 {
 public:
-
     Element(const Token& key_token, Parser& parser);
     ~Element();
-
-public:
 
     const Scope* Compound() const {
         return compound.get();
@@ -107,13 +101,10 @@ public:
     }
 
 private:
-
     const Token& key_token;
     TokenList tokens;
-    boost::scoped_ptr<Scope> compound;
+    std::unique_ptr<Scope> compound;
 };
-
-
 
 /** FBX data entity that consists of a 'scope', a collection
  *  of not necessarily unique #Element instances.
@@ -128,18 +119,25 @@ private:
  *  @endverbatim  */
 class Scope
 {
-
 public:
-
     Scope(Parser& parser, bool topLevel = false);
     ~Scope();
-
-public:
 
     const Element* operator[] (const std::string& index) const {
         ElementMap::const_iterator it = elements.find(index);
         return it == elements.end() ? NULL : (*it).second;
     }
+
+	const Element* FindElementCaseInsensitive(const std::string& elementName) const {
+		const char* elementNameCStr = elementName.c_str();
+		for (auto element = elements.begin(); element != elements.end(); ++element)
+		{
+			if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, MAXLEN)) {
+				return element->second;
+			}
+		}
+		return NULL;
+	}
 
     ElementCollection GetCollection(const std::string& index) const {
         return elements.equal_range(index);
@@ -150,35 +148,28 @@ public:
     }
 
 private:
-
     ElementMap elements;
 };
-
 
 /** FBX parsing class, takes a list of input tokens and generates a hierarchy
  *  of nested #Scope instances, representing the fbx DOM.*/
 class Parser
 {
 public:
-
     /** Parse given a token list. Does not take ownership of the tokens -
      *  the objects must persist during the entire parser lifetime */
     Parser (const TokenList& tokens,bool is_binary);
     ~Parser();
 
-public:
-
     const Scope& GetRootScope() const {
         return *root.get();
     }
-
 
     bool IsBinary() const {
         return is_binary;
     }
 
 private:
-
     friend class Scope;
     friend class Element;
 
@@ -188,14 +179,12 @@ private:
     TokenPtr CurrentToken() const;
 
 
-
 private:
-
     const TokenList& tokens;
 
     TokenPtr last, current;
     TokenList::const_iterator cursor;
-    boost::scoped_ptr<Scope> root;
+    std::unique_ptr<Scope> root;
 
     const bool is_binary;
 };
@@ -229,8 +218,6 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& e);
 void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el);
 
-
-
 // extract a required element from a scope, abort if the element cannot be found
 const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL);
 
@@ -238,8 +225,6 @@ const Element& GetRequiredElement(const Scope& sc, const std::string& index, con
 const Scope& GetRequiredScope(const Element& el);
 // get token at a particular index
 const Token& GetRequiredToken(const Element& el, unsigned int index);
-
-
 
 // read a 4x4 matrix from an array of 16 floats
 aiMatrix4x4 ReadMatrix(const Element& element);

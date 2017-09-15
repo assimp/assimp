@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2008, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,8 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
-//#include <windows.h>
-#include "DefaultIOSystem.h"
 #include "Q3BSPFileImporter.h"
 #include "Q3BSPZipArchive.h"
 #include "Q3BSPFileParser.h"
@@ -53,10 +52,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   include "../contrib/zlib/zlib.h"
 #endif
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/importerdesc.h>
 #include <vector>
 #include <sstream>
 #include "StringComparison.h"
@@ -75,14 +76,6 @@ static const aiImporterDesc desc = {
 };
 
 namespace Assimp {
-
-/*
-static void getSupportedExtensions(std::vector<std::string> &supportedExtensions) {
-    supportedExtensions.push_back( ".jpg" );
-    supportedExtensions.push_back( ".png" );
-    supportedExtensions.push_back( ".tga" );
-}
-*/
 
 using namespace Q3BSP;
 
@@ -131,11 +124,11 @@ static void normalizePathName( const std::string &rPath, std::string &rNormalize
     static const unsigned int numDelimiters = 2;
     const char delimiters[ numDelimiters ] = { '/', '\\' };
     rNormalizedPath = rPath;
-    for ( unsigned int i=0; i<numDelimiters; i++ )
+    for (const char delimiter : delimiters)
     {
         for ( size_t j=0; j<rNormalizedPath.size(); j++ )
         {
-            if ( rNormalizedPath[j] == delimiters[ i ] )
+            if ( rNormalizedPath[j] == delimiter )
             {
                 rNormalizedPath[ j ] = sep[ 0 ];
             }
@@ -175,7 +168,7 @@ Q3BSPFileImporter::~Q3BSPFileImporter() {
 bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
 {
     if(!checkSig) {
-        return SimpleExtensionCheck( rFile, "pk3" );
+        return SimpleExtensionCheck( rFile, "pk3", "bsp" );
     }
     // TODO perhaps add keyword based detection
     return false;
@@ -339,14 +332,14 @@ void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* p
         }
     }
 
-    pParent->mNumChildren = MeshArray.size();
+    pParent->mNumChildren = static_cast<unsigned int>(MeshArray.size());
     pParent->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren ];
     for ( size_t i=0; i<NodeArray.size(); i++ )
     {
         aiNode *pNode = NodeArray[ i ];
         pNode->mParent = pParent;
         pParent->mChildren[ i ] = pNode;
-        pParent->mChildren[ i ]->mMeshes[ 0 ] = i;
+        pParent->mChildren[ i ]->mMeshes[ 0 ] = static_cast<unsigned int>(i);
     }
 }
 
@@ -373,9 +366,9 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
     pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
     pMesh->mFaces = new aiFace[ numTriangles ];
-    pMesh->mNumFaces = numTriangles;
+    pMesh->mNumFaces = static_cast<unsigned int>(numTriangles);
 
-    pMesh->mNumVertices = numVerts;
+    pMesh->mNumVertices = static_cast<unsigned int>(numVerts);
     pMesh->mVertices = new aiVector3D[ numVerts ];
     pMesh->mNormals =  new aiVector3D[ numVerts ];
     pMesh->mTextureCoords[ 0 ] = new aiVector3D[ numVerts ];
@@ -524,7 +517,7 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
         pScene->mMaterials[ pScene->mNumMaterials ] = pMatHelper;
         pScene->mNumMaterials++;
     }
-    pScene->mNumTextures = mTextures.size();
+    pScene->mNumTextures = static_cast<unsigned int>(mTextures.size());
     pScene->mTextures = new aiTexture*[ pScene->mNumTextures ];
     std::copy( mTextures.begin(), mTextures.end(), pScene->mTextures );
 }
@@ -658,7 +651,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
             size_t texSize = pTextureStream->FileSize();
             aiTexture *pTexture = new aiTexture;
             pTexture->mHeight = 0;
-            pTexture->mWidth = texSize;
+            pTexture->mWidth = static_cast<unsigned int>(texSize);
             unsigned char *pData = new unsigned char[ pTexture->mWidth ];
             size_t readSize = pTextureStream->Read( pData, sizeof( unsigned char ), pTexture->mWidth );
             (void)readSize;
@@ -672,7 +665,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 
             aiString name;
             name.data[ 0 ] = '*';
-            name.length = 1 + ASSIMP_itoa10( name.data + 1, MAXLEN-1, mTextures.size() );
+            name.length = 1 + ASSIMP_itoa10( name.data + 1, static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(mTextures.size()) );
 
             pArchive->Close( pTextureStream );
 
@@ -730,7 +723,7 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 
     aiString name;
     name.data[ 0 ] = '*';
-    name.length = 1 + ASSIMP_itoa10( name.data + 1, MAXLEN-1,  mTextures.size() );
+    name.length = 1 + ASSIMP_itoa10( name.data + 1, static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(mTextures.size()) );
 
     pMatHelper->AddProperty( &name,AI_MATKEY_TEXTURE_LIGHTMAP( 1 ) );
     mTextures.push_back( pTexture );

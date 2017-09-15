@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -70,14 +71,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../code/MaterialSystem.h"   // aiMaterial class
 #include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
-
-// in order for std::min and std::max to behave properly
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif // max
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif // min
 
 #include <time.h>
 
@@ -194,7 +187,7 @@ enum EClickPos
 {
     // The click was inside the inner circle (x,y axis)
     EClickPos_Circle,
-    // The click was inside one of tghe vertical snap-ins
+    // The click was inside one of the vertical snap-ins
     EClickPos_CircleVert,
     // The click was inside onf of the horizontal snap-ins
     EClickPos_CircleHor,

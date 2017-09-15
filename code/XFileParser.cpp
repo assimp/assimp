@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -48,14 +49,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XFileHelper.h"
 #include "fast_atof.h"
 #include "Exceptional.h"
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
+#include "TinyFormatter.h"
 #include "ByteSwapper.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "StringUtils.h"
+#include <assimp/DefaultLogger.hpp>
 
 
 using namespace Assimp;
 using namespace Assimp::XFile;
+using namespace Assimp::Formatter;
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
 
@@ -129,8 +131,8 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
         mIsBinaryFormat = true;
         compressed = true;
     }
-    else ThrowException( boost::str(boost::format("Unsupported xfile format '%c%c%c%c'")
-        % P[8] % P[9] % P[10] % P[11]));
+    else ThrowException( format() << "Unsupported xfile format '" <<
+       P[8] << P[9] << P[10] << P[11] << "'");
 
     // float size
     mBinaryFloatSize = (unsigned int)(P[12] - 48) * 1000
@@ -139,8 +141,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
         + (unsigned int)(P[15] - 48);
 
     if( mBinaryFloatSize != 32 && mBinaryFloatSize != 64)
-        ThrowException( boost::str( boost::format( "Unknown float size %1% specified in xfile header.")
-            % mBinaryFloatSize));
+        ThrowException( format() << "Unknown float size " << mBinaryFloatSize << " specified in xfile header." );
 
     // The x format specifies size in bits, but we work in bytes
     mBinaryFloatSize /= 8;
@@ -465,15 +466,12 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
     pMesh->mPosFaces.resize( numPosFaces);
     for( unsigned int a = 0; a < numPosFaces; a++)
     {
-        unsigned int numIndices = ReadInt();
-        if( numIndices < 3) {
-            ThrowException( boost::str( boost::format( "Invalid index count %1% for face %2%.") % numIndices % a));
-        }
-
         // read indices
+        unsigned int numIndices = ReadInt();
         Face& face = pMesh->mPosFaces[a];
-        for( unsigned int b = 0; b < numIndices; b++)
-            face.mIndices.push_back( ReadInt());
+        for (unsigned int b = 0; b < numIndices; b++) {
+            face.mIndices.push_back( ReadInt() );
+        }
         TestForSeparator();
     }
 
@@ -731,7 +729,7 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
     std::string matName;
     readHeadOfDataObject( &matName);
     if( matName.empty())
-        matName = std::string( "material") + boost::lexical_cast<std::string>( mLineNumber);
+        matName = std::string( "material") + to_string( mLineNumber );
     pMaterial->mName = matName;
     pMaterial->mIsReference = false;
 
@@ -929,7 +927,7 @@ void XFileParser::ParseDataObjectAnimationKey( AnimBone* pAnimBone)
             }
 
             default:
-                ThrowException( boost::str( boost::format( "Unknown key type %1% in animation.") % keyType));
+                ThrowException( format() << "Unknown key type " << keyType << " in animation." );
                 break;
         } // end switch
 
@@ -1298,7 +1296,7 @@ unsigned int XFileParser::ReadInt()
 
         // TODO: consider using strtol10 instead???
 
-        // check preceeding minus sign
+        // check preceding minus sign
         bool isNegative = false;
         if( *P == '-')
         {
@@ -1326,7 +1324,7 @@ unsigned int XFileParser::ReadInt()
 }
 
 // ------------------------------------------------------------------------------------------------
-float XFileParser::ReadFloat()
+ai_real XFileParser::ReadFloat()
 {
     if( mIsBinaryFormat)
     {
@@ -1343,7 +1341,7 @@ float XFileParser::ReadFloat()
         if( mBinaryFloatSize == 8)
         {
             if( End - P >= 8) {
-                float result = (float) (*(double*) P);
+                ai_real result = (ai_real) (*(double*) P);
                 P += 8;
                 return result;
             } else {
@@ -1353,7 +1351,7 @@ float XFileParser::ReadFloat()
         } else
         {
             if( End - P >= 4) {
-                float result = *(float*) P;
+                ai_real result = *(ai_real*) P;
                 P += 4;
                 return result;
             } else {
@@ -1372,17 +1370,17 @@ float XFileParser::ReadFloat()
     {
         P += 9;
         CheckForSeparator();
-        return 0.0f;
+        return 0.0;
     } else
     if( strncmp( P, "1.#QNAN0", 8) == 0)
     {
         P += 8;
         CheckForSeparator();
-        return 0.0f;
+        return 0.0;
     }
 
-    float result = 0.0f;
-    P = fast_atoreal_move<float>( P, result);
+    ai_real result = 0.0;
+    P = fast_atoreal_move<ai_real>( P, result);
 
     CheckForSeparator();
 
@@ -1444,7 +1442,7 @@ AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
     if( mIsBinaryFormat)
         throw DeadlyImportError( pText);
     else
-        throw DeadlyImportError( boost::str( boost::format( "Line %d: %s") % mLineNumber % pText));
+        throw DeadlyImportError( format() << "Line " << mLineNumber << ": " << pText );
 }
 
 
@@ -1453,7 +1451,7 @@ AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
 void XFileParser::FilterHierarchy( XFile::Node* pNode)
 {
     // if the node has just a single unnamed child containing a mesh, remove
-    // the anonymous node inbetween. The 3DSMax kwXport plugin seems to produce this
+    // the anonymous node between. The 3DSMax kwXport plugin seems to produce this
     // mess in some cases
     if( pNode->mChildren.size() == 1 && pNode->mMeshes.empty() )
     {

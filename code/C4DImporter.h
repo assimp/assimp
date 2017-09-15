@@ -47,14 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "LogAux.h"
 
-#include <set>
+#include <map>
 struct aiNode;
 struct aiMesh;
 struct aiMaterial;
 
 struct aiImporterDesc;
 
-namespace _melange_ {
+namespace melange {
     class BaseObject; // c4d_file.h
     class PolygonObject;
     class BaseMaterial;
@@ -103,17 +103,17 @@ protected:
 
 private:
 
-    void ReadMaterials(_melange_::BaseMaterial* mat);
-    void RecurseHierarchy(_melange_::BaseObject* object, aiNode* parent);
-    aiMesh* ReadMesh(_melange_::BaseObject* object);
-    unsigned int ResolveMaterial(_melange_::PolygonObject* obj);
+    void ReadMaterials(melange::BaseMaterial* mat);
+    void RecurseHierarchy(melange::BaseObject* object, aiNode* parent);
+    aiMesh* ReadMesh(melange::BaseObject* object);
+    unsigned int ResolveMaterial(melange::PolygonObject* obj);
 
-    bool ReadShader(aiMaterial* out, _melange_::BaseShader* shader);
+    bool ReadShader(aiMaterial* out, melange::BaseShader* shader);
 
     std::vector<aiMesh*> meshes;
     std::vector<aiMaterial*> materials;
 
-    typedef std::map<_melange_::BaseMaterial*, unsigned int> MaterialMap;
+    typedef std::map<melange::BaseMaterial*, unsigned int> MaterialMap;
     MaterialMap material_mapping;
 
 }; // !class C4DImporter

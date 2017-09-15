@@ -384,7 +384,7 @@
 	* il_jpeg.c:53: Added check for IL_USE_IJL.
 	* il_exr.cpp:319,329: Changed to write functions instead of read.
 	* il_files.c: Added iSetOutputFake.
-	* il_files.c (iSetOutputLump): Added check for NULL to accomodate ilDetermineSize function.
+	* il_files.c (iSetOutputLump): Added check for NULL to accommodate ilDetermineSize function.
 	* il_hdr.c:457: Changed from char* to ILbyte*.
 	* il_icns.h:24,30: Changed from ILbyte to char.
 	* il_size.c: Added #ifdefs for when user has declared IL_NO_XXX.  Changed error to ENUM instead of PARAM.
@@ -410,7 +410,7 @@
 	* il_pic.c (readScanline):294-295: Added check for alpha channel.
 	* il_pic.c: Added ilSetError calls throughout. 
 	* il_sgi.c (iLoadSgiInternal): Fixed bug #1060946 - Removed IL_LUMINANCE_ALPHA filetype.
-	* WindowsTest.cpp:52,53: Changed border size to accomodate Windows Vista/7.
+	* WindowsTest.cpp:52,53: Changed border size to accommodate Windows Vista/7.
 	* il_endian.h:20: Changed to give __BIG_ENDIAN__ a value of 1.  The Google cached page of
 	http://74.125.47.132/search?q=cache:YfSl36C2pAQJ:patch-tracking.debian.net/patch/series/view/devil/1.7.2-1/00_endian_and_ILvoid_fixes.diff+devil+big+endian&hl=en&ct=clnk&cd=11&gl=us&lr=lang_en
 	has this patch (Nov. 24, 2008 cache).
@@ -597,7 +597,7 @@ Up to 2009-01-02 (since 1.7.5 release) Denton Woods <doomwiz@users.sf.net>
 	* Fixed bug in iRegisterLoad (https://sourceforge.net/forum/message.php?msg_id=5973761).
 	* Changed seek functions in il_files.c to return ILint.
 	* Added rpcsal.h and sal.h #includes to ilut.h for DX10.
-	* Added IL_MAX_QUANT_INDICES to use instead of IL_MAX_QUANT_INDEXS (mispelled).
+	* Added IL_MAX_QUANT_INDICES to use instead of IL_MAX_QUANT_INDEXS (misspelled).
 	* Added WBMP support (loading and saving).
 	* EXR files can now be loaded as file streams and lumps.
 	* Changed iNeuQuant to take number of colors in palette.

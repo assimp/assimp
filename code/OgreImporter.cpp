@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,13 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-
-
 #include "OgreImporter.h"
 #include "OgreBinarySerializer.h"
 #include "OgreXmlSerializer.h"
-#include "../include/assimp/Importer.hpp"
-#include <boost/scoped_ptr.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
+#include <memory>
 
 static const aiImporterDesc desc = {
     "Ogre3D Mesh Importer",
@@ -110,7 +110,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
         MemoryStreamReader reader(f);
 
         // Import mesh
-        boost::scoped_ptr<Mesh> mesh(OgreBinarySerializer::ImportMesh(&reader));
+        std::unique_ptr<Mesh> mesh(OgreBinarySerializer::ImportMesh(&reader));
 
         // Import skeleton
         OgreBinarySerializer::ImportSkeleton(pIOHandler, mesh.get());
@@ -125,12 +125,12 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
     else
     {
         /// @note XmlReader does not take ownership of f, hence the scoped ptr.
-        boost::scoped_ptr<IOStream> scopedFile(f);
-        boost::scoped_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
-        boost::scoped_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+        std::unique_ptr<IOStream> scopedFile(f);
+        std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
+        std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
 
         // Import mesh
-        boost::scoped_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(reader.get()));
+        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(reader.get()));
 
         // Import skeleton
         OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh.get());

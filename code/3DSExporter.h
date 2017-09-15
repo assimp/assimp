@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,10 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_3DSEXPORTER_H_INC
 
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "StreamWriter.h"
-#include "./../include/assimp/material.h"
+#include <assimp/material.h>
 
 struct aiScene;
 struct aiNode;
@@ -64,7 +65,7 @@ namespace Assimp
 class Discreet3DSExporter
 {
 public:
-    Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* pScene);
+    Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* pScene);
 
 private:
 
@@ -80,6 +81,7 @@ private:
     void WriteString(const aiString& s);
     void WriteColor(const aiColor3D& color);
     void WritePercentChunk(float f);
+    void WritePercentChunk(double f);
 
 private:
 

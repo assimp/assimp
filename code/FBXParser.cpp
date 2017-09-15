@@ -281,7 +281,7 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
     unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
     ai_assert(length > 0);
 
-    const char* out;
+    const char* out = nullptr;
     const uint64_t id = strtoul10_64(t.begin(),&out,&length);
     if (out > t.end()) {
         err_out = "failed to parse ID (text)";
@@ -327,7 +327,7 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out)
         return 0;
     }
 
-    const char* out;
+    const char* out = nullptr;
     const size_t id = static_cast<size_t>(strtoul10_64(t.begin() + 1,&out,&length));
     if (out > t.end()) {
         err_out = "failed to parse ID";
@@ -440,7 +440,7 @@ int64_t ParseTokenAsInt64(const Token& t, const char*& err_out)
     unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
     ai_assert(length > 0);
 
-    const char* out;
+    const char* out = nullptr;
     const int64_t id = strtol10_64(t.begin(), &out, &length);
     if (out > t.end()) {
         err_out = "failed to parse Int64 (text)";

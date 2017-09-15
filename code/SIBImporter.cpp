@@ -827,7 +827,7 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
 static void CheckVersion(StreamReaderLE* stream)
 {
     uint32_t version = stream->GetU4();
-    if ( version != 1 ) {
+    if ( version < 1 || version > 2 ) {
         throw DeadlyImportError( "SIB: Unsupported file version." );
     }
 }

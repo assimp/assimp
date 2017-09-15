@@ -650,9 +650,9 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 Write<float>(&chunk,l->mAttenuationQuadratic);
             }
 
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorDiffuse);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorSpecular);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorAmbient);
+            Write<aiColor3D>(&chunk,l->mColorDiffuse);
+            Write<aiColor3D>(&chunk,l->mColorSpecular);
+            Write<aiColor3D>(&chunk,l->mColorAmbient);
 
             if (l->mType == aiLightSource_SPOT) {
                 Write<float>(&chunk,l->mAngleInnerCone);

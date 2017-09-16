@@ -142,6 +142,17 @@ inline size_t Write<aiVector3D>(IOStream * stream, const aiVector3D& v)
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
+inline size_t Write<aiColor3D>(IOStream * stream, const aiColor3D& v)
+{
+    size_t t = Write<float>(stream,v.r);
+    t += Write<float>(stream,v.g);
+    t += Write<float>(stream,v.b);
+    return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
 inline size_t Write<aiColor4D>(IOStream * stream, const aiColor4D& v)
 {
     size_t t = Write<float>(stream,v.r);
@@ -639,9 +650,9 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 Write<float>(&chunk,l->mAttenuationQuadratic);
             }
 
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorDiffuse);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorSpecular);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorAmbient);
+            Write<aiColor3D>(&chunk,l->mColorDiffuse);
+            Write<aiColor3D>(&chunk,l->mColorSpecular);
+            Write<aiColor3D>(&chunk,l->mColorAmbient);
 
             if (l->mType == aiLightSource_SPOT) {
                 Write<float>(&chunk,l->mAngleInnerCone);

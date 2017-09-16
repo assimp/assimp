@@ -24,8 +24,6 @@ os:
   - linux
   - osx
 
-osx_image: xcode8.3
-
 env:
   global:
   # COVERITY_SCAN_TOKEN
@@ -52,7 +50,7 @@ matrix:
       env: LINUX=1 SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF
     - os: osx
       compiler: clang
-      osx_image: xcode8.2
+      osx_image: xcode8.3
       env:
 
 install:

@@ -201,7 +201,7 @@ static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
     //ConvertUTF16toUTF8(&start, end, &dest, limit, lenientConversion);
     //*dest = '\0';
 
-    str[str.size()-1] = '\0';
+    str[str.size()] = '\0';
     // Return the final string.
     aiString result = aiString((const char *)&str[0]);
     //delete[] str;
@@ -827,7 +827,7 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
 static void CheckVersion(StreamReaderLE* stream)
 {
     uint32_t version = stream->GetU4();
-    if ( version != 1 ) {
+    if ( version < 1 || version > 2 ) {
         throw DeadlyImportError( "SIB: Unsupported file version." );
     }
 }

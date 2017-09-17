@@ -110,6 +110,7 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     }
 
     ExportMeshes();
+    MergeMeshes();
 
     ExportScene();
 
@@ -739,6 +740,27 @@ void glTF2Exporter::ExportMeshes()
             Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
             meshNode->skeletons.push_back(rootJoint);
             meshNode->skin = skinRef;
+        }
+    }
+}
+
+void glTF2Exporter::MergeMeshes()
+{
+    for (unsigned int n = 0; n < mAsset->nodes.Size(); ++n) {
+        Ref<Node> node = mAsset->nodes.Get(n);
+
+        unsigned int nMeshes = node->meshes.size();
+
+        if (nMeshes) {
+            Ref<Mesh> firstMesh = node->meshes.at(0);
+
+            for (unsigned int m = 1; m < nMeshes; ++m) {
+                Ref<Mesh> mesh = node->meshes.at(m);
+                Mesh::Primitive primitive = mesh->primitives.at(0);
+                firstMesh->primitives.push_back(primitive);
+            }
+
+            node->meshes.erase(node->meshes.begin() + 1, node->meshes.end());
         }
     }
 }

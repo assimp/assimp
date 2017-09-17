@@ -518,13 +518,22 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
     }
 
     if (node.mesh) {
-        ainode->mNumMeshes = 1;
-        ainode->mMeshes = new unsigned int[1];
 
-        int k = 0;
         int idx = node.mesh.GetIndex();
 
-        for (unsigned int j = meshOffsets[idx]; j < meshOffsets[idx + 1]; ++j, ++k) {
+        ai_assert(idx >= 0 && idx < meshOffsets.size());
+
+        unsigned int offBegin = meshOffsets[idx];
+        unsigned int offEnd = meshOffsets[idx + 1];
+        int k = 0;
+        
+        ai_assert(offEnd >= offBegin);
+
+        ainode->mNumMeshes = offEnd - offBegin;
+        ainode->mMeshes = new unsigned int[ainode->mNumMeshes];
+
+        for (unsigned int j = offBegin; j < offEnd; ++j, ++k) {
+            ai_assert(k < ainode->mNumMeshes);
             ainode->mMeshes[k] = j;
         }
     }

@@ -934,9 +934,16 @@ inline void Node::Read(Value& obj, Asset& r)
     }
 
     if (Value* mesh = FindUInt(obj, "mesh")) {
+        //unsigned numMeshes = (unsigned)meshes->Size();
+        unsigned numMeshes = 1;
+
+        //std::vector<unsigned int> meshList;
+
+        this->meshes.reserve(numMeshes);
+
         Ref<Mesh> meshRef = r.meshes.Retrieve((*mesh).GetUint());
 
-        if (meshRef) this->mesh = meshRef;
+        if (meshRef) this->meshes.push_back(meshRef);
     }
 
     if (Value* camera = FindUInt(obj, "camera")) {

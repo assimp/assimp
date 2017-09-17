@@ -476,15 +476,16 @@ void glTF2Exporter::ExportMaterials()
  */
 bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
 {
-
-    if (nodeIn->mesh && meshID.compare(nodeIn->mesh->id) == 0) {
-        meshNode = nodeIn;
-        return true;
+    for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
+        if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
+          meshNode = nodeIn;
+          return true;
+        }
     }
 
     for (unsigned int i = 0; i < nodeIn->children.size(); ++i) {
         if(FindMeshNode(nodeIn->children[i], meshNode, meshID)) {
-            return true;
+          return true;
         }
     }
 
@@ -755,8 +756,8 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode* n)
         CopyValue(n->mTransformation, node->matrix.value);
     }
 
-    if (n->mNumMeshes > 0) {
-        node->mesh = mAsset->meshes.Get(n->mMeshes[0]);
+    for (unsigned int i = 0; i < n->mNumMeshes; ++i) {
+        node->meshes.push_back(mAsset->meshes.Get(n->mMeshes[i]));
     }
 
     for (unsigned int i = 0; i < n->mNumChildren; ++i) {
@@ -784,8 +785,8 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
         CopyValue(n->mTransformation, node->matrix.value);
     }
 
-    if (n->mNumMeshes > 0) {
-        node->mesh = mAsset->meshes.Get(n->mMeshes[0]);
+    for (unsigned int i = 0; i < n->mNumMeshes; ++i) {
+        node->meshes.push_back(mAsset->meshes.Get(n->mMeshes[i]));
     }
 
     for (unsigned int i = 0; i < n->mNumChildren; ++i) {

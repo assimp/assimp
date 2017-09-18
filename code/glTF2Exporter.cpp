@@ -424,20 +424,11 @@ void glTF2Exporter::ExportMaterials()
         mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
         mat->Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
 
-        bool foundAlphaMode = false;
-        for (size_t i = 0; i < mat->mNumProperties; ++i) {
-            aiMaterialProperty *prop = mat->mProperties[i];
-            if (prop->mKey != aiString("$mat.gltf.alphaMode"))
-                continue;
+        aiString alphaMode;
 
-            std::string alphaMode;
-            for (size_t c = 0; c < prop->mDataLength; ++c)
-                alphaMode += prop->mData[c];
-            m->alphaMode = alphaMode;
-            foundAlphaMode = true;
-        }
-
-        if (!foundAlphaMode) {
+        if (mat->Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) == AI_SUCCESS) {
+            m->alphaMode = alphaMode.C_Str();
+        } else {
             float opacity;
 
             if (mat->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {

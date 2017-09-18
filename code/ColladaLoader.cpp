@@ -674,7 +674,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     // create morph target meshes if any
     std::vector<aiMesh*> targetMeshes;
     std::vector<float> targetWeights;
-    Collada::MorphMethod method;
+    Collada::MorphMethod method = Collada::Normalized;
 
     for(std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin();
         it != pParser.mControllerLibrary.end(); it++)

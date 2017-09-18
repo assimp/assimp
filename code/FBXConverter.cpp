@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 
 #include <assimp/scene.h>
+
 #include <tuple>
 #include <memory>
-
 #include <iterator>
 #include <vector>
 
@@ -931,7 +931,7 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
         const TransformationComp comp = static_cast< TransformationComp >( i );
 
         if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
-            comp == TransformationComp_GeometricScaling || comp == TransformationComp_GeometricRotation || comp == TransformationComp_GeometricTranslation ) {
+                comp == TransformationComp_GeometricScaling || comp == TransformationComp_GeometricRotation || comp == TransformationComp_GeometricTranslation ) {
             continue;
         }
 
@@ -949,8 +949,7 @@ std::string Converter::NameTransformationChainNode( const std::string& name, Tra
     return name + std::string( MAGIC_NODE_TAG ) + "_" + NameTransformationComp( comp );
 }
 
-void Converter::GenerateTransformationNodeChain( const Model& model,
-    std::vector<aiNode*>& output_nodes )
+void Converter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes )
 {
     const PropertyTable& props = model.Props();
     const Model::RotOrder rot = model.RotationOrder();
@@ -3124,7 +3123,6 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
     }
 }
 
-
 void Converter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
     const aiVector3D& def_value,
     double& maxTime,
@@ -3145,7 +3143,6 @@ void Converter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, con
 
         valOut[ i ].mTime = temp[ i ].mTime;
 
-
         GetRotationMatrix( order, temp[ i ].mValue, m );
         aiQuaternion quat = aiQuaternion( aiMatrix3x3( m ) );
 
@@ -3163,7 +3160,6 @@ void Converter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, con
         valOut[ i ].mValue = quat;
     }
 }
-
 
 void Converter::ConvertTransformOrder_TRStoSRT( aiQuatKey* out_quat, aiVectorKey* out_scale,
     aiVectorKey* out_translation,
@@ -3223,7 +3219,6 @@ void Converter::ConvertTransformOrder_TRStoSRT( aiQuatKey* out_quat, aiVectorKey
     }
 }
 
-
 aiQuaternion Converter::EulerToQuaternion( const aiVector3D& rot, Model::RotOrder order )
 {
     aiMatrix4x4 m;
@@ -3231,7 +3226,6 @@ aiQuaternion Converter::EulerToQuaternion( const aiVector3D& rot, Model::RotOrde
 
     return aiQuaternion( aiMatrix3x3( m ) );
 }
-
 
 void Converter::ConvertScaleKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
     int64_t start, int64_t stop,
@@ -3253,7 +3247,6 @@ void Converter::ConvertScaleKeys( aiNodeAnim* na, const std::vector<const Animat
         InterpolateKeys( na->mScalingKeys, keys, inputs, aiVector3D( 1.0f, 1.0f, 1.0f ), maxTime, minTime );
 }
 
-
 void Converter::ConvertTranslationKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
     const LayerMap& /*layers*/,
     int64_t start, int64_t stop,
@@ -3271,7 +3264,6 @@ void Converter::ConvertTranslationKeys( aiNodeAnim* na, const std::vector<const 
     if ( keys.size() > 0 )
         InterpolateKeys( na->mPositionKeys, keys, inputs, aiVector3D( 0.0f, 0.0f, 0.0f ), maxTime, minTime );
 }
-
 
 void Converter::ConvertRotationKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
     const LayerMap& /*layers*/,
@@ -3294,7 +3286,8 @@ void Converter::ConvertRotationKeys( aiNodeAnim* na, const std::vector<const Ani
 
 void Converter::TransferDataToScene()
 {
-    ai_assert( !out->mMeshes && !out->mNumMeshes );
+    ai_assert( !out->mMeshes );
+    ai_assert( !out->mNumMeshes );
 
     // note: the trailing () ensures initialization with NULL - not
     // many C++ users seem to know this, so pointing it out to avoid

@@ -866,8 +866,8 @@ void ColladaExporter::WriteController( size_t pIndex)
 
     std::vector<ai_real> bind_poses;
     bind_poses.reserve(mesh->mNumBones * 16);
-    for( size_t i = 0; i < mesh->mNumBones; ++i)
-        for( size_t j = 0; j < 4; ++j)
+    for(unsigned int i = 0; i < mesh->mNumBones; ++i)
+        for( unsigned int j = 0; j < 4; ++j)
             bind_poses.insert(bind_poses.end(), mesh->mBones[i]->mOffsetMatrix[j], mesh->mBones[i]->mOffsetMatrix[j] + 4);
 
     WriteFloatArray( idstr + "-skin-bind_poses", FloatType_Mat4x4, (const ai_real*) bind_poses.data(), bind_poses.size() / 16);
@@ -924,11 +924,11 @@ void ColladaExporter::WriteController( size_t pIndex)
 
     ai_uint weight_index = 0;
     std::vector<ai_int> joint_weight_indices(2 * joint_weight_indices_length, (ai_int)-1);
-    for( size_t i = 0; i < mesh->mNumBones; ++i)
-        for( size_t j = 0; j < mesh->mBones[i]->mNumWeights; ++j)
+    for( unsigned int i = 0; i < mesh->mNumBones; ++i)
+        for( unsigned j = 0; j < mesh->mBones[i]->mNumWeights; ++j)
         {
             unsigned int vId = mesh->mBones[i]->mWeights[j].mVertexId;
-            for( size_t k = 0; k < num_influences[vId]; ++k)
+            for( ai_uint k = 0; k < num_influences[vId]; ++k)
             {
                 if (joint_weight_indices[2 * (accum_influences[vId] + k)] == -1)
                 {

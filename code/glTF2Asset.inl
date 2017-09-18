@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -43,11 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
-
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-	// Header files, Open3DGC.
-#	include <Open3DGC/o3dgcSC3DMCDecoder.h>
-#endif
 
 using namespace Assimp;
 
@@ -128,6 +123,18 @@ namespace {
         return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
     }
 
+    inline Value* FindNumber(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
+    }
+
+    inline Value* FindUInt(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsUint()) ? &it->value : 0;
+    }
+
     inline Value* FindArray(Value& val, const char* id)
     {
         Value::MemberIterator it = val.FindMember(id);
@@ -176,7 +183,7 @@ inline void LazyDict<T>::AttachToDocument(Document& doc)
     }
 
     if (container) {
-        mDict = FindObject(*container, mDictId);
+        mDict = FindArray(*container, mDictId);
     }
 }
 
@@ -187,18 +194,11 @@ inline void LazyDict<T>::DetachFromDocument()
 }
 
 template<class T>
-Ref<T> LazyDict<T>::Get(unsigned int i)
+Ref<T> LazyDict<T>::Retrieve(unsigned int i)
 {
-    return Ref<T>(mObjs, i);
-}
 
-template<class T>
-Ref<T> LazyDict<T>::Get(const char* id)
-{
-    id = T::TranslateId(mAsset, id);
-
-    typename Dict::iterator it = mObjsById.find(id);
-    if (it != mObjsById.end()) { // already created?
+    typename Dict::iterator it = mObjsByOIndex.find(i);
+    if (it != mObjsByOIndex.end()) {// already created?
         return Ref<T>(mObjs, it->second);
     }
 
@@ -207,20 +207,44 @@ Ref<T> LazyDict<T>::Get(const char* id)
         throw DeadlyImportError("GLTF: Missing section \"" + std::string(mDictId) + "\"");
     }
 
-    Value::MemberIterator obj = mDict->FindMember(id);
-    if (obj == mDict->MemberEnd()) {
-        throw DeadlyImportError("GLTF: Missing object with id \"" + std::string(id) + "\" in \"" + mDictId + "\"");
-    }
-    if (!obj->value.IsObject()) {
-        throw DeadlyImportError("GLTF: Object with id \"" + std::string(id) + "\" is not a JSON object");
+    if (!mDict->IsArray()) {
+        throw DeadlyImportError("GLTF: Field is not an array \"" + std::string(mDictId) + "\"");
     }
 
-    // create an instance of the given type
+    Value &obj = (*mDict)[i];
+
+    if (!obj.IsObject()) {
+        throw DeadlyImportError("GLTF: Object at index \"" + std::to_string(i) + "\" is not a JSON object");
+    }
+
     T* inst = new T();
-    inst->id = id;
-    ReadMember(obj->value, "name", inst->name);
-    inst->Read(obj->value, mAsset);
+    inst->id = std::string(mDictId) + "_" + std::to_string(i);
+    inst->oIndex = i;
+    ReadMember(obj, "name", inst->name);
+    inst->Read(obj, mAsset);
+
     return Add(inst);
+}
+
+template<class T>
+Ref<T> LazyDict<T>::Get(unsigned int i)
+{
+
+    return Ref<T>(mObjs, i);
+
+}
+
+template<class T>
+Ref<T> LazyDict<T>::Get(const char* id)
+{
+    id = T::TranslateId(mAsset, id);
+
+    typename IdDict::iterator it = mObjsById.find(id);
+    if (it != mObjsById.end()) { // already created?
+        return Ref<T>(mObjs, it->second);
+    }
+
+    return Ref<T>();
 }
 
 template<class T>
@@ -228,6 +252,7 @@ Ref<T> LazyDict<T>::Add(T* obj)
 {
     unsigned int idx = unsigned(mObjs.size());
     mObjs.push_back(obj);
+    mObjsByOIndex[obj->oIndex] = idx;
     mObjsById[obj->id] = idx;
     mAsset.mUsedIds[obj->id] = true;
     return Ref<T>(mObjs, idx);
@@ -241,8 +266,10 @@ Ref<T> LazyDict<T>::Create(const char* id)
         throw DeadlyImportError("GLTF: two objects with the same ID exist");
     }
     T* inst = new T();
+    unsigned int idx = unsigned(mObjs.size());
     inst->id = id;
-    inst->index = mObjs.size();
+    inst->index = idx;
+    inst->oIndex = idx;
     return Add(inst);
 }
 
@@ -263,11 +290,6 @@ inline Buffer::~Buffer()
 
 inline const char* Buffer::TranslateId(Asset& r, const char* id)
 {
-    // Compatibility with old spec
-    if (r.extensionsUsed.KHR_binary_glTF && strcmp(id, "KHR_binary_glTF") == 0) {
-        return "binary_glTF";
-    }
-
     return id;
 }
 
@@ -310,7 +332,9 @@ inline void Buffer::Read(Value& obj, Asset& r)
     }
     else { // Local file
         if (byteLength > 0) {
-            IOStream* file = r.OpenFile(uri, "rb");
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir + "/") : "";
+
+            IOStream* file = r.OpenFile(dir + uri, "rb");
             if (file) {
                 bool ok = LoadFromStream(*file, byteLength);
                 delete file;
@@ -437,9 +461,9 @@ inline void Buffer::Grow(size_t amount)
 
 inline void BufferView::Read(Value& obj, Asset& r)
 {
-    const char* bufferId = MemberOrDefault<const char*>(obj, "buffer", 0);
-    if (bufferId) {
-        buffer = r.buffers.Get(bufferId);
+
+    if (Value* bufferVal = FindUInt(obj, "buffer")) {
+        buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
@@ -452,9 +476,9 @@ inline void BufferView::Read(Value& obj, Asset& r)
 
 inline void Accessor::Read(Value& obj, Asset& r)
 {
-    const char* bufferViewId = MemberOrDefault<const char*>(obj, "bufferView", 0);
-    if (bufferViewId) {
-        bufferView = r.bufferViews.Get(bufferViewId);
+
+    if (Value* bufferViewVal = FindUInt(obj, "bufferView")) {
+        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
@@ -601,29 +625,6 @@ inline Image::Image()
 
 inline void Image::Read(Value& obj, Asset& r)
 {
-    // Check for extensions first (to detect binary embedded data)
-    if (Value* extensions = FindObject(obj, "extensions")) {
-        if (r.extensionsUsed.KHR_binary_glTF) {
-            if (Value* ext = FindObject(*extensions, "KHR_binary_glTF")) {
-
-                width  = MemberOrDefault(*ext, "width", 0);
-                height = MemberOrDefault(*ext, "height", 0);
-
-                ReadMember(*ext, "mimeType", mimeType);
-
-                const char* bufferViewId;
-                if (ReadMember(*ext, "bufferView", bufferViewId)) {
-                    Ref<BufferView> bv = r.bufferViews.Get(bufferViewId);
-                    if (bv) {
-                        mDataLength = bv->byteLength;
-                        mData = new uint8_t[mDataLength];
-                        memcpy(mData, bv->buffer->GetPointer() + bv->byteOffset, mDataLength);
-                    }
-                }
-            }
-        }
-    }
-
     if (!mDataLength) {
         if (Value* uri = FindString(obj, "uri")) {
             const char* uristr = uri->GetString();
@@ -671,6 +672,7 @@ inline void Sampler::Read(Value& obj, Asset& r)
 {
     SetDefaults();
 
+    ReadMember(obj, "name", name);
     ReadMember(obj, "magFilter", magFilter);
     ReadMember(obj, "minFilter", minFilter);
     ReadMember(obj, "wrapS", wrapS);
@@ -679,34 +681,61 @@ inline void Sampler::Read(Value& obj, Asset& r)
 
 inline void Sampler::SetDefaults()
 {
-    magFilter = SamplerMagFilter_Linear;
-    minFilter = SamplerMinFilter_Linear;
-    wrapS = SamplerWrap_Repeat;
-    wrapT = SamplerWrap_Repeat;
+    //only wrapping modes have defaults
+    wrapS = SamplerWrap::Repeat;
+    wrapT = SamplerWrap::Repeat;
+    magFilter = SamplerMagFilter::UNSET;
+    minFilter = SamplerMinFilter::UNSET;
 }
 
 inline void Texture::Read(Value& obj, Asset& r)
 {
-    const char* sourcestr;
-    if (ReadMember(obj, "source", sourcestr)) {
-        source = r.images.Get(sourcestr);
+    if (Value* sourceVal = FindUInt(obj, "source")) {
+        source = r.images.Retrieve(sourceVal->GetUint());
     }
 
-    const char* samplerstr;
-    if (ReadMember(obj, "sampler", samplerstr)) {
-        sampler = r.samplers.Get(samplerstr);
+    if (Value* samplerVal = FindUInt(obj, "sampler")) {
+        sampler = r.samplers.Retrieve(samplerVal->GetUint());
     }
 }
 
 namespace {
-    inline void ReadMaterialProperty(Asset& r, Value& vals, const char* propName, TexProperty& out)
+    inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out)
+    {
+        if (Value* index = FindUInt(*prop, "index")) {
+            out.texture = r.textures.Retrieve(index->GetUint());
+        }
+
+        if (Value* texcoord = FindUInt(*prop, "texCoord")) {
+            out.texCoord = texcoord->GetUint();
+        }
+    }
+
+    inline void ReadTextureProperty(Asset& r, Value& vals, const char* propName, TextureInfo& out)
     {
         if (Value* prop = FindMember(vals, propName)) {
-            if (prop->IsString()) {
-                out.texture = r.textures.Get(prop->GetString());
+            SetTextureProperties(r, prop, out);
+        }
+    }
+
+    inline void ReadTextureProperty(Asset& r, Value& vals, const char* propName, NormalTextureInfo& out)
+    {
+        if (Value* prop = FindMember(vals, propName)) {
+            SetTextureProperties(r, prop, out);
+
+            if (Value* scale = FindNumber(*prop, "scale")) {
+                out.scale = scale->GetDouble();
             }
-            else {
-                ReadValue(*prop, out.color);
+        }
+    }
+
+    inline void ReadTextureProperty(Asset& r, Value& vals, const char* propName, OcclusionTextureInfo& out)
+    {
+        if (Value* prop = FindMember(vals, propName)) {
+            SetTextureProperties(r, prop, out);
+
+            if (Value* strength = FindNumber(*prop, "strength")) {
+                out.strength = strength->GetDouble();
             }
         }
     }
@@ -716,59 +745,67 @@ inline void Material::Read(Value& material, Asset& r)
 {
     SetDefaults();
 
-    if (Value* values = FindObject(material, "values")) {
-        ReadMaterialProperty(r, *values, "ambient", this->ambient);
-        ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
-        ReadMaterialProperty(r, *values, "specular", this->specular);
-
-        ReadMember(*values, "transparency", transparency);
-        ReadMember(*values, "shininess", shininess);
+    if (Value* pbrMetallicRoughness = FindObject(material, "pbrMetallicRoughness")) {
+        ReadMember(*pbrMetallicRoughness, "baseColorFactor", this->pbrMetallicRoughness.baseColorFactor);
+        ReadTextureProperty(r, *pbrMetallicRoughness, "baseColorTexture", this->pbrMetallicRoughness.baseColorTexture);
+        ReadTextureProperty(r, *pbrMetallicRoughness, "metallicRoughnessTexture", this->pbrMetallicRoughness.metallicRoughnessTexture);
+        ReadMember(*pbrMetallicRoughness, "metallicFactor", this->pbrMetallicRoughness.metallicFactor);
+        ReadMember(*pbrMetallicRoughness, "roughnessFactor", this->pbrMetallicRoughness.roughnessFactor);
     }
 
+    ReadTextureProperty(r, material, "normalTexture", this->normalTexture);
+    ReadTextureProperty(r, material, "occlusionTexture", this->occlusionTexture);
+    ReadTextureProperty(r, material, "emissiveTexture", this->emissiveTexture);
+    ReadMember(material, "emissiveFactor", this->emissiveFactor);
+
+    ReadMember(material, "doubleSided", this->doubleSided);
+    ReadMember(material, "alphaMode", this->alphaMode);
+    ReadMember(material, "alphaCutoff", this->alphaCutoff);
+
     if (Value* extensions = FindObject(material, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_common) {
-            if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
-                if (Value* tnq = FindString(*ext, "technique")) {
-                    const char* t = tnq->GetString();
-                    if      (strcmp(t, "BLINN") == 0)    technique = Technique_BLINN;
-                    else if (strcmp(t, "PHONG") == 0)    technique = Technique_PHONG;
-                    else if (strcmp(t, "LAMBERT") == 0)  technique = Technique_LAMBERT;
-                    else if (strcmp(t, "CONSTANT") == 0) technique = Technique_CONSTANT;
-                }
+        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+            if (Value* pbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
+                PbrSpecularGlossiness pbrSG;
 
-                if (Value* values = FindObject(*ext, "values")) {
-                    ReadMaterialProperty(r, *values, "ambient", this->ambient);
-                    ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
-                    ReadMaterialProperty(r, *values, "specular", this->specular);
+                ReadMember(*pbrSpecularGlossiness, "diffuseFactor", pbrSG.diffuseFactor);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "diffuseTexture", pbrSG.diffuseTexture);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "specularGlossinessTexture", pbrSG.specularGlossinessTexture);
+                ReadMember(*pbrSpecularGlossiness, "specularFactor", pbrSG.specularFactor);
+                ReadMember(*pbrSpecularGlossiness, "glossinessFactor", pbrSG.glossinessFactor);
 
-                    ReadMember(*values, "doubleSided", doubleSided);
-                    ReadMember(*values, "transparent", transparent);
-                    ReadMember(*values, "transparency", transparency);
-                    ReadMember(*values, "shininess", shininess);
-                }
+                this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
     }
 }
 
 namespace {
-    void SetVector(vec4& v, float x, float y, float z, float w)
-        { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
+    void SetVector(vec4& v, const float(&in)[4])
+        { v[0] = in[0]; v[1] = in[1]; v[2] = in[2]; v[3] = in[3]; }
+
+    void SetVector(vec3& v, const float(&in)[3])
+        { v[0] = in[0]; v[1] = in[1]; v[2] = in[2]; }
 }
 
 inline void Material::SetDefaults()
 {
-    SetVector(ambient.color, 0, 0, 0, 1);
-    SetVector(diffuse.color, 0, 0, 0, 1);
-    SetVector(specular.color, 0, 0, 0, 1);
-    SetVector(emission.color, 0, 0, 0, 1);
+    //pbr materials
+    SetVector(pbrMetallicRoughness.baseColorFactor, defaultBaseColor);
+    pbrMetallicRoughness.metallicFactor = 1.0;
+    pbrMetallicRoughness.roughnessFactor = 1.0;
 
+    SetVector(emissiveFactor, defaultEmissiveFactor);
+    alphaMode = "OPAQUE";
+    alphaCutoff = 0.5;
     doubleSided = false;
-    transparent = false;
-    transparency = 1.0;
-    shininess = 0.0;
+}
 
-    technique = Technique_undefined;
+inline void PbrSpecularGlossiness::SetDefaults()
+{
+    //pbrSpecularGlossiness properties
+    SetVector(diffuseFactor, defaultDiffuseFactor);
+    SetVector(specularFactor, defaultSpecularFactor);
+    glossinessFactor = 1.0;
 }
 
 namespace {
@@ -808,6 +845,10 @@ namespace {
 
 inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 {
+    if (Value* name = FindMember(pJSON_Object, "name")) {
+        this->name = name->GetString();
+    }
+
 	/****************** Mesh primitives ******************/
 	if (Value* primitives = FindArray(pJSON_Object, "primitives")) {
         this->primitives.resize(primitives->Size());
@@ -819,7 +860,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
             if (Value* attrs = FindObject(primitive, "attributes")) {
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
-                    if (!it->value.IsString()) continue;
+                    if (!it->value.IsUint()) continue;
                     const char* attr = it->name.GetString();
                     // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
@@ -829,261 +870,21 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);
-						(*vec)[idx] = pAsset_Root.accessors.Get(it->value.GetString());
+						(*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
                     }
                 }
             }
 
-            if (Value* indices = FindString(primitive, "indices")) {
-				prim.indices = pAsset_Root.accessors.Get(indices->GetString());
+            if (Value* indices = FindUInt(primitive, "indices")) {
+				prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
             }
 
-            if (Value* material = FindString(primitive, "material")) {
-				prim.material = pAsset_Root.materials.Get(material->GetString());
+            if (Value* material = FindUInt(primitive, "material")) {
+				prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
             }
         }
     }
-
-	/****************** Mesh extensions ******************/
-	Value* json_extensions = FindObject(pJSON_Object, "extensions");
-
-	if(json_extensions == nullptr) goto mr_skip_extensions;
-
-	for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++)
-	{
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-        if(it_memb->name.GetString() == std::string("Open3DGC-compression"))
-		{
-			// Search for compressed data.
-			// Compressed data contain description of part of "buffer" which is encoded. This part must be decoded and
-			// new data will replace old encoded part by request. In fact \"compressedData\" is kind of "accessor" structure.
-			Value* comp_data = FindObject(it_memb->value, "compressedData");
-
-			if(comp_data == nullptr) throw DeadlyImportError("GLTF: \"Open3DGC-compression\" must has \"compressedData\".");
-
-			DefaultLogger::get()->info("GLTF: Decompressing Open3DGC data.");
-
-			/************** Read data from JSON-document **************/
-			#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut) \
-				if(!ReadMember(*comp_data, pFieldName, pOut)) \
-				{ \
-					throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pFieldName + "\"."); \
-				}
-
-			const char* mode_str;
-			const char* type_str;
-			ComponentType component_type;
-			SCompression_Open3DGC* ext_o3dgc = new SCompression_Open3DGC;
-
-			MESH_READ_COMPRESSEDDATA_MEMBER("buffer", ext_o3dgc->Buffer);
-			MESH_READ_COMPRESSEDDATA_MEMBER("byteOffset", ext_o3dgc->Offset);
-			MESH_READ_COMPRESSEDDATA_MEMBER("componentType", component_type);
-			MESH_READ_COMPRESSEDDATA_MEMBER("type", type_str);
-			MESH_READ_COMPRESSEDDATA_MEMBER("count", ext_o3dgc->Count);
-			MESH_READ_COMPRESSEDDATA_MEMBER("mode", mode_str);
-			MESH_READ_COMPRESSEDDATA_MEMBER("indicesCount", ext_o3dgc->IndicesCount);
-			MESH_READ_COMPRESSEDDATA_MEMBER("verticesCount", ext_o3dgc->VerticesCount);
-
-			#undef MESH_READ_COMPRESSEDDATA_MEMBER
-
-			// Check some values
-			if(strcmp(type_str, "SCALAR")) throw DeadlyImportError("GLTF: only \"SCALAR\" type is supported for compressed data.");
-			if(component_type != ComponentType_UNSIGNED_BYTE) throw DeadlyImportError("GLTF: only \"UNSIGNED_BYTE\" component type is supported for compressed data.");
-
-			// Set read/write data mode.
-			if(strcmp(mode_str, "binary") == 0)
-				ext_o3dgc->Binary = true;
-			else if(strcmp(mode_str, "ascii") == 0)
-				ext_o3dgc->Binary = false;
-			else
-				throw DeadlyImportError(std::string("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"") + mode_str + "\".");
-
-			/************************ Decoding ************************/
-			Decode_O3DGC(*ext_o3dgc, pAsset_Root);
-			Extension.push_back(ext_o3dgc);// store info in mesh extensions list.
-		}// if(it_memb->name.GetString() == "Open3DGC-compression")
-		else
-#endif
-		{
-			throw DeadlyImportError(std::string("GLTF: Unknown mesh extension: \"") + it_memb->name.GetString() + "\".");
-		}
-	}// for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); json_extensions++)
-
-mr_skip_extensions:
-
-	return;// After label some operators must be present.
 }
-
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
-{
-typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
-
-o3dgc::SC3DMCDecoder<IndicesType> decoder;
-o3dgc::IndexedFaceSet<IndicesType> ifs;
-o3dgc::BinaryStream bstream;
-uint8_t* decoded_data;
-size_t decoded_data_size = 0;
-Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
-
-	// Read data from buffer and place it in BinaryStream for decoder.
-	// Just "Count" because always is used type equivalent to uint8_t.
-	bstream.LoadFromBuffer(&buf->GetPointer()[pCompression_Open3DGC.Offset], static_cast<unsigned long>(pCompression_Open3DGC.Count));
-
-	// After decoding header we can get size of primitives.
-	if(decoder.DecodeHeader(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC header.");
-
-	/****************** Get sizes of arrays and check sizes ******************/
-	// Note. See "Limitations for meshes when using Open3DGC-compression".
-
-	// Indices
-	size_t size_coordindex = ifs.GetNCoordIndex() * 3;// See float attributes note.
-
-	if(primitives[0].indices->count != size_coordindex)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (" + std::to_string(size_coordindex) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].indices->count) + ").");
-
-	size_coordindex *= sizeof(IndicesType);
-	// Coordinates
-	size_t size_coord = ifs.GetNCoord();// See float attributes note.
-
-	if(primitives[0].attributes.position[0]->count != size_coord)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (" + std::to_string(size_coord) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.position[0]->count) + ").");
-
-	size_coord *= 3 * sizeof(float);
-	// Normals
-	size_t size_normal = ifs.GetNNormal();// See float attributes note.
-
-	if(primitives[0].attributes.normal[0]->count != size_normal)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (" + std::to_string(size_normal) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.normal[0]->count) + ").");
-
-	size_normal *= 3 * sizeof(float);
-	// Additional attributes.
-	std::vector<size_t> size_floatattr;
-	std::vector<size_t> size_intattr;
-
-	size_floatattr.resize(ifs.GetNumFloatAttributes());
-	size_intattr.resize(ifs.GetNumIntAttributes());
-
-	decoded_data_size = size_coordindex + size_coord + size_normal;
-	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
-	{
-		// size = number_of_elements * components_per_element * size_of_component.
-		// Note. But as you can see above, at first we are use this variable in meaning "count". After checking count of objects...
-		size_t tval = ifs.GetNFloatAttribute(static_cast<unsigned long>(idx));
-
-		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
-		{
-			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
-				// Check situation when encoded data contain texture coordinates but primitive not.
-				if(idx_texcoord < primitives[0].attributes.texcoord.size())
-				{
-					if(primitives[0].attributes.texcoord[idx]->count != tval)
-						throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (" + std::to_string(tval) +
-												") not equal to uncompressed (" + std::to_string(primitives[0].attributes.texcoord[idx]->count) + ").");
-
-					idx_texcoord++;
-				}
-				else
-				{
-					ifs.SetNFloatAttribute(static_cast<unsigned long>(idx), 0ul);// Disable decoding this attribute.
-				}
-
-				break;
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
-		}
-
-		tval *=  ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real);// After checking count of objects we can get size of array.
-		size_floatattr[idx] = tval;
-		decoded_data_size += tval;
-	}
-
-	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++)
-	{
-		// size = number_of_elements * components_per_element * size_of_component. See float attributes note.
-		size_t tval = ifs.GetNIntAttribute(static_cast<unsigned long>(idx));
-		switch( ifs.GetIntAttributeType(static_cast<unsigned long>(idx) ) )
-		{
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
-                break;
-
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
-		}
-
-		tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long);// See float attributes note.
-		size_intattr[idx] = tval;
-		decoded_data_size += tval;
-	}
-
-	// Create array for decoded data.
-	decoded_data = new uint8_t[decoded_data_size];
-
-	/****************** Set right array regions for decoder ******************/
-
-	auto get_buf_offset = [](Ref<Accessor>& pAccessor) -> size_t { return pAccessor->byteOffset + pAccessor->bufferView->byteOffset; };
-
-	// Indices
-	ifs.SetCoordIndex((IndicesType* const)(decoded_data + get_buf_offset(primitives[0].indices)));
-	// Coordinates
-	ifs.SetCoord((o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.position[0])));
-	// Normals
-	if(size_normal)
-	{
-		ifs.SetNormal((o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.normal[0])));
-	}
-
-	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
-	{
-		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
-		{
-			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
-				if(idx_texcoord < primitives[0].attributes.texcoord.size())
-				{
-					// See above about absent attributes.
-					ifs.SetFloatAttribute(static_cast<unsigned long>(idx), (o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
-					idx_texcoord++;
-				}
-
-				break;
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
-		}
-	}
-
-	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++) {
-		switch(ifs.GetIntAttributeType(static_cast<unsigned int>(idx))) {
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
-                break;
-
-			// ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
-		}
-	}
-
-	//
-	// Decode data
-	//
-    if ( decoder.DecodePayload( ifs, bstream ) != o3dgc::O3DGC_OK ) {
-        throw DeadlyImportError( "GLTF: can not decode Open3DGC data." );
-    }
-
-	// Set encoded region for "buffer".
-	buf->EncodedRegion_Mark(pCompression_Open3DGC.Offset, pCompression_Open3DGC.Count, decoded_data, decoded_data_size, id);
-	// No. Do not delete "output_data". After calling "EncodedRegion_Mark" bufferView is owner of "output_data".
-	// "delete [] output_data;"
-}
-#endif
 
 inline void Camera::Read(Value& obj, Asset& r)
 {
@@ -1095,79 +896,33 @@ inline void Camera::Read(Value& obj, Asset& r)
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");
 
     if (type == Camera::Perspective) {
-        perspective.aspectRatio = MemberOrDefault(*it, "aspectRatio", 0.f);
-        perspective.yfov        = MemberOrDefault(*it, "yfov", 3.1415f/2.f);
-        perspective.zfar        = MemberOrDefault(*it, "zfar", 100.f);
-        perspective.znear       = MemberOrDefault(*it, "znear", 0.01f);
+        cameraProperties.perspective.aspectRatio = MemberOrDefault(*it, "aspectRatio", 0.f);
+        cameraProperties.perspective.yfov        = MemberOrDefault(*it, "yfov", 3.1415f/2.f);
+        cameraProperties.perspective.zfar        = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.perspective.znear       = MemberOrDefault(*it, "znear", 0.01f);
     }
     else {
-        ortographic.xmag  = MemberOrDefault(obj, "xmag", 1.f);
-        ortographic.ymag  = MemberOrDefault(obj, "ymag", 1.f);
-        ortographic.zfar  = MemberOrDefault(obj, "zfar", 100.f);
-        ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag  = MemberOrDefault(obj, "xmag", 1.f);
+        cameraProperties.ortographic.ymag  = MemberOrDefault(obj, "ymag", 1.f);
+        cameraProperties.ortographic.zfar  = MemberOrDefault(obj, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
     }
-}
-
-inline void Light::Read(Value& obj, Asset& r)
-{
-    SetDefaults();
-
-    if (Value* type = FindString(obj, "type")) {
-        const char* t = type->GetString();
-        if      (strcmp(t, "ambient") == 0)     this->type = Type_ambient;
-        else if (strcmp(t, "directional") == 0) this->type = Type_directional;
-        else if (strcmp(t, "point") == 0)       this->type = Type_point;
-        else if (strcmp(t, "spot") == 0)        this->type = Type_spot;
-
-        if (this->type != Type_undefined) {
-            if (Value* vals = FindString(obj, t)) {
-                ReadMember(*vals, "color", color);
-
-                ReadMember(*vals, "constantAttenuation", constantAttenuation);
-                ReadMember(*vals, "linearAttenuation", linearAttenuation);
-                ReadMember(*vals, "quadraticAttenuation", quadraticAttenuation);
-                ReadMember(*vals, "distance", distance);
-
-                ReadMember(*vals, "falloffAngle", falloffAngle);
-                ReadMember(*vals, "falloffExponent", falloffExponent);
-            }
-        }
-    }
-}
-
-inline void Light::SetDefaults()
-{
-    #ifndef M_PI
-        const float M_PI = 3.14159265358979323846f;
-    #endif
-
-    type = Type_undefined;
-
-    SetVector(color, 0.f, 0.f, 0.f, 1.f);
-
-    constantAttenuation = 0.f;
-    linearAttenuation = 1.f;
-    quadraticAttenuation = 1.f;
-    distance = 0.f;
-
-    falloffAngle = static_cast<float>(M_PI / 2.f);
-    falloffExponent = 0.f;
 }
 
 inline void Node::Read(Value& obj, Asset& r)
 {
+
     if (Value* children = FindArray(obj, "children")) {
         this->children.reserve(children->Size());
         for (unsigned int i = 0; i < children->Size(); ++i) {
             Value& child = (*children)[i];
-            if (child.IsString()) {
+            if (child.IsUint()) {
                 // get/create the child node
-                Ref<Node> chn = r.nodes.Get(child.GetString());
+                Ref<Node> chn = r.nodes.Retrieve(child.GetUint());
                 if (chn) this->children.push_back(chn);
             }
         }
     }
-
 
     if (Value* matrix = FindArray(obj, "matrix")) {
         ReadValue(*matrix, this->matrix);
@@ -1178,38 +933,16 @@ inline void Node::Read(Value& obj, Asset& r)
         ReadMember(obj, "rotation", rotation);
     }
 
-    if (Value* meshes = FindArray(obj, "meshes")) {
-        unsigned numMeshes = (unsigned)meshes->Size();
+    if (Value* mesh = FindUInt(obj, "mesh")) {
+        Ref<Mesh> meshRef = r.meshes.Retrieve((*mesh).GetUint());
 
-        std::vector<unsigned int> meshList;
-
-        this->meshes.reserve(numMeshes);
-        for (unsigned i = 0; i < numMeshes; ++i) {
-            if ((*meshes)[i].IsString()) {
-                Ref<Mesh> mesh = r.meshes.Get((*meshes)[i].GetString());
-                if (mesh) this->meshes.push_back(mesh);
-            }
-        }
+        if (meshRef) this->mesh = meshRef;
     }
 
-    if (Value* camera = FindString(obj, "camera")) {
-        this->camera = r.cameras.Get(camera->GetString());
+    if (Value* camera = FindUInt(obj, "camera")) {
+        this->camera = r.cameras.Retrieve(camera->GetUint());
         if (this->camera)
             this->camera->id = this->id;
-    }
-
-    // TODO load "skeletons", "skin", "jointName"
-
-    if (Value* extensions = FindObject(obj, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_common) {
-
-            if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
-                if (Value* light = FindString(*ext, "light")) {
-                    this->light = r.lights.Get(light->GetString());
-                }
-            }
-
-        }
     }
 }
 
@@ -1217,25 +950,29 @@ inline void Scene::Read(Value& obj, Asset& r)
 {
     if (Value* array = FindArray(obj, "nodes")) {
         for (unsigned int i = 0; i < array->Size(); ++i) {
-            if (!(*array)[i].IsString()) continue;
-            Ref<Node> node = r.nodes.Get((*array)[i].GetString());
+            if (!(*array)[i].IsUint()) continue;
+            Ref<Node> node = r.nodes.Retrieve((*array)[i].GetUint());
             if (node)
                 this->nodes.push_back(node);
         }
     }
 }
 
-
 inline void AssetMetadata::Read(Document& doc)
 {
-    // read the version, etc.
-    float statedVersion = 0;
     if (Value* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
-        premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-        statedVersion = MemberOrDefault(*obj, "version", 0);
+        if (Value* versionString = FindString(*obj, "version")) {
+            version = versionString->GetString();
+        } else if (Value* versionNumber = FindNumber (*obj, "version")) {
+            char buf[4];
+
+            ai_snprintf(buf, 4, "%.1f", versionNumber->GetDouble());
+
+            version = buf;
+        }
 
         if (Value* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);
@@ -1243,60 +980,16 @@ inline void AssetMetadata::Read(Document& doc)
         }
     }
 
-    version = std::max(statedVersion, version);
-
-    if (version == 0) {
-        // if missing version, we'll assume version 1.0...
-        version = 1;
-    }
-
-    if (version != 1) {
-        char msg[128];
-        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %.1f", version);
-        throw DeadlyImportError(msg);
+    if (version.empty() || version[0] != '2') {
+        throw DeadlyImportError("GLTF: Unsupported glTF version: " + version);
     }
 }
-
-
 
 //
 // Asset methods implementation
 //
 
-inline void Asset::ReadBinaryHeader(IOStream& stream)
-{
-    GLB_Header header;
-    if (stream.Read(&header, sizeof(header), 1) != 1) {
-        throw DeadlyImportError("GLTF: Unable to read the file header");
-    }
-
-    if (strncmp((char*)header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic)) != 0) {
-        throw DeadlyImportError("GLTF: Invalid binary glTF file");
-    }
-
-    AI_SWAP4(header.version);
-    asset.version = header.version;
-    if (header.version != 1) {
-        throw DeadlyImportError("GLTF: Unsupported binary glTF version");
-    }
-
-    AI_SWAP4(header.sceneFormat);
-    if (header.sceneFormat != SceneFormat_JSON) {
-        throw DeadlyImportError("GLTF: Unsupported binary glTF scene format");
-    }
-
-    AI_SWAP4(header.length);
-    AI_SWAP4(header.sceneLength);
-
-    mSceneLength = static_cast<size_t>(header.sceneLength);
-
-    mBodyOffset = sizeof(header)+mSceneLength;
-    mBodyOffset = (mBodyOffset + 3) & ~3; // Round up to next multiple of 4
-
-    mBodyLength = header.length - mBodyOffset;
-}
-
-inline void Asset::Load(const std::string& pFile, bool isBinary)
+inline void Asset::Load(const std::string& pFile)
 {
     mCurrentAssetDir.clear();
     int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
@@ -1307,16 +1000,8 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
         throw DeadlyImportError("GLTF: Could not open file for reading");
     }
 
-    // is binary? then read the header
-    if (isBinary) {
-        SetAsBinary(); // also creates the body buffer
-        ReadBinaryHeader(*stream);
-    }
-    else {
-        mSceneLength = stream->FileSize();
-        mBodyLength = 0;
-    }
-
+    mSceneLength = stream->FileSize();
+    mBodyLength = 0;
 
     // read the scene data
 
@@ -1361,12 +1046,14 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
         mDicts[i]->AttachToDocument(doc);
     }
 
-
-
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
-    if (Value* scene = FindString(doc, "scene")) {
-        this->scene = scenes.Get(scene->GetString());
+    if (Value* scene = FindUInt(doc, "scene")) {
+        unsigned int sceneIndex = scene->GetUint();
+
+        Ref<Scene> s = scenes.Retrieve(sceneIndex);
+
+        this->scene = s;
     }
 
     // Clean up
@@ -1374,16 +1061,6 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
         mDicts[i]->DetachFromDocument();
     }
 }
-
-inline void Asset::SetAsBinary()
-{
-    if (!extensionsUsed.KHR_binary_glTF) {
-        extensionsUsed.KHR_binary_glTF = true;
-        mBodyBuffer = buffers.Create("binary_glTF");
-        mBodyBuffer->MarkAsSpecial();
-    }
-}
-
 
 inline void Asset::ReadExtensionsUsed(Document& doc)
 {
@@ -1401,8 +1078,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
     #define CHECK_EXT(EXT) \
         if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
-    CHECK_EXT(KHR_binary_glTF);
-    CHECK_EXT(KHR_materials_common);
+    CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
 
     #undef CHECK_EXT
 }

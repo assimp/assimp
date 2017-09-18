@@ -78,6 +78,10 @@ OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
 )
+OPTION ( ASSIMP_WERRRO
+  "Treat warnings as errors."
+  OFF
+)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -210,6 +214,11 @@ if (ASSIMP_COVERALLS)
     INCLUDE(Coveralls)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
+
+if (ASSIMP_WERROR)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
 endif()
 
 INCLUDE (FindPkgMacros)

@@ -558,7 +558,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrF(const int pAttrIdx, std::vector
 
         WordIterator wordItBegin(val, val + strlen(val));
         WordIterator wordItEnd;
-        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atof(match); });
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return static_cast<float>(atof(match)); });
     }
 }
 

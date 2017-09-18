@@ -61,6 +61,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
   ${HEADER_PATH}/defs.h
+  ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h
@@ -665,6 +666,8 @@ ADD_ASSIMP_IMPORTER( GLTF
   glTF2Asset.inl
   glTF2AssetWriter.h
   glTF2AssetWriter.inl
+  glTF2Importer.cpp
+  glTF2Importer.h
   glTF2Exporter.h
   glTF2Exporter.cpp
 )

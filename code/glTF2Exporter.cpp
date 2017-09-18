@@ -479,14 +479,14 @@ bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
 {
     for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
         if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
-          meshNode = nodeIn;
-          return true;
+            meshNode = nodeIn;
+            return true;
         }
     }
 
     for (unsigned int i = 0; i < nodeIn->children.size(); ++i) {
         if(FindMeshNode(nodeIn->children[i], meshNode, meshID)) {
-          return true;
+            return true;
         }
     }
 

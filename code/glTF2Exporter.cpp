@@ -755,31 +755,18 @@ void glTF2Exporter::MergeMeshes()
         //skip if it's 1 or less meshes per node
         if (nMeshes > 1) {
             Ref<Mesh> firstMesh = node->meshes.at(0);
-            Mesh::Primitive firstPrimitive = firstMesh->primitives.at(0);
 
             //loop backwards to allow easy removal of a mesh from a node once it's merged
             for (unsigned int m = nMeshes - 1; m >= 1; --m) {
                 Ref<Mesh> mesh = node->meshes.at(m);
-                bool primitivesPushed = false;
 
-                for (unsigned int p = 0; p < mesh->primitives.size(); ++p) {
-                    Mesh::Primitive primitive = mesh->primitives.at(p);
+                firstMesh->primitives.insert(firstMesh->primitives.end(), mesh->primitives.begin(), mesh->primitives.end());
 
-                    if (firstPrimitive.mode == primitive.mode) {
-                        firstMesh->primitives.push_back(primitive);
-                        primitivesPushed = true;
-                    }
-                }
-
-                if (primitivesPushed) {
-                    //remove the merged meshes from the node
-                    node->meshes.erase(node->meshes.begin() + m);
-                }
+                node->meshes.erase(node->meshes.begin() + m);
             }
 
             //since we were looping backwards, reverse the order of merged primitives to their original order
             std::reverse(firstMesh->primitives.begin() + 1, firstMesh->primitives.end());
-
         }
     }
 }

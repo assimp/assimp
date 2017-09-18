@@ -1065,6 +1065,10 @@ void Converter::GenerateTransformationNodeChain( const Model& model,
                 continue;
             }
 
+            if ( comp == TransformationComp_PostRotation  ) {
+                chain[ i ] = chain[ i ].Inverse();
+            }
+
             aiNode* nd = new aiNode();
             output_nodes.push_back( nd );
 

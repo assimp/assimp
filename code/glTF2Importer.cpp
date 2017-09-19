@@ -239,7 +239,9 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
         SetMaterialColorProperty(r, mat.emissiveFactor, aimat, AI_MATKEY_COLOR_EMISSIVE);
 
         aimat->AddProperty(&mat.doubleSided, 1, AI_MATKEY_TWOSIDED);
-        aimat->AddProperty(&mat.alphaMode, 1, AI_MATKEY_GLTF_ALPHAMODE);
+
+        aiString alphaMode(mat.alphaMode);
+        aimat->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);
         aimat->AddProperty(&mat.alphaCutoff, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 
         //pbrSpecularGlossiness

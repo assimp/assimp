@@ -120,6 +120,7 @@ namespace Assimp
         void ExportMetadata();
         void ExportMaterials();
         void ExportMeshes();
+        void MergeMeshes();
         unsigned int ExportNodeHierarchy(const aiNode* n);
         unsigned int ExportNode(const aiNode* node, glTF2::Ref<glTF2::Node>& parent);
         void ExportScene();

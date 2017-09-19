@@ -417,8 +417,8 @@ namespace glTF2 {
 
         AddRefsVector(obj, "children", n.children, w.mAl);
 
-        if (n.mesh) {
-            obj.AddMember("mesh", n.mesh->index, w.mAl);
+        if (!n.meshes.empty()) {
+            obj.AddMember("mesh", n.meshes[0]->index, w.mAl);
         }
 
         AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);

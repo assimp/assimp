@@ -170,9 +170,10 @@ void PLYImporter::InternReadFile(const std::string& pFile,
   std::vector<char> headerCheck;
   streamedBuffer.getNextLine(headerCheck);
 
-  if ((headerCheck.size() >= 3) && (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
-    (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
-    (headerCheck[2] != 'Y' && headerCheck[2] != 'y'))
+  if ((headerCheck.size() < 3) ||
+      (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
+      (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
+      (headerCheck[2] != 'Y' && headerCheck[2] != 'y') )
   {
     streamedBuffer.close();
     throw DeadlyImportError("Invalid .ply file: Magic number \'ply\' is no there");

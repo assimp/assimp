@@ -168,7 +168,7 @@ struct FIBase64ValueImpl: public FIBase64Value {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
-            uint8_t c1, c2;
+            uint8_t c1 = 0, c2;
             int imod3 = 0;
             std::vector<uint8_t>::size_type valueSize = value.size();
             for (std::vector<uint8_t>::size_type i = 0; i < valueSize; ++i) {

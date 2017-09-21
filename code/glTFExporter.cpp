@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 
 #include "SplitLargeMeshes.h"
-#include "SceneCombiner.h"
 
+#include <assimp/SceneCombiner.h>
 #include <assimp/version.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
@@ -185,8 +185,11 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     unsigned int bytesPerComp = ComponentTypeSize(compType);
 
     size_t offset = buffer->byteLength;
+    // make sure offset is correctly byte-aligned, as required by spec
+    size_t padding = offset % bytesPerComp;
+    offset += padding;
     size_t length = count * numCompsOut * bytesPerComp;
-    buffer->Grow(length);
+    buffer->Grow(length + padding);
 
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
@@ -441,7 +444,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
         nodeRef->jointName = nodeRef->id;
 
-        unsigned int jointNamesIndex;
+        unsigned int jointNamesIndex = 0;
         bool addJointToJointNames = true;
         for ( unsigned int idx_joint = 0; idx_joint < skinRef->jointNames.size(); ++idx_joint) {
             if (skinRef->jointNames[idx_joint]->jointName.compare(nodeRef->jointName) == 0) {
@@ -466,8 +469,8 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
             float vertWeight      = aib->mWeights[idx_weights].mWeight;
 
             // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) { 
-                continue; 
+            if (jointsPerVertex[vertexId] > 3) {
+                continue;
             }
 
             vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;
@@ -504,7 +507,7 @@ void glTFExporter::ExportMeshes()
 
     // Variables needed for compression. BEGIN.
     // Indices, not pointers - because pointer to buffer is changing while writing to it.
-    size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
+    size_t idx_srcdata_begin = 0; // Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
     size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
     std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
     size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
@@ -872,7 +875,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             timeData[i] = nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond;
         }
 
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, numKeyframes, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
         if (timeAccessor) animRef->Parameters.TIME = timeAccessor;
     }
 
@@ -885,7 +888,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             translationData[i] = nodeChannel->mPositionKeys[frameIndex].mValue;
         }
 
-        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, numKeyframes, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if ( tranAccessor ) {
             animRef->Parameters.translation = tranAccessor;
         }
@@ -901,7 +904,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             scaleData[i] = nodeChannel->mScalingKeys[frameIndex].mValue;
         }
 
-        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, numKeyframes, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if ( scaleAccessor ) {
             animRef->Parameters.scale = scaleAccessor;
         }
@@ -920,7 +923,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             rotationData[i][3] = nodeChannel->mRotationKeys[frameIndex].mValue.w;
         }
 
-        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, numKeyframes, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
         if ( rotAccessor ) {
             animRef->Parameters.rotation = rotAccessor;
         }

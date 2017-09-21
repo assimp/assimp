@@ -109,28 +109,6 @@ ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
 
-/*void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
-{
-    auto curPosition = buffer.begin();
-    do
-    {
-        while (*curPosition!='\n'&&*curPosition!='\\')
-        {
-            ++curPosition;
-        }
-        if (*curPosition=='\\')
-        {
-            std::vector<char> tempBuf;
-            do
-            {
-                streamBuffer.getNextDataLine(tempBuf, '\\' );
-            } while (tempBuf[0]=='\n');
-            *curPosition = ' ';
-            std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
-        }
-    } while (*curPosition!='\n');
-}*/
-
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
@@ -201,7 +179,18 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
 
         case 'u': // Parse a material desc. setter
             {
-                getMaterialDesc();
+                std::string name;
+
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+
+                size_t nextSpace = name.find(" ");
+                if (nextSpace != std::string::npos)
+                    name = name.substr(0, nextSpace);
+
+                if(name == "usemtl")
+                {
+                    getMaterialDesc();
+                }
             }
             break;
 
@@ -566,10 +555,15 @@ void ObjFileParser::getMaterialDesc() {
         // Search for material
         std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
         if (it == m_pModel->m_MaterialMap.end()) {
-            // Not found, use default material
-            m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-            DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
-            strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
+			// Not found, so we don't know anything about the material except for its name.
+			// This may be the case if the material library is missing. We don't want to lose all
+			// materials if that happens, so create a new named material instead of discarding it
+			// completely.
+			DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", creating new material");
+			m_pModel->m_pCurrentMaterial = new ObjFile::Material();
+			m_pModel->m_pCurrentMaterial->MaterialName.Set(strName);
+			m_pModel->m_MaterialLib.push_back(strName);
+			m_pModel->m_MaterialMap[strName] = m_pModel->m_pCurrentMaterial;
         } else {
             // Found, using detected material
             m_pModel->m_pCurrentMaterial = (*it).second;

@@ -237,8 +237,9 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 // Creates the meshes for the given node.
 void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vector<XFile::Mesh*>& pMeshes)
 {
-    if( pMeshes.size() == 0)
+    if (pMeshes.empty()) {
         return;
+    }
 
     // create a mesh for each mesh-material combination in the source node
     std::vector<aiMesh*> meshes;

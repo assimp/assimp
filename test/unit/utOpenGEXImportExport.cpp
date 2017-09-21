@@ -54,8 +54,6 @@ public:
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0 );
         return nullptr != scene;
-
-        return true;
     }
 };
 

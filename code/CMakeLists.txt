@@ -61,6 +61,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
   ${HEADER_PATH}/defs.h
+  ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h
@@ -96,6 +97,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/Exporter.hpp
   ${HEADER_PATH}/DefaultIOStream.h
   ${HEADER_PATH}/DefaultIOSystem.h
+  ${HEADER_PATH}/SceneCombiner.h
 )
 
 SET( Core_SRCS
@@ -148,7 +150,6 @@ SET( Common_SRCS
   SpatialSort.cpp
   SpatialSort.h
   SceneCombiner.cpp
-  SceneCombiner.h
   ScenePreprocessor.cpp
   ScenePreprocessor.h
   SkeletonMeshBuilder.cpp
@@ -647,6 +648,9 @@ ADD_ASSIMP_IMPORTER(X3D
   X3DImporter_Rendering.cpp
   X3DImporter_Shape.cpp
   X3DImporter_Texturing.cpp
+  FIReader.hpp
+  FIReader.cpp
+  X3DVocabulary.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -658,6 +662,14 @@ ADD_ASSIMP_IMPORTER( GLTF
   glTFImporter.h
   glTFExporter.h
   glTFExporter.cpp
+  glTF2Asset.h
+  glTF2Asset.inl
+  glTF2AssetWriter.h
+  glTF2AssetWriter.inl
+  glTF2Importer.cpp
+  glTF2Importer.h
+  glTF2Exporter.h
+  glTF2Exporter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( 3MF
@@ -695,11 +707,6 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-SET( ConvertUTF_SRCS
-  ../contrib/ConvertUTF/ConvertUTF.h
-  ../contrib/ConvertUTF/ConvertUTF.c
-)
-SOURCE_GROUP( ConvertUTF FILES ${ConvertUTF_SRCS})
 
 SET( Clipper_SRCS
   ../contrib/clipper/clipper.hpp
@@ -737,10 +744,12 @@ SET ( openddl_parser_SRCS
   ../contrib/openddlparser/code/OpenDDLCommon.cpp
   ../contrib/openddlparser/code/OpenDDLExport.cpp
   ../contrib/openddlparser/code/Value.cpp
+  ../contrib/openddlparser/code/OpenDDLStream.cpp
   ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLExport.h
+  ../contrib/openddlparser/include/openddlparser/OpenDDLStream.h
   ../contrib/openddlparser/include/openddlparser/DDLNode.h
   ../contrib/openddlparser/include/openddlparser/Value.h
 )
@@ -835,7 +844,6 @@ SET( assimp_src
 
   # Third-party libraries
   ${IrrXML_SRCS}
-  ${ConvertUTF_SRCS}
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
@@ -935,14 +943,25 @@ if (ASSIMP_ANDROID_JNIIOSYSTEM)
 endif(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
-  install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
-    DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    CONFIGURATIONS Debug
-  )
-  install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
-    DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    CONFIGURATIONS RelWithDebInfo
-  )
+  IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
+    install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS Debug
+    )
+    install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS RelWithDebInfo
+    )
+  ELSE()
+    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS Debug
+    )
+    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS RelWithDebInfo
+    )
+  ENDIF()
 endif ()
 
 if (ASSIMP_COVERALLS)

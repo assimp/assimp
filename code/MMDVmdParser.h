@@ -1,3 +1,43 @@
+/*
+Open Asset Import Library (assimp)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2017, assimp team
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
+following conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
 #pragma once
 
 #include <vector>
@@ -10,19 +50,13 @@
 
 namespace vmd
 {
-	/// ボーンフレーム
 	class VmdBoneFrame
 	{
 	public:
-		/// ボーン名
 		std::string name;
-		/// フレーム番号
 		int frame;
-		/// 位置
 		float position[3];
-		/// 回転
 		float orientation[4];
-		/// 補間曲線
 		char interpolation[4][4][4];
 
 		void Read(std::istream* stream)
@@ -46,15 +80,11 @@ namespace vmd
 		}
 	};
 
-	/// 表情フレーム
 	class VmdFaceFrame
 	{
 	public:
-		/// 表情名
 		std::string face_name;
-		/// 表情の重み
 		float weight;
-		/// フレーム番号
 		uint32_t frame;
 
 		void Read(std::istream* stream)
@@ -74,23 +104,15 @@ namespace vmd
 		}
 	};
 
-	/// カメラフレーム
 	class VmdCameraFrame
 	{
 	public:
-		/// フレーム番号
 		int frame;
-		/// 距離
 		float distance;
-		/// 位置
 		float position[3];
-		/// 回転
 		float orientation[3];
-		/// 補間曲線
 		char interpolation[6][4];
-		/// 視野角
 		float angle;
-		/// 不明データ
 		char unknown[3];
 
 		void Read(std::istream *stream)
@@ -116,15 +138,11 @@ namespace vmd
 		}
 	};
 
-	/// ライトフレーム
 	class VmdLightFrame
 	{
 	public:
-		/// フレーム番号
 		int frame;
-		/// 色
 		float color[3];
-		/// 位置
 		float position[3];
 
 		void Read(std::istream* stream)
@@ -142,7 +160,6 @@ namespace vmd
 		}
 	};
 
-	/// IKの有効無効
 	class VmdIkEnable
 	{
 	public:
@@ -150,7 +167,6 @@ namespace vmd
 		bool enable;
 	};
 
-	/// IKフレーム
 	class VmdIkFrame
 	{
 	public:
@@ -189,23 +205,15 @@ namespace vmd
 		}
 	};
 
-	/// VMDモーション
 	class VmdMotion
 	{
 	public:
-		/// モデル名
 		std::string model_name;
-		/// バージョン
 		int version;
-		/// ボーンフレーム
 		std::vector<VmdBoneFrame> bone_frames;
-		/// 表情フレーム
 		std::vector<VmdFaceFrame> face_frames;
-		/// カメラフレーム
 		std::vector<VmdCameraFrame> camera_frames;
-		/// ライトフレーム
 		std::vector<VmdLightFrame> light_frames;
-		/// IKフレーム
 		std::vector<VmdIkFrame> ik_frames;
 
 		static std::unique_ptr<VmdMotion> LoadFromFile(char const *filename)

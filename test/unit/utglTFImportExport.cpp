@@ -50,13 +50,11 @@ class utglTFImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glFT/TwoBoxes/TwoBoxes.gltf", 0 );
-        //return nullptr != scene;
-
-        return true;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", 0 );
+        return nullptr != scene;
     }
 };
 
-TEST_F( utglTFImportExport, importglTFromFileTest ) {
+TEST_F( utglTFImportExport, importglTFFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }

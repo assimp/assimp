@@ -95,14 +95,10 @@ public:
     XmlSerializer(XmlReader* xmlReader)
         : xmlReader(xmlReader)
     {
-
+		// empty
     }
 
-    void ImportXml(aiScene* scene)
-    {
-
-        scene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-
+    void ImportXml(aiScene* scene) {
         scene->mRootNode = new aiNode();
         std::vector<aiNode*> children;
 

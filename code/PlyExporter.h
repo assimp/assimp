@@ -51,14 +51,12 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to a Stanford Ply file. */
 // ------------------------------------------------------------------------------------------------
-class PlyExporter
-{
+class PlyExporter {
 public:
     /// The class constructor for a specific scene to export
     PlyExporter(const char* filename, const aiScene* pScene, bool binary = false);

@@ -466,15 +466,12 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
     pMesh->mPosFaces.resize( numPosFaces);
     for( unsigned int a = 0; a < numPosFaces; a++)
     {
-        unsigned int numIndices = ReadInt();
-        if( numIndices < 3) {
-            ThrowException( format() << "Invalid index count " << numIndices << " for face " << a << "." );
-        }
-
         // read indices
+        unsigned int numIndices = ReadInt();
         Face& face = pMesh->mPosFaces[a];
-        for( unsigned int b = 0; b < numIndices; b++)
-            face.mIndices.push_back( ReadInt());
+        for (unsigned int b = 0; b < numIndices; b++) {
+            face.mIndices.push_back( ReadInt() );
+        }
         TestForSeparator();
     }
 

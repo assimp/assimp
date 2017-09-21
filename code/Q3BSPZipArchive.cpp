@@ -39,14 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
 #include "Q3BSPZipArchive.h"
-#include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <assimp/ai_assert.h>
 
 namespace Assimp {
@@ -137,7 +133,6 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
     return mapping;
 }
 
-// ------------------------------------------------------------------------------------------------
 ZipFile::ZipFile(size_t size) : m_Size(size) {
     ai_assert(m_Size != 0);
 

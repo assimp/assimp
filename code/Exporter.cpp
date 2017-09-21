@@ -54,7 +54,7 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 #include "BlobIOSystem.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "BaseProcess.h"
 #include "Importer.h" // need this for GetPostProcessingStepInstanceList()
 
@@ -90,6 +90,7 @@ void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*, const ExportPr
 void ExportScene3DS(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneGLTF2(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
@@ -144,6 +145,8 @@ Exporter::ExportFormatEntry gExporters[] =
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
     Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
+    Exporter::ExportFormatEntry( "gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
@@ -172,8 +175,10 @@ public:
         GetPostProcessingStepInstanceList(mPostProcessingSteps);
 
         // grab all built-in exporters
-        mExporters.resize(ASSIMP_NUM_EXPORTERS);
-        std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
+        if ( 0 != ( ASSIMP_NUM_EXPORTERS ) ) {
+            mExporters.resize( ASSIMP_NUM_EXPORTERS );
+            std::copy( gExporters, gExporters + ASSIMP_NUM_EXPORTERS, mExporters.begin() );
+        }
     }
 
     ~ExporterPimpl()
@@ -187,7 +192,6 @@ public:
     }
 
 public:
-
     aiExportDataBlob* blob;
     std::shared_ptr< Assimp::IOSystem > mIOSystem;
     bool mIsDefaultIOHandler;
@@ -408,6 +412,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
 
     pimpl->mError = std::string("Found no exporter to handle this file format: ") + pFormatId;
     ASSIMP_END_EXCEPTION_REGION(aiReturn);
+    
     return AI_FAILURE;
 }
 
@@ -491,7 +496,6 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 , mMatrixProperties(other.mMatrixProperties) {
     // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property

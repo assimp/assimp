@@ -142,6 +142,17 @@ inline size_t Write<aiVector3D>(IOStream * stream, const aiVector3D& v)
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
+inline size_t Write<aiColor3D>(IOStream * stream, const aiColor3D& v)
+{
+    size_t t = Write<float>(stream,v.r);
+    t += Write<float>(stream,v.g);
+    t += Write<float>(stream,v.b);
+    return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
 inline size_t Write<aiColor4D>(IOStream * stream, const aiColor4D& v)
 {
     size_t t = Write<float>(stream,v.r);
@@ -325,10 +336,13 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         {
             AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AINODE );
 
+			unsigned int nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
+
             Write<aiString>(&chunk,node->mName);
             Write<aiMatrix4x4>(&chunk,node->mTransformation);
             Write<unsigned int>(&chunk,node->mNumChildren);
             Write<unsigned int>(&chunk,node->mNumMeshes);
+			Write<unsigned int>(&chunk,nb_metadata);
 
             for (unsigned int i = 0; i < node->mNumMeshes;++i) {
                 Write<unsigned int>(&chunk,node->mMeshes[i]);
@@ -337,6 +351,44 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
             for (unsigned int i = 0; i < node->mNumChildren;++i) {
                 WriteBinaryNode( &chunk, node->mChildren[i] );
             }
+
+			for (unsigned int i = 0; i < nb_metadata; ++i) {
+				const aiString& key = node->mMetaData->mKeys[i];
+				aiMetadataType type = node->mMetaData->mValues[i].mType;
+				void* value = node->mMetaData->mValues[i].mData;
+
+				Write<aiString>(&chunk, key);
+				Write<uint16_t>(&chunk, type);
+				
+				switch (type) {
+                    case AI_BOOL:
+                        Write<bool>(&chunk, *((bool*) value));
+                        break;
+                    case AI_INT32:
+                        Write<int32_t>(&chunk, *((int32_t*) value));
+                        break;
+                    case AI_UINT64:
+                        Write<uint64_t>(&chunk, *((uint64_t*) value));
+                        break;
+                    case AI_FLOAT:
+                        Write<float>(&chunk, *((float*) value));
+                        break;
+                    case AI_DOUBLE:
+                        Write<double>(&chunk, *((double*) value));
+                        break;
+                    case AI_AISTRING:
+                        Write<aiString>(&chunk, *((aiString*) value));
+                        break;
+                    case AI_AIVECTOR3D:
+                        Write<aiVector3D>(&chunk, *((aiVector3D*) value));
+                        break;
+#ifdef SWIG
+                    case FORCE_32BIT:
+#endif // SWIG
+                    default:
+                        break;
+				}
+			}
         }
 
         // -----------------------------------------------------------------------------------
@@ -598,9 +650,9 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 Write<float>(&chunk,l->mAttenuationQuadratic);
             }
 
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorDiffuse);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorSpecular);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorAmbient);
+            Write<aiColor3D>(&chunk,l->mColorDiffuse);
+            Write<aiColor3D>(&chunk,l->mColorSpecular);
+            Write<aiColor3D>(&chunk,l->mColorAmbient);
 
             if (l->mType == aiLightSource_SPOT) {
                 Write<float>(&chunk,l->mAngleInnerCone);

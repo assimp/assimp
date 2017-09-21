@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 #include "LogAux.h"
+#include "fast_atof.h"
 
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"
@@ -84,11 +85,8 @@ typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> Element
 class Element
 {
 public:
-
     Element(const Token& key_token, Parser& parser);
     ~Element();
-
-public:
 
     const Scope* Compound() const {
         return compound.get();
@@ -103,13 +101,10 @@ public:
     }
 
 private:
-
     const Token& key_token;
     TokenList tokens;
     std::unique_ptr<Scope> compound;
 };
-
-
 
 /** FBX data entity that consists of a 'scope', a collection
  *  of not necessarily unique #Element instances.
@@ -124,18 +119,25 @@ private:
  *  @endverbatim  */
 class Scope
 {
-
 public:
-
     Scope(Parser& parser, bool topLevel = false);
     ~Scope();
-
-public:
 
     const Element* operator[] (const std::string& index) const {
         ElementMap::const_iterator it = elements.find(index);
         return it == elements.end() ? NULL : (*it).second;
     }
+
+	const Element* FindElementCaseInsensitive(const std::string& elementName) const {
+		const char* elementNameCStr = elementName.c_str();
+		for (auto element = elements.begin(); element != elements.end(); ++element)
+		{
+			if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, MAXLEN)) {
+				return element->second;
+			}
+		}
+		return NULL;
+	}
 
     ElementCollection GetCollection(const std::string& index) const {
         return elements.equal_range(index);
@@ -146,27 +148,22 @@ public:
     }
 
 private:
-
     ElementMap elements;
 };
-
 
 /** FBX parsing class, takes a list of input tokens and generates a hierarchy
  *  of nested #Scope instances, representing the fbx DOM.*/
 class Parser
 {
 public:
-
     /** Parse given a token list. Does not take ownership of the tokens -
      *  the objects must persist during the entire parser lifetime */
     Parser (const TokenList& tokens,bool is_binary);
     ~Parser();
 
-public:
     const Scope& GetRootScope() const {
         return *root.get();
     }
-
 
     bool IsBinary() const {
         return is_binary;
@@ -221,8 +218,6 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& e);
 void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el);
 
-
-
 // extract a required element from a scope, abort if the element cannot be found
 const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL);
 
@@ -230,8 +225,6 @@ const Element& GetRequiredElement(const Scope& sc, const std::string& index, con
 const Scope& GetRequiredScope(const Element& el);
 // get token at a particular index
 const Token& GetRequiredToken(const Element& el, unsigned int index);
-
-
 
 // read a 4x4 matrix from an array of 16 floats
 aiMatrix4x4 ReadMatrix(const Element& element);

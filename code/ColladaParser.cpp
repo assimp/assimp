@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Collada parser helper
  */
 
-
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include <sstream>
@@ -1866,7 +1865,7 @@ void ColladaParser::ReadMesh( Mesh* pMesh)
                 ReadIndexData( pMesh);
             } else
             {
-                // ignore the rest
+                // ignore the restf
                 SkipElement();
             }
         }
@@ -2216,8 +2215,9 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
             else if (IsElement("extra"))
             {
                 SkipElement("extra");
-            } else
-            {
+            } else if ( IsElement("ph")) {                
+                SkipElement("ph");
+            } else {
                 ThrowException( format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">" );
             }
         }
@@ -2231,7 +2231,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
     }
 
 #ifdef ASSIMP_BUILD_DEBUG
-	if (primType != Prim_TriFans && primType != Prim_TriStrips &&
+	if (primType != Prim_TriFans && primType != Prim_TriStrips && primType != Prim_LineStrip &&
         primType != Prim_Lines) { // this is ONLY to workaround a bug in SketchUp 15.3.331 where it writes the wrong 'count' when it writes out the 'lines'.
         ai_assert(actualPrimitives == numPrimitives);
     }
@@ -2400,6 +2400,10 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
         size_t numberOfVertices = indices.size() / numOffsets;
         numPrimitives = numberOfVertices - 2;
     }
+    if (pPrimType == Prim_LineStrip) {
+        size_t numberOfVertices = indices.size() / numOffsets;
+        numPrimitives = numberOfVertices - 1;
+    }
 
     pMesh->mFaceSize.reserve( numPrimitives);
     pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);
@@ -2415,6 +2419,11 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
                 numPoints = 2;
                 for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
                     CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+                break;
+            case Prim_LineStrip:
+                numPoints = 2;
+                for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+                    CopyVertex(currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
                 break;
             case Prim_Triangles:
                 numPoints = 3;

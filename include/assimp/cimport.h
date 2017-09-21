@@ -417,7 +417,7 @@ ASSIMP_API void aiSetImportPropertyInteger(
 ASSIMP_API void aiSetImportPropertyFloat(
     C_STRUCT aiPropertyStore* store,
     const char* szName,
-    float value);
+    ai_real value);
 
 // --------------------------------------------------------------------------------
 /** Set a string property.

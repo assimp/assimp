@@ -548,8 +548,6 @@ bool Curve :: InRange(IfcFloat u) const
     const ParamRange range = GetParametricRange();
     if (IsClosed()) {
         return true;
-        //ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
-        //u = range.first + std::fmod(u-range.first,range.second-range.first);
     }
     const IfcFloat epsilon = 1e-5;
     return u - range.first > -epsilon && range.second - u > -epsilon;

@@ -66,6 +66,7 @@ TEST_F( BatchLoaderTest, createTest ) {
     } catch ( ... ) {
         ok = false;
     }
+    EXPECT_TRUE( ok );
 }
 
 TEST_F( BatchLoaderTest, validateAccessTest ) {

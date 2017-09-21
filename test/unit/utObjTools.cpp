@@ -109,9 +109,8 @@ TEST_F( utObjTools, countComponents_TwoLines_Success ) {
     buffer.resize( data.size() );
     ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
     test_parser.setBuffer( buffer );
-    static const size_t Size = 4096UL;
-    char data_buffer[ Size ];
 
     size_t numComps = test_parser.testGetNumComponentsInDataDefinition();
     EXPECT_EQ( 3U, numComps );
 }
+

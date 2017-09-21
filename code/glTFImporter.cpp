@@ -100,24 +100,19 @@ const aiImporterDesc* glTFImporter::GetInfo() const
 
 bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-    const std::string& extension = GetExtension(pFile);
+    const std::string &extension = GetExtension(pFile);
 
-    if (extension == "gltf" || extension == "glb")
-        return true;
+    if (extension != "gltf" && extension != "glb")
+        return false;
 
-    if ((checkSig || !extension.length()) && pIOHandler) {
-        char buffer[4];
-
-        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile));
-        if (pStream && pStream->Read(buffer, sizeof(buffer), 1) == 1) {
-            if (memcmp(buffer, AI_GLB_MAGIC_NUMBER, sizeof(buffer)) == 0) {
-                return true; // Has GLB header
-            }
-            else if (memcmp(buffer, "{\r\n ", sizeof(buffer)) == 0
-                    || memcmp(buffer, "{\n  ", sizeof(buffer)) == 0) {
-                // seems a JSON file, and we're the only format that can read them
-                return true;
-            }
+    if (checkSig && pIOHandler) {
+        glTF::Asset asset(pIOHandler);
+        try {
+            asset.Load(pFile, extension == "glb");
+            std::string version = asset.asset.version;
+            return !version.empty() && version[0] == '1';
+        } catch (...) {
+            return false;
         }
     }
 
@@ -179,9 +174,7 @@ inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& r
     else {
         aiColor4D col;
         CopyValue(prop.color, col);
-        if (col.r != 1.f || col.g != 1.f || col.b != 1.f || col.a != 1.f) {
-            mat->AddProperty(&col, 1, pKey, type, idx);
-        }
+        mat->AddProperty(&col, 1, pKey, type, idx);
     }
 }
 
@@ -677,7 +670,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
 	MakeVerboseFormatProcess process;
     process.Execute(pScene);
-    
+
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

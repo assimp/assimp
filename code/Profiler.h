@@ -52,21 +52,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 
 namespace Assimp {
-    namespace Profiling {
+namespace Profiling {
 
-        using namespace Formatter;
-
+using namespace Formatter;
 
 // ------------------------------------------------------------------------------------------------
 /** Simple wrapper around boost::timer to simplify reporting. Timings are automatically
  *  dumped to the log file.
  */
-class Profiler
-{
-
+class Profiler {
 public:
-
-    Profiler() {}
+    Profiler() {
+        // empty
+    }
 
 public:
 
@@ -84,17 +82,17 @@ public:
             return;
         }
 
-        auto elapsedSeconds = std::chrono::system_clock::now() - regions[region];
+        std::chrono::duration<double> elapsedSeconds = std::chrono::system_clock::now() - regions[region];
         DefaultLogger::get()->debug((format("END   `"),region,"`, dt= ", elapsedSeconds.count()," s"));
     }
 
 private:
-
     typedef std::map<std::string,std::chrono::time_point<std::chrono::system_clock>> RegionMap;
     RegionMap regions;
 };
 
-    }
+}
 }
 
 #endif
+

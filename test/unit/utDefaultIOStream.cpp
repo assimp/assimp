@@ -44,10 +44,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #if defined(__GNUC__) || defined(__clang__)
-#define MAKE_TEMP_FILE_NAME mktemp
+#define TMP_PATH "/tmp/"
+void MakeTmpFilePath(char* tmplate)
+{
+    auto err = mkstemp(tmplate);
+    ASSERT_NE(err, -1);
+}
 #elif defined(_MSC_VER)
 #include <io.h>
-#define MAKE_TEMP_FILE_NAME _mktemp
+#define TMP_PATH "./"
+void MakeTmpFilePath(char* tmplate)
+{
+    auto pathtemplate = _mktemp(tmplate);
+    ASSERT_NE(pathtemplate, nullptr);
+}
 #endif
 
 using namespace ::Assimp;
@@ -67,12 +77,9 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
     const auto dataSize = sizeof(data);
     const auto dataCount = dataSize / sizeof(*data);
 
-    char fpath[] = { "./rndfp.XXXXXX" };
-    auto tmplate = MAKE_TEMP_FILE_NAME(fpath);
-    ASSERT_NE(tmplate, nullptr);
+    char fpath[] = { TMP_PATH"rndfp.XXXXXX" };
+    MakeTmpFilePath(fpath);
     
-    //char buffer[ L_tmpnam ];
-    //tmpnam( buffer );
     auto *fs = std::fopen(fpath, "w+" );
     ASSERT_NE(fs, nullptr);
     auto written = std::fwrite(data, sizeof(*data), dataCount, fs );

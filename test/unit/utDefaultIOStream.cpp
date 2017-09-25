@@ -39,6 +39,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------------------*/
 #include <gtest/gtest.h>
 #include "TestIOStream.h"
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#if defined(__GNUC__) || defined(__clang__)
+#define MAKE_TEMP_FILE_NAME mktemp
+#elif defined(_MSC_VER)
+#include <io.h>
+#define MAKE_TEMP_FILE_NAME _mktemp
+#endif
 
 using namespace ::Assimp;
 
@@ -46,16 +56,33 @@ class utDefaultIOStream : public ::testing::Test {
     // empty
 };
 
-TEST_F( utDefaultIOStream, FileSizeTest ) {
-    char buffer[ L_tmpnam ];
-    tmpnam( buffer );
-    std::FILE *fs( std::fopen( buffer, "w+" ) );
-    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
-    EXPECT_NE( 0U, written );
-    std::fflush( fs );
 
-    TestDefaultIOStream myStream( fs, buffer );
+
+const char data[]{"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Qui\
+sque luctus sem diam, ut eleifend arcu auctor eu. Vestibulum id est vel nulla l\
+obortis malesuada ut sed turpis. Nulla a volutpat tortor. Nunc vestibulum portt\
+itor sapien ornare sagittis volutpat."};
+
+TEST_F( utDefaultIOStream, FileSizeTest ) {
+    const auto dataSize = sizeof(data);
+    const auto dataCount = dataSize / sizeof(*data);
+
+    char fpath[] = { "./rndfp.XXXXXX" };
+    auto tmplate = MAKE_TEMP_FILE_NAME(fpath);
+    ASSERT_NE(tmplate, nullptr);
+    
+    //char buffer[ L_tmpnam ];
+    //tmpnam( buffer );
+    auto *fs = std::fopen(fpath, "w+" );
+    ASSERT_NE(fs, nullptr);
+    auto written = std::fwrite(data, sizeof(*data), dataCount, fs );
+    EXPECT_NE( 0U, written );
+    auto vflush = std::fflush( fs );
+    ASSERT_EQ(vflush, 0);
+
+    TestDefaultIOStream myStream( fs, fpath);
     size_t size = myStream.FileSize();
-    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
-    remove( buffer );
+    EXPECT_EQ( size, dataSize);
+    remove(fpath);
+    
 }

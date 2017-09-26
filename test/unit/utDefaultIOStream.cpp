@@ -60,7 +60,7 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
     const auto dataCount = dataSize / sizeof(*data);
 
     char fpath[] = { TMP_PATH"rndfp.XXXXXX" };
-    auto* fs = MakeTmpFilePath(fpath);
+    auto* fs = MakeTmpFile(fpath);
     ASSERT_NE(nullptr, fs);
     {
         auto written = std::fwrite(data, sizeof(*data), dataCount, fs );

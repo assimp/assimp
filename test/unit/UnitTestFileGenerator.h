@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(__GNUC__) || defined(__clang__)
 #define TMP_PATH "/tmp/"
-inline FILE* MakeTmpFilePath(char* tmplate)
+inline FILE* MakeTmpFile(char* tmplate)
 {
     auto fd = mkstemp(tmplate);
     EXPECT_NE(-1, fd);
@@ -61,7 +61,7 @@ inline FILE* MakeTmpFilePath(char* tmplate)
 #elif defined(_MSC_VER)
 #include <io.h>
 #define TMP_PATH "./"
-inline FILE* MakeTmpFilePath(char* tmplate)
+inline FILE* MakeTmpFile(char* tmplate)
 {
     auto pathtemplate = _mktemp(tmplate);
     EXPECT_NE(pathtemplate, nullptr);

@@ -43,30 +43,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <string>
 
-#if defined(__GNUC__) || defined(__clang__)
-#define TMP_PATH "/tmp/"
-void MakeTmpFilePath(char* tmplate)
-{
-    auto err = mkstemp(tmplate);
-    ASSERT_NE(err, -1);
-}
-#elif defined(_MSC_VER)
-#include <io.h>
-#define TMP_PATH "./"
-void MakeTmpFilePath(char* tmplate)
-{
-    auto pathtemplate = _mktemp(tmplate);
-    ASSERT_NE(pathtemplate, nullptr);
-}
-#endif
-
 using namespace ::Assimp;
 
 class utDefaultIOStream : public ::testing::Test {
     // empty
 };
 
-
+#if defined(__GNUC__) || defined(__clang__)
+#define TMP_PATH "/tmp/"
+FILE* MakeTmpFilePath(char* tmplate)
+{
+    auto fd = mkstemp(tmplate);
+    EXPECT_NE(-1, fd);
+    if(fd == -1)
+    {
+        return nullptr;
+    }
+    auto fs = fdopen(fd, "w+");
+    EXPECT_NE(nullptr, fs);
+    return fs;
+}
+#elif defined(_MSC_VER)
+#include <io.h>
+#define TMP_PATH "./"
+FILE* MakeTmpFilePath(char* tmplate)
+{
+    auto pathtemplate = _mktemp(tmplate);
+    EXPECT_NE(pathtemplate, nullptr);
+    if(pathtemplate == nullptr)
+    {
+        return nullptr;
+    }
+    auto* fs = std::fopen(pathtemplate, "w+");
+    EXPECT_NE(fs, nullptr);
+    return fs;
+}
+#endif
 
 const char data[]{"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Qui\
 sque luctus sem diam, ut eleifend arcu auctor eu. Vestibulum id est vel nulla l\
@@ -78,18 +90,18 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
     const auto dataCount = dataSize / sizeof(*data);
 
     char fpath[] = { TMP_PATH"rndfp.XXXXXX" };
-    MakeTmpFilePath(fpath);
+    auto* fs = MakeTmpFilePath(fpath);
+    ASSERT_NE(nullptr, fs);
+    {
+        auto written = std::fwrite(data, sizeof(*data), dataCount, fs );
+        EXPECT_NE( 0U, written );
     
-    auto *fs = std::fopen(fpath, "w+" );
-    ASSERT_NE(fs, nullptr);
-    auto written = std::fwrite(data, sizeof(*data), dataCount, fs );
-    EXPECT_NE( 0U, written );
-    auto vflush = std::fflush( fs );
-    ASSERT_EQ(vflush, 0);
+        auto vflush = std::fflush( fs );
+        ASSERT_EQ(vflush, 0);
 
-    TestDefaultIOStream myStream( fs, fpath);
-    size_t size = myStream.FileSize();
-    EXPECT_EQ( size, dataSize);
+        TestDefaultIOStream myStream( fs, fpath);
+        size_t size = myStream.FileSize();
+        EXPECT_EQ( size, dataSize);
+    }
     remove(fpath);
-    
 }

@@ -741,7 +741,7 @@ void glTF2Exporter::MergeMeshes()
     for (unsigned int n = 0; n < mAsset->nodes.Size(); ++n) {
         Ref<Node> node = mAsset->nodes.Get(n);
 
-        unsigned int nMeshes = node->meshes.size();
+        unsigned int nMeshes = static_cast<unsigned int>(node->meshes.size());
 
         //skip if it's 1 or less meshes per node
         if (nMeshes > 1) {

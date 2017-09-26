@@ -1,9 +1,9 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2017, assimp team
-
 
 All rights reserved.
 
@@ -36,42 +36,41 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include <gtest/gtest.h>
-#include "TestIOStream.h"
-#include "UnitTestFileGenerator.h"
+---------------------------------------------------------------------------
+*/
+#pragma once
+
 #include <cstdio>
 #include <cstdlib>
-#include <string>
+#include <gtest/gtest.h>
 
-using namespace ::Assimp;
-
-class utDefaultIOStream : public ::testing::Test {
-    // empty
-};
-
-const char data[]{"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Qui\
-sque luctus sem diam, ut eleifend arcu auctor eu. Vestibulum id est vel nulla l\
-obortis malesuada ut sed turpis. Nulla a volutpat tortor. Nunc vestibulum portt\
-itor sapien ornare sagittis volutpat."};
-
-TEST_F( utDefaultIOStream, FileSizeTest ) {
-    const auto dataSize = sizeof(data);
-    const auto dataCount = dataSize / sizeof(*data);
-
-    char fpath[] = { TMP_PATH"rndfp.XXXXXX" };
-    auto* fs = MakeTmpFilePath(fpath);
-    ASSERT_NE(nullptr, fs);
+#if defined(__GNUC__) || defined(__clang__)
+#define TMP_PATH "/tmp/"
+inline FILE* MakeTmpFilePath(char* tmplate)
+{
+    auto fd = mkstemp(tmplate);
+    EXPECT_NE(-1, fd);
+    if(fd == -1)
     {
-        auto written = std::fwrite(data, sizeof(*data), dataCount, fs );
-        EXPECT_NE( 0U, written );
-    
-        auto vflush = std::fflush( fs );
-        ASSERT_EQ(vflush, 0);
-
-        TestDefaultIOStream myStream( fs, fpath);
-        size_t size = myStream.FileSize();
-        EXPECT_EQ( size, dataSize);
+        return nullptr;
     }
-    remove(fpath);
+    auto fs = fdopen(fd, "w+");
+    EXPECT_NE(nullptr, fs);
+    return fs;
 }
+#elif defined(_MSC_VER)
+#include <io.h>
+#define TMP_PATH "./"
+inline FILE* MakeTmpFilePath(char* tmplate)
+{
+    auto pathtemplate = _mktemp(tmplate);
+    EXPECT_NE(pathtemplate, nullptr);
+    if(pathtemplate == nullptr)
+    {
+        return nullptr;
+    }
+    auto* fs = std::fopen(pathtemplate, "w+");
+    EXPECT_NE(fs, nullptr);
+    return fs;
+}
+#endif

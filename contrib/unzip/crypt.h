@@ -32,7 +32,7 @@
 /***********************************************************************
  * Return the next byte in the pseudo-random sequence
  */
-static int decrypt_byte(unsigned long* pkeys, const unsigned long* pcrc_32_tab)
+static int decrypt_byte(unsigned long* pkeys, const z_crc_t* pcrc_32_tab)
 {
     unsigned temp;  /* POTENTIAL BUG:  temp*(temp^1) may overflow in an
                      * unpredictable manner on 16-bit systems; not a problem
@@ -62,7 +62,7 @@ static int update_keys(unsigned long* pkeys,const z_crc_t* pcrc_32_tab,int c)
  * Initialize the encryption keys and the random header according to
  * the given password.
  */
-static void init_keys(const char* passwd,unsigned long* pkeys,const unsigned long* pcrc_32_tab)
+static void init_keys(const char* passwd,unsigned long* pkeys,const z_crc_t* pcrc_32_tab)
 {
     *(pkeys+0) = 305419896L;
     *(pkeys+1) = 591751049L;

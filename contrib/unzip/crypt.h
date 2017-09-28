@@ -45,7 +45,7 @@ static int decrypt_byte(unsigned long* pkeys, const unsigned long* pcrc_32_tab)
 /***********************************************************************
  * Update the encryption keys with the next byte of plain text
  */
-static int update_keys(unsigned long* pkeys,const unsigned long* pcrc_32_tab,int c)
+static int update_keys(unsigned long* pkeys,const z_crc_t* pcrc_32_tab,int c)
 {
     (*(pkeys+0)) = CRC32((*(pkeys+0)), c);
     (*(pkeys+1)) += (*(pkeys+0)) & 0xff;

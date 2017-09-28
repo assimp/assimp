@@ -147,7 +147,7 @@ typedef struct
     int encrypted;
 #    ifndef NOUNCRYPT
     unsigned long keys[3];     /* keys defining the pseudo-random sequence */
-    const unsigned long* pcrc_32_tab;
+    const z_crc_t* pcrc_32_tab;
 #    endif
 } unz_s;
 

@@ -1118,11 +1118,12 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
     if (it == mUsedIds.end())
         return id;
 
-    char buffer[256];
-    int offset = ai_snprintf(buffer, sizeof(buffer), "%s_", id.c_str());
+    std::vector<char> buffer;
+    buffer.resize(id.size() + 16);
+    int offset = ai_snprintf(buffer.data(), buffer.size(), "%s_", id.c_str());
     for (int i = 0; it != mUsedIds.end(); ++i) {
-        ai_snprintf(buffer + offset, sizeof(buffer) - offset, "%d", i);
-        id = buffer;
+        ai_snprintf(buffer.data() + offset, buffer.size() - offset, "%d", i);
+        id = buffer.data();
         it = mUsedIds.find(id);
     }
 

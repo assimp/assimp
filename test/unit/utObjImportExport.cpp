@@ -254,3 +254,18 @@ TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
     EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test.obj" ) );
 #endif // ASSIMP_BUILD_NO_EXPORT
 }
+
+TEST_F( utObjImportExport, issue1453_segfault ) {
+    static const std::string ObjModel =
+        "v  0.0  0.0  0.0"
+        "v  0.0  0.0  1.0"
+        "v  0.0  1.0  0.0"
+        "v  0.0  1.0  1.0"
+        "v  1.0  0.0  0.0"
+        "v  1.0  0.0  1.0"
+        "v  1.0  1.0  0.0"
+        "v  1.0  1.0  1.0";
+
+    Assimp::Importer myimporter;
+    const aiScene* myscene = myimporter.ReadFileFromMemory( ObjModel.c_str(), ObjModel.size(), 0 );
+}

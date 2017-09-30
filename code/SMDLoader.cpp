@@ -650,12 +650,14 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
 // create output materials
 void SMDImporter::CreateOutputMaterials()
 {
+    ai_assert( nullptr != pScene );
+
     pScene->mNumMaterials = (unsigned int)aszTextures.size();
     pScene->mMaterials = new aiMaterial*[std::max(1u, pScene->mNumMaterials)];
 
-    for (unsigned int iMat = 0; iMat < pScene->mNumMaterials;++iMat)
-    {
+    for (unsigned int iMat = 0; iMat < pScene->mNumMaterials; ++iMat) {
         aiMaterial* pcMat = new aiMaterial();
+        ai_assert( nullptr != pcMat );
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;

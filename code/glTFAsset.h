@@ -232,7 +232,9 @@ namespace glTF
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
+                std::string err = "GLTF: Unsupported Component Type ";
+                err += t;
+                throw DeadlyImportError(err);
         }
     }
 

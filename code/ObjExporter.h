@@ -163,9 +163,9 @@ private:
         void getColors( std::vector<aiColor4D> &colors );
     };
 
-    vecIndexMap vpMap, vnMap, vtMap;
-    colIndexMap vcMap;
-    std::vector<MeshInstance> meshes;
+    vecIndexMap mVpMap, mVnMap, mVtMap;
+    colIndexMap mVcMap;
+    std::vector<MeshInstance> mMeshes;
 
     // this endl() doesn't flush() the stream
     const std::string endl;

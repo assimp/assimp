@@ -313,7 +313,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
         if (dataURI.base64) {
             uint8_t* data = 0;
             this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
-            this->mData.reset(data);
+            this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
                 throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
@@ -326,7 +326,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
                                         " bytes, but found " + to_string(dataURI.dataLength));
             }
 
-            this->mData.reset(new uint8_t[dataURI.dataLength]);
+            this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
             memcpy( this->mData.get(), dataURI.data, dataURI.dataLength );
         }
     }
@@ -432,7 +432,7 @@ uint8_t* new_data;
 	// Copy data which place after replacing part.
 	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
 	// Apply new data
-	mData.reset(new_data);
+	mData.reset(new_data, std::default_delete<uint8_t[]>());
 	byteLength = new_data_size;
 
 	return true;

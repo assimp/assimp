@@ -78,7 +78,7 @@ OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
 )
-OPTION ( ASSIMP_WERRRO
+OPTION ( ASSIMP_WERROR
   "Treat warnings as errors."
   OFF
 )

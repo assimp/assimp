@@ -204,9 +204,11 @@ ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -std=c++11" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -std=c++11" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 

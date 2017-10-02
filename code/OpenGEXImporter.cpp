@@ -1182,8 +1182,16 @@ void OpenGEXImporter::resolveReferences() {
                     const std::string name( currentRefInfo->m_Names[ i ] );
                     ReferenceMap::const_iterator it( m_material2refMap.find( name ) );
                     if ( m_material2refMap.end() != it ) {
-                        unsigned int matIdx = static_cast< unsigned int >( m_material2refMap[ name ] );
-                        m_currentMesh->mMaterialIndex = matIdx;
+                        if ( nullptr != m_currentMesh ) {
+                            unsigned int matIdx = static_cast< unsigned int >( m_material2refMap[ name ] );
+                            if ( m_currentMesh->mMaterialIndex != 0 ) {
+                                DefaultLogger::get()->warn( "Override of material reference in current mesh by material reference." );
+                            }
+                            m_currentMesh->mMaterialIndex = matIdx;
+                        }  else {
+                            DefaultLogger::get()->warn( "Cannot resolve material reference, because no current mesh is there." );
+
+                        }
                     }
                 }
             } else {

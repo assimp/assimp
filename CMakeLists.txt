@@ -219,8 +219,12 @@ if (ASSIMP_COVERALLS)
 endif()
 
 if (ASSIMP_WERROR)
+  IF (MSVC)
+    add_compile_options(/WX)
+  ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  ENDIF()
 endif()
 
 INCLUDE (FindPkgMacros)

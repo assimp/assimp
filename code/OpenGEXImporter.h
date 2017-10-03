@@ -185,6 +185,7 @@ private:
     std::vector<aiMesh*> m_meshCache;
     typedef std::map<std::string, size_t> ReferenceMap;
     std::map<std::string, size_t> m_mesh2refMap;
+    std::map<std::string, size_t> m_material2refMap;
 
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];

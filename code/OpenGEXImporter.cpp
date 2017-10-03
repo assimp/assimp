@@ -261,6 +261,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_nodeChildMap()
 , m_meshCache()
 , m_mesh2refMap()
+, m_material2refMap()
 , m_ctx( nullptr )
 , m_metrics()
 , m_currentNode( nullptr )
@@ -482,7 +483,10 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
                 || m_tokenType == Grammar::CameraNodeToken ) {
             m_currentNode->mName.Set( name.c_str() );
         } else if( m_tokenType == Grammar::MaterialToken ) {
-
+            aiString aiName;
+            aiName.Set( name );
+            m_currentMaterial->AddProperty( &aiName, AI_MATKEY_NAME );
+            m_material2refMap[ name ] = m_materialCache.size() - 1;
         }
     }
 }
@@ -1050,7 +1054,6 @@ void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pSc
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
                 } else if( prop->m_value->getString() == Grammar::SpecularPowerTextureToken ) {
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_SPECULAR( 0 ) );
-
                 } else if( prop->m_value->getString() == Grammar::EmissionTextureToken ) {
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE( 0 ) );
                 } else if( prop->m_value->getString() == Grammar::OpacyTextureToken ) {
@@ -1166,7 +1169,7 @@ void OpenGEXImporter::resolveReferences() {
         if( nullptr != currentRefInfo ) {
             aiNode *node( currentRefInfo->m_node );
             if( RefInfo::MeshRef == currentRefInfo->m_type ) {
-                for( size_t i = 0; i < currentRefInfo->m_Names.size(); i++ ) {
+                for( size_t i = 0; i < currentRefInfo->m_Names.size(); ++i ) {
                     const std::string &name( currentRefInfo->m_Names[ i ] );
                     ReferenceMap::const_iterator it( m_mesh2refMap.find( name ) );
                     if( m_mesh2refMap.end() != it ) {
@@ -1175,7 +1178,22 @@ void OpenGEXImporter::resolveReferences() {
                     }
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
-                // ToDo!
+                for ( size_t i = 0; i < currentRefInfo->m_Names.size(); ++i ) {
+                    const std::string name( currentRefInfo->m_Names[ i ] );
+                    ReferenceMap::const_iterator it( m_material2refMap.find( name ) );
+                    if ( m_material2refMap.end() != it ) {
+                        if ( nullptr != m_currentMesh ) {
+                            unsigned int matIdx = static_cast< unsigned int >( m_material2refMap[ name ] );
+                            if ( m_currentMesh->mMaterialIndex != 0 ) {
+                                DefaultLogger::get()->warn( "Override of material reference in current mesh by material reference." );
+                            }
+                            m_currentMesh->mMaterialIndex = matIdx;
+                        }  else {
+                            DefaultLogger::get()->warn( "Cannot resolve material reference, because no current mesh is there." );
+
+                        }
+                    }
+                }
             } else {
                 throw DeadlyImportError( "Unknown reference info to resolve." );
             }

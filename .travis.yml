@@ -25,6 +25,10 @@ branches:
 os:
   - linux
 
+compiler:
+  - gcc
+  - clang
+
 env:
   global:
   # COVERITY_SCAN_TOKEN
@@ -34,6 +38,10 @@ env:
 matrix:
   exclude:
     - os: linux
+      compiler: gcc
+      env:
+    - os: linux
+      compiler: clang
       env:
 
   include:
@@ -48,6 +56,12 @@ matrix:
       env: LINUX=1 SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF  ASAN=OFF
     - os: linux
       compiler: gcc
+      env: LINUX=1 SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF  ASAN=OFF
+    - os: linux
+      compiler: clang
+      env: LINUX=1 TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF ASAN=ON
+    - os: linux
+      compiler: clang
       env: LINUX=1 SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF  ASAN=OFF
 
 install:

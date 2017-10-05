@@ -89,7 +89,7 @@ public:
 
         scene->mRootNode = new aiNode;
         scene->mRootNode->mNumMeshes = 1;
-        scene->mRootNode->mMeshes = new unsigned int[scene->mRootNode->mNumMeshes]{ 0 };
+        scene->mRootNode->mMeshes = new unsigned int[1]{ 0 };
 
         return scene;
     }

@@ -201,7 +201,7 @@ private:
     std::vector<aiCamera*> m_cameraCache;
     std::vector<aiLight*> m_lightCache;
     std::vector<aiNode*> m_nodeStack;
-    std::vector<RefInfo*> m_unresolvedRefStack;
+    std::vector<std::unique_ptr<RefInfo> > m_unresolvedRefStack;
 };
 
 } // Namespace OpenGEX

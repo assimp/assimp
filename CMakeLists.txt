@@ -82,6 +82,10 @@ OPTION ( ASSIMP_WERROR
   "Treat warnings as errors."
   OFF
 )
+OPTION ( ASSIMP_ASAN
+  "Enable AddressSanitizer."
+  OFF
+)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -203,6 +207,11 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
+
+  # disable "elements of array '' will be default initialized" warning on MSVC2013
+  IF(MSVC12)
+    add_compile_options(/wd4351)
+  ENDIF()
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -std=c++11" )
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
@@ -219,8 +228,17 @@ if (ASSIMP_COVERALLS)
 endif()
 
 if (ASSIMP_WERROR)
+  IF (MSVC)
+    add_compile_options(/WX)
+  ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  ENDIF()
+endif()
+
+if (ASSIMP_ASAN)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
 endif()
 
 INCLUDE (FindPkgMacros)

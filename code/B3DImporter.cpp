@@ -82,6 +82,20 @@ static const aiImporterDesc desc = {
 
 //#define DEBUG_B3D
 
+template<typename T>
+void DeleteAllBarePointers(std::vector<T>& x)
+{
+    for(auto p : x)
+    {
+        delete p;
+    }
+}
+
+B3DImporter::~B3DImporter()
+{
+    DeleteAllBarePointers(_animations);
+}
+
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const{
 
@@ -558,13 +572,19 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
 void B3DImporter::ReadBB3D( aiScene *scene ){
 
     _textures.clear();
+
     _materials.clear();
 
     _vertices.clear();
+
     _meshes.clear();
 
+    DeleteAllBarePointers(_nodes);
     _nodes.clear();
+
     _nodeAnims.clear();
+
+    DeleteAllBarePointers(_animations);
     _animations.clear();
 
     string t=ReadChunk();

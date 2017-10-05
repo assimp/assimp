@@ -634,7 +634,7 @@ void PretransformVertices::Execute( aiScene* pScene)
         aiNode* newRoot = new aiNode();
         newRoot->mName = pScene->mRootNode->mName;
         delete pScene->mRootNode;
-        pScene->mRootNode = new aiNode();
+        pScene->mRootNode = newRoot;
 
         if (1 == pScene->mNumMeshes && !pScene->mNumLights && !pScene->mNumCameras)
         {

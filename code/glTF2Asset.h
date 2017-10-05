@@ -511,7 +511,7 @@ namespace glTF2
 
 			/// \fn ~SEncodedRegion()
 			/// Destructor.
-			~SEncodedRegion() { delete [] DecodedData; }
+			~SEncodedRegion() { delete[] DecodedData; }
 		};
 
 		/******************* Variables *******************/

@@ -74,6 +74,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
         EXPECT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
         EXPECT_EQ( opacity, newOpacity );
     }
+    delete scene;
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

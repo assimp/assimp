@@ -237,6 +237,15 @@ TEST_F( utObjImportExport, obj_import_test ) {
     differ.showReport();
 
     m_im->FreeScene();
+    for(unsigned int i = 0; i < expected->mNumMeshes; ++i)
+    {
+        delete expected->mMeshes[i];
+    }
+    delete[] expected->mMeshes;
+    expected->mMeshes = nullptr;
+    delete[] expected->mMaterials;
+    expected->mMaterials = nullptr;
+    delete expected;
 }
 
 TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {

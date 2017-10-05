@@ -60,6 +60,13 @@ namespace Assimp    {
         class DB;
     }
 
+#ifndef _MSC_VER
+    // GCC and Clang need to see this explicit declaration to avoid warning
+    // MSVC complains about redeclaration even though this is just the
+    // declaration, not the definition
+    class IFCImporter;
+    template<> const std::string LogFunctions<IFCImporter>::log_prefix;
+#endif  // _MSC_VER
 
 // -------------------------------------------------------------------------------------------
 /** Load the IFC format, which is an open specification to describe building and construction

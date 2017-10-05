@@ -157,7 +157,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
     DefaultLogger::get()->debug("UNREAL: uc file is "   + uc_path);
 
     // and open the files ... we can't live without them
-    IOStream* p = pIOHandler->Open(d_path);
+    std::unique_ptr<IOStream> p(pIOHandler->Open(d_path));
     if (!p)
         throw DeadlyImportError("UNREAL: Unable to open _d file");
     StreamReaderLE d_reader(pIOHandler->Open(d_path));
@@ -203,7 +203,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
         d_reader.IncPtr(1);
     }
 
-    p = pIOHandler->Open(a_path);
+    p.reset(pIOHandler->Open(a_path));
     if (!p)
         throw DeadlyImportError("UNREAL: Unable to open _a file");
     StreamReaderLE a_reader(pIOHandler->Open(a_path));

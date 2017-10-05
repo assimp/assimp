@@ -322,6 +322,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     copyMeshes( pScene );
     copyCameras( pScene );
     copyLights( pScene );
+    copyMaterials( pScene );
     resolveReferences();
     createNodeTree( pScene );
 }
@@ -1156,6 +1157,19 @@ void OpenGEXImporter::copyLights( aiScene *pScene ) {
     pScene->mNumLights = static_cast<unsigned int>(m_lightCache.size());
     pScene->mLights = new aiLight*[ pScene->mNumLights ];
     std::copy( m_lightCache.begin(), m_lightCache.end(), pScene->mLights );
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::copyMaterials( aiScene *pScene ) {
+    ai_assert( nullptr != pScene );
+
+    if ( m_materialCache.empty() ) {
+        return;
+    }
+
+    pScene->mNumMaterials = static_cast<unsigned int>(m_materialCache.size());
+    pScene->mMaterials = new aiMaterial*[ pScene->mNumMaterials ];
+    std::copy( m_materialCache.begin(), m_materialCache.end(), pScene->mMaterials );
 }
 
 //------------------------------------------------------------------------------------------------

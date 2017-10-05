@@ -1231,9 +1231,9 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
         if( m_nodeChildMap.end() == it ) {
             info = new ChildInfo;
             m_root = info;
-            m_nodeChildMap[ node->mParent ] = info;
+            m_nodeChildMap[ node->mParent ] = std::unique_ptr<ChildInfo>(info);
         } else {
-            info = it->second;
+            info = it->second.get();
         }
         info->m_children.push_back( node );
     } else {
@@ -1243,9 +1243,9 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
         NodeChildMap::iterator it( m_nodeChildMap.find( node->mParent ) );
         if( m_nodeChildMap.end() == it ) {
             info = new ChildInfo;
-            m_nodeChildMap[ node->mParent ] = info;
+            m_nodeChildMap[ node->mParent ] = std::unique_ptr<ChildInfo>(info);
         } else {
-            info = it->second;
+            info = it->second.get();
         }
         info->m_children.push_back( node );
     }

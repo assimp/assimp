@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <list>
 #include <map>
+#include <memory>
 
 namespace ODDLParser {
     class DDLNode;
@@ -179,7 +180,7 @@ private:
         std::list<aiNode*> m_children;
     };
     ChildInfo *m_root;
-    typedef std::map<aiNode*, ChildInfo*> NodeChildMap;
+    typedef std::map<aiNode*, std::unique_ptr<ChildInfo> > NodeChildMap;
     NodeChildMap m_nodeChildMap;
 
     std::vector<aiMesh*> m_meshCache;

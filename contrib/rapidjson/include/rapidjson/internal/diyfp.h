@@ -21,10 +21,9 @@
 
 #include "../rapidjson.h"
 
-#if defined(_MSC_VER) && defined(_M_AMD64) && !defined(__INTEL_COMPILER)
+#if defined(_MSC_VER) && defined(_M_AMD64)
 #include <intrin.h>
 #pragma intrinsic(_BitScanReverse64)
-#pragma intrinsic(_umul128)
 #endif
 
 RAPIDJSON_NAMESPACE_BEGIN
@@ -35,13 +34,8 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
 #endif
 
-#ifdef __clang__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(padded)
-#endif
-
 struct DiyFp {
-    DiyFp() : f(), e() {}
+    DiyFp() {}
 
     DiyFp(uint64_t fp, int exp) : f(fp), e(exp) {}
 
@@ -238,18 +232,13 @@ inline DiyFp GetCachedPower(int e, int* K) {
 }
 
 inline DiyFp GetCachedPower10(int exp, int *outExp) {
-     unsigned index = (static_cast<unsigned>(exp) + 348u) / 8u;
-     *outExp = -348 + static_cast<int>(index) * 8;
+     unsigned index = (exp + 348) / 8;
+     *outExp = -348 + index * 8;
      return GetCachedPowerByIndex(index);
  }
 
 #ifdef __GNUC__
 RAPIDJSON_DIAG_POP
-#endif
-
-#ifdef __clang__
-RAPIDJSON_DIAG_POP
-RAPIDJSON_DIAG_OFF(padded)
 #endif
 
 } // namespace internal

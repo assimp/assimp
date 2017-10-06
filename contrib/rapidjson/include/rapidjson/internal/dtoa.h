@@ -29,7 +29,6 @@ namespace internal {
 #ifdef __GNUC__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
-RAPIDJSON_DIAG_OFF(array-bounds) // some gcc versions generate wrong warnings https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
 #endif
 
 inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest, uint64_t ten_kappa, uint64_t wp_w) {
@@ -41,7 +40,7 @@ inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest, uin
     }
 }
 
-inline int CountDecimalDigit32(uint32_t n) {
+inline unsigned CountDecimalDigit32(uint32_t n) {
     // Simple pure C++ implementation was faster than __builtin_clz version in this situation.
     if (n < 10) return 1;
     if (n < 100) return 2;
@@ -102,8 +101,7 @@ inline void DigitGen(const DiyFp& W, const DiyFp& Mp, uint64_t delta, char* buff
         kappa--;
         if (p2 < delta) {
             *K += kappa;
-            int index = -kappa;
-            GrisuRound(buffer, *len, delta, p2, one.f, wp_w.f * (index < 9 ? kPow10[index] : 0));
+            GrisuRound(buffer, *len, delta, p2, one.f, wp_w.f * kPow10[-kappa]);
             return;
         }
     }
@@ -147,10 +145,10 @@ inline char* WriteExponent(int K, char* buffer) {
     return buffer;
 }
 
-inline char* Prettify(char* buffer, int length, int k, int maxDecimalPlaces) {
+inline char* Prettify(char* buffer, int length, int k) {
     const int kk = length + k;  // 10^(kk-1) <= v < 10^kk
 
-    if (0 <= k && kk <= 21) {
+    if (length <= kk && kk <= 21) {
         // 1234e7 -> 12340000000
         for (int i = length; i < kk; i++)
             buffer[i] = '0';
@@ -160,44 +158,19 @@ inline char* Prettify(char* buffer, int length, int k, int maxDecimalPlaces) {
     }
     else if (0 < kk && kk <= 21) {
         // 1234e-2 -> 12.34
-        std::memmove(&buffer[kk + 1], &buffer[kk], static_cast<size_t>(length - kk));
+        std::memmove(&buffer[kk + 1], &buffer[kk], length - kk);
         buffer[kk] = '.';
-        if (0 > k + maxDecimalPlaces) {
-            // When maxDecimalPlaces = 2, 1.2345 -> 1.23, 1.102 -> 1.1
-            // Remove extra trailing zeros (at least one) after truncation.
-            for (int i = kk + maxDecimalPlaces; i > kk + 1; i--)
-                if (buffer[i] != '0')
-                    return &buffer[i + 1];
-            return &buffer[kk + 2]; // Reserve one zero
-        }
-        else
-            return &buffer[length + 1];
+        return &buffer[length + 1];
     }
     else if (-6 < kk && kk <= 0) {
         // 1234e-6 -> 0.001234
         const int offset = 2 - kk;
-        std::memmove(&buffer[offset], &buffer[0], static_cast<size_t>(length));
+        std::memmove(&buffer[offset], &buffer[0], length);
         buffer[0] = '0';
         buffer[1] = '.';
         for (int i = 2; i < offset; i++)
             buffer[i] = '0';
-        if (length - kk > maxDecimalPlaces) {
-            // When maxDecimalPlaces = 2, 0.123 -> 0.12, 0.102 -> 0.1
-            // Remove extra trailing zeros (at least one) after truncation.
-            for (int i = maxDecimalPlaces + 1; i > 2; i--)
-                if (buffer[i] != '0')
-                    return &buffer[i + 1];
-            return &buffer[3]; // Reserve one zero
-        }
-        else
-            return &buffer[length + offset];
-    }
-    else if (kk < -maxDecimalPlaces) {
-        // Truncate to zero
-        buffer[0] = '0';
-        buffer[1] = '.';
-        buffer[2] = '0';
-        return &buffer[3];
+        return &buffer[length + offset];
     }
     else if (length == 1) {
         // 1e30
@@ -206,15 +179,14 @@ inline char* Prettify(char* buffer, int length, int k, int maxDecimalPlaces) {
     }
     else {
         // 1234e30 -> 1.234e33
-        std::memmove(&buffer[2], &buffer[1], static_cast<size_t>(length - 1));
+        std::memmove(&buffer[2], &buffer[1], length - 1);
         buffer[1] = '.';
         buffer[length + 1] = 'e';
         return WriteExponent(kk - 1, &buffer[0 + length + 2]);
     }
 }
 
-inline char* dtoa(double value, char* buffer, int maxDecimalPlaces = 324) {
-    RAPIDJSON_ASSERT(maxDecimalPlaces >= 1);
+inline char* dtoa(double value, char* buffer) {
     Double d(value);
     if (d.IsZero()) {
         if (d.Sign())
@@ -231,7 +203,7 @@ inline char* dtoa(double value, char* buffer, int maxDecimalPlaces = 324) {
         }
         int length, K;
         Grisu2(value, buffer, &length, &K);
-        return Prettify(buffer, length, K, maxDecimalPlaces);
+        return Prettify(buffer, length, K);
     }
 }
 

@@ -724,7 +724,7 @@ namespace {
             SetTextureProperties(r, prop, out);
 
             if (Value* scale = FindNumber(*prop, "scale")) {
-                out.scale = scale->GetDouble();
+                out.scale = static_cast<float>(scale->GetDouble());
             }
         }
     }
@@ -735,7 +735,7 @@ namespace {
             SetTextureProperties(r, prop, out);
 
             if (Value* strength = FindNumber(*prop, "strength")) {
-                out.strength = strength->GetDouble();
+                out.strength = static_cast<float>(strength->GetDouble());
             }
         }
     }

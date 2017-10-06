@@ -307,6 +307,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
 
     std::vector<char> buffer;
     TextFileToBuffer( file, buffer );
+    pIOHandler->Close( file );
 
     OpenDDLParser myParser;
     myParser.setBuffer( &buffer[ 0 ], buffer.size() );
@@ -321,6 +322,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     copyMeshes( pScene );
     copyCameras( pScene );
     copyLights( pScene );
+    copyMaterials( pScene );
     resolveReferences();
     createNodeTree( pScene );
 }
@@ -524,7 +526,7 @@ void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
         m_currentNode->mNumMeshes = static_cast<unsigned int>(objRefNames.size());
         m_currentNode->mMeshes = new unsigned int[ objRefNames.size() ];
         if ( !objRefNames.empty() ) {
-            m_unresolvedRefStack.push_back( new RefInfo( m_currentNode, RefInfo::MeshRef, objRefNames ) );
+            m_unresolvedRefStack.push_back( std::unique_ptr<RefInfo>( new RefInfo( m_currentNode, RefInfo::MeshRef, objRefNames ) ) );
         }
     } else if ( m_tokenType == Grammar::LightNodeToken ) {
         // TODO!
@@ -543,7 +545,7 @@ void OpenGEXImporter::handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene 
     std::vector<std::string> matRefNames;
     getRefNames( node, matRefNames );
     if( !matRefNames.empty() ) {
-        m_unresolvedRefStack.push_back( new RefInfo( m_currentNode, RefInfo::MaterialRef, matRefNames ) );
+        m_unresolvedRefStack.push_back( std::unique_ptr<RefInfo>( new RefInfo( m_currentNode, RefInfo::MaterialRef, matRefNames ) ) );
     }
 }
 
@@ -1158,14 +1160,27 @@ void OpenGEXImporter::copyLights( aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
+void OpenGEXImporter::copyMaterials( aiScene *pScene ) {
+    ai_assert( nullptr != pScene );
+
+    if ( m_materialCache.empty() ) {
+        return;
+    }
+
+    pScene->mNumMaterials = static_cast<unsigned int>(m_materialCache.size());
+    pScene->mMaterials = new aiMaterial*[ pScene->mNumMaterials ];
+    std::copy( m_materialCache.begin(), m_materialCache.end(), pScene->mMaterials );
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::resolveReferences() {
     if( m_unresolvedRefStack.empty() ) {
         return;
     }
 
     RefInfo *currentRefInfo( nullptr );
-    for( std::vector<RefInfo*>::iterator it = m_unresolvedRefStack.begin(); it != m_unresolvedRefStack.end(); ++it ) {
-        currentRefInfo = *it;
+    for( auto it = m_unresolvedRefStack.begin(); it != m_unresolvedRefStack.end(); ++it ) {
+        currentRefInfo = it->get();
         if( nullptr != currentRefInfo ) {
             aiNode *node( currentRefInfo->m_node );
             if( RefInfo::MeshRef == currentRefInfo->m_type ) {
@@ -1231,9 +1246,9 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
         if( m_nodeChildMap.end() == it ) {
             info = new ChildInfo;
             m_root = info;
-            m_nodeChildMap[ node->mParent ] = info;
+            m_nodeChildMap[ node->mParent ] = std::unique_ptr<ChildInfo>(info);
         } else {
-            info = it->second;
+            info = it->second.get();
         }
         info->m_children.push_back( node );
     } else {
@@ -1243,9 +1258,9 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
         NodeChildMap::iterator it( m_nodeChildMap.find( node->mParent ) );
         if( m_nodeChildMap.end() == it ) {
             info = new ChildInfo;
-            m_nodeChildMap[ node->mParent ] = info;
+            m_nodeChildMap[ node->mParent ] = std::unique_ptr<ChildInfo>(info);
         } else {
-            info = it->second;
+            info = it->second.get();
         }
         info->m_children.push_back( node );
     }

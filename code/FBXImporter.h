@@ -58,14 +58,6 @@ namespace Formatter {
     typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
 }
 
-#ifndef _MSC_VER
-// GCC and Clang need to see this explicit declaration to avoid warning
-// MSVC complains about redeclaration even though this is just the
-// declaration, not the definition
-class FBXImporter;
-template<> const std::string LogFunctions<FBXImporter>::log_prefix;
-#endif  // _MSC_VER
-
 // -------------------------------------------------------------------------------------------
 /** Load the Autodesk FBX file format.
 

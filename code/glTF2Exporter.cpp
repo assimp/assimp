@@ -563,7 +563,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
                 continue;
             }
 
-            vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
+            vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;
             vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
 
             jointsPerVertex[vertexId] += 1;
@@ -872,7 +872,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             size_t frameIndex = i * nodeChannel->mNumPositionKeys / numKeyframes;
             // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
             // Check if we have to cast type here. e.g. uint16_t()
-            timeData[i] = static_cast<float>(nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond);
+            timeData[i] = nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond;
         }
 
         Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
@@ -953,7 +953,7 @@ void glTF2Exporter::ExportAnimations()
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
             // Parameters
-            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, static_cast<float>(anim->mTicksPerSecond));
+            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, anim->mTicksPerSecond);
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;

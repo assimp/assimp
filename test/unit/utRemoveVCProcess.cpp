@@ -70,7 +70,7 @@ TEST_F( utRevmoveVCProcess, issue1266_ProcessMeshTest_NoCrash ) {
     mesh->mNumVertices = 1;
     mesh->mColors[ 0 ] = new aiColor4D[ 2 ];
     scene->mMeshes[ 0 ] = mesh;
-    std::unique_ptr<RemoveVCProcess> process(new RemoveVCProcess);
+    RemoveVCProcess *process = new RemoveVCProcess;
     process->Execute( scene );
     delete scene;
 }

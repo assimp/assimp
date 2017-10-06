@@ -15,13 +15,8 @@
 #ifndef RAPIDJSON_FILEWRITESTREAM_H_
 #define RAPIDJSON_FILEWRITESTREAM_H_
 
-#include "stream.h"
+#include "rapidjson.h"
 #include <cstdio>
-
-#ifdef __clang__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(unreachable-code)
-#endif
 
 RAPIDJSON_NAMESPACE_BEGIN
 
@@ -62,11 +57,7 @@ public:
 
     void Flush() {
         if (current_ != buffer_) {
-            size_t result = fwrite(buffer_, 1, static_cast<size_t>(current_ - buffer_), fp_);
-            if (result < static_cast<size_t>(current_ - buffer_)) {
-                // failure deliberately ignored at this time
-                // added to avoid warn_unused_result build errors
-            }
+            fwrite(buffer_, 1, static_cast<size_t>(current_ - buffer_), fp_);
             current_ = buffer_;
         }
     }
@@ -96,9 +87,5 @@ inline void PutN(FileWriteStream& stream, char c, size_t n) {
 }
 
 RAPIDJSON_NAMESPACE_END
-
-#ifdef __clang__
-RAPIDJSON_DIAG_POP
-#endif
 
 #endif // RAPIDJSON_FILESTREAM_H_

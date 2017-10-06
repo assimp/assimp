@@ -12,15 +12,10 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-#ifndef RAPIDJSON_ERROR_ERROR_H_
-#define RAPIDJSON_ERROR_ERROR_H_
+#ifndef RAPIDJSON_ERROR_ERROR_H__
+#define RAPIDJSON_ERROR_ERROR_H__
 
 #include "../rapidjson.h"
-
-#ifdef __clang__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(padded)
-#endif
 
 /*! \file error.h */
 
@@ -104,9 +99,7 @@ enum ParseErrorCode {
     \see GenericReader::Parse, GenericDocument::Parse
 */
 struct ParseResult {
-    //!! Unspecified boolean type
-    typedef bool (ParseResult::*BooleanType)() const;
-public:
+
     //! Default constructor, no error.
     ParseResult() : code_(kParseErrorNone), offset_(0) {}
     //! Constructor to set an error.
@@ -117,18 +110,14 @@ public:
     //! Get the error offset, if \ref IsError(), 0 otherwise.
     size_t Offset() const { return offset_; }
 
-    //! Explicit conversion to \c bool, returns \c true, iff !\ref IsError().
-    operator BooleanType() const { return !IsError() ? &ParseResult::IsError : NULL; }
+    //! Conversion to \c bool, returns \c true, iff !\ref IsError().
+    operator bool() const { return !IsError(); }
     //! Whether the result is an error.
     bool IsError() const { return code_ != kParseErrorNone; }
 
     bool operator==(const ParseResult& that) const { return code_ == that.code_; }
     bool operator==(ParseErrorCode code) const { return code_ == code; }
     friend bool operator==(ParseErrorCode code, const ParseResult & err) { return code == err.code_; }
-
-    bool operator!=(const ParseResult& that) const { return !(*this == that); }
-    bool operator!=(ParseErrorCode code) const { return !(*this == code); }
-    friend bool operator!=(ParseErrorCode code, const ParseResult & err) { return err != code; }
 
     //! Reset error code.
     void Clear() { Set(kParseErrorNone); }
@@ -154,8 +143,4 @@ typedef const RAPIDJSON_ERROR_CHARTYPE* (*GetParseErrorFunc)(ParseErrorCode);
 
 RAPIDJSON_NAMESPACE_END
 
-#ifdef __clang__
-RAPIDJSON_DIAG_POP
-#endif
-
-#endif // RAPIDJSON_ERROR_ERROR_H_
+#endif // RAPIDJSON_ERROR_ERROR_H__

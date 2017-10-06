@@ -59,7 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 
 namespace Assimp {
-    template<> const std::string LogFunctions<FBXImporter>::log_prefix = "FBX: ";
+    template<> const char* LogFunctions<FBXImporter>::Prefix()
+    {
+        static auto prefix = "FBX: ";
+        return prefix;
+    }
 }
 
 using namespace Assimp;

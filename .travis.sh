@@ -2,7 +2,7 @@ function generate()
 {
     OPTIONS="-DASSIMP_WERROR=ON"
 
-    if [ "$TRAVIS_NO_EXPORT" = "YES" ] ; then
+    if [ "$DISABLE_EXPORTERS" = "YES" ] ; then
         OPTIONS="$OPTIONS -DASSIMP_NO_EXPORT=YES"
     else
         OPTIONS="$OPTIONS -DASSIMP_NO_EXPORT=NO"

@@ -47,7 +47,7 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: TRAVIS_NO_EXPORT=YES ENABLE_COVERALLS=ON
+      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
     - os: linux
       compiler: gcc
       env: SHARED_BUILD=ON

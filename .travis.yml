@@ -36,14 +36,6 @@ env:
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
 
 matrix:
-  exclude:
-    - os: linux
-      compiler: gcc
-      env:
-    - os: linux
-      compiler: clang
-      env:
-
   include:
     - os: linux
       compiler: gcc

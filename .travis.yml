@@ -50,9 +50,6 @@ matrix:
       env: TRAVIS_NO_EXPORT=YES ENABLE_COVERALLS=ON
     - os: linux
       compiler: gcc
-      env: TRAVIS_NO_EXPORT=NO ASAN=ON
-    - os: linux
-      compiler: gcc
       env: SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO
     - os: linux
       compiler: gcc

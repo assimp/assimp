@@ -50,16 +50,16 @@ matrix:
       env: TRAVIS_NO_EXPORT=YES ENABLE_COVERALLS=ON
     - os: linux
       compiler: gcc
-      env: SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO
+      env: SHARED_BUILD=ON
     - os: linux
       compiler: gcc
-      env: SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO
+      env: SHARED_BUILD=ON
     - os: linux
       compiler: clang
-      env: TRAVIS_NO_EXPORT=NO ASAN=ON
+      env: ASAN=ON
     - os: linux
       compiler: clang
-      env: SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO
+      env: SHARED_BUILD=ON
 
 install:
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi

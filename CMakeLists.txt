@@ -108,7 +108,10 @@ IF(MSVC)
 ENDIF(MSVC)
 
 IF(NOT BUILD_SHARED_LIBS)
+  MESSAGE(STATUS "Shared libraries disabled")
   SET(LINK_SEARCH_START_STATIC TRUE)
+ELSE()
+  MESSAGE(STATUS "Shared libraries enabled")
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
@@ -209,12 +212,14 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
 ENDIF()
 
 if (ASSIMP_COVERALLS)
+    MESSAGE(STATUS "Coveralls enabled")
     INCLUDE(Coveralls)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
 if (ASSIMP_WERROR)
+  MESSAGE(STATUS "Treating warnings as errors")
   IF (MSVC)
     add_compile_options(/WX)
   ELSE()
@@ -224,6 +229,7 @@ if (ASSIMP_WERROR)
 endif()
 
 if (ASSIMP_ASAN)
+    MESSAGE(STATUS "AddressSanitizer enabled")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
 endif()

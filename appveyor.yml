@@ -42,12 +42,13 @@ after_build:
   - 7z a assimp.7z %APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%\* %APPVEYOR_BUILD_FOLDER%\lib\%CONFIGURATION%\*
   
 before_test:
-  - xcopy /s "%APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%\" "%APPVEYOR_BUILD_FOLDER%\test\%CONFIGURATION%\"
+  - dir "%APPVEYOR_BUILD_FOLDER%\bin"
+  - xcopy /s "%APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%" "%APPVEYOR_BUILD_FOLDER%\bin\test\%CONFIGURATION%"
 
 test:
   assemblies:
     only:
-      - test\%CONFIGURATION%\unit.exe
+      - bin\test\%CONFIGURATION%\unit.exe
   
 artifacts:
   - path: assimp.7z

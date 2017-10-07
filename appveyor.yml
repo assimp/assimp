@@ -28,7 +28,7 @@ build:
   project: Assimp.sln
 
 install:
-  - @echo off
+  - echo off
   - set CMAKE_DEFINES -DASSIMP_WERROR=ON
   - if "%platform%"=="x86" set CMAKE_GENERATOR_NAME=%APPVEYOR_BUILD_WORKER_IMAGE%
   - if "%platform%"=="x64" set CMAKE_GENERATOR_NAME=%APPVEYOR_BUILD_WORKER_IMAGE% Win64

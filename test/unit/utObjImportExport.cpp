@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
+#include <assimp/postprocess.h>
+#include <code/Exceptional.h>
 
 using namespace Assimp;
 
@@ -257,15 +259,16 @@ TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
 
 TEST_F( utObjImportExport, issue1453_segfault ) {
     static const std::string ObjModel =
-        "v  0.0  0.0  0.0"
-        "v  0.0  0.0  1.0"
-        "v  0.0  1.0  0.0"
-        "v  0.0  1.0  1.0"
-        "v  1.0  0.0  0.0"
-        "v  1.0  0.0  1.0"
-        "v  1.0  1.0  0.0"
-        "v  1.0  1.0  1.0";
+        "v  0.0  0.0  0.0\n"
+        "v  0.0  0.0  1.0\n"
+        "v  0.0  1.0  0.0\n"
+        "v  0.0  1.0  1.0\n"
+        "v  1.0  0.0  0.0\n"
+        "v  1.0  0.0  1.0\n"
+        "v  1.0  1.0  0.0\n"
+        "v  1.0  1.0  1.0\nB";
 
     Assimp::Importer myimporter;
-    const aiScene* myscene = myimporter.ReadFileFromMemory( ObjModel.c_str(), ObjModel.size(), 0 );
+    const aiScene *scene = myimporter.ReadFileFromMemory( ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure );
+    EXPECT_EQ( nullptr, scene );
 }

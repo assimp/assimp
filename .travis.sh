@@ -1,6 +1,32 @@
 function generate()
 {
-    cmake -G "Unix Makefiles" -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD -DASSIMP_COVERALLS=$ENABLE_COVERALLS
+    OPTIONS="-DASSIMP_WERROR=ON"
+
+    if [ "$DISABLE_EXPORTERS" = "YES" ] ; then
+        OPTIONS="$OPTIONS -DASSIMP_NO_EXPORT=YES"
+    else
+        OPTIONS="$OPTIONS -DASSIMP_NO_EXPORT=NO"
+    fi
+
+    if [ "$SHARED_BUILD" = "ON" ] ; then
+        OPTIONS="$OPTIONS -DBUILD_SHARED_LIBS=ON"
+    else
+        OPTIONS="$OPTIONS -DBUILD_SHARED_LIBS=OFF"
+    fi
+
+    if [ "$ENABLE_COVERALLS" = "ON" ] ; then
+        OPTIONS="$OPTIONS -DASSIMP_COVERALLS=ON"
+    else
+        OPTIONS="$OPTIONS -DASSIMP_COVERALLS=OFF"
+    fi
+
+    if [ "$ASAN" = "ON" ] ; then
+        OPTIONS="$OPTIONS -DASSIMP_ASAN=ON"
+    else
+        OPTIONS="$OPTIONS -DASSIMP_ASAN=OFF"
+    fi
+
+    cmake -G "Unix Makefiles" $OPTIONS
 }
 
 if [ $ANDROID ]; then

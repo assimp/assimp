@@ -78,8 +78,12 @@ OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
 )
-OPTION ( ASSIMP_WERRRO
+OPTION ( ASSIMP_WERROR
   "Treat warnings as errors."
+  OFF
+)
+OPTION ( ASSIMP_ASAN
+  "Enable AddressSanitizer."
   OFF
 )
 OPTION ( SYSTEM_IRRXML
@@ -104,7 +108,10 @@ IF(MSVC)
 ENDIF(MSVC)
 
 IF(NOT BUILD_SHARED_LIBS)
+  MESSAGE(STATUS "Shared libraries disabled")
   SET(LINK_SEARCH_START_STATIC TRUE)
+ELSE()
+  MESSAGE(STATUS "Shared libraries enabled")
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
@@ -146,19 +153,6 @@ ENDIF(NOT GIT_COMMIT_HASH)
 IF(ASSIMP_DOUBLE_PRECISION)
     ADD_DEFINITIONS(-DASSIMP_DOUBLE_PRECISION)
 ENDIF(ASSIMP_DOUBLE_PRECISION)
-
-# Check for OpenMP support
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
-    IF(MSVC)
-        IF(MSVC_VERSION GREATER 1910)
-            SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
-        ENDIF()
-    ENDIF()
-endif()
 
 CONFIGURE_FILE(
   ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
@@ -203,22 +197,41 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
+
+  # disable "elements of array '' will be default initialized" warning on MSVC2013
+  IF(MSVC12)
+    add_compile_options(/wd4351)
+  ENDIF()
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -std=c++11" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -std=c++11" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
 if (ASSIMP_COVERALLS)
+    MESSAGE(STATUS "Coveralls enabled")
     INCLUDE(Coveralls)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
 if (ASSIMP_WERROR)
+  MESSAGE(STATUS "Treating warnings as errors")
+  IF (MSVC)
+    add_compile_options(/WX)
+  ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  ENDIF()
+endif()
+
+if (ASSIMP_ASAN)
+    MESSAGE(STATUS "AddressSanitizer enabled")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
 endif()
 
 INCLUDE (FindPkgMacros)

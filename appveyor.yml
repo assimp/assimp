@@ -40,7 +40,10 @@ after_build:
   - 7z a assimp.7z %APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%\* %APPVEYOR_BUILD_FOLDER%\lib\%CONFIGURATION%\*
 
 test_script:
-  - cmd: bin\%CONFIGURATION%\unit.exe
+  - cmd: bin\%CONFIGURATION%\unit.exe -gtest_output=xml:testout.xml
+
+after_test:
+  - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\testout.xml))
   
 artifacts:
   - path: assimp.7z

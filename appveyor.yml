@@ -39,10 +39,8 @@ cache:
 after_build:
   - 7z a assimp.7z %APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%\* %APPVEYOR_BUILD_FOLDER%\lib\%CONFIGURATION%\*
 
-test:
-  assemblies:
-    only:
-      - bin\%CONFIGURATION%\unit.exe
+test_script:
+  - cmd: bin\%CONFIGURATION%\unit.exe
   
 artifacts:
   - path: assimp.7z

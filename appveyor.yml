@@ -51,10 +51,8 @@ after_build:
 
 test_script:
   - cmd: bin\%CONFIGURATION%\unit.exe --gtest_output=xml:testout.xml
-
-after_test:
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\testout.xml))
-  
+
 artifacts:
   - path: assimp.7z
     name: assimp_lib

@@ -395,15 +395,15 @@ namespace o3dgc
                                 {
                                     return m_stream.GetSize();
                                 }
-    const unsigned char * const GetBuffer(unsigned long position) const
+    const unsigned char *       GetBuffer(unsigned long position) const
                                 {
                                     return m_stream.GetBuffer() + position;
                                 }
-    unsigned char * const       GetBuffer(unsigned long position)
+    unsigned char *             GetBuffer(unsigned long position)
                                 {
                                     return (m_stream.GetBuffer() + position);
                                 }                                
-    unsigned char * const       GetBuffer()
+    unsigned char *             GetBuffer()
                                 {
                                     return m_stream.GetBuffer();
                                 }                                

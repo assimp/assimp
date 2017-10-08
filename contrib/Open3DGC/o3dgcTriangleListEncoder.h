@@ -50,10 +50,10 @@ namespace o3dgc
                                            BinaryStream & bstream);
         O3DGCStreamType       GetStreamType() const { return m_streamType; }
         void                        SetStreamType(O3DGCStreamType streamType) { m_streamType = streamType; }
-        const long * const          GetInvVMap() const { return m_invVMap;}
-        const long * const          GetInvTMap() const { return m_invTMap;}        
-        const long * const          GetVMap()    const { return m_vmap;}
-        const long * const          GetTMap()    const { return m_tmap;}
+        const long *                GetInvVMap() const { return m_invVMap;}
+        const long *                GetInvTMap() const { return m_invTMap;}
+        const long *                GetVMap()    const { return m_vmap;}
+        const long *                GetTMap()    const { return m_tmap;}
         const AdjacencyInfo &       GetVertexToTriangle() const { return m_vertexToTriangle;}
 
         private:

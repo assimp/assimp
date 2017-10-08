@@ -25,6 +25,10 @@ branches:
 os:
   - linux
 
+compiler:
+  - gcc
+  - clang
+
 env:
   global:
   # COVERITY_SCAN_TOKEN
@@ -32,23 +36,19 @@ env:
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
 
 matrix:
-  exclude:
-    - os: linux
-      env:
-
   include:
     - os: linux
       compiler: gcc
-      env: LINUX=1 TRAVIS_NO_EXPORT=YES ENABLE_COVERALLS=ON  ASAN=OFF
+      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
     - os: linux
       compiler: gcc
-      env: LINUX=1 TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF ASAN=ON
+      env: SHARED_BUILD=ON
     - os: linux
-      compiler: gcc
-      env: LINUX=1 SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF  ASAN=OFF
+      compiler: clang
+      env: ASAN=ON
     - os: linux
-      compiler: gcc
-      env: LINUX=1 SHARED_BUILD=ON TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF  ASAN=OFF
+      compiler: clang
+      env: SHARED_BUILD=ON
 
 install:
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi

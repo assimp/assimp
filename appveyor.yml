@@ -34,7 +34,7 @@ install:
   - cmake %CMAKE_DEFINES% -G "%CMAKE_GENERATOR_NAME%"
 
 cache:
-  - code\assimp.dir\%CONFIGURATION%
+  - assimp.dir\%CONFIGURATION%
   
 after_build:
   - 7z a assimp.7z %APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%\* %APPVEYOR_BUILD_FOLDER%\lib\%CONFIGURATION%\*

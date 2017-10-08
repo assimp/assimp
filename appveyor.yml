@@ -20,9 +20,9 @@ platform:
   - x64
 
 environment:
-  - build_cache_dir: bin\.mtime_cache
-  - build_binary_dir: bin\%CONFIGURATION%
-  - appveyor_script_dir: scripts\AppVeyor
+  build_cache_dir: bin\.mtime_cache
+  build_binary_dir: bin\%CONFIGURATION%
+  appveyor_script_dir: scripts\AppVeyor
   
 configuration: Release
 

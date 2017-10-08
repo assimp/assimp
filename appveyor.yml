@@ -45,17 +45,17 @@ cache:
   - $(build_cache_dir)
   
 before_build:
-  - ruby $(appveyor_script_dir)\mtime_cache -g $(appveyor_script_dir)\cacheglobs.txt -c $(build_cache_dir)\cache.json
+  - ruby %appveyor_script_dir%\mtime_cache -g %appveyor_script_dir%\cacheglobs.txt -c %build_cache_dir%\cache.json
   
 build:
   parallel: true
   project: Assimp.sln
   
 after_build:
-  - 7z a assimp.7z $(build_binary_dir)\* lib\%CONFIGURATION%\*
+  - 7z a assimp.7z %build_binary_dir%\* lib\%CONFIGURATION%\*
 
 test_script:
-  - cmd: $(build_binary_dir)\unit.exe --gtest_output=xml:testout.xml
+  - cmd: %build_binary_dir%\unit.exe --gtest_output=xml:testout.xml
 
 after_test:
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\testout.xml))

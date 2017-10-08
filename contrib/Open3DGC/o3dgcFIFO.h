@@ -81,8 +81,8 @@ namespace o3dgc
                                         m_end = 0;
                                     }
                                 }
-        const unsigned long     GetSize()          const { return m_size;};
-        const unsigned long     GetAllocatedSize() const { return m_allocated;};
+        unsigned long           GetSize()          const { return m_size;};
+        unsigned long           GetAllocatedSize() const { return m_allocated;};
         void                    Clear() { m_start = m_end = m_size = 0;};
 
     private:

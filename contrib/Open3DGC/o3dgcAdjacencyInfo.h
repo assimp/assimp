@@ -140,8 +140,8 @@ namespace o3dgc
                                 { 
                                     return End(element) - Begin(element);
                                 }
-        long * const            GetNumNeighborsBuffer() { return m_numNeighbors;}
-        long * const            GetNeighborsBuffer()    { return m_neighbors;}
+        long *                  GetNumNeighborsBuffer() { return m_numNeighbors;}
+        long *                  GetNeighborsBuffer()    { return m_neighbors;}
 
     private:
         long                    m_neighborsSize;    // actual allocated size for m_neighbors

@@ -50,7 +50,7 @@ after_build:
   - 7z a assimp.7z bin\%CONFIGURATION%\* lib\%CONFIGURATION%\*
 
 test_script:
-  - cmd: bin\%CONFIGURATION%\unit.exe --gtest_output=xml:testout.xml || (Powershell.exe -executionpolicy remotesigned -Command "(new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\testout.xml))" && exit 1)
+  - cmd: bin\%CONFIGURATION%\unit.exe --gtest_output=xml:testout.xml || (Powershell.exe -executionpolicy remotesigned -Command "(new-object net.webclient).UploadFile(`\"https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)`\", (Resolve-Path .\testout.xml))" && exit 1)
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\testout.xml))
 
 artifacts:

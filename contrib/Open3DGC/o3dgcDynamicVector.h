@@ -48,10 +48,10 @@ namespace o3dgc
         unsigned long               GetNVector()       const { return m_num;}
         unsigned long               GetDimVector()     const { return m_dim;}
         unsigned long               GetStride()        const { return m_stride;}
-        const Real * const          GetMin()           const { return m_min;}
-        const Real * const          GetMax()           const { return m_max;}
-        const Real * const          GetVectors()       const { return m_vectors;}
-        Real * const                GetVectors()             { return m_vectors;}
+        const Real *                GetMin()           const { return m_min;}
+        const Real *                GetMax()           const { return m_max;}
+        const Real *                GetVectors()       const { return m_vectors;}
+        Real *                      GetVectors()             { return m_vectors;}
         Real                        GetMin(unsigned long j) const { return m_min[j];}
         Real                        GetMax(unsigned long j) const { return m_max[j];}
 

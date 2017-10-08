@@ -19,28 +19,43 @@ platform:
   - Win32
   - x64
 
+environment:
+  - build_cache_dir: bin\.mtime_cache
+  - build_binary_dir: bin\%CONFIGURATION%
+  - appveyor_script_dir: scripts\AppVeyor
+  
 configuration: Release
 
-build:
-  parallel: true
-  project: Assimp.sln
-
 install:
+  - set PATH=C:\Ruby24-x64\bin;%PATH%
   - set CMAKE_DEFINES -DASSIMP_WERROR=ON
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" set CMAKE_GENERATOR_NAME=Visual Studio 12 2013
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" set CMAKE_GENERATOR_NAME=Visual Studio 14 2015
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" set CMAKE_GENERATOR_NAME=Visual Studio 15 2017
   - if "%platform%"=="x64" set CMAKE_GENERATOR_NAME=%CMAKE_GENERATOR_NAME% Win64
   - cmake %CMAKE_DEFINES% -G "%CMAKE_GENERATOR_NAME%"
-
+  
 cache:
   - assimp.dir\%CONFIGURATION%
+  - zlibstatic.dir\%CONFIGURATION%
+  - zlib.dir\%CONFIGURATION%
+  - assimp_cmd.dir\%CONFIGURATION%
+  - assimp_viewer.dir\%CONFIGURATION%
+  - unit.dir\%CONFIGURATION%
+  - $(build_cache_dir)
+  
+before_build:
+  - ruby $(appveyor_script_dir)\mtime_cache -g $(appveyor_script_dir)\cacheglobs.txt -c $(build_cache_dir)\cache.json
+  
+build:
+  parallel: true
+  project: Assimp.sln
   
 after_build:
-  - 7z a assimp.7z %APPVEYOR_BUILD_FOLDER%\bin\%CONFIGURATION%\* %APPVEYOR_BUILD_FOLDER%\lib\%CONFIGURATION%\*
+  - 7z a assimp.7z $(build_binary_dir)\* lib\%CONFIGURATION%\*
 
 test_script:
-  - cmd: bin\%CONFIGURATION%\unit.exe -gtest_output=xml:testout.xml
+  - cmd: $(build_binary_dir)\unit.exe --gtest_output=xml:testout.xml
 
 after_test:
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\testout.xml))

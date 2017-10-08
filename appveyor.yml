@@ -21,9 +21,6 @@ platform:
   
 configuration: Release
 
-matrix:
-  fast_finish: true
-
 install:
   - set PATH=C:\Ruby24-x64\bin;%PATH%
   - set CMAKE_DEFINES -DASSIMP_WERROR=ON

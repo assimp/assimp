@@ -596,10 +596,10 @@ public:
 		return textures[index];
 
     }
-	const int textureCount() const {
+	int textureCount() const {
 		return static_cast<int>(textures.size());
 	}
-    const BlendMode GetBlendMode() const
+    BlendMode GetBlendMode() const
     {
         return blendMode;
     }
@@ -647,7 +647,7 @@ public:
         return content;
     }
 
-    const uint32_t ContentLength() const {
+    uint32_t ContentLength() const {
         return contentLength;
     }
 

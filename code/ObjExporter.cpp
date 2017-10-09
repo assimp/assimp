@@ -61,6 +61,10 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     // invoke the exporter
     ObjExporter exporter(pFile, pScene);
 
+    if (exporter.mOutput.fail() || exporter.mOutputMat.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
+
     // we're still here - export successfully completed. Write both the main OBJ file and the material script
     {
         std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));

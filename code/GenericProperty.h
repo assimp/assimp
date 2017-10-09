@@ -111,7 +111,7 @@ inline void SetGenericPropertyPtr(std::map< unsigned int, T* >& list,
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-inline const bool HasGenericProperty(const std::map< unsigned int, T >& list,
+inline bool HasGenericProperty(const std::map< unsigned int, T >& list,
     const char* szName)
 {
     ai_assert(NULL != szName);

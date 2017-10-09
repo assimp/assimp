@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -49,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter.hpp"
 
 // Header files, Assimp.
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "StandardShapes.h"
 #include "StringUtils.h"
 
@@ -260,21 +261,20 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	size_t off_b = 0;
 
 	// Calculate size of the target array and rule how data will be copied.
-    if ( nullptr != src_texture ) {
-        if(!pID_R.empty()) {
-            tex_size += src_texture[0]->Data.size(); step++, off_g++, off_b++;
-        }
-        if(!pID_G.empty()) {
-            tex_size += src_texture[1]->Data.size(); step++, off_b++;
-        }
-        if(!pID_B.empty()) {
-            tex_size += src_texture[2]->Data.size(); step++;
-        }
-        if(!pID_A.empty()) {
-            tex_size += src_texture[3]->Data.size(); step++;
-        }
+    if(!pID_R.empty() && nullptr != src_texture[ 0 ] ) {
+        tex_size += src_texture[0]->Data.size(); step++, off_g++, off_b++;
     }
-	// Create target array.
+    if(!pID_G.empty() && nullptr != src_texture[ 1 ] ) {
+        tex_size += src_texture[1]->Data.size(); step++, off_b++;
+    }
+    if(!pID_B.empty() && nullptr != src_texture[ 2 ] ) {
+        tex_size += src_texture[2]->Data.size(); step++;
+    }
+    if(!pID_A.empty() && nullptr != src_texture[ 3 ] ) {
+        tex_size += src_texture[3]->Data.size(); step++;
+    }
+
+    // Create target array.
 	converted_texture.Data = new uint8_t[tex_size];
 	// And copy data
 	auto CopyTextureData = [&](const std::string& pID, const size_t pOffset, const size_t pStep, const uint8_t pSrcTexNum) -> void
@@ -686,7 +686,6 @@ std::list<unsigned int> mesh_idx;
 				tmesh->mNumVertices = static_cast<unsigned int>(vert_arr.size());
 				tmesh->mVertices = new aiVector3D[tmesh->mNumVertices];
 				tmesh->mColors[0] = new aiColor4D[tmesh->mNumVertices];
-				tmesh->mFaces = new aiFace[face_list_cur.size()];
 
 				memcpy(tmesh->mVertices, vert_arr.data(), tmesh->mNumVertices * sizeof(aiVector3D));
 				memcpy(tmesh->mColors[0], col_arr.data(), tmesh->mNumVertices * sizeof(aiColor4D));

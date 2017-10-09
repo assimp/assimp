@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -59,18 +60,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /// \class CAMFImporter_NodeElement
 /// Base class for elements of nodes.
-class CAMFImporter_NodeElement
-{
-	/***********************************************/
-	/******************** Types ********************/
-	/***********************************************/
+class CAMFImporter_NodeElement {
 
 public:
-
-	/// \enum EType
 	/// Define what data type contain node element.
-	enum EType
-	{
+	enum EType {
 		ENET_Color,        ///< Color element: <color>.
 		ENET_Constellation,///< Grouping element: <constellation>.
 		ENET_Coordinates,  ///< Coordinates element: <coordinates>.
@@ -91,52 +85,37 @@ public:
 		ENET_Invalid       ///< Element has invalid type and possible contain invalid data.
 	};
 
-	/***********************************************/
-	/****************** Constants ******************/
-	/***********************************************/
-
-public:
-
 	const EType Type;///< Type of element.
-
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
 	std::string ID;///< ID of element.
-	CAMFImporter_NodeElement* Parent;///< Parrent element. If nullptr then this node is root.
+	CAMFImporter_NodeElement* Parent;///< Parent element. If nullptr then this node is root.
 	std::list<CAMFImporter_NodeElement*> Child;///< Child elements.
 
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
+public:                                               /// Destructor, virtual..
+    virtual ~CAMFImporter_NodeElement() {
+        // empty
+    }
 
 private:
-
-	/// \fn CAMFImporter_NodeElement(const CAMFImporter_NodeElement& pNodeElement)
 	/// Disabled copy constructor.
 	CAMFImporter_NodeElement(const CAMFImporter_NodeElement& pNodeElement);
 
-	/// \fn CAMFImporter_NodeElement& operator=(const CAMFImporter_NodeElement& pNodeElement)
 	/// Disabled assign operator.
 	CAMFImporter_NodeElement& operator=(const CAMFImporter_NodeElement& pNodeElement);
 
-	/// \fn CAMFImporter_NodeElement()
 	/// Disabled default constructor.
 	CAMFImporter_NodeElement();
 
 protected:
-
-	/// \fn CAMFImporter_NodeElement(const EType pType, CAMFImporter_NodeElement* pParent)
 	/// In constructor inheritor must set element type.
 	/// \param [in] pType - element type.
 	/// \param [in] pParent - parent element.
 	CAMFImporter_NodeElement(const EType pType, CAMFImporter_NodeElement* pParent)
-		: Type(pType), Parent(pParent)
-	{}
-
+	: Type(pType)
+    , ID()
+    , Parent(pParent)
+    , Child() {
+        // empty
+    }
 };// class IAMFImporter_NodeElement
 
 /// \struct CAMFImporter_NodeElement_Constellation
@@ -399,25 +378,23 @@ struct CAMFImporter_NodeElement_Triangle : public CAMFImporter_NodeElement
 
 };// struct CAMFImporter_NodeElement_Triangle
 
-/// \struct CAMFImporter_NodeElement_Texture
 /// Structure that define texture node.
-struct CAMFImporter_NodeElement_Texture : public CAMFImporter_NodeElement
-{
-	/****************** Variables ******************/
-
+struct CAMFImporter_NodeElement_Texture : public CAMFImporter_NodeElement {
 	size_t Width, Height, Depth;///< Size of the texture.
 	std::vector<uint8_t> Data;///< Data of the texture.
 	bool Tiled;
 
-	/****************** Functions ******************/
-
-	/// \fn CAMFImporter_NodeElement_Texture(CAMFImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	CAMFImporter_NodeElement_Texture(CAMFImporter_NodeElement* pParent)
-		: CAMFImporter_NodeElement(ENET_Texture, pParent)
-	{}
-
+	: CAMFImporter_NodeElement(ENET_Texture, pParent)
+    , Width( 0 )
+    , Height( 0 )
+    , Depth( 0 )
+    , Data()
+    , Tiled( false ){
+        // empty
+    }
 };// struct CAMFImporter_NodeElement_Texture
 
 #endif // INCLUDED_AI_AMF_IMPORTER_NODE_H

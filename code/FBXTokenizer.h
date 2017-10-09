@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -100,7 +101,6 @@ public:
         return std::string(begin(),end());
     }
 
-public:
     bool IsBinary() const {
         return column == BINARY_MARKER;
     }

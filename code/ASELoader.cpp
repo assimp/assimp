@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -44,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
+
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
 #include "ASELoader.h"
@@ -1318,5 +1321,7 @@ bool ASEImporter::GenerateNormals(ASE::Mesh& mesh)  {
     ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
     return false;
 }
+
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 
 #endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER

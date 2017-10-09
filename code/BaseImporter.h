@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -59,7 +60,6 @@ class IOSystem;
 class BaseProcess;
 class SharedPostProcessInfo;
 class IOStream;
-
 
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
@@ -193,13 +193,10 @@ public:
         const Importer* pImp
         );
 
-
     // -------------------------------------------------------------------
     /** Called by #Importer::GetImporterInfo to get a description of
      *  some loader features. Importers must provide this information. */
     virtual const aiImporterDesc* GetInfo() const = 0;
-
-
 
     // -------------------------------------------------------------------
     /** Called by #Importer::GetExtensionList for each loaded importer.
@@ -316,7 +313,7 @@ public: // static utilities
      *  @param Size of one token, in bytes. Maximally 16 bytes.
      *  @return true if one of the given tokens was found
      *
-     *  @note For convinence, the check is also performed for the
+     *  @note For convenience, the check is also performed for the
      *  byte-swapped variant of all tokens (big endian). Only for
      *  tokens of size 2,4.
      */

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,13 +51,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *       OptimizeGraph step.
   */
 // ----------------------------------------------------------------------------
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "StringUtils.h"
 #include "fast_atof.h"
 #include "Hash.h"
 #include "time.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
+#include <assimp/mesh.h>
 #include <stdio.h>
 #include "ScenePrivate.h"
 
@@ -756,7 +758,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 
 // ------------------------------------------------------------------------------------------------
 // Merge a list of meshes
-void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
+void SceneCombiner::MergeMeshes(aiMesh** _out, unsigned int /*flags*/,
     std::vector<aiMesh*>::const_iterator begin,
     std::vector<aiMesh*>::const_iterator end)
 {
@@ -771,8 +773,14 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
     aiMesh* out = *_out = new aiMesh();
     out->mMaterialIndex = (*begin)->mMaterialIndex;
 
+    std::string name;
     // Find out how much output storage we'll need
-    for (std::vector<aiMesh*>::const_iterator it = begin; it != end;++it)   {
+    for (std::vector<aiMesh*>::const_iterator it = begin; it != end; ++it) {
+        const char *meshName( (*it)->mName.C_Str() );
+        name += std::string( meshName );
+        if ( it != end - 1 ) {
+            name += ".";
+        }
         out->mNumVertices   += (*it)->mNumVertices;
         out->mNumFaces      += (*it)->mNumFaces;
         out->mNumBones      += (*it)->mNumBones;
@@ -780,6 +788,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
         // combine primitive type flags
         out->mPrimitiveTypes |= (*it)->mPrimitiveTypes;
     }
+    out->mName.Set( name.c_str() );
 
     if (out->mNumVertices) {
         aiVector3D* pv2;
@@ -788,7 +797,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
         if ((**begin).HasPositions())   {
 
             pv2 = out->mVertices = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh*>::const_iterator it = begin; it != end;++it)   {
+            for (std::vector<aiMesh*>::const_iterator it = begin; it != end; ++it)  {
                 if ((*it)->mVertices)   {
                     ::memcpy(pv2,(*it)->mVertices,(*it)->mNumVertices*sizeof(aiVector3D));
                 }
@@ -808,7 +817,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
                 pv2 += (*it)->mNumVertices;
             }
         }
-        // copy tangents and bitangents
+        // copy tangents and bi-tangents
         if ((**begin).HasTangentsAndBitangents())   {
 
             pv2 = out->mTangents = new aiVector3D[out->mNumVertices];

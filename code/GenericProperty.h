@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -110,7 +111,7 @@ inline void SetGenericPropertyPtr(std::map< unsigned int, T* >& list,
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-inline const bool HasGenericProperty(const std::map< unsigned int, T >& list,
+inline bool HasGenericProperty(const std::map< unsigned int, T >& list,
     const char* szName)
 {
     ai_assert(NULL != szName);

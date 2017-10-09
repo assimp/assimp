@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, stdlib.
 #include <list>
+#include <vector>
 #include <string>
 
 /// \class CX3DImporter_NodeElement
@@ -263,7 +265,7 @@ public:
 /// This struct describe metavalue of type boolean.
 struct CX3DImporter_NodeElement_MetaBoolean : public CX3DImporter_NodeElement_Meta
 {
-	std::list<bool> Value;///< Stored value.
+	std::vector<bool> Value;///< Stored value.
 
 	/// \fn CX3DImporter_NodeElement_MetaBoolean(CX3DImporter_NodeElement* pParent)
 	/// Constructor
@@ -278,7 +280,7 @@ struct CX3DImporter_NodeElement_MetaBoolean : public CX3DImporter_NodeElement_Me
 /// This struct describe metavalue of type double.
 struct CX3DImporter_NodeElement_MetaDouble : public CX3DImporter_NodeElement_Meta
 {
-	std::list<double> Value;///< Stored value.
+	std::vector<double> Value;///< Stored value.
 
 	/// \fn CX3DImporter_NodeElement_MetaDouble(CX3DImporter_NodeElement* pParent)
 	/// Constructor
@@ -293,7 +295,7 @@ struct CX3DImporter_NodeElement_MetaDouble : public CX3DImporter_NodeElement_Met
 /// This struct describe metavalue of type float.
 struct CX3DImporter_NodeElement_MetaFloat : public CX3DImporter_NodeElement_Meta
 {
-	std::list<float> Value;///< Stored value.
+	std::vector<float> Value;///< Stored value.
 
 	/// \fn CX3DImporter_NodeElement_MetaFloat(CX3DImporter_NodeElement* pParent)
 	/// Constructor
@@ -308,7 +310,7 @@ struct CX3DImporter_NodeElement_MetaFloat : public CX3DImporter_NodeElement_Meta
 /// This struct describe metavalue of type integer.
 struct CX3DImporter_NodeElement_MetaInteger : public CX3DImporter_NodeElement_Meta
 {
-	std::list<int32_t> Value;///< Stored value.
+	std::vector<int32_t> Value;///< Stored value.
 
 	/// \fn CX3DImporter_NodeElement_MetaInteger(CX3DImporter_NodeElement* pParent)
 	/// Constructor
@@ -466,42 +468,29 @@ public:
 
 /// \class CX3DImporter_NodeElement_Geometry3D
 /// Three-dimensional body.
-class CX3DImporter_NodeElement_Geometry3D : public CX3DImporter_NodeElement
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
+class CX3DImporter_NodeElement_Geometry3D : public CX3DImporter_NodeElement {
 public:
+	std::list<aiVector3D> Vertices;  ///< Vertices list.
+	size_t                NumIndices;///< Number of indices in one face.
+	bool                  Solid;     ///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
 
-	std::list<aiVector3D> Vertices;///< Vertices list.
-	size_t NumIndices;///< Number of indices in one face.
-	bool Solid;///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
-	/// \fn CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode)
-	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode);
-
-	/// \fn CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode)
-	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode);
-
-public:
-
-	/// \fn CX3DImporter_NodeElement_Geometry3D(const EType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
 	CX3DImporter_NodeElement_Geometry3D(const EType pType, CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(pType, pParent), Solid(true)
-	{}
+	: CX3DImporter_NodeElement(pType, pParent)
+	, Vertices()
+	, NumIndices( 0 )
+	, Solid(true) {
+        // empty		
+	}
 
+private:
+	/// Disabled copy constructor.
+	CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode);
+
+	/// Disabled assign operator.
+	CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode);
 };// class CX3DImporter_NodeElement_Geometry3D
 
 /// \class CX3DImporter_NodeElement_ElevationGrid
@@ -520,7 +509,7 @@ public:
 	/// If the angle between the geometric normals of two adjacent faces is less than the crease angle, normals shall be calculated so that the faces are
 	/// shaded smoothly across the edge; otherwise, normals shall be calculated so that a lighting discontinuity across the edge is produced.
 	float CreaseAngle;
-	std::list<int32_t> CoordIdx;///< Coordinates list by faces. In X3D format: "-1" - delimiter for faces.
+	std::vector<int32_t> CoordIdx;///< Coordinates list by faces. In X3D format: "-1" - delimiter for faces.
 
 	/***********************************************/
 	/****************** Functions ******************/
@@ -566,21 +555,21 @@ public:
 	/// direction. If normals are not generated but are supplied using a Normal node, and the orientation of the normals does not match the setting of the
 	/// ccw field, results are undefined.
 	bool CCW;
-	std::list<int32_t> ColorIndex;///< Field to specify the polygonal faces by indexing into the <Color> or <ColorRGBA>.
+	std::vector<int32_t> ColorIndex;///< Field to specify the polygonal faces by indexing into the <Color> or <ColorRGBA>.
 	bool ColorPerVertex;///< If true then colors are defined for every vertex, else for every face(line).
 	/// \var Convex
 	/// The convex field indicates whether all polygons in the shape are convex (TRUE). A polygon is convex if it is planar, does not intersect itself,
 	/// and all of the interior angles at its vertices are less than 180 degrees. Non planar and self intersecting polygons may produce undefined results
 	/// even if the convex field is FALSE.
 	bool Convex;
-	std::list<int32_t> CoordIndex;///< Field to specify the polygonal faces by indexing into the <Coordinate>.
+	std::vector<int32_t> CoordIndex;///< Field to specify the polygonal faces by indexing into the <Coordinate>.
 	/// \var CreaseAngle
 	/// If the angle between the geometric normals of two adjacent faces is less than the crease angle, normals shall be calculated so that the faces are
 	/// shaded smoothly across the edge; otherwise, normals shall be calculated so that a lighting discontinuity across the edge is produced.
 	float CreaseAngle;
-	std::list<int32_t> NormalIndex;///< Field to specify the polygonal faces by indexing into the <Normal>.
+	std::vector<int32_t> NormalIndex;///< Field to specify the polygonal faces by indexing into the <Normal>.
 	bool NormalPerVertex;///< If true then normals are defined for every vertex, else for every face(line).
-	std::list<int32_t> TexCoordIndex;///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
+	std::vector<int32_t> TexCoordIndex;///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
 
 	/***********************************************/
 	/****************** Functions ******************/
@@ -628,10 +617,10 @@ public:
 	bool CCW;
 	bool ColorPerVertex;///< If true then colors are defined for every vertex, else for every face(line).
 	bool NormalPerVertex;///< If true then normals are defined for every vertex, else for every face(line).
-	std::list<int32_t> CoordIndex;///< Field to specify the polygonal faces by indexing into the <Coordinate>.
-	std::list<int32_t> NormalIndex;///< Field to specify the polygonal faces by indexing into the <Normal>.
-	std::list<int32_t> TexCoordIndex;///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
-	std::list<int32_t> VertexCount;///< Field describes how many vertices are to be used in each polyline(polygon) from the <Coordinate> field.
+	std::vector<int32_t> CoordIndex;///< Field to specify the polygonal faces by indexing into the <Coordinate>.
+	std::vector<int32_t> NormalIndex;///< Field to specify the polygonal faces by indexing into the <Normal>.
+	std::vector<int32_t> TexCoordIndex;///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
+	std::vector<int32_t> VertexCount;///< Field describes how many vertices are to be used in each polyline(polygon) from the <Coordinate> field.
 
 	/***********************************************/
 	/****************** Functions ******************/
@@ -687,45 +676,35 @@ struct CX3DImporter_NodeElement_Appearance : public CX3DImporter_NodeElement
 
 /// \class CX3DImporter_NodeElement_Material
 /// Material.
-class CX3DImporter_NodeElement_Material : public CX3DImporter_NodeElement
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
+class CX3DImporter_NodeElement_Material : public CX3DImporter_NodeElement {
 public:
+	float     AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
+	aiColor3D DiffuseColor;    ///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
+	aiColor3D EmissiveColor;   ///< Models "glowing" objects. This can be useful for displaying pre-lit models.
+	float     Shininess;       ///< Lower shininess values produce soft glows, while higher values result in sharper, smaller highlights.
+	aiColor3D SpecularColor;   ///< The specularColor and shininess fields determine the specular highlights.
+	float     Transparency;    ///< Specifies how "clear" an object is, with 1.0 being completely transparent, and 0.0 completely opaque.
 
-	float AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
-	aiColor3D DiffuseColor;///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
-	aiColor3D EmissiveColor;///< Models "glowing" objects. This can be useful for displaying pre-lit models.
-	float Shininess;///< Lower shininess values produce soft glows, while higher values result in sharper, smaller highlights.
-	aiColor3D SpecularColor;///< The specularColor and shininess fields determine the specular highlights.
-	float Transparency;///< Specifies how "clear" an object is, with 1.0 being completely transparent, and 0.0 completely opaque.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
-	/// \fn CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode)
-	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode);
-
-	/// \fn CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode)
-	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode);
-
-public:
-
-	/// \fn CX3DImporter_NodeElement_Material(const EType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
 	CX3DImporter_NodeElement_Material(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Material, pParent)
-	{}
+	: CX3DImporter_NodeElement(ENET_Material, pParent)
+	, AmbientIntensity( 0.0f )
+	, DiffuseColor()
+	, EmissiveColor()
+	, Shininess( 0.0f )
+	, SpecularColor()
+	, Transparency( 1.0f ) {
+		// empty
+	}
 
+private:
+	/// Disabled copy constructor.
+	CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode);
+
+	/// Disabled assign operator.
+	CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode);
 };// class CX3DImporter_NodeElement_Material
 
 /// \struct CX3DImporter_NodeElement_ImageTexture

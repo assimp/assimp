@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -179,16 +180,16 @@ void X3DImporter::ParseNode_Rendering_Coordinate()
 void X3DImporter::ParseNode_Rendering_IndexedLineSet()
 {
     std::string use, def;
-    std::list<int32_t> colorIndex;
+    std::vector<int32_t> colorIndex;
     bool colorPerVertex = true;
-    std::list<int32_t> coordIndex;
+    std::vector<int32_t> coordIndex;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-		MACRO_ATTRREAD_CHECK_REF("colorIndex", colorIndex, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("colorIndex", colorIndex, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("coordIndex", coordIndex, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("coordIndex", coordIndex, XML_ReadNode_GetAttrVal_AsArrI32);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
@@ -255,7 +256,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
-    std::list<int32_t> index;
+    std::vector<int32_t> index;
     bool normalPerVertex = true;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -264,7 +265,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("ccw", ccw, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("index", index, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("index", index, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("solid", solid, XML_ReadNode_GetAttrVal_AsBool);
 	MACRO_ATTRREAD_LOOPEND;
@@ -287,9 +288,46 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
-		ne_alias.CoordIndex = index;
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
+
+		ne_alias.CoordIndex.clear();
+		int counter = 0;
+		int32_t idx[3];
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		{
+			idx[2] = *idx_it;
+			if (idx[2] < 0)
+			{
+				counter = 0;
+			}
+			else
+			{
+				if (counter >= 2)
+				{
+					if(ccw)
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+					}
+					else
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+					}
+					ne_alias.CoordIndex.push_back(-1);
+					idx[1] = idx[2];
+				}
+				else
+				{
+					idx[counter] = idx[2];
+				}
+				++counter;
+			}
+		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
+
         // check for child nodes
         if(!mReader->isEmptyElement())
         {
@@ -336,7 +374,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
-    std::list<int32_t> index;
+    std::vector<int32_t> index;
     bool normalPerVertex = true;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -345,7 +383,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("ccw", ccw, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("index", index, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("index", index, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("solid", solid, XML_ReadNode_GetAttrVal_AsBool);
 	MACRO_ATTRREAD_LOOPEND;
@@ -368,9 +406,34 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
-		ne_alias.CoordIndex = index;
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
+
+		ne_alias.CoordIndex.clear();
+		int counter = 0;
+		int32_t idx[3];
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		{
+			idx[counter++] = *idx_it;
+			if (counter > 2)
+			{
+				counter = 0;
+				if(ccw)
+				{
+					ne_alias.CoordIndex.push_back(idx[0]);
+					ne_alias.CoordIndex.push_back(idx[1]);
+					ne_alias.CoordIndex.push_back(idx[2]);
+				}
+				else
+				{
+					ne_alias.CoordIndex.push_back(idx[0]);
+					ne_alias.CoordIndex.push_back(idx[2]);
+					ne_alias.CoordIndex.push_back(idx[1]);
+				}
+				ne_alias.CoordIndex.push_back(-1);
+			}
+		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
+
         // check for child nodes
         if(!mReader->isEmptyElement())
         {
@@ -417,7 +480,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
-    std::list<int32_t> index;
+    std::vector<int32_t> index;
     bool normalPerVertex = true;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -426,7 +489,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("ccw", ccw, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("index", index, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("index", index, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("solid", solid, XML_ReadNode_GetAttrVal_AsBool);
 	MACRO_ATTRREAD_LOOPEND;
@@ -449,9 +512,42 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
-		ne_alias.CoordIndex = index;
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
+
+		ne_alias.CoordIndex.clear();
+		int counter = 0;
+		int32_t idx[3];
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		{
+			idx[2] = *idx_it;
+			if (idx[2] < 0)
+			{
+				counter = 0;
+			}
+			else
+			{
+				if (counter >= 2)
+				{
+					if(ccw)
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+					}
+					else
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+					}
+					ne_alias.CoordIndex.push_back(-1);
+				}
+				idx[counter & 1] = idx[2];
+				++counter;
+			}
+		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
+
         // check for child nodes
         if(!mReader->isEmptyElement())
         {
@@ -491,12 +587,12 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 void X3DImporter::ParseNode_Rendering_LineSet()
 {
     std::string use, def;
-    std::list<int32_t> vertexCount;
+    std::vector<int32_t> vertexCount;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-		MACRO_ATTRREAD_CHECK_REF("vertexCount", vertexCount, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("vertexCount", vertexCount, XML_ReadNode_GetAttrVal_AsArrI32);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
@@ -520,7 +616,7 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 		size_t coord_num = 0;
 
 		ne_alias.CoordIndex.clear();
-		for(std::list<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
 		{
 			if(*vc_it < 2) throw DeadlyImportError("LineSet. vertexCount shall be greater than or equal to two.");
 
@@ -626,7 +722,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
-    std::list<int32_t> fanCount;
+    std::vector<int32_t> fanCount;
     bool normalPerVertex = true;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -635,7 +731,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("ccw", ccw, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("fanCount", fanCount, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("fanCount", fanCount, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("solid", solid, XML_ReadNode_GetAttrVal_AsBool);
 	MACRO_ATTRREAD_LOOPEND;
@@ -668,7 +764,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 		// assign indices for first triangle
 		coord_num_first = 0;
 		coord_num_prev = 1;
-		for(std::list<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
 		{
 			if(*vc_it < 3) throw DeadlyImportError("TriangleFanSet. fanCount shall be greater than or equal to three.");
 
@@ -817,7 +913,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
-    std::list<int32_t> stripCount;
+    std::vector<int32_t> stripCount;
     bool normalPerVertex = true;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -826,7 +922,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("ccw", ccw, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("stripCount", stripCount, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("stripCount", stripCount, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("solid", solid, XML_ReadNode_GetAttrVal_AsBool);
 	MACRO_ATTRREAD_LOOPEND;
@@ -859,7 +955,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 
 		ne_alias.CoordIndex.clear();
 		coord_num_sb = 0;
-		for(std::list<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
 		{
 			if(*vc_it < 3) throw DeadlyImportError("TriangleStripSet. stripCount shall be greater than or equal to three.");
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -69,7 +70,7 @@ TEST_F(BlendImportMaterials, testImportMaterial)
     ASSERT_TRUE(pTest != NULL);
     ASSERT_TRUE(pTest->HasMaterials());
 
-    ASSERT_EQ(1, pTest->mNumMaterials);
+    ASSERT_EQ(1U, pTest->mNumMaterials);
 
     auto alpha = pTest->mMaterials[0];
 

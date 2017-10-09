@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -236,8 +237,9 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 // Creates the meshes for the given node.
 void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vector<XFile::Mesh*>& pMeshes)
 {
-    if( pMeshes.size() == 0)
+    if (pMeshes.empty()) {
         return;
+    }
 
     // create a mesh for each mesh-material combination in the source node
     std::vector<aiMesh*> meshes;

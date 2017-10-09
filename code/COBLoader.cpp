@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -941,20 +941,22 @@ void COBImporter::UnsupportedChunk_Binary( StreamReaderLE& reader, const ChunkIn
 // ------------------------------------------------------------------------------------------------
 // tiny utility guard to aid me at staying within chunk boundaries.
 class chunk_guard {
-
 public:
-
     chunk_guard(const COB::ChunkInfo& nfo, StreamReaderLE& reader)
-        : nfo(nfo)
-        , reader(reader)
-        , cur(reader.GetCurrentPos())
-    {
+    : nfo(nfo)
+    , reader(reader)
+    , cur(reader.GetCurrentPos()) {
     }
 
     ~chunk_guard() {
         // don't do anything if the size is not given
         if(nfo.size != static_cast<unsigned int>(-1)) {
-            reader.IncPtr(static_cast<int>(nfo.size)-reader.GetCurrentPos()+cur);
+            try {
+                reader.IncPtr( static_cast< int >( nfo.size ) - reader.GetCurrentPos() + cur );
+            } catch ( DeadlyImportError e ) {
+                // out of limit so correct the value
+                reader.IncPtr( reader.GetReadLimit() );
+            }
         }
     }
 

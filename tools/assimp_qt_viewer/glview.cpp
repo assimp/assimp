@@ -6,7 +6,11 @@
 #include "glview.hpp"
 
 // Header files, OpenGL.
-#include <GL/glu.h>
+#if defined(__APPLE__)
+# include <OpenGL/glu.h>
+#else
+# include <GL/glu.h>
+#endif
 
 // Header files, DevIL.
 #include <il.h>
@@ -142,8 +146,8 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
 
 void CGLView::Matrix_NodeToRoot(const aiNode* pNode, aiMatrix4x4& pOutMatrix)
 {
-const aiNode* node_cur;
-std::list<aiMatrix4x4> mat_list;
+    const aiNode* node_cur;
+    std::list<aiMatrix4x4> mat_list;
 
 	pOutMatrix = aiMatrix4x4();
 	// starting walk from current element to root

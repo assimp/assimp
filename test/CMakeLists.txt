@@ -1,7 +1,8 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2016, assimp team
+# Copyright (c) 2006-2017, assimp team
+
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -37,7 +38,8 @@
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 2.6 )
 
-#INCLUDE( AddGTest )
+include( CTest )
+enable_testing()
 
 INCLUDE_DIRECTORIES(
 	../contrib/gtest/include
@@ -55,6 +57,7 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/UTLogStream.h
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h
@@ -62,7 +65,7 @@ SET( TEST_SRCS
   unit/ut3DSImportExport.cpp
   unit/utACImportExport.cpp
   unit/utAMFImportExport.cpp
-  unit/utASEImportExport.cpp  
+  unit/utASEImportExport.cpp
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
   unit/utB3DImportExport.cpp
@@ -85,6 +88,7 @@ SET( TEST_SRCS
   unit/utFixInfacingNormals.cpp
   unit/utGenNormals.cpp
   unit/utglTFImportExport.cpp
+  unit/utglTF2ImportExport.cpp
   unit/utHMPImportExport.cpp
   unit/utIFCImportExport.cpp
   unit/utImporter.cpp
@@ -103,12 +107,17 @@ SET( TEST_SRCS
   unit/SceneDiffer.cpp
   unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
+  unit/utObjTools.cpp
+  unit/utOpenGEXImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utPLYImportExport.cpp
+  unit/utPMXImporter.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
+  unit/utRemoveVCProcess.cpp
   unit/utScenePreprocessor.cpp
+  unit/utSceneCombiner.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
   unit/utSMDImportExport.cpp
@@ -123,6 +132,8 @@ SET( TEST_SRCS
   unit/utVector3.cpp
   unit/utXImporterExporter.cpp
   unit/utD3MFImportExport.cpp
+  unit/utQ3DImportExport.cpp
+  unit/utProfiler.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
@@ -136,7 +147,7 @@ add_executable( unit
 )
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
-    
+
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 IF( WIN32 )
@@ -152,15 +163,6 @@ ENDIF(MSVC)
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
-#if (ASSIMP_COVERALLS)
-#    include(Coveralls)
-#
-#    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
-#
-#    # Create the coveralls target.
-#    coveralls_setup(
-#        "${COVERAGE_SRCS}" # The source files.
-#        ON                 # If we should upload.
-#        "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
-#endif()
+
+add_test( unittests unit )
 

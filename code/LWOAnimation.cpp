@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "LWOFileData.h"
+#include <assimp/anim.h>
 
 using namespace Assimp;
 using namespace Assimp::LWO;
@@ -162,7 +164,7 @@ void AnimResolver::UpdateAnimRangeSetup()
                 {
                 const double start_time = delta - std::fmod(my_first-first,delta);
                 std::vector<LWO::Key>::iterator n = std::find_if((*it).keys.begin(),(*it).keys.end(),
-                    std::bind1st(std::greater<double>(),start_time)),m;
+                    [start_time](double t) { return start_time > t; }),m;
 
                 size_t ofs = 0;
                 if (n != (*it).keys.end()) {

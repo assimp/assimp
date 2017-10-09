@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -142,7 +143,6 @@ struct NodeAttachmentInfo
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
-
 typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
 
 // ---------------------------------------------------------------------------
@@ -151,7 +151,6 @@ typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
 struct BoneWithHash : public std::pair<uint32_t,aiString*>  {
     std::vector<BoneSrcIndex> pSrcBones;
 };
-
 
 // ---------------------------------------------------------------------------
 /** @brief Utility for SceneCombiner
@@ -218,10 +217,9 @@ public:
     static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
         unsigned int flags = 0);
 
-
     // -------------------------------------------------------------------
-    /** Merges two or more scenes and attaches all sceenes to a specific
-     *  position in the node graph of the masteer scene.
+    /** Merges two or more scenes and attaches all scenes to a specific
+     *  position in the node graph of the master scene.
      *
      *  @param dest Receives a pointer to the destination scene. If the
      *    pointer doesn't point to NULL when the function is called, the
@@ -236,7 +234,6 @@ public:
     static void MergeScenes(aiScene** dest, aiScene* master,
         std::vector<AttachmentInfo>& src,
         unsigned int flags = 0);
-
 
     // -------------------------------------------------------------------
     /** Merges two or more meshes
@@ -255,7 +252,6 @@ public:
     static void MergeMeshes(aiMesh** dest,unsigned int flags,
         std::vector<aiMesh*>::const_iterator begin,
         std::vector<aiMesh*>::const_iterator end);
-
 
     // -------------------------------------------------------------------
     /** Merges two or more bones

@@ -1492,7 +1492,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     vmax -= vmin;
 
     // If this happens then the projection must have been wrong.
-    assert(vmax.Length());
+    ai_assert(vmax.Length());
 
     ClipperLib::ExPolygons clipped;
     ClipperLib::Polygons holes_union;
@@ -1616,7 +1616,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
         std::vector<IfcVector3> tmpvec;
         for(ClipperLib::Polygon& opening : holes_union) {
 
-            assert(ClipperLib::Orientation(opening));
+            ai_assert(ClipperLib::Orientation(opening));
 
             tmpvec.clear();
 
@@ -1705,7 +1705,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
                     static_cast<IfcFloat>( tri->GetPoint(i)->y )
                 );
 
-                assert(v.x <= 1.0 && v.x >= 0.0 && v.y <= 1.0 && v.y >= 0.0);
+                ai_assert(v.x <= 1.0 && v.x >= 0.0 && v.y <= 1.0 && v.y >= 0.0);
                 const IfcVector3 v3 = minv * IfcVector3(vmin.x + v.x * vmax.x, vmin.y + v.y * vmax.y,coord) ;
 
                 curmesh.verts.push_back(v3);

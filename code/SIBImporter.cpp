@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -57,14 +58,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 #include "StreamReader.h"
 #include "TinyFormatter.h"
-#include "../contrib/ConvertUTF/ConvertUTF.h"
+//#include "../contrib/ConvertUTF/ConvertUTF.h"
+#include "../contrib/utf8cpp/source/utf8.h"
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
 
 #include <map>
-
 
 using namespace Assimp;
 
@@ -79,25 +80,26 @@ static const aiImporterDesc desc = {
     "sib"
 };
 
-struct SIBChunk
-{
+struct SIBChunk {
     uint32_t    Tag;
     uint32_t    Size;
 } PACK_STRUCT;
 
-enum { POS, NRM, UV,    N };
+enum { 
+    POS, 
+    NRM, 
+    UV,    
+    N
+};
 
 typedef std::pair<uint32_t, uint32_t> SIBPair;
-static SIBPair makePair(uint32_t a, uint32_t b) { return (a<b) ? SIBPair(a, b) : SIBPair(b, a); }
 
-struct SIBEdge
-{
+struct SIBEdge {
     uint32_t faceA, faceB;
     bool creased;
 };
 
-struct SIBMesh
-{
+struct SIBMesh {
     aiMatrix4x4 axis;
     uint32_t numPts;
     std::vector<aiVector3D> pos, nrm, uv;
@@ -108,15 +110,13 @@ struct SIBMesh
     std::map<SIBPair, uint32_t> edgeMap;
 };
 
-struct SIBObject
-{
+struct SIBObject {
     aiString name;
     aiMatrix4x4 axis;
     size_t meshIdx, meshCount;
 };
 
-struct SIB
-{
+struct SIB {
     std::vector<aiMaterial*> mtls;
     std::vector<aiMesh*> meshes;
     std::vector<aiLight*> lights;
@@ -124,8 +124,7 @@ struct SIB
 };
 
 // ------------------------------------------------------------------------------------------------
-static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB)
-{
+static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB) {
     SIBPair pair = (posA < posB) ? SIBPair(posA, posB) : SIBPair(posB, posA);
     std::map<SIBPair, uint32_t>::iterator it = mesh->edgeMap.find(pair);
     if (it != mesh->edgeMap.end())
@@ -177,24 +176,29 @@ static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
 }
 
 // Reads a UTF-16LE string and returns it at UTF-8.
-static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
-{
+static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
+    if ( nullptr == stream || 0 == numWChars ) {
+        static const aiString empty;
+        return empty;
+    }
+
     // Allocate buffers (max expansion is 1 byte -> 4 bytes for UTF-8)
-    UTF16* temp = new UTF16[numWChars];
-    UTF8* str = new UTF8[numWChars * 4 + 1];
-    for (uint32_t n=0;n<numWChars;n++)
-        temp[n] = stream->GetU2();
+    std::vector<unsigned char> str;
+    str.reserve( numWChars * 4 + 1 );
+    uint16_t *temp = new uint16_t[ numWChars ];
+    for ( uint32_t n = 0; n < numWChars; ++n ) {
+        temp[ n ] = stream->GetU2();
+    }
 
     // Convert it and NUL-terminate.
-    const UTF16 *start = temp, *end = temp + numWChars;
-    UTF8 *dest = str, *limit = str + numWChars*4;
-    ConvertUTF16toUTF8(&start, end, &dest, limit, lenientConversion);
-    *dest = '\0';
+    const uint16_t *start( temp ), *end( temp + numWChars );
+    utf8::utf16to8( start, end, back_inserter( str ) );
+    str[ str.size() - 1 ] = '\0';
 
     // Return the final string.
-    aiString result = aiString((const char *)str);
-    delete[] str;
+    aiString result = aiString((const char *)&str[0]);
     delete[] temp;
+
     return result;
 }
 
@@ -212,26 +216,26 @@ SIBImporter::~SIBImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool SIBImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
-{
+bool SIBImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const {
     return SimpleExtensionCheck(pFile, "sib");
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* SIBImporter::GetInfo () const
-{
+const aiImporterDesc* SIBImporter::GetInfo () const {
     return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
-static void ReadVerts(SIBMesh* mesh, StreamReaderLE* stream, uint32_t count)
-{
-    mesh->pos.resize(count);
+static void ReadVerts(SIBMesh* mesh, StreamReaderLE* stream, uint32_t count) {
+    if ( nullptr == mesh || nullptr == stream ) {
+        return;
+    }
 
-    for (uint32_t n=0;n<count;n++) {
-        mesh->pos[n].x = stream->GetF4();
-        mesh->pos[n].y = stream->GetF4();
-        mesh->pos[n].z = stream->GetF4();
+    mesh->pos.resize(count);
+    for ( uint32_t n=0; n<count; ++n ) {
+        mesh->pos[ n ].x = stream->GetF4();
+        mesh->pos[ n ].y = stream->GetF4();
+        mesh->pos[ n ].z = stream->GetF4();
     }
 }
 
@@ -816,7 +820,7 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
 static void CheckVersion(StreamReaderLE* stream)
 {
     uint32_t version = stream->GetU4();
-    if ( version != 1 ) {
+    if ( version < 1 || version > 2 ) {
         throw DeadlyImportError( "SIB: Unsupported file version." );
     }
 }

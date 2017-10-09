@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -44,8 +45,9 @@ Assimp C export interface. See Exporter.cpp for some notes.
 */
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
+
 #include "CInterfaceIOWrapper.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "ScenePrivate.h"
 #include <assimp/Exporter.hpp>
 

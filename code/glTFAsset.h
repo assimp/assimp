@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,8 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef glTFAsset_H_INC
-#define glTFAsset_H_INC
+#ifndef GLTFASSET_H_INC
+#define GLTFASSET_H_INC
+
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include <map>
 #include <string>
@@ -229,7 +232,9 @@ namespace glTF
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
+                std::string err = "GLTF: Unsupported Component Type ";
+                err += t;
+                throw DeadlyImportError(err);
         }
     }
 
@@ -1055,13 +1060,13 @@ namespace glTF
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        int version; //!< The glTF format version (should be 1)
+        std::string version; //!< The glTF format version (should be 1.0)
 
         void Read(Document& doc);
 
         AssetMetadata()
             : premultipliedAlpha(false)
-            , version(0)
+            , version("")
         {
         }
     };
@@ -1186,4 +1191,6 @@ namespace glTF
 // Include the implementation of the methods
 #include "glTFAsset.inl"
 
-#endif
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+#endif // GLTFASSET_H_INC

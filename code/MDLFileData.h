@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -52,10 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER_H_INC
 #define AI_MDLFILEHELPER_H_INC
 
+#include <assimp/anim.h>
+#include <assimp/mesh.h>
+#include <assimp/Compiler/pushpack1.h>
 #include "ByteSwapper.h"
-#include "./../include/assimp/anim.h"
-#include "./../include/assimp/mesh.h"
-#include "./../include/assimp/Compiler/pushpack1.h"
 #include <stdint.h>
 #include <vector>
 
@@ -89,7 +90,6 @@ namespace MDL   {
 #define AI_MDL_MAGIC_NUMBER_BE_GS7  AI_MAKE_MAGIC("MDL7")
 #define AI_MDL_MAGIC_NUMBER_LE_GS7  AI_MAKE_MAGIC("7LDM")
 
-
 // common limitations for Quake1 meshes. The loader does not check them,
 // (however it warns) but models should not exceed these limits.
 #if (!defined AI_MDL_VERSION)
@@ -118,8 +118,7 @@ namespace MDL   {
 /** \struct Header
  *  \brief Data structure for the MDL main header
  */
-struct Header
-{
+struct Header {
     //! magic number: "IDPO"
     uint32_t ident;
 
@@ -127,16 +126,16 @@ struct Header
     int32_t version;
 
     //! scale factors for each axis
-    aiVector3D scale;
+    ai_real scale[3];
 
     //! translation factors for each axis
-    aiVector3D translate;
+    ai_real translate[3];
 
     //! bounding radius of the mesh
     float boundingradius;
 
     //! Position of the viewer's exe. Ignored
-    aiVector3D vEyePos;
+    ai_real vEyePos[3];
 
     //! Number of textures
     int32_t num_skins;
@@ -172,8 +171,7 @@ struct Header
 /** \struct Header_MDL7
  *  \brief Data structure for the MDL 7 main header
  */
-struct Header_MDL7
-{
+struct Header_MDL7 {
     //! magic number: "MDL7"
     char    ident[4];
 
@@ -232,8 +230,7 @@ struct Header_MDL7
 /** \struct Bone_MDL7
  *  \brief Data structure for a bone in a MDL7 file
  */
-struct Bone_MDL7
-{
+struct Bone_MDL7 {
     //! Index of the parent bone of *this* bone. 0xffff means:
     //! "hey, I have no parent, I'm an orphan"
     uint16_t parent_index;
@@ -267,8 +264,7 @@ struct Bone_MDL7
 /** \struct Group_MDL7
  *  \brief Group in a MDL7 file
  */
-struct Group_MDL7
-{
+struct Group_MDL7 {
     //! = '1' -> triangle based Mesh
     unsigned char   typ;
 
@@ -309,8 +305,7 @@ struct Group_MDL7
 /** \struct Deformer_MDL7
  *  \brief Deformer in a MDL7 file
  */
-struct Deformer_MDL7
-{
+struct Deformer_MDL7 {
     int8_t  deformer_version;       // 0
     int8_t  deformer_typ;           // 0 - bones
     int8_t  _unused_[2];
@@ -324,26 +319,22 @@ struct Deformer_MDL7
 /** \struct DeformerElement_MDL7
  *  \brief Deformer element in a MDL7 file
  */
-struct DeformerElement_MDL7
-{
+struct DeformerElement_MDL7 {
     //! bei deformer_typ==0 (==bones) element_index == bone index
     int32_t element_index;
     char    element_name[AI_MDL7_MAX_BONENAMESIZE];
     int32_t weights;
 } PACK_STRUCT;
 
-
 // -------------------------------------------------------------------------------------
 /** \struct DeformerWeight_MDL7
  *  \brief Deformer weight in a MDL7 file
  */
-struct DeformerWeight_MDL7
-{
+struct DeformerWeight_MDL7 {
     //! for deformer_typ==0 (==bones) index == vertex index
     int32_t index;
     float   weight;
 } PACK_STRUCT;
-
 
 // don't know why this was in the original headers ...
 typedef int32_t MD7_MATERIAL_ASCDEFSIZE;
@@ -352,8 +343,7 @@ typedef int32_t MD7_MATERIAL_ASCDEFSIZE;
 /** \struct ColorValue_MDL7
  *  \brief Data structure for a color value in a MDL7 file
  */
-struct ColorValue_MDL7
-{
+struct ColorValue_MDL7 {
     float r,g,b,a;
 } PACK_STRUCT;
 
@@ -361,8 +351,7 @@ struct ColorValue_MDL7
 /** \struct Material_MDL7
  *  \brief Data structure for a Material in a MDL7 file
  */
-struct Material_MDL7
-{
+struct Material_MDL7 {
     //! Diffuse base color of the material
     ColorValue_MDL7 Diffuse;
 
@@ -379,13 +368,11 @@ struct Material_MDL7
     float           Power;
 } PACK_STRUCT;
 
-
 // -------------------------------------------------------------------------------------
 /** \struct Skin
  *  \brief Skin data structure #1 - used by Quake1, MDL2, MDL3 and MDL4
  */
-struct Skin
-{
+struct Skin {
     //! 0 = single (Skin), 1 = group (GroupSkin)
     //! For MDL3-5: Defines the type of the skin and there
     //! fore the size of the data to skip:
@@ -409,8 +396,7 @@ struct Skin
  *  \brief Skin data structure #2 - used by MDL5, MDL6 and MDL7
  *  \see Skin
  */
-struct Skin_MDL5
-{
+struct Skin_MDL5 {
     int32_t size, width, height;
     uint8_t *data;
 } PACK_STRUCT;
@@ -424,8 +410,7 @@ struct Skin_MDL5
 /** \struct Skin_MDL7
  *  \brief Skin data structure #3 - used by MDL7 and HMP7
  */
-struct Skin_MDL7
-{
+struct Skin_MDL7 {
     uint8_t         typ;
     int8_t          _unused_[3];
     int32_t         width;
@@ -437,8 +422,7 @@ struct Skin_MDL7
 /** \struct RGB565
  *  \brief Data structure for a RGB565 pixel in a texture
  */
-struct RGB565
-{
+struct RGB565 {
     uint16_t r : 5;
     uint16_t g : 6;
     uint16_t b : 5;
@@ -448,20 +432,18 @@ struct RGB565
 /** \struct ARGB4
  *  \brief Data structure for a ARGB4444 pixel in a texture
  */
-struct ARGB4
-{
+struct ARGB4 {
     uint16_t a : 4;
     uint16_t r : 4;
     uint16_t g : 4;
     uint16_t b : 4;
-} PACK_STRUCT;
+} /*PACK_STRUCT*/;
 
 // -------------------------------------------------------------------------------------
 /** \struct GroupSkin
  *  \brief Skin data structure #2 (group of pictures)
  */
-struct GroupSkin
-{
+struct GroupSkin {
     //! 0 = single (Skin), 1 = group (GroupSkin)
     int32_t group;
 
@@ -479,8 +461,7 @@ struct GroupSkin
 /** \struct TexCoord
  *  \brief Texture coordinate data structure used by the Quake1 MDL format
  */
-struct TexCoord
-{
+struct TexCoord {
     //! Is the vertex on the noundary between front and back piece?
     int32_t onseam;
 
@@ -495,8 +476,7 @@ struct TexCoord
 /** \struct TexCoord_MDL3
  *  \brief Data structure for an UV coordinate in the 3DGS MDL3 format
  */
-struct TexCoord_MDL3
-{
+struct TexCoord_MDL3 {
     //! position, horizontally in range 0..skinwidth-1
     int16_t u;
 
@@ -508,8 +488,7 @@ struct TexCoord_MDL3
 /** \struct TexCoord_MDL7
  *  \brief Data structure for an UV coordinate in the 3DGS MDL7 format
  */
-struct TexCoord_MDL7
-{
+struct TexCoord_MDL7 {
     //! position, horizontally in range 0..1
     float u;
 
@@ -626,7 +605,6 @@ struct Vertex_MDL7
     };
 } PACK_STRUCT;
 
-
 // -------------------------------------------------------------------------------------
 /** \struct BoneTransform_MDL7
  *  \brief bone transformation matrix structure used in MDL7 files
@@ -646,7 +624,6 @@ struct BoneTransform_MDL7
 
 
 #define AI_MDL7_MAX_FRAMENAMESIZE       16
-
 
 // -------------------------------------------------------------------------------------
 /** \struct Frame_MDL7
@@ -737,8 +714,7 @@ struct GroupFrame
 /** \struct IntFace_MDL7
  *  \brief Internal data structure to temporarily represent a face
  */
-struct IntFace_MDL7
-{
+struct IntFace_MDL7 {
     // provide a constructor for our own convenience
     IntFace_MDL7()
     {

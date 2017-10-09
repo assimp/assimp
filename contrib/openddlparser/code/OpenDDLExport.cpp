@@ -29,60 +29,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
-StreamFormatterBase::StreamFormatterBase() {
-
-}
-
-StreamFormatterBase::~StreamFormatterBase() {
-
-}
-
-std::string StreamFormatterBase::format( const std::string &statement ) {
-    std::string tmp( statement );
-    return tmp;
-}
-
-IOStreamBase::IOStreamBase( StreamFormatterBase *formatter )
-: m_formatter( formatter )
-, m_file( ddl_nullptr ) {
-    if (ddl_nullptr == m_formatter) {
-        m_formatter = new StreamFormatterBase;
-    }
-}
-
-IOStreamBase::~IOStreamBase() {
-    delete m_formatter;
-    m_formatter = ddl_nullptr;
-}
-
-bool IOStreamBase::open( const std::string &name ) {
-    m_file = ::fopen( name.c_str(), "a" );
-    if (m_file == ddl_nullptr) {
-        return false;
-    }
-    
-    return true;
-}
-
-bool IOStreamBase::close() {
-    if (ddl_nullptr == m_file) {
-        return false;
-    }
-
-    ::fclose( m_file );
-    m_file = ddl_nullptr;
-
-    return true;
-}
-
-size_t IOStreamBase::write( const std::string &statement ) {
-    if (ddl_nullptr == m_file) {
-        return 0;
-    }
-    std::string formatStatement = m_formatter->format( statement );
-    return ::fwrite( formatStatement.c_str(), sizeof( char ), formatStatement.size(), m_file );
-}
-
 struct DDLNodeIterator {
     const DDLNode::DllNodeList &m_childs;
     size_t m_idx;
@@ -280,7 +226,7 @@ bool OpenDDLExport::writeValueType( Value::ValueType type, size_t numItems, std:
         statement += "[";
         char buffer[ 256 ];
         ::memset( buffer, '\0', 256 * sizeof( char ) );
-        sprintf( buffer, "%d", int(numItems) );
+        sprintf( buffer, "%d", static_cast<int>( numItems ) );
         statement += buffer;
         statement += "]";
     }

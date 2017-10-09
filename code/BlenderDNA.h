@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -252,10 +253,7 @@ public:
      *  a compiler complain is the result.
      *  @param dest Destination value to be written
      *  @param db File database, including input stream. */
-    template <typename T> inline void Convert (T& dest,
-        const FileDatabase& db) const;
-
-
+    template <typename T> void Convert (T& dest, const FileDatabase& db) const;
 
     // --------------------------------------------------------
     // generic converter

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,18 +40,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  STEPFileEncoding.cpp
- *  @brief STEP character handling, string unescaping
+ *  @brief STEP character handling, string un-escaping
  */
 #include "STEPFileEncoding.h"
 #include "fast_atof.h"
+#include <contrib/utf8cpp/source/utf8.h>
 
-#include "../contrib/ConvertUTF/ConvertUTF.h"
 #include <memory>
 
 using namespace Assimp;
 
 // roman1 to utf16 table
-static const UTF16 mac_codetable[] = {
+static const uint16_t mac_codetable[] = {
     // 0x20 unassig./nonprint. slots
      0x0020 ,
      0x0021 ,
@@ -308,14 +309,12 @@ bool STEP::StringToUTF8(std::string& s)
 
                 ai_assert(sizeof(mac_codetable) / sizeof(mac_codetable[0]) == 0x100-0x20);
 
-                const UTF32 unival = mac_codetable[macval - 0x20], *univalp = &unival;
+                const uint32_t unival = mac_codetable[macval - 0x20], *univalp = &unival;
 
-                UTF8 temp[5], *tempp = temp;
-                ai_assert(sizeof(UTF8) == 1);
+                unsigned char temp[5], *tempp = temp;
+                ai_assert(sizeof( unsigned char ) == 1);
 
-                if(ConvertUTF32toUTF8(&univalp, univalp+1, &tempp, tempp+sizeof(temp), lenientConversion) != conversionOK) {
-                    return false;
-                }
+                utf8::utf32to8( univalp, univalp + 1, tempp );
 
                 const size_t outcount = static_cast<size_t>(tempp-temp);
 
@@ -354,28 +353,26 @@ bool STEP::StringToUTF8(std::string& s)
                             }
 
                             const size_t count = (j-basei)/4;
-                            std::unique_ptr<UTF16[]> src(new UTF16[count]);
+                            std::unique_ptr<uint16_t[]> src(new uint16_t[count]);
 
                             const char* cur = s.c_str() + basei;
                             for (size_t k = 0; k < count; ++k, cur += 4) {
-                                src[k] = (static_cast<UTF16>(HexOctetToDecimal(cur)) << 8u)  |
-                                     static_cast<UTF16>(HexOctetToDecimal(cur+2));
+                                src[k] = (static_cast<uint16_t>(HexOctetToDecimal(cur)) << 8u)  |
+                                     static_cast<uint16_t>(HexOctetToDecimal(cur+2));
                             }
 
                             const size_t dcount = count * 3; // this is enough to hold all possible outputs
-                            std::unique_ptr<UTF8[]> dest(new UTF8[dcount]);
+                            std::unique_ptr<unsigned char[]> dest(new unsigned char[dcount]);
 
-                            const UTF16* srct = src.get();
-                            UTF8* destt = dest.get();
-                            if(ConvertUTF16toUTF8(&srct, srct+count, &destt, destt+dcount, lenientConversion) != conversionOK) {
-                                return false;
-                            }
+                            const uint16_t* srct = src.get();
+                            unsigned char* destt = dest.get();
+                            utf8::utf16to8( srct, srct + count, destt );
 
                             const size_t outcount = static_cast<size_t>(destt-dest.get());
 
                             s.erase(i,(j+4-i));
 
-                            ai_assert(sizeof(UTF8) == 1);
+                            ai_assert(sizeof(unsigned char) == 1);
                             s.insert(i, reinterpret_cast<char*>(dest.get()), outcount);
 
                             i += outcount;
@@ -387,37 +384,34 @@ bool STEP::StringToUTF8(std::string& s)
                             }
 
                             const size_t count = (j-basei)/8;
-                            std::unique_ptr<UTF32[]> src(new UTF32[count]);
+                            std::unique_ptr<uint32_t[]> src(new uint32_t[count]);
 
                             const char* cur = s.c_str() + basei;
                             for (size_t k = 0; k < count; ++k, cur += 8) {
-                                src[k] = (static_cast<UTF32>(HexOctetToDecimal(cur  )) << 24u) |
-                                         (static_cast<UTF32>(HexOctetToDecimal(cur+2)) << 16u) |
-                                         (static_cast<UTF32>(HexOctetToDecimal(cur+4)) << 8u)  |
-                                         (static_cast<UTF32>(HexOctetToDecimal(cur+6)));
+                                src[k] = (static_cast<uint32_t>(HexOctetToDecimal(cur  )) << 24u) |
+                                         (static_cast<uint32_t>(HexOctetToDecimal(cur+2)) << 16u) |
+                                         (static_cast<uint32_t>(HexOctetToDecimal(cur+4)) << 8u)  |
+                                         (static_cast<uint32_t>(HexOctetToDecimal(cur+6)));
                             }
 
                             const size_t dcount = count * 5; // this is enough to hold all possible outputs
-                            std::unique_ptr<UTF8[]> dest(new UTF8[dcount]);
+                            std::unique_ptr<unsigned char[]> dest(new unsigned char[dcount]);
 
-                            const UTF32* srct = src.get();
-                            UTF8* destt = dest.get();
-                            if(ConvertUTF32toUTF8(&srct, srct+count, &destt, destt+dcount, lenientConversion) != conversionOK) {
-                                return false;
-                            }
+                            const uint32_t* srct = src.get();
+                            unsigned char* destt = dest.get();
+                            utf8::utf32to8( srct, srct + count, destt );
 
                             const size_t outcount = static_cast<size_t>(destt-dest.get());
 
                             s.erase(i,(j+4-i));
 
-                            ai_assert(sizeof(UTF8) == 1);
+                            ai_assert(sizeof(unsigned char) == 1);
                             s.insert(i, reinterpret_cast<char*>(dest.get()), outcount);
 
                             i += outcount;
                             continue;
                         }
                     }
-
                     break;
 
                     // TODO: other encoding patterns?

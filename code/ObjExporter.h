@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -97,16 +98,13 @@ private:
     void WriteHeader(std::ostringstream& out);
     void WriteMaterialFile();
     void WriteGeometryFile();
-
     std::string GetMaterialName(unsigned int index);
-
     void AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat);
     void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
 
 private:
-    const std::string filename;
+    std::string filename;
     const aiScene* const pScene;
-
     std::vector<aiVector3D> vp, vn, vt;
     std::vector<aiColor4D> vc;
 
@@ -165,9 +163,9 @@ private:
         void getColors( std::vector<aiColor4D> &colors );
     };
 
-    vecIndexMap vpMap, vnMap, vtMap;
-    colIndexMap vcMap;
-    std::vector<MeshInstance> meshes;
+    vecIndexMap mVpMap, mVnMap, mVtMap;
+    colIndexMap mVcMap;
+    std::vector<MeshInstance> mMeshes;
 
     // this endl() doesn't flush() the stream
     const std::string endl;

@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
 #include "AbstractImportExportBase.h"
 
 using namespace ::Assimp;
@@ -50,15 +52,41 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0 );
-        return nullptr != scene;
+        EXPECT_EQ( 1u, scene->mNumMeshes );
+        EXPECT_NE( nullptr, scene->mMeshes[0] );
+        EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
+        EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
+        
+        return (nullptr != scene);
     }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    virtual bool exporterTest() {
+        Importer importer;
+        Exporter exporter;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0);
+        EXPECT_NE(nullptr, scene);
+        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "ply", ASSIMP_TEST_MODELS_DIR "/PLY/cube_test.ply"));
+
+        return true;
+    }
+#endif // ASSIMP_BUILD_NO_EXPORT
 };
 
-TEST_F( utPLYImportExport, importTest ) {
+TEST_F( utPLYImportExport, importTest_Success ) {
     EXPECT_TRUE( importerTest() );
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utPLYImportExport, exportTest_Success ) {
+    EXPECT_TRUE(exporterTest());
+}
+
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", 0 );
+    EXPECT_NE( nullptr, scene );
 }

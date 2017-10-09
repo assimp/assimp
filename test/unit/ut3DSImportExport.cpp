@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,7 +53,11 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", 0 );
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
         return nullptr != scene;
+#else
+        return nullptr == scene;
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
     }
 };
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -82,8 +83,11 @@ struct free_it
 };
 
 namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
-template<> const std::string LogFunctions<XGLImporter>::log_prefix = "XGL: ";
-
+    template<> const char* LogFunctions<XGLImporter>::Prefix()
+    {
+        static auto prefix = "XGL: ";
+        return prefix;
+    }
 }
 
 static const aiImporterDesc desc = {

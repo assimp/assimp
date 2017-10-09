@@ -1,5 +1,5 @@
-project(assimp_qt_viewer)
 set(PROJECT_VERSION "")
+project(assimp_qt_viewer)
 
 cmake_minimum_required(VERSION 2.6)
 

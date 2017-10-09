@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -127,7 +128,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
             meshout.verts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
         }
 
-        meshout.vertcnt.push_back(segments);
+        meshout.vertcnt.push_back(static_cast<unsigned int>(segments));
     }
     else if( const IfcIShapeProfileDef* const ishape = def.ToPtr<IfcIShapeProfileDef>()) {
         // construct simplified IBeam shape

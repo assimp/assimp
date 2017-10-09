@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -545,10 +546,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     else if (iMasked || !iType || (iType && iWidth && iHeight))
     {
-        // ***** STANDARD COLOR TEXTURE *****
-        if(pcNew!= nullptr)
-            delete pcNew;
-
         pcNew = new aiTexture();
         if (!iHeight || !iWidth)
         {

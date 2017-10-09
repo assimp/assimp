@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -125,9 +126,8 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
     const ai_real dist = pPosition * mPlaneNormal;
     const ai_real minDist = dist - pRadius, maxDist = dist + pRadius;
 
-    // clear the array in this strange fashion because a simple clear() would also deallocate
-    // the array which we want to avoid
-    poResults.erase( poResults.begin(), poResults.end());
+    // clear the array
+    poResults.clear();
 
     // quick check for positions outside the range
     if( mPositions.size() == 0)
@@ -269,7 +269,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 
     // clear the array in this strange fashion because a simple clear() would also deallocate
     // the array which we want to avoid
-    poResults.erase( poResults.begin(), poResults.end());
+    poResults.resize( 0 );
 
     // do a binary search for the minimal distance to start the iteration there
     unsigned int index = (unsigned int)mPositions.size() / 2;

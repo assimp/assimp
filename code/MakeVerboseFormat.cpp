@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -192,14 +193,14 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
     p = 0;
     while (pcMesh->HasTextureCoords(p))
     {
-        delete pcMesh->mTextureCoords[p];
+        delete[] pcMesh->mTextureCoords[p];
         pcMesh->mTextureCoords[p] = apvTextureCoords[p];
         ++p;
     }
     p = 0;
     while (pcMesh->HasVertexColors(p))
     {
-        delete pcMesh->mColors[p];
+        delete[] pcMesh->mColors[p];
         pcMesh->mColors[p] = apvColorSets[p];
         ++p;
     }

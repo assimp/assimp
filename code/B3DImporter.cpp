@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -80,6 +81,20 @@ static const aiImporterDesc desc = {
 #endif
 
 //#define DEBUG_B3D
+
+template<typename T>
+void DeleteAllBarePointers(std::vector<T>& x)
+{
+    for(auto p : x)
+    {
+        delete p;
+    }
+}
+
+B3DImporter::~B3DImporter()
+{
+    DeleteAllBarePointers(_animations);
+}
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const{
@@ -557,13 +572,19 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
 void B3DImporter::ReadBB3D( aiScene *scene ){
 
     _textures.clear();
+
     _materials.clear();
 
     _vertices.clear();
+
     _meshes.clear();
 
+    DeleteAllBarePointers(_nodes);
     _nodes.clear();
+
     _nodeAnims.clear();
+
+    DeleteAllBarePointers(_animations);
     _animations.clear();
 
     string t=ReadChunk();

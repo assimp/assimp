@@ -10,6 +10,9 @@ branches:
   only:
     - master
 
+matrix:
+  fast_finish: true
+    
 image:
   - Visual Studio 2013
   - Visual Studio 2015
@@ -31,12 +34,12 @@ install:
   - cmake %CMAKE_DEFINES% -G "%CMAKE_GENERATOR_NAME%"
   
 cache:
-  - assimp.dir\%CONFIGURATION%
-  - zlibstatic.dir\%CONFIGURATION%
-  - zlib.dir\%CONFIGURATION%
-  - assimp_cmd.dir\%CONFIGURATION%
-  - assimp_viewer.dir\%CONFIGURATION%
-  - unit.dir\%CONFIGURATION%
+  - bin\assimp.dir\%CONFIGURATION%
+  - bin\zlibstatic.dir\%CONFIGURATION%
+  - bin\zlib.dir\%CONFIGURATION%
+  - bin\assimp_cmd.dir\%CONFIGURATION%
+  - bin\assimp_viewer.dir\%CONFIGURATION%
+  - bin\unit.dir\%CONFIGURATION%
   - bin\.mtime_cache
   
 before_build:
@@ -48,6 +51,9 @@ build:
   
 after_build:
   - 7z a assimp.7z bin\%CONFIGURATION%\* lib\%CONFIGURATION%\*
+  - cmd: dir
+  - cmd: dir bin\
+  - cmd: exit 1
 
 test_script:
   - cmd: bin\%CONFIGURATION%\unit.exe --gtest_output=xml:testout.xml

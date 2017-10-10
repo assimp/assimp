@@ -60,34 +60,34 @@ public:
     // ------------------------------------------------------------------------------------------------
     static void ThrowException(const std::string& msg)
     {
-        throw DeadlyImportError(Prefix()+msg);
+        throw DeadlyImportError(Prefix() + msg);
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogWarn(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->warn(Prefix() +(std::string)message);
+            DefaultLogger::get()->warn(Prefix() + (std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogError(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->error(Prefix() +(std::string)message);
+            DefaultLogger::get()->error(Prefix() + (std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogInfo(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->info(Prefix() +(std::string)message);
+            DefaultLogger::get()->info(Prefix() + (std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogDebug(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->debug(Prefix() +(std::string)message);
+            DefaultLogger::get()->debug(Prefix() + (std::string)message);
         }
     }
 

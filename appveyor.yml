@@ -34,12 +34,12 @@ install:
   - cmake %CMAKE_DEFINES% -G "%CMAKE_GENERATOR_NAME%"
   
 cache:
-  - bin\assimp.dir\%CONFIGURATION%
-  - bin\zlibstatic.dir\%CONFIGURATION%
-  - bin\zlib.dir\%CONFIGURATION%
-  - bin\assimp_cmd.dir\%CONFIGURATION%
-  - bin\assimp_viewer.dir\%CONFIGURATION%
-  - bin\unit.dir\%CONFIGURATION%
+  - code\assimp.dir\%CONFIGURATION%
+  - contrib\zlib\zlibstatic.dir\%CONFIGURATION%
+  - contrib\zlib\zlib.dir\%CONFIGURATION%
+  - tools\assimp_cmd\assimp_cmd.dir\%CONFIGURATION%
+  - tools\assimp_view\assimp_viewer.dir\%CONFIGURATION%
+  - test\unit.dir\%CONFIGURATION%
   - bin\.mtime_cache
   
 before_build:
@@ -51,9 +51,6 @@ build:
   
 after_build:
   - 7z a assimp.7z bin\%CONFIGURATION%\* lib\%CONFIGURATION%\*
-  - cmd: dir
-  - cmd: dir bin\
-  - cmd: exit 1
 
 test_script:
   - cmd: bin\%CONFIGURATION%\unit.exe --gtest_output=xml:testout.xml

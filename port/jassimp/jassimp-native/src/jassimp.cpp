@@ -1005,8 +1005,164 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	return true;
 }
 
+static bool loadMetadata(JNIEnv *env, const aiNode* cNode, jobject& jNode)
+{
+    aiMetadata *cMetadata = cNode->mMetaData;
 
-static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobject* loadedNode = NULL) 
+	for(unsigned i = 0; i<cMetadata->mNumProperties; i++) {
+
+        aiString& metaDataKey = cMetadata->mKeys[i];
+		void* cData = cMetadata->mValues[i].mData;
+		aiMetadataType cMetadataType = cMetadata->mValues[i].mType;
+
+		jobject jAiMetadataEntry = NULL;
+		SmartLocalRef refMetadataEntry(env, jAiMetadataEntry);
+
+		if(!createInstance(env, "jassimp/AiMetadataEntry", jAiMetadataEntry)) {
+			return false;
+		}
+
+		jobject jAiMetadataTypeEnumValue = NULL;
+		SmartLocalRef refMetadataTypeEnumValue(env, jAiMetadataTypeEnumValue);
+
+		jobject jMetadataData = NULL;
+		SmartLocalRef refMetadataData(env, jMetadataData);
+
+		bool getMetadataTypeSuccess = false;
+		bool getMetadataDataSuccess = false;
+
+		jvalue boxingMethodArgument[1];
+
+        jboolean exceptionThrown;
+
+		switch (cMetadataType) {
+
+			case AI_BOOL: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_BOOL", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                boxingMethodArgument[0].z = (jboolean) *static_cast<bool*>(cData);
+                getMetadataDataSuccess = callStaticObject(env, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", boxingMethodArgument, jMetadataData);
+                break;
+            }
+            case AI_INT32: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_INT32", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                boxingMethodArgument[0].i = (jint) *static_cast<int32_t*>(cData);
+                getMetadataDataSuccess = callStaticObject(env, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", boxingMethodArgument, jMetadataData);
+                break;
+            }
+            case AI_UINT64: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_UINT64", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                boxingMethodArgument[0].j = (jlong) *static_cast<uint64_t*>(cData);
+                getMetadataDataSuccess = callStaticObject(env, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", boxingMethodArgument, jMetadataData);
+                break;
+            }
+            case AI_FLOAT: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_FLOAT", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                boxingMethodArgument[0].f = (jfloat) *static_cast<float*>(cData);
+                getMetadataDataSuccess = callStaticObject(env, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", boxingMethodArgument, jMetadataData);
+                break;
+            }
+            case AI_DOUBLE: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_DOUBLE", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                boxingMethodArgument[0].d = (jdouble) *static_cast<double*>(cData);
+                getMetadataDataSuccess = callStaticObject(env, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", boxingMethodArgument, jMetadataData);
+                break;
+            }
+            case AI_AISTRING: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_AISTRING", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue);
+                jMetadataData = env->NewStringUTF(static_cast<aiString*>(cData)->C_Str());
+                getMetadataDataSuccess = (jMetadataData != NULL);
+                break;
+            }
+            case AI_AIVECTOR3D: {
+                getMetadataTypeSuccess = getStaticField(env, "jassimp/AiMetadataEntry$AiMetadataType", "AI_AIVECTOR3D",
+                                                        "Ljassimp/AiMetadataEntry$AiMetadataType;",
+                                                        jAiMetadataTypeEnumValue);
+                jvalue wrapVec3Args[3];
+                aiVector3D *vector3D = static_cast<aiVector3D *>(cData);
+                wrapVec3Args[0].f = vector3D->x;
+                wrapVec3Args[1].f = vector3D->y;
+                wrapVec3Args[2].f = vector3D->z;
+                getMetadataDataSuccess = callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;",
+                                                          wrapVec3Args, jMetadataData);
+                break;
+            }
+            default: {
+                getMetadataTypeSuccess = false;
+                getMetadataDataSuccess = false;
+                break;
+            }
+        }
+
+        exceptionThrown = env->ExceptionCheck();
+
+        if(!getMetadataTypeSuccess || !getMetadataDataSuccess) {
+            if(exceptionThrown)
+            {
+                env->ExceptionDescribe();
+            }
+
+            return false;
+        }
+
+        if(!setObjectField(env, jAiMetadataEntry, "mType", "Ljassimp/AiMetadataEntry$AiMetadataType;", jAiMetadataTypeEnumValue)) {
+            exceptionThrown = env->ExceptionCheck();
+
+            if(exceptionThrown)
+            {
+                env->ExceptionDescribe();
+            }
+
+            return false;
+        }
+
+        if(!setObjectField(env, jAiMetadataEntry, "mData", "Ljava/lang/Object;", jMetadataData)) {
+            exceptionThrown = env->ExceptionCheck();
+
+            if(exceptionThrown)
+            {
+                env->ExceptionDescribe();
+            }
+
+            return false;
+        }
+
+        jobject jNodeMetadata = NULL;
+        SmartLocalRef refMetadata(env, jNodeMetadata);
+
+        if(!getField(env, jNode, "m_metaData", "Ljava/util/Map;", jNodeMetadata)) {
+            exceptionThrown = env->ExceptionCheck();
+
+            if(exceptionThrown)
+            {
+                env->ExceptionDescribe();
+            }
+
+            return false;
+        }
+
+        jclass hashMapClass = env->FindClass("java/util/HashMap");
+        jmethodID jHashMapPutMethod = env->GetMethodID(hashMapClass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+
+        jstring jKey = env->NewStringUTF(metaDataKey.C_Str());
+        SmartLocalRef keyRef(env, jKey);
+
+        // Only check exception instead of result here because maps will return
+        // null on success if they did not overwrite an existing mapping for the given key.
+        env->CallObjectMethod(jNodeMetadata, jHashMapPutMethod, jKey, jAiMetadataEntry);
+
+        exceptionThrown = env->ExceptionCheck();
+
+        if(exceptionThrown) {
+            env->ExceptionDescribe();
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobject* loadedNode = NULL)
 {
 	lprintf("   converting node %s ...\n", cNode->mName.C_Str());
 
@@ -1019,7 +1175,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	wrapMatParams[0].l = jMatrixArr;
 	jobject jMatrix;
 	SmartLocalRef refMatrix(env, jMatrix);
-				
+
 	if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix))
 	{
 		return false;
@@ -1068,12 +1224,19 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 		}
 	}
 
-	if (NULL != loadedNode)
-	{
-		*loadedNode = jNode;
-	} else {
-	    env->DeleteLocalRef(jNode);
-	}
+    if (NULL != loadedNode)
+    {
+        if(cNode->mMetaData) {
+            if(!loadMetadata(env, cNode, jNode))
+            {
+                return false;
+            }
+        }
+
+        *loadedNode = jNode;
+    } else {
+        env->DeleteLocalRef(jNode);
+    }
 
 	return true;
 }

@@ -214,7 +214,7 @@ static bool getStaticField(JNIEnv *env, const char* className, const char* field
 		return false;
 	}
 
-	jfieldID fieldId = env->GetFieldID(clazz, fieldName, signature);
+	jfieldID fieldId = env->GetStaticFieldID(clazz, fieldName, signature);
 
 	if (NULL == fieldId)
 	{

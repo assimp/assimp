@@ -359,8 +359,6 @@ void ObjFileParser::getHomogeneousVector3( std::vector<aiVector3D> &point3d_arra
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for two 3D vectors on the same line
 void ObjFileParser::getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b ) {
     ai_real x, y, z;
     copyNextWord(m_buffer, Buffersize);
@@ -388,8 +386,6 @@ void ObjFileParser::getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, st
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for a new 2D vector instance
 void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
     ai_real x, y;
     copyNextWord(m_buffer, Buffersize);
@@ -405,8 +401,6 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
 
 static const std::string DefaultObjName = "defaultobject";
 
-// -------------------------------------------------------------------
-//  Get values for a new face instance
 void ObjFileParser::getFace( aiPrimitiveType type ) {
     m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
     if ( m_DataIt == m_DataItEnd || *m_DataIt == '\0' ) {
@@ -522,8 +516,6 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for a new material description
 void ObjFileParser::getMaterialDesc() {
     // Get next data for material data
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);

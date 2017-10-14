@@ -151,7 +151,8 @@ uint32_t ReadWord(const char* input, const char*& cursor, const char* end)
         TokenizeError("cannot ReadWord, out of bounds",input, cursor);
     }
 
-    uint32_t word = *reinterpret_cast<const uint32_t*>(cursor);
+    uint32_t word;
+    memcpy(&word, cursor, 4);
     AI_SWAP4(word);
 
     cursor += k_to_read;

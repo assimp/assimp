@@ -26,6 +26,10 @@ function generate()
         OPTIONS="$OPTIONS -DASSIMP_ASAN=OFF"
     fi
 
+    if [ "$UBSAN" = "ON" ] ; then
+        OPTIONS="$OPTIONS -DASSIMP_UBSAN=ON"
+    fi
+
     cmake -G "Unix Makefiles" $OPTIONS
 }
 

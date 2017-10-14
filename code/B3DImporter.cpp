@@ -171,7 +171,8 @@ int B3DImporter::ReadByte(){
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadInt(){
     if( _pos+4<=_buf.size() ){
-        int n=*(int*)&_buf[_pos];
+        int n;
+        memcpy(&n, &_buf[_pos], 4);
         _pos+=4;
         return n;
     }
@@ -182,7 +183,8 @@ int B3DImporter::ReadInt(){
 // ------------------------------------------------------------------------------------------------
 float B3DImporter::ReadFloat(){
     if( _pos+4<=_buf.size() ){
-        float n=*(float*)&_buf[_pos];
+        float n;
+        memcpy(&n, &_buf[_pos], 4);
         _pos+=4;
         return n;
     }

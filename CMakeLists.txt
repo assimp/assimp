@@ -86,6 +86,10 @@ OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
   OFF
 )
+OPTION ( ASSIMP_UBSAN
+  "Enable Undefined Behavior sanitizer."
+  OFF
+)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -232,6 +236,12 @@ if (ASSIMP_ASAN)
     MESSAGE(STATUS "AddressSanitizer enabled")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+endif()
+
+if (ASSIMP_UBSAN)
+    MESSAGE(STATUS "Undefined Behavior sanitizer enabled")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
 endif()
 
 INCLUDE (FindPkgMacros)

@@ -79,6 +79,20 @@ public final class Jassimp {
         return importFile(filename, EnumSet.noneOf(AiPostProcessSteps.class));
     }
     
+    /**
+     * Imports a file via assimp without post processing.
+     * 
+     * @param filename the file to import
+     * @param ioSystem ioSystem to load files, or null for default
+     * @return the loaded scene
+     * @throws IOException if an error occurs
+     */
+    public static AiScene importFile(String filename, AiIOSystem<?> ioSystem) 
+          throws IOException {
+       
+       return importFile(filename, EnumSet.noneOf(AiPostProcessSteps.class), ioSystem);
+    }
+    
     
     /**
      * Imports a file via assimp.
@@ -89,12 +103,28 @@ public final class Jassimp {
      * @throws IOException if an error occurs
      */
     public static AiScene importFile(String filename, 
-            Set<AiPostProcessSteps> postProcessing) throws IOException {
+                                     Set<AiPostProcessSteps> postProcessing) 
+                                           throws IOException {
+        return importFile(filename, postProcessing, null);
+    }
+    
+    /**
+     * Imports a file via assimp.
+     * 
+     * @param filename the file to import
+     * @param postProcessing post processing flags
+     * @param ioSystem ioSystem to load files, or null for default
+     * @return the loaded scene, or null if an error occurred
+     * @throws IOException if an error occurs
+     */
+    public static AiScene importFile(String filename, 
+            Set<AiPostProcessSteps> postProcessing, AiIOSystem<?> ioSystem) 
+                  throws IOException {
         
        loadLibrary();
        
         return aiImportFile(filename, AiPostProcessSteps.toRawValue(
-                postProcessing));
+                postProcessing), ioSystem);
     }
     
     
@@ -310,7 +340,7 @@ public final class Jassimp {
      * @throws IOException if an error occurs
      */
     private static native AiScene aiImportFile(String filename, 
-            long postProcessing) throws IOException;
+            long postProcessing, AiIOSystem<?> ioSystem) throws IOException;
     
     
     /**

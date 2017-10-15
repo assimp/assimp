@@ -104,7 +104,7 @@ unsigned int PretransformVertices::CountNodes( aiNode* pcNode )
 
 // ------------------------------------------------------------------------------------------------
 // Get a bitwise combination identifying the vertex format of a mesh
-unsigned int PretransformVertices::GetMeshVFormat(aiMesh* pcMesh)
+unsigned int PretransformVertices::GetMeshVFormat( aiMesh* pcMesh )
 {
     // the vertex format is stored in aiMesh::mBones for later retrieval.
     // there isn't a good reason to compute it a few hundred times
@@ -634,7 +634,7 @@ void PretransformVertices::Execute( aiScene* pScene)
         aiNode* newRoot = new aiNode();
         newRoot->mName = pScene->mRootNode->mName;
         delete pScene->mRootNode;
-        pScene->mRootNode = new aiNode();
+        pScene->mRootNode = newRoot;
 
         if (1 == pScene->mNumMeshes && !pScene->mNumLights && !pScene->mNumCameras)
         {

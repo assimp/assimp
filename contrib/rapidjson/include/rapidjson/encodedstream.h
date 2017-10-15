@@ -15,11 +15,17 @@
 #ifndef RAPIDJSON_ENCODEDSTREAM_H_
 #define RAPIDJSON_ENCODEDSTREAM_H_
 
-#include "rapidjson.h"
+#include "stream.h"
+#include "memorystream.h"
 
 #ifdef __GNUC__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
+#endif
+
+#ifdef __clang__
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(padded)
 #endif
 
 RAPIDJSON_NAMESPACE_BEGIN
@@ -57,10 +63,38 @@ private:
     Ch current_;
 };
 
+//! Specialized for UTF8 MemoryStream.
+template <>
+class EncodedInputStream<UTF8<>, MemoryStream> {
+public:
+    typedef UTF8<>::Ch Ch;
+
+    EncodedInputStream(MemoryStream& is) : is_(is) {
+        if (static_cast<unsigned char>(is_.Peek()) == 0xEFu) is_.Take();
+        if (static_cast<unsigned char>(is_.Peek()) == 0xBBu) is_.Take();
+        if (static_cast<unsigned char>(is_.Peek()) == 0xBFu) is_.Take();
+    }
+    Ch Peek() const { return is_.Peek(); }
+    Ch Take() { return is_.Take(); }
+    size_t Tell() const { return is_.Tell(); }
+
+    // Not implemented
+    void Put(Ch) {}
+    void Flush() {} 
+    Ch* PutBegin() { return 0; }
+    size_t PutEnd(Ch*) { return 0; }
+
+    MemoryStream& is_;
+
+private:
+    EncodedInputStream(const EncodedInputStream&);
+    EncodedInputStream& operator=(const EncodedInputStream&);
+};
+
 //! Output byte stream wrapper with statically bound encoding.
 /*!
     \tparam Encoding The interpretation of encoding of the stream. Either UTF8, UTF16LE, UTF16BE, UTF32LE, UTF32BE.
-    \tparam InputByteStream Type of input byte stream. For example, FileWriteStream.
+    \tparam OutputByteStream Type of input byte stream. For example, FileWriteStream.
 */
 template <typename Encoding, typename OutputByteStream>
 class EncodedOutputStream {
@@ -77,8 +111,8 @@ public:
     void Flush() { os_.Flush(); }
 
     // Not implemented
-    Ch Peek() const { RAPIDJSON_ASSERT(false); }
-    Ch Take() { RAPIDJSON_ASSERT(false);  }
+    Ch Peek() const { RAPIDJSON_ASSERT(false); return 0;}
+    Ch Take() { RAPIDJSON_ASSERT(false); return 0;}
     size_t Tell() const { RAPIDJSON_ASSERT(false);  return 0; }
     Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
     size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
@@ -142,11 +176,11 @@ private:
         // FF FE        UTF-16LE
         // EF BB BF     UTF-8
 
-        const unsigned char* c = (const unsigned char *)is_->Peek4();
+        const unsigned char* c = reinterpret_cast<const unsigned char *>(is_->Peek4());
         if (!c)
             return;
 
-        unsigned bom = c[0] | (c[1] << 8) | (c[2] << 16) | (c[3] << 24);
+        unsigned bom = static_cast<unsigned>(c[0] | (c[1] << 8) | (c[2] << 16) | (c[3] << 24));
         hasBOM_ = false;
         if (bom == 0xFFFE0000)                  { type_ = kUTF32BE; hasBOM_ = true; is_->Take(); is_->Take(); is_->Take(); is_->Take(); }
         else if (bom == 0x0000FEFF)             { type_ = kUTF32LE; hasBOM_ = true; is_->Take(); is_->Take(); is_->Take(); is_->Take(); }
@@ -166,7 +200,7 @@ private:
         // xx xx xx xx  UTF-8
 
         if (!hasBOM_) {
-            unsigned pattern = (c[0] ? 1 : 0) | (c[1] ? 2 : 0) | (c[2] ? 4 : 0) | (c[3] ? 8 : 0);
+            int pattern = (c[0] ? 1 : 0) | (c[1] ? 2 : 0) | (c[2] ? 4 : 0) | (c[3] ? 8 : 0);
             switch (pattern) {
             case 0x08: type_ = kUTF32BE; break;
             case 0x0A: type_ = kUTF16BE; break;
@@ -193,7 +227,7 @@ private:
 //! Output stream wrapper with dynamically bound encoding and automatic encoding detection.
 /*!
     \tparam CharType Type of character for writing.
-    \tparam InputByteStream type of output byte stream to be wrapped.
+    \tparam OutputByteStream type of output byte stream to be wrapped.
 */
 template <typename CharType, typename OutputByteStream>
 class AutoUTFOutputStream {
@@ -227,8 +261,8 @@ public:
     void Flush() { os_->Flush(); } 
 
     // Not implemented
-    Ch Peek() const { RAPIDJSON_ASSERT(false); }
-    Ch Take() { RAPIDJSON_ASSERT(false); }
+    Ch Peek() const { RAPIDJSON_ASSERT(false); return 0;}
+    Ch Take() { RAPIDJSON_ASSERT(false); return 0;}
     size_t Tell() const { RAPIDJSON_ASSERT(false); return 0; }
     Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
     size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
@@ -253,6 +287,10 @@ private:
 #undef RAPIDJSON_ENCODINGS_FUNC
 
 RAPIDJSON_NAMESPACE_END
+
+#ifdef __clang__
+RAPIDJSON_DIAG_POP
+#endif
 
 #ifdef __GNUC__
 RAPIDJSON_DIAG_POP

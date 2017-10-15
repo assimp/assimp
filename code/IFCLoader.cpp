@@ -66,7 +66,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 namespace Assimp {
-    template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
+    template<> const char* LogFunctions<IFCImporter>::Prefix()
+    {
+        static auto prefix = "IFC: ";
+        return prefix;
+    }
 }
 
 using namespace Assimp;

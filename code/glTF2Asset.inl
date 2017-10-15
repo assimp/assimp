@@ -313,7 +313,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
         if (dataURI.base64) {
             uint8_t* data = 0;
             this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
-            this->mData.reset(data);
+            this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
                 throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
@@ -326,7 +326,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
                                         " bytes, but found " + to_string(dataURI.dataLength));
             }
 
-            this->mData.reset(new uint8_t[dataURI.dataLength]);
+            this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
             memcpy( this->mData.get(), dataURI.data, dataURI.dataLength );
         }
     }
@@ -357,7 +357,7 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
         stream.Seek(baseOffset, aiOrigin_SET);
     }
 
-    mData.reset(new uint8_t[byteLength]);
+    mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
 
     if (stream.Read(mData.get(), byteLength, 1) != 1) {
         return false;
@@ -432,7 +432,7 @@ uint8_t* new_data;
 	// Copy data which place after replacing part.
 	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
 	// Apply new data
-	mData.reset(new_data);
+	mData.reset(new_data, std::default_delete<uint8_t[]>());
 	byteLength = new_data_size;
 
 	return true;
@@ -451,7 +451,7 @@ inline void Buffer::Grow(size_t amount)
     if (amount <= 0) return;
     uint8_t* b = new uint8_t[byteLength + amount];
     if (mData) memcpy(b, mData.get(), byteLength);
-    mData.reset(b);
+    mData.reset(b, std::default_delete<uint8_t[]>());
     byteLength += amount;
 }
 
@@ -724,7 +724,7 @@ namespace {
             SetTextureProperties(r, prop, out);
 
             if (Value* scale = FindNumber(*prop, "scale")) {
-                out.scale = scale->GetDouble();
+                out.scale = static_cast<float>(scale->GetDouble());
             }
         }
     }
@@ -735,7 +735,7 @@ namespace {
             SetTextureProperties(r, prop, out);
 
             if (Value* strength = FindNumber(*prop, "strength")) {
-                out.strength = strength->GetDouble();
+                out.strength = static_cast<float>(strength->GetDouble());
             }
         }
     }
@@ -1118,11 +1118,12 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
     if (it == mUsedIds.end())
         return id;
 
-    char buffer[256];
-    int offset = ai_snprintf(buffer, sizeof(buffer), "%s_", id.c_str());
+    std::vector<char> buffer;
+    buffer.resize(id.size() + 16);
+    int offset = ai_snprintf(buffer.data(), buffer.size(), "%s_", id.c_str());
     for (int i = 0; it != mUsedIds.end(); ++i) {
-        ai_snprintf(buffer + offset, sizeof(buffer) - offset, "%d", i);
-        id = buffer;
+        ai_snprintf(buffer.data() + offset, buffer.size() - offset, "%d", i);
+        id = buffer.data();
         it = mUsedIds.find(id);
     }
 

@@ -15,7 +15,13 @@
 #ifndef RAPIDJSON_MEMORYSTREAM_H_
 #define RAPIDJSON_MEMORYSTREAM_H_
 
-#include "rapidjson.h"
+#include "stream.h"
+
+#ifdef __clang__
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(unreachable-code)
+RAPIDJSON_DIAG_OFF(missing-noreturn)
+#endif
 
 RAPIDJSON_NAMESPACE_BEGIN
 
@@ -36,8 +42,8 @@ struct MemoryStream {
 
     MemoryStream(const Ch *src, size_t size) : src_(src), begin_(src), end_(src + size), size_(size) {}
 
-    Ch Peek() const { return (src_ == end_) ? '\0' : *src_; }
-    Ch Take() { return (src_ == end_) ? '\0' : *src_++; }
+    Ch Peek() const { return RAPIDJSON_UNLIKELY(src_ == end_) ? '\0' : *src_; }
+    Ch Take() { return RAPIDJSON_UNLIKELY(src_ == end_) ? '\0' : *src_++; }
     size_t Tell() const { return static_cast<size_t>(src_ - begin_); }
 
     Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
@@ -57,5 +63,9 @@ struct MemoryStream {
 };
 
 RAPIDJSON_NAMESPACE_END
+
+#ifdef __clang__
+RAPIDJSON_DIAG_POP
+#endif
 
 #endif // RAPIDJSON_MEMORYBUFFER_H_

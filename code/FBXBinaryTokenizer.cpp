@@ -151,7 +151,8 @@ uint32_t ReadWord(const char* input, const char*& cursor, const char* end)
         TokenizeError("cannot ReadWord, out of bounds",input, cursor);
     }
 
-    uint32_t word = *reinterpret_cast<const uint32_t*>(cursor);
+    uint32_t word;
+    memcpy(&word, cursor, 4);
     AI_SWAP4(word);
 
     cursor += k_to_read;
@@ -439,11 +440,11 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
     }
 
     const char* cursor = input + 18;
-	const uint8_t unknown_1 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_2 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_3 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_4 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_5 = ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
 	const uint32_t version = ReadWord(input, cursor, input + length);
 	const bool is64bits = version >= 7500;
     while (cursor < input + length)

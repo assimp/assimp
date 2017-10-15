@@ -280,3 +280,28 @@ TEST_F( utObjImportExport, issue1453_segfault ) {
     const aiScene *scene = myimporter.ReadFileFromMemory( ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure );
     EXPECT_EQ( nullptr, scene );
 }
+
+TEST_F(utObjImportExport, relative_indices_Test) {
+    static const std::string ObjModel =
+        "v -0.500000 0.000000 0.400000\n"
+        "v -0.500000 0.000000 -0.800000\n"
+        "v -0.500000 1.000000 -0.800000\n"
+        "v -0.500000 1.000000 0.400000\n"
+        "f -4 -3 -2 -1\nB";
+
+    Assimp::Importer myimporter;
+    const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMeshes, 1);
+    const aiMesh *mesh = scene->mMeshes[0];
+    EXPECT_EQ(mesh->mNumVertices, 4);
+    EXPECT_EQ(mesh->mNumFaces, 1);
+    const aiFace face = mesh->mFaces[0];
+    EXPECT_EQ(face.mNumIndices, 4);
+    for (unsigned int i = 0; i < face.mNumIndices; ++i)
+    {
+        EXPECT_EQ(face.mIndices[i], i);
+    }
+
+}

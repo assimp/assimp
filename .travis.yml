@@ -48,6 +48,9 @@ matrix:
       env: ASAN=ON
     - os: linux
       compiler: clang
+      env: UBSAN=ON
+    - os: linux
+      compiler: clang
       env: SHARED_BUILD=ON
 
 install:

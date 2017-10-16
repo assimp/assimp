@@ -108,7 +108,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
     // set up strings
     endstr = "\n";
 
-    // start writing
+    // start writing the file
     WriteFile();
 }
 

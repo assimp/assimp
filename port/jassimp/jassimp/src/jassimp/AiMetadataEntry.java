@@ -58,4 +58,61 @@ public class AiMetadataEntry
    {
       return mData;
    }
+
+   public static boolean getAiBoolAsBoolean(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_BOOL);
+
+      return (boolean) metadataEntry.mData;
+   }
+
+   public static int getAiInt32AsInteger(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_INT32);
+
+      return (int) metadataEntry.mData;
+   }
+
+   public static long getAiUint64AsLong(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_UINT64);
+
+      return (long) metadataEntry.mData;
+   }
+
+   public static float getAiFloatAsFloat(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_FLOAT);
+
+      return (float) metadataEntry.mData;
+   }
+
+   public static double getAiDoubleAsDouble(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_DOUBLE);
+
+      return (double) metadataEntry.mData;
+   }
+
+   public static String getAiStringAsString(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_AISTRING);
+
+      return (String) metadataEntry.mData;
+   }
+
+   public static AiVector getAiAiVector3DAsAiVector(AiMetadataEntry metadataEntry)
+   {
+      checkTypeBeforeCasting(metadataEntry, AiMetadataType.AI_AIVECTOR3D);
+
+      return (AiVector) metadataEntry.mData;
+   }
+
+   private static void checkTypeBeforeCasting(AiMetadataEntry entry, AiMetadataType expectedType)
+   {
+      if(entry.mType != expectedType)
+      {
+         throw new RuntimeException("Cannot cast entry of type " + entry.mType.name() + " to " + expectedType.name());
+      }
+   }
 }

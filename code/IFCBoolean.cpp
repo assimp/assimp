@@ -272,7 +272,6 @@ bool IntersectsBoundaryProfile(const IfcVector3& e0, const IfcVector3& e1, const
         const IfcVector3& b0 = boundary[i];
         const IfcVector3& b1 = boundary[(i + 1) % bcount];
         IfcVector3 b = b1 - b0;
-        IfcFloat b_sqlen_inv = 1.0 / b.SquareLength();
 
         // segment-segment intersection
         // solve b0 + b*s = e0 + e*t for (s,t)
@@ -281,6 +280,7 @@ bool IntersectsBoundaryProfile(const IfcVector3& e0, const IfcVector3& e1, const
             // no solutions (parallel lines)
             continue;
         }
+        IfcFloat b_sqlen_inv = 1.0 / b.SquareLength();
 
         const IfcFloat x = b0.x - e0.x;
         const IfcFloat y = b0.y - e0.y;
@@ -381,7 +381,6 @@ bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
     IntersectsBoundaryProfile(p, p + IfcVector3(0.6, -0.6, 0.0), boundary, true, intersected_boundary, true);
     votes += intersected_boundary.size() % 2;
 
-//  ai_assert(votes == 3 || votes == 0);
     return votes > 1;
 }
 

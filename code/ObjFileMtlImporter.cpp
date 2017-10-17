@@ -55,20 +55,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp    {
 
-// Material specific token
-static const std::string DiffuseTexture      = "map_Kd";
-static const std::string AmbientTexture      = "map_Ka";
-static const std::string SpecularTexture     = "map_Ks";
-static const std::string OpacityTexture      = "map_d";
-static const std::string EmissiveTexture    = "map_emissive";
-static const std::string EmissiveTexture_1  = "map_Ke";
-static const std::string BumpTexture1        = "map_bump";
-static const std::string BumpTexture2        = "map_Bump";
-static const std::string BumpTexture3        = "bump";
-static const std::string NormalTexture       = "map_Kn";
-static const std::string ReflectionTexture   = "refl";
-static const std::string DisplacementTexture = "disp";
-static const std::string SpecularityTexture  = "map_ns";
+// Material specific token (case insensitive compare)
+static const std::string DiffuseTexture       = "map_Kd";
+static const std::string AmbientTexture       = "map_Ka";
+static const std::string SpecularTexture      = "map_Ks";
+static const std::string OpacityTexture       = "map_d";
+static const std::string EmissiveTexture1     = "map_emissive";
+static const std::string EmissiveTexture2     = "map_Ke";
+static const std::string BumpTexture1         = "map_bump";
+static const std::string BumpTexture2         = "bump";
+static const std::string NormalTexture        = "map_Kn";
+static const std::string ReflectionTexture    = "refl";
+static const std::string DisplacementTexture1 = "map_disp";
+static const std::string DisplacementTexture2 = "disp";
+static const std::string SpecularityTexture   = "map_ns";
 
 // texture option specific token
 static const std::string BlendUOption       = "-blendu";
@@ -304,7 +304,7 @@ void ObjFileMtlImporter::createMaterial()
         m_pModel->m_pCurrentMaterial = new ObjFile::Material();
         m_pModel->m_pCurrentMaterial->MaterialName.Set( name );
         if (m_pModel->m_pCurrentMesh) {
-            m_pModel->m_pCurrentMesh->m_uiMaterialIndex = m_pModel->m_MaterialLib.size() - 1;
+            m_pModel->m_pCurrentMesh->m_uiMaterialIndex = static_cast<unsigned int>(m_pModel->m_MaterialLib.size() - 1);
         }
         m_pModel->m_MaterialLib.push_back( name );
         m_pModel->m_MaterialMap[ name ] = m_pModel->m_pCurrentMaterial;
@@ -329,7 +329,7 @@ void ObjFileMtlImporter::getTexture() {
         // Ambient texture
         out = & m_pModel->m_pCurrentMaterial->textureAmbient;
         clampIndex = ObjFile::Material::TextureAmbientType;
-    } else if (!ASSIMP_strincmp( pPtr, SpecularTexture.c_str(), static_cast<unsigned int>(SpecularTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, SpecularTexture.c_str(), static_cast<unsigned int>(SpecularTexture.size()) ) ) {
         // Specular texture
         out = & m_pModel->m_pCurrentMaterial->textureSpecular;
         clampIndex = ObjFile::Material::TextureSpecularType;
@@ -337,33 +337,30 @@ void ObjFileMtlImporter::getTexture() {
         // Opacity texture
         out = & m_pModel->m_pCurrentMaterial->textureOpacity;
         clampIndex = ObjFile::Material::TextureOpacityType;
-    } else if (!ASSIMP_strincmp( pPtr, EmissiveTexture.c_str(), static_cast<unsigned int>(EmissiveTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, EmissiveTexture1.c_str(), static_cast<unsigned int>(EmissiveTexture1.size()) ) ||
+                !ASSIMP_strincmp( pPtr, EmissiveTexture2.c_str(), static_cast<unsigned int>(EmissiveTexture2.size()) ) ) {
         // Emissive texture
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
-    } else if ( !ASSIMP_strincmp( pPtr, EmissiveTexture_1.c_str(), static_cast<unsigned int>(EmissiveTexture_1.size()) ) ) {
-        // Emissive texture
-        out = &m_pModel->m_pCurrentMaterial->textureEmissive;
-        clampIndex = ObjFile::Material::TextureEmissiveType;
     } else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), static_cast<unsigned int>(BumpTexture1.size()) ) ||
-                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), static_cast<unsigned int>(BumpTexture2.size()) ) ||
-                !ASSIMP_strincmp( pPtr, BumpTexture3.c_str(), static_cast<unsigned int>(BumpTexture3.size()) ) ) {
+                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), static_cast<unsigned int>(BumpTexture2.size()) ) ) {
         // Bump texture
         out = & m_pModel->m_pCurrentMaterial->textureBump;
         clampIndex = ObjFile::Material::TextureBumpType;
-    } else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), static_cast<unsigned int>(NormalTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr,NormalTexture.c_str(), static_cast<unsigned int>(NormalTexture.size()) ) ) {
         // Normal map
         out = & m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;
-    } else if(!ASSIMP_strincmp( pPtr, ReflectionTexture.c_str(), static_cast<unsigned int>(ReflectionTexture.size()) ) ) {
+    } else if( !ASSIMP_strincmp( pPtr, ReflectionTexture.c_str(), static_cast<unsigned int>(ReflectionTexture.size()) ) ) {
         // Reflection texture(s)
         //Do nothing here
         return;
-    } else if (!ASSIMP_strincmp( pPtr, DisplacementTexture.c_str(), static_cast<unsigned int>(DisplacementTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, DisplacementTexture1.c_str(), static_cast<unsigned int>(DisplacementTexture1.size()) ) ||
+                !ASSIMP_strincmp( pPtr, DisplacementTexture2.c_str(), static_cast<unsigned int>(DisplacementTexture2.size()) ) ) {
         // Displacement texture
         out = &m_pModel->m_pCurrentMaterial->textureDisp;
         clampIndex = ObjFile::Material::TextureDispType;
-    } else if (!ASSIMP_strincmp( pPtr, SpecularityTexture.c_str(), static_cast<unsigned int>(SpecularityTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, SpecularityTexture.c_str(), static_cast<unsigned int>(SpecularityTexture.size()) ) ) {
         // Specularity scaling (glossiness)
         out = & m_pModel->m_pCurrentMaterial->textureSpecularity;
         clampIndex = ObjFile::Material::TextureSpecularityType;

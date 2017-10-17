@@ -359,8 +359,6 @@ void ObjFileParser::getHomogeneousVector3( std::vector<aiVector3D> &point3d_arra
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for two 3D vectors on the same line
 void ObjFileParser::getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b ) {
     ai_real x, y, z;
     copyNextWord(m_buffer, Buffersize);
@@ -388,8 +386,6 @@ void ObjFileParser::getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, st
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for a new 2D vector instance
 void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
     ai_real x, y;
     copyNextWord(m_buffer, Buffersize);
@@ -405,8 +401,6 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
 
 static const std::string DefaultObjName = "defaultobject";
 
-// -------------------------------------------------------------------
-//  Get values for a new face instance
 void ObjFileParser::getFace( aiPrimitiveType type ) {
     m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
     if ( m_DataIt == m_DataItEnd || *m_DataIt == '\0' ) {
@@ -522,8 +516,6 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for a new material description
 void ObjFileParser::getMaterialDesc() {
     // Get next data for material data
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
@@ -555,10 +547,15 @@ void ObjFileParser::getMaterialDesc() {
         // Search for material
         std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
         if (it == m_pModel->m_MaterialMap.end()) {
-            // Not found, use default material
-            m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-            DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
-            strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
+			// Not found, so we don't know anything about the material except for its name.
+			// This may be the case if the material library is missing. We don't want to lose all
+			// materials if that happens, so create a new named material instead of discarding it
+			// completely.
+			DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", creating new material");
+			m_pModel->m_pCurrentMaterial = new ObjFile::Material();
+			m_pModel->m_pCurrentMaterial->MaterialName.Set(strName);
+			m_pModel->m_MaterialLib.push_back(strName);
+			m_pModel->m_MaterialMap[strName] = m_pModel->m_pCurrentMaterial;
         } else {
             // Found, using detected material
             m_pModel->m_pCurrentMaterial = (*it).second;

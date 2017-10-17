@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <list>
 #include <map>
+#include <memory>
 
 namespace ODDLParser {
     class DDLNode;
@@ -132,6 +133,7 @@ protected:
     void copyMeshes( aiScene *pScene );
     void copyCameras( aiScene *pScene );
     void copyLights( aiScene *pScene );
+    void copyMaterials( aiScene *pScene );
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();
@@ -179,12 +181,13 @@ private:
         std::list<aiNode*> m_children;
     };
     ChildInfo *m_root;
-    typedef std::map<aiNode*, ChildInfo*> NodeChildMap;
+    typedef std::map<aiNode*, std::unique_ptr<ChildInfo> > NodeChildMap;
     NodeChildMap m_nodeChildMap;
 
     std::vector<aiMesh*> m_meshCache;
     typedef std::map<std::string, size_t> ReferenceMap;
     std::map<std::string, size_t> m_mesh2refMap;
+    std::map<std::string, size_t> m_material2refMap;
 
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
@@ -199,7 +202,7 @@ private:
     std::vector<aiCamera*> m_cameraCache;
     std::vector<aiLight*> m_lightCache;
     std::vector<aiNode*> m_nodeStack;
-    std::vector<RefInfo*> m_unresolvedRefStack;
+    std::vector<std::unique_ptr<RefInfo> > m_unresolvedRefStack;
 };
 
 } // Namespace OpenGEX

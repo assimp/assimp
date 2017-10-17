@@ -1,5 +1,6 @@
 Open Asset Import Library (assimp)
 ==================================
+A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data.
 ### Current build status ###
 [![Linux Build Status](https://travis-ci.org/assimp/assimp.svg)](https://travis-ci.org/assimp/assimp)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
@@ -7,7 +8,6 @@ Open Asset Import Library (assimp)
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
-<span class="badge-patreon"><a href="https://www.patreon.com/assimp" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 [![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 <br>
@@ -17,6 +17,11 @@ APIs are provided for C and C++. There are various bindings to other languages (
 Additionally, assimp features various __mesh post processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
 This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
+
+Monthly donations via Patreon:
+<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
+
+<br>
 
 One-off donations via PayPal:
 <br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
@@ -29,50 +34,67 @@ Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 A full list [is here](http://assimp.org/main_features_formats.html).
 __Importers__:
-
+- 3D
 - 3DS
-- BLEND (Blender)
-- DAE/Collada
-- FBX
-- IFC-STEP
+- 3MF
+- AC
+- AC3D
+- ACC
+- AMJ
 - ASE
+- ASK
+- B3D;
+- BLEND (Blender)
+- BVH
+- COB
+- CMS
+- DAE/Collada
 - DXF
-- HMP
+- ENFF
+- FBX
+- glTF 1.0 + GLB
+- glTF 2.0
+- HMB
+- IFC-STEP
+- IRR / IRRMESH
+- LWO
+- LWS
+- LXO
 - MD2
 - MD3
 - MD5
 - MDC
 - MDL
-- NFF
-- PLY
-- STL
-- X
-- OBJ
-- OpenGEX
-- SMD
-- LWO
-- LXO
-- LWS  
-- TER
-- AC3D
+- MESH / MESH.XML
+- MOT
 - MS3D
-- COB
-- Q3BSP
-- XGL
-- CSM
-- BVH
-- B3D
 - NDO
-- Ogre Binary
-- Ogre XML
-- Q3D
-- ASSBIN (Assimp custom format)
-- glTF (partial)
-- 3MF
+- NFF
+- OBJ
+- OFF
+- OGEX
+- PLY
+- PMX
+- PRJ
+- Q3O
+- Q3S
+- RAW
+- SCN
+- SIB
+- SMD
+- STL
+- STP
+- TER
+- UC
+- VTA
+- X
+- X3D
+- XGL
+- ZGL
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
-- C4D (https://github.com/acgessler/assimp-cinema4d)
+- C4D (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange)
 
 __Exporters__:
 
@@ -85,7 +107,8 @@ __Exporters__:
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
 - STEP
-- glTF (partial)
+- glTF 1.0 (partial)
+- glTF 2.0 (partial)
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
@@ -96,6 +119,8 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 * [.NET](port/AssimpNET/Readme.md)
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
+* [Unity 3d Plugin] (https://www.assetstore.unity3d.com/en/#!/content/91777)
+* [JVM](https://github.com/kotlin-graphics/assimp) Full jvm port (currently supported obj, ply, stl, ~collada)
 
 ### Other tools ###
 [open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.

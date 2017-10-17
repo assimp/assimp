@@ -82,6 +82,20 @@ static const aiImporterDesc desc = {
 
 //#define DEBUG_B3D
 
+template<typename T>
+void DeleteAllBarePointers(std::vector<T>& x)
+{
+    for(auto p : x)
+    {
+        delete p;
+    }
+}
+
+B3DImporter::~B3DImporter()
+{
+    DeleteAllBarePointers(_animations);
+}
+
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const{
 
@@ -157,7 +171,8 @@ int B3DImporter::ReadByte(){
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadInt(){
     if( _pos+4<=_buf.size() ){
-        int n=*(int*)&_buf[_pos];
+        int n;
+        memcpy(&n, &_buf[_pos], 4);
         _pos+=4;
         return n;
     }
@@ -168,7 +183,8 @@ int B3DImporter::ReadInt(){
 // ------------------------------------------------------------------------------------------------
 float B3DImporter::ReadFloat(){
     if( _pos+4<=_buf.size() ){
-        float n=*(float*)&_buf[_pos];
+        float n;
+        memcpy(&n, &_buf[_pos], 4);
         _pos+=4;
         return n;
     }
@@ -558,13 +574,19 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
 void B3DImporter::ReadBB3D( aiScene *scene ){
 
     _textures.clear();
+
     _materials.clear();
 
     _vertices.clear();
+
     _meshes.clear();
 
+    DeleteAllBarePointers(_nodes);
     _nodes.clear();
+
     _nodeAnims.clear();
+
+    DeleteAllBarePointers(_animations);
     _animations.clear();
 
     string t=ReadChunk();

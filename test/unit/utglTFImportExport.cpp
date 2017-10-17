@@ -55,6 +55,6 @@ public:
     }
 };
 
-TEST_F( utglTFImportExport, importglTFromFileTest ) {
+TEST_F( utglTFImportExport, importglTFFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }

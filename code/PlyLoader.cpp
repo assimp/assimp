@@ -170,9 +170,10 @@ void PLYImporter::InternReadFile(const std::string& pFile,
   std::vector<char> headerCheck;
   streamedBuffer.getNextLine(headerCheck);
 
-  if ((headerCheck.size() >= 3) && (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
-    (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
-    (headerCheck[2] != 'Y' && headerCheck[2] != 'y'))
+  if ((headerCheck.size() < 3) ||
+      (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
+      (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
+      (headerCheck[2] != 'Y' && headerCheck[2] != 'y') )
   {
     streamedBuffer.close();
     throw DeadlyImportError("Invalid .ply file: Magic number \'ply\' is no there");
@@ -299,252 +300,205 @@ void PLYImporter::InternReadFile(const std::string& pFile,
   }
 }
 
-void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementInstance* instElement, unsigned int pos)
-{
-  ai_assert(NULL != pcElement);
-  ai_assert(NULL != instElement);
+void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementInstance* instElement, unsigned int pos) {
+    ai_assert(NULL != pcElement);
+    ai_assert(NULL != instElement);
 
-  ai_uint aiPositions[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-  PLY::EDataType aiTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
+    ai_uint aiPositions[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    PLY::EDataType aiTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
 
-  ai_uint aiNormal[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-  PLY::EDataType aiNormalTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
+    ai_uint aiNormal[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    PLY::EDataType aiNormalTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
 
-  unsigned int aiColors[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-  PLY::EDataType aiColorsTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
+    unsigned int aiColors[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    PLY::EDataType aiColorsTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
 
-  unsigned int aiTexcoord[2] = { 0xFFFFFFFF, 0xFFFFFFFF };
-  PLY::EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
+    unsigned int aiTexcoord[2] = { 0xFFFFFFFF, 0xFFFFFFFF };
+    PLY::EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
 
-  unsigned int cnt = 0;
+    // now check whether which normal components are available
+    unsigned int _a( 0 ), cnt( 0 );
+    for ( std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
+            a != pcElement->alProperties.end(); ++a, ++_a) {
+        if ((*a).bIsList) {
+            continue;
+        }
 
-  // now check whether which normal components are available
-  unsigned int _a = 0;
-  for (std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
-    a != pcElement->alProperties.end(); ++a, ++_a)
-  {
-    if ((*a).bIsList)continue;
-
-    // Positions
-    if (PLY::EST_XCoord == (*a).Semantic)
-    {
-      cnt++;
-      aiPositions[0] = _a;
-      aiTypes[0] = (*a).eType;
-    }
-    else if (PLY::EST_YCoord == (*a).Semantic)
-    {
-      cnt++;
-      aiPositions[1] = _a;
-      aiTypes[1] = (*a).eType;
-    }
-    else if (PLY::EST_ZCoord == (*a).Semantic)
-    {
-      cnt++;
-      aiPositions[2] = _a;
-      aiTypes[2] = (*a).eType;
-    }
-
-    // Normals
-    else if (PLY::EST_XNormal == (*a).Semantic)
-    {
-      cnt++;
-      aiNormal[0] = _a;
-      aiNormalTypes[0] = (*a).eType;
-    }
-    else if (PLY::EST_YNormal == (*a).Semantic)
-    {
-      cnt++;
-      aiNormal[1] = _a;
-      aiNormalTypes[1] = (*a).eType;
-    }
-    else if (PLY::EST_ZNormal == (*a).Semantic)
-    {
-      cnt++;
-      aiNormal[2] = _a;
-      aiNormalTypes[2] = (*a).eType;
-    }
-    // Colors
-    else if (PLY::EST_Red == (*a).Semantic)
-    {
-      cnt++;
-      aiColors[0] = _a;
-      aiColorsTypes[0] = (*a).eType;
-    }
-    else if (PLY::EST_Green == (*a).Semantic)
-    {
-      cnt++;
-      aiColors[1] = _a;
-      aiColorsTypes[1] = (*a).eType;
-    }
-    else if (PLY::EST_Blue == (*a).Semantic)
-    {
-      cnt++;
-      aiColors[2] = _a;
-      aiColorsTypes[2] = (*a).eType;
-    }
-    else if (PLY::EST_Alpha == (*a).Semantic)
-    {
-      cnt++;
-      aiColors[3] = _a;
-      aiColorsTypes[3] = (*a).eType;
-    }
-    // Texture coordinates
-    else if (PLY::EST_UTextureCoord == (*a).Semantic)
-    {
-      cnt++;
-      aiTexcoord[0] = _a;
-      aiTexcoordTypes[0] = (*a).eType;
-    }
-    else if (PLY::EST_VTextureCoord == (*a).Semantic)
-    {
-      cnt++;
-      aiTexcoord[1] = _a;
-      aiTexcoordTypes[1] = (*a).eType;
-    }
-  }
-
-  // check whether we have a valid source for the vertex data
-  if (0 != cnt)
-  {
-    // Position
-    aiVector3D vOut;
-    if (0xFFFFFFFF != aiPositions[0])
-    {
-      vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiPositions[0]).avList.front(), aiTypes[0]);
+        // Positions
+        if (PLY::EST_XCoord == (*a).Semantic) {
+            ++cnt;
+            aiPositions[0] = _a;
+            aiTypes[0] = (*a).eType;
+        } else if (PLY::EST_YCoord == (*a).Semantic) {
+            ++cnt;
+            aiPositions[1] = _a;
+            aiTypes[1] = (*a).eType;
+        } else if (PLY::EST_ZCoord == (*a).Semantic) {
+            ++cnt;
+            aiPositions[2] = _a;
+            aiTypes[2] = (*a).eType;
+        } else if (PLY::EST_XNormal == (*a).Semantic) {
+            // Normals
+            ++cnt;
+            aiNormal[0] = _a;
+            aiNormalTypes[0] = (*a).eType;
+        } else if (PLY::EST_YNormal == (*a).Semantic) {
+            ++cnt;
+            aiNormal[1] = _a;
+            aiNormalTypes[1] = (*a).eType;
+        } else if (PLY::EST_ZNormal == (*a).Semantic) {
+            ++cnt;
+            aiNormal[2] = _a;
+            aiNormalTypes[2] = (*a).eType;
+        } else if (PLY::EST_Red == (*a).Semantic) {
+            // Colors
+            ++cnt;
+            aiColors[0] = _a;
+            aiColorsTypes[0] = (*a).eType;
+        } else if (PLY::EST_Green == (*a).Semantic) {
+            ++cnt;
+            aiColors[1] = _a;
+            aiColorsTypes[1] = (*a).eType;
+        } else if (PLY::EST_Blue == (*a).Semantic) {
+            ++cnt;
+            aiColors[2] = _a;
+            aiColorsTypes[2] = (*a).eType;
+        } else if (PLY::EST_Alpha == (*a).Semantic) {
+            ++cnt;
+            aiColors[3] = _a;
+            aiColorsTypes[3] = (*a).eType;
+        } else if (PLY::EST_UTextureCoord == (*a).Semantic) {
+            // Texture coordinates
+            ++cnt;
+            aiTexcoord[0] = _a;
+            aiTexcoordTypes[0] = (*a).eType;
+        } else if (PLY::EST_VTextureCoord == (*a).Semantic) {
+            ++cnt;
+            aiTexcoord[1] = _a;
+            aiTexcoordTypes[1] = (*a).eType;
+        }
     }
 
-    if (0xFFFFFFFF != aiPositions[1])
-    {
-      vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiPositions[1]).avList.front(), aiTypes[1]);
-    }
+    // check whether we have a valid source for the vertex data
+    if (0 != cnt) {
+        // Position
+        aiVector3D vOut;
+        if (0xFFFFFFFF != aiPositions[0]) {
+            vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiPositions[0]).avList.front(), aiTypes[0]);
+        }
 
-    if (0xFFFFFFFF != aiPositions[2])
-    {
-      vOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiPositions[2]).avList.front(), aiTypes[2]);
-    }
+        if (0xFFFFFFFF != aiPositions[1]) {
+            vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiPositions[1]).avList.front(), aiTypes[1]);
+        }
 
-    // Normals
-    aiVector3D nOut;
-    bool haveNormal = false;
-    if (0xFFFFFFFF != aiNormal[0])
-    {
-      nOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiNormal[0]).avList.front(), aiNormalTypes[0]);
-      haveNormal = true;
-    }
+        if (0xFFFFFFFF != aiPositions[2]) {
+            vOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiPositions[2]).avList.front(), aiTypes[2]);
+        }
 
-    if (0xFFFFFFFF != aiNormal[1])
-    {
-      nOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiNormal[1]).avList.front(), aiNormalTypes[1]);
-      haveNormal = true;
-    }
+        // Normals
+        aiVector3D nOut;
+        bool haveNormal = false;
+        if (0xFFFFFFFF != aiNormal[0]) {
+            nOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiNormal[0]).avList.front(), aiNormalTypes[0]);
+            haveNormal = true;
+        }
 
-    if (0xFFFFFFFF != aiNormal[2])
-    {
-      nOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiNormal[2]).avList.front(), aiNormalTypes[2]);
-      haveNormal = true;
-    }
+        if (0xFFFFFFFF != aiNormal[1]) {
+            nOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiNormal[1]).avList.front(), aiNormalTypes[1]);
+            haveNormal = true;
+        }
 
-    //Colors
-    aiColor4D cOut;
-    bool haveColor = false;
-    if (0xFFFFFFFF != aiColors[0])
-    {
-      cOut.r = NormalizeColorValue(GetProperty(instElement->alProperties,
-        aiColors[0]).avList.front(), aiColorsTypes[0]);
-      haveColor = true;
-    }
+        if (0xFFFFFFFF != aiNormal[2]) {
+            nOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiNormal[2]).avList.front(), aiNormalTypes[2]);
+            haveNormal = true;
+        }
 
-    if (0xFFFFFFFF != aiColors[1])
-    {
-      cOut.g = NormalizeColorValue(GetProperty(instElement->alProperties,
-        aiColors[1]).avList.front(), aiColorsTypes[1]);
-      haveColor = true;
-    }
+        //Colors
+        aiColor4D cOut;
+        bool haveColor = false;
+        if (0xFFFFFFFF != aiColors[0]) {
+            cOut.r = NormalizeColorValue(GetProperty(instElement->alProperties,
+                aiColors[0]).avList.front(), aiColorsTypes[0]);
+            haveColor = true;
+        }
 
-    if (0xFFFFFFFF != aiColors[2])
-    {
-      cOut.b = NormalizeColorValue(GetProperty(instElement->alProperties,
-        aiColors[2]).avList.front(), aiColorsTypes[2]);
-      haveColor = true;
-    }
+        if (0xFFFFFFFF != aiColors[1]) {
+            cOut.g = NormalizeColorValue(GetProperty(instElement->alProperties,
+                aiColors[1]).avList.front(), aiColorsTypes[1]);
+            haveColor = true;
+        }
 
-    // assume 1.0 for the alpha channel ifit is not set
-    if (0xFFFFFFFF == aiColors[3])
-    {
-      cOut.a = 1.0;
-    }
-    else
-    {
-      cOut.a = NormalizeColorValue(GetProperty(instElement->alProperties,
-        aiColors[3]).avList.front(), aiColorsTypes[3]);
+        if (0xFFFFFFFF != aiColors[2]) {
+            cOut.b = NormalizeColorValue(GetProperty(instElement->alProperties,
+                aiColors[2]).avList.front(), aiColorsTypes[2]);
+            haveColor = true;
+        }
 
-      haveColor = true;
-    }
+        // assume 1.0 for the alpha channel ifit is not set
+        if (0xFFFFFFFF == aiColors[3]) {
+            cOut.a = 1.0;
+        } else {
+            cOut.a = NormalizeColorValue(GetProperty(instElement->alProperties,
+                aiColors[3]).avList.front(), aiColorsTypes[3]);
 
-    //Texture coordinates
-    aiVector3D tOut;
-    tOut.z = 0;
-    bool haveTextureCoords = false;
-    if (0xFFFFFFFF != aiTexcoord[0])
-    {
-      tOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiTexcoord[0]).avList.front(), aiTexcoordTypes[0]);
-      haveTextureCoords = true;
-    }
+            haveColor = true;
+        }
 
-    if (0xFFFFFFFF != aiTexcoord[1])
-    {
-      tOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
-        GetProperty(instElement->alProperties, aiTexcoord[1]).avList.front(), aiTexcoordTypes[1]);
-      haveTextureCoords = true;
-    }
+        //Texture coordinates
+        aiVector3D tOut;
+        tOut.z = 0;
+        bool haveTextureCoords = false;
+        if (0xFFFFFFFF != aiTexcoord[0]) {
+            tOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiTexcoord[0]).avList.front(), aiTexcoordTypes[0]);
+            haveTextureCoords = true;
+        }
 
-    //create aiMesh if needed
-    if (mGeneratedMesh == NULL)
-    {
-      mGeneratedMesh = new aiMesh();
-      mGeneratedMesh->mMaterialIndex = 0;
-    }
+        if (0xFFFFFFFF != aiTexcoord[1]) {
+            tOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
+                GetProperty(instElement->alProperties, aiTexcoord[1]).avList.front(), aiTexcoordTypes[1]);
+            haveTextureCoords = true;
+        }
 
-    if (mGeneratedMesh->mVertices == NULL)
-    {
-      mGeneratedMesh->mNumVertices = pcElement->NumOccur;
-      mGeneratedMesh->mVertices = new aiVector3D[mGeneratedMesh->mNumVertices];
-    }
+        //create aiMesh if needed
+        if ( nullptr == mGeneratedMesh ) {
+            mGeneratedMesh = new aiMesh();
+            mGeneratedMesh->mMaterialIndex = 0;
+        }
 
-    mGeneratedMesh->mVertices[pos] = vOut;
+        if (nullptr == mGeneratedMesh->mVertices) {
+            mGeneratedMesh->mNumVertices = pcElement->NumOccur;
+            mGeneratedMesh->mVertices = new aiVector3D[mGeneratedMesh->mNumVertices];
+        }
 
-    if (haveNormal)
-    {
-      if (mGeneratedMesh->mNormals == NULL)
-        mGeneratedMesh->mNormals = new aiVector3D[mGeneratedMesh->mNumVertices];
-      mGeneratedMesh->mNormals[pos] = nOut;
-    }
+        mGeneratedMesh->mVertices[pos] = vOut;
 
-    if (haveColor)
-    {
-      if (mGeneratedMesh->mColors[0] == NULL)
-        mGeneratedMesh->mColors[0] = new aiColor4D[mGeneratedMesh->mNumVertices];
-      mGeneratedMesh->mColors[0][pos] = cOut;
-    }
+        if (haveNormal) {
+            if (nullptr == mGeneratedMesh->mNormals)
+                mGeneratedMesh->mNormals = new aiVector3D[mGeneratedMesh->mNumVertices];
+            mGeneratedMesh->mNormals[pos] = nOut;
+        }
 
-    if (haveTextureCoords)
-    {
-      if (mGeneratedMesh->mTextureCoords[0] == NULL)
-      {
-        mGeneratedMesh->mNumUVComponents[0] = 2;
-        mGeneratedMesh->mTextureCoords[0] = new aiVector3D[mGeneratedMesh->mNumVertices];
-      }
-      mGeneratedMesh->mTextureCoords[0][pos] = tOut;
+        if (haveColor) {
+            if (nullptr == mGeneratedMesh->mColors[0])
+                mGeneratedMesh->mColors[0] = new aiColor4D[mGeneratedMesh->mNumVertices];
+            mGeneratedMesh->mColors[0][pos] = cOut;
+        }
+
+        if (haveTextureCoords) {
+            if (nullptr == mGeneratedMesh->mTextureCoords[0]) {
+                mGeneratedMesh->mNumUVComponents[0] = 2;
+                mGeneratedMesh->mTextureCoords[0] = new aiVector3D[mGeneratedMesh->mNumVertices];
+            }
+            mGeneratedMesh->mTextureCoords[0][pos] = tOut;
+        }
     }
-  }
 }
 
 
@@ -585,7 +539,7 @@ void PLYImporter::LoadFace(const PLY::Element* pcElement, const PLY::ElementInst
   ai_assert(NULL != instElement);
 
   if (mGeneratedMesh == NULL)
-    throw DeadlyImportError("Invalid .ply file: Vertices shoud be declared before faces");
+    throw DeadlyImportError("Invalid .ply file: Vertices should be declared before faces");
 
   bool bOne = false;
 

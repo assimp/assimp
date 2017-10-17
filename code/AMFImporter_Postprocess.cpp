@@ -686,7 +686,6 @@ std::list<unsigned int> mesh_idx;
 				tmesh->mNumVertices = static_cast<unsigned int>(vert_arr.size());
 				tmesh->mVertices = new aiVector3D[tmesh->mNumVertices];
 				tmesh->mColors[0] = new aiColor4D[tmesh->mNumVertices];
-				tmesh->mFaces = new aiFace[face_list_cur.size()];
 
 				memcpy(tmesh->mVertices, vert_arr.data(), tmesh->mNumVertices * sizeof(aiVector3D));
 				memcpy(tmesh->mColors[0], col_arr.data(), tmesh->mNumVertices * sizeof(aiColor4D));

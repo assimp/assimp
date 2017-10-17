@@ -119,7 +119,7 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
          *  might be NULL and it's our duty to return true here.
          */
         if (!pIOHandler)return true;
-        const char* tokens[] = {"collada"};
+        const char* tokens[] = {"<collada"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
     return false;
@@ -674,7 +674,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     // create morph target meshes if any
     std::vector<aiMesh*> targetMeshes;
     std::vector<float> targetWeights;
-    Collada::MorphMethod method;
+    Collada::MorphMethod method = Collada::Normalized;
 
     for(std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin();
         it != pParser.mControllerLibrary.end(); it++)
@@ -728,7 +728,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
                                 ? aiMorphingMethod_MORPH_RELATIVE
                                 : aiMorphingMethod_MORPH_NORMALIZED;
         dstMesh->mAnimMeshes = new aiAnimMesh*[animMeshes.size()];
-        dstMesh->mNumAnimMeshes = animMeshes.size();
+        dstMesh->mNumAnimMeshes = static_cast<unsigned int>(animMeshes.size());
         for (unsigned int i = 0; i < animMeshes.size(); i++)
             dstMesh->mAnimMeshes[i] = animMeshes.at(i);
     }
@@ -1377,9 +1377,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
         {
               aiNodeAnim* dstAnim = new aiNodeAnim;
               dstAnim->mNodeName = nodeName;
-              dstAnim->mNumPositionKeys = resultTrafos.size();
-              dstAnim->mNumRotationKeys= resultTrafos.size();
-              dstAnim->mNumScalingKeys = resultTrafos.size();
+              dstAnim->mNumPositionKeys = static_cast<unsigned int>(resultTrafos.size());
+              dstAnim->mNumRotationKeys = static_cast<unsigned int>(resultTrafos.size());
+              dstAnim->mNumScalingKeys = static_cast<unsigned int>(resultTrafos.size());
               dstAnim->mPositionKeys = new aiVectorKey[resultTrafos.size()];
               dstAnim->mRotationKeys = new aiQuatKey[resultTrafos.size()];
               dstAnim->mScalingKeys = new aiVectorKey[resultTrafos.size()];
@@ -1445,11 +1445,11 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                     ++morphAnimChannelIndex;
                 }
 
-                morphAnim->mNumKeys = morphTimeValues.size();
+                morphAnim->mNumKeys = static_cast<unsigned int>(morphTimeValues.size());
                 morphAnim->mKeys = new aiMeshMorphKey[morphAnim->mNumKeys];
                 for (unsigned int key = 0; key < morphAnim->mNumKeys; key++)
                 {
-                    morphAnim->mKeys[key].mNumValuesAndWeights = morphChannels.size();
+                    morphAnim->mKeys[key].mNumValuesAndWeights = static_cast<unsigned int>(morphChannels.size());
                     morphAnim->mKeys[key].mValues = new unsigned int [morphChannels.size()];
                     morphAnim->mKeys[key].mWeights = new double [morphChannels.size()];
 
@@ -1470,13 +1470,13 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
     {
         aiAnimation* anim = new aiAnimation;
         anim->mName.Set( pName);
-        anim->mNumChannels = anims.size();
+        anim->mNumChannels = static_cast<unsigned int>(anims.size());
         if (anim->mNumChannels > 0)
         {
             anim->mChannels = new aiNodeAnim*[anims.size()];
             std::copy( anims.begin(), anims.end(), anim->mChannels);
         }
-        anim->mNumMorphMeshChannels = morphAnims.size();
+        anim->mNumMorphMeshChannels = static_cast<unsigned int>(morphAnims.size());
         if (anim->mNumMorphMeshChannels > 0)
         {
             anim->mMorphMeshChannels = new aiMeshMorphAnim*[anim->mNumMorphMeshChannels];

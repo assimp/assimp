@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/ai_assert.h>
 
+#include <cstdlib>
 #include <memory>
 #include <vector>
 #include <map>
@@ -228,7 +229,7 @@ ZipFile::~ZipFile() {
 
 size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount) {
     const size_t size = pSize * pCount;
-    assert(size <= m_Size);
+    ai_assert(size <= m_Size);
 
     std::memcpy(pvBuffer, m_Buffer, size);
 

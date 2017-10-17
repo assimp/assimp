@@ -61,6 +61,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
   ${HEADER_PATH}/defs.h
+  ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h
@@ -661,6 +662,14 @@ ADD_ASSIMP_IMPORTER( GLTF
   glTFImporter.h
   glTFExporter.h
   glTFExporter.cpp
+  glTF2Asset.h
+  glTF2Asset.inl
+  glTF2AssetWriter.h
+  glTF2AssetWriter.inl
+  glTF2Importer.cpp
+  glTF2Importer.h
+  glTF2Exporter.h
+  glTF2Exporter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( 3MF
@@ -934,14 +943,25 @@ if (ASSIMP_ANDROID_JNIIOSYSTEM)
 endif(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
-  install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
-    DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    CONFIGURATIONS Debug
-  )
-  install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
-    DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    CONFIGURATIONS RelWithDebInfo
-  )
+  IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
+    install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS Debug
+    )
+    install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS RelWithDebInfo
+    )
+  ELSE()
+    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS Debug
+    )
+    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}.pdb
+      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      CONFIGURATIONS RelWithDebInfo
+    )
+  ENDIF()
 endif ()
 
 if (ASSIMP_COVERALLS)

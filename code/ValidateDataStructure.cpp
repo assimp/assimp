@@ -89,9 +89,7 @@ AI_WONT_RETURN void ValidateDSProcess::ReportError(const char* msg,...)
     ai_assert(iLen > 0);
 
     va_end(args);
-#ifdef ASSIMP_BUILD_DEBUG
-    ai_assert( false );
-#endif
+
     throw DeadlyImportError("Validation failed: " + std::string(szBuffer,iLen));
 }
 // ------------------------------------------------------------------------------------------------
@@ -409,12 +407,12 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             // the MSB flag is temporarily used by the extra verbose
             // mode to tell us that the JoinVerticesProcess might have
             // been executed already.
-			if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && !(this->mScene->mFlags & AI_SCENE_FLAGS_ALLOW_SHARED) &&
+			/*if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && !(this->mScene->mFlags & AI_SCENE_FLAGS_ALLOW_SHARED) &&
 				abRefList[face.mIndices[a]])
             {
                 ReportError("aiMesh::mVertices[%i] is referenced twice - second "
                     "time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
-            }
+            }*/
             abRefList[face.mIndices[a]] = true;
         }
     }

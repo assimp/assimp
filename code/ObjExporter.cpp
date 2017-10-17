@@ -91,11 +91,11 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
 , vn()
 , vt()
 , vc() 
-, vpMap()
-, vnMap()
-, vtMap()
-, vcMap()
-, meshes()
+, mVpMap()
+, mVnMap()
+, mVtMap()
+, mVcMap()
+, mMeshes()
 , endl("\n") {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
@@ -137,15 +137,21 @@ std::string ObjExporter::GetMaterialLibFileName() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: WriteHeader(std::ostringstream& out) {
+void ObjExporter::WriteHeader(std::ostringstream& out) {
     out << "# File produced by Open Asset Import Library (http://www.assimp.sf.net)" << endl;
-    out << "# (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.' << aiGetVersionRevision() << ")" << endl  << endl;
+    out << "# (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
+        << aiGetVersionRevision() << ")" << endl  << endl;
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string ObjExporter :: GetMaterialName(unsigned int index)
+std::string ObjExporter::GetMaterialName(unsigned int index)
 {
     const aiMaterial* const mat = pScene->mMaterials[index];
+    if ( nullptr == mat ) {
+        static const std::string EmptyStr;
+        return EmptyStr;
+    }
+
     aiString s;
     if(AI_SUCCESS == mat->Get(AI_MATKEY_NAME,s)) {
         return std::string(s.data,s.length);
@@ -235,8 +241,8 @@ void ObjExporter::WriteGeometryFile() {
     AddNode(pScene->mRootNode, mBase);
 
     // write vertex positions with colors, if any
-    vpMap.getVectors( vp );
-    vcMap.getColors( vc );
+    mVpMap.getVectors( vp );
+    mVcMap.getColors( vc );
     if ( vc.empty() ) {
         mOutput << "# " << vp.size() << " vertex positions" << endl;
         for ( const aiVector3D& v : vp ) {
@@ -253,7 +259,7 @@ void ObjExporter::WriteGeometryFile() {
     mOutput << endl;
 
     // write uv coordinates
-    vtMap.getVectors(vt);
+    mVtMap.getVectors(vt);
     mOutput << "# " << vt.size() << " UV coordinates" << endl;
     for(const aiVector3D& v : vt) {
         mOutput << "vt " << v.x << " " << v.y << " " << v.z << endl;
@@ -261,7 +267,7 @@ void ObjExporter::WriteGeometryFile() {
     mOutput << endl;
 
     // write vertex normals
-    vnMap.getVectors(vn);
+    mVnMap.getVectors(vn);
     mOutput << "# " << vn.size() << " vertex normals" << endl;
     for(const aiVector3D& v : vn) {
         mOutput << "vn " << v.x << " " << v.y << " " << v.z << endl;
@@ -269,7 +275,7 @@ void ObjExporter::WriteGeometryFile() {
     mOutput << endl;
 
     // now write all mesh instances
-    for(const MeshInstance& m : meshes) {
+    for(const MeshInstance& m : mMeshes) {
         mOutput << "# Mesh \'" << m.name << "\' with " << m.faces.size() << " faces" << endl;
         if (!m.name.empty()) {
             mOutput << "g " << m.name << endl;
@@ -345,8 +351,8 @@ void ObjExporter::colIndexMap::getColors( std::vector<aiColor4D> &colors ) {
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat) {
-    meshes.push_back(MeshInstance());
-    MeshInstance& mesh = meshes.back();
+    mMeshes.push_back(MeshInstance());
+    MeshInstance& mesh = mMeshes.back();
 
     mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_" + std::string(m->mName.data,m->mName.length) : "");
     mesh.matname = GetMaterialName(m->mMaterialIndex);
@@ -373,24 +379,24 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
             const unsigned int idx = f.mIndices[a];
 
             aiVector3D vert = mat * m->mVertices[idx];
-            face.indices[a].vp = vpMap.getIndex(vert);
+            face.indices[a].vp = mVpMap.getIndex(vert);
 
             if (m->mNormals) {
                 aiVector3D norm = aiMatrix3x3(mat) * m->mNormals[idx];
-                face.indices[a].vn = vnMap.getIndex(norm);
+                face.indices[a].vn = mVnMap.getIndex(norm);
             } else {
                 face.indices[a].vn = 0;
             }
 
             if ( nullptr != m->mColors[ 0 ] ) {
                 aiColor4D col4 = m->mColors[ 0 ][ idx ];
-                face.indices[ a ].vc = vcMap.getIndex( col4 );
+                face.indices[ a ].vc = mVcMap.getIndex( col4 );
             } else {
                 face.indices[ a ].vc = 0;
             }
 
             if ( m->mTextureCoords[ 0 ] ) {
-                face.indices[a].vt = vtMap.getIndex(m->mTextureCoords[0][idx]);
+                face.indices[a].vt = mVtMap.getIndex(m->mTextureCoords[0][idx]);
             } else {
                 face.indices[a].vt = 0;
             }

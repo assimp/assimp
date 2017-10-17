@@ -128,7 +128,10 @@ protected:
     /// Enters a new xml element, which increases the indentation
     void PushTag() { startstr.append( "  "); }
     /// Leaves an element, decreasing the indentation
-    void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
+    void PopTag() { 
+        ai_assert( startstr.length() > 1); 
+        startstr.erase( startstr.length() - 2); 
+    }
 
     /// Creates a mesh ID for the given mesh
     std::string GetMeshId( size_t pIndex) const {

@@ -71,7 +71,6 @@ class AssbinImporter : public BaseImporter
 private:
   bool shortened;
   bool compressed;
-protected:
 
 public:
   virtual bool CanRead(

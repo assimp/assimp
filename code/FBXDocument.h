@@ -338,12 +338,7 @@ public:
 class Model : public Object
 {
 public:
-    Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~Model();
-
-public:
-    enum RotOrder
-    {
+    enum RotOrder {
         RotOrder_EulerXYZ = 0,
         RotOrder_EulerXZY,
         RotOrder_EulerYZX,
@@ -357,8 +352,7 @@ public:
     };
 
 
-    enum TransformInheritance
-    {
+    enum TransformInheritance {
         TransformInheritance_RrSs = 0,
         TransformInheritance_RSrs,
         TransformInheritance_Rrs,
@@ -366,7 +360,10 @@ public:
         TransformInheritance_MAX // end-of-enum sentinel
     };
 
-public:
+    Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+
+    virtual ~Model();
+
     fbx_simple_property(QuaternionInterpolate, int, 0)
 
     fbx_simple_property(RotationOffset, aiVector3D, aiVector3D())
@@ -443,7 +440,6 @@ public:
     fbx_simple_property(LODBox, bool, false)
     fbx_simple_property(Freeze, bool, false)
 
-public:
     const std::string& Shading() const {
         return shading;
     }
@@ -462,12 +458,10 @@ public:
         return materials;
     }
 
-
     /** Get geometry links */
     const std::vector<const Geometry*>& GetGeometry() const {
         return geometry;
     }
-
 
     /** Get node attachments */
     const std::vector<const NodeAttribute*>& GetAttributes() const {
@@ -476,7 +470,6 @@ public:
 
     /** convenience method to check if the node has a Null node marker */
     bool IsNull() const;
-
 
 private:
     void ResolveLinks(const Element& element, const Document& doc);
@@ -603,10 +596,10 @@ public:
 		return textures[index];
 
     }
-	const int textureCount() const {
+	int textureCount() const {
 		return static_cast<int>(textures.size());
 	}
-    const BlendMode GetBlendMode() const
+    BlendMode GetBlendMode() const
     {
         return blendMode;
     }
@@ -654,7 +647,7 @@ public:
         return content;
     }
 
-    const uint32_t ContentLength() const {
+    uint32_t ContentLength() const {
         return contentLength;
     }
 
@@ -805,7 +798,6 @@ private:
 
 typedef std::vector<const AnimationCurveNode*> AnimationCurveNodeList;
 
-
 /** Represents a FBX animation layer (i.e. a list of node animations) */
 class AnimationLayer : public Object
 {
@@ -828,9 +820,7 @@ private:
     const Document& doc;
 };
 
-
 typedef std::vector<const AnimationLayer*> AnimationLayerList;
-
 
 /** Represents a FBX animation stack (i.e. a list of animation layers) */
 class AnimationStack : public Object
@@ -839,7 +829,6 @@ public:
     AnimationStack(uint64_t id, const Element& element, const std::string& name, const Document& doc);
     virtual ~AnimationStack();
 
-public:
     fbx_simple_property(LocalStart, int64_t, 0L)
     fbx_simple_property(LocalStop, int64_t, 0L)
     fbx_simple_property(ReferenceStart, int64_t, 0L)
@@ -878,7 +867,6 @@ private:
 
 typedef std::vector<float> WeightArray;
 typedef std::vector<unsigned int> WeightIndexArray;
-
 
 /** DOM class for skin deformer clusters (aka subdeformers) */
 class Cluster : public Deformer
@@ -923,8 +911,6 @@ private:
 
     const Model* node;
 };
-
-
 
 /** DOM class for skin deformers */
 class Skin : public Deformer
@@ -1009,9 +995,7 @@ public:
 typedef std::map<uint64_t, LazyObject*> ObjectMap;
 typedef std::fbx_unordered_map<std::string, std::shared_ptr<const PropertyTable> > PropertyTemplateMap;
 
-
 typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
-
 
 /** DOM class for global document settings, a single instance per document can
  *  be accessed via Document.Globals(). */
@@ -1073,9 +1057,6 @@ private:
     std::shared_ptr<const PropertyTable> props;
     const Document& doc;
 };
-
-
-
 
 /** DOM root for a FBX file */
 class Document
@@ -1154,8 +1135,6 @@ private:
         const ConnectionMap&,
         const char* const* classnames,
         size_t count) const;
-
-private:
     void ReadHeader();
     void ReadObjects();
     void ReadPropertyTemplates();

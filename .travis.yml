@@ -34,15 +34,6 @@ env:
 matrix:
   include:
     - os: linux
-      compiler: gcc
-      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
-    - os: linux
-      compiler: gcc
-      env: SHARED_BUILD=ON
-    - os: linux
-      compiler: gcc
-      env: ANALYZE=ON
-    - os: linux
       compiler: clang
       env: ANALYZE=ON
     - os: linux
@@ -53,6 +44,15 @@ matrix:
       env: UBSAN=ON
     - os: linux
       compiler: clang
+      env: SHARED_BUILD=ON
+    - os: linux
+      compiler: gcc
+      env: ANALYZE=ON
+    - os: linux
+      compiler: gcc
+      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
+    - os: linux
+      compiler: gcc
       env: SHARED_BUILD=ON
 
 install:

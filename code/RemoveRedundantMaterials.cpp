@@ -145,6 +145,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
             if (!abReferenced[i]) {
                 ++unreferencedRemoved;
                 delete pScene->mMaterials[i];
+                pScene->mMaterials[i] = nullptr;
                 continue;
             }
 
@@ -158,6 +159,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
                     me = 0;
                     aiMappingTable[i] = aiMappingTable[a];
                     delete pScene->mMaterials[i];
+                    pScene->mMaterials[i] = nullptr;
                     break;
                 }
             }

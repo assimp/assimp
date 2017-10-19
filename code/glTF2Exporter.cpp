@@ -448,7 +448,7 @@ void glTF2Exporter::ExportMaterials()
                 float specularIntensity = specularColor[0] * 0.2125 + specularColor[1] * 0.7154 + specularColor[2] * 0.0721;
                 float roughnessFactor = 1 - std::sqrt(shininess / 1000);
 
-                roughnessFactor = std::powf(roughnessFactor, 2);
+                roughnessFactor = std::pow(roughnessFactor, 2);
                 roughnessFactor = std::min(std::max(roughnessFactor, 0.0f), 1.0f);
 
                 // low specular intensity values should produce a rough material even if shininess is high.

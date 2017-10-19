@@ -172,9 +172,7 @@ namespace glTF2
 	#define AI_MATKEY_GLTF_ALPHAMODE "$mat.gltf.alphaMode", 0, 0
 	#define AI_MATKEY_GLTF_ALPHACUTOFF "$mat.gltf.alphaCutoff", 0, 0
 	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS "$mat.gltf.pbrSpecularGlossiness", 0, 0
-	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR "$clr.specular", 0, 1
 	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR "$mat.gltf.pbrMetallicRoughness.glossinessFactor", 0, 0
-	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE aiTextureType_UNKNOWN, 1
 
 	#define _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE "$tex.file.texCoord"
 	#define _AI_MATKEY_GLTF_MAPPINGNAME_BASE "$tex.mappingname"

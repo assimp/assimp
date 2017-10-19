@@ -32,7 +32,7 @@ function generate()
 
     cmake -G "Unix Makefiles" $OPTIONS
 }
-
+# build and run unittests, if not android
 if [ $ANDROID ]; then
     ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni
 fi
@@ -41,7 +41,5 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     && make -j4 \
     && sudo make install \
     && sudo ldconfig \
-    && (cd test/unit; ../../bin/unit) \
-    #&& (cd test/regression; chmod 755 run.py; ./run.py ../../bin/assimp; \
-	#   chmod 755 result_checker.py; ./result_checker.py)
+    && (cd test/unit; ../../bin/unit)
 fi

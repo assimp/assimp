@@ -434,7 +434,29 @@ void glTF2Exporter::ExportMaterials()
             m->pbrMetallicRoughness.metallicFactor = 0;
         }
 
-        mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor);
+        // get roughness if source is gltf2 file
+        if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor) != AI_SUCCESS) {
+            // otherwise, try to derive and convert from specular + shininess values
+            aiColor4D specularColor;
+            ai_real shininess;
+
+            if (
+                mat->Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS &&
+                mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
+            ) {
+                // convert specular color to luminance
+                float specularIntensity = specularColor[0] * 0.2125 + specularColor[1] * 0.7154 + specularColor[2] * 0.0721;
+                float roughnessFactor = 1 - std::sqrt(shininess / 1000);
+
+                roughnessFactor = std::powf(roughnessFactor, 2);
+                roughnessFactor = std::min(std::max(roughnessFactor, 0.0f), 1.0f);
+
+                // low specular intensity values should produce a rough material even if shininess is high.
+                roughnessFactor = 1 - (roughnessFactor * specularIntensity);
+
+                m->pbrMetallicRoughness.roughnessFactor = roughnessFactor;
+            }
+        }
 
         GetMatTex(mat, m->normalTexture, aiTextureType_NORMALS);
         GetMatTex(mat, m->occlusionTexture, aiTextureType_LIGHTMAP);
@@ -470,9 +492,17 @@ void glTF2Exporter::ExportMaterials()
 
             PbrSpecularGlossiness pbrSG;
 
-            mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor);
             GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
             GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_COLOR_SPECULAR);
+
+            if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) != AI_SUCCESS) {
+                float shininess;
+
+                if (mat->Get(AI_MATKEY_SHININESS, shininess)) {
+                    pbrSG.glossinessFactor = shininess / 1000;
+                }
+            }
+
             GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
             GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
 

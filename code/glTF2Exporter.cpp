@@ -475,7 +475,7 @@ void glTF2Exporter::ExportMaterials()
 
             if (mat->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
                 if (opacity < 1) {
-                    m->alphaMode = "MASK";
+                    m->alphaMode = "BLEND";
                     m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
                 }
             }

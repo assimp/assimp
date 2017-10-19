@@ -1,3 +1,10 @@
+#---------------------------------------------------------------------------
+#Open Asset Import Library (assimp)
+#---------------------------------------------------------------------------
+# Copyright (c) 2006-2017, assimp team
+#
+# License see LICENSE file
+#
 function generate()
 {
     OPTIONS="-DASSIMP_WERROR=ON"

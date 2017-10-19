@@ -228,7 +228,11 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
         }
 
         SetMaterialColorProperty(r, mat.pbrMetallicRoughness.baseColorFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
+        SetMaterialColorProperty(r, mat.pbrMetallicRoughness.baseColorFactor, aimat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR);
+
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.baseColorTexture, aimat, aiTextureType_DIFFUSE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.baseColorTexture, aimat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.metallicRoughnessTexture, aimat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
         aimat->AddProperty(&mat.pbrMetallicRoughness.metallicFactor, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
         aimat->AddProperty(&mat.pbrMetallicRoughness.roughnessFactor, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR);
@@ -249,11 +253,11 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
             PbrSpecularGlossiness &pbrSG = mat.pbrSpecularGlossiness.value;
 
             aimat->AddProperty(&mat.pbrSpecularGlossiness.isPresent, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS);
-            SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_FACTOR);
             SetMaterialColorProperty(r, pbrSG.specularFactor, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR);
+            SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
             aimat->AddProperty(&pbrSG.glossinessFactor, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.diffuseTexture, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_TEXTURE);
             SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.specularGlossinessTexture, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.diffuseTexture, aimat, aiTextureType_DIFFUSE);
         }
     }
 }

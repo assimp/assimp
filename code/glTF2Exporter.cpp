@@ -372,20 +372,28 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, OcclusionTextureInfo& prop,
     }
 }
 
-void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
+aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
 {
     aiColor4D col;
-    if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
+    aiReturn result = mat->Get(propName, type, idx, col);
+
+    if (result == AI_SUCCESS) {
         prop[0] = col.r; prop[1] = col.g; prop[2] = col.b; prop[3] = col.a;
     }
+
+    return result;
 }
 
-void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* propName, int type, int idx)
+aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* propName, int type, int idx)
 {
     aiColor3D col;
-    if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
+    aiReturn result = mat->Get(propName, type, idx, col);
+
+    if (result == AI_SUCCESS) {
         prop[0] = col.r; prop[1] = col.g; prop[2] = col.b;
     }
+
+    return result;
 }
 
 void glTF2Exporter::ExportMaterials()
@@ -406,9 +414,20 @@ void glTF2Exporter::ExportMaterials()
 
         m->name = name;
 
-        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
+        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+
+        if (!m->pbrMetallicRoughness.baseColorTexture.texture) {
+            //if there wasn't a baseColorTexture defined in the source, fallback to any diffuse texture
+            GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
+        }
+
         GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
-        GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+
+        if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR) != AI_SUCCESS) {
+            // if baseColorFactor wasn't defined, then the source is likely not a metallic roughness material.
+            //a fallback to any diffuse color should be used instead
+            GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+        }
 
         if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor) != AI_SUCCESS) {
             //if metallicFactor wasn't defined, then the source is likely not a PBR file, and the metallicFactor should be 0
@@ -451,11 +470,11 @@ void glTF2Exporter::ExportMaterials()
 
             PbrSpecularGlossiness pbrSG;
 
-            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_FACTOR);
             GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR);
             mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor);
-            GetMatTex(mat, pbrSG.diffuseTexture, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_TEXTURE);
             GetMatTex(mat, pbrSG.specularGlossinessTexture, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE);
+            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
+            GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
 
             m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }

@@ -35,6 +35,13 @@
 #----------------------------------------------------------------------
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
+
+# Override /MD with /MT on MSVC
+set(CMAKE_USER_MAKE_RULES_OVERRIDE
+   ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/c_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+   ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/cxx_flag_overrides.cmake)
+
 PROJECT( Assimp )
 
 # All supported options ###############################################

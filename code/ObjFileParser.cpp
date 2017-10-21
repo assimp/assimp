@@ -475,7 +475,11 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
                 } else {
                     reportErrorTokenInFace();
                 }
+            } else {
+                //On error, std::atoi will return 0 which is not a valid value
+                throw DeadlyImportError("OBJ: Invalid face indice");
             }
+
         }
         m_DataIt += iStep;
     }

@@ -171,6 +171,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
         // If the new material count differs from the original,
         // we need to rebuild the material list and remap mesh material indexes.
         if (iNewNum != pScene->mNumMaterials) {
+            ai_assert(iNewNum > 0);
             aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
             ::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
             for (unsigned int p = 0; p < pScene->mNumMaterials;++p)

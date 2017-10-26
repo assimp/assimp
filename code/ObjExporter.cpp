@@ -83,12 +83,34 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Worker function for exporting a scene to Wavefront OBJ without the material file. Prototyped and registered in Exporter.cpp
+void ExportSceneObjNoMtl(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
+    // invoke the exporter
+    ObjExporter exporter(pFile, pScene, true);
+
+    if (exporter.mOutput.fail() || exporter.mOutputMat.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
+
+    // we're still here - export successfully completed. Write both the main OBJ file and the material script
+    {
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+        if(outfile == NULL) {
+            throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
+        }
+        outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
+    }
+
+
+}
+
 } // end of namespace Assimp
 
 static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
-ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
+ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene, bool noMtl)
 : filename(_filename)
 , pScene(pScene)
 , vp()
@@ -108,8 +130,9 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
     mOutputMat.imbue(l);
     mOutputMat.precision(16);
 
-    WriteGeometryFile();
-    WriteMaterialFile();
+    WriteGeometryFile(noMtl);
+    if (!noMtl)
+        WriteMaterialFile();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -236,9 +259,10 @@ void ObjExporter::WriteMaterialFile()
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter::WriteGeometryFile() {
+void ObjExporter::WriteGeometryFile(bool noMtl) {
     WriteHeader(mOutput);
-    mOutput << "mtllib "  << GetMaterialLibName() << endl << endl;
+    if (!noMtl)
+        mOutput << "mtllib "  << GetMaterialLibName() << endl << endl;
 
     // collect mesh geometry
     aiMatrix4x4 mBase;
@@ -284,7 +308,8 @@ void ObjExporter::WriteGeometryFile() {
         if (!m.name.empty()) {
             mOutput << "g " << m.name << endl;
         }
-        mOutput << "usemtl " << m.matname << endl;
+        if (!noMtl)
+            mOutput << "usemtl " << m.matname << endl;
 
         for(const Face& f : m.faces) {
             mOutput << f.kind << ' ';

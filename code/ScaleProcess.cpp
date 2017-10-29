@@ -39,13 +39,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 #include "ScaleProcess.h"
+
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace Assimp {
 
 ScaleProcess::ScaleProcess()
 : BaseProcess()
-, mScale( 1.0f ) {
+, mScale( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT ) {
     // empty
 }
 
@@ -62,11 +64,11 @@ ai_real ScaleProcess::getScale() const {
 }
 
 bool ScaleProcess::IsActive( unsigned int pFlags ) const {
-    return true;
+    return ( pFlags & aiProcess_GlobalScale ) != 0;
 }
 
 void ScaleProcess::SetupProperties( const Importer* pImp ) {
-    mScale = pImp->GetPropertyFloat( AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT );
+    mScale = pImp->GetPropertyFloat( AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, 0 );
 }
 
 void ScaleProcess::Execute( aiScene* pScene ) {
@@ -87,7 +89,9 @@ void ScaleProcess::Execute( aiScene* pScene ) {
 }
 
 void ScaleProcess::applyScaling( aiNode *currentNode ) {
-    currentNode->mTransformation = currentNode->mTransformation * mScale;
+    if ( nullptr != currentNode ) {
+        currentNode->mTransformation = currentNode->mTransformation * mScale;
+    }
 }
 
 } // Namespace Assimp

@@ -1314,7 +1314,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 		
 		{
 			std::vector<std::string> names;
-			for (int i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
+			for ( size_t i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
 				if ( nodeAnim->mPreState == aiAnimBehaviour_DEFAULT
 					|| nodeAnim->mPreState == aiAnimBehaviour_LINEAR
 					|| nodeAnim->mPreState == aiAnimBehaviour_REPEAT

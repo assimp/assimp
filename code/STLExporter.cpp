@@ -62,6 +62,10 @@ void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     // invoke the exporter
     STLExporter exporter(pFile, pScene);
 
+    if (exporter.mOutput.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
+    
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
@@ -75,6 +79,10 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
     // invoke the exporter
     STLExporter exporter(pFile, pScene, true);
 
+    if (exporter.mOutput.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
+    
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wb"));
     if(outfile == NULL) {

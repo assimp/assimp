@@ -95,7 +95,9 @@ void ScaleProcess::traverseNodes( aiNode *node ) {
 
 void ScaleProcess::applyScaling( aiNode *currentNode ) {
     if ( nullptr != currentNode ) {
-        currentNode->mTransformation = currentNode->mTransformation * mScale;
+        currentNode->mTransformation.a1 = currentNode->mTransformation.a1 * mScale;
+        currentNode->mTransformation.b2 = currentNode->mTransformation.b2 * mScale;
+        currentNode->mTransformation.c3 = currentNode->mTransformation.c3 * mScale;
     }
 }
 

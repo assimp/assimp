@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 #include <assimp/scene.h>
+#include <assimp/mesh.h>
 #include <assimp/material.h>
 
 namespace Assimp {
@@ -57,7 +58,7 @@ public:
         // empty
     }
 
-    static aiScene *createDefaultTestModel( float &opacity  ) {
+    static aiScene *createDefaultTestModel( float &opacity ) {
         aiScene *scene( new aiScene );
         scene->mNumMaterials = 1;
         scene->mMaterials = new aiMaterial*[scene->mNumMaterials];
@@ -92,6 +93,11 @@ public:
         scene->mRootNode->mMeshes = new unsigned int[1]{ 0 };
 
         return scene;
+    }
+
+    static void releaseDefaultTestModel( aiScene **scene ) {
+        delete *scene;
+        *scene = nullptr;
     }
 };
 

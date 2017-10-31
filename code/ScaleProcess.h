@@ -50,17 +50,34 @@ struct aiNode;
 
 namespace Assimp {
 
-class ScaleProcess : public BaseProcess {
+// ---------------------------------------------------------------------------
+/** ScaleProcess: Class to rescale the whole model.
+*/
+class ASSIMP_API ScaleProcess : public BaseProcess {
 public:
+    /// The default class constructor.
     ScaleProcess();
+
+    /// The class destructor.
     virtual ~ScaleProcess();
+
+    /// Will set the scale manually.
     void setScale( ai_real scale );
+
+    /// Returns the current scaling value.
     ai_real getScale() const;
+
+    /// Overwritten, @see BaseProcess
     virtual bool IsActive( unsigned int pFlags ) const;
+
+    /// Overwritten, @see BaseProcess
     virtual void SetupProperties( const Importer* pImp );
+
+    /// Overwritten, @see BaseProcess
     virtual void Execute( aiScene* pScene );
 
 private:
+    void traverseNodes( aiNode *currentNode );
     void applyScaling( aiNode *currentNode );
 
 private:

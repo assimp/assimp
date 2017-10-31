@@ -80,10 +80,15 @@ void ScaleProcess::Execute( aiScene* pScene ) {
         return;
     }
 
-    for ( unsigned int i = 0; i < pScene->mRootNode->mNumChildren; ++i ) {
-        aiNode *currentNode = pScene->mRootNode->mChildren[ i ];
+    traverseNodes( pScene->mRootNode );
+}
+
+void ScaleProcess::traverseNodes( aiNode *node ) {
+    applyScaling( node );
+    for ( unsigned int i = 0; i < node->mNumChildren; ++i ) {
+        aiNode *currentNode = currentNode->mChildren[ i ];
         if ( nullptr != currentNode ) {
-            applyScaling( currentNode );
+            traverseNodes( currentNode );
         }
     }
 }

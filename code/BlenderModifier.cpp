@@ -310,7 +310,9 @@ void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data
 
     std::unique_ptr<Subdivider> subd(Subdivider::Create(algo));
     ai_assert(subd);
-
+    if ( conv_data.meshes->empty() ) {
+        return;
+    }
     aiMesh** const meshes = &conv_data.meshes[conv_data.meshes->size() - out.mNumMeshes];
     std::unique_ptr<aiMesh*[]> tempmeshes(new aiMesh*[out.mNumMeshes]());
 

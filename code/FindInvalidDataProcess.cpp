@@ -360,10 +360,13 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
     // process texture coordinates
     for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i];++i)    {
         if (ProcessArray(pMesh->mTextureCoords[i],pMesh->mNumVertices,"uvcoords",dirtyMask))    {
+            pMesh->mNumUVComponents[i] = 0;
 
             // delete all subsequent texture coordinate sets.
-            for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)  {
-                delete[] pMesh->mTextureCoords[a]; pMesh->mTextureCoords[a] = NULL;
+            for (unsigned int a = i + 1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+                delete[] pMesh->mTextureCoords[a];
+                pMesh->mTextureCoords[a] = NULL;
+                pMesh->mNumUVComponents[a] = 0;
             }
             ret = true;
         }

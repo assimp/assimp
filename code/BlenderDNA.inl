@@ -585,7 +585,7 @@ template <> inline void Structure :: Convert<int>    (int& dest,const FileDataba
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const
+template<> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const
 {
     // automatic rescaling from short to float and vice versa (seems to be used by normals)
     if (name == "float") {

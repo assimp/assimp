@@ -525,7 +525,17 @@ enum aiPostProcessSteps
      *  Use <tt>#AI_CONFIG_PP_DB_ALL_OR_NONE</tt> if you want bones removed if and
      *  only if all bones within the scene qualify for removal.
     */
-    aiProcess_Debone  = 0x4000000
+    aiProcess_Debone  = 0x4000000,
+
+    // -------------------------------------------------------------------------
+    /** <hr>This step will perform a global scale of the model.
+    *
+    *  Some importers are providing a mechanism to define a scaling unit for the
+    *  model. This post processing step can be used to do so.
+    *
+    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to control this.
+    */
+    aiProcess_GlobalScale = 0x8000000
 
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000

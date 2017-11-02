@@ -205,6 +205,7 @@ protected:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_test.obj" ) );
         
         return true;
     }

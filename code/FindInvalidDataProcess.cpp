@@ -169,8 +169,8 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline const char* ValidateArrayContents(const T* arr, unsigned int size,
-    const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
+inline const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/,
+    const std::vector<bool>& /*dirtyMask*/, bool /*mayBeIdentical = false*/, bool /*mayBeZero = true*/)
 {
     return NULL;
 }

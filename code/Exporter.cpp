@@ -241,7 +241,7 @@ bool Exporter::IsDefaultIOHandler() const {
 
 // ------------------------------------------------------------------------------------------------
 const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const char* pFormatId,
-                                                unsigned int, const ExportProperties* pProperties ) {
+                                                unsigned int, const ExportProperties* /*pProperties*/ ) {
     if (pimpl->blob) {
         delete pimpl->blob;
         pimpl->blob = NULL;

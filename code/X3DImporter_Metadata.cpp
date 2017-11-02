@@ -105,7 +105,7 @@ bool X3DImporter::ParseHelper_CheckRead_X3DMetadataObject()
 	return true;
 }
 
-void X3DImporter::ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& pNodeName)
+void X3DImporter::ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& /*pNodeName*/)
 {
 	ParseHelper_Node_Enter(pParentElement);
 	MACRO_NODECHECK_METADATA(mReader->getNodeName());

@@ -187,7 +187,7 @@ namespace glTF {
         obj.AddMember("target", int(bv.target), w.mAl);
     }
 
-    inline void Write(Value& obj, Camera& c, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)
     {
 
     }
@@ -398,7 +398,7 @@ namespace glTF {
         }
     }
 
-    inline void Write(Value& obj, Program& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Program& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -424,7 +424,7 @@ namespace glTF {
         AddRefsVector(scene, "nodes", s.nodes, w.mAl);
     }
 
-    inline void Write(Value& obj, Shader& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Shader& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -452,7 +452,7 @@ namespace glTF {
 
     }
 
-    inline void Write(Value& obj, Technique& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Technique& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -467,7 +467,7 @@ namespace glTF {
         }
     }
 
-    inline void Write(Value& obj, Light& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Light& /*b*/, AssetWriter& /*w*/)
     {
 
     }

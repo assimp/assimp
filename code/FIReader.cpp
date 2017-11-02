@@ -1776,17 +1776,17 @@ public:
         return reader->getParserFormat();
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const /*override*/ {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int /*idx*/) const /*override*/ {
         return nullptr;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const /*override*/ {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* /*name*/) const /*override*/ {
         return nullptr;
     }
 
-    virtual void registerDecoder(const std::string &algorithmUri, std::unique_ptr<FIDecoder> decoder) /*override*/ {}
+    virtual void registerDecoder(const std::string &/*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) /*override*/ {}
+    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary */*vocabulary*/) /*override*/ {}
 
 private:
 

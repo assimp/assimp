@@ -675,7 +675,7 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
     }
 }
 
-inline void Sampler::Read(Value& obj, Asset& r)
+inline void Sampler::Read(Value& obj, Asset& /*r*/)
 {
     SetDefaults();
 
@@ -1093,7 +1093,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 }
 #endif
 
-inline void Camera::Read(Value& obj, Asset& r)
+inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
@@ -1116,7 +1116,7 @@ inline void Camera::Read(Value& obj, Asset& r)
     }
 }
 
-inline void Light::Read(Value& obj, Asset& r)
+inline void Light::Read(Value& obj, Asset& /*r*/)
 {
     SetDefaults();
 
@@ -1414,7 +1414,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
     #undef CHECK_EXT
 }
 
-inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool absolute)
+inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool /*absolute*/)
 {
     #ifdef ASSIMP_API
         return mIOSystem->Open(path, mode);

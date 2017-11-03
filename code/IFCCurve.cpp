@@ -513,6 +513,7 @@ IfcFloat Curve::GetParametricRangeDelta() const {
 
 // ------------------------------------------------------------------------------------------------
 size_t Curve::EstimateSampleCount(IfcFloat a, IfcFloat b) const {
+    (void)(a); (void)(b);  
     ai_assert( InRange( a ) );
     ai_assert( InRange( b ) );
 

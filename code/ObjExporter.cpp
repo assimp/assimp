@@ -58,7 +58,7 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Wavefront OBJ. Prototyped and registered in Exporter.cpp
-void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
+void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
     // invoke the exporter
     ObjExporter exporter(pFile, pScene);
 
@@ -94,7 +94,7 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
 , vp()
 , vn()
 , vt()
-, vc() 
+, vc()
 , mVpMap()
 , mVnMap()
 , mVtMap()
@@ -193,7 +193,7 @@ void ObjExporter::WriteMaterialFile()
         if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_TRANSPARENT,c)) {
             mOutputMat << "Tf " << c.r << " " << c.g << " " << c.b << endl;
         }
-        
+
         ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
@@ -341,7 +341,7 @@ int ObjExporter::colIndexMap::getIndex( const aiColor4D& col ) {
     colMap[ col ] = mNextIndex;
     int ret = mNextIndex;
     mNextIndex++;
-    
+
     return ret;
 }
 

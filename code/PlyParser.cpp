@@ -381,6 +381,11 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
   {
     char* endPos = &buffer[0] + (strlen(&buffer[0]) - 1);
     pOut->szName = std::string(&buffer[0], endPos);
+
+    // go to the next line
+    PLY::DOM::SkipSpacesAndLineEnd(buffer);
+
+    return true;
   }
 
   //parse the number of occurrences of this element
@@ -933,7 +938,7 @@ bool PLY::PropertyInstance::ParseValue(const char* &pCur,
 {
   ai_assert(NULL != pCur);
   ai_assert(NULL != out);
-  
+
   //calc element size
   bool ret = true;
   switch (eType)

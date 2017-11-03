@@ -156,6 +156,8 @@ SET( Common_SRCS
   SkeletonMeshBuilder.h
   SplitByBoneCountProcess.cpp
   SplitByBoneCountProcess.h
+  ScaleProcess.cpp
+  ScaleProcess.h
   SmoothingGroups.h
   StandardShapes.cpp
   StandardShapes.h

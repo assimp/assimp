@@ -302,7 +302,7 @@ namespace vmd
 			return result;
 		}
 
-		bool SaveToFile(const std::u16string& filename)
+        bool SaveToFile(const std::u16string& /*filename*/)
 		{
 			// TODO: How to adapt u16string to string?
 			/*

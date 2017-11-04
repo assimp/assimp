@@ -80,7 +80,7 @@ namespace Assimp {
 } // end of namespace Assimp
 
 glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-                           const ExportProperties* pProperties, bool isBinary)
+                           const ExportProperties* pProperties, bool /*isBinary*/)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
     , mProperties(pProperties)

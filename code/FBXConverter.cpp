@@ -2429,6 +2429,7 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
     anim->mTicksPerSecond = anim_fps;
 }
 
+#ifdef ASSIMP_BUILD_DEBUG
 // ------------------------------------------------------------------------------------------------
 // sanity check whether the input is ok
 static void validateAnimCurveNodes( const std::vector<const AnimationCurveNode*>& curves,
@@ -2446,6 +2447,7 @@ static void validateAnimCurveNodes( const std::vector<const AnimationCurveNode*>
         }
     }
 }
+#endif // ASSIMP_BUILD_DEBUG
 
 // ------------------------------------------------------------------------------------------------
 void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,

@@ -110,7 +110,7 @@ namespace Blender {
         void operator= (const TempArray&)  {
         }
 
-        TempArray(const TempArray& arr) {
+        TempArray(const TempArray& /*arr*/) {
         }
 
     private:

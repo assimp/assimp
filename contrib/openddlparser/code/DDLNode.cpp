@@ -191,7 +191,7 @@ Reference *DDLNode::getReferences() const {
     return m_references;
 }
 
-void DDLNode::dump(IOStreamBase &stream) {
+void DDLNode::dump(IOStreamBase &/*stream*/) {
     // Todo!    
 }
 

@@ -288,7 +288,7 @@ inline Buffer::~Buffer()
 	for(SEncodedRegion* reg : EncodedRegion_List) delete reg;
 }
 
-inline const char* Buffer::TranslateId(Asset& r, const char* id)
+inline const char* Buffer::TranslateId(Asset& /*r*/, const char* id)
 {
     return id;
 }
@@ -623,7 +623,7 @@ inline Image::Image()
 
 }
 
-inline void Image::Read(Value& obj, Asset& r)
+inline void Image::Read(Value& obj, Asset& /*r*/)
 {
     if (!mDataLength) {
         if (Value* uri = FindString(obj, "uri")) {
@@ -668,7 +668,7 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
     }
 }
 
-inline void Sampler::Read(Value& obj, Asset& r)
+inline void Sampler::Read(Value& obj, Asset& /*r*/)
 {
     SetDefaults();
 
@@ -886,7 +886,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
     }
 }
 
-inline void Camera::Read(Value& obj, Asset& r)
+inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
@@ -1087,7 +1087,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
     #undef CHECK_EXT
 }
 
-inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool absolute)
+inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool /*absolute*/)
 {
     #ifdef ASSIMP_API
         return mIOSystem->Open(path, mode);

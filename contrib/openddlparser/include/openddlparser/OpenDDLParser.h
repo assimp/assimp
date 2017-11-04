@@ -41,7 +41,7 @@ struct Property;
 
 template<class T>
 inline
-bool isEmbeddedCommentOpenTag( T *in, T *end ) {
+bool isEmbeddedCommentOpenTag( T *in, T */*end*/ ) {
     if ( in == '/' && in+1 == '*' ) {
         return true;
     }

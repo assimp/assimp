@@ -103,6 +103,7 @@ namespace {
     T SafeParse(const char* data, const char* end) {
         // Actual size validation happens during Tokenization so
         // this is valid as an assertion.
+        (void)(end);
         ai_assert(static_cast<size_t>(end - data) >= sizeof(T));
         T result = static_cast<T>(0);
         ::memcpy(&result, data, sizeof(T));

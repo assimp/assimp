@@ -692,7 +692,7 @@ bool found = false;
 	return true;
 }
 
-X3DExporter::X3DExporter(const char* pFileName, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+X3DExporter::X3DExporter(const char* pFileName, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 	: mScene(pScene)
 {
 list<SAttribute> attr_list;

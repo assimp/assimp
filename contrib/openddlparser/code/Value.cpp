@@ -294,7 +294,7 @@ Reference *Value::getRef() const {
     return (Reference*) m_data;
 }
 
-void Value::dump( IOStreamBase &stream ) {
+void Value::dump( IOStreamBase &/*stream*/ ) {
     switch( m_type ) {
         case ddl_none:
             std::cout << "None" << std::endl;

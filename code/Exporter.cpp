@@ -83,6 +83,7 @@ void ExportSceneCollada(const char*,IOSystem*, const aiScene*, const ExportPrope
 void ExportSceneXFile(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneStep(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneObj(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneObjNoMtl(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScenePly(const char*,IOSystem*, const aiScene*, const ExportProperties*);
@@ -114,6 +115,8 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
     Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj,
+        aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */),
+    Exporter::ExportFormatEntry( "objnomtl", "Wavefront OBJ format without material file", "obj", &ExportSceneObjNoMtl,
         aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */),
 #endif
 

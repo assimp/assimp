@@ -477,6 +477,8 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
                 }
             } else {
                 //On error, std::atoi will return 0 which is not a valid value
+                delete m_pModel;
+                m_pModel = nullptr;
                 throw DeadlyImportError("OBJ: Invalid face indice");
             }
 

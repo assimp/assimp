@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
-aiColor4D AMFImporter::SPP_Material::GetColor(const float pX, const float pY, const float pZ) const
+aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*pY*/, const float /*pZ*/) const
 {
     aiColor4D tcol;
 

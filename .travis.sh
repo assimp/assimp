@@ -5,8 +5,7 @@
 #
 # License see LICENSE file
 #
-function generate()
-{
+function generate() {
     OPTIONS="-DASSIMP_WERROR=ON"
 
     if [ "$DISABLE_EXPORTERS" = "YES" ] ; then

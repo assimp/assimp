@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 
 // Forward declarations
-class aiNode;
+struct aiNode;
 
 namespace Assimp {
 

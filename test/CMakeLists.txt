@@ -132,6 +132,7 @@ SET( TEST_SRCS
   unit/utX3DImportExport.cpp
   unit/utD3MFImportExport.cpp
   unit/utQ3DImportExport.cpp
+  unit/utSTLImportExport.cpp
   unit/utProfiler.cpp
 )
 SET( POST_PROCESSES

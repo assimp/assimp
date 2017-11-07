@@ -1079,6 +1079,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
     // generate the camera
     if (hasCam)
     {
+        ai_assert(ppcChildren);
         aiNode* nd = new aiNode();
         *ppcChildren = nd;
         nd->mName.Set("<NFF_Camera>");
@@ -1104,6 +1105,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
     // generate light sources
     if (!lights.empty())
     {
+        ai_assert(ppcChildren);
         pScene->mNumLights = (unsigned int)lights.size();
         pScene->mLights = new aiLight*[pScene->mNumLights];
         for (unsigned int i = 0; i < pScene->mNumLights;++i,++ppcChildren)

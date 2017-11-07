@@ -971,6 +971,8 @@ namespace glTF2
         Ref<T> Create(const std::string& id)
             { return Create(id.c_str()); }
 
+        unsigned int Remove(const char* id);
+
         inline unsigned int Size() const
             { return unsigned(mObjs.size()); }
 

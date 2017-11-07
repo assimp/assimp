@@ -1021,6 +1021,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 
                             // convert bones, if existing
                             if (!mesh.mBones.empty()) {
+                                ai_assert(avOutputBones);
                                 // check whether there is a vertex weight for this vertex index
                                 if (iIndex2 < mesh.mBoneVertices.size())    {
 

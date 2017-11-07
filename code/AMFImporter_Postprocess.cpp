@@ -281,8 +281,9 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	{
 		if(!pID.empty())
 		{
-			for(size_t idx_target = pOffset, idx_src = 0; idx_target < tex_size; idx_target += pStep, idx_src++)
+			for(size_t idx_target = pOffset, idx_src = 0; idx_target < tex_size; idx_target += pStep, idx_src++) {
 				converted_texture.Data[idx_target] = src_texture[pSrcTexNum]->Data.at(idx_src);
+			}
 		}
 	};// auto CopyTextureData = [&](const size_t pOffset, const size_t pStep, const uint8_t pSrcTexNum) -> void
 

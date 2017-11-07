@@ -114,8 +114,6 @@ SET( TEST_SRCS
   unit/utPMXImporter.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
-  unit/utRemoveRedundantMaterials.cpp
-  unit/utRemoveVCProcess.cpp
   unit/utScenePreprocessor.cpp
   unit/utSceneCombiner.cpp
   unit/utSharedPPData.cpp
@@ -131,12 +129,21 @@ SET( TEST_SRCS
   unit/utVersion.cpp
   unit/utVector3.cpp
   unit/utXImporterExporter.cpp
+  unit/utX3DImportExport.cpp
   unit/utD3MFImportExport.cpp
   unit/utQ3DImportExport.cpp
+  unit/utSTLImportExport.cpp
   unit/utProfiler.cpp
 )
+SET( POST_PROCESSES
+  unit/utRemoveRedundantMaterials.cpp
+  unit/utRemoveVCProcess.cpp
+  unit/utScaleProcess.cpp
+  unit/utJoinVertices.cpp
+)
 
-SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
+SOURCE_GROUP( tests             FILES  ${TEST_SRCS} )
+SOURCE_GROUP( tests/PostProcess FILES  ${POST_PROCESSES})
 
 add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
@@ -144,6 +151,7 @@ add_executable( unit
     unit/Main.cpp
     ../code/Version.cpp
     ${TEST_SRCS}
+    ${POST_PROCESSES}
 )
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")

@@ -205,6 +205,7 @@ protected:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_test.obj" ) );
         
         return true;
     }
@@ -304,4 +305,39 @@ TEST_F(utObjImportExport, relative_indices_Test) {
         EXPECT_EQ(face.mIndices[i], i);
     }
 
+}
+
+TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
+    static const std::string ObjModel =
+        "v -0.500000 0.000000 0.400000 0.50000\n"
+        "v -0.500000 0.000000 -0.800000 1.00000\n"
+        "v 0.500000 1.000000 -0.800000 0.5000\n"
+        "f 1 2 3\nB";
+
+    Assimp::Importer myimporter;
+    const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMeshes, 1);
+    const aiMesh *mesh = scene->mMeshes[0];
+    EXPECT_EQ(mesh->mNumVertices, 3);
+    EXPECT_EQ(mesh->mNumFaces, 1);
+    const aiFace face = mesh->mFaces[0];
+    EXPECT_EQ(face.mNumIndices, 3);
+    const aiVector3D vertice = mesh->mVertices[0];
+    EXPECT_EQ(vertice.x, -1.0f);
+    EXPECT_EQ(vertice.y, 0.0f);
+    EXPECT_EQ(vertice.z, 0.8f);
+}
+
+TEST_F(utObjImportExport, 0based_array_Test) {
+    static const std::string ObjModel =
+        "v -0.500000 0.000000 0.400000\n"
+        "v -0.500000 0.000000 -0.800000\n"
+        "v -0.500000 1.000000 -0.800000\n"
+        "f 0 1 2\nB";
+
+    Assimp::Importer myimporter;
+    const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), 0);
+    EXPECT_EQ(nullptr, scene);
 }

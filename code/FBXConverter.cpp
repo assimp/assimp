@@ -645,7 +645,6 @@ void Converter::ConvertCameras( const Model& model )
     }
 }
 
-
 void Converter::ConvertLight( const Model& model, const Light& light )
 {
     lights.push_back( new aiLight() );
@@ -782,7 +781,6 @@ const char* Converter::NameTransformationComp( TransformationComp comp )
     ai_assert( false );
     return NULL;
 }
-
 
 const char* Converter::NameTransformationCompProperty( TransformationComp comp )
 {
@@ -2239,9 +2237,17 @@ void Converter::ConvertAnimations()
     }
 }
 
+void Converter::RenameNode( const std::string& fixed_name, const std::string& new_name ) {
+    if ( node_names.find( fixed_name ) == node_names.end() ) {
+        FBXImporter::LogError( "Cannot rename node " + fixed_name + ", not existing.");
+        return;
+    }
 
-void Converter::RenameNode( const std::string& fixed_name, const std::string& new_name )
-{
+    if ( node_names.find( new_name ) != node_names.end() ) {
+        FBXImporter::LogError( "Cannot rename node " + fixed_name + " to " + new_name +", name already existing." );
+        return;
+    }
+
     ai_assert( node_names.find( fixed_name ) != node_names.end() );
     ai_assert( node_names.find( new_name ) == node_names.end() );
 
@@ -2429,6 +2435,7 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
     anim->mTicksPerSecond = anim_fps;
 }
 
+#ifdef ASSIMP_BUILD_DEBUG
 // ------------------------------------------------------------------------------------------------
 // sanity check whether the input is ok
 static void validateAnimCurveNodes( const std::vector<const AnimationCurveNode*>& curves,
@@ -2446,6 +2453,7 @@ static void validateAnimCurveNodes( const std::vector<const AnimationCurveNode*>
         }
     }
 }
+#endif // ASSIMP_BUILD_DEBUG
 
 // ------------------------------------------------------------------------------------------------
 void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,

@@ -38,24 +38,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#include "OpenGEXExporter.h"
+#pragma once
+
+#include "BaseProcess.h"
+
+struct aiNode;
+
+#if (!defined AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT)
+#   define AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT  1.0f
+#endif // !! AI_DEBONE_THRESHOLD
 
 namespace Assimp {
-namespace OpenGEX {
 
-#ifndef ASSIMP_BUILD_NO_OPENGEX_EXPORTER
+// ---------------------------------------------------------------------------
+/** ScaleProcess: Class to rescale the whole model.
+*/
+class ASSIMP_API ScaleProcess : public BaseProcess {
+public:
+    /// The default class constructor.
+    ScaleProcess();
 
-OpenGEXExporter::OpenGEXExporter() {
-}
+    /// The class destructor.
+    virtual ~ScaleProcess();
 
-OpenGEXExporter::~OpenGEXExporter() {
-}
+    /// Will set the scale manually.
+    void setScale( ai_real scale );
 
-bool OpenGEXExporter::exportScene( const char */*filename*/, const aiScene* /*pScene*/ ) {
-    return true;
-}
+    /// Returns the current scaling value.
+    ai_real getScale() const;
 
-#endif // ASSIMP_BUILD_NO_OPENGEX_EXPORTER
+    /// Overwritten, @see BaseProcess
+    virtual bool IsActive( unsigned int pFlags ) const;
 
-} // Namespace OpenGEX
+    /// Overwritten, @see BaseProcess
+    virtual void SetupProperties( const Importer* pImp );
+
+    /// Overwritten, @see BaseProcess
+    virtual void Execute( aiScene* pScene );
+
+private:
+    void traverseNodes( aiNode *currentNode );
+    void applyScaling( aiNode *currentNode );
+
+private:
+    ai_real mScale;
+};
+
 } // Namespace Assimp

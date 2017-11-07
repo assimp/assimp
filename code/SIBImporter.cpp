@@ -163,7 +163,7 @@ static aiColor3D ReadColor(StreamReaderLE* stream)
     return aiColor3D(r, g, b);
 }
 
-static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
+static void UnknownChunk(StreamReaderLE* /*stream*/, const SIBChunk& chunk)
 {
     char temp[5] = {
         static_cast<char>(( chunk.Tag>>24 ) & 0xff),

@@ -107,7 +107,7 @@ const aiImporterDesc *MMDImporter::GetInfo() const { return &desc; }
 // ------------------------------------------------------------------------------------------------
 //  MMD import implementation
 void MMDImporter::InternReadFile(const std::string &file, aiScene *pScene,
-                                 IOSystem *pIOHandler) {
+                                 IOSystem */*pIOHandler*/) {
   // Read file by istream
   std::filebuf fb;
   if (!fb.open(file, std::ios::in | std::ios::binary)) {

@@ -80,7 +80,9 @@ static bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
         return false;
     }
 
-    const uint32_t faceCount = *reinterpret_cast<const uint32_t*>(buffer + 80);
+    char *facecount_pos = buffer + 80;
+    uint32_t faceCount( 0 );
+    ::memcpy( &faceCount, facecount_pos, sizeof( uint32_t ) );
     const uint32_t expectedBinaryFileSize = faceCount * 50 + 84;
 
     return expectedBinaryFileSize == fileSize;

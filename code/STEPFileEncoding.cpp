@@ -334,7 +334,7 @@ bool STEP::StringToUTF8(std::string& s)
                         size_t j = basei, jend = s.size()-3;
 
                         for (; j < jend; ++j) {
-                            if (s[j] == '\\' && s[j] == 'X' && s[j] == '0' && s[j] == '\\') {
+                            if (s[j] == '\\' && s[j+1] == 'X' && s[j+2] == '0' && s[j+3] == '\\') {
                                 break;
                             }
                         }

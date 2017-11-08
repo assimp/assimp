@@ -1309,8 +1309,9 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 				// Combine the above transformations
 				aiMatrix4x4 mat = TranslationM * RotationM * ScalingM;
 				
-				for( uint j = 0; j < 4; ++j)
+				for( size_t j = 0; j < 4; ++j) {
 					keyframes.insert(keyframes.end(), mat[j], mat[j] + 4);
+                }
 			}
 			
 			WriteFloatArray( node_idstr, FloatType_Mat4x4, (const ai_real*) keyframes.data(), keyframes.size() / 16);
@@ -1337,8 +1338,9 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 			
 			// source array
 			mOutput << startstr << "<Name_array id=\"" << XMLEscape(arrayId) << "\" count=\"" << names.size() << "\"> ";
-			for( size_t a = 0; a < names.size(); ++a )
+			for( size_t a = 0; a < names.size(); ++a ) {
 				mOutput << names[a] << " ";
+            }
 			mOutput << "</Name_array>" << endstr;
 			
 			mOutput << startstr << "<technique_common>" << endstr;

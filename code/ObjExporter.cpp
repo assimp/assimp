@@ -383,7 +383,7 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
     mMeshes.push_back(MeshInstance());
     MeshInstance& mesh = mMeshes.back();
 
-    mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_" + std::string(m->mName.data,m->mName.length) : "");
+    mesh.name = std::string( name.data, name.length );
     mesh.matname = GetMaterialName(m->mMaterialIndex);
 
     mesh.faces.resize(m->mNumFaces);

@@ -207,12 +207,6 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         throw DeadlyImportError( "Failed to determine STL storage representation for " + pFile + ".");
     }
 
-    // add all created meshes to the single node
-    /*pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
-    for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
-        pScene->mRootNode->mMeshes[i] = i;
-    */
     // create a single default material, using a white diffuse color for consistency with
     // other geometric types (e.g., PLY).
     aiMaterial* pcMat = new aiMaterial();

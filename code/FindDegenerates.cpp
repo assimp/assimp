@@ -172,14 +172,16 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
                     }
                 }
             }
-            ai_real area = calculateAreaOfTriangle( face, mesh );
-            if ( area < 1e-6 ) {
-                if ( configRemoveDegenerates ) {
-                    remove_me[ a ] = true;
-                    goto evil_jump_outside;
-                }
+            if ( face.mNumIndices == 3 ) {
+                ai_real area = calculateAreaOfTriangle( face, mesh );
+                if ( area < 1e-6 ) {
+                    if ( configRemoveDegenerates ) {
+                        remove_me[ a ] = true;
+                        goto evil_jump_outside;
+                    }
 
-                // todo: check for index which is corrupt.
+                    // todo: check for index which is corrupt.
+                }
             }
         }
 

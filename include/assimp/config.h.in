@@ -903,7 +903,7 @@ enum aiComponent
 /** @brief  Set the tessellation for IFC cylindrical shapes.
  *
  * This is used by the IFC importer to determine the tessellation parameter
- * for cylindrical shapes, i.e. the number of segments used to aproximate a circle.
+ * for cylindrical shapes, i.e. the number of segments used to approximate a circle.
  * @note The default value is AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION and the
  * accepted values are in range [3, 180].
  * Property type: Integer.

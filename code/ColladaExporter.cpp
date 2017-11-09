@@ -1561,7 +1561,7 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     for( size_t a = 0; a < pNode->mNumMeshes; ++a )
     {
         const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-        // do not instanciate mesh if empty. I wonder how this could happen
+        // do not instantiate mesh if empty. I wonder how this could happen
         if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
             continue;
 

@@ -32,7 +32,7 @@ L'utilizzo della Creative Commons non influisce su questo diritto.
 ************************************************
 
 This model is released under Creative Commons Licence, Attribution 2.0
-for informations see:
+for information see:
 http://creativecommons.org
 http://creativecommons.org/licenses/by/2.0/
 feel free to use and improve it.

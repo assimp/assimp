@@ -114,7 +114,7 @@
 %include "interface/IOSystem.i"
 
 
-// We have to "instanciate" the templates used by the ASSSIMP_*_ARRAY macros
+// We have to "instantiate" the templates used by the ASSSIMP_*_ARRAY macros
 // here at the end to avoid running into forward reference issues (SWIG would
 // spit out the helper functions before the header includes for the element
 // types otherwise).

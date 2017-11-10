@@ -249,7 +249,7 @@ private:
 
 	/// \fn size_t PostprocessHelper_GetTextureID_Or_Create(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B, const std::string& pID_A)
 	/// Return converted texture ID which related to specified source textures ID's. If converted texture does not exist then it will be created and ID on new
-	/// converted texture will be returned. Convertion: set of textures from \ref CAMFImporter_NodeElement_Texture to one \ref SPP_Texture and place it
+	/// converted texture will be returned. Conversion: set of textures from \ref CAMFImporter_NodeElement_Texture to one \ref SPP_Texture and place it
 	/// to converted textures list.
 	/// Any of source ID's can be absent(empty string) or even one ID only specified. But at least one ID must be specified.
 	/// \param [in] pID_R - ID of source "red" texture.
@@ -378,7 +378,7 @@ private:
 	void XML_CheckNode_MustHaveChildren();
 
 	/// \fn bool XML_CheckNode_NameEqual(const std::string& pNodeName)
-	/// Chek if current node name is equal to pNodeName.
+	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
 	/// return true if current node name is equal to pNodeName, else - false.
 	bool XML_CheckNode_NameEqual(const std::string& pNodeName) { return mReader->getNodeName() == pNodeName; }

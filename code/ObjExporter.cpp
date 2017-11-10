@@ -155,7 +155,7 @@ std::string ObjExporter :: GetMaterialLibName()
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialLibFileName() {
-    // Remove existing .obj file extention so that the final material file name will be fileName.mtl and not fileName.obj.mtl
+    // Remove existing .obj file extension so that the final material file name will be fileName.mtl and not fileName.obj.mtl
     size_t lastdot = filename.find_last_of('.');
     if (lastdot != std::string::npos)
         return filename.substr(0, lastdot) + MaterialExt;

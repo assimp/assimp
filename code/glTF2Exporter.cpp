@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-// Header files, standart library.
+// Header files, standard library.
 #include <memory>
 #include <inttypes.h>
 
@@ -80,7 +80,7 @@ namespace Assimp {
 } // end of namespace Assimp
 
 glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-                           const ExportProperties* pProperties, bool isBinary)
+                           const ExportProperties* pProperties, bool /*isBinary*/)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
     , mProperties(pProperties)

@@ -274,11 +274,9 @@ void MD2Importer::InternReadFile( const std::string& pFile,
     aiMesh* pcMesh = pScene->mMeshes[0] = new aiMesh();
     pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
-    // navigate to the begin of the frame data
-    BE_NCONST MD2::Frame* pcFrame = (BE_NCONST MD2::Frame*) ((uint8_t*)
-        m_pcHeader + m_pcHeader->offsetFrames);
-
-    pcFrame += configFrameID;
+    // navigate to the begin of the current frame data
+	BE_NCONST MD2::Frame* pcFrame = (BE_NCONST MD2::Frame*) ((uint8_t*)
+		m_pcHeader + m_pcHeader->offsetFrames + (m_pcHeader->frameSize * configFrameID));
 
     // navigate to the begin of the triangle data
     MD2::Triangle* pcTriangles = (MD2::Triangle*) ((uint8_t*)

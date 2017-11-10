@@ -379,6 +379,7 @@ IOStream *D3MFZipArchive::Open(const char* pFile, const char* /*pMode*/) {
 // ------------------------------------------------------------------------------------------------
 //  Close a filestream.
 void D3MFZipArchive::Close(IOStream *pFile) {
+    (void)(pFile);
     ai_assert(pFile != NULL);
 
     // We don't do anything in case the file would be opened again in the future

@@ -344,7 +344,7 @@ bool D3MFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool 
     return false;
 }
 
-void D3MFImporter::SetupProperties(const Importer *pImp)
+void D3MFImporter::SetupProperties(const Importer */*pImp*/)
 {
 
 }

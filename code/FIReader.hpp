@@ -46,11 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FI_READER_H
 #define INCLUDED_AI_FI_READER_H
 
-#include <irrXML.h>
-#include <memory>
 #include <string>
+#include <cerrno>
+#include <cwchar>
+#include <memory>
 #include <vector>
 #include <cstdint>
+#include <irrXML.h>
 
 namespace Assimp {
 
@@ -154,7 +156,7 @@ class IOStream;
 
 class FIReader: public irr::io::IIrrXMLReader<char, irr::io::IXMLBase> {
 public:
-
+	virtual ~FIReader();
     virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const = 0;
 
     virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char *name) const = 0;
@@ -166,6 +168,11 @@ public:
     static std::unique_ptr<FIReader> create(IOStream *stream);
 
 };// class IFIReader
+
+inline
+FIReader::~FIReader() {
+	// empty
+}
 
 }// namespace Assimp
 

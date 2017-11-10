@@ -52,24 +52,55 @@ INCLUDE_DIRECTORIES(
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
-SOURCE_GROUP( unit FILES
-  unit/CCompilerTest.c
-)
-
-SET( TEST_SRCS
+SET( COMMON
+  unit/utIOSystem.cpp
+  unit/utIOStreamBuffer.cpp
+  unit/utIssues.cpp
+  unit/utAnim.cpp
+  unit/AssimpAPITest.cpp
+  unit/utBatchLoader.cpp
+  unit/utDefaultIOStream.cpp
+  unit/utFastAtof.cpp
+  unit/utMetadata.cpp
+  unit/SceneDiffer.h
+  unit/SceneDiffer.cpp
   unit/UTLogStream.h
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h
+  unit/utTypes.cpp
+  unit/utVersion.cpp
+  unit/utProfiler.cpp
+  unit/utSharedPPData.cpp
+  unit/utStringUtils.cpp
+)
+
+SET( IMPORTERS
+  unit/utLWSImportExport.cpp
+  unit/utSMDImportExport.cpp
+  unit/utglTFImportExport.cpp
+  unit/utglTF2ImportExport.cpp
+  unit/utHMPImportExport.cpp
+  unit/utIFCImportExport.cpp
+  unit/utFBXImporterExporter.cpp
+  unit/utImporter.cpp
   unit/ut3DImportExport.cpp
   unit/ut3DSImportExport.cpp
   unit/utACImportExport.cpp
   unit/utAMFImportExport.cpp
   unit/utASEImportExport.cpp
-  unit/utAnim.cpp
-  unit/AssimpAPITest.cpp
-  unit/utB3DImportExport.cpp
-  unit/utBatchLoader.cpp
+  unit/utD3MFImportExport.cpp
+  unit/utQ3DImportExport.cpp
+  unit/utSTLImportExport.cpp
+  unit/utXImporterExporter.cpp
+  unit/utX3DImportExport.cpp
+  unit/utDXFImporterExporter.cpp
+  unit/utPMXImporter.cpp
+  unit/utPLYImportExport.cpp
+  unit/utObjImportExport.cpp
+  unit/utObjTools.cpp
+  unit/utOpenGEXImportExport.cpp
+  unit/utSIBImporter.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
   unit/utBlenderImportExport.cpp
@@ -79,78 +110,60 @@ SET( TEST_SRCS
   unit/utColladaExportLight.cpp
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
-  unit/utDefaultIOStream.cpp
-  unit/utDXFImporterExporter.cpp
-  unit/utFastAtof.cpp
-  unit/utFBXImporterExporter.cpp
-  unit/utFindDegenerates.cpp
-  unit/utFindInvalidData.cpp
-  unit/utFixInfacingNormals.cpp
-  unit/utGenNormals.cpp
-  unit/utglTFImportExport.cpp
-  unit/utglTF2ImportExport.cpp
-  unit/utHMPImportExport.cpp
-  unit/utIFCImportExport.cpp
-  unit/utImporter.cpp
-  unit/utImproveCacheLocality.cpp
-  unit/utIOSystem.cpp
-  unit/utIOStreamBuffer.cpp
-  unit/utIssues.cpp
-  unit/utJoinVertices.cpp
-  unit/utLimitBoneWeights.cpp
-  unit/utLWSImportExport.cpp
+  unit/utB3DImportExport.cpp
+)
+
+SET( MATERIAL
   unit/utMaterialSystem.cpp
+)
+
+SET( MATH
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
-  unit/utMetadata.cpp
-  unit/SceneDiffer.h
-  unit/SceneDiffer.cpp
-  unit/utSIBImporter.cpp
-  unit/utObjImportExport.cpp
-  unit/utObjTools.cpp
-  unit/utOpenGEXImportExport.cpp
-  unit/utPretransformVertices.cpp
-  unit/utPLYImportExport.cpp
-  unit/utPMXImporter.cpp
-  unit/utRemoveComments.cpp
-  unit/utRemoveComponent.cpp
-  unit/utScenePreprocessor.cpp
-  unit/utSceneCombiner.cpp
-  unit/utSharedPPData.cpp
-  unit/utStringUtils.cpp
-  unit/utSMDImportExport.cpp
-  unit/utSortByPType.cpp
-  unit/utSplitLargeMeshes.cpp
-  unit/utTargetAnimation.cpp
-  unit/utTextureTransform.cpp
-  unit/utTriangulate.cpp
-  unit/utTypes.cpp
-  unit/utVertexTriangleAdjacency.cpp
-  unit/utVersion.cpp
   unit/utVector3.cpp
-  unit/utXImporterExporter.cpp
-  unit/utX3DImportExport.cpp
-  unit/utD3MFImportExport.cpp
-  unit/utQ3DImportExport.cpp
-  unit/utSTLImportExport.cpp
-  unit/utProfiler.cpp
 )
+
 SET( POST_PROCESSES
+  unit/utImproveCacheLocality.cpp
+  unit/utFixInfacingNormals.cpp
+  unit/utGenNormals.cpp
+  unit/utTriangulate.cpp
+  unit/utTextureTransform.cpp
   unit/utRemoveRedundantMaterials.cpp
   unit/utRemoveVCProcess.cpp
   unit/utScaleProcess.cpp
   unit/utJoinVertices.cpp
+  unit/utRemoveComments.cpp
+  unit/utRemoveComponent.cpp
+  unit/utVertexTriangleAdjacency.cpp
+  unit/utJoinVertices.cpp
+  unit/utSplitLargeMeshes.cpp
+  unit/utFindDegenerates.cpp
+  unit/utFindInvalidData.cpp
+  unit/utLimitBoneWeights.cpp
+  unit/utPretransformVertices.cpp
+  unit/utScenePreprocessor.cpp
+  unit/utTargetAnimation.cpp
+  unit/utSortByPType.cpp
+  unit/utSceneCombiner.cpp
 )
 
-SOURCE_GROUP( tests             FILES  ${TEST_SRCS} )
-SOURCE_GROUP( tests/PostProcess FILES  ${POST_PROCESSES})
+SOURCE_GROUP( UnitTests\Compiler     FILES  unit/CCompilerTest.c )
+SOURCE_GROUP( UnitTests\\Common      FILES  ${COMMON} )
+SOURCE_GROUP( UnitTests\\Importers   FILES  ${IMPORTERS} )
+SOURCE_GROUP( UnitTests\\Material    FILES  ${MATERIAL} )
+SOURCE_GROUP( UnitTests\\Math        FILES  ${MATH} )
+SOURCE_GROUP( UnitTests\\PostProcess FILES  ${POST_PROCESSES})
 
 add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Version.cpp
-    ${TEST_SRCS}
+	${COMMON}
+	${IMPORTERS}
+	${MATERIAL}
+	${MATH}
     ${POST_PROCESSES}
 )
 

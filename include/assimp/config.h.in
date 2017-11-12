@@ -267,6 +267,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     "PP_FD_REMOVE"
 
 // ---------------------------------------------------------------------------
+/**
+ *  @brief  Configures the #aiProcess_FindDegenerates to check the area of a
+ *  trinagle to be greates than e-6. If this is not the case the triangle will
+ *  be removed if #AI_CONFIG_PP_FD_REMOVE is set to true.
+ */
+#define AI_CONFIG_PP_FD_CHECKAREA \
+    "PP_FD_CHECKAREA"
+
+// ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_OptimizeGraph step to preserve nodes
  * matching a name in a given list.
  *

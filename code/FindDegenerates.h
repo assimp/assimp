@@ -54,14 +54,10 @@ namespace Assimp    {
 // ---------------------------------------------------------------------------
 /** FindDegeneratesProcess: Searches a mesh for degenerated triangles.
 */
-class ASSIMP_API FindDegeneratesProcess : public BaseProcess
-{
+class ASSIMP_API FindDegeneratesProcess : public BaseProcess {
 public:
-
     FindDegeneratesProcess();
     ~FindDegeneratesProcess();
-
-public:
 
     // -------------------------------------------------------------------
     // Check whether step is active
@@ -79,28 +75,53 @@ public:
     // Execute step on a given mesh
     void ExecuteOnMesh( aiMesh* mesh);
 
+    // -------------------------------------------------------------------
+    /// @brief Enable the instant removal of degenerated primitives
+    /// @param enabled  true for enabled.
+    void EnableInstantRemoval(bool enabled);
 
     // -------------------------------------------------------------------
-    /** @brief Enable the instant removal of degenerated primitives
-     *  @param d hm ... difficult to guess what this means, hu!?
-     */
-    void EnableInstantRemoval(bool d) {
-        configRemoveDegenerates = d;
-    }
+    /// @brief Check whether instant removal is currently enabled
+    /// @return The instant removal state.
+    bool IsInstantRemoval() const;
 
     // -------------------------------------------------------------------
-    /** @brief Check whether instant removal is currently enabled
-     *  @return ...
-     */
-    bool IsInstantRemoval() const {
-        return configRemoveDegenerates;
-    }
+    /// @brief Enable the area check for triangles.
+    /// @param enabled  true for enabled.
+    void EnableAreaCheck( bool enabled );
+
+    // -------------------------------------------------------------------
+    /// @brief Check whether the area check is enabled.
+    /// @return The area check state.
+    bool isAreaCheckEnabled() const;
 
 private:
-
     //! Configuration option: remove degenerates faces immediately
-    bool configRemoveDegenerates;
+    bool mConfigRemoveDegenerates;
+    //! Configuration option: check for area
+    bool mConfigCheckAreaOfTriangle;
 };
+
+inline
+void FindDegeneratesProcess::EnableInstantRemoval(bool enabled) {
+    mConfigRemoveDegenerates = enabled;
 }
+
+inline
+bool FindDegeneratesProcess::IsInstantRemoval() const {
+    return mConfigRemoveDegenerates;
+}
+
+inline
+void FindDegeneratesProcess::EnableAreaCheck( bool enabled ) {
+    mConfigCheckAreaOfTriangle = enabled;
+}
+
+inline
+bool FindDegeneratesProcess::isAreaCheckEnabled() const {
+    return mConfigCheckAreaOfTriangle;
+}
+
+} // Namespace Assimp
 
 #endif // !! AI_FINDDEGENERATESPROCESS_H_INC

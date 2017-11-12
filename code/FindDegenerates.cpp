@@ -56,7 +56,8 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindDegeneratesProcess::FindDegeneratesProcess()
-: configRemoveDegenerates (false) {
+: mConfigRemoveDegenerates( false )
+, mConfigCheckAreaOfTriangle( false ){
     // empty
 }
 
@@ -76,7 +77,8 @@ bool FindDegeneratesProcess::IsActive( unsigned int pFlags) const {
 // Setup import configuration
 void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
     // Get the current value of AI_CONFIG_PP_FD_REMOVE
-    configRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE,0));
+    mConfigRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE,0));
+    mConfigCheckAreaOfTriangle = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_CHECKAREA) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -126,7 +128,7 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
     mesh->mPrimitiveTypes = 0;
 
     std::vector<bool> remove_me;
-    if (configRemoveDegenerates) {
+    if (mConfigRemoveDegenerates) {
         remove_me.resize( mesh->mNumFaces, false );
     }
 
@@ -166,21 +168,24 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
                         first = false;
                     }
 
-                    if ( configRemoveDegenerates ) {
+                    if ( mConfigRemoveDegenerates ) {
                         remove_me[ a ] = true;
                         goto evil_jump_outside; // hrhrhrh ... yeah, this rocks baby!
                     }
                 }
             }
-            if ( face.mNumIndices == 3 ) {
-                ai_real area = calculateAreaOfTriangle( face, mesh );
-                if ( area < 1e-6 ) {
-                    if ( configRemoveDegenerates ) {
-                        remove_me[ a ] = true;
-                        goto evil_jump_outside;
-                    }
 
-                    // todo: check for index which is corrupt.
+            if ( mConfigCheckAreaOfTriangle ) {
+                if ( face.mNumIndices == 3 ) {
+                    ai_real area = calculateAreaOfTriangle( face, mesh );
+                    if ( area < 1e-6 ) {
+                        if ( mConfigRemoveDegenerates ) {
+                            remove_me[ a ] = true;
+                            goto evil_jump_outside;
+                        }
+
+                        // todo: check for index which is corrupt.
+                    }
                 }
             }
         }
@@ -206,7 +211,7 @@ evil_jump_outside:
     }
 
     // If AI_CONFIG_PP_FD_REMOVE is true, remove degenerated faces from the import
-    if (configRemoveDegenerates && deg) {
+    if (mConfigRemoveDegenerates && deg) {
         unsigned int n = 0;
         for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
         {

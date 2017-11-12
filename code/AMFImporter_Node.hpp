@@ -137,7 +137,7 @@ struct CAMFImporter_NodeElement_Instance : public CAMFImporter_NodeElement
 {
 	/****************** Variables ******************/
 
-	std::string ObjectID;///< ID of object for instanciation.
+	std::string ObjectID;///< ID of object for instantiation.
 	/// \var Delta - The distance of translation in the x, y, or z direction, respectively, in the referenced object's coordinate system, to
 	/// create an instance of the object in the current constellation.
 	aiVector3D Delta;

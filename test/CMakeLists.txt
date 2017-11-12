@@ -148,7 +148,7 @@ SET( POST_PROCESSES
   unit/utSceneCombiner.cpp
 )
 
-SOURCE_GROUP( UnitTests\Compiler     FILES  unit/CCompilerTest.c )
+SOURCE_GROUP( UnitTests\\Compiler     FILES  unit/CCompilerTest.c )
 SOURCE_GROUP( UnitTests\\Common      FILES  ${COMMON} )
 SOURCE_GROUP( UnitTests\\Importers   FILES  ${IMPORTERS} )
 SOURCE_GROUP( UnitTests\\Material    FILES  ${MATERIAL} )

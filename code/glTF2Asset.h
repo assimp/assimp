@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include "StringUtils.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/rapidjson.h>
@@ -239,7 +240,7 @@ namespace glTF2
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type " + std::to_string(t));
+                throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
         }
     }
 

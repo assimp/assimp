@@ -402,7 +402,7 @@ void glTF2Exporter::ExportMaterials()
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
 
-        std::string id = "material_" + std::to_string(i);
+        std::string id = "material_" + to_string(i);
 
         Ref<Material> m = mAsset->materials.Create(id);
 

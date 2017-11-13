@@ -1282,7 +1282,7 @@ inline void Asset::ReadBinaryHeader(IOStream& stream)
     }
 
     AI_SWAP4(header.version);
-    asset.version = std::to_string(header.version);
+    asset.version = to_string(header.version);
     if (header.version != 1) {
         throw DeadlyImportError("GLTF: Unsupported binary glTF version");
     }

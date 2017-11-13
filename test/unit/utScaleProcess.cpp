@@ -1,14 +1,16 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -35,27 +37,49 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
-#include "OpenGEXExporter.h"
+#include "UnitTestPCH.h"
+#include "ScaleProcess.h"
+#include "TestModelFactory.h"
 
 namespace Assimp {
-namespace OpenGEX {
+namespace UnitTest {
 
-#ifndef ASSIMP_BUILD_NO_OPENGEX_EXPORTER
+class utScaleProcess : public ::testing::Test {
+    // empty
+};
 
-OpenGEXExporter::OpenGEXExporter() {
+TEST_F( utScaleProcess, createTest ) {
+    bool ok = true;
+    try {
+        ScaleProcess process;
+    } catch ( ... ) {
+        ok = false;
+    }
+    EXPECT_TRUE( ok );
 }
 
-OpenGEXExporter::~OpenGEXExporter() {
+TEST_F( utScaleProcess, accessScaleTest ) {
+    ScaleProcess process;
+    EXPECT_FLOAT_EQ( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT, process.getScale() );
+
+    process.setScale( 2.0f );
+    EXPECT_FLOAT_EQ( 2.0f, process.getScale() );
 }
 
-bool OpenGEXExporter::exportScene( const char */*filename*/, const aiScene* /*pScene*/ ) {
-    return true;
+TEST_F( utScaleProcess, rescaleModelTest ) {
+    float opacity;
+    aiScene *testScene = TestModelFacttory::createDefaultTestModel( opacity );
+    ai_real v1 = testScene->mRootNode->mTransformation.a1;
+    ScaleProcess process;
+    process.setScale( 10.0f );
+    process.Execute( testScene );
+    ai_real v2 = testScene->mRootNode->mTransformation.a1;
+    const ai_real scale = v2 / v1;
+    EXPECT_FLOAT_EQ( scale, 10.0f );
+    TestModelFacttory::releaseDefaultTestModel( &testScene );
 }
 
-#endif // ASSIMP_BUILD_NO_OPENGEX_EXPORTER
-
-} // Namespace OpenGEX
+} // Namespace UnitTest
 } // Namespace Assimp

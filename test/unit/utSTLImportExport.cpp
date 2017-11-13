@@ -1,14 +1,16 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -35,27 +37,32 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
-#include "OpenGEXExporter.h"
 
-namespace Assimp {
-namespace OpenGEX {
+#include "UnitTestPCH.h"
+#include "SceneDiffer.h"
+#include "AbstractImportExportBase.h"
 
-#ifndef ASSIMP_BUILD_NO_OPENGEX_EXPORTER
+#include <assimp/Importer.hpp>
 
-OpenGEXExporter::OpenGEXExporter() {
+using namespace Assimp;
+
+class utSTLImporterExporter : public AbstractImportExportBase {
+public:
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", 0 );
+        return nullptr != scene;
+    }
+};
+
+TEST_F( utSTLImporterExporter, importXFromFileTest ) {
+    EXPECT_TRUE( importerTest() );
 }
 
-OpenGEXExporter::~OpenGEXExporter() {
+TEST_F( utSTLImporterExporter, test_with_two_solids ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", 0 );
+    EXPECT_NE( nullptr, scene );
 }
-
-bool OpenGEXExporter::exportScene( const char */*filename*/, const aiScene* /*pScene*/ ) {
-    return true;
-}
-
-#endif // ASSIMP_BUILD_NO_OPENGEX_EXPORTER
-
-} // Namespace OpenGEX
-} // Namespace Assimp

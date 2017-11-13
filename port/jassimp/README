@@ -44,7 +44,6 @@ jassimp supports most of assimps features. Current limitations are
 * no support for mesh animations
 * no support for embedded textures
 * no support for importer configurations
-* no support for the custom I/O API of assimp
 * some texture related material properties are not exposed via the API but only 
   accessible by traversing the list of properties. However this limitation is
   also present in the c-API ...

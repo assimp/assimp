@@ -56,14 +56,11 @@ namespace Assimp
  * vectors of an object are facing inwards. In this case they will be
  * flipped.
  */
-class FixInfacingNormalsProcess : public BaseProcess
-{
+class FixInfacingNormalsProcess : public BaseProcess {
 public:
-
     FixInfacingNormalsProcess();
     ~FixInfacingNormalsProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
      * @param pFlags The processing flags the importer was called with. A bitwise

@@ -671,7 +671,6 @@ bool PLY::ElementInstanceList::ParseInstanceList(
   PLYImporter* loader)
 {
   ai_assert(NULL != pcElement);
-  const char* pCur = (const char*)&buffer[0];
 
   // parse all elements
   if (EEST_INVALID == pcElement->eSemantic || pcElement->alProperties.empty())
@@ -683,11 +682,11 @@ bool PLY::ElementInstanceList::ParseInstanceList(
       PLY::DOM::SkipComments(buffer);
       PLY::DOM::SkipLine(buffer);
       streamBuffer.getNextLine(buffer);
-      pCur = (buffer.empty()) ? NULL : (const char*)&buffer[0];
     }
   }
   else
   {
+    const char* pCur = (const char*)&buffer[0];
     // be sure to have enough storage
     for (unsigned int i = 0; i < pcElement->NumOccur; ++i)
     {

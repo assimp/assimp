@@ -342,7 +342,6 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
     } else {
         ++in;
         logInvalidTokenError( in, std::string( Grammar::OpenBracketToken ), m_logCallback );
-        error = true;
         return ddl_nullptr;
     }
     in = lookForNextToken( in, end );

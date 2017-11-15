@@ -88,6 +88,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #endif
 
+#include "StringUtils.h"
+
 namespace glTF2
 {
 #ifdef ASSIMP_API
@@ -239,7 +241,7 @@ namespace glTF2
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type " + std::to_string(t));
+                throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
         }
     }
 

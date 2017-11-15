@@ -43,6 +43,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <ostream>
@@ -2365,6 +2366,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
       //ok, so far it looks like we're still in range of the horizontal edge
       if ( e->xcurr == horzEdge->xtop && !eMaxPair )
       {
+        assert(horzEdge->nextInLML);
         if (SlopesEqual(*e, *horzEdge->nextInLML, m_UseFullRange))
         {
           //if output polygons share an edge, they'll need joining later ...

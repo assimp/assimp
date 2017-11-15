@@ -285,13 +285,15 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
         }
 
 
-		Property *first(ddl_nullptr);
+		std::unique_ptr<Property> first;
 		in = lookForNextToken(in, end);
 		if (*in == Grammar::OpenPropertyToken[0]) {
 			in++;
-			Property *prop(ddl_nullptr), *prev(ddl_nullptr);
+			std::unique_ptr<Property> prop, prev;
 			while (*in != Grammar::ClosePropertyToken[0] && in != end) {
-				in = OpenDDLParser::parseProperty(in, end, &prop);
+				Property *prop_(ddl_nullptr);
+				in = OpenDDLParser::parseProperty(in, end, &prop_);
+				prop.reset(prop_);
 				in = lookForNextToken(in, end);
 
 				if (*in != Grammar::CommaSeparator[0] && *in != Grammar::ClosePropertyToken[0]) {
@@ -301,20 +303,20 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
 
 				if (ddl_nullptr != prop && *in != Grammar::CommaSeparator[0]) {
 					if (ddl_nullptr == first) {
-						first = prop;
+						first = std::move(prop);
 					}
 					if (ddl_nullptr != prev) {
-						prev->m_next = prop;
+						prev->m_next = prop.release();
 					}
-					prev = prop;
+					prev = std::move(prop);
 				}
 			}
 			++in;
 		}
 
 		// set the properties
-		if (ddl_nullptr != first && ddl_nullptr != node) {
-			node->setProperties(first);
+		if (first && ddl_nullptr != node) {
+			node->setProperties(first.release());
 		}
     }
 

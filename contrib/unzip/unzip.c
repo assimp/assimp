@@ -733,11 +733,9 @@ local int unzlocal_GetCurrentFileInfoInternal (file,
         if ((file_info.size_file_comment>0) && (commentBufferSize>0))
             if (ZREAD(s->z_filefunc, s->filestream,szComment,uSizeRead)!=uSizeRead)
                 err=UNZ_ERRNO;
-        lSeek+=file_info.size_file_comment - uSizeRead;
     }
     else
     {
-        lSeek+=file_info.size_file_comment;
     }
 
     if ((err==UNZ_OK) && (pfile_info!=NULL))

@@ -27,6 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <memory>
 #include <math.h>
 
 #ifdef _WIN32
@@ -275,22 +276,24 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
         }
         delete id;
 
-		Name *name(ddl_nullptr);
-		in = OpenDDLParser::parseName(in, end, &name);
+		Name *name_(ddl_nullptr);
+		in = OpenDDLParser::parseName(in, end, &name_);
+		std::unique_ptr<Name> name(name_);
         if( ddl_nullptr != name && ddl_nullptr != node ) {
             const std::string nodeName( name->m_id->m_buffer );
             node->setName( nodeName );
-            delete name;
         }
 
 
-		Property *first(ddl_nullptr);
+		std::unique_ptr<Property> first;
 		in = lookForNextToken(in, end);
 		if (*in == Grammar::OpenPropertyToken[0]) {
 			in++;
-			Property *prop(ddl_nullptr), *prev(ddl_nullptr);
+			std::unique_ptr<Property> prop, prev;
 			while (*in != Grammar::ClosePropertyToken[0] && in != end) {
-				in = OpenDDLParser::parseProperty(in, end, &prop);
+				Property *prop_(ddl_nullptr);
+				in = OpenDDLParser::parseProperty(in, end, &prop_);
+				prop.reset(prop_);
 				in = lookForNextToken(in, end);
 
 				if (*in != Grammar::CommaSeparator[0] && *in != Grammar::ClosePropertyToken[0]) {
@@ -300,20 +303,20 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
 
 				if (ddl_nullptr != prop && *in != Grammar::CommaSeparator[0]) {
 					if (ddl_nullptr == first) {
-						first = prop;
+						first = std::move(prop);
 					}
 					if (ddl_nullptr != prev) {
-						prev->m_next = prop;
+						prev->m_next = prop.release();
 					}
-					prev = prop;
+					prev = std::move(prop);
 				}
 			}
 			++in;
 		}
 
 		// set the properties
-		if (ddl_nullptr != first && ddl_nullptr != node) {
-			node->setProperties(first);
+		if (first && ddl_nullptr != node) {
+			node->setProperties(first.release());
 		}
     }
 
@@ -339,7 +342,6 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
     } else {
         ++in;
         logInvalidTokenError( in, std::string( Grammar::OpenBracketToken ), m_logCallback );
-        error = true;
         return ddl_nullptr;
     }
     in = lookForNextToken( in, end );

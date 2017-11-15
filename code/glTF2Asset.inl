@@ -204,7 +204,7 @@ unsigned int LazyDict<T>::Remove(const char* id)
         throw DeadlyExportError("GLTF: Object with id \"" + std::string(id) + "\" is not found");
     }
 
-    const int index = it->second;
+    const unsigned int index = it->second;
 
     mAsset.mUsedIds[id] = false;
     mObjsById.erase(id);

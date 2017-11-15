@@ -4,7 +4,7 @@ language: cpp
 cache: ccache
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq && sudo apt-get install cmake && sudo apt-get install cmake python3 && sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca- ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq && sudo apt-get install cmake cppcheck && sudo apt-get install cmake python3 && sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca- ; fi
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ];  then
        if brew ls --versions cmake > /dev/null; then
          echo cmake already installed.;
@@ -34,11 +34,8 @@ env:
 matrix:
   include:
     - os: linux
-      compiler: gcc
-      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
-    - os: linux
-      compiler: gcc
-      env: SHARED_BUILD=ON
+      compiler: clang
+      env: ANALYZE=ON
     - os: linux
       compiler: clang
       env: ASAN=ON
@@ -47,6 +44,15 @@ matrix:
       env: UBSAN=ON
     - os: linux
       compiler: clang
+      env: SHARED_BUILD=ON
+    - os: linux
+      compiler: gcc
+      env: ANALYZE=ON
+    - os: linux
+      compiler: gcc
+      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
+    - os: linux
+      compiler: gcc
       env: SHARED_BUILD=ON
 
 install:

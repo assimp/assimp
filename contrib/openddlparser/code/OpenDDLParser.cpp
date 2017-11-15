@@ -27,6 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <memory>
 #include <math.h>
 
 #ifdef _WIN32
@@ -275,12 +276,12 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
         }
         delete id;
 
-		Name *name(ddl_nullptr);
-		in = OpenDDLParser::parseName(in, end, &name);
+		Name *name_(ddl_nullptr);
+		in = OpenDDLParser::parseName(in, end, &name_);
+		std::unique_ptr<Name> name(name_);
         if( ddl_nullptr != name && ddl_nullptr != node ) {
             const std::string nodeName( name->m_id->m_buffer );
             node->setName( nodeName );
-            delete name;
         }
 
 

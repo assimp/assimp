@@ -566,7 +566,6 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 
                 if ( !name_carrier ) {
                     nodes_chain.push_back( new aiNode( original_name ) );
-                    name_carrier = nodes_chain.back();
                 }
 
                 //setup metadata on newest node

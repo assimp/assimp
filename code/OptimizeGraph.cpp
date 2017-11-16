@@ -233,10 +233,12 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 
     nd->mNumChildren = static_cast<unsigned int>(child_nodes.size());
 
-    aiNode** tmp = nd->mChildren;
-    for (std::list<aiNode*>::iterator it = child_nodes.begin(); it != child_nodes.end(); ++it) {
-        aiNode* node = *tmp++ = *it;
-        node->mParent = nd;
+    if (nd->mChildren) {
+        aiNode** tmp = nd->mChildren;
+        for (std::list<aiNode*>::iterator it = child_nodes.begin(); it != child_nodes.end(); ++it) {
+            aiNode* node = *tmp++ = *it;
+            node->mParent = nd;
+        }
     }
 
     nodes_out += static_cast<unsigned int>(child_nodes.size());

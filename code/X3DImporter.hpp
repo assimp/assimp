@@ -154,7 +154,7 @@ namespace Assimp {
 ///		Geometry3D component:
 ///			"Box", "Cone", "Cylinder", "ElevationGrid", "Extrusion", "IndexedFaceSet", "Sphere"
 ///		Grouping component:
-///			"Group", "StaticGroup", "Switch", "Transform"
+///			"Group", "StaticGroup", "Switch", "Transform", "MatrixTransform"
 ///		Lighting component:
 ///			"DirectionalLight", "PointLight", "SpotLight"
 ///		Networking component:
@@ -737,6 +737,12 @@ private:
 
 	/// Doing actions at an exit from <Transform>. Walk up in scene graph.
 	void ParseNode_Grouping_TransformEnd();
+
+	/// Parse <MatrixTransform> node of the file. And create new node in scene graph.
+	void ParseNode_Grouping_MatrixTransform();
+
+	/// Doing actions at an exit from <MatrixTransform>. Walk up in scene graph.
+	void ParseNode_Grouping_MatrixTransformEnd();
 
 	/// Parse <Color> node of the file.
 	void ParseNode_Rendering_Color();

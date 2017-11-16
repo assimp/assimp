@@ -171,11 +171,14 @@ add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
 
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
-IF( WIN32 )
+#IF( WIN32 )
     SET( platform_libs )
-ELSE( WIN32 )
-    SET( platform_libs pthread )
-ENDIF( WIN32 )
+#ELSE( WIN32 )
+#  IF( ${OPERATING_SYSTEM} MATCHES "Android")
+#  ELSE()
+#     SET( platform_libs pthread )
+#   ENDIF()
+#ENDIF( WIN32 )
 
 IF(MSVC)
 		add_definitions(-D_CRT_SECURE_NO_WARNINGS)

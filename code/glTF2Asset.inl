@@ -258,11 +258,11 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
     Value &obj = (*mDict)[i];
 
     if (!obj.IsObject()) {
-        throw DeadlyImportError("GLTF: Object at index \"" + std::to_string(i) + "\" is not a JSON object");
+        throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" is not a JSON object");
     }
 
     T* inst = new T();
-    inst->id = std::string(mDictId) + "_" + std::to_string(i);
+    inst->id = std::string(mDictId) + "_" + to_string(i);
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);

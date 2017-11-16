@@ -1525,11 +1525,13 @@ auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> vo
 static const char* GroupName_Group = "Group";
 static const char* GroupName_StaticGroup = "StaticGroup";
 static const char* GroupName_Transform = "Transform";
+static const char* GroupName_MatrixTransform = "MatrixTransform";
 static const char* GroupName_Switch = "Switch";
 
 bool close_found = false;
 size_t counter_group = 0;
 size_t counter_transform = 0;
+size_t counter_matrixtransform = 0;
 size_t counter_switch = 0;
 
 	// while create static node? Because objects name used deeper in "USE" attribute can be equal to some meta in <head> node.
@@ -1562,6 +1564,13 @@ size_t counter_switch = 0;
 				ParseNode_Grouping_Transform();
 				// if node is empty then decrease group counter at this place.
 				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_transform, GroupName_Transform);
+			}
+			else if (XML_CheckNode_NameEqual(GroupName_MatrixTransform))
+			{
+				GroupCounter_Increase(counter_matrixtransform, GroupName_MatrixTransform);
+				ParseNode_Grouping_MatrixTransform();
+				// if node is empty then decrease group counter at this place.
+				if (mReader->isEmptyElement()) GroupCounter_Decrease(counter_matrixtransform, GroupName_MatrixTransform);
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_Switch))
 			{
@@ -1614,6 +1623,11 @@ size_t counter_switch = 0;
 				GroupCounter_Decrease(counter_transform, GroupName_Transform);
 				ParseNode_Grouping_TransformEnd();
 			}
+            else if (XML_CheckNode_NameEqual(GroupName_MatrixTransform))
+            {
+                GroupCounter_Decrease(counter_matrixtransform, GroupName_MatrixTransform);
+                ParseNode_Grouping_TransformEnd();
+            }
 			else if(XML_CheckNode_NameEqual(GroupName_Switch))
 			{
 				GroupCounter_Decrease(counter_switch, GroupName_Switch);

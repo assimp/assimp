@@ -165,7 +165,7 @@ private:
     inline void DoValidation(T** array, unsigned int size,
         const char* firstName, const char* secondName);
 
-    // extended version: checks whethr T::mName occurs twice
+    // extended version: checks whether T::mName occurs twice
     template <typename T>
     inline void DoValidationEx(T** array, unsigned int size,
         const char* firstName, const char* secondName);

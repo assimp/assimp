@@ -45,13 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+#include "FIReader.hpp"
+#include "StringUtils.h"
+
 // Workaround for issue #1361
 // https://github.com/assimp/assimp/issues/1361
 #ifdef __ANDROID__
-#define _GLIBCXX_USE_C99 1
+#  define _GLIBCXX_USE_C99 1
 #endif
 
-#include "FIReader.hpp"
 #include "Exceptional.h"
 #include <assimp/IOStream.hpp>
 #include <assimp/types.h>
@@ -685,7 +687,7 @@ public:
         if (intValue) {
             return intValue->value.size() == 1 ? intValue->value.front() : 0;
         }
-        return stoi(attr->value->toString());
+        return atoi(attr->value->toString().c_str());
     }
 
     virtual int getAttributeValueAsInt(int idx) const /*override*/ {
@@ -696,7 +698,7 @@ public:
         if (intValue) {
             return intValue->value.size() == 1 ? intValue->value.front() : 0;
         }
-        return stoi(attributes[idx].value->toString());
+        return atoi(attributes[idx].value->toString().c_str());
     }
 
     virtual float getAttributeValueAsFloat(const char* name) const /*override*/ {
@@ -708,7 +710,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return stof(attr->value->toString());
+        return atof(attr->value->toString().c_str());
     }
 
     virtual float getAttributeValueAsFloat(int idx) const /*override*/ {
@@ -719,7 +721,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return stof(attributes[idx].value->toString());
+        return atof(attributes[idx].value->toString().c_str());
     }
 
     virtual const char* getNodeName() const /*override*/ {
@@ -984,13 +986,13 @@ private:
         if (index < 32) {
             FIDecoder *decoder = defaultDecoder[index];
             if (!decoder) {
-                throw DeadlyImportError("Invalid encoding algorithm index " + std::to_string(index));
+                throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
             }
             return decoder->decode(dataP, len);
         }
         else {
             if (index - 32 >= vocabulary.encodingAlgorithmTable.size()) {
-                throw DeadlyImportError("Invalid encoding algorithm index " + std::to_string(index));
+                throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
             }
             std::string uri = vocabulary.encodingAlgorithmTable[index - 32];
             auto it = decoderMap.find(uri);
@@ -1014,12 +1016,12 @@ private:
                 alphabet = "0123456789-:TZ ";
                 break;
             default:
-                throw DeadlyImportError("Invalid restricted alphabet index " + std::to_string(index));
+                throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
             }
         }
         else {
             if (index - 16 >= vocabulary.restrictedAlphabetTable.size()) {
-                throw DeadlyImportError("Invalid restricted alphabet index " + std::to_string(index));
+                throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
             }
             alphabet = vocabulary.restrictedAlphabetTable[index - 16];
         }
@@ -1027,7 +1029,7 @@ private:
         utf8::utf8to32(alphabet.begin(), alphabet.end(), back_inserter(alphabetUTF32));
         std::string::size_type alphabetLength = alphabetUTF32.size();
         if (alphabetLength < 2) {
-            throw DeadlyImportError("Invalid restricted alphabet length " + std::to_string(alphabetLength));
+            throw DeadlyImportError("Invalid restricted alphabet length " + to_string(alphabetLength));
         }
         std::string::size_type bitsPerCharacter = 1;
         while ((1ull << bitsPerCharacter) <= alphabetLength) {

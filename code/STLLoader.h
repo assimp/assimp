@@ -48,53 +48,61 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include <assimp/types.h>
 
-namespace Assimp    {
+// Forward declarations
+struct aiNode;
+
+namespace Assimp {
+
 
 // ---------------------------------------------------------------------------
-/** Importer class for the sterolithography STL file format
-*/
-class STLImporter : public BaseImporter
-{
+/**
+ * @brief   Importer class for the sterolithography STL file format.
+ */
+class STLImporter : public BaseImporter {
 public:
+    /**
+     * @brief STLImporter, the class default constructor.
+     */
     STLImporter();
+
+    /**
+     * @brief   The class destructor.
+     */
     ~STLImporter();
 
-
-public:
-
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details.
+    /**
+     * @brief   Returns whether the class can handle the format of the given file.
+     *  See BaseImporter::CanRead() for details.
      */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 protected:
 
-    // -------------------------------------------------------------------
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details
+    /**
+     * @brief   Return importer meta information.
+     *  See #BaseImporter::GetInfo for the details
      */
     const aiImporterDesc* GetInfo () const;
 
-    // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure.
+    /**
+     * @brief   Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
     void InternReadFile( const std::string& pFile, aiScene* pScene,
         IOSystem* pIOHandler);
 
-
-    // -------------------------------------------------------------------
-    /** Loads a binary .stl file
+    /**
+     * @brief   Loads a binary .stl file
      * @return true if the default vertex color must be used as material color
-    */
+     */
     bool LoadBinaryFile();
 
-    // -------------------------------------------------------------------
-    /** Loads a ASCII text .stl file
-    */
-    void LoadASCIIFile();
+    /**
+     * @brief   Loads a ASCII text .stl file
+     */
+    void LoadASCIIFile( aiNode *root );
+
+    void pushMeshesToNode( std::vector<unsigned int> &meshIndices, aiNode *node );
 
 protected:
 

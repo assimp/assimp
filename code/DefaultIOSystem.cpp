@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <stdlib.h>
 
-
 #ifdef __unix__
 #include <sys/param.h>
 #include <stdlib.h>

@@ -198,6 +198,7 @@ inline uint32_t Write<aiQuaternion>(const aiQuaternion& v)
 	t += Write<float>(v.x);
 	t += Write<float>(v.y);
 	t += Write<float>(v.z);
+	ai_assert(t == 16);
 	return 16;
 }
 

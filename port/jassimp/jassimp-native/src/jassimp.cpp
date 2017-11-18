@@ -1951,7 +1951,7 @@ error:
 
 	if (NULL == exception)
 	{
-		/* thats really a problem because we cannot throw in this case */
+		/* that's really a problem because we cannot throw in this case */
 		env->FatalError("could not throw java.io.IOException");
 	}
 	gLastErrorString = imp.GetErrorString();

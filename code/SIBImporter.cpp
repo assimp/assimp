@@ -163,7 +163,7 @@ static aiColor3D ReadColor(StreamReaderLE* stream)
     return aiColor3D(r, g, b);
 }
 
-static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
+static void UnknownChunk(StreamReaderLE* /*stream*/, const SIBChunk& chunk)
 {
     char temp[5] = {
         static_cast<char>(( chunk.Tag>>24 ) & 0xff),
@@ -902,6 +902,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     // Add nodes for each object.
     for (size_t n=0;n<sib.objs.size();n++)
     {
+        ai_assert(root->mChildren);
         SIBObject& obj = sib.objs[n];
         aiNode* node = new aiNode;
         root->mChildren[childIdx++] = node;
@@ -926,6 +927,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     // (no transformation as the light is already in world space)
     for (size_t n=0;n<sib.lights.size();n++)
     {
+        ai_assert(root->mChildren);
         aiLight* light = sib.lights[n];
         if ( nullptr != light ) {
             aiNode* node = new aiNode;

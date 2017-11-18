@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)
 #   define ASSIMP_STEP_USE_UNORDERED_MULTIMAP
-#   else
+#else
 #   define step_unordered_map map
 #   define step_unordered_multimap multimap
 #endif

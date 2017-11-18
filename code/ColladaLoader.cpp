@@ -1619,7 +1619,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
         mat.AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
 
         // transparency, a very hard one. seemingly not all files are following the
-        // specification here (1.0 transparency => completly opaque)...
+        // specification here (1.0 transparency => completely opaque)...
         // therefore, we let the opportunity for the user to manually invert
         // the transparency if necessary and we add preliminary support for RGB_ZERO mode
         if(effect.mTransparency >= 0.f && effect.mTransparency <= 1.f) {

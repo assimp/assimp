@@ -267,6 +267,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     "PP_FD_REMOVE"
 
 // ---------------------------------------------------------------------------
+/**
+ *  @brief  Configures the #aiProcess_FindDegenerates to check the area of a
+ *  trinagle to be greates than e-6. If this is not the case the triangle will
+ *  be removed if #AI_CONFIG_PP_FD_REMOVE is set to true.
+ */
+#define AI_CONFIG_PP_FD_CHECKAREA \
+    "PP_FD_CHECKAREA"
+
+// ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_OptimizeGraph step to preserve nodes
  * matching a name in a given list.
  *
@@ -903,7 +912,7 @@ enum aiComponent
 /** @brief  Set the tessellation for IFC cylindrical shapes.
  *
  * This is used by the IFC importer to determine the tessellation parameter
- * for cylindrical shapes, i.e. the number of segments used to aproximate a circle.
+ * for cylindrical shapes, i.e. the number of segments used to approximate a circle.
  * @note The default value is AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION and the
  * accepted values are in range [3, 180].
  * Property type: Integer.
@@ -933,6 +942,14 @@ enum aiComponent
 
 #define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
 
+/**
+ *  @brief  Specifies a gobal key factor for scale, float value
+ */
+#define AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY "GLOBAL_SCALE_FACTOR"
+
+#if (!defined AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT)
+#   define AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT  1.0f
+#endif // !! AI_DEBONE_THRESHOLD
 
 // ---------- All the Build/Compile-time defines ------------
 

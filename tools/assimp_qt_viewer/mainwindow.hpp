@@ -65,23 +65,23 @@ private:
 	void LogError(const QString& pMessage);
 
 	/********************************************************************/
-	/*********************** Overrided functions ************************/
+	/*********************** Override functions ************************/
 	/********************************************************************/
 
 protected:
 
 	/// \fn void mousePressEvent(QMouseEvent* pEvent) override
-	/// Overrided function which handle mouse event "button pressed".
+	/// Override function which handles mouse event "button pressed".
 	/// \param [in] pEvent - pointer to event data.
 	void mousePressEvent(QMouseEvent* pEvent) override;
 
 	/// \fn void mouseMoveEvent(QMouseEvent* pEvent) override
-	/// Overrided function which handle mouse event "move".
+	/// Override function which handles mouse event "move".
 	/// \param [in] pEvent - pointer to event data.
 	void mouseMoveEvent(QMouseEvent* pEvent) override;
 
 	/// \fn void keyPressEvent(QKeyEvent* pEvent) override
-	/// Overrided function which handle key event "key pressed".
+	/// Override function which handles key event "key pressed".
 	/// \param [in] pEvent - pointer to event data.
 	void keyPressEvent(QKeyEvent* pEvent) override;
 

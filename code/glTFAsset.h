@@ -393,7 +393,7 @@ namespace glTF
         virtual ~Object() {}
 
         //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
-        static const char* TranslateId(Asset& r, const char* id)
+        static const char* TranslateId(Asset& /*r*/, const char* id)
             { return id; }
     };
 

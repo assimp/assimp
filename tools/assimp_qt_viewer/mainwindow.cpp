@@ -107,7 +107,7 @@ void MainWindow::LogError(const QString& pMessage)
 }
 
 /********************************************************************/
-/*********************** Overrided functions ************************/
+/*********************** Override functions ************************/
 /********************************************************************/
 
 void MainWindow::mousePressEvent(QMouseEvent* pEvent)

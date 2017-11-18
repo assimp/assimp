@@ -485,7 +485,9 @@ struct FIFloatDecoder: public FIDecoder {
         value.reserve(numFloats);
         for (size_t i = 0; i < numFloats; ++i) {
             int v = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
-            value.push_back(*(float*)&v);
+            float f;
+            memcpy(&f, &v, 4);
+            value.push_back(f);
             data += 4;
         }
         return FIFloatValue::create(std::move(value));
@@ -503,7 +505,9 @@ struct FIDoubleDecoder: public FIDecoder {
         for (size_t i = 0; i < numDoubles; ++i) {
             long long b0 = data[0], b1 = data[1], b2 = data[2], b3 = data[3], b4 = data[4], b5 = data[5], b6 = data[6], b7 = data[7];
             long long v = (b0 << 56) | (b1 << 48) | (b2 << 40) | (b3 << 32) | (b4 << 24) | (b5 << 16) | (b6 << 8) | b7;
-            value.push_back(*(double*)&v);
+            double f;
+            memcpy(&f, &v, 8);
+            value.push_back(f);
             data += 8;
         }
         return FIDoubleValue::create(std::move(value));

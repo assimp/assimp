@@ -294,12 +294,12 @@ TEST_F(utObjImportExport, relative_indices_Test) {
     const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mNumMeshes, 1U);
     const aiMesh *mesh = scene->mMeshes[0];
-    EXPECT_EQ(mesh->mNumVertices, 4);
-    EXPECT_EQ(mesh->mNumFaces, 1);
+    EXPECT_EQ(mesh->mNumVertices, 4U);
+    EXPECT_EQ(mesh->mNumFaces, 1U);
     const aiFace face = mesh->mFaces[0];
-    EXPECT_EQ(face.mNumIndices, 4);
+    EXPECT_EQ(face.mNumIndices, 4U);
     for (unsigned int i = 0; i < face.mNumIndices; ++i)
     {
         EXPECT_EQ(face.mIndices[i], i);
@@ -318,12 +318,12 @@ TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
     const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mNumMeshes, 1U);
     const aiMesh *mesh = scene->mMeshes[0];
-    EXPECT_EQ(mesh->mNumVertices, 3);
-    EXPECT_EQ(mesh->mNumFaces, 1);
+    EXPECT_EQ(mesh->mNumVertices, 3U);
+    EXPECT_EQ(mesh->mNumFaces, 1U);
     const aiFace face = mesh->mFaces[0];
-    EXPECT_EQ(face.mNumIndices, 3);
+    EXPECT_EQ(face.mNumIndices, 3U);
     const aiVector3D vertice = mesh->mVertices[0];
     EXPECT_EQ(vertice.x, -1.0f);
     EXPECT_EQ(vertice.y, 0.0f);

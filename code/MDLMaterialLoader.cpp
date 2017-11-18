@@ -665,7 +665,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         if (0.0f != pcMatIn->Power)
         {
             iShadingMode = (int)aiShadingMode_Phong;
-            pcMatOut->AddProperty<float>(&pcMatIn->Power,1,AI_MATKEY_SHININESS);
+            // pcMatIn is packed, we can't form pointers to its members
+            float power = pcMatIn->Power;
+            pcMatOut->AddProperty<float>(&power,1,AI_MATKEY_SHININESS);
         }
         pcMatOut->AddProperty<int>(&iShadingMode,1,AI_MATKEY_SHADING_MODEL);
     }

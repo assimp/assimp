@@ -186,7 +186,7 @@ IF( UNIX )
   IF( ${OPERATING_SYSTEM} MATCHES "Android")
   ELSE()
     IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
-      ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+      #ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
     ENDIF()
   ENDIF()
 

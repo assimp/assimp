@@ -59,7 +59,9 @@ template <> void Structure :: Convert<Object> (
 {
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
+    int temp = 0;
+    ReadField<ErrorPolicy_Fail>(temp,"type",db);
+    dest.type = static_cast<Assimp::Blender::Object::Type>(temp);
     ReadFieldArray2<ErrorPolicy_Warn>(dest.obmat,"obmat",db);
     ReadFieldArray2<ErrorPolicy_Warn>(dest.parentinv,"parentinv",db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.parsubstr,"parsubstr",db);
@@ -100,14 +102,21 @@ template <> void Structure :: Convert<MTex> (
     ) const
 {
 
-    ReadField<ErrorPolicy_Igno>((short&)dest.mapto,"mapto",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.blendtype,"blendtype",db);
+    int temp_short = 0;
+    ReadField<ErrorPolicy_Igno>(temp_short,"mapto",db);
+    dest.mapto = static_cast<Assimp::Blender::MTex::MapType>(temp_short);
+    int temp = 0;
+    ReadField<ErrorPolicy_Igno>(temp,"blendtype",db);
+    dest.blendtype = static_cast<Assimp::Blender::MTex::BlendType>(temp);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.object,"*object",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tex,"*tex",db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.uvname,"uvname",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.projx,"projx",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.projy,"projy",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.projz,"projz",db);
+    ReadField<ErrorPolicy_Igno>(temp,"projx",db);
+    dest.projx = static_cast<Assimp::Blender::MTex::Projection>(temp);
+    ReadField<ErrorPolicy_Igno>(temp,"projy",db);
+    dest.projy = static_cast<Assimp::Blender::MTex::Projection>(temp);
+    ReadField<ErrorPolicy_Igno>(temp,"projz",db);
+    dest.projx = static_cast<Assimp::Blender::MTex::Projection>(temp);
     ReadField<ErrorPolicy_Igno>(dest.mapping,"mapping",db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.ofs,"ofs",db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.size,"size",db);
@@ -190,7 +199,9 @@ template <> void Structure :: Convert<Lamp> (
 {
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
+    int temp = 0;
+    ReadField<ErrorPolicy_Fail>(temp,"type",db);
+    dest.type = static_cast<Assimp::Blender::Lamp::Type>(temp);
     ReadField<ErrorPolicy_Igno>(dest.flags,"flags",db);
     ReadField<ErrorPolicy_Igno>(dest.colormodel,"colormodel",db);
     ReadField<ErrorPolicy_Igno>(dest.totex,"totex",db);
@@ -204,7 +215,8 @@ template <> void Structure :: Convert<Lamp> (
     ReadField<ErrorPolicy_Igno>(dest.spotblend,"spotblend",db);
     ReadField<ErrorPolicy_Igno>(dest.att1,"att1",db);
     ReadField<ErrorPolicy_Igno>(dest.att2,"att2",db);
-    ReadField<ErrorPolicy_Igno>((int&)dest.falloff_type,"falloff_type",db);
+    ReadField<ErrorPolicy_Igno>(temp,"falloff_type",db);
+    dest.falloff_type = static_cast<Assimp::Blender::Lamp::FalloffType>(temp);
     ReadField<ErrorPolicy_Igno>(dest.sun_brightness,"sun_brightness",db);
     ReadField<ErrorPolicy_Igno>(dest.area_size,"area_size",db);
     ReadField<ErrorPolicy_Igno>(dest.area_sizey,"area_sizey",db);
@@ -693,8 +705,12 @@ template <> void Structure :: Convert<Tex> (
     const FileDatabase& db
     ) const
 {
-    ReadField<ErrorPolicy_Igno>((short&)dest.imaflag,"imaflag",db);
-    ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
+    short temp_short = 0;
+    ReadField<ErrorPolicy_Igno>(temp_short,"imaflag",db);
+    dest.imaflag = static_cast<Assimp::Blender::Tex::ImageFlags>(temp_short);
+    int temp = 0;
+    ReadField<ErrorPolicy_Fail>(temp,"type",db);
+    dest.type = static_cast<Assimp::Blender::Tex::Type>(temp);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.ima,"*ima",db);
 
     db.reader->IncPtr(size);
@@ -708,8 +724,11 @@ template <> void Structure :: Convert<Camera> (
 {
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
-    ReadField<ErrorPolicy_Warn>((int&)dest.type,"type",db);
-    ReadField<ErrorPolicy_Warn>((int&)dest.flag,"flag",db);
+    int temp = 0;
+    ReadField<ErrorPolicy_Warn>(temp,"type",db);
+    dest.type = static_cast<Assimp::Blender::Camera::Type>(temp);
+    ReadField<ErrorPolicy_Warn>(temp,"flag",db);
+    dest.flag = static_cast<Assimp::Blender::Camera::Type>(temp);
     ReadField<ErrorPolicy_Warn>(dest.lens,"lens",db);
     ReadField<ErrorPolicy_Warn>(dest.sensor_x,"sensor_x",db);
     ReadField<ErrorPolicy_Igno>(dest.clipsta,"clipsta",db);

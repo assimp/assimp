@@ -91,7 +91,7 @@ protected:
 
     // -------------------------------------------------------------------
     /** Report a validation warning. This won't throw an exception,
-     *  control will return to the callera.
+     *  control will return to the caller.
      * @param msg Format string for sprintf().*/
     void ReportWarning(const char* msg,...);
 

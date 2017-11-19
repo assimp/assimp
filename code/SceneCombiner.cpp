@@ -107,8 +107,9 @@ void SceneCombiner::AddNodePrefixes(aiNode* node, const char* prefix, unsigned i
     PrefixString(node->mName,prefix,len);
 
     // Process all children recursively
-    for (unsigned int i = 0; i < node->mNumChildren;++i)
-        AddNodePrefixes(node->mChildren[i],prefix,len);
+    for ( unsigned int i = 0; i < node->mNumChildren; ++i ) {
+        AddNodePrefixes( node->mChildren[ i ], prefix, len );
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -118,7 +119,6 @@ bool SceneCombiner::FindNameMatch(const aiString& name, std::vector<SceneHelper>
 
     // Check whether we find a positive match in one of the given sets
     for (unsigned int i = 0; i < input.size(); ++i) {
-
         if (cur != i && input[i].hashes.find(hash) != input[i].hashes.end()) {
             return true;
         }
@@ -135,7 +135,6 @@ void SceneCombiner::AddNodePrefixesChecked(aiNode* node, const char* prefix, uns
 
     // Check whether we find a positive match in one of the given sets
     for (unsigned int i = 0; i < input.size(); ++i) {
-
         if (cur != i && input[i].hashes.find(hash) != input[i].hashes.end()) {
             PrefixString(node->mName,prefix,len);
             break;
@@ -149,28 +148,25 @@ void SceneCombiner::AddNodePrefixesChecked(aiNode* node, const char* prefix, uns
 
 // ------------------------------------------------------------------------------------------------
 // Add an offset to all mesh indices in a node graph
-void SceneCombiner::OffsetNodeMeshIndices (aiNode* node, unsigned int offset)
-{
+void SceneCombiner::OffsetNodeMeshIndices (aiNode* node, unsigned int offset) {
     for (unsigned int i = 0; i < node->mNumMeshes;++i)
         node->mMeshes[i] += offset;
 
-    for (unsigned int i = 0; i < node->mNumChildren;++i)
-        OffsetNodeMeshIndices(node->mChildren[i],offset);
+    for ( unsigned int i = 0; i < node->mNumChildren; ++i ) {
+        OffsetNodeMeshIndices( node->mChildren[ i ], offset );
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Merges two scenes. Currently only used by the LWS loader.
-void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
-        unsigned int flags) {
+void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src, unsigned int flags) {
     if ( nullptr == _dest ) {
         return;
     }
 
     // if _dest points to NULL allocate a new scene. Otherwise clear the old and reuse it
-    if (src.empty())
-    {
-        if (*_dest)
-        {
+    if (src.empty()) {
+        if (*_dest) {
             (*_dest)->~aiScene();
             SceneCombiner::CopySceneFlat(_dest,src[0]);
         }
@@ -1078,8 +1074,7 @@ void SceneCombiner::Copy( aiMesh** _dest, const aiMesh* src ) {
 
     // make a deep copy of all faces
     GetArrayCopy(dest->mFaces,dest->mNumFaces);
-    for (unsigned int i = 0; i < dest->mNumFaces;++i)
-    {
+    for (unsigned int i = 0; i < dest->mNumFaces;++i) {
         aiFace& f = dest->mFaces[i];
         GetArrayCopy(f.mIndices,f.mNumIndices);
     }
@@ -1090,7 +1085,6 @@ void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src) {
     if ( nullptr == _dest || nullptr == src ) {
         return;
     }
-
 
     aiMaterial* dest = (aiMaterial*) ( *_dest = new aiMaterial() );
 
@@ -1245,6 +1239,10 @@ void SceneCombiner::Copy     (aiNode** _dest, const aiNode* src)
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy(aiMetadata** _dest, const aiMetadata* src) {
     if ( nullptr == _dest || nullptr == src ) {
+        return;
+    }
+
+    if ( 0 == src->mNumProperties ) {
         return;
     }
 

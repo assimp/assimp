@@ -42,6 +42,10 @@ OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
 )
+OPTION( BUILD_FRAMEWORK
+  "Build package as Mac OS X Framework bundle."
+  OFF
+)
 OPTION( ASSIMP_DOUBLE_PRECISION
   "Set to ON to enable double precision processing"
   OFF
@@ -110,6 +114,11 @@ IF(MSVC)
     ON
   )
 ENDIF(MSVC)
+
+IF (BUILD_FRAMEWORK)
+  SET (BUILD_SHARED_LIBS ON)
+  MESSAGE(STATUS "Framework bundle building enabled")
+ENDIF(BUILD_FRAMEWORK)
 
 IF(NOT BUILD_SHARED_LIBS)
   MESSAGE(STATUS "Shared libraries disabled")

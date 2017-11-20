@@ -60,7 +60,7 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 <b>Stanford Ply</b> ( <i>*.ply</i> )<br>
 <b>TrueSpace</b> ( <i>*.cob, *.scn</i> )<sup>2</sup><br><br>
 </tt>
-See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not.
+See the @link importer_notes Importer Notes Page @endlink for information, what a specific importer can do and what not.
 Note that although this paper claims to be the official documentation,
 http://assimp.sourceforge.net/main_features_formats.html
 <br>is usually the most up-to-date list of file formats supported by the library. <br>
@@ -81,7 +81,7 @@ formats handle the required endian conversion correctly, so large parts of the l
 
 The assimp linker library and viewer application are provided under the BSD 3-clause license. This basically means
 that you are free to use it in open- or closed-source projects, for commercial or non-commercial purposes as you like
-as long as you retain the license informations and take own responsibility for what you do with it. For details see
+as long as you retain the license information and take own responsibility for what you do with it. For details see
 the LICENSE file.
 
 You can find test models for almost all formats in the <assimp_root>/test/models directory. Beware, they're *free*,
@@ -1420,7 +1420,7 @@ IFC file properties (IfcPropertySet) are kept as per-node metadata, see aiNode::
 
 This section contains implementations notes for the OgreXML importer.
 @subsection overview Overview
-Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that I use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
+Ogre importer is currently optimized for the Blender Ogre exporter, because that's the only one that I use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
 @subsection what What will be loaded?
 
@@ -1434,7 +1434,7 @@ Skeleton: Skeleton with Bone hierarchy (Position and Rotation, but no Scaling in
 animations with rotation, translation and scaling keys.
 
 @subsection export_Blender How to export Files from Blender
-You can find informations about how to use the Ogreexporter by your own, so here are just some options that you need, so the assimp
+You can find information about how to use the Ogreexporter by your own, so here are just some options that you need, so the assimp
 importer will load everything correctly:
 - Use either "Rendering Material" or "Custom Material" see @ref material
 - do not use "Flip Up Axies to Y"
@@ -1543,7 +1543,7 @@ Done! Please, share your loader that everyone can profit from it!
 
 @section properties Properties
 
-You can use properties to chance the behavior of you importer. In order to do so, you have to overide BaseImporter::SetupProperties, and specify
+You can use properties to chance the behavior of you importer. In order to do so, you have to override BaseImporter::SetupProperties, and specify
 you custom properties in config.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
 
 The properties can be set with Importer::SetProperty***() and can be accessed in your SetupProperties function with Importer::GetProperty***(). You can

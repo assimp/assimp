@@ -317,7 +317,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
                     info.lockedPos = AI_TT_UV_IDX_LOCK_TBD;
                 }
 
-                // Get all coresponding meshes
+                // Get all corresponding meshes
                 for (unsigned int n = 0; n < pScene->mNumMeshes;++n)    {
                     aiMesh* mesh = pScene->mMeshes[n];
                     if (mesh->mMaterialIndex != i || !mesh->mTextureCoords[0])

@@ -566,7 +566,6 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 
                 if ( !name_carrier ) {
                     nodes_chain.push_back( new aiNode( original_name ) );
-                    name_carrier = nodes_chain.back();
                 }
 
                 //setup metadata on newest node
@@ -644,7 +643,6 @@ void Converter::ConvertCameras( const Model& model )
         }
     }
 }
-
 
 void Converter::ConvertLight( const Model& model, const Light& light )
 {
@@ -782,7 +780,6 @@ const char* Converter::NameTransformationComp( TransformationComp comp )
     ai_assert( false );
     return NULL;
 }
-
 
 const char* Converter::NameTransformationCompProperty( TransformationComp comp )
 {
@@ -2239,9 +2236,17 @@ void Converter::ConvertAnimations()
     }
 }
 
+void Converter::RenameNode( const std::string& fixed_name, const std::string& new_name ) {
+    if ( node_names.find( fixed_name ) == node_names.end() ) {
+        FBXImporter::LogError( "Cannot rename node " + fixed_name + ", not existing.");
+        return;
+    }
 
-void Converter::RenameNode( const std::string& fixed_name, const std::string& new_name )
-{
+    if ( node_names.find( new_name ) != node_names.end() ) {
+        FBXImporter::LogError( "Cannot rename node " + fixed_name + " to " + new_name +", name already existing." );
+        return;
+    }
+
     ai_assert( node_names.find( fixed_name ) != node_names.end() );
     ai_assert( node_names.find( new_name ) == node_names.end() );
 

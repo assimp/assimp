@@ -27,7 +27,7 @@ namespace Assimp
 ///
 /// Pay attention that X3D is format for interactive graphic and simulations for web browsers. aiScene can not contain all features of the X3D format.
 /// Also, aiScene contain rasterized-like data. For example, X3D can describe circle all cylinder with one tag, but aiScene contain result of tesselation:
-/// vertices, faces etc. Yes, you can use algorithm for detecting figures or shapes, but thats not good idea at all.
+/// vertices, faces etc. Yes, you can use algorithm for detecting figures or shapes, but that's not a good idea at all.
 ///
 /// Supported nodes:
 ///		Core component:
@@ -96,7 +96,7 @@ private:
 	aiMatrix4x4 Matrix_GlobalToCurrent(const aiNode& pNode) const;
 
 	/// \fn void AttrHelper_CommaToPoint(std::string& pStringWithComma)
-	/// Convert commas in string to points. Thats need because "std::to_string" result depend on locale (regional settings).
+	/// Convert commas in string to points. That's needed because "std::to_string" result depends on locale (regional settings).
 	/// \param [in, out] pStringWithComma - reference to string, which must be modified.
 	void AttrHelper_CommaToPoint(std::string& pStringWithComma) { for(char& c: pStringWithComma) { if(c == ',') c = '.'; } }
 

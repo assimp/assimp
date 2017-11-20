@@ -652,6 +652,8 @@ static void setMatrix( aiNode *node, DataArrayList *transformData ) {
         i++;
     }
 
+    ai_assert(i == 16);
+
     node->mTransformation.a1 = m[ 0 ];
     node->mTransformation.a2 = m[ 4 ];
     node->mTransformation.a3 = m[ 8 ];

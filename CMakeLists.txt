@@ -183,8 +183,11 @@ SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
 IF( UNIX )
   # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
-  IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
-    ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+  IF( ${OPERATING_SYSTEM} MATCHES "Android")
+  ELSE()
+    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
+      #ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+    ENDIF()
   ENDIF()
 
   # Use GNUInstallDirs for Unix predefined directories

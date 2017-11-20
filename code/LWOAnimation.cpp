@@ -446,8 +446,6 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 
     // Iterate through all three arrays at once - it's tricky, but
     // rather interesting to implement.
-    double lasttime = std::min(envl_x->keys[0].time,std::min(envl_y->keys[0].time,envl_z->keys[0].time));
-
     cur_x = envl_x->keys.begin();
     cur_y = envl_y->keys.begin();
     cur_z = envl_z->keys.begin();
@@ -503,7 +501,7 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
                 InterpolateTrack(out,fill,(end_y ? (*cur_x) : (*cur_y)).time);
             }
         }
-        lasttime = fill.mTime;
+        double lasttime = fill.mTime;
         out.push_back(fill);
 
         if (lasttime >= (*cur_x).time) {

@@ -98,10 +98,6 @@ namespace glTF2 {
         obj.AddMember("bufferView", a.bufferView->index, w.mAl);
         obj.AddMember("byteOffset", a.byteOffset, w.mAl);
 
-        if (a.byteStride != 0) {
-            obj.AddMember("byteStride", a.byteStride, w.mAl);
-        }
-
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
@@ -168,6 +164,9 @@ namespace glTF2 {
         obj.AddMember("buffer", bv.buffer->index, w.mAl);
         obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
         obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
+        if (bv.byteStride != 0) {
+            obj.AddMember("byteStride", bv.byteStride, w.mAl);
+        }
         obj.AddMember("target", int(bv.target), w.mAl);
     }
 

@@ -58,8 +58,7 @@ protected:
 };
 
 // ------------------------------------------------------------------------------------------------
-void FindDegeneratesProcessTest::SetUp()
-{
+void FindDegeneratesProcessTest::SetUp() {
     mesh = new aiMesh();
     process = new FindDegeneratesProcess();
 
@@ -107,16 +106,12 @@ void FindDegeneratesProcessTest::SetUp()
     mesh->mNumUVComponents[1] = numFaces;
 }
 
-// ------------------------------------------------------------------------------------------------
-void FindDegeneratesProcessTest::TearDown()
-{
+void FindDegeneratesProcessTest::TearDown() {
     delete mesh;
     delete process;
 }
 
-// ------------------------------------------------------------------------------------------------
-TEST_F(FindDegeneratesProcessTest, testDegeneratesDetection)
-{
+TEST_F(FindDegeneratesProcessTest, testDegeneratesDetection) {
     process->EnableInstantRemoval(false);
     process->ExecuteOnMesh(mesh);
 
@@ -135,12 +130,18 @@ TEST_F(FindDegeneratesProcessTest, testDegeneratesDetection)
               mesh->mPrimitiveTypes);
 }
 
-// ------------------------------------------------------------------------------------------------
-TEST_F(FindDegeneratesProcessTest, testDegeneratesRemoval)
-{
+TEST_F(FindDegeneratesProcessTest, testDegeneratesRemoval) {
+    process->EnableAreaCheck(false);
     process->EnableInstantRemoval(true);
     process->ExecuteOnMesh(mesh);
 
     EXPECT_EQ(mesh->mNumUVComponents[1], mesh->mNumFaces);
 }
 
+TEST_F(FindDegeneratesProcessTest, testDegeneratesRemovalWithAreaCheck) {
+    process->EnableAreaCheck(true);
+    process->EnableInstantRemoval(true);
+    process->ExecuteOnMesh(mesh);
+
+    EXPECT_EQ(mesh->mNumUVComponents[1]-100, mesh->mNumFaces);
+}

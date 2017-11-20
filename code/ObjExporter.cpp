@@ -155,7 +155,7 @@ std::string ObjExporter :: GetMaterialLibName()
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialLibFileName() {
-    // Remove existing .obj file extention so that the final material file name will be fileName.mtl and not fileName.obj.mtl
+    // Remove existing .obj file extension so that the final material file name will be fileName.mtl and not fileName.obj.mtl
     size_t lastdot = filename.find_last_of('.');
     if (lastdot != std::string::npos)
         return filename.substr(0, lastdot) + MaterialExt;
@@ -258,7 +258,6 @@ void ObjExporter::WriteMaterialFile()
     }
 }
 
-// ------------------------------------------------------------------------------------------------
 void ObjExporter::WriteGeometryFile(bool noMtl) {
     WriteHeader(mOutput);
     if (!noMtl)
@@ -280,8 +279,10 @@ void ObjExporter::WriteGeometryFile(bool noMtl) {
         mOutput << "# " << vp.size() << " vertex positions and colors" << endl;
         size_t colIdx = 0;
         for ( const aiVector3D& v : vp ) {
-            mOutput << "v  " << v.x << " " << v.y << " " << v.z << " " << vc[ colIdx ].r << " " << vc[ colIdx ].g << " " << vc[ colIdx ].b << endl;
-            colIdx++;
+            if ( colIdx < vc.size() ) {
+                mOutput << "v  " << v.x << " " << v.y << " " << v.z << " " << vc[ colIdx ].r << " " << vc[ colIdx ].g << " " << vc[ colIdx ].b << endl;
+            }
+            ++colIdx;
         }
     }
     mOutput << endl;

@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-// Header files, standart library.
+// Header files, standard library.
 #include <memory>
 #include <inttypes.h>
 
@@ -170,13 +170,13 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     bv->buffer = buffer;
     bv->byteOffset = unsigned(offset);
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
+    bv->byteStride = 0;
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
     acc->byteOffset = 0;
-    acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;
     acc->type = typeOut;
@@ -402,7 +402,7 @@ void glTF2Exporter::ExportMaterials()
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
 
-        std::string id = "material_" + std::to_string(i);
+        std::string id = "material_" + to_string(i);
 
         Ref<Material> m = mAsset->materials.Create(id);
 
@@ -800,9 +800,33 @@ void glTF2Exporter::MergeMeshes()
             for (unsigned int m = nMeshes - 1; m >= 1; --m) {
                 Ref<Mesh> mesh = node->meshes.at(m);
 
-                firstMesh->primitives.insert(firstMesh->primitives.end(), mesh->primitives.begin(), mesh->primitives.end());
+                //append this mesh's primitives to the first mesh's primitives
+                firstMesh->primitives.insert(
+                    firstMesh->primitives.end(),
+                    mesh->primitives.begin(),
+                    mesh->primitives.end()
+                );
 
-                node->meshes.erase(node->meshes.begin() + m);
+                //remove the mesh from the list of meshes
+                unsigned int removedIndex = mAsset->meshes.Remove(mesh->id.c_str());
+
+                //find the presence of the removed mesh in other nodes
+                for (unsigned int nn = 0; nn < mAsset->nodes.Size(); ++nn) {
+                    Ref<Node> node = mAsset->nodes.Get(nn);
+
+                    for (unsigned int mm = 0; mm < node->meshes.size(); ++mm) {
+                        Ref<Mesh>& meshRef = node->meshes.at(mm);
+                        unsigned int meshIndex = meshRef.GetIndex();
+
+                        if (meshIndex == removedIndex) {
+                            node->meshes.erase(node->meshes.begin() + mm);
+                        } else if (meshIndex > removedIndex) {
+                            Ref<Mesh> newMeshRef = mAsset->meshes.Get(meshIndex - 1);
+
+                            meshRef = newMeshRef;
+                        }
+                    }
+                }
             }
 
             //since we were looping backwards, reverse the order of merged primitives to their original order

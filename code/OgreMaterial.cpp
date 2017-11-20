@@ -258,7 +258,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
                 ReadTechnique(Trim(techniqueName), ss, material);
             }
 
-            // Read informations from a custom material
+            // Read information from a custom material
             /** @todo This "set $x y" does not seem to be a official Ogre material system feature.
                 Materials can inherit other materials and override texture units by using the (unique)
                 parent texture unit name in your cloned material.

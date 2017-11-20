@@ -422,7 +422,6 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
     return true;
 }
 
-
 }
 
 // ------------------------------------------------------------------------------------------------

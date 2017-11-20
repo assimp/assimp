@@ -51,7 +51,7 @@ import assimp.types;
 extern ( C ) {
    /*
     * These limits are required to match the settings Assimp was compiled
-    * against. Therfore, do not redefine them unless you build the library
+    * against. Therefore, do not redefine them unless you build the library
     * from source using the same definitions.
     */
 

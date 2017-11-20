@@ -170,13 +170,13 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     bv->buffer = buffer;
     bv->byteOffset = unsigned(offset);
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
+    bv->byteStride = 0;
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
     acc->byteOffset = 0;
-    acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;
     acc->type = typeOut;

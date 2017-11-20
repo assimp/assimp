@@ -100,6 +100,8 @@ bool D3MFExporter::exportAsset() {
     writeBuild();
 
     mOutput << "</" << XmlTag::model << ">\n";
+
+    return true;
 }
 
 void D3MFExporter::writeHeader() {

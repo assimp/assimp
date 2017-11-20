@@ -436,7 +436,6 @@ namespace glTF2
     {
         Ref<BufferView> bufferView;  //!< The ID of the bufferView. (required)
         unsigned int byteOffset;     //!< The offset relative to the start of the bufferView in bytes. (required)
-        unsigned int byteStride;     //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         unsigned int count;          //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
@@ -627,6 +626,7 @@ namespace glTF2
         Ref<Buffer> buffer; //! The ID of the buffer. (required)
         size_t byteOffset; //! The offset into the buffer in bytes. (required)
         size_t byteLength; //! The length of the bufferView in bytes. (default: 0)
+        unsigned int byteStride; //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
 
         BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 

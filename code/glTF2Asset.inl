@@ -512,6 +512,7 @@ inline void BufferView::Read(Value& obj, Asset& r)
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
     byteLength = MemberOrDefault(obj, "byteLength", 0u);
+    byteStride = MemberOrDefault(obj, "byteStride", 0u);
 }
 
 //
@@ -526,7 +527,6 @@ inline void Accessor::Read(Value& obj, Asset& r)
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
-    byteStride = MemberOrDefault(obj, "byteStride", 0u);
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
     count = MemberOrDefault(obj, "count", 0u);
 
@@ -601,7 +601,7 @@ bool Accessor::ExtractData(T*& outData)
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
 
-    const size_t stride = byteStride ? byteStride : elemSize;
+    const size_t stride = bufferView && bufferView->byteStride ? bufferView->byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
     ai_assert(elemSize <= targetElemSize);
@@ -641,7 +641,7 @@ inline Accessor::Indexer::Indexer(Accessor& acc)
     : accessor(acc)
     , data(acc.GetPointer())
     , elemSize(acc.GetElementSize())
-    , stride(acc.byteStride ? acc.byteStride : elemSize)
+    , stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize)
 {
 
 }

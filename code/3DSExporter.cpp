@@ -211,6 +211,12 @@ Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> outfile, con
 }
 
 // ------------------------------------------------------------------------------------------------
+Discreet3DSExporter::~Discreet3DSExporter() {
+    // empty
+}
+
+
+// ------------------------------------------------------------------------------------------------
 int Discreet3DSExporter::WriteHierarchy(const aiNode& node, int seq, int sibling_level)
 {
     // 3DS scene hierarchy is serialized as in http://www.martinreddy.net/gfx/3d/3DS.spec

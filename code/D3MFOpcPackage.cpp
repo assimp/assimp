@@ -80,24 +80,15 @@ namespace XmlTag {
 }
 
 class IOSystem2Unzip {
-
-    public:
-
-        static voidpf open(voidpf opaque, const char* filename, int mode);
-
-        static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
-
-        static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
-
-        static long tell(voidpf opaque, voidpf stream);
-
-        static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
-
-        static int close(voidpf opaque, voidpf stream);
-
-        static int testerror(voidpf opaque, voidpf stream);
-
-        static zlib_filefunc_def get(IOSystem* pIOHandler);
+public:
+    static voidpf open(voidpf opaque, const char* filename, int mode);
+    static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
+    static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
+    static long tell(voidpf opaque, voidpf stream);
+    static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
+    static int close(voidpf opaque, voidpf stream);
+    static int testerror(voidpf opaque, voidpf stream);
+    static zlib_filefunc_def get(IOSystem* pIOHandler);
 };
 
 voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
@@ -257,42 +248,26 @@ void ZipFile::Flush() {
 }
 
 
-class D3MFZipArchive : public IOSystem
-{
+class D3MFZipArchive : public IOSystem {
 public:
-
     static const unsigned int FileNameSize = 256;
 
-public:
-
     D3MFZipArchive(IOSystem* pIOHandler, const std::string & rFile);
-
     ~D3MFZipArchive();
-
     bool Exists(const char* pFile) const;
-
     char getOsSeparator() const;
-
     IOStream* Open(const char* pFile, const char* pMode = "rb");
-
     void Close(IOStream* pFile);
-
     bool isOpen() const;
-
     void getFileList(std::vector<std::string> &rFileList);
 
 private:
-
     bool mapArchive();
 
 private:
-
     unzFile m_ZipFileHandle;
-
     std::map<std::string, ZipFile*> m_ArchiveMap;
-
 };
-
 
 // ------------------------------------------------------------------------------------------------
 //  Constructor.

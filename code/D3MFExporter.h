@@ -11,18 +11,18 @@ with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
+copyright notice, this list of conditions and the
+following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
 
 * Neither the name of the assimp team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the assimp team.
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -38,27 +38,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#pragma once
 
-#ifndef AI_D3MFLOADER_H_INCLUDED
-#define AI_D3MFLOADER_H_INCLUDED
+#include <memory>
+#include <sstream>
+#include <vector>
+#include <assimp/vector3.h>
 
-#include "BaseImporter.h"
+struct aiScene;
+struct aiNode;
+struct aiMaterial;
+struct aiMesh;
 
 namespace Assimp {
 
-class D3MFImporter : public BaseImporter {
+class IOStream;
+
+namespace D3MF {
+
+class D3MFExporter {
 public:
-    // BaseImporter interface
-    D3MFImporter();
-    ~D3MFImporter();
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
-    void SetupProperties(const Importer *pImp);
-    const aiImporterDesc *GetInfo() const;
+    D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pScene );
+    ~D3MFExporter();
+    bool validate();
+    bool exportAsset();
 
 protected:
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    void writeHeader();
+    void writeObjects();
+    void writeMesh( aiMesh *mesh );
+    void writeVertex( const aiVector3D &pos );
+    void writeFaces( aiMesh *mesh );
+    void writeBuild();
+
+private:
+    IOStream *mStream;
+    const aiScene *mScene;
+    std::ostringstream mOutput;
+    std::vector<unsigned int> mBuildItems;
 };
 
+}
 } // Namespace Assimp
 
-#endif // AI_D3MFLOADER_H_INCLUDED

@@ -56,15 +56,15 @@ typedef std::shared_ptr<XmlReader> XmlReaderPtr;
 
 class D3MFZipArchive;
 
-class D3MFOpcPackage
-{
+class D3MFOpcPackage {
 public:
     D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile);
     ~D3MFOpcPackage();
-
     IOStream* RootStream() const;
-private:
+
+protected:
     std::string ReadPackageRootRelationship(IOStream* stream);
+
 private:
     IOStream* m_RootStream;
     std::unique_ptr<D3MFZipArchive> zipArchive;

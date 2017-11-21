@@ -193,7 +193,7 @@ protected:
 
     virtual bool importerTest() {
         ::Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
         return nullptr != scene;
     }
 
@@ -202,7 +202,7 @@ protected:
     virtual bool exporterTest() {
         ::Assimp::Importer importer;
         ::Assimp::Exporter exporter;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_test.obj" ) );
@@ -257,7 +257,7 @@ TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {
 
 TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
     ::Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", 0 );
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

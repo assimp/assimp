@@ -63,7 +63,9 @@ public:
     D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pScene );
     ~D3MFExporter();
     bool validate();
-    bool exportAsset();
+    bool exportArchive();
+    bool exportRelations();
+    bool export3DModel();
 
 protected:
     void writeHeader();

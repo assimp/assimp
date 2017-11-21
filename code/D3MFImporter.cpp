@@ -79,15 +79,10 @@ public:
         scene->mRootNode = new aiNode();
         std::vector<aiNode*> children;
 
-        while(ReadToEndElement(D3MF::XmlTag::model))
-        {
-
-            if(xmlReader->getNodeName() == D3MF::XmlTag::object)
-            {
+        while(ReadToEndElement(D3MF::XmlTag::model)) {
+            if(xmlReader->getNodeName() == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(scene));
-            }
-            else if(xmlReader->getNodeName() == D3MF::XmlTag::build)
-            {
+            } else if(xmlReader->getNodeName() == D3MF::XmlTag::build) {
 
             }
         }
@@ -95,7 +90,6 @@ public:
         if ( scene->mRootNode->mName.length == 0 ) {
             scene->mRootNode->mName.Set( "3MF" );
         }
-
 
         scene->mNumMeshes = static_cast<unsigned int>(meshes.size());
         scene->mMeshes = new aiMesh*[scene->mNumMeshes]();

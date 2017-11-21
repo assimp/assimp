@@ -55,29 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <algorithm>
 #include <cassert>
-
 #include <contrib/unzip/unzip.h>
+#include "3MFXmlTags.h"
 
 namespace Assimp {
 
 namespace D3MF {
-
-namespace XmlTag {
-    static const std::string CONTENT_TYPES_ARCHIVE  = "[Content_Types].xml";
-    static const std::string ROOT_RELATIONSHIPS_ARCHIVE  = "_rels/.rels";
-    static const std::string SCHEMA_CONTENTTYPES         = "http://schemas.openxmlformats.org/package/2006/content-types";
-    static const std::string SCHEMA_RELATIONSHIPS        = "http://schemas.openxmlformats.org/package/2006/relationships";
-    static const std::string RELS_RELATIONSHIP_CONTAINER = "Relationships";
-    static const std::string RELS_RELATIONSHIP_NODE      = "Relationship";
-    static const std::string RELS_ATTRIB_TARGET         = "Target";
-    static const std::string RELS_ATTRIB_TYPE            = "Type";
-    static const std::string RELS_ATTRIB_ID              = "Id";
-    static const std::string PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
-    static const std::string PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
-    static const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
-    static const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
-    static const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-}
 
 class IOSystem2Unzip {
 public:
@@ -194,9 +177,10 @@ private:
     size_t m_Size;
 };
 
-ZipFile::ZipFile(size_t size) : m_Size(size) {
+ZipFile::ZipFile(size_t size)
+: m_Buffer( nullptr )
+, m_Size(size) {
     ai_assert(m_Size != 0);
-
     m_Buffer = ::malloc(m_Size);
 }
 
@@ -431,13 +415,11 @@ public:
         }
     }
 
-    void ParseAttributes(XmlReader*)
-    {
+    void ParseAttributes(XmlReader*) {
 
     }
 
-    void ParseChildNode(XmlReader* xmlReader)
-    {        
+    void ParseChildNode(XmlReader* xmlReader) {        
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
 
         relPtr->id = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_ID.c_str());
@@ -446,42 +428,41 @@ public:
 
         m_relationShips.push_back(relPtr);
     }
+
     std::vector<OpcPackageRelationshipPtr> m_relationShips;
 };
 // ------------------------------------------------------------------------------------------------
 
 D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
-    : m_RootStream(nullptr)
-{    
-    zipArchive.reset(new D3MF::D3MFZipArchive( pIOHandler, rFile ));    
-    if(!zipArchive->isOpen()) {
+: mRootStream(nullptr)
+, mZipArchive() {    
+    mZipArchive.reset( new D3MF::D3MFZipArchive( pIOHandler, rFile ) );    
+    if(!mZipArchive->isOpen()) {
         throw DeadlyImportError("Failed to open file " + rFile+ ".");
     }
 
     std::vector<std::string> fileList;
-    zipArchive->getFileList(fileList);
+    mZipArchive->getFileList(fileList);
 
-    for(auto& file: fileList){
+    for (auto& file: fileList) {
         if(file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
             //PkgRelationshipReader pkgRelReader(file, archive);
-            ai_assert(zipArchive->Exists(file.c_str()));
+            ai_assert(mZipArchive->Exists(file.c_str()));
 
-            IOStream *fileStream = zipArchive->Open(file.c_str());
+            IOStream *fileStream = mZipArchive->Open(file.c_str());
 
             ai_assert(fileStream != nullptr);
 
             std::string rootFile = ReadPackageRootRelationship(fileStream);
-            if(rootFile.size() > 0 && rootFile[0] == '/')
-                rootFile = rootFile.substr(1);
+            if ( rootFile.size() > 0 && rootFile[ 0 ] == '/' ) {
+                rootFile = rootFile.substr( 1 );
+            }
 
             DefaultLogger::get()->debug(rootFile);
 
-            m_RootStream = zipArchive->Open(rootFile.c_str());
+            mRootStream = mZipArchive->Open(rootFile.c_str());
 
-            ai_assert(m_RootStream != nullptr);
-
-
-
+            ai_assert(mRootStream != nullptr);
 
         //    const size_t size = zipArchive->FileSize();
         //    m_Data.resize( size );
@@ -492,41 +473,31 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
         //        m_Data.clear();
         //        return false;
         //    }
-            zipArchive->Close( fileStream );
+            mZipArchive->Close( fileStream );
 
-        }
-        else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE)
-        {
+        } else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
 
         }
     }
 }
 
-D3MFOpcPackage::~D3MFOpcPackage()
-{
-
+D3MFOpcPackage::~D3MFOpcPackage() {
+    // empty
 }
 
-IOStream* D3MFOpcPackage::RootStream() const
-{
-    return m_RootStream;
+IOStream* D3MFOpcPackage::RootStream() const {
+    return mRootStream;
 }
 
-
-std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream)
-{
-
+std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream) {
     std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(stream));
     std::unique_ptr<XmlReader> xml(irr::io::createIrrXMLReader(xmlStream.get()));
 
     OpcPackageRelationshipReader reader(xml.get());
 
-
     auto itr = std::find_if(reader.m_relationShips.begin(), reader.m_relationShips.end(), [](const OpcPackageRelationshipPtr& rel){
         return rel->type == XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;
     });
-
-
 
     if(itr == reader.m_relationShips.end())
         throw DeadlyImportError("Cannot find" + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
@@ -534,8 +505,8 @@ std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream)
     return (*itr)->target;
 }
 
-} //namespace D3MF
+} // Namespace D3MF
 
-}
+} // Namespace Assimp
 
 #endif //ASSIMP_BUILD_NO_3MF_IMPORTER

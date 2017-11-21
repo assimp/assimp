@@ -59,7 +59,7 @@ void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pSce
 
     D3MF::D3MFExporter myExporter( outfile, pScene );
     if ( myExporter.validate() ) {
-        bool ok = myExporter.exportAsset();
+        bool ok = myExporter.exportArchive();
     }
 }
 
@@ -90,7 +90,25 @@ bool D3MFExporter::validate() {
     return true;
 }
 
-bool D3MFExporter::exportAsset() {
+bool D3MFExporter::exportArchive() {
+    bool ok( true );
+    ok |= exportRelations();
+    ok |= export3DModel();
+
+    return ok;
+}
+
+bool D3MFExporter::exportRelations() {
+    mOutput.clear();
+
+    mOutput << "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n";
+    mOutput
+    return true;
+}
+
+bool D3MFExporter::export3DModel() {
+    mOutput.clear();
+
     writeHeader();
     mOutput << "<" << XmlTag::model << " " << XmlTag::model_unit << "=\"millimeter\""
             << "xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">"

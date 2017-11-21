@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "irrXMLWrapper.h"
 
 namespace Assimp {
-
 namespace D3MF {
 
 typedef irr::io::IrrXMLReader XmlReader;
@@ -66,8 +65,8 @@ protected:
     std::string ReadPackageRootRelationship(IOStream* stream);
 
 private:
-    IOStream* m_RootStream;
-    std::unique_ptr<D3MFZipArchive> zipArchive;
+    IOStream* mRootStream;
+    std::unique_ptr<D3MFZipArchive> mZipArchive;
 };
 
 }

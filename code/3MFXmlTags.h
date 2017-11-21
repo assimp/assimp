@@ -67,6 +67,22 @@ namespace XmlTag {
     static const std::string item = "item";
     static const std::string objectid = "objectid";
     static const std::string transform = "transform";
+
+    static const std::string CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
+    static const std::string ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";
+    static const std::string SCHEMA_CONTENTTYPES = "http://schemas.openxmlformats.org/package/2006/content-types";
+    static const std::string SCHEMA_RELATIONSHIPS = "http://schemas.openxmlformats.org/package/2006/relationships";
+    static const std::string RELS_RELATIONSHIP_CONTAINER = "Relationships";
+    static const std::string RELS_RELATIONSHIP_NODE = "Relationship";
+    static const std::string RELS_ATTRIB_TARGET = "Target";
+    static const std::string RELS_ATTRIB_TYPE = "Type";
+    static const std::string RELS_ATTRIB_ID = "Id";
+    static const std::string PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+    static const std::string PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
+    static const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
+    static const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
+    static const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
+
 }
 
 }

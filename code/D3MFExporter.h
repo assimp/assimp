@@ -56,6 +56,8 @@ class IOStream;
 
 namespace D3MF {
 
+#ifndef ASSIMP_BUILD_NO3MF_EXPORTER
+
 class D3MFExporter {
 public:
     D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pScene );
@@ -77,6 +79,8 @@ private:
     std::ostringstream mOutput;
     std::vector<unsigned int> mBuildItems;
 };
+
+#endif // ASSIMP_BUILD_NO3MF_EXPORTER
 
 }
 } // Namespace Assimp

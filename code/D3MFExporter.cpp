@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3MFXmlTags.h"
 
 namespace Assimp {
-namespace D3MF {
 
 void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/ ) {
     std::shared_ptr<IOStream> outfile( pIOSystem->Open( pFile, "wb" ) );
@@ -58,11 +57,15 @@ void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pSce
         throw DeadlyExportError( "Could not open output .3ds file: " + std::string( pFile ) );
     }
 
-    D3MFExporter myExporter( outfile, pScene );
+    D3MF::D3MFExporter myExporter( outfile, pScene );
     if ( myExporter.validate() ) {
         bool ok = myExporter.exportAsset();
     }
 }
+
+namespace D3MF {
+
+#ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
 D3MFExporter::D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pScene )
 : mStream( outfile.get() )
@@ -100,6 +103,8 @@ bool D3MFExporter::exportAsset() {
     writeBuild();
 
     mOutput << "</" << XmlTag::model << ">\n";
+
+    std::string exportedFile = mOutput.str();
 
     return true;
 }
@@ -178,6 +183,8 @@ void D3MFExporter::writeBuild() {
     }
     mOutput << "</" << XmlTag::build << ">\n";
 }
+
+#endif // ASSIMP_BUILD_NO3MF_EXPORTER
 
 }
 } // Namespace Assimp

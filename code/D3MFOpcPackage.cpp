@@ -107,7 +107,6 @@ voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
         }
     }
 
-
     return (voidpf) io_system->Open(filename, mode_fopen);
 }
 
@@ -177,44 +176,32 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
     return mapping;
 }
 
-
-class ZipFile : public IOStream
-{
+class ZipFile : public IOStream {
     friend class D3MFZipArchive;
 
 public:
     explicit ZipFile(size_t size);
-
-    ~ZipFile();
-
+    virtual ~ZipFile();
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
-
     size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
-
     size_t FileSize() const;
-
     aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
-
     size_t Tell() const;
-
     void Flush();
 
 private:
-
-    void* m_Buffer;
-
+    void *m_Buffer;
     size_t m_Size;
-
 };
 
 ZipFile::ZipFile(size_t size) : m_Size(size) {
     ai_assert(m_Size != 0);
 
-    m_Buffer = malloc(m_Size);
+    m_Buffer = ::malloc(m_Size);
 }
 
 ZipFile::~ZipFile() {
-    free(m_Buffer);
+    ::free(m_Buffer);
     m_Buffer = NULL;
 }
 
@@ -227,8 +214,12 @@ size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount) {
     return size;
 }
 
-size_t ZipFile::Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) {
-    return 0;
+size_t ZipFile::Write(const void* pvBuffer, size_t size, size_t pCount ) {
+    const size_t size_to_write( size * pCount );
+    if ( 0 == size_to_write ) {
+        return 0U;
+    }
+    return 0U;
 }
 
 size_t ZipFile::FileSize() const {
@@ -246,7 +237,6 @@ size_t ZipFile::Tell() const {
 void ZipFile::Flush() {
     // empty
 }
-
 
 class D3MFZipArchive : public IOSystem {
 public:
@@ -272,14 +262,12 @@ private:
 // ------------------------------------------------------------------------------------------------
 //  Constructor.
 D3MFZipArchive::D3MFZipArchive(IOSystem* pIOHandler, const std::string& rFile)
-    : m_ZipFileHandle(NULL), m_ArchiveMap()
-{
-    if (! rFile.empty())
-    {                
+: m_ZipFileHandle(NULL)
+, m_ArchiveMap() {
+    if (! rFile.empty()) {                
         zlib_filefunc_def mapping = IOSystem2Unzip::get(pIOHandler);            
 
         m_ZipFileHandle = unzOpen2(rFile.c_str(), &mapping);
-
         if(m_ZipFileHandle != NULL) {            
             mapArchive();
         }
@@ -409,8 +397,7 @@ bool D3MFZipArchive::mapArchive() {
 
 // ------------------------------------------------------------------------------------------------
 
-struct OpcPackageRelationship
-{
+struct OpcPackageRelationship {
     std::string id;
     std::string type;
     std::string target;
@@ -418,15 +405,10 @@ struct OpcPackageRelationship
 
 typedef std::shared_ptr<OpcPackageRelationship> OpcPackageRelationshipPtr;
 
-class OpcPackageRelationshipReader
-{
+class OpcPackageRelationshipReader {
 public:
-
-    OpcPackageRelationshipReader(XmlReader* xmlReader)
-    {        
-
-        while(xmlReader->read())
-        {
+    OpcPackageRelationshipReader(XmlReader* xmlReader) {        
+        while(xmlReader->read()) {
             if(xmlReader->getNodeType() == irr::io::EXN_ELEMENT &&
                xmlReader->getNodeName() == XmlTag::RELS_RELATIONSHIP_CONTAINER)
             {

@@ -43,7 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
+
+#include "D3MFExporter.h"
 
 class utD3MFImporterExporter : public AbstractImportExportBase {
 public:
@@ -58,8 +61,21 @@ public:
         
         return ( nullptr != scene );
     }
+
+    virtual bool exporterTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0 );
+
+        Assimp::Exporter exporter;
+        return nullptr != exporter.ExportToBlob( scene, "3mf", 0 );
+    }
+
 };
 
 TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F( utD3MFImporterExporter, export3MFtoMemTest ) {
+    EXPECT_TRUE( exporterTest() );
 }

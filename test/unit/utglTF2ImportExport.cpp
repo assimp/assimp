@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
+#include <assimp/postprocess.h>
 
 using namespace Assimp;
 
@@ -51,7 +52,7 @@ class utglTF2ImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", 0);
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 
@@ -59,7 +60,7 @@ public:
     virtual bool exporterTest() {
         Assimp::Importer importer;
         Assimp::Exporter exporter;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.gltf" ) );
 

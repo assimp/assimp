@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace Assimp;
 
@@ -52,7 +53,7 @@ class utSTLImporterExporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
         return nullptr != scene;
     }
 };
@@ -63,6 +64,6 @@ TEST_F( utSTLImporterExporter, importXFromFileTest ) {
 
 TEST_F( utSTLImporterExporter, test_with_two_solids ) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", 0 );
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 }

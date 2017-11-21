@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SMDLoader.h"
 #include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 #include "AbstractImportExportBase.h"
 
 using namespace ::Assimp;
@@ -51,7 +52,7 @@ class utSMDImporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SMD/triangle.smd", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SMD/triangle.smd", aiProcess_ValidateDataStructure );
         return nullptr != scene;
     }
 };
@@ -73,6 +74,6 @@ TEST_F( utSMDImporter, importTest ) {
 
 TEST_F( utSMDImporter, issue_899_Texture_garbage_at_end_of_string_Test ) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SMD/holy_grailref.smd", 0 );
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SMD/holy_grailref.smd", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 }

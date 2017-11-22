@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
+#include <assimp/postprocess.h>
 
 #include "TestModelFactory.h"
 
@@ -66,7 +67,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     EXPECT_NE( desc, nullptr );
     path.append( desc->fileExtension );
     EXPECT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
-    const aiScene *newScene( importer.ReadFile( path, 0 ) );
+    const aiScene *newScene( importer.ReadFile( path, aiProcess_ValidateDataStructure ) );
     EXPECT_TRUE( NULL != newScene );
     float newOpacity;
     if ( newScene->mNumMaterials > 0 ) {

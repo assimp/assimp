@@ -1280,7 +1280,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 
 			std::vector<ai_real> frames;
 			for( size_t i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
-				frames.push_back(nodeAnim->mPositionKeys[i].mTime);
+				frames.push_back(static_cast<ai_real>(nodeAnim->mPositionKeys[i].mTime));
 			}
 			
 			WriteFloatArray( node_idstr , FloatType_Time, (const ai_real*) frames.data(), frames.size());

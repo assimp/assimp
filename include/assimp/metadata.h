@@ -187,7 +187,7 @@ struct aiMetadata {
     static inline
     aiMetadata *Alloc( unsigned int numProperties ) {
         if ( 0 == numProperties ) {
-            return NULL;
+            return nullptr;
         }
 
         aiMetadata *data = new aiMetadata;

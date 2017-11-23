@@ -416,7 +416,7 @@ public:
     }
 
     void ParseAttributes(XmlReader*) {
-
+        // empty
     }
 
     void ParseChildNode(XmlReader* xmlReader) {        

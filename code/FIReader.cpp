@@ -714,7 +714,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return atof(attr->value->toString().c_str());
+        return static_cast<float>( atof( attr->value->toString().c_str() ) );
     }
 
     virtual float getAttributeValueAsFloat(int idx) const /*override*/ {
@@ -725,7 +725,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return atof(attributes[idx].value->toString().c_str());
+        return static_cast<float>( atof( attributes[ idx ].value->toString().c_str() ) );
     }
 
     virtual const char* getNodeName() const /*override*/ {
@@ -1792,7 +1792,7 @@ public:
 
     virtual void registerDecoder(const std::string &/*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary */*vocabulary*/) /*override*/ {}
+    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
 
 private:
 

@@ -57,9 +57,9 @@ void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pSce
         throw DeadlyExportError( "Could not open output .3ds file: " + std::string( pFile ) );
     }
 
-    D3MF::D3MFExporter myExporter( outfile, pScene );
+    D3MF::D3MFExporter myExporter( outfile, pIOSystem, pScene );
     if ( myExporter.validate() ) {
-        bool ok = myExporter.exportArchive();
+        bool ok = myExporter.exportArchive(pFile);
     }
 }
 
@@ -67,8 +67,9 @@ namespace D3MF {
 
 #ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
-D3MFExporter::D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pScene )
-: mStream( outfile.get() )
+D3MFExporter::D3MFExporter( std::shared_ptr<IOStream> outfile, IOSystem* pIOSystem, const aiScene* pScene )
+: mIOSystem( pIOSystem )
+, mStream( outfile.get() )
 , mScene( pScene )
 , mBuildItems() {
     // empty
@@ -76,6 +77,26 @@ D3MFExporter::D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pS
 
 D3MFExporter::~D3MFExporter() {
     // empty
+}
+
+bool D3MFExporter::createFileStructure( const char *file ) {
+    if ( !mIOSystem->CreateDirectory( file ) ) {
+        return false;
+    }
+
+    if ( !mIOSystem->ChangeDirectory( file ) ) {
+        return false;
+    }
+
+    if ( !mIOSystem->CreateDirectory( "3D" ) ) {
+        return false;
+    }
+
+    if ( !mIOSystem->CreateDirectory( "_rels" ) ) {
+        return false;
+    }
+
+    return true;
 }
 
 bool D3MFExporter::validate() {
@@ -90,8 +111,9 @@ bool D3MFExporter::validate() {
     return true;
 }
 
-bool D3MFExporter::exportArchive() {
+bool D3MFExporter::exportArchive( const char *file ) {
     bool ok( true );
+    ok |= createFileStructure( file );
     ok |= exportRelations();
     ok |= export3DModel();
 
@@ -102,7 +124,10 @@ bool D3MFExporter::exportRelations() {
     mOutput.clear();
 
     mOutput << "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n";
-    mOutput
+    //mOutput
+
+    writeRelInfoToFile();
+
     return true;
 }
 
@@ -116,6 +141,8 @@ bool D3MFExporter::export3DModel() {
     mOutput << "<" << XmlTag::resources << ">\n";
 
     writeObjects();
+
+    writeModelToArchive();
 
     mOutput << "</" << XmlTag::resources << ">\n";
     writeBuild();
@@ -201,6 +228,9 @@ void D3MFExporter::writeBuild() {
     }
     mOutput << "</" << XmlTag::build << ">\n";
 }
+
+bool writeModelToArchive();
+bool writeRelInfoToFile();
 
 #endif // ASSIMP_BUILD_NO3MF_EXPORTER
 

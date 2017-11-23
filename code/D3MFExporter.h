@@ -53,6 +53,7 @@ struct aiMesh;
 namespace Assimp {
 
 class IOStream;
+class IOSystem;
 
 namespace D3MF {
 
@@ -60,10 +61,11 @@ namespace D3MF {
 
 class D3MFExporter {
 public:
-    D3MFExporter( std::shared_ptr<IOStream> outfile, const aiScene* pScene );
+    D3MFExporter( std::shared_ptr<IOStream> outfile, IOSystem* pIOSystem, const aiScene* pScene );
     ~D3MFExporter();
     bool validate();
-    bool exportArchive();
+    bool createFileStructure( const char *file );
+    bool exportArchive( const char *file );
     bool exportRelations();
     bool export3DModel();
 
@@ -74,8 +76,11 @@ protected:
     void writeVertex( const aiVector3D &pos );
     void writeFaces( aiMesh *mesh );
     void writeBuild();
+    bool writeModelToArchive();
+    bool writeRelInfoToFile();
 
 private:
+    IOSystem *mIOSystem;
     IOStream *mStream;
     const aiScene *mScene;
     std::ostringstream mOutput;

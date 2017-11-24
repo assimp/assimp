@@ -1790,9 +1790,9 @@ public:
         return nullptr;
     }
 
-    virtual void registerDecoder(const std::string &/*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
+    virtual void registerDecoder(const std::string & /*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary */*vocabulary*/) /*override*/ {}
+    virtual void registerVocabulary(const std::string & /*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
 
 private:
 

@@ -934,7 +934,7 @@ inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
-    const char* subobjId = (type == Camera::Orthographic) ? "ortographic" : "perspective";
+    const char* subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 
     Value* it = FindObject(obj, subobjId);
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");

@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #   include <sys/stat.h>
 #   include <sys/types.h>
+#   include <unistd.h>
 #endif // _WIN32
 
 #include <vector>

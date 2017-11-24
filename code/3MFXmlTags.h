@@ -85,5 +85,5 @@ namespace XmlTag {
 
 }
 
-}
-}
+} // Namespace D3MF
+} // Namespace Assimp

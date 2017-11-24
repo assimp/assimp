@@ -59,9 +59,11 @@ namespace D3MF {
 
 #ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
+struct OpcPackageRelationship;
+
 class D3MFExporter {
 public:
-    D3MFExporter( std::shared_ptr<IOStream> outfile, IOSystem* pIOSystem, const aiScene* pScene );
+    D3MFExporter( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene );
     ~D3MFExporter();
     bool validate();
     bool createFileStructure( const char *file );
@@ -76,19 +78,21 @@ protected:
     void writeVertex( const aiVector3D &pos );
     void writeFaces( aiMesh *mesh );
     void writeBuild();
-    bool writeModelToArchive();
-    bool writeRelInfoToFile();
+    void writeModelToArchive( const std::string &folder, const std::string &modelName );
+    void writeRelInfoToFile( const std::string &folder, const std::string &relName );
+    void createZipArchiveFromeFileStructure();
 
 private:
     IOSystem *mIOSystem;
-    IOStream *mStream;
+    std::string mArchiveName;
     const aiScene *mScene;
     std::ostringstream mOutput;
     std::vector<unsigned int> mBuildItems;
+    std::vector<OpcPackageRelationship*> mRelations;
 };
 
 #endif // ASSIMP_BUILD_NO3MF_EXPORTER
 
-}
+} // Namespace D3MF
 } // Namespace Assimp
 

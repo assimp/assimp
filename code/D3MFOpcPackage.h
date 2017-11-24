@@ -53,6 +53,12 @@ namespace D3MF {
 typedef irr::io::IrrXMLReader XmlReader;
 typedef std::shared_ptr<XmlReader> XmlReaderPtr;
 
+struct OpcPackageRelationship {
+    std::string id;
+    std::string type;
+    std::string target;
+};
+
 class D3MFZipArchive;
 
 class D3MFOpcPackage {

@@ -381,12 +381,6 @@ bool D3MFZipArchive::mapArchive() {
 
 // ------------------------------------------------------------------------------------------------
 
-struct OpcPackageRelationship {
-    std::string id;
-    std::string type;
-    std::string target;
-};
-
 typedef std::shared_ptr<OpcPackageRelationship> OpcPackageRelationshipPtr;
 
 class OpcPackageRelationshipReader {

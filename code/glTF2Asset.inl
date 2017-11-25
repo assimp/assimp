@@ -212,7 +212,7 @@ unsigned int LazyDict<T>::Remove(const char* id)
     mObjs.erase(mObjs.begin() + index);
 
     //update index of object in mObjs;
-    for (size_t i = index; i < mObjs.size(); ++i) {
+    for (unsigned int i = index; i < mObjs.size(); ++i) {
         T *obj = mObjs[i];
 
         obj->index = i;

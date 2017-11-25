@@ -445,7 +445,7 @@ void glTF2Exporter::ExportMaterials()
                 mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
             ) {
                 // convert specular color to luminance
-                float specularIntensity = specularColor[0] * 0.2125 + specularColor[1] * 0.7154 + specularColor[2] * 0.0721;
+                float specularIntensity = specularColor[0] * 0.2125f + specularColor[1] * 0.7154f + specularColor[2] * 0.0721f;
                 //normalize shininess (assuming max is 1000) with an inverse exponentional curve
                 float normalizedShininess = std::sqrt(shininess / 1000);
 

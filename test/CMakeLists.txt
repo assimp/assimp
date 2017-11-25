@@ -177,6 +177,13 @@ ELSE( WIN32 )
     SET( platform_libs pthread )
 ENDIF( WIN32 )
 
+IF( WIN32 )
+  ADD_CUSTOM_COMMAND(TARGET unit
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:unit>
+    MAIN_DEPENDENCY assimp)
+ENDIF( WIN32 )
+
 IF(MSVC)
 		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(MSVC)

@@ -339,7 +339,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
     bool ret = false;
-    std::vector<bool> dirtyMask(pMesh->mNumVertices, pMesh->mNumFaces);
+    std::vector<bool> dirtyMask(pMesh->mNumVertices, pMesh->mNumFaces != 0);
 
     // Ignore elements that are not referenced by vertices.
     // (they are, for example, caused by the FindDegenerates step)

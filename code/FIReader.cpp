@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MemoryIOWrapper.h"
 #include "irrXMLWrapper.h"
 #include "../contrib/utf8cpp/source/utf8.h"
+#include "fast_atof.h"
 #include <stack>
 #include <map>
 #include <iostream>
@@ -714,7 +715,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return atof(attr->value->toString().c_str());
+        return fast_atof(attr->value->toString().c_str());
     }
 
     virtual float getAttributeValueAsFloat(int idx) const /*override*/ {
@@ -725,7 +726,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return atof(attributes[idx].value->toString().c_str());
+        return fast_atof(attributes[idx].value->toString().c_str());
     }
 
     virtual const char* getNodeName() const /*override*/ {
@@ -1790,9 +1791,9 @@ public:
         return nullptr;
     }
 
-    virtual void registerDecoder(const std::string &/*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
+    virtual void registerDecoder(const std::string & /*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary */*vocabulary*/) /*override*/ {}
+    virtual void registerVocabulary(const std::string & /*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
 
 private:
 

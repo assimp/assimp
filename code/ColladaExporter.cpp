@@ -1309,7 +1309,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 				// Combine the above transformations
 				aiMatrix4x4 mat = TranslationM * RotationM * ScalingM;
 				
-				for( size_t j = 0; j < 4; ++j) {
+				for( unsigned int j = 0; j < 4; ++j) {
 					keyframes.insert(keyframes.end(), mat[j], mat[j] + 4);
                 }
 			}

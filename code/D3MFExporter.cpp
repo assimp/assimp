@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/ ) {
-    D3MF::D3MFExporter myExporter( pFile, pIOSystem, pScene );
+    D3MF::D3MFExporter myExporter( pFile, pScene );
     if ( myExporter.validate() ) {
         bool ok = myExporter.exportArchive(pFile);
         if ( !ok ) {
@@ -68,9 +68,8 @@ namespace D3MF {
 
 #ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
-D3MFExporter::D3MFExporter( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene )
-: mIOSystem( pIOSystem )
-, mArchiveName( pFile )
+D3MFExporter::D3MFExporter( const char* pFile, const aiScene* pScene )
+: mArchiveName( pFile )
 , m_zipArchive( nullptr )
 , mScene( pScene )
 , mBuildItems()

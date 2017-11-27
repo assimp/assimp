@@ -81,14 +81,14 @@ protected:
     void writeBuild();
     void writeModelToArchive( const std::string &folder, const std::string &modelName );
     void writeRelInfoToFile( const std::string &folder, const std::string &relName );
-    void createZipArchiveFromeFileStructure( const char* pFile );
 
 private:
     IOSystem *mIOSystem;
     std::string mArchiveName;
     zip_t *m_zipArchive;
     const aiScene *mScene;
-    std::ostringstream mOutput;
+    std::ostringstream mModelOutput;
+    std::ostringstream mRelOutput;
     std::vector<unsigned int> mBuildItems;
     std::vector<OpcPackageRelationship*> mRelations;
 };

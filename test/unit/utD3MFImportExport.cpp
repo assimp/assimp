@@ -67,7 +67,7 @@ public:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0 );
 
         Assimp::Exporter exporter;
-        return nullptr != exporter.ExportToBlob( scene, "3mf", 0 );
+        return AI_SUCCESS == exporter.Export( scene, "3mf", "test.3mf" );
     }
 
 };

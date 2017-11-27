@@ -104,46 +104,54 @@ bool D3MFExporter::exportArchive( const char *file ) {
     if ( nullptr == m_zipArchive ) {
         return false;
     }
-    ok |= exportRelations();
     ok |= export3DModel();
+    ok |= exportRelations();
+
+    zip_close( m_zipArchive );
+    m_zipArchive = nullptr;
 
     return ok;
 }
 
 bool D3MFExporter::exportRelations() {
-    mOutput.clear();
+    mRelOutput.clear();
 
-    mOutput << "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n";
-    mOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">\n";
+    mRelOutput << "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n";
+    mRelOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">\n";
 
     for ( size_t i = 0; i < mRelations.size(); ++i ) {
-        mOutput << "<Relationship Target =\"/3D/" << mRelations[ i ]->target << " ";
-        mOutput << "id=\"" << mRelations[i]->id << " ";
-        mOutput << "Type=\"" << mRelations[ i ]->type << "/>\n";
+        mRelOutput << "<Relationship Target =\"/3D/" << mRelations[ i ]->target << "\" ";
+        mRelOutput << "id=\"" << mRelations[i]->id << "\" ";
+        mRelOutput << "Type=\"" << mRelations[ i ]->type << "/>";
+        mRelOutput << std::endl;
     }
-    mOutput << "</Relationships>\n";
+    mRelOutput << "</Relationships>";
+    mRelOutput << std::endl;
 
     writeRelInfoToFile( "_rels", ".rels" );
+    mRelOutput.flush();
 
     return true;
 }
 
 bool D3MFExporter::export3DModel() {
-    mOutput.clear();
+    mModelOutput.clear();
 
     writeHeader();
-    mOutput << "<" << XmlTag::model << " " << XmlTag::model_unit << "=\"millimeter\""
+    mModelOutput << "<" << XmlTag::model << " " << XmlTag::model_unit << "=\"millimeter\""
             << "xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">"
-            << "\n";
-    mOutput << "<" << XmlTag::resources << ">\n";
+            << std::endl;
+    mModelOutput << "<" << XmlTag::resources << ">";
+    mModelOutput << std::endl;
 
     writeObjects();
 
 
-    mOutput << "</" << XmlTag::resources << ">\n";
+    mModelOutput << "</" << XmlTag::resources << ">";
+    mModelOutput << std::endl;
     writeBuild();
 
-    mOutput << "</" << XmlTag::model << ">\n";
+    mModelOutput << "</" << XmlTag::model << ">\n";
 
     OpcPackageRelationship *info = new OpcPackageRelationship;
     info->id = mArchiveName;
@@ -151,15 +159,15 @@ bool D3MFExporter::export3DModel() {
     info->type = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
     mRelations.push_back( info );
 
-    writeModelToArchive( "3D", mArchiveName );
-
-    mOutput.clear();
+    writeModelToArchive( "3D", "3DModel.model" );
+    mModelOutput.flush();
 
     return true;
 }
 
 void D3MFExporter::writeHeader() {
-    mOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>" << "\n";
+    mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
+    mModelOutput << std::endl;
 }
 
 void D3MFExporter::writeObjects() {
@@ -173,7 +181,8 @@ void D3MFExporter::writeObjects() {
         if ( nullptr == currentNode ) {
             continue;
         }
-        mOutput << "<" << XmlTag::object << " id=\"" << currentNode->mName.C_Str() << "\" type=\"model\">\n";
+        mModelOutput << "<" << XmlTag::object << " id=\"" << currentNode->mName.C_Str() << "\" type=\"model\">";
+        mModelOutput << std::endl;
         for ( unsigned int j = 0; j < currentNode->mNumMeshes; ++j ) {
             aiMesh *currentMesh = mScene->mMeshes[ currentNode->mMeshes[ j ] ];
             if ( nullptr == currentMesh ) {
@@ -183,7 +192,8 @@ void D3MFExporter::writeObjects() {
         }
         mBuildItems.push_back( i );
 
-        mOutput << "</" << XmlTag::object << ">\n";
+        mModelOutput << "</" << XmlTag::object << ">";
+        mModelOutput << std::endl;
     }
 }
 
@@ -192,19 +202,20 @@ void D3MFExporter::writeMesh( aiMesh *mesh ) {
         return;
     }
 
-    mOutput << "<" << XmlTag::mesh << ">\n";
-    mOutput << "<" << XmlTag::vertices << ">\n";
+    mModelOutput << "<" << XmlTag::mesh << ">" << std::endl;
+    mModelOutput << "<" << XmlTag::vertices << ">" << std::endl;
     for ( unsigned int i = 0; i < mesh->mNumVertices; ++i ) {
         writeVertex( mesh->mVertices[ i ] );
     }
-    mOutput << "</" << XmlTag::vertices << ">\n";
-    mOutput << "</" << XmlTag::mesh << ">\n";
+    mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
+    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 
     writeFaces( mesh );
 }
 
 void D3MFExporter::writeVertex( const aiVector3D &pos ) {
-    mOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\">\n";
+    mModelOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\">";
+    mModelOutput << std::endl;
 }
 
 void D3MFExporter::writeFaces( aiMesh *mesh ) {
@@ -215,39 +226,45 @@ void D3MFExporter::writeFaces( aiMesh *mesh ) {
     if ( !mesh->HasFaces() ) {
         return;
     }
-    mOutput << "<" << XmlTag::triangles << ">\n";
+    mModelOutput << "<" << XmlTag::triangles << ">" << std::endl;
     for ( unsigned int i = 0; i < mesh->mNumFaces; ++i ) {
         aiFace &currentFace = mesh->mFaces[ i ];
-        mOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[ 0 ] << "\" v2=\""
-                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ] << "\"/>\n";
+        mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[ 0 ] << "\" v2=\""
+                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ] << "\"/>";
+        mModelOutput << std::endl;
     }
-    mOutput << "</" << XmlTag::triangles << ">\n";
+    mModelOutput << "</" << XmlTag::triangles << ">";
+    mModelOutput << std::endl;
 }
 
 void D3MFExporter::writeBuild() {
-    mOutput << "<" << XmlTag::build << ">\n";
+    mModelOutput << "<" << XmlTag::build << ">" << std::endl;
 
     for ( size_t i = 0; i < mBuildItems.size(); ++i ) {
-        mOutput << "<" << XmlTag::item << " objectid=\"" << i + 1 << "\"/>\n";
+        mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 1 << "\"/>";
+        mModelOutput << std::endl;
     }
-    mOutput << "</" << XmlTag::build << ">\n";
+    mModelOutput << "</" << XmlTag::build << ">";
+    mModelOutput << std::endl;
 }
 
 void D3MFExporter::writeModelToArchive( const std::string &folder, const std::string &modelName ) {
-    const std::string entry = folder + "/" + mArchiveName;
+    const std::string entry = folder + "/" + modelName;
     zip_entry_open( m_zipArchive, entry.c_str() );
 
-    const std::string &exportTxt( mOutput.str() );
+    const std::string &exportTxt( mModelOutput.str() );
     zip_entry_write( m_zipArchive, exportTxt.c_str(), exportTxt.size() );
 
     zip_entry_close( m_zipArchive );
 }
 
 void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::string &relName ) {
-    const std::string entry = folder + "/" + "_rels";
+    const std::string entry = folder + "/" + relName;
     zip_entry_open( m_zipArchive, entry.c_str() );
-    const std::string &exportTxt( mOutput.str() );
+
+    const std::string &exportTxt( mRelOutput.str() );
     zip_entry_write( m_zipArchive, exportTxt.c_str(), exportTxt.size() );
+
     zip_entry_close( m_zipArchive );
 }
 

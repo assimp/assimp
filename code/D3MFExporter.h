@@ -50,6 +50,8 @@ struct aiNode;
 struct aiMaterial;
 struct aiMesh;
 
+struct zip_t;
+
 namespace Assimp {
 
 class IOStream;
@@ -66,7 +68,6 @@ public:
     D3MFExporter( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene );
     ~D3MFExporter();
     bool validate();
-    bool createFileStructure( const char *file );
     bool exportArchive( const char *file );
     bool exportRelations();
     bool export3DModel();
@@ -80,11 +81,12 @@ protected:
     void writeBuild();
     void writeModelToArchive( const std::string &folder, const std::string &modelName );
     void writeRelInfoToFile( const std::string &folder, const std::string &relName );
-    void createZipArchiveFromeFileStructure();
+    void createZipArchiveFromeFileStructure( const char* pFile );
 
 private:
     IOSystem *mIOSystem;
     std::string mArchiveName;
+    zip_t *m_zipArchive;
     const aiScene *mScene;
     std::ostringstream mOutput;
     std::vector<unsigned int> mBuildItems;

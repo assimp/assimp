@@ -50,12 +50,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3MFXmlTags.h"
 #include "D3MFOpcPackage.h"
 
+#include <contrib/zip/src/zip.h>
+
 namespace Assimp {
 
 void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/ ) {
     D3MF::D3MFExporter myExporter( pFile, pIOSystem, pScene );
     if ( myExporter.validate() ) {
         bool ok = myExporter.exportArchive(pFile);
+        if ( !ok ) {
+            throw DeadlyExportError( "Could not export 3MP archive: " + std::string( pFile ) );
+        }
     }
 }
 
@@ -66,6 +71,7 @@ namespace D3MF {
 D3MFExporter::D3MFExporter( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene )
 : mIOSystem( pIOSystem )
 , mArchiveName( pFile )
+, m_zipArchive( nullptr )
 , mScene( pScene )
 , mBuildItems()
 , mRelations() {
@@ -77,26 +83,6 @@ D3MFExporter::~D3MFExporter() {
         delete mRelations[ i ];
     }
     mRelations.clear();
-}
-
-bool D3MFExporter::createFileStructure( const char *file ) {
-    if ( !mIOSystem->CreateDirectory( file ) ) {
-        return false;
-    }
-
-    if ( !mIOSystem->ChangeDirectory( file ) ) {
-        return false;
-    }
-
-    if ( !mIOSystem->CreateDirectory( "3D" ) ) {
-        return false;
-    }
-
-    if ( !mIOSystem->CreateDirectory( "_rels" ) ) {
-        return false;
-    }
-
-    return true;
 }
 
 bool D3MFExporter::validate() {
@@ -113,13 +99,14 @@ bool D3MFExporter::validate() {
 
 bool D3MFExporter::exportArchive( const char *file ) {
     bool ok( true );
-    ok |= createFileStructure( file );
+
+    m_zipArchive = zip_open( file, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w' );
+    if ( nullptr == m_zipArchive ) {
+        return false;
+    }
     ok |= exportRelations();
     ok |= export3DModel();
 
-    if ( ok ) {
-        createZipArchiveFromeFileStructure();
-    }
     return ok;
 }
 
@@ -247,45 +234,21 @@ void D3MFExporter::writeBuild() {
 }
 
 void D3MFExporter::writeModelToArchive( const std::string &folder, const std::string &modelName ) {
-    const std::string &oldFolder( mIOSystem->CurrentDirectory() );
-    if ( folder != oldFolder ) {
-        mIOSystem->PushDirectory( oldFolder );
-        mIOSystem->ChangeDirectory( folder );
+    const std::string entry = folder + "/" + mArchiveName;
+    zip_entry_open( m_zipArchive, entry.c_str() );
 
-        const std::string &exportTxt( mOutput.str() );
-        std::shared_ptr<IOStream> outfile( mIOSystem->Open( modelName, "wb" ) );
-        if ( !outfile ) {
-            throw DeadlyExportError( "Could not open output model file: " + std::string( modelName ) );
-        }
+    const std::string &exportTxt( mOutput.str() );
+    zip_entry_write( m_zipArchive, exportTxt.c_str(), exportTxt.size() );
 
-        const size_t writtenBytes( outfile->Write( exportTxt.c_str(), sizeof( char ), exportTxt.size() ) );
-
-        mIOSystem->ChangeDirectory( ".." );
-        mIOSystem->PopDirectory();
-    }
+    zip_entry_close( m_zipArchive );
 }
 
 void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::string &relName ) {
-    const std::string &oldFolder( mIOSystem->CurrentDirectory() );
-    if ( folder != oldFolder ) {
-        mIOSystem->PushDirectory( oldFolder );
-        mIOSystem->ChangeDirectory( folder );
-
-        const std::string &exportTxt( mOutput.str() );
-        std::shared_ptr<IOStream> outfile( mIOSystem->Open( relName, "wb" ) );
-        if ( !outfile ) {
-            throw DeadlyExportError( "Could not open output model file: " + std::string( relName ) );
-        }
-
-        const size_t writtenBytes( outfile->Write( exportTxt.c_str(), sizeof( char ), exportTxt.size() ) );
-
-        mIOSystem->ChangeDirectory( ".." );
-        mIOSystem->PopDirectory();
-    }
-}
-
-void D3MFExporter::createZipArchiveFromeFileStructure() {
-
+    const std::string entry = folder + "/" + "_rels";
+    zip_entry_open( m_zipArchive, entry.c_str() );
+    const std::string &exportTxt( mOutput.str() );
+    zip_entry_write( m_zipArchive, exportTxt.c_str(), exportTxt.size() );
+    zip_entry_close( m_zipArchive );
 }
 
 #endif // ASSIMP_BUILD_NO3MF_EXPORTER

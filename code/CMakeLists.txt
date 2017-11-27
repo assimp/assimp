@@ -743,6 +743,14 @@ SET( unzip_SRCS
 )
 SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
+SET( ziplib_SRCS
+  ../contrib/zip/src/miniz.h
+  ../contrib/zip/src/zip.c
+  ../contrib/zip/src/zip.h
+)
+
+SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
+
 SET ( openddl_parser_SRCS
   ../contrib/openddlparser/code/OpenDDLParser.cpp
   ../contrib/openddlparser/code/DDLNode.cpp
@@ -854,6 +862,7 @@ SET( assimp_src
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
+  ${ziplib_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}

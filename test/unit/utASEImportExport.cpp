@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace Assimp;
 
@@ -52,7 +53,7 @@ class utASEImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen.ASE", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen.ASE", aiProcess_ValidateDataStructure );
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
         return nullptr != scene;
 #else 

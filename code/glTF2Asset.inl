@@ -212,7 +212,7 @@ unsigned int LazyDict<T>::Remove(const char* id)
     mObjs.erase(mObjs.begin() + index);
 
     //update index of object in mObjs;
-    for (size_t i = index; i < mObjs.size(); ++i) {
+    for (unsigned int i = index; i < mObjs.size(); ++i) {
         T *obj = mObjs[i];
 
         obj->index = i;
@@ -934,7 +934,7 @@ inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
-    const char* subobjId = (type == Camera::Orthographic) ? "ortographic" : "perspective";
+    const char* subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 
     Value* it = FindObject(obj, subobjId);
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");

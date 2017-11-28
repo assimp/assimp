@@ -539,7 +539,13 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
             CopyValue(node.translation.value, trans);
             aiMatrix4x4 t;
             aiMatrix4x4::Translation(trans, t);
-            matrix = t * matrix;
+            matrix = matrix * t;
+        }
+
+        if (node.rotation.isPresent) {
+            aiQuaternion rot;
+            CopyValue(node.rotation.value, rot);
+            matrix = matrix * aiMatrix4x4(rot.GetMatrix());
         }
 
         if (node.scale.isPresent) {
@@ -547,14 +553,7 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
             CopyValue(node.scale.value, scal);
             aiMatrix4x4 s;
             aiMatrix4x4::Scaling(scal, s);
-            matrix = s * matrix;
-        }
-
-
-        if (node.rotation.isPresent) {
-            aiQuaternion rot;
-            CopyValue(node.rotation.value, rot);
-            matrix = aiMatrix4x4(rot.GetMatrix()) * matrix;
+            matrix = matrix * s;
         }
     }
 

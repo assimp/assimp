@@ -55,6 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/ ) {
+    if ( nullptr == pIOSystem ) {
+        throw DeadlyExportError( "Could not export 3MP archive: " + std::string( pFile ) );
+    }
     D3MF::D3MFExporter myExporter( pFile, pScene );
     if ( myExporter.validate() ) {
         bool ok = myExporter.exportArchive(pFile);
@@ -248,6 +251,9 @@ void D3MFExporter::writeBuild() {
 }
 
 void D3MFExporter::writeModelToArchive( const std::string &folder, const std::string &modelName ) {
+    if ( nullptr == m_zipArchive ) {
+        throw DeadlyExportError( "3MF-Export: Zip archive not valid, nullptr." );
+    }
     const std::string entry = folder + "/" + modelName;
     zip_entry_open( m_zipArchive, entry.c_str() );
 
@@ -258,6 +264,9 @@ void D3MFExporter::writeModelToArchive( const std::string &folder, const std::st
 }
 
 void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::string &relName ) {
+    if ( nullptr == m_zipArchive ) {
+        throw DeadlyExportError( "3MF-Export: Zip archive not valid, nullptr." );
+    }
     const std::string entry = folder + "/" + relName;
     zip_entry_open( m_zipArchive, entry.c_str() );
 
@@ -271,3 +280,4 @@ void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::str
 
 } // Namespace D3MF
 } // Namespace Assimp
+

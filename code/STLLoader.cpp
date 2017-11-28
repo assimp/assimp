@@ -248,7 +248,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
         std::vector<unsigned int> meshIndices;
         aiMesh* pMesh = new aiMesh();
         pMesh->mMaterialIndex = 0;
-        meshIndices.push_back( meshes.size() );
+        meshIndices.push_back((unsigned int) meshes.size() );
         meshes.push_back(pMesh);
         aiNode *node = new aiNode;
         node->mParent = root;
@@ -383,7 +383,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
         pScene->mMeshes[ i ] = meshes[i];
     }
 
-    root->mNumChildren = nodes.size();
+    root->mNumChildren = (unsigned int) nodes.size();
     root->mChildren = new aiNode*[ root->mNumChildren ];
     for ( size_t i=0; i<nodes.size(); ++i ) {
         root->mChildren[ i ] = nodes[ i ];

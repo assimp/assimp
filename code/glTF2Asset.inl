@@ -212,7 +212,7 @@ unsigned int LazyDict<T>::Remove(const char* id)
     mObjs.erase(mObjs.begin() + index);
 
     //update index of object in mObjs;
-    for (size_t i = index; i < mObjs.size(); ++i) {
+    for (unsigned int i = index; i < mObjs.size(); ++i) {
         T *obj = mObjs[i];
 
         obj->index = i;
@@ -867,6 +867,9 @@ namespace {
         else if ((pos = Compare(attr, "NORMAL"))) {
             v = &(p.attributes.normal);
         }
+        else if ((pos = Compare(attr, "TANGENT"))) {
+            v = &(p.attributes.tangent);
+        }
         else if ((pos = Compare(attr, "TEXCOORD"))) {
             v = &(p.attributes.texcoord);
         }
@@ -906,7 +909,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
                     if (!it->value.IsUint()) continue;
                     const char* attr = it->name.GetString();
-                    // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
+                    // Valid attribute semantics include POSITION, NORMAL, TANGENT, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
                     int undPos = 0;
@@ -934,7 +937,7 @@ inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
-    const char* subobjId = (type == Camera::Orthographic) ? "ortographic" : "perspective";
+    const char* subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 
     Value* it = FindObject(obj, subobjId);
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");

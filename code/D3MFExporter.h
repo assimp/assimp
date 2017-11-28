@@ -55,7 +55,6 @@ struct zip_t;
 namespace Assimp {
 
 class IOStream;
-class IOSystem;
 
 namespace D3MF {
 

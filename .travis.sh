@@ -46,7 +46,7 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]; then
   if [ $ANALYZE = "ON" ] ; then
     if [ "$CC" = "clang" ]; then
         scan-build cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_TESTS=OFF
-        scan-build --status-bugs make -j2
+        scan-build --status-bugs make -j2 -v
     else
         cppcheck --version
         generate \

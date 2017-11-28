@@ -55,7 +55,6 @@ struct zip_t;
 namespace Assimp {
 
 class IOStream;
-class IOSystem;
 
 namespace D3MF {
 
@@ -65,7 +64,7 @@ struct OpcPackageRelationship;
 
 class D3MFExporter {
 public:
-    D3MFExporter( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene );
+    D3MFExporter( const char* pFile, const aiScene* pScene );
     ~D3MFExporter();
     bool validate();
     bool exportArchive( const char *file );
@@ -83,7 +82,6 @@ protected:
     void writeRelInfoToFile( const std::string &folder, const std::string &relName );
 
 private:
-    IOSystem *mIOSystem;
     std::string mArchiveName;
     zip_t *m_zipArchive;
     const aiScene *mScene;

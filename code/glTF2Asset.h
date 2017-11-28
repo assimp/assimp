@@ -775,7 +775,7 @@ namespace glTF2
             PrimitiveMode mode;
 
             struct Attributes {
-                AccessorList position, normal, texcoord, color, joint, jointmatrix, weight;
+                AccessorList position, normal, tangent, texcoord, color, joint, jointmatrix, weight;
             } attributes;
 
             Ref<Accessor> indices;

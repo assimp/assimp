@@ -55,7 +55,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/ ) {
-    D3MF::D3MFExporter myExporter( pFile, pIOSystem, pScene );
+    if ( nullptr == pIOSystem ) {
+        throw DeadlyExportError( "Could not export 3MP archive: " + std::string( pFile ) );
+    }
+    D3MF::D3MFExporter myExporter( pFile, pScene );
     if ( myExporter.validate() ) {
         bool ok = myExporter.exportArchive(pFile);
         if ( !ok ) {

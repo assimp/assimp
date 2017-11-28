@@ -68,9 +68,8 @@ namespace D3MF {
 
 #ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
-D3MFExporter::D3MFExporter( const char* pFile, IOSystem* pIOSystem, const aiScene* pScene )
-: mIOSystem( pIOSystem )
-, mArchiveName( pFile )
+D3MFExporter::D3MFExporter( const char* pFile, const aiScene* pScene )
+: mArchiveName( pFile )
 , m_zipArchive( nullptr )
 , mScene( pScene )
 , mBuildItems()
@@ -249,6 +248,9 @@ void D3MFExporter::writeBuild() {
 }
 
 void D3MFExporter::writeModelToArchive( const std::string &folder, const std::string &modelName ) {
+    if ( nullptr == m_zipArchive ) {
+        throw DeadlyExportError( "3MF-Export: Zip archive not valid, nullptr." );
+    }
     const std::string entry = folder + "/" + modelName;
     zip_entry_open( m_zipArchive, entry.c_str() );
 
@@ -259,6 +261,9 @@ void D3MFExporter::writeModelToArchive( const std::string &folder, const std::st
 }
 
 void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::string &relName ) {
+    if ( nullptr == m_zipArchive ) {
+        throw DeadlyExportError( "3MF-Export: Zip archive not valid, nullptr." );
+    }
     const std::string entry = folder + "/" + relName;
     zip_entry_open( m_zipArchive, entry.c_str() );
 

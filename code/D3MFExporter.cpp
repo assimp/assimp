@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
-#include <assimp//IOStream.hpp>
+#include <assimp/IOStream.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
 

@@ -505,6 +505,12 @@ bool STLImporter::LoadBinaryFile()
     // now copy faces
     addFacesToMesh(pMesh);
 
+    // add all created meshes to the single node
+    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
+        pScene->mRootNode->mMeshes[i] = i;
+
     if (bIsMaterialise && !pMesh->mColors[0])
     {
         // use the color as diffuse material color

@@ -63,6 +63,8 @@ public:
         return ( nullptr != scene );
     }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
     virtual bool exporterTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0 );
@@ -70,13 +72,17 @@ public:
         Assimp::Exporter exporter;
         return AI_SUCCESS == exporter.Export( scene, "3mf", "test.3mf" );
     }
-
+#endif // ASSIMP_BUILD_NO_EXPORT
 };
 
 TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 TEST_F( utD3MFImporterExporter, export3MFtoMemTest ) {
     EXPECT_TRUE( exporterTest() );
 }
+
+#endif // ASSIMP_BUILD_NO_EXPORT

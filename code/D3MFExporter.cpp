@@ -38,6 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#ifndef ASSIMP_BUILD_NO_EXPORT
+#ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
+
 #include "D3MFExporter.h"
 
 #include <assimp/scene.h>
@@ -68,8 +71,6 @@ void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pSce
 }
 
 namespace D3MF {
-
-#ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
 D3MFExporter::D3MFExporter( const char* pFile, const aiScene* pScene )
 : mArchiveName( pFile )
@@ -276,8 +277,9 @@ void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::str
     zip_entry_close( m_zipArchive );
 }
 
-#endif // ASSIMP_BUILD_NO3MF_EXPORTER
 
 } // Namespace D3MF
 } // Namespace Assimp
 
+#endif // ASSIMP_BUILD_NO3MF_EXPORTER
+#endif // ASSIMP_BUILD_NO_EXPORT

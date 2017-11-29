@@ -58,6 +58,7 @@ class IOStream;
 
 namespace D3MF {
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO3MF_EXPORTER
 
 struct OpcPackageRelationship;
@@ -92,6 +93,7 @@ private:
 };
 
 #endif // ASSIMP_BUILD_NO3MF_EXPORTER
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 } // Namespace D3MF
 } // Namespace Assimp

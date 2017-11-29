@@ -8,6 +8,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 0
+
 #include "zip.h"
 #include "miniz.h"
 

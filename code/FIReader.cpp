@@ -715,6 +715,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
+
         return fast_atof(attr->value->toString().c_str());
     }
 
@@ -1793,7 +1794,8 @@ public:
 
     virtual void registerDecoder(const std::string & /*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string & /*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
+
+    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
 
 private:
 

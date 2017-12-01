@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace {
+    
 static const aiImporterDesc desc = {
     "Stereolithography (STL) Importer",
     "",
@@ -504,6 +505,12 @@ bool STLImporter::LoadBinaryFile()
 
     // now copy faces
     addFacesToMesh(pMesh);
+
+    // add all created meshes to the single node
+    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
+        pScene->mRootNode->mMeshes[i] = i;
 
     if (bIsMaterialise && !pMesh->mColors[0])
     {

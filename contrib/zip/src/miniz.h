@@ -3804,9 +3804,7 @@ mz_bool mz_zip_reader_extract_to_callback(mz_zip_archive *pZip, mz_uint file_ind
         status = TINFL_STATUS_FAILED;
       else if (!(flags & MZ_ZIP_FLAG_COMPRESSED_DATA))
         file_crc32 = (mz_uint32)mz_crc32(file_crc32, (const mz_uint8 *)pRead_buf, (size_t)file_stat.m_comp_size);
-      cur_file_ofs += file_stat.m_comp_size;
       out_buf_ofs += file_stat.m_comp_size;
-      comp_remaining = 0;
     }
     else
     {
@@ -4685,7 +4683,6 @@ mz_bool mz_zip_writer_add_from_zip_reader(mz_zip_archive *pZip, mz_zip_archive *
       return MZ_FALSE;
     }
 
-    cur_src_file_ofs += n;
     cur_dst_file_ofs += n;
   }
   pZip->m_pFree(pZip->m_pAlloc_opaque, pBuf);

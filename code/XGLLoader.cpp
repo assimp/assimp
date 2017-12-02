@@ -359,7 +359,7 @@ void XGLImporter::ReadLighting(TempScope& scope)
 // ------------------------------------------------------------------------------------------------
 aiLight* XGLImporter::ReadDirectionalLight()
 {
-    ScopeGuard<aiLight> l(new aiLight());
+    std::unique_ptr<aiLight> l(new aiLight());
     l->mType = aiLightSource_DIRECTIONAL;
 
     while (ReadElementUpToClosing("directionallight"))  {
@@ -374,13 +374,13 @@ aiLight* XGLImporter::ReadDirectionalLight()
             l->mColorSpecular = ReadCol3();
         }
     }
-    return l.dismiss();
+    return l.release();
 }
 
 // ------------------------------------------------------------------------------------------------
 aiNode* XGLImporter::ReadObject(TempScope& scope, bool skipFirst, const char* closetag)
 {
-    ScopeGuard<aiNode> nd(new aiNode());
+    std::unique_ptr<aiNode> nd(new aiNode());
     std::vector<aiNode*> children;
     std::vector<unsigned int> meshes;
 
@@ -463,11 +463,11 @@ aiNode* XGLImporter::ReadObject(TempScope& scope, bool skipFirst, const char* cl
         nd->mChildren = new aiNode*[nd->mNumChildren]();
         for(unsigned int i = 0; i < nd->mNumChildren; ++i) {
             nd->mChildren[i] = children[i];
-            children[i]->mParent = nd;
+            children[i]->mParent = nd.get();
         }
     }
 
-    return nd.dismiss();
+    return nd.release();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -539,7 +539,7 @@ aiMatrix4x4 XGLImporter::ReadTrafo()
 // ------------------------------------------------------------------------------------------------
 aiMesh* XGLImporter::ToOutputMesh(const TempMaterialMesh& m)
 {
-    ScopeGuard<aiMesh> mesh(new aiMesh());
+    std::unique_ptr<aiMesh> mesh(new aiMesh());
 
     mesh->mNumVertices = static_cast<unsigned int>(m.positions.size());
     mesh->mVertices = new aiVector3D[mesh->mNumVertices];
@@ -576,7 +576,7 @@ aiMesh* XGLImporter::ToOutputMesh(const TempMaterialMesh& m)
 
     mesh->mPrimitiveTypes = m.pflags;
     mesh->mMaterialIndex = m.matid;
-    return mesh.dismiss();
+    return mesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -745,7 +745,7 @@ void XGLImporter::ReadMaterial(TempScope& scope)
 {
     const unsigned int mat_id = ReadIDAttr();
 
-    ScopeGuard<aiMaterial> mat(new aiMaterial());
+    std::unique_ptr<aiMaterial> mat(new aiMaterial());
     while (ReadElementUpToClosing("mat"))  {
         const std::string& s = GetElementName();
         if (s == "amb") {
@@ -774,8 +774,8 @@ void XGLImporter::ReadMaterial(TempScope& scope)
         }
     }
 
-    scope.materials[mat_id] = mat;
-    scope.materials_linear.push_back(mat.dismiss());
+    scope.materials[mat_id] = mat.get();
+    scope.materials_linear.push_back(mat.release());
 }
 
 

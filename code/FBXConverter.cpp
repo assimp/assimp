@@ -2744,10 +2744,10 @@ aiNodeAnim* Converter::GenerateRotationNodeAnim( const std::string& name,
     double& max_time,
     double& min_time )
 {
-    ScopeGuard<aiNodeAnim> na( new aiNodeAnim() );
+    std::unique_ptr<aiNodeAnim> na( new aiNodeAnim() );
     na->mNodeName.Set( name );
 
-    ConvertRotationKeys( na, curves, layer_map, start, stop, max_time, min_time, target.RotationOrder() );
+    ConvertRotationKeys( na.get(), curves, layer_map, start, stop, max_time, min_time, target.RotationOrder() );
 
     // dummy scaling key
     na->mScalingKeys = new aiVectorKey[ 1 ];
@@ -2763,7 +2763,7 @@ aiNodeAnim* Converter::GenerateRotationNodeAnim( const std::string& name,
     na->mPositionKeys[ 0 ].mTime = 0.;
     na->mPositionKeys[ 0 ].mValue = aiVector3D();
 
-    return na.dismiss();
+    return na.release();
 }
 
 aiNodeAnim* Converter::GenerateScalingNodeAnim( const std::string& name,
@@ -2774,10 +2774,10 @@ aiNodeAnim* Converter::GenerateScalingNodeAnim( const std::string& name,
     double& max_time,
     double& min_time )
 {
-    ScopeGuard<aiNodeAnim> na( new aiNodeAnim() );
+    std::unique_ptr<aiNodeAnim> na( new aiNodeAnim() );
     na->mNodeName.Set( name );
 
-    ConvertScaleKeys( na, curves, layer_map, start, stop, max_time, min_time );
+    ConvertScaleKeys( na.get(), curves, layer_map, start, stop, max_time, min_time );
 
     // dummy rotation key
     na->mRotationKeys = new aiQuatKey[ 1 ];
@@ -2793,7 +2793,7 @@ aiNodeAnim* Converter::GenerateScalingNodeAnim( const std::string& name,
     na->mPositionKeys[ 0 ].mTime = 0.;
     na->mPositionKeys[ 0 ].mValue = aiVector3D();
 
-    return na.dismiss();
+    return na.release();
 }
 
 
@@ -2806,10 +2806,10 @@ aiNodeAnim* Converter::GenerateTranslationNodeAnim( const std::string& name,
     double& min_time,
     bool inverse )
 {
-    ScopeGuard<aiNodeAnim> na( new aiNodeAnim() );
+    std::unique_ptr<aiNodeAnim> na( new aiNodeAnim() );
     na->mNodeName.Set( name );
 
-    ConvertTranslationKeys( na, curves, layer_map, start, stop, max_time, min_time );
+    ConvertTranslationKeys( na.get(), curves, layer_map, start, stop, max_time, min_time );
 
     if ( inverse ) {
         for ( unsigned int i = 0; i < na->mNumPositionKeys; ++i ) {
@@ -2831,7 +2831,7 @@ aiNodeAnim* Converter::GenerateTranslationNodeAnim( const std::string& name,
     na->mRotationKeys[ 0 ].mTime = 0.;
     na->mRotationKeys[ 0 ].mValue = aiQuaternion();
 
-    return na.dismiss();
+    return na.release();
 }
 
 aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
@@ -2845,7 +2845,7 @@ aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
     bool reverse_order )
 
 {
-    ScopeGuard<aiNodeAnim> na( new aiNodeAnim() );
+    std::unique_ptr<aiNodeAnim> na( new aiNodeAnim() );
     na->mNodeName.Set( name );
 
     const PropertyTable& props = target.Props();
@@ -2917,7 +2917,7 @@ aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
         // which requires all of rotation, scaling and translation
         // to be set.
         if ( chain[ TransformationComp_Scaling ] != iter_end ) {
-            ConvertScaleKeys( na, ( *chain[ TransformationComp_Scaling ] ).second,
+            ConvertScaleKeys( na.get(), ( *chain[ TransformationComp_Scaling ] ).second,
                 layer_map,
                 start, stop,
                 max_time,
@@ -2933,7 +2933,7 @@ aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
         }
 
         if ( chain[ TransformationComp_Rotation ] != iter_end ) {
-            ConvertRotationKeys( na, ( *chain[ TransformationComp_Rotation ] ).second,
+            ConvertRotationKeys( na.get(), ( *chain[ TransformationComp_Rotation ] ).second,
                 layer_map,
                 start, stop,
                 max_time,
@@ -2951,7 +2951,7 @@ aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
         }
 
         if ( chain[ TransformationComp_Translation ] != iter_end ) {
-            ConvertTranslationKeys( na, ( *chain[ TransformationComp_Translation ] ).second,
+            ConvertTranslationKeys( na.get(), ( *chain[ TransformationComp_Translation ] ).second,
                 layer_map,
                 start, stop,
                 max_time,
@@ -2967,7 +2967,7 @@ aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
         }
 
     }
-    return na.dismiss();
+    return na.release();
 }
 
 Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop )

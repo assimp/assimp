@@ -106,7 +106,7 @@ public:
 private:
     aiNode* ReadObject(aiScene* scene)
     {
-        ScopeGuard<aiNode> node(new aiNode());
+        std::unique_ptr<aiNode> node(new aiNode());
 
         std::vector<unsigned long> meshIds;
 
@@ -146,7 +146,7 @@ private:
 
         std::copy(meshIds.begin(), meshIds.end(), node->mMeshes);
 
-        return node.dismiss();
+        return node.release();
 
     }
 

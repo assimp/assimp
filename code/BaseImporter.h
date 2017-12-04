@@ -65,42 +65,6 @@ class IOStream;
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
     (string[1] << 16) + (string[2] << 8) + string[3]))
 
-// ---------------------------------------------------------------------------
-template <typename T>
-struct ScopeGuard
-{
-    explicit ScopeGuard(T* obj) : obj(obj), mdismiss() {}
-    ~ScopeGuard () throw() {
-        if (!mdismiss) {
-            delete obj;
-        }
-        obj = NULL;
-    }
-
-    T* dismiss() {
-        mdismiss=true;
-        return obj;
-    }
-
-    operator T*() {
-        return obj;
-    }
-
-    T* operator -> () {
-        return obj;
-    }
-
-private:
-    // no copying allowed.
-    ScopeGuard();
-    ScopeGuard( const ScopeGuard & );
-    ScopeGuard &operator = ( const ScopeGuard & );
-
-    T* obj;
-    bool mdismiss;
-};
-
-
 
 // ---------------------------------------------------------------------------
 /** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface

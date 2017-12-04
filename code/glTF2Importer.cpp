@@ -74,7 +74,7 @@ static const aiImporterDesc desc = {
     "",
     "",
     "",
-    aiImporterFlags_SupportTextFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
+    aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
     0,
     0,
     0,
@@ -103,13 +103,13 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 {
     const std::string &extension = GetExtension(pFile);
 
-    if (extension != "gltf") // We currently can't read glTF2 binary files (.glb), yet
+    if (extension != "gltf" && extension != "glb")
         return false;
 
     if (checkSig && pIOHandler) {
         glTF2::Asset asset(pIOHandler);
         try {
-            asset.Load(pFile);
+            asset.Load(pFile, extension == "glb");
             std::string version = asset.asset.version;
             return !version.empty() && version[0] == '2';
         } catch (...) {
@@ -362,7 +362,31 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 attr.position[0]->ExtractData(aim->mVertices);
             }
 
-            if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
+            if (attr.normal.size() > 0 && attr.normal[0]) {
+                attr.normal[0]->ExtractData(aim->mNormals);
+
+                // only extract tangents if normals are present
+                if (attr.tangent.size() > 0 && attr.tangent[0]) {
+                    // generate bitangents from normals and tangents according to spec
+                    struct Tangent
+                    {
+                        aiVector3D xyz;
+                        ai_real w;
+                    } *tangents = nullptr;
+
+                    attr.tangent[0]->ExtractData(tangents);
+
+                    aim->mTangents = new aiVector3D[aim->mNumVertices];
+                    aim->mBitangents = new aiVector3D[aim->mNumVertices];
+
+                    for (unsigned int i = 0; i < aim->mNumVertices; ++i) {
+                        aim->mTangents[i] = tangents[i].xyz;
+                        aim->mBitangents[i] = (aim->mNormals[i] ^ tangents[i].xyz) * tangents[i].w;
+                    }
+
+                    delete tangents;
+                }
+            }
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
@@ -492,7 +516,9 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
 {
     Node& node = *ptr;
 
-    aiNode* ainode = new aiNode(node.id);
+    std::string nameOrId = node.name.empty() ? node.id : node.name;
+
+    aiNode* ainode = new aiNode(nameOrId);
 
     if (!node.children.empty()) {
         ainode->mNumChildren = unsigned(node.children.size());
@@ -515,7 +541,13 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
             CopyValue(node.translation.value, trans);
             aiMatrix4x4 t;
             aiMatrix4x4::Translation(trans, t);
-            matrix = t * matrix;
+            matrix = matrix * t;
+        }
+
+        if (node.rotation.isPresent) {
+            aiQuaternion rot;
+            CopyValue(node.rotation.value, rot);
+            matrix = matrix * aiMatrix4x4(rot.GetMatrix());
         }
 
         if (node.scale.isPresent) {
@@ -523,14 +555,7 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
             CopyValue(node.scale.value, scal);
             aiMatrix4x4 s;
             aiMatrix4x4::Scaling(scal, s);
-            matrix = s * matrix;
-        }
-
-
-        if (node.rotation.isPresent) {
-            aiQuaternion rot;
-            CopyValue(node.rotation.value, rot);
-            matrix = aiMatrix4x4(rot.GetMatrix()) * matrix;
+            matrix = matrix * s;
         }
     }
 
@@ -639,7 +664,7 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
 
     // read the asset file
     glTF2::Asset asset(pIOHandler);
-    asset.Load(pFile);
+    asset.Load(pFile, GetExtension(pFile) == "glb");
 
     //
     // Copy the data out

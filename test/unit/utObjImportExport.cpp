@@ -193,7 +193,7 @@ protected:
 
     virtual bool importerTest() {
         ::Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
         return nullptr != scene;
     }
 
@@ -202,7 +202,7 @@ protected:
     virtual bool exporterTest() {
         ::Assimp::Importer importer;
         ::Assimp::Exporter exporter;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_test.obj" ) );
@@ -257,7 +257,7 @@ TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {
 
 TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
     ::Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", 0 );
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -294,12 +294,12 @@ TEST_F(utObjImportExport, relative_indices_Test) {
     const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mNumMeshes, 1U);
     const aiMesh *mesh = scene->mMeshes[0];
-    EXPECT_EQ(mesh->mNumVertices, 4);
-    EXPECT_EQ(mesh->mNumFaces, 1);
+    EXPECT_EQ(mesh->mNumVertices, 4U);
+    EXPECT_EQ(mesh->mNumFaces, 1U);
     const aiFace face = mesh->mFaces[0];
-    EXPECT_EQ(face.mNumIndices, 4);
+    EXPECT_EQ(face.mNumIndices, 4U);
     for (unsigned int i = 0; i < face.mNumIndices; ++i)
     {
         EXPECT_EQ(face.mIndices[i], i);
@@ -318,12 +318,12 @@ TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
     const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mNumMeshes, 1U);
     const aiMesh *mesh = scene->mMeshes[0];
-    EXPECT_EQ(mesh->mNumVertices, 3);
-    EXPECT_EQ(mesh->mNumFaces, 1);
+    EXPECT_EQ(mesh->mNumVertices, 3U);
+    EXPECT_EQ(mesh->mNumFaces, 1U);
     const aiFace face = mesh->mFaces[0];
-    EXPECT_EQ(face.mNumIndices, 3);
+    EXPECT_EQ(face.mNumIndices, 3U);
     const aiVector3D vertice = mesh->mVertices[0];
     EXPECT_EQ(vertice.x, -1.0f);
     EXPECT_EQ(vertice.y, 0.0f);

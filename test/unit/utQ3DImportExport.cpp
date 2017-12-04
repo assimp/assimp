@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace Assimp;
 
@@ -51,7 +52,7 @@ class utQ3DImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Q3D/earth.q3o", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Q3D/earth.q3o", aiProcess_ValidateDataStructure );
         return nullptr != scene;
     }
 };

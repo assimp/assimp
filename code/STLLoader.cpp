@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace {
+    
 static const aiImporterDesc desc = {
     "Stereolithography (STL) Importer",
     "",
@@ -248,7 +249,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
         std::vector<unsigned int> meshIndices;
         aiMesh* pMesh = new aiMesh();
         pMesh->mMaterialIndex = 0;
-        meshIndices.push_back( meshes.size() );
+        meshIndices.push_back((unsigned int) meshes.size() );
         meshes.push_back(pMesh);
         aiNode *node = new aiNode;
         node->mParent = root;
@@ -383,7 +384,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
         pScene->mMeshes[ i ] = meshes[i];
     }
 
-    root->mNumChildren = nodes.size();
+    root->mNumChildren = (unsigned int) nodes.size();
     root->mChildren = new aiNode*[ root->mNumChildren ];
     for ( size_t i=0; i<nodes.size(); ++i ) {
         root->mChildren[ i ] = nodes[ i ];
@@ -504,6 +505,12 @@ bool STLImporter::LoadBinaryFile()
 
     // now copy faces
     addFacesToMesh(pMesh);
+
+    // add all created meshes to the single node
+    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
+        pScene->mRootNode->mMeshes[i] = i;
 
     if (bIsMaterialise && !pMesh->mColors[0])
     {

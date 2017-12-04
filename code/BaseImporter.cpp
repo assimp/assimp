@@ -89,12 +89,12 @@ aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, 
     FileSystemFilter filter(pFile,pIOHandler);
 
     // create a scene object to hold the data
-    ScopeGuard<aiScene> sc(new aiScene());
+    std::unique_ptr<aiScene> sc(new aiScene());
 
     // dispatch importing
     try
     {
-        InternReadFile( pFile, sc, &filter);
+        InternReadFile( pFile, sc.get(), &filter);
 
     } catch( const std::exception& err )    {
         // extract error description
@@ -104,8 +104,7 @@ aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, 
     }
 
     // return what we gathered from the import.
-    sc.dismiss();
-    return sc;
+    return sc.release();
 }
 
 // ------------------------------------------------------------------------------------------------

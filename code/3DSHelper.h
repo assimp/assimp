@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_3DSFILEHELPER_H_INC
 #define AI_3DSFILEHELPER_H_INC
 
-
 #include "SpatialSort.h"
 #include "SmoothingGroups.h"
 #include "StringUtils.h"
@@ -64,16 +63,19 @@ namespace D3DS  {
 /** Discreet3DS class: Helper class for loading 3ds files. Defines chunks
 *  and data structures.
 */
-class Discreet3DS
-{
+class Discreet3DS {
 private:
-    inline Discreet3DS() {}
+    Discreet3DS() {
+        // empty
+    }
+
+    ~Discreet3DS() {
+        // empty
+    }
 
 public:
-
     //! data structure for a single chunk in a .3ds file
-    struct Chunk
-    {
+    struct Chunk {
         uint16_t    Flag;
         uint32_t    Size;
     } PACK_STRUCT;

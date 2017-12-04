@@ -677,8 +677,11 @@ ADD_ASSIMP_IMPORTER( GLTF
 ADD_ASSIMP_IMPORTER( 3MF
     D3MFImporter.h
     D3MFImporter.cpp
+    D3MFExporter.h
+    D3MFExporter.cpp
     D3MFOpcPackage.h
     D3MFOpcPackage.cpp
+    3MFXmlTags.h
 )
 
 ADD_ASSIMP_IMPORTER( MMD
@@ -739,6 +742,14 @@ SET( unzip_SRCS
   ../contrib/unzip/unzip.h
 )
 SOURCE_GROUP( unzip FILES ${unzip_SRCS})
+
+SET( ziplib_SRCS
+  ../contrib/zip/src/miniz.h
+  ../contrib/zip/src/zip.c
+  ../contrib/zip/src/zip.h
+)
+
+SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
 
 SET ( openddl_parser_SRCS
   ../contrib/openddlparser/code/OpenDDLParser.cpp
@@ -851,6 +862,7 @@ SET( assimp_src
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
+  ${ziplib_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -914,8 +926,27 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 )
 
 if (APPLE)
-  SET_TARGET_PROPERTIES( assimp PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR}")
-endif()
+  SET_TARGET_PROPERTIES( assimp PROPERTIES
+    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR}"
+  )
+
+  if (BUILD_FRAMEWORK)
+    SET_TARGET_PROPERTIES( assimp PROPERTIES
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION C
+      MACOSX_FRAMEWORK_IDENTIFIER net.sf.assimp
+      PUBLIC_HEADER "${PUBLIC_HEADERS}"
+    )
+
+    # PUBLIC_HEADER option does not support directory structure creation
+    # add ./Compiler/*.h to assimp.framework via copy command
+    ADD_CUSTOM_COMMAND(TARGET assimp POST_BUILD 
+      COMMAND "${CMAKE_COMMAND}" -E copy_directory 
+         "../${HEADER_PATH}/Compiler"
+         assimp.framework/Headers/Compiler
+      COMMENT "Copying public ./Compiler/ header files to framework bundle's Headers/Compiler/")
+  endif(BUILD_FRAMEWORK)
+endif(APPLE)
 
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
@@ -935,9 +966,11 @@ INSTALL( TARGETS assimp
   LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
   ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
   RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
   COMPONENT ${LIBASSIMP_COMPONENT})
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
+
 if (ASSIMP_ANDROID_JNIIOSYSTEM)
   INSTALL(FILES ${HEADER_PATH}/${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
     DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}

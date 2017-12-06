@@ -224,6 +224,8 @@ public:
      */
     virtual bool ChangeDirectory( const std::string &path );
 
+    virtual bool DeleteFile( const std::string &file );
+
 private:
     std::vector<std::string> m_pathStack;
 };
@@ -342,6 +344,16 @@ bool IOSystem::ChangeDirectory( const std::string &path ) {
 #endif // _WIN32
 }
 
+
+// ----------------------------------------------------------------------------
+AI_FORCE_INLINE
+bool IOSystem::DeleteFile( const std::string &file ) {
+    if ( file.empty() ) {
+        return false;
+    }
+    const int retCode( ::remove( file.c_str() ) );
+    return ( 0 == retCode );
+}
 } //!ns Assimp
 
 #endif //AI_IOSYSTEM_H_INC

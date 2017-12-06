@@ -100,7 +100,6 @@ public:
         scene->mRootNode->mChildren = new aiNode*[scene->mRootNode->mNumChildren]();
 
         std::copy(children.begin(), children.end(), scene->mRootNode->mChildren);
-
     }
 
 private:

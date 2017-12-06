@@ -416,9 +416,9 @@ public:
     void ParseChildNode(XmlReader* xmlReader) {        
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
 
-        relPtr->id = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_ID.c_str());
-        relPtr->type = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TYPE.c_str());
-        relPtr->target = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TARGET.c_str());
+        relPtr->id = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_ID.c_str());
+        relPtr->type = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TYPE.c_str());
+        relPtr->target = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TARGET.c_str());
 
         m_relationShips.push_back(relPtr);
     }
@@ -494,7 +494,7 @@ std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream) {
     });
 
     if(itr == reader.m_relationShips.end())
-        throw DeadlyImportError("Cannot find" + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
+        throw DeadlyImportError("Cannot find " + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
 
     return (*itr)->target;
 }

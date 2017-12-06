@@ -413,14 +413,22 @@ public:
         // empty
     }
 
+    bool validateRels( OpcPackageRelationshipPtr &relPtr ) {
+        if ( relPtr->id.empty() || relPtr->type.empty() || relPtr->target.empty() ) {
+            return false;
+        }
+        return true;
+    }
+
     void ParseChildNode(XmlReader* xmlReader) {        
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
 
-        relPtr->id = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_ID.c_str());
-        relPtr->type = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TYPE.c_str());
-        relPtr->target = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TARGET.c_str());
-
-        m_relationShips.push_back(relPtr);
+        relPtr->id = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_ID.c_str());
+        relPtr->type = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TYPE.c_str());
+        relPtr->target = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TARGET.c_str());
+        if ( validateRels( relPtr ) ) {
+            m_relationShips.push_back( relPtr );
+        }
     }
 
     std::vector<OpcPackageRelationshipPtr> m_relationShips;
@@ -450,13 +458,19 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
             std::string rootFile = ReadPackageRootRelationship(fileStream);
             if ( rootFile.size() > 0 && rootFile[ 0 ] == '/' ) {
                 rootFile = rootFile.substr( 1 );
+                if ( rootFile[ 0 ] == '/' ) {
+                    // deal with zipbug
+                    rootFile = rootFile.substr( 1 );
+                }
             }
 
             DefaultLogger::get()->debug(rootFile);
 
             mRootStream = mZipArchive->Open(rootFile.c_str());
-
-            ai_assert(mRootStream != nullptr);
+            ai_assert( mRootStream != nullptr );
+            if ( nullptr == mRootStream ) {
+                throw DeadlyExportError( "Cannot open rootfile in archive : " + rootFile );
+            }
 
         //    const size_t size = zipArchive->FileSize();
         //    m_Data.resize( size );
@@ -494,7 +508,7 @@ std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream) {
     });
 
     if(itr == reader.m_relationShips.end())
-        throw DeadlyImportError("Cannot find" + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
+        throw DeadlyImportError("Cannot find " + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
 
     return (*itr)->target;
 }

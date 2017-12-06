@@ -191,7 +191,7 @@ bool D3MFExporter::export3DModel() {
     info->type = XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;
     mRelations.push_back( info );
 
-    writeModelToArchive( "/3D", "3DModel.model" );
+    writeModelToArchive( "3D", "3DModel.model" );
     mModelOutput.flush();
 
     return true;

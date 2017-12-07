@@ -240,13 +240,14 @@ void D3MFExporter::writeMesh( aiMesh *mesh ) {
         writeVertex( mesh->mVertices[ i ] );
     }
     mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
-    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 
     writeFaces( mesh );
+
+    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 }
 
 void D3MFExporter::writeVertex( const aiVector3D &pos ) {
-    mModelOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\">";
+    mModelOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\" />";
     mModelOutput << std::endl;
 }
 

@@ -72,7 +72,7 @@ public:
     }
 
     ~XmlSerializer() {
-
+        // empty
     }
 
     void ImportXml(aiScene* scene) {

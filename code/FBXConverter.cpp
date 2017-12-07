@@ -440,12 +440,11 @@ private:
 	bool FindTextureIndexByFilename(const Video& video, unsigned int& index) {
 		index = 0;
 		const char* videoFileName = video.FileName().c_str();
-		for (auto texture = textures_converted.begin(); texture != textures_converted.end(); ++texture)
-		{
+		for (auto texture = textures_converted.begin(); texture != textures_converted.end(); ++texture) {
 			if (!strcmp(texture->first->FileName().c_str(), videoFileName)) {
+                index = texture->second;
 				return true;
 			}
-			index++;
 		}
 		return false;
 	}

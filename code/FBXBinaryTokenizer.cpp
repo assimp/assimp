@@ -435,11 +435,6 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
         TokenizeError("file is too short",0);
     }
 
-    if (strncmp(input,"Kaydara FBX Binary",18)) {
-        TokenizeError("magic bytes not found",0);
-    }
-
-
     //uint32_t offset = 0x15;
     const char* cursor = input + 0x15;
 

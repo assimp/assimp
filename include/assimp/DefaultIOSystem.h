@@ -52,12 +52,6 @@ namespace Assimp    {
 class ASSIMP_API DefaultIOSystem : public IOSystem
 {
 public:
-    /** Constructor. */
-    DefaultIOSystem();
-
-    /** Destructor. */
-    ~DefaultIOSystem();
-
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
     bool Exists( const char* pFile) const;

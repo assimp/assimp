@@ -54,7 +54,7 @@ TEST_F( utVersion, aiGetLegalStringTest ) {
 }
 
 TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ( aiGetVersionMinor(), 0U );
+    EXPECT_EQ( aiGetVersionMinor(), 1U );
 }
     
 TEST_F( utVersion, aiGetVersionMajorTest ) {

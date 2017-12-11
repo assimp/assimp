@@ -165,7 +165,7 @@ Exporter::ExportFormatEntry gExporters[] =
     Exporter::ExportFormatEntry( "x3d", "Extensible 3D", "x3d" , &ExportSceneX3D, 0 ),
 #endif
 
-#ifndef ASSIMP_BUILD_NO3MF_EXPORTER
+#ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
     Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 )
 #endif
 };

@@ -32,7 +32,7 @@ PROJECT_NAME           = Assimp
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = "v3.1.1 (June 2014)"
+PROJECT_NUMBER         = "v4.1. (December 2018)"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description 
 # for a project that appears at the top of each page and should give viewer 

@@ -324,5 +324,5 @@ void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::str
 } // Namespace D3MF
 } // Namespace Assimp
 
-#endif // ASSIMP_BUILD_NO3MF_EXPORTER
+#endif // ASSIMP_BUILD_NO_3MF_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

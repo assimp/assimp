@@ -702,6 +702,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
     //nodes
     scene->mRootNode=_nodes[0];
+    _nodes.clear();  // node ownership now belongs to scene
 
     //material
     if( !_materials.size() ){

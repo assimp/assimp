@@ -123,7 +123,7 @@ private:
     std::vector<Vertex> _vertices;
 
     std::vector<aiNode*> _nodes;
-    std::vector<aiMesh*> _meshes;
+    std::vector<std::unique_ptr<aiMesh> > _meshes;
     std::vector<aiNodeAnim*> _nodeAnims;
     std::vector<std::unique_ptr<aiAnimation> > _animations;
 };

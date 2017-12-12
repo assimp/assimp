@@ -400,8 +400,7 @@ void B3DImporter::ReadTRIS( int v0 ){
         Fail( "Bad material id" );
     }
 
-    aiMesh *mesh=new aiMesh;
-    _meshes.push_back( mesh );
+    std::unique_ptr<aiMesh> mesh(new aiMesh);
 
     mesh->mMaterialIndex=matid;
     mesh->mNumFaces=0;
@@ -429,6 +428,8 @@ void B3DImporter::ReadTRIS( int v0 ){
         ++mesh->mNumFaces;
         ++face;
     }
+
+    _meshes.emplace_back( std::move(mesh) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -635,7 +636,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
         aiNode *node=_nodes[i];
 
         for( size_t j=0;j<node->mNumMeshes;++j ){
-            aiMesh *mesh=_meshes[node->mMeshes[j]];
+            aiMesh *mesh = _meshes[node->mMeshes[j]].get();
 
             int n_tris=mesh->mNumFaces;
             int n_verts=mesh->mNumVertices=n_tris * 3;
@@ -708,7 +709,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
     //meshes
     scene->mNumMeshes= static_cast<unsigned int>(_meshes.size());
-    scene->mMeshes=to_array( _meshes );
+    scene->mMeshes = unique_to_array( _meshes );
 
     //animations
     if( _animations.size()==1 && _nodeAnims.size() ){

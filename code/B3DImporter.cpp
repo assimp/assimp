@@ -309,8 +309,7 @@ void B3DImporter::ReadBRUS(){
         /*int blend=**/ReadInt();
         int fx=ReadInt();
 
-        aiMaterial *mat=new aiMaterial;
-        _materials.push_back( mat );
+        std::unique_ptr<aiMaterial> mat(new aiMaterial);
 
         // Name
         aiString ainame( name );
@@ -347,6 +346,7 @@ void B3DImporter::ReadBRUS(){
                 mat->AddProperty( &texname,AI_MATKEY_TEXTURE_DIFFUSE(0) );
             }
         }
+        _materials.emplace_back( std::move(mat) );
     }
 }
 
@@ -702,10 +702,10 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
     //material
     if( !_materials.size() ){
-        _materials.push_back( new aiMaterial );
+        _materials.emplace_back( std::unique_ptr<aiMaterial>(new aiMaterial) );
     }
     scene->mNumMaterials= static_cast<unsigned int>(_materials.size());
-    scene->mMaterials=to_array( _materials );
+    scene->mMaterials = unique_to_array( _materials );
 
     //meshes
     scene->mNumMeshes= static_cast<unsigned int>(_meshes.size());

@@ -117,7 +117,7 @@ private:
     std::vector<unsigned> _stack;
 
     std::vector<std::string> _textures;
-    std::vector<aiMaterial*> _materials;
+    std::vector<std::unique_ptr<aiMaterial> > _materials;
 
     int _vflags,_tcsets,_tcsize;
     std::vector<Vertex> _vertices;

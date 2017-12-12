@@ -546,7 +546,7 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
     node->mParent=parent;
     node->mTransformation=tform;
 
-    aiNodeAnim *nodeAnim=0;
+    std::unique_ptr<aiNodeAnim> nodeAnim;
     vector<unsigned> meshes;
     vector<aiNode*> children;
 
@@ -564,16 +564,19 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
             ReadANIM();
         }else if( t=="KEYS" ){
             if( !nodeAnim ){
-                nodeAnim=new aiNodeAnim;
-                _nodeAnims.push_back( nodeAnim );
+                nodeAnim.reset(new aiNodeAnim);
                 nodeAnim->mNodeName=node->mName;
             }
-            ReadKEYS( nodeAnim );
+            ReadKEYS( nodeAnim.get() );
         }else if( t=="NODE" ){
             aiNode *child=ReadNODE( node );
             children.push_back( child );
         }
         ExitChunk();
+    }
+
+    if (nodeAnim) {
+        _nodeAnims.emplace_back( std::move(nodeAnim) );
     }
 
     node->mNumMeshes= static_cast<unsigned int>(meshes.size());
@@ -716,7 +719,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
         aiAnimation *anim = _animations.back().get();
         anim->mNumChannels=static_cast<unsigned int>(_nodeAnims.size());
-        anim->mChannels=to_array( _nodeAnims );
+        anim->mChannels = unique_to_array( _nodeAnims );
 
         scene->mNumAnimations=static_cast<unsigned int>(_animations.size());
         scene->mAnimations=unique_to_array( _animations );

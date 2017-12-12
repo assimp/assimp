@@ -267,6 +267,21 @@ T *B3DImporter::to_array( const vector<T> &v ){
     return p;
 }
 
+
+// ------------------------------------------------------------------------------------------------
+template<class T>
+T **unique_to_array( vector<std::unique_ptr<T> > &v ){
+    if( v.empty() ) {
+        return 0;
+    }
+    T **p = new T*[ v.size() ];
+    for( size_t i = 0; i < v.size(); ++i ){
+        p[i] = v[i].release();
+    }
+    return p;
+}
+
+
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadTEXS(){
     while( ChunkSize() ){

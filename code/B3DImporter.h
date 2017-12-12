@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include "BaseImporter.h"
 
+#include <memory>
 #include <vector>
 
 struct aiNodeAnim;
@@ -124,7 +125,7 @@ private:
     std::vector<aiNode*> _nodes;
     std::vector<aiMesh*> _meshes;
     std::vector<aiNodeAnim*> _nodeAnims;
-    std::vector<aiAnimation*> _animations;
+    std::vector<std::unique_ptr<aiAnimation> > _animations;
 };
 
 }

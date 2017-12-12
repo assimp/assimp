@@ -93,7 +93,6 @@ void DeleteAllBarePointers(std::vector<T>& x)
 
 B3DImporter::~B3DImporter()
 {
-    DeleteAllBarePointers(_animations);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -515,11 +514,11 @@ void B3DImporter::ReadANIM(){
     int frames=ReadInt();
     float fps=ReadFloat();
 
-    aiAnimation *anim=new aiAnimation;
-    _animations.push_back( anim );
+    std::unique_ptr<aiAnimation> anim(new aiAnimation);
 
     anim->mDuration=frames;
     anim->mTicksPerSecond=fps;
+    _animations.emplace_back( std::move(anim) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -601,7 +600,6 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
     _nodeAnims.clear();
 
-    DeleteAllBarePointers(_animations);
     _animations.clear();
 
     string t=ReadChunk();
@@ -715,12 +713,12 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
     //animations
     if( _animations.size()==1 && _nodeAnims.size() ){
 
-        aiAnimation *anim=_animations.back();
+        aiAnimation *anim = _animations.back().get();
         anim->mNumChannels=static_cast<unsigned int>(_nodeAnims.size());
         anim->mChannels=to_array( _nodeAnims );
 
         scene->mNumAnimations=static_cast<unsigned int>(_animations.size());
-        scene->mAnimations=to_array( _animations );
+        scene->mAnimations=unique_to_array( _animations );
     }
 
     // convert to RH

@@ -1113,7 +1113,7 @@ namespace glTF2
             extensionsUsed["KHR_materials_pbrSpecularGlossiness"] = false;
             extensionsUsed["KHR_materials_common"] = false;
 
-            //extensionsUsed.insert(std::pair<std::string, bool>("KHR_materials_pbrSpecularGlossiness", false));
+            extensionsRequired = extensionsUsed;
         }
 
         //! Main function

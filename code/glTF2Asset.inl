@@ -1294,7 +1294,12 @@ inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
         if ((*extsRequired)[i].IsString()) {
             requiredExtsMap[(*extsRequired)[i].GetString()] = true;
             std::string extensionName = (*extsRequired)[i].GetString();
-            if (extensionsUsed.find(extensionName) == extensionsUsed.end()) {
+            IdMap::iterator it = extensionsUsed.find(extensionName);
+            if (it != extensionsRequired.end()) {
+                it->second = true;
+                extensionsUsed[extensionName] = true; // an extension required must be listed as used too
+            }
+            else {
                 throw DeadlyImportError("GLTF: Missing required extension \"" + extensionName + "\"");
             }
         }

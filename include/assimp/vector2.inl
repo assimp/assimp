@@ -137,21 +137,6 @@ TReal aiVector2t<TReal>::operator[](unsigned int i) const {
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 inline
-TReal& aiVector2t<TReal>::operator[](unsigned int i) {
-	switch (i) {
-		case 0:
-			return x;
-		case 1:
-			return y;
-		default:
-			break;
-    }
-    return x;
-}
-
-// ------------------------------------------------------------------------------------------------
-template <typename TReal>
-inline
 bool aiVector2t<TReal>::operator== (const aiVector2t& other) const {
     return x == other.x && y == other.y;
 }

@@ -586,7 +586,6 @@ namespace glTF2 {
 
         uint32_t jsonChunkLength = (docBuffer.GetSize() + 3) & ~3; // Round up to next multiple of 4
         auto paddingLength = jsonChunkLength - docBuffer.GetSize();
-        std::cout << paddingLength << std::endl;
 
         GLB_Chunk jsonChunk;
         jsonChunk.chunkLength = jsonChunkLength;

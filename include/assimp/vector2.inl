@@ -192,7 +192,7 @@ const aiVector2t<TReal> aiVector2t<TReal>::SymMul(const aiVector2t& o) {
 // symmetric addition
 template <typename TReal>
 inline
-inline aiVector2t<TReal> operator + (const aiVector2t<TReal>& v1, const aiVector2t<TReal>& v2) {
+aiVector2t<TReal> operator + (const aiVector2t<TReal>& v1, const aiVector2t<TReal>& v2) {
     return aiVector2t<TReal>( v1.x + v2.x, v1.y + v2.y);
 }
 

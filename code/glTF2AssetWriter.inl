@@ -720,23 +720,30 @@ namespace glTF2 {
 
     inline void AssetWriter::WriteExtensionsUsed()
     {
-        Value exts;
-        exts.SetArray();
+        Value extsUsed;
+        extsUsed.SetArray();
         {
-            // This is used to export pbrSpecularGlossiness materials with GLTF 2.
-            if (this->mAsset.extensionsUsed.at("KHR_materials_pbrSpecularGlossiness")) {
-                exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
-            }
-            if (this->mAsset.extensionsUsed.at("KHR_materials_unlit")) {
-              exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
-            }
-            if (this->mAsset.extensionsUsed.at("KHR_materials_common")) {
-                exts.PushBack(StringRef("KHR_materials_common"), mAl);
+            for (Asset::IdMap::iterator it = this->mAsset.extensionsUsed.begin(), itEnd = this->mAsset.extensionsUsed.end(); it!=itEnd; ++it) {
+                if (it->second) {
+                  extsUsed.PushBack(StringRef(it->first), mAl);
+                }
             }
         }
 
-        if (!exts.Empty())
-            mDoc.AddMember("extensionsUsed", exts, mAl);
+        Value extsRequired;
+        extsRequired.SetArray();
+        {
+            for (Asset::IdMap::iterator it = this->mAsset.extensionsRequired.begin(), itEnd = this->mAsset.extensionsRequired.end(); it!=itEnd; ++it) {
+                if (it->second) {
+                    extsRequired.PushBack(StringRef(it->first), mAl);
+                }
+            }
+        }
+
+        if (!extsUsed.Empty())
+            mDoc.AddMember("extensionsUsed", extsUsed, mAl);
+        if (!extsRequired.Empty())
+            mDoc.AddMember("extensionsRequired", extsRequired, mAl);
     }
 
     template<class T>

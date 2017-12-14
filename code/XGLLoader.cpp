@@ -921,7 +921,7 @@ aiVector2D XGLImporter::ReadVec2()
         ++s;
     }
 	vec.x = v[0];
-	vex.y = v[1];
+	vec.y = v[1];
 
     return vec;
 }

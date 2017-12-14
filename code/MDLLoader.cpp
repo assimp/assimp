@@ -416,7 +416,8 @@ void MDLImporter::InternReadFile_Quake1( )
     {
         // get the first frame in the group
         BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
-        pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
+        //pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
+		ai_assert( false && "Unaligned pointer" );
     }
     BE_NCONST MDL::Vertex* pcVertices = (BE_NCONST MDL::Vertex*) ((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));

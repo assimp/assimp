@@ -419,7 +419,7 @@ void glTF2Exporter::ExportMaterials()
         mat->Get(AI_MATKEY_GLTF_COMMON, hasCommonSource);
         bool exportAsCommonMaterial = hasCommonSource || (mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) && mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
         // The value is false if the export as a common material is active and the export option is false
-        bool exportAsPBRMaterial = false; //exportAsCommonMaterial && (!mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) || mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
+        bool exportAsPBRMaterial = exportAsCommonMaterial && (!mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) || mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
         
         
         if (exportAsPBRMaterial) {

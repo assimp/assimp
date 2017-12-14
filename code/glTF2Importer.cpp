@@ -289,7 +289,6 @@ static aiMaterial* ImportMaterial(std::vector<int>& embeddedTexIdxs, Asset& r, M
         aimat->AddProperty(&mat.pbrSpecularGlossiness.isPresent, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS);
         SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
         SetMaterialColorProperty(r, pbrSG.specularFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
-
         float glossinessAsShininess = pbrSG.glossinessFactor * 1000.0f;
         aimat->AddProperty(&glossinessAsShininess, 1, AI_MATKEY_SHININESS);
         aimat->AddProperty(&pbrSG.glossinessFactor, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR);
@@ -301,7 +300,48 @@ static aiMaterial* ImportMaterial(std::vector<int>& embeddedTexIdxs, Asset& r, M
     if (mat.unlit) {
         aimat->AddProperty(&mat.unlit, 1, AI_MATKEY_GLTF_UNLIT);
     }
+    //common
+    if (mat.common.isPresent) {
+        Common &common = mat.common.value;
 
+        aimat->AddProperty(&mat.common.isPresent, 1, AI_MATKEY_GLTF_COMMON);
+        SetMaterialColorProperty(r, common.ambientFactor, aimat, AI_MATKEY_COLOR_AMBIENT);
+        SetMaterialColorProperty(r, common.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
+        SetMaterialColorProperty(r, common.emissiveFactor, aimat, AI_MATKEY_COLOR_EMISSIVE);
+        SetMaterialColorProperty(r, common.specularFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
+
+        SetMaterialTextureProperty(embeddedTexIdxs, r, common.ambientTexture, aimat, aiTextureType_AMBIENT);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, common.diffuseTexture, aimat, aiTextureType_DIFFUSE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, common.emissiveTexture, aimat, aiTextureType_EMISSIVE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, common.specularTexture, aimat, aiTextureType_SPECULAR);
+
+        aimat->AddProperty(&common.doubleSided, 1, AI_MATKEY_TWOSIDED);
+        aimat->AddProperty(&common.shininess, 1, AI_MATKEY_SHININESS);
+        aimat->AddProperty(&common.transparency, 1, AI_MATKEY_OPACITY);
+        if (common.transparent) {
+            aiString alphaMode("BLEND");
+            aimat->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);
+        }
+
+        aiShadingMode shadingMode;
+        if ("BLINN"==common.technique) {
+            shadingMode = aiShadingMode_Blinn;
+        }
+        else if ("CONSTANT"==common.technique) {
+            shadingMode = aiShadingMode_Constant;
+        }
+        else if ("LAMBERT"==common.technique) {
+            shadingMode = aiShadingMode_Lambert;
+        }
+        else if ("PHONG"==common.technique) {
+            shadingMode = aiShadingMode_Phong;
+        }
+        else {
+            shadingMode = aiShadingMode_NoShading;
+        }
+
+        aimat->AddProperty<int>( (int*)&shadingMode, 1, AI_MATKEY_SHADING_MODEL);
+    }
     return aimat;
 }
 
@@ -745,4 +785,3 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
 }
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
-

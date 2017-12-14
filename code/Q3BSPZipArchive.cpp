@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,14 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
 #include "Q3BSPZipArchive.h"
-#include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <assimp/ai_assert.h>
 
 namespace Assimp {
@@ -136,7 +133,6 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
     return mapping;
 }
 
-// ------------------------------------------------------------------------------------------------
 ZipFile::ZipFile(size_t size) : m_Size(size) {
     ai_assert(m_Size != 0);
 
@@ -259,6 +255,7 @@ IOStream *Q3BSPZipArchive::Open(const char* pFile, const char* /*pMode*/) {
 // ------------------------------------------------------------------------------------------------
 //  Close a filestream.
 void Q3BSPZipArchive::Close(IOStream *pFile) {
+    (void)(pFile);
     ai_assert(pFile != NULL);
 
     // We don't do anything in case the file would be opened again in the future

@@ -179,7 +179,7 @@ extern void exit(int);
  glutSpecialUpFunc, glutIgnoreKeyRepeat, glutSetKeyRepeat,
  glutJoystickFunc, glutForceJoystickFunc (NOT FINALIZED!).
 **/
-#ifndef GLUT_API_VERSION  /* allow this to be overriden */
+#ifndef GLUT_API_VERSION  /* allow this to be overridden */
 #define GLUT_API_VERSION		3
 #endif
 
@@ -219,7 +219,7 @@ extern void exit(int);
 
  GLUT_XLIB_IMPLEMENTATION=15 mjk's GLUT 3.7 beta sync'ed with Mesa <GL/glut.h>
 **/
-#ifndef GLUT_XLIB_IMPLEMENTATION  /* Allow this to be overriden. */
+#ifndef GLUT_XLIB_IMPLEMENTATION  /* Allow this to be overridden. */
 #define GLUT_XLIB_IMPLEMENTATION	15
 #endif
 

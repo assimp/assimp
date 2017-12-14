@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,19 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of conversion routines to convert IFC materials to aiMaterial
  */
 
-
-
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
+
 #include "IFCUtil.h"
 #include <limits>
 #include <assimp/material.h>
 
 namespace Assimp {
-    namespace IFC {
+namespace IFC {
 
 // ------------------------------------------------------------------------------------------------
-int ConvertShadingMode(const std::string& name)
-{
+static int ConvertShadingMode(const std::string& name) {
     if (name == "BLINN") {
         return aiShadingMode_Blinn;
     }
@@ -69,8 +68,7 @@ int ConvertShadingMode(const std::string& name)
 }
 
 // ------------------------------------------------------------------------------------------------
-void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionData& conv)
-{
+static void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionData& conv) {
     aiString name;
     name.Set((surf->Name? surf->Name.Get() : "IfcSurfaceStyle_Unnamed"));
     mat->AddProperty(&name,AI_MATKEY_NAME);
@@ -134,8 +132,7 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat)
-{
+unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat) {
     STEP::DB::RefMapRange range = conv.db.GetRefs().equal_range(id);
     for(;range.first != range.second; ++range.first) {
         if(const IFC::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcStyledItem>()) {
@@ -162,31 +159,33 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
                         unsigned int matindex = static_cast<unsigned int>(conv.materials.size() - 1);
                         conv.cached_materials[surf] = matindex;
                         return matindex;
+                    }
+                }
             }
-        }
-    }
         }
     }
 
     // no local material defined. If there's global one, use that instead
-    if( prevMatId != std::numeric_limits<uint32_t>::max() )
+    if ( prevMatId != std::numeric_limits<uint32_t>::max() ) {
         return prevMatId;
+    }
 
     // we're still here - create an default material if required, or simply fail otherwise
-    if( !forceDefaultMat )
+    if ( !forceDefaultMat ) {
         return std::numeric_limits<uint32_t>::max();
+    }
 
     aiString name;
     name.Set("<IFCDefault>");
     //  ConvertColorToString( color, name);
 
     // look if there's already a default material with this base color
-    for( size_t a = 0; a < conv.materials.size(); ++a )
-    {
+    for( size_t a = 0; a < conv.materials.size(); ++a ) {
         aiString mname;
         conv.materials[a]->Get(AI_MATKEY_NAME, mname);
-        if( name == mname )
-            return (unsigned int)a;
+        if ( name == mname ) {
+            return ( unsigned int )a;
+        }
     }
 
     // we're here, yet - no default material with suitable color available. Generate one
@@ -203,4 +202,4 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
 } // ! IFC
 } // ! Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_IFC_IMPORTER

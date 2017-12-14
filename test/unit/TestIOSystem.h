@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -45,25 +45,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 
 using namespace std;
-using namespace Assimp;
+
+namespace Assimp {
 
 static const string Sep = "/";
+
 class TestIOSystem : public IOSystem {
 public:
-    TestIOSystem() : IOSystem() {}
-    virtual ~TestIOSystem() {}
+    TestIOSystem()
+    : IOSystem() {
+        // empty
+    }
+
+    virtual ~TestIOSystem() {
+        // empty
+    }
+    
     virtual bool Exists( const char* ) const {
         return true;
     }
+
     virtual char getOsSeparator() const {
         return Sep[ 0 ];
     }
 
     virtual IOStream* Open( const char* pFile, const char* pMode = "rb" ) {
+        EXPECT_NE( nullptr, pFile );
+        EXPECT_NE( nullptr, pMode );
         return NULL;
     }
 
     virtual void Close( IOStream* pFile ) {
-        // empty
+        EXPECT_NE( nullptr, pFile );
     }
 };
+
+} // Namespace Assimp

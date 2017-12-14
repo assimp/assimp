@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -157,6 +158,54 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::operator *= (const aiMatrix4x4t
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
+inline aiMatrix4x4t<TReal> aiMatrix4x4t<TReal>::operator* (const TReal& aFloat) const
+{
+    aiMatrix4x4t<TReal> temp(
+        a1 * aFloat,
+        a2 * aFloat,
+        a3 * aFloat,
+        a4 * aFloat,
+        b1 * aFloat,
+        b2 * aFloat,
+        b3 * aFloat,
+        b4 * aFloat,
+        c1 * aFloat,
+        c2 * aFloat,
+        c3 * aFloat,
+        c4 * aFloat,
+        d1 * aFloat,
+        d2 * aFloat,
+        d3 * aFloat,
+        d4 * aFloat);
+    return temp;
+}
+
+// ----------------------------------------------------------------------------------------
+template <typename TReal>
+inline aiMatrix4x4t<TReal> aiMatrix4x4t<TReal>::operator+ (const aiMatrix4x4t<TReal>& m) const
+{
+    aiMatrix4x4t<TReal> temp(
+        m.a1 + a1,
+        m.a2 + a2,
+        m.a3 + a3,
+        m.a4 + a4,
+        m.b1 + b1,
+        m.b2 + b2,
+        m.b3 + b3,
+        m.b4 + b4,
+        m.c1 + c1,
+        m.c2 + c2,
+        m.c3 + c3,
+        m.c4 + c4,
+        m.d1 + d1,
+        m.d2 + d2,
+        m.d3 + d3,
+        m.d4 + d4);
+    return temp;
+}
+
+// ----------------------------------------------------------------------------------------
+template <typename TReal>
 inline aiMatrix4x4t<TReal> aiMatrix4x4t<TReal>::operator* (const aiMatrix4x4t<TReal>& m) const
 {
     aiMatrix4x4t<TReal> temp( *this);
@@ -243,9 +292,19 @@ inline TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) {
     if (p_iIndex > 3) {
         return NULL;
     }
-
-    // XXX this is UB. Has been for years. The fact that it works now does not make it better.
-    return &this->a1 + p_iIndex * 4;
+    switch ( p_iIndex ) {
+        case 0:
+            return &a1;
+        case 1:
+            return &b1;
+        case 2:
+            return &c1;
+        case 3:
+            return &d1;
+        default:
+            break;
+    }
+    return &a1;
 }
 
 // ----------------------------------------------------------------------------------------
@@ -255,8 +314,19 @@ inline const TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) const
         return NULL;
     }
 
-    // XXX same
-    return &this->a1 + p_iIndex * 4;
+    switch ( p_iIndex ) {
+        case 0:
+            return &a1;
+        case 1:
+            return &b1;
+        case 2:
+            return &c1;
+        case 3:
+            return &d1;
+        default:
+            break;
+    }
+    return &a1;
 }
 
 // ----------------------------------------------------------------------------------------
@@ -592,7 +662,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Scaling( const aiVector3t<TReal
  * "from" into another vector called "to".
  * Input : from[3], to[3] which both must be *normalized* non-zero vectors
  * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
- * Authors: Tomas M�ller, John Hughes
+ * Authors: Tomas Möller, John Hughes
  *          "Efficiently Building a Matrix to Rotate One Vector to Another"
  *          Journal of Graphics Tools, 4(4):1-4, 1999
  */

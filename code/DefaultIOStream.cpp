@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -44,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <assimp/ai_assert.h>
-#include "DefaultIOStream.h"
+#include <assimp/DefaultIOStream.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -126,7 +127,7 @@ size_t DefaultIOStream::FileSize() const
         if (0 != err)
             return 0;
         mCachedSize = (size_t) (fileStat.st_size);
-#elif defined __GNUC__ || defined __APPLE__ || defined __MACH__
+#elif defined __GNUC__ || defined __APPLE__ || defined __MACH__ || defined __FreeBSD__
         struct stat fileStat;
         int err = stat(mFilename.c_str(), &fileStat );
         if (0 != err)

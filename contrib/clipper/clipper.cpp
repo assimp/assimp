@@ -26,7 +26,7 @@
 * Paper no. DETC2005-85513 pp. 565-575                                         *
 * ASME 2005 International Design Engineering Technical Conferences             *
 * and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
-* September 24–28, 2005 , Long Beach, California, USA                          *
+* September 24-28, 2005 , Long Beach, California, USA                          *
 * http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
 *                                                                              *
 *******************************************************************************/
@@ -43,6 +43,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <ostream>
@@ -2365,6 +2366,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
       //ok, so far it looks like we're still in range of the horizontal edge
       if ( e->xcurr == horzEdge->xtop && !eMaxPair )
       {
+        assert(horzEdge->nextInLML);
         if (SlopesEqual(*e, *horzEdge->nextInLML, m_UseFullRange))
         {
           //if output polygons share an edge, they'll need joining later ...
@@ -2429,6 +2431,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
     if ( horzEdge->outIdx >= 0 )
       IntersectEdges( horzEdge, eMaxPair,
       IntPoint(horzEdge->xtop, horzEdge->ycurr), ipBoth);
+    assert(eMaxPair);
     if (eMaxPair->outIdx >= 0) throw clipperException("ProcessHorizontal error");
     DeleteFromAEL(eMaxPair);
     DeleteFromAEL(horzEdge);

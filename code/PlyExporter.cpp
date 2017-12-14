@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -64,10 +65,14 @@ template<> const char* type_of(double&) { return "double"; }
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to PLY. Prototyped and registered in Exporter.cpp
-void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
     // invoke the exporter
     PlyExporter exporter(pFile, pScene);
+
+    if (exporter.mOutput.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
 
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
@@ -78,7 +83,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 }
 
-void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
     // invoke the exporter
     PlyExporter exporter(pFile, pScene, true);

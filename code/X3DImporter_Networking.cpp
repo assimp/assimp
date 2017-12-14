@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,10 +49,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter_Macro.hpp"
 
 // Header files, Assimp.
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
+
+//#include <regex>
 
 namespace Assimp
 {
+
+//static std::regex pattern_parentDir(R"((^|/)[^/]+/../)");
+static std::string parentDir("/../");
 
 // <Inline
 // DEF=""              ID
@@ -88,12 +94,30 @@ void X3DImporter::ParseNode_Networking_Inline()
 
 		if(load && (url.size() > 0))
 		{
-			DefaultIOSystem io_handler;
-			std::string full_path;
+			std::string full_path = mpIOHandler->CurrentDirectory() + url.front();
 
-			full_path = mFileDir + "/" + url.front();
+			//full_path = std::regex_replace(full_path, pattern_parentDir, "$1");
+			for (std::string::size_type pos = full_path.find(parentDir); pos != std::string::npos; pos = full_path.find(parentDir, pos)) {
+				if (pos > 0) {
+					std::string::size_type pos2 = full_path.rfind('/', pos - 1);
+					if (pos2 != std::string::npos) {
+						full_path.erase(pos2, pos - pos2 + 3);
+						pos = pos2;
+					}
+					else {
+						full_path.erase(0, pos + 4);
+						pos = 0;
+					}
+				}
+				else {
+					pos += 3;
+				}
+			}
 			// Attribute "url" can contain list of strings. But we need only one - first.
-			ParseFile(full_path, &io_handler);
+			std::string::size_type slashPos = full_path.find_last_of("\\/");
+			mpIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : full_path.substr(0, slashPos + 1));
+			ParseFile(full_path, mpIOHandler);
+			mpIOHandler->PopDirectory();
 		}
 
 		// check for X3DMetadataObject childs.

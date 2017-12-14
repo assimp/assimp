@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Subdivision.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "SpatialSort.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"
@@ -532,9 +533,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
                             ai_assert(adj[o]-moffsets[nidx].first < mp->mNumFaces);
                             const aiFace& f = mp->mFaces[adj[o]-moffsets[nidx].first];
-#               ifdef ASSIMP_BUILD_DEBUG
                             bool haveit = false;
-#               endif
 
                             // find our original point in the face
                             for (unsigned int m = 0; m < f.mNumIndices; ++m) {
@@ -555,15 +554,16 @@ void CatmullClarkSubdivider::InternSubdivide (
                                     // fixme: replace with mod face.mNumIndices?
                                     R += c0.midpoint+c1.midpoint;
 
-#                       ifdef ASSIMP_BUILD_DEBUG
                                     haveit = true;
-#                       endif
                                     break;
                                 }
                             }
 
                             // this invariant *must* hold if the vertex-to-face adjacency table is valid
                             ai_assert(haveit);
+                            if ( !haveit ) {
+                                DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+                            }
                         }
 
                         const float div = static_cast<float>(cnt), divsq = 1.f/(div*div);

@@ -140,7 +140,7 @@ void X3DExporter::AttrHelper_Col3DArrToString(const aiColor3D* pArray, const siz
 	AttrHelper_CommaToPoint(pTargetString);
 }
 
-void X3DExporter::AttrHelper_Color3ToAttrList(std::list<SAttribute> pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue)
+void X3DExporter::AttrHelper_Color3ToAttrList(std::list<SAttribute>& pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue)
 {
 string tstr;
 
@@ -150,7 +150,7 @@ string tstr;
 	pList.push_back({pName, tstr});
 }
 
-void X3DExporter::AttrHelper_FloatToAttrList(std::list<SAttribute> pList, const string& pName, const float pValue, const float pDefaultValue)
+void X3DExporter::AttrHelper_FloatToAttrList(std::list<SAttribute>& pList, const string& pName, const float pValue, const float pDefaultValue)
 {
 string tstr;
 
@@ -240,8 +240,12 @@ list<SAttribute> attr_list;
 		if((rotate_angle != 0) && (rotate_axis.Length() > 0))
 			attr_list.push_back({"rotation", Rotation2String(rotate_axis, rotate_angle)});
 
-		if(!scale.Equal({1, 1, 1})) attr_list.push_back({"scale", Vector2String(scale)});
-		if(translate.Length() > 0) attr_list.push_back({"translation", Vector2String(translate)});
+        if(!scale.Equal({1.0,1.0,1.0})) {
+            attr_list.push_back({"scale", Vector2String(scale)});
+        }
+        if(translate.Length() > 0) {
+            attr_list.push_back({"translation", Vector2String(translate)});
+        }
 	}
 
 	// Begin node if need.
@@ -692,7 +696,7 @@ bool found = false;
 	return true;
 }
 
-X3DExporter::X3DExporter(const char* pFileName, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+X3DExporter::X3DExporter(const char* pFileName, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 	: mScene(pScene)
 {
 list<SAttribute> attr_list;

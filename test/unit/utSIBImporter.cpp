@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SIBImporter.h"
 #include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 #include "AbstractImportExportBase.h"
 
 using namespace ::Assimp;
@@ -50,7 +52,7 @@ class utSIBImporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SIB/heffalump.sib", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SIB/heffalump.sib", aiProcess_ValidateDataStructure );
         return nullptr != scene;
     }
 };

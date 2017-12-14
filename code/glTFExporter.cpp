@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,15 +48,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 
 #include "SplitLargeMeshes.h"
-#include "SceneCombiner.h"
 
+#include <assimp/SceneCombiner.h>
 #include <assimp/version.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-// Header files, standart library.
+// Header files, standard library.
 #include <memory>
 #include <inttypes.h>
 
@@ -184,8 +185,11 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     unsigned int bytesPerComp = ComponentTypeSize(compType);
 
     size_t offset = buffer->byteLength;
+    // make sure offset is correctly byte-aligned, as required by spec
+    size_t padding = offset % bytesPerComp;
+    offset += padding;
     size_t length = count * numCompsOut * bytesPerComp;
-    buffer->Grow(length);
+    buffer->Grow(length + padding);
 
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
@@ -440,7 +444,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
         nodeRef->jointName = nodeRef->id;
 
-        unsigned int jointNamesIndex;
+        unsigned int jointNamesIndex = 0;
         bool addJointToJointNames = true;
         for ( unsigned int idx_joint = 0; idx_joint < skinRef->jointNames.size(); ++idx_joint) {
             if (skinRef->jointNames[idx_joint]->jointName.compare(nodeRef->jointName) == 0) {
@@ -465,11 +469,11 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
             float vertWeight      = aib->mWeights[idx_weights].mWeight;
 
             // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) { 
-                continue; 
+            if (jointsPerVertex[vertexId] > 3) {
+                continue;
             }
 
-            vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;
+            vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
             vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
 
             jointsPerVertex[vertexId] += 1;
@@ -503,7 +507,7 @@ void glTFExporter::ExportMeshes()
 
     // Variables needed for compression. BEGIN.
     // Indices, not pointers - because pointer to buffer is changing while writing to it.
-    size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
+    size_t idx_srcdata_begin = 0; // Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
     size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
     std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
     size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
@@ -511,7 +515,7 @@ void glTFExporter::ExportMeshes()
     // Variables needed for compression. END.
 
     std::string fname = std::string(mFilename);
-    std::string bufferIdPrefix = fname.substr(0, fname.find("."));
+    std::string bufferIdPrefix = fname.substr(0, fname.rfind(".gltf"));
     std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
 
     Ref<Buffer> b = mAsset->GetBodyBuffer();
@@ -582,7 +586,7 @@ void glTFExporter::ExportMeshes()
 		if (v) p.attributes.position.push_back(v);
 
 		/******************** Normals ********************/
-		if(comp_allow && (aim->mNormals > 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
+		if(comp_allow && (aim->mNormals != 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
 
 		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
 		if (n) p.attributes.normal.push_back(n);
@@ -830,7 +834,7 @@ void glTFExporter::ExportScene()
 void glTFExporter::ExportMetadata()
 {
     glTF::AssetMetadata& asset = mAsset->asset;
-    asset.version = 1;
+    asset.version = "1.0";
 
     char buffer[256];
     ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",
@@ -839,11 +843,23 @@ void glTFExporter::ExportMetadata()
     asset.generator = buffer;
 }
 
-inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel)
+inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)
 {
     // Loop over the data and check to see if it exactly matches an existing buffer.
     //    If yes, then reference the existing corresponding accessor.
     //    Otherwise, add to the buffer and create a new accessor.
+
+    size_t counts[3] = {
+        nodeChannel->mNumPositionKeys,
+        nodeChannel->mNumScalingKeys,
+        nodeChannel->mNumRotationKeys,
+    };
+    size_t numKeyframes = 1;
+    for (int i = 0; i < 3; ++i) {
+        if (counts[i] > numKeyframes) {
+            numKeyframes = counts[i];
+        }
+    }
 
     //-------------------------------------------------------
     // Extract TIME parameter data.
@@ -851,24 +867,28 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     if(nodeChannel->mNumPositionKeys > 0) {
         typedef float TimeType;
         std::vector<TimeType> timeData;
-        timeData.resize(nodeChannel->mNumPositionKeys);
-        for (size_t i = 0; i < nodeChannel->mNumPositionKeys; ++i) {
-            timeData[i] = nodeChannel->mPositionKeys[i].mTime;  // Check if we have to cast type here. e.g. uint16_t()
+        timeData.resize(numKeyframes);
+        for (size_t i = 0; i < numKeyframes; ++i) {
+            size_t frameIndex = i * nodeChannel->mNumPositionKeys / numKeyframes;
+            // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
+            // Check if we have to cast type here. e.g. uint16_t()
+            timeData[i] = static_cast<float>(nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond);
         }
 
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
         if (timeAccessor) animRef->Parameters.TIME = timeAccessor;
     }
 
     //-------------------------------------------------------
     // Extract translation parameter data
     if(nodeChannel->mNumPositionKeys > 0) {
-        C_STRUCT aiVector3D* translationData = new aiVector3D[nodeChannel->mNumPositionKeys];
-        for (size_t i = 0; i < nodeChannel->mNumPositionKeys; ++i) {
-            translationData[i] = nodeChannel->mPositionKeys[i].mValue;
+        C_STRUCT aiVector3D* translationData = new aiVector3D[numKeyframes];
+        for (size_t i = 0; i < numKeyframes; ++i) {
+            size_t frameIndex = i * nodeChannel->mNumPositionKeys / numKeyframes;
+            translationData[i] = nodeChannel->mPositionKeys[frameIndex].mValue;
         }
 
-        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if ( tranAccessor ) {
             animRef->Parameters.translation = tranAccessor;
         }
@@ -878,12 +898,13 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     //-------------------------------------------------------
     // Extract scale parameter data
     if(nodeChannel->mNumScalingKeys > 0) {
-        C_STRUCT aiVector3D* scaleData = new aiVector3D[nodeChannel->mNumScalingKeys];
-        for (size_t i = 0; i < nodeChannel->mNumScalingKeys; ++i) {
-            scaleData[i] = nodeChannel->mScalingKeys[i].mValue;
+        C_STRUCT aiVector3D* scaleData = new aiVector3D[numKeyframes];
+        for (size_t i = 0; i < numKeyframes; ++i) {
+            size_t frameIndex = i * nodeChannel->mNumScalingKeys / numKeyframes;
+            scaleData[i] = nodeChannel->mScalingKeys[frameIndex].mValue;
         }
 
-        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumScalingKeys, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if ( scaleAccessor ) {
             animRef->Parameters.scale = scaleAccessor;
         }
@@ -893,15 +914,16 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     //-------------------------------------------------------
     // Extract rotation parameter data
     if(nodeChannel->mNumRotationKeys > 0) {
-        vec4* rotationData = new vec4[nodeChannel->mNumRotationKeys];
-        for (size_t i = 0; i < nodeChannel->mNumRotationKeys; ++i) {
-            rotationData[i][0] = nodeChannel->mRotationKeys[i].mValue.x;
-            rotationData[i][1] = nodeChannel->mRotationKeys[i].mValue.y;
-            rotationData[i][2] = nodeChannel->mRotationKeys[i].mValue.z;
-            rotationData[i][3] = nodeChannel->mRotationKeys[i].mValue.w;
+        vec4* rotationData = new vec4[numKeyframes];
+        for (size_t i = 0; i < numKeyframes; ++i) {
+            size_t frameIndex = i * nodeChannel->mNumRotationKeys / numKeyframes;
+            rotationData[i][0] = nodeChannel->mRotationKeys[frameIndex].mValue.x;
+            rotationData[i][1] = nodeChannel->mRotationKeys[frameIndex].mValue.y;
+            rotationData[i][2] = nodeChannel->mRotationKeys[frameIndex].mValue.z;
+            rotationData[i][3] = nodeChannel->mRotationKeys[frameIndex].mValue.w;
         }
 
-        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
         if ( rotAccessor ) {
             animRef->Parameters.rotation = rotAccessor;
         }
@@ -931,7 +953,7 @@ void glTFExporter::ExportAnimations()
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
             /******************* Parameters ********************/
-            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel);
+            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, static_cast<float>(anim->mTicksPerSecond));
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;

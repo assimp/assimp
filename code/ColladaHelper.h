@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAHELPER_H_INC
 #define AI_COLLADAHELPER_H_INC
 
-#include <string>
 #include <map>
 #include <vector>
 #include <stdint.h>
@@ -88,6 +88,21 @@ enum InputType
     IT_Tangent,
     IT_Bitangent
 };
+
+/** Supported controller types */
+enum ControllerType
+{
+    Skin,
+    Morph
+};
+
+/** Supported morph methods */
+enum MorphMethod
+{
+    Normalized,
+    Relative
+};
+
 
 /** Contains all data for one of the different transformation types */
 struct Transform
@@ -287,7 +302,7 @@ struct Accessor
     size_t mOffset;  // in number of values
     size_t mStride;  // Stride in number of values
     std::vector<std::string> mParams; // names of the data streams in the accessors. Empty string tells to ignore.
-    size_t mSubOffset[4]; // Suboffset inside the object for the common 4 elements. For a vector, thats XYZ, for a color RGBA and so on.
+    size_t mSubOffset[4]; // Suboffset inside the object for the common 4 elements. For a vector, that's XYZ, for a color RGBA and so on.
                           // For example, SubOffset[0] denotes which of the values inside the object is the vector X component.
     std::string mSource;   // URL of the source array
     mutable const Data* mData; // Pointer to the source array, if resolved. NULL else
@@ -380,6 +395,12 @@ enum PrimitiveType
 /** A skeleton controller to deform a mesh with the use of joints */
 struct Controller
 {
+    // controller type
+    ControllerType mType;
+
+    // Morphing method if type is Morph
+    MorphMethod mMethod;
+
     // the URL of the mesh deformed by the controller.
     std::string mMeshId;
 
@@ -402,6 +423,9 @@ struct Controller
 
     // JointIndex-WeightIndex pairs for all vertices
     std::vector< std::pair<size_t, size_t> > mWeights;
+
+    std::string mMorphTarget;
+    std::string mMorphWeight;
 };
 
 /** A collada material. Pretty much the only member is a reference to an effect. */
@@ -577,6 +601,12 @@ struct AnimationChannel
     std::string mSourceTimes;
     /** Source URL of the value values. Collada calls them "output". */
     std::string mSourceValues;
+    /** Source URL of the IN_TANGENT semantic values. */
+    std::string mInTanValues;
+    /** Source URL of the OUT_TANGENT semantic values. */
+    std::string mOutTanValues;
+    /** Source URL of the INTERPOLATION semantic values. */
+    std::string mInterpolationValues;
 };
 
 /** An animation. Container for 0-x animation channels or 0-x animations */
@@ -645,6 +675,7 @@ struct Animation
 struct ChannelEntry
 {
     const Collada::AnimationChannel* mChannel; ///> the source channel
+    std::string mTargetId;
     std::string mTransformId;   // the ID of the transformation step of the node which is influenced
     size_t mTransformIndex; // Index into the node's transform chain to apply the channel to
     size_t mSubElement; // starting index inside the transform data

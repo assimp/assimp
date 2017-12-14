@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -54,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include "StringComparison.h"
 
 using namespace Assimp;
@@ -1379,7 +1381,7 @@ void Discreet3DSImporter::ParseColorChunk( aiColor3D* out, bool acceptPercent )
         bGamma = true;
 
     case Discreet3DS::CHUNK_RGBF:
-        if (sizeof(ai_real) * 3 > diff)   {
+        if (sizeof(float) * 3 > diff)   {
             *out = clrError;
             return;
         }

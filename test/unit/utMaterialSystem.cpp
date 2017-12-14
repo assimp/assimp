@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -72,7 +73,7 @@ TEST_F(MaterialSystemTest, testFloatArrayProperty)
 {
     float pf[] = {0.0f,1.0f,2.0f,3.0f};
     unsigned int pMax = sizeof(pf) / sizeof(float);
-    this->pcMat->AddProperty(&pf,pMax,"testKey2");
+    this->pcMat->AddProperty(pf,pMax,"testKey2");
     pf[0] = pf[1] = pf[2] = pf[3] = 12.0f;
 
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey2",0,0,pf,&pMax));
@@ -96,7 +97,7 @@ TEST_F(MaterialSystemTest, testIntArrayProperty)
 {
     int pf[] = {0,1,2,3};
     unsigned int pMax = sizeof(pf) / sizeof(int);
-    this->pcMat->AddProperty(&pf,pMax,"testKey4");
+    this->pcMat->AddProperty(pf,pMax,"testKey4");
     pf[0] = pf[1] = pf[2] = pf[3] = 12;
 
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey4",0,0,pf,&pMax));

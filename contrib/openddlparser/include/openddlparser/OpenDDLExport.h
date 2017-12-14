@@ -23,37 +23,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <openddlparser/OpenDDLCommon.h>
+#include <openddlparser/OpenDDLStream.h>
 #include <openddlparser/Value.h>
 
 BEGIN_ODDLPARSER_NS
 
-//-------------------------------------------------------------------------------------------------
-/// @ingroup    IOStreamBase
-///	@brief      This class represents the stream to write out.
-//-------------------------------------------------------------------------------------------------
-class DLL_ODDLPARSER_EXPORT StreamFormatterBase {
-public:
-    StreamFormatterBase();
-    virtual ~StreamFormatterBase();
-    virtual std::string format( const std::string &statement );
-};
-
-//-------------------------------------------------------------------------------------------------
-/// @ingroup    IOStreamBase
-///	@brief      This class represents the stream to write out.
-//-------------------------------------------------------------------------------------------------
-class DLL_ODDLPARSER_EXPORT IOStreamBase {
-public:
-    IOStreamBase( StreamFormatterBase *formatter = ddl_nullptr );
-    virtual ~IOStreamBase();
-    virtual bool open( const std::string &anme );
-    virtual bool close();
-    virtual size_t write( const std::string &statement );
-
-private:
-    StreamFormatterBase *m_formatter;
-    FILE *m_file;
-};
+// Forward declarations
+class IOStreamBase;
 
 //-------------------------------------------------------------------------------------------------
 ///

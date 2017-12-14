@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -45,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
+
 // internal headers
 #include "ASELoader.h"
 #include "StringComparison.h"
@@ -54,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 #include <memory>
 
@@ -1017,6 +1021,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 
                             // convert bones, if existing
                             if (!mesh.mBones.empty()) {
+                                ai_assert(avOutputBones);
                                 // check whether there is a vertex weight for this vertex index
                                 if (iIndex2 < mesh.mBoneVertices.size())    {
 
@@ -1317,5 +1322,7 @@ bool ASEImporter::GenerateNormals(ASE::Mesh& mesh)  {
     ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
     return false;
 }
+
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 
 #endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
 
-#include <assimp/config.h>
 #include <assimp/types.h>
 #include "importerdesc.h"
 
@@ -417,7 +417,7 @@ ASSIMP_API void aiSetImportPropertyInteger(
 ASSIMP_API void aiSetImportPropertyFloat(
     C_STRUCT aiPropertyStore* store,
     const char* szName,
-    float value);
+    ai_real value);
 
 // --------------------------------------------------------------------------------
 /** Set a string property.

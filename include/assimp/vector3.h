@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   include <math.h>
 #endif
 
-#include "./Compiler/pushpack1.h"
 #include "defs.h"
 
 #ifdef __cplusplus
@@ -65,11 +65,10 @@ template <typename TReal>
 class aiVector3t
 {
 public:
-
-    aiVector3t () : x(), y(), z() {}
-    aiVector3t (TReal _x, TReal _y, TReal _z) : x(_x), y(_y), z(_z) {}
-    explicit aiVector3t (TReal _xyz) : x(_xyz), y(_xyz), z(_xyz) {}
-    aiVector3t (const aiVector3t& o) : x(o.x), y(o.y), z(o.z) {}
+    aiVector3t() : x(), y(), z() {}
+    aiVector3t(TReal _x, TReal _y, TReal _z) : x(_x), y(_y), z(_z) {}
+    explicit aiVector3t (TReal _xyz ) : x(_xyz), y(_xyz), z(_xyz) {}
+    aiVector3t( const aiVector3t& o ) : x(o.x), y(o.y), z(o.z) {}
 
 public:
 
@@ -126,7 +125,7 @@ public:
     const aiVector3t SymMul(const aiVector3t& o);
 
     TReal x, y, z;
-} PACK_STRUCT;
+};
 
 
 typedef aiVector3t<ai_real> aiVector3D;
@@ -135,15 +134,11 @@ typedef aiVector3t<ai_real> aiVector3D;
 
 struct aiVector3D {
     ai_real x, y, z;
-} PACK_STRUCT;
+};
 
 #endif // __cplusplus
 
-#include "./Compiler/poppack1.h"
-
 #ifdef __cplusplus
-
-
 
 #endif // __cplusplus
 

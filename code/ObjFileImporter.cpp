@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -41,16 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
-#include "DefaultIOSystem.h"
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
 #include "IOStreamBuffer.h"
 #include <memory>
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 
 static const aiImporterDesc desc = {
     "Wavefront Object Importer",
@@ -607,14 +609,18 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         mat->AddProperty( &pCurrentMaterial->emissive, 1, AI_MATKEY_COLOR_EMISSIVE );
         mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS );
         mat->AddProperty( &pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY );
+        mat->AddProperty( &pCurrentMaterial->transparent,1,AI_MATKEY_COLOR_TRANSPARENT);
 
         // Adding refraction index
         mat->AddProperty( &pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI );
 
         // Adding textures
+        const int uvwIndex = 0;
+
         if ( 0 != pCurrentMaterial->texture.length )
         {
             mat->AddProperty( &pCurrentMaterial->texture, AI_MATKEY_TEXTURE_DIFFUSE(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_DIFFUSE(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureDiffuseType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE);
@@ -624,6 +630,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         if ( 0 != pCurrentMaterial->textureAmbient.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureAmbient, AI_MATKEY_TEXTURE_AMBIENT(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_AMBIENT(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureAmbientType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_AMBIENT);
@@ -631,11 +638,15 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         }
 
         if ( 0 != pCurrentMaterial->textureEmissive.length )
+        {
             mat->AddProperty( &pCurrentMaterial->textureEmissive, AI_MATKEY_TEXTURE_EMISSIVE(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_EMISSIVE(0) );
+        }
 
         if ( 0 != pCurrentMaterial->textureSpecular.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureSpecular, AI_MATKEY_TEXTURE_SPECULAR(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_SPECULAR(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_SPECULAR);
@@ -645,6 +656,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         if ( 0 != pCurrentMaterial->textureBump.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_HEIGHT(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureBumpType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_HEIGHT);
@@ -654,6 +666,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         if ( 0 != pCurrentMaterial->textureNormal.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureNormal, AI_MATKEY_TEXTURE_NORMALS(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_NORMALS(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureNormalType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_NORMALS);
@@ -670,6 +683,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
             for( unsigned i = 0; i < count; i++ )
             {
                 mat->AddProperty(&pCurrentMaterial->textureReflection[i], AI_MATKEY_TEXTURE_REFLECTION(i));
+                mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_REFLECTION(i) );
 
                 if(pCurrentMaterial->clamp[type])
                     addTextureMappingModeProperty(mat, aiTextureType_REFLECTION, 1, i);
@@ -679,6 +693,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         if ( 0 != pCurrentMaterial->textureDisp.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureDisp, AI_MATKEY_TEXTURE_DISPLACEMENT(0) );
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_DISPLACEMENT(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureDispType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_DISPLACEMENT);
@@ -688,6 +703,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         if ( 0 != pCurrentMaterial->textureOpacity.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureOpacity, AI_MATKEY_TEXTURE_OPACITY(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_OPACITY(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureOpacityType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_OPACITY);
@@ -697,6 +713,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         if ( 0 != pCurrentMaterial->textureSpecularity.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureSpecularity, AI_MATKEY_TEXTURE_SHININESS(0));
+            mat->AddProperty( &uvwIndex, 1, AI_MATKEY_UVWSRC_SHININESS(0) );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularityType])
             {
                 addTextureMappingModeProperty(mat, aiTextureType_SHININESS);

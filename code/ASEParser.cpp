@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -45,11 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
 #include "TextureTransform.h"
 #include "ASELoader.h"
-#include "MaterialSystem.h"
 #include "fast_atof.h"
 #include <assimp/DefaultLogger.hpp>
 
@@ -1135,7 +1136,7 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the �dditional information for bezier's and TCBs
+            // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_SCALE_SAMPLE" ,20))
@@ -1181,7 +1182,7 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the �dditional information for bezier's and TCBs
+            // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_POS_SAMPLE" ,18))
@@ -1227,7 +1228,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the  floats -
-            // we ignore the �dditional information for bezier's and TCBs
+            // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_ROT_SAMPLE" ,18))
@@ -1858,7 +1859,7 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
             ++filePtr;
 
             // Face entry
-            if (TokenMatch(filePtr,"MESH_CFACE" ,11))
+            if (TokenMatch(filePtr,"MESH_CFACE" ,10))
             {
                 unsigned int aiValues[3];
                 unsigned int iIndex = 0;
@@ -2150,5 +2151,7 @@ void Parser::ParseLV4MeshLong(unsigned int& iOut)
     // parse the value
     iOut = strtoul10(filePtr,&filePtr);
 }
+
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 
 #endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER

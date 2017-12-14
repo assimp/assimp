@@ -59,7 +59,7 @@ import java.util.Set;
  * Pointer comparison will fail.
  */
 public final class Jassimp {
-    
+
     /**
      * The default wrapper provider using built in types.
      */
@@ -79,6 +79,20 @@ public final class Jassimp {
         return importFile(filename, EnumSet.noneOf(AiPostProcessSteps.class));
     }
     
+    /**
+     * Imports a file via assimp without post processing.
+     * 
+     * @param filename the file to import
+     * @param ioSystem ioSystem to load files, or null for default
+     * @return the loaded scene
+     * @throws IOException if an error occurs
+     */
+    public static AiScene importFile(String filename, AiIOSystem<?> ioSystem) 
+          throws IOException {
+       
+       return importFile(filename, EnumSet.noneOf(AiPostProcessSteps.class), ioSystem);
+    }
+    
     
     /**
      * Imports a file via assimp.
@@ -89,10 +103,28 @@ public final class Jassimp {
      * @throws IOException if an error occurs
      */
     public static AiScene importFile(String filename, 
-            Set<AiPostProcessSteps> postProcessing) throws IOException {
+                                     Set<AiPostProcessSteps> postProcessing) 
+                                           throws IOException {
+        return importFile(filename, postProcessing, null);
+    }
+    
+    /**
+     * Imports a file via assimp.
+     * 
+     * @param filename the file to import
+     * @param postProcessing post processing flags
+     * @param ioSystem ioSystem to load files, or null for default
+     * @return the loaded scene, or null if an error occurred
+     * @throws IOException if an error occurs
+     */
+    public static AiScene importFile(String filename, 
+            Set<AiPostProcessSteps> postProcessing, AiIOSystem<?> ioSystem) 
+                  throws IOException {
         
+       loadLibrary();
+       
         return aiImportFile(filename, AiPostProcessSteps.toRawValue(
-                postProcessing));
+                postProcessing), ioSystem);
     }
     
     
@@ -174,6 +206,11 @@ public final class Jassimp {
             wrapperProvider) {
         
         s_wrapperProvider = wrapperProvider;
+    }
+    
+    
+    public static void setLibraryLoader(JassimpLibraryLoader libraryLoader) {
+       s_libraryLoader = libraryLoader;
     }
     
     
@@ -264,6 +301,35 @@ public final class Jassimp {
         return s_wrapperProvider.wrapSceneNode(parent, matrix, meshRefs, name);
     }
     
+    /**
+     * Helper method to load the library using the provided JassimpLibraryLoader.<p>
+     * 
+     * Synchronized to avoid race conditions.
+     */
+    private static void loadLibrary()
+    {
+       if(!s_libraryLoaded)
+       {
+          synchronized(s_libraryLoadingLock)
+          {
+             if(!s_libraryLoaded)
+             {
+                s_libraryLoader.loadLibrary();
+                NATIVE_AIVEKTORKEY_SIZE = getVKeysize();
+                NATIVE_AIQUATKEY_SIZE = getQKeysize();
+                NATIVE_AIVEKTOR3D_SIZE = getV3Dsize();
+                NATIVE_FLOAT_SIZE = getfloatsize();
+                NATIVE_INT_SIZE = getintsize();
+                NATIVE_UINT_SIZE = getuintsize();
+                NATIVE_DOUBLE_SIZE = getdoublesize();
+                NATIVE_LONG_SIZE = getlongsize();
+                
+                s_libraryLoaded = true;
+             }
+          }
+          
+       }
+    }
     
     /**
      * The native interface.
@@ -274,7 +340,7 @@ public final class Jassimp {
      * @throws IOException if an error occurs
      */
     private static native AiScene aiImportFile(String filename, 
-            long postProcessing) throws IOException;
+            long postProcessing, AiIOSystem<?> ioSystem) throws IOException;
     
     
     /**
@@ -285,30 +351,38 @@ public final class Jassimp {
     
     
     /**
+     * The library loader to load the native library.
+     */
+    private static JassimpLibraryLoader s_libraryLoader = 
+            new JassimpLibraryLoader();
+   
+    /**
+     * Status flag if the library is loaded.
+     * 
+     * Volatile to avoid problems with double checked locking.
+     * 
+     */
+    private static volatile boolean s_libraryLoaded = false;
+    
+    /**
+     * Lock for library loading.
+     */
+    private static final Object s_libraryLoadingLock = new Object();
+    
+    /**
      * Pure static class, no accessible constructor.
      */
     private Jassimp() {
         /* nothing to do */
     }
     
-    public static final int NATIVE_AIVEKTORKEY_SIZE; 
-    public static final int NATIVE_AIQUATKEY_SIZE; 
-    public static final int NATIVE_AIVEKTOR3D_SIZE; 
-    public static final int NATIVE_FLOAT_SIZE; 
-    public static final int NATIVE_INT_SIZE; 
-    public static final int NATIVE_UINT_SIZE; 
-    public static final int NATIVE_DOUBLE_SIZE; 
-    public static final int NATIVE_LONG_SIZE; 
+    public static int NATIVE_AIVEKTORKEY_SIZE; 
+    public static int NATIVE_AIQUATKEY_SIZE; 
+    public static int NATIVE_AIVEKTOR3D_SIZE; 
+    public static int NATIVE_FLOAT_SIZE; 
+    public static int NATIVE_INT_SIZE; 
+    public static int NATIVE_UINT_SIZE; 
+    public static int NATIVE_DOUBLE_SIZE; 
+    public static int NATIVE_LONG_SIZE; 
 
-    static {
-        System.loadLibrary("jassimp");
-    	NATIVE_AIVEKTORKEY_SIZE = getVKeysize();
-    	NATIVE_AIQUATKEY_SIZE = getQKeysize();
-    	NATIVE_AIVEKTOR3D_SIZE = getV3Dsize();
-    	NATIVE_FLOAT_SIZE = getfloatsize();
-    	NATIVE_INT_SIZE = getintsize();
-    	NATIVE_UINT_SIZE = getuintsize();
-    	NATIVE_DOUBLE_SIZE = getdoublesize();
-    	NATIVE_LONG_SIZE = getlongsize();
-    }
 }

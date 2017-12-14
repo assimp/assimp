@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -90,7 +91,7 @@ protected:
 
     // -------------------------------------------------------------------
     /** Report a validation warning. This won't throw an exception,
-     *  control will return to the callera.
+     *  control will return to the caller.
      * @param msg Format string for sprintf().*/
     void ReportWarning(const char* msg,...);
 
@@ -164,7 +165,7 @@ private:
     inline void DoValidation(T** array, unsigned int size,
         const char* firstName, const char* secondName);
 
-    // extended version: checks whethr T::mName occurs twice
+    // extended version: checks whether T::mName occurs twice
     template <typename T>
     inline void DoValidationEx(T** array, unsigned int size,
         const char* firstName, const char* secondName);

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,9 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter_Node.hpp"
 
 // Header files, Assimp.
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/importerdesc.h"
-#include "assimp/ProgressHandler.hpp"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include "assimp/types.h"
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
@@ -135,18 +135,18 @@ private:
 	};
 
 	/// \struct SPP_Texture
-	/// Data type for postprocessing step. More suitable container for texture.
+	/// Data type for post-processing step. More suitable container for texture.
 	struct SPP_Texture
 	{
 		std::string ID;
-		size_t Width, Height, Depth;
-		bool Tiled;
-		decltype(aiTexture::achFormatHint) FormatHint;
-		uint8_t* Data;
+		size_t      Width, Height, Depth;
+		bool        Tiled;
+        char        FormatHint[ 9 ];// 8 for string + 1 for terminator.
+		uint8_t    *Data;
 	};
 
 	///	\struct SComplexFace
-	/// Data type for postprocessing step. Contain face data.
+	/// Data type for post-processing step. Contain face data.
 	struct SComplexFace
 	{
 		aiFace Face;///< Face vertices.
@@ -249,7 +249,7 @@ private:
 
 	/// \fn size_t PostprocessHelper_GetTextureID_Or_Create(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B, const std::string& pID_A)
 	/// Return converted texture ID which related to specified source textures ID's. If converted texture does not exist then it will be created and ID on new
-	/// converted texture will be returned. Convertion: set of textures from \ref CAMFImporter_NodeElement_Texture to one \ref SPP_Texture and place it
+	/// converted texture will be returned. Conversion: set of textures from \ref CAMFImporter_NodeElement_Texture to one \ref SPP_Texture and place it
 	/// to converted textures list.
 	/// Any of source ID's can be absent(empty string) or even one ID only specified. But at least one ID must be specified.
 	/// \param [in] pID_R - ID of source "red" texture.
@@ -378,7 +378,7 @@ private:
 	void XML_CheckNode_MustHaveChildren();
 
 	/// \fn bool XML_CheckNode_NameEqual(const std::string& pNodeName)
-	/// Chek if current node name is equal to pNodeName.
+	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
 	/// return true if current node name is equal to pNodeName, else - false.
 	bool XML_CheckNode_NameEqual(const std::string& pNodeName) { return mReader->getNodeName() == pNodeName; }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -49,20 +50,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
-#include "ColladaParser.h"
+#include <assimp/importerdesc.h>
 
+#include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
-#include "Defines.h"
+#include "CreateAnimMesh.h"
 
 #include "time.h"
 #include "math.h"
 #include <algorithm>
-#include <cstdint>
 #include <numeric>
-#include "Defines.h"
-
+#include <assimp/Defines.h>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
@@ -119,7 +119,7 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
          *  might be NULL and it's our duty to return true here.
          */
         if (!pIOHandler)return true;
-        const char* tokens[] = {"collada"};
+        const char* tokens[] = {"<collada"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
     return false;
@@ -131,7 +131,6 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Get file extension list
@@ -150,6 +149,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
     mMeshIndexByID.clear();
     mMaterialIndexByName.clear();
     mMeshes.clear();
+    mTargetMeshes.clear();
     newMats.clear();
     mLights.clear();
     mCameras.clear();
@@ -572,6 +572,21 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 }
 
 // ------------------------------------------------------------------------------------------------
+// Find mesh from either meshes or morph target meshes
+aiMesh *ColladaLoader::findMesh(std::string meshid)
+{
+    for (unsigned int i = 0; i < mMeshes.size(); i++)
+        if (std::string(mMeshes[i]->mName.data) == meshid)
+            return mMeshes[i];
+
+    for (unsigned int i = 0; i < mTargetMeshes.size(); i++)
+        if (std::string(mTargetMeshes[i]->mName.data) == meshid)
+            return mTargetMeshes[i];
+
+    return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh
 aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
     const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
@@ -656,8 +671,70 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
             face.mIndices[b] = static_cast<unsigned int>(vertex++);
     }
 
+    // create morph target meshes if any
+    std::vector<aiMesh*> targetMeshes;
+    std::vector<float> targetWeights;
+    Collada::MorphMethod method = Collada::Normalized;
+
+    for(std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin();
+        it != pParser.mControllerLibrary.end(); it++)
+    {
+        const Collada::Controller &c = it->second;
+        const Collada::Mesh* baseMesh = pParser.ResolveLibraryReference( pParser.mMeshLibrary, c.mMeshId);
+
+        if (c.mType == Collada::Morph && baseMesh->mName == pSrcMesh->mName)
+        {
+            const Collada::Accessor& targetAccessor = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, c.mMorphTarget);
+            const Collada::Accessor& weightAccessor = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, c.mMorphWeight);
+            const Collada::Data& targetData = pParser.ResolveLibraryReference( pParser.mDataLibrary, targetAccessor.mSource);
+            const Collada::Data& weightData = pParser.ResolveLibraryReference( pParser.mDataLibrary, weightAccessor.mSource);
+
+            // take method
+            method = c.mMethod;
+
+            if (!targetData.mIsStringArray)
+                throw DeadlyImportError( "target data must contain id. ");
+            if (weightData.mIsStringArray)
+                throw DeadlyImportError( "target weight data must not be textual ");
+
+            for (unsigned int i = 0; i < targetData.mStrings.size(); ++i)
+            {
+                const Collada::Mesh* targetMesh = pParser.ResolveLibraryReference(pParser.mMeshLibrary, targetData.mStrings.at(i));
+
+                aiMesh *aimesh = findMesh(targetMesh->mName);
+                if (!aimesh)
+                {
+                    if (targetMesh->mSubMeshes.size() > 1)
+                        throw DeadlyImportError( "Morhing target mesh must be a single");
+                    aimesh = CreateMesh(pParser, targetMesh, targetMesh->mSubMeshes.at(0), NULL, 0, 0);
+                    mTargetMeshes.push_back(aimesh);
+                }
+                targetMeshes.push_back(aimesh);
+            }
+            for (unsigned int i = 0; i < weightData.mValues.size(); ++i)
+                targetWeights.push_back(weightData.mValues.at(i));
+        }
+    }
+    if (targetMeshes.size() > 0 && targetWeights.size() == targetMeshes.size())
+    {
+        std::vector<aiAnimMesh*> animMeshes;
+        for (unsigned int i = 0; i < targetMeshes.size(); i++)
+        {
+            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMeshes.at(i));
+            animMesh->mWeight = targetWeights[i];
+            animMeshes.push_back(animMesh);
+        }
+        dstMesh->mMethod = (method == Collada::Relative)
+                                ? aiMorphingMethod_MORPH_RELATIVE
+                                : aiMorphingMethod_MORPH_NORMALIZED;
+        dstMesh->mAnimMeshes = new aiAnimMesh*[animMeshes.size()];
+        dstMesh->mNumAnimMeshes = static_cast<unsigned int>(animMeshes.size());
+        for (unsigned int i = 0; i < animMeshes.size(); i++)
+            dstMesh->mAnimMeshes[i] = animMeshes.at(i);
+    }
+
     // create bones if given
-    if( pSrcController)
+    if( pSrcController && pSrcController->mType == Collada::Skin)
     {
         // refuse if the vertex count does not match
 //      if( pSrcController->mWeightCounts.size() != dstMesh->mNumVertices)
@@ -956,6 +1033,68 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
         CreateAnimation( pScene, pParser, pSrcAnim, animName);
 }
 
+struct MorphTimeValues
+{
+    float mTime;
+    struct key
+    {
+        float mWeight;
+        unsigned int mValue;
+    };
+    std::vector<key> mKeys;
+};
+
+void insertMorphTimeValue(std::vector<MorphTimeValues> &values, float time, float weight, unsigned int value)
+{
+    MorphTimeValues::key k;
+    k.mValue = value;
+    k.mWeight = weight;
+    if (values.size() == 0 || time < values[0].mTime)
+    {
+        MorphTimeValues val;
+        val.mTime = time;
+        val.mKeys.push_back(k);
+        values.insert(values.begin(), val);
+        return;
+    }
+    if (time > values.back().mTime)
+    {
+        MorphTimeValues val;
+        val.mTime = time;
+        val.mKeys.push_back(k);
+        values.insert(values.end(), val);
+        return;
+    }
+    for (unsigned int i = 0; i < values.size(); i++)
+    {
+        if (std::abs(time - values[i].mTime) < 1e-6f)
+        {
+            values[i].mKeys.push_back(k);
+            return;
+        } else if (time > values[i].mTime && time < values[i+1].mTime)
+        {
+            MorphTimeValues val;
+            val.mTime = time;
+            val.mKeys.push_back(k);
+            values.insert(values.begin() + i, val);
+            return;
+        }
+    }
+    // should not get here
+}
+
+float getWeightAtKey(const std::vector<MorphTimeValues> &values, int key, unsigned int value)
+{
+    for (unsigned int i = 0; i < values[key].mKeys.size(); i++)
+    {
+        if (values[key].mKeys[i].mValue == value)
+            return values[key].mKeys[i].mWeight;
+    }
+    // no value at key found, try to interpolate if present at other keys. if not, return zero
+    // TODO: interpolation
+    return 0.0f;
+}
+
 // ------------------------------------------------------------------------------------------------
 // Constructs the animation for the given source anim
 void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pName)
@@ -965,6 +1104,8 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
     CollectNodes( pScene->mRootNode, nodes);
 
     std::vector<aiNodeAnim*> anims;
+    std::vector<aiMeshMorphAnim*> morphAnims;
+
     for( std::vector<const aiNode*>::const_iterator nit = nodes.begin(); nit != nodes.end(); ++nit)
     {
         // find all the collada anim channels which refer to the current node
@@ -988,7 +1129,20 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
             // find the slash that separates the node name - there should be only one
             std::string::size_type slashPos = srcChannel.mTarget.find( '/');
             if( slashPos == std::string::npos)
+            {
+                std::string::size_type targetPos = srcChannel.mTarget.find(srcNode->mID);
+                if (targetPos == std::string::npos)
+                    continue;
+
+                // not node transform, but something else. store as unknown animation channel for now
+                entry.mChannel = &(*cit);
+                entry.mTargetId = srcChannel.mTarget.substr(targetPos + pSrcAnim->mName.length(),
+                                        srcChannel.mTarget.length() - targetPos - pSrcAnim->mName.length());
+                if (entry.mTargetId.front() == '-')
+                    entry.mTargetId = entry.mTargetId.substr(1);
+                entries.push_back(entry);
                 continue;
+            }
             if( srcChannel.mTarget.find( '/', slashPos+1) != std::string::npos)
                 continue;
             std::string targetID = srcChannel.mTarget.substr( 0, slashPos);
@@ -1068,8 +1222,14 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                 if( srcNode->mTransforms[a].mID == entry.mTransformId)
                     entry.mTransformIndex = a;
 
-            if( entry.mTransformIndex == SIZE_MAX) {
-                continue;
+            if( entry.mTransformIndex == SIZE_MAX)
+            {
+                if (entry.mTransformId.find("morph-weights") != std::string::npos)
+                {
+                    entry.mTargetId = entry.mTransformId;
+                    entry.mTransformId = "";
+                } else
+                    continue;
             }
 
             entry.mChannel = &(*cit);
@@ -1213,49 +1373,125 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 //      ai_assert( resultTrafos.size() > 0);
 
         // build an animation channel for the given node out of these trafo keys
-    if( !resultTrafos.empty() )
-    {
-          aiNodeAnim* dstAnim = new aiNodeAnim;
-          dstAnim->mNodeName = nodeName;
-          dstAnim->mNumPositionKeys = static_cast<unsigned int>(resultTrafos.size());
-          dstAnim->mNumRotationKeys= static_cast<unsigned int>(resultTrafos.size());
-          dstAnim->mNumScalingKeys = static_cast<unsigned int>(resultTrafos.size());
-          dstAnim->mPositionKeys = new aiVectorKey[resultTrafos.size()];
-          dstAnim->mRotationKeys = new aiQuatKey[resultTrafos.size()];
-          dstAnim->mScalingKeys = new aiVectorKey[resultTrafos.size()];
+        if( !resultTrafos.empty() )
+        {
+              aiNodeAnim* dstAnim = new aiNodeAnim;
+              dstAnim->mNodeName = nodeName;
+              dstAnim->mNumPositionKeys = static_cast<unsigned int>(resultTrafos.size());
+              dstAnim->mNumRotationKeys = static_cast<unsigned int>(resultTrafos.size());
+              dstAnim->mNumScalingKeys = static_cast<unsigned int>(resultTrafos.size());
+              dstAnim->mPositionKeys = new aiVectorKey[resultTrafos.size()];
+              dstAnim->mRotationKeys = new aiQuatKey[resultTrafos.size()];
+              dstAnim->mScalingKeys = new aiVectorKey[resultTrafos.size()];
 
-          for( size_t a = 0; a < resultTrafos.size(); ++a)
-          {
-              aiMatrix4x4 mat = resultTrafos[a];
-              double time = double( mat.d4); // remember? time is stored in mat.d4
-        mat.d4 = 1.0f;
+              for( size_t a = 0; a < resultTrafos.size(); ++a)
+              {
+                  aiMatrix4x4 mat = resultTrafos[a];
+                  double time = double( mat.d4); // remember? time is stored in mat.d4
+                    mat.d4 = 1.0f;
 
-              dstAnim->mPositionKeys[a].mTime = time;
-              dstAnim->mRotationKeys[a].mTime = time;
-              dstAnim->mScalingKeys[a].mTime = time;
-              mat.Decompose( dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
-          }
+                  dstAnim->mPositionKeys[a].mTime = time;
+                  dstAnim->mRotationKeys[a].mTime = time;
+                  dstAnim->mScalingKeys[a].mTime = time;
+                  mat.Decompose( dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
+              }
 
-          anims.push_back( dstAnim);
-    } else
-    {
-      DefaultLogger::get()->warn( "Collada loader: found empty animation channel, ignored. Please check your exporter.");
+              anims.push_back( dstAnim);
+        } else
+        {
+          DefaultLogger::get()->warn( "Collada loader: found empty animation channel, ignored. Please check your exporter.");
+        }
+
+        if( !entries.empty() && entries.front().mTimeAccessor->mCount > 0 )
+        {
+            std::vector<Collada::ChannelEntry> morphChannels;
+            for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+            {
+                Collada::ChannelEntry& e = *it;
+
+                // skip non-transform types
+                if (e.mTargetId.empty())
+                    continue;
+
+                if (e.mTargetId.find("morph-weights") != std::string::npos)
+                    morphChannels.push_back(e);
+            }
+            if (morphChannels.size() > 0)
+            {
+                // either 1) morph weight animation count should contain morph target count channels
+                // or     2) one channel with morph target count arrays
+                // assume first
+
+                aiMeshMorphAnim *morphAnim = new aiMeshMorphAnim;
+                morphAnim->mName.Set(nodeName);
+
+                std::vector<MorphTimeValues> morphTimeValues;
+
+                int morphAnimChannelIndex = 0;
+                for( std::vector<Collada::ChannelEntry>::iterator it = morphChannels.begin(); it != morphChannels.end(); ++it)
+                {
+                    Collada::ChannelEntry& e = *it;
+                    std::string::size_type apos = e.mTargetId.find('(');
+                    std::string::size_type bpos = e.mTargetId.find(')');
+                    if (apos == std::string::npos || bpos == std::string::npos)
+                        // unknown way to specify weight -> ignore this animation
+                        continue;
+
+                    // weight target can be in format Weight_M_N, Weight_N, WeightN, or some other way
+                    // we ignore the name and just assume the channels are in the right order
+                    for (unsigned int i = 0; i < e.mTimeData->mValues.size(); i++)
+                        insertMorphTimeValue(morphTimeValues, e.mTimeData->mValues.at(i), e.mValueData->mValues.at(i), morphAnimChannelIndex);
+
+                    ++morphAnimChannelIndex;
+                }
+
+                morphAnim->mNumKeys = static_cast<unsigned int>(morphTimeValues.size());
+                morphAnim->mKeys = new aiMeshMorphKey[morphAnim->mNumKeys];
+                for (unsigned int key = 0; key < morphAnim->mNumKeys; key++)
+                {
+                    morphAnim->mKeys[key].mNumValuesAndWeights = static_cast<unsigned int>(morphChannels.size());
+                    morphAnim->mKeys[key].mValues = new unsigned int [morphChannels.size()];
+                    morphAnim->mKeys[key].mWeights = new double [morphChannels.size()];
+
+                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime;
+                    for (unsigned int valueIndex = 0; valueIndex < morphChannels.size(); valueIndex++)
+                    {
+                        morphAnim->mKeys[key].mValues[valueIndex] = valueIndex;
+                        morphAnim->mKeys[key].mWeights[valueIndex] = getWeightAtKey(morphTimeValues, key, valueIndex);
+                    }
+                }
+
+                morphAnims.push_back(morphAnim);
+            }
+        }
     }
-    }
 
-    if( !anims.empty())
+    if( !anims.empty() || !morphAnims.empty())
     {
         aiAnimation* anim = new aiAnimation;
         anim->mName.Set( pName);
         anim->mNumChannels = static_cast<unsigned int>(anims.size());
-        anim->mChannels = new aiNodeAnim*[anims.size()];
-        std::copy( anims.begin(), anims.end(), anim->mChannels);
+        if (anim->mNumChannels > 0)
+        {
+            anim->mChannels = new aiNodeAnim*[anims.size()];
+            std::copy( anims.begin(), anims.end(), anim->mChannels);
+        }
+        anim->mNumMorphMeshChannels = static_cast<unsigned int>(morphAnims.size());
+        if (anim->mNumMorphMeshChannels > 0)
+        {
+            anim->mMorphMeshChannels = new aiMeshMorphAnim*[anim->mNumMorphMeshChannels];
+            std::copy( morphAnims.begin(), morphAnims.end(), anim->mMorphMeshChannels);
+        }
         anim->mDuration = 0.0f;
         for( size_t a = 0; a < anims.size(); ++a)
         {
-            anim->mDuration = std::max( anim->mDuration, anims[a]->mPositionKeys[anims[a]->mNumPositionKeys-1].mTime);
-            anim->mDuration = std::max( anim->mDuration, anims[a]->mRotationKeys[anims[a]->mNumRotationKeys-1].mTime);
-            anim->mDuration = std::max( anim->mDuration, anims[a]->mScalingKeys[anims[a]->mNumScalingKeys-1].mTime);
+                anim->mDuration = std::max( anim->mDuration, anims[a]->mPositionKeys[anims[a]->mNumPositionKeys-1].mTime);
+                anim->mDuration = std::max( anim->mDuration, anims[a]->mRotationKeys[anims[a]->mNumRotationKeys-1].mTime);
+                anim->mDuration = std::max( anim->mDuration, anims[a]->mScalingKeys[anims[a]->mNumScalingKeys-1].mTime);
+        }
+        for (size_t a = 0; a < morphAnims.size(); ++a)
+        {
+            anim->mDuration = std::max(anim->mDuration, morphAnims[a]->mKeys[morphAnims[a]->mNumKeys-1].mTime);
         }
         anim->mTicksPerSecond = 1;
         mAnims.push_back( anim);
@@ -1383,7 +1619,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
         mat.AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
 
         // transparency, a very hard one. seemingly not all files are following the
-        // specification here (1.0 transparency => completly opaque)...
+        // specification here (1.0 transparency => completely opaque)...
         // therefore, we let the opportunity for the user to manually invert
         // the transparency if necessary and we add preliminary support for RGB_ZERO mode
         if(effect.mTransparency >= 0.f && effect.mTransparency <= 1.f) {
@@ -1489,6 +1725,8 @@ void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
 aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser,
     const Collada::Effect& pEffect, const std::string& pName)
 {
+    aiString result;
+
     // recurse through the param references until we end up at an image
     std::string name = pName;
     while( 1)
@@ -1507,11 +1745,17 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
     ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
     if( imIt == pParser.mImageLibrary.end())
     {
-        throw DeadlyImportError( format() <<
-            "Collada: Unable to resolve effect texture entry \"" << pName << "\", ended up at ID \"" << name << "\"." );
-    }
+        //missing texture should not stop the conversion
+        //throw DeadlyImportError( format() <<
+        //    "Collada: Unable to resolve effect texture entry \"" << pName << "\", ended up at ID \"" << name << "\"." );
 
-    aiString result;
+        DefaultLogger::get()->warn("Collada: Unable to resolve effect texture entry \"" + pName + "\", ended up at ID \"" + name + "\".");
+
+        //set default texture file name
+        result.Set(name + ".jpg");
+        ConvertPath(result);
+        return result;
+    }
 
     // if this is an embedded texture image setup an aiTexture for it
     if (imIt->second.mFileName.empty())
@@ -1659,14 +1903,13 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 }
 
 // ------------------------------------------------------------------------------------------------
-// Finds a proper name for a node derived from the collada-node's properties
+// Finds a proper unique name for a node derived from the collada-node's properties.
+// The name must be unique for proper node-bone association.
 std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
-    // now setup the name of the node. We take the name if not empty, otherwise the collada ID
-    // FIX: Workaround for XSI calling the instanced visual scene 'untitled' by default.
-    if (!pNode->mName.empty() && pNode->mName != "untitled")
-        return pNode->mName;
-    else if (!pNode->mID.empty())
+    // Now setup the name of the assimp node. The collada name might not be
+    // unique, so we use the collada ID.
+    if (!pNode->mID.empty())
         return pNode->mID;
     else if (!pNode->mSID.empty())
     return pNode->mSID;

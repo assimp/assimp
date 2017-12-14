@@ -33,7 +33,7 @@
  * Zalik, B.(2008)'Sweep-line algorithm for constrained Delaunay triangulation',
  * International Journal of Geographical Information Science
  *
- * "FlipScan" Constrained Edge Algorithm invented by Thomas Åhlén, thahlen@gmail.com
+ * "FlipScan" Constrained Edge Algorithm invented by Thomas ?hl?n, thahlen@gmail.com
  */
 
 #ifndef SWEEP_H
@@ -49,17 +49,17 @@ struct Point;
 struct Edge;
 class Triangle;
 
-class Sweep 
+class Sweep
 {
 public:
 
   /**
    * Triangulate
-   * 
+   *
    * @param tcx
    */
   void Triangulate(SweepContext& tcx);
-  
+
   /**
    * Destructor - clean up memory
    */
@@ -69,7 +69,7 @@ private:
 
   /**
    * Start sweeping the Y-sorted point set from bottom to top
-   * 
+   *
    * @param tcx
    */
   void SweepPoints(SweepContext& tcx);
@@ -86,8 +86,8 @@ private:
   Node& PointEvent(SweepContext& tcx, Point& point);
 
    /**
-     * 
-     * 
+     *
+     *
      * @param tcx
      * @param edge
      * @param node
@@ -98,7 +98,7 @@ private:
 
   /**
    * Creates a new front triangle and legalize it
-   * 
+   *
    * @param tcx
    * @param point
    * @param node
@@ -142,7 +142,7 @@ private:
    * @param d - point opposite a
    * @return true if d is inside circle, false if on circle edge
    */
-  bool Incircle(Point& pa, Point& pb, Point& pc, Point& pd);
+  bool Incircle(const Point& pa, const Point& pb, const Point& pc, const Point& pd) const;
 
   /**
    * Rotates a triangle pair one vertex CW
@@ -158,7 +158,7 @@ private:
    *       n4                    n4
    * </pre>
    */
-  void RotateTrianglePair(Triangle& t, Point& p, Triangle& ot, Point& op);
+  void RotateTrianglePair(Triangle& t, Point& p, Triangle& ot, Point& op) const;
 
   /**
    * Fills holes in the Advancing Front
@@ -169,17 +169,24 @@ private:
    */
   void FillAdvancingFront(SweepContext& tcx, Node& n);
 
+  // Decision-making about when to Fill hole.
+  // Contributed by ToolmakerSteve2
+  bool LargeHole_DontFill(const Node* node) const;
+  bool AngleExceeds90Degrees(const Point* origin, const Point* pa, const Point* pb) const;
+  bool AngleExceedsPlus90DegreesOrIsNegative(const Point* origin, const Point* pa, const Point* pb) const;
+  double Angle(const Point* origin, const Point* pa, const Point* pb) const;
+
   /**
    *
    * @param node - middle node
    * @return the angle between 3 front nodes
    */
-  double HoleAngle(Node& node);
+  double HoleAngle(const Node& node) const;
 
   /**
    * The basin angle is decided against the horizontal line [1,0]
    */
-  double BasinAngle(Node& node);
+  double BasinAngle(const Node& node) const;
 
   /**
    * Fills a basin that has formed on the Advancing Front to the right
@@ -228,22 +235,22 @@ private:
   /**
    * After a flip we have two triangles and know that only one will still be
    * intersecting the edge. So decide which to contiune with and legalize the other
-   * 
+   *
    * @param tcx
    * @param o - should be the result of an orient2d( eq, op, ep )
    * @param t - triangle 1
    * @param ot - triangle 2
-   * @param p - a point shared by both triangles 
+   * @param p - a point shared by both triangles
    * @param op - another point shared by both triangles
    * @return returns the triangle still intersecting the edge
    */
   Triangle& NextFlipTriangle(SweepContext& tcx, int o, Triangle&  t, Triangle& ot, Point& p, Point& op);
 
    /**
-     * When we need to traverse from one triangle to the next we need 
+     * When we need to traverse from one triangle to the next we need
      * the point in current triangle that is the opposite point to the next
-     * triangle. 
-     * 
+     * triangle.
+     *
      * @param ep
      * @param eq
      * @param ot
@@ -254,10 +261,10 @@ private:
 
    /**
      * Scan part of the FlipScan algorithm<br>
-     * When a triangle pair isn't flippable we will scan for the next 
-     * point that is inside the flip triangle scan area. When found 
+     * When a triangle pair isn't flippable we will scan for the next
+     * point that is inside the flip triangle scan area. When found
      * we generate a new flipEdgeEvent
-     * 
+     *
      * @param tcx
      * @param ep - last point on the edge we are traversing
      * @param eq - first point on the edge we are traversing

@@ -2,7 +2,8 @@
  Open Asset Import Library (assimp)
  ----------------------------------------------------------------------
 
- Copyright (c) 2006-2016, assimp team
+ Copyright (c) 2006-2017, assimp team
+
  All rights reserved.
 
  Redistribution and use of this software in source and binary forms,
@@ -49,7 +50,6 @@
 #include "ColladaHelper.h"
 #include <assimp/ai_assert.h>
 #include "TinyFormatter.h"
-#include <memory>
 
 namespace Assimp
 {
@@ -77,7 +77,7 @@ namespace Assimp
         /** Reads the structure of the file */
         void ReadStructure();
 
-        /** Reads asset informations such as coordinate system informations and legal blah */
+        /** Reads asset information such as coordinate system information and legal blah */
         void ReadAssetInfo();
 
         /** Reads the animation library */

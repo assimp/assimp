@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -140,9 +141,6 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
         throw DeadlyImportError( "TER: Magic string \'TERRAIN\' not found" );
 
     unsigned int x = 0,y = 0,mode = 0;
-    float rad  = 6370.f;
-    (void)rad;
-
 
     aiNode* root = pScene->mRootNode = new aiNode();
     root->mName.Set("<TERRAGEN.TERRAIN>");
@@ -186,7 +184,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
         // mapping == 1: earth radius
         else if (!::strncmp(head,AI_TERR_CHUNK_CRAD,4))
         {
-            rad = reader.GetF4();
+            reader.GetF4();
         }
         // mapping mode
         else if (!::strncmp(head,AI_TERR_CHUNK_CRVM,4))

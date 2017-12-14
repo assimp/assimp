@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,11 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter_Macro.hpp"
 
 #include "fast_atof.h"
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 
 // Header files, stdlib.
 #include <memory>
-#include <string>
 
 namespace Assimp
 {
@@ -353,7 +353,7 @@ static bool ParseHelper_Decode_Base64_IsBase64(const char pChar)
 void AMFImporter::ParseHelper_Decode_Base64(const std::string& pInputBase64, std::vector<uint8_t>& pOutputData) const
 {
     // With help from
-    // RenИ Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
+    // René Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
     const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     uint8_t tidx = 0;

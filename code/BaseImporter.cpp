@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -50,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/importerdesc.h>
 #include <ios>
 #include <list>
 #include <memory>
@@ -87,12 +89,12 @@ aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, 
     FileSystemFilter filter(pFile,pIOHandler);
 
     // create a scene object to hold the data
-    ScopeGuard<aiScene> sc(new aiScene());
+    std::unique_ptr<aiScene> sc(new aiScene());
 
     // dispatch importing
     try
     {
-        InternReadFile( pFile, sc, &filter);
+        InternReadFile( pFile, sc.get(), &filter);
 
     } catch( const std::exception& err )    {
         // extract error description
@@ -102,8 +104,7 @@ aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, 
     }
 
     // return what we gathered from the import.
-    sc.dismiss();
-    return sc;
+    return sc.release();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -301,24 +302,13 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
     return false;
 }
 
-#include "../contrib/ConvertUTF/ConvertUTF.h"
-
-// ------------------------------------------------------------------------------------------------
-void ReportResult(ConversionResult res)
-{
-    if(res == sourceExhausted) {
-        DefaultLogger::get()->error("Source ends with incomplete character sequence, transformation to UTF-8 fails");
-    }
-    else if(res == sourceIllegal) {
-        DefaultLogger::get()->error("Source contains illegal character sequence, transformation to UTF-8 fails");
-    }
-}
+#include "../contrib/utf8cpp/source/utf8.h"
 
 // ------------------------------------------------------------------------------------------------
 // Convert to UTF8 data
 void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 {
-    ConversionResult result;
+    //ConversionResult result;
     if(data.size() < 8) {
         throw DeadlyImportError("File is too small");
     }
@@ -331,7 +321,8 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
         data.resize(data.size()-3);
         return;
     }
-
+    
+    
     // UTF 32 BE with BOM
     if(*((uint32_t*)&data.front()) == 0xFFFE0000) {
 
@@ -345,21 +336,10 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     if(*((uint32_t*)&data.front()) == 0x0000FFFE) {
         DefaultLogger::get()->debug("Found UTF-32 BOM ...");
 
-        const uint32_t* sstart = (uint32_t*)&data.front()+1, *send = (uint32_t*)&data.back()+1;
-        char* dstart,*dend;
         std::vector<char> output;
-        do {
-            output.resize(output.size()?output.size()*3/2:data.size()/2);
-            dstart = &output.front(),dend = &output.back()+1;
-
-            result = ConvertUTF32toUTF8((const UTF32**)&sstart,(const UTF32*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
-        } while(result == targetExhausted);
-
-        ReportResult(result);
-
-        // copy to output buffer.
-        const size_t outlen = (size_t)(dstart-&output.front());
-        data.assign(output.begin(),output.begin()+outlen);
+        int *ptr = (int*)&data[ 0 ];
+        int *end = ptr + ( data.size() / sizeof(int) ) +1;
+        utf8::utf32to8( ptr, end, back_inserter(output));
         return;
     }
 
@@ -376,21 +356,8 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     if(*((uint16_t*)&data.front()) == 0xFEFF) {
         DefaultLogger::get()->debug("Found UTF-16 BOM ...");
 
-        const uint16_t* sstart = (uint16_t*)&data.front()+1, *send = (uint16_t*)(&data.back()+1);
-        char* dstart,*dend;
-        std::vector<char> output;
-        do {
-            output.resize(output.size()?output.size()*3/2:data.size()*3/4);
-            dstart = &output.front(),dend = &output.back()+1;
-
-            result = ConvertUTF16toUTF8((const UTF16**)&sstart,(const UTF16*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
-        } while(result == targetExhausted);
-
-        ReportResult(result);
-
-        // copy to output buffer.
-        const size_t outlen = (size_t)(dstart-&output.front());
-        data.assign(output.begin(),output.begin()+outlen);
+        std::vector<unsigned char> output;
+        utf8::utf16to8(data.begin(), data.end(), back_inserter(output));
         return;
     }
 }

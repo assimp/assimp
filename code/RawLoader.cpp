@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -54,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -259,7 +260,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
             node = *cc = new aiNode();
             node->mParent = pScene->mRootNode;
         }
-        else node = *cc;++cc;
+        else node = *cc;
         node->mName.Set(outGroup.name);
 
         // add all meshes

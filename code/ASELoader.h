@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,12 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include <assimp/types.h>
+#include "ASEParser.h"
 
 struct aiNode;
-#include "ASEParser.h"
 
 namespace Assimp {
 
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // --------------------------------------------------------------------------------
 /** Importer class for the 3DS ASE ASCII format.
@@ -61,9 +63,6 @@ class ASEImporter : public BaseImporter {
 public:
     ASEImporter();
     ~ASEImporter();
-
-
-public:
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -200,6 +199,9 @@ protected:
     bool noSkeletonMesh;
 };
 
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
+
 } // end of namespace Assimp
+
 
 #endif // AI_3DSIMPORTER_H_INC

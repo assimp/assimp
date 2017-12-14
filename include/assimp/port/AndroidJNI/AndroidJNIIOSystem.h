@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ANDROIDJNIIOSYSTEM_H_INC
 #define AI_ANDROIDJNIIOSYSTEM_H_INC
 
-#include "../code/DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <android/native_activity.h>

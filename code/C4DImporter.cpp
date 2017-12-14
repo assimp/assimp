@@ -185,11 +185,11 @@ void C4DImporter::InternReadFile( const std::string& pFile,
         if(mesh->mMaterialIndex >= mat_count) {
             ++mat_count;
 
-            ScopeGuard<aiMaterial> def_material(new aiMaterial());
+            std::unique_ptr<aiMaterial> def_material(new aiMaterial());
             const aiString name(AI_DEFAULT_MATERIAL_NAME);
             def_material->AddProperty(&name, AI_MATKEY_NAME);
 
-            materials.push_back(def_material.dismiss());
+            materials.push_back(def_material.release());
             break;
         }
     }
@@ -393,7 +393,7 @@ void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent)
 // ------------------------------------------------------------------------------------------------
 aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 {
-    assert(object != NULL && object->GetType() == Opolygon);
+    ai_assert(object != NULL && object->GetType() == Opolygon);
 
     // based on Melange sample code
     PolygonObject* const polyObject = dynamic_cast<PolygonObject*>(object);
@@ -412,7 +412,7 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
     const CPolygon* polys = polyObject->GetPolygonR();
     ai_assert(polys != NULL);
 
-    ScopeGuard<aiMesh> mesh(new aiMesh());
+    std::unique_ptr<aiMesh> mesh(new aiMesh());
     mesh->mNumFaces = static_cast<unsigned int>(polyCount);
     aiFace* face = mesh->mFaces = new aiFace[mesh->mNumFaces]();
 
@@ -616,7 +616,7 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
     }
 
     mesh->mMaterialIndex = ResolveMaterial(polyObject);
-    return mesh.dismiss();
+    return mesh.release();
 }
 
 
@@ -635,7 +635,7 @@ unsigned int C4DImporter::ResolveMaterial(PolygonObject* obj)
     TextureTag& ttag = dynamic_cast<TextureTag&>(*tag);
 
     BaseMaterial* const mat = ttag.GetMaterial();
-    assert(mat != NULL);
+    ai_assert(mat != NULL);
 
     const MaterialMap::const_iterator it = material_mapping.find(mat);
     if(it == material_mapping.end()) {

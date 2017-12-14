@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -44,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
@@ -72,7 +74,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
 {
     const char* file = "cameraExp.dae";
 
-    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cameras.dae",0);
+    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cameras.dae", aiProcess_ValidateDataStructure);
     ASSERT_TRUE(pTest!=NULL);
     ASSERT_TRUE(pTest->HasCameras());
 
@@ -94,7 +96,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
         names[ i ] = orig->mName;
         pos[ i ] = orig->mPosition;
     }
-    const aiScene* imported = im->ReadFile(file,0);
+    const aiScene* imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
 
     ASSERT_TRUE(imported!=NULL);
 

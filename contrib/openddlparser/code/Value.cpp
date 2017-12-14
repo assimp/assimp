@@ -110,7 +110,17 @@ Value::Value( ValueType type )
 }
 
 Value::~Value() {
-    // empty
+    if(m_data!=ddl_nullptr) {
+        if (m_type == ddl_ref ) {
+            Reference *tmp = (Reference *) m_data;
+            if (tmp != ddl_nullptr)
+                delete tmp;
+        }else
+            delete[] m_data;
+
+    }
+    if(m_next!=ddl_nullptr)
+        delete m_next;
 }
 
 void Value::setBool( bool value ) {
@@ -273,13 +283,7 @@ void Value::setRef( Reference *ref ) {
                 delete [] m_data;
             }
 
-            m_data = new unsigned char[ sizeof( Reference ) ];
-            Reference *myRef = ( Reference * ) m_data;
-            myRef->m_numRefs = ref->m_numRefs;
-            myRef->m_referencedName =  new Name *[ myRef->m_numRefs ];
-            for ( size_t i = 0; i < myRef->m_numRefs; i++ ) {
-                myRef->m_referencedName[ i ] = new Name( ref->m_referencedName[ i ]->m_type, ref->m_referencedName[ i ]->m_id );
-            }
+            m_data = (unsigned char*) new Reference(*ref);
         }
     }
 }
@@ -290,7 +294,7 @@ Reference *Value::getRef() const {
     return (Reference*) m_data;
 }
 
-void Value::dump() {
+void Value::dump( IOStreamBase &/*stream*/ ) {
     switch( m_type ) {
         case ddl_none:
             std::cout << "None" << std::endl;
@@ -350,7 +354,7 @@ Value *Value::getNext() const {
     return m_next;
 }
 
-size_t Value::size(){
+size_t Value::size() const{
     size_t result=1;
     Value *n=m_next;
     while( n!=ddl_nullptr) {
@@ -366,7 +370,6 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
     }
 
     Value *data = new Value( type );
-    data->m_type = type;
     switch( type ) {
         case Value::ddl_bool:
             data->m_size = sizeof( bool );
@@ -405,10 +408,10 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
             data->m_size = sizeof( double );
             break;
         case Value::ddl_string:
-            data->m_size = sizeof( char );
+            data->m_size = sizeof( char )*(len+1);
             break;
         case Value::ddl_ref:
-            data->m_size = sizeof( char );
+            data->m_size = 0;
             break;
         case Value::ddl_none:
         case Value::ddl_types_max:
@@ -417,12 +420,8 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
     }
 
     if( data->m_size ) {
-        size_t len1( len );
-        if( Value::ddl_string == type ) {
-            len1++;
-        }
-        data->m_size *= len1;
         data->m_data = new unsigned char[ data->m_size ];
+        ::memset(data->m_data,0,data->m_size);
     }
 
     return data;

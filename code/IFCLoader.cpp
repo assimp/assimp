@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -58,14 +59,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCUtil.h"
 
-#include "StreamReader.h"
 #include "MemoryIOWrapper.h"
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
 
 
 namespace Assimp {
-    template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";
+    template<> const char* LogFunctions<IFCImporter>::Prefix()
+    {
+        static auto prefix = "IFC: ";
+        return prefix;
+    }
 }
 
 using namespace Assimp;
@@ -108,7 +113,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "ifc ifczip"
+    "ifc ifczip stp"
 };
 
 
@@ -128,11 +133,9 @@ IFCImporter::~IFCImporter()
 bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string& extension = GetExtension(pFile);
-    if (extension == "ifc" || extension == "ifczip") {
+    if (extension == "ifc" || extension == "ifczip" || extension == "stp" ) {
         return true;
-    }
-
-    else if ((!extension.length() || checkSig) && pIOHandler)   {
+    } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this is the common identification for STEP-encoded files, so
         // it is only unambiguous as long as we don't support any further
         // file formats with STEP as their encoding.
@@ -155,11 +158,10 @@ const aiImporterDesc* IFCImporter::GetInfo () const
 void IFCImporter::SetupProperties(const Importer* pImp)
 {
     settings.skipSpaceRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_SPACE_REPRESENTATIONS,true);
-    settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
     settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
-
-    settings.conicSamplingAngle = 10.f;
-    settings.skipAnnotations = true;
+    settings.conicSamplingAngle = std::min(std::max((float) pImp->GetPropertyFloat(AI_CONFIG_IMPORT_IFC_SMOOTHING_ANGLE, AI_IMPORT_IFC_DEFAULT_SMOOTHING_ANGLE), 5.0f), 120.0f);
+	settings.cylindricalTessellation = std::min(std::max(pImp->GetPropertyInteger(AI_CONFIG_IMPORT_IFC_CYLINDRICAL_TESSELLATION, AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION), 3), 180);
+	settings.skipAnnotations = true;
 }
 
 
@@ -884,6 +886,7 @@ void ProcessSpatialStructures(ConversionData& conv)
         }
     }
 
+	std::vector<aiNode*> nodes;
 
     for(const STEP::LazyObject* lz : *range) {
         const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
@@ -892,20 +895,19 @@ void ProcessSpatialStructures(ConversionData& conv)
         }
         IFCImporter::LogDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`" + (prod->ObjectType? " which is of type " + prod->ObjectType.Get():""));
 
-        // the primary site is referenced by an IFCRELAGGREGATES element which assigns it to the IFCPRODUCT
+        // the primary sites are referenced by an IFCRELAGGREGATES element which assigns them to the IFCPRODUCT
         const STEP::DB::RefMap& refs = conv.db.GetRefs();
-        STEP::DB::RefMapRange range = refs.equal_range(conv.proj.GetID());
-        for(;range.first != range.second; ++range.first) {
-            if(const IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IfcRelAggregates>()) {
+        STEP::DB::RefMapRange ref_range = refs.equal_range(conv.proj.GetID());
+        for(; ref_range.first != ref_range.second; ++ref_range.first) {
+            if(const IfcRelAggregates* const aggr = conv.db.GetObject((*ref_range.first).second)->ToPtr<IfcRelAggregates>()) {
 
                 for(const IfcObjectDefinition& def : aggr->RelatedObjects) {
                     // comparing pointer values is not sufficient, we would need to cast them to the same type first
                     // as there is multiple inheritance in the game.
                     if (def.GetID() == prod->GetID()) {
                         IFCImporter::LogDebug("selecting this spatial structure as root structure");
-                        // got it, this is the primary site.
-                        conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv,NULL);
-                        return;
+                        // got it, this is one primary site.
+						nodes.push_back(ProcessSpatialStructure(NULL, *prod, conv, NULL));
                     }
                 }
 
@@ -913,19 +915,42 @@ void ProcessSpatialStructures(ConversionData& conv)
         }
     }
 
+	size_t nb_nodes = nodes.size();
 
-    IFCImporter::LogWarn("failed to determine primary site element, taking the first IfcSite");
-    for(const STEP::LazyObject* lz : *range) {
-        const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
-        if(!prod) {
-            continue;
-        }
+	if (nb_nodes == 0) {
+		IFCImporter::LogWarn("failed to determine primary site element, taking all the IfcSite");
+		for (const STEP::LazyObject* lz : *range) {
+			const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
+			if (!prod) {
+				continue;
+			}
 
-        conv.out->mRootNode = ProcessSpatialStructure(NULL,*prod,conv,NULL);
-        return;
-    }
+			nodes.push_back(ProcessSpatialStructure(NULL, *prod, conv, NULL));
+		}
 
-    IFCImporter::ThrowException("failed to determine primary site element");
+		nb_nodes = nodes.size();
+	}
+
+	if (nb_nodes == 1) {
+		conv.out->mRootNode = nodes[0];
+	}
+	else if (nb_nodes > 1) {
+		conv.out->mRootNode = new aiNode("Root");
+		conv.out->mRootNode->mParent = NULL;
+		conv.out->mRootNode->mNumChildren = static_cast<unsigned int>(nb_nodes);
+		conv.out->mRootNode->mChildren = new aiNode*[conv.out->mRootNode->mNumChildren];
+		
+		for (size_t i = 0; i < nb_nodes; ++i) {
+			aiNode* node = nodes[i];
+
+			node->mParent = conv.out->mRootNode;
+
+			conv.out->mRootNode->mChildren[i] = node;
+		}
+	}
+	else {
+		IFCImporter::ThrowException("failed to determine primary site element");
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

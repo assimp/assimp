@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -54,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -93,7 +94,7 @@ bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
     {
         if (!pIOHandler)return true;
         const char* tokens[] = {"off"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,3);
     }
     return false;
 }

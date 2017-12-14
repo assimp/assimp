@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -186,7 +187,7 @@ namespace glTF {
         obj.AddMember("target", int(bv.target), w.mAl);
     }
 
-    inline void Write(Value& obj, Camera& c, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)
     {
 
     }
@@ -397,7 +398,7 @@ namespace glTF {
         }
     }
 
-    inline void Write(Value& obj, Program& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Program& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -423,7 +424,7 @@ namespace glTF {
         AddRefsVector(scene, "nodes", s.nodes, w.mAl);
     }
 
-    inline void Write(Value& obj, Shader& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Shader& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -451,7 +452,7 @@ namespace glTF {
 
     }
 
-    inline void Write(Value& obj, Technique& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Technique& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -466,7 +467,7 @@ namespace glTF {
         }
     }
 
-    inline void Write(Value& obj, Light& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Light& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -605,13 +606,8 @@ namespace glTF {
     {
         Value asset;
         asset.SetObject();
-        {
-            char versionChar[10];
-            ai_snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
-            asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
-
-            asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
-        }
+        asset.AddMember("version", Value(mAsset.asset.version, mAl).Move(), mAl);
+        asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
         mDoc.AddMember("asset", asset, mAl);
     }
 

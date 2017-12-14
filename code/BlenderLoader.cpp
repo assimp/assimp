@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -54,12 +55,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderBMesh.h"
 #include "StringUtils.h"
 #include <assimp/scene.h>
-#include "StringComparison.h"
+#include <assimp/importerdesc.h>
 
+#include "StringComparison.h"
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+
 #include <cctype>
-#include <cstdint>
 
 
 // zlib is needed for compressed blend files
@@ -72,7 +74,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 namespace Assimp {
-    template<> const std::string LogFunctions<BlenderImporter>::log_prefix = "BLEND: ";
+    template<> const char* LogFunctions<BlenderImporter>::Prefix()
+    {
+        static auto prefix = "BLEND: ";
+        return prefix;
+    }
 }
 
 using namespace Assimp;
@@ -96,8 +102,9 @@ static const aiImporterDesc blenderDesc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BlenderImporter::BlenderImporter()
-: modifier_cache(new BlenderModifierShowcase())
-{}
+: modifier_cache(new BlenderModifierShowcase()) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
@@ -107,6 +114,7 @@ BlenderImporter::~BlenderImporter()
 }
 
 static const char* Tokens[] = { "BLENDER" };
+static const char* TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -119,7 +127,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
     else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this won't catch compressed files
-        return SearchFileHeaderForToken(pIOHandler,pFile, Tokens,1);
+        return SearchFileHeaderForToken(pIOHandler,pFile, TokensForSearch,1);
     }
     return false;
 }
@@ -145,8 +153,7 @@ void BlenderImporter::SetupProperties(const Importer* /*pImp*/)
     // nothing to be done for the moment
 }
 
-struct free_it
-{
+struct free_it {
     free_it(void* free) : free(free) {}
     ~free_it() {
         ::free(this->free);
@@ -164,6 +171,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
     Bytef* dest = NULL;
     free_it free_it_really(dest);
 #endif
+
 
     FileDatabase file;
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
@@ -1140,7 +1148,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 // ------------------------------------------------------------------------------------------------
 aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj, const Camera* cam, ConversionData& /*conv_data*/)
 {
-    ScopeGuard<aiCamera> out(new aiCamera());
+    std::unique_ptr<aiCamera> out(new aiCamera());
     out->mName = obj->id.name+2;
     out->mPosition = aiVector3D(0.f, 0.f, 0.f);
     out->mUp = aiVector3D(0.f, 1.f, 0.f);
@@ -1151,13 +1159,13 @@ aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj,
     out->mClipPlaneNear = cam->clipsta;
     out->mClipPlaneFar = cam->clipend;
 
-    return out.dismiss();
+    return out.release();
 }
 
 // ------------------------------------------------------------------------------------------------
 aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, const Lamp* lamp, ConversionData& /*conv_data*/)
 {
-    ScopeGuard<aiLight> out(new aiLight());
+    std::unique_ptr<aiLight> out(new aiLight());
     out->mName = obj->id.name+2;
 
     switch (lamp->type)
@@ -1195,7 +1203,7 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
     out->mColorAmbient = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
     out->mColorSpecular = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
     out->mColorDiffuse = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
-    return out.dismiss();
+    return out.release();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1213,7 +1221,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
         ++it;
     }
 
-    ScopeGuard<aiNode> node(new aiNode(obj->id.name+2)); // skip over the name prefix 'OB'
+    std::unique_ptr<aiNode> node(new aiNode(obj->id.name+2)); // skip over the name prefix 'OB'
     if (obj->data) {
         switch (obj->type)
         {
@@ -1297,14 +1305,14 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
         aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();
         for (const Object* nobj :children) {
             *nd = ConvertNode(in,nobj,conv_data,node->mTransformation * parentTransform);
-            (*nd++)->mParent = node;
+            (*nd++)->mParent = node.get();
         }
     }
 
     // apply modifiers
     modifier_cache->ApplyModifiers(*node,conv_data,in,*obj);
 
-    return node.dismiss();
+    return node.release();
 }
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

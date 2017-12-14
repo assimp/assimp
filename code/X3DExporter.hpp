@@ -27,7 +27,7 @@ namespace Assimp
 ///
 /// Pay attention that X3D is format for interactive graphic and simulations for web browsers. aiScene can not contain all features of the X3D format.
 /// Also, aiScene contain rasterized-like data. For example, X3D can describe circle all cylinder with one tag, but aiScene contain result of tesselation:
-/// vertices, faces etc. Yes, you can use algorithm for detecting figures or shapes, but thats not good idea at all.
+/// vertices, faces etc. Yes, you can use algorithm for detecting figures or shapes, but that's not a good idea at all.
 ///
 /// Supported nodes:
 ///		Core component:
@@ -96,7 +96,7 @@ private:
 	aiMatrix4x4 Matrix_GlobalToCurrent(const aiNode& pNode) const;
 
 	/// \fn void AttrHelper_CommaToPoint(std::string& pStringWithComma)
-	/// Convert commas in string to points. Thats need because "std::to_string" result depend on locale (regional settings).
+	/// Convert commas in string to points. That's needed because "std::to_string" result depends on locale (regional settings).
 	/// \param [in, out] pStringWithComma - reference to string, which must be modified.
 	void AttrHelper_CommaToPoint(std::string& pStringWithComma) { for(char& c: pStringWithComma) { if(c == ',') c = '.'; } }
 
@@ -134,7 +134,7 @@ private:
 
 	/// \fn void AttrHelper_FloatToAttrList(std::list<SAttribute> pList, const std::string& pName, const float pValue, const float pDefaultValue)
 	/// \overload void AttrHelper_Col3DArrToString(const aiColor3D* pArray, const size_t pArray_Size, std::string& pTargetString)
-	void AttrHelper_FloatToAttrList(std::list<SAttribute> pList, const std::string& pName, const float pValue, const float pDefaultValue);
+	void AttrHelper_FloatToAttrList(std::list<SAttribute> &pList, const std::string& pName, const float pValue, const float pDefaultValue);
 
 	/// \fn void AttrHelper_Color3ToAttrList(std::list<SAttribute> pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue)
 	/// Add attribute to list if value not equal to default.
@@ -142,7 +142,7 @@ private:
 	/// \param [in] pName - name of new attribute.
 	/// \param [in] pValue - value of the new attribute.
 	/// \param [in] pDefaultValue - default value for checking: if pValue is equal to pDefaultValue then attribute will not be added.
-	void AttrHelper_Color3ToAttrList(std::list<SAttribute> pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue);
+	void AttrHelper_Color3ToAttrList(std::list<SAttribute> &pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue);
 
 	/// \fn void NodeHelper_OpenNode(const std::string& pNodeName, const size_t pTabLevel, const bool pEmptyElement, const std::list<SAttribute>& pAttrList)
 	/// Begin new XML-node element.

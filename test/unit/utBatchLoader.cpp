@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -65,6 +66,7 @@ TEST_F( BatchLoaderTest, createTest ) {
     } catch ( ... ) {
         ok = false;
     }
+    EXPECT_TRUE( ok );
 }
 
 TEST_F( BatchLoaderTest, validateAccessTest ) {

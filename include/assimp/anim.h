@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -191,6 +192,39 @@ struct aiMeshKey
 };
 
 // ---------------------------------------------------------------------------
+/** Binds a morph anim mesh to a specific point in time. */
+struct aiMeshMorphKey
+{
+    /** The time of this key */
+    double mTime;
+
+    /** The values and weights at the time of this key */
+    unsigned int *mValues;
+    double *mWeights;
+
+    /** The number of values and weights */
+    unsigned int mNumValuesAndWeights;
+#ifdef __cplusplus
+	aiMeshMorphKey()
+		: mTime(0.0)
+		, mValues(NULL)
+		, mWeights(NULL)
+		, mNumValuesAndWeights(0)
+	{
+
+	}
+
+    ~aiMeshMorphKey()
+    {
+        if (mNumValuesAndWeights && mValues && mWeights) {
+            delete [] mValues;
+            delete [] mWeights;
+        }
+    }
+#endif
+};
+
+// ---------------------------------------------------------------------------
 /** Defines how an animation channel behaves outside the defined time
  *  range. This corresponds to aiNodeAnim::mPreState and
  *  aiNodeAnim::mPostState.*/
@@ -341,6 +375,37 @@ struct aiMeshAnim
 };
 
 // ---------------------------------------------------------------------------
+/** Describes a morphing animation of a given mesh. */
+struct aiMeshMorphAnim
+{
+    /** Name of the mesh to be animated. An empty string is not allowed,
+     *  animated meshes need to be named (not necessarily uniquely,
+     *  the name can basically serve as wildcard to select a group
+     *  of meshes with similar animation setup)*/
+    C_STRUCT aiString mName;
+
+    /** Size of the #mKeys array. Must be 1, at least. */
+    unsigned int mNumKeys;
+
+    /** Key frames of the animation. May not be NULL. */
+    C_STRUCT aiMeshMorphKey* mKeys;
+
+#ifdef __cplusplus
+
+    aiMeshMorphAnim()
+        : mNumKeys()
+        , mKeys()
+    {}
+
+    ~aiMeshMorphAnim()
+    {
+        delete[] mKeys;
+    }
+
+#endif
+};
+
+// ---------------------------------------------------------------------------
 /** An animation consists of key-frame data for a number of nodes. For
  *  each node affected by the animation a separate series of data is given.*/
 struct aiAnimation {
@@ -372,14 +437,24 @@ struct aiAnimation {
      *  The array is mNumMeshChannels in size. */
     C_STRUCT aiMeshAnim** mMeshChannels;
 
+    /** The number of mesh animation channels. Each channel affects
+     *  a single mesh and defines morphing animation. */
+    unsigned int mNumMorphMeshChannels;
+
+    /** The morph mesh animation channels. Each channel affects a single mesh.
+     *  The array is mNumMorphMeshChannels in size. */
+    C_STRUCT aiMeshMorphAnim **mMorphMeshChannels;
+
 #ifdef __cplusplus
     aiAnimation()
     : mDuration(-1.)
     , mTicksPerSecond(0.)
     , mNumChannels(0)
-    , mChannels(nullptr)
+    , mChannels(NULL)
     , mNumMeshChannels(0)
-    , mMeshChannels(nullptr) {
+    , mMeshChannels(NULL)
+    , mNumMorphMeshChannels(0)
+    , mMorphMeshChannels(NULL) {
         // empty
     }
 
@@ -398,6 +473,13 @@ struct aiAnimation {
             }
 
             delete [] mMeshChannels;
+        }
+        if (mNumMorphMeshChannels && mMorphMeshChannels) {
+                for( unsigned int a = 0; a < mNumMorphMeshChannels; a++) {
+                        delete mMorphMeshChannels[a];
+                }
+            
+            delete [] mMorphMeshChannels;
         }
     }
 #endif // __cplusplus

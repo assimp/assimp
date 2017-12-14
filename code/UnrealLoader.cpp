@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -60,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 #include <memory>
 
@@ -155,7 +157,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
     DefaultLogger::get()->debug("UNREAL: uc file is "   + uc_path);
 
     // and open the files ... we can't live without them
-    IOStream* p = pIOHandler->Open(d_path);
+    std::unique_ptr<IOStream> p(pIOHandler->Open(d_path));
     if (!p)
         throw DeadlyImportError("UNREAL: Unable to open _d file");
     StreamReaderLE d_reader(pIOHandler->Open(d_path));
@@ -201,7 +203,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
         d_reader.IncPtr(1);
     }
 
-    p = pIOHandler->Open(a_path);
+    p.reset(pIOHandler->Open(a_path));
     if (!p)
         throw DeadlyImportError("UNREAL: Unable to open _a file");
     StreamReaderLE a_reader(pIOHandler->Open(a_path));

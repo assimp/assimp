@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -88,9 +89,7 @@ AI_WONT_RETURN void ValidateDSProcess::ReportError(const char* msg,...)
     ai_assert(iLen > 0);
 
     va_end(args);
-#ifdef ASSIMP_BUILD_DEBUG
-    ai_assert( false );
-#endif
+
     throw DeadlyImportError("Validation failed: " + std::string(szBuffer,iLen));
 }
 // ------------------------------------------------------------------------------------------------
@@ -335,28 +334,28 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             case 1:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT))
                 {
-                    ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimtiveTypes "
+                    ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimitiveTypes "
                         "does not report the POINT flag",i);
                 }
                 break;
             case 2:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_LINE))
                 {
-                    ReportError("aiMesh::mFaces[%i] is a LINE but aiMesh::mPrimtiveTypes "
+                    ReportError("aiMesh::mFaces[%i] is a LINE but aiMesh::mPrimitiveTypes "
                         "does not report the LINE flag",i);
                 }
                 break;
             case 3:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE))
                 {
-                    ReportError("aiMesh::mFaces[%i] is a TRIANGLE but aiMesh::mPrimtiveTypes "
+                    ReportError("aiMesh::mFaces[%i] is a TRIANGLE but aiMesh::mPrimitiveTypes "
                         "does not report the TRIANGLE flag",i);
                 }
                 break;
             default:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POLYGON))
                 {
-                    this->ReportError("aiMesh::mFaces[%i] is a POLYGON but aiMesh::mPrimtiveTypes "
+                    this->ReportError("aiMesh::mFaces[%i] is a POLYGON but aiMesh::mPrimitiveTypes "
                         "does not report the POLYGON flag",i);
                 }
                 break;
@@ -408,12 +407,12 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             // the MSB flag is temporarily used by the extra verbose
             // mode to tell us that the JoinVerticesProcess might have
             // been executed already.
-			if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && !(this->mScene->mFlags & AI_SCENE_FLAGS_ALLOW_SHARED) &&
+			/*if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && !(this->mScene->mFlags & AI_SCENE_FLAGS_ALLOW_SHARED) &&
 				abRefList[face.mIndices[a]])
             {
                 ReportError("aiMesh::mVertices[%i] is referenced twice - second "
                     "time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
-            }
+            }*/
             abRefList[face.mIndices[a]] = true;
         }
     }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -45,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/version.h>
 #include <assimp/config.h>
+#include <assimp/importerdesc.h>
 
 // ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
@@ -65,8 +67,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 
-#include "DefaultIOStream.h"
-#include "DefaultIOSystem.h"
 #include "DefaultProgressHandler.h"
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
@@ -80,6 +80,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <memory>
 #include <cctype>
+
+#include <assimp/DefaultIOStream.h>
+#include <assimp/DefaultIOSystem.h>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #   include "ValidateDataStructure.h"
@@ -271,10 +274,6 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 
     if (it != pimpl->mImporter.end())   {
         pimpl->mImporter.erase(it);
-
-        std::set<std::string> st;
-        pImp->GetExtensionList(st);
-
         DefaultLogger::get()->info("Unregistering custom importer: ");
         return AI_SUCCESS;
     }
@@ -828,8 +827,8 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     pimpl->mProgressHandler->UpdatePostProcess( static_cast<int>(pimpl->mPostProcessingSteps.size()), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
 
     // update private scene flags
-  if( pimpl->mScene )
-    ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
+    if( pimpl->mScene )
+      ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
 
     // clear any data allocated by post-process steps
     pimpl->mPPShared->Clean();

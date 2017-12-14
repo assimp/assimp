@@ -107,7 +107,7 @@ void MainWindow::LogError(const QString& pMessage)
 }
 
 /********************************************************************/
-/*********************** Overrided functions ************************/
+/*********************** Override functions ************************/
 /********************************************************************/
 
 void MainWindow::mousePressEvent(QMouseEvent* pEvent)
@@ -295,7 +295,7 @@ aiReturn rv;
 
 	// begin export
 	time_begin = QTime::currentTime();
-	rv = exporter.Export(mScene, format_id.toLocal8Bit(), filename.toLocal8Bit());
+	rv = exporter.Export(mScene, format_id.toLocal8Bit(), filename.toLocal8Bit(), aiProcess_FlipUVs);
 	ui->lblExportTime->setText(QString("%1").arg(time_begin.secsTo(QTime::currentTime())));
 	if(rv == aiReturn_SUCCESS)
 		LogInfo("Export done: " + filename);

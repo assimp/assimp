@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include "ParsingUtils.h"
 
-#include <iostream>
+#include <vector>
 
 namespace Assimp {
 
@@ -70,8 +71,8 @@ public:
     /// @return true if successful.
     bool close();
 
-    /// @brief  Returns the filesize.
-    /// @return The filesize.
+    /// @brief  Returns the file-size.
+    /// @return The file-size.
     size_t size() const;
     
     /// @brief  Returns the cache size.
@@ -97,7 +98,17 @@ public:
     /// @brief  Will read the next line.
     /// @param  buffer      The buffer for the next line.
     /// @return true if successful.
-    bool getNextLine( std::vector<T> &buffer );
+    bool getNextDataLine( std::vector<T> &buffer, T continuationToken );
+
+    /// @brief  Will read the next line ascii or binary end line char.
+    /// @param  buffer      The buffer for the next line.
+    /// @return true if successful.
+    bool getNextLine(std::vector<T> &buffer);
+
+    /// @brief  Will read the next block.
+    /// @param  buffer      The buffer for the next block.
+    /// @return true if successful.
+    bool getNextBlock( std::vector<T> &buffer );
 
 private:
     IOStream *m_stream;
@@ -228,15 +239,35 @@ size_t IOStreamBuffer<T>::getFilePos() const {
 
 template<class T>
 inline
-bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
+bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationToken ) {
     buffer.resize( m_cacheSize );
     if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
             return false;
         }
     }
+
+    bool continuationFound( false ), endOfDataLine( false );
     size_t i = 0;
-    while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
+    while ( !endOfDataLine ) {
+        if ( continuationToken == m_cache[ m_cachePos ] ) {
+            continuationFound = true;
+            ++m_cachePos;
+        }
+        if ( IsLineEnd( m_cache[ m_cachePos ] ) ) {
+            if ( !continuationFound ) {
+                // the end of the data line
+                break;
+            } else {
+                // skip line end
+                while ( m_cache[m_cachePos] != '\n') {
+                    ++m_cachePos;
+                }
+                ++m_cachePos;
+                continuationFound = false;
+            }
+        }
+
         buffer[ i ] = m_cache[ m_cachePos ];
         m_cachePos++;
         i++;
@@ -246,10 +277,74 @@ bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
             }
         }
     }
+    
     buffer[ i ] = '\n';
     m_cachePos++;
 
     return true;
+}
+
+static 
+inline
+bool isEndOfCache( size_t pos, size_t cacheSize ) {
+    return ( pos == cacheSize );
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
+    buffer.resize(m_cacheSize);
+    if ( isEndOfCache( m_cachePos, m_cacheSize ) || 0 == m_filePos) {
+       if (!readNextBlock()) {
+          return false;
+       }
+      }
+
+    if (IsLineEnd(m_cache[m_cachePos])) {
+        // skip line end
+        while (m_cache[m_cachePos] != '\n') {
+            ++m_cachePos;
+        }
+        ++m_cachePos;
+        if ( isEndOfCache( m_cachePos, m_cacheSize ) ) {
+            if ( !readNextBlock() ) {
+                return false;
+            }
+        }
+    }
+
+    size_t i = 0;
+    while (!IsLineEnd(m_cache[ m_cachePos ])) {
+        buffer[i] = m_cache[ m_cachePos ];
+        m_cachePos++;
+        i++;
+        if (m_cachePos >= m_cacheSize) {
+            if (!readNextBlock()) {
+                return false;
+            }
+        }
+    }
+    buffer[i] = '\n';
+    m_cachePos++;
+
+    return true;
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::getNextBlock( std::vector<T> &buffer) {
+  //just return the last blockvalue if getNextLine was used before
+  if ( m_cachePos !=  0) {      
+      buffer = std::vector<T>(m_cache.begin() + m_cachePos, m_cache.end());
+      m_cachePos = 0;
+  }
+  else {
+      if ( !readNextBlock() )
+          return false;
+
+      buffer = std::vector<T>(m_cache.begin(), m_cache.end());
+  }
+  return true;
 }
 
 } // !ns Assimp

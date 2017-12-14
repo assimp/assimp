@@ -72,20 +72,26 @@ struct SceneAnimNode
     size_t mChannelIndex;
 
     //! Default construction
-    SceneAnimNode() {
-        mChannelIndex = -1; mParent = NULL;
+    SceneAnimNode()
+    : mName()
+    , mParent(NULL)
+    , mChannelIndex(-1) {
+        // empty
     }
 
     //! Construction from a given name
     SceneAnimNode( const std::string& pName)
-        : mName( pName) {
-            mChannelIndex = -1; mParent = NULL;
+    : mName( pName)
+    , mParent(NULL)
+    , mChannelIndex( -1 ) {
+        // empty
     }
 
     //! Destruct all children recursively
     ~SceneAnimNode() {
-        for( std::vector<SceneAnimNode*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it)
+        for (std::vector<SceneAnimNode*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) {
             delete *it;
+        }
     }
 };
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -89,28 +90,36 @@ void PretransformVerticesTest::SetUp()
 
     // add 5 empty materials
     scene->mMaterials = new aiMaterial*[scene->mNumMaterials = 5];
-    for (unsigned int i = 0; i < 5;++i)
+    for (unsigned int i = 0; i < 5;++i) {
         scene->mMaterials[i] = new aiMaterial();
+    }
 
     // add 25 test meshes
     scene->mMeshes = new aiMesh*[scene->mNumMeshes = 25];
-    for (unsigned int i = 0; i < 25;++i) {
-        aiMesh* mesh = scene->mMeshes[i] = new aiMesh();
+    for ( unsigned int i = 0; i < 25; ++i) {
+        aiMesh* mesh = scene->mMeshes[ i ] = new aiMesh();
 
         mesh->mPrimitiveTypes = aiPrimitiveType_POINT;
         mesh->mFaces = new aiFace[ mesh->mNumFaces = 10+i ];
         mesh->mVertices = new aiVector3D[mesh->mNumVertices = mesh->mNumFaces];
         for (unsigned int a = 0; a < mesh->mNumFaces; ++a ) {
-            aiFace& f = mesh->mFaces[a];
-            f.mIndices = new unsigned int [f.mNumIndices = 1];
+            aiFace& f = mesh->mFaces[ a ];
+            f.mIndices = new unsigned int [ f.mNumIndices = 1 ];
             f.mIndices[0] = a*3;
 
             mesh->mVertices[a] = aiVector3D((float)i,(float)a,0.f);
         }
         mesh->mMaterialIndex = i%5;
 
-        if (i % 2)
+        if (i % 2) {
             mesh->mNormals = new aiVector3D[mesh->mNumVertices];
+            for ( unsigned int normalIdx=0; normalIdx<mesh->mNumVertices; ++normalIdx ) {
+                mesh->mNormals[ normalIdx ].x = 1.0f;
+                mesh->mNormals[ normalIdx ].y = 1.0f;
+                mesh->mNormals[ normalIdx ].z = 1.0f;
+                mesh->mNormals[ normalIdx ].Normalize();
+            }
+        }
     }
 
     // construct some nodes (1+25)

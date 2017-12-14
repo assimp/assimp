@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,9 +53,8 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-#include "DefaultIOSystem.h"
 #include "BlobIOSystem.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "BaseProcess.h"
 #include "Importer.h" // need this for GetPostProcessingStepInstanceList()
 
@@ -64,11 +64,12 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "Exceptional.h"
 #include "ScenePrivate.h"
 #include <memory>
+
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <memory>
 
 namespace Assimp {
 
@@ -82,6 +83,7 @@ void ExportSceneCollada(const char*,IOSystem*, const aiScene*, const ExportPrope
 void ExportSceneXFile(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneStep(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneObj(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneObjNoMtl(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScenePly(const char*,IOSystem*, const aiScene*, const ExportProperties*);
@@ -89,30 +91,34 @@ void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*, const ExportPr
 void ExportScene3DS(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneGLTF2(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
 Exporter::ExportFormatEntry gExporters[] =
 {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-    Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
+    Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_X_EXPORTER
     Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
-        aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
+        aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STEP_EXPORTER
-    Exporter::ExportFormatEntry( "stp", "Step Files", "stp", &ExportSceneStep, 0),
+    Exporter::ExportFormatEntry( "stp", "Step Files", "stp", &ExportSceneStep, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
     Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj,
-        aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */),
+        aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */ ),
+    Exporter::ExportFormatEntry( "objnomtl", "Wavefront OBJ format without material file", "obj", &ExportSceneObjNoMtl,
+        aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */ ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
@@ -135,26 +141,32 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
     Exporter::ExportFormatEntry( "3ds", "Autodesk 3DS (legacy)", "3ds" , &ExportScene3DS,
-        aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices),
+        aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
     Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
     Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
+    Exporter::ExportFormatEntry( "gltf2", "GL Transmission Format v. 2", "gltf2", &ExportSceneGLTF2,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
-    Exporter::ExportFormatEntry( "assbin", "Assimp Binary", "assbin" , &ExportSceneAssbin, 0),
+    Exporter::ExportFormatEntry( "assbin", "Assimp Binary", "assbin" , &ExportSceneAssbin, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
-    Exporter::ExportFormatEntry( "assxml", "Assxml Document", "assxml" , &ExportSceneAssxml, 0),
+    Exporter::ExportFormatEntry( "assxml", "Assxml Document", "assxml" , &ExportSceneAssxml, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
-	Exporter::ExportFormatEntry( "x3d", "Extensible 3D", "x3d" , &ExportSceneX3D, 0),
+    Exporter::ExportFormatEntry( "x3d", "Extensible 3D", "x3d" , &ExportSceneX3D, 0 ),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
+    Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 )
 #endif
 };
 
@@ -171,8 +183,10 @@ public:
         GetPostProcessingStepInstanceList(mPostProcessingSteps);
 
         // grab all built-in exporters
-        mExporters.resize(ASSIMP_NUM_EXPORTERS);
-        std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
+        if ( 0 != ( ASSIMP_NUM_EXPORTERS ) ) {
+            mExporters.resize( ASSIMP_NUM_EXPORTERS );
+            std::copy( gExporters, gExporters + ASSIMP_NUM_EXPORTERS, mExporters.begin() );
+        }
     }
 
     ~ExporterPimpl()
@@ -186,7 +200,6 @@ public:
     }
 
 public:
-
     aiExportDataBlob* blob;
     std::shared_ptr< Assimp::IOSystem > mIOSystem;
     bool mIsDefaultIOHandler;
@@ -201,65 +214,48 @@ public:
     std::vector<Exporter::ExportFormatEntry> mExporters;
 };
 
-
 } // end of namespace Assimp
-
-
-
-
 
 using namespace Assimp;
 
-
 // ------------------------------------------------------------------------------------------------
 Exporter :: Exporter()
-: pimpl(new ExporterPimpl())
-{
+: pimpl(new ExporterPimpl()) {
+    // empty
 }
 
-
 // ------------------------------------------------------------------------------------------------
-Exporter :: ~Exporter()
-{
+Exporter::~Exporter() {
     FreeBlob();
 
     delete pimpl;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void Exporter :: SetIOHandler( IOSystem* pIOHandler)
-{
+void Exporter::SetIOHandler( IOSystem* pIOHandler) {
     pimpl->mIsDefaultIOHandler = !pIOHandler;
     pimpl->mIOSystem.reset(pIOHandler);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-IOSystem* Exporter :: GetIOHandler() const
-{
+IOSystem* Exporter::GetIOHandler() const {
     return pimpl->mIOSystem.get();
 }
 
-
 // ------------------------------------------------------------------------------------------------
-bool Exporter :: IsDefaultIOHandler() const
-{
+bool Exporter::IsDefaultIOHandler() const {
     return pimpl->mIsDefaultIOHandler;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int, const ExportProperties* pProperties)
-{
+const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const char* pFormatId,
+                                                unsigned int, const ExportProperties* /*pProperties*/ ) {
     if (pimpl->blob) {
         delete pimpl->blob;
         pimpl->blob = NULL;
     }
 
-
     std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
-
     BlobIOSystem* blobio = new BlobIOSystem();
     pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
@@ -274,10 +270,8 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
     return pimpl->blob;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-bool IsVerboseFormat(const aiMesh* mesh)
-{
+bool IsVerboseFormat(const aiMesh* mesh) {
     // avoid slow vector<bool> specialization
     std::vector<unsigned int> seen(mesh->mNumVertices,0);
     for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
@@ -292,10 +286,8 @@ bool IsVerboseFormat(const aiMesh* mesh)
     return true;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-bool IsVerboseFormat(const aiScene* pScene)
-{
+bool IsVerboseFormat(const aiScene* pScene) {
     for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         if(!IsVerboseFormat(pScene->mMeshes[i])) {
             return false;
@@ -304,10 +296,8 @@ bool IsVerboseFormat(const aiScene* pScene)
     return true;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing, const ExportProperties* pProperties)
-{
+aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing, const ExportProperties* pProperties) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // when they create scenes from scratch, users will likely create them not in verbose
@@ -320,9 +310,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
     for (size_t i = 0; i < pimpl->mExporters.size(); ++i) {
         const Exporter::ExportFormatEntry& exp = pimpl->mExporters[i];
         if (!strcmp(exp.mDescription.id,pFormatId)) {
-
             try {
-
                 // Always create a full copy of the scene. We might optimize this one day,
                 // but for now it is the most pragmatic way.
                 aiScene* scenecopy_tmp = NULL;
@@ -341,18 +329,17 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
                     ? (priv->mPPStepsApplied & ~nonIdempotentSteps)
                     : 0u);
 
-                // If no extra postprocessing was specified, and we obtained this scene from an
+                // If no extra post-processing was specified, and we obtained this scene from an
                 // Assimp importer, apply the reverse steps automatically.
                 // TODO: either drop this, or document it. Otherwise it is just a bad surprise.
                 //if (!pPreprocessing && priv) {
                 //  pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
                 //}
 
-                // If the input scene is not in verbose format, but there is at least postprocessing step that relies on it,
+                // If the input scene is not in verbose format, but there is at least post-processing step that relies on it,
                 // we need to run the MakeVerboseFormat step first.
                 bool must_join_again = false;
                 if (!is_verbose_format) {
-
                     bool verbosify = false;
                     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
                         BaseProcess* const p = pimpl->mPostProcessingSteps[a];
@@ -423,8 +410,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
                 ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
                 exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProperties ? pProperties : &emptyProperties);
-            }
-            catch (DeadlyExportError& err) {
+            } catch (DeadlyExportError& err) {
                 pimpl->mError = err.what();
                 return AI_FAILURE;
             }
@@ -434,67 +420,57 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
     pimpl->mError = std::string("Found no exporter to handle this file format: ") + pFormatId;
     ASSIMP_END_EXCEPTION_REGION(aiReturn);
+    
     return AI_FAILURE;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-const char* Exporter :: GetErrorString() const
-{
+const char* Exporter::GetErrorString() const {
     return pimpl->mError.c_str();
 }
 
 
 // ------------------------------------------------------------------------------------------------
-void Exporter :: FreeBlob( )
-{
+void Exporter::FreeBlob() {
     delete pimpl->blob;
     pimpl->blob = NULL;
 
     pimpl->mError = "";
 }
 
-
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: GetBlob() const
-{
+const aiExportDataBlob* Exporter::GetBlob() const {
     return pimpl->blob;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: GetOrphanedBlob() const
-{
+const aiExportDataBlob* Exporter::GetOrphanedBlob() const {
     const aiExportDataBlob* tmp = pimpl->blob;
     pimpl->blob = NULL;
     return tmp;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-size_t Exporter :: GetExportFormatCount() const
-{
+size_t Exporter::GetExportFormatCount() const {
     return pimpl->mExporters.size();
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex ) const
-{
-    if (pIndex >= GetExportFormatCount()) {
+const aiExportFormatDesc* Exporter::GetExportFormatDescription( size_t index ) const {
+    if (index >= GetExportFormatCount()) {
         return NULL;
     }
 
     // Return from static storage if the requested index is built-in.
-    if (pIndex < sizeof(gExporters) / sizeof(gExporters[0])) {
-        return &gExporters[pIndex].mDescription;
+    if (index < sizeof(gExporters) / sizeof(gExporters[0])) {
+        return &gExporters[index].mDescription;
     }
 
-    return &pimpl->mExporters[pIndex].mDescription;
+    return &pimpl->mExporters[index].mDescription;
 }
 
 // ------------------------------------------------------------------------------------------------
-aiReturn Exporter :: RegisterExporter(const ExportFormatEntry& desc)
-{
+aiReturn Exporter::RegisterExporter(const ExportFormatEntry& desc) {
     for(const ExportFormatEntry& e : pimpl->mExporters) {
         if (!strcmp(e.mDescription.id,desc.mDescription.id)) {
             return aiReturn_FAILURE;
@@ -505,10 +481,8 @@ aiReturn Exporter :: RegisterExporter(const ExportFormatEntry& desc)
     return aiReturn_SUCCESS;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void Exporter :: UnregisterExporter(const char* id)
-{
+void Exporter::UnregisterExporter(const char* id) {
     for(std::vector<ExportFormatEntry>::iterator it = pimpl->mExporters.begin(); it != pimpl->mExporters.end(); ++it) {
         if (!strcmp((*it).mDescription.id,id)) {
             pimpl->mExporters.erase(it);
@@ -517,29 +491,29 @@ void Exporter :: UnregisterExporter(const char* id)
     }
 }
 
-ExportProperties :: ExportProperties() {}
-
-ExportProperties::ExportProperties(const ExportProperties &other)
-     : mIntProperties(other.mIntProperties),
-   mFloatProperties(other.mFloatProperties),
-   mStringProperties(other.mStringProperties),
-   mMatrixProperties(other.mMatrixProperties)
-{
-
+// ------------------------------------------------------------------------------------------------
+ExportProperties::ExportProperties() {
+    // empty
 }
 
+// ------------------------------------------------------------------------------------------------
+ExportProperties::ExportProperties(const ExportProperties &other)
+: mIntProperties(other.mIntProperties)
+, mFloatProperties(other.mFloatProperties)
+, mStringProperties(other.mStringProperties)
+, mMatrixProperties(other.mMatrixProperties) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool ExportProperties :: SetPropertyInteger(const char* szName, int iValue)
-{
+bool ExportProperties::SetPropertyInteger(const char* szName, int iValue) {
     return SetGenericProperty<int>(mIntProperties, szName,iValue);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool ExportProperties :: SetPropertyFloat(const char* szName, ai_real iValue)
-{
+bool ExportProperties::SetPropertyFloat(const char* szName, ai_real iValue) {
     return SetGenericProperty<ai_real>(mFloatProperties, szName,iValue);
 }
 

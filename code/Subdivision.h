@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,10 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines a helper class to evaluate subdivision surfaces.*/
+#pragma once
 #ifndef AI_SUBDISIVION_H_INC
 #define AI_SUBDISIVION_H_INC
 
 #include <cstddef>
+#include <assimp/types.h>
+
 struct aiMesh;
 
 namespace Assimp    {
@@ -51,8 +55,7 @@ namespace Assimp    {
 /** Helper class to evaluate subdivision surfaces. Different algorithms
  *  are provided for choice. */
 // ------------------------------------------------------------------------------
-class Subdivider
-{
+class ASSIMP_API Subdivider {
 public:
 
     /** Enumerates all supported subvidision algorithms */
@@ -60,12 +63,7 @@ public:
         CATMULL_CLARKE = 0x1
     };
 
-public:
-
-    virtual ~Subdivider() {
-    }
-
-public:
+    virtual ~Subdivider();
 
     // ---------------------------------------------------------------
     /** Create a subdivider of a specific type
@@ -118,8 +116,12 @@ public:
         unsigned int num,
         bool discard_input = false) = 0;
 
-private:
 };
+
+inline
+Subdivider::~Subdivider() {
+    // empty
+}
 
 } // end namespace Assimp
 

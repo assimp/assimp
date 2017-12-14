@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -50,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include <memory>
 #include <assimp/IOStream.hpp>
-#include "Defines.h"
+#include <assimp/Defines.h>
 
 namespace Assimp {
 
@@ -243,7 +244,7 @@ public:
      *
      *  @param limit Maximum number of bytes to be read from
      *    the beginning of the file. Specifying UINT_MAX
-     *    resets the limit to the original end of the stream. 
+     *    resets the limit to the original end of the stream.
      *  Returns the previously set limit. */
     unsigned int SetReadLimit(unsigned int _limit)  {
         unsigned int prev = GetReadLimit();
@@ -290,15 +291,11 @@ private:
             throw DeadlyImportError("End of file or stream limit was reached");
         }
 
-#ifdef __arm__
         T f;
         ::memcpy (&f, current, sizeof(T));
-#else
-        T f = *((const T*)current);
-#endif
-        Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
-
+        Intern::Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
         current += sizeof(T);
+
         return f;
     }
 

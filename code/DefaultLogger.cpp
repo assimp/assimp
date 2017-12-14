@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -43,13 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of DefaultLogger (and Logger)
  */
 
-#include "DefaultIOSystem.h"
 
 // Default log streams
 #include "Win32DebugLogStream.h"
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
 #include "StringUtils.h"
+
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/NullLogger.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/ai_assert.h>
@@ -251,8 +253,8 @@ void DefaultLogger::kill()
 //  Debug message
 void DefaultLogger::OnDebug( const char* message )
 {
-    if ( m_Severity == Logger::NORMAL )
-        return;
+	if ( m_Severity == Logger::NORMAL )
+		return;
 
 	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
 	char msg[Size];

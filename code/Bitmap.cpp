@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -101,7 +102,7 @@ namespace Assimp {
         offset += Copy(&data[offset], header.size);
         offset += Copy(&data[offset], header.reserved1);
         offset += Copy(&data[offset], header.reserved2);
-        offset += Copy(&data[offset], header.offset);
+                  Copy(&data[offset], header.offset);
 
         file->Write(data, Header::header_size, 1);
     }
@@ -121,7 +122,7 @@ namespace Assimp {
         offset += Copy(&data[offset], dib.x_resolution);
         offset += Copy(&data[offset], dib.y_resolution);
         offset += Copy(&data[offset], dib.nb_colors);
-        offset += Copy(&data[offset], dib.nb_important_colors);
+                  Copy(&data[offset], dib.nb_important_colors);
 
         file->Write(data, DIB::dib_size, 1);
     }

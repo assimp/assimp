@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,8 +54,7 @@ namespace Assimp {
 /** RemoveVCProcess: Class to exclude specific parts of the data structure
  *  from further processing by removing them,
 */
-class ASSIMP_API RemoveVCProcess : public BaseProcess
-{
+class ASSIMP_API RemoveVCProcess : public BaseProcess {
 public:
     /// The default class constructor.
     RemoveVCProcess();
@@ -62,7 +62,6 @@ public:
     /// The class destructor.
     ~RemoveVCProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
     * @param pFlags The processing flags the importer was called with. A bitwise

@@ -14,7 +14,7 @@ public:
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
 
-        pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test.x",0);
+        pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test.x", aiProcess_ValidateDataStructure);
     }
 
     virtual void TearDown()
@@ -37,7 +37,7 @@ TEST_F(ExporterTest, testExportToFile)
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
 
     // check if we can read it again
-    EXPECT_TRUE(im->ReadFile(file,0));
+    EXPECT_TRUE(im->ReadFile(file, aiProcess_ValidateDataStructure));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ TEST_F(ExporterTest, testCExportInterface)
     for(size_t i = 0; i < aiGetExportFormatCount(); ++i) {
         const aiExportFormatDesc* const desc = aiGetExportFormatDescription(i);
         EXPECT_TRUE(desc);
-        // rest has aleady been validated by testCppExportInterface
+        // rest has already been validated by testCppExportInterface
     }
 }
 

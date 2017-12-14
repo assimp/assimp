@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -222,6 +223,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             iMaxRefTris = std::max(iMaxRefTris,*piCur);
         }
     }
+    ai_assert(iMaxRefTris > 0);
     unsigned int* piCandidates = new unsigned int[iMaxRefTris*3];
     unsigned int iCacheMisses = 0;
 

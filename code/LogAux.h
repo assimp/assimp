@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -59,34 +60,34 @@ public:
     // ------------------------------------------------------------------------------------------------
     static void ThrowException(const std::string& msg)
     {
-        throw DeadlyImportError(log_prefix+msg);
+        throw DeadlyImportError(Prefix()+msg);
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogWarn(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->warn(log_prefix+(std::string)message);
+            DefaultLogger::get()->warn(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogError(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->error(log_prefix+(std::string)message);
+            DefaultLogger::get()->error(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogInfo(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->info(log_prefix+(std::string)message);
+            DefaultLogger::get()->info(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogDebug(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->debug(log_prefix+(std::string)message);
+            DefaultLogger::get()->debug(Prefix()+(std::string)message);
         }
     }
 
@@ -124,8 +125,7 @@ public:
 #endif
 
 private:
-
-    static const std::string log_prefix;
+    static const char* Prefix();
 
 };
 

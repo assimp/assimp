@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -43,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
+#include <assimp/postprocess.h>
 
 #include "TestModelFactory.h"
 
@@ -65,7 +67,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     EXPECT_NE( desc, nullptr );
     path.append( desc->fileExtension );
     EXPECT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
-    const aiScene *newScene( importer.ReadFile( path, 0 ) );
+    const aiScene *newScene( importer.ReadFile( path, aiProcess_ValidateDataStructure ) );
     EXPECT_TRUE( NULL != newScene );
     float newOpacity;
     if ( newScene->mNumMaterials > 0 ) {
@@ -73,6 +75,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
         EXPECT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
         EXPECT_EQ( opacity, newOpacity );
     }
+    delete scene;
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "GenericProperty.h"
 
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "StandardShapes.h"
 #include "Importer.h"
 
@@ -65,7 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/postprocess.h>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 using namespace irr;
@@ -393,7 +394,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 angles[1] %= 360;
                 angles[2] %= 360;
 
-                if ((angles[0]*angles[1]) && (angles[1]*angles[2]))
+                if ( (angles[0]*angles[1]) != 0 && (angles[1]*angles[2]) != 0 )
                 {
                     FindSuitableMultiple(angles[0]);
                     FindSuitableMultiple(angles[1]);

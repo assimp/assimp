@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATRIX4X4_H_INC
 
 #include "vector3.h"
-#include "./Compiler/pushpack1.h"
 #include "defs.h"
 
 #ifdef __cplusplus
@@ -113,6 +113,8 @@ public:
     // matrix multiplication.
     aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);
     aiMatrix4x4t  operator *  (const aiMatrix4x4t& m) const;
+    aiMatrix4x4t operator * (const TReal& aFloat) const;
+    aiMatrix4x4t operator + (const aiMatrix4x4t& aMatrix) const;
 
     template <typename TOther>
     operator aiMatrix4x4t<TOther> () const;
@@ -222,7 +224,7 @@ public:
      *  @return Reference to the output matrix
      */
     static aiMatrix4x4t& Rotation(TReal a, const aiVector3t<TReal>& axis,
-        aiMatrix4x4t& out);
+            aiMatrix4x4t& out);
 
     // -------------------------------------------------------------------
     /** @brief Returns a translation matrix
@@ -230,7 +232,8 @@ public:
      *  @param out Receives the output matrix
      *  @return Reference to the output matrix
      */
-    static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, aiMatrix4x4t& out);
+    static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, 
+            aiMatrix4x4t& out);
 
     // -------------------------------------------------------------------
     /** @brief Returns a scaling matrix
@@ -250,14 +253,14 @@ public:
      *          Journal of Graphics Tools, 4(4):1-4, 1999
      */
     static aiMatrix4x4t& FromToMatrix(const aiVector3t<TReal>& from,
-        const aiVector3t<TReal>& to, aiMatrix4x4t& out);
+            const aiVector3t<TReal>& to, aiMatrix4x4t& out);
 
 public:
     TReal a1, a2, a3, a4;
     TReal b1, b2, b3, b4;
     TReal c1, c2, c3, c4;
     TReal d1, d2, d3, d4;
-} PACK_STRUCT;
+};
 
 typedef aiMatrix4x4t<ai_real> aiMatrix4x4;
 
@@ -268,11 +271,9 @@ struct aiMatrix4x4 {
     ai_real b1, b2, b3, b4;
     ai_real c1, c2, c3, c4;
     ai_real d1, d2, d3, d4;
-} PACK_STRUCT;
+};
 
 
 #endif // __cplusplus
-
-#include "./Compiler/poppack1.h"
 
 #endif // AI_MATRIX4X4_H_INC

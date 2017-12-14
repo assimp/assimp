@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
 #include "MD3Loader.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "GenericProperty.h"
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
@@ -62,9 +63,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include <cctype>
-
-
 
 using namespace Assimp;
 
@@ -1018,11 +1018,11 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
                 // Convert the normal vector to uncompressed float3 format
                 aiVector3D& nor = pcMesh->mNormals[iCurrent];
-                LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,(ai_real*)&nor);
+                LatLngNormalToVec3(pcVertices[index].NORMAL,(ai_real*)&nor);
 
                 // Read texture coordinates
-                pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;
-                pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[ pcTriangles->INDEXES[c]].V;
+                pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[index].U;
+                pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-pcUVs[index].V;
             }
             // Flip face order if necessary
             if (!shader || shader->cull == Q3Shader::CULL_CW) {

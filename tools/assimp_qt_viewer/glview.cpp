@@ -6,7 +6,11 @@
 #include "glview.hpp"
 
 // Header files, OpenGL.
-#include <GL/glu.h>
+#if defined(__APPLE__)
+# include <OpenGL/glu.h>
+#else
+# include <GL/glu.h>
+#endif
 
 // Header files, DevIL.
 #include <il.h>
@@ -142,8 +146,8 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
 
 void CGLView::Matrix_NodeToRoot(const aiNode* pNode, aiMatrix4x4& pOutMatrix)
 {
-const aiNode* node_cur;
-std::list<aiMatrix4x4> mat_list;
+    const aiNode* node_cur;
+    std::list<aiMatrix4x4> mat_list;
 
 	pOutMatrix = aiMatrix4x4();
 	// starting walk from current element to root
@@ -557,7 +561,7 @@ void CGLView::Enable_Textures(const bool pEnable)
 }
 
 /********************************************************************/
-/*********************** Overrided functions ************************/
+/*********************** Override functions ************************/
 /********************************************************************/
 
 void CGLView::initializeGL()
@@ -715,7 +719,7 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 		mHelper_Mesh_Quantity = mScene->mNumMeshes;
 		mHelper_Mesh = new SHelper_Mesh*[mScene->mNumMeshes];
 
-		// Walk thru the meshes and extract needed data and, also calculate BBox.
+		// Walk through the meshes and extract needed data and, also calculate BBox.
 		for(size_t idx_mesh = 0; idx_mesh < mScene->mNumMeshes; idx_mesh++)
 		{
 			aiMesh& mesh_cur = *mScene->mMeshes[idx_mesh];
@@ -793,7 +797,7 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 	//
 	// Scene BBox
 	//
-	// For calculating right BBox we must walk thru all nodes and apply transformation to meshes BBoxes
+	// For calculating right BBox we must walk through all nodes and apply transformation to meshes BBoxes
 	if(mHelper_Mesh_Quantity > 0)
 	{
 		bool first_assign = true;

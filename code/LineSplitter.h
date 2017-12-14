@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -68,27 +69,23 @@ for(LineSplitter splitter(stream);splitter;++splitter) {
 
     std::cout << "Current line is: " << splitter.get_index() << std::endl;
 }
-@endcode */
+@endcode
+*/
 // ------------------------------------------------------------------------------------------------
-class LineSplitter
-{
+class LineSplitter {
 public:
-
     typedef size_t line_idx;
-
-public:
 
     // -----------------------------------------
     /** construct from existing stream reader
     note: trim is *always* assumed true if skyp_empty_lines==true
     */
     LineSplitter(StreamReaderLE& stream, bool skip_empty_lines = true, bool trim = true)
-        : idx( 0 )
-        , stream(stream)
-        , swallow()
-        , skip_empty_lines(skip_empty_lines)
-        , trim(trim)
-    {
+    : idx( 0 )
+    , stream(stream)
+    , swallow()
+    , skip_empty_lines(skip_empty_lines)
+    , trim(trim) {
         cur.reserve(1024);
         operator++();
 

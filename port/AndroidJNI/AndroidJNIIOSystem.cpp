@@ -46,14 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <android/api-level.h>
 #if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 
+#include <libgen.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <android/log.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <android/native_activity.h>
 #include <assimp/ai_assert.h>
 #include <assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
-#include <code/DefaultIOStream.h>
+#include <assimp/DefaultIOStream.h>
 #include <fstream>
 
 using namespace Assimp;
@@ -101,6 +103,27 @@ void AndroidJNIIOSystem::AndroidActivityInit(ANativeActivity* activity)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Create the directory for the extracted resource
+static int mkpath(std::string path, mode_t mode)
+{
+    if (mkdir(path.c_str(), mode) == -1) {
+        switch(errno) {
+            case ENOENT:
+                if (mkpath(path.substr(0, path.find_last_of('/')), mode) == -1)
+                    return -1;
+                else
+                    return mkdir(path.c_str(), mode);
+            case EEXIST:
+                return 0;
+            default:
+                return -1;
+        }
+    }
+
+    return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Extracts android asset
 bool AndroidJNIIOSystem::AndroidExtractAsset(std::string name)
 {
@@ -130,6 +153,15 @@ bool AndroidJNIIOSystem::AndroidExtractAsset(std::string name)
 
 		// Close
 		AAsset_close(asset);
+
+		// Prepare directory for output buffer
+		std::string directoryNewPath = newPath;
+		directoryNewPath = dirname(&directoryNewPath[0]);
+
+		if (mkpath(directoryNewPath, S_IRUSR | S_IWUSR | S_IXUSR) == -1) {
+			__android_log_print(ANDROID_LOG_ERROR, "assimp",
+					"Can not create the directory for the output file");
+		}
 
 		// Prepare output buffer
 		std::ofstream assetExtracted(newPath.c_str(),

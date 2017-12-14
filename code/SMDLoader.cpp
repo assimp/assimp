@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -54,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 
 using namespace Assimp;
@@ -448,7 +450,9 @@ void SMDImporter::CreateOutputMeshes()
 // add bone child nodes
 void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 {
-    ai_assert(NULL != pcNode && 0 == pcNode->mNumChildren && NULL == pcNode->mChildren);
+    ai_assert( NULL != pcNode );
+    ai_assert( 0 == pcNode->mNumChildren );
+    ai_assert( NULL == pcNode->mChildren);
 
     // first count ...
     for (unsigned int i = 0; i < asBones.size();++i)
@@ -646,12 +650,14 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
 // create output materials
 void SMDImporter::CreateOutputMaterials()
 {
+    ai_assert( nullptr != pScene );
+
     pScene->mNumMaterials = (unsigned int)aszTextures.size();
     pScene->mMaterials = new aiMaterial*[std::max(1u, pScene->mNumMaterials)];
 
-    for (unsigned int iMat = 0; iMat < pScene->mNumMaterials;++iMat)
-    {
+    for (unsigned int iMat = 0; iMat < pScene->mNumMaterials; ++iMat) {
         aiMaterial* pcMat = new aiMaterial();
+        ai_assert( nullptr != pcMat );
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;
@@ -702,7 +708,7 @@ void SMDImporter::ParseFile()
     {
         if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
-        // "version <n> \n", <n> should be 1 for hl and hl� SMD files
+        // "version <n> \n", <n> should be 1 for hl and hl2 SMD files
         if (TokenMatch(szCurrent,"version",7))
         {
             if(!SkipSpaces(szCurrent,&szCurrent)) break;
@@ -1020,7 +1026,7 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 
     // read the texture file name
     const char* szLast = szCurrent;
-    while (!IsSpaceOrNewLine(*szCurrent++));
+    while (!IsSpaceOrNewLine(*++szCurrent));
 
     // ... and get the index that belongs to this file name
     face.iTexture = GetTextureIndex(std::string(szLast,(uintptr_t)szCurrent-(uintptr_t)szLast));

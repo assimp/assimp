@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
+#include <assimp/Defines.h>
 #include "qnan.h"
-#include "Defines.h"
 
 
 using namespace Assimp;
@@ -545,10 +546,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     else if (iMasked || !iType || (iType && iWidth && iHeight))
     {
-        // ***** STANDARD COLOR TEXTURE *****
-        if(pcNew!= nullptr)
-            delete pcNew;
-
         pcNew = new aiTexture();
         if (!iHeight || !iWidth)
         {
@@ -668,7 +665,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         if (0.0f != pcMatIn->Power)
         {
             iShadingMode = (int)aiShadingMode_Phong;
-            pcMatOut->AddProperty<float>(&pcMatIn->Power,1,AI_MATKEY_SHININESS);
+            // pcMatIn is packed, we can't form pointers to its members
+            float power = pcMatIn->Power;
+            pcMatOut->AddProperty<float>(&power,1,AI_MATKEY_SHININESS);
         }
         pcMatOut->AddProperty<int>(&iShadingMode,1,AI_MATKEY_SHADING_MODEL);
     }

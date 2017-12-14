@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -170,7 +171,7 @@ public:
     *   Any IO handlers set via #SetIOHandler are ignored here.
     * @note Use aiCopyScene() to get a modifiable copy of a previously
     *   imported scene. */
-    const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
+    const aiExportDataBlob* ExportToBlob(const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u, const ExportProperties* = NULL);
     const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId, unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
 
     // -------------------------------------------------------------------
@@ -296,8 +297,7 @@ protected:
     ExporterPimpl* pimpl;
 };
 
-class ASSIMP_API ExportProperties
-{
+class ASSIMP_API ExportProperties {
 public:
     // Data type to store the key hash
     typedef unsigned int KeyType;

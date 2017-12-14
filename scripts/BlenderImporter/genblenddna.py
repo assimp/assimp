@@ -58,24 +58,16 @@ template_src = "BlenderScene.cpp.template"
 # workaround for stackoverflowing when reading the linked list of scene objects
 # with the usual approach. See embedded notes for details.
 Structure_Convert_Base_fullcode = """
-template <> void Structure :: Convert<Base> (
-    Base& dest,
-    const FileDatabase& db
-    ) const
-{ 
+template <> void Structure::Convert<Base>( Base& dest, const FileDatabase& db ) const { 
 	// note: as per https://github.com/assimp/assimp/issues/128,
 	// reading the Object linked list recursively is prone to stack overflow.
 	// This structure converter is therefore an hand-written exception that
 	// does it iteratively.
 
 	const int initial_pos = db.reader->GetCurrentPos();
-
 	std::pair<Base*, int> todo = std::make_pair(&dest, initial_pos);
-
 	Base* saved_prev = NULL;
-
 	while(true) {
-	
 		Base& cur_dest = *todo.first;
 		db.reader->SetCurrentPos(todo.second);
 
@@ -303,8 +295,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-
-
-    

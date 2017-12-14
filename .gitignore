@@ -81,3 +81,5 @@ lib64/assimp-vc120-mtd.ilk
 lib64/assimp-vc120-mtd.exp
 lib64/assimp-vc120-mt.exp
 xcuserdata
+
+cmake-build-debug

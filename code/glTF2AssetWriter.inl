@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -330,6 +330,44 @@ namespace glTF2 {
                 exts.AddMember("KHR_materials_pbrSpecularGlossiness", pbrSpecularGlossiness, w.mAl);
             }
         }
+        
+        if (m.common.isPresent) {
+            Value common;
+            common.SetObject();
+            
+            Common &materialCommon = m.common.value;
+            
+            //common
+            WriteVec(common, materialCommon.ambientFactor, "ambientFactor", defaultCommonAmbientFactor, w.mAl);
+            WriteVec(common, materialCommon.diffuseFactor, "diffuseFactor", defaultCommonDiffuseFactor, w.mAl);
+            WriteVec(common, materialCommon.emissiveFactor, "emissiveFactor", defaultCommonEmissiveFactor, w.mAl);
+            WriteVec(common, materialCommon.specularFactor, "specularFactor", defaultCommonSpecularFactor, w.mAl);
+            
+            WriteTex(common, materialCommon.ambientTexture, "ambientTexture", w.mAl);
+            WriteTex(common, materialCommon.diffuseTexture, "diffuseTexture", w.mAl);
+            WriteTex(common, materialCommon.emissiveTexture, "emissiveTexture", w.mAl);
+            WriteTex(common, materialCommon.specularTexture, "specularTexture", w.mAl);
+            
+            if (materialCommon.doubleSided) {
+                common.AddMember("doubleSided", materialCommon.doubleSided, w.mAl);
+            }
+            
+            if (materialCommon.shininess!=0.0f) {
+                WriteFloat(common, materialCommon.shininess, "shininess", w.mAl);
+            }
+            
+            if (materialCommon.transparency!=0.0f) {
+                WriteFloat(common, materialCommon.transparency, "transparency", w.mAl);
+            }
+            
+            if (materialCommon.transparent) {
+                common.AddMember("transparent", materialCommon.transparent, w.mAl);
+            }
+            
+            if (!common.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_common", common, w.mAl);
+            }
+        }
 
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
@@ -576,8 +614,11 @@ namespace glTF2 {
         exts.SetArray();
         {
             // This is used to export pbrSpecularGlossiness materials with GLTF 2.
-            if (this->mAsset.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+            if (this->mAsset.extensionsUsed.at("KHR_materials_pbrSpecularGlossiness")) {
                 exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
+            }
+            if (this->mAsset.extensionsUsed.at("KHR_materials_common")) {
+                exts.PushBack(StringRef("KHR_materials_common"), mAl);
             }
         }
 

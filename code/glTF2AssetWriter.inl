@@ -569,8 +569,8 @@ namespace glTF2 {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
-        // Padding with zeros make a invalid JSON for the gltf online validator
-        uint8_t padding[] = { '\n', '\n', '\n' };
+        // Padding with spaces as required by the spec
+        uint32_t padding = 0x20202020;
 
         // Adapt JSON so that it is not pointing to an external file,
         // as this is required by the GLB spec'.
@@ -599,7 +599,7 @@ namespace glTF2 {
         if (outfile->Write(docBuffer.GetString(), 1, docBuffer.GetSize()) != docBuffer.GetSize()) {
             throw DeadlyExportError("Failed to write scene data!");
         }
-        if (paddingLength && outfile->Write(padding, 1, paddingLength) != paddingLength) {
+        if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
             throw DeadlyExportError("Failed to write scene data padding!");
         }
 
@@ -627,7 +627,7 @@ namespace glTF2 {
                 if (outfile->Write(b->GetPointer(), 1, b->byteLength) != b->byteLength) {
                     throw DeadlyExportError("Failed to write body data!");
                 }
-                if (paddingLength && outfile->Write(padding, 1, paddingLength) != paddingLength) {
+                if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
                     throw DeadlyExportError("Failed to write body data padding!");
                 }
             }

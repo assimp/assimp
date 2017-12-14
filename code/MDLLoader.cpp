@@ -415,7 +415,7 @@ void MDLImporter::InternReadFile_Quake1( )
     else
     {
         // get the first frame in the group
-        BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
+        //BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
         //pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
 		ai_assert( false && "Unaligned pointer" );
     }

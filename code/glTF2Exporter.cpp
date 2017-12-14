@@ -504,8 +504,8 @@ void glTF2Exporter::ExportMaterials()
 
         if (hasPbrSpecularGlossiness) {
 
-            if (!mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
-                mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = true;
+            if (!mAsset->extensionsUsed["KHR_materials_pbrSpecularGlossiness"]) {
+                mAsset->extensionsUsed["KHR_materials_pbrSpecularGlossiness"] = true;
             }
 
             PbrSpecularGlossiness pbrSG;
@@ -529,7 +529,7 @@ void glTF2Exporter::ExportMaterials()
 
         bool unlit;
         if (mat->Get(AI_MATKEY_GLTF_UNLIT, unlit) == AI_SUCCESS && unlit) {
-            mAsset->extensionsUsed.KHR_materials_unlit = true;
+            mAsset->extensionsUsed["KHR_materials_unlit"] = true;
             m->unlit = true;
         }
     }

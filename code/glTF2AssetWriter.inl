@@ -686,11 +686,11 @@ namespace glTF2 {
         exts.SetArray();
         {
             // This is used to export pbrSpecularGlossiness materials with GLTF 2.
-            if (this->mAsset.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+            if (this->mAsset.extensionsUsed["KHR_materials_pbrSpecularGlossiness"]) {
                 exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
             }
 
-            if (this->mAsset.extensionsUsed.KHR_materials_unlit) {
+            if (this->mAsset.extensionsUsed["KHR_materials_unlit"]) {
               exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
             }
         }
@@ -748,5 +748,3 @@ namespace glTF2 {
     }
 
 }
-
-

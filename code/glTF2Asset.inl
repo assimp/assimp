@@ -847,7 +847,7 @@ inline void Material::Read(Value& material, Asset& r)
     ReadMember(material, "alphaCutoff", this->alphaCutoff);
 
     if (Value* extensions = FindObject(material, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+        if (r.extensionsUsed.at("KHR_materials_pbrSpecularGlossiness")) {
             if (Value* pbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
                 PbrSpecularGlossiness pbrSG;
 
@@ -862,6 +862,35 @@ inline void Material::Read(Value& material, Asset& r)
         }
 
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
+
+        if (r.extensionsUsed.at("KHR_materials_common")) {
+            if (Value* commonMaterial = FindObject(*extensions, "KHR_materials_common")) {
+                
+                std::string technique;
+                ReadMember(*commonMaterial, "technique", technique);
+                
+                if (Value* commonValues = FindObject(*commonMaterial, "values")) {
+                    Common commonComponent;
+                    commonComponent.technique = technique;
+                    
+                    ReadMember(*commonValues, "ambientFactor", commonComponent.ambientFactor);
+                    ReadMember(*commonValues, "diffuseFactor", commonComponent.diffuseFactor);
+                    ReadMember(*commonValues, "emissiveFactor", commonComponent.emissiveFactor);
+                    ReadMember(*commonValues, "specularFactor", commonComponent.specularFactor);
+                    
+                    ReadTextureProperty(r, *commonValues, "ambientTexture", commonComponent.ambientTexture);
+                    ReadTextureProperty(r, *commonValues, "diffuseTexture", commonComponent.diffuseTexture);
+                    ReadTextureProperty(r, *commonValues, "emissiveTexture", commonComponent.emissiveTexture);
+                    ReadTextureProperty(r, *commonValues, "specularTexture", commonComponent.specularTexture);
+                    ReadMember(*commonValues, "doubleSided", commonComponent.doubleSided);
+                    ReadMember(*commonValues, "shininess", commonComponent.shininess);
+                    ReadMember(*commonValues, "transparency", commonComponent.transparency);
+                    ReadMember(*commonValues, "transparent", commonComponent.transparent);
+                    
+                    this->common = Nullable<Common>(commonComponent);
+                }
+            }
+        }
     }
 }
 
@@ -893,6 +922,19 @@ inline void PbrSpecularGlossiness::SetDefaults()
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
     glossinessFactor = 1.0;
+}
+
+inline void Common::SetDefaults()
+{
+    //material_common properties
+    SetVector(ambientFactor, defaultCommonAmbientFactor);
+    SetVector(diffuseFactor, defaultCommonDiffuseFactor);
+    SetVector(emissiveFactor, defaultCommonEmissiveFactor);
+    SetVector(specularFactor, defaultCommonSpecularFactor);
+    doubleSided = false;
+    shininess = 0.0f;
+    transparency = 1.0f;
+    transparent = false;
 }
 
 namespace {
@@ -1207,7 +1249,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     // Load the metadata
     asset.Read(doc);
-    ReadExtensionsUsed(doc);
+    ReadExtensionsUsedAndRequired(doc);
 
     // Prepare the dictionaries
     for (size_t i = 0; i < mDicts.size(); ++i) {
@@ -1242,24 +1284,44 @@ inline void Asset::SetAsBinary()
 }
 
 
-inline void Asset::ReadExtensionsUsed(Document& doc)
+inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
 {
+    Value* extsRequired = FindArray(doc, "extensionsRequired");
+
+    std::gltf_unordered_map<std::string, bool> requiredExtsMap;
+    
+    for (unsigned int i = 0; i < extsRequired->Size(); ++i) {
+        if ((*extsRequired)[i].IsString()) {
+            requiredExtsMap[(*extsRequired)[i].GetString()] = true;
+            std::string extensionName = (*extsRequired)[i].GetString();
+            if (extensionsUsed.find(extensionName) == extensionsUsed.end()) {
+                throw DeadlyImportError("GLTF: Missing required extension \"" + extensionName + "\"");
+            }
+        }
+    }
+    
     Value* extsUsed = FindArray(doc, "extensionsUsed");
-    if (!extsUsed) return;
+    if (!extsRequired || !extsUsed) return;
 
     std::gltf_unordered_map<std::string, bool> exts;
 
     for (unsigned int i = 0; i < extsUsed->Size(); ++i) {
         if ((*extsUsed)[i].IsString()) {
             exts[(*extsUsed)[i].GetString()] = true;
+            IdMap::iterator it = extensionsUsed.find((*extsUsed)[i].GetString());
+            if (it != extensionsUsed.end()) {
+                it->second = true;
+            }
         }
     }
 
     #define CHECK_EXT(EXT) \
-        if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
+        if (requiredExtsMap.find(#EXT) != requiredExtsMap.end()) extensionsRequired[#EXT] = true; \
+        if (extensionsUsed.find(#EXT) != extensionsUsed.end()) extensionsUsed[#EXT] = true;
 
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
     CHECK_EXT(KHR_materials_unlit);
+    CHECK_EXT(KHR_materials_common);
 
     #undef CHECK_EXT
 }

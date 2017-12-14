@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness full
  *   KHR_materials_unlit full
+ *   KHR_materials_common partial
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -168,6 +169,8 @@ namespace glTF2
     //! Magic number for GLB files
 	#define AI_GLB_MAGIC_NUMBER "glTF"
 	#include <assimp/pbrmaterial.h>
+
+    #define AI_MATKEY_GLTF_COMMON "$mat.gltf.common", 0, 0
 
     #ifdef ASSIMP_API
         #include "./../include/assimp/Compiler/pushpack1.h"
@@ -685,6 +688,10 @@ namespace glTF2
 	const vec3 defaultEmissiveFactor = {0, 0, 0};
 	const vec4 defaultDiffuseFactor = {1, 1, 1, 1};
 	const vec3 defaultSpecularFactor = {1, 1, 1};
+    const vec4 defaultCommonAmbientFactor = {0, 0, 0, 1};
+    const vec4 defaultCommonDiffuseFactor = {0, 0, 0, 1};
+    const vec4 defaultCommonEmissiveFactor = {0, 0, 0, 1};
+    const vec4 defaultCommonSpecularFactor = {0, 0, 0, 1};
 
     struct TextureInfo
     {
@@ -724,6 +731,26 @@ namespace glTF2
 		void SetDefaults();
     };
 
+    struct Common
+    {
+        std::string technique;
+        vec4 ambientFactor;
+        TextureInfo ambientTexture;
+        vec4 diffuseFactor;
+        TextureInfo diffuseTexture;
+        bool doubleSided;
+        vec4 emissiveFactor;
+        TextureInfo emissiveTexture;
+        vec4 specularFactor;
+        TextureInfo specularTexture;
+        float shininess;
+        float transparency;
+        bool transparent;
+
+        Common() { SetDefaults(); }
+        void SetDefaults();
+    };
+
     //! The material appearance of a primitive.
     struct Material : public Object
     {
@@ -742,7 +769,10 @@ namespace glTF2
         //extension: KHR_materials_pbrSpecularGlossiness
         Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
 
-        //extension: KHR_materials_unlit 
+        //extension: KHR_materials_common
+        Nullable<Common> common;
+
+        //extension: KHR_materials_unlit
         bool unlit;
 
         Material() { SetDefaults(); }
@@ -1038,12 +1068,8 @@ namespace glTF2
     public:
 
         //! Keeps info about the enabled extensions
-        struct Extensions
-        {
-            bool KHR_materials_pbrSpecularGlossiness;
-            bool KHR_materials_unlit;
-
-        } extensionsUsed;
+        IdMap extensionsUsed;
+        IdMap extensionsRequired;
 
         AssetMetadata asset;
 
@@ -1084,7 +1110,10 @@ namespace glTF2
             , skins         (*this, "skins")
             , textures      (*this, "textures")
         {
-            memset(&extensionsUsed, 0, sizeof(extensionsUsed));
+            extensionsUsed["KHR_materials_pbrSpecularGlossiness"] = false;
+            extensionsUsed["KHR_materials_common"] = false;
+
+            //extensionsUsed.insert(std::pair<std::string, bool>("KHR_materials_pbrSpecularGlossiness", false));
         }
 
         //! Main function
@@ -1102,7 +1131,7 @@ namespace glTF2
     private:
         void ReadBinaryHeader(IOStream& stream, std::vector<char>& sceneData);
 
-        void ReadExtensionsUsed(Document& doc);
+        void ReadExtensionsUsedAndRequired(Document& doc);
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };

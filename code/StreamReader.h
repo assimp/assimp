@@ -192,7 +192,7 @@ public:
 
     // ---------------------------------------------------------------------
     /** Increase the file pointer (relative seeking)  */
-    void IncPtr(size_t plus)    {
+    void IncPtr(intptr_t plus)    {
         current += plus;
         if (current > limit) {
             throw DeadlyImportError("End of file or read limit was reached");

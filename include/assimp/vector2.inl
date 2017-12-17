@@ -130,6 +130,7 @@ TReal aiVector2t<TReal>::operator[](unsigned int i) const {
 			return y;
 		default:
 			break;
+
     }
     return x;
 }

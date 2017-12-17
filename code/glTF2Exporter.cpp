@@ -77,10 +77,18 @@ namespace Assimp {
         glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, false);
     }
 
+    // ------------------------------------------------------------------------------------------------
+    // Worker function for exporting a scene to GLB. Prototyped and registered in Exporter.cpp
+    void ExportSceneGLB2(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+    {
+        // invoke the exporter
+        glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, true);
+    }
+
 } // end of namespace Assimp
 
 glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-                           const ExportProperties* pProperties, bool /*isBinary*/)
+                           const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
     , mProperties(pProperties)
@@ -118,7 +126,11 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     AssetWriter writer(*mAsset);
 
-    writer.WriteFile(filename);
+    if (isBinary) {
+        writer.WriteGLBFile(filename);
+    } else {
+        writer.WriteFile(filename);
+    }
 }
 
 /*

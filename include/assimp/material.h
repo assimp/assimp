@@ -491,7 +491,7 @@ struct aiUVTransform
     }
 #endif
 
-} PACK_STRUCT;
+};
 
 #include "./Compiler/poppack1.h"
 

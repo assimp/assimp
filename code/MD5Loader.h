@@ -145,7 +145,7 @@ protected:
 
     // -------------------------------------------------------------------
     /** Load the contents of a specific file into memory and
-     *  alocates a buffer to keep it.
+     *  allocates a buffer to keep it.
      *
      *  mBuffer is modified to point to this buffer.
      *  @param pFile File stream to be read

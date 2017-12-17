@@ -99,7 +99,7 @@ public:
     operator aiVector2t<TOther> () const;
 
     TReal x, y;
-} PACK_STRUCT;
+};
 
 typedef aiVector2t<ai_real> aiVector2D;
 

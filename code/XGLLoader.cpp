@@ -904,12 +904,14 @@ aiVector2D XGLImporter::ReadVec2()
     }
     const char* s = m_reader->getNodeData();
 
-    for(int i = 0; i < 2; ++i) {
+    ai_real v[2];
+	for(int i = 0; i < 2; ++i) {
         if(!SkipSpaces(&s)) {
             LogError("unexpected EOL, failed to parse vec2");
             return vec;
         }
-        vec[i] = fast_atof(&s);
+		
+        v[i] = fast_atof(&s);
 
         SkipSpaces(&s);
         if (i != 1 && *s != ',') {
@@ -918,6 +920,8 @@ aiVector2D XGLImporter::ReadVec2()
         }
         ++s;
     }
+	vec.x = v[0];
+	vec.y = v[1];
 
     return vec;
 }

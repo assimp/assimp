@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
+#include <assimp/config.h>
 
 // Header files, standard library.
 #include <memory>
@@ -435,9 +436,9 @@ void glTF2Exporter::ExportMaterials()
         // The value is true if the material is from common material source or the export option is true
         bool hasCommonSource;
         mat->Get(AI_MATKEY_GLTF_COMMON, hasCommonSource);
-        bool exportAsCommonMaterial = hasCommonSource || (mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) && mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
+        bool exportAsCommonMaterial = hasCommonSource || (mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON) && mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON));
         // The value is false if the export as a common material is active and the export option is false
-        bool exportAsPBRMaterial = exportAsCommonMaterial && (!mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) || mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
+        bool exportAsPBRMaterial = !(exportAsCommonMaterial && mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) && !mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
 
 
         if (exportAsPBRMaterial) {

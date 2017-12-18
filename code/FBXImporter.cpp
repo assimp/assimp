@@ -135,7 +135,7 @@ void FBXImporter::SetupProperties(const Importer* pImp)
     settings.strictMode = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, false);
     settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
     settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
-	settings.searchEmbeddedTextures = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_SEARCH_EMBEDDED_TEXTURES, false);
+    settings.useLegacyEmbeddedTextureNaming = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING, false);
 }
 
 // ------------------------------------------------------------------------------------------------

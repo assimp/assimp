@@ -338,6 +338,10 @@ namespace glTF2 {
             Common &materialCommon = m.common.value;
             
             //common
+            if (!materialCommon.technique.empty()) {
+                common.AddMember("technique", materialCommon.technique, w.mAl);
+            }
+            
             WriteVec(common, materialCommon.ambientFactor, "ambientFactor", defaultCommonAmbientFactor, w.mAl);
             WriteVec(common, materialCommon.diffuseFactor, "diffuseFactor", defaultCommonDiffuseFactor, w.mAl);
             WriteVec(common, materialCommon.emissiveFactor, "emissiveFactor", defaultCommonEmissiveFactor, w.mAl);

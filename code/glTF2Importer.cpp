@@ -293,16 +293,16 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
             }
             
             aiShadingMode shadingMode;
-            if ("BLINN"==common.technique) {
+            if ("commonBLINN"==common.technique) {
                 shadingMode = aiShadingMode_Blinn;
             }
-            else if ("CONSTANT"==common.technique) {
+            else if ("commonCONSTANT"==common.technique) {
                 shadingMode = aiShadingMode_Constant;
             }
-            else if ("LAMBERT"==common.technique) {
+            else if ("commonLAMBERT"==common.technique) {
                 shadingMode = aiShadingMode_Lambert;
             }
-            else if ("PHONG"==common.technique) {
+            else if ("commonPHONG"==common.technique) {
                 shadingMode = aiShadingMode_Phong;
             }
             else {

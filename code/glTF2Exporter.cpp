@@ -554,23 +554,23 @@ void glTF2Exporter::ExportMaterials()
                 
                 switch (shadingMode) {
                     case aiShadingMode_Blinn: {
-                        technique = "BLINN";
+                        technique = "commonBLINN";
                     }
                     break;
                     case aiShadingMode_Phong: {
-                        technique = "PHONG";
+                        technique = "commonPHONG";
                     }
                     break;
                     case aiShadingMode_Lambert: {
-                        technique = "LAMBERT";
+                        technique = "commonLAMBERT";
                     }
                     break;
                     case aiShadingMode_Constant: {
-                        technique = "CONSTANT";
+                        technique = "commonCONSTANT";
                     }
                     break;
                     default: {
-                        technique = "PHONG";
+                        technique = "commonPHONG";
                     }
                     break;
                 }

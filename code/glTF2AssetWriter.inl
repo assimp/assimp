@@ -338,36 +338,43 @@ namespace glTF2 {
             Common &materialCommon = m.common.value;
             
             //common
+            //technique
             if (!materialCommon.technique.empty()) {
                 common.AddMember("technique", materialCommon.technique, w.mAl);
             }
             
-            WriteVec(common, materialCommon.ambientFactor, "ambientFactor", defaultCommonAmbientFactor, w.mAl);
-            WriteVec(common, materialCommon.diffuseFactor, "diffuseFactor", defaultCommonDiffuseFactor, w.mAl);
-            WriteVec(common, materialCommon.emissiveFactor, "emissiveFactor", defaultCommonEmissiveFactor, w.mAl);
-            WriteVec(common, materialCommon.specularFactor, "specularFactor", defaultCommonSpecularFactor, w.mAl);
+            //values
+            Value values;
+            values.SetObject();
+            WriteVec(values, materialCommon.ambientFactor, "ambientFactor", defaultCommonAmbientFactor, w.mAl);
+            WriteVec(values, materialCommon.diffuseFactor, "diffuseFactor", defaultCommonDiffuseFactor, w.mAl);
+            WriteVec(values, materialCommon.emissiveFactor, "emissiveFactor", defaultCommonEmissiveFactor, w.mAl);
+            WriteVec(values, materialCommon.specularFactor, "specularFactor", defaultCommonSpecularFactor, w.mAl);
             
-            WriteTex(common, materialCommon.ambientTexture, "ambientTexture", w.mAl);
-            WriteTex(common, materialCommon.diffuseTexture, "diffuseTexture", w.mAl);
-            WriteTex(common, materialCommon.emissiveTexture, "emissiveTexture", w.mAl);
-            WriteTex(common, materialCommon.specularTexture, "specularTexture", w.mAl);
+            WriteTex(values, materialCommon.ambientTexture, "ambientTexture", w.mAl);
+            WriteTex(values, materialCommon.diffuseTexture, "diffuseTexture", w.mAl);
+            WriteTex(values, materialCommon.emissiveTexture, "emissiveTexture", w.mAl);
+            WriteTex(values, materialCommon.specularTexture, "specularTexture", w.mAl);
             
             if (materialCommon.doubleSided) {
-                common.AddMember("doubleSided", materialCommon.doubleSided, w.mAl);
+                values.AddMember("doubleSided", materialCommon.doubleSided, w.mAl);
             }
             
             if (materialCommon.shininess!=0.0f) {
-                WriteFloat(common, materialCommon.shininess, "shininess", w.mAl);
+                WriteFloat(values, materialCommon.shininess, "shininess", w.mAl);
             }
             
             if (materialCommon.transparency!=0.0f) {
-                WriteFloat(common, materialCommon.transparency, "transparency", w.mAl);
+                WriteFloat(values, materialCommon.transparency, "transparency", w.mAl);
             }
             
             if (materialCommon.transparent) {
-                common.AddMember("transparent", materialCommon.transparent, w.mAl);
+                values.AddMember("transparent", materialCommon.transparent, w.mAl);
             }
             
+            if (!values.ObjectEmpty()) {
+                common.AddMember("values", values, w.mAl);
+            }
             if (!common.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_common", common, w.mAl);
             }

@@ -369,10 +369,10 @@ struct aiScene
     //! Returns a short filename from a full path
     static const char* GetShortFilename(const char* filename) {
         const char* lastSlash = strrchr(filename, '/');
-        if (lastSlash == '\0') {
+        if (lastSlash == nullptr) {
             lastSlash = strrchr(filename, '\\');
         }
-        const char* shortFilename = lastSlash != '\0' ? lastSlash + 1 : filename;
+        const char* shortFilename = lastSlash != nullptr ? lastSlash + 1 : filename;
         return shortFilename;
     }
 

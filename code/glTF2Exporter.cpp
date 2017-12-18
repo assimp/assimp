@@ -416,7 +416,7 @@ void glTF2Exporter::ExportMaterials()
         m->name = name;
         
         // The value is true if the material is from common material source or the export option is true
-        bool hasCommonSource;
+        bool hasCommonSource = false;
         mat->Get(AI_MATKEY_GLTF_COMMON, hasCommonSource);
         bool exportAsCommonMaterial = hasCommonSource || (mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON) && mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON));
         // The value is false if the export as a common material is active and the export option is false

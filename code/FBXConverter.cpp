@@ -436,18 +436,6 @@ private:
 
     aiScene* const out;
     const FBX::Document& doc;
-
-	bool FindTextureIndexByFilename(const Video& video, unsigned int& index) {
-		index = 0;
-		const char* videoFileName = video.FileName().c_str();
-		for (auto texture = textures_converted.begin(); texture != textures_converted.end(); ++texture) {
-			if (!strcmp(texture->first->FileName().c_str(), videoFileName)) {
-                index = texture->second;
-				return true;
-			}
-		}
-		return false;
-	}
 };
 
 Converter::Converter( aiScene* out, const Document& doc )
@@ -1776,6 +1764,8 @@ unsigned int Converter::ConvertVideo( const Video& video )
         memcpy( out_tex->achFormatHint, ext.c_str(), ext.size() );
     }
 
+    out_tex->mFilename.Set(video.FileName().c_str());
+
     return static_cast<unsigned int>( textures.size() - 1 );
 }
 
@@ -1810,15 +1800,19 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
 					textures_converted[media] = index;
 					textureReady = true;
 				}
-				else if (doc.Settings().searchEmbeddedTextures) { //try to find the texture on the already-loaded textures by the filename, if the flag is on					
-					textureReady = FindTextureIndexByFilename(*media, index);
-				}
 			}
 
 			// setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture), if the texture is ready
-			if (textureReady) {
-				path.data[0] = '*';
-				path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
+			if (doc.Settings().useLegacyEmbeddedTextureNaming) {
+                if (textureReady) {
+                    // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
+                    // In FBX files textures are now stored internally by Assimp with their filename included
+                    // Now Assimp can lookup thru the loaded textures after all data is processed
+                    // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
+                    // This may occur on this case too, it has to be studied
+                    path.data[0] = '*';
+                    path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
+                }
 			}
 		}  
 

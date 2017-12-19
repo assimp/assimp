@@ -1778,6 +1778,11 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
         tex->pcData = (aiTexel*)new char[tex->mWidth];
         memcpy(tex->pcData,&imIt->second.mImageData[0],tex->mWidth);
 
+        // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
+        // In FBX files textures are now stored internally by Assimp with their filename included
+        // Now Assimp can lookup thru the loaded textures after all data is processed
+        // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
+        // This may occur on this case too, it has to be studied
         // setup texture reference string
         result.data[0] = '*';
         result.length = 1 + ASSIMP_itoa10(result.data+1,static_cast<unsigned int>(MAXLEN-1),static_cast<int32_t>(mTextures.size()));

@@ -264,8 +264,12 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
     {
         unsigned int meshId = pObject->m_Meshes[ i ];
         aiMesh *pMesh = createTopology( pModel, pObject, meshId );
-        if( pMesh && pMesh->mNumFaces > 0 ) {
-            MeshArray.push_back( pMesh );
+        if( pMesh ) {
+            if (pMesh->mNumFaces > 0) {
+                MeshArray.push_back( pMesh );
+            } else {
+                delete pMesh;
+            }
         }
     }
 

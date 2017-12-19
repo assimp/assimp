@@ -317,7 +317,7 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
         return NULL;
     }
 
-    aiMesh* pMesh = new aiMesh;
+    std::unique_ptr<aiMesh> pMesh(new aiMesh);
     if( !pObjMesh->m_name.empty() ) {
         pMesh->mName.Set( pObjMesh->m_name );
     }
@@ -382,9 +382,9 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     }
 
     // Create mesh vertices
-    createVertexArray(pModel, pData, meshIndex, pMesh, uiIdxCount);
+    createVertexArray(pModel, pData, meshIndex, pMesh.get(), uiIdxCount);
 
-    return pMesh;
+    return pMesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -264,8 +264,12 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
     {
         unsigned int meshId = pObject->m_Meshes[ i ];
         aiMesh *pMesh = createTopology( pModel, pObject, meshId );
-        if( pMesh && pMesh->mNumFaces > 0 ) {
-            MeshArray.push_back( pMesh );
+        if( pMesh ) {
+            if (pMesh->mNumFaces > 0) {
+                MeshArray.push_back( pMesh );
+            } else {
+                delete pMesh;
+            }
         }
     }
 
@@ -317,7 +321,7 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
         return NULL;
     }
 
-    aiMesh* pMesh = new aiMesh;
+    std::unique_ptr<aiMesh> pMesh(new aiMesh);
     if( !pObjMesh->m_name.empty() ) {
         pMesh->mName.Set( pObjMesh->m_name );
     }
@@ -382,9 +386,9 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     }
 
     // Create mesh vertices
-    createVertexArray(pModel, pData, meshIndex, pMesh, uiIdxCount);
+    createVertexArray(pModel, pData, meshIndex, pMesh.get(), uiIdxCount);
 
-    return pMesh;
+    return pMesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------

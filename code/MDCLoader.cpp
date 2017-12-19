@@ -283,9 +283,8 @@ void MDCImporter::InternReadFile(
         pcMesh->mNumVertices = pcMesh->mNumFaces * 3;
 
         // store the name of the surface for use as node name.
-        // FIX: make sure there is a 0 termination
-        const_cast<char&>(pcSurface->ucName[AI_MDC_MAXQPATH-1]) = '\0';
-        pcMesh->mTextureCoords[3] = (aiVector3D*)pcSurface->ucName;
+        pcMesh->mName.Set(std::string(pcSurface->ucName
+                                    , strnlen(pcSurface->ucName, AI_MDC_MAXQPATH - 1)));
 
         // go to the first shader in the file. ignore the others.
         if (pcSurface->ulNumShaders)
@@ -294,8 +293,8 @@ void MDCImporter::InternReadFile(
             pcMesh->mMaterialIndex = (unsigned int)aszShaders.size();
 
             // create a new shader
-            aszShaders.push_back(std::string( pcShader->ucName, std::min(
-                ::strlen(pcShader->ucName),sizeof(pcShader->ucName)) ));
+            aszShaders.push_back(std::string( pcShader->ucName, 
+                ::strnlen(pcShader->ucName, sizeof(pcShader->ucName)) ));
         }
         // need to create a default material
         else if (UINT_MAX == iDefaultMatIndex)
@@ -432,7 +431,7 @@ void MDCImporter::InternReadFile(
     else if (1 == pScene->mNumMeshes)
     {
         pScene->mRootNode = new aiNode();
-        pScene->mRootNode->mName.Set(std::string((const char*)pScene->mMeshes[0]->mTextureCoords[3]));
+        pScene->mRootNode->mName = pScene->mMeshes[0]->mName;
         pScene->mRootNode->mNumMeshes = 1;
         pScene->mRootNode->mMeshes = new unsigned int[1];
         pScene->mRootNode->mMeshes[0] = 0;
@@ -447,16 +446,12 @@ void MDCImporter::InternReadFile(
         {
             aiNode* pcNode = pScene->mRootNode->mChildren[i] = new aiNode();
             pcNode->mParent = pScene->mRootNode;
-            pcNode->mName.Set(std::string((const char*)pScene->mMeshes[i]->mTextureCoords[3]));
+            pcNode->mName = pScene->mMeshes[i]->mName;
             pcNode->mNumMeshes = 1;
             pcNode->mMeshes = new unsigned int[1];
             pcNode->mMeshes[0] = i;
         }
     }
-
-    // make sure we invalidate the pointer to the mesh name
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-        pScene->mMeshes[i]->mTextureCoords[3] = NULL;
 
     // create materials
     pScene->mNumMaterials = (unsigned int)aszShaders.size();

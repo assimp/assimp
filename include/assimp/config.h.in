@@ -942,6 +942,22 @@ enum aiComponent
 
 #define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
 
+/** @brief Specifies whether the glTF2 exporter must save the material using the KHR_mterials_common extension
+ *
+ * If this property is set to true, each material will be also saved as a KHR_materials_common extension
+ * Property type: Bool. Default value: false.
+ */
+
+#define AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON "EXPORT_MATERIAL_COMMON"
+
+/** @brief Specifies whether the glTF2 exporter must save the material using a PBR representation (metallic roughness or specular glossiness)
+ *
+ * If this property is set to false, each material will be only saved as a KHR_materials_common extension but if the AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON property is set to false
+ * Property type: Bool. Default value: true.
+ */
+
+#define AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR "EXPORT_MATERIAL_PBR"
+
 /**
  *  @brief  Specifies a gobal key factor for scale, float value
  */

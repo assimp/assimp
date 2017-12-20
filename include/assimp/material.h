@@ -353,6 +353,17 @@ enum aiShadingMode
      /** Fresnel shading
      */
     aiShadingMode_Fresnel = 0xa,
+    
+     /** Lambert shading
+      */
+    aiShadingMode_Lambert = 0xb,
+    
+    /** Constant shading
+     *
+     *  Material only shaded by the emissive and ambient contributions,
+     *  independent of the other sources of lightning.
+     */
+    aiShadingMode_Constant = 0xc,
 
 
 #ifndef SWIG

@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
+#include <assimp/config.h>
 
 // Header files, standard library.
 #include <memory>
@@ -413,48 +414,62 @@ void glTF2Exporter::ExportMaterials()
         name = mAsset->FindUniqueID(name, "material");
 
         m->name = name;
-
-        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
-
-        if (!m->pbrMetallicRoughness.baseColorTexture.texture) {
-            //if there wasn't a baseColorTexture defined in the source, fallback to any diffuse texture
-            GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
-        }
-
-        GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
-
-        if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR) != AI_SUCCESS) {
-            // if baseColorFactor wasn't defined, then the source is likely not a metallic roughness material.
-            //a fallback to any diffuse color should be used instead
-            GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
-        }
-
-        if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor) != AI_SUCCESS) {
-            //if metallicFactor wasn't defined, then the source is likely not a PBR file, and the metallicFactor should be 0
-            m->pbrMetallicRoughness.metallicFactor = 0;
-        }
-
-        // get roughness if source is gltf2 file
-        if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor) != AI_SUCCESS) {
-            // otherwise, try to derive and convert from specular + shininess values
-            aiColor4D specularColor;
-            ai_real shininess;
-
-            if (
-                mat->Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS &&
-                mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
-            ) {
-                // convert specular color to luminance
-                float specularIntensity = specularColor[0] * 0.2125f + specularColor[1] * 0.7154f + specularColor[2] * 0.0721f;
-                //normalize shininess (assuming max is 1000) with an inverse exponentional curve
-                float normalizedShininess = std::sqrt(shininess / 1000);
-
-                //clamp the shininess value between 0 and 1
-                normalizedShininess = std::min(std::max(normalizedShininess, 0.0f), 1.0f);
-                // low specular intensity values should produce a rough material even if shininess is high.
-                normalizedShininess = normalizedShininess * specularIntensity;
-
-                m->pbrMetallicRoughness.roughnessFactor = 1 - normalizedShininess;
+        
+        // The value is true if the material is from common material source or the export option is true
+        bool hasCommonSource = false;
+        mat->Get(AI_MATKEY_GLTF_COMMON, hasCommonSource);
+        bool exportAsCommonMaterial = hasCommonSource || (mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON) && mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_COMMON));
+        // The value is false if the export as a common material is active and the export option is false
+        bool exportAsPBRMaterial = !(exportAsCommonMaterial && mProperties->HasPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR) && !mProperties->GetPropertyBool(AI_CONFIG_EXPORT_GLTF2_MATERIAL_PBR));
+        
+        
+        if (exportAsPBRMaterial) {
+            
+            GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+            
+            if (!m->pbrMetallicRoughness.baseColorTexture.texture) {
+                //if there wasn't a baseColorTexture defined in the source, fallback to any diffuse texture
+                GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
+                //exportAsCommonMaterial = exportAsCommonMaterial || !hasPbrSpecularGlossiness;
+            }
+            
+            GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
+            
+            if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR) != AI_SUCCESS) {
+                // if baseColorFactor wasn't defined, then the source is likely not a metallic roughness material.
+                //a fallback to any diffuse color should be used instead
+                GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+                //exportAsCommonMaterial = exportAsCommonMaterial || !hasPbrSpecularGlossiness;
+            }
+            
+            if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor) != AI_SUCCESS) {
+                //if metallicFactor wasn't defined, then the source is likely not a PBR file, and the metallicFactor should be 0
+                m->pbrMetallicRoughness.metallicFactor = 0;
+                //exportAsCommonMaterial = exportAsCommonMaterial || !hasPbrSpecularGlossiness;
+            }
+            
+            // get roughness if source is gltf2 file
+            if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor) != AI_SUCCESS) {
+                // otherwise, try to derive and convert from specular + shininess values
+                aiColor4D specularColor;
+                ai_real shininess;
+                
+                if (
+                    mat->Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS &&
+                    mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
+                    ) {
+                    // convert specular color to luminance
+                    float specularIntensity = specularColor[0] * 0.2125f + specularColor[1] * 0.7154f + specularColor[2] * 0.0721f;
+                    //normalize shininess (assuming max is 1000) with an inverse exponentional curve
+                    float normalizedShininess = std::sqrt(shininess / 1000);
+                    
+                    //clamp the shininess value between 0 and 1
+                    normalizedShininess = std::min(std::max(normalizedShininess, 0.0f), 1.0f);
+                    // low specular intensity values should produce a rough material even if shininess is high.
+                    normalizedShininess = normalizedShininess * specularIntensity;
+                    
+                    m->pbrMetallicRoughness.roughnessFactor = 1 - normalizedShininess;
+                }
             }
         }
 
@@ -480,33 +495,102 @@ void glTF2Exporter::ExportMaterials()
                 }
             }
         }
-
-        bool hasPbrSpecularGlossiness = false;
-        mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, hasPbrSpecularGlossiness);
-
-        if (hasPbrSpecularGlossiness) {
-
-            if (!mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
-                mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = true;
+        
+        if (exportAsPBRMaterial) {
+            // Check if the source is a specular glossiness material instead of a metallic roughness material
+            bool hasPbrSpecularGlossiness = false;
+            mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, hasPbrSpecularGlossiness);
+            
+            if (hasPbrSpecularGlossiness) {
+                
+                if (!mAsset->extensionsUsed.at("KHR_materials_pbrSpecularGlossiness")) {
+                    mAsset->extensionsUsed["KHR_materials_pbrSpecularGlossiness"] = true;
+                }
+                
+                PbrSpecularGlossiness pbrSG;
+                
+                GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
+                GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_COLOR_SPECULAR);
+                
+                if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) != AI_SUCCESS) {
+                    float shininess;
+                    
+                    if (mat->Get(AI_MATKEY_SHININESS, shininess)) {
+                        pbrSG.glossinessFactor = shininess / 1000;
+                    }
+                }
+                
+                GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
+                GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
+                
+                m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
-
-            PbrSpecularGlossiness pbrSG;
-
-            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
-            GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_COLOR_SPECULAR);
-
-            if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) != AI_SUCCESS) {
-                float shininess;
-
-                if (mat->Get(AI_MATKEY_SHININESS, shininess)) {
-                    pbrSG.glossinessFactor = shininess / 1000;
+        }
+        
+        if (exportAsCommonMaterial) {
+            
+            if (!mAsset->extensionsUsed.at("KHR_materials_common")) {
+                mAsset->extensionsUsed["KHR_materials_common"] = true;
+            }
+            
+            Common common;
+            
+            GetMatColor(mat, common.ambientFactor, AI_MATKEY_COLOR_AMBIENT);
+            GetMatColor(mat, common.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
+            GetMatColor(mat, common.emissiveFactor, AI_MATKEY_COLOR_EMISSIVE);
+            GetMatColor(mat, common.specularFactor, AI_MATKEY_COLOR_SPECULAR);
+            
+            GetMatTex(mat, common.ambientTexture, aiTextureType_AMBIENT);
+            GetMatTex(mat, common.diffuseTexture, aiTextureType_DIFFUSE);
+            GetMatTex(mat, common.emissiveTexture, aiTextureType_EMISSIVE);
+            GetMatTex(mat, common.specularTexture, aiTextureType_SPECULAR);
+            
+            mat->Get(AI_MATKEY_TWOSIDED, common.doubleSided);
+            mat->Get(AI_MATKEY_SHININESS, common.shininess);
+            mat->Get(AI_MATKEY_OPACITY, common.transparency);
+            
+            int shadingMode;
+            if (AI_SUCCESS == mat->Get(AI_MATKEY_SHADING_MODEL, shadingMode)) {
+                std::string technique;
+                
+                switch (shadingMode) {
+                    case aiShadingMode_Blinn: {
+                        technique = "BLINN";
+                    }
+                    break;
+                    case aiShadingMode_Phong: {
+                        technique = "PHONG";
+                    }
+                    break;
+                    case aiShadingMode_Lambert: {
+                        technique = "LAMBERT";
+                    }
+                    break;
+                    case aiShadingMode_Constant: {
+                        technique = "CONSTANT";
+                    }
+                    break;
+                    default: {
+                        technique = "PHONG";
+                    }
+                    break;
+                }
+                
+                common.technique = technique;
+                
+                if (!exportAsPBRMaterial) {
+                    mAsset->extensionsRequired.at("KHR_materials_common") = true;
                 }
             }
-
-            GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
-            GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
-
-            m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
+            
+            aiString alphaMode;
+            if (common.transparency!=1.0f && AI_SUCCESS == mat->Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode)) {
+                if (aiString("BLEND")==alphaMode) {
+                    common.transparent = true;
+                }
+            }
+            
+            m->common = Nullable<Common>(common);
         }
     }
 }

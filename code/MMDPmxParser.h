@@ -87,6 +87,7 @@ namespace pmx
 	{
 	public:
 		virtual void Read(std::istream *stream, PmxSetting *setting) = 0;
+		virtual ~PmxVertexSkinning() {}
 	};
 
 	class PmxVertexSkinningBDEF1 : public PmxVertexSkinning

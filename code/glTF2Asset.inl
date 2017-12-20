@@ -461,7 +461,7 @@ inline void Buffer::EncodedRegion_SetCurrent(const std::string& pID)
 	throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
 }
 
-inline 
+inline
 bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
 {
 
@@ -483,8 +483,8 @@ bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferDa
 
 	return true;
 }
-	
-inline 
+
+inline
 bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
 {
 	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) {
@@ -865,19 +865,19 @@ inline void Material::Read(Value& material, Asset& r)
 
         if (r.extensionsUsed.at("KHR_materials_common")) {
             if (Value* commonMaterial = FindObject(*extensions, "KHR_materials_common")) {
-                
+
                 std::string technique;
                 ReadMember(*commonMaterial, "technique", technique);
-                
+
                 if (Value* commonValues = FindObject(*commonMaterial, "values")) {
                     Common commonComponent;
                     commonComponent.technique = technique;
-                    
+
                     ReadMember(*commonValues, "ambientFactor", commonComponent.ambientFactor);
                     ReadMember(*commonValues, "diffuseFactor", commonComponent.diffuseFactor);
                     ReadMember(*commonValues, "emissiveFactor", commonComponent.emissiveFactor);
                     ReadMember(*commonValues, "specularFactor", commonComponent.specularFactor);
-                    
+
                     ReadTextureProperty(r, *commonValues, "ambientTexture", commonComponent.ambientTexture);
                     ReadTextureProperty(r, *commonValues, "diffuseTexture", commonComponent.diffuseTexture);
                     ReadTextureProperty(r, *commonValues, "emissiveTexture", commonComponent.emissiveTexture);
@@ -886,7 +886,7 @@ inline void Material::Read(Value& material, Asset& r)
                     ReadMember(*commonValues, "shininess", commonComponent.shininess);
                     ReadMember(*commonValues, "transparency", commonComponent.transparency);
                     ReadMember(*commonValues, "transparent", commonComponent.transparent);
-                    
+
                     this->common = Nullable<Common>(commonComponent);
                 }
             }
@@ -1288,27 +1288,24 @@ inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
 {
     Value* extsRequired = FindArray(doc, "extensionsRequired");
 
-    std::gltf_unordered_map<std::string, bool> requiredExtsMap;
-    
-    for (unsigned int i = 0; i < extsRequired->Size(); ++i) {
-        if ((*extsRequired)[i].IsString()) {
-            requiredExtsMap[(*extsRequired)[i].GetString()] = true;
-            std::string extensionName = (*extsRequired)[i].GetString();
-            IdMap::iterator it = extensionsUsed.find(extensionName);
-            if (it != extensionsRequired.end()) {
-                it->second = true;
-                extensionsUsed[extensionName] = true; // an extension required must be listed as used too
-            }
-            else {
-                throw DeadlyImportError("GLTF: Missing required extension \"" + extensionName + "\"");
+    if (extsRequired) {
+        for (unsigned int i = 0; i < extsRequired->Size(); ++i) {
+            if ((*extsRequired)[i].IsString()) {
+                std::string extensionName = (*extsRequired)[i].GetString();
+                IdMap::iterator it = extensionsUsed.find(extensionName);
+                if (it != extensionsRequired.end()) {
+                    it->second = true;
+                    extensionsUsed[extensionName] = true; // an extension required must be listed as used too
+                }
+                else {
+                    throw DeadlyImportError("GLTF: Missing required extension \"" + extensionName + "\"");
+                }
             }
         }
     }
-    
+
     Value* extsUsed = FindArray(doc, "extensionsUsed");
     if (!extsRequired || !extsUsed) return;
-
-    std::gltf_unordered_map<std::string, bool> exts;
 
     for (unsigned int i = 0; i < extsUsed->Size(); ++i) {
         if ((*extsUsed)[i].IsString()) {
@@ -1319,16 +1316,16 @@ inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
             }
         }
     }
-
-    #define CHECK_EXT(EXT) \
-        if (requiredExtsMap.find(#EXT) != requiredExtsMap.end()) extensionsRequired[#EXT] = true; \
-        if (extensionsUsed.find(#EXT) != extensionsUsed.end()) extensionsUsed[#EXT] = true;
-
-    CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
-    CHECK_EXT(KHR_materials_unlit);
-    CHECK_EXT(KHR_materials_common);
-
-    #undef CHECK_EXT
+    //
+    // #define CHECK_EXT(EXT) \
+    //     if (requiredExtsMap.find(#EXT) != requiredExtsMap.end()) extensionsRequired[#EXT] = true; \
+    //     if (extensionsUsed.find(#EXT) != extensionsUsed.end()) extensionsUsed[#EXT] = true;
+    //
+    // CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
+    // CHECK_EXT(KHR_materials_unlit);
+    // CHECK_EXT(KHR_materials_common);
+    //
+    // #undef CHECK_EXT
 }
 
 inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool /*absolute*/)

@@ -448,6 +448,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                 throw DeadlyImportError( "OBJ: vertex index out of range" );
             }
 
+            if ( pMesh->mNumVertices <= newIndex ) {
+                throw DeadlyImportError("OBJ: bad vertex index");
+            }
+
             pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 
             // Copy all normals
@@ -477,10 +481,6 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
                 const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
                 pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
-            }
-
-            if ( pMesh->mNumVertices <= newIndex ) {
-                throw DeadlyImportError("OBJ: bad vertex index");
             }
 
             // Get destination face

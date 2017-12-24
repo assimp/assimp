@@ -245,6 +245,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
         pScene->mRootNode->mNumChildren = 0;
     } else {
         cc = new aiNode*[pScene->mRootNode->mNumChildren];
+        memset(cc, 0, sizeof(aiNode*) * pScene->mRootNode->mNumChildren);
         pScene->mRootNode->mChildren = cc;
     }
 

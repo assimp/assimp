@@ -56,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Defines.h>
 #include "qnan.h"
 
+#include <memory>
+
 
 using namespace Assimp;
 static aiTexel* const bad_texel = reinterpret_cast<aiTexel*>(SIZE_MAX);
@@ -489,7 +491,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     unsigned int iWidth,
     unsigned int iHeight)
 {
-    aiTexture* pcNew = nullptr;
+    std::unique_ptr<aiTexture> pcNew;
 
     // get the type of the skin
     unsigned int iMasked = (unsigned int)(iType & 0xF);
@@ -509,7 +511,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
                 "but texture height is not equal to 1, which is not supported by MED");
         }
 
-        pcNew = new aiTexture();
+        pcNew.reset(new aiTexture());
         pcNew->mHeight = 0;
         pcNew->mWidth = iWidth;
 
@@ -546,7 +548,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     else if (iMasked || !iType || (iType && iWidth && iHeight))
     {
-        pcNew = new aiTexture();
+        pcNew.reset(new aiTexture());
         if (!iHeight || !iWidth)
         {
             DefaultLogger::get()->warn("Found embedded texture, but its width "
@@ -577,7 +579,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
             pcNew->mHeight = iHeight;
 
             unsigned int iSkip = 0;
-            ParseTextureColorData(szCurrent,iMasked,&iSkip,pcNew);
+            ParseTextureColorData(szCurrent,iMasked,&iSkip,pcNew.get());
 
             // skip length of texture data
             szCurrent += iSkip;
@@ -588,7 +590,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // texture instead of material colors ... posssible they have
     // been converted to MDL7 from other formats, such as MDL5
     aiColor4D clrTexture;
-    if (pcNew)clrTexture = ReplaceTextureWithColor(pcNew);
+    if (pcNew)clrTexture = ReplaceTextureWithColor(pcNew.get());
     else clrTexture.r = get_qnan();
 
     // check whether a material definition is contained in the skin
@@ -680,8 +682,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // we don't need the texture anymore
     if (is_not_qnan(clrTexture.r))
     {
-        delete pcNew;
-        pcNew = NULL;
+        pcNew.reset();
     }
 
     // If an ASCII effect description (HLSL?) is contained in the file,
@@ -716,7 +717,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         {
             pScene->mNumTextures = 1;
             pScene->mTextures = new aiTexture*[1];
-            pScene->mTextures[0] = pcNew;
+            pScene->mTextures[0] = pcNew.release();
         }
         else
         {
@@ -726,16 +727,13 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
                 pScene->mTextures[i] = pc[i];
             }
 
-            pScene->mTextures[pScene->mNumTextures] = pcNew;
+            pScene->mTextures[pScene->mNumTextures] = pcNew.release();
             pScene->mNumTextures++;
             delete[] pc;
         }
     }
     VALIDATE_FILE_SIZE(szCurrent);
     *szCurrentOut = szCurrent;
-    if ( nullptr != pcNew ) {
-        delete pcNew;
-    }
 }
 
 // ------------------------------------------------------------------------------------------------

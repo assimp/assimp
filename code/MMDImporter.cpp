@@ -141,8 +141,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   aiNode *pNode = new aiNode;
   if (!pModel->model_name.empty()) {
     pNode->mName.Set(pModel->model_name);
-  } else {
-    ai_assert(false);
   }
 
   pScene->mRootNode = pNode;

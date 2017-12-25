@@ -66,6 +66,10 @@ void CommentRemover::RemoveLineComments(const char* szComment,
         if (!strncmp(szBuffer,szComment,len)) {
             while (!IsLineEnd(*szBuffer))
                 *szBuffer++ = chReplacement;
+
+            if (!*szBuffer) {
+                break;
+            }
         }
         ++szBuffer;
     }

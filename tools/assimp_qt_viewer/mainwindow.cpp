@@ -265,6 +265,8 @@ QString filename, filter, format_id;
 Exporter exporter;
 QTime time_begin;
 aiReturn rv;
+QStringList exporterList;
+QMap<QString, const aiExportFormatDesc*> exportersMap;
 
 	if(mScene == nullptr)
 	{
@@ -273,34 +275,40 @@ aiReturn rv;
 		return;
 	}
 
-	// build filter
+	for (int i = 0; i < exporter.GetExportFormatCount(); ++i)
 	{
-		aiString filter_temp;
-
-		mImporter.GetExtensionList(filter_temp);
-		filter = filter_temp.C_Str();
-		filter.replace(';', ' ');
+		const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(i);
+		exporterList.push_back(desc->id + QString(": ") + desc->description);
+		exportersMap.insert(desc->id, desc);
 	}
+
+	// get an exporter
+	bool dialogSelectExporterOk;
+	QString selectedExporter = QInputDialog::getItem(this, "Export format", "Select the exporter : ", exporterList, 0, false, &dialogSelectExporterOk);
+	if (!dialogSelectExporterOk)
+		return;
+
+	// build the filter
+	QString selectedId = selectedExporter.left(selectedExporter.indexOf(':'));
+	filter = QString("*.") + exportersMap[selectedId]->fileExtension;
 
 	// get file path
 	filename = QFileDialog::getSaveFileName(this, "Set file name", "", filter);
-	// extract format ID
-	format_id = filename.right(filename.length() - filename.lastIndexOf('.') - 1);
-	if(format_id.isEmpty())
-	{
-		QMessageBox::critical(this, "Export error", "File name must has extension.");
-
+	// if it's canceled
+	if (filename == "")
 		return;
-	}
 
 	// begin export
 	time_begin = QTime::currentTime();
-	rv = exporter.Export(mScene, format_id.toLocal8Bit(), filename.toLocal8Bit(), aiProcess_FlipUVs);
+	rv = exporter.Export(mScene, selectedId.toLocal8Bit(), filename.toLocal8Bit(), aiProcess_FlipUVs);
 	ui->lblExportTime->setText(QString("%1").arg(time_begin.secsTo(QTime::currentTime())));
 	if(rv == aiReturn_SUCCESS)
 		LogInfo("Export done: " + filename);
 	else
+	{
 		LogError("Export failed: " + filename);
+		QMessageBox::critical(this, "Error", "Export failed: " + filename);
+	}
 }
 
 void MainWindow::on_cbxLighting_clicked(bool pChecked)

@@ -39,7 +39,7 @@ QTime time_begin = QTime::currentTime();
 															aiProcess_GenUVCoords | aiProcess_TransformUVCoords | aiProcess_FlipUVs);
 	if(mScene != nullptr)
 	{
-		ui->lblLoadTime->setText(QString("%1").arg(time_begin.secsTo(QTime::currentTime())));
+		ui->lblLoadTime->setText(QString::number(time_begin.secsTo(QTime::currentTime())));
 		LogInfo("Import done: " + pFileName);
 		// Prepare widgets for new scene.
 		ui->leFileName->setText(pFileName.right(pFileName.length() - pFileName.lastIndexOf('/') - 1));
@@ -89,7 +89,7 @@ QTime time_begin = QTime::currentTime();
 	{
 		ResetSceneInfos();
 
-		QString errorMessage = QString("Error parsing \'%1\' : \'%2\'").arg(pFileName).arg(mImporter.GetErrorString();
+		QString errorMessage = QString("Error parsing \'%1\' : \'%2\'").arg(pFileName).arg(mImporter.GetErrorString());
 		QMessageBox::critical(this, "Import error", errorMessage);
 		LogError(errorMessage);
 	}// if(mScene != nullptr)
@@ -240,8 +240,8 @@ using namespace Assimp;
 
 void MainWindow::Paint_Finished(const size_t pPaintTime_ms, const GLfloat pDistance)
 {
-	ui->lblRenderTime->setText(QString("%1").arg(pPaintTime_ms));
-	ui->lblDistance->setText(QString("%1").arg(pDistance));
+	ui->lblRenderTime->setText(QString::number(pPaintTime_ms));
+	ui->lblDistance->setText(QString::number(pDistance));
 }
 
 void MainWindow::SceneObject_Camera(const QString& pName)
@@ -282,8 +282,9 @@ QString filename, filter, format_id;
 Exporter exporter;
 QTime time_begin;
 aiReturn rv;
-QStringList exporterList;
+QStringList exportersList;
 QMap<QString, const aiExportFormatDesc*> exportersMap;
+
 
 	if(mScene == nullptr)
 	{
@@ -295,13 +296,13 @@ QMap<QString, const aiExportFormatDesc*> exportersMap;
 	for (int i = 0; i < exporter.GetExportFormatCount(); ++i)
 	{
 		const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(i);
-		exporterList.push_back(desc->id + QString(": ") + desc->description);
+		exportersList.push_back(desc->id + QString(": ") + desc->description);
 		exportersMap.insert(desc->id, desc);
 	}
 
 	// get an exporter
 	bool dialogSelectExporterOk;
-	QString selectedExporter = QInputDialog::getItem(this, "Export format", "Select the exporter : ", exporterList, 0, false, &dialogSelectExporterOk);
+	QString selectedExporter = QInputDialog::getItem(this, "Export format", "Select the exporter : ", exportersList, 0, false, &dialogSelectExporterOk);
 	if (!dialogSelectExporterOk)
 		return;
 
@@ -318,13 +319,14 @@ QMap<QString, const aiExportFormatDesc*> exportersMap;
 	// begin export
 	time_begin = QTime::currentTime();
 	rv = exporter.Export(mScene, selectedId.toLocal8Bit(), filename.toLocal8Bit(), aiProcess_FlipUVs);
-	ui->lblExportTime->setText(QString("%1").arg(time_begin.secsTo(QTime::currentTime())));
+	ui->lblExportTime->setText(QString::number(time_begin.secsTo(QTime::currentTime())));
 	if(rv == aiReturn_SUCCESS)
 		LogInfo("Export done: " + filename);
 	else
 	{
-		LogError("Export failed: " + filename);
-		QMessageBox::critical(this, "Error", "Export failed: " + filename);
+		QString errorMessage = QString("Export failed: ") + filename;
+		LogError(errorMessage);
+		QMessageBox::critical(this, "Export error", errorMessage);
 	}
 }
 

@@ -45,16 +45,16 @@ QTime time_begin = QTime::currentTime();
 		ui->leFileName->setText(pFileName.right(pFileName.length() - pFileName.lastIndexOf('/') - 1));
 		ui->lstLight->clear();
 		ui->lstCamera->clear();
-		ui->cbxLighting->setChecked(true), mGLView->Lighting_Enable();
-		ui->cbxBBox->setChecked(false); mGLView->Enable_SceneBBox(false);
-		ui->cbxTextures->setChecked(true), mGLView->Enable_Textures(true);
+		ui->cbxLighting->setChecked(true);	mGLView->Lighting_Enable();
+		ui->cbxBBox->setChecked(false);		mGLView->Enable_SceneBBox(false);
+		ui->cbxTextures->setChecked(true);	mGLView->Enable_Textures(true);
 		//
 		// Fill info labels
 		//
 		// Cameras
-		ui->lblCameraCount->setText(QString("%1").arg(mScene->mNumCameras));
+		ui->lblCameraCount->setText(QString::number(mScene->mNumCameras));
 		// Lights
-		ui->lblLightCount->setText(QString("%1").arg(mScene->mNumLights));
+		ui->lblLightCount->setText(QString::number(mScene->mNumLights));
 		// Meshes, faces, vertices.
 		size_t qty_face = 0;
 		size_t qty_vert = 0;
@@ -65,9 +65,9 @@ QTime time_begin = QTime::currentTime();
 			qty_vert += mScene->mMeshes[idx_mesh]->mNumVertices;
 		}
 
-		ui->lblMeshCount->setText(QString("%1").arg(mScene->mNumMeshes));
-		ui->lblFaceCount->setText(QString("%1").arg(qty_face));
-		ui->lblVertexCount->setText(QString("%1").arg(qty_vert));
+		ui->lblMeshCount->setText(QString::number(mScene->mNumMeshes));
+		ui->lblFaceCount->setText(QString::number(qty_face));
+		ui->lblVertexCount->setText(QString::number(qty_vert));
 		// Animation
 		if(mScene->mNumAnimations)
 			ui->lblHasAnimation->setText("yes");
@@ -87,9 +87,24 @@ QTime time_begin = QTime::currentTime();
 	}
 	else
 	{
-		ui->lblLoadTime->clear();
-		LogError(QString("Error parsing \'%1\' : \'%2\'").arg(pFileName).arg(mImporter.GetErrorString()));
+		ResetSceneInfos();
+
+		QString errorMessage = QString("Error parsing \'%1\' : \'%2\'").arg(pFileName).arg(mImporter.GetErrorString();
+		QMessageBox::critical(this, "Import error", errorMessage);
+		LogError(errorMessage);
 	}// if(mScene != nullptr)
+}
+
+void MainWindow::ResetSceneInfos()
+{
+	ui->lblLoadTime->clear();
+	ui->leFileName->clear();
+	ui->lblMeshCount->setText("0");
+	ui->lblFaceCount->setText("0");
+	ui->lblVertexCount->setText("0");
+	ui->lblCameraCount->setText("0");
+	ui->lblLightCount->setText("0");
+	ui->lblHasAnimation->setText("no");
 }
 
 /********************************************************************/
@@ -202,6 +217,8 @@ using namespace Assimp;
 	mLoggerView = new CLoggerView(ui->tbLog);
 	DefaultLogger::create("", Logger::VERBOSE);
 	DefaultLogger::get()->attachStream(mLoggerView, DefaultLogger::Debugging | DefaultLogger::Info | DefaultLogger::Err | DefaultLogger::Warn);
+
+	ResetSceneInfos();
 }
 
 MainWindow::~MainWindow()

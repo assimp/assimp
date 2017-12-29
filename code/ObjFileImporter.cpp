@@ -474,7 +474,6 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
             if ( !pModel->m_TextureCoord.empty() && vertexIndex < pSourceFace->m_texturCoords.size())
             {
                 const unsigned int tex = pSourceFace->m_texturCoords.at( vertexIndex );
-                ai_assert( tex < pModel->m_TextureCoord.size() );
 
                 if ( tex >= pModel->m_TextureCoord.size() )
                     throw DeadlyImportError("OBJ: texture coordinate index out of range");

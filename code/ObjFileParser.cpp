@@ -353,7 +353,8 @@ void ObjFileParser::getHomogeneousVector3( std::vector<aiVector3D> &point3d_arra
     copyNextWord( m_buffer, Buffersize );
     w = ( ai_real ) fast_atof( m_buffer );
 
-    ai_assert( w != 0 );
+    if (w == 0)
+      throw DeadlyImportError("OBJ: Invalid component in homogeneous vector (Division by zero)");
 
     point3d_array.push_back( aiVector3D( x/w, y/w, z/w ) );
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );

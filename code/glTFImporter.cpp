@@ -616,7 +616,7 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
 
     // Add the embedded textures
     for (size_t i = 0; i < r.images.Size(); ++i) {
-        Image img = r.images[i];
+        Image &img = r.images[i];
         if (!img.HasData()) continue;
 
         int idx = mScene->mNumTextures++;

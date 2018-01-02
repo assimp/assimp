@@ -601,7 +601,6 @@ T Accessor::Indexer::GetValue(int i)
 inline Image::Image()
     : width(0)
     , height(0)
-    , mData(0)
     , mDataLength(0)
 {
 
@@ -624,8 +623,8 @@ inline void Image::Read(Value& obj, Asset& r)
                     Ref<BufferView> bv = r.bufferViews.Get(bufferViewId);
                     if (bv) {
                         mDataLength = bv->byteLength;
-                        mData = new uint8_t[mDataLength];
-                        memcpy(mData, bv->buffer->GetPointer() + bv->byteOffset, mDataLength);
+                        mData.reset(new uint8_t[mDataLength]);
+                        memcpy(mData.get(), bv->buffer->GetPointer() + bv->byteOffset, mDataLength);
                     }
                 }
             }
@@ -640,7 +639,9 @@ inline void Image::Read(Value& obj, Asset& r)
             if (ParseDataURI(uristr, uri->GetStringLength(), dataURI)) {
                 mimeType = dataURI.mediaType;
                 if (dataURI.base64) {
-                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, mData);
+                    uint8_t *ptr = nullptr;
+                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
+                    mData.reset(ptr);
                 }
             }
             else {
@@ -652,10 +653,8 @@ inline void Image::Read(Value& obj, Asset& r)
 
 inline uint8_t* Image::StealData()
 {
-    uint8_t* data = mData;
     mDataLength = 0;
-    mData = 0;
-    return data;
+    return mData.release();
 }
 
 inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
@@ -670,7 +669,7 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
         bufferView->byteOffset = b->AppendData(data, length);
     }
     else { // text file: will be stored as a data uri
-        this->mData = data;
+        this->mData.reset(data);
         this->mDataLength = length;
     }
 }

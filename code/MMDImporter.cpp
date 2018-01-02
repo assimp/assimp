@@ -168,7 +168,7 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   }
 
   // create node hierarchy for bone position
-  aiNode **ppNode = new aiNode *[pModel->bone_count];
+  std::unique_ptr<aiNode *[]> ppNode(new aiNode *[pModel->bone_count]);
   for (auto i = 0; i < pModel->bone_count; i++) {
     ppNode[i] = new aiNode(pModel->bones[i].bone_name);
   }
@@ -177,9 +177,9 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     const pmx::PmxBone &bone = pModel->bones[i];
 
     if (bone.parent_index < 0) {
-      pScene->mRootNode->addChildren(1, ppNode + i);
+      pScene->mRootNode->addChildren(1, ppNode.get() + i);
     } else {
-      ppNode[bone.parent_index]->addChildren(1, ppNode + i);
+      ppNode[bone.parent_index]->addChildren(1, ppNode.get() + i);
 
       aiVector3D v3 = aiVector3D(
           bone.position[0] - pModel->bones[bone.parent_index].position[0],

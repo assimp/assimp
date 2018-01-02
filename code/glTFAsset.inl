@@ -297,7 +297,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
         if (dataURI.base64) {
             uint8_t* data = 0;
             this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
-            this->mData.reset(data);
+            this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
                 throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +

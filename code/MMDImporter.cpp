@@ -324,8 +324,10 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
     auto it = bone_vertex_map.find(ii);
     if (it != bone_vertex_map.end()) {
       pBone->mNumWeights = static_cast<unsigned int>(it->second.size());
-      pBone->mWeights = it->second.data();
-      it->second.swap(*(new vector<aiVertexWeight>));
+      pBone->mWeights = new aiVertexWeight[pBone->mNumWeights];
+      for (unsigned int j = 0; j < pBone->mNumWeights; j++) {
+          pBone->mWeights[j] = it->second[j];
+      }
     }
     bone_ptr_ptr[ii] = pBone;
   }

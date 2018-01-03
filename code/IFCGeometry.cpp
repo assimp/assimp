@@ -330,17 +330,17 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
     const unsigned int cnt_segments = conv.settings.cylindricalTessellation;
     const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
 
-    const size_t samples = curve->EstimateSampleCount(solid.StartParam,solid.EndParam);
+	TempMesh temp;
+	curve->SampleDiscrete(temp, solid.StartParam, solid.EndParam);
+	const std::vector<IfcVector3>& curve_points = temp.verts;
+
+    const size_t samples = curve_points.size();
 
     result.verts.reserve(cnt_segments * samples * 4);
     result.vertcnt.reserve((cnt_segments - 1) * samples);
 
     std::vector<IfcVector3> points;
     points.reserve(cnt_segments * samples);
-
-    TempMesh temp;
-    curve->SampleDiscrete(temp,solid.StartParam,solid.EndParam);
-    const std::vector<IfcVector3>& curve_points = temp.verts;
 
     if(curve_points.empty()) {
         IFCImporter::LogWarn("curve evaluation yielded no points (IfcSweptDiskSolid)");

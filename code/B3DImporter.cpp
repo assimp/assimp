@@ -82,6 +82,19 @@ static const aiImporterDesc desc = {
 
 //#define DEBUG_B3D
 
+template<typename T>
+void DeleteAllBarePointers(std::vector<T>& x)
+{
+    for(auto p : x)
+    {
+        delete p;
+    }
+}
+
+B3DImporter::~B3DImporter()
+{
+}
+
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const{
 
@@ -157,7 +170,8 @@ int B3DImporter::ReadByte(){
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadInt(){
     if( _pos+4<=_buf.size() ){
-        int n=*(int*)&_buf[_pos];
+        int n;
+        memcpy(&n, &_buf[_pos], 4);
         _pos+=4;
         return n;
     }
@@ -168,7 +182,8 @@ int B3DImporter::ReadInt(){
 // ------------------------------------------------------------------------------------------------
 float B3DImporter::ReadFloat(){
     if( _pos+4<=_buf.size() ){
-        float n=*(float*)&_buf[_pos];
+        float n;
+        memcpy(&n, &_buf[_pos], 4);
         _pos+=4;
         return n;
     }
@@ -251,6 +266,21 @@ T *B3DImporter::to_array( const vector<T> &v ){
     return p;
 }
 
+
+// ------------------------------------------------------------------------------------------------
+template<class T>
+T **unique_to_array( vector<std::unique_ptr<T> > &v ){
+    if( v.empty() ) {
+        return 0;
+    }
+    T **p = new T*[ v.size() ];
+    for( size_t i = 0; i < v.size(); ++i ){
+        p[i] = v[i].release();
+    }
+    return p;
+}
+
+
 // ------------------------------------------------------------------------------------------------
 void B3DImporter::ReadTEXS(){
     while( ChunkSize() ){
@@ -279,8 +309,7 @@ void B3DImporter::ReadBRUS(){
         /*int blend=**/ReadInt();
         int fx=ReadInt();
 
-        aiMaterial *mat=new aiMaterial;
-        _materials.push_back( mat );
+        std::unique_ptr<aiMaterial> mat(new aiMaterial);
 
         // Name
         aiString ainame( name );
@@ -317,6 +346,7 @@ void B3DImporter::ReadBRUS(){
                 mat->AddProperty( &texname,AI_MATKEY_TEXTURE_DIFFUSE(0) );
             }
         }
+        _materials.emplace_back( std::move(mat) );
     }
 }
 
@@ -370,8 +400,7 @@ void B3DImporter::ReadTRIS( int v0 ){
         Fail( "Bad material id" );
     }
 
-    aiMesh *mesh=new aiMesh;
-    _meshes.push_back( mesh );
+    std::unique_ptr<aiMesh> mesh(new aiMesh);
 
     mesh->mMaterialIndex=matid;
     mesh->mNumFaces=0;
@@ -399,6 +428,8 @@ void B3DImporter::ReadTRIS( int v0 ){
         ++mesh->mNumFaces;
         ++face;
     }
+
+    _meshes.emplace_back( std::move(mesh) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -484,11 +515,11 @@ void B3DImporter::ReadANIM(){
     int frames=ReadInt();
     float fps=ReadFloat();
 
-    aiAnimation *anim=new aiAnimation;
-    _animations.push_back( anim );
+    std::unique_ptr<aiAnimation> anim(new aiAnimation);
 
     anim->mDuration=frames;
     anim->mTicksPerSecond=fps;
+    _animations.emplace_back( std::move(anim) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -515,7 +546,7 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
     node->mParent=parent;
     node->mTransformation=tform;
 
-    aiNodeAnim *nodeAnim=0;
+    std::unique_ptr<aiNodeAnim> nodeAnim;
     vector<unsigned> meshes;
     vector<aiNode*> children;
 
@@ -533,16 +564,19 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
             ReadANIM();
         }else if( t=="KEYS" ){
             if( !nodeAnim ){
-                nodeAnim=new aiNodeAnim;
-                _nodeAnims.push_back( nodeAnim );
+                nodeAnim.reset(new aiNodeAnim);
                 nodeAnim->mNodeName=node->mName;
             }
-            ReadKEYS( nodeAnim );
+            ReadKEYS( nodeAnim.get() );
         }else if( t=="NODE" ){
             aiNode *child=ReadNODE( node );
             children.push_back( child );
         }
         ExitChunk();
+    }
+
+    if (nodeAnim) {
+        _nodeAnims.emplace_back( std::move(nodeAnim) );
     }
 
     node->mNumMeshes= static_cast<unsigned int>(meshes.size());
@@ -558,13 +592,18 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
 void B3DImporter::ReadBB3D( aiScene *scene ){
 
     _textures.clear();
+
     _materials.clear();
 
     _vertices.clear();
+
     _meshes.clear();
 
+    DeleteAllBarePointers(_nodes);
     _nodes.clear();
+
     _nodeAnims.clear();
+
     _animations.clear();
 
     string t=ReadChunk();
@@ -600,7 +639,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
         aiNode *node=_nodes[i];
 
         for( size_t j=0;j<node->mNumMeshes;++j ){
-            aiMesh *mesh=_meshes[node->mMeshes[j]];
+            aiMesh *mesh = _meshes[node->mMeshes[j]].get();
 
             int n_tris=mesh->mNumFaces;
             int n_verts=mesh->mNumVertices=n_tris * 3;
@@ -663,27 +702,28 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
     //nodes
     scene->mRootNode=_nodes[0];
+    _nodes.clear();  // node ownership now belongs to scene
 
     //material
     if( !_materials.size() ){
-        _materials.push_back( new aiMaterial );
+        _materials.emplace_back( std::unique_ptr<aiMaterial>(new aiMaterial) );
     }
     scene->mNumMaterials= static_cast<unsigned int>(_materials.size());
-    scene->mMaterials=to_array( _materials );
+    scene->mMaterials = unique_to_array( _materials );
 
     //meshes
     scene->mNumMeshes= static_cast<unsigned int>(_meshes.size());
-    scene->mMeshes=to_array( _meshes );
+    scene->mMeshes = unique_to_array( _meshes );
 
     //animations
     if( _animations.size()==1 && _nodeAnims.size() ){
 
-        aiAnimation *anim=_animations.back();
+        aiAnimation *anim = _animations.back().get();
         anim->mNumChannels=static_cast<unsigned int>(_nodeAnims.size());
-        anim->mChannels=to_array( _nodeAnims );
+        anim->mChannels = unique_to_array( _nodeAnims );
 
         scene->mNumAnimations=static_cast<unsigned int>(_animations.size());
-        scene->mAnimations=to_array( _animations );
+        scene->mAnimations=unique_to_array( _animations );
     }
 
     // convert to RH

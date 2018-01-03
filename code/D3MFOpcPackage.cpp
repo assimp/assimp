@@ -55,49 +55,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <algorithm>
 #include <cassert>
-
 #include <contrib/unzip/unzip.h>
+#include "3MFXmlTags.h"
 
 namespace Assimp {
 
 namespace D3MF {
 
-namespace XmlTag {
-    static const std::string CONTENT_TYPES_ARCHIVE  = "[Content_Types].xml";
-    static const std::string ROOT_RELATIONSHIPS_ARCHIVE  = "_rels/.rels";
-    static const std::string SCHEMA_CONTENTTYPES         = "http://schemas.openxmlformats.org/package/2006/content-types";
-    static const std::string SCHEMA_RELATIONSHIPS        = "http://schemas.openxmlformats.org/package/2006/relationships";
-    static const std::string RELS_RELATIONSHIP_CONTAINER = "Relationships";
-    static const std::string RELS_RELATIONSHIP_NODE      = "Relationship";
-    static const std::string RELS_ATTRIB_TARGET         = "Target";
-    static const std::string RELS_ATTRIB_TYPE            = "Type";
-    static const std::string RELS_ATTRIB_ID              = "Id";
-    static const std::string PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
-    static const std::string PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
-    static const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
-    static const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
-    static const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-}
-
 class IOSystem2Unzip {
-
-    public:
-
-        static voidpf open(voidpf opaque, const char* filename, int mode);
-
-        static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
-
-        static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
-
-        static long tell(voidpf opaque, voidpf stream);
-
-        static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
-
-        static int close(voidpf opaque, voidpf stream);
-
-        static int testerror(voidpf opaque, voidpf stream);
-
-        static zlib_filefunc_def get(IOSystem* pIOHandler);
+public:
+    static voidpf open(voidpf opaque, const char* filename, int mode);
+    static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
+    static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
+    static long tell(voidpf opaque, voidpf stream);
+    static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
+    static int close(voidpf opaque, voidpf stream);
+    static int testerror(voidpf opaque, voidpf stream);
+    static zlib_filefunc_def get(IOSystem* pIOHandler);
 };
 
 voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
@@ -115,7 +89,6 @@ voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
             }
         }
     }
-
 
     return (voidpf) io_system->Open(filename, mode_fopen);
 }
@@ -186,44 +159,33 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
     return mapping;
 }
 
-
-class ZipFile : public IOStream
-{
+class ZipFile : public IOStream {
     friend class D3MFZipArchive;
 
 public:
     explicit ZipFile(size_t size);
-
-    ~ZipFile();
-
+    virtual ~ZipFile();
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
-
     size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
-
     size_t FileSize() const;
-
     aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
-
     size_t Tell() const;
-
     void Flush();
 
 private:
-
-    void* m_Buffer;
-
+    void *m_Buffer;
     size_t m_Size;
-
 };
 
-ZipFile::ZipFile(size_t size) : m_Size(size) {
+ZipFile::ZipFile(size_t size)
+: m_Buffer( nullptr )
+, m_Size(size) {
     ai_assert(m_Size != 0);
-
-    m_Buffer = malloc(m_Size);
+    m_Buffer = ::malloc(m_Size);
 }
 
 ZipFile::~ZipFile() {
-    free(m_Buffer);
+    ::free(m_Buffer);
     m_Buffer = NULL;
 }
 
@@ -236,8 +198,12 @@ size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount) {
     return size;
 }
 
-size_t ZipFile::Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) {
-    return 0;
+size_t ZipFile::Write(const void* pvBuffer, size_t size, size_t pCount ) {
+    const size_t size_to_write( size * pCount );
+    if ( 0 == size_to_write ) {
+        return 0U;
+    }
+    return 0U;
 }
 
 size_t ZipFile::FileSize() const {
@@ -256,55 +222,36 @@ void ZipFile::Flush() {
     // empty
 }
 
-
-class D3MFZipArchive : public IOSystem
-{
+class D3MFZipArchive : public IOSystem {
 public:
-
     static const unsigned int FileNameSize = 256;
 
-public:
-
     D3MFZipArchive(IOSystem* pIOHandler, const std::string & rFile);
-
     ~D3MFZipArchive();
-
     bool Exists(const char* pFile) const;
-
     char getOsSeparator() const;
-
     IOStream* Open(const char* pFile, const char* pMode = "rb");
-
     void Close(IOStream* pFile);
-
     bool isOpen() const;
-
     void getFileList(std::vector<std::string> &rFileList);
 
 private:
-
     bool mapArchive();
 
 private:
-
     unzFile m_ZipFileHandle;
-
     std::map<std::string, ZipFile*> m_ArchiveMap;
-
 };
-
 
 // ------------------------------------------------------------------------------------------------
 //  Constructor.
 D3MFZipArchive::D3MFZipArchive(IOSystem* pIOHandler, const std::string& rFile)
-    : m_ZipFileHandle(NULL), m_ArchiveMap()
-{
-    if (! rFile.empty())
-    {                
+: m_ZipFileHandle(NULL)
+, m_ArchiveMap() {
+    if (! rFile.empty()) {                
         zlib_filefunc_def mapping = IOSystem2Unzip::get(pIOHandler);            
 
         m_ZipFileHandle = unzOpen2(rFile.c_str(), &mapping);
-
         if(m_ZipFileHandle != NULL) {            
             mapArchive();
         }
@@ -379,6 +326,7 @@ IOStream *D3MFZipArchive::Open(const char* pFile, const char* /*pMode*/) {
 // ------------------------------------------------------------------------------------------------
 //  Close a filestream.
 void D3MFZipArchive::Close(IOStream *pFile) {
+    (void)(pFile);
     ai_assert(pFile != NULL);
 
     // We don't do anything in case the file would be opened again in the future
@@ -433,24 +381,12 @@ bool D3MFZipArchive::mapArchive() {
 
 // ------------------------------------------------------------------------------------------------
 
-struct OpcPackageRelationship
-{
-    std::string id;
-    std::string type;
-    std::string target;
-};
-
 typedef std::shared_ptr<OpcPackageRelationship> OpcPackageRelationshipPtr;
 
-class OpcPackageRelationshipReader
-{
+class OpcPackageRelationshipReader {
 public:
-
-    OpcPackageRelationshipReader(XmlReader* xmlReader)
-    {        
-
-        while(xmlReader->read())
-        {
+    OpcPackageRelationshipReader(XmlReader* xmlReader) {        
+        while(xmlReader->read()) {
             if(xmlReader->getNodeType() == irr::io::EXN_ELEMENT &&
                xmlReader->getNodeName() == XmlTag::RELS_RELATIONSHIP_CONTAINER)
             {
@@ -473,57 +409,68 @@ public:
         }
     }
 
-    void ParseAttributes(XmlReader*)
-    {
-
+    void ParseAttributes(XmlReader*) {
+        // empty
     }
 
-    void ParseChildNode(XmlReader* xmlReader)
-    {        
+    bool validateRels( OpcPackageRelationshipPtr &relPtr ) {
+        if ( relPtr->id.empty() || relPtr->type.empty() || relPtr->target.empty() ) {
+            return false;
+        }
+        return true;
+    }
+
+    void ParseChildNode(XmlReader* xmlReader) {        
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
 
-        relPtr->id = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_ID.c_str());
-        relPtr->type = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TYPE.c_str());
-        relPtr->target = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TARGET.c_str());
-
-        m_relationShips.push_back(relPtr);
+        relPtr->id = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_ID.c_str());
+        relPtr->type = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TYPE.c_str());
+        relPtr->target = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TARGET.c_str());
+        if ( validateRels( relPtr ) ) {
+            m_relationShips.push_back( relPtr );
+        }
     }
+
     std::vector<OpcPackageRelationshipPtr> m_relationShips;
 };
 // ------------------------------------------------------------------------------------------------
 
 D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
-    : m_RootStream(nullptr)
-{    
-    zipArchive.reset(new D3MF::D3MFZipArchive( pIOHandler, rFile ));    
-    if(!zipArchive->isOpen()) {
+: mRootStream(nullptr)
+, mZipArchive() {    
+    mZipArchive.reset( new D3MF::D3MFZipArchive( pIOHandler, rFile ) );    
+    if(!mZipArchive->isOpen()) {
         throw DeadlyImportError("Failed to open file " + rFile+ ".");
     }
 
     std::vector<std::string> fileList;
-    zipArchive->getFileList(fileList);
+    mZipArchive->getFileList(fileList);
 
-    for(auto& file: fileList){
+    for (auto& file: fileList) {
         if(file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
             //PkgRelationshipReader pkgRelReader(file, archive);
-            ai_assert(zipArchive->Exists(file.c_str()));
+            ai_assert(mZipArchive->Exists(file.c_str()));
 
-            IOStream *fileStream = zipArchive->Open(file.c_str());
+            IOStream *fileStream = mZipArchive->Open(file.c_str());
 
             ai_assert(fileStream != nullptr);
 
             std::string rootFile = ReadPackageRootRelationship(fileStream);
-            if(rootFile.size() > 0 && rootFile[0] == '/')
-                rootFile = rootFile.substr(1);
+            if ( rootFile.size() > 0 && rootFile[ 0 ] == '/' ) {
+                rootFile = rootFile.substr( 1 );
+                if ( rootFile[ 0 ] == '/' ) {
+                    // deal with zipbug
+                    rootFile = rootFile.substr( 1 );
+                }
+            }
 
             DefaultLogger::get()->debug(rootFile);
 
-            m_RootStream = zipArchive->Open(rootFile.c_str());
-
-            ai_assert(m_RootStream != nullptr);
-
-
-
+            mRootStream = mZipArchive->Open(rootFile.c_str());
+            ai_assert( mRootStream != nullptr );
+            if ( nullptr == mRootStream ) {
+                throw DeadlyExportError( "Cannot open rootfile in archive : " + rootFile );
+            }
 
         //    const size_t size = zipArchive->FileSize();
         //    m_Data.resize( size );
@@ -534,50 +481,40 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
         //        m_Data.clear();
         //        return false;
         //    }
-            zipArchive->Close( fileStream );
+            mZipArchive->Close( fileStream );
 
-        }
-        else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE)
-        {
+        } else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
 
         }
     }
 }
 
-D3MFOpcPackage::~D3MFOpcPackage()
-{
-
+D3MFOpcPackage::~D3MFOpcPackage() {
+    // empty
 }
 
-IOStream* D3MFOpcPackage::RootStream() const
-{
-    return m_RootStream;
+IOStream* D3MFOpcPackage::RootStream() const {
+    return mRootStream;
 }
 
-
-std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream)
-{
-
+std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream) {
     std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(stream));
     std::unique_ptr<XmlReader> xml(irr::io::createIrrXMLReader(xmlStream.get()));
 
     OpcPackageRelationshipReader reader(xml.get());
 
-
     auto itr = std::find_if(reader.m_relationShips.begin(), reader.m_relationShips.end(), [](const OpcPackageRelationshipPtr& rel){
         return rel->type == XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;
     });
 
-
-
     if(itr == reader.m_relationShips.end())
-        throw DeadlyImportError("Cannot find" + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
+        throw DeadlyImportError("Cannot find " + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
 
     return (*itr)->target;
 }
 
-} //namespace D3MF
+} // Namespace D3MF
 
-}
+} // Namespace Assimp
 
 #endif //ASSIMP_BUILD_NO_3MF_IMPORTER

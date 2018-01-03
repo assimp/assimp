@@ -253,8 +253,8 @@ void DefaultLogger::kill()
 //  Debug message
 void DefaultLogger::OnDebug( const char* message )
 {
-    if ( m_Severity == Logger::NORMAL )
-        return;
+	if ( m_Severity == Logger::NORMAL )
+		return;
 
 	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
 	char msg[Size];

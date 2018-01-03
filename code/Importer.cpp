@@ -274,10 +274,6 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 
     if (it != pimpl->mImporter.end())   {
         pimpl->mImporter.erase(it);
-
-        std::set<std::string> st;
-        pImp->GetExtensionList(st);
-
         DefaultLogger::get()->info("Unregistering custom importer: ");
         return AI_SUCCESS;
     }
@@ -831,8 +827,8 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     pimpl->mProgressHandler->UpdatePostProcess( static_cast<int>(pimpl->mPostProcessingSteps.size()), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
 
     // update private scene flags
-  if( pimpl->mScene )
-    ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
+    if( pimpl->mScene )
+      ScenePriv(pimpl->mScene)->mPPStepsApplied |= pFlags;
 
     // clear any data allocated by post-process steps
     pimpl->mPPShared->Clean();

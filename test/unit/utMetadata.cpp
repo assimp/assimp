@@ -79,6 +79,7 @@ TEST_F( utMetadata, allocTest ) {
     EXPECT_EQ( 1U, data->mNumProperties );
     EXPECT_NE( nullptr, data->mKeys );
     EXPECT_NE( nullptr, data->mValues );
+    aiMetadata::Dealloc( data );
 }
 
 TEST_F( utMetadata, get_set_pod_Test ) {

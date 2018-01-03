@@ -192,7 +192,7 @@ public:
 
     // ---------------------------------------------------------------------
     /** Increase the file pointer (relative seeking)  */
-    void IncPtr(size_t plus)    {
+    void IncPtr(intptr_t plus)    {
         current += plus;
         if (current > limit) {
             throw DeadlyImportError("End of file or read limit was reached");
@@ -291,15 +291,11 @@ private:
             throw DeadlyImportError("End of file or stream limit was reached");
         }
 
-///*#ifdef __arm__
         T f;
         ::memcpy (&f, current, sizeof(T));
-//#else*/
-//        T f = *((const T*)current);
-//#endif
-        Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
-
+        Intern::Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
         current += sizeof(T);
+
         return f;
     }
 

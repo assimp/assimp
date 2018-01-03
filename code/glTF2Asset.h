@@ -43,8 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Declares a glTF class to handle gltf/glb files
  *
  * glTF Extensions Support:
- *   KHR_binary_glTF: full
- *   KHR_materials_common: full
+ *   KHR_materials_pbrSpecularGlossiness full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -89,6 +88,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #endif
 
+#include "StringUtils.h"
+
 namespace glTF2
 {
 #ifdef ASSIMP_API
@@ -130,15 +131,12 @@ namespace glTF2
 
     struct BufferView; // here due to cross-reference
     struct Texture;
-    struct Light;
     struct Skin;
-
 
     // Vec/matrix types, as raw float arrays
     typedef float (vec3)[3];
     typedef float (vec4)[4];
-    typedef float (mat4)[16];
-
+	typedef float (mat4)[16];
 
     namespace Util
     {
@@ -166,21 +164,47 @@ namespace glTF2
 
 
     //! Magic number for GLB files
-    #define AI_GLB_MAGIC_NUMBER "glTF"
+	#define AI_GLB_MAGIC_NUMBER "glTF"
+
+    #define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR "$mat.gltf.pbrMetallicRoughness.baseColorFactor", 0, 0
+	#define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR "$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0
+	#define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR "$mat.gltf.pbrMetallicRoughness.roughnessFactor", 0, 0
+    #define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE aiTextureType_DIFFUSE, 1
+	#define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE aiTextureType_UNKNOWN, 0
+	#define AI_MATKEY_GLTF_ALPHAMODE "$mat.gltf.alphaMode", 0, 0
+	#define AI_MATKEY_GLTF_ALPHACUTOFF "$mat.gltf.alphaCutoff", 0, 0
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS "$mat.gltf.pbrSpecularGlossiness", 0, 0
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR "$mat.gltf.pbrMetallicRoughness.glossinessFactor", 0, 0
+
+	#define _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE "$tex.file.texCoord"
+	#define _AI_MATKEY_GLTF_MAPPINGNAME_BASE "$tex.mappingname"
+	#define _AI_MATKEY_GLTF_MAPPINGID_BASE "$tex.mappingid"
+	#define _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE "$tex.mappingfiltermag"
+	#define _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE "$tex.mappingfiltermin"
+
+	#define AI_MATKEY_GLTF_TEXTURE_TEXCOORD _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGNAME(type, N) _AI_MATKEY_GLTF_MAPPINGNAME_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGID(type, N) _AI_MATKEY_GLTF_MAPPINGID_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGFILTER_MAG(type, N) _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGFILTER_MIN(type, N) _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE, type, N
 
     #ifdef ASSIMP_API
         #include "./../include/assimp/Compiler/pushpack1.h"
     #endif
 
-    //! For the KHR_binary_glTF extension (binary .glb file)
-    //! 20-byte header (+ the JSON + a "body" data section)
+    //! For binary .glb files
+    //! 12-byte header (+ the JSON + a "body" data section)
     struct GLB_Header
     {
         uint8_t magic[4];     //!< Magic number: "glTF"
-        uint32_t version;     //!< Version number
+        uint32_t version;     //!< Version number (always 2 as of the last update)
         uint32_t length;      //!< Total length of the Binary glTF, including header, scene, and body, in bytes
-        uint32_t sceneLength; //!< Length, in bytes, of the glTF scene
-        uint32_t sceneFormat; //!< Specifies the format of the glTF scene (see the SceneFormat enum)
+    } PACK_STRUCT;
+
+    struct GLB_Chunk
+    {
+        uint32_t chunkLength;
+        uint32_t chunkType;
     } PACK_STRUCT;
 
     #ifdef ASSIMP_API
@@ -188,10 +212,11 @@ namespace glTF2
     #endif
 
 
-    //! Values for the GLB_Header::sceneFormat field
-    enum SceneFormat
+    //! Values for the GLB_Chunk::chunkType field
+    enum ChunkType
     {
-        SceneFormat_JSON = 0
+        ChunkType_JSON = 0x4E4F534A,
+        ChunkType_BIN  = 0x004E4942
     };
 
     //! Values for the mesh primitive modes
@@ -232,7 +257,7 @@ namespace glTF2
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
+                throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
         }
     }
 
@@ -244,15 +269,17 @@ namespace glTF2
     };
 
     //! Values for the Sampler::magFilter field
-    enum SamplerMagFilter
+    enum class SamplerMagFilter: unsigned int
     {
+        UNSET = 0,
         SamplerMagFilter_Nearest = 9728,
         SamplerMagFilter_Linear = 9729
     };
 
     //! Values for the Sampler::minFilter field
-    enum SamplerMinFilter
+    enum class SamplerMinFilter: unsigned int
     {
+        UNSET = 0,
         SamplerMinFilter_Nearest = 9728,
         SamplerMinFilter_Linear = 9729,
         SamplerMinFilter_Nearest_Mipmap_Nearest = 9984,
@@ -262,11 +289,12 @@ namespace glTF2
     };
 
     //! Values for the Sampler::wrapS and Sampler::wrapT field
-    enum SamplerWrap
+    enum class SamplerWrap: unsigned int
     {
-        SamplerWrap_Clamp_To_Edge = 33071,
-        SamplerWrap_Mirrored_Repeat = 33648,
-        SamplerWrap_Repeat = 10497
+        UNSET = 0,
+        Clamp_To_Edge = 33071,
+        Mirrored_Repeat = 33648,
+        Repeat = 10497
     };
 
     //! Values for the Texture::format and Texture::internalFormat fields
@@ -382,6 +410,7 @@ namespace glTF2
     struct Object
     {
         int index;        //!< The index of this object within its property container
+        int oIndex;       //!< The original index of this object defined in the JSON
         std::string id;   //!< The globally unique ID used to reference this object
         std::string name; //!< The user-defined name of this object
 
@@ -392,7 +421,7 @@ namespace glTF2
         virtual ~Object() {}
 
         //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
-        static const char* TranslateId(Asset& r, const char* id)
+        static const char* TranslateId(Asset& /*r*/, const char* id)
             { return id; }
     };
 
@@ -407,7 +436,6 @@ namespace glTF2
     {
         Ref<BufferView> bufferView;  //!< The ID of the bufferView. (required)
         unsigned int byteOffset;     //!< The offset relative to the start of the bufferView in bytes. (required)
-        unsigned int byteStride;     //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         unsigned int count;          //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
@@ -498,7 +526,7 @@ namespace glTF2
 
 			/// \fn ~SEncodedRegion()
 			/// Destructor.
-			~SEncodedRegion() { delete [] DecodedData; }
+			~SEncodedRegion() { delete[] DecodedData; }
 		};
 
 		/******************* Variables *******************/
@@ -598,6 +626,7 @@ namespace glTF2
         Ref<Buffer> buffer; //! The ID of the buffer. (required)
         size_t byteOffset; //! The offset into the buffer in bytes. (required)
         size_t byteLength; //! The length of the bufferView in bytes. (default: 0)
+        unsigned int byteStride; //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
 
         BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
@@ -629,7 +658,7 @@ namespace glTF2
                 float zfar;  //! The floating-point distance to the far clipping plane. (required)
                 float znear; //! The floating-point distance to the near clipping plane. (required)
             } ortographic;
-        };
+        } cameraProperties;
 
         Camera() {}
         void Read(Value& obj, Asset& r);
@@ -668,43 +697,68 @@ namespace glTF2
         inline uint8_t* StealData();
 
         inline void SetData(uint8_t* data, size_t length, Asset& r);
-    };
+	};
 
-    //! Holds a material property that can be a texture or a color
-    struct TexProperty
+	const vec4 defaultBaseColor = {1, 1, 1, 1};
+	const vec3 defaultEmissiveFactor = {0, 0, 0};
+	const vec4 defaultDiffuseFactor = {1, 1, 1, 1};
+	const vec3 defaultSpecularFactor = {1, 1, 1};
+
+    struct TextureInfo
     {
         Ref<Texture> texture;
-        vec4 color;
+        unsigned int index;
+        unsigned int texCoord = 0;
+    };
+
+    struct NormalTextureInfo : TextureInfo
+    {
+        float scale = 1;
+    };
+
+    struct OcclusionTextureInfo : TextureInfo
+    {
+        float strength = 1;
+    };
+
+    struct PbrMetallicRoughness
+    {
+        vec4 baseColorFactor;
+        TextureInfo baseColorTexture;
+        TextureInfo metallicRoughnessTexture;
+        float metallicFactor;
+        float roughnessFactor;
+    };
+
+    struct PbrSpecularGlossiness
+    {
+        vec4 diffuseFactor;
+        vec3 specularFactor;
+        float glossinessFactor;
+        TextureInfo diffuseTexture;
+		TextureInfo specularGlossinessTexture;
+
+		PbrSpecularGlossiness() { SetDefaults(); }
+		void SetDefaults();
     };
 
     //! The material appearance of a primitive.
     struct Material : public Object
     {
-        //Ref<Sampler> source; //!< The ID of the technique.
-        //std::gltf_unordered_map<std::string, std::string> values; //!< A dictionary object of parameter values.
+        //PBR metallic roughness properties
+        PbrMetallicRoughness pbrMetallicRoughness;
 
-        //! Techniques defined by KHR_materials_common
-        enum Technique
-        {
-            Technique_undefined = 0,
-            Technique_BLINN,
-            Technique_PHONG,
-            Technique_LAMBERT,
-            Technique_CONSTANT
-        };
-
-        TexProperty ambient;
-        TexProperty diffuse;
-        TexProperty specular;
-        TexProperty emission;
-        Ref<Texture> normal;
-
+        //other basic material properties
+        NormalTextureInfo normalTexture;
+        OcclusionTextureInfo occlusionTexture;
+        TextureInfo emissiveTexture;
+        vec3 emissiveFactor;
+        std::string alphaMode;
+        float alphaCutoff;
         bool doubleSided;
-        bool transparent;
-        float transparency;
-        float shininess;
 
-        Technique technique;
+        //extension: KHR_materials_pbrSpecularGlossiness
+        Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
 
         Material() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
@@ -721,7 +775,7 @@ namespace glTF2
             PrimitiveMode mode;
 
             struct Attributes {
-                AccessorList position, normal, texcoord, color, joint, jointmatrix, weight;
+                AccessorList position, normal, tangent, texcoord, color, joint, jointmatrix, weight;
             } attributes;
 
             Ref<Accessor> indices;
@@ -729,86 +783,15 @@ namespace glTF2
             Ref<Material> material;
         };
 
-		/// \struct SExtension
-		/// Extension used for mesh.
-		struct SExtension
-		{
-			/// \enum EType
-			/// Type of extension.
-			enum EType
-			{
-				#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-					Compression_Open3DGC,///< Compression of mesh data using Open3DGC algorithm.
-				#endif
-
-				Unknown
-			};
-
-			EType Type;///< Type of extension.
-
-			/// \fn SExtension
-			/// Constructor.
-			/// \param [in] pType - type of extension.
-			SExtension(const EType pType)
-				: Type(pType)
-			{}
-
-            virtual ~SExtension() {
-                // empty
-            }
-		};
-
-		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-			/// \struct SCompression_Open3DGC
-			/// Compression of mesh data using Open3DGC algorithm.
-			struct SCompression_Open3DGC : public SExtension
-			{
-				using SExtension::Type;
-
-				std::string Buffer;///< ID of "buffer" used for storing compressed data.
-				size_t Offset;///< Offset in "bufferView" where compressed data are stored.
-				size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
-				bool Binary;///< If true then "binary" mode is used for coding, if false - "ascii" mode.
-				size_t IndicesCount;///< Count of indices in mesh.
-				size_t VerticesCount;///< Count of vertices in mesh.
-				// AttribType::Value Type;///< Is always "SCALAR".
-				// ComponentType Component_Type;///< Is always "ComponentType_UNSIGNED_BYTE" (5121).
-
-				/// \fn SCompression_Open3DGC
-				/// Constructor.
-				SCompression_Open3DGC()
-				: SExtension(Compression_Open3DGC) {
-                    // empty
-                }
-
-                virtual ~SCompression_Open3DGC() {
-                    // empty
-                }
-			};
-		#endif
-
         std::vector<Primitive> primitives;
-		std::list<SExtension*> Extension;///< List of extensions used in mesh.
 
         Mesh() {}
-
-		/// \fn ~Mesh()
-		/// Destructor.
-		~Mesh() { for(std::list<SExtension*>::iterator it = Extension.begin(), it_end = Extension.end(); it != it_end; it++) { delete *it; }; }
 
 		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
 		/// Get mesh data from JSON-object and place them to root asset.
 		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
 		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
 		void Read(Value& pJSON_Object, Asset& pAsset_Root);
-
-		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-			/// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
-			/// Decode part of "buffer" which encoded with Open3DGC algorithm.
-			/// \param [in] pCompression_Open3DGC - reference to structure which describe encoded region.
-			/// \param [out] pAsset_Root - reference to root assed where data will be stored.
-			void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root);
-		#endif
     };
 
     struct Node : public Object
@@ -822,10 +805,9 @@ namespace glTF2
         Nullable<vec3> scale;
 
         Ref<Camera> camera;
-        Ref<Light>  light;
 
         std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
-        Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
+        Ref<Skin> skin;                           //!< The ID of the skin referenced by this node.
         std::string jointName;                    //!< Name used when this node is a joint in a skin.
 
         Ref<Node> parent;                         //!< This is not part of the glTF specification. Used as a helper.
@@ -843,12 +825,12 @@ namespace glTF2
 
     struct Sampler : public Object
     {
-        SamplerMagFilter magFilter; //!< The texture magnification filter. (required)
-        SamplerMinFilter minFilter; //!< The texture minification filter. (required)
-        SamplerWrap wrapS;          //!< The texture wrapping in the S direction. (required)
-        SamplerWrap wrapT;          //!< The texture wrapping in the T direction. (required)
+        SamplerMagFilter magFilter; //!< The texture magnification filter.
+        SamplerMinFilter minFilter; //!< The texture minification filter.
+        SamplerWrap wrapS;          //!< The texture wrapping in the S direction.
+        SamplerWrap wrapT;          //!< The texture wrapping in the T direction.
 
-        Sampler() {}
+        Sampler() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
         void SetDefaults();
     };
@@ -878,27 +860,6 @@ namespace glTF2
         void Read(Value& obj, Asset& r);
     };
 
-    struct Technique : public Object
-    {
-        struct Parameters
-        {
-
-        };
-
-        struct States
-        {
-
-        };
-
-        struct Functions
-        {
-
-        };
-
-        Technique() {}
-        void Read(Value& obj, Asset& r);
-    };
-
     //! A texture and its sampler.
     struct Texture : public Object
     {
@@ -913,35 +874,6 @@ namespace glTF2
 
         Texture() {}
         void Read(Value& obj, Asset& r);
-    };
-
-
-    //! A light (from KHR_materials_common extension)
-    struct Light : public Object
-    {
-        enum Type
-        {
-            Type_undefined,
-            Type_ambient,
-            Type_directional,
-            Type_point,
-            Type_spot
-        };
-
-        Type type;
-
-        vec4 color;
-        float distance;
-        float constantAttenuation;
-        float linearAttenuation;
-        float quadraticAttenuation;
-        float falloffAngle;
-        float falloffExponent;
-
-        Light() {}
-        void Read(Value& obj, Asset& r);
-
-        void SetDefaults();
     };
 
     struct Animation : public Object
@@ -1025,14 +957,16 @@ namespace glTF2
         friend class Asset;
         friend class AssetWriter;
 
-        typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
+        typedef typename std::gltf_unordered_map< unsigned int, unsigned int > Dict;
+        typedef typename std::gltf_unordered_map< std::string, unsigned int > IdDict;
 
-        std::vector<T*>  mObjs;      //! The read objects
-        Dict             mObjsById;  //! The read objects accessible by id
-        const char*      mDictId;    //! ID of the dictionary object
-        const char*      mExtId;     //! ID of the extension defining the dictionary
-        Value*           mDict;      //! JSON dictionary object
-        Asset&           mAsset;     //! The asset instance
+        std::vector<T*>     mObjs;         //! The read objects
+        Dict                mObjsByOIndex; //! The read objects accessible by original index
+        IdDict              mObjsById;     //! The read objects accessible by id
+        const char*         mDictId;       //! ID of the dictionary object
+        const char*         mExtId;        //! ID of the extension defining the dictionary
+        Value*              mDict;         //! JSON dictionary object
+        Asset&              mAsset;        //! The asset instance
 
         void AttachToDocument(Document& doc);
         void DetachFromDocument();
@@ -1046,13 +980,16 @@ namespace glTF2
         LazyDict(Asset& asset, const char* dictId, const char* extId = 0);
         ~LazyDict();
 
-        Ref<T> Get(const char* id);
+        Ref<T> Retrieve(unsigned int i);
+
         Ref<T> Get(unsigned int i);
-        Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
+        Ref<T> Get(const char* id);
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)
             { return Create(id.c_str()); }
+
+        unsigned int Remove(const char* id);
 
         inline unsigned int Size() const
             { return unsigned(mObjs.size()); }
@@ -1067,22 +1004,17 @@ namespace glTF2
     {
         std::string copyright; //!< A copyright message suitable for display to credit the content creator.
         std::string generator; //!< Tool that generated this glTF model.Useful for debugging.
-        bool premultipliedAlpha; //!< Specifies if the shaders were generated with premultiplied alpha. (default: false)
 
         struct {
             std::string api;     //!< Specifies the target rendering API (default: "WebGL")
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        float version; //!< The glTF format version
+        std::string version; //!< The glTF format version
 
         void Read(Document& doc);
 
-        AssetMetadata()
-            : premultipliedAlpha(false)
-            , version(0)
-        {
-        }
+        AssetMetadata() : version("") {}
     };
 
     //
@@ -1123,8 +1055,7 @@ namespace glTF2
         //! Keeps info about the enabled extensions
         struct Extensions
         {
-            bool KHR_binary_glTF;
-            bool KHR_materials_common;
+            bool KHR_materials_pbrSpecularGlossiness;
 
         } extensionsUsed;
 
@@ -1142,15 +1073,10 @@ namespace glTF2
         LazyDict<Material>    materials;
         LazyDict<Mesh>        meshes;
         LazyDict<Node>        nodes;
-        //LazyDict<Program>   programs;
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
-        //LazyDict<Shader>    shaders;
-        LazyDict<Skin>      skins;
-        //LazyDict<Technique> techniques;
+        LazyDict<Skin>        skins;
         LazyDict<Texture>     textures;
-
-        LazyDict<Light>       lights; // KHR_materials_common ext
 
         Ref<Scene> scene;
 
@@ -1167,14 +1093,10 @@ namespace glTF2
             , materials     (*this, "materials")
             , meshes        (*this, "meshes")
             , nodes         (*this, "nodes")
-            //, programs    (*this, "programs")
             , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
-            //, shaders     (*this, "shaders")
-            , skins       (*this, "skins")
-            //, techniques  (*this, "techniques")
+            , skins         (*this, "skins")
             , textures      (*this, "textures")
-            , lights        (*this, "lights", "KHR_materials_common")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
         }
@@ -1182,7 +1104,7 @@ namespace glTF2
         //! Main function
         void Load(const std::string& file, bool isBinary = false);
 
-        //! Enables the "KHR_binary_glTF" extension on the asset
+        //! Enables binary encoding on the asset
         void SetAsBinary();
 
         //! Search for an available name, starting from the given strings
@@ -1192,10 +1114,9 @@ namespace glTF2
             { return mBodyBuffer; }
 
     private:
-        void ReadBinaryHeader(IOStream& stream);
+        void ReadBinaryHeader(IOStream& stream, std::vector<char>& sceneData);
 
         void ReadExtensionsUsed(Document& doc);
-
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };

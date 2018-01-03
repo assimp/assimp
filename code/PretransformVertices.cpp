@@ -104,7 +104,7 @@ unsigned int PretransformVertices::CountNodes( aiNode* pcNode )
 
 // ------------------------------------------------------------------------------------------------
 // Get a bitwise combination identifying the vertex format of a mesh
-unsigned int PretransformVertices::GetMeshVFormat(aiMesh* pcMesh)
+unsigned int PretransformVertices::GetMeshVFormat( aiMesh* pcMesh )
 {
     // the vertex format is stored in aiMesh::mBones for later retrieval.
     // there isn't a good reason to compute it a few hundred times
@@ -160,6 +160,11 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
             unsigned int& num_ref = num_refs[pcNode->mMeshes[i]];
             ai_assert(0 != num_ref);
             --num_ref;
+            // Save the name of the last mesh
+            if (num_ref==0)
+            {
+                pcMeshOut->mName = pcMesh->mName;
+            }
 
             if (identity)   {
                 // copy positions without modifying them
@@ -626,9 +631,10 @@ void PretransformVertices::Execute( aiScene* pScene)
 
         // now delete all nodes in the scene and build a new
         // flat node graph with a root node and some level 1 children
+        aiNode* newRoot = new aiNode();
+        newRoot->mName = pScene->mRootNode->mName;
         delete pScene->mRootNode;
-        pScene->mRootNode = new aiNode();
-        pScene->mRootNode->mName.Set("<dummy_root>");
+        pScene->mRootNode = newRoot;
 
         if (1 == pScene->mNumMeshes && !pScene->mNumLights && !pScene->mNumCameras)
         {
@@ -646,7 +652,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::ai_snprintf(pcNode->mName.data,MAXLEN,"mesh_%u",i);
+                pcNode->mName = pScene->mMeshes[i]->mName;
 
                 // setup mesh indices
                 pcNode->mNumMeshes = 1;

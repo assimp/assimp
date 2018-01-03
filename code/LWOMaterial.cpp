@@ -483,7 +483,7 @@ void LWOImporter::FindVCChannels(const LWO::Surface& surf, LWO::SortedRep& sorte
         const LWO::VColorChannel& vc = layer.mVColorChannels[i];
 
         if (surf.mVCMap == vc.name) {
-            // The vertex color map is explicitely requested by the surface so we need to take special care of it
+            // The vertex color map is explicitly requested by the surface so we need to take special care of it
             for (unsigned int a = 0; a < std::min(next,AI_MAX_NUMBER_OF_COLOR_SETS-1u); ++a) {
                 out[a+1] = out[a];
             }

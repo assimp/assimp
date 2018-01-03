@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "StringUtils.h"
+#include <iomanip>
 
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
@@ -126,6 +127,12 @@ namespace {
     {
         Value::MemberIterator it = val.FindMember(id);
         return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
+    }
+
+    inline Value* FindNumber(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
     }
 
     inline Value* FindArray(Value& val, const char* id)
@@ -290,7 +297,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
         if (dataURI.base64) {
             uint8_t* data = 0;
             this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
-            this->mData.reset(data);
+            this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
                 throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
@@ -309,7 +316,9 @@ inline void Buffer::Read(Value& obj, Asset& r)
     }
     else { // Local file
         if (byteLength > 0) {
-            IOStream* file = r.OpenFile(uri, "rb");
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir + "/") : "";
+
+            IOStream* file = r.OpenFile(dir + uri, "rb");
             if (file) {
                 bool ok = LoadFromStream(*file, byteLength);
                 delete file;
@@ -332,7 +341,7 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
         stream.Seek(baseOffset, aiOrigin_SET);
     }
 
-    mData.reset(new uint8_t[byteLength]);
+    mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
 
     if (stream.Read(mData.get(), byteLength, 1) != 1) {
         return false;
@@ -592,7 +601,6 @@ T Accessor::Indexer::GetValue(int i)
 inline Image::Image()
     : width(0)
     , height(0)
-    , mData(0)
     , mDataLength(0)
 {
 
@@ -615,8 +623,8 @@ inline void Image::Read(Value& obj, Asset& r)
                     Ref<BufferView> bv = r.bufferViews.Get(bufferViewId);
                     if (bv) {
                         mDataLength = bv->byteLength;
-                        mData = new uint8_t[mDataLength];
-                        memcpy(mData, bv->buffer->GetPointer() + bv->byteOffset, mDataLength);
+                        mData.reset(new uint8_t[mDataLength]);
+                        memcpy(mData.get(), bv->buffer->GetPointer() + bv->byteOffset, mDataLength);
                     }
                 }
             }
@@ -631,7 +639,9 @@ inline void Image::Read(Value& obj, Asset& r)
             if (ParseDataURI(uristr, uri->GetStringLength(), dataURI)) {
                 mimeType = dataURI.mediaType;
                 if (dataURI.base64) {
-                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, mData);
+                    uint8_t *ptr = nullptr;
+                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
+                    mData.reset(ptr);
                 }
             }
             else {
@@ -643,10 +653,8 @@ inline void Image::Read(Value& obj, Asset& r)
 
 inline uint8_t* Image::StealData()
 {
-    uint8_t* data = mData;
     mDataLength = 0;
-    mData = 0;
-    return data;
+    return mData.release();
 }
 
 inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
@@ -661,12 +669,12 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
         bufferView->byteOffset = b->AppendData(data, length);
     }
     else { // text file: will be stored as a data uri
-        this->mData = data;
+        this->mData.reset(data);
         this->mDataLength = length;
     }
 }
 
-inline void Sampler::Read(Value& obj, Asset& r)
+inline void Sampler::Read(Value& obj, Asset& /*r*/)
 {
     SetDefaults();
 
@@ -1084,7 +1092,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 }
 #endif
 
-inline void Camera::Read(Value& obj, Asset& r)
+inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
@@ -1107,7 +1115,7 @@ inline void Camera::Read(Value& obj, Asset& r)
     }
 }
 
-inline void Light::Read(Value& obj, Asset& r)
+inline void Light::Read(Value& obj, Asset& /*r*/)
 {
     SetDefaults();
 
@@ -1228,13 +1236,21 @@ inline void Scene::Read(Value& obj, Asset& r)
 inline void AssetMetadata::Read(Document& doc)
 {
     // read the version, etc.
-    float statedVersion = 0;
     if (Value* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
         premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-        statedVersion = MemberOrDefault(*obj, "version", 0);
+
+        if (Value* versionString = FindString(*obj, "version")) {
+            version = versionString->GetString();
+        } else if (Value* versionNumber = FindNumber (*obj, "version")) {
+            char buf[4];
+
+            ai_snprintf(buf, 4, "%.1f", versionNumber->GetDouble());
+
+            version = buf;
+        }
 
         if (Value* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);
@@ -1242,16 +1258,8 @@ inline void AssetMetadata::Read(Document& doc)
         }
     }
 
-    version = std::max(statedVersion, version);
-    if (version == 0) {
-        // if missing version, we'll assume version 1...
-        version = 1;
-    }
-
-    if (version != 1) {
-        char msg[128];
-        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %.0f", version);
-        throw DeadlyImportError(msg);
+    if (version.empty() || version[0] != '1') {
+        throw DeadlyImportError("GLTF: Unsupported glTF version: " + version);
     }
 }
 
@@ -1273,7 +1281,7 @@ inline void Asset::ReadBinaryHeader(IOStream& stream)
     }
 
     AI_SWAP4(header.version);
-    asset.version = header.version;
+    asset.version = to_string(header.version);
     if (header.version != 1) {
         throw DeadlyImportError("GLTF: Unsupported binary glTF version");
     }
@@ -1405,7 +1413,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
     #undef CHECK_EXT
 }
 
-inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool absolute)
+inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool /*absolute*/)
 {
     #ifdef ASSIMP_API
         return mIOSystem->Open(path, mode);

@@ -30,6 +30,9 @@ if os.name=='posix':
     additional_dirs.append('/usr/lib/x86_64-linux-gnu')
     additional_dirs.append('/usr/local/lib/')
 
+    if 'LD_LIBRARY_PATH' in os.environ:
+        additional_dirs.extend([item for item in os.environ['LD_LIBRARY_PATH'].split(':') if item])
+
     # check if running from anaconda.
     if "conda" or "continuum" in sys.version.lower():
       cur_path = get_python_lib()

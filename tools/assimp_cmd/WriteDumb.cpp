@@ -180,6 +180,17 @@ inline uint32_t Write<aiVector3D>(const aiVector3D& v)
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
+inline uint32_t Write<aiColor3D>(const aiColor3D& v)
+{
+	uint32_t t = Write<float>(v.r);
+	t += Write<float>(v.g);
+	t += Write<float>(v.b);
+	return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
 inline uint32_t Write<aiColor4D>(const aiColor4D& v)
 {
 	uint32_t t = Write<float>(v.r);
@@ -198,6 +209,7 @@ inline uint32_t Write<aiQuaternion>(const aiQuaternion& v)
 	t += Write<float>(v.x);
 	t += Write<float>(v.y);
 	t += Write<float>(v.z);
+	ai_assert(t == 16);
 	return 16;
 }
 
@@ -565,9 +577,9 @@ uint32_t WriteBinaryLight(const aiLight* l)
 		len += Write<float>(l->mAttenuationQuadratic);
 	}
 
-	len += Write<aiVector3D>((const aiVector3D&)l->mColorDiffuse);
-	len += Write<aiVector3D>((const aiVector3D&)l->mColorSpecular);
-	len += Write<aiVector3D>((const aiVector3D&)l->mColorAmbient);
+	len += Write<aiColor3D>(l->mColorDiffuse);
+	len += Write<aiColor3D>(l->mColorSpecular);
+	len += Write<aiColor3D>(l->mColorAmbient);
 
 	if (l->mType == aiLightSource_SPOT) {
 		len += Write<float>(l->mAngleInnerCone);

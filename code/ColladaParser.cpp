@@ -224,7 +224,7 @@ void ColladaParser::ReadStructure()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads asset informations such as coordinate system informations and legal blah
+// Reads asset information such as coordinate system information and legal blah
 void ColladaParser::ReadAssetInfo()
 {
     if( mReader->isEmptyElement())
@@ -2469,8 +2469,7 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
     size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
 
     // don't overrun the boundaries of the index list
-    size_t maxIndexRequested = baseOffset + numOffsets - 1;
-    ai_assert(maxIndexRequested < indices.size());
+    ai_assert((baseOffset + numOffsets - 1) < indices.size());
 
     // extract per-vertex channels using the global per-vertex offset
     for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)

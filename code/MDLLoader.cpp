@@ -415,8 +415,15 @@ void MDLImporter::InternReadFile_Quake1( )
     else
     {
         // get the first frame in the group
+
+#if 1
+        // FIXME: the cast is wrong and causea a warning on clang 5.0
+        // disable thi code for now, fix it later
+        ai_assert(false && "Bad pointer cast");
+#else
         BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
         pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
+#endif
     }
     BE_NCONST MDL::Vertex* pcVertices = (BE_NCONST MDL::Vertex*) ((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));

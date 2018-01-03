@@ -142,6 +142,17 @@ inline size_t Write<aiVector3D>(IOStream * stream, const aiVector3D& v)
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
+inline size_t Write<aiColor3D>(IOStream * stream, const aiColor3D& v)
+{
+    size_t t = Write<float>(stream,v.r);
+    t += Write<float>(stream,v.g);
+    t += Write<float>(stream,v.b);
+    return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
 inline size_t Write<aiColor4D>(IOStream * stream, const aiColor4D& v)
 {
     size_t t = Write<float>(stream,v.r);
@@ -160,6 +171,7 @@ inline size_t Write<aiQuaternion>(IOStream * stream, const aiQuaternion& v)
     t += Write<float>(stream,v.x);
     t += Write<float>(stream,v.y);
     t += Write<float>(stream,v.z);
+    ai_assert(t == 16);
     return 16;
 }
 
@@ -325,7 +337,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         {
             AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AINODE );
 
-			size_t nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
+			unsigned int nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
 
             Write<aiString>(&chunk,node->mName);
             Write<aiMatrix4x4>(&chunk,node->mTransformation);
@@ -639,9 +651,9 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 Write<float>(&chunk,l->mAttenuationQuadratic);
             }
 
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorDiffuse);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorSpecular);
-            Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorAmbient);
+            Write<aiColor3D>(&chunk,l->mColorDiffuse);
+            Write<aiColor3D>(&chunk,l->mColorSpecular);
+            Write<aiColor3D>(&chunk,l->mColorAmbient);
 
             if (l->mType == aiLightSource_SPOT) {
                 Write<float>(&chunk,l->mAngleInnerCone);
@@ -799,7 +811,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         }
     };
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
     AssbinExport exporter;
     exporter.WriteBinaryDump( pFile, pIOSystem, pScene );

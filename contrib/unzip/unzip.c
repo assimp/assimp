@@ -41,6 +41,10 @@ woven in by Terry Thorsen 1/2003.
 #include "zlib.h"
 #include "unzip.h"
 
+#if ZLIB_VERNUM < 0x1270
+typedef unsigned long z_crc_t;
+#endif
+
 #ifdef STDC
 #  include <stddef.h>
 #  include <string.h>
@@ -147,7 +151,7 @@ typedef struct
     int encrypted;
 #    ifndef NOUNCRYPT
     unsigned long keys[3];     /* keys defining the pseudo-random sequence */
-    const unsigned long* pcrc_32_tab;
+    const z_crc_t* pcrc_32_tab;
 #    endif
 } unz_s;
 
@@ -204,7 +208,7 @@ local int unzlocal_getShort (pzlib_filefunc_def,filestream,pX)
     uLong *pX;
 {
     uLong x ;
-    int i;
+    int i = 0;
     int err;
 
     err = unzlocal_getByte(pzlib_filefunc_def,filestream,&i);
@@ -232,7 +236,7 @@ local int unzlocal_getLong (pzlib_filefunc_def,filestream,pX)
     uLong *pX;
 {
     uLong x ;
-    int i;
+    int i = 0;
     int err;
 
     err = unzlocal_getByte(pzlib_filefunc_def,filestream,&i);
@@ -608,10 +612,16 @@ local int unzlocal_GetCurrentFileInfoInternal (file,
 
     /* we check the magic */
     if (err==UNZ_OK)
+    {
         if (unzlocal_getLong(&s->z_filefunc, s->filestream,&uMagic) != UNZ_OK)
+        {
             err=UNZ_ERRNO;
+        }
         else if (uMagic!=0x02014b50)
+        {
             err=UNZ_BADZIPFILE;
+        }
+    }
 
     if (unzlocal_getShort(&s->z_filefunc, s->filestream,&file_info.version) != UNZ_OK)
         err=UNZ_ERRNO;
@@ -688,18 +698,21 @@ local int unzlocal_GetCurrentFileInfoInternal (file,
             uSizeRead = extraFieldBufferSize;
 
         if (lSeek!=0)
+        {
             if (ZSEEK(s->z_filefunc, s->filestream,lSeek,ZLIB_FILEFUNC_SEEK_CUR)==0)
                 lSeek=0;
             else
                 err=UNZ_ERRNO;
+        }
         if ((file_info.size_file_extra>0) && (extraFieldBufferSize>0))
             if (ZREAD(s->z_filefunc, s->filestream,extraField,uSizeRead)!=uSizeRead)
                 err=UNZ_ERRNO;
         lSeek += file_info.size_file_extra - uSizeRead;
     }
     else
+    {
         lSeek+=file_info.size_file_extra;
-
+    }
 
     if ((err==UNZ_OK) && (szComment!=NULL))
     {
@@ -710,20 +723,22 @@ local int unzlocal_GetCurrentFileInfoInternal (file,
             uSizeRead = file_info.size_file_comment;
         }
         else
+        {
             uSizeRead = commentBufferSize;
+        }
 
         if (lSeek!=0)
-            if (ZSEEK(s->z_filefunc, s->filestream,lSeek,ZLIB_FILEFUNC_SEEK_CUR)==0)
-                lSeek=0;
-            else
+        {
+            if (ZSEEK(s->z_filefunc, s->filestream,lSeek,ZLIB_FILEFUNC_SEEK_CUR)!=0)
                 err=UNZ_ERRNO;
+        }
         if ((file_info.size_file_comment>0) && (commentBufferSize>0))
             if (ZREAD(s->z_filefunc, s->filestream,szComment,uSizeRead)!=uSizeRead)
                 err=UNZ_ERRNO;
-        lSeek+=file_info.size_file_comment - uSizeRead;
     }
     else
-        lSeek+=file_info.size_file_comment;
+    {
+    }
 
     if ((err==UNZ_OK) && (pfile_info!=NULL))
         *pfile_info=file_info;
@@ -977,10 +992,12 @@ local int unzlocal_CheckCurrentFileCoherencyHeader (s,piSizeVar,
 
 
     if (err==UNZ_OK)
+    {
         if (unzlocal_getLong(&s->z_filefunc, s->filestream,&uMagic) != UNZ_OK)
             err=UNZ_ERRNO;
         else if (uMagic!=0x04034b50)
             err=UNZ_BADZIPFILE;
+    }
 
     if (unzlocal_getShort(&s->z_filefunc, s->filestream,&uData) != UNZ_OK)
         err=UNZ_ERRNO;
@@ -1112,7 +1129,7 @@ extern int ZEXPORT unzOpenCurrentFile3 (file, method, level, raw, password)
 
     if ((s->cur_file_info.compression_method!=0) &&
         (s->cur_file_info.compression_method!=Z_DEFLATED))
-        err=UNZ_BADZIPFILE;
+        return UNZ_BADZIPFILE;
 
     pfile_in_zip_read_info->crc32_wait=s->cur_file_info.crc;
     pfile_in_zip_read_info->crc32=0;
@@ -1239,7 +1256,7 @@ extern int ZEXPORT unzReadCurrentFile  (file, buf, len)
         return UNZ_PARAMERROR;
 
 
-    if ((pfile_in_zip_read_info->read_buffer == NULL))
+    if (pfile_in_zip_read_info->read_buffer == NULL)
         return UNZ_END_OF_LIST_OF_FILE;
     if (len==0)
         return 0;

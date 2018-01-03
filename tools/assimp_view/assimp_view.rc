@@ -189,7 +189,7 @@ BEGIN
     LTEXT           "Angle limit (in degrees):",IDC_STATIC,13,10,76,8
     LTEXT           "The angle limit defines the maximum angle that may be between two adjacent face normals that they're smoothed together.",IDC_STATIC,13,31,253,19
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,113,278,1
-    LTEXT           "This setting is also used during import, but it can be overriden by single model importers to match the original look of a model as closely as possible. Examples include 3DS, ASE and LWO, all of them relying on smoothing groups and their own angle limits. ",IDC_STATIC,13,51,254,33
+    LTEXT           "This setting is also used during import, but it can be overridden by single model importers to match the original look of a model as closely as possible. Examples include 3DS, ASE and LWO, all of them relying on smoothing groups and their own angle limits. ",IDC_STATIC,13,51,254,33
     LTEXT           "NOTE: New settings don't take effect immediately, use 'Smooth Normals' or 'Reload' to update the model.",IDC_STATIC,14,118,254,22
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,90,277,1
 END

@@ -126,16 +126,16 @@ struct Header {
     int32_t version;
 
     //! scale factors for each axis
-    aiVector3D scale;
+    ai_real scale[3];
 
     //! translation factors for each axis
-    aiVector3D translate;
+    ai_real translate[3];
 
     //! bounding radius of the mesh
     float boundingradius;
 
     //! Position of the viewer's exe. Ignored
-    aiVector3D vEyePos;
+    ai_real vEyePos[3];
 
     //! Number of textures
     int32_t num_skins;

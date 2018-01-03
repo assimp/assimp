@@ -206,7 +206,7 @@ class MeshKey(Structure):
             ("mTime", c_double),
             
             # Index into the aiMesh::mAnimMeshes array of the
-            #  mesh coresponding to the
+            #  mesh corresponding to the
             #aiMeshAnim hosting this
             #  key frame. The referenced anim mesh is evaluated
             #  according to the rules defined in the docs for

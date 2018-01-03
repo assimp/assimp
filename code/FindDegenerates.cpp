@@ -56,95 +56,135 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindDegeneratesProcess::FindDegeneratesProcess()
-: configRemoveDegenerates (false)
-{}
+: mConfigRemoveDegenerates( false )
+, mConfigCheckAreaOfTriangle( false ){
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-FindDegeneratesProcess::~FindDegeneratesProcess()
-{
+FindDegeneratesProcess::~FindDegeneratesProcess() {
     // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool FindDegeneratesProcess::IsActive( unsigned int pFlags) const
-{
+bool FindDegeneratesProcess::IsActive( unsigned int pFlags) const {
     return 0 != (pFlags & aiProcess_FindDegenerates);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup import configuration
-void FindDegeneratesProcess::SetupProperties(const Importer* pImp)
-{
+void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
     // Get the current value of AI_CONFIG_PP_FD_REMOVE
-    configRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE,0));
+    mConfigRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE,0));
+    mConfigCheckAreaOfTriangle = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_CHECKAREA) );
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void FindDegeneratesProcess::Execute( aiScene* pScene)
-{
+void FindDegeneratesProcess::Execute( aiScene* pScene) {
     DefaultLogger::get()->debug("FindDegeneratesProcess begin");
     for (unsigned int i = 0; i < pScene->mNumMeshes;++i){
-        ExecuteOnMesh( pScene->mMeshes[i]);
+        ExecuteOnMesh( pScene->mMeshes[ i ] );
     }
     DefaultLogger::get()->debug("FindDegeneratesProcess finished");
 }
 
+static ai_real heron( ai_real a, ai_real b, ai_real c ) {
+    ai_real s = (a + b + c) / 2;
+    ai_real area = pow((s * ( s - a ) * ( s - b ) * ( s - c ) ), (ai_real)0.5 );
+    return area;
+}
+
+static ai_real distance3D( const aiVector3D &vA, aiVector3D &vB ) {
+    const ai_real lx = ( vB.x - vA.x );
+    const ai_real ly = ( vB.y - vA.y );
+    const ai_real lz = ( vB.z - vA.z );
+    ai_real a = lx*lx + ly*ly + lz*lz;
+    ai_real d = pow( a, (ai_real)0.5 );
+
+    return d;
+}
+
+static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh ) {
+    ai_real area = 0;
+
+    aiVector3D vA( mesh->mVertices[ face.mIndices[ 0 ] ] );
+    aiVector3D vB( mesh->mVertices[ face.mIndices[ 1 ] ] );
+    aiVector3D vC( mesh->mVertices[ face.mIndices[ 2 ] ] );
+
+    ai_real a( distance3D( vA, vB ) );
+    ai_real b( distance3D( vB, vC ) );
+    ai_real c( distance3D( vC, vA ) );
+    area = heron( a, b, c );
+
+    return area;
+}
+
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported mesh
-void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh)
-{
+void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
     mesh->mPrimitiveTypes = 0;
 
     std::vector<bool> remove_me;
-    if (configRemoveDegenerates)
-        remove_me.resize(mesh->mNumFaces,false);
+    if (mConfigRemoveDegenerates) {
+        remove_me.resize( mesh->mNumFaces, false );
+    }
 
     unsigned int deg = 0, limit;
-    for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
-    {
+    for ( unsigned int a = 0; a < mesh->mNumFaces; ++a ) {
         aiFace& face = mesh->mFaces[a];
         bool first = true;
 
         // check whether the face contains degenerated entries
-        for (unsigned int i = 0; i < face.mNumIndices; ++i)
-        {
+        for (unsigned int i = 0; i < face.mNumIndices; ++i) {
             // Polygons with more than 4 points are allowed to have double points, that is
             // simulating polygons with holes just with concave polygons. However,
             // double points may not come directly after another.
             limit = face.mNumIndices;
-            if (face.mNumIndices > 4)
-                limit = std::min(limit,i+2);
+            if (face.mNumIndices > 4) {
+                limit = std::min( limit, i+2 );
+            }
 
-            for (unsigned int t = i+1; t < limit; ++t)
-            {
-                if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]])
-                {
+            for (unsigned int t = i+1; t < limit; ++t) {
+                if (mesh->mVertices[face.mIndices[ i ] ] == mesh->mVertices[ face.mIndices[ t ] ]) {
                     // we have found a matching vertex position
                     // remove the corresponding index from the array
-                    --face.mNumIndices;--limit;
-                    for (unsigned int m = t; m < face.mNumIndices; ++m)
-                    {
-                        face.mIndices[m] = face.mIndices[m+1];
+                    --face.mNumIndices;
+                    --limit;
+                    for (unsigned int m = t; m < face.mNumIndices; ++m) {
+                        face.mIndices[ m ] = face.mIndices[ m+1 ];
                     }
                     --t;
 
                     // NOTE: we set the removed vertex index to an unique value
                     // to make sure the developer gets notified when his
                     // application attemps to access this data.
-                    face.mIndices[face.mNumIndices] = 0xdeadbeef;
+                    face.mIndices[ face.mNumIndices ] = 0xdeadbeef;
 
-                    if(first)
-                    {
+                    if(first) {
                         ++deg;
                         first = false;
                     }
 
-                    if (configRemoveDegenerates) {
-                        remove_me[a] = true;
+                    if ( mConfigRemoveDegenerates ) {
+                        remove_me[ a ] = true;
                         goto evil_jump_outside; // hrhrhrh ... yeah, this rocks baby!
+                    }
+                }
+            }
+
+            if ( mConfigCheckAreaOfTriangle ) {
+                if ( face.mNumIndices == 3 ) {
+                    ai_real area = calculateAreaOfTriangle( face, mesh );
+                    if ( area < 1e-6 ) {
+                        if ( mConfigRemoveDegenerates ) {
+                            remove_me[ a ] = true;
+                            goto evil_jump_outside;
+                        }
+
+                        // todo: check for index which is corrupt.
                     }
                 }
             }
@@ -171,7 +211,7 @@ evil_jump_outside:
     }
 
     // If AI_CONFIG_PP_FD_REMOVE is true, remove degenerated faces from the import
-    if (configRemoveDegenerates && deg) {
+    if (mConfigRemoveDegenerates && deg) {
         unsigned int n = 0;
         for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
         {

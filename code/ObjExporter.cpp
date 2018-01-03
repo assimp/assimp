@@ -58,9 +58,13 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Wavefront OBJ. Prototyped and registered in Exporter.cpp
-void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
+void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
     // invoke the exporter
     ObjExporter exporter(pFile, pScene);
+
+    if (exporter.mOutput.fail() || exporter.mOutputMat.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
 
     // we're still here - export successfully completed. Write both the main OBJ file and the material script
     {
@@ -79,23 +83,45 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Worker function for exporting a scene to Wavefront OBJ without the material file. Prototyped and registered in Exporter.cpp
+void ExportSceneObjNoMtl(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
+    // invoke the exporter
+    ObjExporter exporter(pFile, pScene, true);
+
+    if (exporter.mOutput.fail() || exporter.mOutputMat.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
+
+    // we're still here - export successfully completed. Write both the main OBJ file and the material script
+    {
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+        if(outfile == NULL) {
+            throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
+        }
+        outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
+    }
+
+
+}
+
 } // end of namespace Assimp
 
 static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
-ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
+ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene, bool noMtl)
 : filename(_filename)
 , pScene(pScene)
 , vp()
 , vn()
 , vt()
-, vc() 
-, vpMap()
-, vnMap()
-, vtMap()
-, vcMap()
-, meshes()
+, vc()
+, mVpMap()
+, mVnMap()
+, mVtMap()
+, mVcMap()
+, mMeshes()
 , endl("\n") {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
@@ -104,8 +130,9 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
     mOutputMat.imbue(l);
     mOutputMat.precision(16);
 
-    WriteGeometryFile();
-    WriteMaterialFile();
+    WriteGeometryFile(noMtl);
+    if (!noMtl)
+        WriteMaterialFile();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -128,7 +155,7 @@ std::string ObjExporter :: GetMaterialLibName()
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialLibFileName() {
-    // Remove existing .obj file extention so that the final material file name will be fileName.mtl and not fileName.obj.mtl
+    // Remove existing .obj file extension so that the final material file name will be fileName.mtl and not fileName.obj.mtl
     size_t lastdot = filename.find_last_of('.');
     if (lastdot != std::string::npos)
         return filename.substr(0, lastdot) + MaterialExt;
@@ -137,15 +164,21 @@ std::string ObjExporter::GetMaterialLibFileName() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: WriteHeader(std::ostringstream& out) {
+void ObjExporter::WriteHeader(std::ostringstream& out) {
     out << "# File produced by Open Asset Import Library (http://www.assimp.sf.net)" << endl;
-    out << "# (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.' << aiGetVersionRevision() << ")" << endl  << endl;
+    out << "# (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
+        << aiGetVersionRevision() << ")" << endl  << endl;
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string ObjExporter :: GetMaterialName(unsigned int index)
+std::string ObjExporter::GetMaterialName(unsigned int index)
 {
     const aiMaterial* const mat = pScene->mMaterials[index];
+    if ( nullptr == mat ) {
+        static const std::string EmptyStr;
+        return EmptyStr;
+    }
+
     aiString s;
     if(AI_SUCCESS == mat->Get(AI_MATKEY_NAME,s)) {
         return std::string(s.data,s.length);
@@ -183,7 +216,7 @@ void ObjExporter::WriteMaterialFile()
         if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_TRANSPARENT,c)) {
             mOutputMat << "Tf " << c.r << " " << c.g << " " << c.b << endl;
         }
-        
+
         ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
@@ -225,18 +258,18 @@ void ObjExporter::WriteMaterialFile()
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-void ObjExporter::WriteGeometryFile() {
+void ObjExporter::WriteGeometryFile(bool noMtl) {
     WriteHeader(mOutput);
-    mOutput << "mtllib "  << GetMaterialLibName() << endl << endl;
+    if (!noMtl)
+        mOutput << "mtllib "  << GetMaterialLibName() << endl << endl;
 
     // collect mesh geometry
     aiMatrix4x4 mBase;
     AddNode(pScene->mRootNode, mBase);
 
     // write vertex positions with colors, if any
-    vpMap.getVectors( vp );
-    vcMap.getColors( vc );
+    mVpMap.getVectors( vp );
+    mVcMap.getColors( vc );
     if ( vc.empty() ) {
         mOutput << "# " << vp.size() << " vertex positions" << endl;
         for ( const aiVector3D& v : vp ) {
@@ -246,14 +279,16 @@ void ObjExporter::WriteGeometryFile() {
         mOutput << "# " << vp.size() << " vertex positions and colors" << endl;
         size_t colIdx = 0;
         for ( const aiVector3D& v : vp ) {
-            mOutput << "v  " << v.x << " " << v.y << " " << v.z << " " << vc[ colIdx ].r << " " << vc[ colIdx ].g << " " << vc[ colIdx ].b << endl;
-            colIdx++;
+            if ( colIdx < vc.size() ) {
+                mOutput << "v  " << v.x << " " << v.y << " " << v.z << " " << vc[ colIdx ].r << " " << vc[ colIdx ].g << " " << vc[ colIdx ].b << endl;
+            }
+            ++colIdx;
         }
     }
     mOutput << endl;
 
     // write uv coordinates
-    vtMap.getVectors(vt);
+    mVtMap.getVectors(vt);
     mOutput << "# " << vt.size() << " UV coordinates" << endl;
     for(const aiVector3D& v : vt) {
         mOutput << "vt " << v.x << " " << v.y << " " << v.z << endl;
@@ -261,7 +296,7 @@ void ObjExporter::WriteGeometryFile() {
     mOutput << endl;
 
     // write vertex normals
-    vnMap.getVectors(vn);
+    mVnMap.getVectors(vn);
     mOutput << "# " << vn.size() << " vertex normals" << endl;
     for(const aiVector3D& v : vn) {
         mOutput << "vn " << v.x << " " << v.y << " " << v.z << endl;
@@ -269,12 +304,13 @@ void ObjExporter::WriteGeometryFile() {
     mOutput << endl;
 
     // now write all mesh instances
-    for(const MeshInstance& m : meshes) {
+    for(const MeshInstance& m : mMeshes) {
         mOutput << "# Mesh \'" << m.name << "\' with " << m.faces.size() << " faces" << endl;
         if (!m.name.empty()) {
             mOutput << "g " << m.name << endl;
         }
-        mOutput << "usemtl " << m.matname << endl;
+        if (!noMtl)
+            mOutput << "usemtl " << m.matname << endl;
 
         for(const Face& f : m.faces) {
             mOutput << f.kind << ' ';
@@ -331,7 +367,7 @@ int ObjExporter::colIndexMap::getIndex( const aiColor4D& col ) {
     colMap[ col ] = mNextIndex;
     int ret = mNextIndex;
     mNextIndex++;
-    
+
     return ret;
 }
 
@@ -345,10 +381,10 @@ void ObjExporter::colIndexMap::getColors( std::vector<aiColor4D> &colors ) {
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat) {
-    meshes.push_back(MeshInstance());
-    MeshInstance& mesh = meshes.back();
+    mMeshes.push_back(MeshInstance());
+    MeshInstance& mesh = mMeshes.back();
 
-    mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_" + std::string(m->mName.data,m->mName.length) : "");
+    mesh.name = std::string( name.data, name.length );
     mesh.matname = GetMaterialName(m->mMaterialIndex);
 
     mesh.faces.resize(m->mNumFaces);
@@ -373,24 +409,24 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
             const unsigned int idx = f.mIndices[a];
 
             aiVector3D vert = mat * m->mVertices[idx];
-            face.indices[a].vp = vpMap.getIndex(vert);
+            face.indices[a].vp = mVpMap.getIndex(vert);
 
             if (m->mNormals) {
                 aiVector3D norm = aiMatrix3x3(mat) * m->mNormals[idx];
-                face.indices[a].vn = vnMap.getIndex(norm);
+                face.indices[a].vn = mVnMap.getIndex(norm);
             } else {
                 face.indices[a].vn = 0;
             }
 
             if ( nullptr != m->mColors[ 0 ] ) {
                 aiColor4D col4 = m->mColors[ 0 ][ idx ];
-                face.indices[ a ].vc = vcMap.getIndex( col4 );
+                face.indices[ a ].vc = mVcMap.getIndex( col4 );
             } else {
                 face.indices[ a ].vc = 0;
             }
 
             if ( m->mTextureCoords[ 0 ] ) {
-                face.indices[a].vt = vtMap.getIndex(m->mTextureCoords[0][idx]);
+                face.indices[a].vt = mVtMap.getIndex(m->mTextureCoords[0][idx]);
             } else {
                 face.indices[a].vt = 0;
             }

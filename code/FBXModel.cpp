@@ -77,13 +77,11 @@ Model::Model(uint64_t id, const Element& element, const Document& doc, const std
     ResolveLinks(element,doc);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Model::~Model()
 {
 
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void Model::ResolveLinks(const Element& element, const Document& doc)
@@ -131,7 +129,6 @@ void Model::ResolveLinks(const Element& element, const Document& doc)
         continue;
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 bool Model::IsNull() const

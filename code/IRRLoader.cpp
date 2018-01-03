@@ -394,7 +394,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 angles[1] %= 360;
                 angles[2] %= 360;
 
-                if ((angles[0]*angles[1]) && (angles[1]*angles[2]))
+                if ( (angles[0]*angles[1]) != 0 && (angles[1]*angles[2]) != 0 )
                 {
                     FindSuitableMultiple(angles[0]);
                     FindSuitableMultiple(angles[1]);

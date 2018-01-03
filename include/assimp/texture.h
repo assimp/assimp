@@ -179,6 +179,12 @@ struct aiTexture
      */
     C_STRUCT aiTexel* pcData;
 
+    /** Texture original filename
+    *
+    * Used to get the texture reference
+    */
+    C_STRUCT aiString mFilename;
+
 #ifdef __cplusplus
 
     //! For compressed textures (mHeight == 0): compare the

@@ -107,7 +107,7 @@ const aiImporterDesc *MMDImporter::GetInfo() const { return &desc; }
 // ------------------------------------------------------------------------------------------------
 //  MMD import implementation
 void MMDImporter::InternReadFile(const std::string &file, aiScene *pScene,
-                                 IOSystem *pIOHandler) {
+                                 IOSystem * /*pIOHandler*/) {
   // Read file by istream
   std::filebuf fb;
   if (!fb.open(file, std::ios::in | std::ios::binary)) {
@@ -118,7 +118,7 @@ void MMDImporter::InternReadFile(const std::string &file, aiScene *pScene,
 
   // Get the file-size and validate it, throwing an exception when fails
   fileStream.seekg(0, fileStream.end);
-  size_t fileSize = fileStream.tellg();
+  size_t fileSize = static_cast<size_t>(fileStream.tellg());
   fileStream.seekg(0, fileStream.beg);
 
   if (fileSize < sizeof(pmx::PmxModel)) {
@@ -141,8 +141,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   aiNode *pNode = new aiNode;
   if (!pModel->model_name.empty()) {
     pNode->mName.Set(pModel->model_name);
-  } else {
-    ai_assert(false);
   }
 
   pScene->mRootNode = pNode;
@@ -170,7 +168,7 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   }
 
   // create node hierarchy for bone position
-  aiNode **ppNode = new aiNode *[pModel->bone_count];
+  std::unique_ptr<aiNode *[]> ppNode(new aiNode *[pModel->bone_count]);
   for (auto i = 0; i < pModel->bone_count; i++) {
     ppNode[i] = new aiNode(pModel->bones[i].bone_name);
   }
@@ -179,9 +177,9 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     const pmx::PmxBone &bone = pModel->bones[i];
 
     if (bone.parent_index < 0) {
-      pScene->mRootNode->addChildren(1, ppNode + i);
+      pScene->mRootNode->addChildren(1, ppNode.get() + i);
     } else {
-      ppNode[bone.parent_index]->addChildren(1, ppNode + i);
+      ppNode[bone.parent_index]->addChildren(1, ppNode.get() + i);
 
       aiVector3D v3 = aiVector3D(
           bone.position[0] - pModel->bones[bone.parent_index].position[0],
@@ -278,7 +276,7 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
       bone_vertex_map[vsBDEF2_ptr->bone_index1].push_back(
           aiVertexWeight(index, vsBDEF2_ptr->bone_weight));
       bone_vertex_map[vsBDEF2_ptr->bone_index2].push_back(
-          aiVertexWeight(index, 1.0 - vsBDEF2_ptr->bone_weight));
+          aiVertexWeight(index, 1.0f - vsBDEF2_ptr->bone_weight));
       break;
     case pmx::PmxVertexSkinningType::BDEF4:
       bone_vertex_map[vsBDEF4_ptr->bone_index1].push_back(
@@ -295,7 +293,7 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
       bone_vertex_map[vsSDEF_ptr->bone_index1].push_back(
           aiVertexWeight(index, vsSDEF_ptr->bone_weight));
       bone_vertex_map[vsSDEF_ptr->bone_index2].push_back(
-          aiVertexWeight(index, 1.0 - vsSDEF_ptr->bone_weight));
+          aiVertexWeight(index, 1.0f - vsSDEF_ptr->bone_weight));
       break;
     case pmx::PmxVertexSkinningType::QDEF:
       const auto vsQDEF_ptr =
@@ -325,9 +323,11 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
     aiMatrix4x4::Translation(-pos, pBone->mOffsetMatrix);
     auto it = bone_vertex_map.find(ii);
     if (it != bone_vertex_map.end()) {
-      pBone->mNumWeights = it->second.size();
-      pBone->mWeights = it->second.data();
-      it->second.swap(*(new vector<aiVertexWeight>));
+      pBone->mNumWeights = static_cast<unsigned int>(it->second.size());
+      pBone->mWeights = new aiVertexWeight[pBone->mNumWeights];
+      for (unsigned int j = 0; j < pBone->mNumWeights; j++) {
+          pBone->mWeights[j] = it->second[j];
+      }
     }
     bone_ptr_ptr[ii] = pBone;
   }

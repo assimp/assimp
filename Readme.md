@@ -52,7 +52,8 @@ __Importers__:
 - DXF
 - ENFF
 - FBX
-- GLB/GLTF
+- glTF 1.0 + GLB
+- glTF 2.0
 - HMB
 - IFC-STEP
 - IRR / IRRMESH
@@ -106,8 +107,8 @@ __Exporters__:
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
 - STEP
-- glTF (partial)
-- glTF2.0
+- glTF 1.0 (partial)
+- glTF 2.0 (partial)
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
@@ -118,7 +119,8 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 * [.NET](port/AssimpNET/Readme.md)
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
-* [Unity 3d Plugin] (https://www.assetstore.unity3d.com/en/#!/content/91777)
+* [Unity 3d Plugin](https://www.assetstore.unity3d.com/en/#!/content/91777)
+* [JVM](https://github.com/kotlin-graphics/assimp) Full jvm port (currently supported obj, ply, stl, collada, md2)
 
 ### Other tools ###
 [open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.

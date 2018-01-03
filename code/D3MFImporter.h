@@ -46,21 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-class D3MFImporter : public BaseImporter
-{
+class D3MFImporter : public BaseImporter {
 public:
+    // BaseImporter interface
     D3MFImporter();
     ~D3MFImporter();
-
-    // BaseImporter interface
-public:
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
     void SetupProperties(const Importer *pImp);
     const aiImporterDesc *GetInfo() const;
 
 protected:
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
-
 };
-}
+
+} // Namespace Assimp
+
 #endif // AI_D3MFLOADER_H_INCLUDED

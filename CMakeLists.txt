@@ -42,6 +42,10 @@ OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
 )
+OPTION( BUILD_FRAMEWORK
+  "Build package as Mac OS X Framework bundle."
+  OFF
+)
 OPTION( ASSIMP_DOUBLE_PRECISION
   "Set to ON to enable double precision processing"
   OFF
@@ -78,6 +82,18 @@ OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
 )
+OPTION ( ASSIMP_WERROR
+  "Treat warnings as errors."
+  OFF
+)
+OPTION ( ASSIMP_ASAN
+  "Enable AddressSanitizer."
+  OFF
+)
+OPTION ( ASSIMP_UBSAN
+  "Enable Undefined Behavior sanitizer."
+  OFF
+)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -99,14 +115,22 @@ IF(MSVC)
   )
 ENDIF(MSVC)
 
+IF (BUILD_FRAMEWORK)
+  SET (BUILD_SHARED_LIBS ON)
+  MESSAGE(STATUS "Framework bundle building enabled")
+ENDIF(BUILD_FRAMEWORK)
+
 IF(NOT BUILD_SHARED_LIBS)
+  MESSAGE(STATUS "Shared libraries disabled")
   SET(LINK_SEARCH_START_STATIC TRUE)
+ELSE()
+  MESSAGE(STATUS "Shared libraries enabled")
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
 SET (ASSIMP_VERSION_MAJOR 4)
-SET (ASSIMP_VERSION_MINOR 0)
-SET (ASSIMP_VERSION_PATCH 1)
+SET (ASSIMP_VERSION_MINOR 1)
+SET (ASSIMP_VERSION_PATCH 0)
 SET (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 SET (ASSIMP_SOVERSION 4)
 SET (PROJECT_VERSION "${ASSIMP_VERSION}")
@@ -143,19 +167,6 @@ IF(ASSIMP_DOUBLE_PRECISION)
     ADD_DEFINITIONS(-DASSIMP_DOUBLE_PRECISION)
 ENDIF(ASSIMP_DOUBLE_PRECISION)
 
-# Check for OpenMP support
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
-    IF(MSVC)
-        IF(MSVC_VERSION GREATER 1910)
-            SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
-        ENDIF()
-    ENDIF()
-endif()
-
 CONFIGURE_FILE(
   ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/revision.h
@@ -181,8 +192,11 @@ SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
 IF( UNIX )
   # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
-  IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
-    ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+  IF( ${OPERATING_SYSTEM} MATCHES "Android")
+  ELSE()
+    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
+      #ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+    ENDIF()
   ENDIF()
 
   # Use GNUInstallDirs for Unix predefined directories
@@ -199,17 +213,47 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
+
+  # disable "elements of array '' will be default initialized" warning on MSVC2013
+  IF(MSVC12)
+    add_compile_options(/wd4351)
+  ENDIF()
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -std=c++11" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -std=c++11" )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
 if (ASSIMP_COVERALLS)
+    MESSAGE(STATUS "Coveralls enabled")
     INCLUDE(Coveralls)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
+
+if (ASSIMP_WERROR)
+  MESSAGE(STATUS "Treating warnings as errors")
+  IF (MSVC)
+    add_compile_options(/WX)
+  ELSE()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  ENDIF()
+endif()
+
+if (ASSIMP_ASAN)
+    MESSAGE(STATUS "AddressSanitizer enabled")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+endif()
+
+if (ASSIMP_UBSAN)
+    MESSAGE(STATUS "Undefined Behavior sanitizer enabled")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
 endif()
 
 INCLUDE (FindPkgMacros)

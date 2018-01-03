@@ -197,13 +197,17 @@ struct SceneHelper
  * The class is currently being used by various postprocessing steps
  * and loaders (ie. LWS).
  */
-class ASSIMP_API SceneCombiner
-{
+class ASSIMP_API SceneCombiner {
     // class cannot be instanced
-    SceneCombiner() {}
+    SceneCombiner() {
+        // empty
+    }
+
+    ~SceneCombiner() {
+        // empty
+    }
 
 public:
-
     // -------------------------------------------------------------------
     /** Merges two or more scenes.
      *
@@ -217,10 +221,9 @@ public:
     static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
         unsigned int flags = 0);
 
-
     // -------------------------------------------------------------------
-    /** Merges two or more scenes and attaches all sceenes to a specific
-     *  position in the node graph of the masteer scene.
+    /** Merges two or more scenes and attaches all scenes to a specific
+     *  position in the node graph of the master scene.
      *
      *  @param dest Receives a pointer to the destination scene. If the
      *    pointer doesn't point to NULL when the function is called, the
@@ -235,7 +238,6 @@ public:
     static void MergeScenes(aiScene** dest, aiScene* master,
         std::vector<AttachmentInfo>& src,
         unsigned int flags = 0);
-
 
     // -------------------------------------------------------------------
     /** Merges two or more meshes
@@ -254,7 +256,6 @@ public:
     static void MergeMeshes(aiMesh** dest,unsigned int flags,
         std::vector<aiMesh*>::const_iterator begin,
         std::vector<aiMesh*>::const_iterator end);
-
 
     // -------------------------------------------------------------------
     /** Merges two or more bones

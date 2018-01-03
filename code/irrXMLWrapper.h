@@ -70,9 +70,7 @@ namespace Assimp    {
  * }
  * @endcode
  **/
-class CIrrXML_IOStreamReader
-    : public irr::io::IFileReadCallBack
-{
+class CIrrXML_IOStreamReader : public irr::io::IFileReadCallBack {
 public:
 
     // ----------------------------------------------------------------------------------

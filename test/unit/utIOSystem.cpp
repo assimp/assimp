@@ -73,3 +73,6 @@ TEST_F( IOSystemTest, accessDirectoryStackTest ) {
     EXPECT_EQ( 0U, pImp->StackSize() );
 }
 
+TEST_F( IOSystemTest, delFileTest ) {
+    EXPECT_FALSE( pImp->DeleteFile( "none" ) );
+}

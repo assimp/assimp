@@ -92,7 +92,7 @@ TEST_F(SharedPPDataTest, testPODProperty)
 // ------------------------------------------------------------------------------------------------
 TEST_F(SharedPPDataTest, testPropertyPointer)
 {
-    int *i = new int[35];
+    int *i = new int;
     shared->AddProperty("test16",i);
     int* o;
     EXPECT_TRUE(shared->GetProperty("test16",o));

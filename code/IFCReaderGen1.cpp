@@ -1045,7 +1045,7 @@ void IFC::GetSchema(EXPRESS::ConversionSchema& out)
 namespace STEP {
 
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<NotImplemented>(const STEP::DB& db, const LIST& params, NotImplemented* in)
+template <> size_t GenericFill<NotImplemented>(const STEP::DB& /*db*/, const LIST& /*params*/, NotImplemented* /*in*/)
 {
 	return 0;
 }
@@ -1253,7 +1253,7 @@ template <> size_t GenericFill<IfcPerformanceHistory>(const DB& db, const LIST& 
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcRepresentationItem>(const DB& db, const LIST& params, IfcRepresentationItem* in)
+template <> size_t GenericFill<IfcRepresentationItem>(const DB& /*db*/, const LIST& /*params*/, IfcRepresentationItem* /*in*/)
 {
 	size_t base = 0;
 	return base;
@@ -1715,7 +1715,7 @@ template <> size_t GenericFill<IfcPlateType>(const DB& db, const LIST& params, I
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcObjectPlacement>(const DB& db, const LIST& params, IfcObjectPlacement* in)
+template <> size_t GenericFill<IfcObjectPlacement>(const DB& /*db*/, const LIST& /*params*/, IfcObjectPlacement* /*in*/)
 {
 	size_t base = 0;
 	return base;

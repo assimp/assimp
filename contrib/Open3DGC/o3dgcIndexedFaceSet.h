@@ -62,26 +62,26 @@ namespace o3dgc
                                          }
         unsigned long                    GetNumFloatAttributes()  const { return m_numFloatAttributes;}
         unsigned long                    GetNumIntAttributes()    const { return m_numIntAttributes  ;}
-        const Real * const               GetCoordMin   () const { return m_coordMin;}
-        const Real * const               GetCoordMax   () const { return m_coordMax;}
-        const Real * const               GetNormalMin  () const { return m_normalMin;}
-        const Real * const               GetNormalMax  () const { return m_normalMax;}
+        const Real *                     GetCoordMin   () const { return m_coordMin;}
+        const Real *                     GetCoordMax   () const { return m_coordMax;}
+        const Real *                     GetNormalMin  () const { return m_normalMin;}
+        const Real *                     GetNormalMax  () const { return m_normalMax;}
         Real                             GetCoordMin   (int j)  const { return m_coordMin[j]       ;}
         Real                             GetCoordMax   (int j)  const { return m_coordMax[j]       ;}
         Real                             GetNormalMin  (int j)  const { return m_normalMin[j]      ;}
         Real                             GetNormalMax  (int j)  const { return m_normalMax[j]      ;}
 
-        const O3DGCIFSFloatAttributeType GetFloatAttributeType(unsigned long a) const
+        O3DGCIFSFloatAttributeType       GetFloatAttributeType(unsigned long a) const
                                          { 
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                              return m_typeFloatAttribute[a];
                                          }
-        const O3DGCIFSIntAttributeType   GetIntAttributeType(unsigned long a) const
+        O3DGCIFSIntAttributeType         GetIntAttributeType(unsigned long a) const
                                          { 
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                              return m_typeIntAttribute[a];
                                          }
-        const unsigned long              GetFloatAttributeDim(unsigned long a) const
+        unsigned long                    GetFloatAttributeDim(unsigned long a) const
                                          { 
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                              return m_dimFloatAttribute[a];
@@ -91,12 +91,12 @@ namespace o3dgc
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                              return m_dimIntAttribute[a];
                                          }
-        const Real * const               GetFloatAttributeMin(unsigned long a) const
+        const Real *                     GetFloatAttributeMin(unsigned long a) const
                                          { 
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                              return &(m_minFloatAttribute[a * O3DGC_SC3DMC_MAX_DIM_ATTRIBUTES]);
                                          }
-        const Real * const               GetFloatAttributeMax(unsigned long a) const
+        const Real *                     GetFloatAttributeMax(unsigned long a) const
                                          { 
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                              return &(m_maxFloatAttribute[a * O3DGC_SC3DMC_MAX_DIM_ATTRIBUTES]);
@@ -118,17 +118,17 @@ namespace o3dgc
         bool                             GetSolid()            const { return m_solid           ;}
         bool                             GetConvex()           const { return m_convex          ;}
         bool                             GetIsTriangularMesh() const { return m_isTriangularMesh;}
-        const unsigned long * const      GetIndexBufferID()    const { return m_indexBufferID   ;}
-        const T * const                  GetCoordIndex()       const { return m_coordIndex;}
-        T * const                        GetCoordIndex()             { return m_coordIndex;}
-        Real * const                     GetCoord()            const { return m_coord     ;}
-        Real * const                     GetNormal()           const { return m_normal    ;}
-        Real * const                     GetFloatAttribute(unsigned long a)  const 
+        const unsigned long *            GetIndexBufferID()    const { return m_indexBufferID   ;}
+        const T *                        GetCoordIndex()       const { return m_coordIndex;}
+        T *                              GetCoordIndex()             { return m_coordIndex;}
+        Real *                           GetCoord()            const { return m_coord     ;}
+        Real *                           GetNormal()           const { return m_normal    ;}
+        Real *                           GetFloatAttribute(unsigned long a)  const
                                          {
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                              return m_floatAttribute[a];
                                          }
-        long * const                     GetIntAttribute(unsigned long a)   const 
+        long *                           GetIntAttribute(unsigned long a)   const
                                          {
                                              assert(a < O3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                              return m_intAttribute[a]  ;

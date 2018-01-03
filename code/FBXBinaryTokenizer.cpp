@@ -151,7 +151,8 @@ uint32_t ReadWord(const char* input, const char*& cursor, const char* end)
         TokenizeError("cannot ReadWord, out of bounds",input, cursor);
     }
 
-    uint32_t word = *reinterpret_cast<const uint32_t*>(cursor);
+    uint32_t word;
+    memcpy(&word, cursor, 4);
     AI_SWAP4(word);
 
     cursor += k_to_read;
@@ -421,7 +422,6 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
     return true;
 }
 
-
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -434,16 +434,24 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
         TokenizeError("file is too short",0);
     }
 
+    //uint32_t offset = 0x15;
+/*    const char* cursor = input + 0x15;
+
+    const uint32_t flags = ReadWord(input, cursor, input + length);
+
+    const uint8_t padding_0 = ReadByte(input, cursor, input + length); // unused
+    const uint8_t padding_1 = ReadByte(input, cursor, input + length); // unused*/
+
     if (strncmp(input,"Kaydara FBX Binary",18)) {
         TokenizeError("magic bytes not found",0);
     }
 
     const char* cursor = input + 18;
-	const uint8_t unknown_1 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_2 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_3 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_4 = ReadByte(input, cursor, input + length);
-	const uint8_t unknown_5 = ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
+	/*Result ignored*/ ReadByte(input, cursor, input + length);
 	const uint32_t version = ReadWord(input, cursor, input + length);
 	const bool is64bits = version >= 7500;
     while (cursor < input + length)

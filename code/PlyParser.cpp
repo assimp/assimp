@@ -381,6 +381,11 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
   {
     char* endPos = &buffer[0] + (strlen(&buffer[0]) - 1);
     pOut->szName = std::string(&buffer[0], endPos);
+
+    // go to the next line
+    PLY::DOM::SkipSpacesAndLineEnd(buffer);
+
+    return true;
   }
 
   //parse the number of occurrences of this element
@@ -618,7 +623,7 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM* p_pc
   }
 
   streamBuffer.getNextBlock(buffer);
-  unsigned int bufferSize = buffer.size();
+  unsigned int bufferSize = static_cast<unsigned int>(buffer.size());
   const char* pCur = (char*)&buffer[0];
   if (!p_pcOut->ParseElementInstanceListsBinary(streamBuffer, buffer, pCur, bufferSize, loader, p_bBE))
   {
@@ -666,7 +671,6 @@ bool PLY::ElementInstanceList::ParseInstanceList(
   PLYImporter* loader)
 {
   ai_assert(NULL != pcElement);
-  const char* pCur = (const char*)&buffer[0];
 
   // parse all elements
   if (EEST_INVALID == pcElement->eSemantic || pcElement->alProperties.empty())
@@ -678,11 +682,11 @@ bool PLY::ElementInstanceList::ParseInstanceList(
       PLY::DOM::SkipComments(buffer);
       PLY::DOM::SkipLine(buffer);
       streamBuffer.getNextLine(buffer);
-      pCur = (buffer.empty()) ? NULL : (const char*)&buffer[0];
     }
   }
   else
   {
+    const char* pCur = (const char*)&buffer[0];
     // be sure to have enough storage
     for (unsigned int i = 0; i < pcElement->NumOccur; ++i)
     {
@@ -933,7 +937,7 @@ bool PLY::PropertyInstance::ParseValue(const char* &pCur,
 {
   ai_assert(NULL != pCur);
   ai_assert(NULL != out);
-  
+
   //calc element size
   bool ret = true;
   switch (eType)
@@ -1025,7 +1029,7 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
       buffer = std::vector<char>(buffer.end() - bufferSize, buffer.end());
       buffer.insert(buffer.end(), nbuffer.begin(), nbuffer.end());
       nbuffer.clear();
-      bufferSize = buffer.size();
+      bufferSize = static_cast<unsigned int>(buffer.size());
       pCur = (char*)&buffer[0];
     }
     else

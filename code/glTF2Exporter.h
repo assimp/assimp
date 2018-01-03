@@ -66,8 +66,15 @@ namespace glTF2
 
     class Asset;
     struct TexProperty;
+    struct TextureInfo;
+    struct NormalTextureInfo;
+    struct OcclusionTextureInfo;
     struct Node;
     struct Texture;
+
+    // Vec/matrix types, as raw float arrays
+    typedef float (vec3)[3];
+    typedef float (vec4)[4];
 }
 
 namespace Assimp
@@ -101,12 +108,19 @@ namespace Assimp
 
         void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
 
-        void GetTexSampler(const aiMaterial* mat, glTF2::Ref<glTF2::Texture> texture);
-        void GetMatTex(const aiMaterial* mat, glTF2::Ref<glTF2::Texture>& texture, aiTextureType tt);
-        void GetMatColorOrTex(const aiMaterial* mat, glTF2::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
+        void GetTexSampler(const aiMaterial* mat, glTF2::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
+        void GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int idx);
+        void GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int idx);
+        void GetMatTex(const aiMaterial* mat, glTF2::Ref<glTF2::Texture>& texture, aiTextureType tt, unsigned int slot);
+        void GetMatTex(const aiMaterial* mat, glTF2::TextureInfo& prop, aiTextureType tt, unsigned int slot);
+        void GetMatTex(const aiMaterial* mat, glTF2::NormalTextureInfo& prop, aiTextureType tt, unsigned int slot);
+        void GetMatTex(const aiMaterial* mat, glTF2::OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot);
+        aiReturn GetMatColor(const aiMaterial* mat, glTF2::vec4& prop, const char* propName, int type, int idx);
+        aiReturn GetMatColor(const aiMaterial* mat, glTF2::vec3& prop, const char* propName, int type, int idx);
         void ExportMetadata();
         void ExportMaterials();
         void ExportMeshes();
+        void MergeMeshes();
         unsigned int ExportNodeHierarchy(const aiNode* n);
         unsigned int ExportNode(const aiNode* node, glTF2::Ref<glTF2::Node>& parent);
         void ExportScene();

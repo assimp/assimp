@@ -92,6 +92,12 @@ struct Error : DeadlyImportError {
  *  descendents. It serves as base class for all data structure fields. */
 // -------------------------------------------------------------------------------
 struct ElemBase {
+    ElemBase()
+    : dna_type(nullptr)
+    {
+        // empty
+    }
+
     virtual ~ElemBase() {
         // empty
     }
@@ -253,7 +259,7 @@ public:
      *  a compiler complain is the result.
      *  @param dest Destination value to be written
      *  @param db File database, including input stream. */
-    template <typename T> inline void Convert (T& dest, const FileDatabase& db) const;
+    template <typename T> void Convert (T& dest, const FileDatabase& db) const;
 
     // --------------------------------------------------------
     // generic converter

@@ -433,7 +433,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     // deal with this more elegantly and with less redundancy, but right
     // now it seems unavoidable.
     if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {
-		std::vector<T> tempData;
+        if ( !HasElement( source, indexDataElementName ) ) {
+            return;
+        }
+
+        std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         data_out.resize(vertex_count);
@@ -452,6 +456,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         data_out.resize(vertex_count);
 
         std::vector<int> uvIndices;
+        if ( !HasElement( source, indexDataElementName ) ) {
+            return;
+        }
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
         for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {

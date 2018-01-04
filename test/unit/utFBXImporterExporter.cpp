@@ -61,3 +61,9 @@ public:
 TEST_F( utFBXImporterExporter, importXFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+TEST_F( utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+}

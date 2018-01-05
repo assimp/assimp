@@ -156,7 +156,10 @@ namespace glTF2 {
     inline void Write(Value& obj, Buffer& b, AssetWriter& w)
     {
         obj.AddMember("byteLength", static_cast<uint64_t>(b.byteLength), w.mAl);
-        obj.AddMember("uri", Value(b.GetURI(), w.mAl).Move(), w.mAl);
+
+        const auto uri = b.GetURI();
+        const auto relativeUri = uri.substr(uri.find_last_of("/\\") + 1u);
+        obj.AddMember("uri", Value(relativeUri, w.mAl).Move(), w.mAl);
     }
 
     inline void Write(Value& obj, BufferView& bv, AssetWriter& w)

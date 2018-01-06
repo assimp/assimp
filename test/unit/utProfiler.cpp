@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "UTLogStream.h"
-#include "code/Profiler.h"
+#include <assimp/Profiler.h>
 #include <assimp/DefaultLogger.hpp>
 
 using namespace ::Assimp;

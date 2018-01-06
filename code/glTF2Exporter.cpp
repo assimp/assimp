@@ -109,6 +109,10 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     mAsset.reset( new Asset( pIOSystem ) );
 
+    if (isBinary) {
+        mAsset->SetAsBinary();
+    }
+
     ExportMetadata();
 
     ExportMaterials();

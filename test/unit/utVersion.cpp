@@ -69,3 +69,8 @@ TEST_F( utVersion, aiGetVersionRevisionTest ) {
     EXPECT_NE( aiGetVersionRevision(), 0U );
 }
 
+TEST_F( utVersion, aiGetBranchNameTest ) {
+    EXPECT_NE( nullptr, aiGetBranchName() );
+}
+
+

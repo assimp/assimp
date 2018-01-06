@@ -167,7 +167,9 @@ namespace glTF2 {
         if (bv.byteStride != 0) {
             obj.AddMember("byteStride", bv.byteStride, w.mAl);
         }
-        obj.AddMember("target", int(bv.target), w.mAl);
+        if (bv.target != 0) {
+            obj.AddMember("target", int(bv.target), w.mAl);
+        }
     }
 
     inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)
@@ -177,17 +179,23 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
-        std::string uri;
-        if (img.HasData()) {
-            uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
-            uri += ";base64,";
-            Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+        if (img.bufferView) {
+            obj.AddMember("bufferView", img.bufferView->index, w.mAl);
+            obj.AddMember("mimeType", Value(img.mimeType, w.mAl).Move(), w.mAl);
         }
         else {
-            uri = img.uri;
-        }
+            std::string uri;
+            if (img.HasData()) {
+                uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
+                uri += ";base64,";
+                Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+            }
+            else {
+                uri = img.uri;
+            }
 
-        obj.AddMember("uri", Value(uri, w.mAl).Move(), w.mAl);
+            obj.AddMember("uri", Value(uri, w.mAl).Move(), w.mAl);
+        }
     }
 
     namespace {
@@ -569,12 +577,16 @@ namespace glTF2 {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
+        Ref<Buffer> bodyBuffer = mAsset.GetBodyBuffer();
+        if (bodyBuffer->byteLength > 0) {
+            rapidjson::Value glbBodyBuffer;
+            glbBodyBuffer.SetObject();
+            glbBodyBuffer.AddMember("byteLength", bodyBuffer->byteLength, mAl);
+            mDoc["buffers"].PushBack(glbBodyBuffer, mAl);
+        }
+
         // Padding with spaces as required by the spec
         uint32_t padding = 0x20202020;
-
-        // Adapt JSON so that it is not pointing to an external file,
-        // as this is required by the GLB spec'.
-        mDoc["buffers"][0].RemoveMember("uri");
 
         //
         // JSON chunk
@@ -608,28 +620,25 @@ namespace glTF2 {
         //
 
         uint32_t binaryChunkLength = 0;
-        if (mAsset.buffers.Size() > 0) {
-            Ref<Buffer> b = mAsset.buffers.Get(0u);
-            if (b->byteLength > 0) {
-                binaryChunkLength = (b->byteLength + 3) & ~3; // Round up to next multiple of 4
-                auto paddingLength = binaryChunkLength - b->byteLength;
+        if (bodyBuffer->byteLength > 0) {
+            binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
+            auto paddingLength = binaryChunkLength - bodyBuffer->byteLength;
 
-                GLB_Chunk binaryChunk;
-                binaryChunk.chunkLength = binaryChunkLength;
-                binaryChunk.chunkType = ChunkType_BIN;
-                AI_SWAP4(binaryChunk.chunkLength);
+            GLB_Chunk binaryChunk;
+            binaryChunk.chunkLength = binaryChunkLength;
+            binaryChunk.chunkType = ChunkType_BIN;
+            AI_SWAP4(binaryChunk.chunkLength);
 
-                size_t bodyOffset = sizeof(GLB_Header) + sizeof(GLB_Chunk) + jsonChunk.chunkLength;
-                outfile->Seek(bodyOffset, aiOrigin_SET);
-                if (outfile->Write(&binaryChunk, 1, sizeof(GLB_Chunk)) != sizeof(GLB_Chunk)) {
-                    throw DeadlyExportError("Failed to write body data header!");
-                }
-                if (outfile->Write(b->GetPointer(), 1, b->byteLength) != b->byteLength) {
-                    throw DeadlyExportError("Failed to write body data!");
-                }
-                if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
-                    throw DeadlyExportError("Failed to write body data padding!");
-                }
+            size_t bodyOffset = sizeof(GLB_Header) + sizeof(GLB_Chunk) + jsonChunk.chunkLength;
+            outfile->Seek(bodyOffset, aiOrigin_SET);
+            if (outfile->Write(&binaryChunk, 1, sizeof(GLB_Chunk)) != sizeof(GLB_Chunk)) {
+                throw DeadlyExportError("Failed to write body data header!");
+            }
+            if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
+                throw DeadlyExportError("Failed to write body data!");
+            }
+            if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+                throw DeadlyExportError("Failed to write body data padding!");
             }
         }
 

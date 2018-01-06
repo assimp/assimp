@@ -51,11 +51,8 @@ if os.name=='posix':
 elif os.name=='nt':
     ext_whitelist.append('.dll')
     path_dirs = os.environ['PATH'].split(';')
-    for dir_candidate in path_dirs:
-        if 'assimp' in dir_candidate.lower():
-            additional_dirs.append(dir_candidate)
+    additional_dirs.extend(path_dirs)
 
-#print(additional_dirs)
 def vec2tuple(x):
     """ Converts a VECTOR3D to a Tuple """
     return (x.x, x.y, x.z)

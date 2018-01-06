@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
 
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 #include "3MFXmlTags.h"
 #include "D3MFOpcPackage.h"
 

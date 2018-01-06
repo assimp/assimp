@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LWOFileData.h"
 #include <assimp/SceneCombiner.h>
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 struct aiImporterDesc;
 

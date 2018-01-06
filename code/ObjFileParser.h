@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/vector2.h>
 #include <assimp/vector3.h>
 #include <assimp/mesh.h>
-#include "IOStreamBuffer.h"
+#include <assimp/IOStreamBuffer.h>
 
 namespace Assimp {
 

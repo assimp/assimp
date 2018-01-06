@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /** @file Default implementation of IOSystem using the standard C file functions */
 
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/DefaultIOStream.h>

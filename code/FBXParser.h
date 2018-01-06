@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <map>
 #include <memory>
-#include "LogAux.h"
-#include "fast_atof.h"
+#include <assimp/LogAux.h>
+#include <assimp/fast_atof.h>
 
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"

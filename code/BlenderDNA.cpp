@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include "BlenderDNA.h"
-#include "StreamReader.h"
-#include "fast_atof.h"
-#include "TinyFormatter.h"
+#include <assimp/StreamReader.h>
+#include <assimp/fast_atof.h>
+#include <assimp/TinyFormatter.h>
 
 using namespace Assimp;
 using namespace Assimp::Blender;

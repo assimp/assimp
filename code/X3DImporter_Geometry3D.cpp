@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter_Macro.hpp"
 
 // Header files, Assimp.
-#include "StandardShapes.h"
+#include <assimp/StandardShapes.h>
 
 namespace Assimp
 {

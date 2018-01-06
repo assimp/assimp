@@ -50,8 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "ASELoader.h"
-#include "StringComparison.h"
-#include "SkeletonMeshBuilder.h"
+#include <assimp/StringComparison.h>
+#include <assimp/SkeletonMeshBuilder.h>
 #include "TargetAnimation.h"
 #include <assimp/Importer.hpp>
 #include <assimp/IOSystem.hpp>
@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 // utilities
-#include "fast_atof.h"
+#include <assimp/fast_atof.h>
 
 using namespace Assimp;
 using namespace Assimp::ASE;

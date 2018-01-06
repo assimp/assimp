@@ -48,7 +48,7 @@ corresponding preprocessor flag to selectively disable formats.
 */
 
 #include <vector>
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 // ------------------------------------------------------------------------------------------------
 // Importers

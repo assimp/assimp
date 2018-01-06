@@ -54,9 +54,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MD3Loader.h"
 #include <assimp/SceneCombiner.h>
-#include "GenericProperty.h"
-#include "RemoveComments.h"
-#include "ParsingUtils.h"
+#include <assimp/GenericProperty.h>
+#include <assimp/RemoveComments.h>
+#include <assimp/ParsingUtils.h>
 #include "Importer.h"
 #include <assimp/DefaultLogger.hpp>
 #include <memory>

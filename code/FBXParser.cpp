@@ -1197,6 +1197,14 @@ std::string ParseTokenAsString(const Token& t)
     return i;
 }
 
+bool HasElement( const Scope& sc, const std::string& index ) {
+    const Element* el = sc[ index ];
+    if ( nullptr == el ) {
+        return false;
+    }
+
+    return true;
+}
 
 // ------------------------------------------------------------------------------------------------
 // extract a required element from a scope, abort if the element cannot be found

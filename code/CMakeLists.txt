@@ -951,8 +951,8 @@ if (APPLE)
          "../${HEADER_PATH}/Compiler"
          assimp.framework/Headers/Compiler
       COMMENT "Copying public ./Compiler/ header files to framework bundle's Headers/Compiler/")
-  endif(BUILD_FRAMEWORK)
-endif(APPLE)
+  ENDIF(BUILD_FRAMEWORK)
+ENDIF(APPLE)
 
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
@@ -981,7 +981,7 @@ if (ASSIMP_ANDROID_JNIIOSYSTEM)
   INSTALL(FILES ${HEADER_PATH}/${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
     DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
     COMPONENT assimp-dev)
-endif(ASSIMP_ANDROID_JNIIOSYSTEM)
+ENDIF(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
   IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
@@ -1003,7 +1003,7 @@ if(MSVC AND ASSIMP_INSTALL_PDB)
       CONFIGURATIONS RelWithDebInfo
     )
   ENDIF()
-endif ()
+ENDIF ()
 
 if (ASSIMP_COVERALLS)
     include(Coveralls)
@@ -1015,4 +1015,4 @@ if (ASSIMP_COVERALLS)
         "${COVERAGE_SRCS}" # The source files.
         ON                 # If we should upload.
         "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
-endif()
+ENDIF()

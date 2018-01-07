@@ -34,5 +34,5 @@ declare -a headers=("fast_atof.h"
 
 for i in "${headers[@]}"
 do
-  find . -type f -exec sed -i "s,\"../../code/$i\",<assimp/$i>,g" {} \;
+  find . -type f -exec sed -i "s,\"$i\",<assimp/$i>,g" {} \;
 done

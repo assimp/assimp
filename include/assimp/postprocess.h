@@ -535,7 +535,18 @@ enum aiPostProcessSteps
     *
     *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to control this.
     */
-    aiProcess_GlobalScale = 0x8000000
+    aiProcess_GlobalScale = 0x8000000,
+
+    // -------------------------------------------------------------------------
+    /** <hr>A postprocessing step to embed of textures.
+     *
+     *  This will remove external data dependencies for textures.
+     *  If a texture's file does not exist at the specified path
+     *  (due, for instance, to an absolute path generated on another system),
+     *  it will check if a file with the same name exists at the root folder
+     *  of the imported model. And if so, it uses that.
+     */
+    aiProcess_EmbedTextures  = 0x10000000,
 
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000

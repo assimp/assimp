@@ -677,6 +677,8 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             profiler->EndRegion("import");
         }
 
+        SetPropertyString("sourceFilePath", pFile);
+
         // If successful, apply all active post processing steps to the imported data
         if( pimpl->mScene)  {
 

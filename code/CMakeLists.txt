@@ -525,6 +525,8 @@ SET( PostProcessing_SRCS
   ComputeUVMappingProcess.h
   ConvertToLHProcess.cpp
   ConvertToLHProcess.h
+  EmbedTexturesProcess.cpp
+  EmbedTexturesProcess.h
   FindDegenerates.cpp
   FindDegenerates.h
   FindInstancesProcess.cpp
@@ -940,8 +942,8 @@ if (APPLE)
 
     # PUBLIC_HEADER option does not support directory structure creation
     # add ./Compiler/*.h to assimp.framework via copy command
-    ADD_CUSTOM_COMMAND(TARGET assimp POST_BUILD 
-      COMMAND "${CMAKE_COMMAND}" -E copy_directory 
+    ADD_CUSTOM_COMMAND(TARGET assimp POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E copy_directory
          "../${HEADER_PATH}/Compiler"
          assimp.framework/Headers/Compiler
       COMMENT "Copying public ./Compiler/ header files to framework bundle's Headers/Compiler/")

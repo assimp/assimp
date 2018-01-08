@@ -91,6 +91,9 @@ corresponding preprocessor flag to selectively disable steps.
 #ifndef ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS
 #   include "RemoveRedundantMaterials.h"
 #endif
+#if (!defined ASSIMP_BUILD_NO_EMBEDTEXTURES_PROCESS)
+#   include "EmbedTexturesProcess.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
 #   include "FindInvalidDataProcess.h"
 #endif
@@ -132,7 +135,7 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
     // of sequence it is executed. Steps that are added here are not
     // validated - as RegisterPPStep() does - all dependencies must be given.
     // ----------------------------------------------------------------------------
-    out.reserve(25);
+    out.reserve(30);
 #if (!defined ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS)
     out.push_back( new MakeLeftHandedProcess());
 #endif
@@ -147,6 +150,9 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
 #endif
 #if (!defined ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
     out.push_back( new RemoveRedundantMatsProcess());
+#endif
+#if (!defined ASSIMP_BUILD_NO_EMBEDTEXTURES_PROCESS)
+    out.push_back( new EmbedTexturesProcess());
 #endif
 #if (!defined ASSIMP_BUILD_NO_FINDINSTANCES_PROCESS)
     out.push_back( new FindInstancesProcess());

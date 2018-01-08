@@ -117,7 +117,7 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
         }
     }
 
-    return false;
+    return true;
 }
 
 

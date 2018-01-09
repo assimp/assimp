@@ -561,17 +561,24 @@ The output UV coordinate system has its origin in the lower-left corner:
 @endcode
 Use the #aiProcess_FlipUVs flag to get UV coordinates with the upper-left corner als origin.
 
-All matrices in the library are row-major. That means that the matrices are stored row by row in memory,
-which is similar to the OpenGL matrix layout. A typical 4x4 matrix including a translational part looks like this:
+A typical 4x4 matrix including a translational part looks like this:
 @code
 X1  Y1  Z1  T1
 X2  Y2  Z2  T2
 X3  Y3  Z3  T3
 0   0   0   1
 @endcode
-with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3)
-being the Z base vector and (T1, T2, T3) being the translation part. If you want to use these matrices
-in DirectX functions, you have to transpose them.
+with <tt>(X1, X2, X3)</tt> being the image of the X base vector, <tt>(Y1, Y2, Y3)</tt> being the image of the
+Y base vector, <tt>(Z1, Z2, Z3)</tt> being the image of the Z base vector and <tt>(T1, T2, T3)</tt> being the
+translation part. 
+All matrices in the library are row-major. That means that the matrix elements are stored row by row in memory,
+which is identical to the OpenGL matrix layout. So the above matrix is stored in memory as
+<tt>[X1, Y1, Z1, T1, X2, Y2, Z2, T2, X3, Y3, Z3, T3, 0, 0, 0, 1]</tt>. If you want to use these matrices
+in a framework, which expects the matrix layout to be column-major (stored along the columns), such as
+DirectX or Matlab, you will have to transpose the matrix first.
+
+To be very precise: The transposition has nothing to do with a left-handed or right-handed coordinate system
+but 'converts' between row-major and column-major storage format. 
 
 <hr>
 

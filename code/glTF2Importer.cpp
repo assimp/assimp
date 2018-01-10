@@ -517,6 +517,9 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
 
         aiCamera* aicam = mScene->mCameras[i] = new aiCamera();
 
+        // cameras point in -Z by default, rest is specified in node transform
+        aicam->mLookAt = aiVector3D(0.f,0.f,-1.f);
+
         if (cam.type == Camera::Perspective) {
 
             aicam->mAspect        = cam.cameraProperties.perspective.aspectRatio;

@@ -51,7 +51,7 @@ OpenGEXExporter::OpenGEXExporter() {
 OpenGEXExporter::~OpenGEXExporter() {
 }
 
-bool OpenGEXExporter::exportScene( const char *filename, const aiScene* pScene ) {
+bool OpenGEXExporter::exportScene( const char * /*filename*/, const aiScene* /*pScene*/ ) {
     return true;
 }
 

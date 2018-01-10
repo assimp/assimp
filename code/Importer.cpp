@@ -274,10 +274,6 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp)
 
     if (it != pimpl->mImporter.end())   {
         pimpl->mImporter.erase(it);
-
-        std::set<std::string> st;
-        pImp->GetExtensionList(st);
-
         DefaultLogger::get()->info("Unregistering custom importer: ");
         return AI_SUCCESS;
     }
@@ -680,6 +676,8 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         if (profiler) {
             profiler->EndRegion("import");
         }
+
+        SetPropertyString("sourceFilePath", pFile);
 
         // If successful, apply all active post processing steps to the imported data
         if( pimpl->mScene)  {

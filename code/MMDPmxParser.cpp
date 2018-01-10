@@ -471,7 +471,7 @@ namespace pmx
 		stream->read((char*) &this->is_near, sizeof(uint8_t));
 	}
 
-	void PmxSoftBody::Read(std::istream *stream, PmxSetting *setting)
+    void PmxSoftBody::Read(std::istream * /*stream*/, PmxSetting * /*setting*/)
 	{
 		// 未実装
 		std::cerr << "Not Implemented Exception" << std::endl;

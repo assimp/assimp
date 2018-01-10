@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-// Header files, standart library.
+// Header files, standard library.
 #include <memory>
 #include <inttypes.h>
 
@@ -75,6 +75,14 @@ namespace Assimp {
     {
         // invoke the exporter
         glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, false);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // Worker function for exporting a scene to GLB. Prototyped and registered in Exporter.cpp
+    void ExportSceneGLB2(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+    {
+        // invoke the exporter
+        glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, true);
     }
 
 } // end of namespace Assimp
@@ -101,6 +109,10 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     mAsset.reset( new Asset( pIOSystem ) );
 
+    if (isBinary) {
+        mAsset->SetAsBinary();
+    }
+
     ExportMetadata();
 
     ExportMaterials();
@@ -118,7 +130,11 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     AssetWriter writer(*mAsset);
 
-    writer.WriteFile(filename);
+    if (isBinary) {
+        writer.WriteGLBFile(filename);
+    } else {
+        writer.WriteFile(filename);
+    }
 }
 
 /*
@@ -170,13 +186,13 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     bv->buffer = buffer;
     bv->byteOffset = unsigned(offset);
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
+    bv->byteStride = 0;
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
     acc->byteOffset = 0;
-    acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;
     acc->type = typeOut;
@@ -372,20 +388,28 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, OcclusionTextureInfo& prop,
     }
 }
 
-void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
+aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
 {
     aiColor4D col;
-    if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
+    aiReturn result = mat->Get(propName, type, idx, col);
+
+    if (result == AI_SUCCESS) {
         prop[0] = col.r; prop[1] = col.g; prop[2] = col.b; prop[3] = col.a;
     }
+
+    return result;
 }
 
-void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* propName, int type, int idx)
+aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* propName, int type, int idx)
 {
     aiColor3D col;
-    if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
+    aiReturn result = mat->Get(propName, type, idx, col);
+
+    if (result == AI_SUCCESS) {
         prop[0] = col.r; prop[1] = col.g; prop[2] = col.b;
     }
+
+    return result;
 }
 
 void glTF2Exporter::ExportMaterials()
@@ -394,7 +418,7 @@ void glTF2Exporter::ExportMaterials()
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
 
-        std::string id = "material_" + std::to_string(i);
+        std::string id = "material_" + to_string(i);
 
         Ref<Material> m = mAsset->materials.Create(id);
 
@@ -406,16 +430,49 @@ void glTF2Exporter::ExportMaterials()
 
         m->name = name;
 
-        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
+        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+
+        if (!m->pbrMetallicRoughness.baseColorTexture.texture) {
+            //if there wasn't a baseColorTexture defined in the source, fallback to any diffuse texture
+            GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
+        }
+
         GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
-        GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+
+        if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR) != AI_SUCCESS) {
+            // if baseColorFactor wasn't defined, then the source is likely not a metallic roughness material.
+            //a fallback to any diffuse color should be used instead
+            GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+        }
 
         if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor) != AI_SUCCESS) {
             //if metallicFactor wasn't defined, then the source is likely not a PBR file, and the metallicFactor should be 0
             m->pbrMetallicRoughness.metallicFactor = 0;
         }
 
-        mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor);
+        // get roughness if source is gltf2 file
+        if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor) != AI_SUCCESS) {
+            // otherwise, try to derive and convert from specular + shininess values
+            aiColor4D specularColor;
+            ai_real shininess;
+
+            if (
+                mat->Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS &&
+                mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
+            ) {
+                // convert specular color to luminance
+                float specularIntensity = specularColor[0] * 0.2125f + specularColor[1] * 0.7154f + specularColor[2] * 0.0721f;
+                //normalize shininess (assuming max is 1000) with an inverse exponentional curve
+                float normalizedShininess = std::sqrt(shininess / 1000);
+
+                //clamp the shininess value between 0 and 1
+                normalizedShininess = std::min(std::max(normalizedShininess, 0.0f), 1.0f);
+                // low specular intensity values should produce a rough material even if shininess is high.
+                normalizedShininess = normalizedShininess * specularIntensity;
+
+                m->pbrMetallicRoughness.roughnessFactor = 1 - normalizedShininess;
+            }
+        }
 
         GetMatTex(mat, m->normalTexture, aiTextureType_NORMALS);
         GetMatTex(mat, m->occlusionTexture, aiTextureType_LIGHTMAP);
@@ -434,7 +491,7 @@ void glTF2Exporter::ExportMaterials()
 
             if (mat->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
                 if (opacity < 1) {
-                    m->alphaMode = "MASK";
+                    m->alphaMode = "BLEND";
                     m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
                 }
             }
@@ -451,11 +508,19 @@ void glTF2Exporter::ExportMaterials()
 
             PbrSpecularGlossiness pbrSG;
 
-            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_FACTOR);
-            GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR);
-            mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor);
-            GetMatTex(mat, pbrSG.diffuseTexture, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_TEXTURE);
-            GetMatTex(mat, pbrSG.specularGlossinessTexture, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE);
+            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
+            GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_COLOR_SPECULAR);
+
+            if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) != AI_SUCCESS) {
+                float shininess;
+
+                if (mat->Get(AI_MATKEY_SHININESS, shininess)) {
+                    pbrSG.glossinessFactor = shininess / 1000;
+                }
+            }
+
+            GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
+            GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
 
             m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }
@@ -751,9 +816,33 @@ void glTF2Exporter::MergeMeshes()
             for (unsigned int m = nMeshes - 1; m >= 1; --m) {
                 Ref<Mesh> mesh = node->meshes.at(m);
 
-                firstMesh->primitives.insert(firstMesh->primitives.end(), mesh->primitives.begin(), mesh->primitives.end());
+                //append this mesh's primitives to the first mesh's primitives
+                firstMesh->primitives.insert(
+                    firstMesh->primitives.end(),
+                    mesh->primitives.begin(),
+                    mesh->primitives.end()
+                );
 
-                node->meshes.erase(node->meshes.begin() + m);
+                //remove the mesh from the list of meshes
+                unsigned int removedIndex = mAsset->meshes.Remove(mesh->id.c_str());
+
+                //find the presence of the removed mesh in other nodes
+                for (unsigned int nn = 0; nn < mAsset->nodes.Size(); ++nn) {
+                    Ref<Node> node = mAsset->nodes.Get(nn);
+
+                    for (unsigned int mm = 0; mm < node->meshes.size(); ++mm) {
+                        Ref<Mesh>& meshRef = node->meshes.at(mm);
+                        unsigned int meshIndex = meshRef.GetIndex();
+
+                        if (meshIndex == removedIndex) {
+                            node->meshes.erase(node->meshes.begin() + mm);
+                        } else if (meshIndex > removedIndex) {
+                            Ref<Mesh> newMeshRef = mAsset->meshes.Get(meshIndex - 1);
+
+                            meshRef = newMeshRef;
+                        }
+                    }
+                }
             }
 
             //since we were looping backwards, reverse the order of merged primitives to their original order

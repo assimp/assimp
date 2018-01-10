@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/cexport.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 class BlendImportMaterials : public ::testing::Test {
 public:
@@ -66,7 +67,7 @@ protected:
 // ------------------------------------------------------------------------------------------------
 TEST_F(BlendImportMaterials, testImportMaterial)
 {
-    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderMaterial_269.blend", 0);
+    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderMaterial_269.blend", aiProcess_ValidateDataStructure);
     ASSERT_TRUE(pTest != NULL);
     ASSERT_TRUE(pTest->HasMaterials());
 

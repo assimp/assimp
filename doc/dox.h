@@ -60,7 +60,7 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 <b>Stanford Ply</b> ( <i>*.ply</i> )<br>
 <b>TrueSpace</b> ( <i>*.cob, *.scn</i> )<sup>2</sup><br><br>
 </tt>
-See the @link importer_notes Importer Notes Page @endlink for informations, what a specific importer can do and what not.
+See the @link importer_notes Importer Notes Page @endlink for information, what a specific importer can do and what not.
 Note that although this paper claims to be the official documentation,
 http://assimp.sourceforge.net/main_features_formats.html
 <br>is usually the most up-to-date list of file formats supported by the library. <br>
@@ -81,7 +81,7 @@ formats handle the required endian conversion correctly, so large parts of the l
 
 The assimp linker library and viewer application are provided under the BSD 3-clause license. This basically means
 that you are free to use it in open- or closed-source projects, for commercial or non-commercial purposes as you like
-as long as you retain the license informations and take own responsibility for what you do with it. For details see
+as long as you retain the license information and take own responsibility for what you do with it. For details see
 the LICENSE file.
 
 You can find test models for almost all formats in the <assimp_root>/test/models directory. Beware, they're *free*,
@@ -533,8 +533,9 @@ assimp::Importer::ReadFile(), aiImportFile() or aiImportFileEx() - see the @link
 for further information on how to use the library.
 
 By default, all 3D data is provided in a right-handed coordinate system such as OpenGL uses. In
-this coordinate system, +X points to the right, -Z points away from the viewer into the screen and
-+Y points upwards. Several modeling packages such as 3D Studio Max use this coordinate system as well (or a rotated variant of it).
+this coordinate system, +X points to the right, +Y points upwards and +Z points out of the screen
+towards the viewer. Several modeling packages such as 3D Studio Max use this coordinate system as well
+(or a rotated variant of it).
 By contrast, some other environments use left-handed coordinate systems, a prominent example being
 DirectX. If you need the imported data to be in a left-handed coordinate system, supply the
 #aiProcess_MakeLeftHanded flag to the ReadFile() function call.
@@ -552,7 +553,7 @@ although our built-in triangulation (#aiProcess_Triangulate postprocessing step)
 
 The output UV coordinate system has its origin in the lower-left corner:
 @code
-0y|1y ---------- 1x|1y
+0x|1y ---------- 1x|1y
  |                |
  |                |
  |                |
@@ -568,8 +569,7 @@ X2  Y2  Z2  T2
 X3  Y3  Z3  T3
 0   0   0   1
 @endcode
-
-... with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3)
+with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3)
 being the Z base vector and (T1, T2, T3) being the translation part. If you want to use these matrices
 in DirectX functions, you have to transpose them.
 
@@ -664,7 +664,7 @@ See the @link materials Material System Page. @endlink
 
 @section bones Bones
 
-A mesh may have a set of bones in the form of aiBone structures.. Bones are a means to deform a mesh
+A mesh may have a set of bones in the form of aiBone objects. Bones are a means to deform a mesh
 according to the movement of a skeleton. Each bone has a name and a set of vertices on which it has influence.
 Its offset matrix declares the transformation needed to transform from mesh space to the local space of this bone.
 
@@ -1420,7 +1420,7 @@ IFC file properties (IfcPropertySet) are kept as per-node metadata, see aiNode::
 
 This section contains implementations notes for the OgreXML importer.
 @subsection overview Overview
-Ogre importer is currently optimized for the Blender Ogre exporter, because thats the only one that I use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
+Ogre importer is currently optimized for the Blender Ogre exporter, because that's the only one that I use. You can find the Blender Ogre exporter at: http://www.ogre3d.org/forums/viewtopic.php?f=8&t=45922
 
 @subsection what What will be loaded?
 
@@ -1434,7 +1434,7 @@ Skeleton: Skeleton with Bone hierarchy (Position and Rotation, but no Scaling in
 animations with rotation, translation and scaling keys.
 
 @subsection export_Blender How to export Files from Blender
-You can find informations about how to use the Ogreexporter by your own, so here are just some options that you need, so the assimp
+You can find information about how to use the Ogreexporter by your own, so here are just some options that you need, so the assimp
 importer will load everything correctly:
 - Use either "Rendering Material" or "Custom Material" see @ref material
 - do not use "Flip Up Axies to Y"
@@ -1543,7 +1543,7 @@ Done! Please, share your loader that everyone can profit from it!
 
 @section properties Properties
 
-You can use properties to chance the behavior of you importer. In order to do so, you have to overide BaseImporter::SetupProperties, and specify
+You can use properties to chance the behavior of you importer. In order to do so, you have to override BaseImporter::SetupProperties, and specify
 you custom properties in config.h. Just have a look to the other AI_CONFIG_IMPORT_* defines and you will understand, how it works.
 
 The properties can be set with Importer::SetProperty***() and can be accessed in your SetupProperties function with Importer::GetProperty***(). You can

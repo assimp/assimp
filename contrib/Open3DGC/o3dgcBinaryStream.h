@@ -231,7 +231,8 @@ namespace o3dgc
         float                   ReadFloat32Bin(unsigned long & position) const
                                 {
                                     unsigned long value = ReadUInt32Bin(position);
-                                    float fvalue = *((float *)(&value));
+                                    float fvalue;
+                                    memcpy(&fvalue, &value, 4);
                                     return fvalue;
                                 }
         unsigned long           ReadUInt32Bin(unsigned long & position)  const
@@ -261,7 +262,8 @@ namespace o3dgc
 
         void                    WriteFloat32ASCII(float value) 
                                 {
-                                    unsigned long uiValue = *((unsigned long *)(&value));
+                                    unsigned long uiValue;
+                                    memcpy(&uiValue, &value, 4);
                                     WriteUInt32ASCII(uiValue);
                                 }
         void                    WriteUInt32ASCII(unsigned long position, unsigned long value) 
@@ -314,7 +316,8 @@ namespace o3dgc
         float                   ReadFloat32ASCII(unsigned long & position) const
                                 {
                                     unsigned long value = ReadUInt32ASCII(position);
-                                    float fvalue = *((float *)(&value));
+                                    float fvalue;
+                                    memcpy(&fvalue, &value, 4);
                                     return fvalue;
                                 }
         unsigned long           ReadUInt32ASCII(unsigned long & position)  const

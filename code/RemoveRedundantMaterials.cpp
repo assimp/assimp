@@ -145,6 +145,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
             if (!abReferenced[i]) {
                 ++unreferencedRemoved;
                 delete pScene->mMaterials[i];
+                pScene->mMaterials[i] = nullptr;
                 continue;
             }
 
@@ -158,6 +159,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
                     me = 0;
                     aiMappingTable[i] = aiMappingTable[a];
                     delete pScene->mMaterials[i];
+                    pScene->mMaterials[i] = nullptr;
                     break;
                 }
             }
@@ -169,6 +171,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
         // If the new material count differs from the original,
         // we need to rebuild the material list and remap mesh material indexes.
         if (iNewNum != pScene->mNumMaterials) {
+            ai_assert(iNewNum > 0);
             aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
             ::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
             for (unsigned int p = 0; p < pScene->mNumMaterials;++p)

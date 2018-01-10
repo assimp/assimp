@@ -92,6 +92,12 @@ struct Error : DeadlyImportError {
  *  descendents. It serves as base class for all data structure fields. */
 // -------------------------------------------------------------------------------
 struct ElemBase {
+    ElemBase()
+    : dna_type(nullptr)
+    {
+        // empty
+    }
+
     virtual ~ElemBase() {
         // empty
     }

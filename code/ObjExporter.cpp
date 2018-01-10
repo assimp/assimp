@@ -58,9 +58,13 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Wavefront OBJ. Prototyped and registered in Exporter.cpp
-void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
+void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
     // invoke the exporter
     ObjExporter exporter(pFile, pScene);
+
+    if (exporter.mOutput.fail() || exporter.mOutputMat.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
 
     // we're still here - export successfully completed. Write both the main OBJ file and the material script
     {
@@ -79,18 +83,40 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Worker function for exporting a scene to Wavefront OBJ without the material file. Prototyped and registered in Exporter.cpp
+void ExportSceneObjNoMtl(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
+    // invoke the exporter
+    ObjExporter exporter(pFile, pScene, true);
+
+    if (exporter.mOutput.fail() || exporter.mOutputMat.fail()) {
+        throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
+    }
+
+    // we're still here - export successfully completed. Write both the main OBJ file and the material script
+    {
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+        if(outfile == NULL) {
+            throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
+        }
+        outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
+    }
+
+
+}
+
 } // end of namespace Assimp
 
 static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
-ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
+ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene, bool noMtl)
 : filename(_filename)
 , pScene(pScene)
 , vp()
 , vn()
 , vt()
-, vc() 
+, vc()
 , mVpMap()
 , mVnMap()
 , mVtMap()
@@ -104,8 +130,9 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
     mOutputMat.imbue(l);
     mOutputMat.precision(16);
 
-    WriteGeometryFile();
-    WriteMaterialFile();
+    WriteGeometryFile(noMtl);
+    if (!noMtl)
+        WriteMaterialFile();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -128,7 +155,7 @@ std::string ObjExporter :: GetMaterialLibName()
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialLibFileName() {
-    // Remove existing .obj file extention so that the final material file name will be fileName.mtl and not fileName.obj.mtl
+    // Remove existing .obj file extension so that the final material file name will be fileName.mtl and not fileName.obj.mtl
     size_t lastdot = filename.find_last_of('.');
     if (lastdot != std::string::npos)
         return filename.substr(0, lastdot) + MaterialExt;
@@ -189,7 +216,7 @@ void ObjExporter::WriteMaterialFile()
         if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_TRANSPARENT,c)) {
             mOutputMat << "Tf " << c.r << " " << c.g << " " << c.b << endl;
         }
-        
+
         ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
@@ -231,10 +258,10 @@ void ObjExporter::WriteMaterialFile()
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-void ObjExporter::WriteGeometryFile() {
+void ObjExporter::WriteGeometryFile(bool noMtl) {
     WriteHeader(mOutput);
-    mOutput << "mtllib "  << GetMaterialLibName() << endl << endl;
+    if (!noMtl)
+        mOutput << "mtllib "  << GetMaterialLibName() << endl << endl;
 
     // collect mesh geometry
     aiMatrix4x4 mBase;
@@ -252,8 +279,10 @@ void ObjExporter::WriteGeometryFile() {
         mOutput << "# " << vp.size() << " vertex positions and colors" << endl;
         size_t colIdx = 0;
         for ( const aiVector3D& v : vp ) {
-            mOutput << "v  " << v.x << " " << v.y << " " << v.z << " " << vc[ colIdx ].r << " " << vc[ colIdx ].g << " " << vc[ colIdx ].b << endl;
-            colIdx++;
+            if ( colIdx < vc.size() ) {
+                mOutput << "v  " << v.x << " " << v.y << " " << v.z << " " << vc[ colIdx ].r << " " << vc[ colIdx ].g << " " << vc[ colIdx ].b << endl;
+            }
+            ++colIdx;
         }
     }
     mOutput << endl;
@@ -280,7 +309,8 @@ void ObjExporter::WriteGeometryFile() {
         if (!m.name.empty()) {
             mOutput << "g " << m.name << endl;
         }
-        mOutput << "usemtl " << m.matname << endl;
+        if (!noMtl)
+            mOutput << "usemtl " << m.matname << endl;
 
         for(const Face& f : m.faces) {
             mOutput << f.kind << ' ';
@@ -337,7 +367,7 @@ int ObjExporter::colIndexMap::getIndex( const aiColor4D& col ) {
     colMap[ col ] = mNextIndex;
     int ret = mNextIndex;
     mNextIndex++;
-    
+
     return ret;
 }
 
@@ -354,7 +384,7 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
     mMeshes.push_back(MeshInstance());
     MeshInstance& mesh = mMeshes.back();
 
-    mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_" + std::string(m->mName.data,m->mName.length) : "");
+    mesh.name = std::string( name.data, name.length );
     mesh.matname = GetMaterialName(m->mMaterialIndex);
 
     mesh.faces.resize(m->mNumFaces);

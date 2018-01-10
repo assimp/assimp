@@ -169,8 +169,8 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline const char* ValidateArrayContents(const T* arr, unsigned int size,
-    const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
+inline const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/,
+    const std::vector<bool>& /*dirtyMask*/, bool /*mayBeIdentical = false*/, bool /*mayBeZero = true*/)
 {
     return NULL;
 }
@@ -339,32 +339,37 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
     bool ret = false;
-    std::vector<bool> dirtyMask(pMesh->mNumVertices,(pMesh->mNumFaces ? true : false));
+    std::vector<bool> dirtyMask(pMesh->mNumVertices, pMesh->mNumFaces != 0);
 
     // Ignore elements that are not referenced by vertices.
     // (they are, for example, caused by the FindDegenerates step)
-    for (unsigned int m = 0; m < pMesh->mNumFaces;++m)  {
+    for (unsigned int m = 0; m < pMesh->mNumFaces; ++m) {
         const aiFace& f = pMesh->mFaces[m];
 
-        for (unsigned int i = 0; i < f.mNumIndices;++i) {
+        for (unsigned int i = 0; i < f.mNumIndices; ++i) {
             dirtyMask[f.mIndices[i]] = false;
         }
     }
 
     // Process vertex positions
-    if(pMesh->mVertices && ProcessArray(pMesh->mVertices,pMesh->mNumVertices,"positions",dirtyMask))    {
+    if (pMesh->mVertices && ProcessArray(pMesh->mVertices, pMesh->mNumVertices, "positions", dirtyMask)) {
         DefaultLogger::get()->error("Deleting mesh: Unable to continue without vertex positions");
+
         return 2;
     }
 
     // process texture coordinates
-    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i];++i)    {
-        if (ProcessArray(pMesh->mTextureCoords[i],pMesh->mNumVertices,"uvcoords",dirtyMask))    {
+    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i]; ++i) {
+        if (ProcessArray(pMesh->mTextureCoords[i], pMesh->mNumVertices, "uvcoords", dirtyMask)) {
+            pMesh->mNumUVComponents[i] = 0;
 
             // delete all subsequent texture coordinate sets.
-            for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)  {
-                delete[] pMesh->mTextureCoords[a]; pMesh->mTextureCoords[a] = NULL;
+            for (unsigned int a = i + 1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+                delete[] pMesh->mTextureCoords[a];
+                pMesh->mTextureCoords[a] = NULL;
+                pMesh->mNumUVComponents[a] = 0;
             }
+
             ret = true;
         }
     }

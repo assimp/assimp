@@ -72,7 +72,7 @@ namespace glTF2 {
             return val;
         }
 
-        inline Value& MakeValue(Value& val, float r, MemoryPoolAllocator<>& al) {
+        inline Value& MakeValue(Value& val, float r, MemoryPoolAllocator<>& /*al*/) {
             val.SetDouble(r);
 
             return val;
@@ -97,10 +97,6 @@ namespace glTF2 {
     {
         obj.AddMember("bufferView", a.bufferView->index, w.mAl);
         obj.AddMember("byteOffset", a.byteOffset, w.mAl);
-
-        if (a.byteStride != 0) {
-            obj.AddMember("byteStride", a.byteStride, w.mAl);
-        }
 
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", a.count, w.mAl);
@@ -160,7 +156,10 @@ namespace glTF2 {
     inline void Write(Value& obj, Buffer& b, AssetWriter& w)
     {
         obj.AddMember("byteLength", static_cast<uint64_t>(b.byteLength), w.mAl);
-        obj.AddMember("uri", Value(b.GetURI(), w.mAl).Move(), w.mAl);
+
+        const auto uri = b.GetURI();
+        const auto relativeUri = uri.substr(uri.find_last_of("/\\") + 1u);
+        obj.AddMember("uri", Value(relativeUri, w.mAl).Move(), w.mAl);
     }
 
     inline void Write(Value& obj, BufferView& bv, AssetWriter& w)
@@ -168,27 +167,38 @@ namespace glTF2 {
         obj.AddMember("buffer", bv.buffer->index, w.mAl);
         obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
         obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
-        obj.AddMember("target", int(bv.target), w.mAl);
+        if (bv.byteStride != 0) {
+            obj.AddMember("byteStride", bv.byteStride, w.mAl);
+        }
+        if (bv.target != 0) {
+            obj.AddMember("target", int(bv.target), w.mAl);
+        }
     }
 
-    inline void Write(Value& obj, Camera& c, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)
     {
 
     }
 
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
-        std::string uri;
-        if (img.HasData()) {
-            uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
-            uri += ";base64,";
-            Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+        if (img.bufferView) {
+            obj.AddMember("bufferView", img.bufferView->index, w.mAl);
+            obj.AddMember("mimeType", Value(img.mimeType, w.mAl).Move(), w.mAl);
         }
         else {
-            uri = img.uri;
-        }
+            std::string uri;
+            if (img.HasData()) {
+                uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
+                uri += ";base64,";
+                Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+            }
+            else {
+                uri = img.uri;
+            }
 
-        obj.AddMember("uri", Value(uri, w.mAl).Move(), w.mAl);
+            obj.AddMember("uri", Value(uri, w.mAl).Move(), w.mAl);
+        }
     }
 
     namespace {
@@ -432,7 +442,7 @@ namespace glTF2 {
         }
     }
 
-    inline void Write(Value& obj, Program& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Program& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -465,7 +475,7 @@ namespace glTF2 {
         AddRefsVector(scene, "nodes", s.nodes, w.mAl);
     }
 
-    inline void Write(Value& obj, Shader& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Shader& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -559,6 +569,98 @@ namespace glTF2 {
                     throw DeadlyExportError("Failed to write binary file: " + binPath);
                 }
             }
+        }
+    }
+
+    inline void AssetWriter::WriteGLBFile(const char* path)
+    {
+        std::unique_ptr<IOStream> outfile(mAsset.OpenFile(path, "wb", true));
+
+        if (outfile == 0) {
+            throw DeadlyExportError("Could not open output file: " + std::string(path));
+        }
+
+        Ref<Buffer> bodyBuffer = mAsset.GetBodyBuffer();
+        if (bodyBuffer->byteLength > 0) {
+            rapidjson::Value glbBodyBuffer;
+            glbBodyBuffer.SetObject();
+            glbBodyBuffer.AddMember("byteLength", bodyBuffer->byteLength, mAl);
+            mDoc["buffers"].PushBack(glbBodyBuffer, mAl);
+        }
+
+        // Padding with spaces as required by the spec
+        uint32_t padding = 0x20202020;
+
+        //
+        // JSON chunk
+        //
+
+        StringBuffer docBuffer;
+        Writer<StringBuffer> writer(docBuffer);
+        mDoc.Accept(writer);
+
+        uint32_t jsonChunkLength = (docBuffer.GetSize() + 3) & ~3; // Round up to next multiple of 4
+        auto paddingLength = jsonChunkLength - docBuffer.GetSize();
+
+        GLB_Chunk jsonChunk;
+        jsonChunk.chunkLength = jsonChunkLength;
+        jsonChunk.chunkType = ChunkType_JSON;
+        AI_SWAP4(jsonChunk.chunkLength);
+
+        outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
+        if (outfile->Write(&jsonChunk, 1, sizeof(GLB_Chunk)) != sizeof(GLB_Chunk)) {
+            throw DeadlyExportError("Failed to write scene data header!");
+        }
+        if (outfile->Write(docBuffer.GetString(), 1, docBuffer.GetSize()) != docBuffer.GetSize()) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
+        if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+            throw DeadlyExportError("Failed to write scene data padding!");
+        }
+
+        //
+        // Binary chunk
+        //
+
+        uint32_t binaryChunkLength = 0;
+        if (bodyBuffer->byteLength > 0) {
+            binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
+            auto paddingLength = binaryChunkLength - bodyBuffer->byteLength;
+
+            GLB_Chunk binaryChunk;
+            binaryChunk.chunkLength = binaryChunkLength;
+            binaryChunk.chunkType = ChunkType_BIN;
+            AI_SWAP4(binaryChunk.chunkLength);
+
+            size_t bodyOffset = sizeof(GLB_Header) + sizeof(GLB_Chunk) + jsonChunk.chunkLength;
+            outfile->Seek(bodyOffset, aiOrigin_SET);
+            if (outfile->Write(&binaryChunk, 1, sizeof(GLB_Chunk)) != sizeof(GLB_Chunk)) {
+                throw DeadlyExportError("Failed to write body data header!");
+            }
+            if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
+                throw DeadlyExportError("Failed to write body data!");
+            }
+            if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+                throw DeadlyExportError("Failed to write body data padding!");
+            }
+        }
+
+        //
+        // Header
+        //
+
+        GLB_Header header;
+        memcpy(header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic));
+
+        header.version = 2;
+        AI_SWAP4(header.version);
+
+        header.length = uint32_t(sizeof(GLB_Header) + 2 * sizeof(GLB_Chunk) + jsonChunkLength + binaryChunkLength);
+        AI_SWAP4(header.length);
+
+        outfile->Seek(0, aiOrigin_SET);
+        if (outfile->Write(&header, 1, sizeof(GLB_Header)) != sizeof(GLB_Header)) {
+            throw DeadlyExportError("Failed to write the header!");
         }
     }
 

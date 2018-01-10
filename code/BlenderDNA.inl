@@ -585,11 +585,14 @@ template <> inline void Structure :: Convert<int>    (int& dest,const FileDataba
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const
+template<> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const
 {
     // automatic rescaling from short to float and vice versa (seems to be used by normals)
     if (name == "float") {
-        dest = static_cast<short>(db.reader->GetF4() * 32767.f);
+        float f = db.reader->GetF4();
+        if ( f > 1.0f )
+            f = 1.0f;
+        dest = static_cast<short>( f * 32767.f);
         //db.reader->IncPtr(-4);
         return;
     }

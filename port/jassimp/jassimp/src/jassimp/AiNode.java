@@ -41,7 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package jassimp;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -185,6 +187,18 @@ public final class AiNode {
     public int[] getMeshes() {
         return m_meshReferences;
     }
+
+    /**
+     * Returns the metadata entries for this node.<p>
+     *
+     * Consult the original Doxygen for importer_notes to
+     * see which formats have metadata and what to expect.
+     *
+     * @return A map of metadata names to entries.
+     */
+    public Map<String, AiMetadataEntry> getMetadata() {
+        return m_metaData;
+    }
     
     
     /**
@@ -219,6 +233,11 @@ public final class AiNode {
      * List of children.
      */
     private final List<AiNode> m_children = new ArrayList<AiNode>();
+
+    /**
+     * List of metadata entries.
+     */
+     private final Map<String, AiMetadataEntry> m_metaData = new HashMap<String, AiMetadataEntry>();
     
     
     /**

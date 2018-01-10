@@ -223,6 +223,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             iMaxRefTris = std::max(iMaxRefTris,*piCur);
         }
     }
+    ai_assert(iMaxRefTris > 0);
     unsigned int* piCandidates = new unsigned int[iMaxRefTris*3];
     unsigned int iCacheMisses = 0;
 

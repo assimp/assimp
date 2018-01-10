@@ -218,6 +218,8 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& e);
 void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el);
 
+bool HasElement( const Scope& sc, const std::string& index );
+
 // extract a required element from a scope, abort if the element cannot be found
 const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL);
 

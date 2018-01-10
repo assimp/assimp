@@ -243,8 +243,11 @@ void RAWImporter::InternReadFile( const std::string& pFile,
     {
         cc = &pScene->mRootNode;
         pScene->mRootNode->mNumChildren = 0;
+    } else {
+        cc = new aiNode*[pScene->mRootNode->mNumChildren];
+        memset(cc, 0, sizeof(aiNode*) * pScene->mRootNode->mNumChildren);
+        pScene->mRootNode->mChildren = cc;
     }
-    else cc = pScene->mRootNode->mChildren = new aiNode*[pScene->mRootNode->mNumChildren];
 
     pScene->mNumMaterials = pScene->mNumMeshes;
     aiMaterial** mats = pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
@@ -260,7 +263,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
             node = *cc = new aiNode();
             node->mParent = pScene->mRootNode;
         }
-        else node = *cc;++cc;
+        else node = *cc;
         node->mName.Set(outGroup.name);
 
         // add all meshes

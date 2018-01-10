@@ -129,29 +129,26 @@ AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int offse
 
 
 // ------------------------------------------------------------------------------------------------
-uint32_t Offset(const char* begin, const char* cursor)
-{
+uint32_t Offset(const char* begin, const char* cursor) {
     ai_assert(begin <= cursor);
+
     return static_cast<unsigned int>(cursor - begin);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void TokenizeError(const std::string& message, const char* begin, const char* cursor)
-{
+void TokenizeError(const std::string& message, const char* begin, const char* cursor) {
     TokenizeError(message, Offset(begin, cursor));
 }
 
-
 // ------------------------------------------------------------------------------------------------
-uint32_t ReadWord(const char* input, const char*& cursor, const char* end)
-{
+uint32_t ReadWord(const char* input, const char*& cursor, const char* end) {
     const size_t k_to_read = sizeof( uint32_t );
     if(Offset(cursor, end) < k_to_read ) {
         TokenizeError("cannot ReadWord, out of bounds",input, cursor);
     }
 
-    uint32_t word = *reinterpret_cast<const uint32_t*>(cursor);
+    uint32_t word;
+    ::memcpy(&word, cursor, 4);
     AI_SWAP4(word);
 
     cursor += k_to_read;
@@ -166,7 +163,8 @@ uint64_t ReadDoubleWord(const char* input, const char*& cursor, const char* end)
         TokenizeError("cannot ReadDoubleWord, out of bounds",input, cursor);
     }
 
-    uint64_t dword = *reinterpret_cast<const uint64_t*>(cursor);
+    uint64_t dword /*= *reinterpret_cast<const uint64_t*>(cursor)*/;
+    ::memcpy( &dword, cursor, sizeof( uint64_t ) );
     AI_SWAP8(dword);
 
     cursor += k_to_read;
@@ -175,24 +173,21 @@ uint64_t ReadDoubleWord(const char* input, const char*& cursor, const char* end)
 }
 
 // ------------------------------------------------------------------------------------------------
-uint8_t ReadByte(const char* input, const char*& cursor, const char* end)
-{
+uint8_t ReadByte(const char* input, const char*& cursor, const char* end) {
     if(Offset(cursor, end) < sizeof( uint8_t ) ) {
         TokenizeError("cannot ReadByte, out of bounds",input, cursor);
     }
 
-    uint8_t word = *reinterpret_cast<const uint8_t*>(cursor);
+    uint8_t word;/* = *reinterpret_cast< const uint8_t* >( cursor )*/
+    ::memcpy( &word, cursor, sizeof( uint8_t ) );
     ++cursor;
 
     return word;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-unsigned int ReadString(const char*& sbegin_out, const char*& send_out, const char* input, const char*& cursor, const char* end,
-    bool long_length = false,
-    bool allow_null = false)
-{
+unsigned int ReadString(const char*& sbegin_out, const char*& send_out, const char* input,
+        const char*& cursor, const char* end, bool long_length = false, bool allow_null = false) {
     const uint32_t len_len = long_length ? 4 : 1;
     if(Offset(cursor, end) < len_len) {
         TokenizeError("cannot ReadString, out of bounds reading length",input, cursor);
@@ -221,8 +216,7 @@ unsigned int ReadString(const char*& sbegin_out, const char*& send_out, const ch
 }
 
 // ------------------------------------------------------------------------------------------------
-void ReadData(const char*& sbegin_out, const char*& send_out, const char* input, const char*& cursor, const char* end)
-{
+void ReadData(const char*& sbegin_out, const char*& send_out, const char* input, const char*& cursor, const char* end) {
     if(Offset(cursor, end) < 1) {
         TokenizeError("cannot ReadData, out of bounds reading length",input, cursor);
     }
@@ -421,8 +415,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
     return true;
 }
 
-
-}
+} // anonymous namespace
 
 // ------------------------------------------------------------------------------------------------
 // TODO: Test FBX Binary files newer than the 7500 version to check if the 64 bits address behaviour is consistent
@@ -433,6 +426,14 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
     if(length < 0x1b) {
         TokenizeError("file is too short",0);
     }
+
+    //uint32_t offset = 0x15;
+/*    const char* cursor = input + 0x15;
+
+    const uint32_t flags = ReadWord(input, cursor, input + length);
+
+    const uint8_t padding_0 = ReadByte(input, cursor, input + length); // unused
+    const uint8_t padding_1 = ReadByte(input, cursor, input + length); // unused*/
 
     if (strncmp(input,"Kaydara FBX Binary",18)) {
         TokenizeError("magic bytes not found",0);

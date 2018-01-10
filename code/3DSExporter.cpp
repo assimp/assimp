@@ -39,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
 
@@ -151,7 +150,7 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to 3DS. Prototyped and registered in Exporter.cpp
-void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
     std::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
     if(!outfile) {
@@ -209,6 +208,12 @@ Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> outfile, con
         WriteHierarchy(*scene->mRootNode, -1, -1);
     }
 }
+
+// ------------------------------------------------------------------------------------------------
+Discreet3DSExporter::~Discreet3DSExporter() {
+    // empty
+}
+
 
 // ------------------------------------------------------------------------------------------------
 int Discreet3DSExporter::WriteHierarchy(const aiNode& node, int seq, int sibling_level)

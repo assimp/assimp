@@ -171,6 +171,7 @@ inline size_t Write<aiQuaternion>(IOStream * stream, const aiQuaternion& v)
     t += Write<float>(stream,v.x);
     t += Write<float>(stream,v.y);
     t += Write<float>(stream,v.z);
+    ai_assert(t == 16);
     return 16;
 }
 
@@ -810,7 +811,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         }
     };
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
     AssbinExport exporter;
     exporter.WriteBinaryDump( pFile, pIOSystem, pScene );

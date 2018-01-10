@@ -45,19 +45,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+#include "FIReader.hpp"
+#include "StringUtils.h"
+
 // Workaround for issue #1361
 // https://github.com/assimp/assimp/issues/1361
 #ifdef __ANDROID__
-#define _GLIBCXX_USE_C99 1
+#  define _GLIBCXX_USE_C99 1
 #endif
 
-#include "FIReader.hpp"
 #include "Exceptional.h"
 #include <assimp/IOStream.hpp>
 #include <assimp/types.h>
 #include "MemoryIOWrapper.h"
 #include "irrXMLWrapper.h"
 #include "../contrib/utf8cpp/source/utf8.h"
+#include "fast_atof.h"
 #include <stack>
 #include <map>
 #include <iostream>
@@ -485,7 +488,9 @@ struct FIFloatDecoder: public FIDecoder {
         value.reserve(numFloats);
         for (size_t i = 0; i < numFloats; ++i) {
             int v = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
-            value.push_back(*(float*)&v);
+            float f;
+            memcpy(&f, &v, 4);
+            value.push_back(f);
             data += 4;
         }
         return FIFloatValue::create(std::move(value));
@@ -503,7 +508,9 @@ struct FIDoubleDecoder: public FIDecoder {
         for (size_t i = 0; i < numDoubles; ++i) {
             long long b0 = data[0], b1 = data[1], b2 = data[2], b3 = data[3], b4 = data[4], b5 = data[5], b6 = data[6], b7 = data[7];
             long long v = (b0 << 56) | (b1 << 48) | (b2 << 40) | (b3 << 32) | (b4 << 24) | (b5 << 16) | (b6 << 8) | b7;
-            value.push_back(*(double*)&v);
+            double f;
+            memcpy(&f, &v, 8);
+            value.push_back(f);
             data += 8;
         }
         return FIDoubleValue::create(std::move(value));
@@ -685,7 +692,7 @@ public:
         if (intValue) {
             return intValue->value.size() == 1 ? intValue->value.front() : 0;
         }
-        return stoi(attr->value->toString());
+        return atoi(attr->value->toString().c_str());
     }
 
     virtual int getAttributeValueAsInt(int idx) const /*override*/ {
@@ -696,7 +703,7 @@ public:
         if (intValue) {
             return intValue->value.size() == 1 ? intValue->value.front() : 0;
         }
-        return stoi(attributes[idx].value->toString());
+        return atoi(attributes[idx].value->toString().c_str());
     }
 
     virtual float getAttributeValueAsFloat(const char* name) const /*override*/ {
@@ -708,7 +715,8 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return stof(attr->value->toString());
+
+        return fast_atof(attr->value->toString().c_str());
     }
 
     virtual float getAttributeValueAsFloat(int idx) const /*override*/ {
@@ -719,7 +727,7 @@ public:
         if (floatValue) {
             return floatValue->value.size() == 1 ? floatValue->value.front() : 0;
         }
-        return stof(attributes[idx].value->toString());
+        return fast_atof(attributes[idx].value->toString().c_str());
     }
 
     virtual const char* getNodeName() const /*override*/ {
@@ -984,13 +992,13 @@ private:
         if (index < 32) {
             FIDecoder *decoder = defaultDecoder[index];
             if (!decoder) {
-                throw DeadlyImportError("Invalid encoding algorithm index " + std::to_string(index));
+                throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
             }
             return decoder->decode(dataP, len);
         }
         else {
             if (index - 32 >= vocabulary.encodingAlgorithmTable.size()) {
-                throw DeadlyImportError("Invalid encoding algorithm index " + std::to_string(index));
+                throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
             }
             std::string uri = vocabulary.encodingAlgorithmTable[index - 32];
             auto it = decoderMap.find(uri);
@@ -1014,12 +1022,12 @@ private:
                 alphabet = "0123456789-:TZ ";
                 break;
             default:
-                throw DeadlyImportError("Invalid restricted alphabet index " + std::to_string(index));
+                throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
             }
         }
         else {
             if (index - 16 >= vocabulary.restrictedAlphabetTable.size()) {
-                throw DeadlyImportError("Invalid restricted alphabet index " + std::to_string(index));
+                throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
             }
             alphabet = vocabulary.restrictedAlphabetTable[index - 16];
         }
@@ -1027,7 +1035,7 @@ private:
         utf8::utf8to32(alphabet.begin(), alphabet.end(), back_inserter(alphabetUTF32));
         std::string::size_type alphabetLength = alphabetUTF32.size();
         if (alphabetLength < 2) {
-            throw DeadlyImportError("Invalid restricted alphabet length " + std::to_string(alphabetLength));
+            throw DeadlyImportError("Invalid restricted alphabet length " + to_string(alphabetLength));
         }
         std::string::size_type bitsPerCharacter = 1;
         while ((1ull << bitsPerCharacter) <= alphabetLength) {
@@ -1776,17 +1784,18 @@ public:
         return reader->getParserFormat();
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const /*override*/ {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int /*idx*/) const /*override*/ {
         return nullptr;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const /*override*/ {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* /*name*/) const /*override*/ {
         return nullptr;
     }
 
-    virtual void registerDecoder(const std::string &algorithmUri, std::unique_ptr<FIDecoder> decoder) /*override*/ {}
+    virtual void registerDecoder(const std::string & /*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) /*override*/ {}
+
+    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
 
 private:
 

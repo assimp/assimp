@@ -32,7 +32,7 @@ PROJECT_NAME           = Assimp
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = "v3.1.1 (June 2014)"
+PROJECT_NUMBER         = "v4.1. (December 2018)"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description 
 # for a project that appears at the top of each page and should give viewer 
@@ -725,7 +725,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is 
 # run.
 
-EXCLUDE                = 
+EXCLUDE                = irrXML.h
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 
 # directories that are symbolic links (a Unix file system feature) are excluded 
@@ -1742,7 +1742,7 @@ UML_LOOK               = NO
 # the class node. If there are many fields or methods and many nodes the 
 # graph may become too big to be useful. The UML_LIMIT_NUM_FIELDS 
 # threshold limits the number of items for each type to make the size more 
-# managable. Set this to 0 for no limit. Note that the threshold may be 
+# manageable. Set this to 0 for no limit. Note that the threshold may be 
 # exceeded by 50% before the limit is enforced.
 
 UML_LIMIT_NUM_FIELDS   = 10

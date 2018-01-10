@@ -42,6 +42,10 @@ OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
 )
+OPTION( BUILD_FRAMEWORK
+  "Build package as Mac OS X Framework bundle."
+  OFF
+)
 OPTION( ASSIMP_DOUBLE_PRECISION
   "Set to ON to enable double precision processing"
   OFF
@@ -86,6 +90,10 @@ OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
   OFF
 )
+OPTION ( ASSIMP_UBSAN
+  "Enable Undefined Behavior sanitizer."
+  OFF
+)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -95,6 +103,7 @@ OPTION ( BUILD_DOCS
   OFF
 )
 
+# Use subset of Windows.h
 if (WIN32)
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 endif()
@@ -107,6 +116,11 @@ IF(MSVC)
   )
 ENDIF(MSVC)
 
+IF (BUILD_FRAMEWORK)
+  SET (BUILD_SHARED_LIBS ON)
+  MESSAGE(STATUS "Framework bundle building enabled")
+ENDIF(BUILD_FRAMEWORK)
+
 IF(NOT BUILD_SHARED_LIBS)
   MESSAGE(STATUS "Shared libraries disabled")
   SET(LINK_SEARCH_START_STATIC TRUE)
@@ -116,8 +130,8 @@ ENDIF(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
 SET (ASSIMP_VERSION_MAJOR 4)
-SET (ASSIMP_VERSION_MINOR 0)
-SET (ASSIMP_VERSION_PATCH 1)
+SET (ASSIMP_VERSION_MINOR 1)
+SET (ASSIMP_VERSION_PATCH 0)
 SET (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 SET (ASSIMP_SOVERSION 4)
 SET (PROJECT_VERSION "${ASSIMP_VERSION}")
@@ -179,14 +193,16 @@ SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
 IF( UNIX )
   # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
-  IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
-    ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+  IF( ${OPERATING_SYSTEM} MATCHES "Android")
+  ELSE()
+    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
+      #ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+    ENDIF()
   ENDIF()
 
   # Use GNUInstallDirs for Unix predefined directories
   INCLUDE(GNUInstallDirs)
 ENDIF( UNIX )
-
 
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
@@ -237,6 +253,12 @@ if (ASSIMP_ASAN)
     MESSAGE(STATUS "AddressSanitizer enabled")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+endif()
+
+if (ASSIMP_UBSAN)
+    MESSAGE(STATUS "Undefined Behavior sanitizer enabled")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
 endif()
 
 INCLUDE (FindPkgMacros)

@@ -820,6 +820,7 @@ namespace o3dgc
         for (unsigned n = 0; n < data_symbols; n++)
           total_count += (symbol_count[n] = (symbol_count[n] + 1) >> 1);
       }
+      assert(total_count > 0);
                                  // compute cumulative distribution, decoder table
       unsigned k, sum = 0, s = 0;
       unsigned scale = 0x80000000U / total_count;
@@ -830,6 +831,7 @@ namespace o3dgc
           sum += symbol_count[k];
         }
       else {
+        assert(decoder_table);
         for (k = 0; k < data_symbols; k++) {
           distribution[k] = (scale * sum) >> (31 - DM__LengthShift);
           sum += symbol_count[k];

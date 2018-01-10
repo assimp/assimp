@@ -366,6 +366,27 @@ struct aiScene
         return mAnimations != NULL && mNumAnimations > 0; 
     }
 
+    //! Returns a short filename from a full path
+    static const char* GetShortFilename(const char* filename) {
+        const char* lastSlash = strrchr(filename, '/');
+        if (lastSlash == nullptr) {
+            lastSlash = strrchr(filename, '\\');
+        }
+        const char* shortFilename = lastSlash != nullptr ? lastSlash + 1 : filename;
+        return shortFilename;
+    }
+
+    //! Returns an embedded texture
+    const aiTexture* GetEmbeddedTexture(const char* filename) {
+        const char* shortFilename = GetShortFilename(filename);
+        for (unsigned int i = 0; i < mNumTextures; i++) {
+            const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());
+            if (strcmp(shortTextureFilename, shortFilename) == 0) {
+                return mTextures[i];
+            }
+        }
+        return nullptr;
+    }
 #endif // __cplusplus
 
     /**  Internal data, do not touch */

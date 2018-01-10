@@ -533,8 +533,9 @@ assimp::Importer::ReadFile(), aiImportFile() or aiImportFileEx() - see the @link
 for further information on how to use the library.
 
 By default, all 3D data is provided in a right-handed coordinate system such as OpenGL uses. In
-this coordinate system, +X points to the right, -Z points away from the viewer into the screen and
-+Y points upwards. Several modeling packages such as 3D Studio Max use this coordinate system as well (or a rotated variant of it).
+this coordinate system, +X points to the right, +Y points upwards and +Z points out of the screen
+towards the viewer. Several modeling packages such as 3D Studio Max use this coordinate system as well
+(or a rotated variant of it).
 By contrast, some other environments use left-handed coordinate systems, a prominent example being
 DirectX. If you need the imported data to be in a left-handed coordinate system, supply the
 #aiProcess_MakeLeftHanded flag to the ReadFile() function call.
@@ -552,7 +553,7 @@ although our built-in triangulation (#aiProcess_Triangulate postprocessing step)
 
 The output UV coordinate system has its origin in the lower-left corner:
 @code
-0y|1y ---------- 1x|1y
+0x|1y ---------- 1x|1y
  |                |
  |                |
  |                |
@@ -568,8 +569,7 @@ X2  Y2  Z2  T2
 X3  Y3  Z3  T3
 0   0   0   1
 @endcode
-
-... with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3)
+with (X1, X2, X3) being the X base vector, (Y1, Y2, Y3) being the Y base vector, (Z1, Z2, Z3)
 being the Z base vector and (T1, T2, T3) being the translation part. If you want to use these matrices
 in DirectX functions, you have to transpose them.
 
@@ -664,7 +664,7 @@ See the @link materials Material System Page. @endlink
 
 @section bones Bones
 
-A mesh may have a set of bones in the form of aiBone structures.. Bones are a means to deform a mesh
+A mesh may have a set of bones in the form of aiBone objects. Bones are a means to deform a mesh
 according to the movement of a skeleton. Each bone has a name and a set of vertices on which it has influence.
 Its offset matrix declares the transformation needed to transform from mesh space to the local space of this bone.
 

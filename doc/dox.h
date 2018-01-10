@@ -803,188 +803,203 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <th>Name</th>
     <th>Data Type</th>
     <th>Default Value</th>
-	<th>Meaning</th>
-	<th>Notes</th>
+    <th>Meaning</th>
+    <th>Notes</th>
   </tr>
   <tr>
     <td><tt>NAME</tt></td>
     <td>aiString</td>
     <td>n/a</td>
-	<td>The name of the material, if available. </td>
-	<td>Ignored by <tt>aiProcess_RemoveRedundantMaterials</tt>. Materials are considered equal even if their names are different.</td>
+    <td>The name of the material, if available. </td>
+    <td>Ignored by <tt>aiProcess_RemoveRedundantMaterials</tt>. Materials are considered equal even if their names are different.</td>
   </tr>
   <tr>
     <td><tt>COLOR_DIFFUSE</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-	<td>Diffuse color of the material. This is typically scaled by the amount of incoming diffuse light (e.g. using gouraud shading) </td>
-	<td>---</td>
+    <td>Diffuse color of the material. This is typically scaled by the amount of incoming diffuse light (e.g. using gouraud shading) </td>
+    <td>---</td>
   </tr>
   <tr>
     <td><tt>COLOR_SPECULAR</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-	<td>Specular color of the material. This is typically scaled by the amount of incoming specular light (e.g. using phong shading) </td>
-	<td>---</td>
+    <td>Specular color of the material. This is typically scaled by the amount of incoming specular light (e.g. using phong shading) </td>
+    <td>---</td>
   </tr>
   <tr>
     <td><tt>COLOR_AMBIENT</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-	<td>Ambient color of the material. This is typically scaled by the amount of ambient light </td>
-	<td>---</td>
+    <td>Ambient color of the material. This is typically scaled by the amount of ambient light </td>
+    <td>---</td>
   </tr>
   <tr>
     <td><tt>COLOR_EMISSIVE</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-	<td>Emissive color of the material. This is the amount of light emitted by the object. In real time applications it will usually not affect surrounding objects, but raytracing applications may wish to treat emissive objects as light sources. </td>
-	<td>---</tt></td>
+    <td>Emissive color of the material. This is the amount of light emitted by the object. In real time applications it will usually not affect surrounding objects, but raytracing applications may wish to treat emissive objects as light sources. </td>
+    <td>---</td>
   </tr>
 
   <tr>
     <td><tt>COLOR_TRANSPARENT</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-	<td>Defines the transparent color of the material, this is the color to be multiplied with the color of
-	translucent light to construct the final 'destination color' for a particular position in the screen buffer. T </td>
-	<td>---</tt></td>
+    <td>Defines the transparent color of the material, this is the color to be multiplied with the color of translucent light to construct the final 'destination color' for a particular position in the screen buffer.</td>
+    <td>---</td>
+  </tr>
+
+  <tr>
+    <td><tt>COLOR_REFLECTIVE</tt></td>
+    <td>aiColor3D</td>
+    <td>black (0,0,0)</td>
+    <td>Defines the reflective color of the material. This is typically scaled by the amount of incoming light from the direction of mirror reflection. Usually combined with an enviroment lightmap of some kind for real-time applications.</td>
+    <td>---</td>
+  </tr>
+
+  <tr>
+    <td><tt>REFLECTIVITY</tt></td>
+    <td>float</td>
+    <td>0.0</td>
+    <td>Scales the reflective color of the material.</td>
+    <td>---</td>
   </tr>
 
   <tr>
     <td><tt>WIREFRAME</tt></td>
     <td>int</td>
     <td>false</td>
-	<td>Specifies whether wireframe rendering must be turned on for the material. 0 for false, !0 for true. </td>
-	<td>---</tt></td>
+    <td>Specifies whether wireframe rendering must be turned on for the material. 0 for false, !0 for true. </td>
+    <td>---</td>
   </tr>
 
   <tr>
     <td><tt>TWOSIDED</tt></td>
     <td>int</td>
     <td>false</td>
-	<td>Specifies whether meshes using this material must be rendered without backface culling. 0 for false, !0 for true. </td>
-	<td>Some importers set this property if they don't know whether the output face oder is right. As long as it is not set, you may safely enable backface culling.</tt></td>
+    <td>Specifies whether meshes using this material must be rendered without backface culling. 0 for false, !0 for true. </td>
+    <td>Some importers set this property if they don't know whether the output face oder is right. As long as it is not set, you may safely enable backface culling.</tt></td>
   </tr>
 
   <tr>
     <td><tt>SHADING_MODEL</tt></td>
     <td>int</td>
     <td>gouraud</td>
-	<td>One of the #aiShadingMode enumerated values. Defines the library shading model to use for (real time) rendering to approximate the original look of the material as closely as possible. </td>
-	<td>The presence of this key might indicate a more complex material. If absent, assume phong shading only if a specular exponent is given.</tt></td>
+    <td>One of the #aiShadingMode enumerated values. Defines the library shading model to use for (real time) rendering to approximate the original look of the material as closely as possible. </td>
+    <td>The presence of this key might indicate a more complex material. If absent, assume phong shading only if a specular exponent is given.</tt></td>
   </tr>
 
   <tr>
     <td><tt>BLEND_FUNC</tt></td>
     <td>int</td>
     <td>false</td>
-	<td>One of the #aiBlendMode enumerated values. Defines how the final color value in the screen buffer is computed from the given color at that position and the newly computed color from the material. Simply said, alpha blending settings.</td>
-	<td>-</td>
+    <td>One of the #aiBlendMode enumerated values. Defines how the final color value in the screen buffer is computed from the given color at that position and the newly computed color from the material. Simply said, alpha blending settings.</td>
+    <td>-</td>
   </tr>
 
   <tr>
     <td><tt>OPACITY</tt></td>
     <td>float</td>
     <td>1.0</td>
-	<td>Defines the opacity of the material in a range between 0..1.</td>
-	<td>Use this value to decide whether you have to activate alpha blending for rendering. <tt>OPACITY</tt> != 1 usually also implies TWOSIDED=1 to avoid cull artifacts.</td>
+    <td>Defines the opacity of the material in a range between 0..1.</td>
+    <td>Use this value to decide whether you have to activate alpha blending for rendering. <tt>OPACITY</tt> != 1 usually also implies TWOSIDED=1 to avoid cull artifacts.</td>
   </tr>
 
   <tr>
     <td><tt>SHININESS</tt></td>
     <td>float</td>
     <td>0.f</td>
-	<td>Defines the shininess of a phong-shaded material. This is actually the exponent of the phong specular equation</td>
-	<td><tt>SHININESS</tt>=0 is equivalent to <tt>SHADING_MODEL</tt>=<tt>aiShadingMode_Gouraud</tt>.</td>
+    <td>Defines the shininess of a phong-shaded material. This is actually the exponent of the phong specular equation</td>
+    <td><tt>SHININESS</tt>=0 is equivalent to <tt>SHADING_MODEL</tt>=<tt>aiShadingMode_Gouraud</tt>.</td>
   </tr>
 
   <tr>
     <td><tt>SHININESS_STRENGTH</tt></td>
     <td>float</td>
     <td>1.0</td>
-	<td>Scales the specular color of the material.</td>
-	<td>This value is kept separate from the specular color by most modelers, and so do we.</td>
+    <td>Scales the specular color of the material.</td>
+    <td>This value is kept separate from the specular color by most modelers, and so do we.</td>
   </tr>
 
   <tr>
     <td><tt>REFRACTI</tt></td>
     <td>float</td>
     <td>1.0</td>
-	<td>Defines the Index Of Refraction for the material. That's not supported by most file formats.</td>
-	<td>Might be of interest for raytracing.</td>
+    <td>Defines the Index Of Refraction for the material. That's not supported by most file formats.</td>
+    <td>Might be of interest for raytracing.</td>
   </tr>
 
   <tr>
     <td><tt>TEXTURE(t,n)</tt></td>
     <td>aiString</td>
     <td>n/a</td>
-	<td>Defines the path of the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values. Either a filepath or `*<index>`, where `<index>` is the index of an embedded texture in aiScene::mTextures.</td>
-	<td>See the 'Textures' section above.</td>
+    <td>Defines the path of the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values. Either a filepath or `*<index>`, where `<index>` is the index of an embedded texture in aiScene::mTextures.</td>
+    <td>See the 'Textures' section above.</td>
   </tr>
 
   <tr>
     <td><tt>TEXBLEND(t,n)</tt></td>
     <td>float</td>
     <td>n/a</td>
-	<td>Defines the strength the n'th texture on the stack 't'. All color components (rgb) are multiplied with this factor *before* any further processing is done.</td>
-	<td>-</td>
+    <td>Defines the strength the n'th texture on the stack 't'. All color components (rgb) are multiplied with this factor *before* any further processing is done.</td>
+    <td>-</td>
   </tr>
 
   <tr>
     <td><tt>TEXOP(t,n)</tt></td>
     <td>int</td>
     <td>n/a</td>
-	<td>One of the #aiTextureOp enumerated values. Defines the arithmetic operation to be used to combine the n'th texture on the stack 't' with the n-1'th. <tt>TEXOP(t,0)</tt> refers to the blend operation between the base color for this stack (e.g. <tt>COLOR_DIFFUSE</tt> for the diffuse stack) and the first texture.</td>
-	<td>-</td>
+    <td>One of the #aiTextureOp enumerated values. Defines the arithmetic operation to be used to combine the n'th texture on the stack 't' with the n-1'th. <tt>TEXOP(t,0)</tt> refers to the blend operation between the base color for this stack (e.g. <tt>COLOR_DIFFUSE</tt> for the diffuse stack) and the first texture.</td>
+    <td>-</td>
   </tr>
 
   <tr>
     <td><tt>MAPPING(t,n)</tt></td>
     <td>int</td>
     <td>n/a</td>
-	<td>Defines how the input mapping coordinates for sampling the n'th texture on the stack 't' are computed. Usually explicit UV coordinates are provided, but some model file formats might also be using basic shapes, such as spheres or cylinders, to project textures onto meshes.</td>
-	<td>See the 'Textures' section below. #aiProcess_GenUVCoords can be used to let Assimp compute proper UV coordinates from projective mappings.</td>
+    <td>Defines how the input mapping coordinates for sampling the n'th texture on the stack 't' are computed. Usually explicit UV coordinates are provided, but some model file formats might also be using basic shapes, such as spheres or cylinders, to project textures onto meshes.</td>
+    <td>See the 'Textures' section below. #aiProcess_GenUVCoords can be used to let Assimp compute proper UV coordinates from projective mappings.</td>
   </tr>
 
   <tr>
     <td><tt>UVWSRC(t,n)</tt></td>
     <td>int</td>
     <td>n/a</td>
-	<td>Defines the UV channel to be used as input mapping coordinates for sampling the n'th texture on the stack 't'. All meshes assigned to this material share the same UV channel setup</td>
-	<td>Presence of this key implies <tt>MAPPING(t,n)</tt> to be #aiTextureMapping_UV. See @ref uvwsrc for more details. </td>
+    <td>Defines the UV channel to be used as input mapping coordinates for sampling the n'th texture on the stack 't'. All meshes assigned to this material share the same UV channel setup</td>
+    <td>Presence of this key implies <tt>MAPPING(t,n)</tt> to be #aiTextureMapping_UV. See @ref uvwsrc for more details. </td>
   </tr>
 
   <tr>
     <td><tt>MAPPINGMODE_U(t,n)</tt></td>
     <td>int</td>
     <td>n/a</td>
-	<td>Any of the #aiTextureMapMode enumerated values. Defines the texture wrapping mode on the x axis for sampling the n'th texture on the stack 't'. 'Wrapping' occurs whenever UVs lie outside the 0..1 range. </td>
-	<td>-</td>
+    <td>Any of the #aiTextureMapMode enumerated values. Defines the texture wrapping mode on the x axis for sampling the n'th texture on the stack 't'. 'Wrapping' occurs whenever UVs lie outside the 0..1 range. </td>
+    <td>-</td>
   </tr>
 
   <tr>
     <td><tt>MAPPINGMODE_V(t,n)</tt></td>
     <td>int</td>
     <td>n/a</td>
-	<td>Wrap mode on the v axis. See <tt>MAPPINGMODE_U</tt>. </td>
-	<td>-</td>
+    <td>Wrap mode on the v axis. See <tt>MAPPINGMODE_U</tt>. </td>
+    <td>-</td>
   </tr>
 
    <tr>
     <td><tt>TEXMAP_AXIS(t,n)</tt></td>
     <td>aiVector3D</td>
     <td>n/a</td>
-	<td></tt> Defines the base axis to to compute the mapping coordinates for the n'th texture on the stack 't' from. This is not required for UV-mapped textures. For instance, if <tt>MAPPING(t,n)</tt> is #aiTextureMapping_SPHERE, U and V would map to longitude and latitude of a sphere around the given axis. The axis is given in local mesh space.</td>
-	<td>-</td>
+    <td></tt> Defines the base axis to to compute the mapping coordinates for the n'th texture on the stack 't' from. This is not required for UV-mapped textures. For instance, if <tt>MAPPING(t,n)</tt> is #aiTextureMapping_SPHERE, U and V would map to longitude and latitude of a sphere around the given axis. The axis is given in local mesh space.</td>
+    <td>-</td>
   </tr>
 
   <tr>
     <td><tt>TEXFLAGS(t,n)</tt></td>
     <td>int</td>
     <td>n/a</td>
-	<td></tt> Defines miscellaneous flag for the n'th texture on the stack 't'. This is a bitwise combination of the #aiTextureFlags enumerated values.</td>
-	<td>-</td>
+    <td></tt> Defines miscellaneous flag for the n'th texture on the stack 't'. This is a bitwise combination of the #aiTextureFlags enumerated values.</td>
+    <td>-</td>
   </tr>
 
 </table>
@@ -1075,7 +1090,7 @@ for all textures
       assign channel specified in uvwsrc
    else
       assign channels in ascending order for all texture stacks,
-	    i.e. diffuse1 gets channel 1, opacity0 gets channel 0.
+      i.e. diffuse1 gets channel 1, opacity0 gets channel 0.
 
 @endverbatim
 

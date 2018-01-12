@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <iostream>
 
 class BlendImportAreaLight : public ::testing::Test {
 public:
@@ -70,7 +69,6 @@ protected:
 TEST_F(BlendImportAreaLight, testImportLight)
 {
     const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/AreaLight_269.blend", aiProcess_ValidateDataStructure);
-    if (!pTest) std::cerr << im->GetErrorString() << '\n'; // temporary, for pull req. diagnostics
     ASSERT_TRUE(pTest != NULL);
     ASSERT_TRUE(pTest->HasLights());
 

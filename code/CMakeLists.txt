@@ -457,24 +457,23 @@ ADD_ASSIMP_IMPORTER( BLEND
 )
 
 ADD_ASSIMP_IMPORTER( IFC
-  IFCLoader.cpp
-  IFCLoader.h
-  IFCReaderGen1.cpp
-  IFCReaderGen2.cpp
-  IFCReaderGen.h
-  IFCUtil.h
-  IFCUtil.cpp
-  IFCGeometry.cpp
-  IFCMaterial.cpp
-  IFCProfile.cpp
-  IFCCurve.cpp
-  IFCBoolean.cpp
-  IFCOpenings.cpp
-  STEPFile.h
-  STEPFileReader.h
-  STEPFileReader.cpp
-  STEPFileEncoding.cpp
-  STEPFileEncoding.h
+  Importer/IFC/IFCLoader.cpp
+  Importer/IFC/IFCLoader.h
+  Importer/IFC/IFCReaderGen1_2x3.cpp
+  Importer/IFC/IFCReaderGen2_2x3.cpp
+  Importer/IFC/IFCReaderGen_2x3.h
+  Importer/IFC/IFCUtil.h
+  Importer/IFC/IFCUtil.cpp
+  Importer/IFC/IFCGeometry.cpp
+  Importer/IFC/IFCMaterial.cpp
+  Importer/IFC/IFCProfile.cpp
+  Importer/IFC/IFCCurve.cpp
+  Importer/IFC/IFCBoolean.cpp
+  Importer/IFC/IFCOpenings.cpp
+  Importer/IFC/STEPFileReader.h
+  Importer/IFC/STEPFileReader.cpp
+  Importer/IFC/STEPFileEncoding.cpp
+  Importer/IFC/STEPFileEncoding.h
 )
 if (ASSIMP_BUILD_IFC_IMPORTER)
   if (MSVC)
@@ -695,6 +694,7 @@ ADD_ASSIMP_IMPORTER( MMD
 )
 
 SET( Step_SRCS
+  STEPFile.h
   StepExporter.h
   StepExporter.cpp
 )

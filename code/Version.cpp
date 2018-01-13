@@ -111,6 +111,10 @@ ASSIMP_API unsigned int aiGetVersionRevision() {
     return GitVersion;
 }
 
+ASSIMP_API const char *aiGetBranchName() {
+    return GitBranch;
+}
+
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiScene::aiScene()
 : mFlags(0)

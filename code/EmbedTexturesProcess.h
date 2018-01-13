@@ -1,15 +1,14 @@
-/*-------------------------------------------------------------------------
+/*
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2017, assimp team
-
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -36,41 +35,50 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include "UnitTestPCH.h"
-#include <assimp/version.h>
 
-class utVersion : public ::testing::Test {
-    // empty
+----------------------------------------------------------------------
+*/
+
+#pragma once
+
+#include "BaseProcess.h"
+
+#include <string>
+
+struct aiNode;
+
+namespace Assimp {
+
+/**
+ *  Force embedding of textures (using the path = "*1" convention).
+ *  If a texture's file does not exist at the specified path
+ *  (due, for instance, to an absolute path generated on another system),
+ *  it will check if a file with the same name exists at the root folder
+ *  of the imported model. And if so, it uses that.
+ */
+class ASSIMP_API EmbedTexturesProcess : public BaseProcess {
+public:
+    /// The default class constructor.
+    EmbedTexturesProcess();
+
+    /// The class destructor.
+    virtual ~EmbedTexturesProcess();
+
+    /// Overwritten, @see BaseProcess
+    virtual bool IsActive(unsigned int pFlags) const;
+
+    /// Overwritten, @see BaseProcess
+    virtual void SetupProperties(const Importer* pImp);
+
+    /// Overwritten, @see BaseProcess
+    virtual void Execute(aiScene* pScene);
+
+private:
+    // Resolve the path and add the file content to the scene as a texture.
+    bool addTexture(aiScene* pScene, std::string path) const;
+
+private:
+    std::string mRootPath;
 };
 
-TEST_F( utVersion, aiGetLegalStringTest ) {
-    const char *lv( aiGetLegalString() );
-    EXPECT_NE( lv, nullptr );
-    std::string text( lv );
-
-    size_t pos( text.find( std::string( "2017" ) ) );
-    EXPECT_NE( pos, std::string::npos );
-}
-
-TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ( aiGetVersionMinor(), 1U );
-}
-    
-TEST_F( utVersion, aiGetVersionMajorTest ) {
-    EXPECT_EQ( aiGetVersionMajor(), 4U );
-}
-
-TEST_F( utVersion, aiGetCompileFlagsTest ) {
-    EXPECT_NE( aiGetCompileFlags(), 0U );
-}
-
-TEST_F( utVersion, aiGetVersionRevisionTest ) {
-    EXPECT_NE( aiGetVersionRevision(), 0U );
-}
-
-TEST_F( utVersion, aiGetBranchNameTest ) {
-    EXPECT_NE( nullptr, aiGetBranchName() );
-}
-
-
+} // namespace Assimp

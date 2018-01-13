@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#include "Code/Importer/IFC/IFCUtil.h"
+#include "code/Importer/IFC/IFCUtil.h"
 #include "code/PolyTools.h"
 #include "code/ProcessHelper.h"
 #include <assimp/Defines.h>

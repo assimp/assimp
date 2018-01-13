@@ -68,20 +68,20 @@ static int ConvertShadingMode(const std::string& name) {
 }
 
 // ------------------------------------------------------------------------------------------------
-static void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionData& conv) {
+static void FillMaterial(aiMaterial* mat,const IFC::Schema_2x3::IfcSurfaceStyle* surf,ConversionData& conv) {
     aiString name;
     name.Set((surf->Name? surf->Name.Get() : "IfcSurfaceStyle_Unnamed"));
     mat->AddProperty(&name,AI_MATKEY_NAME);
 
     // now see which kinds of surface information are present
-    for(std::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2 : surf->Styles) {
-        if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
+    for(std::shared_ptr< const IFC::Schema_2x3::IfcSurfaceStyleElementSelect > sel2 : surf->Styles) {
+        if (const IFC::Schema_2x3::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::Schema_2x3::IfcSurfaceStyleShading>(conv.db)) {
             aiColor4D col_base,col;
 
             ConvertColor(col_base, shade->SurfaceColour);
             mat->AddProperty(&col_base,1, AI_MATKEY_COLOR_DIFFUSE);
 
-            if (const IFC::IfcSurfaceStyleRendering* ren = shade->ToPtr<IFC::IfcSurfaceStyleRendering>()) {
+            if (const IFC::Schema_2x3::IfcSurfaceStyleRendering* ren = shade->ToPtr<IFC::Schema_2x3::IfcSurfaceStyleRendering>()) {
 
                 if (ren->Transparency) {
                     const float t = 1.f-static_cast<float>(ren->Transparency.Get());
@@ -112,7 +112,7 @@ static void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,Conver
                 mat->AddProperty(&shading,1, AI_MATKEY_SHADING_MODEL);
 
                 if (ren->SpecularHighlight) {
-                    if(const EXPRESS::REAL* rt = ren->SpecularHighlight.Get()->ToPtr<EXPRESS::REAL>()) {
+                    if(const ::Assimp::STEP::EXPRESS::REAL* rt = ren->SpecularHighlight.Get()->ToPtr<::Assimp::STEP::EXPRESS::REAL>()) {
                         // at this point we don't distinguish between the two distinct ways of
                         // specifying highlight intensities. leave this to the user.
                         const float e = static_cast<float>(*rt);
@@ -123,23 +123,19 @@ static void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,Conver
                     }
                 }
             }
-        } /*
-        else if (const IFC::IfcSurfaceStyleWithTextures* tex = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleWithTextures>(conv.db)) {
-            // XXX
-        } */
+        } 
     }
-
 }
 
 // ------------------------------------------------------------------------------------------------
 unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat) {
     STEP::DB::RefMapRange range = conv.db.GetRefs().equal_range(id);
     for(;range.first != range.second; ++range.first) {
-        if(const IFC::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcStyledItem>()) {
-            for(const IFC::IfcPresentationStyleAssignment& as : styled->Styles) {
-                for(std::shared_ptr<const IFC::IfcPresentationStyleSelect> sel : as.Styles) {
+        if(const IFC::Schema_2x3::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::Schema_2x3::IfcStyledItem>()) {
+            for(const IFC::Schema_2x3::IfcPresentationStyleAssignment& as : styled->Styles) {
+                for(std::shared_ptr<const IFC::Schema_2x3::IfcPresentationStyleSelect> sel : as.Styles) {
 
-                    if( const IFC::IfcSurfaceStyle* const surf = sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db) ) {
+                    if( const IFC::Schema_2x3::IfcSurfaceStyle* const surf = sel->ResolveSelectPtr<IFC::Schema_2x3::IfcSurfaceStyle>(conv.db) ) {
                         // try to satisfy from cache
                         ConversionData::MaterialCache::iterator mit = conv.cached_materials.find(surf);
                         if( mit != conv.cached_materials.end() )

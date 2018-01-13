@@ -43,15 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
-#include "IFCReaderGen.h"
+#include "IFCReaderGen_2x3.h"
 
 namespace Assimp {
-using namespace IFC;
+
+using namespace ::Assimp::IFC;
+using namespace ::Assimp::IFC::Schema_2x3;
 
 namespace {
-
 	typedef EXPRESS::ConversionSchema::SchemaEntry SchemaEntry;
-	const SchemaEntry schema_raw[] =  {
+
+    static const SchemaEntry schema_raw_2x3[] =  {
 		SchemaEntry("ifcstairtypeenum",NULL )
 ,		SchemaEntry("ifcspacetypeenum",NULL )
 ,		SchemaEntry("ifcwalltypeenum",NULL )
@@ -1037,9 +1039,8 @@ namespace {
 }
 
 // -----------------------------------------------------------------------------------------------------------
-void IFC::GetSchema(EXPRESS::ConversionSchema& out)
-{
-	out = EXPRESS::ConversionSchema(schema_raw);
+void IFC::Schema_2x3::GetSchema(EXPRESS::ConversionSchema& out) {
+	out = EXPRESS::ConversionSchema(schema_raw_2x3);
 }
 
 namespace STEP {
@@ -1050,34 +1051,32 @@ template <> size_t GenericFill<NotImplemented>(const STEP::DB& /*db*/, const LIS
 	return 0;
 }
 
-
-
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcRoot>(const DB& db, const LIST& params, IfcRoot* in)
 {
 	size_t base = 0;
 	if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to IfcRoot"); }    do { // convert the 'GlobalId' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRoot,4>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRoot,4>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->GlobalId, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcRoot to be a `IfcGloballyUniqueId`")); }
     } while(0);
     do { // convert the 'OwnerHistory' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRoot,4>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRoot,4>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->OwnerHistory, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcRoot to be a `IfcOwnerHistory`")); }
     } while(0);
     do { // convert the 'Name' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRoot,4>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRoot,4>::aux_is_derived[2]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Name, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcRoot to be a `IfcLabel`")); }
     } while(0);
     do { // convert the 'Description' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRoot,4>::aux_is_derived[3]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRoot,4>::aux_is_derived[3]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Description, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcRoot to be a `IfcText`")); }
@@ -1145,27 +1144,27 @@ template <> size_t GenericFill<IfcRepresentation>(const DB& db, const LIST& para
 	size_t base = 0;
 	if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to IfcRepresentation"); }    do { // convert the 'ContextOfItems' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRepresentation,4>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRepresentation,4>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->ContextOfItems, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcRepresentation to be a `IfcRepresentationContext`")); }
     } while(0);
     do { // convert the 'RepresentationIdentifier' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRepresentation,4>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRepresentation,4>::aux_is_derived[1]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->RepresentationIdentifier, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcRepresentation to be a `IfcLabel`")); }
     } while(0);
     do { // convert the 'RepresentationType' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRepresentation,4>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRepresentation,4>::aux_is_derived[2]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->RepresentationType, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcRepresentation to be a `IfcLabel`")); }
     } while(0);
     do { // convert the 'Items' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRepresentation,4>::aux_is_derived[3]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRepresentation,4>::aux_is_derived[3]=true; break; }
         try { GenericConvert( in->Items, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcRepresentation to be a `SET [1:?] OF IfcRepresentationItem`")); }
     } while(0);
@@ -1231,7 +1230,7 @@ template <> size_t GenericFill<IfcObject>(const DB& db, const LIST& params, IfcO
 	size_t base = GenericFill(db,params,static_cast<IfcObjectDefinition*>(in));
 	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcObject"); }    do { // convert the 'ObjectType' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcObject,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcObject,1>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->ObjectType, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcObject to be a `IfcLabel`")); }
@@ -1284,21 +1283,21 @@ template <> size_t GenericFill<IfcProductRepresentation>(const DB& db, const LIS
 	size_t base = 0;
 	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcProductRepresentation"); }    do { // convert the 'Name' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProductRepresentation,3>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProductRepresentation,3>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Name, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcProductRepresentation to be a `IfcLabel`")); }
     } while(0);
     do { // convert the 'Description' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProductRepresentation,3>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProductRepresentation,3>::aux_is_derived[1]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Description, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcProductRepresentation to be a `IfcText`")); }
     } while(0);
     do { // convert the 'Representations' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProductRepresentation,3>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProductRepresentation,3>::aux_is_derived[2]=true; break; }
         try { GenericConvert( in->Representations, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcProductRepresentation to be a `LIST [1:?] OF IfcRepresentation`")); }
     } while(0);
@@ -1310,14 +1309,14 @@ template <> size_t GenericFill<IfcProduct>(const DB& db, const LIST& params, Ifc
 	size_t base = GenericFill(db,params,static_cast<IfcObject*>(in));
 	if (params.GetSize() < 7) { throw STEP::TypeError("expected 7 arguments to IfcProduct"); }    do { // convert the 'ObjectPlacement' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProduct,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProduct,2>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->ObjectPlacement, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcProduct to be a `IfcObjectPlacement`")); }
     } while(0);
     do { // convert the 'Representation' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProduct,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProduct,2>::aux_is_derived[1]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Representation, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 6 to IfcProduct to be a `IfcProductRepresentation`")); }
@@ -1330,7 +1329,7 @@ template <> size_t GenericFill<IfcElement>(const DB& db, const LIST& params, Ifc
 	size_t base = GenericFill(db,params,static_cast<IfcProduct*>(in));
 	if (params.GetSize() < 8) { throw STEP::TypeError("expected 8 arguments to IfcElement"); }    do { // convert the 'Tag' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcElement,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcElement,1>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Tag, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 7 to IfcElement to be a `IfcIdentifier`")); }
@@ -1369,13 +1368,13 @@ template <> size_t GenericFill<IfcCompositeCurve>(const DB& db, const LIST& para
 	size_t base = GenericFill(db,params,static_cast<IfcBoundedCurve*>(in));
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcCompositeCurve"); }    do { // convert the 'Segments' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCompositeCurve,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCompositeCurve,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Segments, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcCompositeCurve to be a `LIST [1:?] OF IfcCompositeCurveSegment`")); }
     } while(0);
     do { // convert the 'SelfIntersect' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCompositeCurve,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCompositeCurve,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->SelfIntersect, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcCompositeCurve to be a `LOGICAL`")); }
     } while(0);
@@ -1394,27 +1393,27 @@ template <> size_t GenericFill<IfcCartesianTransformationOperator>(const DB& db,
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
 	if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to IfcCartesianTransformationOperator"); }    do { // convert the 'Axis1' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCartesianTransformationOperator,4>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCartesianTransformationOperator,4>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Axis1, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcCartesianTransformationOperator to be a `IfcDirection`")); }
     } while(0);
     do { // convert the 'Axis2' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCartesianTransformationOperator,4>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCartesianTransformationOperator,4>::aux_is_derived[1]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Axis2, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcCartesianTransformationOperator to be a `IfcDirection`")); }
     } while(0);
     do { // convert the 'LocalOrigin' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCartesianTransformationOperator,4>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCartesianTransformationOperator,4>::aux_is_derived[2]=true; break; }
         try { GenericConvert( in->LocalOrigin, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcCartesianTransformationOperator to be a `IfcCartesianPoint`")); }
     } while(0);
     do { // convert the 'Scale' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCartesianTransformationOperator,4>::aux_is_derived[3]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCartesianTransformationOperator,4>::aux_is_derived[3]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Scale, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcCartesianTransformationOperator to be a `REAL`")); }
@@ -1427,7 +1426,7 @@ template <> size_t GenericFill<IfcCartesianTransformationOperator3D>(const DB& d
 	size_t base = GenericFill(db,params,static_cast<IfcCartesianTransformationOperator*>(in));
 	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcCartesianTransformationOperator3D"); }    do { // convert the 'Axis3' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCartesianTransformationOperator3D,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCartesianTransformationOperator3D,1>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Axis3, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcCartesianTransformationOperator3D to be a `IfcDirection`")); }
@@ -1440,13 +1439,13 @@ template <> size_t GenericFill<IfcProperty>(const DB& db, const LIST& params, If
 	size_t base = 0;
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcProperty"); }    do { // convert the 'Name' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProperty,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProperty,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Name, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcProperty to be a `IfcIdentifier`")); }
     } while(0);
     do { // convert the 'Description' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProperty,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProperty,2>::aux_is_derived[1]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Description, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcProperty to be a `IfcText`")); }
@@ -1492,7 +1491,7 @@ template <> size_t GenericFill<IfcElementarySurface>(const DB& db, const LIST& p
 	size_t base = GenericFill(db,params,static_cast<IfcSurface*>(in));
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcElementarySurface"); }    do { // convert the 'Position' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcElementarySurface,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcElementarySurface,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Position, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcElementarySurface to be a `IfcAxis2Placement3D`")); }
     } while(0);
@@ -1510,19 +1509,19 @@ template <> size_t GenericFill<IfcBooleanResult>(const DB& db, const LIST& param
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
 	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcBooleanResult"); }    do { // convert the 'Operator' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBooleanResult,3>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcBooleanResult,3>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Operator, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcBooleanResult to be a `IfcBooleanOperator`")); }
     } while(0);
     do { // convert the 'FirstOperand' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBooleanResult,3>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcBooleanResult,3>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->FirstOperand, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcBooleanResult to be a `IfcBooleanOperand`")); }
     } while(0);
     do { // convert the 'SecondOperand' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcBooleanResult,3>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcBooleanResult,3>::aux_is_derived[2]=true; break; }
         try { GenericConvert( in->SecondOperand, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcBooleanResult to be a `IfcBooleanOperand`")); }
     } while(0);
@@ -1546,7 +1545,7 @@ template <> size_t GenericFill<IfcManifoldSolidBrep>(const DB& db, const LIST& p
 	size_t base = GenericFill(db,params,static_cast<IfcSolidModel*>(in));
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcManifoldSolidBrep"); }    do { // convert the 'Outer' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcManifoldSolidBrep,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcManifoldSolidBrep,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Outer, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcManifoldSolidBrep to be a `IfcClosedShell`")); }
     } while(0);
@@ -1779,13 +1778,13 @@ template <> size_t GenericFill<IfcProfileDef>(const DB& db, const LIST& params, 
 	size_t base = 0;
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcProfileDef"); }    do { // convert the 'ProfileType' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProfileDef,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProfileDef,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->ProfileType, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcProfileDef to be a `IfcProfileTypeEnum`")); }
     } while(0);
     do { // convert the 'ProfileName' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProfileDef,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcProfileDef,2>::aux_is_derived[1]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->ProfileName, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcProfileDef to be a `IfcLabel`")); }
@@ -1798,7 +1797,7 @@ template <> size_t GenericFill<IfcParameterizedProfileDef>(const DB& db, const L
 	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
 	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcParameterizedProfileDef"); }    do { // convert the 'Position' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcParameterizedProfileDef,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcParameterizedProfileDef,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Position, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcParameterizedProfileDef to be a `IfcAxis2Placement2D`")); }
     } while(0);
@@ -1905,7 +1904,7 @@ template <> size_t GenericFill<IfcCircleProfileDef>(const DB& db, const LIST& pa
 	size_t base = GenericFill(db,params,static_cast<IfcParameterizedProfileDef*>(in));
 	if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to IfcCircleProfileDef"); }    do { // convert the 'Radius' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcCircleProfileDef,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcCircleProfileDef,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Radius, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcCircleProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
@@ -1928,7 +1927,7 @@ template <> size_t GenericFill<IfcPlacement>(const DB& db, const LIST& params, I
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcPlacement"); }    do { // convert the 'Location' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcPlacement,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcPlacement,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Location, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcPlacement to be a `IfcCartesianPoint`")); }
     } while(0);
@@ -1958,7 +1957,7 @@ template <> size_t GenericFill<IfcPresentationStyle>(const DB& db, const LIST& p
 	size_t base = 0;
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcPresentationStyle"); }    do { // convert the 'Name' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcPresentationStyle,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcPresentationStyle,1>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Name, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcPresentationStyle to be a `IfcLabel`")); }
@@ -1999,13 +1998,13 @@ template <> size_t GenericFill<IfcRectangleProfileDef>(const DB& db, const LIST&
 	size_t base = GenericFill(db,params,static_cast<IfcParameterizedProfileDef*>(in));
 	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcRectangleProfileDef"); }    do { // convert the 'XDim' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRectangleProfileDef,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRectangleProfileDef,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->XDim, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcRectangleProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
     do { // convert the 'YDim' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRectangleProfileDef,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRectangleProfileDef,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->YDim, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRectangleProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
@@ -2118,13 +2117,13 @@ template <> size_t GenericFill<IfcSweptAreaSolid>(const DB& db, const LIST& para
 	size_t base = GenericFill(db,params,static_cast<IfcSolidModel*>(in));
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcSweptAreaSolid"); }    do { // convert the 'SweptArea' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcSweptAreaSolid,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcSweptAreaSolid,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->SweptArea, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcSweptAreaSolid to be a `IfcProfileDef`")); }
     } while(0);
     do { // convert the 'Position' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcSweptAreaSolid,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcSweptAreaSolid,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->Position, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcSweptAreaSolid to be a `IfcAxis2Placement3D`")); }
     } while(0);
@@ -2198,13 +2197,13 @@ template <> size_t GenericFill<IfcHalfSpaceSolid>(const DB& db, const LIST& para
 	size_t base = GenericFill(db,params,static_cast<IfcGeometricRepresentationItem*>(in));
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcHalfSpaceSolid"); }    do { // convert the 'BaseSurface' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcHalfSpaceSolid,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcHalfSpaceSolid,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->BaseSurface, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcHalfSpaceSolid to be a `IfcSurface`")); }
     } while(0);
     do { // convert the 'AgreementFlag' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcHalfSpaceSolid,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcHalfSpaceSolid,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->AgreementFlag, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcHalfSpaceSolid to be a `BOOLEAN`")); }
     } while(0);
@@ -2354,7 +2353,7 @@ template <> size_t GenericFill<IfcRelDefines>(const DB& db, const LIST& params, 
 	size_t base = GenericFill(db,params,static_cast<IfcRelationship*>(in));
 	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcRelDefines"); }    do { // convert the 'RelatedObjects' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRelDefines,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRelDefines,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->RelatedObjects, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRelDefines to be a `SET [1:?] OF IfcObject`")); }
     } while(0);
@@ -2366,7 +2365,7 @@ template <> size_t GenericFill<IfcRelDefinesByProperties>(const DB& db, const LI
 	size_t base = GenericFill(db,params,static_cast<IfcRelDefines*>(in));
 	if (params.GetSize() < 6) { throw STEP::TypeError("expected 6 arguments to IfcRelDefinesByProperties"); }    do { // convert the 'RelatingPropertyDefinition' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRelDefinesByProperties,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRelDefinesByProperties,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->RelatingPropertyDefinition, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcRelDefinesByProperties to be a `IfcPropertySetDefinition`")); }
     } while(0);
@@ -2399,7 +2398,7 @@ template <> size_t GenericFill<IfcArbitraryOpenProfileDef>(const DB& db, const L
 	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
 	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcArbitraryOpenProfileDef"); }    do { // convert the 'Curve' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcArbitraryOpenProfileDef,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcArbitraryOpenProfileDef,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Curve, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcArbitraryOpenProfileDef to be a `IfcBoundedCurve`")); }
     } while(0);
@@ -2565,13 +2564,13 @@ template <> size_t GenericFill<IfcRelDecomposes>(const DB& db, const LIST& param
 	size_t base = GenericFill(db,params,static_cast<IfcRelationship*>(in));
 	if (params.GetSize() < 6) { throw STEP::TypeError("expected 6 arguments to IfcRelDecomposes"); }    do { // convert the 'RelatingObject' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRelDecomposes,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRelDecomposes,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->RelatingObject, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcRelDecomposes to be a `IfcObjectDefinition`")); }
     } while(0);
     do { // convert the 'RelatedObjects' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcRelDecomposes,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcRelDecomposes,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->RelatedObjects, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcRelDecomposes to be a `SET [1:?] OF IfcObjectDefinition`")); }
     } while(0);
@@ -2653,13 +2652,13 @@ template <> size_t GenericFill<IfcNamedUnit>(const DB& db, const LIST& params, I
 	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcNamedUnit"); }    do { // convert the 'Dimensions' argument
         std::shared_ptr<const DataType> arg = params[base++];
 		if (dynamic_cast<const UNSET*>(&*arg)) break;
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcNamedUnit,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcNamedUnit,2>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Dimensions, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcNamedUnit to be a `IfcDimensionalExponents`")); }
     } while(0);
     do { // convert the 'UnitType' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcNamedUnit,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcNamedUnit,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->UnitType, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcNamedUnit to be a `IfcUnitEnum`")); }
     } while(0);
@@ -2713,14 +2712,14 @@ template <> size_t GenericFill<IfcSpatialStructureElement>(const DB& db, const L
 	size_t base = GenericFill(db,params,static_cast<IfcProduct*>(in));
 	if (params.GetSize() < 9) { throw STEP::TypeError("expected 9 arguments to IfcSpatialStructureElement"); }    do { // convert the 'LongName' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcSpatialStructureElement,2>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcSpatialStructureElement,2>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->LongName, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 7 to IfcSpatialStructureElement to be a `IfcLabel`")); }
     } while(0);
     do { // convert the 'CompositionType' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcSpatialStructureElement,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcSpatialStructureElement,2>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->CompositionType, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 8 to IfcSpatialStructureElement to be a `IfcElementCompositionEnum`")); }
     } while(0);
@@ -2756,7 +2755,7 @@ template <> size_t GenericFill<IfcConnectedFaceSet>(const DB& db, const LIST& pa
 	size_t base = GenericFill(db,params,static_cast<IfcTopologicalRepresentationItem*>(in));
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcConnectedFaceSet"); }    do { // convert the 'CfsFaces' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcConnectedFaceSet,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcConnectedFaceSet,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->CfsFaces, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcConnectedFaceSet to be a `SET [1:?] OF IfcFace`")); }
     } while(0);
@@ -2782,7 +2781,7 @@ template <> size_t GenericFill<IfcConic>(const DB& db, const LIST& params, IfcCo
 	size_t base = GenericFill(db,params,static_cast<IfcCurve*>(in));
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcConic"); }    do { // convert the 'Position' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcConic,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcConic,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Position, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcConic to be a `IfcAxis2Placement`")); }
     } while(0);
@@ -2829,31 +2828,31 @@ template <> size_t GenericFill<IfcIShapeProfileDef>(const DB& db, const LIST& pa
 	size_t base = GenericFill(db,params,static_cast<IfcParameterizedProfileDef*>(in));
 	if (params.GetSize() < 8) { throw STEP::TypeError("expected 8 arguments to IfcIShapeProfileDef"); }    do { // convert the 'OverallWidth' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcIShapeProfileDef,5>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcIShapeProfileDef,5>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->OverallWidth, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcIShapeProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
     do { // convert the 'OverallDepth' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcIShapeProfileDef,5>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcIShapeProfileDef,5>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->OverallDepth, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcIShapeProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
     do { // convert the 'WebThickness' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcIShapeProfileDef,5>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcIShapeProfileDef,5>::aux_is_derived[2]=true; break; }
         try { GenericConvert( in->WebThickness, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 5 to IfcIShapeProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
     do { // convert the 'FlangeThickness' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcIShapeProfileDef,5>::aux_is_derived[3]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcIShapeProfileDef,5>::aux_is_derived[3]=true; break; }
         try { GenericConvert( in->FlangeThickness, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 6 to IfcIShapeProfileDef to be a `IfcPositiveLengthMeasure`")); }
     } while(0);
     do { // convert the 'FilletRadius' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcIShapeProfileDef,5>::aux_is_derived[4]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcIShapeProfileDef,5>::aux_is_derived[4]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->FilletRadius, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 7 to IfcIShapeProfileDef to be a `IfcPositiveLengthMeasure`")); }
@@ -2978,20 +2977,20 @@ template <> size_t GenericFill<IfcStyledItem>(const DB& db, const LIST& params, 
 	size_t base = GenericFill(db,params,static_cast<IfcRepresentationItem*>(in));
 	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcStyledItem"); }    do { // convert the 'Item' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcStyledItem,3>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcStyledItem,3>::aux_is_derived[0]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Item, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcStyledItem to be a `IfcRepresentationItem`")); }
     } while(0);
     do { // convert the 'Styles' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcStyledItem,3>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcStyledItem,3>::aux_is_derived[1]=true; break; }
         try { GenericConvert( in->Styles, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcStyledItem to be a `SET [1:?] OF IfcPresentationStyleAssignment`")); }
     } while(0);
     do { // convert the 'Name' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcStyledItem,3>::aux_is_derived[2]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcStyledItem,3>::aux_is_derived[2]=true; break; }
         if (dynamic_cast<const UNSET*>(&*arg)) break;
         try { GenericConvert( in->Name, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcStyledItem to be a `IfcLabel`")); }
@@ -3018,7 +3017,7 @@ template <> size_t GenericFill<IfcArbitraryClosedProfileDef>(const DB& db, const
 	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
 	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcArbitraryClosedProfileDef"); }    do { // convert the 'OuterCurve' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcArbitraryClosedProfileDef,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcArbitraryClosedProfileDef,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->OuterCurve, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcArbitraryClosedProfileDef to be a `IfcCurve`")); }
     } while(0);
@@ -3106,7 +3105,7 @@ template <> size_t GenericFill<IfcSurfaceStyleShading>(const DB& db, const LIST&
 	size_t base = 0;
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcSurfaceStyleShading"); }    do { // convert the 'SurfaceColour' argument
         std::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcSurfaceStyleShading,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcSurfaceStyleShading,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->SurfaceColour, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcSurfaceStyleShading to be a `IfcColourRgb`")); }
     } while(0);

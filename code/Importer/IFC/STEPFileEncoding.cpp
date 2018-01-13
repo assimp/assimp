@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief STEP character handling, string un-escaping
  */
 #include "STEPFileEncoding.h"
-#include "fast_atof.h"
+#include "code/fast_atof.h"
 #include <contrib/utf8cpp/source/utf8.h>
 
 #include <memory>

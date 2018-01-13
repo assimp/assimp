@@ -364,17 +364,16 @@ namespace STEP {
         // -------------------------------------------------------------------------------
         class ConversionSchema
         {
-
         public:
-
             struct SchemaEntry {
-                SchemaEntry(const char* name,ConvertObjectProc func)
-                    : name(name)
-                    , func(func)
-                {}
+                SchemaEntry( const char *name, ConvertObjectProc func )
+                : mName( name )
+                , mFunc(func) {
+                    // empty
+                }
 
-                const char* name;
-                ConvertObjectProc func;
+                const char* mName;
+                ConvertObjectProc mFunc;
             };
 
             typedef std::map<std::string,ConvertObjectProc> ConverterMap;
@@ -410,7 +409,7 @@ namespace STEP {
             const ConversionSchema& operator=( const SchemaEntry (& schemas)[N]) {
                 for(size_t i = 0; i < N; ++i ) {
                     const SchemaEntry& schema = schemas[i];
-                    converters[schema.name] = schema.func;
+                    converters[schema.mName] = schema.mFunc;
                 }
                 return *this;
             }

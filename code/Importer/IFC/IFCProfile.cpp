@@ -43,28 +43,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Read profile and curves entities from IFC files
  */
 
-
-
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
+
 #include "IFCUtil.h"
 
 namespace Assimp {
-    namespace IFC {
+namespace IFC {
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolyLine(const IfcPolyline& def, TempMesh& meshout, ConversionData& /*conv*/)
+void ProcessPolyLine(const Schema_2x3::IfcPolyline& def, TempMesh& meshout, ConversionData& /*conv*/)
 {
     // this won't produce a valid mesh, it just spits out a list of vertices
     IfcVector3 t;
-    for(const IfcCartesianPoint& cp : def.Points) {
+    for(const Schema_2x3::IfcCartesianPoint& cp : def.Points) {
         ConvertCartesianPoint(t,cp);
-        meshout.verts.push_back(t);
+        meshout.mVerts.push_back(t);
     }
-    meshout.vertcnt.push_back(static_cast<unsigned int>(meshout.verts.size()));
+    meshout.mVertcnt.push_back(static_cast<unsigned int>(meshout.mVerts.size()));
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv)
+bool ProcessCurve(const Schema_2x3::IfcCurve& curve,  TempMesh& meshout, ConversionData& conv)
 {
     std::unique_ptr<const Curve> cv(Curve::Convert(curve,conv));
     if (!cv) {
@@ -78,10 +77,10 @@ bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& con
             bc->SampleDiscrete(meshout);
         }
         catch(const  CurveError& cv) {
-            IFCImporter::LogError(cv.s+ " (error occurred while processing curve)");
+            IFCImporter::LogError(cv.mStr + " (error occurred while processing curve)");
             return false;
         }
-        meshout.vertcnt.push_back(static_cast<unsigned int>(meshout.verts.size()));
+        meshout.mVertcnt.push_back(static_cast<unsigned int>(meshout.mVerts.size()));
         return true;
     }
 
@@ -90,66 +89,66 @@ bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& con
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessClosedProfile(const IfcArbitraryClosedProfileDef& def, TempMesh& meshout, ConversionData& conv)
+void ProcessClosedProfile(const Schema_2x3::IfcArbitraryClosedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
     ProcessCurve(def.OuterCurve,meshout,conv);
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessOpenProfile(const IfcArbitraryOpenProfileDef& def, TempMesh& meshout, ConversionData& conv)
+void ProcessOpenProfile(const Schema_2x3::IfcArbitraryOpenProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
     ProcessCurve(def.Curve,meshout,conv);
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
+void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
 {
-    if(const IfcRectangleProfileDef* const cprofile = def.ToPtr<IfcRectangleProfileDef>()) {
+    if(const Schema_2x3::IfcRectangleProfileDef* const cprofile = def.ToPtr<Schema_2x3::IfcRectangleProfileDef>()) {
         const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
 
-        meshout.verts.reserve(meshout.verts.size()+4);
-        meshout.verts.push_back( IfcVector3( x, y, 0.f ));
-        meshout.verts.push_back( IfcVector3(-x, y, 0.f ));
-        meshout.verts.push_back( IfcVector3(-x,-y, 0.f ));
-        meshout.verts.push_back( IfcVector3( x,-y, 0.f ));
-        meshout.vertcnt.push_back(4);
+        meshout.mVerts.reserve(meshout.mVerts.size()+4);
+        meshout.mVerts.push_back( IfcVector3( x, y, 0.f ));
+        meshout.mVerts.push_back( IfcVector3(-x, y, 0.f ));
+        meshout.mVerts.push_back( IfcVector3(-x,-y, 0.f ));
+        meshout.mVerts.push_back( IfcVector3( x,-y, 0.f ));
+        meshout.mVertcnt.push_back(4);
     }
-    else if( const IfcCircleProfileDef* const circle = def.ToPtr<IfcCircleProfileDef>()) {
-        if(def.ToPtr<IfcCircleHollowProfileDef>()) {
+    else if( const Schema_2x3::IfcCircleProfileDef* const circle = def.ToPtr<Schema_2x3::IfcCircleProfileDef>()) {
+        if(def.ToPtr<Schema_2x3::IfcCircleHollowProfileDef>()) {
             // TODO
         }
         const size_t segments = conv.settings.cylindricalTessellation;
         const IfcFloat delta = AI_MATH_TWO_PI_F/segments, radius = circle->Radius;
 
-        meshout.verts.reserve(segments);
+        meshout.mVerts.reserve(segments);
 
         IfcFloat angle = 0.f;
         for(size_t i = 0; i < segments; ++i, angle += delta) {
-            meshout.verts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
+            meshout.mVerts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
         }
 
-        meshout.vertcnt.push_back(static_cast<unsigned int>(segments));
+        meshout.mVertcnt.push_back(static_cast<unsigned int>(segments));
     }
-    else if( const IfcIShapeProfileDef* const ishape = def.ToPtr<IfcIShapeProfileDef>()) {
+    else if( const Schema_2x3::IfcIShapeProfileDef* const ishape = def.ToPtr<Schema_2x3::IfcIShapeProfileDef>()) {
         // construct simplified IBeam shape
         const IfcFloat offset = (ishape->OverallWidth - ishape->WebThickness) / 2;
         const IfcFloat inner_height = ishape->OverallDepth - ishape->FlangeThickness * 2;
 
-        meshout.verts.reserve(12);
-        meshout.verts.push_back(IfcVector3(0,0,0));
-        meshout.verts.push_back(IfcVector3(0,ishape->FlangeThickness,0));
-        meshout.verts.push_back(IfcVector3(offset,ishape->FlangeThickness,0));
-        meshout.verts.push_back(IfcVector3(offset,ishape->FlangeThickness + inner_height,0));
-        meshout.verts.push_back(IfcVector3(0,ishape->FlangeThickness + inner_height,0));
-        meshout.verts.push_back(IfcVector3(0,ishape->OverallDepth,0));
-        meshout.verts.push_back(IfcVector3(ishape->OverallWidth,ishape->OverallDepth,0));
-        meshout.verts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness + inner_height,0));
-        meshout.verts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness + inner_height,0));
-        meshout.verts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness,0));
-        meshout.verts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness,0));
-        meshout.verts.push_back(IfcVector3(ishape->OverallWidth,0,0));
+        meshout.mVerts.reserve(12);
+        meshout.mVerts.push_back(IfcVector3(0,0,0));
+        meshout.mVerts.push_back(IfcVector3(0,ishape->FlangeThickness,0));
+        meshout.mVerts.push_back(IfcVector3(offset,ishape->FlangeThickness,0));
+        meshout.mVerts.push_back(IfcVector3(offset,ishape->FlangeThickness + inner_height,0));
+        meshout.mVerts.push_back(IfcVector3(0,ishape->FlangeThickness + inner_height,0));
+        meshout.mVerts.push_back(IfcVector3(0,ishape->OverallDepth,0));
+        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,ishape->OverallDepth,0));
+        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness + inner_height,0));
+        meshout.mVerts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness + inner_height,0));
+        meshout.mVerts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness,0));
+        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness,0));
+        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,0,0));
 
-        meshout.vertcnt.push_back(12);
+        meshout.mVertcnt.push_back(12);
     }
     else {
         IFCImporter::LogWarn("skipping unknown IfcParameterizedProfileDef entity, type is " + def.GetClassName());
@@ -162,15 +161,15 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv)
+bool ProcessProfile(const Schema_2x3::IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv)
 {
-    if(const IfcArbitraryClosedProfileDef* const cprofile = prof.ToPtr<IfcArbitraryClosedProfileDef>()) {
+    if(const Schema_2x3::IfcArbitraryClosedProfileDef* const cprofile = prof.ToPtr<Schema_2x3::IfcArbitraryClosedProfileDef>()) {
         ProcessClosedProfile(*cprofile,meshout,conv);
     }
-    else if(const IfcArbitraryOpenProfileDef* const copen = prof.ToPtr<IfcArbitraryOpenProfileDef>()) {
+    else if(const Schema_2x3::IfcArbitraryOpenProfileDef* const copen = prof.ToPtr<Schema_2x3::IfcArbitraryOpenProfileDef>()) {
         ProcessOpenProfile(*copen,meshout,conv);
     }
-    else if(const IfcParameterizedProfileDef* const cparam = prof.ToPtr<IfcParameterizedProfileDef>()) {
+    else if(const Schema_2x3::IfcParameterizedProfileDef* const cparam = prof.ToPtr<Schema_2x3::IfcParameterizedProfileDef>()) {
         ProcessParametrizedProfile(*cparam,meshout,conv);
     }
     else {
@@ -178,7 +177,7 @@ bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData
         return false;
     }
     meshout.RemoveAdjacentDuplicates();
-    if (!meshout.vertcnt.size() || meshout.vertcnt.front() <= 1) {
+    if (!meshout.mVertcnt.size() || meshout.mVertcnt.front() <= 1) {
         return false;
     }
     return true;
@@ -187,4 +186,4 @@ bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData
 } // ! IFC
 } // ! Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_IFC_IMPORTER

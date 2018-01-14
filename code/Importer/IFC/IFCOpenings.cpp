@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
-#include "PolyTools.h"
-#include "ProcessHelper.h"
+#include "code/PolyTools.h"
+#include "code/ProcessHelper.h"
 
 #include "../contrib/poly2tri/poly2tri/poly2tri.h"
 #include "../contrib/clipper/clipper.hpp"
@@ -323,7 +323,7 @@ void InsertWindowContours(const ContourVector& contours,
             if (hit) {
                 if (last_hit != (size_t)-1) {
 
-                    const size_t old = curmesh.verts.size();
+                    const size_t old = curmesh.mVerts.size();
                     size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
                     for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
                         // hack: this is to fix cases where opening contours are self-intersecting.
@@ -335,7 +335,7 @@ void InsertWindowContours(const ContourVector& contours,
                         if ((contour[a] - edge).SquareLength() > diag*diag*0.7) {
                             continue;
                         }
-                        curmesh.verts.push_back(IfcVector3(contour[a].x, contour[a].y, 0.0f));
+                        curmesh.mVerts.push_back(IfcVector3(contour[a].x, contour[a].y, 0.0f));
                     }
 
                     if (edge != contour[last_hit]) {
@@ -356,16 +356,16 @@ void InsertWindowContours(const ContourVector& contours,
                             corner.y = bb.second.y;
                         }
 
-                        curmesh.verts.push_back(IfcVector3(corner.x, corner.y, 0.0f));
+                        curmesh.mVerts.push_back(IfcVector3(corner.x, corner.y, 0.0f));
                     }
                     else if (cnt == 1) {
                         // avoid degenerate polygons (also known as lines or points)
-                        curmesh.verts.erase(curmesh.verts.begin()+old,curmesh.verts.end());
+                        curmesh.mVerts.erase(curmesh.mVerts.begin()+old,curmesh.mVerts.end());
                     }
 
-                    if (const size_t d = curmesh.verts.size()-old) {
-                        curmesh.vertcnt.push_back(static_cast<unsigned int>(d));
-                        std::reverse(curmesh.verts.rbegin(),curmesh.verts.rbegin()+d);
+                    if (const size_t d = curmesh.mVerts.size()-old) {
+                        curmesh.mVertcnt.push_back(static_cast<unsigned int>(d));
+                        std::reverse(curmesh.mVerts.rbegin(),curmesh.mVerts.rbegin()+d);
                     }
                     if (n == very_first_hit) {
                         break;
@@ -504,8 +504,8 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
     std::vector<IfcVector3> vold;
     std::vector<unsigned int> iold;
 
-    vold.reserve(curmesh.verts.size());
-    iold.reserve(curmesh.vertcnt.size());
+    vold.reserve(curmesh.mVerts.size());
+    iold.reserve(curmesh.mVertcnt.size());
 
     // Fix the outer contour using polyclipper
     try {
@@ -530,9 +530,9 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
         subject.reserve(4);
         size_t index = 0;
         size_t countdown = 0;
-        for(const IfcVector3& pip : curmesh.verts) {
+        for(const IfcVector3& pip : curmesh.mVerts) {
             if (!countdown) {
-                countdown = curmesh.vertcnt[index++];
+                countdown = curmesh.mVertcnt[index++];
                 if (!countdown) {
                     continue;
                 }
@@ -572,8 +572,8 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
     }
 
     // swap data arrays
-    std::swap(vold,curmesh.verts);
-    std::swap(iold,curmesh.vertcnt);
+    std::swap(vold,curmesh.mVerts);
+    std::swap(iold,curmesh.mVertcnt);
 }
 
 typedef std::vector<TempOpening*> OpeningRefs;
@@ -898,14 +898,14 @@ size_t CloseWindows(ContourVector& contours,
 
             SkipList::const_iterator skipbegin = (*it).skiplist.begin();
 
-            curmesh.verts.reserve(curmesh.verts.size() + (*it).contour.size() * 4);
-            curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).contour.size());
+            curmesh.mVerts.reserve(curmesh.mVerts.size() + (*it).contour.size() * 4);
+            curmesh.mVertcnt.reserve(curmesh.mVertcnt.size() + (*it).contour.size());
 
 			bool reverseCountourFaces = false;
 
             // compare base poly normal and contour normal to detect if we need to reverse the face winding
-			if(curmesh.vertcnt.size() > 0) {
-				IfcVector3 basePolyNormal = TempMesh::ComputePolygonNormal(curmesh.verts.data(), curmesh.vertcnt.front());
+			if(curmesh.mVertcnt.size() > 0) {
+				IfcVector3 basePolyNormal = TempMesh::ComputePolygonNormal(curmesh.mVerts.data(), curmesh.mVertcnt.front());
 				
 				std::vector<IfcVector3> worldSpaceContourVtx(it->contour.size());
 				
@@ -954,14 +954,14 @@ size_t CloseWindows(ContourVector& contours,
                 }
 
                 if (drop_this_edge) {
-                    curmesh.verts.pop_back();
-                    curmesh.verts.pop_back();
+                    curmesh.mVerts.pop_back();
+                    curmesh.mVerts.pop_back();
                 }
                 else {
-                    curmesh.verts.push_back(((cit == cbegin) != reverseCountourFaces) ? world_point : bestv);
-                    curmesh.verts.push_back(((cit == cbegin) != reverseCountourFaces) ? bestv : world_point);
+                    curmesh.mVerts.push_back(((cit == cbegin) != reverseCountourFaces) ? world_point : bestv);
+                    curmesh.mVerts.push_back(((cit == cbegin) != reverseCountourFaces) ? bestv : world_point);
 
-                    curmesh.vertcnt.push_back(4);
+                    curmesh.mVertcnt.push_back(4);
                     ++closed;
                 }
 
@@ -971,8 +971,8 @@ size_t CloseWindows(ContourVector& contours,
                     continue;
                 }
 
-                curmesh.verts.push_back(reverseCountourFaces ? bestv : world_point);
-                curmesh.verts.push_back(reverseCountourFaces ? world_point : bestv);
+                curmesh.mVerts.push_back(reverseCountourFaces ? bestv : world_point);
+                curmesh.mVerts.push_back(reverseCountourFaces ? world_point : bestv);
 
                 if (cit == cend - 1) {
                     drop_this_edge = *skipit;
@@ -981,13 +981,13 @@ size_t CloseWindows(ContourVector& contours,
                     // a border edge that needs to be dropped.
                     if (drop_this_edge) {
                         --closed;
-                        curmesh.vertcnt.pop_back();
-                        curmesh.verts.pop_back();
-                        curmesh.verts.pop_back();
+                        curmesh.mVertcnt.pop_back();
+                        curmesh.mVerts.pop_back();
+                        curmesh.mVerts.pop_back();
                     }
                     else {
-                        curmesh.verts.push_back(reverseCountourFaces ? start0 : start1);
-                        curmesh.verts.push_back(reverseCountourFaces ? start1 : start0);
+                        curmesh.mVerts.push_back(reverseCountourFaces ? start0 : start1);
+                        curmesh.mVerts.push_back(reverseCountourFaces ? start1 : start0);
                     }
                 }
             }
@@ -1029,10 +1029,10 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
     QuadrifyPart(IfcVector2(),one_vec,field,bbs,quads);
     ai_assert(!(quads.size() % 4));
 
-    curmesh.vertcnt.resize(quads.size()/4,4);
-    curmesh.verts.reserve(quads.size());
+    curmesh.mVertcnt.resize(quads.size()/4,4);
+    curmesh.mVerts.reserve(quads.size());
     for(const IfcVector2& v2 : quads) {
-        curmesh.verts.push_back(IfcVector3(v2.x, v2.y, static_cast<IfcFloat>(0.0)));
+        curmesh.mVerts.push_back(IfcVector3(v2.x, v2.y, static_cast<IfcFloat>(0.0)));
     }
 }
 
@@ -1053,7 +1053,7 @@ void Quadrify(const ContourVector& contours, TempMesh& curmesh)
 IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh& in_mesh,
     bool &ok, IfcVector3& nor_out)
 {
-    const std::vector<IfcVector3>& in_verts = in_mesh.verts;
+    const std::vector<IfcVector3>& in_verts = in_mesh.mVerts;
     ok = true;
 
     IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(in_mesh, ok, nor_out));
@@ -1200,8 +1200,8 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
                 }
             }
         }
-        std::vector<IfcVector3> profile_verts = profile_data->verts;
-        std::vector<unsigned int> profile_vertcnts = profile_data->vertcnt;
+        std::vector<IfcVector3> profile_verts = profile_data->mVerts;
+        std::vector<unsigned int> profile_vertcnts = profile_data->mVertcnt;
         if(profile_verts.size() <= 2) {
             continue;
         }
@@ -1421,7 +1421,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
     CleanupOuterContour(contour_flat, curmesh);
 
     // Undo the projection and get back to world (or local object) space
-    for(IfcVector3& v3 : curmesh.verts) {
+    for(IfcVector3& v3 : curmesh.mVerts) {
         v3 = minv * v3;
     }
 
@@ -1438,7 +1438,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     TempMesh& curmesh)
 {
     IFCImporter::LogWarn("forced to use poly2tri fallback method to generate wall openings");
-    std::vector<IfcVector3>& out = curmesh.verts;
+    std::vector<IfcVector3>& out = curmesh.mVerts;
 
     bool result = false;
 
@@ -1513,14 +1513,14 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
                 continue;
             }
 
-            const std::vector<IfcVector3>& va = t.profileMesh->verts;
+            const std::vector<IfcVector3>& va = t.profileMesh->mVerts;
             if(va.size() <= 2) {
                 continue;
             }
 
             std::vector<IfcVector2> contour;
 
-            for(const IfcVector3& xx : t.profileMesh->verts) {
+            for(const IfcVector3& xx : t.profileMesh->mVerts) {
                 IfcVector3 vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
 
                 const bool is_extruded_side = std::fabs(vv.z - coord) > std::fabs(vv_extr.z - coord);
@@ -1603,8 +1603,8 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     std::vector<IfcVector3> old_verts;
     std::vector<unsigned int> old_vertcnt;
 
-    old_verts.swap(curmesh.verts);
-    old_vertcnt.swap(curmesh.vertcnt);
+    old_verts.swap(curmesh.mVerts);
+    old_vertcnt.swap(curmesh.mVertcnt);
 
     std::vector< std::vector<p2t::Point*> > contours;
     for(ClipperLib::ExPolygon& clip : clipped) {
@@ -1669,9 +1669,9 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
                 ai_assert(v.x <= 1.0 && v.x >= 0.0 && v.y <= 1.0 && v.y >= 0.0);
                 const IfcVector3 v3 = minv * IfcVector3(vmin.x + v.x * vmax.x, vmin.y + v.y * vmax.y,coord) ;
 
-                curmesh.verts.push_back(v3);
+                curmesh.mVerts.push_back(v3);
             }
-            curmesh.vertcnt.push_back(3);
+            curmesh.mVertcnt.push_back(3);
         }
 
         result = true;
@@ -1679,8 +1679,8 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
     if (!result) {
         // revert -- it's a shame, but better than nothing
-        curmesh.verts.insert(curmesh.verts.end(),old_verts.begin(), old_verts.end());
-        curmesh.vertcnt.insert(curmesh.vertcnt.end(),old_vertcnt.begin(), old_vertcnt.end());
+        curmesh.mVerts.insert(curmesh.mVerts.end(),old_verts.begin(), old_verts.end());
+        curmesh.mVertcnt.insert(curmesh.mVertcnt.end(),old_vertcnt.begin(), old_vertcnt.end());
 
         IFCImporter::LogError("Ifc: revert, could not generate openings for this wall");
     }

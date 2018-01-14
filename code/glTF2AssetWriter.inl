@@ -584,7 +584,7 @@ namespace glTF2 {
         if (bodyBuffer->byteLength > 0) {
             rapidjson::Value glbBodyBuffer;
             glbBodyBuffer.SetObject();
-            glbBodyBuffer.AddMember("byteLength", bodyBuffer->byteLength, mAl);
+            glbBodyBuffer.AddMember("byteLength", static_cast<uint64_t>(bodyBuffer->byteLength), mAl);
             mDoc["buffers"].PushBack(glbBodyBuffer, mAl);
         }
 

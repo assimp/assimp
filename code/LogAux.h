@@ -51,12 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-template <class TDeriving>
-class LogFunctions
-{
-
+template<class TDeriving>
+class LogFunctions {
 public:
-
     // ------------------------------------------------------------------------------------------------
     static void ThrowException(const std::string& msg)
     {

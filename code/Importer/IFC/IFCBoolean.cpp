@@ -42,16 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implements a subset of Ifc boolean operations
  */
 
-
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#include "IFCUtil.h"
-#include "PolyTools.h"
-#include "ProcessHelper.h"
+#include "code/Importer/IFC/IFCUtil.h"
+#include "code/PolyTools.h"
+#include "code/ProcessHelper.h"
 #include <assimp/Defines.h>
 
 #include <iterator>
 #include <tuple>
-
 
 namespace Assimp {
     namespace IFC {
@@ -61,7 +59,7 @@ namespace Assimp {
 // The function then generates a hit only if the end is beyond a certain margin in that direction, filtering out
 // "very close to plane" ghost hits as long as start and end stay directly on or within the given plane side.
 bool IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const IfcVector3& e0,
-    const IfcVector3& e1, bool assumeStartOnWhiteSide, IfcVector3& out)
+        const IfcVector3& e1, bool assumeStartOnWhiteSide, IfcVector3& out)
 {
     const IfcVector3 pdelta = e0 - p, seg = e1 - e0;
     const IfcFloat dotOne = n*seg, dotTwo = -(n*pdelta);
@@ -131,20 +129,20 @@ void WritePolygon(std::vector<IfcVector3>& resultpoly, TempMesh& result)
 
     if( resultpoly.size() > 2 )
     {
-        result.verts.insert(result.verts.end(), resultpoly.begin(), resultpoly.end());
-        result.vertcnt.push_back(static_cast<unsigned int>(resultpoly.size()));
+        result.mVerts.insert(result.mVerts.end(), resultpoly.begin(), resultpoly.end());
+        result.mVertcnt.push_back(static_cast<unsigned int>(resultpoly.size()));
     }
 }
 
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result,
+void ProcessBooleanHalfSpaceDifference(const Schema_2x3::IfcHalfSpaceSolid* hs, TempMesh& result,
     const TempMesh& first_operand,
     ConversionData& /*conv*/)
 {
     ai_assert(hs != NULL);
 
-    const IfcPlane* const plane = hs->BaseSurface->ToPtr<IfcPlane>();
+    const Schema_2x3::IfcPlane* const plane = hs->BaseSurface->ToPtr<Schema_2x3::IfcPlane>();
     if(!plane) {
         IFCImporter::LogError("expected IfcPlane as base surface for the IfcHalfSpaceSolid");
         return;
@@ -162,14 +160,14 @@ void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& re
     }
 
     // clip the current contents of `meshout` against the plane we obtained from the second operand
-    const std::vector<IfcVector3>& in = first_operand.verts;
-    std::vector<IfcVector3>& outvert = result.verts;
+    const std::vector<IfcVector3>& in = first_operand.mVerts;
+    std::vector<IfcVector3>& outvert = result.mVerts;
 
-    std::vector<unsigned int>::const_iterator begin = first_operand.vertcnt.begin(),
-        end = first_operand.vertcnt.end(), iit;
+    std::vector<unsigned int>::const_iterator begin = first_operand.mVertcnt.begin(),
+        end = first_operand.mVertcnt.end(), iit;
 
     outvert.reserve(in.size());
-    result.vertcnt.reserve(first_operand.vertcnt.size());
+    result.mVertcnt.reserve(first_operand.mVertcnt.size());
 
     unsigned int vidx = 0;
     for(iit = begin; iit != end; vidx += *iit++) {
@@ -229,10 +227,10 @@ void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& re
             --newcount;
         }
         if(newcount > 2) {
-            result.vertcnt.push_back(newcount);
+            result.mVertcnt.push_back(newcount);
         }
         else while(newcount-->0) {
-            result.verts.pop_back();
+            result.mVerts.pop_back();
         }
 
     }
@@ -386,13 +384,13 @@ bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
 
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
+void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
                                                        const TempMesh& first_operand,
                                                        ConversionData& conv)
 {
     ai_assert(hs != NULL);
 
-    const IfcPlane* const plane = hs->BaseSurface->ToPtr<IfcPlane>();
+    const Schema_2x3::IfcPlane* const plane = hs->BaseSurface->ToPtr<Schema_2x3::IfcPlane>();
     if(!plane) {
         IFCImporter::LogError("expected IfcPlane as base surface for the IfcHalfSpaceSolid");
         return;
@@ -419,7 +417,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
     }
 
     // determine winding order by calculating the normal.
-    IfcVector3 profileNormal = TempMesh::ComputePolygonNormal(profile->verts.data(), profile->verts.size());
+    IfcVector3 profileNormal = TempMesh::ComputePolygonNormal(profile->mVerts.data(), profile->mVerts.size());
 
     IfcMatrix4 proj_inv;
     ConvertAxisPlacement(proj_inv,hs->Position);
@@ -430,16 +428,16 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
     proj.Inverse();
 
     // clip the current contents of `meshout` against the plane we obtained from the second operand
-    const std::vector<IfcVector3>& in = first_operand.verts;
-    std::vector<IfcVector3>& outvert = result.verts;
-    std::vector<unsigned int>& outvertcnt = result.vertcnt;
+    const std::vector<IfcVector3>& in = first_operand.mVerts;
+    std::vector<IfcVector3>& outvert = result.mVerts;
+    std::vector<unsigned int>& outvertcnt = result.mVertcnt;
 
     outvert.reserve(in.size());
-    outvertcnt.reserve(first_operand.vertcnt.size());
+    outvertcnt.reserve(first_operand.mVertcnt.size());
 
     unsigned int vidx = 0;
-    std::vector<unsigned int>::const_iterator begin = first_operand.vertcnt.begin();
-    std::vector<unsigned int>::const_iterator end = first_operand.vertcnt.end();
+    std::vector<unsigned int>::const_iterator begin = first_operand.mVertcnt.begin();
+    std::vector<unsigned int>::const_iterator end = first_operand.mVertcnt.end();
     std::vector<unsigned int>::const_iterator iit;
     for( iit = begin; iit != end; vidx += *iit++ )
     {
@@ -510,7 +508,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
         {
             // poly edge index, intersection point, edge index in boundary poly
             std::vector<std::tuple<size_t, IfcVector3, size_t> > intersections;
-            bool startedInside = PointInPoly(proj * blackside.front(), profile->verts);
+            bool startedInside = PointInPoly(proj * blackside.front(), profile->mVerts);
             bool isCurrentlyInside = startedInside;
 
             std::vector<std::pair<size_t, IfcVector3> > intersected_boundary;
@@ -521,7 +519,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                 const IfcVector3 e1 = proj * blackside[(a + 1) % blackside.size()];
 
                 intersected_boundary.clear();
-                IntersectsBoundaryProfile(e0, e1, profile->verts, isCurrentlyInside, intersected_boundary);
+                IntersectsBoundaryProfile(e0, e1, profile->mVerts, isCurrentlyInside, intersected_boundary);
                 // sort the hits by distance from e0 to get the correct in/out/in sequence. Manually :-( I miss you, C++11.
                 if( intersected_boundary.size() > 1 )
                 {
@@ -634,17 +632,17 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
                     // generate segments along the boundary polygon that lie in the poly's plane until we hit another intersection
                     IfcVector3 startingPoint = proj * std::get<1>(nextintsec);
-                    size_t currentBoundaryEdgeIdx = (std::get<2>(nextintsec) + (marchBackwardsOnBoundary ? 1 : 0)) % profile->verts.size();
+                    size_t currentBoundaryEdgeIdx = (std::get<2>(nextintsec) + (marchBackwardsOnBoundary ? 1 : 0)) % profile->mVerts.size();
                     size_t nextIntsecIdx = SIZE_MAX;
                     while( nextIntsecIdx == SIZE_MAX )
                     {
                         IfcFloat t = 1e10;
 
-                        size_t nextBoundaryEdgeIdx = marchBackwardsOnBoundary ? (currentBoundaryEdgeIdx + profile->verts.size() - 1) : currentBoundaryEdgeIdx + 1;
-                        nextBoundaryEdgeIdx %= profile->verts.size();
+                        size_t nextBoundaryEdgeIdx = marchBackwardsOnBoundary ? (currentBoundaryEdgeIdx + profile->mVerts.size() - 1) : currentBoundaryEdgeIdx + 1;
+                        nextBoundaryEdgeIdx %= profile->mVerts.size();
                         // vertices of the current boundary segments
-                        IfcVector3 currBoundaryPoint = profile->verts[currentBoundaryEdgeIdx];
-                        IfcVector3 nextBoundaryPoint = profile->verts[nextBoundaryEdgeIdx];
+                        IfcVector3 currBoundaryPoint = profile->mVerts[currentBoundaryEdgeIdx];
+                        IfcVector3 nextBoundaryPoint = profile->mVerts[nextBoundaryEdgeIdx];
                         // project the two onto the polygon
                         if( std::abs(polyNormal.z) > 1e-5 )
                         {
@@ -693,7 +691,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                         }
 
                         // quick endless loop check
-                        if( resultpoly.size() > blackside.size() + profile->verts.size() )
+                        if( resultpoly.size() > blackside.size() + profile->mVerts.size() )
                         {
                             IFCImporter::LogError("Encountered endless loop while clipping polygon against poly-bounded half space.");
                             break;
@@ -718,7 +716,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result,
+void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid* as, TempMesh& result,
                                                const TempMesh& first_operand,
                                                ConversionData& conv)
 {
@@ -738,12 +736,12 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 
     TempMesh temp;
 
-    std::vector<IfcVector3>::const_iterator vit = first_operand.verts.begin();
-    for(unsigned int pcount : first_operand.vertcnt) {
+    std::vector<IfcVector3>::const_iterator vit = first_operand.mVerts.begin();
+    for(unsigned int pcount : first_operand.mVertcnt) {
         temp.Clear();
 
-        temp.verts.insert(temp.verts.end(), vit, vit + pcount);
-        temp.vertcnt.push_back(pcount);
+        temp.mVerts.insert(temp.mVerts.end(), vit, vit + pcount);
+        temp.mVertcnt.push_back(pcount);
 
         // The algorithms used to generate mesh geometry sometimes
         // spit out lines or other degenerates which must be
@@ -767,11 +765,11 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
+void ProcessBoolean(const Schema_2x3::IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
 {
     // supported CSG operations:
     //   DIFFERENCE
-    if(const IfcBooleanResult* const clip = boolean.ToPtr<IfcBooleanResult>()) {
+    if(const Schema_2x3::IfcBooleanResult* const clip = boolean.ToPtr<Schema_2x3::IfcBooleanResult>()) {
         if(clip->Operator != "DIFFERENCE") {
             IFCImporter::LogWarn("encountered unsupported boolean operator: " + (std::string)clip->Operator);
             return;
@@ -786,18 +784,18 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
         //  IfcExtrudedAreaSolid -- reduce to an instance of the quadrify() algorithm
 
 
-        const IfcHalfSpaceSolid* const hs = clip->SecondOperand->ResolveSelectPtr<IfcHalfSpaceSolid>(conv.db);
-        const IfcExtrudedAreaSolid* const as = clip->SecondOperand->ResolveSelectPtr<IfcExtrudedAreaSolid>(conv.db);
+        const Schema_2x3::IfcHalfSpaceSolid* const hs = clip->SecondOperand->ResolveSelectPtr<Schema_2x3::IfcHalfSpaceSolid>(conv.db);
+        const Schema_2x3::IfcExtrudedAreaSolid* const as = clip->SecondOperand->ResolveSelectPtr<Schema_2x3::IfcExtrudedAreaSolid>(conv.db);
         if(!hs && !as) {
             IFCImporter::LogError("expected IfcHalfSpaceSolid or IfcExtrudedAreaSolid as second clipping operand");
             return;
         }
 
         TempMesh first_operand;
-        if(const IfcBooleanResult* const op0 = clip->FirstOperand->ResolveSelectPtr<IfcBooleanResult>(conv.db)) {
+        if(const Schema_2x3::IfcBooleanResult* const op0 = clip->FirstOperand->ResolveSelectPtr<Schema_2x3::IfcBooleanResult>(conv.db)) {
             ProcessBoolean(*op0,first_operand,conv);
         }
-        else if (const IfcSweptAreaSolid* const swept = clip->FirstOperand->ResolveSelectPtr<IfcSweptAreaSolid>(conv.db)) {
+        else if (const Schema_2x3::IfcSweptAreaSolid* const swept = clip->FirstOperand->ResolveSelectPtr<Schema_2x3::IfcSweptAreaSolid>(conv.db)) {
             ProcessSweptAreaSolid(*swept,first_operand,conv);
         }
         else {
@@ -807,7 +805,7 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 
         if(hs) {
 
-            const IfcPolygonalBoundedHalfSpace* const hs_bounded = clip->SecondOperand->ResolveSelectPtr<IfcPolygonalBoundedHalfSpace>(conv.db);
+            const Schema_2x3::IfcPolygonalBoundedHalfSpace* const hs_bounded = clip->SecondOperand->ResolveSelectPtr<Schema_2x3::IfcPolygonalBoundedHalfSpace>(conv.db);
             if (hs_bounded) {
                 ProcessPolygonalBoundedBooleanHalfSpaceDifference(hs_bounded, result, first_operand, conv);
             }

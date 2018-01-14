@@ -43,7 +43,7 @@ __Importers__:
 - AMJ
 - ASE
 - ASK
-- B3D;
+- B3D
 - BLEND (Blender)
 - BVH
 - COB

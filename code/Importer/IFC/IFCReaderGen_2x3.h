@@ -43,10 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_IFC_READER_GEN_H
 #define INCLUDED_IFC_READER_GEN_H
 
-#include "STEPFile.h"
+#include "code/STEPFile.h"
 
 namespace Assimp {
 namespace IFC {
+    namespace Schema_2x3 {
+
     using namespace STEP;
     using namespace STEP::EXPRESS;
 
@@ -3912,15 +3914,16 @@ namespace IFC {
     };
 
     void GetSchema(EXPRESS::ConversionSchema& out);
-
+    } //! Schema_2x3
 } //! IFC
+
 namespace STEP {
 
     // ******************************************************************************
     // Converter stubs
     // ******************************************************************************
 
-#define DECL_CONV_STUB(type) template <> size_t GenericFill<IFC::type>(const STEP::DB& db, const EXPRESS::LIST& params, IFC::type* in)
+#define DECL_CONV_STUB(type) template <> size_t GenericFill<IFC::Schema_2x3::type>(const STEP::DB& db, const EXPRESS::LIST& params, IFC::Schema_2x3::type* in)
 
     DECL_CONV_STUB(IfcRepresentationItem);
     DECL_CONV_STUB(IfcGeometricRepresentationItem);

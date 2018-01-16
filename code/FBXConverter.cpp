@@ -241,6 +241,10 @@ private:
     // ------------------------------------------------------------------------------------------------
     aiColor3D GetColorPropertyFromMaterial( const PropertyTable& props, const std::string& baseName,
         bool& result );
+    aiColor3D GetColorPropertyFactored( const PropertyTable& props, const std::string& colorName,
+        const std::string& factorName, bool& result, bool useTemplate=true );
+    aiColor3D GetColorProperty( const PropertyTable& props, const std::string& colorName,
+        bool& result, bool useTemplate=true );
 
     // ------------------------------------------------------------------------------------------------
     void SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyTable& props );
@@ -1716,7 +1720,7 @@ unsigned int Converter::ConvertMaterial( const Material& material, const MeshGeo
 
     aiString str;
 
-    // stip Material:: prefix
+    // strip Material:: prefix
     std::string name = material.Name();
     if ( name.substr( 0, 10 ) == "Material::" ) {
         name = name.substr( 10 );
@@ -2077,40 +2081,62 @@ void Converter::SetTextureProperties( aiMaterial* out_mat, const LayeredTextureM
     TrySetTextureProperties( out_mat, layeredTextures, "ShininessExponent", aiTextureType_SHININESS, mesh );
 }
 
-aiColor3D Converter::GetColorPropertyFromMaterial( const PropertyTable& props, const std::string& baseName,
-    bool& result )
+aiColor3D Converter::GetColorPropertyFactored( const PropertyTable& props, const std::string& colorName,
+    const std::string& factorName, bool& result, bool useTemplate )
 {
     result = true;
 
     bool ok;
-    const aiVector3D& Diffuse = PropertyGet<aiVector3D>( props, baseName, ok );
-    if ( ok ) {
-        return aiColor3D( Diffuse.x, Diffuse.y, Diffuse.z );
+    aiVector3D BaseColor = PropertyGet<aiVector3D>( props, colorName, ok, useTemplate );
+    if ( ! ok ) {
+        result = false;
+        return aiColor3D( 0.0f, 0.0f, 0.0f );
     }
-    else {
-        aiVector3D DiffuseColor = PropertyGet<aiVector3D>( props, baseName + "Color", ok );
-        if ( ok ) {
-            float DiffuseFactor = PropertyGet<float>( props, baseName + "Factor", ok );
-            if ( ok ) {
-                DiffuseColor *= DiffuseFactor;
-            }
 
-            return aiColor3D( DiffuseColor.x, DiffuseColor.y, DiffuseColor.z );
-        }
+    // if no factor name, return the colour as is
+    if ( factorName.empty() ) {
+        return aiColor3D( BaseColor.x, BaseColor.y, BaseColor.z );
     }
-    result = false;
-    return aiColor3D( 0.0f, 0.0f, 0.0f );
+
+    // otherwise it should be multiplied by the factor, if found.
+    float factor = PropertyGet<float>( props, factorName, ok, useTemplate );
+    if ( ok ) {
+        BaseColor *= factor;
+    }
+    return aiColor3D( BaseColor.x, BaseColor.y, BaseColor.z );
 }
 
+aiColor3D Converter::GetColorPropertyFromMaterial( const PropertyTable& props, const std::string& baseName,
+    bool& result )
+{
+    return GetColorPropertyFactored( props, baseName + "Color", baseName + "Factor", result, true );
+}
+
+aiColor3D Converter::GetColorProperty( const PropertyTable& props, const std::string& colorName,
+    bool& result, bool useTemplate )
+{
+    result = true;
+    bool ok;
+    const aiVector3D& ColorVec = PropertyGet<aiVector3D>( props, colorName, ok, useTemplate );
+    if ( ! ok ) {
+        result = false;
+        return aiColor3D( 0.0f, 0.0f, 0.0f );
+    }
+    return aiColor3D( ColorVec.x, ColorVec.y, ColorVec.z );
+}
 
 void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyTable& props )
 {
-    // set shading properties. There are various, redundant ways in which FBX materials
-    // specify their shading settings (depending on shading models, prop
-    // template etc.). No idea which one is right in a particular context.
-    // Just try to make sense of it - there's no spec to verify this against,
-    // so why should we.
+    // Set shading properties.
+    // Modern FBX Files have two separate systems for defining these,
+    // with only the more comprehensive one described in the property template.
+    // Likely the other values are a legacy system,
+    // which is still always exported by the official FBX SDK.
+    //
+    // Blender's FBX import and export mostly ignore this legacy system,
+    // and as we only support recent versions of FBX anyway, we can do the same.
     bool ok;
+
     const aiColor3D& Diffuse = GetColorPropertyFromMaterial( props, "Diffuse", ok );
     if ( ok ) {
         out_mat->AddProperty( &Diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
@@ -2126,29 +2152,64 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
         out_mat->AddProperty( &Ambient, 1, AI_MATKEY_COLOR_AMBIENT );
     }
 
-    const aiColor3D& Specular = GetColorPropertyFromMaterial( props, "Specular", ok );
+    // we store specular factor as SHININESS_STRENGTH, so just get the color
+    const aiColor3D& Specular = GetColorProperty( props, "SpecularColor", ok, true );
     if ( ok ) {
         out_mat->AddProperty( &Specular, 1, AI_MATKEY_COLOR_SPECULAR );
     }
 
+    // and also try to get SHININESS_STRENGTH
+    const float SpecularFactor = PropertyGet<float>( props, "SpecularFactor", ok, true );
+    if ( ok ) {
+        out_mat->AddProperty( &SpecularFactor, 1, AI_MATKEY_SHININESS_STRENGTH );
+    }
+
+    // and the specular exponent
+    const float ShininessExponent = PropertyGet<float>( props, "ShininessExponent", ok );
+    if ( ok ) {
+        out_mat->AddProperty( &ShininessExponent, 1, AI_MATKEY_SHININESS );
+    }
+
+    // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:
+    const aiColor3D& Transparent = GetColorPropertyFactored( props, "TransparentColor", "TransparencyFactor", ok );
+    float CalculatedOpacity = 1.0;
+    if ( ok ) {
+        out_mat->AddProperty( &Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
+        // as calculated by FBX SDK 2017:
+        CalculatedOpacity = 1.0 - ((Transparent.r + Transparent.g + Transparent.b) / 3.0);
+    }
+
+    // use of TransparencyFactor is inconsistent.
+    // Maya always stores it as 1.0,
+    // so we can't use it to set AI_MATKEY_OPACITY.
+    // Blender is more sensible and stores it as the alpha value.
+    // However both the FBX SDK and Blender always write an additional
+    // legacy "Opacity" field, so we can try to use that.
+    //
+    // If we can't find it,
+    // we can fall back to the value which the FBX SDK calculates
+    // from transparency colour (RGB) and factor (F) as
+    // 1.0 - F*((R+G+B)/3).
+    //
+    // There's no consistent way to interpret this opacity value,
+    // so it's up to clients to do the correct thing.
     const float Opacity = PropertyGet<float>( props, "Opacity", ok );
     if ( ok ) {
         out_mat->AddProperty( &Opacity, 1, AI_MATKEY_OPACITY );
     }
-
-    const float Reflectivity = PropertyGet<float>( props, "Reflectivity", ok );
-    if ( ok ) {
-        out_mat->AddProperty( &Reflectivity, 1, AI_MATKEY_REFLECTIVITY );
+    else if ( CalculatedOpacity != 1.0 ) {
+        out_mat->AddProperty( &CalculatedOpacity, 1, AI_MATKEY_OPACITY );
     }
 
-    const float Shininess = PropertyGet<float>( props, "Shininess", ok );
+    // reflection color and factor are stored separately
+    const aiColor3D& Reflection = GetColorProperty( props, "ReflectionColor", ok, true );
     if ( ok ) {
-        out_mat->AddProperty( &Shininess, 1, AI_MATKEY_SHININESS_STRENGTH );
+        out_mat->AddProperty( &Reflection, 1, AI_MATKEY_COLOR_REFLECTIVE );
     }
 
-    const float ShininessExponent = PropertyGet<float>( props, "ShininessExponent", ok );
+    float ReflectionFactor = PropertyGet<float>( props, "ReflectionFactor", ok, true );
     if ( ok ) {
-        out_mat->AddProperty( &ShininessExponent, 1, AI_MATKEY_SHININESS );
+        out_mat->AddProperty( &ReflectionFactor, 1, AI_MATKEY_REFLECTIVITY );
     }
 
     const float BumpFactor = PropertyGet<float>(props, "BumpFactor", ok);

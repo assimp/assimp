@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCUtil.h"
 
-#include <assimp/MemoryIOWrapper.h>
+#include "code/MemoryIOWrapper.h"
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
@@ -931,7 +931,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 		conv.out->mRootNode->mParent = NULL;
 		conv.out->mRootNode->mNumChildren = static_cast<unsigned int>(nb_nodes);
 		conv.out->mRootNode->mChildren = new aiNode*[conv.out->mRootNode->mNumChildren];
-
+		
 		for (size_t i = 0; i < nb_nodes; ++i) {
 			aiNode* node = nodes[i];
 

@@ -702,6 +702,7 @@ ADD_ASSIMP_IMPORTER( MMD
 )
 
 SET( Step_SRCS
+  STEPFile.h
   StepExporter.h
   StepExporter.cpp
 )

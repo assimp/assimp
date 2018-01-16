@@ -44,10 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of BaseImporter
  */
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include "FileSystemFilter.h"
 #include "Importer.h"
-#include "ByteSwapper.h"
+#include <assimp/ByteSwapper.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

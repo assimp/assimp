@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 
 #include "RemoveRedundantMaterials.h"
-#include "ParsingUtils.h"
+#include <assimp/ParsingUtils.h>
 #include "ProcessHelper.h"
 #include "MaterialSystem.h"
 #include <stdio.h>

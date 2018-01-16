@@ -45,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJ_TOOLS_H_INC
 #define OBJ_TOOLS_H_INC
 
-#include "fast_atof.h"
-#include "ParsingUtils.h"
+#include <assimp/fast_atof.h>
+#include <assimp/ParsingUtils.h>
 #include <vector>
 
 namespace Assimp {

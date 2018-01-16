@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Win32DebugLogStream.h"
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/NullLogger.hpp>

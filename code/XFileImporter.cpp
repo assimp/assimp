@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 #include "ConvertToLHProcess.h"
 #include <assimp/Defines.h>
 #include <assimp/IOSystem.hpp>

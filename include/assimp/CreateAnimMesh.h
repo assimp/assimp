@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp    {
 
 /** Create aiAnimMesh from aiMesh. */
-aiAnimMesh *aiCreateAnimMesh(const aiMesh *mesh);
+ASSIMP_API aiAnimMesh *aiCreateAnimMesh(const aiMesh *mesh);
 
 } // end of namespace Assimp
 #endif // INCLUDED_AI_CREATE_ANIM_MESH_H

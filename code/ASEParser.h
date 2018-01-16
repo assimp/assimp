@@ -52,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // for some helper routines like IsSpace()
-#include "ParsingUtils.h"
-#include "qnan.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/qnan.h>
 
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "3DSLoader.h"

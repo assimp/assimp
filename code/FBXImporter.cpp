@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXConverter.h"
 
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
+#include <assimp/StreamReader.h>
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
 

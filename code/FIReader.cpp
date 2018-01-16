@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "FIReader.hpp"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 // Workaround for issue #1361
 // https://github.com/assimp/assimp/issues/1361
@@ -54,13 +54,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  define _GLIBCXX_USE_C99 1
 #endif
 
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/types.h>
-#include "MemoryIOWrapper.h"
-#include "irrXMLWrapper.h"
+#include <assimp/MemoryIOWrapper.h>
+#include <assimp/irrXMLWrapper.h>
 #include "../contrib/utf8cpp/source/utf8.h"
-#include "fast_atof.h"
+#include <assimp/fast_atof.h>
 #include <stack>
 #include <map>
 #include <iostream>

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include <RemoveComments.h>
+#include <assimp/RemoveComments.h>
 
 
 using namespace std;

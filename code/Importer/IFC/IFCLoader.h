@@ -45,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_IFC_LOADER_H
 #define INCLUDED_AI_IFC_LOADER_H
 
-#include <assimp/BaseImporter.h>
-#include <assimp/LogAux.h>
+#include "code/BaseImporter.h"
+#include "code/LogAux.h"
 
 namespace Assimp    {
 

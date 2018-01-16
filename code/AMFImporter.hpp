@@ -56,8 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
 #include "assimp/types.h"
-#include "BaseImporter.h"
-#include "irrXMLWrapper.h"
+#include <assimp/BaseImporter.h>
+#include <assimp/irrXMLWrapper.h>
 
 // Header files, stdlib.
 #include <set>

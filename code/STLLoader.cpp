@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "STLLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
 #include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
@@ -444,27 +444,29 @@ bool STLImporter::LoadBinaryFile()
 
     pMesh->mNumVertices = pMesh->mNumFaces*3;
 
-    aiVector3D* vp,*vn;
-    vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-    vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    
+    aiVector3D *vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+    aiVector3D *vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
-    for (unsigned int i = 0; i < pMesh->mNumFaces;++i) {
-
+    for ( unsigned int i = 0; i < pMesh->mNumFaces; ++i ) {
         // NOTE: Blender sometimes writes empty normals ... this is not
         // our fault ... the RemoveInvalidData helper step should fix that
-        *vn = *((aiVector3D*)sz);
+        ::memcpy( vn, sz, sizeof( aiVector3D ) );
         sz += sizeof(aiVector3D);
         *(vn+1) = *vn;
         *(vn+2) = *vn;
         vn += 3;
 
-        *vp++ = *((aiVector3D*)sz);
+        ::memcpy( vp, sz, sizeof( aiVector3D ) );
+        ++vp;
         sz += sizeof(aiVector3D);
 
-        *vp++ = *((aiVector3D*)sz);
+        ::memcpy( vp, sz, sizeof( aiVector3D ) );
+        ++vp;
         sz += sizeof(aiVector3D);
 
-        *vp++ = *((aiVector3D*)sz);
+        ::memcpy( vp, sz, sizeof( aiVector3D ) );
+        ++vp;
         sz += sizeof(aiVector3D);
 
         uint16_t color = *((uint16_t*)sz);

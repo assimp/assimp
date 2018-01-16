@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_DNA_INL
 
 #include <memory>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 namespace Assimp {
 namespace Blender {

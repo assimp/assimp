@@ -44,10 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_3DSFILEHELPER_H_INC
 #define AI_3DSFILEHELPER_H_INC
 
-#include "SpatialSort.h"
-#include "SmoothingGroups.h"
-#include "StringUtils.h"
-#include "qnan.h"
+#include <assimp/SpatialSort.h>
+#include <assimp/SmoothingGroups.h>
+#include <assimp/StringUtils.h>
+#include <assimp/qnan.h>
 #include <assimp/material.h>
 #include <assimp/camera.h>
 #include <assimp/light.h>

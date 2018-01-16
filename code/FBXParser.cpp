@@ -56,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXParser.h"
 #include "FBXUtil.h"
 
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include "ByteSwapper.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
+#include <assimp/ByteSwapper.h>
 
 #include <iostream>
 

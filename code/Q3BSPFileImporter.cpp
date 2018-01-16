@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <vector>
 #include <sstream>
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 
 static const aiImporterDesc desc = {
     "Quake III BSP Importer",

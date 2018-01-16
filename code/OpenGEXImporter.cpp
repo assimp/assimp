@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/DefaultLogger.hpp>
 #include "MakeVerboseFormat.h"
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 
 #include <openddlparser/OpenDDLParser.h>
 #include <assimp/scene.h>

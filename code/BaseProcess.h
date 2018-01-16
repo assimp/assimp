@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BASEPROCESS_H
 
 #include <map>
-#include "GenericProperty.h"
+#include <assimp/GenericProperty.h>
 
 struct aiScene;
 

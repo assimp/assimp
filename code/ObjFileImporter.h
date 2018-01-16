@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJ_FILE_IMPORTER_H_INC
 #define OBJ_FILE_IMPORTER_H_INC
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include <assimp/material.h>
 #include <vector>
 

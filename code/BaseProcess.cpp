@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of BaseProcess */
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include "BaseProcess.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>

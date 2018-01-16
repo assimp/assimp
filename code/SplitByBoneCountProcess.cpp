@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #include <limits>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;

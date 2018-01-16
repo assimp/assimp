@@ -50,12 +50,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 
-#include "GenericProperty.h"
+#include <assimp/GenericProperty.h>
 #include "CInterfaceIOWrapper.h"
 #include "Importer.h"
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 #include "ScenePrivate.h"
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include <list>
 
 // ------------------------------------------------------------------------------------------------

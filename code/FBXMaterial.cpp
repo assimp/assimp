@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
-#include "ByteSwapper.h"
+#include <assimp/ByteSwapper.h>
 
 namespace Assimp {
 namespace FBX {

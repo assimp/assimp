@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 #include <iomanip>
 
 // Header files, Assimp

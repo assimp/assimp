@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "OgreStructs.h"
-#include "irrXMLWrapper.h"
+#include <assimp/irrXMLWrapper.h>
 
 namespace Assimp
 {

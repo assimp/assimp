@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include "MDCFileData.h"
-#include "ByteSwapper.h"
+#include <assimp/ByteSwapper.h>
 
 namespace Assimp {
 

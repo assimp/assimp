@@ -70,7 +70,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "../../code/MaterialSystem.h"   // aiMaterial class
-#include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
+#include <assimp/StringComparison.h> // ASSIMP_stricmp and ASSIMP_strincmp
 
 #include <time.h>
 

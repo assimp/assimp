@@ -48,7 +48,7 @@ corresponding preprocessor flag to selectively disable formats.
 */
 
 #include <vector>
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 // ------------------------------------------------------------------------------------------------
 // Importers
@@ -169,7 +169,7 @@ corresponding preprocessor flag to selectively disable formats.
 #   include "NDOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#   include "IFCLoader.h"
+#   include "Importer/IFC/IFCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 #   include "XGLLoader.h"

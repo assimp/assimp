@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BITMAP_H_INC
 #define AI_BITMAP_H_INC
 
+#include "defs.h"
 #include <stdint.h>
 #include <cstddef>
 
@@ -58,7 +59,7 @@ namespace Assimp {
 
 class IOStream;
 
-class Bitmap {
+class ASSIMP_API Bitmap {
 protected:
 
     struct Header {

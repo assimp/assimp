@@ -53,10 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 
 #include "ColladaParser.h"
-#include "fast_atof.h"
-#include "ParsingUtils.h"
-#include "SkeletonMeshBuilder.h"
-#include "CreateAnimMesh.h"
+#include <assimp/fast_atof.h>
+#include <assimp/ParsingUtils.h>
+#include <assimp/SkeletonMeshBuilder.h>
+#include <assimp/CreateAnimMesh.h>
 
 #include "time.h"
 #include "math.h"

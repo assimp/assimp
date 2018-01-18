@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFImporter.h"
-#include "StringComparison.h"
-#include "StringUtils.h"
+#include <assimp/StringComparison.h>
+#include <assimp/StringUtils.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -98,14 +98,14 @@ const aiImporterDesc* glTFImporter::GetInfo() const
     return &desc;
 }
 
-bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool /* checkSig */) const
 {
     const std::string &extension = GetExtension(pFile);
 
     if (extension != "gltf" && extension != "glb")
         return false;
 
-    if (checkSig && pIOHandler) {
+    if (pIOHandler) {
         glTF::Asset asset(pIOHandler);
         try {
             asset.Load(pFile, extension == "glb");

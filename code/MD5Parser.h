@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MD5PARSER_H_INCLUDED
 
 #include <assimp/types.h>
-#include "ParsingUtils.h"
+#include <assimp/ParsingUtils.h>
 #include <vector>
 #include <stdint.h>
 

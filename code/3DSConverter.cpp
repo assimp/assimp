@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetAnimation.h"
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 #include <memory>
 #include <cctype>
 

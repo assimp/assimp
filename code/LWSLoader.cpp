@@ -48,12 +48,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
 
 #include "LWSLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
 
 #include <assimp/SceneCombiner.h>
-#include "GenericProperty.h"
-#include "SkeletonMeshBuilder.h"
+#include <assimp/GenericProperty.h>
+#include <assimp/SkeletonMeshBuilder.h>
 #include "ConvertToLHProcess.h"
 #include "Importer.h"
 #include <assimp/DefaultLogger.hpp>

@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileMtlImporter.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"
-#include "fast_atof.h"
-#include "ParsingUtils.h"
+#include <assimp/fast_atof.h>
+#include <assimp/ParsingUtils.h>
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
 

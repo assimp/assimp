@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "B3DImporter.h"
 #include "TextureTransform.h"
 #include "ConvertToLHProcess.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 #include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/anim.h>

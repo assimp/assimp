@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OptimizeGraph.h"
 #include "ProcessHelper.h"
 #include <assimp/SceneCombiner.h>
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 #include <stdio.h>
 
 using namespace Assimp;

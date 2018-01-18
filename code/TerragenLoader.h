@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 #define INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 namespace Assimp    {
 
 // Magic strings

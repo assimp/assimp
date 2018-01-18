@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <deque>
 #include <map>
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include <assimp/material.h>
 
 namespace Assimp {

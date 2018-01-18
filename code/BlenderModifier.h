@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_MODIFIER_H
 
 #include "BlenderIntermediate.h"
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 namespace Assimp {
 namespace Blender {

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreBinarySerializer.h"
 #include "OgreParsingUtils.h"
 
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 #include <assimp/DefaultLogger.hpp>
 #include <memory>
 

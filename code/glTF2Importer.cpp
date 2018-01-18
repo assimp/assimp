@@ -103,8 +103,8 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 {
     const std::string &extension = GetExtension(pFile);
 
-    if (extension == "gltf" || extension == "glb")
-        return true;
+    if (extension != "gltf" && extension != "glb")
+        return false;
 
     if (pIOHandler) {
         glTF2::Asset asset(pIOHandler);

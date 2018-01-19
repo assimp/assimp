@@ -36,7 +36,7 @@ function generate() {
         OPTIONS="$OPTIONS -DASSIMP_UBSAN=ON"
     fi
 
-    cmake -G "Unix Makefiles" $OPTIONS
+    cmake -G "Ninja" $OPTIONS
 }
 # build and run unittests, if not android
 if [ $ANDROID ]; then
@@ -59,7 +59,7 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]; then
   else
     generate \
     && ninja \
-    && sudo make install \
+    && sudo ninja install \
     && sudo ldconfig \
     && (cd test/unit; ../../bin/unit)
   fi

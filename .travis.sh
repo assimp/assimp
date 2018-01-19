@@ -36,7 +36,7 @@ function generate() {
         OPTIONS="$OPTIONS -DASSIMP_UBSAN=ON"
     fi
 
-    cmake -G "Unix Makefiles" $OPTIONS
+    cmake -G "Ninja" $OPTIONS
 }
 # build and run unittests, if not android
 if [ $ANDROID ]; then
@@ -45,8 +45,8 @@ fi
 if [ "$TRAVIS_OS_NAME" = "linux" ]; then
   if [ $ANALYZE = "ON" ] ; then
     if [ "$CC" = "clang" ]; then
-        scan-build cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_TESTS=OFF
-        scan-build --status-bugs make -j2
+        scan-build cmake -G "Ninja" -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_TESTS=OFF
+        scan-build --status-bugs ninja
     else
         cppcheck --version
         generate \
@@ -58,8 +58,8 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     fi
   else
     generate \
-    && make -j4 \
-    && sudo make install \
+    && ninja \
+    && sudo ninja install \
     && sudo ldconfig \
     && (cd test/unit; ../../bin/unit)
   fi

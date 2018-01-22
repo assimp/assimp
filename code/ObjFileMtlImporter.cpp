@@ -52,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
 
-
 namespace Assimp    {
 
 // Material specific token (case insensitive compare)

@@ -84,7 +84,8 @@ namespace Assimp {
     }
 
     template<typename T>
-    inline std::size_t Copy(uint8_t* data, T& field) {
+    inline 
+    std::size_t Copy(uint8_t* data, const T &field) {
 #ifdef AI_BUILD_BIG_ENDIAN
         T field_swapped=AI_BE(field);
         std::memcpy(data, &field_swapped, sizeof(field)); return sizeof(field);

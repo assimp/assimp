@@ -73,6 +73,16 @@ struct Material : public D3DS::Material
     , bNeed (false)
     {}
 
+
+    Material(const Material &other)            = default;
+    Material(Material &&other)                 = default;
+
+    Material &operator=(const Material &other) = default;
+    Material &operator=(Material &&other)      = default;
+
+    ~Material() {}
+
+
     //! Contains all sub materials of this material
     std::vector<Material> avSubMaterials;
 

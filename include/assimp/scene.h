@@ -326,6 +326,16 @@ struct aiScene
     */
     C_STRUCT aiCamera** mCameras;
 
+    /**
+     *  @brief  The global metadata assigned to the scene itself.
+     *
+     *  This data contains global metadata which belongs to the scene like 
+     *  unit-conversions, versions, vendors or other model-specific data. This 
+     *  can be used to store format-specific metadata as well.
+     */
+    C_STRUCT aiMetadata* mMetaData;
+
+
 #ifdef __cplusplus
 
     //! Default constructor - set everything to 0/NULL

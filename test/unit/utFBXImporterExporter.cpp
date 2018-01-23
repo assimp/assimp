@@ -97,3 +97,15 @@ TEST_F( utFBXImporterExporter, importPhongMaterial ) {
     EXPECT_EQ( mat->Get(AI_MATKEY_OPACITY, f), aiReturn_SUCCESS );
     EXPECT_EQ( f, 0.5 );
 }
+
+TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/spider.fbx", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMetaData);
+
+    double factor(0.0);
+    scene->mMetaData->Get("UnitScaleFactor", factor);
+    EXPECT_DOUBLE_EQ(1.0, factor);
+}

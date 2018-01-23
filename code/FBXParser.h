@@ -174,10 +174,8 @@ private:
     friend class Element;
 
     TokenPtr AdvanceToNextToken();
-
     TokenPtr LastToken() const;
     TokenPtr CurrentToken() const;
-
 
 private:
     const TokenList& tokens;
@@ -198,7 +196,6 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out);
 int ParseTokenAsInt(const Token& t, const char*& err_out);
 int64_t ParseTokenAsInt64(const Token& t, const char*& err_out);
 std::string ParseTokenAsString(const Token& t, const char*& err_out);
-
 
 /* wrapper around ParseTokenAsXXX() with DOMError handling */
 uint64_t ParseTokenAsID(const Token& t);

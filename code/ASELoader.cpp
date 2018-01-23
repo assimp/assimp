@@ -276,14 +276,13 @@ void ASEImporter::GenerateDefaultMaterial()
     }
     if (bHas || mParser->m_vMaterials.empty())  {
         // add a simple material without submaterials to the parser's list
-        mParser->m_vMaterials.push_back ( ASE::Material() );
+        mParser->m_vMaterials.push_back ( ASE::Material(AI_DEFAULT_MATERIAL_NAME) );
         ASE::Material& mat = mParser->m_vMaterials.back();
 
         mat.mDiffuse  = aiColor3D(0.6f,0.6f,0.6f);
         mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
         mat.mAmbient  = aiColor3D(0.05f,0.05f,0.05f);
         mat.mShading  = Discreet3DS::Gouraud;
-        mat.mName     = AI_DEFAULT_MATERIAL_NAME;
     }
 }
 

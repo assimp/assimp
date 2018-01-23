@@ -376,7 +376,8 @@ struct Material
 
     //! Constructor with explicit name
     explicit Material(const std::string &name)
-    : mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
+    : mName(name)
+    , mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
     , mSpecularExponent   ( ai_real( 0.0 ) )
     , mShininessStrength  ( ai_real( 1.0 ) )
     , mShading(Discreet3DS::Gouraud)
@@ -384,7 +385,6 @@ struct Material
     , mBumpHeight         ( ai_real( 1.0 ) )
     , mTwoSided           (false)
     {
-        mName = name;
     }
 
 

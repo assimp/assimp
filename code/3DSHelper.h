@@ -370,22 +370,8 @@ struct Texture
 /** Helper structure representing a 3ds material */
 struct Material
 {
-    //! Default constructor. Builds a default name for the material
-    Material()
-    : mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
-    , mSpecularExponent   ( ai_real( 0.0 ) )
-    , mShininessStrength  ( ai_real( 1.0 ) )
-    , mShading(Discreet3DS::Gouraud)
-    , mTransparency       ( ai_real( 1.0 ) )
-    , mBumpHeight         ( ai_real( 1.0 ) )
-    , mTwoSided           (false)
-    {
-        static int iCnt = 0;
-
-        char szTemp[128];
-        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-    }
+    //! Default constructor has been deleted
+    Material() = delete;
 
 
     //! Constructor with explicit name

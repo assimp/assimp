@@ -387,6 +387,16 @@ struct Material
         mName = szTemp;
     }
 
+
+    Material(const Material &other)            = default;
+    Material(Material &&other)                 = default;
+
+    Material &operator=(const Material &other) = default;
+    Material &operator=(Material &&other)      = default;
+
+    ~Material() {}
+
+
     //! Name of the material
     std::string mName;
     //! Diffuse color of the material

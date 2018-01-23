@@ -528,7 +528,7 @@ void Parser::ParseLV1MaterialListBlock()
                 ParseLV4MeshLong(iMaterialCount);
 
                 // now allocate enough storage to hold all materials
-                m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
+                m_vMaterials.resize(iOldMaterialCount+iMaterialCount, Material("INVALID"));
                 continue;
             }
             if (TokenMatch(filePtr,"MATERIAL",8))

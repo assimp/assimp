@@ -74,6 +74,14 @@ struct Material : public D3DS::Material
     {}
 
 
+    //! Constructor with explicit name
+    explicit Material(const std::string &name)
+    : D3DS::Material(name)
+    , pcInstance(NULL)
+    , bNeed (false)
+    {}
+
+
     Material(const Material &other)            = default;
     Material(Material &&other)                 = default;
 

@@ -67,11 +67,8 @@ using namespace D3DS;
 /** Helper structure representing an ASE material */
 struct Material : public D3DS::Material
 {
-    //! Default constructor
-    Material()
-    : pcInstance(NULL)
-    , bNeed (false)
-    {}
+    //! Default constructor has been deleted
+    Material() = delete;
 
 
     //! Constructor with explicit name

@@ -105,14 +105,14 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 Discreet3DSImporter::Discreet3DSImporter()
-    : stream(),
-    mLastNodeIndex(),
-    mCurrentNode(),
-    mRootNode(),
-    mScene(),
-    mMasterScale(),
-    bHasBG(),
-    bIsPrj()
+: stream()
+, mLastNodeIndex()
+, mCurrentNode()
+, mRootNode()
+, mScene()
+, mMasterScale()
+, bHasBG()
+, bIsPrj()
 {}
 
 // ------------------------------------------------------------------------------------------------

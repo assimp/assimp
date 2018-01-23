@@ -68,7 +68,9 @@ using namespace D3DS;
 struct Material : public D3DS::Material
 {
     //! Default constructor
-    Material() : pcInstance(NULL), bNeed (false)
+    Material()
+    : pcInstance(NULL)
+    , bNeed (false)
     {}
 
     //! Contains all sub materials of this material

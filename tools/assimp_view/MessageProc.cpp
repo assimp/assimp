@@ -118,7 +118,7 @@ void MakeFileAssociations()
         D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 
     CLogDisplay::Instance().AddEntry(tmp.data,D3DCOLOR_ARGB(0xFF,0,0xFF,0));
-    }
+}
 
 
 //-------------------------------------------------------------------------------
@@ -128,17 +128,16 @@ void MakeFileAssociations()
 // Other command line parameters are not handled
 //-------------------------------------------------------------------------------
 void HandleCommandLine(char* p_szCommand)
-    {
+{
     char* sz = p_szCommand;
     //bool bQuak = false;
 
     if (strlen(sz) < 2)return;
 
-    if (*sz == '\"')
-  {
+    if (*sz == '\"') {
         char* sz2 = strrchr(sz,'\"');
         if (sz2)*sz2 = 0;
-    sz++; // skip the starting quote
+        sz++; // skip the starting quote
     }
 
     strcpy( g_szFileName, sz );
@@ -149,8 +148,7 @@ void HandleCommandLine(char* p_szCommand)
 
     // Save the list of previous files to the registry
     SaveHistory();
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Load the light colors from the registry
@@ -158,15 +156,10 @@ void HandleCommandLine(char* p_szCommand)
 void LoadLightColors()
 {
     DWORD dwTemp = 4;
-    RegQueryValueEx(g_hRegistry,"LightColor0",NULL,NULL,
-        (BYTE*)&g_avLightColors[0],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor1",NULL,NULL,
-        (BYTE*)&g_avLightColors[1],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor2",NULL,NULL,
-        (BYTE*)&g_avLightColors[2],&dwTemp);
-    return;
+    RegQueryValueEx(g_hRegistry,"LightColor0",NULL,NULL, (BYTE*)&g_avLightColors[0],&dwTemp);
+    RegQueryValueEx(g_hRegistry,"LightColor1",NULL,NULL, (BYTE*)&g_avLightColors[1],&dwTemp);
+    RegQueryValueEx(g_hRegistry,"LightColor2",NULL,NULL, (BYTE*)&g_avLightColors[2],&dwTemp);
 }
-
 
 //-------------------------------------------------------------------------------
 // Save the light colors to the registry
@@ -177,7 +170,6 @@ void SaveLightColors()
     RegSetValueExA(g_hRegistry,"LightColor1",0,REG_DWORD,(const BYTE*)&g_avLightColors[1],4);
     RegSetValueExA(g_hRegistry,"LightColor2",0,REG_DWORD,(const BYTE*)&g_avLightColors[2],4);
 }
-
 
 //-------------------------------------------------------------------------------
 // Save the checker pattern colors to the registry

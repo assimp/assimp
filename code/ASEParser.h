@@ -80,10 +80,36 @@ struct Material : public D3DS::Material
 
 
     Material(const Material &other)            = default;
-    Material(Material &&other)                 = default;
-
     Material &operator=(const Material &other) = default;
-    Material &operator=(Material &&other)      = default;
+
+
+    //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
+    Material(Material &&other)
+    : D3DS::Material(std::move(other))
+    , avSubMaterials(std::move(other.avSubMaterials))
+    , pcInstance(std::move(other.pcInstance))
+    , bNeed(std::move(other.bNeed))
+    {
+        other.pcInstance = nullptr;
+    }
+
+
+    Material &operator=(Material &&other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        D3DS::Material::operator=(std::move(other));
+
+        avSubMaterials = std::move(other.avSubMaterials);
+        pcInstance = std::move(other.pcInstance);
+        bNeed = std::move(other.bNeed);
+
+        other.pcInstance = nullptr;
+
+        return *this;
+    }
+
 
     ~Material() {}
 

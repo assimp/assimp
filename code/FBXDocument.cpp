@@ -344,9 +344,8 @@ void Document::ReadGlobalSettings()
 {
     const Scope& sc = parser.GetRootScope();
     const Element* const ehead = sc["GlobalSettings"];
-    if(!ehead || !ehead->Compound()) {
-        DOMWarning("no GlobalSettings dictionary found");
-
+    if ( nullptr == ehead || !ehead->Compound() ) {
+        DOMWarning( "no GlobalSettings dictionary found" );
         globals.reset(new FileGlobalSettings(*this, std::make_shared<const PropertyTable>()));
         return;
     }

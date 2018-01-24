@@ -528,7 +528,7 @@ void Parser::ParseLV1MaterialListBlock()
                 ParseLV4MeshLong(iMaterialCount);
 
                 // now allocate enough storage to hold all materials
-                m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
+                m_vMaterials.resize(iOldMaterialCount+iMaterialCount, Material("INVALID"));
                 continue;
             }
             if (TokenMatch(filePtr,"MATERIAL",8))
@@ -706,7 +706,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
                 ParseLV4MeshLong(iNumSubMaterials);
 
                 // allocate enough storage
-                mat.avSubMaterials.resize(iNumSubMaterials);
+                mat.avSubMaterials.resize(iNumSubMaterials, Material("INVALID SUBMATERIAL"));
             }
             // submaterial chunks
             if (TokenMatch(filePtr,"SUBMATERIAL",11))

@@ -75,10 +75,9 @@ using namespace Util;
 
 
 Converter::Converter( aiScene* out, const Document& doc )
-    : defaultMaterialIndex()
-    , out( out )
-    , doc( doc )
-{
+: defaultMaterialIndex()
+, out( out )
+, doc( doc ) {
     // animations need to be converted first since this will
     // populate the node_anim_chain_bits map, which is needed
     // to determine which nodes need to be generated.
@@ -116,8 +115,7 @@ Converter::Converter( aiScene* out, const Document& doc )
 }
 
 
-Converter::~Converter()
-{
+Converter::~Converter() {
     std::for_each( meshes.begin(), meshes.end(), Util::delete_fun<aiMesh>() );
     std::for_each( materials.begin(), materials.end(), Util::delete_fun<aiMaterial>() );
     std::for_each( animations.begin(), animations.end(), Util::delete_fun<aiAnimation>() );
@@ -126,8 +124,7 @@ Converter::~Converter()
     std::for_each( textures.begin(), textures.end(), Util::delete_fun<aiTexture>() );
 }
 
-void Converter::ConvertRootNode()
-{
+void Converter::ConvertRootNode() {
     out->mRootNode = new aiNode();
     out->mRootNode->mName.Set( "RootNode" );
 
@@ -354,10 +351,12 @@ void Converter::ConvertCamera( const Model& model, const Camera& cam )
     out_camera->mName.Set( FixNodeName( model.Name() ) );
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
+
     //cameras are defined along positive x direction
-    out_camera->mPosition = aiVector3D(0.0f);
-    out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
-    out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
+    out_camera->mPosition = cam.Position();
+    out_camera->mLookAt = ( cam.InterestPosition() - out_camera->mPosition ).Normalize();
+    out_camera->mUp = cam.UpVector();
+
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD( cam.FieldOfView() );
     out_camera->mClipPlaneNear = cam.NearPlane();
     out_camera->mClipPlaneFar = cam.FarPlane();

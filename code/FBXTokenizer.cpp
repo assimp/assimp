@@ -76,12 +76,10 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
     ai_assert(static_cast<size_t>(send-sbegin) > 0);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Token::~Token()
 {
 }
-
 
 namespace {
 

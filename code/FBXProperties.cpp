@@ -108,7 +108,7 @@ Property* ReadTypedProperty(const Element& element)
             ParseTokenAsFloat(*tok[6]))
         );
     }
-    else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView")) {
+    else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
         return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
     }
     return NULL;
@@ -137,7 +137,6 @@ PropertyTable::PropertyTable()
 , element()
 {
 }
-
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps)
@@ -228,8 +227,6 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
 
     return result;
 }
-
-
 
 } //! FBX
 } //! Assimp

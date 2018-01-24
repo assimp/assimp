@@ -387,7 +387,7 @@ struct aiScene
     }
 
     //! Returns an embedded texture
-    const aiTexture* GetEmbeddedTexture(const char* filename) {
+    const aiTexture* GetEmbeddedTexture(const char* filename) const {
         const char* shortFilename = GetShortFilename(filename);
         for (unsigned int i = 0; i < mNumTextures; i++) {
             const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());

@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "SMDLoader.h"
-#include "fast_atof.h"
-#include "SkeletonMeshBuilder.h"
+#include <assimp/fast_atof.h>
+#include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/Importer.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>

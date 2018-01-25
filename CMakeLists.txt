@@ -103,6 +103,7 @@ OPTION ( BUILD_DOCS
   OFF
 )
 
+# Use subset of Windows.h
 if (WIN32)
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 endif()
@@ -202,7 +203,6 @@ IF( UNIX )
   # Use GNUInstallDirs for Unix predefined directories
   INCLUDE(GNUInstallDirs)
 ENDIF( UNIX )
-
 
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)

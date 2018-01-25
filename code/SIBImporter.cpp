@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "SIBImporter.h"
-#include "ByteSwapper.h"
-#include "StreamReader.h"
-#include "TinyFormatter.h"
+#include <assimp/ByteSwapper.h>
+#include <assimp/StreamReader.h>
+#include <assimp/TinyFormatter.h>
 //#include "../contrib/ConvertUTF/ConvertUTF.h"
 #include "../contrib/utf8cpp/source/utf8.h"
 #include <assimp/IOSystem.hpp>

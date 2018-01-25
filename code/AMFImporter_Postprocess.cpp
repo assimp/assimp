@@ -51,8 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, Assimp.
 #include <assimp/SceneCombiner.h>
-#include "StandardShapes.h"
-#include "StringUtils.h"
+#include <assimp/StandardShapes.h>
+#include <assimp/StringUtils.h>
 
 // Header files, stdlib.
 #include <iterator>

@@ -54,8 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/ProgressHandler.hpp>
 #include <assimp/types.h>
-#include "BaseImporter.h"
-#include "irrXMLWrapper.h"
+#include <assimp/BaseImporter.h>
+#include <assimp/irrXMLWrapper.h>
 #include "FIReader.hpp"
 //#include <regex>
 

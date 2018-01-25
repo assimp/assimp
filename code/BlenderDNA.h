@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_BLEND_DNA_H
 #define INCLUDED_AI_BLEND_DNA_H
 
-#include "BaseImporter.h"
-#include "StreamReader.h"
+#include <assimp/BaseImporter.h>
+#include <assimp/StreamReader.h>
 #include <assimp/DefaultLogger.hpp>
 #include <stdint.h>
 #include <memory>

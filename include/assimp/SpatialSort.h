@@ -57,7 +57,7 @@ namespace Assimp
  * time, with O(n) worst case complexity when all vertices lay on the plane. The plane is chosen
  * so that it avoids common planes in usual data sets. */
 // ------------------------------------------------------------------------------------------------
-class SpatialSort
+class ASSIMP_API SpatialSort
 {
 public:
 

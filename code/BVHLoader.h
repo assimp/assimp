@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BVHLOADER_H_INC
 #define AI_BVHLOADER_H_INC
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 struct aiNode;
 

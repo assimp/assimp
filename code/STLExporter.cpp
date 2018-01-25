@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <memory>
-#include "Exceptional.h"
-#include "ByteSwapper.h"
+#include <assimp/Exceptional.h>
+#include <assimp/ByteSwapper.h>
 
 using namespace Assimp;
 namespace Assimp    {

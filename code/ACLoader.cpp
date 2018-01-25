@@ -49,11 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "ACLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include "Subdivision.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
+#include <assimp/Subdivision.h>
 #include "Importer.h"
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include <assimp/Importer.hpp>
 #include <assimp/light.h>
 #include <assimp/DefaultLogger.hpp>

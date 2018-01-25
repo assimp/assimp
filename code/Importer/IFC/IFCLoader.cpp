@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCUtil.h"
 
-#include "MemoryIOWrapper.h"
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
@@ -99,7 +99,7 @@ void SetUnits(ConversionData& conv);
 void SetCoordinateSpace(ConversionData& conv);
 void ProcessSpatialStructures(ConversionData& conv);
 void MakeTreeRelative(ConversionData& conv);
-void ConvertUnit(const EXPRESS::DataType& dt,ConversionData& conv);
+void ConvertUnit(const ::Assimp::STEP::EXPRESS::DataType& dt,ConversionData& conv);
 
 } // anon
 
@@ -152,7 +152,6 @@ const aiImporterDesc* IFCImporter::GetInfo () const
     return &desc;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties for the loader
 void IFCImporter::SetupProperties(const Importer* pImp)
@@ -167,8 +166,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void IFCImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
+void IFCImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
     if (!stream) {
@@ -253,8 +251,8 @@ void IFCImporter::InternReadFile( const std::string& pFile,
     }
 
     // obtain a copy of the machine-generated IFC scheme
-    EXPRESS::ConversionSchema schema;
-    GetSchema(schema);
+    ::Assimp::STEP::EXPRESS::ConversionSchema schema;
+    Schema_2x3::GetSchema(schema);
 
     // tell the reader which entity types to track with special care
     static const char* const types_to_track[] = {
@@ -273,7 +271,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
         ThrowException("missing IfcProject entity");
     }
 
-    ConversionData conv(*db,proj->To<IfcProject>(),pScene,settings);
+    ConversionData conv(*db,proj->To<Schema_2x3::IfcProject>(),pScene,settings);
     SetUnits(conv);
     SetCoordinateSpace(conv);
     ProcessSpatialStructures(conv);
@@ -323,10 +321,9 @@ namespace {
 
 
 // ------------------------------------------------------------------------------------------------
-void ConvertUnit(const IfcNamedUnit& unit,ConversionData& conv)
+void ConvertUnit(const Schema_2x3::IfcNamedUnit& unit,ConversionData& conv)
 {
-    if(const IfcSIUnit* const si = unit.ToPtr<IfcSIUnit>()) {
-
+    if(const Schema_2x3::IfcSIUnit* const si = unit.ToPtr<Schema_2x3::IfcSIUnit>()) {
         if(si->UnitType == "LENGTHUNIT") {
             conv.len_scale = si->Prefix ? ConvertSIPrefix(si->Prefix) : 1.f;
             IFCImporter::LogDebug("got units used for lengths");
@@ -337,11 +334,10 @@ void ConvertUnit(const IfcNamedUnit& unit,ConversionData& conv)
             }
         }
     }
-    else if(const IfcConversionBasedUnit* const convu = unit.ToPtr<IfcConversionBasedUnit>()) {
-
+    else if(const Schema_2x3::IfcConversionBasedUnit* const convu = unit.ToPtr<Schema_2x3::IfcConversionBasedUnit>()) {
         if(convu->UnitType == "PLANEANGLEUNIT") {
             try {
-                conv.angle_scale = convu->ConversionFactor->ValueComponent->To<EXPRESS::REAL>();
+                conv.angle_scale = convu->ConversionFactor->ValueComponent->To<::Assimp::STEP::EXPRESS::REAL>();
                 ConvertUnit(*convu->ConversionFactor->UnitComponent,conv);
                 IFCImporter::LogDebug("got units used for angles");
             }
@@ -353,12 +349,12 @@ void ConvertUnit(const IfcNamedUnit& unit,ConversionData& conv)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertUnit(const EXPRESS::DataType& dt,ConversionData& conv)
+void ConvertUnit(const ::Assimp::STEP::EXPRESS::DataType& dt,ConversionData& conv)
 {
     try {
-        const EXPRESS::ENTITY& e = dt.To<ENTITY>();
+        const ::Assimp::STEP::EXPRESS::ENTITY& e = dt.To<::Assimp::STEP::EXPRESS::ENTITY>();
 
-        const IfcNamedUnit& unit = e.ResolveSelect<IfcNamedUnit>(conv.db);
+        const Schema_2x3::IfcNamedUnit& unit = e.ResolveSelect<Schema_2x3::IfcNamedUnit>(conv.db);
         if(unit.UnitType != "LENGTHUNIT" && unit.UnitType != "PLANEANGLEUNIT") {
             return;
         }
@@ -384,8 +380,8 @@ void SetUnits(ConversionData& conv)
 // ------------------------------------------------------------------------------------------------
 void SetCoordinateSpace(ConversionData& conv)
 {
-    const IfcRepresentationContext* fav = NULL;
-    for(const IfcRepresentationContext& v : conv.proj.RepresentationContexts) {
+    const Schema_2x3::IfcRepresentationContext* fav = NULL;
+    for(const Schema_2x3::IfcRepresentationContext& v : conv.proj.RepresentationContexts) {
         fav = &v;
         // Model should be the most suitable type of context, hence ignore the others
         if (v.ContextType && v.ContextType.Get() == "Model") {
@@ -393,7 +389,7 @@ void SetCoordinateSpace(ConversionData& conv)
         }
     }
     if (fav) {
-        if(const IfcGeometricRepresentationContext* const geo = fav->ToPtr<IfcGeometricRepresentationContext>()) {
+        if(const Schema_2x3::IfcGeometricRepresentationContext* const geo = fav->ToPtr<Schema_2x3::IfcGeometricRepresentationContext>()) {
             ConvertAxisPlacement(conv.wcs, *geo->WorldCoordinateSystem, conv);
             IFCImporter::LogDebug("got world coordinate system");
         }
@@ -402,9 +398,9 @@ void SetCoordinateSpace(ConversionData& conv)
 
 
 // ------------------------------------------------------------------------------------------------
-void ResolveObjectPlacement(aiMatrix4x4& m, const IfcObjectPlacement& place, ConversionData& conv)
+void ResolveObjectPlacement(aiMatrix4x4& m, const Schema_2x3::IfcObjectPlacement& place, ConversionData& conv)
 {
-    if (const IfcLocalPlacement* const local = place.ToPtr<IfcLocalPlacement>()){
+    if (const Schema_2x3::IfcLocalPlacement* const local = place.ToPtr<Schema_2x3::IfcLocalPlacement>()){
         IfcMatrix4 tmp;
         ConvertAxisPlacement(tmp, *local->RelativePlacement, conv);
 
@@ -422,9 +418,9 @@ void ResolveObjectPlacement(aiMatrix4x4& m, const IfcObjectPlacement& place, Con
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, unsigned int matid, ConversionData& conv)
+bool ProcessMappedItem(const Schema_2x3::IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, unsigned int matid, ConversionData& conv)
 {
-    // insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
+    // insert a custom node here, the carthesian transform operator is simply a conventional transformation matrix
     std::unique_ptr<aiNode> nd(new aiNode());
     nd->mName.Set("IfcMappedItem");
 
@@ -448,10 +444,10 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
     }
 
     unsigned int localmatid = ProcessMaterials(mapped.GetID(),matid,conv,false);
-    const IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
+    const Schema_2x3::IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
 
     bool got = false;
-    for(const IfcRepresentationItem& item : repr.Items) {
+    for(const Schema_2x3::IfcRepresentationItem& item : repr.Items) {
         if(!ProcessRepresentationItem(item,localmatid,meshes,conv)) {
             IFCImporter::LogWarn("skipping mapped entity of type " + item.GetClassName() + ", no representations could be generated");
         }
@@ -483,8 +479,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 
 // ------------------------------------------------------------------------------------------------
 struct RateRepresentationPredicate {
-
-    int Rate(const IfcRepresentation* r) const {
+    int Rate(const Schema_2x3::IfcRepresentation* r) const {
         // the smaller, the better
 
         if (! r->RepresentationIdentifier) {
@@ -497,7 +492,7 @@ struct RateRepresentationPredicate {
         if (name == "MappedRepresentation") {
             if (!r->Items.empty()) {
                 // take the first item and base our choice on it
-                const IfcMappedItem* const m = r->Items.front()->ToPtr<IfcMappedItem>();
+                const Schema_2x3::IfcMappedItem* const m = r->Items.front()->ToPtr<Schema_2x3::IfcMappedItem>();
                 if (m) {
                     return Rate(m->MappingSource->MappedRepresentation);
                 }
@@ -509,8 +504,6 @@ struct RateRepresentationPredicate {
     }
 
     int Rate(const std::string& r) const {
-
-
         if (r == "SolidModel") {
             return -3;
         }
@@ -541,13 +534,13 @@ struct RateRepresentationPredicate {
         return 0;
     }
 
-    bool operator() (const IfcRepresentation* a, const IfcRepresentation* b) const {
+    bool operator() (const Schema_2x3::IfcRepresentation* a, const Schema_2x3::IfcRepresentation* b) const {
         return Rate(a) < Rate(b);
     }
 };
 
 // ------------------------------------------------------------------------------------------------
-void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector< aiNode* >& subnodes, ConversionData& conv)
+void ProcessProductRepresentation(const Schema_2x3::IfcProduct& el, aiNode* nd, std::vector< aiNode* >& subnodes, ConversionData& conv)
 {
     if(!el.Representation) {
         return;
@@ -562,14 +555,14 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
     // representation is relatively generic and allows the concrete implementations
     // for the different representation types to make some sensible choices what
     // to load and what not to load.
-    const STEP::ListOf< STEP::Lazy< IfcRepresentation >, 1, 0 >& src = el.Representation.Get()->Representations;
-    std::vector<const IfcRepresentation*> repr_ordered(src.size());
+    const STEP::ListOf< STEP::Lazy< Schema_2x3::IfcRepresentation >, 1, 0 >& src = el.Representation.Get()->Representations;
+    std::vector<const Schema_2x3::IfcRepresentation*> repr_ordered(src.size());
     std::copy(src.begin(),src.end(),repr_ordered.begin());
     std::sort(repr_ordered.begin(),repr_ordered.end(),RateRepresentationPredicate());
-    for(const IfcRepresentation* repr : repr_ordered) {
+    for(const Schema_2x3::IfcRepresentation* repr : repr_ordered) {
         bool res = false;
-        for(const IfcRepresentationItem& item : repr->Items) {
-            if(const IfcMappedItem* const geo = item.ToPtr<IfcMappedItem>()) {
+        for(const Schema_2x3::IfcRepresentationItem& item : repr->Items) {
+            if(const Schema_2x3::IfcMappedItem* const geo = item.ToPtr<Schema_2x3::IfcMappedItem>()) {
                 res = ProcessMappedItem(*geo,nd,subnodes,matid,conv) || res;
             }
             else {
@@ -587,25 +580,25 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 typedef std::map<std::string, std::string> Metadata;
 
 // ------------------------------------------------------------------------------------------------
-void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties,
+void ProcessMetadata(const Schema_2x3::ListOf< Schema_2x3::Lazy< Schema_2x3::IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties,
     const std::string& prefix = "",
     unsigned int nest = 0)
 {
-    for(const IfcProperty& property : set) {
+    for(const Schema_2x3::IfcProperty& property : set) {
         const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
-        if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
+        if (const Schema_2x3::IfcPropertySingleValue* const singleValue = property.ToPtr<Schema_2x3::IfcPropertySingleValue>()) {
             if (singleValue->NominalValue) {
-                if (const EXPRESS::STRING* str = singleValue->NominalValue.Get()->ToPtr<EXPRESS::STRING>()) {
+                if (const ::Assimp::STEP::EXPRESS::STRING* str = singleValue->NominalValue.Get()->ToPtr<::Assimp::STEP::EXPRESS::STRING>()) {
                     std::string value = static_cast<std::string>(*str);
                     properties[key]=value;
                 }
-                else if (const EXPRESS::REAL* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::REAL>()) {
+                else if (const ::Assimp::STEP::EXPRESS::REAL* val = singleValue->NominalValue.Get()->ToPtr<::Assimp::STEP::EXPRESS::REAL>()) {
                     float value = static_cast<float>(*val);
                     std::stringstream s;
                     s << value;
                     properties[key]=s.str();
                 }
-                else if (const EXPRESS::INTEGER* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::INTEGER>()) {
+                else if (const ::Assimp::STEP::EXPRESS::INTEGER* val = singleValue->NominalValue.Get()->ToPtr<::Assimp::STEP::EXPRESS::INTEGER>()) {
                     int64_t value = static_cast<int64_t>(*val);
                     std::stringstream s;
                     s << value;
@@ -613,21 +606,21 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
                 }
             }
         }
-        else if (const IfcPropertyListValue* const listValue = property.ToPtr<IfcPropertyListValue>()) {
+        else if (const Schema_2x3::IfcPropertyListValue* const listValue = property.ToPtr<Schema_2x3::IfcPropertyListValue>()) {
             std::stringstream ss;
             ss << "[";
             unsigned index=0;
-            for(const IfcValue::Out& v : listValue->ListValues) {
+            for(const Schema_2x3::IfcValue::Out& v : listValue->ListValues) {
                 if (!v) continue;
-                if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
+                if (const ::Assimp::STEP::EXPRESS::STRING* str = v->ToPtr<::Assimp::STEP::EXPRESS::STRING>()) {
                     std::string value = static_cast<std::string>(*str);
                     ss << "'" << value << "'";
                 }
-                else if (const EXPRESS::REAL* val = v->ToPtr<EXPRESS::REAL>()) {
+                else if (const ::Assimp::STEP::EXPRESS::REAL* val = v->ToPtr<::Assimp::STEP::EXPRESS::REAL>()) {
                     float value = static_cast<float>(*val);
                     ss << value;
                 }
-                else if (const EXPRESS::INTEGER* val = v->ToPtr<EXPRESS::INTEGER>()) {
+                else if (const ::Assimp::STEP::EXPRESS::INTEGER* val = v->ToPtr<::Assimp::STEP::EXPRESS::INTEGER>()) {
                     int64_t value = static_cast<int64_t>(*val);
                     ss << value;
                 }
@@ -639,7 +632,7 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
             ss << "]";
             properties[key]=ss.str();
         }
-        else if (const IfcComplexProperty* const complexProp = property.ToPtr<IfcComplexProperty>()) {
+        else if (const Schema_2x3::IfcComplexProperty* const complexProp = property.ToPtr<Schema_2x3::IfcComplexProperty>()) {
             if(nest > 2) { // mostly arbitrary limit to prevent stack overflow vulnerabilities
                 IFCImporter::LogError("maximum nesting level for IfcComplexProperty reached, skipping this property.");
             }
@@ -657,29 +650,29 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
 // ------------------------------------------------------------------------------------------------
 void ProcessMetadata(uint64_t relDefinesByPropertiesID, ConversionData& conv, Metadata& properties)
 {
-    if (const IfcRelDefinesByProperties* const pset = conv.db.GetObject(relDefinesByPropertiesID)->ToPtr<IfcRelDefinesByProperties>()) {
-        if (const IfcPropertySet* const set = conv.db.GetObject(pset->RelatingPropertyDefinition->GetID())->ToPtr<IfcPropertySet>()) {
+    if (const Schema_2x3::IfcRelDefinesByProperties* const pset = conv.db.GetObject(relDefinesByPropertiesID)->ToPtr<Schema_2x3::IfcRelDefinesByProperties>()) {
+        if (const Schema_2x3::IfcPropertySet* const set = conv.db.GetObject(pset->RelatingPropertyDefinition->GetID())->ToPtr<Schema_2x3::IfcPropertySet>()) {
             ProcessMetadata(set->HasProperties, conv, properties);
         }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, ConversionData& conv, std::vector<TempOpening>* collect_openings = NULL)
+aiNode* ProcessSpatialStructure(aiNode* parent, const Schema_2x3::IfcProduct& el, ConversionData& conv, std::vector<TempOpening>* collect_openings = NULL)
 {
     const STEP::DB::RefMap& refs = conv.db.GetRefs();
 
     // skip over space and annotation nodes - usually, these have no meaning in Assimp's context
     bool skipGeometry = false;
     if(conv.settings.skipSpaceRepresentations) {
-        if(el.ToPtr<IfcSpace>()) {
+        if(el.ToPtr<Schema_2x3::IfcSpace>()) {
             IFCImporter::LogDebug("skipping IfcSpace entity due to importer settings");
             skipGeometry = true;
         }
     }
 
     if(conv.settings.skipAnnotations) {
-        if(el.ToPtr<IfcAnnotation>()) {
+        if(el.ToPtr<Schema_2x3::IfcAnnotation>()) {
             IFCImporter::LogDebug("skipping IfcAnnotation entity due to importer settings");
             return NULL;
         }
@@ -745,12 +738,12 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
             const STEP::LazyObject& obj = conv.db.MustGetObject((*range2.first).second);
 
             // handle regularly-contained elements
-            if(const IfcRelContainedInSpatialStructure* const cont = obj->ToPtr<IfcRelContainedInSpatialStructure>()) {
+            if(const Schema_2x3::IfcRelContainedInSpatialStructure* const cont = obj->ToPtr<Schema_2x3::IfcRelContainedInSpatialStructure>()) {
                 if(cont->RelatingStructure->GetID() != el.GetID()) {
                     continue;
                 }
-                for(const IfcProduct& pro : cont->RelatedElements) {
-                    if(pro.ToPtr<IfcOpeningElement>()) {
+                for(const Schema_2x3::IfcProduct& pro : cont->RelatedElements) {
+                    if(pro.ToPtr<Schema_2x3::IfcOpeningElement>()) {
                         // IfcOpeningElement is handled below. Sadly we can't use it here as is:
                         // The docs say that opening elements are USUALLY attached to building storey,
                         // but we want them for the building elements to which they belong.
@@ -764,9 +757,9 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                 }
             }
             // handle openings, which we collect in a list rather than adding them to the node graph
-            else if(const IfcRelVoidsElement* const fills = obj->ToPtr<IfcRelVoidsElement>()) {
+            else if(const Schema_2x3::IfcRelVoidsElement* const fills = obj->ToPtr<Schema_2x3::IfcRelVoidsElement>()) {
                 if(fills->RelatingBuildingElement->GetID() == el.GetID()) {
-                    const IfcFeatureElementSubtraction& open = fills->RelatedOpeningElement;
+                    const Schema_2x3::IfcFeatureElementSubtraction& open = fills->RelatedOpeningElement;
 
                     // move opening elements to a separate node since they are semantically different than elements that are just 'contained'
                     std::unique_ptr<aiNode> nd_aggr(new aiNode());
@@ -808,7 +801,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
             if (conv.already_processed.find((*range.first).second) != conv.already_processed.end()) {
                 continue;
             }
-            if(const IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IfcRelAggregates>()) {
+            if(const Schema_2x3::IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<Schema_2x3::IfcRelAggregates>()) {
                 if(aggr->RelatingObject->GetID() != el.GetID()) {
                     continue;
                 }
@@ -821,8 +814,8 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                 nd_aggr->mTransformation = nd->mTransformation;
 
                 nd_aggr->mChildren = new aiNode*[aggr->RelatedObjects.size()]();
-                for(const IfcObjectDefinition& def : aggr->RelatedObjects) {
-                    if(const IfcProduct* const prod = def.ToPtr<IfcProduct>()) {
+                for(const Schema_2x3::IfcObjectDefinition& def : aggr->RelatedObjects) {
+                    if(const Schema_2x3::IfcProduct* const prod = def.ToPtr<Schema_2x3::IfcProduct>()) {
 
                         aiNode* const ndnew = ProcessSpatialStructure(nd_aggr.get(),*prod,conv,NULL);
                         if(ndnew) {
@@ -889,7 +882,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 	std::vector<aiNode*> nodes;
 
     for(const STEP::LazyObject* lz : *range) {
-        const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
+        const Schema_2x3::IfcSpatialStructureElement* const prod = lz->ToPtr<Schema_2x3::IfcSpatialStructureElement>();
         if(!prod) {
             continue;
         }
@@ -899,9 +892,9 @@ void ProcessSpatialStructures(ConversionData& conv)
         const STEP::DB::RefMap& refs = conv.db.GetRefs();
         STEP::DB::RefMapRange ref_range = refs.equal_range(conv.proj.GetID());
         for(; ref_range.first != ref_range.second; ++ref_range.first) {
-            if(const IfcRelAggregates* const aggr = conv.db.GetObject((*ref_range.first).second)->ToPtr<IfcRelAggregates>()) {
+            if(const Schema_2x3::IfcRelAggregates* const aggr = conv.db.GetObject((*ref_range.first).second)->ToPtr<Schema_2x3::IfcRelAggregates>()) {
 
-                for(const IfcObjectDefinition& def : aggr->RelatedObjects) {
+                for(const Schema_2x3::IfcObjectDefinition& def : aggr->RelatedObjects) {
                     // comparing pointer values is not sufficient, we would need to cast them to the same type first
                     // as there is multiple inheritance in the game.
                     if (def.GetID() == prod->GetID()) {
@@ -910,7 +903,6 @@ void ProcessSpatialStructures(ConversionData& conv)
 						nodes.push_back(ProcessSpatialStructure(NULL, *prod, conv, NULL));
                     }
                 }
-
             }
         }
     }
@@ -920,7 +912,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 	if (nb_nodes == 0) {
 		IFCImporter::LogWarn("failed to determine primary site element, taking all the IfcSite");
 		for (const STEP::LazyObject* lz : *range) {
-			const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
+			const Schema_2x3::IfcSpatialStructureElement* const prod = lz->ToPtr<Schema_2x3::IfcSpatialStructureElement>();
 			if (!prod) {
 				continue;
 			}
@@ -939,7 +931,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 		conv.out->mRootNode->mParent = NULL;
 		conv.out->mRootNode->mNumChildren = static_cast<unsigned int>(nb_nodes);
 		conv.out->mRootNode->mChildren = new aiNode*[conv.out->mRootNode->mNumChildren];
-		
+
 		for (size_t i = 0; i < nb_nodes; ++i) {
 			aiNode* node = nodes[i];
 

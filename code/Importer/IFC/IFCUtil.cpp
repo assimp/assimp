@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
-#include "IFCUtil.h"
-#include "PolyTools.h"
-#include "ProcessHelper.h"
+#include "code/Importer/IFC/IFCUtil.h"
+#include "code/PolyTools.h"
+#include "code/ProcessHelper.h"
 #include <assimp/Defines.h>
 
 namespace Assimp {
@@ -70,31 +70,31 @@ void TempOpening::Transform(const IfcMatrix4& mat)
 // ------------------------------------------------------------------------------------------------
 aiMesh* TempMesh::ToMesh()
 {
-    ai_assert(verts.size() == std::accumulate(vertcnt.begin(),vertcnt.end(),size_t(0)));
+    ai_assert(mVerts.size() == std::accumulate(mVertcnt.begin(),mVertcnt.end(),size_t(0)));
 
-    if (verts.empty()) {
+    if (mVerts.empty()) {
         return NULL;
     }
 
     std::unique_ptr<aiMesh> mesh(new aiMesh());
 
     // copy vertices
-    mesh->mNumVertices = static_cast<unsigned int>(verts.size());
+    mesh->mNumVertices = static_cast<unsigned int>(mVerts.size());
     mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-    std::copy(verts.begin(),verts.end(),mesh->mVertices);
+    std::copy(mVerts.begin(),mVerts.end(),mesh->mVertices);
 
     // and build up faces
-    mesh->mNumFaces = static_cast<unsigned int>(vertcnt.size());
+    mesh->mNumFaces = static_cast<unsigned int>(mVertcnt.size());
     mesh->mFaces = new aiFace[mesh->mNumFaces];
 
     for(unsigned int i = 0,n=0, acc = 0; i < mesh->mNumFaces; ++n) {
         aiFace& f = mesh->mFaces[i];
-        if (!vertcnt[n]) {
+        if (!mVertcnt[n]) {
             --mesh->mNumFaces;
             continue;
         }
 
-        f.mNumIndices = vertcnt[n];
+        f.mNumIndices = mVertcnt[n];
         f.mIndices = new unsigned int[f.mNumIndices];
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
             f.mIndices[a] = acc++;
@@ -109,14 +109,14 @@ aiMesh* TempMesh::ToMesh()
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Clear()
 {
-    verts.clear();
-    vertcnt.clear();
+    mVerts.clear();
+    mVertcnt.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Transform(const IfcMatrix4& mat)
 {
-    for(IfcVector3& v : verts) {
+    for(IfcVector3& v : mVerts) {
         v *= mat;
     }
 }
@@ -124,14 +124,14 @@ void TempMesh::Transform(const IfcMatrix4& mat)
 // ------------------------------------------------------------------------------
 IfcVector3 TempMesh::Center() const
 {
-    return (verts.size() == 0) ? IfcVector3(0.0f, 0.0f, 0.0f) : (std::accumulate(verts.begin(),verts.end(),IfcVector3()) / static_cast<IfcFloat>(verts.size()));
+    return (mVerts.size() == 0) ? IfcVector3(0.0f, 0.0f, 0.0f) : (std::accumulate(mVerts.begin(),mVerts.end(),IfcVector3()) / static_cast<IfcFloat>(mVerts.size()));
 }
 
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Append(const TempMesh& other)
 {
-    verts.insert(verts.end(),other.verts.begin(),other.verts.end());
-    vertcnt.insert(vertcnt.end(),other.vertcnt.begin(),other.vertcnt.end());
+    mVerts.insert(mVerts.end(),other.mVerts.begin(),other.mVerts.end());
+    mVertcnt.insert(mVertcnt.end(),other.mVertcnt.begin(),other.mVertcnt.end());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -147,13 +147,13 @@ void TempMesh::RemoveDegenerates()
     bool drop = false;
     size_t inor = 0;
 
-    std::vector<IfcVector3>::iterator vit = verts.begin();
-    for (std::vector<unsigned int>::iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
+    std::vector<IfcVector3>::iterator vit = mVerts.begin();
+    for (std::vector<unsigned int>::iterator it = mVertcnt.begin(); it != mVertcnt.end(); ++inor) {
         const unsigned int pcount = *it;
 
         if (normals[inor].SquareLength() < 1e-10f) {
-            it = vertcnt.erase(it);
-            vit = verts.erase(vit, vit + pcount);
+            it = mVertcnt.erase(it);
+            vit = mVerts.erase(vit, vit + pcount);
 
             drop = true;
             continue;
@@ -191,24 +191,24 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
     size_t ofs) const
 {
     size_t max_vcount = 0;
-    std::vector<unsigned int>::const_iterator begin = vertcnt.begin()+ofs, end = vertcnt.end(),  iit;
+    std::vector<unsigned int>::const_iterator begin = mVertcnt.begin()+ofs, end = mVertcnt.end(),  iit;
     for(iit = begin; iit != end; ++iit) {
         max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
     }
 
     std::vector<IfcFloat> temp((max_vcount+2)*4);
-    normals.reserve( normals.size() + vertcnt.size()-ofs );
+    normals.reserve( normals.size() + mVertcnt.size()-ofs );
 
     // `NewellNormal()` currently has a relatively strange interface and need to
     // re-structure things a bit to meet them.
-    size_t vidx = std::accumulate(vertcnt.begin(),begin,0);
+    size_t vidx = std::accumulate(mVertcnt.begin(),begin,0);
     for(iit = begin; iit != end; vidx += *iit++) {
         if (!*iit) {
             normals.push_back(IfcVector3());
             continue;
         }
         for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
-            const IfcVector3& v = verts[vidx+vofs];
+            const IfcVector3& v = mVerts[vidx+vofs];
             temp[cnt++] = v.x;
             temp[cnt++] = v.y;
             temp[cnt++] = v.z;
@@ -233,7 +233,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
 // Compute the normal of the last polygon in the given mesh
 IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const
 {
-    return ComputePolygonNormal(&verts[verts.size() - vertcnt.back()], vertcnt.back(), normalize);
+    return ComputePolygonNormal(&mVerts[mVerts.size() - mVertcnt.back()], mVertcnt.back(), normalize);
 }
 
 struct CompareVector
@@ -258,27 +258,27 @@ void TempMesh::FixupFaceOrientation()
     const IfcVector3 vavg = Center();
 
     // create a list of start indices for all faces to allow random access to faces
-    std::vector<size_t> faceStartIndices(vertcnt.size());
-    for( size_t i = 0, a = 0; a < vertcnt.size(); i += vertcnt[a], ++a )
+    std::vector<size_t> faceStartIndices(mVertcnt.size());
+    for( size_t i = 0, a = 0; a < mVertcnt.size(); i += mVertcnt[a], ++a )
         faceStartIndices[a] = i;
 
     // list all faces on a vertex
     std::map<IfcVector3, std::vector<size_t>, CompareVector> facesByVertex;
-    for( size_t a = 0; a < vertcnt.size(); ++a )
+    for( size_t a = 0; a < mVertcnt.size(); ++a )
     {
-        for( size_t b = 0; b < vertcnt[a]; ++b )
-            facesByVertex[verts[faceStartIndices[a] + b]].push_back(a);
+        for( size_t b = 0; b < mVertcnt[a]; ++b )
+            facesByVertex[mVerts[faceStartIndices[a] + b]].push_back(a);
     }
     // determine neighbourhood for all polys
-    std::vector<size_t> neighbour(verts.size(), SIZE_MAX);
+    std::vector<size_t> neighbour(mVerts.size(), SIZE_MAX);
     std::vector<size_t> tempIntersect(10);
-    for( size_t a = 0; a < vertcnt.size(); ++a )
+    for( size_t a = 0; a < mVertcnt.size(); ++a )
     {
-        for( size_t b = 0; b < vertcnt[a]; ++b )
+        for( size_t b = 0; b < mVertcnt[a]; ++b )
         {
-            size_t ib = faceStartIndices[a] + b, nib = faceStartIndices[a] + (b + 1) % vertcnt[a];
-            const std::vector<size_t>& facesOnB = facesByVertex[verts[ib]];
-            const std::vector<size_t>& facesOnNB = facesByVertex[verts[nib]];
+            size_t ib = faceStartIndices[a] + b, nib = faceStartIndices[a] + (b + 1) % mVertcnt[a];
+            const std::vector<size_t>& facesOnB = facesByVertex[mVerts[ib]];
+            const std::vector<size_t>& facesOnNB = facesByVertex[mVerts[nib]];
             // there should be exactly one or two faces which appear in both lists. Our face and the other side
             std::vector<size_t>::iterator sectstart = tempIntersect.begin();
             std::vector<size_t>::iterator sectend = std::set_intersection(
@@ -295,33 +295,33 @@ void TempMesh::FixupFaceOrientation()
     // now we're getting started. We take the face which is the farthest away from the center. This face is most probably
     // facing outwards. So we reverse this face to point outwards in relation to the center. Then we adapt neighbouring
     // faces to have the same winding until all faces have been tested.
-    std::vector<bool> faceDone(vertcnt.size(), false);
+    std::vector<bool> faceDone(mVertcnt.size(), false);
     while( std::count(faceDone.begin(), faceDone.end(), false) != 0 )
     {
         // find the farthest of the remaining faces
         size_t farthestIndex = SIZE_MAX;
         IfcFloat farthestDistance = -1.0;
-        for( size_t a = 0; a < vertcnt.size(); ++a )
+        for( size_t a = 0; a < mVertcnt.size(); ++a )
         {
             if( faceDone[a] )
                 continue;
-            IfcVector3 faceCenter = std::accumulate(verts.begin() + faceStartIndices[a],
-                verts.begin() + faceStartIndices[a] + vertcnt[a], IfcVector3(0.0)) / IfcFloat(vertcnt[a]);
+            IfcVector3 faceCenter = std::accumulate(mVerts.begin() + faceStartIndices[a],
+                mVerts.begin() + faceStartIndices[a] + mVertcnt[a], IfcVector3(0.0)) / IfcFloat(mVertcnt[a]);
             IfcFloat dst = (faceCenter - vavg).SquareLength();
             if( dst > farthestDistance ) { farthestDistance = dst; farthestIndex = a; }
         }
 
         // calculate its normal and reverse the poly if its facing towards the mesh center
-        IfcVector3 farthestNormal = ComputePolygonNormal(verts.data() + faceStartIndices[farthestIndex], vertcnt[farthestIndex]);
-        IfcVector3 farthestCenter = std::accumulate(verts.begin() + faceStartIndices[farthestIndex],
-            verts.begin() + faceStartIndices[farthestIndex] + vertcnt[farthestIndex], IfcVector3(0.0))
-            / IfcFloat(vertcnt[farthestIndex]);
+        IfcVector3 farthestNormal = ComputePolygonNormal(mVerts.data() + faceStartIndices[farthestIndex], mVertcnt[farthestIndex]);
+        IfcVector3 farthestCenter = std::accumulate(mVerts.begin() + faceStartIndices[farthestIndex],
+            mVerts.begin() + faceStartIndices[farthestIndex] + mVertcnt[farthestIndex], IfcVector3(0.0))
+            / IfcFloat(mVertcnt[farthestIndex]);
         // We accapt a bit of negative orientation without reversing. In case of doubt, prefer the orientation given in
         // the file.
         if( (farthestNormal * (farthestCenter - vavg).Normalize()) < -0.4 )
         {
-            size_t fsi = faceStartIndices[farthestIndex], fvc = vertcnt[farthestIndex];
-            std::reverse(verts.begin() + fsi, verts.begin() + fsi + fvc);
+            size_t fsi = faceStartIndices[farthestIndex], fvc = mVertcnt[farthestIndex];
+            std::reverse(mVerts.begin() + fsi, mVerts.begin() + fsi + fvc);
             std::reverse(neighbour.begin() + fsi, neighbour.begin() + fsi + fvc);
             // because of the neighbour index belonging to the edge starting with the point at the same index, we need to
             // cycle the neighbours through to match the edges again.
@@ -339,7 +339,7 @@ void TempMesh::FixupFaceOrientation()
         while( !todo.empty() )
         {
             size_t tdf = todo.back();
-            size_t vsi = faceStartIndices[tdf], vc = vertcnt[tdf];
+            size_t vsi = faceStartIndices[tdf], vc = mVertcnt[tdf];
             todo.pop_back();
 
             // check its neighbours
@@ -350,19 +350,19 @@ void TempMesh::FixupFaceOrientation()
                 if( nbi == SIZE_MAX || faceDone[nbi] )
                     continue;
 
-                const IfcVector3& vp = verts[vsi + a];
-                size_t nbvsi = faceStartIndices[nbi], nbvc = vertcnt[nbi];
-                std::vector<IfcVector3>::iterator it = std::find_if(verts.begin() + nbvsi, verts.begin() + nbvsi + nbvc, FindVector(vp));
-                ai_assert(it != verts.begin() + nbvsi + nbvc);
-                size_t nb_vidx = std::distance(verts.begin() + nbvsi, it);
+                const IfcVector3& vp = mVerts[vsi + a];
+                size_t nbvsi = faceStartIndices[nbi], nbvc = mVertcnt[nbi];
+                std::vector<IfcVector3>::iterator it = std::find_if(mVerts.begin() + nbvsi, mVerts.begin() + nbvsi + nbvc, FindVector(vp));
+                ai_assert(it != mVerts.begin() + nbvsi + nbvc);
+                size_t nb_vidx = std::distance(mVerts.begin() + nbvsi, it);
                 // two faces winded in the same direction should have a crossed edge, where one face has p0->p1 and the other
                 // has p1'->p0'. If the next point on the neighbouring face is also the next on the current face, we need
                 // to reverse the neighbour
                 nb_vidx = (nb_vidx + 1) % nbvc;
                 size_t oursideidx = (a + 1) % vc;
-                if( FuzzyVectorCompare(1e-6)(verts[vsi + oursideidx], verts[nbvsi + nb_vidx]) )
+                if( FuzzyVectorCompare(1e-6)(mVerts[vsi + oursideidx], mVerts[nbvsi + nb_vidx]) )
                 {
-                    std::reverse(verts.begin() + nbvsi, verts.begin() + nbvsi + nbvc);
+                    std::reverse(mVerts.begin() + nbvsi, mVerts.begin() + nbvsi + nbvc);
                     std::reverse(neighbour.begin() + nbvsi, neighbour.begin() + nbvsi + nbvc);
                     for( size_t a = 0; a < nbvc - 1; ++a )
                         std::swap(neighbour[nbvsi + a], neighbour[nbvsi + a + 1]);
@@ -379,12 +379,10 @@ void TempMesh::FixupFaceOrientation()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TempMesh::RemoveAdjacentDuplicates()
-{
-
+void TempMesh::RemoveAdjacentDuplicates() {
     bool drop = false;
-    std::vector<IfcVector3>::iterator base = verts.begin();
-    for(unsigned int& cnt : vertcnt) {
+    std::vector<IfcVector3>::iterator base = mVerts.begin();
+    for(unsigned int& cnt : mVertcnt) {
         if (cnt < 2){
             base += cnt;
             continue;
@@ -425,13 +423,13 @@ void TempMesh::RemoveAdjacentDuplicates()
         std::vector<IfcVector3>::iterator end = base+cnt, e = std::unique( base, end, fz );
         if (e != end) {
             cnt -= static_cast<unsigned int>(std::distance(e, end));
-            verts.erase(e,end);
+            mVerts.erase(e,end);
             drop  = true;
         }
 
         // check front and back vertices for this polygon
         if (cnt > 1 && fz(*base,*(base+cnt-1))) {
-            verts.erase(base+ --cnt);
+            mVerts.erase(base+ --cnt);
             drop  = true;
         }
 
@@ -447,12 +445,12 @@ void TempMesh::RemoveAdjacentDuplicates()
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Swap(TempMesh& other)
 {
-    vertcnt.swap(other.vertcnt);
-    verts.swap(other.verts);
+    mVertcnt.swap(other.mVertcnt);
+    mVerts.swap(other.mVerts);
 }
 
 // ------------------------------------------------------------------------------------------------
-bool IsTrue(const EXPRESS::BOOLEAN& in)
+bool IsTrue(const ::Assimp::STEP::EXPRESS::BOOLEAN& in)
 {
     return (std::string)in == "TRUE" || (std::string)in == "T";
 }
@@ -515,7 +513,7 @@ IfcFloat ConvertSIPrefix(const std::string& prefix)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, const IfcColourRgb& in)
+void ConvertColor(aiColor4D& out, const Schema_2x3::IfcColourRgb& in)
 {
     out.r = static_cast<float>( in.Red );
     out.g = static_cast<float>( in.Green );
@@ -524,9 +522,9 @@ void ConvertColor(aiColor4D& out, const IfcColourRgb& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base)
+void ConvertColor(aiColor4D& out, const Schema_2x3::IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base)
 {
-    if (const EXPRESS::REAL* const r = in.ToPtr<EXPRESS::REAL>()) {
+    if (const ::Assimp::STEP::EXPRESS::REAL* const r = in.ToPtr<::Assimp::STEP::EXPRESS::REAL>()) {
         out.r = out.g = out.b = static_cast<float>(*r);
         if(base) {
             out.r *= static_cast<float>( base->r );
@@ -536,7 +534,7 @@ void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& co
         }
         else out.a = 1.0;
     }
-    else if (const IfcColourRgb* const rgb = in.ResolveSelectPtr<IfcColourRgb>(conv.db)) {
+    else if (const Schema_2x3::IfcColourRgb* const rgb = in.ResolveSelectPtr<Schema_2x3::IfcColourRgb>(conv.db)) {
         ConvertColor(out,*rgb);
     }
     else {
@@ -545,7 +543,7 @@ void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& co
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in)
+void ConvertCartesianPoint(IfcVector3& out, const Schema_2x3::IfcCartesianPoint& in)
 {
     out = IfcVector3();
     for(size_t i = 0; i < in.Coordinates.size(); ++i) {
@@ -554,14 +552,14 @@ void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertVector(IfcVector3& out, const IfcVector& in)
+void ConvertVector(IfcVector3& out, const Schema_2x3::IfcVector& in)
 {
     ConvertDirection(out,in.Orientation);
     out *= in.Magnitude;
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertDirection(IfcVector3& out, const IfcDirection& in)
+void ConvertDirection(IfcVector3& out, const Schema_2x3::IfcDirection& in)
 {
     out = IfcVector3();
     for(size_t i = 0; i < in.DirectionRatios.size(); ++i) {
@@ -592,7 +590,7 @@ void AssignMatrixAxes(IfcMatrix4& out, const IfcVector3& x, const IfcVector3& y,
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement3D& in)
+void ConvertAxisPlacement(IfcMatrix4& out, const Schema_2x3::IfcAxis2Placement3D& in)
 {
     IfcVector3 loc;
     ConvertCartesianPoint(loc,in.Location);
@@ -617,7 +615,7 @@ void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement3D& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement2D& in)
+void ConvertAxisPlacement(IfcMatrix4& out, const Schema_2x3::IfcAxis2Placement2D& in)
 {
     IfcVector3 loc;
     ConvertCartesianPoint(loc,in.Location);
@@ -634,7 +632,7 @@ void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement2D& in)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const IfcAxis1Placement& in)
+void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const Schema_2x3::IfcAxis1Placement& in)
 {
     ConvertCartesianPoint(pos,in.Location);
     if (in.Axis) {
@@ -646,12 +644,12 @@ void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const IfcAxis1Place
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement& in, ConversionData& conv)
+void ConvertAxisPlacement(IfcMatrix4& out, const Schema_2x3::IfcAxis2Placement& in, ConversionData& conv)
 {
-    if(const IfcAxis2Placement3D* pl3 = in.ResolveSelectPtr<IfcAxis2Placement3D>(conv.db)) {
+    if(const Schema_2x3::IfcAxis2Placement3D* pl3 = in.ResolveSelectPtr<Schema_2x3::IfcAxis2Placement3D>(conv.db)) {
         ConvertAxisPlacement(out,*pl3);
     }
-    else if(const IfcAxis2Placement2D* pl2 = in.ResolveSelectPtr<IfcAxis2Placement2D>(conv.db)) {
+    else if(const Schema_2x3::IfcAxis2Placement2D* pl2 = in.ResolveSelectPtr<Schema_2x3::IfcAxis2Placement2D>(conv.db)) {
         ConvertAxisPlacement(out,*pl2);
     }
     else {
@@ -660,7 +658,7 @@ void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement& in, Conversi
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationOperator& op)
+void ConvertTransformOperator(IfcMatrix4& out, const Schema_2x3::IfcCartesianTransformationOperator& op)
 {
     IfcVector3 loc;
     ConvertCartesianPoint(loc,op.LocalOrigin);
@@ -672,7 +670,7 @@ void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationO
     if (op.Axis2) {
         ConvertDirection(y,*op.Axis2.Get());
     }
-    if (const IfcCartesianTransformationOperator3D* op2 = op.ToPtr<IfcCartesianTransformationOperator3D>()) {
+    if (const Schema_2x3::IfcCartesianTransformationOperator3D* op2 = op.ToPtr<Schema_2x3::IfcCartesianTransformationOperator3D>()) {
         if(op2->Axis3) {
             ConvertDirection(z,*op2->Axis3.Get());
         }
@@ -684,7 +682,7 @@ void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationO
 
 
     IfcVector3 vscale;
-    if (const IfcCartesianTransformationOperator3DnonUniform* nuni = op.ToPtr<IfcCartesianTransformationOperator3DnonUniform>()) {
+    if (const Schema_2x3::IfcCartesianTransformationOperator3DnonUniform* nuni = op.ToPtr<Schema_2x3::IfcCartesianTransformationOperator3DnonUniform>()) {
         vscale.x = nuni->Scale?op.Scale.Get():1.f;
         vscale.y = nuni->Scale2?nuni->Scale2.Get():1.f;
         vscale.z = nuni->Scale3?nuni->Scale3.Get():1.f;

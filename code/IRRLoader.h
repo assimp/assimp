@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IRRShared.h"
 #include <assimp/SceneCombiner.h>
 #include "Importer.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 #include <assimp/anim.h>
 
 namespace Assimp    {

@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include <assimp/IOSystem.hpp>
-#include "irrXMLWrapper.h"
+#include <assimp/irrXMLWrapper.h>
 
 namespace Assimp {
 namespace D3MF {

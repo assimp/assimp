@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "TextureTransform.h"
 #include "ASELoader.h"
-#include "fast_atof.h"
+#include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
 
 using namespace Assimp;
@@ -528,7 +528,7 @@ void Parser::ParseLV1MaterialListBlock()
                 ParseLV4MeshLong(iMaterialCount);
 
                 // now allocate enough storage to hold all materials
-                m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
+                m_vMaterials.resize(iOldMaterialCount+iMaterialCount, Material("INVALID"));
                 continue;
             }
             if (TokenMatch(filePtr,"MATERIAL",8))
@@ -706,7 +706,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
                 ParseLV4MeshLong(iNumSubMaterials);
 
                 // allocate enough storage
-                mat.avSubMaterials.resize(iNumSubMaterials);
+                mat.avSubMaterials.resize(iNumSubMaterials, Material("INVALID SUBMATERIAL"));
             }
             // submaterial chunks
             if (TokenMatch(filePtr,"SUBMATERIAL",11))

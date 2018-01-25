@@ -47,11 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileParser.h"
 #include "XFileHelper.h"
-#include "fast_atof.h"
-#include "Exceptional.h"
-#include "TinyFormatter.h"
-#include "ByteSwapper.h"
-#include "StringUtils.h"
+#include <assimp/fast_atof.h>
+#include <assimp/Exceptional.h>
+#include <assimp/TinyFormatter.h>
+#include <assimp/ByteSwapper.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
 

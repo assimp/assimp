@@ -53,13 +53,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderIntermediate.h"
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
 
-#include "StringComparison.h"
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
+#include <assimp/StringComparison.h>
+#include <assimp/StreamReader.h>
+#include <assimp/MemoryIOWrapper.h>
 
 #include <cctype>
 

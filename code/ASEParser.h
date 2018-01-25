@@ -52,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // for some helper routines like IsSpace()
-#include "ParsingUtils.h"
-#include "qnan.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/qnan.h>
 
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "3DSLoader.h"
@@ -67,9 +67,52 @@ using namespace D3DS;
 /** Helper structure representing an ASE material */
 struct Material : public D3DS::Material
 {
-    //! Default constructor
-    Material() : pcInstance(NULL), bNeed (false)
+    //! Default constructor has been deleted
+    Material() = delete;
+
+
+    //! Constructor with explicit name
+    explicit Material(const std::string &name)
+    : D3DS::Material(name)
+    , pcInstance(NULL)
+    , bNeed (false)
     {}
+
+
+    Material(const Material &other)            = default;
+    Material &operator=(const Material &other) = default;
+
+
+    //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
+    Material(Material &&other)
+    : D3DS::Material(std::move(other))
+    , avSubMaterials(std::move(other.avSubMaterials))
+    , pcInstance(std::move(other.pcInstance))
+    , bNeed(std::move(other.bNeed))
+    {
+        other.pcInstance = nullptr;
+    }
+
+
+    Material &operator=(Material &&other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        D3DS::Material::operator=(std::move(other));
+
+        avSubMaterials = std::move(other.avSubMaterials);
+        pcInstance = std::move(other.pcInstance);
+        bNeed = std::move(other.bNeed);
+
+        other.pcInstance = nullptr;
+
+        return *this;
+    }
+
+
+    ~Material() {}
+
 
     //! Contains all sub materials of this material
     std::vector<Material> avSubMaterials;

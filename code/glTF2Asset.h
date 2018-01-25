@@ -65,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_API
 #   include <memory>
 #   include <assimp/DefaultIOSystem.h>
-#   include "ByteSwapper.h"
+#   include <assimp/ByteSwapper.h>
 #else
 #   include <memory>
 #   define AI_SWAP4(p)
@@ -88,7 +88,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #endif
 
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 namespace glTF2
 {
@@ -181,13 +181,17 @@ namespace glTF2
 	#define _AI_MATKEY_GLTF_MAPPINGID_BASE "$tex.mappingid"
 	#define _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE "$tex.mappingfiltermag"
 	#define _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE "$tex.mappingfiltermin"
+    #define _AI_MATKEY_GLTF_SCALE_BASE "$tex.scale"
+    #define _AI_MATKEY_GLTF_STRENGTH_BASE "$tex.strength"
 
 	#define AI_MATKEY_GLTF_TEXTURE_TEXCOORD _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, type, N
 	#define AI_MATKEY_GLTF_MAPPINGNAME(type, N) _AI_MATKEY_GLTF_MAPPINGNAME_BASE, type, N
 	#define AI_MATKEY_GLTF_MAPPINGID(type, N) _AI_MATKEY_GLTF_MAPPINGID_BASE, type, N
 	#define AI_MATKEY_GLTF_MAPPINGFILTER_MAG(type, N) _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE, type, N
 	#define AI_MATKEY_GLTF_MAPPINGFILTER_MIN(type, N) _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE, type, N
-
+    #define AI_MATKEY_GLTF_TEXTURE_SCALE(type, N) _AI_MATKEY_GLTF_SCALE_BASE, type, N
+    #define AI_MATKEY_GLTF_TEXTURE_STRENGTH(type, N) _AI_MATKEY_GLTF_STRENGTH_BASE, type, N
+    
     #ifdef ASSIMP_API
         #include "./../include/assimp/Compiler/pushpack1.h"
     #endif

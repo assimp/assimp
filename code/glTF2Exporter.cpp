@@ -43,9 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "glTF2Exporter.h"
 
-#include "Exceptional.h"
-#include "StringComparison.h"
-#include "ByteSwapper.h"
+#include <assimp/Exceptional.h>
+#include <assimp/StringComparison.h>
+#include <assimp/ByteSwapper.h>
 
 #include "SplitLargeMeshes.h"
 
@@ -77,10 +77,18 @@ namespace Assimp {
         glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, false);
     }
 
+    // ------------------------------------------------------------------------------------------------
+    // Worker function for exporting a scene to GLB. Prototyped and registered in Exporter.cpp
+    void ExportSceneGLB2(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+    {
+        // invoke the exporter
+        glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, true);
+    }
+
 } // end of namespace Assimp
 
 glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-                           const ExportProperties* pProperties, bool /*isBinary*/)
+                           const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
     , mProperties(pProperties)
@@ -101,6 +109,10 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     mAsset.reset( new Asset( pIOSystem ) );
 
+    if (isBinary) {
+        mAsset->SetAsBinary();
+    }
+
     ExportMetadata();
 
     ExportMaterials();
@@ -118,7 +130,11 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     AssetWriter writer(*mAsset);
 
-    writer.WriteFile(filename);
+    if (isBinary) {
+        writer.WriteGLBFile(filename);
+    } else {
+        writer.WriteFile(filename);
+    }
 }
 
 /*
@@ -692,8 +708,13 @@ void glTF2Exporter::ExportMeshes()
 		if (v) p.attributes.position.push_back(v);
 
 		/******************** Normals ********************/
+        // Normalize all normals as the validator can emit a warning otherwise
+        for (auto i = 0u; i < aim->mNumVertices; ++i) {
+            aim->mNormals[i].Normalize();
+        }
+
 		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-		if (n) p.attributes.normal.push_back(n);
+        if (n) p.attributes.normal.push_back(n);
 
 		/************** Texture coordinates **************/
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {

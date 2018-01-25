@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "JoinVerticesProcess.h"
 #include "ProcessHelper.h"
-#include "Vertex.h"
-#include "TinyFormatter.h"
+#include <assimp/Vertex.h>
+#include <assimp/TinyFormatter.h>
 #include <stdio.h>
 
 using namespace Assimp;

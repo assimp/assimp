@@ -46,9 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_IFCUTIL_H
 #define INCLUDED_IFCUTIL_H
 
-#include "IFCReaderGen.h"
+#include "IFCReaderGen_2x3.h"
 #include "IFCLoader.h"
-#include "STEPFile.h"
+#include "code/STEPFile.h"
 #include <assimp/mesh.h>
 #include <assimp/material.h>
 
@@ -71,8 +71,7 @@ namespace IFC {
 // Helper for std::for_each to delete all heap-allocated items in a container
 // ------------------------------------------------------------------------------------------------
 template<typename T>
-struct delete_fun
-{
+struct delete_fun {
     void operator()(T* del) {
         delete del;
     }
@@ -83,10 +82,9 @@ struct delete_fun
 // ------------------------------------------------------------------------------------------------
 // Helper used during mesh construction. Aids at creating aiMesh'es out of relatively few polygons.
 // ------------------------------------------------------------------------------------------------
-struct TempMesh
-{
-    std::vector<IfcVector3> verts;
-    std::vector<unsigned int> vertcnt;
+struct TempMesh {
+    std::vector<IfcVector3> mVerts;
+    std::vector<unsigned int> mVertcnt;
 
     // utilities
     aiMesh* ToMesh();
@@ -94,22 +92,20 @@ struct TempMesh
     void Transform(const IfcMatrix4& mat);
     IfcVector3 Center() const;
     void Append(const TempMesh& other);
-
-    bool IsEmpty() const {
-        return verts.empty() && vertcnt.empty();
-    }
-
+    bool IsEmpty() const;
     void RemoveAdjacentDuplicates();
     void RemoveDegenerates();
-
     void FixupFaceOrientation();
-
     static IfcVector3 ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bool normalize = true);
     IfcVector3 ComputeLastPolygonNormal(bool normalize = true) const;
     void ComputePolygonNormals(std::vector<IfcVector3>& normals, bool normalize = true, size_t ofs = 0) const;
-
     void Swap(TempMesh& other);
 };
+
+inline
+bool TempMesh::IsEmpty() const {
+    return mVerts.empty() && mVertcnt.empty();
+}
 
 
 // ------------------------------------------------------------------------------------------------
@@ -117,7 +113,7 @@ struct TempMesh
 // ------------------------------------------------------------------------------------------------
 struct TempOpening
 {
-    const IFC::IfcSolidModel* solid;
+    const IFC::Schema_2x3::IfcSolidModel *solid;
     IfcVector3 extrusionDir;
 
     std::shared_ptr<TempMesh> profileMesh;
@@ -139,7 +135,7 @@ struct TempOpening
     }
 
     // ------------------------------------------------------------------------------
-    TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
+    TempOpening(const IFC::Schema_2x3::IfcSolidModel* solid,IfcVector3 extrusionDir,
         std::shared_ptr<TempMesh> profileMesh,
         std::shared_ptr<TempMesh> profileMesh2D)
         : solid(solid)
@@ -174,7 +170,7 @@ struct TempOpening
 // ------------------------------------------------------------------------------------------------
 struct ConversionData
 {
-    ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
+    ConversionData(const STEP::DB& db, const IFC::Schema_2x3::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
         : len_scale(1.0)
         , angle_scale(-1.0)
         , db(db)
@@ -194,7 +190,7 @@ struct ConversionData
     bool plane_angle_in_radians;
 
     const STEP::DB& db;
-    const IFC::IfcProject& proj;
+    const IFC::Schema_2x3::IfcProject& proj;
     aiScene* out;
 
     IfcMatrix4 wcs;
@@ -202,16 +198,16 @@ struct ConversionData
     std::vector<aiMaterial*> materials;
 
     struct MeshCacheIndex {
-        const IFC::IfcRepresentationItem* item; unsigned int matindex;
+        const IFC::Schema_2x3::IfcRepresentationItem* item; unsigned int matindex;
         MeshCacheIndex() : item(NULL), matindex(0) { }
-        MeshCacheIndex(const IFC::IfcRepresentationItem* i, unsigned int mi) : item(i), matindex(mi) { }
+        MeshCacheIndex(const IFC::Schema_2x3::IfcRepresentationItem* i, unsigned int mi) : item(i), matindex(mi) { }
         bool operator == (const MeshCacheIndex& o) const { return item == o.item && matindex == o.matindex; }
         bool operator < (const MeshCacheIndex& o) const { return item < o.item || (item == o.item && matindex < o.matindex); }
     };
     typedef std::map<MeshCacheIndex, std::vector<unsigned int> > MeshCache;
     MeshCache cached_meshes;
 
-    typedef std::map<const IFC::IfcSurfaceStyle*, unsigned int> MaterialCache;
+    typedef std::map<const IFC::Schema_2x3::IfcSurfaceStyle*, unsigned int> MaterialCache;
     MaterialCache cached_materials;
 
     const IFCImporter::Settings& settings;
@@ -260,50 +256,50 @@ struct XYSorter {
 
 
 // conversion routines for common IFC entities, implemented in IFCUtil.cpp
-void ConvertColor(aiColor4D& out, const IfcColourRgb& in);
-void ConvertColor(aiColor4D& out, const IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base);
-void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in);
-void ConvertDirection(IfcVector3& out, const IfcDirection& in);
-void ConvertVector(IfcVector3& out, const IfcVector& in);
+void ConvertColor(aiColor4D& out, const Schema_2x3::IfcColourRgb& in);
+void ConvertColor(aiColor4D& out, const Schema_2x3::IfcColourOrFactor& in,ConversionData& conv,const aiColor4D* base);
+void ConvertCartesianPoint(IfcVector3& out, const Schema_2x3::IfcCartesianPoint& in);
+void ConvertDirection(IfcVector3& out, const Schema_2x3::IfcDirection& in);
+void ConvertVector(IfcVector3& out, const Schema_2x3::IfcVector& in);
 void AssignMatrixAxes(IfcMatrix4& out, const IfcVector3& x, const IfcVector3& y, const IfcVector3& z);
-void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement3D& in);
-void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement2D& in);
-void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const IFC::IfcAxis1Placement& in);
-void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement& in, ConversionData& conv);
-void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationOperator& op);
-bool IsTrue(const EXPRESS::BOOLEAN& in);
+void ConvertAxisPlacement(IfcMatrix4& out, const Schema_2x3::IfcAxis2Placement3D& in);
+void ConvertAxisPlacement(IfcMatrix4& out, const Schema_2x3::IfcAxis2Placement2D& in);
+void ConvertAxisPlacement(IfcVector3& axis, IfcVector3& pos, const IFC::Schema_2x3::IfcAxis1Placement& in);
+void ConvertAxisPlacement(IfcMatrix4& out, const Schema_2x3::IfcAxis2Placement& in, ConversionData& conv);
+void ConvertTransformOperator(IfcMatrix4& out, const Schema_2x3::IfcCartesianTransformationOperator& op);
+bool IsTrue(const Assimp::STEP::EXPRESS::BOOLEAN& in);
 IfcFloat ConvertSIPrefix(const std::string& prefix);
 
 
 // IFCProfile.cpp
-bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv);
-bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
+bool ProcessProfile(const Schema_2x3::IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv);
+bool ProcessCurve(const Schema_2x3::IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
 
 // IFCMaterial.cpp
 unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat);
 
 // IFCGeometry.cpp
 IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut);
-bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int matid, std::vector<unsigned int>& mesh_indices, ConversionData& conv);
+bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, unsigned int matid, std::vector<unsigned int>& mesh_indices, ConversionData& conv);
 void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/);
 
-void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
+void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, TempMesh& meshout,
                            ConversionData& conv);
 
-void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result,
+void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid, TempMesh& result,
                               ConversionData& conv, bool collect_openings);
 
 // IFCBoolean.cpp
 
-void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv);
-void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result,
+void ProcessBoolean(const Schema_2x3::IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv);
+void ProcessBooleanHalfSpaceDifference(const Schema_2x3::IfcHalfSpaceSolid* hs, TempMesh& result,
                                        const TempMesh& first_operand,
                                        ConversionData& conv);
 
-void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
+void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
                                                        const TempMesh& first_operand,
                                                        ConversionData& conv);
-void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result,
+void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid* as, TempMesh& result,
                                                const TempMesh& first_operand,
                                                ConversionData& conv);
 
@@ -324,37 +320,30 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 // ------------------------------------------------------------------------------------------------
 // Custom exception for use by members of the Curve class
 // ------------------------------------------------------------------------------------------------
-class CurveError
-{
+class CurveError {
 public:
     CurveError(const std::string& s)
-        : s(s)
-    {
+    : mStr(s) {
+        // empty
     }
 
-    std::string s;
+    std::string mStr;
 };
-
 
 // ------------------------------------------------------------------------------------------------
 // Temporary representation for an arbitrary sub-class of IfcCurve. Used to sample the curves
 // to obtain a list of line segments.
 // ------------------------------------------------------------------------------------------------
-class Curve
-{
+class Curve {
 protected:
-
-    Curve(const IfcCurve& base_entity, ConversionData& conv)
-        : base_entity(base_entity)
-        , conv(conv)
-    {}
+    Curve(const Schema_2x3::IfcCurve& base_entity, ConversionData& conv)
+    : base_entity(base_entity)
+    , conv(conv) {
+        // empty
+    }
 
 public:
-
     typedef std::pair<IfcFloat, IfcFloat> ParamRange;
-
-public:
-
 
     virtual ~Curve() {}
 
@@ -386,14 +375,10 @@ public:
     // check if a particular parameter value lies within the well-defined range
     bool InRange(IfcFloat) const;
 #endif
-
-public:
-
-    static Curve* Convert(const IFC::IfcCurve&,ConversionData& conv);
+    static Curve* Convert(const IFC::Schema_2x3::IfcCurve&,ConversionData& conv);
 
 protected:
-
-    const IfcCurve& base_entity;
+    const Schema_2x3::IfcCurve& base_entity;
     ConversionData& conv;
 };
 
@@ -402,11 +387,9 @@ protected:
 // A BoundedCurve always holds the invariant that GetParametricRange()
 // never returns infinite values.
 // --------------------------------------------------------------------------------
-class BoundedCurve : public Curve
-{
+class BoundedCurve : public Curve {
 public:
-
-    BoundedCurve(const IfcBoundedCurve& entity, ConversionData& conv)
+    BoundedCurve(const Schema_2x3::IfcBoundedCurve& entity, ConversionData& conv)
         : Curve(entity,conv)
     {}
 
@@ -422,7 +405,7 @@ public:
 };
 
 // IfcProfile.cpp
-bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
+bool ProcessCurve(const Schema_2x3::IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
 }
 }
 

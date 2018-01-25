@@ -57,7 +57,7 @@ namespace {
 class Conic : public Curve {
 public:
     // --------------------------------------------------
-    Conic(const IfcConic& entity, ConversionData& conv)
+    Conic(const Schema_2x3::IfcConic& entity, ConversionData& conv)
     : Curve(entity,conv) {
         IfcMatrix4 trafo;
         ConvertAxisPlacement(trafo,*entity.Position,conv);
@@ -103,7 +103,7 @@ protected:
 class Circle : public Conic {
 public:
     // --------------------------------------------------
-    Circle(const IfcCircle& entity, ConversionData& conv)
+    Circle(const Schema_2x3::IfcCircle& entity, ConversionData& conv)
         : Conic(entity,conv)
         , entity(entity)
     {
@@ -117,9 +117,8 @@ public:
     }
 
 private:
-    const IfcCircle& entity;
+    const Schema_2x3::IfcCircle& entity;
 };
-
 
 // --------------------------------------------------------------------------------
 // Ellipse
@@ -127,7 +126,7 @@ private:
 class Ellipse : public Conic {
 public:
     // --------------------------------------------------
-    Ellipse(const IfcEllipse& entity, ConversionData& conv)
+    Ellipse(const Schema_2x3::IfcEllipse& entity, ConversionData& conv)
     : Conic(entity,conv)
     , entity(entity) {
         // empty
@@ -141,7 +140,7 @@ public:
     }
 
 private:
-    const IfcEllipse& entity;
+    const Schema_2x3::IfcEllipse& entity;
 };
 
 // --------------------------------------------------------------------------------
@@ -150,7 +149,7 @@ private:
 class Line : public Curve {
 public:
     // --------------------------------------------------
-    Line(const IfcLine& entity, ConversionData& conv)
+    Line(const Schema_2x3::IfcLine& entity, ConversionData& conv)
     : Curve(entity,conv) {
         ConvertCartesianPoint(p,entity.Pnt);
         ConvertVector(v,entity.Dir);
@@ -181,12 +180,12 @@ public:
         ai_assert( InRange( b ) );
 
         if (a == b) {
-            out.verts.push_back(Eval(a));
+            out.mVerts.push_back(Eval(a));
             return;
         }
-        out.verts.reserve(out.verts.size()+2);
-        out.verts.push_back(Eval(a));
-        out.verts.push_back(Eval(b));
+        out.mVerts.reserve(out.mVerts.size()+2);
+        out.mVerts.push_back(Eval(a));
+        out.mVerts.push_back(Eval(b));
     }
 
     // --------------------------------------------------
@@ -208,11 +207,11 @@ class CompositeCurve : public BoundedCurve {
 
 public:
     // --------------------------------------------------
-    CompositeCurve(const IfcCompositeCurve& entity, ConversionData& conv)
+    CompositeCurve(const Schema_2x3::IfcCompositeCurve& entity, ConversionData& conv)
     : BoundedCurve(entity,conv)
     , total() {
         curves.reserve(entity.Segments.size());
-        for(const IfcCompositeCurveSegment& curveSegment :entity.Segments) {
+        for(const Schema_2x3::IfcCompositeCurveSegment& curveSegment :entity.Segments) {
             // according to the specification, this must be a bounded curve
             std::shared_ptr< Curve > cv(Curve::Convert(curveSegment.ParentCurve,conv));
             std::shared_ptr< BoundedCurve > bc = std::dynamic_pointer_cast<BoundedCurve>(cv);
@@ -282,14 +281,14 @@ public:
         ai_assert( InRange( b ) );
 
         const size_t cnt = EstimateSampleCount(a,b);
-        out.verts.reserve(out.verts.size() + cnt);
+        out.mVerts.reserve(out.mVerts.size() + cnt);
 
         for(const CurveEntry& entry : curves) {
-            const size_t cnt = out.verts.size();
+            const size_t cnt = out.mVerts.size();
             entry.first->SampleDiscrete(out);
 
-            if (!entry.second && cnt != out.verts.size()) {
-                std::reverse(out.verts.begin()+cnt,out.verts.end());
+            if (!entry.second && cnt != out.mVerts.size()) {
+                std::reverse(out.mVerts.begin()+cnt,out.mVerts.end());
             }
         }
     }
@@ -310,7 +309,7 @@ private:
 class TrimmedCurve : public BoundedCurve {
 public:
     // --------------------------------------------------
-    TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv)
+    TrimmedCurve(const Schema_2x3::IfcTrimmedCurve& entity, ConversionData& conv)
         : BoundedCurve(entity,conv)
     {
         base = std::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
@@ -325,12 +324,12 @@ public:
         bool have_param = false, have_point = false;
         IfcVector3 point;
         for(const Entry sel :entity.Trim1) {
-            if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
+            if (const ::Assimp::STEP::EXPRESS::REAL* const r = sel->ToPtr<::Assimp::STEP::EXPRESS::REAL>()) {
                 range.first = *r;
                 have_param = true;
                 break;
             }
-            else if (const IfcCartesianPoint* const r = sel->ResolveSelectPtr<IfcCartesianPoint>(conv.db)) {
+            else if (const Schema_2x3::IfcCartesianPoint* const r = sel->ResolveSelectPtr<Schema_2x3::IfcCartesianPoint>(conv.db)) {
                 ConvertCartesianPoint(point,*r);
                 have_point = true;
             }
@@ -342,12 +341,12 @@ public:
         }
         have_param = false, have_point = false;
         for(const Entry sel :entity.Trim2) {
-            if (const EXPRESS::REAL* const r = sel->ToPtr<EXPRESS::REAL>()) {
+            if (const ::Assimp::STEP::EXPRESS::REAL* const r = sel->ToPtr<::Assimp::STEP::EXPRESS::REAL>()) {
                 range.second = *r;
                 have_param = true;
                 break;
             }
-            else if (const IfcCartesianPoint* const r = sel->ResolveSelectPtr<IfcCartesianPoint>(conv.db)) {
+            else if (const Schema_2x3::IfcCartesianPoint* const r = sel->ResolveSelectPtr<Schema_2x3::IfcCartesianPoint>(conv.db)) {
                 ConvertCartesianPoint(point,*r);
                 have_point = true;
             }
@@ -420,13 +419,13 @@ private:
 class PolyLine : public BoundedCurve {
 public:
     // --------------------------------------------------
-    PolyLine(const IfcPolyline& entity, ConversionData& conv)
+    PolyLine(const Schema_2x3::IfcPolyline& entity, ConversionData& conv)
         : BoundedCurve(entity,conv)
     {
         points.reserve(entity.Points.size());
 
         IfcVector3 t;
-        for(const IfcCartesianPoint& cp : entity.Points) {
+        for(const Schema_2x3::IfcCartesianPoint& cp : entity.Points) {
             ConvertCartesianPoint(t,cp);
             points.push_back(t);
         }
@@ -463,29 +462,29 @@ private:
 } // anon
 
 // ------------------------------------------------------------------------------------------------
-Curve* Curve::Convert(const IFC::IfcCurve& curve,ConversionData& conv) {
-    if(curve.ToPtr<IfcBoundedCurve>()) {
-        if(const IfcPolyline* c = curve.ToPtr<IfcPolyline>()) {
+Curve* Curve::Convert(const IFC::Schema_2x3::IfcCurve& curve,ConversionData& conv) {
+    if(curve.ToPtr<Schema_2x3::IfcBoundedCurve>()) {
+        if(const Schema_2x3::IfcPolyline* c = curve.ToPtr<Schema_2x3::IfcPolyline>()) {
             return new PolyLine(*c,conv);
         }
-        if(const IfcTrimmedCurve* c = curve.ToPtr<IfcTrimmedCurve>()) {
+        if(const Schema_2x3::IfcTrimmedCurve* c = curve.ToPtr<Schema_2x3::IfcTrimmedCurve>()) {
             return new TrimmedCurve(*c,conv);
         }
-        if(const IfcCompositeCurve* c = curve.ToPtr<IfcCompositeCurve>()) {
+        if(const Schema_2x3::IfcCompositeCurve* c = curve.ToPtr<Schema_2x3::IfcCompositeCurve>()) {
             return new CompositeCurve(*c,conv);
         }
     }
 
-    if(curve.ToPtr<IfcConic>()) {
-        if(const IfcCircle* c = curve.ToPtr<IfcCircle>()) {
+    if(curve.ToPtr<Schema_2x3::IfcConic>()) {
+        if(const Schema_2x3::IfcCircle* c = curve.ToPtr<Schema_2x3::IfcCircle>()) {
             return new Circle(*c,conv);
         }
-        if(const IfcEllipse* c = curve.ToPtr<IfcEllipse>()) {
+        if(const Schema_2x3::IfcEllipse* c = curve.ToPtr<Schema_2x3::IfcEllipse>()) {
             return new Ellipse(*c,conv);
         }
     }
 
-    if(const IfcLine* c = curve.ToPtr<IfcLine>()) {
+    if(const Schema_2x3::IfcLine* c = curve.ToPtr<Schema_2x3::IfcLine>()) {
         return new Line(*c,conv);
     }
 
@@ -589,11 +588,11 @@ void Curve::SampleDiscrete(TempMesh& out,IfcFloat a, IfcFloat b) const {
     ai_assert( InRange( b ) );
 
     const size_t cnt = std::max(static_cast<size_t>(0),EstimateSampleCount(a,b));
-    out.verts.reserve( out.verts.size() + cnt + 1);
+    out.mVerts.reserve( out.mVerts.size() + cnt + 1);
 
     IfcFloat p = a, delta = (b-a)/cnt;
     for(size_t i = 0; i <= cnt; ++i, p += delta) {
-        out.verts.push_back(Eval(p));
+        out.mVerts.push_back(Eval(p));
     }
 }
 

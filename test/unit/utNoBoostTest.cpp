@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define ASSIMP_FORCE_NOBOOST
 #include "BoostWorkaround/boost/format.hpp"
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 
 using namespace std;

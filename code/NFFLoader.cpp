@@ -47,11 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "NFFLoader.h"
-#include "ParsingUtils.h"
-#include "StandardShapes.h"
-#include "qnan.h"
-#include "fast_atof.h"
-#include "RemoveComments.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/StandardShapes.h>
+#include <assimp/qnan.h>
+#include <assimp/fast_atof.h>
+#include <assimp/RemoveComments.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>

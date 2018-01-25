@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
-#include "fast_atof.h"
-#include "ParsingUtils.h"
+#include "../include/assimp/fast_atof.h"
+#include "../include/assimp/ParsingUtils.h"
 
 namespace Assimp    {
 

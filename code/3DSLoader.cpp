@@ -51,12 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "3DSLoader.h"
-#include "Macros.h"
+#include <assimp/Macros.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 
 using namespace Assimp;
 
@@ -105,14 +105,14 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 Discreet3DSImporter::Discreet3DSImporter()
-    : stream(),
-    mLastNodeIndex(),
-    mCurrentNode(),
-    mRootNode(),
-    mScene(),
-    mMasterScale(),
-    bHasBG(),
-    bIsPrj()
+: stream()
+, mLastNodeIndex()
+, mCurrentNode()
+, mRootNode()
+, mScene()
+, mMasterScale()
+, bHasBG()
+, bIsPrj()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -346,7 +346,7 @@ void Discreet3DSImporter::ParseObjectChunk()
     case Discreet3DS::CHUNK_MAT_MATERIAL:
 
         // Add a new material to the list
-        mScene->mMaterials.push_back(D3DS::Material());
+        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + std::to_string(mScene->mMaterials.size()))));
         ParseMaterialChunk();
         break;
 

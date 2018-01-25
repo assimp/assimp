@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "UnitTestPCH.h"
-#include <fast_atof.h>
+#include <assimp/fast_atof.h>
 #include <vector>
 #include <string>
 

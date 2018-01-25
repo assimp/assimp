@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-#include "Exceptional.h"
-#include "qnan.h"
+#include <assimp/Exceptional.h>
+#include <assimp/qnan.h>
 
 
 using namespace Assimp;

@@ -52,9 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 // ----------------------------------------------------------------------------
 #include <assimp/SceneCombiner.h>
-#include "StringUtils.h"
-#include "fast_atof.h"
-#include "Hash.h"
+#include <assimp/StringUtils.h>
+#include <assimp/fast_atof.h>
+#include <assimp/Hash.h>
 #include "time.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>

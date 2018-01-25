@@ -48,11 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // tab width for logging columns
 #define ASSIMP_FBX_TAB_WIDTH 4
 
-#include "ParsingUtils.h"
+#include <assimp/ParsingUtils.h>
 
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 
 namespace Assimp {
 namespace FBX {
@@ -76,12 +76,10 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
     ai_assert(static_cast<size_t>(send-sbegin) > 0);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Token::~Token()
 {
 }
-
 
 namespace {
 

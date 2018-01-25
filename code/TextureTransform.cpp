@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 
 #include "TextureTransform.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 using namespace Assimp;
 

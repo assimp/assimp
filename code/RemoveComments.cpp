@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines the CommentRemover utility class
  */
 
-#include "RemoveComments.h"
-#include "ParsingUtils.h"
+#include <assimp/RemoveComments.h>
+#include <assimp/ParsingUtils.h>
 
 namespace Assimp    {
 
@@ -66,6 +66,10 @@ void CommentRemover::RemoveLineComments(const char* szComment,
         if (!strncmp(szBuffer,szComment,len)) {
             while (!IsLineEnd(*szBuffer))
                 *szBuffer++ = chReplacement;
+
+            if (!*szBuffer) {
+                break;
+            }
         }
         ++szBuffer;
     }

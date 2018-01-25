@@ -1129,14 +1129,14 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
                 out_mesh->mBitangents[ cursor ] = ( *binormals )[ in_cursor ];
             }
 
-            for ( unsigned int i = 0; i < num_uvs; ++i ) {
-                const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords( i );
-                out_mesh->mTextureCoords[ i ][ cursor ] = aiVector3D( uvs[ in_cursor ].x, uvs[ in_cursor ].y, 0.0f );
+            for ( unsigned int j = 0; j < num_uvs; ++j ) {
+                const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords( j );
+                out_mesh->mTextureCoords[ j ][ cursor ] = aiVector3D( uvs[ in_cursor ].x, uvs[ in_cursor ].y, 0.0f );
             }
 
-            for ( unsigned int i = 0; i < num_vcs; ++i ) {
-                const std::vector<aiColor4D>& cols = mesh.GetVertexColors( i );
-                out_mesh->mColors[ i ][ cursor ] = cols[ in_cursor ];
+            for ( unsigned int j = 0; j < num_vcs; ++j ) {
+                const std::vector<aiColor4D>& cols = mesh.GetVertexColors( j );
+                out_mesh->mColors[ j ][ cursor ] = cols[ in_cursor ];
             }
         }
     }

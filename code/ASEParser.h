@@ -358,17 +358,8 @@ struct Light : public BaseNode
         DIRECTIONAL
     };
 
-    //! Constructor.
-    Light()
-        : BaseNode   (BaseNode::Light)
-        , mLightType (OMNI)
-        , mColor     (1.f,1.f,1.f)
-        , mIntensity (1.f) // light is white by default
-        , mAngle     (45.f)
-        , mFalloff   (0.f)
-    {
-    }
-
+    //! Default constructor has been deleted
+    Light() = delete;
 
     //! Construction from an existing name
     explicit Light(const std::string &name)

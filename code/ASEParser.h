@@ -415,7 +415,7 @@ struct Dummy : public BaseNode
 {
     //! Constructor
     Dummy()
-        : BaseNode  (BaseNode::Dummy)
+        : BaseNode  (BaseNode::Dummy, "DUMMY")
     {
     }
 };

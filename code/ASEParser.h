@@ -308,18 +308,8 @@ struct BaseNode
 /** Helper structure to represent an ASE file mesh */
 struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode
 {
-    //! Constructor.
-    Mesh()
-        : BaseNode  (BaseNode::Mesh)
-        , bSkip     (false)
-    {
-        // use 2 texture vertex components by default
-        for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
-            this->mNumUVComponents[c] = 2;
-
-        // setup the default material index by default
-        iMaterialIndex = Face::DEFAULT_MATINDEX;
-    }
+    //! Default constructor has been deleted
+    Mesh() = delete;
 
 
     //! Construction from an existing name

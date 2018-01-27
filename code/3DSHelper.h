@@ -494,17 +494,8 @@ struct Material
 /** Helper structure to represent a 3ds file mesh */
 struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 {
-    //! Default constructor
-    Mesh()
-    {
-        static int iCnt = 0;
-
-        // Generate a default name for the mesh
-        char szTemp[128];
-        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-    }
-
+    //! Default constructor has been deleted
+    Mesh() = delete;
 
     //! Constructor with explicit name
     explicit Mesh(const std::string &name)

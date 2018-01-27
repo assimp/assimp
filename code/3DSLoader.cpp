@@ -402,11 +402,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
     case Discreet3DS::CHUNK_TRIMESH:
         {
         // this starts a new triangle mesh
-        mScene->mMeshes.push_back(D3DS::Mesh());
-        D3DS::Mesh& m = mScene->mMeshes.back();
-
-        // Setup the name of the mesh
-        m.mName = std::string(name, num);
+        mScene->mMeshes.push_back(D3DS::Mesh(std::string(name, num)));
 
         // Read mesh chunks
         ParseMeshChunk();

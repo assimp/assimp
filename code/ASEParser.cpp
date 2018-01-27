@@ -315,7 +315,7 @@ void Parser::Parse()
             // camera object
             if (TokenMatch(filePtr,"CAMERAOBJECT",12))
             {
-                m_vCameras.push_back(Camera());
+                m_vCameras.push_back(Camera("UNNAMED"));
                 ParseLV1ObjectBlock(m_vCameras.back());
                 continue;
             }

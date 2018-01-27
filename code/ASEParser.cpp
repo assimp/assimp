@@ -292,7 +292,7 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"GEOMOBJECT",10))
 
             {
-                m_vMeshes.push_back(Mesh());
+                m_vMeshes.push_back(Mesh("UNNAMED"));
                 ParseLV1ObjectBlock(m_vMeshes.back());
                 continue;
             }

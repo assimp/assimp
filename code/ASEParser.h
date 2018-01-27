@@ -390,15 +390,8 @@ struct Camera : public BaseNode
         TARGET
     };
 
-    //! Constructor
-    Camera()
-        : BaseNode    (BaseNode::Camera)
-        , mFOV        (0.75f)   // in radians
-        , mNear       (0.1f)
-        , mFar        (1000.f)  // could be zero
-        , mCameraType (FREE)
-    {
-    }
+    //! Default constructor has been deleted
+    Camera() = delete;
 
 
     //! Construction from an existing name

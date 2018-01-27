@@ -321,6 +321,19 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode
         iMaterialIndex = Face::DEFAULT_MATINDEX;
     }
 
+
+    //! Construction from an existing name
+    explicit Mesh(const std::string &name)
+    : BaseNode  (BaseNode::Mesh, name)
+    , iMaterialIndex(Face::DEFAULT_MATINDEX)
+    , bSkip     (false)
+    {
+        // use 2 texture vertex components by default
+        for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
+            this->mNumUVComponents[c] = 2;
+    }
+
+
     //! List of all texture coordinate sets
     std::vector<aiVector3D> amTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 

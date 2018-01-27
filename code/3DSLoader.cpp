@@ -170,7 +170,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 
     // Initialize members
     mLastNodeIndex             = -1;
-    mCurrentNode               = new D3DS::Node();
+    mCurrentNode               = new D3DS::Node("UNNAMED");
     mRootNode                  = mCurrentNode;
     mRootNode->mHierarchyPos   = -1;
     mRootNode->mHierarchyIndex = -1;

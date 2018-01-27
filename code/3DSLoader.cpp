@@ -686,8 +686,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
             pcNode->mInstanceCount++;
             instanceNumber = pcNode->mInstanceCount;
         }
-        pcNode = new D3DS::Node();
-        pcNode->mName = name;
+        pcNode = new D3DS::Node(name);
         pcNode->mInstanceNumber = instanceNumber;
 
         // There are two unknown values which we can safely ignore

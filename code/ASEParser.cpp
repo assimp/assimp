@@ -1553,7 +1553,7 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 {
     AI_ASE_PARSER_INIT();
-    mesh.mBones.resize(iNumBones);
+    mesh.mBones.resize(iNumBones, Bone("UNNAMED"));
     while (true)
     {
         if ('*' == *filePtr)

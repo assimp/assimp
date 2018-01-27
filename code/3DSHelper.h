@@ -549,25 +549,7 @@ struct aiFloatKey
 /** Helper structure to represent a 3ds file node */
 struct Node
 {
-    Node()
-    : mParent(NULL)
-    , mInstanceNumber(0)
-    , mHierarchyPos       (0)
-    , mHierarchyIndex     (0)
-    , mInstanceCount      (1)
-    {
-        static int iCnt = 0;
-
-        // Generate a default name for the node
-        char szTemp[128];
-        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-
-        aRotationKeys.reserve (20);
-        aPositionKeys.reserve (20);
-        aScalingKeys.reserve  (20);
-    }
-
+    Node() = delete;
 
     explicit Node(const std::string &name)
     : mParent(NULL)

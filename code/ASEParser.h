@@ -400,6 +400,18 @@ struct Camera : public BaseNode
     {
     }
 
+
+    //! Construction from an existing name
+    explicit Camera(const std::string &name)
+    : BaseNode    (BaseNode::Camera, name)
+    , mFOV        (0.75f)   // in radians
+    , mNear       (0.1f)
+    , mFar        (1000.f)  // could be zero
+    , mCameraType (FREE)
+    {
+    }
+
+
     ai_real mFOV, mNear, mFar;
     CameraType mCameraType;
 };

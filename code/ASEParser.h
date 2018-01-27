@@ -264,6 +264,19 @@ struct BaseNode
         mTargetPosition.x = qnan;
     }
 
+
+    //! Construction from an existing name
+    BaseNode(Type _mType, const std::string &name)
+    : mType         (_mType)
+    , mName         (name)
+    , mProcessed    (false)
+    {
+        // Set mTargetPosition to qnan
+        const ai_real qnan = get_qnan();
+        mTargetPosition.x = qnan;
+    }
+
+
     //! Name of the mesh
     std::string mName;
 

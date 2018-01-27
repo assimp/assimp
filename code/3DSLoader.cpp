@@ -51,12 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "3DSLoader.h"
-#include "Macros.h"
+#include <assimp/Macros.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 
 using namespace Assimp;
 
@@ -105,14 +105,14 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 Discreet3DSImporter::Discreet3DSImporter()
-    : stream(),
-    mLastNodeIndex(),
-    mCurrentNode(),
-    mRootNode(),
-    mScene(),
-    mMasterScale(),
-    bHasBG(),
-    bIsPrj()
+: stream()
+, mLastNodeIndex()
+, mCurrentNode()
+, mRootNode()
+, mScene()
+, mMasterScale()
+, bHasBG()
+, bIsPrj()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 
     // Initialize members
     mLastNodeIndex             = -1;
-    mCurrentNode               = new D3DS::Node();
+    mCurrentNode               = new D3DS::Node("UNNAMED");
     mRootNode                  = mCurrentNode;
     mRootNode->mHierarchyPos   = -1;
     mRootNode->mHierarchyIndex = -1;
@@ -346,7 +346,7 @@ void Discreet3DSImporter::ParseObjectChunk()
     case Discreet3DS::CHUNK_MAT_MATERIAL:
 
         // Add a new material to the list
-        mScene->mMaterials.push_back(D3DS::Material());
+        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + std::to_string(mScene->mMaterials.size()))));
         ParseMaterialChunk();
         break;
 
@@ -402,11 +402,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
     case Discreet3DS::CHUNK_TRIMESH:
         {
         // this starts a new triangle mesh
-        mScene->mMeshes.push_back(D3DS::Mesh());
-        D3DS::Mesh& m = mScene->mMeshes.back();
-
-        // Setup the name of the mesh
-        m.mName = std::string(name, num);
+        mScene->mMeshes.push_back(D3DS::Mesh(std::string(name, num)));
 
         // Read mesh chunks
         ParseMeshChunk();
@@ -690,8 +686,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
             pcNode->mInstanceCount++;
             instanceNumber = pcNode->mInstanceCount;
         }
-        pcNode = new D3DS::Node();
-        pcNode->mName = name;
+        pcNode = new D3DS::Node(name);
         pcNode->mInstanceNumber = instanceNumber;
 
         // There are two unknown values which we can safely ignore

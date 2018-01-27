@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 vertices close to a given position. Special implementation for
 the 3ds loader handling smooth groups correctly  */
 
-#include "SGSpatialSort.h"
+#include <assimp/SGSpatialSort.h>
 
 using namespace Assimp;
 

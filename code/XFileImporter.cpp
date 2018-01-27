@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 #include "ConvertToLHProcess.h"
 #include <assimp/Defines.h>
 #include <assimp/IOSystem.hpp>
@@ -246,6 +246,10 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
     for( unsigned int a = 0; a < pMeshes.size(); a++)
     {
         XFile::Mesh* sourceMesh = pMeshes[a];
+        if ( nullptr == sourceMesh ) {
+            continue;
+        }
+
         // first convert its materials so that we can find them with their index afterwards
         ConvertMaterials( pScene, sourceMesh->mMaterials);
 

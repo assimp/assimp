@@ -70,7 +70,7 @@ class ASSIMP_API IOStream
 {
 protected:
     /** Constructor protected, use IOSystem::Open() to create an instance. */
-    IOStream(void);
+    IOStream();
 
 public:
     // -------------------------------------------------------------------
@@ -124,17 +124,18 @@ public:
 }; //! class IOStream
 
 // ----------------------------------------------------------------------------------
-inline IOStream::IOStream()
-{
+inline
+IOStream::IOStream() {
     // empty
 }
 
 // ----------------------------------------------------------------------------------
-inline IOStream::~IOStream()
-{
+inline
+IOStream::~IOStream() {
     // empty
 }
 // ----------------------------------------------------------------------------------
+
 } //!namespace Assimp
 
 #endif //!!AI_IOSTREAM_H_INC

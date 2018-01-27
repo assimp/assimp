@@ -85,6 +85,18 @@ TEST_F(utPLYImportExport, exportTest_Success ) {
 
 #endif // ASSIMP_BUILD_NO_EXPORT
 
+//Test issue 1623, crash when loading two PLY files in a row
+TEST_F(utPLYImportExport, importerMultipleTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0);
+
+    EXPECT_NE(nullptr, scene);
+
+    scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0);
+
+    EXPECT_NE(nullptr, scene);
+}
+
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", 0 );

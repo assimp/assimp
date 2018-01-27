@@ -330,6 +330,18 @@ TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
     EXPECT_EQ(vertice.z, 0.8f);
 }
 
+TEST_F(utObjImportExport, homogeneous_coordinates_divide_by_zero_Test) {
+  static const std::string ObjModel =
+    "v -0.500000 0.000000 0.400000 0.\n"
+    "v -0.500000 0.000000 -0.800000 1.00000\n"
+    "v 0.500000 1.000000 -0.800000 0.5000\n"
+    "f 1 2 3\nB";
+
+  Assimp::Importer myimporter;
+  const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
+  EXPECT_EQ(nullptr, scene);
+}
+
 TEST_F(utObjImportExport, 0based_array_Test) {
     static const std::string ObjModel =
         "v -0.500000 0.000000 0.400000\n"

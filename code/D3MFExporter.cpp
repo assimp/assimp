@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
 
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 #include "3MFXmlTags.h"
 #include "D3MFOpcPackage.h"
 
@@ -63,6 +63,11 @@ void ExportScene3MF( const char* pFile, IOSystem* pIOSystem, const aiScene* pSce
     }
     D3MF::D3MFExporter myExporter( pFile, pScene );
     if ( myExporter.validate() ) {
+        if ( pIOSystem->Exists( pFile ) ) {
+            if ( !pIOSystem->DeleteFile( pFile ) ) {
+                throw DeadlyExportError( "File exists, cannot override : " + std::string( pFile ) );
+            }
+        }
         bool ok = myExporter.exportArchive(pFile);
         if ( !ok ) {
             throw DeadlyExportError( "Could not export 3MP archive: " + std::string( pFile ) );
@@ -76,6 +81,9 @@ D3MFExporter::D3MFExporter( const char* pFile, const aiScene* pScene )
 : mArchiveName( pFile )
 , m_zipArchive( nullptr )
 , mScene( pScene )
+, mModelOutput()
+, mRelOutput()
+, mContentOutput()
 , mBuildItems()
 , mRelations() {
     // empty
@@ -107,6 +115,7 @@ bool D3MFExporter::exportArchive( const char *file ) {
     if ( nullptr == m_zipArchive ) {
         return false;
     }
+    ok |= exportContentTypes();
     ok |= export3DModel();
     ok |= exportRelations();
 
@@ -116,16 +125,36 @@ bool D3MFExporter::exportArchive( const char *file ) {
     return ok;
 }
 
+
+bool D3MFExporter::exportContentTypes() {
+    mContentOutput.clear();
+
+    mContentOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    mContentOutput << std::endl;
+    mContentOutput << "<Types xmlns = \"http://schemas.openxmlformats.org/package/2006/content-types\">";
+    mContentOutput << std::endl;
+    mContentOutput << "<Default Extension = \"rels\" ContentType = \"application/vnd.openxmlformats-package.relationships+xml\" />";
+    mContentOutput << std::endl;
+    mContentOutput << "<Default Extension = \"model\" ContentType = \"application/vnd.ms-package.3dmanufacturing-3dmodel+xml\" />";
+    mContentOutput << std::endl;
+    mContentOutput << "</Types>";
+    mContentOutput << std::endl;
+    exportContentTyp( XmlTag::CONTENT_TYPES_ARCHIVE );
+
+    return true;
+}
+
 bool D3MFExporter::exportRelations() {
     mRelOutput.clear();
 
-    mRelOutput << "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n";
-    mRelOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">\n";
+    mRelOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    mRelOutput << std::endl;
+    mRelOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">";
 
     for ( size_t i = 0; i < mRelations.size(); ++i ) {
-        mRelOutput << "<Relationship Target =\"/3D/" << mRelations[ i ]->target << "\" ";
-        mRelOutput << "id=\"" << mRelations[i]->id << "\" ";
-        mRelOutput << "Type=\"" << mRelations[ i ]->type << "/>";
+        mRelOutput << "<Relationship Target=\"/" << mRelations[ i ]->target << "\" ";
+        mRelOutput << "Id=\"" << mRelations[i]->id << "\" ";
+        mRelOutput << "Type=\"" << mRelations[ i ]->type << "\" />";
         mRelOutput << std::endl;
     }
     mRelOutput << "</Relationships>";
@@ -157,9 +186,9 @@ bool D3MFExporter::export3DModel() {
     mModelOutput << "</" << XmlTag::model << ">\n";
 
     OpcPackageRelationship *info = new OpcPackageRelationship;
-    info->id = mArchiveName;
-    info->target = "rel0";
-    info->type = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+    info->id = "rel0";
+    info->target = "/3D/3DModel.model";
+    info->type = XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;
     mRelations.push_back( info );
 
     writeModelToArchive( "3D", "3DModel.model" );
@@ -211,13 +240,14 @@ void D3MFExporter::writeMesh( aiMesh *mesh ) {
         writeVertex( mesh->mVertices[ i ] );
     }
     mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
-    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 
     writeFaces( mesh );
+
+    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 }
 
 void D3MFExporter::writeVertex( const aiVector3D &pos ) {
-    mModelOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\">";
+    mModelOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\" />";
     mModelOutput << std::endl;
 }
 
@@ -251,6 +281,19 @@ void D3MFExporter::writeBuild() {
     mModelOutput << std::endl;
 }
 
+void D3MFExporter::exportContentTyp( const std::string &filename ) {
+    if ( nullptr == m_zipArchive ) {
+        throw DeadlyExportError( "3MF-Export: Zip archive not valid, nullptr." );
+    }
+    const std::string entry = filename;
+    zip_entry_open( m_zipArchive, entry.c_str() );
+
+    const std::string &exportTxt( mContentOutput.str() );
+    zip_entry_write( m_zipArchive, exportTxt.c_str(), exportTxt.size() );
+
+    zip_entry_close( m_zipArchive );
+}
+
 void D3MFExporter::writeModelToArchive( const std::string &folder, const std::string &modelName ) {
     if ( nullptr == m_zipArchive ) {
         throw DeadlyExportError( "3MF-Export: Zip archive not valid, nullptr." );
@@ -281,5 +324,5 @@ void D3MFExporter::writeRelInfoToFile( const std::string &folder, const std::str
 } // Namespace D3MF
 } // Namespace Assimp
 
-#endif // ASSIMP_BUILD_NO3MF_EXPORTER
+#endif // ASSIMP_BUILD_NO_3MF_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

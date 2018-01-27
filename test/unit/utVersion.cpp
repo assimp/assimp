@@ -54,7 +54,7 @@ TEST_F( utVersion, aiGetLegalStringTest ) {
 }
 
 TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ( aiGetVersionMinor(), 0U );
+    EXPECT_EQ( aiGetVersionMinor(), 1U );
 }
     
 TEST_F( utVersion, aiGetVersionMajorTest ) {
@@ -68,4 +68,9 @@ TEST_F( utVersion, aiGetCompileFlagsTest ) {
 TEST_F( utVersion, aiGetVersionRevisionTest ) {
     EXPECT_NE( aiGetVersionRevision(), 0U );
 }
+
+TEST_F( utVersion, aiGetBranchNameTest ) {
+    EXPECT_NE( nullptr, aiGetBranchName() );
+}
+
 

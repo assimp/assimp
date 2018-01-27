@@ -45,7 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #   include <zlib.h>
 #else
@@ -56,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXParser.h"
 #include "FBXUtil.h"
 
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include "ByteSwapper.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
+#include <assimp/ByteSwapper.h>
 
 #include <iostream>
 
@@ -66,7 +65,6 @@ using namespace Assimp;
 using namespace Assimp::FBX;
 
 namespace {
-
 
     // ------------------------------------------------------------------------------------------------
     // signal parse error, this is always unrecoverable. Throws DeadlyImportError.
@@ -212,7 +210,6 @@ Scope::~Scope()
         delete v.second;
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Parser::Parser (const TokenList& tokens, bool is_binary)
@@ -537,18 +534,18 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
     uint32_t stride = 0;
     switch(type)
     {
-    case 'f':
-    case 'i':
-        stride = 4;
-        break;
+        case 'f':
+        case 'i':
+            stride = 4;
+            break;
 
-    case 'd':
-    case 'l':
-        stride = 8;
-        break;
+        case 'd':
+        case 'l':
+            stride = 8;
+            break;
 
-    default:
-        ai_assert(false);
+        default:
+            ai_assert(false);
     };
 
     const uint32_t full_length = stride * count;
@@ -1197,6 +1194,14 @@ std::string ParseTokenAsString(const Token& t)
     return i;
 }
 
+bool HasElement( const Scope& sc, const std::string& index ) {
+    const Element* el = sc[ index ];
+    if ( nullptr == el ) {
+        return false;
+    }
+
+    return true;
+}
 
 // ------------------------------------------------------------------------------------------------
 // extract a required element from a scope, abort if the element cannot be found

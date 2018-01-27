@@ -52,6 +52,11 @@ private:
 	/// \param [in] pFileName - path and name of the file.
 	void ImportFile(const QString& pFileName);
 
+
+	/// \fn void ResetSceneInfos()
+	/// Reset informations about the scene
+	void ResetSceneInfos();
+
 	/********************************************************************/
 	/************************ Logging functions *************************/
 	/********************************************************************/

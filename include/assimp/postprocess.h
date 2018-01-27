@@ -360,6 +360,11 @@ enum aiPostProcessSteps
      *       and line meshes from the scene.
      *   </li>
      * </ul>
+     *
+     * This step also removes very small triangles with a surface area smaller
+     * than 10^-6. If you rely on having these small triangles, or notice holes
+     * in your model, set the property <tt>#AI_CONFIG_PP_FD_CHECKAREA</tt> to
+     * false.
      * @note Degenerate polygons are not necessarily evil and that's why
      * they're not removed by default. There are several file formats which
      * don't support lines or points, and some exporters bypass the
@@ -535,7 +540,18 @@ enum aiPostProcessSteps
     *
     *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to control this.
     */
-    aiProcess_GlobalScale = 0x8000000
+    aiProcess_GlobalScale = 0x8000000,
+
+    // -------------------------------------------------------------------------
+    /** <hr>A postprocessing step to embed of textures.
+     *
+     *  This will remove external data dependencies for textures.
+     *  If a texture's file does not exist at the specified path
+     *  (due, for instance, to an absolute path generated on another system),
+     *  it will check if a file with the same name exists at the root folder
+     *  of the imported model. And if so, it uses that.
+     */
+    aiProcess_EmbedTextures  = 0x10000000,
 
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000

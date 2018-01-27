@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #include "LWOFileData.h"
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 #include <map>
 

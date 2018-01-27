@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
-#include "StringComparison.h"
-#include "StringUtils.h"
+#include <assimp/StringComparison.h>
+#include <assimp/StringUtils.h>
 
 #include <string>
 #include <vector>
@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "D3MFOpcPackage.h"
 #include <contrib/unzip/unzip.h>
-#include "irrXMLWrapper.h"
+#include <assimp/irrXMLWrapper.h>
 #include "3MFXmlTags.h"
 
 namespace Assimp {
@@ -72,7 +72,7 @@ public:
     }
 
     ~XmlSerializer() {
-
+        // empty
     }
 
     void ImportXml(aiScene* scene) {
@@ -100,7 +100,6 @@ public:
         scene->mRootNode->mChildren = new aiNode*[scene->mRootNode->mNumChildren]();
 
         std::copy(children.begin(), children.end(), scene->mRootNode->mChildren);
-
     }
 
 private:

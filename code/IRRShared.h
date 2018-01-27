@@ -7,8 +7,8 @@
 #ifndef INCLUDED_AI_IRRSHARED_H
 #define INCLUDED_AI_IRRSHARED_H
 
-#include "irrXMLWrapper.h"
-#include "BaseImporter.h"
+#include <assimp/irrXMLWrapper.h>
+#include <assimp/BaseImporter.h>
 #include <stdint.h>
 
 struct aiMaterial;

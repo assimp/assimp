@@ -110,6 +110,7 @@ OPTION ( BUILD_DOCS
   OFF
 )
 
+# Use subset of Windows.h
 if (WIN32)
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 endif()
@@ -136,8 +137,8 @@ ENDIF(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
 SET (ASSIMP_VERSION_MAJOR 4)
-SET (ASSIMP_VERSION_MINOR 0)
-SET (ASSIMP_VERSION_PATCH 1)
+SET (ASSIMP_VERSION_MINOR 1)
+SET (ASSIMP_VERSION_PATCH 0)
 SET (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 SET (ASSIMP_SOVERSION 4)
 SET (PROJECT_VERSION "${ASSIMP_VERSION}")
@@ -210,7 +211,6 @@ IF( UNIX )
   INCLUDE(GNUInstallDirs)
 ENDIF( UNIX )
 
-
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   # hide all not-exported symbols
@@ -220,7 +220,9 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
-
+  if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+    add_compile_options( /bigobj )
+  endif()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     add_compile_options(/wd4351)

@@ -46,11 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 
 #include "XGLLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
 
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
+#include <assimp/StreamReader.h>
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
@@ -904,12 +904,14 @@ aiVector2D XGLImporter::ReadVec2()
     }
     const char* s = m_reader->getNodeData();
 
-    for(int i = 0; i < 2; ++i) {
+    ai_real v[2];
+	for(int i = 0; i < 2; ++i) {
         if(!SkipSpaces(&s)) {
             LogError("unexpected EOL, failed to parse vec2");
             return vec;
         }
-        vec[i] = fast_atof(&s);
+		
+        v[i] = fast_atof(&s);
 
         SkipSpaces(&s);
         if (i != 1 && *s != ',') {
@@ -918,6 +920,8 @@ aiVector2D XGLImporter::ReadVec2()
         }
         ++s;
     }
+	vec.x = v[0];
+	vec.y = v[1];
 
     return vec;
 }

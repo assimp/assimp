@@ -45,18 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_LOGAUX_H
 #define INCLUDED_AI_LOGAUX_H
 
-#include "TinyFormatter.h"
-#include "Exceptional.h"
+#include <assimp/TinyFormatter.h>
+#include <assimp/Exceptional.h>
 #include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
 
-template <class TDeriving>
-class LogFunctions
-{
-
+template<class TDeriving>
+class LogFunctions {
 public:
-
     // ------------------------------------------------------------------------------------------------
     static void ThrowException(const std::string& msg)
     {

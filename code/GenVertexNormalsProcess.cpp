@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "GenVertexNormalsProcess.h"
 #include "ProcessHelper.h"
-#include "Exceptional.h"
-#include "qnan.h"
+#include <assimp/Exceptional.h>
+#include <assimp/qnan.h>
 
 using namespace Assimp;
 

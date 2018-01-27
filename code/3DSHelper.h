@@ -505,6 +505,14 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
         mName = szTemp;
     }
 
+
+    //! Constructor with explicit name
+    explicit Mesh(const std::string &name)
+    : mName(name)
+    {
+    }
+
+
     //! Name of the mesh
     std::string mName;
 

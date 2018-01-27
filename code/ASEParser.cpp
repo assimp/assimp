@@ -292,7 +292,7 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"GEOMOBJECT",10))
 
             {
-                m_vMeshes.push_back(Mesh());
+                m_vMeshes.push_back(Mesh("UNNAMED"));
                 ParseLV1ObjectBlock(m_vMeshes.back());
                 continue;
             }
@@ -308,14 +308,14 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"LIGHTOBJECT",11))
 
             {
-                m_vLights.push_back(Light());
+                m_vLights.push_back(Light("UNNAMED"));
                 ParseLV1ObjectBlock(m_vLights.back());
                 continue;
             }
             // camera object
             if (TokenMatch(filePtr,"CAMERAOBJECT",12))
             {
-                m_vCameras.push_back(Camera());
+                m_vCameras.push_back(Camera("UNNAMED"));
                 ParseLV1ObjectBlock(m_vCameras.back());
                 continue;
             }
@@ -1553,7 +1553,7 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 {
     AI_ASE_PARSER_INIT();
-    mesh.mBones.resize(iNumBones);
+    mesh.mBones.resize(iNumBones, Bone("UNNAMED"));
     while (true)
     {
         if ('*' == *filePtr)

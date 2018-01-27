@@ -494,16 +494,15 @@ struct Material
 /** Helper structure to represent a 3ds file mesh */
 struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 {
-    //! Default constructor
-    Mesh()
-    {
-        static int iCnt = 0;
+    //! Default constructor has been deleted
+    Mesh() = delete;
 
-        // Generate a default name for the mesh
-        char szTemp[128];
-        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
+    //! Constructor with explicit name
+    explicit Mesh(const std::string &name)
+    : mName(name)
+    {
     }
+
 
     //! Name of the mesh
     std::string mName;
@@ -550,24 +549,21 @@ struct aiFloatKey
 /** Helper structure to represent a 3ds file node */
 struct Node
 {
-    Node():
-    	mParent(NULL)
-		,	mInstanceNumber(0)
-		,	mHierarchyPos		(0)
-		,	mHierarchyIndex		(0)
-		,	mInstanceCount		(1)
+    Node() = delete;
+
+    explicit Node(const std::string &name)
+    : mParent(NULL)
+    , mName(name)
+    , mInstanceNumber(0)
+    , mHierarchyPos       (0)
+    , mHierarchyIndex     (0)
+    , mInstanceCount      (1)
     {
-        static int iCnt = 0;
-
-        // Generate a default name for the node
-        char szTemp[128];
-        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-
         aRotationKeys.reserve (20);
         aPositionKeys.reserve (20);
         aScalingKeys.reserve  (20);
     }
+
 
     ~Node()
     {

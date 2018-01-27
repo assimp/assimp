@@ -369,6 +369,19 @@ struct Light : public BaseNode
     {
     }
 
+
+    //! Construction from an existing name
+    explicit Light(const std::string &name)
+    : BaseNode   (BaseNode::Light, name)
+    , mLightType (OMNI)
+    , mColor     (1.f,1.f,1.f)
+    , mIntensity (1.f) // light is white by default
+    , mAngle     (45.f)
+    , mFalloff   (0.f)
+    {
+    }
+
+
     LightType mLightType;
     aiColor3D mColor;
     ai_real mIntensity;

@@ -568,6 +568,21 @@ struct Node
         aScalingKeys.reserve  (20);
     }
 
+
+    explicit Node(const std::string &name)
+    : mParent(NULL)
+    , mName(name)
+    , mInstanceNumber(0)
+    , mHierarchyPos       (0)
+    , mHierarchyIndex     (0)
+    , mInstanceCount      (1)
+    {
+        aRotationKeys.reserve (20);
+        aPositionKeys.reserve (20);
+        aScalingKeys.reserve  (20);
+    }
+
+
     ~Node()
     {
         for (unsigned int i = 0; i < mChildren.size();++i)

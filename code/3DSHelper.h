@@ -549,12 +549,12 @@ struct aiFloatKey
 /** Helper structure to represent a 3ds file node */
 struct Node
 {
-    Node():
-    	mParent(NULL)
-		,	mInstanceNumber(0)
-		,	mHierarchyPos		(0)
-		,	mHierarchyIndex		(0)
-		,	mInstanceCount		(1)
+    Node()
+    : mParent(NULL)
+    , mInstanceNumber(0)
+    , mHierarchyPos       (0)
+    , mHierarchyIndex     (0)
+    , mInstanceCount      (1)
     {
         static int iCnt = 0;
 

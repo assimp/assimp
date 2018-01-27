@@ -248,22 +248,6 @@ struct BaseNode
 {
     enum Type {Light, Camera, Mesh, Dummy} mType;
 
-    //! Constructor. Creates a default name for the node
-    explicit BaseNode(Type _mType)
-        : mType         (_mType)
-        , mProcessed    (false)
-    {
-        // generate a default name for the  node
-        static int iCnt = 0;
-        char szTemp[128]; // should be sufficiently large
-        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-
-        // Set mTargetPosition to qnan
-        const ai_real qnan = get_qnan();
-        mTargetPosition.x = qnan;
-    }
-
 
     //! Construction from an existing name
     BaseNode(Type _mType, const std::string &name)

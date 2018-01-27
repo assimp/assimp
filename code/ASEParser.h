@@ -168,15 +168,7 @@ struct Face : public FaceWithSmoothingGroup
 struct Bone
 {
     //! Constructor
-    Bone()
-    {
-        static int iCnt = 0;
-
-        // Generate a default name for the bone
-        char szTemp[128];
-        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-    }
+    Bone() = delete;
 
     //! Construction from an existing name
     explicit Bone( const std::string& name)

@@ -231,75 +231,75 @@ std::string &OgreXmlSerializer::SkipCurrentNode()
 // Mesh XML constants
 
 // <mesh>
-const std::string nnMesh                = "mesh";
-const std::string nnSharedGeometry      = "sharedgeometry";
-const std::string nnSubMeshes           = "submeshes";
-const std::string nnSubMesh             = "submesh";
-const std::string nnSubMeshNames        = "submeshnames";
-const std::string nnSkeletonLink        = "skeletonlink";
-const std::string nnLOD                 = "levelofdetail";
-const std::string nnExtremes            = "extremes";
-const std::string nnPoses               = "poses";
-const std::string nnAnimations          = "animations";
+const char *nnMesh                = "mesh";
+const char *nnSharedGeometry      = "sharedgeometry";
+const char *nnSubMeshes           = "submeshes";
+const char *nnSubMesh             = "submesh";
+const char *nnSubMeshNames        = "submeshnames";
+const char *nnSkeletonLink        = "skeletonlink";
+const char *nnLOD                 = "levelofdetail";
+const char *nnExtremes            = "extremes";
+const char *nnPoses               = "poses";
+const char *nnAnimations          = "animations";
 
 // <submesh>
-const std::string nnFaces               = "faces";
-const std::string nnFace                = "face";
-const std::string nnGeometry            = "geometry";
-const std::string nnTextures            = "textures";
+const char *nnFaces               = "faces";
+const char *nnFace                = "face";
+const char *nnGeometry            = "geometry";
+const char *nnTextures            = "textures";
 
 // <mesh/submesh>
-const std::string nnBoneAssignments     = "boneassignments";
+const char *nnBoneAssignments     = "boneassignments";
 
 // <sharedgeometry/geometry>
-const std::string nnVertexBuffer        = "vertexbuffer";
+const char *nnVertexBuffer        = "vertexbuffer";
 
 // <vertexbuffer>
-const std::string nnVertex              = "vertex";
-const std::string nnPosition            = "position";
-const std::string nnNormal              = "normal";
-const std::string nnTangent             = "tangent";
-const std::string nnBinormal            = "binormal";
-const std::string nnTexCoord            = "texcoord";
-const std::string nnColorDiffuse        = "colour_diffuse";
-const std::string nnColorSpecular       = "colour_specular";
+const char *nnVertex              = "vertex";
+const char *nnPosition            = "position";
+const char *nnNormal              = "normal";
+const char *nnTangent             = "tangent";
+const char *nnBinormal            = "binormal";
+const char *nnTexCoord            = "texcoord";
+const char *nnColorDiffuse        = "colour_diffuse";
+const char *nnColorSpecular       = "colour_specular";
 
 // <boneassignments>
-const std::string nnVertexBoneAssignment = "vertexboneassignment";
+const char *nnVertexBoneAssignment = "vertexboneassignment";
 
 // Skeleton XML constants
 
 // <skeleton>
-const std::string nnSkeleton            = "skeleton";
-const std::string nnBones               = "bones";
-const std::string nnBoneHierarchy       = "bonehierarchy";
-const std::string nnAnimationLinks      = "animationlinks";
+const char *nnSkeleton            = "skeleton";
+const char *nnBones               = "bones";
+const char *nnBoneHierarchy       = "bonehierarchy";
+const char *nnAnimationLinks      = "animationlinks";
 
 // <bones>
-const std::string nnBone                = "bone";
-const std::string nnRotation            = "rotation";
-const std::string nnAxis                = "axis";
-const std::string nnScale               = "scale";
+const char *nnBone                = "bone";
+const char *nnRotation            = "rotation";
+const char *nnAxis                = "axis";
+const char *nnScale               = "scale";
 
 // <bonehierarchy>
-const std::string nnBoneParent          = "boneparent";
+const char *nnBoneParent          = "boneparent";
 
 // <animations>
-const std::string nnAnimation           = "animation";
-const std::string nnTracks              = "tracks";
+const char *nnAnimation           = "animation";
+const char *nnTracks              = "tracks";
 
 // <tracks>
-const std::string nnTrack               = "track";
-const std::string nnKeyFrames           = "keyframes";
-const std::string nnKeyFrame            = "keyframe";
-const std::string nnTranslate           = "translate";
-const std::string nnRotate              = "rotate";
+const char *nnTrack               = "track";
+const char *nnKeyFrames           = "keyframes";
+const char *nnKeyFrame            = "keyframe";
+const char *nnTranslate           = "translate";
+const char *nnRotate              = "rotate";
 
 // Common XML constants
 
-const std::string anX = "x";
-const std::string anY = "y";
-const std::string anZ = "z";
+const char *anX = "x";
+const char *anY = "y";
+const char *anZ = "z";
 
 // Mesh
 
@@ -968,11 +968,11 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
                 }
                 else
                 {
-                    if (HasAttribute(anX.c_str()))
+                    if (HasAttribute(anX))
                         bone->scale.x = ReadAttribute<float>(anX);
-                    if (HasAttribute(anY.c_str()))
+                    if (HasAttribute(anY))
                         bone->scale.y = ReadAttribute<float>(anY);
-                    if (HasAttribute(anZ.c_str()))
+                    if (HasAttribute(anZ))
                         bone->scale.z = ReadAttribute<float>(anZ);
                 }
             }

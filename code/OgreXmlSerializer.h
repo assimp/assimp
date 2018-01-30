@@ -98,7 +98,7 @@ private:
     void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest);
 
     template<typename T>
-    T ReadAttribute(const std::string &name) const;
+    T ReadAttribute(const char *name) const;
     bool HasAttribute(const char *name) const;
 
     std::string &NextNode();

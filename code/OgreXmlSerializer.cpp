@@ -72,11 +72,11 @@ AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::strin
 }
 
 template<>
-int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const std::string &name) const
+int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
-        return static_cast<int32_t>(m_reader->getAttributeValueAsInt(name.c_str()));
+        return static_cast<int32_t>(m_reader->getAttributeValueAsInt(name));
     }
     else
     {
@@ -86,9 +86,9 @@ int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const std::string &name) const
 }
 
 template<>
-uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const std::string &name) const
+uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
         /** @note This is hackish. But we are never expecting unsigned values that go outside the
             int32_t range. Just monitor for negative numbers and kill the import. */
@@ -110,9 +110,9 @@ uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const std::string &name) con
 }
 
 template<>
-uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const std::string &name) const
+uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
         return static_cast<uint16_t>(ReadAttribute<uint32_t>(name));
     }
@@ -124,11 +124,11 @@ uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const std::string &name) con
 }
 
 template<>
-float OgreXmlSerializer::ReadAttribute<float>(const std::string &name) const
+float OgreXmlSerializer::ReadAttribute<float>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
-        return m_reader->getAttributeValueAsFloat(name.c_str());
+        return m_reader->getAttributeValueAsFloat(name);
     }
     else
     {
@@ -138,9 +138,9 @@ float OgreXmlSerializer::ReadAttribute<float>(const std::string &name) const
 }
 
 template<>
-std::string OgreXmlSerializer::ReadAttribute<std::string>(const std::string &name) const
+std::string OgreXmlSerializer::ReadAttribute<std::string>(const char *name) const
 {
-    const char* value = m_reader->getAttributeValue(name.c_str());
+    const char* value = m_reader->getAttributeValue(name);
     if (value)
     {
         return std::string(value);
@@ -153,7 +153,7 @@ std::string OgreXmlSerializer::ReadAttribute<std::string>(const std::string &nam
 }
 
 template<>
-bool OgreXmlSerializer::ReadAttribute<bool>(const std::string &name) const
+bool OgreXmlSerializer::ReadAttribute<bool>(const char *name) const
 {
     std::string value = Ogre::ToLower(ReadAttribute<std::string>(name));
     if (ASSIMP_stricmp(value, "true") == 0)

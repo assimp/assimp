@@ -538,20 +538,20 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
 
 void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
 {
-    static const std::string anMaterial          = "material";
-    static const std::string anUseSharedVertices = "usesharedvertices";
-    static const std::string anCount             = "count";
-    static const std::string anV1                = "v1";
-    static const std::string anV2                = "v2";
-    static const std::string anV3                = "v3";
-    static const std::string anV4                = "v4";
+    static const char *anMaterial          = "material";
+    static const char *anUseSharedVertices = "usesharedvertices";
+    static const char *anCount             = "count";
+    static const char *anV1                = "v1";
+    static const char *anV2                = "v2";
+    static const char *anV3                = "v3";
+    static const char *anV4                = "v4";
 
     SubMeshXml* submesh = new SubMeshXml();
 
-    if (HasAttribute(anMaterial.c_str())) {
+    if (HasAttribute(anMaterial)) {
         submesh->materialRef = ReadAttribute<std::string>(anMaterial);
     }
-    if (HasAttribute(anUseSharedVertices.c_str())) {
+    if (HasAttribute(anUseSharedVertices)) {
         submesh->usesSharedVertexData = ReadAttribute<bool>(anUseSharedVertices);
     }
 
@@ -587,7 +587,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
                 face.mIndices[2] = ReadAttribute<uint32_t>(anV3);
 
                 /// @todo Support quads if Ogre even supports them in XML (I'm not sure but I doubt it)
-                if (!quadWarned && HasAttribute(anV4.c_str())) {
+                if (!quadWarned && HasAttribute(anV4)) {
                     DefaultLogger::get()->warn("Submesh <face> has quads with <v4>, only triangles are supported at the moment!");
                     quadWarned = true;
                 }
@@ -635,9 +635,9 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
         throw DeadlyImportError("Cannot read bone assignments, vertex data is null.");
     }
 
-    static const std::string anVertexIndex = "vertexindex";
-    static const std::string anBoneIndex   = "boneindex";
-    static const std::string anWeight      = "weight";
+    static const char *anVertexIndex = "vertexindex";
+    static const char *anBoneIndex   = "boneindex";
+    static const char *anWeight      = "weight";
 
     std::set<uint32_t> influencedVertices;
 

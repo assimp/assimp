@@ -171,9 +171,9 @@ bool OgreXmlSerializer::ReadAttribute<bool>(const std::string &name) const
     }
 }
 
-bool OgreXmlSerializer::HasAttribute(const std::string &name) const
+bool OgreXmlSerializer::HasAttribute(const char *name) const
 {
-    return (m_reader->getAttributeValue(name.c_str()) != 0);
+    return (m_reader->getAttributeValue(name) != 0);
 }
 
 std::string &OgreXmlSerializer::NextNode()
@@ -548,10 +548,10 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
 
     SubMeshXml* submesh = new SubMeshXml();
 
-    if (HasAttribute(anMaterial)) {
+    if (HasAttribute(anMaterial.c_str())) {
         submesh->materialRef = ReadAttribute<std::string>(anMaterial);
     }
-    if (HasAttribute(anUseSharedVertices)) {
+    if (HasAttribute(anUseSharedVertices.c_str())) {
         submesh->usesSharedVertexData = ReadAttribute<bool>(anUseSharedVertices);
     }
 
@@ -587,7 +587,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
                 face.mIndices[2] = ReadAttribute<uint32_t>(anV3);
 
                 /// @todo Support quads if Ogre even supports them in XML (I'm not sure but I doubt it)
-                if (!quadWarned && HasAttribute(anV4)) {
+                if (!quadWarned && HasAttribute(anV4.c_str())) {
                     DefaultLogger::get()->warn("Submesh <face> has quads with <v4>, only triangles are supported at the moment!");
                     quadWarned = true;
                 }
@@ -968,11 +968,11 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
                 }
                 else
                 {
-                    if (HasAttribute(anX))
+                    if (HasAttribute(anX.c_str()))
                         bone->scale.x = ReadAttribute<float>(anX);
-                    if (HasAttribute(anY))
+                    if (HasAttribute(anY.c_str()))
                         bone->scale.y = ReadAttribute<float>(anY);
-                    if (HasAttribute(anZ))
+                    if (HasAttribute(anZ.c_str()))
                         bone->scale.z = ReadAttribute<float>(anZ);
                 }
             }

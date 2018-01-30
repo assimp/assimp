@@ -99,7 +99,7 @@ private:
 
     template<typename T>
     T ReadAttribute(const std::string &name) const;
-    bool HasAttribute(const std::string &name) const;
+    bool HasAttribute(const char *name) const;
 
     std::string &NextNode();
     std::string &SkipCurrentNode();

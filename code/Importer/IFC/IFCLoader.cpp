@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tuple>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
-#   include <contrib/unzip/unzip.h>
+#   include <unzip.h>
 #endif
 
 #include "IFCLoader.h"

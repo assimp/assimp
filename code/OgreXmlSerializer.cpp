@@ -231,75 +231,75 @@ std::string &OgreXmlSerializer::SkipCurrentNode()
 // Mesh XML constants
 
 // <mesh>
-const char *nnMesh                = "mesh";
-const char *nnSharedGeometry      = "sharedgeometry";
-const char *nnSubMeshes           = "submeshes";
-const char *nnSubMesh             = "submesh";
-const char *nnSubMeshNames        = "submeshnames";
-const char *nnSkeletonLink        = "skeletonlink";
-const char *nnLOD                 = "levelofdetail";
-const char *nnExtremes            = "extremes";
-const char *nnPoses               = "poses";
-const char *nnAnimations          = "animations";
+static const char *nnMesh                = "mesh";
+static const char *nnSharedGeometry      = "sharedgeometry";
+static const char *nnSubMeshes           = "submeshes";
+static const char *nnSubMesh             = "submesh";
+static const char *nnSubMeshNames        = "submeshnames";
+static const char *nnSkeletonLink        = "skeletonlink";
+static const char *nnLOD                 = "levelofdetail";
+static const char *nnExtremes            = "extremes";
+static const char *nnPoses               = "poses";
+static const char *nnAnimations          = "animations";
 
 // <submesh>
-const char *nnFaces               = "faces";
-const char *nnFace                = "face";
-const char *nnGeometry            = "geometry";
-const char *nnTextures            = "textures";
+static const char *nnFaces               = "faces";
+static const char *nnFace                = "face";
+static const char *nnGeometry            = "geometry";
+static const char *nnTextures            = "textures";
 
 // <mesh/submesh>
-const char *nnBoneAssignments     = "boneassignments";
+static const char *nnBoneAssignments     = "boneassignments";
 
 // <sharedgeometry/geometry>
-const char *nnVertexBuffer        = "vertexbuffer";
+static const char *nnVertexBuffer        = "vertexbuffer";
 
 // <vertexbuffer>
-const char *nnVertex              = "vertex";
-const char *nnPosition            = "position";
-const char *nnNormal              = "normal";
-const char *nnTangent             = "tangent";
-const char *nnBinormal            = "binormal";
-const char *nnTexCoord            = "texcoord";
-const char *nnColorDiffuse        = "colour_diffuse";
-const char *nnColorSpecular       = "colour_specular";
+static const char *nnVertex              = "vertex";
+static const char *nnPosition            = "position";
+static const char *nnNormal              = "normal";
+static const char *nnTangent             = "tangent";
+static const char *nnBinormal            = "binormal";
+static const char *nnTexCoord            = "texcoord";
+static const char *nnColorDiffuse        = "colour_diffuse";
+static const char *nnColorSpecular       = "colour_specular";
 
 // <boneassignments>
-const char *nnVertexBoneAssignment = "vertexboneassignment";
+static const char *nnVertexBoneAssignment = "vertexboneassignment";
 
 // Skeleton XML constants
 
 // <skeleton>
-const char *nnSkeleton            = "skeleton";
-const char *nnBones               = "bones";
-const char *nnBoneHierarchy       = "bonehierarchy";
-const char *nnAnimationLinks      = "animationlinks";
+static const char *nnSkeleton            = "skeleton";
+static const char *nnBones               = "bones";
+static const char *nnBoneHierarchy       = "bonehierarchy";
+static const char *nnAnimationLinks      = "animationlinks";
 
 // <bones>
-const char *nnBone                = "bone";
-const char *nnRotation            = "rotation";
-const char *nnAxis                = "axis";
-const char *nnScale               = "scale";
+static const char *nnBone                = "bone";
+static const char *nnRotation            = "rotation";
+static const char *nnAxis                = "axis";
+static const char *nnScale               = "scale";
 
 // <bonehierarchy>
-const char *nnBoneParent          = "boneparent";
+static const char *nnBoneParent          = "boneparent";
 
 // <animations>
-const char *nnAnimation           = "animation";
-const char *nnTracks              = "tracks";
+static const char *nnAnimation           = "animation";
+static const char *nnTracks              = "tracks";
 
 // <tracks>
-const char *nnTrack               = "track";
-const char *nnKeyFrames           = "keyframes";
-const char *nnKeyFrame            = "keyframe";
-const char *nnTranslate           = "translate";
-const char *nnRotate              = "rotate";
+static const char *nnTrack               = "track";
+static const char *nnKeyFrames           = "keyframes";
+static const char *nnKeyFrame            = "keyframe";
+static const char *nnTranslate           = "translate";
+static const char *nnRotate              = "rotate";
 
 // Common XML constants
 
-const char *anX = "x";
-const char *anY = "y";
-const char *anZ = "z";
+static const char *anX = "x";
+static const char *anY = "y";
+static const char *anZ = "z";
 
 // Mesh
 
@@ -835,7 +835,7 @@ void OgreXmlSerializer::ReadAnimationTracks(Animation *dest)
 
 void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest)
 {
-    const aiVector3D zeroVec(0.f, 0.f, 0.f);
+    static const aiVector3D zeroVec(0.f, 0.f, 0.f);
 
     NextNode();
     while(m_currentNodeName == nnKeyFrame)
@@ -916,8 +916,11 @@ void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
     }
 }
 
-bool BoneCompare(Bone *a, Bone *b)
+static bool BoneCompare(Bone *a, Bone *b)
 {
+    ai_assert( nullptr != a );
+    ai_assert( nullptr != b );
+    
     return (a->id < b->id);
 }
 

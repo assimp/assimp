@@ -111,7 +111,7 @@ void RemoveVCProcessTest::SetUp()
     char check[sizeof(aiMaterial) == sizeof(aiMaterial) ? 10 : -1];
     check[0] = 0;
     // to remove compiler warning
-    EXPECT_TRUE( check );
+    EXPECT_EQ( 0, check[0] );
 }
 
 // ------------------------------------------------------------------------------------------------

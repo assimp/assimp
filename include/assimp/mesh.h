@@ -212,7 +212,10 @@ struct aiVertexWeight
 #ifdef __cplusplus
 
     //! Default constructor
-    aiVertexWeight() { }
+    aiVertexWeight()
+    : mVertexId(0)
+    , mWeight(0.0f)
+    { }
 
     //! Initialisation from a given index and vertex weight factor
     //! \param pID ID

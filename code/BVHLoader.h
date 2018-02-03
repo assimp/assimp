@@ -84,7 +84,10 @@ class BVHLoader : public BaseImporter
         std::vector<ChannelType> mChannels;
         std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
 
-        Node() { }
+        Node()
+        : mNode(nullptr)
+        { }
+
         explicit Node( const aiNode* pNode) : mNode( pNode) { }
     };
 

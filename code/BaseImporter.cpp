@@ -157,9 +157,6 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
         // read 200 characters from the file
         std::unique_ptr<char[]> _buffer (new char[searchBytes+1 /* for the '\0' */]);
         char* buffer = _buffer.get();
-        if( NULL == buffer ) {
-            return false;
-        }
 
         const size_t read = pStream->Read(buffer,1,searchBytes);
         if( !read ) {

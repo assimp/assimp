@@ -651,7 +651,8 @@ void PretransformVertices::Execute( aiScene* pScene)
             // generate mesh nodes
             for (unsigned int i = 0; i < pScene->mNumMeshes;++i,++nodes)
             {
-                aiNode* pcNode = *nodes = new aiNode();
+                aiNode* pcNode = new aiNode();
+                *nodes = pcNode;
                 pcNode->mParent = pScene->mRootNode;
                 pcNode->mName = pScene->mMeshes[i]->mName;
 
@@ -663,7 +664,8 @@ void PretransformVertices::Execute( aiScene* pScene)
             // generate light nodes
             for (unsigned int i = 0; i < pScene->mNumLights;++i,++nodes)
             {
-                aiNode* pcNode = *nodes = new aiNode();
+                aiNode* pcNode = new aiNode();
+                *nodes = pcNode;
                 pcNode->mParent = pScene->mRootNode;
                 pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "light_%u",i);
                 pScene->mLights[i]->mName = pcNode->mName;
@@ -671,7 +673,8 @@ void PretransformVertices::Execute( aiScene* pScene)
             // generate camera nodes
             for (unsigned int i = 0; i < pScene->mNumCameras;++i,++nodes)
             {
-                aiNode* pcNode = *nodes = new aiNode();
+                aiNode* pcNode = new aiNode();
+                *nodes = pcNode;
                 pcNode->mParent = pScene->mRootNode;
                 pcNode->mName.length = ::ai_snprintf(pcNode->mName.data,MAXLEN,"cam_%u",i);
                 pScene->mCameras[i]->mName = pcNode->mName;

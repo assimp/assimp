@@ -162,7 +162,10 @@ struct aiMeshKey
 
 #ifdef __cplusplus
 
-    aiMeshKey() {
+    aiMeshKey()
+    : mTime(0.0)
+    , mValue(0)
+    {
     }
 
     /** Construction from a given time and key value */

@@ -90,9 +90,16 @@ but not all of them are *open-source*. If there's an accompagning '<file>\source
 @section main_install Installation
 
 assimp can be used in two ways: linking against the pre-built libraries or building the library on your own. The former
-option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2012, 2013 and 2015. 
+option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2013, 2015 and 2017. 
 For other compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but 
 needs a bit more work. Both ways are described at the @link install Installation page. @endlink
+If you want to use assimp on Ubuntu you can install it via the following command:
+
+@code
+sudo apt-get install assimp
+@endcode
+
+If you want to use the python-assimp-port just follow these instructions: https://github.com/assimp/assimp/tree/master/port/PyAssimp
 
 @section main_usage Usage
 
@@ -113,7 +120,6 @@ There are many 3d file formats in the world, and we're happy to support as many 
 a particular file format, why not implement it yourself and add it to the library? Writing importer plugins for
 assimp is considerably easy, as the whole postprocessing infrastructure is available and does much of the work for you.
 See the @link extend Extending the library @endlink page for more information.
-
 
 
 @section main_support Support & Feedback
@@ -139,7 +145,8 @@ to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&g
 and the assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
 This is necessary only once to setup all paths inside you IDE.
 
-To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder as a subdirectory via the cmake-command
+To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder 
+as a subdirectory via the cmake-command
 
 @code
 addsubdiectory(assimp)

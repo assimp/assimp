@@ -304,6 +304,20 @@ struct aiString
         data[len] = 0;
     }
 
+
+    /** Assigment operator */
+    aiString& operator = (const aiString &rOther) {
+        if (this == &rOther) {
+            return *this;
+        }
+
+        length = rOther.length;;
+        memcpy( data, rOther.data, length);
+        data[length] = '\0';
+        return *this;
+    }
+
+
     /** Assign a const char* to the string */
     aiString& operator = (const char* sz) {
         Set(sz);

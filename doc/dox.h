@@ -206,56 +206,16 @@ the library files. Alternatively you can simply add the assimp project to your p
 your solution.
 
 
-@section use_noboost Building without boost.
-
-The Boost-Workaround consists of dummy replacements for some boost utility templates. Currently there are replacements for
-
- - boost.scoped_ptr
- - boost.scoped_array
- - boost.format
- - boost.random
- - boost.common_factor
- - boost.foreach
- - boost.tuple
- - boost.make_shared
-
-These implementations are very limited and are not intended for use outside assimp. A compiler
-with full support for partial template specializations is required. To enable the workaround, put the following in
-your compiler's list of predefined macros:
-@code
-#define ASSIMP_BUILD_BOOST_WORKAROUND
-@endcode
-<br>
-If you're working with the provided solutions for Visual Studio use the <i>-noboost</i> build configs. <br>
-
-<b>assimp_BUILD_BOOST_WORKAROUND</b> implies <b>assimp_BUILD_SINGLETHREADED</b>. <br>
-See the @ref assimp_st section
-for more details.
-
-
-
 
 @section assimp_dll Windows DLL Build
 
-assimp can be built as DLL. You just need to select a -dll config from the list of project
-configs and you're fine.
+The Assimp-package can be built as DLL. You just need to run the default cmake run.
 
-<b>NOTE:</b> Theoretically, assimp-dll can be used with multithreaded (non-dll) runtime libraries,
-as long as you don't utilize any non-public stuff from the code folder. However, if you happen
-to encounter *very* strange problems, try changing the runtime to <i>Multithreaded (Debug) DLL</i>.
 
-@section assimp_stlport Building against STLport
+@section assimp static lib
 
-STLport is a free, fast and secure STL replacement that works with
-all major compilers and platforms. To get it, download the latest release from
-<a href="http://www.stlport.org"/><stlport.org></a>.
-Usually you'll just need to run 'configure' + a makefile (see their README for more details).
-Don't miss to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
-to the directory where your compiler vendor's headers lie. Do the same for  <stlport_root>/lib and
-recompile assimp. To ensure you're really building against STLport see aiGetCompileFlags().
-<br>
-In our testing, STLport builds tend to be a bit faster than builds against Microsoft's
-C++ Standard Library.
+The Assimp-package can be build as a static library as well. Do do so just set the configuration variable <b>BUILD_SHARED_LIBS</b>
+to off during the cmake run.
 
 */
 

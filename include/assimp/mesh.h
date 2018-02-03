@@ -270,6 +270,32 @@ struct aiBone
         }
     }
 
+
+    //! Assignment operator
+    aiBone &operator=(const aiBone& other)
+    {
+        if (this == &other) {
+            return *this;
+        }
+
+        mName         = other.mName;
+        mNumWeights   = other.mNumWeights;
+        mOffsetMatrix = other.mOffsetMatrix;
+
+        if (other.mWeights && other.mNumWeights)
+        {
+            if (mWeights) {
+                delete[] mWeights;
+            }
+
+            mWeights = new aiVertexWeight[mNumWeights];
+            ::memcpy(mWeights,other.mWeights,mNumWeights * sizeof(aiVertexWeight));
+        }
+
+        return *this;
+    }
+
+
     //! Destructor - deletes the array of vertex weights
     ~aiBone()
     {

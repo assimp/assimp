@@ -136,7 +136,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
     TextFileToBuffer(file.get(),mBuffer2);
     const char* buffer = &mBuffer2[0];
 
-    aiAnimation* anim = new aiAnimation();
+    std::unique_ptr<aiAnimation> anim(new aiAnimation());
     int first = 0, last = 0x00ffffff;
 
     // now process the file and look out for '$' sections
@@ -294,8 +294,8 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
     // Store the one and only animation in the scene
     pScene->mAnimations    = new aiAnimation*[pScene->mNumAnimations=1];
-    pScene->mAnimations[0] = anim;
     anim->mName.Set("$CSM_MasterAnim");
+    pScene->mAnimations[0] = anim.release();
 
     // mark the scene as incomplete and run SkeletonMeshBuilder on it
     pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

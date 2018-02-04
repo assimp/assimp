@@ -1022,8 +1022,8 @@ public:
     fbx_simple_property(CoordAxisSign, int, 1)
     fbx_simple_property(OriginalUpAxis, int, 0)
     fbx_simple_property(OriginalUpAxisSign, int, 1)
-    fbx_simple_property(UnitScaleFactor, double, 1)
-    fbx_simple_property(OriginalUnitScaleFactor, double, 1)
+    fbx_simple_property(UnitScaleFactor, float, 1)
+    fbx_simple_property(OriginalUnitScaleFactor, float, 1)
     fbx_simple_property(AmbientColor, aiVector3D, aiVector3D(0,0,0))
     fbx_simple_property(DefaultCamera, std::string, "")
 

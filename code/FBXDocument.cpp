@@ -351,7 +351,9 @@ void Document::ReadGlobalSettings()
         return;
     }
 
-    std::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
+    std::shared_ptr<const PropertyTable> props = GetPropertyTable( *this, "", *ehead, *ehead->Compound(), true );
+
+    //double v = PropertyGet<float>( *props.get(), std::string("UnitScaleFactor"), 1.0 );
 
     if(!props) {
         DOMError("GlobalSettings dictionary contains no property table");

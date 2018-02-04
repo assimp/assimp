@@ -466,12 +466,11 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
     // read position faces
     unsigned int numPosFaces = ReadInt();
     pMesh->mPosFaces.resize( numPosFaces);
-    for( unsigned int a = 0; a < numPosFaces; a++)
-    {
+    for( unsigned int a = 0; a < numPosFaces; ++a) {
         // read indices
         unsigned int numIndices = ReadInt();
         Face& face = pMesh->mPosFaces[a];
-        for (unsigned int b = 0; b < numIndices; b++) {
+        for (unsigned int b = 0; b < numIndices; ++b) {
             face.mIndices.push_back( ReadInt() );
         }
         TestForSeparator();
@@ -479,11 +478,10 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
 
     // here, other data objects may follow
     bool running = true;
-    while ( running )
-    {
+    while ( running ) {
         std::string objectName = GetNextToken();
 
-        if( objectName.size() == 0)
+        if( objectName.empty() )
             ThrowException( "Unexpected end of file while parsing mesh structure");
         else
         if( objectName == "}")
@@ -518,8 +516,10 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-void XFileParser::ParseDataObjectSkinWeights( Mesh *pMesh)
-{
+void XFileParser::ParseDataObjectSkinWeights( Mesh *pMesh) {
+    if ( nullptr == pMesh ) {
+        return;
+    }
     readHeadOfDataObject();
 
     std::string transformNodeName;
@@ -1053,39 +1053,40 @@ void XFileParser::readHeadOfDataObject( std::string* poName)
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string XFileParser::GetNextToken()
-{
+std::string XFileParser::GetNextToken() {
     std::string s;
 
     // process binary-formatted file
-    if( mIsBinaryFormat)
-    {
+    if( mIsBinaryFormat) {
         // in binary mode it will only return NAME and STRING token
         // and (correctly) skip over other tokens.
-
-        if( mEnd - mP < 2) return s;
+        if ( mEnd - mP < 2 ) {
+            return s;
+        }
         unsigned int tok = ReadBinWord();
         unsigned int len;
 
         // standalone tokens
-        switch( tok)
-        {
+        switch( tok ) {
             case 1: {
-                    // name token
-                    if ( mEnd - mP < 4 ) return s;
-                    len = ReadBinDWord();
-                    const int bounds( mEnd - mP );
-                    const int iLen( len );
-                    if ( iLen < 0 ) {
-                        return s;
-                    }
-                    if ( bounds < iLen ) {
-                        return s;
-                    }
-                    s = std::string( mP, len );
-                    mP += len;
+                // name token
+                if ( mEnd - mP < 4 ) {
+                    return s;
                 }
-                return s;
+                len = ReadBinDWord();
+                const int bounds( mEnd - mP );
+                const int iLen( len );
+                if ( iLen < 0 ) {
+                    return s;
+                }
+                if ( bounds < iLen ) {
+                    return s;
+                }
+                s = std::string( mP, len );
+                mP += len;
+            }
+            return s;
+
             case 2:
                 // string token
                 if( mEnd - mP < 4) return s;

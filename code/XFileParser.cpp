@@ -1349,20 +1349,20 @@ ai_real XFileParser::ReadFloat()
         }
 
         --mBinaryNumCount;
-        if( mBinaryFloatSize == 8)
-        {
+        if( mBinaryFloatSize == 8) {
             if( mEnd - mP >= 8) {
-                ai_real result = (ai_real) (*(double*) mP);
+                double res;
+                ::memcpy( &res, mP, 8 );
                 mP += 8;
                 return result;
             } else {
                 mP = mEnd;
                 return 0;
             }
-        } else
-        {
+        } else {
             if( mEnd - mP >= 4) {
-                ai_real result = *(ai_real*) mP;
+                ai_real result;
+                ::memcpy( &result, mP, 4 );
                 mP += 4;
                 return result;
             } else {

@@ -1354,6 +1354,7 @@ ai_real XFileParser::ReadFloat()
                 double res;
                 ::memcpy( &res, mP, 8 );
                 mP += 8;
+                const ai_real result( static_cast<ai_real>( res ) );
                 return result;
             } else {
                 mP = mEnd;

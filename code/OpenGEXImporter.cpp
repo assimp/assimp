@@ -223,8 +223,6 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numColors( 0 )
 , m_colors( nullptr )
-, m_numNormals( 0 )
-, m_normals( nullptr )
 , m_numUVComps()
 , m_textureCoords() {
     // empty
@@ -233,7 +231,6 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_colors;
-    delete[] m_normals;
 
     for(auto &texcoords : m_textureCoords) {
         delete [] texcoords;
@@ -861,9 +858,8 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
             m_currentVertices.m_colors = new aiColor4D[ numItems ];
             copyColor4DArray( numItems, vaList, m_currentVertices.m_colors );
         } else if( Normal == attribType ) {
-            m_currentVertices.m_numNormals = numItems;
-            m_currentVertices.m_normals = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentVertices.m_normals );
+            m_currentVertices.m_normals.resize( numItems );
+            copyVectorArray( numItems, vaList, m_currentVertices.m_normals.data() );
         } else if( TexCoord == attribType ) {
             m_currentVertices.m_numUVComps[ 0 ] = numItems;
             m_currentVertices.m_textureCoords[ 0 ] = new aiVector3D[ numItems ];
@@ -900,7 +896,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         hasColors = true;
     }
     bool hasNormalCoords( false );
-    if ( m_currentVertices.m_numNormals > 0 ) {
+    if ( !m_currentVertices.m_normals.empty() ) {
         m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
         hasNormalCoords = true;
     }

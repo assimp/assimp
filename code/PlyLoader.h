@@ -57,7 +57,6 @@ struct aiMesh;
 
 namespace Assimp {
 
-
 using namespace PLY;
 
 // ---------------------------------------------------------------------------

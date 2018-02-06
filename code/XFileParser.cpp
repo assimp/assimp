@@ -1460,7 +1460,6 @@ aiColor3D XFileParser::ReadRGB()
 // ------------------------------------------------------------------------------------------------
 // Throws an exception with a line number and the given text.
 AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText) {
-    delete mScene;
     if ( mIsBinaryFormat ) {
         throw DeadlyImportError( pText );
     } else {

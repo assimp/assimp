@@ -432,7 +432,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
         unsigned int num = static_cast<unsigned int>(apcMeshes.size() - meshStart);
         if (layer.mName != "<LWODefault>" || num > 0) {
             aiNode* pcNode = new aiNode();
-            apcNodes[layer.mIndex] = pcNode;
             pcNode->mName.Set(layer.mName);
             pcNode->mParent = (aiNode*)&layer;
             pcNode->mNumMeshes = num;
@@ -442,6 +441,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
                 for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
                     pcNode->mMeshes[p] = p + meshStart;
             }
+            apcNodes[layer.mIndex] = pcNode;
         }
     }
 
@@ -593,7 +593,6 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
         //Create pivot node, store it into the pivot map, and set the parent as the pivot
         aiNode* pivotNode = new aiNode();
         pivotNode->mName.Set("Pivot-"+std::string(itapcNodes->second->mName.data));
-        mapPivot[-(itapcNodes->first+2)] = pivotNode;
         itapcNodes->second->mParent = pivotNode;
 
         //Look for the parent node to attach the pivot to
@@ -611,6 +610,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
         pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
         pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
         pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
+        mapPivot[-(itapcNodes->first+2)] = pivotNode;
     }
 
     //Merge pivot map into node map

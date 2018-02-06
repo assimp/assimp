@@ -221,9 +221,7 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
-: m_numVerts( 0 )
-, m_vertices( nullptr )
-, m_numColors( 0 )
+: m_numColors( 0 )
 , m_colors( nullptr )
 , m_numNormals( 0 )
 , m_normals( nullptr )
@@ -234,7 +232,6 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
-    delete[] m_vertices;
     delete[] m_colors;
     delete[] m_normals;
 
@@ -857,9 +854,8 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         const size_t numItems( countDataArrayListItems( vaList ) );
 
         if( Position == attribType ) {
-            m_currentVertices.m_numVerts = numItems;
-            m_currentVertices.m_vertices = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentVertices.m_vertices );
+            m_currentVertices.m_vertices.resize( numItems );
+            copyVectorArray( numItems, vaList, m_currentVertices.m_vertices.data() );
         } else if ( Color == attribType ) {
             m_currentVertices.m_numColors = numItems;
             m_currentVertices.m_colors = new aiColor4D[ numItems ];
@@ -922,7 +918,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         Value *next( vaList->m_dataList );
         for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
             const int idx( next->getUnsignedInt32() );
-            ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_numVerts );
+            ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_vertices.size() );
             ai_assert( index < m_currentMesh->mNumVertices );
             aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
             m_currentMesh->mVertices[ index ].Set( pos.x, pos.y, pos.z );

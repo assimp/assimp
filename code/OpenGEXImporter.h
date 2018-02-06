@@ -144,8 +144,7 @@ protected:
 
 private:
     struct VertexContainer {
-        size_t m_numVerts;
-        aiVector3D *m_vertices;
+        std::vector<aiVector3D> m_vertices;
         size_t m_numColors;
         aiColor4D *m_colors;
         size_t m_numNormals;

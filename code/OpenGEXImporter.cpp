@@ -1137,7 +1137,9 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
 
     pScene->mNumMeshes = static_cast<unsigned int>(m_meshCache.size());
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-    std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
+        pScene->mMeshes[i] = m_meshCache[i];
+    }
 }
 
 //------------------------------------------------------------------------------------------------

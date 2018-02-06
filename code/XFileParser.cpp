@@ -1047,8 +1047,10 @@ void XFileParser::readHeadOfDataObject( std::string* poName)
         if( poName)
             *poName = nameOrBrace;
 
-        if( GetNextToken() != "{")
-            ThrowException( "Opening brace expected.");
+        if ( GetNextToken() != "{" ) {
+            delete mScene;
+            ThrowException( "Opening brace expected." );
+        }
     }
 }
 
@@ -1224,21 +1226,29 @@ void XFileParser::GetNextTokenAsString( std::string& poString)
     }
 
     FindNextNoneWhiteSpace();
-    if( mP >= mEnd)
-        ThrowException( "Unexpected end of file while parsing string");
+    if ( mP >= mEnd ) {
+        delete mScene;
+        ThrowException( "Unexpected end of file while parsing string" );
+    }
 
-    if( *mP != '"')
-        ThrowException( "Expected quotation mark.");
+    if ( *mP != '"' ) {
+        delete mScene;
+        ThrowException( "Expected quotation mark." );
+    }
     ++mP;
 
     while( mP < mEnd && *mP != '"')
         poString.append( mP++, 1);
 
-    if( mP >= mEnd-1)
-        ThrowException( "Unexpected end of file while parsing string");
+    if ( mP >= mEnd - 1 ) {
+        delete mScene;
+        ThrowException( "Unexpected end of file while parsing string" );
+    }
 
-    if( mP[1] != ';' || mP[0] != '"')
-        ThrowException( "Expected quotation mark and semicolon at the end of a string.");
+    if ( mP[ 1 ] != ';' || mP[ 0 ] != '"' ) {
+        delete mScene;
+        ThrowException( "Expected quotation mark and semicolon at the end of a string." );
+    }
     mP+=2;
 }
 
@@ -1449,14 +1459,14 @@ aiColor3D XFileParser::ReadRGB()
 
 // ------------------------------------------------------------------------------------------------
 // Throws an exception with a line number and the given text.
-AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
-{
-    if( mIsBinaryFormat)
-        throw DeadlyImportError( pText);
-    else
+AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText) {
+    delete mScene;
+    if ( mIsBinaryFormat ) {
+        throw DeadlyImportError( pText );
+    } else {
         throw DeadlyImportError( format() << "Line " << mLineNumber << ": " << pText );
+    }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Filters the imported hierarchy for some degenerated cases that some exporters produce.

@@ -691,7 +691,8 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene * 
 void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
-    m_meshCache.push_back( m_currentMesh );
+    // ownership is transfered but a reference remains in m_currentMesh
+    m_meshCache.emplace_back( m_currentMesh );
 
     Property *prop = node->getProperties();
     if( nullptr != prop ) {
@@ -1138,7 +1139,7 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     pScene->mNumMeshes = static_cast<unsigned int>(m_meshCache.size());
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
-        pScene->mMeshes[i] = m_meshCache[i];
+        pScene->mMeshes[i] = m_meshCache[i].release();
     }
 }
 

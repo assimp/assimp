@@ -183,7 +183,7 @@ private:
     typedef std::map<aiNode*, std::unique_ptr<ChildInfo> > NodeChildMap;
     NodeChildMap m_nodeChildMap;
 
-    std::vector<aiMesh*> m_meshCache;
+    std::vector<std::unique_ptr<aiMesh> > m_meshCache;
     typedef std::map<std::string, size_t> ReferenceMap;
     std::map<std::string, size_t> m_mesh2refMap;
     std::map<std::string, size_t> m_material2refMap;

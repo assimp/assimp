@@ -584,7 +584,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
     //Set parent of all children, inserting pivots
     //std::cout << "Set parent of all children" << std::endl;
     std::map<uint16_t, aiNode*> mapPivot;
-    for (std::map<uint16_t,aiNode*>::iterator itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
+    for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
 
         //Get the parent index
         LWO::Layer* nodeLayer = (LWO::Layer*)(itapcNodes->second->mParent);
@@ -615,14 +615,14 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
 
     //Merge pivot map into node map
     //std::cout << "Merge pivot map into node map" << std::endl;
-    for (std::map<uint16_t, aiNode*>::iterator itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
+    for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
         apcNodes[itMapPivot->first] = itMapPivot->second;
     }
 
     //Set children of all parents
     apcNodes[-1] = root;
-    for (std::map<uint16_t,aiNode*>::iterator itMapParentNodes = apcNodes.begin(); itMapParentNodes != apcNodes.end(); ++itMapParentNodes) {
-        for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+    for (auto itMapParentNodes = apcNodes.begin(); itMapParentNodes != apcNodes.end(); ++itMapParentNodes) {
+        for (auto itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
             if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
                 ++(itMapParentNodes->second->mNumChildren);
             }
@@ -630,7 +630,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
         if (itMapParentNodes->second->mNumChildren) {
             itMapParentNodes->second->mChildren = new aiNode* [ itMapParentNodes->second->mNumChildren ];
             uint16_t p = 0;
-            for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+            for (auto itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
                 if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
                     itMapParentNodes->second->mChildren[p++] = itMapChildNodes->second;
                 }

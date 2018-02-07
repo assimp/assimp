@@ -122,9 +122,11 @@ namespace Blender {
 #   pragma warning(disable:4351)
 #endif
 
+    // As counter-intuitive as it may seem, a comparator must return false for equal values.
+    // The C++ standard defines and expects this behavior: true if lhs < rhs, false otherwise.
     struct ObjectCompare {
         bool operator() (const Object* left, const Object* right) const {
-            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
+            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) < 0;
         }
     };
 
@@ -143,9 +145,11 @@ namespace Blender {
             , db(db)
         {}
 
+        // As counter-intuitive as it may seem, a comparator must return false for equal values.
+        // The C++ standard defines and expects this behavior: true if lhs < rhs, false otherwise.
         struct ObjectCompare {
             bool operator() (const Object* left, const Object* right) const {
-                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
+                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) < 0;
             }
         };
 

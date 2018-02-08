@@ -1502,7 +1502,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
                     groupData.bNeed2UV = true;
                 }
             }
-            groupData.pcFaces = new MDL::IntFace_MDL7[groupInfo.pcGroup->numtris];
+            groupData.pcFaces.resize(groupInfo.pcGroup->numtris);
 
             // read all faces into the preallocated arrays
             ReadFaces_3DGS_MDL7(groupInfo, groupData);

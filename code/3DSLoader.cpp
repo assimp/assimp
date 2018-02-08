@@ -113,22 +113,24 @@ Discreet3DSImporter::Discreet3DSImporter()
 , mScene()
 , mMasterScale()
 , bHasBG()
-, bIsPrj()
-{}
+, bIsPrj() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-Discreet3DSImporter::~Discreet3DSImporter()
-{}
+Discreet3DSImporter::~Discreet3DSImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
+bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     std::string extension = GetExtension(pFile);
     if(extension == "3ds" || extension == "prj" ) {
         return true;
     }
+
     if (!extension.length() || checkSig) {
         uint16_t token[3];
         token[0] = 0x4d4d;
@@ -210,7 +212,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
     ConvertScene(pScene);
 
     // Generate the node graph for the scene. This is a little bit
-    // tricky since we'll need to split some meshes into submeshes
+    // tricky since we'll need to split some meshes into sub-meshes
     GenerateNodeGraph(pScene);
 
     // Now apply the master scaling factor to the scene

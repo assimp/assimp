@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -211,7 +212,10 @@ struct aiVertexWeight
 #ifdef __cplusplus
 
     //! Default constructor
-    aiVertexWeight() { }
+    aiVertexWeight()
+    : mVertexId(0)
+    , mWeight(0.0f)
+    { }
 
     //! Initialisation from a given index and vertex weight factor
     //! \param pID ID
@@ -268,6 +272,32 @@ struct aiBone
             ::memcpy(mWeights,other.mWeights,mNumWeights * sizeof(aiVertexWeight));
         }
     }
+
+
+    //! Assignment operator
+    aiBone &operator=(const aiBone& other)
+    {
+        if (this == &other) {
+            return *this;
+        }
+
+        mName         = other.mName;
+        mNumWeights   = other.mNumWeights;
+        mOffsetMatrix = other.mOffsetMatrix;
+
+        if (other.mWeights && other.mNumWeights)
+        {
+            if (mWeights) {
+                delete[] mWeights;
+            }
+
+            mWeights = new aiVertexWeight[mNumWeights];
+            ::memcpy(mWeights,other.mWeights,mNumWeights * sizeof(aiVertexWeight));
+        }
+
+        return *this;
+    }
+
 
     //! Destructor - deletes the array of vertex weights
     ~aiBone()

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -153,14 +154,6 @@ void BlenderImporter::SetupProperties(const Importer* /*pImp*/)
     // nothing to be done for the moment
 }
 
-struct free_it {
-    free_it(void* free) : free(free) {}
-    ~free_it() {
-        ::free(this->free);
-    }
-
-    void* free;
-};
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
@@ -168,8 +161,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-    Bytef* dest = NULL;
-    free_it free_it_really(dest);
+    std::vector<Bytef> uncompressed;
 #endif
 
 
@@ -217,6 +209,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 
         size_t total = 0l;
 
+        // TODO: be smarter about this, decompress directly into heap buffer
         // and decompress the data .... do 1k chunks in the hope that we won't kill the stack
 #define MYBLOCK 1024
         Bytef block[MYBLOCK];
@@ -231,8 +224,8 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
             }
             const size_t have = MYBLOCK - zstream.avail_out;
             total += have;
-            dest = reinterpret_cast<Bytef*>( realloc(dest,total) );
-            memcpy(dest + total - have,block,have);
+            uncompressed.resize(total);
+            memcpy(uncompressed.data() + total - have,block,have);
         }
         while (ret != Z_STREAM_END);
 
@@ -240,7 +233,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
         inflateEnd(&zstream);
 
         // replace the input stream with a memory stream
-        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total));
+        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()),total));
 
         // .. and retry
         stream->Read(magic,7,1);

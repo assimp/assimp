@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -96,4 +97,16 @@ TEST_F( utFBXImporterExporter, importPhongMaterial ) {
     EXPECT_EQ( c, aiColor3D(0.75, 0.5, 0.25) );
     EXPECT_EQ( mat->Get(AI_MATKEY_OPACITY, f), aiReturn_SUCCESS );
     EXPECT_EQ( f, 0.5 );
+}
+
+TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/global_settings.fbx", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMetaData);
+
+    double factor(0.0);
+    scene->mMetaData->Get("UnitScaleFactor", factor);
+    EXPECT_DOUBLE_EQ(500.0, factor);
 }

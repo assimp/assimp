@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -100,5 +101,30 @@ TEST_F(utPLYImportExport, importerMultipleTest) {
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", 0 );
+    EXPECT_NE( nullptr, scene );
+}
+
+static const char *test_file =
+    "ply\n"
+    "format ascii 1.0\n"
+    "element vertex 4\n"
+    "property float x\n"
+    "property float y\n"
+    "property float z\n"
+    "property uchar red\n"
+    "property uchar green\n"
+    "property uchar blue\n"
+    "property float nx\n"
+    "property float ny\n"
+    "property float nz\n"
+    "end_header\n"
+    "0.0 0.0 0.0 255 255 255 0.0 1.0 0.0\n"
+    "0.0 0.0 1.0 255 0 255 0.0 0.0 1.0\n"
+    "0.0 1.0 0.0 255 255 0 1.0 0.0 0.0\n"
+    "0.0 1.0 1.0 0 255 255 1.0 1.0 0.0\n";
+
+TEST_F( utPLYImportExport, parseErrorTest ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), 0 );
     EXPECT_NE( nullptr, scene );
 }

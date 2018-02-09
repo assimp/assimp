@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -292,7 +293,7 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"GEOMOBJECT",10))
 
             {
-                m_vMeshes.push_back(Mesh());
+                m_vMeshes.push_back(Mesh("UNNAMED"));
                 ParseLV1ObjectBlock(m_vMeshes.back());
                 continue;
             }
@@ -308,14 +309,14 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"LIGHTOBJECT",11))
 
             {
-                m_vLights.push_back(Light());
+                m_vLights.push_back(Light("UNNAMED"));
                 ParseLV1ObjectBlock(m_vLights.back());
                 continue;
             }
             // camera object
             if (TokenMatch(filePtr,"CAMERAOBJECT",12))
             {
-                m_vCameras.push_back(Camera());
+                m_vCameras.push_back(Camera("UNNAMED"));
                 ParseLV1ObjectBlock(m_vCameras.back());
                 continue;
             }
@@ -528,7 +529,7 @@ void Parser::ParseLV1MaterialListBlock()
                 ParseLV4MeshLong(iMaterialCount);
 
                 // now allocate enough storage to hold all materials
-                m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
+                m_vMaterials.resize(iOldMaterialCount+iMaterialCount, Material("INVALID"));
                 continue;
             }
             if (TokenMatch(filePtr,"MATERIAL",8))
@@ -706,7 +707,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
                 ParseLV4MeshLong(iNumSubMaterials);
 
                 // allocate enough storage
-                mat.avSubMaterials.resize(iNumSubMaterials);
+                mat.avSubMaterials.resize(iNumSubMaterials, Material("INVALID SUBMATERIAL"));
             }
             // submaterial chunks
             if (TokenMatch(filePtr,"SUBMATERIAL",11))
@@ -1553,7 +1554,7 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 {
     AI_ASE_PARSER_INIT();
-    mesh.mBones.resize(iNumBones);
+    mesh.mBones.resize(iNumBones, Bone("UNNAMED"));
     while (true)
     {
         if ('*' == *filePtr)

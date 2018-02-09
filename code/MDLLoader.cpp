@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -340,9 +341,9 @@ void FlipQuakeHeader(BE_NCONST MDL::Header* pcHeader)
 
 // ------------------------------------------------------------------------------------------------
 // Read a Quake 1 file
-void MDLImporter::InternReadFile_Quake1( )
-{
+void MDLImporter::InternReadFile_Quake1() {
     ai_assert(NULL != pScene);
+
     BE_NCONST MDL::Header *pcHeader = (BE_NCONST MDL::Header*)this->mBuffer;
 
 #ifdef AI_BUILD_BIG_ENDIAN
@@ -355,9 +356,11 @@ void MDLImporter::InternReadFile_Quake1( )
     const unsigned char* szCurrent = (const unsigned char*)(pcHeader+1);
 
     // need to read all textures
-    for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i)
-    {
-        union{BE_NCONST MDL::Skin* pcSkin;BE_NCONST MDL::GroupSkin* pcGroupSkin;};
+    for ( unsigned int i = 0; i < (unsigned int)pcHeader->num_skins; ++i) {
+        union {
+            BE_NCONST MDL::Skin* pcSkin;
+            BE_NCONST MDL::GroupSkin* pcGroupSkin;
+        };
         if (szCurrent + sizeof(MDL::Skin) > this->mBuffer + this->iFileSize) {
             throw DeadlyImportError("[Quake 1 MDL] Unexpected EOF");
         }
@@ -365,17 +368,15 @@ void MDLImporter::InternReadFile_Quake1( )
 
         AI_SWAP4( pcSkin->group );
 
-        // Quake 1 groupskins
-        if (1 == pcSkin->group)
-        {
+        // Quake 1 group-skins
+        if (1 == pcSkin->group) {
             AI_SWAP4( pcGroupSkin->nb );
 
             // need to skip multiple images
             const unsigned int iNumImages = (unsigned int)pcGroupSkin->nb;
             szCurrent += sizeof(uint32_t) * 2;
 
-            if (0 != iNumImages)
-            {
+            if (0 != iNumImages) {
                 if (!i) {
                     // however, create only one output image (the first)
                     this->CreateTextureARGB8_3DGS_MDL3(szCurrent + iNumImages * sizeof(float));
@@ -384,10 +385,7 @@ void MDLImporter::InternReadFile_Quake1( )
                 szCurrent += pcHeader->skinheight * pcHeader->skinwidth +
                     sizeof(float) * iNumImages;
             }
-        }
-        // 3DGS has a few files that are using other 3DGS like texture formats here
-        else
-        {
+        } else {
             szCurrent += sizeof(uint32_t);
             unsigned int iSkip = i ? UINT_MAX : 0;
             CreateTexture_3DGS_MDL4(szCurrent,pcSkin->group,&iSkip);
@@ -407,17 +405,14 @@ void MDLImporter::InternReadFile_Quake1( )
     BE_NCONST MDL::Frame* pcFrames = (BE_NCONST MDL::Frame*)szCurrent;
     BE_NCONST MDL::SimpleFrame* pcFirstFrame;
 
-    if (0 == pcFrames->type)
-    {
+    if (0 == pcFrames->type) {
         // get address of single frame
         pcFirstFrame = &pcFrames->frame;
-    }
-    else
-    {
+    } else {
         // get the first frame in the group
 
 #if 1
-        // FIXME: the cast is wrong and causea a warning on clang 5.0
+        // FIXME: the cast is wrong and cause a warning on clang 5.0
         // disable thi code for now, fix it later
         ai_assert(false && "Bad pointer cast");
 #else
@@ -1507,7 +1502,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
                     groupData.bNeed2UV = true;
                 }
             }
-            groupData.pcFaces = new MDL::IntFace_MDL7[groupInfo.pcGroup->numtris];
+            groupData.pcFaces.resize(groupInfo.pcGroup->numtris);
 
             // read all faces into the preallocated arrays
             ReadFaces_3DGS_MDL7(groupInfo, groupData);

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -118,19 +119,20 @@ ASSIMP_API const char *aiGetBranchName() {
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiScene::aiScene()
 : mFlags(0)
-, mRootNode(NULL)
+, mRootNode(nullptr)
 , mNumMeshes(0)
-, mMeshes(NULL)
+, mMeshes(nullptr)
 , mNumMaterials(0)
-, mMaterials(NULL)
+, mMaterials(nullptr)
 , mNumAnimations(0)
-, mAnimations(NULL)
+, mAnimations(nullptr)
 , mNumTextures(0)
-, mTextures(NULL)
+, mTextures(nullptr)
 , mNumLights(0)
-, mLights(NULL)
+, mLights(nullptr)
 , mNumCameras(0)
-, mCameras(NULL)
+, mCameras(nullptr)
+, mMetaData(nullptr)
 , mPrivate(new Assimp::ScenePrivateData()) {
 	// empty
 }
@@ -172,6 +174,9 @@ ASSIMP_API aiScene::~aiScene() {
         for( unsigned int a = 0; a < mNumCameras; a++)
             delete mCameras[a];
     delete [] mCameras;
+
+    aiMetadata::Dealloc(mMetaData);
+    mMetaData = nullptr;
 
     delete static_cast<Assimp::ScenePrivateData*>( mPrivate );
 }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -787,9 +788,17 @@ int ShutdownD3D(void)
     return 1;
 }
 
+template<class TComPtr>
+inline 
+void SafeRelease(TComPtr *ptr) {
+    if (nullptr != g_piPassThroughEffect) {
+        g_piPassThroughEffect->Release();
+        g_piPassThroughEffect = nullptr;
+    }
+}
 
 //-------------------------------------------------------------------------------
-// Shutdown the D3D devie object and all resources associated with it
+// Shutdown the D3D device object and all resources associated with it
 // NOTE: Assumes that the asset has already been deleted
 //-------------------------------------------------------------------------------
 int ShutdownDevice(void)
@@ -798,49 +807,20 @@ int ShutdownDevice(void)
     CBackgroundPainter::Instance().ReleaseNativeResource();
     CLogDisplay::Instance().ReleaseNativeResource();
 
-    // release global shaders that have been allocazed
-    if (NULL != g_piDefaultEffect)
-    {
-        g_piDefaultEffect->Release();
-        g_piDefaultEffect = NULL;
-    }
-    if (NULL != g_piNormalsEffect)
-    {
-        g_piNormalsEffect->Release();
-        g_piNormalsEffect = NULL;
-    }
-    if (NULL != g_piPassThroughEffect)
-    {
-        g_piPassThroughEffect->Release();
-        g_piPassThroughEffect = NULL;
-    }
-    if (NULL != g_piPatternEffect)
-    {
-        g_piPatternEffect->Release();
-        g_piPatternEffect = NULL;
-    }
-    if (NULL != g_pcTexture)
-    {
-        g_pcTexture->Release();
-        g_pcTexture = NULL;
-    }
-
-    if( NULL != gDefaultVertexDecl)
-    {
-        gDefaultVertexDecl->Release();
-        gDefaultVertexDecl = NULL;
-    }
+    // release global shaders that have been allocated
+    SafeRelease(g_piDefaultEffect);
+    SafeRelease(g_piNormalsEffect);
+    SafeRelease(g_piPassThroughEffect);
+    SafeRelease(g_piPatternEffect);
+    SafeRelease(g_pcTexture);
+    SafeRelease(gDefaultVertexDecl);
 
     // delete the main D3D device object
-    if (NULL != g_piDevice)
-    {
-        g_piDevice->Release();
-        g_piDevice = NULL;
-    }
+    SafeRelease(g_piDevice);
 
     // deleted the one channel image allocated to hold the HUD mask
     delete[] g_szImageMask;
-    g_szImageMask = NULL;
+    g_szImageMask = nullptr;
 
     return 1;
 }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -83,11 +84,11 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ASEImporter::ASEImporter()
-    : mParser(),
-    mBuffer(),
-    pcScene(),
-    configRecomputeNormals(),
-    noSkeletonMesh()
+: mParser()
+, mBuffer()
+, pcScene()
+, configRecomputeNormals()
+, noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -276,14 +277,13 @@ void ASEImporter::GenerateDefaultMaterial()
     }
     if (bHas || mParser->m_vMaterials.empty())  {
         // add a simple material without submaterials to the parser's list
-        mParser->m_vMaterials.push_back ( ASE::Material() );
+        mParser->m_vMaterials.push_back ( ASE::Material(AI_DEFAULT_MATERIAL_NAME) );
         ASE::Material& mat = mParser->m_vMaterials.back();
 
         mat.mDiffuse  = aiColor3D(0.6f,0.6f,0.6f);
         mat.mSpecular = aiColor3D(1.0f,1.0f,1.0f);
         mat.mAmbient  = aiColor3D(0.05f,0.05f,0.05f);
         mat.mShading  = Discreet3DS::Gouraud;
-        mat.mName     = AI_DEFAULT_MATERIAL_NAME;
     }
 }
 
@@ -583,7 +583,7 @@ void ASEImporter::AddNodes (const std::vector<BaseNode*>& nodes,
         node->mTransformation = mParentAdjust*snode->mTransform;
 
         // Add sub nodes - prevent stack overflow due to recursive parenting
-        if (node->mName != node->mParent->mName) {
+        if (node->mName != node->mParent->mName && node->mName != node->mParent->mParent->mName ) {
             AddNodes(nodes,node,node->mName.data,snode->mTransform);
         }
 

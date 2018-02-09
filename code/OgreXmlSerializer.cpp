@@ -835,7 +835,7 @@ void OgreXmlSerializer::ReadAnimationTracks(Animation *dest)
 
 void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest)
 {
-    static const aiVector3D zeroVec(0.f, 0.f, 0.f);
+    const aiVector3D zeroVec(0.f, 0.f, 0.f);
 
     NextNode();
     while(m_currentNodeName == nnKeyFrame)

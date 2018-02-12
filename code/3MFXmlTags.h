@@ -69,6 +69,12 @@ namespace XmlTag {
     static const std::string objectid = "objectid";
     static const std::string transform = "transform";
 
+    // Material definitions
+    static const std::string basematerials = "basematerials";
+    static const std::string basematerials_base = "base";
+    static const std::string basematerials_name = "name";
+    static const std::string basematerials_displaycolor = "displaycolor";
+
     static const std::string CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
     static const std::string ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";
     static const std::string SCHEMA_CONTENTTYPES = "http://schemas.openxmlformats.org/package/2006/content-types";
@@ -83,7 +89,6 @@ namespace XmlTag {
     static const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
     static const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
     static const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-
 }
 
 } // Namespace D3MF

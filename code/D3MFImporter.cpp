@@ -68,7 +68,9 @@ namespace D3MF {
 class XmlSerializer {
 public:
     XmlSerializer(XmlReader* xmlReader)
-    : xmlReader(xmlReader) {
+    : xmlReader(xmlReader)
+    , mMeshes()
+    , mMaterials() {
 		// empty
     }
 
@@ -77,6 +79,10 @@ public:
     }
 
     void ImportXml(aiScene* scene) {
+        if ( nullptr != scene ) {
+            return;
+        }
+
         scene->mRootNode = new aiNode();
         std::vector<aiNode*> children;
 
@@ -84,7 +90,9 @@ public:
             if(xmlReader->getNodeName() == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(scene));
             } else if(xmlReader->getNodeName() == D3MF::XmlTag::build) {
-
+                // 
+            } else if ( xmlReader->getNodeName() == D3MF::XmlTag::basematerials ) {
+                ReadBaseMaterials();
             }
         }
 
@@ -92,10 +100,10 @@ public:
             scene->mRootNode->mName.Set( "3MF" );
         }
 
-        scene->mNumMeshes = static_cast<unsigned int>(meshes.size());
+        scene->mNumMeshes = static_cast<unsigned int>( mMeshes.size());
         scene->mMeshes = new aiMesh*[scene->mNumMeshes]();
 
-        std::copy(meshes.begin(), meshes.end(), scene->mMeshes);
+        std::copy( mMeshes.begin(), mMeshes.end(), scene->mMeshes);
 
         scene->mRootNode->mNumChildren = static_cast<unsigned int>(children.size());
         scene->mRootNode->mChildren = new aiNode*[scene->mRootNode->mNumChildren]();
@@ -104,8 +112,7 @@ public:
     }
 
 private:
-    aiNode* ReadObject(aiScene* scene)
-    {
+    aiNode* ReadObject(aiScene* scene) {
         std::unique_ptr<aiNode> node(new aiNode());
 
         std::vector<unsigned long> meshIds;
@@ -124,19 +131,16 @@ private:
         node->mParent = scene->mRootNode;
         node->mName.Set(name);
 
-        size_t meshIdx = meshes.size();
+        size_t meshIdx = mMeshes.size();
 
-        while(ReadToEndElement(D3MF::XmlTag::object))
-        {
-            if(xmlReader->getNodeName() == D3MF::XmlTag::mesh)
-            {
+        while(ReadToEndElement(D3MF::XmlTag::object)) {
+            if(xmlReader->getNodeName() == D3MF::XmlTag::mesh) {
                 auto mesh = ReadMesh();
 
                 mesh->mName.Set(name);
-                meshes.push_back(mesh);
+                mMeshes.push_back(mesh);
                 meshIds.push_back(static_cast<unsigned long>(meshIdx));
-                meshIdx++;
-
+                ++meshIdx;
             }
         }
 
@@ -147,19 +151,14 @@ private:
         std::copy(meshIds.begin(), meshIds.end(), node->mMeshes);
 
         return node.release();
-
     }
 
     aiMesh* ReadMesh() {
         aiMesh* mesh = new aiMesh();
-        while(ReadToEndElement(D3MF::XmlTag::mesh))
-        {
-            if(xmlReader->getNodeName() == D3MF::XmlTag::vertices)
-            {
+        while(ReadToEndElement(D3MF::XmlTag::mesh)) {
+            if(xmlReader->getNodeName() == D3MF::XmlTag::vertices) {
                 ImportVertices(mesh);
-            }
-            else if(xmlReader->getNodeName() == D3MF::XmlTag::triangles)
-            {
+            } else if(xmlReader->getNodeName() == D3MF::XmlTag::triangles) {
                 ImportTriangles(mesh);
             }
         }
@@ -167,8 +166,7 @@ private:
         return mesh;
     }
 
-    void ImportVertices(aiMesh* mesh)
-    {
+    void ImportVertices(aiMesh* mesh) {
         std::vector<aiVector3D> vertices;
 
         while(ReadToEndElement(D3MF::XmlTag::vertices))
@@ -182,11 +180,9 @@ private:
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 
         std::copy(vertices.begin(), vertices.end(), mesh->mVertices);
-
     }
 
-    aiVector3D ReadVertex()
-    {
+    aiVector3D ReadVertex() {
         aiVector3D vertex;
 
         vertex.x = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
@@ -196,15 +192,11 @@ private:
         return vertex;
     }
 
-    void ImportTriangles(aiMesh* mesh)
-    {
+    void ImportTriangles(aiMesh* mesh) {
          std::vector<aiFace> faces;
 
-
-         while(ReadToEndElement(D3MF::XmlTag::triangles))
-         {
-             if(xmlReader->getNodeName() == D3MF::XmlTag::triangle)
-             {
+         while(ReadToEndElement(D3MF::XmlTag::triangles)) {
+             if(xmlReader->getNodeName() == D3MF::XmlTag::triangle) {
                  faces.push_back(ReadTriangle());
              }
          }
@@ -216,8 +208,7 @@ private:
         std::copy(faces.begin(), faces.end(), mesh->mFaces);
     }
 
-    aiFace ReadTriangle()
-    {
+    aiFace ReadTriangle() {
         aiFace face;
 
         face.mNumIndices = 3;
@@ -227,6 +218,77 @@ private:
         face.mIndices[2] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v3.c_str())));
 
         return face;
+    }
+
+    void ReadBaseMaterials() {
+        while ( ReadToEndElement( D3MF::XmlTag::basematerials ) ) {
+            mMaterials.push_back( readMaterialDef() );
+        }
+    }
+
+    bool parseColor( const char *color, aiColor4D &diffuse ) {
+        if ( nullptr == color ) {
+            return false;
+        }
+
+        const size_t len( strlen( color ) );
+        if ( 9 != len ) {
+            return false;
+        }
+
+        const char *buf( color );
+        if ( '#' != *buf ) {
+            return false;
+        }
+
+        char comp[ 2 ] = { 0,0 };
+        comp[ 0 ] = *buf;
+        ++buf;
+        comp[ 1 ] = *buf;
+        ++buf;
+        diffuse.r = static_cast<ai_real>( std::atoi( comp ) );
+
+        comp[ 0 ] = *buf;
+        ++buf;
+        comp[ 1 ] = *buf;
+        ++buf;
+        diffuse.g = static_cast<ai_real>( std::atoi( comp ) );
+
+        comp[ 0 ] = *buf;
+        ++buf;
+        comp[ 1 ] = *buf;
+        ++buf;
+        diffuse.b = static_cast<ai_real>( std::atoi( comp ) );
+
+        comp[ 0 ] = *buf;
+        ++buf;
+        comp[ 1 ] = *buf;
+        ++buf;
+        diffuse.a = static_cast<ai_real>( std::atoi( comp ) );
+
+        return true;
+    }
+
+    aiMaterial *readMaterialDef() {
+        while ( ReadToEndElement( D3MF::XmlTag::basematerials_base ) ) {
+            const char *name( nullptr );
+            const char *color( nullptr );
+            if ( xmlReader->getNodeName() == D3MF::XmlTag::basematerials_name ) {
+                name = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_name.c_str() );
+
+                aiString matName;
+                matName.Set( name );
+                aiMaterial *mat = new aiMaterial;
+                mat->AddProperty( &matName, AI_MATKEY_NAME );
+
+                color = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_displaycolor.c_str() );
+                aiColor4D diffuse;
+                if ( parseColor( color, diffuse ) ) {
+                    mat->AddProperty<aiColor4D>( &diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
+                }
+            }
+        }
+
     }
 
 private:
@@ -267,7 +329,8 @@ private:
 
 
 private:
-    std::vector<aiMesh*> meshes;
+    std::vector<aiMesh*> mMeshes;
+    std::vector<aiMaterial*> mMaterials;
     XmlReader* xmlReader;
 };
 

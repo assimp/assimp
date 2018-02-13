@@ -47,8 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <assimp/types.h>
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /** A little helper class to quickly find all vertices in the epsilon environment of a given
@@ -148,17 +147,20 @@ protected:
     aiVector3D mPlaneNormal;
 
     /** An entry in a spatially sorted position array. Consists of a vertex index,
-     * its position and its precalculated distance from the reference plane */
-    struct Entry
-    {
+     * its position and its pre-calculated distance from the reference plane */
+    struct Entry {
         unsigned int mIndex; ///< The vertex referred by this entry
         aiVector3D mPosition; ///< Position
         ai_real mDistance; ///< Distance of this vertex to the sorting plane
 
-        Entry() { /** intentionally not initialized.*/ }
+        Entry()
+        : mIndex( 999999999 ), mPosition(), mDistance( 99999. ) {
+            // empty        
+        }
         Entry( unsigned int pIndex, const aiVector3D& pPosition, ai_real pDistance)
-            : mIndex( pIndex), mPosition( pPosition), mDistance( pDistance)
-        {   }
+        : mIndex( pIndex), mPosition( pPosition), mDistance( pDistance) {
+            // empty
+        }
 
         bool operator < (const Entry& e) const { return mDistance < e.mDistance; }
     };

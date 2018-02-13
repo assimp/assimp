@@ -193,7 +193,6 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
         throw std::invalid_argument( std::string( "The string \"" ) + in + "\" cannot be converted into a value." );
     }
 
-    bool running = true;
     for ( ;; ) {
         if ( *in < '0' || *in > '9' ) {
             break;
@@ -239,8 +238,9 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
 inline
 int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0) {
     bool inv = (*in == '-');
-    if (inv || *in == '+')
+    if (inv || *in == '+') {
         ++in;
+    }
 
     int64_t value = strtoul10_64(in, out, max_inout);
     if (inv) {
@@ -297,8 +297,7 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
         f = static_cast<Real>( strtoul10_64 ( c, &c) );
     }
 
-    if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')
-    {
+    if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9') {
         ++c;
 
         // NOTE: The original implementation is highly inaccurate here. The precision of a single

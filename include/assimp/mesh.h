@@ -200,8 +200,7 @@ struct aiFace
 // ---------------------------------------------------------------------------
 /** @brief A single influence of a bone on a vertex.
  */
-struct aiVertexWeight
-{
+struct aiVertexWeight {
     //! Index of the vertex which is influenced by the bone.
     unsigned int mVertexId;
 
@@ -214,15 +213,26 @@ struct aiVertexWeight
     //! Default constructor
     aiVertexWeight()
     : mVertexId(0)
-    , mWeight(0.0f)
-    { }
+    , mWeight(0.0f) {
+        // empty
+    }
 
     //! Initialisation from a given index and vertex weight factor
     //! \param pID ID
     //! \param pWeight Vertex weight factor
-    aiVertexWeight( unsigned int pID, float pWeight)
-        : mVertexId( pID), mWeight( pWeight)
-    { /* nothing to do here */ }
+    aiVertexWeight( unsigned int pID, float pWeight )
+    : mVertexId( pID )
+    , mWeight( pWeight ) {
+        // empty
+    }
+
+    bool operator == ( const aiVertexWeight &rhs ) const {
+        return ( mVertexId == rhs.mVertexId && mWeight == rhs.mWeight );
+    }
+
+    bool operator != ( const aiVertexWeight &rhs ) const {
+        return ( *this == rhs );
+    }
 
 #endif // __cplusplus
 };
@@ -235,8 +245,7 @@ struct aiVertexWeight
  *  which it can be addressed by animations. In addition it has a number of
  *  influences on vertices.
  */
-struct aiBone
-{
+struct aiBone {
     //! The name of the bone.
     C_STRUCT aiString mName;
 
@@ -254,10 +263,10 @@ struct aiBone
 
     //! Default constructor
     aiBone()
-        : mName()
-        , mNumWeights( 0 )
-      , mWeights( NULL )
-    {
+    : mName()
+    , mNumWeights( 0 )
+    , mWeights( nullptr ) {
+        // empty
     }
 
     //! Copy constructor
@@ -298,7 +307,19 @@ struct aiBone
         return *this;
     }
 
+    bool operator == ( const aiBone &rhs ) const {
+        if ( mName != rhs.mName || mNumWeights != rhs.mNumWeights ) {
+            return false;
+        }
 
+        for ( size_t i = 0; i < mNumWeights; ++i ) {
+            if ( mWeights[ i ] != rhs.mWeights[ i ] ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
     //! Destructor - deletes the array of vertex weights
     ~aiBone()
     {

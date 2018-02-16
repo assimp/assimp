@@ -116,7 +116,7 @@ template <> void Structure :: Convert<MTex> (
     ReadField<ErrorPolicy_Igno>(temp,"projy",db);
     dest.projy = static_cast<Assimp::Blender::MTex::Projection>(temp);
     ReadField<ErrorPolicy_Igno>(temp,"projz",db);
-    dest.projx = static_cast<Assimp::Blender::MTex::Projection>(temp);
+    dest.projz = static_cast<Assimp::Blender::MTex::Projection>(temp);
     ReadField<ErrorPolicy_Igno>(dest.mapping,"mapping",db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.ofs,"ofs",db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.size,"size",db);

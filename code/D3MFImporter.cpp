@@ -79,7 +79,7 @@ public:
     }
 
     void ImportXml(aiScene* scene) {
-        if ( nullptr != scene ) {
+        if ( nullptr == scene ) {
             return;
         }
 
@@ -87,11 +87,12 @@ public:
         std::vector<aiNode*> children;
 
         while(ReadToEndElement(D3MF::XmlTag::model)) {
-            if(xmlReader->getNodeName() == D3MF::XmlTag::object) {
+            const std::string nodeName( xmlReader->getNodeName() );
+            if( nodeName == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(scene));
-            } else if(xmlReader->getNodeName() == D3MF::XmlTag::build) {
+            } else if( nodeName == D3MF::XmlTag::build) {
                 // 
-            } else if ( xmlReader->getNodeName() == D3MF::XmlTag::basematerials ) {
+            } else if ( nodeName == D3MF::XmlTag::basematerials ) {
                 ReadBaseMaterials();
             }
         }
@@ -105,6 +106,11 @@ public:
 
         std::copy( mMeshes.begin(), mMeshes.end(), scene->mMeshes);
 
+        scene->mNumMaterials = mMaterials.size();
+        if ( 0 != scene->mNumMaterials ) {
+            scene->mMaterials = new aiMaterial*[ scene->mNumMaterials ];
+            std::copy( mMaterials.begin(), mMaterials.end(), scene->mMaterials );
+        }
         scene->mRootNode->mNumChildren = static_cast<unsigned int>(children.size());
         scene->mRootNode->mChildren = new aiNode*[scene->mRootNode->mNumChildren]();
 
@@ -196,8 +202,13 @@ private:
          std::vector<aiFace> faces;
 
          while(ReadToEndElement(D3MF::XmlTag::triangles)) {
+             const std::string nodeName( xmlReader->getNodeName() );
              if(xmlReader->getNodeName() == D3MF::XmlTag::triangle) {
                  faces.push_back(ReadTriangle());
+             } else if ( nodeName == D3MF::XmlTag::pid ) {
+                 const std::string matId( xmlReader->getAttributeValue( nodeName.c_str() ) );
+                 int matIdx( std::atoi( matId.c_str() ) );
+                 mesh->mMaterialIndex = matIdx;
              }
          }
 
@@ -270,15 +281,17 @@ private:
     }
 
     aiMaterial *readMaterialDef() {
-        while ( ReadToEndElement( D3MF::XmlTag::basematerials_base ) ) {
+        aiMaterial *mat( nullptr );
+        //while ( ReadToEndElement( D3MF::XmlTag::basematerials_base ) ) {
             const char *name( nullptr );
             const char *color( nullptr );
-            if ( xmlReader->getNodeName() == D3MF::XmlTag::basematerials_name ) {
+            const std::string nodeName( xmlReader->getNodeName() );
+            if ( nodeName == D3MF::XmlTag::basematerials_base ) {
                 name = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_name.c_str() );
 
                 aiString matName;
                 matName.Set( name );
-                aiMaterial *mat = new aiMaterial;
+                mat = new aiMaterial;
                 mat->AddProperty( &matName, AI_MATKEY_NAME );
 
                 color = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_displaycolor.c_str() );
@@ -287,8 +300,9 @@ private:
                     mat->AddProperty<aiColor4D>( &diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
                 }
             }
-        }
+        //}
 
+        return mat;
     }
 
 private:

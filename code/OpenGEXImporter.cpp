@@ -731,17 +731,22 @@ enum MeshAttribute {
     TexCoord
 };
 
+static const std::string PosToken = "position";
+static const std::string ColToken = "color";
+static const std::string NormalToken = "normal";
+static const std::string TexCoordToken = "texcoord";
+
 //------------------------------------------------------------------------------------------------
 static MeshAttribute getAttributeByName( const char *attribName ) {
     ai_assert( nullptr != attribName  );
 
-    if ( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
+    if ( 0 == strncmp( PosToken.c_str(), attribName, PosToken.size() ) ) {
         return Position;
-    } else if ( 0 == strncmp( "color", attribName, strlen( "color" ) ) ) {
+    } else if ( 0 == strncmp( ColToken.c_str(), attribName, ColToken.size() ) ) {
         return Color;
-    } else if( 0 == strncmp( "normal", attribName, strlen( "normal" ) ) ) {
+    } else if( 0 == strncmp( NormalToken.c_str(), attribName, NormalToken.size() ) ) {
         return Normal;
-    } else if( 0 == strncmp( "texcoord", attribName, strlen( "texcoord" ) ) ) {
+    } else if( 0 == strncmp( TexCoordToken.c_str(), attribName, TexCoordToken.size() ) ) {
         return TexCoord;
     }
 
@@ -1098,14 +1103,12 @@ void OpenGEXImporter::handleParamNode( ODDLParser::DDLNode *node, aiScene * /*pS
             return;
         }
         const float floatVal( val->getFloat() );
-        if ( prop->m_value  != nullptr ) {
-            if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mHorizontalFOV = floatVal;
-            } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mClipPlaneNear = floatVal;
-            } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mClipPlaneFar = floatVal;
-            }
+        if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
+            m_currentCamera->mHorizontalFOV = floatVal;
+        } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 4 ) ) {
+            m_currentCamera->mClipPlaneNear = floatVal;
+        } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
+            m_currentCamera->mClipPlaneFar = floatVal;
         }
     }
 }

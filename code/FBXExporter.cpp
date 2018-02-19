@@ -147,6 +147,11 @@ void FBXExporter::ExportBinary (
     // remember that we're exporting in binary mode
     binary = true;
 
+    // we're not currently using these preferences,
+    // but clang will cry about it if we never touch it.
+    // TODO: some of these might be relevant to export
+    (void)mProperties;
+
     // open the indicated file for writing (in binary mode)
     outfile.reset(pIOSystem->Open(pFile,"wb"));
     if (!outfile) {

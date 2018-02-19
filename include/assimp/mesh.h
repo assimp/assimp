@@ -243,20 +243,31 @@ struct aiVertexWeight {
  *
  *  A bone has a name by which it can be found in the frame hierarchy and by
  *  which it can be addressed by animations. In addition it has a number of
- *  influences on vertices.
+ *  influences on vertices, and a matrix relating the mesh position to the
+ *  position of the bone at the time of binding.
  */
 struct aiBone {
     //! The name of the bone.
     C_STRUCT aiString mName;
 
-    //! The number of vertices affected by this bone
+    //! The number of vertices affected by this bone.
     //! The maximum value for this member is #AI_MAX_BONE_WEIGHTS.
     unsigned int mNumWeights;
 
-    //! The vertices affected by this bone
+    //! The influence weights of this bone, by vertex index.
     C_STRUCT aiVertexWeight* mWeights;
 
-    //! Matrix that transforms from mesh space to bone space in bind pose
+    /** Matrix that transforms from bone space to mesh space in bind pose.
+     *
+     * This matrix describes the position of the mesh
+     * in the local space of this bone when the skeleton was bound.
+     * Thus it can be used directly to determine a desired vertex position,
+     * given the world-space transform of the bone when animated,
+     * and the position of the vertex in mesh space.
+     *
+     * It is sometimes called an inverse-bind matrix,
+     * or inverse bind pose matrix.
+     */
     C_STRUCT aiMatrix4x4 mOffsetMatrix;
 
 #ifdef __cplusplus

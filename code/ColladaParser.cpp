@@ -3127,20 +3127,20 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
         switch( tf.mType)
         {
             case TF_LOOKAT:
-      {
-        aiVector3D pos( tf.f[0], tf.f[1], tf.f[2]);
-        aiVector3D dstPos( tf.f[3], tf.f[4], tf.f[5]);
-        aiVector3D up = aiVector3D( tf.f[6], tf.f[7], tf.f[8]).Normalize();
-        aiVector3D dir = aiVector3D( dstPos - pos).Normalize();
-        aiVector3D right = (dir ^ up).Normalize();
+            {
+                aiVector3D pos( tf.f[0], tf.f[1], tf.f[2]);
+                aiVector3D dstPos( tf.f[3], tf.f[4], tf.f[5]);
+                aiVector3D up = aiVector3D( tf.f[6], tf.f[7], tf.f[8]).Normalize();
+                aiVector3D dir = aiVector3D( dstPos - pos).Normalize();
+                aiVector3D right = (dir ^ up).Normalize();
 
-        res *= aiMatrix4x4(
-          right.x, up.x, -dir.x, pos.x,
-          right.y, up.y, -dir.y, pos.y,
-          right.z, up.z, -dir.z, pos.z,
-          0, 0, 0, 1);
-                break;
-      }
+                res *= aiMatrix4x4(
+                  right.x, up.x, -dir.x, pos.x,
+                  right.y, up.y, -dir.y, pos.y,
+                  right.z, up.z, -dir.z, pos.z,
+                  0, 0, 0, 1);
+                        break;
+            }
             case TF_ROTATE:
             {
                 aiMatrix4x4 rot;

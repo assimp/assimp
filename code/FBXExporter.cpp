@@ -70,7 +70,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
 // https://wiki.blender.org/index.php/User:Mont29/Foundation/FBX_File_Structure
 
-constexpr double DEG = 360.0 / 6.283185307179586476925286766559;
+const double DEG = 57.29577951308232087679815481; // degrees per radian
 
 // some constants that we'll use for writing metadata
 namespace FBX {

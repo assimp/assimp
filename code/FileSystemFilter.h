@@ -67,7 +67,7 @@ public:
     FileSystemFilter(const std::string& file, IOSystem* old)
     : mWrapped  (old)
     , mSrc_file(file)
-    , sep(wrapped->getOsSeparator()) {
+    , sep(mWrapped->getOsSeparator()) {
         ai_assert(nullptr != mWrapped);
 
         // Determine base directory
@@ -101,6 +101,7 @@ public:
     /** Tests for the existence of a file at the given path. */
     bool Exists( const char* pFile) const {
         ai_assert( nullptr != mWrapped );
+        
         std::string tmp = pFile;
 
         // Currently this IOSystem is also used to open THE ONE FILE.
@@ -165,51 +166,51 @@ public:
 
     // -------------------------------------------------------------------
     /** Pushes a new directory onto the directory stack. */
-    bool PushDirectory(const std::string &path)
-    {
-        return wrapped->PushDirectory(path);
+    bool PushDirectory(const std::string &path ) {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->PushDirectory(path);
     }
 
     // -------------------------------------------------------------------
     /** Returns the top directory from the stack. */
-    const std::string &CurrentDirectory() const
-    {
-        return wrapped->CurrentDirectory();
+    const std::string &CurrentDirectory() const {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->CurrentDirectory();
     }
 
     // -------------------------------------------------------------------
     /** Returns the number of directories stored on the stack. */
-    size_t StackSize() const
-    {
-        return wrapped->StackSize();
+    size_t StackSize() const {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->StackSize();
     }
 
     // -------------------------------------------------------------------
     /** Pops the top directory from the stack. */
-    bool PopDirectory()
-    {
-        return wrapped->PopDirectory();
+    bool PopDirectory() {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->PopDirectory();
     }
 
     // -------------------------------------------------------------------
     /** Creates an new directory at the given path. */
-    bool CreateDirectory(const std::string &path)
-    {
-        return wrapped->CreateDirectory(path);
+    bool CreateDirectory(const std::string &path) {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->CreateDirectory(path);
     }
 
     // -------------------------------------------------------------------
     /** Will change the current directory to the given path. */
-    bool ChangeDirectory(const std::string &path)
-    {
-        return wrapped->ChangeDirectory(path);
+    bool ChangeDirectory(const std::string &path) {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->ChangeDirectory(path);
     }
 
     // -------------------------------------------------------------------
     /** Delete file. */
-    bool DeleteFile(const std::string &file)
-    {
-        return wrapped->DeleteFile(file);
+    bool DeleteFile(const std::string &file) {
+        ai_assert( nullptr != mWrapped );
+        return mWrapped->DeleteFile(file);
     }
 
 private:

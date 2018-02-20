@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -247,9 +248,9 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
         }
     }
 
-    bool continuationFound( false ), endOfDataLine( false );
+    bool continuationFound( false );
     size_t i = 0;
-    while ( !endOfDataLine ) {
+    for( ;; ) {
         if ( continuationToken == m_cache[ m_cachePos ] ) {
             continuationFound = true;
             ++m_cachePos;

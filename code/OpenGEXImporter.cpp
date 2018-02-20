@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -220,12 +221,8 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
-: m_numVerts( 0 )
-, m_vertices( nullptr )
-, m_numColors( 0 )
+: m_numColors( 0 )
 , m_colors( nullptr )
-, m_numNormals( 0 )
-, m_normals( nullptr )
 , m_numUVComps()
 , m_textureCoords() {
     // empty
@@ -233,9 +230,7 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
-    delete[] m_vertices;
     delete[] m_colors;
-    delete[] m_normals;
 
     for(auto &texcoords : m_textureCoords) {
         delete [] texcoords;
@@ -696,7 +691,8 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene * 
 void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
-    m_meshCache.push_back( m_currentMesh );
+    // ownership is transfered but a reference remains in m_currentMesh
+    m_meshCache.emplace_back( m_currentMesh );
 
     Property *prop = node->getProperties();
     if( nullptr != prop ) {
@@ -735,17 +731,22 @@ enum MeshAttribute {
     TexCoord
 };
 
+static const std::string PosToken = "position";
+static const std::string ColToken = "color";
+static const std::string NormalToken = "normal";
+static const std::string TexCoordToken = "texcoord";
+
 //------------------------------------------------------------------------------------------------
 static MeshAttribute getAttributeByName( const char *attribName ) {
     ai_assert( nullptr != attribName  );
 
-    if ( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
+    if ( 0 == strncmp( PosToken.c_str(), attribName, PosToken.size() ) ) {
         return Position;
-    } else if ( 0 == strncmp( "color", attribName, strlen( "color" ) ) ) {
+    } else if ( 0 == strncmp( ColToken.c_str(), attribName, ColToken.size() ) ) {
         return Color;
-    } else if( 0 == strncmp( "normal", attribName, strlen( "normal" ) ) ) {
+    } else if( 0 == strncmp( NormalToken.c_str(), attribName, NormalToken.size() ) ) {
         return Normal;
-    } else if( 0 == strncmp( "texcoord", attribName, strlen( "texcoord" ) ) ) {
+    } else if( 0 == strncmp( TexCoordToken.c_str(), attribName, TexCoordToken.size() ) ) {
         return TexCoord;
     }
 
@@ -856,17 +857,15 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         const size_t numItems( countDataArrayListItems( vaList ) );
 
         if( Position == attribType ) {
-            m_currentVertices.m_numVerts = numItems;
-            m_currentVertices.m_vertices = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentVertices.m_vertices );
+            m_currentVertices.m_vertices.resize( numItems );
+            copyVectorArray( numItems, vaList, m_currentVertices.m_vertices.data() );
         } else if ( Color == attribType ) {
             m_currentVertices.m_numColors = numItems;
             m_currentVertices.m_colors = new aiColor4D[ numItems ];
             copyColor4DArray( numItems, vaList, m_currentVertices.m_colors );
         } else if( Normal == attribType ) {
-            m_currentVertices.m_numNormals = numItems;
-            m_currentVertices.m_normals = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentVertices.m_normals );
+            m_currentVertices.m_normals.resize( numItems );
+            copyVectorArray( numItems, vaList, m_currentVertices.m_normals.data() );
         } else if( TexCoord == attribType ) {
             m_currentVertices.m_numUVComps[ 0 ] = numItems;
             m_currentVertices.m_textureCoords[ 0 ] = new aiVector3D[ numItems ];
@@ -903,7 +902,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         hasColors = true;
     }
     bool hasNormalCoords( false );
-    if ( m_currentVertices.m_numNormals > 0 ) {
+    if ( !m_currentVertices.m_normals.empty() ) {
         m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
         hasNormalCoords = true;
     }
@@ -921,7 +920,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         Value *next( vaList->m_dataList );
         for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
             const int idx( next->getUnsignedInt32() );
-            ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_numVerts );
+            ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_vertices.size() );
             ai_assert( index < m_currentMesh->mNumVertices );
             aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
             m_currentMesh->mVertices[ index ].Set( pos.x, pos.y, pos.z );
@@ -1104,14 +1103,12 @@ void OpenGEXImporter::handleParamNode( ODDLParser::DDLNode *node, aiScene * /*pS
             return;
         }
         const float floatVal( val->getFloat() );
-        if ( prop->m_value  != nullptr ) {
-            if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mHorizontalFOV = floatVal;
-            } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mClipPlaneNear = floatVal;
-            } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mClipPlaneFar = floatVal;
-            }
+        if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
+            m_currentCamera->mHorizontalFOV = floatVal;
+        } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 4 ) ) {
+            m_currentCamera->mClipPlaneNear = floatVal;
+        } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
+            m_currentCamera->mClipPlaneFar = floatVal;
         }
     }
 }
@@ -1144,7 +1141,9 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
 
     pScene->mNumMeshes = static_cast<unsigned int>(m_meshCache.size());
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-    std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
+        pScene->mMeshes[i] = m_meshCache[i].release();
+    }
 }
 
 //------------------------------------------------------------------------------------------------

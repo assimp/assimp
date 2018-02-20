@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -70,17 +71,6 @@ using namespace irr::io;
 #   endif
 #endif
 
-
-// scopeguard for a malloc'ed buffer
-struct free_it
-{
-    free_it(void* free) : free(free) {}
-    ~free_it() {
-        ::free(this->free);
-    }
-
-    void* free;
-};
 
 namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
     template<> const char* LogFunctions<XGLImporter>::Prefix()
@@ -154,8 +144,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-    Bytef* dest = NULL;
-    free_it free_it_really(dest);
+    std::vector<Bytef> uncompressed;
 #endif
 
     m_scene = pScene;
@@ -191,6 +180,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 
         size_t total = 0l;
 
+        // TODO: be smarter about this, decompress directly into heap buffer
         // and decompress the data .... do 1k chunks in the hope that we won't kill the stack
     #define MYBLOCK 1024
         Bytef block[MYBLOCK];
@@ -205,8 +195,8 @@ void XGLImporter::InternReadFile( const std::string& pFile,
             }
             const size_t have = MYBLOCK - zstream.avail_out;
             total += have;
-            dest = reinterpret_cast<Bytef*>( realloc(dest,total) );
-            memcpy(dest + total - have,block,have);
+            uncompressed.resize(total);
+            memcpy(uncompressed.data() + total - have,block,have);
         }
         while (ret != Z_STREAM_END);
 
@@ -214,7 +204,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
         inflateEnd(&zstream);
 
         // replace the input stream with a memory stream
-        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total));
+        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()),total));
 #endif
     }
 

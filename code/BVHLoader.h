@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -83,7 +84,10 @@ class BVHLoader : public BaseImporter
         std::vector<ChannelType> mChannels;
         std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
 
-        Node() { }
+        Node()
+        : mNode(nullptr)
+        { }
+
         explicit Node( const aiNode* pNode) : mNode( pNode) { }
     };
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -431,7 +432,6 @@ void LWOImporter::InternReadFile( const std::string& pFile,
         unsigned int num = static_cast<unsigned int>(apcMeshes.size() - meshStart);
         if (layer.mName != "<LWODefault>" || num > 0) {
             aiNode* pcNode = new aiNode();
-            apcNodes[layer.mIndex] = pcNode;
             pcNode->mName.Set(layer.mName);
             pcNode->mParent = (aiNode*)&layer;
             pcNode->mNumMeshes = num;
@@ -441,6 +441,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
                 for (unsigned int p = 0; p < pcNode->mNumMeshes;++p)
                     pcNode->mMeshes[p] = p + meshStart;
             }
+            apcNodes[layer.mIndex] = pcNode;
         }
     }
 
@@ -583,7 +584,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
     //Set parent of all children, inserting pivots
     //std::cout << "Set parent of all children" << std::endl;
     std::map<uint16_t, aiNode*> mapPivot;
-    for (std::map<uint16_t,aiNode*>::iterator itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
+    for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
 
         //Get the parent index
         LWO::Layer* nodeLayer = (LWO::Layer*)(itapcNodes->second->mParent);
@@ -592,7 +593,6 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
         //Create pivot node, store it into the pivot map, and set the parent as the pivot
         aiNode* pivotNode = new aiNode();
         pivotNode->mName.Set("Pivot-"+std::string(itapcNodes->second->mName.data));
-        mapPivot[-(itapcNodes->first+2)] = pivotNode;
         itapcNodes->second->mParent = pivotNode;
 
         //Look for the parent node to attach the pivot to
@@ -610,18 +610,19 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
         pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
         pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
         pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
+        mapPivot[-(itapcNodes->first+2)] = pivotNode;
     }
 
     //Merge pivot map into node map
     //std::cout << "Merge pivot map into node map" << std::endl;
-    for (std::map<uint16_t, aiNode*>::iterator itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
+    for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
         apcNodes[itMapPivot->first] = itMapPivot->second;
     }
 
     //Set children of all parents
     apcNodes[-1] = root;
-    for (std::map<uint16_t,aiNode*>::iterator itMapParentNodes = apcNodes.begin(); itMapParentNodes != apcNodes.end(); ++itMapParentNodes) {
-        for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+    for (auto itMapParentNodes = apcNodes.begin(); itMapParentNodes != apcNodes.end(); ++itMapParentNodes) {
+        for (auto itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
             if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
                 ++(itMapParentNodes->second->mNumChildren);
             }
@@ -629,7 +630,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
         if (itMapParentNodes->second->mNumChildren) {
             itMapParentNodes->second->mChildren = new aiNode* [ itMapParentNodes->second->mNumChildren ];
             uint16_t p = 0;
-            for (std::map<uint16_t,aiNode*>::iterator itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
+            for (auto itMapChildNodes = apcNodes.begin(); itMapChildNodes != apcNodes.end(); ++itMapChildNodes) {
                 if ((itMapParentNodes->first != itMapChildNodes->first) && (itMapParentNodes->second == itMapChildNodes->second->mParent)) {
                     itMapParentNodes->second->mChildren[p++] = itMapChildNodes->second;
                 }

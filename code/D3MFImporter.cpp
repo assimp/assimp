@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -57,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include "D3MFOpcPackage.h"
-#include <contrib/unzip/unzip.h>
+#include <unzip.h>
 #include <assimp/irrXMLWrapper.h>
 #include "3MFXmlTags.h"
 

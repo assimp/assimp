@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -427,16 +428,19 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     const std::vector<unsigned int>& mapping_offsets,
     const std::vector<unsigned int>& mappings)
 {
+    bool isDirect = ReferenceInformationType == "Direct";
+    bool isIndexToDirect = ReferenceInformationType == "IndexToDirect";
 
+    // fallback to direct data if there is no index data element
+    if ( isIndexToDirect && !HasElement( source, indexDataElementName ) ) {
+        isDirect = true;
+        isIndexToDirect = false;
+    }
 
     // handle permutations of Mapping and Reference type - it would be nice to
     // deal with this more elegantly and with less redundancy, but right
     // now it seems unavoidable.
-    if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {
-        if ( !HasElement( source, indexDataElementName ) ) {
-            return;
-        }
-
+    if (MappingInformationType == "ByVertice" && isDirect) {
         std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -449,14 +453,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             }
         }
     }
-    else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {
+    else if (MappingInformationType == "ByVertice" && isIndexToDirect) {
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         data_out.resize(vertex_count);
-        if ( !HasElement( source, indexDataElementName ) ) {
-            return;
-        }
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
@@ -471,7 +472,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             }
         }
     }
-    else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {
+    else if (MappingInformationType == "ByPolygonVertex" && isDirect) {
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -484,7 +485,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 
 		data_out.swap(tempData);
     }
-    else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {
+    else if (MappingInformationType == "ByPolygonVertex" && isIndexToDirect) {
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 

@@ -62,7 +62,7 @@ that it has not been implemented yet and some (most ...) formats lack proper spe
 </tt>
 See the @link importer_notes Importer Notes Page @endlink for information, what a specific importer can do and what not.
 Note that although this paper claims to be the official documentation,
-http://assimp.sourceforge.net/main_features_formats.html
+https://github.com/assimp/assimp/blob/master/Readme.md
 <br>is usually the most up-to-date list of file formats supported by the library. <br>
 
 <sup>1</sup>: Experimental loaders<br>
@@ -90,9 +90,16 @@ but not all of them are *open-source*. If there's an accompagning '<file>\source
 @section main_install Installation
 
 assimp can be used in two ways: linking against the pre-built libraries or building the library on your own. The former
-option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2005 and 2008. For other
-compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but needs a bit
-more work. Both ways are described at the @link install Installation page. @endlink
+option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2013, 2015 and 2017. 
+For other compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but 
+needs a bit more work. Both ways are described at the @link install Installation page. @endlink
+If you want to use assimp on Ubuntu you can install it via the following command:
+
+@code
+sudo apt-get install assimp
+@endcode
+
+If you want to use the python-assimp-port just follow these instructions: https://github.com/assimp/assimp/tree/master/port/PyAssimp
 
 @section main_usage Usage
 
@@ -115,7 +122,6 @@ assimp is considerably easy, as the whole postprocessing infrastructure is avail
 See the @link extend Extending the library @endlink page for more information.
 
 
-
 @section main_support Support & Feedback
 
 If you have any questions/comments/suggestions/bug reports you're welcome to post them in our
@@ -133,129 +139,50 @@ assimp-discussions</a>.
 
 @section install_prebuilt Using the pre-built libraries with Visual C++ 8/9
 
-If you develop at Visual Studio 2005 or 2008, you can simply use the pre-built linker libraries provided in the distribution.
+If you develop at Visual Studio 2015 or 2017, you can simply use the pre-built linker libraries provided in the distribution.
 Extract all files to a place of your choice. A directory called "assimp" will be created there. Add the assimp/include path
 to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Include files)
 and the assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
 This is necessary only once to setup all paths inside you IDE.
 
-To use the library in your C++ project you have to include either &lt;assimp/Importer.hpp&gt; or &lt;assimp/cimport.h&gt; plus some others starting with &lt;types.h&gt;.
-If you set up your IDE correctly the compiler should be able to find the files. Then you have to add the linker library to your
-project dependencies. Link to <assimp_root>/lib/<config-name>/assimp.lib. config-name is one of the predefined
-project configs. For static linking, use release/debug. See the sections below on this page for more information on the
-other build configs.
-If done correctly you should now be able to compile, link,
-run and use the application. If the linker complains about some integral functions being defined twice you probably have
-mixed the runtimes. Recheck the project configuration (project properties -&gt; C++ -&gt; Code generation -&gt; Runtime) if you use
-static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL).
-Choose the assimp linker lib accordingly.
-<br><br>
-Please don't forget to also read the @ref assimp_stl section on MSVC and the STL.
-
-@section assimp_stl Microsoft Compilers and the C++ Standard Library
-
-In VC8 and VC9 Microsoft introduced some Standard Library debugging features. A good example are improved iterator checks and
-various useful debug checks. The problem is the performance penalty that incurs with those extra checks.
-
-Most of these security enhancements are active in release builds by default, rendering assimp several times
-slower. However, it is possible to disable them by setting
+To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder 
+as a subdirectory via the cmake-command
 
 @code
-_HAS_ITERATOR_DEBUGGING=0
-_SECURE_SCL=0
+addsubdiectory(assimp)
 @endcode
 
-in the preprocessor options (or alternatively in the source code, just before the STL is included for the first time).
-<b>assimp's vc8 and vc9 configs enable these flags by default</b>.
+Now just add the assimp-dependency to your application:
 
-<i>If you're linking statically against assimp:</i> Make sure your applications uses the same STl settings!
-If you do not, there are two binary incompatible STL versions mangled together and you'll crash.
-Alternatively you can disable the fast STL settings for assimp by removing the 'FastSTL' property sheet from
-the vc project file.
+@code
+TARGET_LINK_LIBRARIES(my_game assimp)
+@endcode
 
-<i>If you're using assimp in a DLL/SO:</i> It's ok. There's no STL used in the binary DLL/SO interface, so it doesn't care whether
-your application uses the same STL settings or not.
-<br><br>
-Another option is to build against a different STL implementation, for example STlport. There's a special
-@ref assimp_stlport section that has a description how to achieve this.
+If done correctly you should now be able to compile, link, run and use the application. 
 
 
 @section install_own Building the library from scratch
 
-To build the library on your own you first have to get hold of the dependencies. Fortunately, special attention was paid to
-keep the list of dependencies short. Unfortunately, the only dependency is <a href="http://www.boost.org">boost</a> which
-can be a bit painful to set up for certain development environments. Boost is a widely used collection of classes and
-functions for various purposes. Chances are that it was already installed along with your compiler. If not, you have to install
-it for yourself. Read the "Getting Started" section of the Boost documentation for how to setup boost. VisualStudio users
-can use a comfortable installer from <a href="http://www.boost-consulting.com/products/free">
-http://www.boost-consulting.com/products/free</a>. Choose the appropriate version of boost for your runtime of choice.
+First you need to install cmake. Now just get the code from github or download the latest version from the webside.
+to buil the library just open a command-prompt / bash, navigate into the repo-folder and run cmake via:
 
-<b>If you don't want to use boost</b>, you can build against our <i>"Boost-Workaround"</i>. It consists of very small
-implementations of the various boost utility classes used. However, you'll lose functionality (e.g. threading) by doing this.
-So, if you can use boost, you should use boost. Otherwise, See the @link use_noboost NoBoost-Section @endlink
-later on this page for the details of the workaround.
-
-Once boost is working, you have to set up a project for the assimp library in your favorite IDE. If you use VC2005 or
-VC2008, you can simply load the solution or project files in the workspaces/ folder, otherwise you have to create a new
-package and add all the headers and source files from the include/ and code/ directories. Set the temporary output folder
-to obj/, for example, and redirect the output folder to bin/. Then build the library - it should compile and link fine.
-
-The last step is to integrate the library into your project. This is basically the same task as described in the
-"Using the pre-built libraries" section above: add the include/ and bin/ directories to your IDE's paths so that the compiler can find
-the library files. Alternatively you can simply add the assimp project to your project's overall solution and build it inside
-your solution.
-
-
-@section use_noboost Building without boost.
-
-The Boost-Workaround consists of dummy replacements for some boost utility templates. Currently there are replacements for
-
- - boost.scoped_ptr
- - boost.scoped_array
- - boost.format
- - boost.random
- - boost.common_factor
- - boost.foreach
- - boost.tuple
- - boost.make_shared
-
-These implementations are very limited and are not intended for use outside assimp. A compiler
-with full support for partial template specializations is required. To enable the workaround, put the following in
-your compiler's list of predefined macros:
 @code
-#define ASSIMP_BUILD_BOOST_WORKAROUND
+cmake CMakeLists.txt
 @endcode
-<br>
-If you're working with the provided solutions for Visual Studio use the <i>-noboost</i> build configs. <br>
 
-<b>assimp_BUILD_BOOST_WORKAROUND</b> implies <b>assimp_BUILD_SINGLETHREADED</b>. <br>
-See the @ref assimp_st section
-for more details.
-
-
+A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated. 
+Run the build and you are done. You can find the libs at assimp/lib and the dll's / so's at bin.
 
 
 @section assimp_dll Windows DLL Build
 
-assimp can be built as DLL. You just need to select a -dll config from the list of project
-configs and you're fine.
+The Assimp-package can be built as DLL. You just need to run the default cmake run.
 
-<b>NOTE:</b> Theoretically, assimp-dll can be used with multithreaded (non-dll) runtime libraries,
-as long as you don't utilize any non-public stuff from the code folder. However, if you happen
-to encounter *very* strange problems, try changing the runtime to <i>Multithreaded (Debug) DLL</i>.
 
-@section assimp_stlport Building against STLport
+@section assimp static lib
 
-STLport is a free, fast and secure STL replacement that works with
-all major compilers and platforms. To get it, download the latest release from
-<a href="http://www.stlport.org"/><stlport.org></a>.
-Usually you'll just need to run 'configure' + a makefile (see their README for more details).
-Don't miss to add <stlport_root>/stlport to your compiler's default include paths - <b>prior</b>
-to the directory where your compiler vendor's headers lie. Do the same for  <stlport_root>/lib and
-recompile assimp. To ensure you're really building against STLport see aiGetCompileFlags().
-<br>
-In our testing, STLport builds tend to be a bit faster than builds against Microsoft's
-C++ Standard Library.
+The Assimp-package can be build as a static library as well. Do do so just set the configuration variable <b>BUILD_SHARED_LIBS</b>
+to off during the cmake run.
 
 */
 

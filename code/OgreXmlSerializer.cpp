@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -71,11 +72,11 @@ AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::strin
 }
 
 template<>
-int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const std::string &name) const
+int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
-        return static_cast<int32_t>(m_reader->getAttributeValueAsInt(name.c_str()));
+        return static_cast<int32_t>(m_reader->getAttributeValueAsInt(name));
     }
     else
     {
@@ -85,9 +86,9 @@ int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const std::string &name) const
 }
 
 template<>
-uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const std::string &name) const
+uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
         /** @note This is hackish. But we are never expecting unsigned values that go outside the
             int32_t range. Just monitor for negative numbers and kill the import. */
@@ -109,9 +110,9 @@ uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const std::string &name) con
 }
 
 template<>
-uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const std::string &name) const
+uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
         return static_cast<uint16_t>(ReadAttribute<uint32_t>(name));
     }
@@ -123,11 +124,11 @@ uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const std::string &name) con
 }
 
 template<>
-float OgreXmlSerializer::ReadAttribute<float>(const std::string &name) const
+float OgreXmlSerializer::ReadAttribute<float>(const char *name) const
 {
-    if (HasAttribute(name.c_str()))
+    if (HasAttribute(name))
     {
-        return m_reader->getAttributeValueAsFloat(name.c_str());
+        return m_reader->getAttributeValueAsFloat(name);
     }
     else
     {
@@ -137,9 +138,9 @@ float OgreXmlSerializer::ReadAttribute<float>(const std::string &name) const
 }
 
 template<>
-std::string OgreXmlSerializer::ReadAttribute<std::string>(const std::string &name) const
+std::string OgreXmlSerializer::ReadAttribute<std::string>(const char *name) const
 {
-    const char* value = m_reader->getAttributeValue(name.c_str());
+    const char* value = m_reader->getAttributeValue(name);
     if (value)
     {
         return std::string(value);
@@ -152,7 +153,7 @@ std::string OgreXmlSerializer::ReadAttribute<std::string>(const std::string &nam
 }
 
 template<>
-bool OgreXmlSerializer::ReadAttribute<bool>(const std::string &name) const
+bool OgreXmlSerializer::ReadAttribute<bool>(const char *name) const
 {
     std::string value = Ogre::ToLower(ReadAttribute<std::string>(name));
     if (ASSIMP_stricmp(value, "true") == 0)
@@ -170,9 +171,9 @@ bool OgreXmlSerializer::ReadAttribute<bool>(const std::string &name) const
     }
 }
 
-bool OgreXmlSerializer::HasAttribute(const std::string &name) const
+bool OgreXmlSerializer::HasAttribute(const char *name) const
 {
-    return (m_reader->getAttributeValue(name.c_str()) != 0);
+    return (m_reader->getAttributeValue(name) != 0);
 }
 
 std::string &OgreXmlSerializer::NextNode()
@@ -230,75 +231,75 @@ std::string &OgreXmlSerializer::SkipCurrentNode()
 // Mesh XML constants
 
 // <mesh>
-const std::string nnMesh                = "mesh";
-const std::string nnSharedGeometry      = "sharedgeometry";
-const std::string nnSubMeshes           = "submeshes";
-const std::string nnSubMesh             = "submesh";
-const std::string nnSubMeshNames        = "submeshnames";
-const std::string nnSkeletonLink        = "skeletonlink";
-const std::string nnLOD                 = "levelofdetail";
-const std::string nnExtremes            = "extremes";
-const std::string nnPoses               = "poses";
-const std::string nnAnimations          = "animations";
+static const char *nnMesh                = "mesh";
+static const char *nnSharedGeometry      = "sharedgeometry";
+static const char *nnSubMeshes           = "submeshes";
+static const char *nnSubMesh             = "submesh";
+static const char *nnSubMeshNames        = "submeshnames";
+static const char *nnSkeletonLink        = "skeletonlink";
+static const char *nnLOD                 = "levelofdetail";
+static const char *nnExtremes            = "extremes";
+static const char *nnPoses               = "poses";
+static const char *nnAnimations          = "animations";
 
 // <submesh>
-const std::string nnFaces               = "faces";
-const std::string nnFace                = "face";
-const std::string nnGeometry            = "geometry";
-const std::string nnTextures            = "textures";
+static const char *nnFaces               = "faces";
+static const char *nnFace                = "face";
+static const char *nnGeometry            = "geometry";
+static const char *nnTextures            = "textures";
 
 // <mesh/submesh>
-const std::string nnBoneAssignments     = "boneassignments";
+static const char *nnBoneAssignments     = "boneassignments";
 
 // <sharedgeometry/geometry>
-const std::string nnVertexBuffer        = "vertexbuffer";
+static const char *nnVertexBuffer        = "vertexbuffer";
 
 // <vertexbuffer>
-const std::string nnVertex              = "vertex";
-const std::string nnPosition            = "position";
-const std::string nnNormal              = "normal";
-const std::string nnTangent             = "tangent";
-const std::string nnBinormal            = "binormal";
-const std::string nnTexCoord            = "texcoord";
-const std::string nnColorDiffuse        = "colour_diffuse";
-const std::string nnColorSpecular       = "colour_specular";
+static const char *nnVertex              = "vertex";
+static const char *nnPosition            = "position";
+static const char *nnNormal              = "normal";
+static const char *nnTangent             = "tangent";
+static const char *nnBinormal            = "binormal";
+static const char *nnTexCoord            = "texcoord";
+static const char *nnColorDiffuse        = "colour_diffuse";
+static const char *nnColorSpecular       = "colour_specular";
 
 // <boneassignments>
-const std::string nnVertexBoneAssignment = "vertexboneassignment";
+static const char *nnVertexBoneAssignment = "vertexboneassignment";
 
 // Skeleton XML constants
 
 // <skeleton>
-const std::string nnSkeleton            = "skeleton";
-const std::string nnBones               = "bones";
-const std::string nnBoneHierarchy       = "bonehierarchy";
-const std::string nnAnimationLinks      = "animationlinks";
+static const char *nnSkeleton            = "skeleton";
+static const char *nnBones               = "bones";
+static const char *nnBoneHierarchy       = "bonehierarchy";
+static const char *nnAnimationLinks      = "animationlinks";
 
 // <bones>
-const std::string nnBone                = "bone";
-const std::string nnRotation            = "rotation";
-const std::string nnAxis                = "axis";
-const std::string nnScale               = "scale";
+static const char *nnBone                = "bone";
+static const char *nnRotation            = "rotation";
+static const char *nnAxis                = "axis";
+static const char *nnScale               = "scale";
 
 // <bonehierarchy>
-const std::string nnBoneParent          = "boneparent";
+static const char *nnBoneParent          = "boneparent";
 
 // <animations>
-const std::string nnAnimation           = "animation";
-const std::string nnTracks              = "tracks";
+static const char *nnAnimation           = "animation";
+static const char *nnTracks              = "tracks";
 
 // <tracks>
-const std::string nnTrack               = "track";
-const std::string nnKeyFrames           = "keyframes";
-const std::string nnKeyFrame            = "keyframe";
-const std::string nnTranslate           = "translate";
-const std::string nnRotate              = "rotate";
+static const char *nnTrack               = "track";
+static const char *nnKeyFrames           = "keyframes";
+static const char *nnKeyFrame            = "keyframe";
+static const char *nnTranslate           = "translate";
+static const char *nnRotate              = "rotate";
 
 // Common XML constants
 
-const std::string anX = "x";
-const std::string anY = "y";
-const std::string anZ = "z";
+static const char *anX = "x";
+static const char *anY = "y";
+static const char *anZ = "z";
 
 // Mesh
 
@@ -537,13 +538,13 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
 
 void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
 {
-    static const std::string anMaterial          = "material";
-    static const std::string anUseSharedVertices = "usesharedvertices";
-    static const std::string anCount             = "count";
-    static const std::string anV1                = "v1";
-    static const std::string anV2                = "v2";
-    static const std::string anV3                = "v3";
-    static const std::string anV4                = "v4";
+    static const char *anMaterial          = "material";
+    static const char *anUseSharedVertices = "usesharedvertices";
+    static const char *anCount             = "count";
+    static const char *anV1                = "v1";
+    static const char *anV2                = "v2";
+    static const char *anV3                = "v3";
+    static const char *anV4                = "v4";
 
     SubMeshXml* submesh = new SubMeshXml();
 
@@ -634,9 +635,9 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
         throw DeadlyImportError("Cannot read bone assignments, vertex data is null.");
     }
 
-    static const std::string anVertexIndex = "vertexindex";
-    static const std::string anBoneIndex   = "boneindex";
-    static const std::string anWeight      = "weight";
+    static const char *anVertexIndex = "vertexindex";
+    static const char *anBoneIndex   = "boneindex";
+    static const char *anWeight      = "weight";
 
     std::set<uint32_t> influencedVertices;
 
@@ -915,8 +916,11 @@ void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
     }
 }
 
-bool BoneCompare(Bone *a, Bone *b)
+static bool BoneCompare(Bone *a, Bone *b)
 {
+    ai_assert( nullptr != a );
+    ai_assert( nullptr != b );
+    
     return (a->id < b->id);
 }
 

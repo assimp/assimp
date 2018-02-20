@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -1255,29 +1256,30 @@ void SceneCombiner::Copy(aiMetadata** _dest, const aiMetadata* src) {
         aiMetadataEntry& out = dest->mValues[i];
         out.mType = in.mType;
         switch (dest->mValues[i].mType) {
-        case AI_BOOL:
-            out.mData = new bool(*static_cast<bool*>(in.mData));
-            break;
-        case AI_INT32:
-            out.mData = new int32_t(*static_cast<int32_t*>(in.mData));
-            break;
-        case AI_UINT64:
-            out.mData = new uint64_t(*static_cast<uint64_t*>(in.mData));
-            break;
-        case AI_FLOAT:
-            out.mData = new float(*static_cast<float*>(in.mData));
-            break;
-        case AI_DOUBLE:
-            out.mData = new double(*static_cast<double*>(in.mData));
-            break;
-        case AI_AISTRING:
-            out.mData = new aiString(*static_cast<aiString*>(in.mData));
-            break;
-        case AI_AIVECTOR3D:
-            out.mData = new aiVector3D(*static_cast<aiVector3D*>(in.mData));
-            break;
-        default:
-            ai_assert(false);
+            case AI_BOOL:
+                out.mData = new bool(*static_cast<bool*>(in.mData));
+                break;
+            case AI_INT32:
+                out.mData = new int32_t(*static_cast<int32_t*>(in.mData));
+                break;
+            case AI_UINT64:
+                out.mData = new uint64_t(*static_cast<uint64_t*>(in.mData));
+                break;
+            case AI_FLOAT:
+                out.mData = new float(*static_cast<float*>(in.mData));
+                break;
+            case AI_DOUBLE:
+                out.mData = new double(*static_cast<double*>(in.mData));
+                break;
+            case AI_AISTRING:
+                out.mData = new aiString(*static_cast<aiString*>(in.mData));
+                break;
+            case AI_AIVECTOR3D:
+                out.mData = new aiVector3D(*static_cast<aiVector3D*>(in.mData));
+                break;
+            default:
+                ai_assert(false);
+                break;
         }
     }
 }

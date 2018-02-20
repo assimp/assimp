@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -76,12 +77,10 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
     ai_assert(static_cast<size_t>(send-sbegin) > 0);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 Token::~Token()
 {
 }
-
 
 namespace {
 

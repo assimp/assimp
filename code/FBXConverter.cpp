@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -75,10 +76,9 @@ using namespace Util;
 
 
 Converter::Converter( aiScene* out, const Document& doc )
-    : defaultMaterialIndex()
-    , out( out )
-    , doc( doc )
-{
+: defaultMaterialIndex()
+, out( out )
+, doc( doc ) {
     // animations need to be converted first since this will
     // populate the node_anim_chain_bits map, which is needed
     // to determine which nodes need to be generated.
@@ -116,8 +116,7 @@ Converter::Converter( aiScene* out, const Document& doc )
 }
 
 
-Converter::~Converter()
-{
+Converter::~Converter() {
     std::for_each( meshes.begin(), meshes.end(), Util::delete_fun<aiMesh>() );
     std::for_each( materials.begin(), materials.end(), Util::delete_fun<aiMaterial>() );
     std::for_each( animations.begin(), animations.end(), Util::delete_fun<aiAnimation>() );
@@ -126,8 +125,7 @@ Converter::~Converter()
     std::for_each( textures.begin(), textures.end(), Util::delete_fun<aiTexture>() );
 }
 
-void Converter::ConvertRootNode()
-{
+void Converter::ConvertRootNode() {
     out->mRootNode = new aiNode();
     out->mRootNode->mName.Set( "RootNode" );
 
@@ -354,10 +352,12 @@ void Converter::ConvertCamera( const Model& model, const Camera& cam )
     out_camera->mName.Set( FixNodeName( model.Name() ) );
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
+
     //cameras are defined along positive x direction
-    out_camera->mPosition = aiVector3D(0.0f);
-    out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
-    out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
+    out_camera->mPosition = cam.Position();
+    out_camera->mLookAt = ( cam.InterestPosition() - out_camera->mPosition ).Normalize();
+    out_camera->mUp = cam.UpVector();
+
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD( cam.FieldOfView() );
     out_camera->mClipPlaneNear = cam.NearPlane();
     out_camera->mClipPlaneFar = cam.FarPlane();
@@ -1130,14 +1130,14 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
                 out_mesh->mBitangents[ cursor ] = ( *binormals )[ in_cursor ];
             }
 
-            for ( unsigned int i = 0; i < num_uvs; ++i ) {
-                const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords( i );
-                out_mesh->mTextureCoords[ i ][ cursor ] = aiVector3D( uvs[ in_cursor ].x, uvs[ in_cursor ].y, 0.0f );
+            for ( unsigned int j = 0; j < num_uvs; ++j ) {
+                const std::vector<aiVector2D>& uvs = mesh.GetTextureCoords( j );
+                out_mesh->mTextureCoords[ j ][ cursor ] = aiVector3D( uvs[ in_cursor ].x, uvs[ in_cursor ].y, 0.0f );
             }
 
-            for ( unsigned int i = 0; i < num_vcs; ++i ) {
-                const std::vector<aiColor4D>& cols = mesh.GetVertexColors( i );
-                out_mesh->mColors[ i ][ cursor ] = cols[ in_cursor ];
+            for ( unsigned int j = 0; j < num_vcs; ++j ) {
+                const std::vector<aiColor4D>& cols = mesh.GetVertexColors( j );
+                out_mesh->mColors[ j ][ cursor ] = cols[ in_cursor ];
             }
         }
     }

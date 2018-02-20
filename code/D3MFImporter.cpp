@@ -205,10 +205,11 @@ private:
              const std::string nodeName( xmlReader->getNodeName() );
              if(xmlReader->getNodeName() == D3MF::XmlTag::triangle) {
                  faces.push_back(ReadTriangle());
-             } else if ( nodeName == D3MF::XmlTag::pid ) {
-                 const std::string matId( xmlReader->getAttributeValue( nodeName.c_str() ) );
-                 int matIdx( std::atoi( matId.c_str() ) );
-                 mesh->mMaterialIndex = matIdx;
+                 const char *pidToken( xmlReader->getAttributeValue( D3MF::XmlTag::pid.c_str() ) );
+                 if ( nullptr != pidToken ) {
+                     int matIdx( std::atoi( pidToken ) );
+                     mesh->mMaterialIndex = matIdx;
+                 }
              }
          }
 
@@ -234,6 +235,7 @@ private:
     void ReadBaseMaterials() {
         while ( ReadToEndElement( D3MF::XmlTag::basematerials ) ) {
             mMaterials.push_back( readMaterialDef() );
+            xmlReader->read();
         }
     }
 
@@ -324,8 +326,7 @@ private:
         return false;
     }
 
-    bool ReadToEndElement(const std::string& closeTag)
-    {
+    bool ReadToEndElement(const std::string& closeTag) {
         while(xmlReader->read())
         {
             if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT) {

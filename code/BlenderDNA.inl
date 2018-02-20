@@ -502,7 +502,7 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
 {
     // the file blocks appear in list sorted by
     // with ascending base addresses so we can run a
-    // binary search to locate the pointee quickly.
+    // binary search to locate the pointer quickly.
 
     // NOTE: Blender seems to distinguish between side-by-side
     // data (stored in the same data block) and far pointers,

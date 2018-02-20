@@ -168,6 +168,55 @@ public:
         return wrapped->ComparePaths (one,second);
     }
 
+    // -------------------------------------------------------------------
+    /** Pushes a new directory onto the directory stack. */
+    bool PushDirectory(const std::string &path)
+    {
+        return wrapped->PushDirectory(path);
+    }
+
+    // -------------------------------------------------------------------
+    /** Returns the top directory from the stack. */
+    const std::string &CurrentDirectory() const
+    {
+        return wrapped->CurrentDirectory();
+    }
+
+    // -------------------------------------------------------------------
+    /** Returns the number of directories stored on the stack. */
+    size_t StackSize() const
+    {
+        return wrapped->StackSize();
+    }
+
+    // -------------------------------------------------------------------
+    /** Pops the top directory from the stack. */
+    bool PopDirectory()
+    {
+        return wrapped->PopDirectory();
+    }
+
+    // -------------------------------------------------------------------
+    /** Creates an new directory at the given path. */
+    bool CreateDirectory(const std::string &path)
+    {
+        return wrapped->CreateDirectory(path);
+    }
+
+    // -------------------------------------------------------------------
+    /** Will change the current directory to the given path. */
+    bool ChangeDirectory(const std::string &path)
+    {
+        return wrapped->ChangeDirectory(path);
+    }
+
+    // -------------------------------------------------------------------
+    /** Delete file. */
+    bool DeleteFile(const std::string &file)
+    {
+        return wrapped->DeleteFile(file);
+    }
+
 private:
 
     // -------------------------------------------------------------------

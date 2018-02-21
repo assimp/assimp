@@ -579,6 +579,7 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
     bool ok;
 
     const float zero_epsilon = 1e-6f;
+    const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for ( size_t i = 0; i < TransformationComp_MAXIMUM; ++i ) {
         const TransformationComp comp = static_cast< TransformationComp >( i );
 
@@ -586,9 +587,17 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
             continue;
         }
 
+        bool scale_compare = ( comp == TransformationComp_GeometricScaling || comp == TransformationComp_Scaling );
+
         const aiVector3D& v = PropertyGet<aiVector3D>( props, NameTransformationCompProperty( comp ), ok );
-        if ( ok && v.SquareLength() > zero_epsilon ) {
-            return true;
+        if ( ok && scale_compare ) {
+            if ( (v - all_ones).SquareLength() > zero_epsilon ) {
+                return true;
+            }
+        } else if ( ok ) {
+            if ( v.SquareLength() > zero_epsilon ) {
+                return true;
+            }
         }
     }
 
@@ -612,6 +621,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
 
     // generate transformation matrices for all the different transformation components
     const float zero_epsilon = 1e-6f;
+    const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     bool is_complex = false;
 
     const aiVector3D& PreRotation = PropertyGet<aiVector3D>( props, "PreRotation", ok );
@@ -664,7 +674,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 
     const aiVector3D& Scaling = PropertyGet<aiVector3D>( props, "Lcl Scaling", ok );
-    if ( ok && std::fabs( Scaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+    if ( ok && (Scaling - all_ones).SquareLength() > zero_epsilon ) {
         aiMatrix4x4::Scaling( Scaling, chain[ TransformationComp_Scaling ] );
     }
 
@@ -674,7 +684,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 
     const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>( props, "GeometricScaling", ok );
-    if ( ok && std::fabs( GeometricScaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+    if ( ok && (GeometricScaling - all_ones).SquareLength() > zero_epsilon ) {
         is_complex = true;
         aiMatrix4x4::Scaling( GeometricScaling, chain[ TransformationComp_GeometricScaling ] );
         aiVector3D GeometricScalingInverse = GeometricScaling;

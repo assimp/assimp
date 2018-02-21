@@ -126,7 +126,6 @@ protected:
     void WriteSceneLibrary();
 
     /// Prepare the animation library
-    void PrepareAnimations();
     std::vector<aiNodeAnim> PrepareNodeAnimations(const aiAnimation* animation);
     
 	// customized, Writes the animation library

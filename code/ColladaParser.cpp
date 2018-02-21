@@ -3116,6 +3116,85 @@ const char* ColladaParser::TestTextContent()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Calculates the resulting transformation from all the given transform steps
+void ColladaParser::CalculateResultTransform( const std::vector<Transform>& pTransforms, aiVector3D& outScaling, aiQuaternion& outRotation, aiVector3D& outPosition) const {
+    
+    aiMatrix4x4 res;
+    aiVector3D position, scaling; aiQuaternion rotation;
+    aiVector3D resScaling(1.0f, 1.0f, 1.0f);
+    
+    for( std::vector<Transform>::const_iterator it = pTransforms.begin(); it != pTransforms.end(); ++it)
+    {
+        const Transform& tf = *it;
+        switch( tf.mType)
+        {
+            case TF_LOOKAT:
+            {
+                aiVector3D pos( tf.f[0], tf.f[1], tf.f[2]);
+                aiVector3D dstPos( tf.f[3], tf.f[4], tf.f[5]);
+                aiVector3D up = aiVector3D( tf.f[6], tf.f[7], tf.f[8]).Normalize();
+                aiVector3D dir = aiVector3D( dstPos - pos).Normalize();
+                aiVector3D right = (dir ^ up).Normalize();
+                
+                res *= aiMatrix4x4(
+                                   right.x, up.x, -dir.x, pos.x,
+                                   right.y, up.y, -dir.y, pos.y,
+                                   right.z, up.z, -dir.z, pos.z,
+                                   0, 0, 0, 1);
+                
+                break;
+            }
+            case TF_ROTATE:
+            {
+                aiMatrix4x4 rot;
+                ai_real angle = tf.f[3] * ai_real( AI_MATH_PI) / ai_real( 180.0 );
+                aiVector3D axis( tf.f[0], tf.f[1], tf.f[2]);
+                aiMatrix4x4::Rotation( angle, axis, rot);
+                res *= rot;
+                break;
+            }
+            case TF_TRANSLATE:
+            {
+                aiMatrix4x4 trans;
+                aiMatrix4x4::Translation( aiVector3D( tf.f[0], tf.f[1], tf.f[2]), trans);
+                res *= trans;
+                break;
+            }
+            case TF_SCALE:
+            {
+                // don't multiply by a scaling matrix as scaling can be (0, 0, 0)
+                resScaling = resScaling.SymMul(aiVector3D( tf.f[0], tf.f[1], tf.f[2]));
+                break;
+            }
+            case TF_SKEW:
+                // TODO: (thom)
+                ai_assert( false);
+                break;
+            case TF_MATRIX:
+            {
+                aiMatrix4x4 mat( tf.f[0], tf.f[1], tf.f[2], tf.f[3], tf.f[4], tf.f[5], tf.f[6], tf.f[7],
+                                tf.f[8], tf.f[9], tf.f[10], tf.f[11], tf.f[12], tf.f[13], tf.f[14], tf.f[15]);
+                
+                // extract the scaling factors (supposed not 0 otherwise the matrix is singular)
+                mat.Decompose(scaling, rotation, position);
+                res*= aiMatrix4x4(aiVector3D(1.0f, 1.0f, 1.0f), rotation, position);
+                resScaling = resScaling.SymMul(scaling);
+                
+                break;
+            }
+            default:
+                ai_assert( false);
+                break;
+        }
+    }
+    
+    res.Decompose(scaling, rotation, position);
+    outScaling = resScaling;
+    outRotation = rotation;
+    outPosition = position;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Calculates the resulting transformation fromm all the given transform steps
 aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform>& pTransforms) const
 {

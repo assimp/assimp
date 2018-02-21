@@ -582,8 +582,7 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
     for ( size_t i = 0; i < TransformationComp_MAXIMUM; ++i ) {
         const TransformationComp comp = static_cast< TransformationComp >( i );
 
-        if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
-                comp == TransformationComp_GeometricScaling || comp == TransformationComp_GeometricRotation || comp == TransformationComp_GeometricTranslation ) {
+        if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ) {
             continue;
         }
 
@@ -676,6 +675,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
 
     const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>( props, "GeometricScaling", ok );
     if ( ok && std::fabs( GeometricScaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+        is_complex = true;
         aiMatrix4x4::Scaling( GeometricScaling, chain[ TransformationComp_GeometricScaling ] );
         aiVector3D GeometricScalingInverse = GeometricScaling;
         bool canscale = true;
@@ -695,6 +695,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
 
     const aiVector3D& GeometricRotation = PropertyGet<aiVector3D>( props, "GeometricRotation", ok );
     if ( ok && GeometricRotation.SquareLength() > zero_epsilon ) {
+        is_complex = true;
         GetRotationMatrix( rot, GeometricRotation, chain[ TransformationComp_GeometricRotation ] );
         GetRotationMatrix( rot, GeometricRotation, chain[ TransformationComp_GeometricRotationInverse ] );
         chain[ TransformationComp_GeometricRotationInverse ].Inverse();
@@ -702,6 +703,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
 
     const aiVector3D& GeometricTranslation = PropertyGet<aiVector3D>( props, "GeometricTranslation", ok );
     if ( ok && GeometricTranslation.SquareLength() > zero_epsilon ) {
+        is_complex = true;
         aiMatrix4x4::Translation( GeometricTranslation, chain[ TransformationComp_GeometricTranslation ] );
         aiMatrix4x4::Translation( -GeometricTranslation, chain[ TransformationComp_GeometricTranslationInverse ] );
     }
@@ -2265,8 +2267,7 @@ void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
 
             has_any = true;
 
-            if ( comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation &&
-                comp != TransformationComp_GeometricScaling && comp != TransformationComp_GeometricRotation && comp != TransformationComp_GeometricTranslation )
+            if ( comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation )
             {
                 has_complex = true;
             }

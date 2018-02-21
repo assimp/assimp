@@ -95,51 +95,6 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 } // end of namespace Assimp
 
 namespace {
-    /*
-    template <typename T>
-    class ArrayIterator {
-    public:
-        ArrayIterator(T* value): _value(value){};
-        ArrayIterator(const ArrayIterator& other): _value(other._value){};
-        ArrayIterator& operator++(){
-            ++_value;
-            return *this;
-        }
-        ArrayIterator operator++(int){
-            ArrayIterator<T> copy(*this);
-            operator++();
-            return copy;
-        }
-        ArrayIterator& operator+=(size_t n){
-            _value+=n;
-            return *this;
-        }
-        bool operator!=(const ArrayIterator& other) const { return _value!=other._value;}
-        bool operator==(const ArrayIterator& other) const { return !operator!=(other);}
-        T& operator*() {return *_value;};
-
-    private:
-        T* _value;
-    };
-
-    template <typename T>
-    class IterableArray {
-    public:
-        IterableArray(): _array(nullptr), _size(0){};
-        IterableArray(T* array, size_t size): _array(array), _size(size){};
-        ArrayIterator<T> begin() {
-            return {_array};
-        };
-        ArrayIterator<T> end() {
-            return {_array+_size};
-        };
-        size_t size() const {
-            return _size;
-        }
-    private:
-        T* _array;
-        size_t _size;
-    };*/
 
     template <typename T>
     class IterableArray {
@@ -1419,139 +1374,6 @@ void ColladaExporter::WriteSceneLibrary()
 }
 
 // ------------------------------------------------------------------------------------------------
-void ColladaExporter::PrepareAnimations()
-{
-    // find all the nodes targeted by an animation
-    struct AnimatedNode {
-        aiNode* node = nullptr;
-        aiAnimation* animation = nullptr;
-        AnimatedNode(aiNode* _node, aiAnimation* _animation): node(_node), animation(_animation){}
-    };
-    std::map<std::string, AnimatedNode> animatedNodes;
-    /*std::function<aiNode*(aiNode*, const aiString&)> findNamedNode;
-    findNamedNode = [&findNamedNode](aiNode* node, const aiString& name){
-        aiNode* namedNode = nullptr;
-        if (node){
-            if (name==node->mName) {
-                namedNode = node;
-            }
-            else {
-                for ( auto child = node->mChildren, childEnd = node->mChildren+node->mNumChildren; child!=childEnd; ++child) {
-                    namedNode = findNamedNode(*child, name);
-                    if (namedNode) {
-                        break;
-                    }
-                }
-            }
-        }
-        return namedNode;
-    };
-    for( auto anim = mScene->mAnimations, animEnd = mScene->mAnimations+mScene->mNumAnimations; anim!=animEnd; ++anim) {
-        aiNode* node = findNamedNode(mScene->mRootNode, (*anim)->mName);
-        if (node){
-            animatedNodes.emplace((*anim)->mName, node);
-        }
-    }*/
-    //std::set<aiAnimation*> animationTargets;
-    std::map<std::string,aiAnimation*> animationSet;
-    for( auto anim = mScene->mAnimations, animEnd = anim+mScene->mNumAnimations; anim!=animEnd; ++anim) {
-        //animationTargets.insert((*anim)->mName.C_Str());
-        animationSet.emplace((*anim)->mName.C_Str(), *anim);
-    }
-    std::function<void(aiNode*)> findTargetNodes;
-    findTargetNodes = [&findTargetNodes, &animationSet, &animatedNodes](aiNode* node){
-        if (node){
-            aiString nodeName = node->mName;
-            //auto it = animationTargets.find(nodeName.C_Str());
-            auto it = animationSet.find(nodeName.C_Str());
-            if (animationSet.end()!=it) {
-                animatedNodes.emplace(std::string(nodeName.C_Str()), AnimatedNode{node, it->second});
-                animationSet.erase(it);
-            }
-            if (0<animationSet.size()) {
-                for ( auto child = node->mChildren, childEnd = node->mChildren+node->mNumChildren; child!=childEnd; ++child) {
-                    if (0<animationSet.size()) {
-                        findTargetNodes(*child);
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
-        }
-    };
-
-    std::vector<aiVectorKey> sampledPositionKeys;
-    std::vector<aiQuatKey> sampledRotationKeys;
-    std::vector<aiVectorKey> sampledScalingKeys;
-
-    for (auto animNode = animatedNodes.cbegin(), animNodeEnd = animatedNodes.cend(); animNode!=animNodeEnd; ++animNode){
-        aiAnimation* animation = animNode->second.animation;
-        if (0 < animation->mNumChannels) {
-            // resolve all the node animations which compose the animation
-            for (auto nodeAnim = animation->mChannels, nodeAnimEnd = nodeAnim+animation->mNumChannels; nodeAnim!=nodeAnimEnd; ++ nodeAnim) {
-                aiNodeAnim* nodeAnimation = *nodeAnim;
-
-                if (0==nodeAnimation->mNumPositionKeys && 0==nodeAnimation->mNumRotationKeys && 0==nodeAnimation->mNumScalingKeys) {
-                    break;
-                }
-
-                aiVector3D position, scaling; aiQuaternion rotation;
-                animNode->second.node->mTransformation.Decompose(scaling, rotation, position);
-                aiVectorKey nodePositionKey(0, position), nodeScalingKey(0, scaling);
-                aiQuatKey nodeRotationKey(0, rotation);
-
-                AnimKeyInterpolator<aiVectorKey> positionKeyInterpolator(nodeAnimation->mPositionKeys, nodeAnimation->mNumPositionKeys, animation->mDuration, nodePositionKey, nodeAnimation->mPreState, nodeAnimation->mPostState);
-                AnimKeyInterpolator<aiQuatKey> rotationKeyInterpolator(nodeAnimation->mRotationKeys, nodeAnimation->mNumRotationKeys, animation->mDuration, nodeRotationKey, nodeAnimation->mPreState, nodeAnimation->mPostState);
-                AnimKeyInterpolator<aiVectorKey> scalingKeyInterpolator(nodeAnimation->mScalingKeys, nodeAnimation->mNumScalingKeys, animation->mDuration, nodeScalingKey, nodeAnimation->mPreState, nodeAnimation->mPostState);
-
-
-                // get the first time key (if keys of a specific kind exist, there must be a key at time 0)
-                double startTime = 1e20;
-
-                if (0<positionKeyInterpolator.keys.size()){
-                    startTime = std::min(startTime, positionKeyInterpolator.keys.cbegin()->mTime);
-                }
-                if (0<rotationKeyInterpolator.keys.size()){
-                    startTime = std::min(startTime, rotationKeyInterpolator.keys.cbegin()->mTime);
-                }
-                if (0<scalingKeyInterpolator.keys.size()){
-                    startTime = std::min(startTime, scalingKeyInterpolator.keys.cbegin()->mTime);
-                }
-
-                ai_real time = startTime;
-
-                while ( 1 ){
-                    sampledPositionKeys.push_back(positionKeyInterpolator.interpolate(time));
-                    sampledRotationKeys.push_back(rotationKeyInterpolator.interpolate(time));
-                    sampledScalingKeys.push_back(scalingKeyInterpolator.interpolate(time));
-
-                    // find next time value
-                    time = std::min(static_cast<ai_real>(positionKeyInterpolator.nextTimeKey()), static_cast<ai_real>(rotationKeyInterpolator.nextTimeKey()));
-                    time = std::min(time, static_cast<ai_real>(scalingKeyInterpolator.nextTimeKey()));
-                    if (time>animation->mDuration) {
-                        break;
-                    }
-                }
-
-                delete[] nodeAnimation->mPositionKeys;
-                delete[] nodeAnimation->mRotationKeys;
-                delete[] nodeAnimation->mScalingKeys;
-                nodeAnimation->mNumPositionKeys = static_cast<unsigned int>(sampledPositionKeys.size());
-                nodeAnimation->mNumRotationKeys = static_cast<unsigned int>(sampledRotationKeys.size());
-                nodeAnimation->mNumScalingKeys = static_cast<unsigned int>(sampledScalingKeys.size());
-                nodeAnimation->mPositionKeys = new aiVectorKey[nodeAnimation->mNumPositionKeys];
-                nodeAnimation->mRotationKeys = new aiQuatKey[nodeAnimation->mNumRotationKeys];
-                nodeAnimation->mScalingKeys = new aiVectorKey[nodeAnimation->mNumScalingKeys];
-                std::move(sampledPositionKeys.begin(), sampledPositionKeys.end(), nodeAnimation->mPositionKeys);
-                std::move(sampledRotationKeys.begin(), sampledRotationKeys.end(), nodeAnimation->mRotationKeys);
-                std::move(sampledScalingKeys.begin(), sampledScalingKeys.end(), nodeAnimation->mScalingKeys);
-            }
-        }
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
 std::vector<aiNodeAnim> ColladaExporter::PrepareNodeAnimations(const aiAnimation* animation)
 {
     // result
@@ -1562,19 +1384,12 @@ std::vector<aiNodeAnim> ColladaExporter::PrepareNodeAnimations(const aiAnimation
     }
 
     // find all the nodes targeted by an animation
-    /*struct AnimatedNode {
-        aiNode* node = nullptr;
-        aiAnimation* animation = nullptr;
-        AnimatedNode(aiNode* _node, aiAnimation* _animation): node(_node), animation(_animation){}
-    };*/
     static std::unique_ptr<std::map<std::string, aiNode*>> animatedNodes = nullptr;
 
     if (nullptr==animatedNodes){
         animatedNodes.reset(new std::map<std::string, aiNode*>());
-        //std::map<std::string,aiAnimation*> animationSet;
         std::set<std::string> nodeAnimNames;
         for( auto anim = mScene->mAnimations, animEnd = anim+mScene->mNumAnimations; anim!=animEnd; ++anim) {
-            //animationSet.emplace((*anim)->mName.C_Str(), *anim);
             for ( auto nodeAnim = (*anim)->mChannels, nodeAnimEnd = nodeAnim + (*anim)->mNumChannels; nodeAnim!=nodeAnimEnd; ++nodeAnim) {
                nodeAnimNames.insert((*nodeAnim)->mNodeName.C_Str());
             }
@@ -1585,7 +1400,6 @@ std::vector<aiNodeAnim> ColladaExporter::PrepareNodeAnimations(const aiAnimation
         findTargetNodes = [&findTargetNodes, &nodeAnimNames, &animatedNodesPtr](aiNode* node){
             if (node){
                 aiString nodeName = node->mName;
-                //auto it = animationTargets.find(nodeName.C_Str());
                 auto it = nodeAnimNames.find(nodeName.C_Str());
                 if (nodeAnimNames.end()!=it) {
                     animatedNodesPtr->emplace(*it, node);
@@ -1608,8 +1422,8 @@ std::vector<aiNodeAnim> ColladaExporter::PrepareNodeAnimations(const aiAnimation
 
 
     // prepare all the anim nodes of the given animation
-
     if (0 < animation->mNumChannels) {
+
         // resolve all the node animations which compose the animation
         for (const auto *nodeAnim = animation->mChannels, *nodeAnimEnd = nodeAnim+animation->mNumChannels; nodeAnim!=nodeAnimEnd; ++ nodeAnim) {
 

@@ -85,7 +85,7 @@ public:
         if ( mBase.empty() ) {
             mBase = ".";
             mBase += getOsSeparator();
-        } else if ((s = *(base.end()-1)) != '\\' && s != '/') {
+        } else if ((s = *(mBase.end()-1)) != '\\' && s != '/') {
             mBase += getOsSeparator();
         }
 
@@ -123,6 +123,10 @@ public:
     /** Open a new file with a given path. */
     IOStream* Open( const char* pFile, const char* pMode = "rb") {
         ai_assert( nullptr != mWrapped );
+        if ( nullptr == pFile || nullptr == pMode ) {
+            return nullptr;
+        }
+        
         ai_assert( nullptr != pFile );
         ai_assert( nullptr != pMode );
 

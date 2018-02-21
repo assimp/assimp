@@ -82,7 +82,10 @@ public:
     *  The different parts that make up the final local transformation of a fbx-node
     */
     enum TransformationComp {
-        TransformationComp_Translation = 0,
+        TransformationComp_GeometricScalingInverse = 0,
+        TransformationComp_GeometricRotationInverse,
+        TransformationComp_GeometricTranslationInverse,
+        TransformationComp_Translation,
         TransformationComp_RotationOffset,
         TransformationComp_RotationPivot,
         TransformationComp_PreRotation,
@@ -153,7 +156,7 @@ private:
     /**
     *  note: memory for output_nodes will be managed by the caller
     */
-    void GenerateTransformationNodeChain(const Model& model, std::vector<aiNode*>& output_nodes);
+    void GenerateTransformationNodeChain(const Model& model, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes);
 
     // ------------------------------------------------------------------------------------------------
     void SetupNodeMetadata(const Model& model, aiNode& nd);

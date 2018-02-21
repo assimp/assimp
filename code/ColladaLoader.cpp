@@ -1105,6 +1105,13 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
     std::vector<aiNodeAnim*> anims;
     std::vector<aiMeshMorphAnim*> morphAnims;
+    
+    struct CompoundAnimKey {
+        double time;
+        aiVector3D position;
+        aiQuaternion rotation;
+        aiVector3D scaling;
+    };
 
     for( std::vector<const aiNode*>::const_iterator nit = nodes.begin(); nit != nodes.end(); ++nit)
     {
@@ -1262,7 +1269,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
       }
         }
 
-    std::vector<aiMatrix4x4> resultTrafos;
+    std::vector<CompoundAnimKey> resultTrafos;
     if( !entries.empty() && entries.front().mTimeAccessor->mCount > 0 )
     {
           // create a local transformation chain of the node's transforms
@@ -1315,11 +1322,12 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
               }
 
               // Calculate resulting transformation
-              aiMatrix4x4 mat = pParser.CalculateResultTransform( transforms);
+              CompoundAnimKey compoundKey;
+              pParser.CalculateResultTransform( transforms, compoundKey.scaling, compoundKey.rotation, compoundKey.position);
 
               // out of laziness: we store the time in matrix.d4
-              mat.d4 = time;
-              resultTrafos.push_back( mat);
+              compoundKey.time = time;
+              resultTrafos.push_back( std::move(compoundKey) );
 
               // find next point in time to evaluate. That's the closest frame larger than the current in any channel
               ai_real nextTime = ai_real( 1e20 );
@@ -1386,14 +1394,14 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
               for( size_t a = 0; a < resultTrafos.size(); ++a)
               {
-                  aiMatrix4x4 mat = resultTrafos[a];
-                  double time = double( mat.d4); // remember? time is stored in mat.d4
-                    mat.d4 = 1.0f;
+                  CompoundAnimKey& compoundKey = resultTrafos[a];
 
-                  dstAnim->mPositionKeys[a].mTime = time;
-                  dstAnim->mRotationKeys[a].mTime = time;
-                  dstAnim->mScalingKeys[a].mTime = time;
-                  mat.Decompose( dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
+                  dstAnim->mPositionKeys[a].mTime = compoundKey.time;
+                  dstAnim->mRotationKeys[a].mTime = compoundKey.time;
+                  dstAnim->mScalingKeys[a].mTime = compoundKey.time;
+                  dstAnim->mScalingKeys[a].mValue = compoundKey.scaling;
+                  dstAnim->mRotationKeys[a].mValue = compoundKey.rotation;
+                  dstAnim->mPositionKeys[a].mValue = compoundKey.position;
               }
 
               anims.push_back( dstAnim);

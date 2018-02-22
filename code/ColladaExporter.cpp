@@ -159,18 +159,24 @@ namespace {
             if (time==next->mTime) {
                 if (keys.end()!=futureKey){
                     ++futureKey;
+                    if (keys.end()==futureKey){
+                        nodeDefaultKey.mTime = duration;
+                    }
                 }
                 interpolatedKey.mValue = next->mValue;
             }
             else {
-                const KeyType *previousKey = nullptr, *nextKey = next;
+                const KeyType *previousKey = nullptr, *nextKey = nullptr;
                 if (time<timeRange.start){
                     nodeDefaultKey.mTime = 0.0;
+                    nextKey = next;
                     previousKey = &nodeDefaultKey;
                 }
                 else if (time>=timeRange.end) {
                     nodeDefaultKey.mTime = duration;
+                    previousKey = keys.cend()-1;
                     nextKey = &nodeDefaultKey;
+                    futureKey = next;
                 }
                 else {
                     while (time>futureKey->mTime) {

@@ -146,9 +146,9 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
     // Augment: Fix Level 0 - remove the key collapsing step as some exporters don't support the results
     // Process animations
-    /*for (unsigned int a = 0; a < pScene->mNumAnimations;++a) {
+    for (unsigned int a = 0; a < pScene->mNumAnimations;++a) {
         ProcessAnimation( pScene->mAnimations[a]);
-    }*/
+    }
 
 
     if (out)    {

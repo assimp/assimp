@@ -1396,6 +1396,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
               {
                   CompoundAnimKey& compoundKey = resultTrafos[a];
 
+                  dstAnim->mPostState = aiAnimBehaviour_STEP; //values remain constant after last time key
                   dstAnim->mPositionKeys[a].mTime = compoundKey.time;
                   dstAnim->mRotationKeys[a].mTime = compoundKey.time;
                   dstAnim->mScalingKeys[a].mTime = compoundKey.time;

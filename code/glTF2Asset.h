@@ -911,6 +911,8 @@ namespace glTF2
 
         struct AnimParameters {
             Ref<Accessor> TIME;           //!< Accessor reference to a buffer storing a array of floating point scalar values.
+            Ref<Accessor> TIME2;          //!< Accessor reference to a buffer storing a array of floating point scalar values.
+            Ref<Accessor> TIME3;          //!< Accessor reference to a buffer storing a array of floating point scalar values.
             Ref<Accessor> rotation;       //!< Accessor reference to a buffer storing a array of four-component floating-point vectors.
             Ref<Accessor> scale;          //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
             Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
@@ -931,6 +933,10 @@ namespace glTF2
         Ref<Accessor> GetAccessor(std::string name) {
             if (name == "TIME") {
                 return Parameters.TIME;
+            } else if (name == "TIME2") {
+                return Parameters.TIME2;
+            } else if (name == "TIME3") {
+                return Parameters.TIME3;
             } else if (name == "rotation") {
                 return Parameters.rotation;
             } else if (name == "scale") {

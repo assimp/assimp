@@ -61,6 +61,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unzip.h>
 #include <assimp/irrXMLWrapper.h>
 #include "3MFXmlTags.h"
+#include <assimp/fast_atof.h>
+
+#include <iomanip>
 
 namespace Assimp {
 namespace D3MF {
@@ -175,10 +178,8 @@ private:
     void ImportVertices(aiMesh* mesh) {
         std::vector<aiVector3D> vertices;
 
-        while(ReadToEndElement(D3MF::XmlTag::vertices))
-        {
-            if(xmlReader->getNodeName() == D3MF::XmlTag::vertex)
-            {
+        while(ReadToEndElement(D3MF::XmlTag::vertices)) {
+            if(xmlReader->getNodeName() == D3MF::XmlTag::vertex) {
                 vertices.push_back(ReadVertex());
             }
         }
@@ -205,7 +206,7 @@ private:
              const std::string nodeName( xmlReader->getNodeName() );
              if(xmlReader->getNodeName() == D3MF::XmlTag::triangle) {
                  faces.push_back(ReadTriangle());
-                 const char *pidToken( xmlReader->getAttributeValue( D3MF::XmlTag::pid.c_str() ) );
+                 const char *pidToken( xmlReader->getAttributeValue( D3MF::XmlTag::p1.c_str() ) );
                  if ( nullptr != pidToken ) {
                      int matIdx( std::atoi( pidToken ) );
                      mesh->mMaterialIndex = matIdx;
@@ -253,92 +254,85 @@ private:
         if ( '#' != *buf ) {
             return false;
         }
-
-        char comp[ 2 ] = { 0,0 };
-        comp[ 0 ] = *buf;
         ++buf;
-        comp[ 1 ] = *buf;
-        ++buf;
-        diffuse.r = static_cast<ai_real>( std::atoi( comp ) );
+        char comp[ 3 ] = { 0,0,'\0' };
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.g = static_cast<ai_real>( std::atoi( comp ) );
+        diffuse.r = static_cast<ai_real>( strtol( comp, NULL, 16 ) );
+
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.b = static_cast<ai_real>( std::atoi( comp ) );
+        diffuse.g = static_cast< ai_real >( strtol( comp, NULL, 16 ) );
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.a = static_cast<ai_real>( std::atoi( comp ) );
+        diffuse.b = static_cast< ai_real >( strtol( comp, NULL, 16 ) );
+
+        comp[ 0 ] = *buf;
+        ++buf;
+        comp[ 1 ] = *buf;
+        ++buf;
+        diffuse.a = static_cast< ai_real >( strtol( comp, NULL, 16 ) );
 
         return true;
     }
 
     aiMaterial *readMaterialDef() {
         aiMaterial *mat( nullptr );
-        //while ( ReadToEndElement( D3MF::XmlTag::basematerials_base ) ) {
-            const char *name( nullptr );
-            const char *color( nullptr );
-            const std::string nodeName( xmlReader->getNodeName() );
-            if ( nodeName == D3MF::XmlTag::basematerials_base ) {
-                name = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_name.c_str() );
+        const char *name( nullptr );
+        const char *color( nullptr );
+        const std::string nodeName( xmlReader->getNodeName() );
+        if ( nodeName == D3MF::XmlTag::basematerials_base ) {
+            name = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_name.c_str() );
 
-                aiString matName;
-                matName.Set( name );
-                mat = new aiMaterial;
-                mat->AddProperty( &matName, AI_MATKEY_NAME );
+            aiString matName;
+            matName.Set( name );
+            mat = new aiMaterial;
+            mat->AddProperty( &matName, AI_MATKEY_NAME );
 
-                color = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_displaycolor.c_str() );
-                aiColor4D diffuse;
-                if ( parseColor( color, diffuse ) ) {
-                    mat->AddProperty<aiColor4D>( &diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
-                }
+            color = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_displaycolor.c_str() );
+            aiColor4D diffuse;
+            if ( parseColor( color, diffuse ) ) {
+                mat->AddProperty<aiColor4D>( &diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
             }
-        //}
+        }
 
         return mat;
     }
 
 private:
-    bool ReadToStartElement(const std::string& startTag)
-    {
-        while(xmlReader->read())
-        {
-            if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT && xmlReader->getNodeName() == startTag)
-            {
+    bool ReadToStartElement(const std::string& startTag) {
+        while(xmlReader->read()) {
+            const std::string &nodeName( xmlReader->getNodeName() );
+            if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT && nodeName == startTag) {
                 return true;
-            }
-            else if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT_END &&
-                     xmlReader->getNodeName() == startTag)
-            {
+            } else if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT_END && nodeName == startTag) {
                 return false;
             }
         }
-        //DefaultLogger::get()->error("unexpected EOF, expected closing <" + closeTag + "> tag");
+
         return false;
     }
 
     bool ReadToEndElement(const std::string& closeTag) {
-        while(xmlReader->read())
-        {
+        while(xmlReader->read()) {
+            const std::string &nodeName( xmlReader->getNodeName() );
             if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT) {
                 return true;
-            }
-            else if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT_END
-                     && xmlReader->getNodeName() == closeTag)
-            {
+            } else if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT_END && nodeName == closeTag) {
                 return false;
             }
         }
         DefaultLogger::get()->error("unexpected EOF, expected closing <" + closeTag + "> tag");
+
         return false;
     }
 

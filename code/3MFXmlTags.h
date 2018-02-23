@@ -45,6 +45,7 @@ namespace Assimp {
 namespace D3MF {
 
 namespace XmlTag {
+    // Model-data specific tags
     static const std::string model = "model";
     static const std::string model_unit = "unit";
     static const std::string metadata = "metadata";
@@ -63,6 +64,7 @@ namespace XmlTag {
     static const std::string v3 = "v3";
     static const std::string id = "id";
     static const std::string pid = "pid";
+    static const std::string p1 = "p1";
     static const std::string name = "name";
     static const std::string type = "type";
     static const std::string build = "build";
@@ -76,6 +78,7 @@ namespace XmlTag {
     static const std::string basematerials_name = "name";
     static const std::string basematerials_displaycolor = "displaycolor";
 
+    // Meta info tags
     static const std::string CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
     static const std::string ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";
     static const std::string SCHEMA_CONTENTTYPES = "http://schemas.openxmlformats.org/package/2006/content-types";

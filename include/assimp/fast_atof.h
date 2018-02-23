@@ -129,8 +129,8 @@ inline unsigned int strtoul16( const char* in, const char** out=0)
 // Convert just one hex digit
 // Return value is UINT_MAX if the input character is not a hex digit.
 // ------------------------------------------------------------------------------------
-inline unsigned int HexDigitToDecimal(char in)
-{
+inline
+unsigned int HexDigitToDecimal(char in) {
     unsigned int out = UINT_MAX;
     if (in >= '0' && in <= '9')
         out = in - '0';

@@ -14,8 +14,8 @@
 // ------------------------------------------------------------------------------------
 
 
-#ifndef __FAST_A_TO_F_H_INCLUDED__
-#define __FAST_A_TO_F_H_INCLUDED__
+#ifndef FAST_A_TO_F_H_INCLUDED
+#define FAST_A_TO_F_H_INCLUDED
 
 #include <cmath>
 #include <limits>
@@ -26,15 +26,13 @@
 #include "StringComparison.h"
 #include <assimp/DefaultLogger.hpp>
 
-
 #ifdef _MSC_VER
 #  include <stdint.h>
 #else
 #  include <assimp/Compiler/pstdint.h>
 #endif
 
-namespace Assimp
-{
+namespace Assimp {
 
 const double fast_atof_table[16] =  {  // we write [16] here instead of [] to work around a swig bug
     0.0,
@@ -64,8 +62,9 @@ unsigned int strtoul10( const char* in, const char** out=0) {
     unsigned int value = 0;
 
     for ( ;; ) {
-        if ( *in < '0' || *in > '9' )
+        if ( *in < '0' || *in > '9' ) {
             break;
+        }
 
         value = ( value * 10 ) + ( *in - '0' );
         ++in;
@@ -109,8 +108,7 @@ unsigned int strtoul16( const char* in, const char** out=0) {
             value = ( value << 4u ) + ( *in - 'A' ) + 10;
         } else if (*in >= 'a' && *in <= 'f') {
             value = ( value << 4u ) + ( *in - 'a' ) + 10;
-        }
-        else {
+        } else {
             break;
         }
         ++in;
@@ -205,7 +203,6 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
             DefaultLogger::get()->warn( std::string( "Converting the string \"" ) + in + "\" into a value resulted in overflow." );
             return 0;
         }
-            //throw std::overflow_error();
 
         value = new_value;
 
@@ -213,21 +210,23 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
         ++cur;
 
         if (max_inout && *max_inout == cur) {
-
             if (out) { /* skip to end */
-                while (*in >= '0' && *in <= '9')
+                while ( *in >= '0' && *in <= '9' ) {
                     ++in;
+                }
                 *out = in;
             }
 
             return value;
         }
     }
-    if (out)
+    if ( out ) {
         *out = in;
+    }
 
-    if (max_inout)
+    if ( max_inout ) {
         *max_inout = cur;
+    }
 
     return value;
 }
@@ -238,7 +237,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
 inline
 int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0) {
     bool inv = (*in == '-');
-    if (inv || *in == '+') {
+    if ( inv || *in == '+' ) {
         ++in;
     }
 
@@ -249,7 +248,6 @@ int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inou
     return value;
 }
 
-
 // Number of relevant decimals for floating-point parsing.
 #define AI_FAST_ATOF_RELAVANT_DECIMALS 15
 
@@ -258,7 +256,7 @@ int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inou
 //! about 6 times faster than atof in win32.
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
-template <typename Real>
+template<typename Real>
 inline
 const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true) {
     Real f = 0;
@@ -284,10 +282,10 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
             c += 5;
         }
         return c;
-    }
+     }
 
     if (!(c[0] >= '0' && c[0] <= '9') &&
-        !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')) {
+            !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')) {
         throw std::invalid_argument("Cannot parse string "
                                     "as real number: does not start with digit "
                                     "or decimal point followed by digit.");
@@ -322,7 +320,6 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
     // A major 'E' must be allowed. Necessary for proper reading of some DXF files.
     // Thanks to Zhao Lei to point out that this if() must be outside the if (*c == '.' ..)
     if (*c == 'e' || *c == 'E') {
-
         ++c;
         const bool einv = (*c=='-');
         if (einv || *c=='+') {
@@ -352,6 +349,7 @@ inline
 ai_real fast_atof(const char* c) {
     ai_real ret(0.0);
     fast_atoreal_move<ai_real>(c, ret);
+
     return ret;
 }
 
@@ -374,4 +372,4 @@ ai_real fast_atof( const char** inout) {
 
 } //! namespace Assimp
 
-#endif // __FAST_A_TO_F_H_INCLUDED__
+#endif // FAST_A_TO_F_H_INCLUDED

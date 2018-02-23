@@ -142,6 +142,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
     nodes.reserve( conns.size() );
 
     std::vector<aiNode*> nodes_chain;
+    std::vector<aiNode*> post_nodes_chain;
 
     try {
         for( const Connection* con : conns ) {
@@ -161,6 +162,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 
             if ( model ) {
                 nodes_chain.clear();
+                post_nodes_chain.clear();
 
                 aiMatrix4x4 new_abs_transform = parent_transform;
 
@@ -168,7 +170,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 // assimp (or rather: the complicated transformation chain that
                 // is employed by fbx) means that we may need multiple aiNode's
                 // to represent a fbx node's transformation.
-                GenerateTransformationNodeChain( *model, nodes_chain );
+                GenerateTransformationNodeChain( *model, nodes_chain, post_nodes_chain );
 
                 ai_assert( nodes_chain.size() );
 
@@ -213,8 +215,25 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 // attach geometry
                 ConvertModel( *model, *nodes_chain.back(), new_abs_transform );
 
+                // now link the geometric transform inverse nodes,
+                // before we attach any child nodes
+                for( aiNode* postnode : post_nodes_chain ) {
+                    ai_assert( postnode );
+
+                    if ( last_parent != &parent ) {
+                        last_parent->mNumChildren = 1;
+                        last_parent->mChildren = new aiNode*[ 1 ];
+                        last_parent->mChildren[ 0 ] = postnode;
+                    }
+
+                    postnode->mParent = last_parent;
+                    last_parent = postnode;
+
+                    new_abs_transform *= postnode->mTransformation;
+                }
+
                 // attach sub-nodes
-                ConvertNodes( model->ID(), *nodes_chain.back(), new_abs_transform );
+                ConvertNodes( model->ID(), *last_parent, new_abs_transform );
 
                 if ( doc.Settings().readLights ) {
                     ConvertLights( *model );
@@ -396,6 +415,12 @@ const char* Converter::NameTransformationComp( TransformationComp comp )
         return "GeometricRotation";
     case TransformationComp_GeometricTranslation:
         return "GeometricTranslation";
+    case TransformationComp_GeometricScalingInverse:
+        return "GeometricScalingInverse";
+    case TransformationComp_GeometricRotationInverse:
+        return "GeometricRotationInverse";
+    case TransformationComp_GeometricTranslationInverse:
+        return "GeometricTranslationInverse";
     case TransformationComp_MAXIMUM: // this is to silence compiler warnings
     default:
         break;
@@ -437,6 +462,12 @@ const char* Converter::NameTransformationCompProperty( TransformationComp comp )
         return "GeometricRotation";
     case TransformationComp_GeometricTranslation:
         return "GeometricTranslation";
+    case TransformationComp_GeometricScalingInverse:
+        return "GeometricScalingInverse";
+    case TransformationComp_GeometricRotationInverse:
+        return "GeometricRotationInverse";
+    case TransformationComp_GeometricTranslationInverse:
+        return "GeometricTranslationInverse";
     case TransformationComp_MAXIMUM: // this is to silence compiler warnings
         break;
     }
@@ -548,17 +579,25 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
     bool ok;
 
     const float zero_epsilon = 1e-6f;
+    const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for ( size_t i = 0; i < TransformationComp_MAXIMUM; ++i ) {
         const TransformationComp comp = static_cast< TransformationComp >( i );
 
-        if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
-                comp == TransformationComp_GeometricScaling || comp == TransformationComp_GeometricRotation || comp == TransformationComp_GeometricTranslation ) {
+        if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ) {
             continue;
         }
 
+        bool scale_compare = ( comp == TransformationComp_GeometricScaling || comp == TransformationComp_Scaling );
+
         const aiVector3D& v = PropertyGet<aiVector3D>( props, NameTransformationCompProperty( comp ), ok );
-        if ( ok && v.SquareLength() > zero_epsilon ) {
-            return true;
+        if ( ok && scale_compare ) {
+            if ( (v - all_ones).SquareLength() > zero_epsilon ) {
+                return true;
+            }
+        } else if ( ok ) {
+            if ( v.SquareLength() > zero_epsilon ) {
+                return true;
+            }
         }
     }
 
@@ -570,7 +609,7 @@ std::string Converter::NameTransformationChainNode( const std::string& name, Tra
     return name + std::string( MAGIC_NODE_TAG ) + "_" + NameTransformationComp( comp );
 }
 
-void Converter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes )
+void Converter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes )
 {
     const PropertyTable& props = model.Props();
     const Model::RotOrder rot = model.RotationOrder();
@@ -582,6 +621,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
 
     // generate transformation matrices for all the different transformation components
     const float zero_epsilon = 1e-6f;
+    const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     bool is_complex = false;
 
     const aiVector3D& PreRotation = PropertyGet<aiVector3D>( props, "PreRotation", ok );
@@ -634,7 +674,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 
     const aiVector3D& Scaling = PropertyGet<aiVector3D>( props, "Lcl Scaling", ok );
-    if ( ok && std::fabs( Scaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+    if ( ok && (Scaling - all_ones).SquareLength() > zero_epsilon ) {
         aiMatrix4x4::Scaling( Scaling, chain[ TransformationComp_Scaling ] );
     }
 
@@ -644,18 +684,38 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 
     const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>( props, "GeometricScaling", ok );
-    if ( ok && std::fabs( GeometricScaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+    if ( ok && (GeometricScaling - all_ones).SquareLength() > zero_epsilon ) {
+        is_complex = true;
         aiMatrix4x4::Scaling( GeometricScaling, chain[ TransformationComp_GeometricScaling ] );
+        aiVector3D GeometricScalingInverse = GeometricScaling;
+        bool canscale = true;
+        for (size_t i = 0; i < 3; ++i) {
+            if ( std::fabs( GeometricScalingInverse[i] ) > zero_epsilon ) {
+                GeometricScalingInverse[i] = 1.0f / GeometricScaling[i];
+            } else {
+                FBXImporter::LogError( "cannot invert geometric scaling matrix with a 0.0 scale component" );
+                canscale = false;
+                break;
+            }
+        }
+        if (canscale) {
+            aiMatrix4x4::Scaling( GeometricScalingInverse, chain[ TransformationComp_GeometricScalingInverse ] );
+        }
     }
 
     const aiVector3D& GeometricRotation = PropertyGet<aiVector3D>( props, "GeometricRotation", ok );
     if ( ok && GeometricRotation.SquareLength() > zero_epsilon ) {
+        is_complex = true;
         GetRotationMatrix( rot, GeometricRotation, chain[ TransformationComp_GeometricRotation ] );
+        GetRotationMatrix( rot, GeometricRotation, chain[ TransformationComp_GeometricRotationInverse ] );
+        chain[ TransformationComp_GeometricRotationInverse ].Inverse();
     }
 
     const aiVector3D& GeometricTranslation = PropertyGet<aiVector3D>( props, "GeometricTranslation", ok );
     if ( ok && GeometricTranslation.SquareLength() > zero_epsilon ) {
+        is_complex = true;
         aiMatrix4x4::Translation( GeometricTranslation, chain[ TransformationComp_GeometricTranslation ] );
+        aiMatrix4x4::Translation( -GeometricTranslation, chain[ TransformationComp_GeometricTranslationInverse ] );
     }
 
     // is_complex needs to be consistent with NeedsComplexTransformationChain()
@@ -690,10 +750,18 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
             }
 
             aiNode* nd = new aiNode();
-            output_nodes.push_back( nd );
-
             nd->mName.Set( NameTransformationChainNode( name, comp ) );
             nd->mTransformation = chain[ i ];
+
+            // geometric inverses go in a post-node chain
+            if ( comp == TransformationComp_GeometricScalingInverse ||
+                 comp == TransformationComp_GeometricRotationInverse ||
+                 comp == TransformationComp_GeometricTranslationInverse
+            ) {
+                post_output_nodes.push_back( nd );
+            } else {
+                output_nodes.push_back( nd );
+            }
         }
 
         ai_assert( output_nodes.size() );
@@ -2209,8 +2277,7 @@ void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
 
             has_any = true;
 
-            if ( comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation &&
-                comp != TransformationComp_GeometricScaling && comp != TransformationComp_GeometricRotation && comp != TransformationComp_GeometricTranslation )
+            if ( comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation )
             {
                 has_complex = true;
             }

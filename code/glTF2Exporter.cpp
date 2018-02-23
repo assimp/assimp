@@ -166,6 +166,91 @@ namespace {
         
         return minMaxValues;
     }
+    
+    class AKeyExtraction {
+    public:
+        size_t keyCount;
+        AttribType::Value attribInType;
+        AttribType::Value attribOutType;
+        ComponentType componentType;
+        Ref<Accessor>& targetTimeAccessor;
+        Ref<Accessor>& targetValueAccessor;
+        
+        AKeyExtraction(size_t iKeyCount,
+                       AttribType::Value& iAttribInType,
+                       AttribType::Value& iAttribOutType,
+                       ComponentType& iComponentType,
+                       Ref<Accessor>& iTargetTimeAccessor,
+                       Ref<Accessor>& iTargetValueAccessor
+                       ):
+                        keyCount(iKeyCount),
+                        attribInType(iAttribInType),
+                        attribOutType(iAttribOutType),
+                        componentType(iComponentType),
+                        targetTimeAccessor(iTargetTimeAccessor),
+                        targetValueAccessor(iTargetValueAccessor) {
+            
+        }
+        
+        virtual void* getTimeData() = 0;
+        virtual void* getValueData() = 0;
+        virtual void extract() = 0;
+    };
+    
+    template <typename DataTypeIn, typename DataTypeOut>
+    class KeyExtraction : public AKeyExtraction {
+        
+    public:
+        KeyExtraction(DataTypeIn* iKeyData,
+                      size_t iDataCount,
+                      size_t iValueDataCount,
+                      AttribType::Value iAttribInType,
+                      AttribType::Value iAttribOutType,
+                      ComponentType iComponentType,
+                      Ref<Accessor>& iTargetTimeAccessor,
+                      Ref<Accessor>& iTargetValueAccessor,
+                      double iTimeCoef): AKeyExtraction(iDataCount, iAttribInType, iAttribOutType, iComponentType, iTargetTimeAccessor, iTargetValueAccessor),
+                      _keyData(iKeyData),
+                      _timeCoef(iTimeCoef) {
+            timeData.resize(iDataCount);
+            valueData.resize(iValueDataCount);
+        }
+        
+        void* getTimeData() {
+            return timeData.data();
+        }
+        
+        void* getValueData() {
+            return valueData.data();
+        }
+        
+        inline void extract() {
+            DataTypeIn* key = _keyData;
+            for (size_t i = 0, iend = timeData.size(); i < iend; ++i, ++key){
+                timeData[i] = static_cast<float>(key->mTime / _timeCoef);
+                valueData[i] = key->mValue;
+            }
+        }
+        
+    private:
+        DataTypeIn* _keyData;
+        double _timeCoef;
+        std::vector<float> timeData;
+        std::vector<DataTypeOut> valueData;
+    };
+    
+    template<>
+    void KeyExtraction<aiQuatKey, float>::extract() {
+        aiQuatKey* key = _keyData;
+        float* value = valueData.data();
+        for (size_t i = 0, iend = timeData.size(); i < iend; ++i, ++key, value+=4){
+            timeData[i] = static_cast<float>(key->mTime / _timeCoef);
+            *value = key->mValue.x;
+            *(value+1) = key->mValue.y;
+            *(value+2) = key->mValue.z;
+            *(value+3) = key->mValue.w;
+        }
+    }
 }
 
 
@@ -1072,12 +1157,6 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     //    Otherwise, add to the buffer and create a new accessor.
 
     struct {
-        size_t position;
-        size_t rotation;
-        size_t scaling;
-    } keyCounts = {nodeChannel->mNumPositionKeys, nodeChannel->mNumRotationKeys, nodeChannel->mNumScalingKeys};
-    
-    struct {
         size_t position = 0;
         size_t rotation = 1;
         size_t scaling = 2;
@@ -1086,80 +1165,28 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             return timeChannel==0 ? parameters.TIME : (timeChannel==1 ? parameters.TIME2 : parameters.TIME3);
         }
     } timeChannels;
-
+    
+    std::vector<std::unique_ptr<AKeyExtraction>> keyExtractions;
+    keyExtractions.push_back(std::unique_ptr<AKeyExtraction>(new KeyExtraction<aiVectorKey, aiVector3D>(nodeChannel->mPositionKeys, nodeChannel->mNumPositionKeys, nodeChannel->mNumPositionKeys, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.position), animRef->Parameters.translation, ticksPerSecond
+                                                                                                        )));
+    keyExtractions.push_back(std::unique_ptr<AKeyExtraction>(new KeyExtraction<aiVectorKey, aiVector3D>(nodeChannel->mScalingKeys, nodeChannel->mNumScalingKeys, nodeChannel->mNumScalingKeys, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.scaling), animRef->Parameters.scale, ticksPerSecond
+                                                                                                        )));
+    keyExtractions.push_back(std::unique_ptr<AKeyExtraction>(new KeyExtraction<aiQuatKey, float>(nodeChannel->mRotationKeys, nodeChannel->mNumRotationKeys, 4*nodeChannel->mNumRotationKeys, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT, timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.rotation), animRef->Parameters.rotation, ticksPerSecond
+                                                                                                        )));
+    
     //-------------------------------------------------------
-    // Extract translation parameter data
-    if(nodeChannel->mNumPositionKeys > 0) {
-        size_t keyCount = keyCounts.position;
-        std::vector<float> timeData(keyCount);
-        std::vector<aiVector3D> valueData(keyCount);
-        auto positionKey = nodeChannel->mPositionKeys;
+    // Extract the parameter data
+    for (auto& keyExtraction : keyExtractions) {
+        keyExtraction->extract();
         
-        for (size_t i = 0; i < keyCount; ++i, ++positionKey){
-            timeData[i] = static_cast<float>(positionKey->mTime / ticksPerSecond);
-            valueData[i] = positionKey->mValue;
-        }
-        
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyCount), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
-        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyCount), valueData.data(), AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyExtraction->keyCount), keyExtraction->getTimeData(), AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+        Ref<Accessor> valueAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyExtraction->keyCount), keyExtraction->getValueData(), keyExtraction->attribInType, keyExtraction->attribOutType, keyExtraction->componentType);
         
         if (timeAccessor) {
-            timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.position) = timeAccessor;
+            keyExtraction->targetTimeAccessor = timeAccessor;
         }
-        if ( tranAccessor ) {
-            animRef->Parameters.translation = tranAccessor;
-        }
-    }
-
-    //-------------------------------------------------------
-    // Extract scale parameter data
-    if(nodeChannel->mNumScalingKeys > 0) {
-        size_t keyCount = keyCounts.scaling;
-        std::vector<float> timeData(keyCount);
-        std::vector<aiVector3D> valueData(keyCount);
-        auto scalingKey = nodeChannel->mScalingKeys;
-        
-        for (size_t i = 0; i < keyCount; ++i, ++scalingKey){
-            timeData[i] = static_cast<float>(scalingKey->mTime / ticksPerSecond);
-            valueData[i] = scalingKey->mValue;
-        }
-        
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyCount), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
-        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyCount), valueData.data(), AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        
-        if (timeAccessor) {
-            timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.scaling) = timeAccessor;
-        }
-        if ( scaleAccessor ) {
-            animRef->Parameters.scale = scaleAccessor;
-        }
-    }
-
-    //-------------------------------------------------------
-    // Extract rotation parameter data
-    if(nodeChannel->mNumRotationKeys > 0) {
-        size_t keyCount = keyCounts.rotation;
-        std::vector<float> timeData(keyCount);
-        std::vector<float> valueData(4*keyCount);
-        auto rotationKey = nodeChannel->mRotationKeys;
-        auto valueDataPtr = valueData.data();
-        
-        for (size_t i = 0; i < keyCount; ++i, ++rotationKey, valueDataPtr+=4){
-            timeData[i] = static_cast<float>(rotationKey->mTime / ticksPerSecond);
-            *valueDataPtr = rotationKey->mValue.x;
-            *(valueDataPtr+1) = rotationKey->mValue.y;
-            *(valueDataPtr+2) = rotationKey->mValue.z;
-            *(valueDataPtr+3) = rotationKey->mValue.w;
-        }
-        
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyCount), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
-        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyCount), valueData.data(), AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-        
-        if (timeAccessor) {
-            timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.rotation) = timeAccessor;
-        }
-        if ( rotAccessor ) {
-            animRef->Parameters.rotation = rotAccessor;
+        if (valueAccessor) {
+            keyExtraction->targetValueAccessor = valueAccessor;
         }
     }
 }

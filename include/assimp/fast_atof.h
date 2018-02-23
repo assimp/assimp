@@ -59,69 +59,65 @@ const double fast_atof_table[16] =  {  // we write [16] here instead of [] to wo
 // ------------------------------------------------------------------------------------
 // Convert a string in decimal format to a number
 // ------------------------------------------------------------------------------------
-inline unsigned int strtoul10( const char* in, const char** out=0)
-{
+inline
+unsigned int strtoul10( const char* in, const char** out=0) {
     unsigned int value = 0;
 
-    bool running = true;
-    while ( running )
-    {
+    for ( ;; ) {
         if ( *in < '0' || *in > '9' )
             break;
 
         value = ( value * 10 ) + ( *in - '0' );
         ++in;
     }
-    if (out)*out = in;
+    if ( out ) {
+        *out = in;
+    }
     return value;
 }
 
 // ------------------------------------------------------------------------------------
 // Convert a string in octal format to a number
 // ------------------------------------------------------------------------------------
-inline unsigned int strtoul8( const char* in, const char** out=0)
-{
-    unsigned int value = 0;
-
-    bool running = true;
-    while ( running )
-    {
-        if ( *in < '0' || *in > '7' )
+inline
+unsigned int strtoul8( const char* in, const char** out=0) {
+    unsigned int value( 0 );
+    for ( ;; ) {
+        if ( *in < '0' || *in > '7' ) {
             break;
+        }
 
         value = ( value << 3 ) + ( *in - '0' );
         ++in;
     }
-    if (out)*out = in;
+    if ( out ) {
+        *out = in;
+    }
     return value;
 }
 
 // ------------------------------------------------------------------------------------
 // Convert a string in hex format to a number
 // ------------------------------------------------------------------------------------
-inline unsigned int strtoul16( const char* in, const char** out=0)
-{
-    unsigned int value = 0;
-
-    bool running = true;
-    while ( running )
-    {
-        if ( *in >= '0' && *in <= '9' )
-        {
+inline
+unsigned int strtoul16( const char* in, const char** out=0) {
+    unsigned int value( 0 );
+    for ( ;; ) {
+        if ( *in >= '0' && *in <= '9' ) {
             value = ( value << 4u ) + ( *in - '0' );
-        }
-        else if (*in >= 'A' && *in <= 'F')
-        {
+        } else if (*in >= 'A' && *in <= 'F') {
             value = ( value << 4u ) + ( *in - 'A' ) + 10;
-        }
-        else if (*in >= 'a' && *in <= 'f')
-        {
+        } else if (*in >= 'a' && *in <= 'f') {
             value = ( value << 4u ) + ( *in - 'a' ) + 10;
         }
-        else break;
+        else {
+            break;
+        }
         ++in;
     }
-    if (out)*out = in;
+    if ( out ) {
+        *out = in;
+    }
     return value;
 }
 
@@ -131,15 +127,14 @@ inline unsigned int strtoul16( const char* in, const char** out=0)
 // ------------------------------------------------------------------------------------
 inline
 unsigned int HexDigitToDecimal(char in) {
-    unsigned int out = UINT_MAX;
-    if (in >= '0' && in <= '9')
+    unsigned int out( UINT_MAX );
+    if ( in >= '0' && in <= '9' ) {
         out = in - '0';
-
-    else if (in >= 'a' && in <= 'f')
+    } else if ( in >= 'a' && in <= 'f' ) {
         out = 10u + in - 'a';
-
-    else if (in >= 'A' && in <= 'F')
+    } else if ( in >= 'A' && in <= 'F' ) {
         out = 10u + in - 'A';
+    }
 
     // return value is UINT_MAX if the input is not a hex digit
     return out;
@@ -160,8 +155,9 @@ uint8_t HexOctetToDecimal(const char* in) {
 inline
 int strtol10( const char* in, const char** out=0) {
     bool inv = (*in=='-');
-    if (inv || *in=='+')
+    if ( inv || *in == '+' ) {
         ++in;
+    }
 
     int value = strtoul10(in,out);
     if (inv) {
@@ -197,8 +193,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
         throw std::invalid_argument( std::string( "The string \"" ) + in + "\" cannot be converted into a value." );
     }
 
-    bool running = true;
-    while ( running ) {
+    for ( ;; ) {
         if ( *in < '0' || *in > '9' ) {
             break;
         }
@@ -378,6 +373,6 @@ ai_real fast_atof( const char** inout) {
     return ret;
 }
 
-} // end of namespace Assimp
+} //! namespace Assimp
 
 #endif // FAST_A_TO_F_H_INCLUDED

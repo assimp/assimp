@@ -205,7 +205,7 @@ enum ErrorPolicy {
 
 // -------------------------------------------------------------------------------
 /** Represents a data structure in a BLEND file. A Structure defines n fields
- *  and their locatios and encodings the input stream. Usually, every
+ *  and their locations and encodings the input stream. Usually, every
  *  Structure instance pertains to one equally-named data structure in the
  *  BlenderScene.h header. This class defines various utilities to map a
  *  binary `blob` read from the file to such a structure instance with

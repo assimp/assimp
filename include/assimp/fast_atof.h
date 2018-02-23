@@ -14,8 +14,8 @@
 // ------------------------------------------------------------------------------------
 
 
-#ifndef __FAST_A_TO_F_H_INCLUDED__
-#define __FAST_A_TO_F_H_INCLUDED__
+#ifndef FAST_A_TO_F_H_INCLUDED
+#define FAST_A_TO_F_H_INCLUDED
 
 #include <cmath>
 #include <limits>
@@ -148,8 +148,8 @@ unsigned int HexDigitToDecimal(char in) {
 // ------------------------------------------------------------------------------------
 // Convert a hex-encoded octet (2 characters, i.e. df or 1a).
 // ------------------------------------------------------------------------------------
-inline uint8_t HexOctetToDecimal(const char* in)
-{
+inline
+uint8_t HexOctetToDecimal(const char* in) {
     return ((uint8_t)HexDigitToDecimal(in[0])<<4)+(uint8_t)HexDigitToDecimal(in[1]);
 }
 
@@ -157,8 +157,8 @@ inline uint8_t HexOctetToDecimal(const char* in)
 // ------------------------------------------------------------------------------------
 // signed variant of strtoul10
 // ------------------------------------------------------------------------------------
-inline int strtol10( const char* in, const char** out=0)
-{
+inline
+int strtol10( const char* in, const char** out=0) {
     bool inv = (*in=='-');
     if (inv || *in=='+')
         ++in;
@@ -176,10 +176,9 @@ inline int strtol10( const char* in, const char** out=0)
 // 0NNN   - oct
 // NNN    - dec
 // ------------------------------------------------------------------------------------
-inline unsigned int strtoul_cppstyle( const char* in, const char** out=0)
-{
-    if ('0' == in[0])
-    {
+inline
+unsigned int strtoul_cppstyle( const char* in, const char** out=0) {
+    if ('0' == in[0]) {
         return 'x' == in[1] ? strtoul16(in+2,out) : strtoul8(in+1,out);
     }
     return strtoul10(in, out);
@@ -189,19 +188,20 @@ inline unsigned int strtoul_cppstyle( const char* in, const char** out=0)
 // Special version of the function, providing higher accuracy and safety
 // It is mainly used by fast_atof to prevent ugly and unwanted integer overflows.
 // ------------------------------------------------------------------------------------
-inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_inout=0)
-{
+inline
+uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_inout=0) {
     unsigned int cur = 0;
     uint64_t value = 0;
 
-    if ( *in < '0' || *in > '9' )
-        throw std::invalid_argument(std::string("The string \"") + in + "\" cannot be converted into a value.");
+    if ( *in < '0' || *in > '9' ) {
+        throw std::invalid_argument( std::string( "The string \"" ) + in + "\" cannot be converted into a value." );
+    }
 
     bool running = true;
-    while ( running )
-    {
-        if ( *in < '0' || *in > '9' )
+    while ( running ) {
+        if ( *in < '0' || *in > '9' ) {
             break;
+        }
 
         const uint64_t new_value = ( value * 10 ) + ( *in - '0' );
 
@@ -210,7 +210,6 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
             DefaultLogger::get()->warn( std::string( "Converting the string \"" ) + in + "\" into a value resulted in overflow." );
             return 0;
         }
-            //throw std::overflow_error();
 
         value = new_value;
 
@@ -218,21 +217,23 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
         ++cur;
 
         if (max_inout && *max_inout == cur) {
-
             if (out) { /* skip to end */
-                while (*in >= '0' && *in <= '9')
+                while ( *in >= '0' && *in <= '9' ) {
                     ++in;
+                }
                 *out = in;
             }
 
             return value;
         }
     }
-    if (out)
+    if ( out ) {
         *out = in;
+    }
 
-    if (max_inout)
+    if ( max_inout ) {
         *max_inout = cur;
+    }
 
     return value;
 }
@@ -240,11 +241,12 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 // ------------------------------------------------------------------------------------
 // signed variant of strtoul10_64
 // ------------------------------------------------------------------------------------
-inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0)
-{
+inline
+int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0) {
     bool inv = (*in == '-');
-    if (inv || *in == '+')
+    if ( inv || *in == '+' ) {
         ++in;
+    }
 
     int64_t value = strtoul10_64(in, out, max_inout);
     if (inv) {
@@ -252,7 +254,6 @@ inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* m
     }
     return value;
 }
-
 
 // Number of relevant decimals for floating-point parsing.
 #define AI_FAST_ATOF_RELAVANT_DECIMALS 15
@@ -263,8 +264,8 @@ inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* m
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
 template <typename Real>
-inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
-{
+inline
+const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true) {
     Real f = 0;
 
     bool inv = (*c == '-');
@@ -272,42 +273,36 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
         ++c;
     }
 
-    if ((c[0] == 'N' || c[0] == 'n') && ASSIMP_strincmp(c, "nan", 3) == 0)
-    {
+    if ((c[0] == 'N' || c[0] == 'n') && ASSIMP_strincmp(c, "nan", 3) == 0) {
         out = std::numeric_limits<Real>::quiet_NaN();
         c += 3;
         return c;
     }
 
-    if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inf", 3) == 0)
-    {
+    if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inf", 3) == 0) {
         out = std::numeric_limits<Real>::infinity();
         if (inv) {
             out = -out;
         }
         c += 3;
-        if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inity", 5) == 0)
-        {
+        if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inity", 5) == 0) {
             c += 5;
         }
         return c;
-    }
+     
 
     if (!(c[0] >= '0' && c[0] <= '9') &&
-        !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9'))
-    {
+            !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')){
         throw std::invalid_argument("Cannot parse string "
                                     "as real number: does not start with digit "
                                     "or decimal point followed by digit.");
     }
 
-    if (*c != '.' && (! check_comma || c[0] != ','))
-    {
+    if (*c != '.' && (! check_comma || c[0] != ',')) {
         f = static_cast<Real>( strtoul10_64 ( c, &c) );
     }
 
-    if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')
-    {
+    if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9') {
         ++c;
 
         // NOTE: The original implementation is highly inaccurate here. The precision of a single
@@ -358,24 +353,25 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
 
 // ------------------------------------------------------------------------------------
 // The same but more human.
-inline ai_real fast_atof(const char* c)
-{
+inline
+ai_real fast_atof(const char* c) {
     ai_real ret(0.0);
     fast_atoreal_move<ai_real>(c, ret);
+
     return ret;
 }
 
 
-inline ai_real fast_atof( const char* c, const char** cout)
-{
+inline
+ai_real fast_atof( const char* c, const char** cout) {
     ai_real ret(0.0);
     *cout = fast_atoreal_move<ai_real>(c, ret);
 
     return ret;
 }
 
-inline ai_real fast_atof( const char** inout)
-{
+inline
+ai_real fast_atof( const char** inout) {
     ai_real ret(0.0);
     *inout = fast_atoreal_move<ai_real>(*inout, ret);
 
@@ -384,4 +380,4 @@ inline ai_real fast_atof( const char** inout)
 
 } // end of namespace Assimp
 
-#endif
+#endif // FAST_A_TO_F_H_INCLUDED

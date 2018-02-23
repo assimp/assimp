@@ -71,9 +71,9 @@ namespace D3MF {
 class XmlSerializer {
 public:
     XmlSerializer(XmlReader* xmlReader)
-    : xmlReader(xmlReader)
-    , mMeshes()
-    , mMaterials() {
+    : mMeshes()
+    , mMaterials() 
+    , xmlReader(xmlReader){
 		// empty
     }
 

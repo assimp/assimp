@@ -215,24 +215,38 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 // attach geometry
                 ConvertModel( *model, *nodes_chain.back(), new_abs_transform );
 
-                // now link the geometric transform inverse nodes,
+                // check if there will be any child nodes
+                const std::vector<const Connection*>& child_conns
+                    = doc.GetConnectionsByDestinationSequenced( model->ID(), "Model" );
+
+                // if so, link the geometric transform inverse nodes
                 // before we attach any child nodes
-                for( aiNode* postnode : post_nodes_chain ) {
-                    ai_assert( postnode );
+                if (child_conns.size()) {
+                    for( aiNode* postnode : post_nodes_chain ) {
+                        ai_assert( postnode );
 
-                    if ( last_parent != &parent ) {
-                        last_parent->mNumChildren = 1;
-                        last_parent->mChildren = new aiNode*[ 1 ];
-                        last_parent->mChildren[ 0 ] = postnode;
+                        if ( last_parent != &parent ) {
+                            last_parent->mNumChildren = 1;
+                            last_parent->mChildren = new aiNode*[ 1 ];
+                            last_parent->mChildren[ 0 ] = postnode;
+                        }
+
+                        postnode->mParent = last_parent;
+                        last_parent = postnode;
+
+                        new_abs_transform *= postnode->mTransformation;
                     }
-
-                    postnode->mParent = last_parent;
-                    last_parent = postnode;
-
-                    new_abs_transform *= postnode->mTransformation;
+                } else {
+                    // free the nodes we allocated as we don't need them
+                    Util::delete_fun<aiNode> deleter;
+                    std::for_each(
+                        post_nodes_chain.begin(),
+                        post_nodes_chain.end(),
+                        deleter
+                    );
                 }
 
-                // attach sub-nodes
+                // attach sub-nodes (if any)
                 ConvertNodes( model->ID(), *last_parent, new_abs_transform );
 
                 if ( doc.Settings().readLights ) {
@@ -259,6 +273,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
         Util::delete_fun<aiNode> deleter;
         std::for_each( nodes.begin(), nodes.end(), deleter );
         std::for_each( nodes_chain.begin(), nodes_chain.end(), deleter );
+        std::for_each( post_nodes_chain.begin(), post_nodes_chain.end(), deleter );
     }
 }
 

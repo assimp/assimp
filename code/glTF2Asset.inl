@@ -691,8 +691,9 @@ inline void Image::Read(Value& obj, Asset& r)
             Ref<Buffer> buffer = this->bufferView->buffer;
 
             this->mDataLength = this->bufferView->byteLength;
+            // maybe this memcpy could be avoided if aiTexture does not delete[] pcData at destruction.
             this->mData = new uint8_t [this->mDataLength];
-            memcpy(this->mData, buffer->GetPointer(), this->mDataLength);
+            memcpy(this->mData, buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
 
             if (Value* mtype = FindString(obj, "mimeType")) {
                 this->mimeType = mtype->GetString();

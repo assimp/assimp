@@ -236,6 +236,14 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 
                         new_abs_transform *= postnode->mTransformation;
                     }
+                } else {
+                    // free the nodes we allocated as we don't need them
+                    Util::delete_fun<aiNode> deleter;
+                    std::for_each(
+                        post_nodes_chain.begin(),
+                        post_nodes_chain.end(),
+                        deleter
+                    );
                 }
 
                 // attach sub-nodes (if any)

@@ -265,6 +265,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
         Util::delete_fun<aiNode> deleter;
         std::for_each( nodes.begin(), nodes.end(), deleter );
         std::for_each( nodes_chain.begin(), nodes_chain.end(), deleter );
+        std::for_each( post_nodes_chain.begin(), post_nodes_chain.end(), deleter );
     }
 }
 

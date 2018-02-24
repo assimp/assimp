@@ -1775,7 +1775,10 @@ const std::map<std::string,std::pair<std::string,char>> transform_types = {
     {"ScalingPivotInverse", {"ScalingPivotInverse", 'i'}},
     {"GeometricScaling", {"GeometricScaling", 's'}},
     {"GeometricRotation", {"GeometricRotation", 'r'}},
-    {"GeometricTranslation", {"GeometricTranslation", 't'}}
+    {"GeometricTranslation", {"GeometricTranslation", 't'}},
+    {"GeometricTranslationInverse", {"GeometricTranslationInverse", 'i'}},
+    {"GeometricRotationInverse", {"GeometricRotationInverse", 'i'}},
+    {"GeometricScalingInverse", {"GeometricScalingInverse", 'i'}}
 };
 
 // write a single model node to the stream

@@ -66,49 +66,50 @@ static const unsigned int BufferSize = 4096;
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE char_t ToLower( char_t in)
-{
+AI_FORCE_INLINE
+char_t ToLower( char_t in ) {
     return (in >= (char_t)'A' && in <= (char_t)'Z') ? (char_t)(in+0x20) : in;
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE char_t ToUpper( char_t in) {
+AI_FORCE_INLINE
+char_t ToUpper( char_t in) {
     return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in-0x20) : in;
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsUpper( char_t in)
-{
+AI_FORCE_INLINE
+bool IsUpper( char_t in) {
     return (in >= (char_t)'A' && in <= (char_t)'Z');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsLower( char_t in)
-{
+AI_FORCE_INLINE
+bool IsLower( char_t in) {
     return (in >= (char_t)'a' && in <= (char_t)'z');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsSpace( char_t in)
-{
+AI_FORCE_INLINE
+bool IsSpace( char_t in) {
     return (in == (char_t)' ' || in == (char_t)'\t');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsLineEnd( char_t in)
-{
+AI_FORCE_INLINE
+bool IsLineEnd( char_t in) {
     return (in==(char_t)'\r'||in==(char_t)'\n'||in==(char_t)'\0'||in==(char_t)'\f');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsSpaceOrNewLine( char_t in)
-{
+AI_FORCE_INLINE
+bool IsSpaceOrNewLine( char_t in) {
     return IsSpace<char_t>(in) || IsLineEnd<char_t>(in);
 }
 

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2018, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,72 +38,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS
 
-#include "ScaleProcess.h"
+/** @file FBXCommon.h
+* Some useful constants and enums for dealing with FBX files.
+*/
+#ifndef AI_FBXCOMMON_H_INC
+#define AI_FBXCOMMON_H_INC
 
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
 
-namespace Assimp {
 
-ScaleProcess::ScaleProcess()
-: BaseProcess()
-, mScale( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT ) {
-    // empty
+namespace FBX
+{
+    const std::string NULL_RECORD = { // 13 null bytes
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0'
+    }; // who knows why
+    const std::string SEPARATOR = {'\x00', '\x01'}; // for use inside strings
+    const std::string MAGIC_NODE_TAG = "_$AssimpFbx$"; // from import
+    const int64_t SECOND = 46186158000; // FBX's kTime unit
+
+    // rotation order. We'll probably use EulerXYZ for everything
+    enum RotOrder {
+        RotOrder_EulerXYZ = 0,
+        RotOrder_EulerXZY,
+        RotOrder_EulerYZX,
+        RotOrder_EulerYXZ,
+        RotOrder_EulerZXY,
+        RotOrder_EulerZYX,
+
+        RotOrder_SphericXYZ,
+
+        RotOrder_MAX // end-of-enum sentinel
+    };
+
+    // transformation inheritance method. Most of the time RSrs
+    enum TransformInheritance {
+        TransformInheritance_RrSs = 0,
+        TransformInheritance_RSrs,
+        TransformInheritance_Rrs,
+
+        TransformInheritance_MAX // end-of-enum sentinel
+    };
 }
 
-ScaleProcess::~ScaleProcess() {
-    // empty
-}
+#endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 
-void ScaleProcess::setScale( ai_real scale ) {
-    mScale = scale;
-}
-
-ai_real ScaleProcess::getScale() const {
-    return mScale;
-}
-
-bool ScaleProcess::IsActive( unsigned int pFlags ) const {
-    return ( pFlags & aiProcess_GlobalScale ) != 0;
-}
-
-void ScaleProcess::SetupProperties( const Importer* pImp ) {
-    mScale = pImp->GetPropertyFloat( AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, 0 );
-}
-
-void ScaleProcess::Execute( aiScene* pScene ) {
-    if ( nullptr == pScene ) {
-        return;
-    }
-
-    if ( nullptr == pScene->mRootNode ) {
-        return;
-    }
-
-    traverseNodes( pScene->mRootNode );
-}
-
-void ScaleProcess::traverseNodes( aiNode *node ) {
-    applyScaling( node );
-
-    /*for ( unsigned int i = 0; i < node->mNumChildren; ++i ) {
-        aiNode *currentNode = currentNode->mChildren[ i ];
-        if ( nullptr != currentNode ) {
-            traverseNodes( currentNode );
-        }
-    }*/
-}
-
-void ScaleProcess::applyScaling( aiNode *currentNode ) {
-    if ( nullptr != currentNode ) {
-        currentNode->mTransformation.a1 = currentNode->mTransformation.a1 * mScale;
-        currentNode->mTransformation.b2 = currentNode->mTransformation.b2 * mScale;
-        currentNode->mTransformation.c3 = currentNode->mTransformation.c3 * mScale;
-    }
-}
-
-} // Namespace Assimp
-
-#endif // !! ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS
+#endif // AI_FBXCOMMON_H_INC

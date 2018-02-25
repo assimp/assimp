@@ -1604,6 +1604,8 @@ void FBXExporter::WriteObjects ()
 
         // TODO, FIXME: this won't work if anything is not in the bind pose.
         // for now if such a situation is detected, we throw an exception.
+        std::set<const aiBone*> not_in_bind_pose;
+        std::set<const aiNode*> no_offset_matrix;
 
         // first get this mesh's position in world space,
         // as we'll need it for each subdeformer.
@@ -1612,10 +1614,6 @@ void FBXExporter::WriteObjects ()
         // as it can be instanced to many nodes.
         // All we can do is assume no instancing,
         // and take the first node we find that contains the mesh.
-        //
-        // We could in stead take the transform from the bone's node,
-        // but there's no guarantee that the bone is in the bindpose,
-        // so this would be even less reliable.
         aiNode* mesh_node = get_node_for_mesh(mi, mScene->mRootNode);
         aiMatrix4x4 mesh_xform = get_world_transform(mesh_node, mScene);
 
@@ -1631,6 +1629,9 @@ void FBXExporter::WriteObjects ()
                     b = m->mBones[bi];
                     break;
                 }
+            }
+            if (!b) {
+                no_offset_matrix.insert(bone_node);
             }
 
             // start the subdeformer node
@@ -1669,30 +1670,52 @@ void FBXExporter::WriteObjects ()
             }
 
             // transform is the transform of the mesh, but in bone space.
-            // To get it we take the inverse of the world-space bone transform,
+            // if the skeleton is in the bind pose,
+            // we can take the inverse of the world-space bone transform
             // and multiply by the world-space transform of the mesh.
             aiMatrix4x4 bone_xform = get_world_transform(bone_node, mScene);
             aiMatrix4x4 inverse_bone_xform = bone_xform;
             inverse_bone_xform.Inverse();
             aiMatrix4x4 tr = inverse_bone_xform * mesh_xform;
-            sdnode.AddChild("Transform", tr);
 
-            // this should match assimp's mOffsetMatrix.
-            // if it doesn't then we have a problem.
-            // as assimp doesn't store a mOffsetMatrix for bones with 0 weight
-            // we have no way of reconstructing that information.
+            // this should be the same as the bone's mOffsetMatrix.
+            // if it's not the same, the skeleton isn't in the bind pose.
             const float epsilon = 1e-5; // some error is to be expected
+            bool bone_xform_okay = true;
             if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
-                std::stringstream err;
-                err << "transform matrix for bone \"" << b->mName.C_Str();
-                err << "\" does not match mOffsetMatrix!";
-                err << " Bones *must* be in the bind pose to export.";
-                throw DeadlyExportError(err.str());
+                not_in_bind_pose.insert(b);
+                bone_xform_okay = false;
             }
 
-            // transformlink should be the position of the bone in world space,
-            // which we just calculated.
-            sdnode.AddChild("TransformLink", bone_xform);
+            // if we have a bone we should use the mOffsetMatrix,
+            // otherwise try to just use the calculated transform.
+            if (b) {
+                sdnode.AddChild("Transform", b->mOffsetMatrix);
+            } else {
+                sdnode.AddChild("Transform", tr);
+            }
+            // note: it doesn't matter if we mix these,
+            // because if they disagree we'll throw an exception later.
+            // it could be that the skeleton is not in the bone pose
+            // but all bones are still defined,
+            // in which case this would use the mOffsetMatrix for everything
+            // and a correct skeleton would still be output.
+
+            // transformlink should be the position of the bone in world space.
+            // if the bone is in the bind pose (or nonexistant),
+            // we can just use the matrix we already calculated
+            if (bone_xform_okay) {
+                sdnode.AddChild("TransformLink", bone_xform);
+            // otherwise we can only work it out using the mesh position.
+            } else {
+                aiMatrix4x4 trl = b->mOffsetMatrix;
+                trl.Inverse();
+                trl *= mesh_xform;
+                sdnode.AddChild("TransformLink", trl);
+            }
+            // note: this means we ALWAYS rely on the mesh node transform
+            // being unchanged from the time the skeleton was bound.
+            // there's not really any way around this at the moment.
 
             // done
             sdnode.Dump(outstream);
@@ -1708,6 +1731,29 @@ void FBXExporter::WriteObjects ()
             connections.push_back(c); // TODO: emplace_back
         }
 
+        // if we cannot create a valid FBX file, simply die.
+        // this will both prevent unnecessary bug reports,
+        // and tell the user what they can do to fix the situation
+        // (i.e. export their model in the bind pose).
+        if (no_offset_matrix.size() && not_in_bind_pose.size()) {
+            std::stringstream err;
+            err << "Not enough information to construct bind pose";
+            err << " for mesh " << mi << "!";
+            err << " Transform matrix for bone \"";
+            err << (*not_in_bind_pose.begin())->mName.C_Str() << "\"";
+            if (not_in_bind_pose.size() > 1) {
+                err << " (and " << not_in_bind_pose.size() - 1 << " more)";
+            }
+            err << " does not match mOffsetMatrix,";
+            err << " and node \"";
+            err << (*no_offset_matrix.begin())->mName.C_Str() << "\"";
+            if (no_offset_matrix.size() > 1) {
+                err << " (and " << no_offset_matrix.size() - 1 << " more)";
+            }
+            err << " has no offset matrix to rely on.";
+            err << " Please ensure bones are in the bind pose to export.";
+            throw DeadlyExportError(err.str());
+        }
 
     }
 

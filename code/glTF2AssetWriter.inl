@@ -376,7 +376,7 @@ namespace glTF2 {
                 WriteFloat(values, materialCommon.shininess, "shininess", w.mAl);
             }
 
-            if (materialCommon.transparency!=0.0f) {
+            if (materialCommon.transparency!=1.0f) {
                 WriteFloat(values, materialCommon.transparency, "transparency", w.mAl);
             }
 

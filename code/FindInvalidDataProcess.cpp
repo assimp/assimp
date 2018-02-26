@@ -371,7 +371,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
     }
     
     if (keysSimplified)
-        DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
+        DefaultLogger::get()->warn("Simplified dummy tracks by removing redundant keys");
 }
 
 // ------------------------------------------------------------------------------------------------

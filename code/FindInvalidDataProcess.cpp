@@ -371,7 +371,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
         }
     }
     if (1 == i)
-        ASSIMP_LOG_WARN("Simplified dummy tracks with just one key");
+        ASSIMP_LOG_WARN("Simplified dummy tracks by removing redundant keys");
 }
 
 // ------------------------------------------------------------------------------------------------

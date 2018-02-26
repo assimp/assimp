@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/mesh.h>
 #include <assimp/light.h>
+#include <assimp/anim.h>
 #include <assimp/Exporter.hpp>
 #include <sstream>
 #include <vector>
@@ -124,6 +125,9 @@ protected:
     /// Writes the scene library
     void WriteSceneLibrary();
 
+    /// Prepare the animation library
+    std::vector<aiNodeAnim> PrepareNodeAnimations(const aiAnimation* animation);
+    
 	// customized, Writes the animation library
 	void WriteAnimationsLibrary();
 	void WriteAnimationLibrary( size_t pIndex);

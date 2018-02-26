@@ -263,6 +263,7 @@ namespace Assimp
 
         /** Calculates the resulting transformation from all the given transform steps */
         aiMatrix4x4 CalculateResultTransform( const std::vector<Collada::Transform>& pTransforms) const;
+        void CalculateResultTransform( const std::vector<Collada::Transform>& pTransforms, aiVector3D& outScaling, aiQuaternion& outRotation, aiVector3D& outPosition) const;
 
         /** Determines the input data type for the given semantic string */
         Collada::InputType GetTypeForSemantic( const std::string& pSemantic);

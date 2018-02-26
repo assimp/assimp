@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 using namespace Assimp;
 
@@ -91,6 +92,137 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 }
 
 } // end of namespace Assimp
+
+namespace {
+    
+    template <typename T>
+    class IterableArray {
+    public:
+        IterableArray(): _array(nullptr), _size(0){};
+        IterableArray(T* array, size_t size): _array(array), _size(size){};
+        T* begin() const {return {_array};};
+        T const* cbegin() const {return {_array};};
+        T* end() const {return {_size?_array+_size:_array};};
+        T const* cend() const {return {_array+_size};};
+        size_t size() const {return _size;}
+    private:
+        T* _array;
+        size_t _size;
+    };
+    
+    template <typename KeyType>
+    struct TimeRange {
+        static double max;
+        ai_real start;
+        ai_real end;
+        TimeRange(): start(0), end(max){}
+        TimeRange(KeyType* keys, size_t size){
+            if (0<size) {
+                start = keys->mTime;
+                end = (keys+size)->mTime;
+            }
+        }
+    };
+    template <typename KeyType>
+    double TimeRange<KeyType>::max = 1e20;
+    
+    template <typename KeyType>
+    struct AnimKeyInterpolator {
+        IterableArray<KeyType> keys;
+        const KeyType* next;
+        TimeRange<KeyType> timeRange;
+        double duration;
+        KeyType nodeDefaultKey;
+        aiAnimBehaviour interpolationMode;
+        aiAnimBehaviour interpolationModeEnd;
+        Interpolator<typename KeyType::elem_type> interpolator;
+        
+        AnimKeyInterpolator(KeyType* keys, size_t count, double animationDuration, const KeyType& nodeAnimKey, const aiAnimBehaviour& preState, const aiAnimBehaviour& postState) {
+            this->keys = IterableArray<KeyType>(keys, count);
+            next = this->keys.begin();
+            timeRange = TimeRange<KeyType>(keys, count);
+            duration = animationDuration;
+            nodeDefaultKey = nodeAnimKey;
+            interpolationMode = preState;
+            interpolationModeEnd = postState;
+        }
+        
+        KeyType interpolate(ai_real time) {
+            if (0==keys.size()){
+                return KeyType(time, nodeDefaultKey.mValue);
+            }
+            
+            const KeyType *futureKey = next;
+            KeyType interpolatedKey(time, typename KeyType::elem_type());
+            
+            if (time==next->mTime) {
+                if (keys.end()!=futureKey){
+                    ++futureKey;
+                    if (keys.end()==futureKey){
+                        nodeDefaultKey.mTime = duration;
+                    }
+                }
+                interpolatedKey.mValue = next->mValue;
+            }
+            else {
+                const KeyType *previousKey = nullptr, *nextKey = nullptr;
+                if (time<timeRange.start){
+                    nodeDefaultKey.mTime = 0.0;
+                    nextKey = next;
+                    previousKey = &nodeDefaultKey;
+                }
+                else if (time>=timeRange.end) {
+                    nodeDefaultKey.mTime = duration;
+                    previousKey = keys.cend()-1;
+                    nextKey = &nodeDefaultKey;
+                    futureKey = next;
+                }
+                else {
+                    while (time>futureKey->mTime) {
+                        ++futureKey;
+                    }
+                    
+                    previousKey = --nextKey;
+                }
+                
+                ai_real coef;
+                aiAnimBehaviour interpolation = time<timeRange.end ? interpolationMode : interpolationModeEnd;
+                
+                switch (interpolation)
+                {
+                    case aiAnimBehaviour_CONSTANT:
+                    {
+                        coef = (time-previousKey->mTime)<(nextKey->mTime-time) ? 0.0f : 1.0f;
+                        break;
+                    }
+                    case aiAnimBehaviour_STEP:
+                    {
+                        coef = 0.0f;
+                        break;
+                    }
+                    case aiAnimBehaviour_LINEAR:
+                    case aiAnimBehaviour_DEFAULT:
+                    default:
+                    {
+                        coef = (time-static_cast<ai_real>(previousKey->mTime))/(nextKey->mTime-static_cast<ai_real>(previousKey->mTime));
+                        break;
+                    }
+                }
+                
+                typename KeyType::elem_type interpolatedValue;
+                interpolator(interpolatedValue, nextKey->mValue, previousKey->mValue, coef);
+                interpolatedKey.mValue = interpolatedValue;
+            }
+         
+            next = futureKey;
+            return interpolatedKey;
+        }
+        
+        const double& nextTimeKey() const {
+            return keys.cend()!=next ? next->mTime : TimeRange<KeyType>::max;
+        }
+    } ;
+}
 
 
 
@@ -1245,6 +1377,132 @@ void ColladaExporter::WriteSceneLibrary()
     PopTag();
     mOutput << startstr << "</library_visual_scenes>" << endstr;
 }
+
+// ------------------------------------------------------------------------------------------------
+std::vector<aiNodeAnim> ColladaExporter::PrepareNodeAnimations(const aiAnimation* animation)
+{
+    // result
+    std::vector<aiNodeAnim> sampledNodeAnims;
+    
+    if (nullptr==animation) {
+        return sampledNodeAnims;
+    }
+    
+    // find all the nodes targeted by an animation
+    static std::unique_ptr<std::map<std::string, aiNode*>> animatedNodes = nullptr;
+    
+    if (nullptr==animatedNodes){
+        animatedNodes.reset(new std::map<std::string, aiNode*>());
+        std::set<std::string> nodeAnimNames;
+        for( auto anim = mScene->mAnimations, animEnd = anim+mScene->mNumAnimations; anim!=animEnd; ++anim) {
+            for ( auto nodeAnim = (*anim)->mChannels, nodeAnimEnd = nodeAnim + (*anim)->mNumChannels; nodeAnim!=nodeAnimEnd; ++nodeAnim) {
+               nodeAnimNames.insert((*nodeAnim)->mNodeName.C_Str());
+            }
+        }
+        
+        std::map<std::string, aiNode*>* animatedNodesPtr = animatedNodes.get();
+        std::function<void(aiNode*)> findTargetNodes;
+        findTargetNodes = [&findTargetNodes, &nodeAnimNames, &animatedNodesPtr](aiNode* node){
+            if (node){
+                aiString nodeName = node->mName;
+                auto it = nodeAnimNames.find(nodeName.C_Str());
+                if (nodeAnimNames.end()!=it) {
+                    animatedNodesPtr->emplace(*it, node);
+                    nodeAnimNames.erase(it);
+                }
+                if (0<nodeAnimNames.size()) {
+                    for ( auto child = node->mChildren, childEnd = node->mChildren+node->mNumChildren; child!=childEnd; ++child) {
+                        if (0<nodeAnimNames.size()) {
+                            findTargetNodes(*child);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        findTargetNodes(mScene->mRootNode);
+    }
+
+
+    // prepare all the anim nodes of the given animation
+    if (0 < animation->mNumChannels) {
+        
+        // resolve all the node animations which compose the animation
+        for (const auto *nodeAnim = animation->mChannels, *nodeAnimEnd = nodeAnim+animation->mNumChannels; nodeAnim!=nodeAnimEnd; ++ nodeAnim) {
+            
+            const aiNodeAnim* nodeAnimation = *nodeAnim;
+            std::vector<aiVectorKey> sampledPositionKeys;
+            std::vector<aiQuatKey> sampledRotationKeys;
+            std::vector<aiVectorKey> sampledScalingKeys;
+            sampledNodeAnims.reserve(animation->mNumChannels);
+            
+            auto animatedNodeIt = animatedNodes->find(nodeAnimation->mNodeName.C_Str());
+            if (animatedNodes->end()==animatedNodeIt || (0==nodeAnimation->mNumPositionKeys && 0==nodeAnimation->mNumRotationKeys && 0==nodeAnimation->mNumScalingKeys)) {
+                continue;
+            }
+                
+            aiVector3D position, scaling; aiQuaternion rotation;
+            animatedNodeIt->second->mTransformation.Decompose(scaling, rotation, position);
+            aiVectorKey nodePositionKey(0, position), nodeScalingKey(0, scaling);
+            aiQuatKey nodeRotationKey(0, rotation);
+                
+            AnimKeyInterpolator<aiVectorKey> positionKeyInterpolator(nodeAnimation->mPositionKeys, nodeAnimation->mNumPositionKeys, animation->mDuration, nodePositionKey, nodeAnimation->mPreState, nodeAnimation->mPostState);
+            AnimKeyInterpolator<aiQuatKey> rotationKeyInterpolator(nodeAnimation->mRotationKeys, nodeAnimation->mNumRotationKeys, animation->mDuration, nodeRotationKey, nodeAnimation->mPreState, nodeAnimation->mPostState);
+            AnimKeyInterpolator<aiVectorKey> scalingKeyInterpolator(nodeAnimation->mScalingKeys, nodeAnimation->mNumScalingKeys, animation->mDuration, nodeScalingKey, nodeAnimation->mPreState, nodeAnimation->mPostState);
+                
+                
+            // get the first time key (if keys of a specific kind exist, there must be a key at time 0)
+            double startTime = 1e20;
+                
+            if (0<positionKeyInterpolator.keys.size()){
+                startTime = std::min(startTime, positionKeyInterpolator.keys.cbegin()->mTime);
+            }
+            if (0<rotationKeyInterpolator.keys.size()){
+                startTime = std::min(startTime, rotationKeyInterpolator.keys.cbegin()->mTime);
+            }
+            if (0<scalingKeyInterpolator.keys.size()){
+                startTime = std::min(startTime, scalingKeyInterpolator.keys.cbegin()->mTime);
+            }
+                
+            ai_real time = startTime;
+                
+            while ( 1 ){
+                sampledPositionKeys.push_back(positionKeyInterpolator.interpolate(time));
+                sampledRotationKeys.push_back(rotationKeyInterpolator.interpolate(time));
+                sampledScalingKeys.push_back(scalingKeyInterpolator.interpolate(time));
+                    
+                // find next time value
+                time = std::min(static_cast<ai_real>(positionKeyInterpolator.nextTimeKey()), static_cast<ai_real>(rotationKeyInterpolator.nextTimeKey()));
+                time = std::min(time, static_cast<ai_real>(scalingKeyInterpolator.nextTimeKey()));
+                if (time>animation->mDuration) {
+                    break;
+                }
+            }
+                
+            // create the new nodeAnim
+            sampledNodeAnims.push_back(aiNodeAnim());
+            aiNodeAnim& sampledNodeAnim = sampledNodeAnims.back();
+            
+            sampledNodeAnim.mNumPositionKeys = static_cast<unsigned int>(sampledPositionKeys.size());
+            sampledNodeAnim.mNumRotationKeys = static_cast<unsigned int>(sampledRotationKeys.size());
+            sampledNodeAnim.mNumScalingKeys = static_cast<unsigned int>(sampledScalingKeys.size());
+            sampledNodeAnim.mPositionKeys = new aiVectorKey[sampledNodeAnim.mNumPositionKeys];
+            sampledNodeAnim.mRotationKeys = new aiQuatKey[sampledNodeAnim.mNumRotationKeys];
+            sampledNodeAnim.mScalingKeys = new aiVectorKey[sampledNodeAnim.mNumScalingKeys];
+            std::move(sampledPositionKeys.begin(), sampledPositionKeys.end(), sampledNodeAnim.mPositionKeys);
+            std::move(sampledRotationKeys.begin(), sampledRotationKeys.end(), sampledNodeAnim.mRotationKeys);
+            std::move(sampledScalingKeys.begin(), sampledScalingKeys.end(), sampledNodeAnim.mScalingKeys);
+            sampledNodeAnim.mPreState = nodeAnimation->mPreState;
+            sampledNodeAnim.mPostState = nodeAnimation->mPostState;
+            sampledNodeAnim.mNodeName = nodeAnimation->mNodeName;
+        }
+    }
+    
+    return sampledNodeAnims;
+}
+
 // ------------------------------------------------------------------------------------------------
 void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 {
@@ -1268,10 +1526,12 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 	
 	mOutput << startstr << "<animation id=\"" + idstrEscaped + "\" name=\"" + animation_name_escaped + "\">" << endstr;
 	PushTag();
-	
-	for (size_t a = 0; a < anim->mNumChannels; ++a) {
-		const aiNodeAnim * nodeAnim = anim->mChannels[a];
-		
+    
+    // sample the NodeAnims to build a transformation matrix for each time key
+    auto sampledNodeAnims = PrepareNodeAnimations(anim);
+    
+    for (auto nodeAnim = sampledNodeAnims.cbegin(), nodeAnimEnd = sampledNodeAnims.cend(); nodeAnim!=nodeAnimEnd; ++nodeAnim) {
+
 		// sanity check
 		if ( nodeAnim->mNumPositionKeys != nodeAnim->mNumScalingKeys ||  nodeAnim->mNumPositionKeys != nodeAnim->mNumRotationKeys ) continue;
 		
@@ -1325,7 +1585,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 					|| nodeAnim->mPreState == aiAnimBehaviour_REPEAT
 					) {
 					names.push_back( "LINEAR" );
-				} else if (nodeAnim->mPostState == aiAnimBehaviour_CONSTANT) {
+				} else if (nodeAnim->mPreState == aiAnimBehaviour_STEP || nodeAnim->mPostState == aiAnimBehaviour_CONSTANT) {
 					names.push_back( "STEP" );
 				}
 			}
@@ -1404,8 +1664,9 @@ void ColladaExporter::WriteAnimationsLibrary()
 		PushTag();
 		
 		// start recursive write at the root node
-		for( size_t a = 0; a < mScene->mNumAnimations; ++a)
-			WriteAnimationLibrary( a );
+        for( size_t a = 0; a < mScene->mNumAnimations; ++a) {
+            WriteAnimationLibrary( a );
+        }
 
 		PopTag();
 		mOutput << startstr << "</library_animations>" << endstr;

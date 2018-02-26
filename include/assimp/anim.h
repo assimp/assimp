@@ -245,6 +245,9 @@ enum aiAnimBehaviour
      *  If the animation key go from n to m and the current
      *  time is t, use the value at (t-n) % (|m-n|).*/
     aiAnimBehaviour_REPEAT   = 0x3,
+    
+    /** The previous key value or the value from the default node transformation is used */
+    aiAnimBehaviour_STEP   = 0x4,
 
     /** This value is not used, it is just here to force the
      *  the compiler to map this enum to a 32 Bit integer  */

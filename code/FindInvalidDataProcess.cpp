@@ -295,42 +295,80 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
     // ScenePreprocessor's work ...
     ai_assert((0 != anim->mPositionKeys && 0 != anim->mRotationKeys && 0 != anim->mScalingKeys));
 
-    // Check whether all values in a tracks are identical - in this case
-    // we can remove al keys except one.
-    // POSITIONS
-    if (anim->mNumPositionKeys > 1 && AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys,configEpsilon))
-    {
-        aiVectorKey v = anim->mPositionKeys[0];
+    bool keysSimplified = false;
 
-        // Reallocate ... we need just ONE element, it makes no sense to reuse the array
-        delete[] anim->mPositionKeys;
-        anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys = 1];
-        anim->mPositionKeys[0] = v;
-        i = 1;
+    // Augment - Remove the redundant keys which are identical to their previous and next keys.
+    // ex: A A A A B B B C C D E E E => A A B B C C D E E
+    // POSITIONS
+    if (2<anim->mNumPositionKeys) {
+        std::vector<aiVectorKey> newKeySequence;
+        aiVectorKey *keys = anim->mPositionKeys, *previousKey= &keys[0], *nextKey = &keys[2], *currentKey = &keys[1], *endKey = keys+anim->mNumPositionKeys;
+        newKeySequence.push_back(keys[0]);
+        while (nextKey!=endKey) {
+            if (currentKey->mValue!=previousKey->mValue || currentKey->mValue!=nextKey->mValue) {
+                newKeySequence.push_back(*currentKey);
+                previousKey = currentKey;
+            }
+            ++nextKey;
+            ++currentKey;
+        }
+        newKeySequence.push_back(*currentKey);
+
+        if (anim->mNumPositionKeys!=newKeySequence.size()) {
+            anim->mNumPositionKeys = static_cast<unsigned int>(newKeySequence.size());
+            delete[] anim->mPositionKeys;
+            anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+            std::copy(newKeySequence.data(), newKeySequence.data()+newKeySequence.size(), anim->mPositionKeys);
+            keysSimplified = true;
+        }
     }
 
     // ROTATIONS
-    if (anim->mNumRotationKeys > 1 && AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys,configEpsilon))
-    {
-        aiQuatKey v = anim->mRotationKeys[0];
+    if (2<anim->mNumRotationKeys) {
+        std::vector<aiQuatKey> newKeySequence;
+        aiQuatKey *keys = anim->mRotationKeys, *previousKey= &keys[0], *nextKey = &keys[2], *currentKey = &keys[1], *endKey = keys+anim->mNumRotationKeys;
+        newKeySequence.push_back(keys[0]);
+        while (nextKey!=endKey) {
+            if (currentKey->mValue!=previousKey->mValue || currentKey->mValue!=nextKey->mValue) {
+                newKeySequence.push_back(*currentKey);
+                previousKey = currentKey;
+            }
+            ++nextKey;
+            ++currentKey;
+        }
+        newKeySequence.push_back(*currentKey);
 
-        // Reallocate ... we need just ONE element, it makes no sense to reuse the array
-        delete[] anim->mRotationKeys;
-        anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys = 1];
-        anim->mRotationKeys[0] = v;
-        i = 1;
+        if (anim->mNumRotationKeys!=newKeySequence.size()) {
+            anim->mNumRotationKeys = static_cast<unsigned int>(newKeySequence.size());
+            delete[] anim->mRotationKeys;
+            anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+            std::copy(newKeySequence.data(), newKeySequence.data()+newKeySequence.size(), anim->mRotationKeys);
+            keysSimplified = true;
+        }
     }
 
     // SCALINGS
-    if (anim->mNumScalingKeys > 1 && AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys,configEpsilon))
-    {
-        aiVectorKey v = anim->mScalingKeys[0];
+    if (2<anim->mNumScalingKeys) {
+        std::vector<aiVectorKey> newKeySequence;
+        aiVectorKey *keys = anim->mScalingKeys, *previousKey= &keys[0], *nextKey = &keys[2], *currentKey = &keys[1], *endKey = keys+anim->mNumScalingKeys;
+        newKeySequence.push_back(keys[0]);
+        while (nextKey!=endKey) {
+            if (currentKey->mValue!=previousKey->mValue || currentKey->mValue!=nextKey->mValue) {
+                newKeySequence.push_back(*currentKey);
+                previousKey = currentKey;
+            }
+            ++nextKey;
+            ++currentKey;
+        }
+        newKeySequence.push_back(*currentKey);
 
-        // Reallocate ... we need just ONE element, it makes no sense to reuse the array
-        delete[] anim->mScalingKeys;
-        anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys = 1];
-        anim->mScalingKeys[0] = v;
-        i = 1;
+        if (anim->mNumScalingKeys!=newKeySequence.size()) {
+            anim->mNumScalingKeys = static_cast<unsigned int>(newKeySequence.size());
+            delete[] anim->mScalingKeys;
+            anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
+            std::copy(newKeySequence.data(), newKeySequence.data()+newKeySequence.size(), anim->mScalingKeys);
+            keysSimplified = true;
+        }
     }
     if (1 == i)
         ASSIMP_LOG_WARN("Simplified dummy tracks with just one key");

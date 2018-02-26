@@ -1269,178 +1269,112 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
             }
         }
 
-        struct {
-            std::vector<aiVectorKey> position;
-            std::vector<aiVectorKey> scaling;
-            std::vector<aiQuatKey> rotation;
-        } animationKeys;
+    std::vector<CompoundAnimKey> resultTrafos;
+    if( !entries.empty() && entries.front().mTimeAccessor->mCount > 0 )
+    {
+          // create a local transformation chain of the node's transforms
+          std::vector<Collada::Transform> transforms = srcNode->mTransforms;
 
-        struct {
-            bool position;
-            bool scaling;
-            bool rotation;
-            bool rotationSubSampling;
+          // now for every unique point in time, find or interpolate the key values for that time
+          // and apply them to the transform chain. Then the node's present transformation can be calculated.
+          ai_real time = startTime;
+          while( 1)
+          {
+              for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+              {
+                  Collada::ChannelEntry& e = *it;
 
-            void clear(){
-                position = scaling = rotation = rotationSubSampling = false;
-            }
+                  // find the keyframe behind the current point in time
+                  size_t pos = 0;
+                  ai_real postTime = 0.0;
+                  while( 1)
+                  {
+                      if( pos >= e.mTimeAccessor->mCount)
+                          break;
+                      postTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos, 0);
+                      if( postTime >= time)
+                          break;
+                      ++pos;
+                  }
 
-            void set(Collada::TransformType& type) {
-                switch(type){
-                    case Collada::TransformType::TF_LOOKAT:
-                    {
-                        position = scaling = rotation = true;
-                        break;
-                    }
-                    case Collada::TransformType::TF_ROTATE:
-                    {
-                        rotation = true;
-                        break;
-                    }
-                    case Collada::TransformType::TF_TRANSLATE:
-                    {
-                        position = true;
-                        break;
-                    }
-                    case Collada::TransformType::TF_SCALE:
-                    {
-                        scaling = true;
-                        break;
-                    }
-                    case Collada::TransformType::TF_MATRIX:
-                    {
-                        position = scaling = rotation = true;
-                        break;
-                    }
-                    case Collada::TransformType::TF_SKEW:
-                    default:
-                        ai_assert( false);
-                        break;
-                }
-            }
-        } registerKeys;
+                  pos = std::min( pos, e.mTimeAccessor->mCount-1);
 
-        if( !entries.empty() && entries.front().mTimeAccessor->mCount > 0 )
-        {
-            // create a local transformation chain of the node's transforms
-            std::vector<Collada::Transform> transforms = srcNode->mTransforms;
+                  // read values from there
+                  ai_real temp[16];
+                  for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
+                      temp[c] = ReadFloat( *e.mValueAccessor, *e.mValueData, pos, c);
 
-            // now for every unique point in time, find or interpolate the key values for that time
-            // and apply them to the transform chain. Then the node's present transformation can be calculated.
-            ai_real time = startTime;
-            while( 1)
-            {
-                registerKeys.clear();
+                  // if not exactly at the key time, interpolate with previous value set
+                  if( postTime > time && pos > 0)
+                  {
+                      ai_real preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
+                      ai_real factor = (time - postTime) / (preTime - postTime);
 
-                for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
-                {
-                    Collada::ChannelEntry& e = *it;
+                      for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
+                      {
+                          ai_real v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
+                          temp[c] += (v - temp[c]) * factor;
+                      }
+                  }
 
-                    // find the keyframe behind the current point in time
-                    size_t pos = 0;
-                    ai_real postTime = 0.0;
-                    while( 1)
-                    {
-                        if( pos >= e.mTimeAccessor->mCount)
-                            break;
-                        postTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos, 0);
-                        if( postTime >= time)
-                            break;
-                        ++pos;
-                    }
+                  // Apply values to current transformation
+                  std::copy( temp, temp + e.mValueAccessor->mSize, transforms[e.mTransformIndex].f + e.mSubElement);
+              }
 
-                    if (time==postTime) {
-                        registerKeys.set(transforms[e.mTransformIndex].mType);
-                    }
+              // Calculate resulting transformation
+              CompoundAnimKey compoundKey;
+              pParser.CalculateResultTransform( transforms, compoundKey.scaling, compoundKey.rotation, compoundKey.position);
 
-                    pos = std::min( pos, e.mTimeAccessor->mCount-1);
+              compoundKey.time = time;
+              resultTrafos.push_back( std::move(compoundKey) );
 
-                    // read values from there
-                    ai_real temp[16];
-                    for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
-                        temp[c] = ReadFloat( *e.mValueAccessor, *e.mValueData, pos, c);
+              // find next point in time to evaluate. That's the closest frame larger than the current in any channel
+              ai_real nextTime = ai_real( 1e20 );
+              for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
+              {
+                  Collada::ChannelEntry& channelElement = *it;
 
-                    // if not exactly at the key time, interpolate with previous value set
-                    if( postTime > time && pos > 0)
-                    {
-                        ai_real preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
-                        ai_real factor = (time - postTime) / (preTime - postTime);
+                  // find the next time value larger than the current
+                  size_t pos = 0;
+                  while( pos < channelElement.mTimeAccessor->mCount)
+                  {
+                      const ai_real t = ReadFloat( *channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
+                      if( t > time)
+                      {
+                          nextTime = std::min( nextTime, t);
+                          break;
+                      }
+                      ++pos;
+                  }
 
-                        for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
-                        {
-                            ai_real v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
-                            temp[c] += (v - temp[c]) * factor;
-                        }
-                    }
+				  // https://github.com/assimp/assimp/issues/458
+			  	  // Sub-sample axis-angle channels if the delta between two consecutive
+                  // key-frame angles is >= 180 degrees.
+				  if (transforms[channelElement.mTransformIndex].mType == Collada::TF_ROTATE && channelElement.mSubElement == 3 && pos > 0 && pos < channelElement.mTimeAccessor->mCount) {
+					  const ai_real cur_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos, 0);
+                      const ai_real last_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos - 1, 0);
+                      const ai_real cur_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
+                      const ai_real last_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos - 1, 0);
+                      const ai_real last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time);
+                      const ai_real delta = std::abs(cur_key_angle - last_eval_angle);
+				      if (delta >= 180.0) {
+						const int subSampleCount = static_cast<int>(std::floor(delta / 90.0));
+						if (cur_key_time != time) {
+							const ai_real nextSampleTime = time + (cur_key_time - time) / subSampleCount;
+							nextTime = std::min(nextTime, nextSampleTime);
+						  }
+					  }
+				  }
+              }
 
-                    // Apply values to current transformation
-                    std::copy( temp, temp + e.mValueAccessor->mSize, transforms[e.mTransformIndex].f + e.mSubElement);
-                }
+              // no more keys on any channel after the current time -> we're done
+              if( nextTime > 1e19)
+                  break;
 
-                // Calculate resulting transformation
-                aiVector3D position, scaling;
-                aiQuaternion rotation;
-                pParser.CalculateResultTransform( transforms, scaling, rotation, position);
-
-                if (registerKeys.position) {
-                    animationKeys.position.emplace_back(time, position);
-                }
-                if (registerKeys.scaling) {
-                    animationKeys.scaling.emplace_back(time, scaling);
-                }
-                if (registerKeys.rotation || registerKeys.rotationSubSampling) {
-                    animationKeys.rotation.emplace_back(time, rotation);
-                    registerKeys.rotationSubSampling = false;
-                }
-
-                // find next point in time to evaluate. That's the closest frame larger than the current in any channel
-                ai_real nextTime = ai_real( 1e20 );
-                for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
-                {
-                    Collada::ChannelEntry& channelElement = *it;
-
-                    // find the next time value larger than the current
-                    size_t pos = 0;
-                    while( pos < channelElement.mTimeAccessor->mCount)
-                    {
-                        const ai_real t = ReadFloat( *channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
-                        if( t > time)
-                        {
-                            nextTime = std::min( nextTime, t);
-                            break;
-                        }
-                        ++pos;
-                    }
-
-                    // https://github.com/assimp/assimp/issues/458
-                    // Sub-sample axis-angle channels if the delta between two consecutive
-                    // key-frame angles is >= 180 degrees.
-                    if (transforms[channelElement.mTransformIndex].mType == Collada::TF_ROTATE && channelElement.mSubElement == 3 && pos > 0 && pos < channelElement.mTimeAccessor->mCount) {
-                        const ai_real cur_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos, 0);
-                        const ai_real last_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos - 1, 0);
-                        const ai_real cur_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
-                        const ai_real last_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos - 1, 0);
-                        const ai_real last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time);
-                        const ai_real delta = std::abs(cur_key_angle - last_eval_angle);
-                        if (delta >= 180.0) {
-                        const int subSampleCount = static_cast<int>(std::floor(delta / 90.0));
-                        if (cur_key_time != time) {
-                            const ai_real nextSampleTime = time + (cur_key_time - time) / subSampleCount;
-                            nextTime = std::min(nextTime, nextSampleTime);
-                            registerKeys.rotationSubSampling = true;
-                            }
-                        }
-                    }
-                }
-
-                // no more keys on any channel after the current time -> we're done
-                if( nextTime > 1e19)
-                    break;
-
-                // else construct next keyframe at this following time point
-                time = nextTime;
-            }
-        }
+              // else construct next keyframe at this following time point
+              time = nextTime;
+          }
+    }
 
         // there should be some keyframes, but we aren't that fixated on valid input data
 

@@ -1665,7 +1665,7 @@ void ColladaExporter::WriteAnimationsLibrary()
 		
 		// start recursive write at the root node
         for( size_t a = 0; a < mScene->mNumAnimations; ++a) {
-			WriteAnimationLibrary( a );
+            WriteAnimationLibrary( a );
         }
 
 		PopTag();

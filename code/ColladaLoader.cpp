@@ -1325,7 +1325,6 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
               CompoundAnimKey compoundKey;
               pParser.CalculateResultTransform( transforms, compoundKey.scaling, compoundKey.rotation, compoundKey.position);
 
-              // out of laziness: we store the time in matrix.d4
               compoundKey.time = time;
               resultTrafos.push_back( std::move(compoundKey) );
 

@@ -80,5 +80,6 @@ TEST_F( utIFCImportExport, importComplextypeAsColor ) {
         "#5 = IFCCOMPLEXPROPERTY( 'Color', $, 'Color', ( #19, #20, #21 ) );\n";
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory( asset.c_str(), asset.size(), 0 );
+    EXPECT_EQ( nullptr, scene );
 
 }

@@ -184,7 +184,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
 } // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* scene)
+Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, const aiScene* scene)
 : scene(scene)
 , writer(outfile)
 {

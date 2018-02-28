@@ -334,7 +334,8 @@ bool ExportModel(const aiScene* pOut,
 		PrintHorBar();
 	}
 	if (res != AI_SUCCESS) {
-		printf("ERROR: Failed to write file\n");	
+		printf("Failed to write file\n");
+		printf("ERROR: %s\n", globalExporter->GetErrorString());
 		return false;
 	}
 

@@ -178,9 +178,17 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
         }
         *cur2 = '\0';
 
+        std::string token;
         for (unsigned int i = 0; i < numTokens;++i) {
-            ai_assert(NULL != tokens[i]);
-            const char* r = strstr(buffer,tokens[i]);
+            ai_assert( nullptr != tokens[i] );
+            size_t len( strlen( tokens[ i ] ) );
+            token.clear();
+            const char *ptr( tokens[ i ] );
+            for ( size_t tokIdx = 0; tokIdx < len; ++tokIdx ) {
+                token.push_back( tolower( *ptr ) );
+                ++ptr;
+            }
+            const char* r = strstr( buffer, token.c_str() );
             if( !r ) {
                 continue;
             }

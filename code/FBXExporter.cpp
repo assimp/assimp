@@ -1463,46 +1463,67 @@ void FBXExporter::WriteObjects ()
     // one sticky point is that the number of vertices may not match,
     // because assimp splits vertices by normal, uv, etc.
 
-    // first we should mark all the skeleton nodes,
-    // so that they can be treated as LimbNode in stead of Mesh or Null.
-    // at the same time we can build up a map of bone nodes.
+    // first we should mark the skeleton for each mesh.
+    // the skeleton must include not only the aiBones,
+    // but also all their parent nodes.
+    // anything that affects the position of any bone node must be included.
+    std::vector<std::set<const aiNode*>> skeleton_by_mesh(mScene->mNumMeshes);
+    // at the same time we can build a list of all the skeleton nodes,
+    // which will be used later to mark them as type "limbNode".
     std::unordered_set<const aiNode*> limbnodes;
+    // and a map of nodes by bone name, as finding them is annoying.
     std::map<std::string,aiNode*> node_by_bone;
     for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
         const aiMesh* m = mScene->mMeshes[mi];
+        std::set<const aiNode*> skeleton;
         for (size_t bi =0; bi < m->mNumBones; ++bi) {
             const aiBone* b = m->mBones[bi];
             const std::string name(b->mName.C_Str());
-            if (node_by_bone.count(name) > 0) {
-                // already processed, skip
-                continue;
+            auto elem = node_by_bone.find(name);
+            aiNode* n;
+            if (elem != node_by_bone.end()) {
+                n = elem->second;
+            } else {
+                n = mScene->mRootNode->FindNode(b->mName);
+                if (!n) {
+                    // this should never happen
+                    std::stringstream err;
+                    err << "Failed to find node for bone: \"" << name << "\"";
+                    throw DeadlyExportError(err.str());
+                }
+                node_by_bone[name] = n;
+                limbnodes.insert(n);
             }
-            aiNode* n = mScene->mRootNode->FindNode(b->mName);
-            if (!n) {
-                // this should never happen
-                std::stringstream err;
-                err << "Failed to find node for bone: \"" << name << "\"";
-                throw DeadlyExportError(err.str());
-            }
-            node_by_bone[name] = n;
-            limbnodes.insert(n);
-            if (n == mScene->mRootNode) { continue; }
+            skeleton.insert(n);
             // mark all parent nodes as skeleton as well,
             // up until we find the root node,
             // or else the node containing the mesh,
             // or else the parent of a node containig the mesh.
             for (
                 const aiNode* parent = n->mParent;
-                parent != mScene->mRootNode;
+                parent && parent != mScene->mRootNode;
                 parent = parent->mParent
             ) {
+                // if we've already done this node we can skip it all
+                if (skeleton.count(parent)) {
+                    break;
+                }
+                // ignore fbx transform nodes as these will be collapsed later
+                // TODO: cache this by aiNode*
+                const std::string node_name(parent->mName.C_Str());
+                if (node_name.find(MAGIC_NODE_TAG) != std::string::npos) {
+                    continue;
+                }
+                // otherwise check if this is the root of the skeleton
                 bool end = false;
+                // is the mesh part of this node?
                 for (size_t i = 0; i < parent->mNumMeshes; ++i) {
                     if (parent->mMeshes[i] == mi) {
                         end = true;
                         break;
                     }
                 }
+                // is the mesh in one of the children of this node?
                 for (size_t j = 0; j < parent->mNumChildren; ++j) {
                     aiNode* child = parent->mChildren[j];
                     for (size_t i = 0; i < child->mNumMeshes; ++i) {
@@ -1513,27 +1534,23 @@ void FBXExporter::WriteObjects ()
                     }
                     if (end) { break; }
                 }
-                if (end) { break; }
                 limbnodes.insert(parent);
+                skeleton.insert(parent);
+                // if it was the skeleton root we can finish here
+                if (end) { break; }
             }
         }
+        skeleton_by_mesh[mi] = skeleton;
     }
 
     // we'll need the uids for the bone nodes, so generate them now
-    std::map<std::string,int64_t> bone_uids;
-    for (auto &bone : limbnodes) {
-        std::string bone_name(bone->mName.C_Str());
-        aiNode* bone_node = mScene->mRootNode->FindNode(bone->mName);
-        if (!bone_node) {
-            throw DeadlyExportError("Couldn't find node for bone" + bone_name);
-        }
-        auto elem = node_uids.find(bone_node);
-        if (elem == node_uids.end()) {
-            int64_t uid = generate_uid();
-            node_uids[bone_node] = uid;
-            bone_uids[bone_name] = uid;
-        } else {
-            bone_uids[bone_name] = elem->second;
+    for (size_t i = 0; i < mScene->mNumMeshes; ++i) {
+        auto &s = skeleton_by_mesh[i];
+        for (const aiNode* n : s) {
+            auto elem = node_uids.find(n);
+            if (elem == node_uids.end()) {
+                node_uids[n] = generate_uid();
+            }
         }
     }
 
@@ -1585,6 +1602,11 @@ void FBXExporter::WriteObjects ()
             }
         }
 
+        // TODO, FIXME: this won't work if anything is not in the bind pose.
+        // for now if such a situation is detected, we throw an exception.
+        std::set<const aiBone*> not_in_bind_pose;
+        std::set<const aiNode*> no_offset_matrix;
+
         // first get this mesh's position in world space,
         // as we'll need it for each subdeformer.
         //
@@ -1592,17 +1614,27 @@ void FBXExporter::WriteObjects ()
         // as it can be instanced to many nodes.
         // All we can do is assume no instancing,
         // and take the first node we find that contains the mesh.
-        //
-        // We could in stead take the transform from the bone's node,
-        // but there's no guarantee that the bone is in the bindpose,
-        // so this would be even less reliable.
         aiNode* mesh_node = get_node_for_mesh(mi, mScene->mRootNode);
-        aiMatrix4x4 mesh_node_xform = get_world_transform(mesh_node, mScene);
+        aiMatrix4x4 mesh_xform = get_world_transform(mesh_node, mScene);
 
-        // now make a subdeformer for each bone
-        for (size_t bi =0; bi < m->mNumBones; ++bi) {
-            const aiBone* b = m->mBones[bi];
-            const std::string name(b->mName.C_Str());
+        // now make a subdeformer for each bone in the skeleton
+        const std::set<const aiNode*> &skeleton = skeleton_by_mesh[mi];
+        for (const aiNode* bone_node : skeleton) {
+            // if there's a bone for this node, find it
+            const aiBone* b = nullptr;
+            for (size_t bi = 0; bi < m->mNumBones; ++bi) {
+                // TODO: this probably should index by something else
+                const std::string name(m->mBones[bi]->mName.C_Str());
+                if (node_by_bone[name] == bone_node) {
+                    b = m->mBones[bi];
+                    break;
+                }
+            }
+            if (!b) {
+                no_offset_matrix.insert(bone_node);
+            }
+
+            // start the subdeformer node
             const int64_t subdeformer_uid = generate_uid();
             FBX::Node sdnode("Deformer");
             sdnode.AddProperties(
@@ -1611,43 +1643,79 @@ void FBXExporter::WriteObjects ()
             sdnode.AddChild("Version", int32_t(100));
             sdnode.AddChild("UserData", "", "");
 
-            // get indices and weights
-            std::vector<int32_t> subdef_indices;
-            std::vector<double> subdef_weights;
-            int32_t last_index = -1;
-            for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
-                int32_t vi = vertex_indices[b->mWeights[wi].mVertexId];
-                if (vi == last_index) {
-                    // only for vertices we exported to fbx
-                    // TODO, FIXME: this assumes identically-located vertices
-                    // will always deform in the same way.
-                    // as assimp doesn't store a separate list of "positions",
-                    // there's not much that can be done about this
-                    // other than assuming that identical position means
-                    // identical vertex.
-                    continue;
+            // add indices and weights, if any
+            if (b) {
+                std::vector<int32_t> subdef_indices;
+                std::vector<double> subdef_weights;
+                int32_t last_index = -1;
+                for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
+                    int32_t vi = vertex_indices[b->mWeights[wi].mVertexId];
+                    if (vi == last_index) {
+                        // only for vertices we exported to fbx
+                        // TODO, FIXME: this assumes identically-located vertices
+                        // will always deform in the same way.
+                        // as assimp doesn't store a separate list of "positions",
+                        // there's not much that can be done about this
+                        // other than assuming that identical position means
+                        // identical vertex.
+                        continue;
+                    }
+                    subdef_indices.push_back(vi);
+                    subdef_weights.push_back(b->mWeights[wi].mWeight);
+                    last_index = vi;
                 }
-                subdef_indices.push_back(vi);
-                subdef_weights.push_back(b->mWeights[wi].mWeight);
-                last_index = vi;
+                // yes, "indexes"
+                sdnode.AddChild("Indexes", subdef_indices);
+                sdnode.AddChild("Weights", subdef_weights);
             }
-            // yes, "indexes"
-            sdnode.AddChild("Indexes", subdef_indices);
-            sdnode.AddChild("Weights", subdef_weights);
-            // transform is the transform of the mesh, but in bone space...
-            // which is exactly what assimp's mOffsetMatrix is,
-            // no matter what the assimp docs may say.
-            aiMatrix4x4 tr = b->mOffsetMatrix;
-            sdnode.AddChild("Transform", tr);
-            // transformlink should be the position of the bone in world space,
-            // in the bind pose.
-            // For now let's use the inverse of mOffsetMatrix,
-            // and the (assumedly static) mesh position in world space.
-            // TODO: find a better way of doing this? there aren't many options
-            tr = b->mOffsetMatrix;
-            tr.Inverse();
-            tr *= mesh_node_xform;
-            sdnode.AddChild("TransformLink", tr);
+
+            // transform is the transform of the mesh, but in bone space.
+            // if the skeleton is in the bind pose,
+            // we can take the inverse of the world-space bone transform
+            // and multiply by the world-space transform of the mesh.
+            aiMatrix4x4 bone_xform = get_world_transform(bone_node, mScene);
+            aiMatrix4x4 inverse_bone_xform = bone_xform;
+            inverse_bone_xform.Inverse();
+            aiMatrix4x4 tr = inverse_bone_xform * mesh_xform;
+
+            // this should be the same as the bone's mOffsetMatrix.
+            // if it's not the same, the skeleton isn't in the bind pose.
+            const float epsilon = 1e-5; // some error is to be expected
+            bool bone_xform_okay = true;
+            if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
+                not_in_bind_pose.insert(b);
+                bone_xform_okay = false;
+            }
+
+            // if we have a bone we should use the mOffsetMatrix,
+            // otherwise try to just use the calculated transform.
+            if (b) {
+                sdnode.AddChild("Transform", b->mOffsetMatrix);
+            } else {
+                sdnode.AddChild("Transform", tr);
+            }
+            // note: it doesn't matter if we mix these,
+            // because if they disagree we'll throw an exception later.
+            // it could be that the skeleton is not in the bone pose
+            // but all bones are still defined,
+            // in which case this would use the mOffsetMatrix for everything
+            // and a correct skeleton would still be output.
+
+            // transformlink should be the position of the bone in world space.
+            // if the bone is in the bind pose (or nonexistant),
+            // we can just use the matrix we already calculated
+            if (bone_xform_okay) {
+                sdnode.AddChild("TransformLink", bone_xform);
+            // otherwise we can only work it out using the mesh position.
+            } else {
+                aiMatrix4x4 trl = b->mOffsetMatrix;
+                trl.Inverse();
+                trl *= mesh_xform;
+                sdnode.AddChild("TransformLink", trl);
+            }
+            // note: this means we ALWAYS rely on the mesh node transform
+            // being unchanged from the time the skeleton was bound.
+            // there's not really any way around this at the moment.
 
             // done
             sdnode.Dump(outstream);
@@ -1659,10 +1727,33 @@ void FBXExporter::WriteObjects ()
 
             // we also need to connect the limb node to the subdeformer.
             c = FBX::Node("C");
-            c.AddProperties("OO", bone_uids[name], subdeformer_uid);
+            c.AddProperties("OO", node_uids[bone_node], subdeformer_uid);
             connections.push_back(c); // TODO: emplace_back
         }
 
+        // if we cannot create a valid FBX file, simply die.
+        // this will both prevent unnecessary bug reports,
+        // and tell the user what they can do to fix the situation
+        // (i.e. export their model in the bind pose).
+        if (no_offset_matrix.size() && not_in_bind_pose.size()) {
+            std::stringstream err;
+            err << "Not enough information to construct bind pose";
+            err << " for mesh " << mi << "!";
+            err << " Transform matrix for bone \"";
+            err << (*not_in_bind_pose.begin())->mName.C_Str() << "\"";
+            if (not_in_bind_pose.size() > 1) {
+                err << " (and " << not_in_bind_pose.size() - 1 << " more)";
+            }
+            err << " does not match mOffsetMatrix,";
+            err << " and node \"";
+            err << (*no_offset_matrix.begin())->mName.C_Str() << "\"";
+            if (no_offset_matrix.size() > 1) {
+                err << " (and " << no_offset_matrix.size() - 1 << " more)";
+            }
+            err << " has no offset matrix to rely on.";
+            err << " Please ensure bones are in the bind pose to export.";
+            throw DeadlyExportError(err.str());
+        }
 
     }
 
@@ -1753,7 +1844,7 @@ void FBXExporter::WriteObjects ()
     // write nodes (i.e. model heirarchy)
     // start at root node
     WriteModelNodes(
-        outstream, mScene->mRootNode, 0, bone_uids
+        outstream, mScene->mRootNode, 0, limbnodes
     );
 
     object_node.End(outstream, true);
@@ -1864,17 +1955,17 @@ void FBXExporter::WriteModelNodes(
     StreamWriterLE& s,
     const aiNode* node,
     int64_t parent_uid,
-    const std::map<std::string,int64_t>& bone_uids
+    const std::unordered_set<const aiNode*>& limbnodes
 ) {
     std::vector<std::pair<std::string,aiVector3D>> chain;
-    WriteModelNodes(s, node, parent_uid, bone_uids, chain);
+    WriteModelNodes(s, node, parent_uid, limbnodes, chain);
 }
 
 void FBXExporter::WriteModelNodes(
     StreamWriterLE& outstream,
     const aiNode* node,
     int64_t parent_uid,
-    const std::map<std::string,int64_t>& bone_uids,
+    const std::unordered_set<const aiNode*>& limbnodes,
     std::vector<std::pair<std::string,aiVector3D>>& transform_chain
 ) {
     // first collapse any expanded transformation chains created by FBX import.
@@ -1924,7 +2015,7 @@ void FBXExporter::WriteModelNodes(
         }
         // now just continue to the next node
         WriteModelNodes(
-            outstream, next_node, parent_uid, bone_uids, transform_chain
+            outstream, next_node, parent_uid, limbnodes, transform_chain
         );
         return;
     }
@@ -1962,7 +2053,7 @@ void FBXExporter::WriteModelNodes(
         connections.push_back(c);
         // write model node
         WriteModelNode(outstream, node, node_uid, "Mesh", transform_chain);
-    } else if (bone_uids.count(node_name)) {
+    } else if (limbnodes.count(node)) {
         WriteModelNode(outstream, node, node_uid, "LimbNode", transform_chain);
         // we also need to write a nodeattribute to mark it as a skeleton
         int64_t node_attribute_uid = generate_uid();
@@ -2021,7 +2112,7 @@ void FBXExporter::WriteModelNodes(
     // now recurse into children
     for (size_t i = 0; i < node->mNumChildren; ++i) {
         WriteModelNodes(
-            outstream, node->mChildren[i], node_uid, bone_uids
+            outstream, node->mChildren[i], node_uid, limbnodes
         );
     }
 }

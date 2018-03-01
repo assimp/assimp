@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXProperties.h"
 #include <assimp/ByteSwapper.h>
 
+#include <algorithm> // std::transform
+
 namespace Assimp {
 namespace FBX {
 
@@ -82,11 +84,12 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     std::string templateName;
 
-    const char* const sh = shading.c_str();
-    if(!strcmp(sh,"phong")) {
+    // lower-case shading because Blender (for example) writes "Phong"
+    std::transform(shading.begin(), shading.end(), shading.begin(), ::tolower);
+    if(shading == "phong") {
         templateName = "Material.FbxSurfacePhong";
     }
-    else if(!strcmp(sh,"lambert")) {
+    else if(shading == "lambert") {
         templateName = "Material.FbxSurfaceLambert";
     }
     else {

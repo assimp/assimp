@@ -247,6 +247,11 @@ void FBXExporter::WriteBinaryFooter()
         outfile->Write("\x00", 1, 1);
     }
 
+    // not sure what this is, but it seems to always be 0 in modern files
+    for (size_t i = 0; i < 4; ++i) {
+        outfile->Write("\x00", 1, 1);
+    }
+
     // now the file version again
     {
         StreamWriterLE outstream(outfile);

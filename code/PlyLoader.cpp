@@ -244,6 +244,9 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
     // if no face list is existing we assume that the vertex
     // list is containing a list of points
     bool pointsOnly = mGeneratedMesh->mFaces == NULL ? true : false;
+    if (pointsOnly) {
+      mGeneratedMesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_POINT;
+    }
 
     // now load a list of all materials
     std::vector<aiMaterial*> avMaterials;

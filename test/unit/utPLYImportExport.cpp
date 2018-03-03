@@ -97,6 +97,8 @@ TEST_F(utPLYImportExport, importerMultipleTest) {
     scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
 }
 
 TEST_F(utPLYImportExport, importPLYwithUV) {
@@ -145,6 +147,7 @@ TEST_F(utPLYImportExport, pointcloudTest) {
   EXPECT_EQ(1u, scene->mNumMeshes);
   EXPECT_NE(nullptr, scene->mMeshes[0]);
   EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
+  EXPECT_EQ(aiPrimitiveType::aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
   EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
 }
 

@@ -136,6 +136,18 @@ TEST_F( utPLYImportExport, vertexColorTest ) {
     EXPECT_EQ(2, first_face.mIndices[2]);
 }
 
+//Test issue #623, PLY importer should not automatically create faces
+TEST_F(utPLYImportExport, pointcloudTest) {
+  Assimp::Importer importer;
+  const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
+  EXPECT_NE(nullptr, scene);
+
+  EXPECT_EQ(1u, scene->mNumMeshes);
+  EXPECT_NE(nullptr, scene->mMeshes[0]);
+  EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
+  EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+}
+
 static const char *test_file =
     "ply\n"
     "format ascii 1.0\n"

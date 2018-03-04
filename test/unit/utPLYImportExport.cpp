@@ -111,6 +111,16 @@ TEST_F(utPLYImportExport, importPLYwithUV) {
     EXPECT_EQ(true, scene->mMeshes[0]->HasTextureCoords(0));
 }
 
+TEST_F(utPLYImportExport, importBinaryPLY) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", 0);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    //This test model is double sided, so 12 faces instead of 6
+    EXPECT_EQ(12u, scene->mMeshes[0]->mNumFaces);
+}
+
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", aiProcess_ValidateDataStructure);

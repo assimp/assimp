@@ -115,7 +115,7 @@ TEST_F(utPLYImportExport, importPLYwithUV) {
 
 TEST_F(utPLYImportExport, importBinaryPLY) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", 0);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
     EXPECT_NE(nullptr, scene->mMeshes[0]);
@@ -141,6 +141,7 @@ TEST_F( utPLYImportExport, vertexColorTest ) {
 //Test issue #623, PLY importer should not automatically create faces
 TEST_F(utPLYImportExport, pointcloudTest) {
   Assimp::Importer importer;
+  //Could not use aiProcess_ValidateDataStructure since it's missing faces.
   const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
   EXPECT_NE(nullptr, scene);
 
@@ -172,6 +173,7 @@ static const char *test_file =
 
 TEST_F( utPLYImportExport, parseErrorTest ) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), aiProcess_ValidateDataStructure);
+    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), 0);
     EXPECT_NE( nullptr, scene );
 }

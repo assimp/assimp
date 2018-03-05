@@ -1043,71 +1043,91 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
   switch (eType)
   {
   case EDT_UInt:
-    out->iUInt = (uint32_t)*((uint32_t*)pCur);
-    pCur += 4;
+  {
+    uint32_t t;
+    memcpy(&t, pCur, sizeof(uint32_t));
+    pCur += sizeof(uint32_t);
 
     // Swap endianness
-    if (p_bBE)ByteSwap::Swap((int32_t*)&out->iUInt);
+    if (p_bBE)ByteSwap::Swap(&t);
+    out->iUInt = t;
     break;
+  }
 
   case EDT_UShort:
   {
-    uint16_t i = *((uint16_t*)pCur);
+    uint16_t t;
+    memcpy(&t, pCur, sizeof(uint16_t));
+    pCur += sizeof(uint16_t);
 
     // Swap endianness
-    if (p_bBE)ByteSwap::Swap(&i);
-    out->iUInt = (uint32_t)i;
-    pCur += 2;
+    if (p_bBE)ByteSwap::Swap(&t);
+    out->iUInt = t;
     break;
   }
 
   case EDT_UChar:
   {
-    out->iUInt = (uint32_t)(*((uint8_t*)pCur));
-    pCur++;
+    uint8_t t;
+    memcpy(&t, pCur, sizeof(uint8_t));
+    pCur += sizeof(uint8_t);
+    out->iUInt = t;
     break;
   }
 
   case EDT_Int:
-    out->iInt = *((int32_t*)pCur);
-    pCur += 4;
+  {
+    int32_t t;
+    memcpy(&t, pCur, sizeof(int32_t));
+    pCur += sizeof(int32_t);
 
     // Swap endianness
-    if (p_bBE)ByteSwap::Swap(&out->iInt);
+    if (p_bBE)ByteSwap::Swap(&t);
+    out->iInt = t;
     break;
+  }
 
   case EDT_Short:
   {
-    int16_t i = *((int16_t*)pCur);
+    int16_t t;
+    memcpy(&t, pCur, sizeof(int16_t));
+    pCur += sizeof(int16_t);
 
     // Swap endianness
-    if (p_bBE)ByteSwap::Swap(&i);
-    out->iInt = (int32_t)i;
-    pCur += 2;
+    if (p_bBE)ByteSwap::Swap(&t);
+    out->iInt = t;
     break;
   }
 
   case EDT_Char:
-    out->iInt = (int32_t)*((int8_t*)pCur);
-    pCur++;
+  {
+    int8_t t;
+    memcpy(&t, pCur, sizeof(int8_t));
+    pCur += sizeof(int8_t);
+    out->iInt = t;
     break;
+  }
 
   case EDT_Float:
   {
-    out->fFloat = *((float*)pCur);
+    float t;
+    memcpy(&t, pCur, sizeof(float));
+    pCur += sizeof(float);
 
     // Swap endianness
-    if (p_bBE)ByteSwap::Swap((int32_t*)&out->fFloat);
-    pCur += 4;
+    if (p_bBE)ByteSwap::Swap(&t);
+    out->fFloat = t;
     break;
   }
   case EDT_Double:
   {
-    out->fDouble = *((double*)pCur);
+    double t;
+    memcpy(&t, pCur, sizeof(double));
+    pCur += sizeof(double);
 
     // Swap endianness
-    if (p_bBE)ByteSwap::Swap((int64_t*)&out->fDouble);
-    pCur += 8;
+    if (p_bBE)ByteSwap::Swap(&t);
+    out->fDouble = t;
     break;
   }
   default:

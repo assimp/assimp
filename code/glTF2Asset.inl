@@ -669,7 +669,7 @@ inline Image::Image()
 
 }
 
-inline void Image::Read(Value& obj, Asset& /*r*/)
+inline void Image::Read(Value& obj, Asset& r)
 {
     if (!mDataLength) {
         if (Value* uri = FindString(obj, "uri")) {
@@ -684,6 +684,19 @@ inline void Image::Read(Value& obj, Asset& /*r*/)
             }
             else {
                 this->uri = uristr;
+            }
+        }
+        else if (Value* bufferViewVal = FindUInt(obj, "bufferView")) {
+            this->bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+            Ref<Buffer> buffer = this->bufferView->buffer;
+
+            this->mDataLength = this->bufferView->byteLength;
+            // maybe this memcpy could be avoided if aiTexture does not delete[] pcData at destruction.
+            this->mData = new uint8_t [this->mDataLength];
+            memcpy(this->mData, buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
+
+            if (Value* mtype = FindString(obj, "mimeType")) {
+                this->mimeType = mtype->GetString();
             }
         }
     }

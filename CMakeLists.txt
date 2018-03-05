@@ -230,6 +230,11 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
+if (IOS)
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fembed-bitcode -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -O3")
+endif()
+
 if (ASSIMP_COVERALLS)
     MESSAGE(STATUS "Coveralls enabled")
     INCLUDE(Coveralls)

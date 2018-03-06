@@ -471,7 +471,7 @@ bool STLImporter::LoadBinaryFile()
 
         // vertex 3
         *vp++ = *theVec;
-        sz += 4 * sizeof aiVector3F;
+        sz += 4 * sizeof( aiVector3F );
 
         uint16_t color = *((uint16_t*)sz);
         sz += 2;

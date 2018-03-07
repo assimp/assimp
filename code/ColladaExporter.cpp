@@ -120,7 +120,7 @@ namespace {
         TimeRange(KeyType* keys, size_t size){
             if (0<size) {
                 start = keys->mTime;
-                end = (keys+size)->mTime;
+                end = (keys+size-1)->mTime;
             }
         }
     };

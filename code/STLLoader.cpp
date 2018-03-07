@@ -451,6 +451,7 @@ bool STLImporter::LoadBinaryFile()
 
     typedef aiVector3t<float> aiVector3F;
     aiVector3F* theVec;
+    aiVector3F theVec3F;
     
     for ( unsigned int i = 0; i < pMesh->mNumFaces; ++i ) {
         // NOTE: Blender sometimes writes empty normals ... this is not
@@ -459,19 +460,32 @@ bool STLImporter::LoadBinaryFile()
         // There's one normal for the face in the STL; use it three times
         // for vertex normals
         theVec = (aiVector3F*) sz;
-        *vn++ = *theVec;
-        *vn++ = *theVec;
-        *vn++ = *theVec++;
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vn->x = theVec3F.x; vn->y = theVec3F.y; vn->z = theVec3F.z;
+        *(vn+1) = *vn;
+        *(vn+2) = *vn;
+        ++theVec;
+        vn += 3;
 
         // vertex 1
-        *vp++ = *theVec++;
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
+        ++theVec;
+        ++vp;
 
         // vertex 2
-        *vp++ = *theVec++;
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
+        ++theVec;
+        ++vp;
 
         // vertex 3
-        *vp++ = *theVec;
-        sz += 4 * sizeof( aiVector3F );
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
+        ++theVec;
+        ++vp;
+        
+        sz = theVec;
 
         uint16_t color = *((uint16_t*)sz);
         sz += 2;

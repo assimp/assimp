@@ -485,7 +485,7 @@ bool STLImporter::LoadBinaryFile()
         ++theVec;
         ++vp;
         
-        sz = theVec;
+        sz = (const unsigned char*) theVec;
 
         uint16_t color = *((uint16_t*)sz);
         sz += 2;

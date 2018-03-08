@@ -248,6 +248,7 @@ protected:
 
     bool noSkeletonMesh;
     bool ignoreUpDirection;
+    bool useColladaName;
 
     /** Used by FindNameForNode() to generate unique node names */
     unsigned int mNodeNameCounter;

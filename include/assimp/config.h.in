@@ -934,6 +934,16 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
+// ---------------------------------------------------------------------------
+/** @brief Specifies whether the Collada loader should use Collada names as node names.
+ *
+ * If this property is set to true, the Collada names will be used as the
+ * node name. The default is to use the id tag (resp. sid tag, if no id tag is present)
+ * instead.
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES "IMPORT_COLLADA_USE_COLLADA_NAMES"
+
 // ---------- All the Export defines ------------
 
 /** @brief Specifies the xfile use double for real values of float

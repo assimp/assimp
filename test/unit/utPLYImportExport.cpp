@@ -97,6 +97,8 @@ TEST_F(utPLYImportExport, importerMultipleTest) {
     scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
 }
 
 TEST_F(utPLYImportExport, importPLYwithUV) {
@@ -113,7 +115,7 @@ TEST_F(utPLYImportExport, importPLYwithUV) {
 
 TEST_F(utPLYImportExport, importBinaryPLY) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", 0);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
     EXPECT_NE(nullptr, scene->mMeshes[0]);
@@ -134,6 +136,20 @@ TEST_F( utPLYImportExport, vertexColorTest ) {
     EXPECT_EQ(0, first_face.mIndices[0]);
     EXPECT_EQ(1, first_face.mIndices[1]);
     EXPECT_EQ(2, first_face.mIndices[2]);
+}
+
+//Test issue #623, PLY importer should not automatically create faces
+TEST_F(utPLYImportExport, pointcloudTest) {
+  Assimp::Importer importer;
+  //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+  const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
+  EXPECT_NE(nullptr, scene);
+
+  EXPECT_EQ(1u, scene->mNumMeshes);
+  EXPECT_NE(nullptr, scene->mMeshes[0]);
+  EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
+  EXPECT_EQ(aiPrimitiveType::aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
+  EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
 }
 
 static const char *test_file =
@@ -157,6 +173,7 @@ static const char *test_file =
 
 TEST_F( utPLYImportExport, parseErrorTest ) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), aiProcess_ValidateDataStructure);
+    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), 0);
     EXPECT_NE( nullptr, scene );
 }

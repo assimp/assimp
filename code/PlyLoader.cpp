@@ -245,28 +245,7 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
     // list is containing a list of points
     bool pointsOnly = mGeneratedMesh->mFaces == NULL ? true : false;
     if (pointsOnly) {
-        if (mGeneratedMesh->mNumVertices < 3) {
-            if (mGeneratedMesh != NULL) {
-                delete(mGeneratedMesh);
-                mGeneratedMesh = nullptr;
-            }
-
-            streamedBuffer.close();
-            throw DeadlyImportError("Invalid .ply file: Not enough "
-                    "vertices to build a proper face list. ");
-        }
-
-        const unsigned int iNum = (unsigned int)mGeneratedMesh->mNumVertices / 3;
-        mGeneratedMesh->mNumFaces = iNum;
-        mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
-
-        for (unsigned int i = 0; i < iNum; ++i) {
-            mGeneratedMesh->mFaces[i].mNumIndices = 3;
-            mGeneratedMesh->mFaces[i].mIndices = new unsigned int[3];
-            mGeneratedMesh->mFaces[i].mIndices[0] = (i * 3);
-            mGeneratedMesh->mFaces[i].mIndices[1] = (i * 3) + 1;
-            mGeneratedMesh->mFaces[i].mIndices[2] = (i * 3) + 2;
-        }
+      mGeneratedMesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_POINT;
     }
 
     // now load a list of all materials

@@ -49,8 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
-
+#include <assimp/StringUtils.h>
 #include <assimp/Exceptional.h>
+
 #include "3MFXmlTags.h"
 #include "D3MFOpcPackage.h"
 
@@ -204,8 +205,45 @@ void D3MFExporter::writeHeader() {
     mModelOutput << std::endl;
 }
 
-void D3MFExporter::writeBaseMaterials() {
+static std::string to_hex( int to_convert ) {
+    std::string result;
+    std::stringstream ss;
+    ss << std::hex << to_convert;
+    ss >> result;
+    return result;
+}
 
+void D3MFExporter::writeBaseMaterials() {
+    mModelOutput << "<basematerials id=\"1\">\n";
+    for ( size_t i = 0; i < mScene->mNumMaterials; ++i ) {
+        aiMaterial *mat = mScene->mMaterials[ i ];
+        std::string strName;
+        aiString name;
+        if ( mat->Get( AI_MATKEY_NAME, name ) != aiReturn_SUCCESS ) {
+            strName = "basemat_" + to_string( i );
+        } else {
+            strName = name.C_Str();
+        }
+        std::string hexDiffuseColor;
+        aiColor4D color;
+        if ( mat->Get( AI_MATKEY_COLOR_DIFFUSE, color ) == aiReturn_SUCCESS ) {
+            hexDiffuseColor = "#";
+            std::string tmp;
+            tmp = to_hex( color.r );
+            hexDiffuseColor += tmp;
+            tmp = to_hex( color.g );
+            hexDiffuseColor += tmp;
+            tmp = to_hex( color.b );
+            hexDiffuseColor += tmp;
+            tmp = to_hex( color.a );
+            hexDiffuseColor += tmp;
+        } else {
+            hexDiffuseColor = "#FFFFFFFF";
+        }
+
+        mModelOutput << "<base name=\""+strName+"\" "+" displaycolor=\""+hexDiffuseColor+"\">\n";
+    }
+    mModelOutput << "</basematerials>\n";
 }
 
 void D3MFExporter::writeObjects() {

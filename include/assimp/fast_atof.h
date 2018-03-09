@@ -146,7 +146,6 @@ uint8_t HexOctetToDecimal(const char* in) {
     return ((uint8_t)HexDigitToDecimal(in[0])<<4)+(uint8_t)HexDigitToDecimal(in[1]);
 }
 
-
 // ------------------------------------------------------------------------------------
 // signed variant of strtoul10
 // ------------------------------------------------------------------------------------
@@ -352,7 +351,6 @@ ai_real fast_atof(const char* c) {
 
     return ret;
 }
-
 
 inline
 ai_real fast_atof( const char* c, const char** cout) {

@@ -235,9 +235,6 @@ void FBXExporter::WriteBinaryFooter()
     outfile->Write(NULL_RECORD.c_str(), NULL_RECORD.size(), 1);
 
     outfile->Write(GENERIC_FOOTID.c_str(), GENERIC_FOOTID.size(), 1);
-    for (size_t i = 0; i < 4; ++i) {
-        outfile->Write("\x00", 1, 1);
-    }
 
     // here some padding is added for alignment to 16 bytes.
     // if already aligned, the full 16 bytes is added.

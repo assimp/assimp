@@ -285,7 +285,9 @@ void D3MFExporter::writeMesh( aiMesh *mesh ) {
     }
     mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
 
-    writeFaces( mesh );
+    const unsigned int matIdx( mesh->mMaterialIndex );
+
+    writeFaces( mesh, matIdx );
 
     mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 }
@@ -295,7 +297,7 @@ void D3MFExporter::writeVertex( const aiVector3D &pos ) {
     mModelOutput << std::endl;
 }
 
-void D3MFExporter::writeFaces( aiMesh *mesh ) {
+void D3MFExporter::writeFaces( aiMesh *mesh, unsigned int matIdx ) {
     if ( nullptr == mesh ) {
         return;
     }
@@ -307,7 +309,8 @@ void D3MFExporter::writeFaces( aiMesh *mesh ) {
     for ( unsigned int i = 0; i < mesh->mNumFaces; ++i ) {
         aiFace &currentFace = mesh->mFaces[ i ];
         mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[ 0 ] << "\" v2=\""
-                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ] << "\"/>";
+                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ]
+                << "\" pid=\"1\" p1=\""+to_string(matIdx)+"\" />";
         mModelOutput << std::endl;
     }
     mModelOutput << "</" << XmlTag::triangles << ">";

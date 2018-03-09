@@ -91,12 +91,14 @@ void MakeLeftHandedProcess::Execute( aiScene* pScene)
     ProcessNode( pScene->mRootNode, aiMatrix4x4());
 
     // process the meshes accordingly
-    for( unsigned int a = 0; a < pScene->mNumMeshes; ++a)
-        ProcessMesh( pScene->mMeshes[a]);
+    for ( unsigned int a = 0; a < pScene->mNumMeshes; ++a ) {
+        ProcessMesh( pScene->mMeshes[ a ] );
+    }
 
     // process the materials accordingly
-    for( unsigned int a = 0; a < pScene->mNumMaterials; ++a)
-        ProcessMaterial( pScene->mMaterials[a]);
+    for ( unsigned int a = 0; a < pScene->mNumMaterials; ++a ) {
+        ProcessMaterial( pScene->mMaterials[ a ] );
+    }
 
     // transform all animation channels as well
     for( unsigned int a = 0; a < pScene->mNumAnimations; a++)
@@ -136,8 +138,11 @@ void MakeLeftHandedProcess::ProcessNode( aiNode* pNode, const aiMatrix4x4& pPare
 
 // ------------------------------------------------------------------------------------------------
 // Converts a single mesh to left handed coordinates.
-void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
-{
+void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh) {
+    if ( nullptr == pMesh ) {
+        DefaultLogger::get()->error( "Nullptr to mesh found." );
+        return;
+    }
     // mirror positions, normals and stuff along the Z axis
     for( size_t a = 0; a < pMesh->mNumVertices; ++a)
     {
@@ -173,8 +178,12 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 
 // ------------------------------------------------------------------------------------------------
 // Converts a single material to left handed coordinates.
-void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
-{
+void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat) {
+    if ( nullptr == _mat ) {
+        DefaultLogger::get()->error( "Nullptr to aiMaterial found." );
+        return;
+    }
+
     aiMaterial* mat = (aiMaterial*)_mat;
     for (unsigned int a = 0; a < mat->mNumProperties;++a)   {
         aiMaterialProperty* prop = mat->mProperties[a];
@@ -183,7 +192,6 @@ void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
         if (!::strcmp( prop->mKey.data, "$tex.mapaxis"))    {
             ai_assert( prop->mDataLength >= sizeof(aiVector3D)); /* something is wrong with the validation if we end up here */
             aiVector3D* pff = (aiVector3D*)prop->mData;
-
             pff->z *= -1.f;
         }
     }

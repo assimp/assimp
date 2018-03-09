@@ -126,7 +126,6 @@ bool D3MFExporter::exportArchive( const char *file ) {
     return ok;
 }
 
-
 bool D3MFExporter::exportContentTypes() {
     mContentOutput.clear();
 
@@ -177,6 +176,8 @@ bool D3MFExporter::export3DModel() {
     mModelOutput << "<" << XmlTag::resources << ">";
     mModelOutput << std::endl;
 
+    writeBaseMaterials();
+
     writeObjects();
 
 
@@ -201,6 +202,10 @@ bool D3MFExporter::export3DModel() {
 void D3MFExporter::writeHeader() {
     mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
     mModelOutput << std::endl;
+}
+
+void D3MFExporter::writeBaseMaterials() {
+
 }
 
 void D3MFExporter::writeObjects() {

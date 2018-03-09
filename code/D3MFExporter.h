@@ -76,6 +76,7 @@ public:
 
 protected:
     void writeHeader();
+    void writeBaseMaterials();
     void writeObjects();
     void writeMesh( aiMesh *mesh );
     void writeVertex( const aiVector3D &pos );

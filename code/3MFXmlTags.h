@@ -74,6 +74,7 @@ namespace XmlTag {
 
     // Material definitions
     static const std::string basematerials = "basematerials";
+    static const std::string basematerials_id = "id";
     static const std::string basematerials_base = "base";
     static const std::string basematerials_name = "name";
     static const std::string basematerials_displaycolor = "displaycolor";

@@ -259,7 +259,6 @@ private:
 
         while ( ReadToEndElement( D3MF::XmlTag::basematerials ) ) {
             mMatArray.push_back( readMaterialDef() );
-            xmlReader->read();
         }
     }
 
@@ -398,7 +397,6 @@ static const aiImporterDesc desc = {
     Extension.c_str()
 };
 
-
 D3MFImporter::D3MFImporter()
 : BaseImporter() {
     // empty
@@ -431,8 +429,8 @@ const aiImporterDesc *D3MFImporter::GetInfo() const {
     return &desc;
 }
 
-void D3MFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-    D3MF::D3MFOpcPackage opcPackage(pIOHandler, pFile);
+void D3MFImporter::InternReadFile( const std::string &filename, aiScene *pScene, IOSystem *pIOHandler ) {
+    D3MF::D3MFOpcPackage opcPackage(pIOHandler, filename);
 
     std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(opcPackage.RootStream()));
     std::unique_ptr<D3MF::XmlReader> xmlReader(irr::io::createIrrXMLReader(xmlStream.get()));

@@ -153,7 +153,11 @@ bool D3MFExporter::exportRelations() {
     mRelOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">";
 
     for ( size_t i = 0; i < mRelations.size(); ++i ) {
-        mRelOutput << "<Relationship Target=\"/" << mRelations[ i ]->target << "\" ";
+        if ( mRelations[ i ]->target[ 0 ] == '/' ) {
+            mRelOutput << "<Relationship Target=\"" << mRelations[ i ]->target << "\" ";
+        } else {
+            mRelOutput << "<Relationship Target=\"/" << mRelations[ i ]->target << "\" ";
+        }
         mRelOutput << "Id=\"" << mRelations[i]->id << "\" ";
         mRelOutput << "Type=\"" << mRelations[ i ]->type << "\" />";
         mRelOutput << std::endl;
@@ -205,14 +209,6 @@ void D3MFExporter::writeHeader() {
     mModelOutput << std::endl;
 }
 
-static std::string to_hex( int to_convert ) {
-    std::string result;
-    std::stringstream ss;
-    ss << std::hex << to_convert;
-    ss >> result;
-    return result;
-}
-
 void D3MFExporter::writeBaseMaterials() {
     mModelOutput << "<basematerials id=\"1\">\n";
     for ( size_t i = 0; i < mScene->mNumMaterials; ++i ) {
@@ -229,19 +225,20 @@ void D3MFExporter::writeBaseMaterials() {
         if ( mat->Get( AI_MATKEY_COLOR_DIFFUSE, color ) == aiReturn_SUCCESS ) {
             hexDiffuseColor = "#";
             std::string tmp;
-            tmp = to_hex( color.r );
+            
+            tmp = DecimalToHexa( color.r );
             hexDiffuseColor += tmp;
-            tmp = to_hex( color.g );
+            tmp = DecimalToHexa( color.g );
             hexDiffuseColor += tmp;
-            tmp = to_hex( color.b );
+            tmp = DecimalToHexa( color.b );
             hexDiffuseColor += tmp;
-            tmp = to_hex( color.a );
+            tmp = DecimalToHexa( color.a );
             hexDiffuseColor += tmp;
         } else {
             hexDiffuseColor = "#FFFFFFFF";
         }
 
-        mModelOutput << "<base name=\""+strName+"\" "+" displaycolor=\""+hexDiffuseColor+"\">\n";
+        mModelOutput << "<base name=\""+strName+"\" "+" displaycolor=\""+hexDiffuseColor+"\" />\n";
     }
     mModelOutput << "</basematerials>\n";
 }

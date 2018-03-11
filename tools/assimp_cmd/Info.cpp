@@ -329,6 +329,29 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		special_points[2][0],special_points[2][1],special_points[2][2]
 		)
 	;
+
+	// meshes
+	if (scene->mNumMeshes) {
+		printf("\nMeshes:  (name) [vertices / bones / faces | primitive_types]\n");
+	}
+	for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+		const aiMesh* mesh = scene->mMeshes[i];
+		printf("    %d (%s)", i, mesh->mName.C_Str());
+		printf(
+			": [%d / %d / %d |",
+			mesh->mNumVertices,
+			mesh->mNumBones,
+			mesh->mNumFaces
+		);
+		const unsigned int ptypes = mesh->mPrimitiveTypes;
+		if (ptypes & aiPrimitiveType_POINT) { printf(" point"); }
+		if (ptypes & aiPrimitiveType_LINE) { printf(" line"); }
+		if (ptypes & aiPrimitiveType_TRIANGLE) { printf(" triangle"); }
+		if (ptypes & aiPrimitiveType_POLYGON) { printf(" polygon"); }
+		printf("]\n");
+	}
+
+	// materials
 	unsigned int total=0;
 	for(unsigned int i = 0;i < scene->mNumMaterials; ++i) {
 		aiString name;
@@ -340,6 +363,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		printf("\n");
 	}
 
+	// textures
 	total=0;
 	for(unsigned int i = 0;i < scene->mNumMaterials; ++i) {
 		aiString name;
@@ -369,6 +393,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		printf("\n");
 	}
 
+	// animations
 	total=0;
 	for(unsigned int i = 0;i < scene->mNumAnimations; ++i) {
 		if (scene->mAnimations[i]->mName.length) {
@@ -379,6 +404,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		printf("\n");
 	}
 
+	// node hierarchy
 	printf("\nNode hierarchy:\n");
 	unsigned int cline=0;
 	PrintHierarchy(scene->mRootNode,20,1000,cline,verbose);

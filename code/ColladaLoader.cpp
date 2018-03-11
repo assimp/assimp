@@ -131,6 +131,7 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
 {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
+    useColladaName = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES,0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1913,6 +1914,11 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 // The name must be unique for proper node-bone association.
 std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
+    // If explicitly requested, just use the collada name.
+    if (useColladaName) {
+        return pNode->mName;
+    }
+
     // Now setup the name of the assimp node. The collada name might not be
     // unique, so we use the collada ID.
     if (!pNode->mID.empty())

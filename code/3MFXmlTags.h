@@ -45,6 +45,10 @@ namespace Assimp {
 namespace D3MF {
 
 namespace XmlTag {
+    // Meta-data
+    static const std::string meta = "metadata";
+    static const std::string meta_name = "name";
+
     // Model-data specific tags
     static const std::string model = "model";
     static const std::string model_unit = "unit";

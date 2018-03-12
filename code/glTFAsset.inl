@@ -948,24 +948,24 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 	size_t size_coordindex = ifs.GetNCoordIndex() * 3;// See float attributes note.
 
 	if(primitives[0].indices->count != size_coordindex)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (" + std::to_string(size_coordindex) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].indices->count) + ").");
+		throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (" + to_string(size_coordindex) +
+								") not equal to uncompressed (" + to_string(primitives[0].indices->count) + ").");
 
 	size_coordindex *= sizeof(IndicesType);
 	// Coordinates
 	size_t size_coord = ifs.GetNCoord();// See float attributes note.
 
 	if(primitives[0].attributes.position[0]->count != size_coord)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (" + std::to_string(size_coord) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.position[0]->count) + ").");
+		throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (" + to_string(size_coord) +
+								") not equal to uncompressed (" + to_string(primitives[0].attributes.position[0]->count) + ").");
 
 	size_coord *= 3 * sizeof(float);
 	// Normals
 	size_t size_normal = ifs.GetNNormal();// See float attributes note.
 
 	if(primitives[0].attributes.normal[0]->count != size_normal)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (" + std::to_string(size_normal) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.normal[0]->count) + ").");
+		throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (" + to_string(size_normal) +
+								") not equal to uncompressed (" + to_string(primitives[0].attributes.normal[0]->count) + ").");
 
 	size_normal *= 3 * sizeof(float);
 	// Additional attributes.
@@ -989,8 +989,8 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 				if(idx_texcoord < primitives[0].attributes.texcoord.size())
 				{
 					if(primitives[0].attributes.texcoord[idx]->count != tval)
-						throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (" + std::to_string(tval) +
-												") not equal to uncompressed (" + std::to_string(primitives[0].attributes.texcoord[idx]->count) + ").");
+						throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (" + to_string(tval) +
+												") not equal to uncompressed (" + to_string(primitives[0].attributes.texcoord[idx]->count) + ").");
 
 					idx_texcoord++;
 				}

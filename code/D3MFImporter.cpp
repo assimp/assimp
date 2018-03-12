@@ -133,11 +133,11 @@ private:
 
         const char *attrib( nullptr );
         std::string name, type;
-        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::name.c_str() );
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::id.c_str() );
         if ( nullptr != attrib ) {
             name = attrib;
         }
-        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::name.c_str() );
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::type.c_str() );
         if ( nullptr != attrib ) {
             type = attrib;
         }

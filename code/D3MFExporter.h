@@ -76,10 +76,11 @@ public:
 
 protected:
     void writeHeader();
+    void writeBaseMaterials();
     void writeObjects();
     void writeMesh( aiMesh *mesh );
     void writeVertex( const aiVector3D &pos );
-    void writeFaces( aiMesh *mesh );
+    void writeFaces( aiMesh *mesh, unsigned int matIdx );
     void writeBuild();
     void exportContentTyp( const std::string &filename );
     void writeModelToArchive( const std::string &folder, const std::string &modelName );

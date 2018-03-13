@@ -86,4 +86,11 @@ TEST_F( utD3MFImporterExporter, export3MFtoMemTest ) {
     EXPECT_TRUE( exporterTest() );
 }
 
+TEST_F( utD3MFImporterExporter, roundtrip3MFtoMemTest ) {
+    EXPECT_TRUE( exporterTest() );
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "test.3mf", 0 );
+}
+
 #endif // ASSIMP_BUILD_NO_EXPORT

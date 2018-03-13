@@ -499,6 +499,15 @@ bool D3MFOpcPackage::validate() {
     return mZipArchive->Exists( ModelRef.c_str() );
 }
 
+bool D3MFOpcPackage::isZipArchive( IOSystem* pIOHandler, const std::string& rFile ) {
+    D3MF::D3MFZipArchive ar( pIOHandler, rFile );
+    if ( !ar.isOpen() ) {
+        return false;
+    }
+
+    return true;
+}
+
 std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream) {
     std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(stream));
     std::unique_ptr<XmlReader> xml(irr::io::createIrrXMLReader(xmlStream.get()));

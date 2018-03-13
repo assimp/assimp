@@ -414,6 +414,9 @@ bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bo
         if ( nullptr == pIOHandler ) {
             return false;
         }
+        if ( !D3MF::D3MFOpcPackage::isZipArchive( pIOHandler, filename ) ) {
+            return false;
+        }
         D3MF::D3MFOpcPackage opcPackage( pIOHandler, filename );
         return opcPackage.validate();
     }

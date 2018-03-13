@@ -64,10 +64,11 @@ class D3MFZipArchive;
 
 class D3MFOpcPackage {
 public:
-    D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile);
+    D3MFOpcPackage( IOSystem* pIOHandler, const std::string& rFile );
     ~D3MFOpcPackage();
     IOStream* RootStream() const;
     bool validate();
+    static bool isZipArchive( IOSystem* pIOHandler, const std::string& rFile );
 
 protected:
     std::string ReadPackageRootRelationship(IOStream* stream);

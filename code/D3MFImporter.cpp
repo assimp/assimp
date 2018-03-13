@@ -114,7 +114,7 @@ public:
 
         std::copy( mMeshes.begin(), mMeshes.end(), scene->mMeshes);
 
-        scene->mNumMaterials = mMatArray.size();
+        scene->mNumMaterials = static_cast<unsigned int>( mMatArray.size() );
         if ( 0 != scene->mNumMaterials ) {
             scene->mMaterials = new aiMaterial*[ scene->mNumMaterials ];
             std::copy( mMatArray.begin(), mMatArray.end(), scene->mMaterials );

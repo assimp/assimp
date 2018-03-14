@@ -643,14 +643,14 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     if ( ok && PreRotation.SquareLength() > zero_epsilon ) {
         is_complex = true;
 
-        GetRotationMatrix( rot, PreRotation, chain[ TransformationComp_PreRotation ] );
+        GetRotationMatrix( Model::RotOrder::RotOrder_EulerXYZ, PreRotation, chain[ TransformationComp_PreRotation ] );
     }
 
     const aiVector3D& PostRotation = PropertyGet<aiVector3D>( props, "PostRotation", ok );
     if ( ok && PostRotation.SquareLength() > zero_epsilon ) {
         is_complex = true;
 
-        GetRotationMatrix( rot, PostRotation, chain[ TransformationComp_PostRotation ] );
+        GetRotationMatrix( Model::RotOrder::RotOrder_EulerXYZ, PostRotation, chain[ TransformationComp_PostRotation ] );
     }
 
     const aiVector3D& RotationPivot = PropertyGet<aiVector3D>( props, "RotationPivot", ok );

@@ -524,7 +524,7 @@
 		C4940DCF795A428F90B1B693 /* RemoveVCProcess.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = RemoveVCProcess.h; path = code/RemoveVCProcess.h; sourceTree = SOURCE_ROOT; };
 		C52C48E46AA243A28E2EF4BA /* CInterfaceIOWrapper.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CInterfaceIOWrapper.cpp; path = code/CInterfaceIOWrapper.cpp; sourceTree = SOURCE_ROOT; };
 		C5D5BEC5D73B494FADEF1538 /* JoinVerticesProcess.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = JoinVerticesProcess.h; path = code/JoinVerticesProcess.h; sourceTree = SOURCE_ROOT; };
-		C80A8EDDC7814E8B9EF83BBC /* libassimp.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = libassimp.4.0.0.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		C80A8EDDC7814E8B9EF83BBC /* libassimpMAC.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libassimpMAC.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA4459DF9C9B4DE79C40F0C5 /* irrString.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = irrString.h; path = contrib/irrXML/irrString.h; sourceTree = SOURCE_ROOT; };
 		CA79B2C439374B52820F6E61 /* postprocess.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = postprocess.h; path = include/assimp/postprocess.h; sourceTree = SOURCE_ROOT; };
 		CACEF351363847398C0E7413 /* ObjExporter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ObjExporter.h; path = code/ObjExporter.h; sourceTree = SOURCE_ROOT; };
@@ -815,7 +815,7 @@
 			isa = PBXGroup;
 			children = (
 				13DF16E901AE46B0B3EC5686 /* libIrrXML.a */,
-				C80A8EDDC7814E8B9EF83BBC /* libassimp.dylib */,
+				C80A8EDDC7814E8B9EF83BBC /* libassimpMAC.dylib */,
 				9DFE61071F4C349A00418EC2 /* libassimpIOS.a */,
 			);
 			name = Products;
@@ -1112,7 +1112,7 @@
 			);
 			name = assimp;
 			productName = assimp;
-			productReference = C80A8EDDC7814E8B9EF83BBC /* libassimp.dylib */;
+			productReference = C80A8EDDC7814E8B9EF83BBC /* libassimpMAC.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		9DFE61061F4C349A00418EC2 /* assimpIOS */ = {
@@ -1767,8 +1767,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DYLIB_COMPATIBILITY_VERSION = 4.0.0;
-				DYLIB_CURRENT_VERSION = 4.0.0;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_PREFIX = lib;
 				EXECUTABLE_SUFFIX = .dylib;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -1884,7 +1884,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "";
+				INSTALL_PATH = "@executable_path/..";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = (
@@ -1905,13 +1905,11 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"-install_name",
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code/MinSizeRel/libassimp.4.dylib,
 					/usr/lib/libz.dylib,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/MinSizeRel/libIrrXML.a,
 				);
 				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = assimp.4.0.0;
+				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
 				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
 				USE_HEADERMAP = NO;
@@ -1984,8 +1982,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DYLIB_COMPATIBILITY_VERSION = 4.0.0;
-				DYLIB_CURRENT_VERSION = 4.0.0;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_PREFIX = lib;
 				EXECUTABLE_SUFFIX = .dylib;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -2101,7 +2099,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "";
+				INSTALL_PATH = "@executable_path/..";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = "   -fPIC  ";
@@ -2117,13 +2115,11 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"-install_name",
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code/Debug/libassimp.4.dylib,
 					/usr/lib/libz.dylib,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/Debug/libIrrXML.a,
 				);
 				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = assimp.4.0.0;
+				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
 				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
 				USE_HEADERMAP = NO;
@@ -2171,8 +2167,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DYLIB_COMPATIBILITY_VERSION = 4.0.0;
-				DYLIB_CURRENT_VERSION = 4.0.0;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_PREFIX = lib;
 				EXECUTABLE_SUFFIX = .dylib;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -2288,7 +2284,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "";
+				INSTALL_PATH = "@executable_path/..";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = (
@@ -2309,13 +2305,11 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"-install_name",
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code/Release/libassimp.4.dylib,
 					/usr/lib/libz.dylib,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/Release/libIrrXML.a,
 				);
 				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = assimp.4.0.0;
+				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
 				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
 				USE_HEADERMAP = NO;
@@ -3207,8 +3201,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DYLIB_COMPATIBILITY_VERSION = 4.0.0;
-				DYLIB_CURRENT_VERSION = 4.0.0;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_PREFIX = lib;
 				EXECUTABLE_SUFFIX = .dylib;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -3324,7 +3318,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "";
+				INSTALL_PATH = "@executable_path/..";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = (
@@ -3344,13 +3338,11 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"-install_name",
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code/RelWithDebInfo/libassimp.4.dylib,
 					/usr/lib/libz.dylib,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/RelWithDebInfo/libIrrXML.a,
 				);
 				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = assimp.4.0.0;
+				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
 				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
 				USE_HEADERMAP = NO;

@@ -241,6 +241,18 @@
 		FC87B6B1A80249FB9B86A9AB /* TriangulateProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE5357E571AB44BAB6EB0A07 /* TriangulateProcess.cpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXBuildRule section */
+		9D1C72991FD586E600D4D986 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+			);
+			script = "";
+		};
+/* End PBXBuildRule section */
+
 /* Begin PBXContainerItemProxy section */
 		2267FB26D096444AA207DD7A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1112,6 +1124,7 @@
 				9DFE61051F4C349A00418EC2 /* CopyFiles */,
 			);
 			buildRules = (
+				9D1C72991FD586E600D4D986 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -2583,7 +2596,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2739,7 +2752,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2896,7 +2909,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3053,7 +3066,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

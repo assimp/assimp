@@ -100,26 +100,22 @@ IRRImporter::~IRRImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
-    /* NOTE: A simple check for the file extension is not enough
-     * here. Irrmesh and irr are easy, but xml is too generic
-     * and could be collada, too. So we need to open the file and
-     * search for typical tokens.
-     */
+bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(pFile);
-
-    if (extension == "irr")return true;
-    else if (extension == "xml" || checkSig)
-    {
+    if ( extension == "irr" ) {
+        return true;
+    } else if (extension == "xml" || checkSig) {
         /*  If CanRead() is called in order to check whether we
          *  support a specific file extension in general pIOHandler
          *  might be NULL and it's our duty to return true here.
          */
-        if (!pIOHandler)return true;
+        if ( nullptr == pIOHandler ) {
+            return true;
+        }
         const char* tokens[] = {"irr_scene"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
+
     return false;
 }
 

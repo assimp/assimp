@@ -49,8 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
-
+#include <assimp/StringUtils.h>
 #include <assimp/Exceptional.h>
+
 #include "3MFXmlTags.h"
 #include "D3MFOpcPackage.h"
 
@@ -126,7 +127,6 @@ bool D3MFExporter::exportArchive( const char *file ) {
     return ok;
 }
 
-
 bool D3MFExporter::exportContentTypes() {
     mContentOutput.clear();
 
@@ -153,7 +153,11 @@ bool D3MFExporter::exportRelations() {
     mRelOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">";
 
     for ( size_t i = 0; i < mRelations.size(); ++i ) {
-        mRelOutput << "<Relationship Target=\"/" << mRelations[ i ]->target << "\" ";
+        if ( mRelations[ i ]->target[ 0 ] == '/' ) {
+            mRelOutput << "<Relationship Target=\"" << mRelations[ i ]->target << "\" ";
+        } else {
+            mRelOutput << "<Relationship Target=\"/" << mRelations[ i ]->target << "\" ";
+        }
         mRelOutput << "Id=\"" << mRelations[i]->id << "\" ";
         mRelOutput << "Type=\"" << mRelations[ i ]->type << "\" />";
         mRelOutput << std::endl;
@@ -176,6 +180,8 @@ bool D3MFExporter::export3DModel() {
             << std::endl;
     mModelOutput << "<" << XmlTag::resources << ">";
     mModelOutput << std::endl;
+
+    writeBaseMaterials();
 
     writeObjects();
 
@@ -201,6 +207,40 @@ bool D3MFExporter::export3DModel() {
 void D3MFExporter::writeHeader() {
     mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
     mModelOutput << std::endl;
+}
+
+void D3MFExporter::writeBaseMaterials() {
+    mModelOutput << "<basematerials id=\"1\">\n";
+    for ( size_t i = 0; i < mScene->mNumMaterials; ++i ) {
+        aiMaterial *mat = mScene->mMaterials[ i ];
+        std::string strName;
+        aiString name;
+        if ( mat->Get( AI_MATKEY_NAME, name ) != aiReturn_SUCCESS ) {
+            strName = "basemat_" + to_string( i );
+        } else {
+            strName = name.C_Str();
+        }
+        std::string hexDiffuseColor;
+        aiColor4D color;
+        if ( mat->Get( AI_MATKEY_COLOR_DIFFUSE, color ) == aiReturn_SUCCESS ) {
+            hexDiffuseColor = "#";
+            std::string tmp;
+            
+            tmp = DecimalToHexa( color.r );
+            hexDiffuseColor += tmp;
+            tmp = DecimalToHexa( color.g );
+            hexDiffuseColor += tmp;
+            tmp = DecimalToHexa( color.b );
+            hexDiffuseColor += tmp;
+            tmp = DecimalToHexa( color.a );
+            hexDiffuseColor += tmp;
+        } else {
+            hexDiffuseColor = "#FFFFFFFF";
+        }
+
+        mModelOutput << "<base name=\""+strName+"\" "+" displaycolor=\""+hexDiffuseColor+"\" />\n";
+    }
+    mModelOutput << "</basematerials>\n";
 }
 
 void D3MFExporter::writeObjects() {
@@ -242,7 +282,9 @@ void D3MFExporter::writeMesh( aiMesh *mesh ) {
     }
     mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
 
-    writeFaces( mesh );
+    const unsigned int matIdx( mesh->mMaterialIndex );
+
+    writeFaces( mesh, matIdx );
 
     mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
 }
@@ -252,7 +294,7 @@ void D3MFExporter::writeVertex( const aiVector3D &pos ) {
     mModelOutput << std::endl;
 }
 
-void D3MFExporter::writeFaces( aiMesh *mesh ) {
+void D3MFExporter::writeFaces( aiMesh *mesh, unsigned int matIdx ) {
     if ( nullptr == mesh ) {
         return;
     }
@@ -264,7 +306,8 @@ void D3MFExporter::writeFaces( aiMesh *mesh ) {
     for ( unsigned int i = 0; i < mesh->mNumFaces; ++i ) {
         aiFace &currentFace = mesh->mFaces[ i ];
         mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[ 0 ] << "\" v2=\""
-                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ] << "\"/>";
+                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ]
+                << "\" pid=\"1\" p1=\""+to_string(matIdx)+"\" />";
         mModelOutput << std::endl;
     }
     mModelOutput << "</" << XmlTag::triangles << ">";

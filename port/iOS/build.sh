@@ -12,7 +12,8 @@ BUILD_DIR="./lib/iOS"
 IOS_SDK_VERSION=$(xcodebuild -version -sdk iphoneos | grep SDKVersion | cut -f2 -d ':' | tr -d '[[:space:]]')
 ###################################
 
-BUILD_SHARED_LIBS="OFF"
+BUILD_SHARED_LIBS=ON
+BUILD_TYPE=MinSizeRel
 
 ################################################
 # 		 Minimum iOS deployment target version
@@ -23,9 +24,9 @@ IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
 TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 
-BUILD_ARCHS_DEVICE="armv7s arm64"
-BUILD_ARCHS_SIMULATOR="x86_64"
-BUILD_ARCHS_ALL=(armv7s arm64 x86_64)
+BUILD_ARCHS_DEVICE="armv7 arm64"
+BUILD_ARCHS_SIMULATOR="x86_64 i386"
+BUILD_ARCHS_ALL=(armv7 arm64 x86_64 i386)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
@@ -61,16 +62,23 @@ build_arch()
 
     rm CMakeCache.txt
 
-    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
+    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
 
     echo "[!] Building $1 library"
 
     $XCODE_ROOT_DIR/usr/bin/make clean
     $XCODE_ROOT_DIR/usr/bin/make assimp -j 8 -l
 
-    echo "[!] Moving built library into: $BUILD_DIR/$1/"
+    echo "[!] Moving built libraries into: $BUILD_DIR/$1/"
 
-    mv ./lib/libassimp.a $BUILD_DIR/$1/
+	if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
+   	 mv ./lib/libassimp*.dylib  $BUILD_DIR/$1/
+	else
+    	mv ./lib/libassimp.a $BUILD_DIR/$1/
+	fi
+
+    mv ./lib/libIrrXML.a $BUILD_DIR/$1/
+    mv ./lib/libzlibstatic.a $BUILD_DIR/$1/
 }
 
 echo "[!] $0 - assimp iOS build script"
@@ -120,13 +128,40 @@ for ARCH_TARGET in $DEPLOY_ARCHS; do
 done
 
 if [[ "$DEPLOY_FAT" -eq 1 ]]; then
-    echo '[+] Creating fat binary ...'
+    echo '[+] Creating fat libassimp binary ...'
     for ARCH_TARGET in $DEPLOY_ARCHS; do
-        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
+	if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
+		LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.dylib "
+	else
+		LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
+	fi        
     done
-    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
+	if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
+		LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.dylib"
+	else
+    	LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
+	fi
     lipo $LIPO_ARGS
     echo "[!] Done! The fat binary can be found at $BUILD_DIR"
+    LIPO_ARGS=""
+
+    echo '[+] Creating fat libIrrXML binary ...'
+    for ARCH_TARGET in $DEPLOY_ARCHS; do
+        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libIrrXML.a "
+    done
+    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libIrrXML-fat.a"
+    lipo $LIPO_ARGS
+    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
+    LIPO_ARGS=""
+    
+    echo '[+] Creating fat libzlibstatic binary ...'
+    for ARCH_TARGET in $DEPLOY_ARCHS; do
+        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libzlibstatic.a "
+    done
+    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libzlibstatic-fat.a"
+    lipo $LIPO_ARGS
+    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
+    LIPO_ARGS=""
 fi
 
 

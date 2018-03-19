@@ -148,6 +148,17 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
         << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
         << aiGetVersionRevision() << ")" << endl;
 
+    // Look through materials for a diffuse texture, and add it if found
+    for ( unsigned int i = 0; i < pScene->mNumMaterials; ++i )
+    {
+        const aiMaterial* const mat = pScene->mMaterials[i];
+        aiString s;
+        if ( AI_SUCCESS == mat->Get( AI_MATKEY_TEXTURE_DIFFUSE( 0 ), s ) )
+        {
+            mOutput << "comment TextureFile " << s.data << endl;
+        }
+    }
+
     // TODO: probably want to check here rather than just assume something
     //       definitely not good to always write float even if we might have double precision
 

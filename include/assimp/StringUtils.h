@@ -55,7 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///	@return	The number of written characters if the buffer size was big enough. If an encoding error occurs, a negative number is returned.
 #if defined(_MSC_VER) && _MSC_VER < 1900
 
-	inline int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap) {
+	inline
+    int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap) {
 		int count(-1);
 		if (0 != size) {
 			count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
@@ -67,7 +68,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		return count;
 	}
 
-	inline int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
+	inline
+    int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
 		int count;
 		va_list ap;
 
@@ -82,14 +84,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   define ai_snprintf snprintf
 #endif
 
+///	@fn		to_string
+///	@brief	The portable version of to_string ( some gcc-versions on embedded devices are not supporting this).
+///	@param	value   The value to write into the std::string.
+///	@return	The value as a std::string
 template <typename T>
 inline
 std::string to_string( T value ) {
     std::ostringstream os;
     os << value;
+
     return os.str();
 }
 
+///	@fn		ai_strtof
+///	@brief	The portable version of strtof.
+///	@param	begin   The first character of the string.
+/// @param  end     The last character
+///	@return	The float value, 0.0f in cas of an error.
 inline
 float ai_strtof( const char *begin, const char *end ) {
     if ( nullptr == begin ) {
@@ -107,5 +119,23 @@ float ai_strtof( const char *begin, const char *end ) {
     return val;
 }
 
-#endif // INCLUDED_AI_STRINGUTILS_H
+///	@fn		DecimalToHexa
+///	@brief	The portable to convert a decimal value into a hexadecimal string.
+///	@param	toConvert   Value to convert
+///	@return	The hexadecimal string, is empty in case of an error.
+template<class T>
+inline
+std::string DecimalToHexa( T toConvert ) {
+    std::string result;
+    std::stringstream ss;
+    ss << std::hex << toConvert;
+    ss >> result;
 
+    for ( size_t i = 0; i < result.size(); ++i ) {
+        result[ i ] = toupper( result[ i ] );
+    }
+
+    return result;
+}
+
+#endif // INCLUDED_AI_STRINGUTILS_H

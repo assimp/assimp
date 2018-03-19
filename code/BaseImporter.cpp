@@ -115,13 +115,12 @@ void BaseImporter::SetupProperties(const Importer* /*pImp*/)
 }
 
 // ------------------------------------------------------------------------------------------------
-void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
-{
+void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
     const aiImporterDesc* desc = GetInfo();
-    ai_assert(desc != NULL);
+    ai_assert(desc != nullptr);
 
     const char* ext = desc->mFileExtensions;
-    ai_assert(ext != NULL);
+    ai_assert(ext != nullptr );
 
     const char* last = ext;
     do {
@@ -145,12 +144,13 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
     unsigned int        searchBytes /* = 200 */,
     bool                tokensSol /* false */)
 {
-    ai_assert( NULL != tokens );
+    ai_assert( nullptr != tokens );
     ai_assert( 0 != numTokens );
     ai_assert( 0 != searchBytes);
 
-    if (!pIOHandler)
+    if ( nullptr == pIOHandler ) {
         return false;
+    }
 
     std::unique_ptr<IOStream> pStream (pIOHandler->Open(pFile));
     if (pStream.get() ) {
@@ -179,9 +179,9 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
         *cur2 = '\0';
 
         std::string token;
-        for (unsigned int i = 0; i < numTokens;++i) {
+        for (unsigned int i = 0; i < numTokens; ++i ) {
             ai_assert( nullptr != tokens[i] );
-            size_t len( strlen( tokens[ i ] ) );
+            const size_t len( strlen( tokens[ i ] ) );
             token.clear();
             const char *ptr( tokens[ i ] );
             for ( size_t tokIdx = 0; tokIdx < len; ++tokIdx ) {

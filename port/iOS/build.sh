@@ -6,17 +6,24 @@
 
 BUILD_DIR="./lib/iOS"
 
-IOS_SDK_VERSION=
-IOS_SDK_TARGET=6.0
-#(iPhoneOS iPhoneSimulator) -- determined from arch
-IOS_SDK_DEVICE=
+###################################
+# 		 SDK Version
+###################################
+IOS_SDK_VERSION=$(xcodebuild -version -sdk iphoneos | grep SDKVersion | cut -f2 -d ':' | tr -d '[[:space:]]')
+###################################
 
-XCODE_ROOT_DIR=/Applications/Xcode.app/Contents
-TOOLCHAIN=$XCODE_ROOT_DIR//Developer/Toolchains/XcodeDefault.xctoolchain
+################################################
+# 		 Minimum iOS deployment target version
+################################################
+MIN_IOS_VERSION="8.0"
 
-BUILD_ARCHS_DEVICE="armv7 armv7s arm64"
-BUILD_ARCHS_SIMULATOR="i386 x86_64"
-BUILD_ARCHS_ALL=(armv7 armv7s arm64 i386 x86_64)
+IOS_SDK_TARGET=$MIN_IOS_VERSION
+XCODE_ROOT_DIR=$(xcode-select  --print-path)
+TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
+
+BUILD_ARCHS_DEVICE="armv7s arm64"
+BUILD_ARCHS_SIMULATOR="x86_64"
+BUILD_ARCHS_ALL=(armv7s arm64 x86_64)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
@@ -43,7 +50,7 @@ build_arch()
 
     unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
 
-    export DEVROOT=$XCODE_ROOT_DIR/Developer/Platforms/$IOS_SDK_DEVICE.platform/Developer
+    export DEVROOT=$XCODE_ROOT_DIR/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
     export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -$CPP_DEV_TARGET=$IOS_SDK_TARGET -I$SDKROOT/usr/include/"
     export LDFLAGS="-L$SDKROOT/usr/lib/"
@@ -56,8 +63,8 @@ build_arch()
 
     echo "[!] Building $1 library"
 
-    $XCODE_ROOT_DIR/Developer/usr/bin/make clean
-    $XCODE_ROOT_DIR/Developer/usr/bin/make assimp -j 8 -l
+    $XCODE_ROOT_DIR/usr/bin/make clean
+    $XCODE_ROOT_DIR/usr/bin/make assimp -j 8 -l
 
     echo "[!] Moving built library into: $BUILD_DIR/$1/"
 

@@ -12,6 +12,8 @@ BUILD_DIR="./lib/iOS"
 IOS_SDK_VERSION=$(xcodebuild -version -sdk iphoneos | grep SDKVersion | cut -f2 -d ':' | tr -d '[[:space:]]')
 ###################################
 
+BUILD_SHARED_LIBS="OFF"
+
 ################################################
 # 		 Minimum iOS deployment target version
 ################################################
@@ -59,7 +61,7 @@ build_arch()
 
     rm CMakeCache.txt
 
-    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=OFF
+    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
 
     echo "[!] Building $1 library"
 
@@ -95,7 +97,7 @@ for i in "$@"; do
     -n|--no-fat)
         DEPLOY_FAT=0
         echo "[!] Fat binary will not be created."
-    ;;
+        ;;
     -h|--help)
         echo " - don't build fat library (--no-fat)."
         echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"

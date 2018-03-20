@@ -102,11 +102,22 @@ public:
                 // 
             } else if ( nodeName == D3MF::XmlTag::basematerials ) {
                 ReadBaseMaterials();
+            } else if ( nodeName == D3MF::XmlTag::meta ) {
+                ReadMetadata();
             }
         }
 
         if ( scene->mRootNode->mName.length == 0 ) {
             scene->mRootNode->mName.Set( "3MF" );
+        }
+
+        if ( !mMetaData.empty() ) {
+            const size_t numMeta( mMetaData.size() );
+            scene->mMetaData = aiMetadata::Alloc( numMeta );
+            for ( size_t i = 0; i < numMeta; ++i ) {
+                aiString val( mMetaData[ i ].value );
+                scene->mMetaData->Add( mMetaData[ i ].name, val );
+            }
         }
 
         scene->mNumMeshes = static_cast<unsigned int>( mMeshes.size());
@@ -178,6 +189,21 @@ private:
         }
 
         return mesh;
+    }
+
+    void ReadMetadata() {
+        const std::string name = xmlReader->getAttributeValue( D3MF::XmlTag::meta_name.c_str() );
+        xmlReader->read();
+        const std::string value = xmlReader->getNodeData();
+
+        if ( name.empty() ) {
+            return;
+        }
+
+        MetaEntry entry;
+        entry.name = name;
+        entry.value = value;
+        mMetaData.push_back( entry );
     }
 
     void ImportVertices(aiMesh* mesh) {
@@ -371,8 +397,12 @@ private:
         return false;
     }
 
-
 private:
+    struct MetaEntry {
+        std::string name;
+        std::string value;
+    };
+    std::vector<MetaEntry> mMetaData;
     std::vector<aiMesh*> mMeshes;
     MatArray mMatArray;
     unsigned int mActiveMatGroup;

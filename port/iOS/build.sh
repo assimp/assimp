@@ -24,10 +24,9 @@ IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
 TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 
-BUILD_ARCHS_DEVICE="arm64"
-BUILD_ARCHS_SIMULATOR="x86_64"
-BUILD_ARCHS_ALL=(arm64 x86_64)
-#BUILD_ARCHS_ALL=(armv7 arm64 x86_64 i386)
+BUILD_ARCHS_DEVICE="arm64 armv7"
+BUILD_ARCHS_SIMULATOR="x86_64 i386"
+BUILD_ARCHS_ALL=(armv7 arm64 x86_64 i386)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=

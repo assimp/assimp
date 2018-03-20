@@ -308,7 +308,8 @@ bool IsVerboseFormat(const aiScene* pScene) {
 }
 
 // ------------------------------------------------------------------------------------------------
-aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing, const ExportProperties* pProperties) {
+aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const char* pPath,
+        unsigned int pPreprocessing, const ExportProperties* pProperties) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // when they create scenes from scratch, users will likely create them not in verbose

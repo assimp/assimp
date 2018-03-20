@@ -76,7 +76,7 @@ bool DefaultIOSystem::Exists( const char* pFile) const
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
 
-    bool isUnicode = IsTextUnicode(pFile, static_cast<nt>(strlen(pFile)), NULL);
+    bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL);
     if (isUnicode) {
 
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, pFile, -1, fileName16, PATHLIMIT);

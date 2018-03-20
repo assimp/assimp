@@ -46,7 +46,7 @@ endif()
 
 OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
-  OFF
+  ON
 )
 
 OPTION( BUILD_FRAMEWORK
@@ -433,11 +433,11 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # Why here? Maybe user do not want Qt viewer and have no Qt.
   # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
   # Because viewer can be build independently of Assimp.
-  FIND_PACKAGE(OpenGL QUIET)
   IF (NOT IOS)
   	FIND_PACKAGE(Qt5Widgets QUIET)
   ENDIF (NOT IOS)
   FIND_PACKAGE(DevIL QUIET)
+  FIND_PACKAGE(OpenGL QUIET)
   IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
     ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
   ELSE()

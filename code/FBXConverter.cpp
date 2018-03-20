@@ -1642,9 +1642,8 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
 }
 
 void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures,
-    const std::string& propName,
-    aiTextureType target, const MeshGeometry* const mesh )
-{
+        const std::string& propName,
+        aiTextureType target, const MeshGeometry* const mesh ) {
     LayeredTextureMap::const_iterator it = layeredTextures.find( propName );
     if ( it == layeredTextures.end() ) {
         return;

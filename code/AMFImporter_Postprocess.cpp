@@ -156,10 +156,11 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	TextureConverted_Index = 0;
 	for(const SPP_Texture& tex_convd: mTexture_Converted)
 	{
-		if(tex_convd.ID == TextureConverted_ID)
-			return TextureConverted_Index;
-		else
-			TextureConverted_Index++;
+        if ( tex_convd.ID == TextureConverted_ID ) {
+            return TextureConverted_Index;
+        } else {
+            ++TextureConverted_Index;
+        }
 	}
 
 	//

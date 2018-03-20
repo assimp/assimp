@@ -87,6 +87,9 @@ namespace Assimp
 		/** Reads the animation clip library */
 		void ReadAnimationClipLibrary();
 
+        /** Unwrap controllers dependency hierarchy */
+        void PostProcessControllers();
+    
 		/** Re-build animations from animation clip library, if present, otherwise combine single-channel animations */
 		void PostProcessRootAnimations();
 

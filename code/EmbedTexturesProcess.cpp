@@ -134,7 +134,7 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     // Add the new texture
     auto pTexture = new aiTexture();
     pTexture->mHeight = 0; // Means that this is still compressed
-    pTexture->mWidth = uint32_t(imageSize);
+    pTexture->mWidth = static_cats<uint32_t>(imageSize);
     pTexture->pcData = imageContent;
 
     auto extension = path.substr(path.find_last_of('.') + 1u);

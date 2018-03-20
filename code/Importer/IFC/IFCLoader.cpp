@@ -583,9 +583,8 @@ typedef std::map<std::string, std::string> Metadata;
 
 // ------------------------------------------------------------------------------------------------
 void ProcessMetadata(const Schema_2x3::ListOf< Schema_2x3::Lazy< Schema_2x3::IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties,
-    const std::string& prefix = "",
-    unsigned int nest = 0)
-{
+        const std::string& prefix = "",
+        unsigned int nest = 0) {
     for(const Schema_2x3::IfcProperty& property : set) {
         const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
         if (const Schema_2x3::IfcPropertySingleValue* const singleValue = property.ToPtr<Schema_2x3::IfcPropertySingleValue>()) {

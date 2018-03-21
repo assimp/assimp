@@ -237,20 +237,20 @@ void D3MFExporter::writeMetaData() {
 
 void D3MFExporter::writeBaseMaterials() {
     mModelOutput << "<basematerials id=\"1\">\n";
+    std::string strName, hexDiffuseColor , tmp;
     for ( size_t i = 0; i < mScene->mNumMaterials; ++i ) {
         aiMaterial *mat = mScene->mMaterials[ i ];
-        std::string strName;
         aiString name;
         if ( mat->Get( AI_MATKEY_NAME, name ) != aiReturn_SUCCESS ) {
             strName = "basemat_" + to_string( i );
         } else {
             strName = name.C_Str();
         }
-        std::string hexDiffuseColor;
         aiColor4D color;
         if ( mat->Get( AI_MATKEY_COLOR_DIFFUSE, color ) == aiReturn_SUCCESS ) {
+            hexDiffuseColor.clear();
+            tmp.clear();
             hexDiffuseColor = "#";
-            std::string tmp;
             
             tmp = DecimalToHexa( color.r );
             hexDiffuseColor += tmp;

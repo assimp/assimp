@@ -132,18 +132,18 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene, bool noMt
     mOutputMat.precision(16);
 
     WriteGeometryFile(noMtl);
-    if (!noMtl)
+    if ( !noMtl ) {
         WriteMaterialFile();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 ObjExporter::~ObjExporter() {
-
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string ObjExporter :: GetMaterialLibName()
-{
+std::string ObjExporter::GetMaterialLibName() {
     // within the Obj file, we use just the relative file name with the path stripped
     const std::string& s = GetMaterialLibFileName();
     std::string::size_type il = s.find_last_of("/\\");
@@ -158,8 +158,9 @@ std::string ObjExporter :: GetMaterialLibName()
 std::string ObjExporter::GetMaterialLibFileName() {
     // Remove existing .obj file extension so that the final material file name will be fileName.mtl and not fileName.obj.mtl
     size_t lastdot = filename.find_last_of('.');
-    if (lastdot != std::string::npos)
-        return filename.substr(0, lastdot) + MaterialExt;
+    if ( lastdot != std::string::npos ) {
+        return filename.substr( 0, lastdot ) + MaterialExt;
+    }
 
     return filename + MaterialExt;
 }
@@ -172,8 +173,7 @@ void ObjExporter::WriteHeader(std::ostringstream& out) {
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string ObjExporter::GetMaterialName(unsigned int index)
-{
+std::string ObjExporter::GetMaterialName(unsigned int index) {
     const aiMaterial* const mat = pScene->mMaterials[index];
     if ( nullptr == mat ) {
         static const std::string EmptyStr;
@@ -191,8 +191,7 @@ std::string ObjExporter::GetMaterialName(unsigned int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter::WriteMaterialFile()
-{
+void ObjExporter::WriteMaterialFile() {
     WriteHeader(mOutputMat);
 
     for(unsigned int i = 0; i < pScene->mNumMaterials; ++i) {
@@ -310,8 +309,9 @@ void ObjExporter::WriteGeometryFile(bool noMtl) {
         if (!m.name.empty()) {
             mOutput << "g " << m.name << endl;
         }
-        if (!noMtl)
+        if ( !noMtl ) {
             mOutput << "usemtl " << m.matname << endl;
+        }
 
         for(const Face& f : m.faces) {
             mOutput << f.kind << ' ';
@@ -382,7 +382,7 @@ void ObjExporter::colIndexMap::getColors( std::vector<aiColor4D> &colors ) {
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat) {
-    mMeshes.push_back(MeshInstance());
+    mMeshes.push_back(MeshInstance() );
     MeshInstance& mesh = mMeshes.back();
 
     mesh.name = std::string( name.data, name.length );
@@ -436,8 +436,7 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
-{
+void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent) {
     const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
 
     for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {

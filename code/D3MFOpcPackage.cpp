@@ -288,8 +288,8 @@ bool D3MFZipArchive::Exists(const char* pFile) const {
         return false;
     }
 
-    std::string rFile(pFile);
-    std::map<std::string, ZipFile*>::const_iterator it = m_ArchiveMap.find(rFile);
+    std::string filename(pFile);
+    std::map<std::string, ZipFile*>::const_iterator it = m_ArchiveMap.find(filename);
     bool exist( false );
     if(it != m_ArchiveMap.end()) {
         exist = true;

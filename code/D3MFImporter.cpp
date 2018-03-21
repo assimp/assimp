@@ -282,7 +282,7 @@ private:
                     MatIdArray = it->second;
                 }
             }
-            MatIdArray.push_back( newMatIdx );
+            MatIdArray.push_back( static_cast<unsigned int>( newMatIdx ) );
             mMatId2MatArray[ mActiveMatGroup ] = MatIdArray;
         }
 

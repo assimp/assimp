@@ -104,7 +104,7 @@ public:
 
     // ---------------------------------------------------------------------
     ~StreamWriter() {
-        stream->Write(&buffer[0], 1, buffer.size());
+        stream->Write(buffer.data(), 1, buffer.size());
         stream->Flush();
     }
 
@@ -114,7 +114,7 @@ public:
     /** Flush the contents of the internal buffer, and the output IOStream */
     void Flush()
     {
-        stream->Write(&buffer[0], 1, buffer.size());
+        stream->Write(buffer.data(), 1, buffer.size());
         stream->Flush();
         buffer.clear();
         cursor = 0;

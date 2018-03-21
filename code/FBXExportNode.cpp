@@ -182,7 +182,7 @@ void FBX::Node::Begin(Assimp::StreamWriterLE &s)
     s.PutU4(0); // total property section length
 
     // node name
-    s.PutU1(name.size()); // length of node name
+    s.PutU1(uint8_t(name.size())); // length of node name
     s.PutString(name); // node name as raw bytes
 
     // property data comes after here
@@ -217,8 +217,8 @@ void FBX::Node::EndProperties(
     ai_assert(pos > property_start);
     size_t property_section_size = pos - property_start;
     s.Seek(start_pos + 4);
-    s.PutU4(num_properties);
-    s.PutU4(property_section_size);
+    s.PutU4(uint32_t(num_properties));
+    s.PutU4(uint32_t(property_section_size));
     s.Seek(pos);
 }
 
@@ -232,7 +232,7 @@ void FBX::Node::End(
     // now go back and write initial pos
     this->end_pos = s.Tell();
     s.Seek(start_pos);
-    s.PutU4(end_pos);
+    s.PutU4(uint32_t(end_pos));
     s.Seek(end_pos);
 }
 
@@ -251,9 +251,9 @@ void FBX::Node::WritePropertyNode(
     Node node(name);
     node.Begin(s);
     s.PutU1('d');
-    s.PutU4(v.size()); // number of elements
+    s.PutU4(uint32_t(v.size())); // number of elements
     s.PutU4(0); // no encoding (1 would be zip-compressed)
-    s.PutU4(v.size() * 8); // data size
+    s.PutU4(uint32_t(v.size()) * 8); // data size
     for (auto it = v.begin(); it != v.end(); ++it) { s.PutF8(*it); }
     node.EndProperties(s, 1);
     node.End(s, false);
@@ -271,9 +271,9 @@ void FBX::Node::WritePropertyNode(
     Node node(name);
     node.Begin(s);
     s.PutU1('i');
-    s.PutU4(v.size()); // number of elements
+    s.PutU4(uint32_t(v.size())); // number of elements
     s.PutU4(0); // no encoding (1 would be zip-compressed)
-    s.PutU4(v.size() * 4); // data size
+    s.PutU4(uint32_t(v.size()) * 4); // data size
     for (auto it = v.begin(); it != v.end(); ++it) { s.PutI4(*it); }
     node.EndProperties(s, 1);
     node.End(s, false);

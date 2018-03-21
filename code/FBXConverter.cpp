@@ -704,7 +704,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
         aiMatrix4x4::Scaling( GeometricScaling, chain[ TransformationComp_GeometricScaling ] );
         aiVector3D GeometricScalingInverse = GeometricScaling;
         bool canscale = true;
-        for (size_t i = 0; i < 3; ++i) {
+        for (unsigned int i = 0; i < 3; ++i) {
             if ( std::fabs( GeometricScalingInverse[i] ) > zero_epsilon ) {
                 GeometricScalingInverse[i] = 1.0f / GeometricScaling[i];
             } else {
@@ -1888,11 +1888,11 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
 
     // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:
     const aiColor3D& Transparent = GetColorPropertyFactored( props, "TransparentColor", "TransparencyFactor", ok );
-    float CalculatedOpacity = 1.0;
+    float CalculatedOpacity = 1.0f;
     if ( ok ) {
         out_mat->AddProperty( &Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
         // as calculated by FBX SDK 2017:
-        CalculatedOpacity = 1.0 - ((Transparent.r + Transparent.g + Transparent.b) / 3.0);
+        CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
     }
 
     // use of TransparencyFactor is inconsistent.

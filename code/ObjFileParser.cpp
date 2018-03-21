@@ -612,13 +612,14 @@ void ObjFileParser::getMaterialLib() {
         if ( '/' != *path.rbegin() ) {
           path += '/';
         }
-        absName = path + strMatName;
+        absName += path;
+        absName += strMatName;
     } else {
         absName = strMatName;
     }
-    IOStream *pFile = m_pIO->Open( absName );
 
-    if (!pFile ) {
+    IOStream *pFile = m_pIO->Open( absName );
+    if ( nullptr == pFile ) {
         DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName);
         std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
         DefaultLogger::get()->info("OBJ: Opening fallback material file " + strMatFallbackName);

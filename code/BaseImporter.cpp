@@ -251,7 +251,8 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
 /* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile,
     const void* _magic, unsigned int num, unsigned int offset, unsigned int size)
 {
-    ai_assert(size <= 16 && _magic);
+    ai_assert( size <= 16 );
+    ai_assert( _magic );
 
     if (!pIOHandler) {
         return false;

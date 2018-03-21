@@ -460,7 +460,7 @@ size_t count_images(const aiScene* scene) {
         ){
             const aiTextureType textype = static_cast<aiTextureType>(tt);
             const size_t texcount = mat->GetTextureCount(textype);
-            for (size_t j = 0; j < texcount; ++j) {
+            for (unsigned int j = 0; j < texcount; ++j) {
                 mat->GetTexture(textype, j, &texpath);
                 images.insert(std::string(texpath.C_Str()));
             }
@@ -593,7 +593,7 @@ void FBXExporter::WriteDefinitions ()
 
     // Model / FbxNode
     // <~~ node heirarchy
-    count = count_nodes(mScene->mRootNode) - 1; // (not counting root node)
+    count = int32_t(count_nodes(mScene->mRootNode)) - 1; // (not counting root node)
     if (count) {
         n = FBX::Node("ObjectType", Property("Model"));
         n.AddChild("Count", count);
@@ -763,7 +763,7 @@ void FBXExporter::WriteDefinitions ()
 
     // Video / FbxVideo
     // one for each image file.
-    count = count_images(mScene);
+    count = int32_t(count_images(mScene));
     if (count) {
         n = FBX::Node("ObjectType", Property("Video"));
         n.AddChild("Count", count);
@@ -792,7 +792,7 @@ void FBXExporter::WriteDefinitions ()
 
     // Texture / FbxFileTexture
     // <~~ aiTexture
-    count = count_textures(mScene);
+    count = int32_t(count_textures(mScene));
     if (count) {
         n = FBX::Node("ObjectType", Property("Texture"));
         n.AddChild("Count", count);
@@ -848,7 +848,7 @@ void FBXExporter::WriteDefinitions ()
     }
 
     // Deformer
-    count = count_deformers(mScene);
+    count = int32_t(count_deformers(mScene));
     if (count) {
         n = FBX::Node("ObjectType", Property("Deformer"));
         n.AddChild("Count", count);
@@ -943,7 +943,7 @@ void FBXExporter::WriteObjects ()
         std::vector<int32_t> vertex_indices;
         // map of vertex value to its index in the data vector
         std::map<aiVector3D,size_t> index_by_vertex_value;
-        size_t index = 0;
+		int32_t index = 0;
         for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
             aiVector3D vtx = m->mVertices[vi];
             auto elem = index_by_vertex_value.find(vtx);
@@ -955,7 +955,7 @@ void FBXExporter::WriteObjects ()
                 flattened_vertices.push_back(vtx[2]);
                 ++index;
             } else {
-                vertex_indices.push_back(elem->second);
+                vertex_indices.push_back(int32_t(elem->second));
             }
         }
         FBX::Node::WritePropertyNode(
@@ -1052,7 +1052,7 @@ void FBXExporter::WriteObjects ()
             std::vector<double> uv_data;
             std::vector<int32_t> uv_indices;
             std::map<aiVector3D,int32_t> index_by_uv;
-            size_t index = 0;
+			int32_t index = 0;
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
@@ -1062,7 +1062,7 @@ void FBXExporter::WriteObjects ()
                     if (elem == index_by_uv.end()) {
                         index_by_uv[uv] = index;
                         uv_indices.push_back(index);
-                        for (size_t x = 0; x < m->mNumUVComponents[uvi]; ++x) {
+                        for (unsigned int x = 0; x < m->mNumUVComponents[uvi]; ++x) {
                             uv_data.push_back(uv[x]);
                         }
                         ++index;
@@ -1208,13 +1208,13 @@ void FBXExporter::WriteObjects ()
         // and usualy are completely ignored when loading.
         // One notable exception is the "Opacity" property,
         // which Blender uses as (1.0 - alpha).
-        c.r = 0; c.g = 0; c.b = 0;
+        c.r = 0.0f; c.g = 0.0f; c.b = 0.0f;
         m->Get(AI_MATKEY_COLOR_EMISSIVE, c);
         p.AddP70vector("Emissive", c.r, c.g, c.b);
-        c.r = 0.2; c.g = 0.2; c.b = 0.2;
+        c.r = 0.2f; c.g = 0.2f; c.b = 0.2f;
         m->Get(AI_MATKEY_COLOR_AMBIENT, c);
         p.AddP70vector("Ambient", c.r, c.g, c.b);
-        c.r = 0.8; c.g = 0.8; c.b = 0.8;
+        c.r = 0.8f; c.g = 0.8f; c.b = 0.8f;
         m->Get(AI_MATKEY_COLOR_DIFFUSE, c);
         p.AddP70vector("Diffuse", c.r, c.g, c.b);
         // The FBX SDK determines "Opacity" from transparency colour (RGB)
@@ -1223,29 +1223,29 @@ void FBXExporter::WriteObjects ()
         // so we should take it from AI_MATKEY_OPACITY if possible.
         // It might make more sense to use TransparencyFactor,
         // but Blender actually loads "Opacity" correctly, so let's use it.
-        f = 1.0;
+        f = 1.0f;
         if (m->Get(AI_MATKEY_COLOR_TRANSPARENT, c) == aiReturn_SUCCESS) {
-            f = 1.0 - ((c.r + c.g + c.b) / 3);
+            f = 1.0f - ((c.r + c.g + c.b) / 3.0f);
         }
         m->Get(AI_MATKEY_OPACITY, f);
         p.AddP70double("Opacity", f);
         if (phong) {
             // specular color is multiplied by shininess_strength
-            c.r = 0.2; c.g = 0.2; c.b = 0.2;
+            c.r = 0.2f; c.g = 0.2f; c.b = 0.2f;
             m->Get(AI_MATKEY_COLOR_SPECULAR, c);
-            f = 1.0;
+            f = 1.0f;
             m->Get(AI_MATKEY_SHININESS_STRENGTH, f);
             p.AddP70vector("Specular", f*c.r, f*c.g, f*c.b);
-            f = 20.0;
+            f = 20.0f;
             m->Get(AI_MATKEY_SHININESS, f);
             p.AddP70double("Shininess", f);
             // Legacy "Reflectivity" is F*F*((R+G+B)/3),
             // where F is the proportion of light reflected (AKA reflectivity),
             // and RGB is the reflective colour of the material.
             // No idea why, but we might as well set it the same way.
-            f = 0.0;
+            f = 0.0f;
             m->Get(AI_MATKEY_REFLECTIVITY, f);
-            c.r = 1.0, c.g = 1.0, c.b = 1.0;
+            c.r = 1.0f, c.g = 1.0f, c.b = 1.0f;
             m->Get(AI_MATKEY_COLOR_REFLECTIVE, c);
             p.AddP70double("Reflectivity", f*f*((c.r+c.g+c.b)/3.0));
         }
@@ -1269,7 +1269,7 @@ void FBXExporter::WriteObjects ()
             const aiTextureType textype = static_cast<aiTextureType>(tt);
             const size_t texcount = mat->GetTextureCount(textype);
             for (size_t j = 0; j < texcount; ++j) {
-                mat->GetTexture(textype, j, &texpath);
+                mat->GetTexture(textype, (unsigned int)j, &texpath);
                 const std::string texstring = texpath.C_Str();
                 auto elem = uid_by_image.find(texstring);
                 if (elem == uid_by_image.end()) {
@@ -1591,7 +1591,7 @@ void FBXExporter::WriteObjects ()
         std::vector<int32_t> vertex_indices;
         // map of vertex value to its index in the data vector
         std::map<aiVector3D,size_t> index_by_vertex_value;
-        size_t index = 0;
+        int32_t index = 0;
         for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
             aiVector3D vtx = m->mVertices[vi];
             auto elem = index_by_vertex_value.find(vtx);
@@ -1600,7 +1600,7 @@ void FBXExporter::WriteObjects ()
                 index_by_vertex_value[vtx] = index;
                 ++index;
             } else {
-                vertex_indices.push_back(elem->second);
+                vertex_indices.push_back(int32_t(elem->second));
             }
         }
 
@@ -1616,7 +1616,7 @@ void FBXExporter::WriteObjects ()
         // as it can be instanced to many nodes.
         // All we can do is assume no instancing,
         // and take the first node we find that contains the mesh.
-        aiNode* mesh_node = get_node_for_mesh(mi, mScene->mRootNode);
+        aiNode* mesh_node = get_node_for_mesh((unsigned int)mi, mScene->mRootNode);
         aiMatrix4x4 mesh_xform = get_world_transform(mesh_node, mScene);
 
         // now make a subdeformer for each bone in the skeleton
@@ -1682,7 +1682,7 @@ void FBXExporter::WriteObjects ()
 
             // this should be the same as the bone's mOffsetMatrix.
             // if it's not the same, the skeleton isn't in the bind pose.
-            const float epsilon = 1e-5; // some error is to be expected
+            const float epsilon = 1e-5f; // some error is to be expected
             bool bone_xform_okay = true;
             if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
                 not_in_bind_pose.insert(b);
@@ -2002,7 +2002,7 @@ void FBXExporter::WriteModelNodes(
             transform_chain.emplace_back(elem->first, t);
             break;
         case 'r': // rotation
-            r *= DEG;
+            r *= float(DEG);
             transform_chain.emplace_back(elem->first, r);
             break;
         case 's': // scale

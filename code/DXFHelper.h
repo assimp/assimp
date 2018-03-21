@@ -169,7 +169,6 @@ public:
     }
 
 private:
-
     LineSplitter splitter;
     int groupcode;
     std::string value;

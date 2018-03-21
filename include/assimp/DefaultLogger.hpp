@@ -131,9 +131,7 @@ public:
     bool detatchStream(LogStream *pStream,
         unsigned int severity);
 
-
 private:
-
     // ----------------------------------------------------------------------
     /** @briefPrivate construction for internal use by create().
      *  @param severity Logging granularity  */
@@ -142,8 +140,6 @@ private:
     // ----------------------------------------------------------------------
     /** @briefDestructor    */
     ~DefaultLogger();
-
-private:
 
     /** @brief  Logs debug infos, only been written when severity level VERBOSE is set */
     void OnDebug(const char* message);

@@ -94,8 +94,9 @@ public:
         scene->mRootNode = new aiNode();
         std::vector<aiNode*> children;
 
+        std::string nodeName;
         while(ReadToEndElement(D3MF::XmlTag::model)) {
-            const std::string nodeName( xmlReader->getNodeName() );
+            nodeName = xmlReader->getNodeName();
             if( nodeName == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(scene));
             } else if( nodeName == D3MF::XmlTag::build) {

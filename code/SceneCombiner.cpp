@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
 #include <assimp/fast_atof.h>
+#include <assimp/metadata.h>
 #include <assimp/Hash.h>
 #include "time.h"
 #include <assimp/DefaultLogger.hpp>
@@ -1003,7 +1004,12 @@ void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate) 
         *_dest = new aiScene();
     }
     aiScene* dest = *_dest;
-    ai_assert(dest);
+    ai_assert(nullptr != dest);
+
+    // copy metadata
+    if ( nullptr != src->mMetaData ) {
+        dest->mMetaData = new aiMetadata( *src->mMetaData );
+    }
 
     // copy animations
     dest->mNumAnimations = src->mNumAnimations;

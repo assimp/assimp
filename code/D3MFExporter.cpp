@@ -117,6 +117,7 @@ bool D3MFExporter::exportArchive( const char *file ) {
     if ( nullptr == m_zipArchive ) {
         return false;
     }
+
     ok |= exportContentTypes();
     ok |= export3DModel();
     ok |= exportRelations();
@@ -181,6 +182,8 @@ bool D3MFExporter::export3DModel() {
     mModelOutput << "<" << XmlTag::resources << ">";
     mModelOutput << std::endl;
 
+    writeMetaData();
+
     writeBaseMaterials();
 
     writeObjects();
@@ -207,6 +210,29 @@ bool D3MFExporter::export3DModel() {
 void D3MFExporter::writeHeader() {
     mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
     mModelOutput << std::endl;
+}
+
+void D3MFExporter::writeMetaData() {
+    if ( nullptr == mScene->mMetaData ) {
+        return;
+    }
+
+    const unsigned int numMetaEntries( mScene->mMetaData->mNumProperties );
+    if ( 0 == numMetaEntries ) {
+        return;
+    }
+
+    const aiString *key;
+    const aiMetadataEntry *entry(nullptr);
+    for ( size_t i = 0; i < numMetaEntries; ++i ) {
+        mScene->mMetaData->Get( i, key, entry );
+        std::string k( key->C_Str() );
+        aiString value;
+        mScene->mMetaData->Get(  k, value );
+        mModelOutput << "<" << XmlTag::meta << " " << XmlTag::meta_name << "=\"" << key->C_Str() << "\">";
+        mModelOutput << value.C_Str();
+        mModelOutput << "</" << XmlTag::meta << ">" << std::endl;
+    }
 }
 
 void D3MFExporter::writeBaseMaterials() {

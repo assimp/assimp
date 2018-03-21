@@ -76,6 +76,7 @@ public:
 
 protected:
     void writeHeader();
+    void writeMetaData();
     void writeBaseMaterials();
     void writeObjects();
     void writeMesh( aiMesh *mesh );

@@ -127,8 +127,8 @@ FBX::Property::Property(const aiMatrix4x4& vm)
     : type('d'), data(8*16)
 {
     double* d = reinterpret_cast<double*>(data.data());
-    for (size_t c = 0; c < 4; ++c) {
-        for (size_t r = 0; r < 4; ++r) {
+    for (unsigned int c = 0; c < 4; ++c) {
+        for (unsigned int r = 0; r < 4; ++r) {
             d[4*c+r] = vm[r][c];
         }
     }
@@ -164,15 +164,15 @@ void FBX::Property::Dump(Assimp::StreamWriterLE &s)
     case 'L': s.PutI8(*(reinterpret_cast<int64_t*>(data.data()))); return;
     case 'S':
     case 'R':
-        s.PutU4(data.size());
+        s.PutU4(uint32_t(data.size()));
         for (size_t i = 0; i < data.size(); ++i) { s.PutU1(data[i]); }
         return;
     case 'i':
         N = data.size() / 4;
-        s.PutU4(N); // number of elements
+        s.PutU4(uint32_t(N)); // number of elements
         s.PutU4(0); // no encoding (1 would be zip-compressed)
         // TODO: compress if large?
-        s.PutU4(data.size()); // data size
+        s.PutU4(uint32_t(data.size())); // data size
         d = data.data();
         for (size_t i = 0; i < N; ++i) {
             s.PutI4((reinterpret_cast<int32_t*>(d))[i]);
@@ -180,10 +180,10 @@ void FBX::Property::Dump(Assimp::StreamWriterLE &s)
         return;
     case 'd':
         N = data.size() / 8;
-        s.PutU4(N); // number of elements
+        s.PutU4(uint32_t(N)); // number of elements
         s.PutU4(0); // no encoding (1 would be zip-compressed)
         // TODO: compress if large?
-        s.PutU4(data.size()); // data size
+        s.PutU4(uint32_t(data.size())); // data size
         d = data.data();
         for (size_t i = 0; i < N; ++i) {
             s.PutF8((reinterpret_cast<double*>(d))[i]);

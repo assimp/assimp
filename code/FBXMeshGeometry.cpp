@@ -79,13 +79,12 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
 // ------------------------------------------------------------------------------------------------
 Geometry::~Geometry()
 {
-
+    // empty
 }
 
 const Skin* Geometry::DeformerSkin() const {
     return skin;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
@@ -186,9 +185,8 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 }
 
 // ------------------------------------------------------------------------------------------------
-MeshGeometry::~MeshGeometry()
-{
-
+MeshGeometry::~MeshGeometry() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -218,7 +216,7 @@ const std::vector<unsigned int>& MeshGeometry::GetFaceIndexCounts() const {
 
 // ------------------------------------------------------------------------------------------------
 const std::vector<aiVector2D>& MeshGeometry::GetTextureCoords( unsigned int index ) const {
-    static const std::vector<aiVector2D> empty;
+    const std::vector<aiVector2D> empty;
     return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? empty : m_uvs[ index ];
 }
 
@@ -227,7 +225,7 @@ std::string MeshGeometry::GetTextureCoordChannelName( unsigned int index ) const
 }
 
 const std::vector<aiColor4D>& MeshGeometry::GetVertexColors( unsigned int index ) const {
-    static const std::vector<aiColor4D> empty;
+    const std::vector<aiColor4D> empty;
     return index >= AI_MAX_NUMBER_OF_COLOR_SETS ? empty : m_colors[ index ];
 }
 
@@ -307,7 +305,6 @@ void MeshGeometry::ReadLayerElement(const Scope& layerElement)
     FBXImporter::LogError(Formatter::format("failed to resolve vertex layer element: ")
         << type << ", index: " << typedIndex);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scope& source)
@@ -412,7 +409,6 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Lengthy utility function to read and resolve a FBX vertex data array - that is, the
 // output is in polygon vertex order. This logic is used for reading normals, UVs, colors,
@@ -431,7 +427,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     bool isDirect = ReferenceInformationType == "Direct";
     bool isIndexToDirect = ReferenceInformationType == "IndexToDirect";
 
-    // fallback to direct data if there is no index data element
+    // fall-back to direct data if there is no index data element
     if ( isIndexToDirect && !HasElement( source, indexDataElementName ) ) {
         isDirect = true;
         isIndexToDirect = false;
@@ -499,9 +495,14 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             return;
         }
 
+        const T empty;
         unsigned int next = 0;
         for(int i : uvIndices) {
-			if (static_cast<size_t>(i) >= tempData.size()) {
+            if ( -1 == i ) {
+                data_out[ next++ ] = empty;
+                continue;
+            }
+            if (static_cast<size_t>(i) >= tempData.size()) {
                 DOMError("index out of range",&GetRequiredElement(source,indexDataElementName));
             }
 
@@ -528,7 +529,6 @@ void MeshGeometry::ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, c
         m_mappings);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source,
     const std::string& MappingInformationType,
@@ -542,7 +542,6 @@ void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope
         m_mapping_offsets,
         m_mappings);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source,

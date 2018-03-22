@@ -216,7 +216,7 @@ const std::vector<unsigned int>& MeshGeometry::GetFaceIndexCounts() const {
 
 // ------------------------------------------------------------------------------------------------
 const std::vector<aiVector2D>& MeshGeometry::GetTextureCoords( unsigned int index ) const {
-    const std::vector<aiVector2D> empty;
+    static const std::vector<aiVector2D> empty;
     return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? empty : m_uvs[ index ];
 }
 
@@ -225,7 +225,7 @@ std::string MeshGeometry::GetTextureCoordChannelName( unsigned int index ) const
 }
 
 const std::vector<aiColor4D>& MeshGeometry::GetVertexColors( unsigned int index ) const {
-    const std::vector<aiColor4D> empty;
+    static const std::vector<aiColor4D> empty;
     return index >= AI_MAX_NUMBER_OF_COLOR_SETS ? empty : m_colors[ index ];
 }
 

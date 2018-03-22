@@ -199,6 +199,7 @@ aiNode* BVHLoader::ReadNode()
     Node& internNode = mNodes.back();
 
     // now read the node's contents
+    std::string siteToken;
     while( 1)
     {
         std::string token = GetNextToken();
@@ -218,7 +219,8 @@ aiNode* BVHLoader::ReadNode()
         else if( token == "End")
         {
             // The real symbol is "End Site". Second part comes in a separate token
-            std::string siteToken = GetNextToken();
+            siteToken.clear();
+            siteToken = GetNextToken();
             if( siteToken != "Site")
                 ThrowException( format() << "Expected \"End Site\" keyword, but found \"" << token << " " << siteToken << "\"." );
 
@@ -262,21 +264,18 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
     aiNode* node = new aiNode( "EndSite_" + pParentName);
 
     // now read the node's contents. Only possible entry is "OFFSET"
-    while( 1)
-    {
-        std::string token = GetNextToken();
+    std::string token;
+    while( 1) {
+        token.clear();
+        token = GetNextToken();
 
         // end node's offset
-        if( token == "OFFSET")
-        {
+        if( token == "OFFSET") {
             ReadNodeOffset( node);
-        }
-        else if( token == "}")
-        {
+        } else if( token == "}") {
             // we're done with the end node
             break;
-        } else
-        {
+        } else {
             // everything else is a parse error
             ThrowException( format() << "Unknown keyword \"" << token << "\"." );
         }
@@ -296,8 +295,10 @@ void BVHLoader::ReadNodeOffset( aiNode* pNode)
     offset.z = GetNextTokenAsFloat();
 
     // build a transformation matrix from it
-    pNode->mTransformation = aiMatrix4x4( 1.0f, 0.0f, 0.0f, offset.x, 0.0f, 1.0f, 0.0f, offset.y,
-        0.0f, 0.0f, 1.0f, offset.z, 0.0f, 0.0f, 0.0f, 1.0f);
+    pNode->mTransformation = aiMatrix4x4( 1.0f, 0.0f, 0.0f, offset.x,
+                                          0.0f, 1.0f, 0.0f, offset.y,
+                                          0.0f, 0.0f, 1.0f, offset.z,
+                                          0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 // ------------------------------------------------------------------------------------------------

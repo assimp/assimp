@@ -1076,8 +1076,8 @@ std::string XFileParser::GetNextToken() {
                     return s;
                 }
                 len = ReadBinDWord();
-                const int bounds( mEnd - mP );
-                const int iLen( len );
+                const int bounds = int( mEnd - mP );
+                const int iLen   = int( len );
                 if ( iLen < 0 ) {
                     return s;
                 }

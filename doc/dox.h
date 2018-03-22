@@ -667,27 +667,31 @@ need them at all.
 Normally textures used by assets are stored in separate files, however,
 there are file formats embedding their textures directly into the model file.
 Such textures are loaded into an aiTexture structure.
-For embedded textures, the value of `AI_MATKEY_TEXTURE(textureType, index)` will be `*<index>` where
-`<index>` is the index of the texture in aiScene::mTextures.
-<br>
+
+In previous versions, the path from the query for `AI_MATKEY_TEXTURE(textureType, index)` would be
+`*<index>` where `<index>` is the index of the texture in aiScene::mTextures. Now this call will
+return a file path for embedded textures in FBX files. To test if it is an embdedded texture use
+aiScene::GetEmbeddedTexture. If the returned pointer is not null, it is embedded und can be loaded
+from the data structure. If it is null, search for a separate file. Other file types still use the
+old behaviour.<br>
+If your rely on the old behaviour, you can use Assimp::Importer::SetPropertyBool with the key
+#AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING to force the old behaviour.
+
 There are two cases:
-<br>
-<b>1)</b> The texture is NOT compressed. Its color data is directly stored
-in the aiTexture structure as an array of aiTexture::mWidth * aiTexture::mHeight aiTexel structures. Each aiTexel represents a pixel (or "texel") of the texture
-image. The color data is stored in an unsigned RGBA8888 format, which can be easily used for
-both Direct3D and OpenGL (swizzling the order of the color components might be necessary).
-RGBA8888 has been chosen because it is well-known, easy to use and natively
-supported by nearly all graphics APIs.
-<br>
-<b>2)</b> This applies if aiTexture::mHeight == 0 is fulfilled. Then, texture is stored in a
-"compressed" format such as DDS or PNG. The term "compressed" does not mean that the
-texture data must actually be compressed, however the texture was found in the
-model file as if it was stored in a separate file on the harddisk. Appropriate
-decoders (such as libjpeg, libpng, D3DX, DevIL) are required to load theses textures.
-aiTexture::mWidth specifies the size of the texture data in bytes, aiTexture::pcData is
-a pointer to the raw image data and aiTexture::achFormatHint is either zeroed or
-contains the most common file extension of the embedded texture's format. This value is only
-set if assimp is able to determine the file format.
+1. The texture is NOT compressed. Its color data is directly stored in the aiTexture structure as an
+   array of aiTexture::mWidth * aiTexture::mHeight aiTexel structures. Each aiTexel represents a
+   pixel (or "texel") of the texture image. The color data is stored in an unsigned RGBA8888 format,
+   which can be easily used for both Direct3D and OpenGL (swizzling the order of the color
+   components might be necessary).  RGBA8888 has been chosen because it is well-known, easy to use
+   and natively supported by nearly all graphics APIs.
+2. This applies if aiTexture::mHeight == 0 is fulfilled. Then, texture is stored in a "compressed"
+   format such as DDS or PNG. The term "compressed" does not mean that the texture data must
+   actually be compressed, however the texture was found in the model file as if it was stored in a
+   separate file on the harddisk. Appropriate decoders (such as libjpeg, libpng, D3DX, DevIL) are
+   required to load theses textures.  aiTexture::mWidth specifies the size of the texture data in
+   bytes, aiTexture::pcData is a pointer to the raw image data and aiTexture::achFormatHint is
+   either zeroed or contains the most common file extension of the embedded texture's format. This
+   value is only set if assimp is able to determine the file format.
 */
 
 
@@ -871,8 +875,11 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td><tt>TEXTURE(t,n)</tt></td>
     <td>aiString</td>
     <td>n/a</td>
-    <td>Defines the path of the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values. Either a filepath or `*<index>`, where `<index>` is the index of an embedded texture in aiScene::mTextures.</td>
-    <td>See the 'Textures' section above.</td>
+    <td>Defines the path of the n'th texture on the stack 't', where 'n' is any value >= 0 and 't'
+    is one of the #aiTextureType enumerated values. A file path to an external file or an embedded
+    texture. Use aiScene::GetEmbeddedTexture to test if it is embedded for FBX files, in other cases
+    embedded textures start with '*' followed by an index into aiScene::mTextures.</td>
+    <td>See the @ref mat_tex section above. Also see @ref textures for a more information about texture retrieval.</td>
   </tr>
 
   <tr>

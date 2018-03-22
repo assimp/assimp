@@ -32,8 +32,8 @@ Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 #### Supported file formats ####
 
-A full list [is here](http://assimp.org/main_features_formats.html).
 __Importers__:
+
 - 3D
 - 3DS
 - 3MF
@@ -109,6 +109,8 @@ __Exporters__:
 - STEP
 - glTF 1.0 (partial)
 - glTF 2.0 (partial)
+- 3MF ( experimental )
+- FBX ( experimental )
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.

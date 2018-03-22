@@ -94,14 +94,17 @@ public:
         scene->mRootNode = new aiNode();
         std::vector<aiNode*> children;
 
+        std::string nodeName;
         while(ReadToEndElement(D3MF::XmlTag::model)) {
-            const std::string nodeName( xmlReader->getNodeName() );
+            nodeName = xmlReader->getNodeName();
             if( nodeName == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(scene));
             } else if( nodeName == D3MF::XmlTag::build) {
                 // 
             } else if ( nodeName == D3MF::XmlTag::basematerials ) {
                 ReadBaseMaterials();
+            } else if ( nodeName == D3MF::XmlTag::meta ) {
+                ReadMetadata();
             }
         }
 
@@ -109,19 +112,31 @@ public:
             scene->mRootNode->mName.Set( "3MF" );
         }
 
+        // import the metadata
+        if ( !mMetaData.empty() ) {
+            const size_t numMeta( mMetaData.size() );
+            scene->mMetaData = aiMetadata::Alloc( numMeta );
+            for ( size_t i = 0; i < numMeta; ++i ) {
+                aiString val( mMetaData[ i ].value );
+                scene->mMetaData->Set( i, mMetaData[ i ].name, val );
+            }
+        }
+
+        // import the meshes
         scene->mNumMeshes = static_cast<unsigned int>( mMeshes.size());
         scene->mMeshes = new aiMesh*[scene->mNumMeshes]();
-
         std::copy( mMeshes.begin(), mMeshes.end(), scene->mMeshes);
 
+        // import the materials
         scene->mNumMaterials = static_cast<unsigned int>( mMatArray.size() );
         if ( 0 != scene->mNumMaterials ) {
             scene->mMaterials = new aiMaterial*[ scene->mNumMaterials ];
             std::copy( mMatArray.begin(), mMatArray.end(), scene->mMaterials );
         }
+
+        // create the scenegraph
         scene->mRootNode->mNumChildren = static_cast<unsigned int>(children.size());
         scene->mRootNode->mChildren = new aiNode*[scene->mRootNode->mNumChildren]();
-
         std::copy(children.begin(), children.end(), scene->mRootNode->mChildren);
     }
 
@@ -178,6 +193,21 @@ private:
         }
 
         return mesh;
+    }
+
+    void ReadMetadata() {
+        const std::string name = xmlReader->getAttributeValue( D3MF::XmlTag::meta_name.c_str() );
+        xmlReader->read();
+        const std::string value = xmlReader->getNodeData();
+
+        if ( name.empty() ) {
+            return;
+        }
+
+        MetaEntry entry;
+        entry.name = name;
+        entry.value = value;
+        mMetaData.push_back( entry );
     }
 
     void ImportVertices(aiMesh* mesh) {
@@ -253,7 +283,7 @@ private:
                     MatIdArray = it->second;
                 }
             }
-            MatIdArray.push_back( newMatIdx );
+            MatIdArray.push_back( static_cast<unsigned int>( newMatIdx ) );
             mMatId2MatArray[ mActiveMatGroup ] = MatIdArray;
         }
 
@@ -371,8 +401,12 @@ private:
         return false;
     }
 
-
 private:
+    struct MetaEntry {
+        std::string name;
+        std::string value;
+    };
+    std::vector<MetaEntry> mMetaData;
     std::vector<aiMesh*> mMeshes;
     MatArray mMatArray;
     unsigned int mActiveMatGroup;

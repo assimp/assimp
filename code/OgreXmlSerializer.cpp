@@ -213,18 +213,18 @@ std::string &OgreXmlSerializer::SkipCurrentNode()
     DefaultLogger::get()->debug("Skipping node <" + m_currentNodeName + ">");
 #endif
 
-    for(;;)
-    {
-        if (!m_reader->read())
-        {
+    for(;;) {
+        if (!m_reader->read()) {
             m_currentNodeName = "";
             return m_currentNodeName;
         }
-        if (m_reader->getNodeType() != irr::io::EXN_ELEMENT_END)
+        if ( m_reader->getNodeType() != irr::io::EXN_ELEMENT_END ) {
             continue;
-        else if (std::string(m_reader->getNodeName()) == m_currentNodeName)
+        } else if ( std::string( m_reader->getNodeName() ) == m_currentNodeName ) {
             break;
+        }
     }
+
     return NextNode();
 }
 
@@ -303,17 +303,16 @@ static const char *anZ = "z";
 
 // Mesh
 
-MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader)
-{
+MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader) {
     OgreXmlSerializer serializer(reader);
 
     MeshXml *mesh = new MeshXml();
     serializer.ReadMesh(mesh);
+
     return mesh;
 }
 
-void OgreXmlSerializer::ReadMesh(MeshXml *mesh)
-{
+void OgreXmlSerializer::ReadMesh(MeshXml *mesh) {
     if (NextNode() != nnMesh) {
         throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <mesh>");
     }

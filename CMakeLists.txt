@@ -110,7 +110,6 @@ if (WIN32)
 endif()
 
 IF(MSVC)
-  SET (CMAKE_PREFIX_PATH "D:\\libs\\devil")
   OPTION( ASSIMP_INSTALL_PDB
     "Install MSVC debug files."
     ON

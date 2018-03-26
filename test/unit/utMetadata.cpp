@@ -199,7 +199,7 @@ TEST_F( utMetadata, copy_test ) {
     m_data->Set( 6, "aiVector3D", vecVal );
 
     aiMetadata copy( *m_data );
-    EXPECT_EQ( 7, copy.mNumProperties );
+    EXPECT_EQ( 7u, copy.mNumProperties );
 
     // bool test
     {

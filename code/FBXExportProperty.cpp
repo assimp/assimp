@@ -116,6 +116,20 @@ FBX::Property::Property(const std::vector<int32_t>& va)
     for (size_t i = 0; i < va.size(); ++i) { d[i] = va[i]; }
 }
 
+FBX::Property::Property(const std::vector<int64_t>& va)
+    : type('l'), data(8*va.size())
+{
+    int64_t* d = reinterpret_cast<int64_t*>(data.data());
+    for (size_t i = 0; i < va.size(); ++i) { d[i] = va[i]; }
+}
+
+FBX::Property::Property(const std::vector<float>& va)
+    : type('f'), data(4*va.size())
+{
+    float* d = reinterpret_cast<float*>(data.data());
+    for (size_t i = 0; i < va.size(); ++i) { d[i] = va[i]; }
+}
+
 FBX::Property::Property(const std::vector<double>& va)
     : type('d'), data(8*va.size())
 {
@@ -176,6 +190,28 @@ void FBX::Property::Dump(Assimp::StreamWriterLE &s)
         d = data.data();
         for (size_t i = 0; i < N; ++i) {
             s.PutI4((reinterpret_cast<int32_t*>(d))[i]);
+        }
+        return;
+    case 'l':
+        N = data.size() / 8;
+        s.PutU4(uint32_t(N)); // number of elements
+        s.PutU4(0); // no encoding (1 would be zip-compressed)
+        // TODO: compress if large?
+        s.PutU4(uint32_t(data.size())); // data size
+        d = data.data();
+        for (size_t i = 0; i < N; ++i) {
+            s.PutI8((reinterpret_cast<int64_t*>(d))[i]);
+        }
+        return;
+    case 'f':
+        N = data.size() / 4;
+        s.PutU4(uint32_t(N)); // number of elements
+        s.PutU4(0); // no encoding (1 would be zip-compressed)
+        // TODO: compress if large?
+        s.PutU4(uint32_t(data.size())); // data size
+        d = data.data();
+        for (size_t i = 0; i < N; ++i) {
+            s.PutF4((reinterpret_cast<float*>(d))[i]);
         }
         return;
     case 'd':

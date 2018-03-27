@@ -139,6 +139,23 @@ namespace Assimp
             const std::unordered_set<const aiNode*>& limbnodes,
             std::vector<std::pair<std::string,aiVector3D>>& transform_chain
         );
+        void WriteAnimationCurveNode(
+            StreamWriterLE& outstream,
+            int64_t uid,
+            std::string name, // "T", "R", or "S"
+            aiVector3D default_value,
+            std::string property_name, // "Lcl Translation" etc
+            int64_t animation_layer_uid,
+            int64_t node_uid
+        );
+        void WriteAnimationCurve(
+            StreamWriterLE& outstream,
+            double default_value,
+            const std::vector<int64_t>& times,
+            const std::vector<float>& values,
+            int64_t curvenode_id,
+            const std::string& property_link // "d|X", "d|Y", etc
+        );
     };
 }
 

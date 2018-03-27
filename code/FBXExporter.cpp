@@ -962,7 +962,7 @@ void FBXExporter::WriteObjects ()
         std::vector<int32_t> vertex_indices;
         // map of vertex value to its index in the data vector
         std::map<aiVector3D,size_t> index_by_vertex_value;
-		int32_t index = 0;
+        int32_t index = 0;
         for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
             aiVector3D vtx = m->mVertices[vi];
             auto elem = index_by_vertex_value.find(vtx);
@@ -1071,7 +1071,7 @@ void FBXExporter::WriteObjects ()
             std::vector<double> uv_data;
             std::vector<int32_t> uv_indices;
             std::map<aiVector3D,int32_t> index_by_uv;
-			int32_t index = 0;
+            int32_t index = 0;
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
@@ -1908,13 +1908,14 @@ void FBXExporter::WriteObjects ()
         std::string name = anim->mName.C_Str() + FBX::SEPARATOR + "AnimStack";
         asnode.AddProperties(animstack_uid, name, "");
         FBX::Node p("Properties70");
-        p.AddP70time("LocalStart", 0);
-        p.AddP70time("LocalStop", 0);
+        p.AddP70time("LocalStart", 0); // assimp doesn't store this
+        p.AddP70time("LocalStop", to_ktime(anim->mDuration, anim));
         p.AddP70time("ReferenceStart", 0);
-        p.AddP70time("ReferenceStop", 0);
+        p.AddP70time("ReferenceStop", to_ktime(anim->mDuration, anim));
         asnode.AddChild(p);
 
         // this node absurdly always pretends it has children
+        // (in this case it does, but just in case...)
         asnode.Begin(outstream);
         asnode.DumpProperties(outstream);
         asnode.EndProperties(outstream);
@@ -1959,66 +1960,32 @@ void FBXExporter::WriteObjects ()
             const aiMatrix4x4 node_xfm = get_world_transform(node, mScene);
             aiVector3D T, R, S;
             node_xfm.Decompose(S, R, T);
-            // generate uids for all AnimationCurveNode
+
+            // AnimationCurveNode uids
             std::array<int64_t,3> ids;
             ids[0] = generate_uid(); // T
             ids[1] = generate_uid(); // R
             ids[2] = generate_uid(); // S
 
             // translation
-            FBX::Node t("AnimationCurveNode");
-            t.AddProperties(ids[0], "T" + FBX::SEPARATOR + "AnimCurveNode", "");
-            FBX::Node tp("Properties70");
-            tp.AddP70numberA("d|X", T.x);
-            tp.AddP70numberA("d|Y", T.y);
-            tp.AddP70numberA("d|Z", T.z);
-            t.AddChild(tp);
-            t.Dump(outstream);
-            // connect to layer
-            FBX::Node tcl("C");
-            tcl.AddProperties("OO", ids[0], layer_uid);
-            connections.push_back(tcl); // TODO: emplace_back
-            // connect to bone
-            FBX::Node tcb("C");
-            tcb.AddProperties("OP", ids[0], node_uids[node], "Lcl Translation");
-            connections.push_back(tcb); // TODO: emplace_back
+            WriteAnimationCurveNode(outstream,
+                ids[0], "T", T, "Lcl Translation",
+                layer_uid, node_uids[node]
+            );
 
             // rotation
-            FBX::Node r("AnimationCurveNode");
-            r.AddProperties(ids[1], "R" + FBX::SEPARATOR + "AnimCurveNode", "");
-            FBX::Node rp("Properties70");
-            rp.AddP70numberA("d|X", DEG*R.x);
-            rp.AddP70numberA("d|Y", DEG*R.y);
-            rp.AddP70numberA("d|Z", DEG*R.z);
-            r.AddChild(rp);
-            r.Dump(outstream);
-            // connect to layer
-            FBX::Node rcl("C");
-            rcl.AddProperties("OO", ids[1], layer_uid);
-            connections.push_back(rcl); // TODO: emplace_back
-            // connect to bone
-            FBX::Node rcb("C");
-            rcb.AddProperties("OP", ids[1], node_uids[node], "Lcl Rotation");
-            connections.push_back(rcb); // TODO: emplace_back
+            WriteAnimationCurveNode(outstream,
+                ids[1], "R", R, "Lcl Rotation",
+                layer_uid, node_uids[node]
+            );
 
             // scale
-            FBX::Node s("AnimationCurveNode");
-            s.AddProperties(ids[2], "S" + FBX::SEPARATOR + "AnimCurveNode", "");
-            FBX::Node sp("Properties70");
-            sp.AddP70numberA("d|X", S.x);
-            sp.AddP70numberA("d|Y", S.y);
-            sp.AddP70numberA("d|Z", S.z);
-            s.AddChild(sp);
-            s.Dump(outstream);
-            // connect to layer
-            FBX::Node scl("C");
-            scl.AddProperties("OO", ids[2], layer_uid);
-            connections.push_back(scl); // TODO: emplace_back
-            // connect to bone
-            FBX::Node scb("C");
-            scb.AddProperties("OP", ids[2], node_uids[node], "Lcl Scaling");
-            connections.push_back(scb); // TODO: emplace_back
+            WriteAnimationCurveNode(outstream,
+                ids[2], "S", S, "Lcl Scale",
+                layer_uid, node_uids[node]
+            );
 
+            // store the uids for later use
             nodeanim_uids.push_back(ids);
         }
         curve_node_uids.push_back(nodeanim_uids);
@@ -2039,242 +2006,52 @@ void FBXExporter::WriteObjects ()
             node_xfm.Decompose(S, R, T);
             const std::array<int64_t,3>& ids = curve_node_uids[ai][nai];
 
-            int64_t curve_uid;
             std::vector<int64_t> times;
-            std::vector<float> values;
+            std::vector<float> xval, yval, zval;
 
-            // TODO: compress code (it's a bit annoying)
-
-            // translation x
-            FBX::Node tx("AnimationCurve");
-            curve_uid = generate_uid();
-            tx.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            tx.AddChild("Default", double(T.x)); // default value
-            tx.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumPositionKeys; ++pki) {
-                const aiVectorKey& k = na->mPositionKeys[pki];
+            // position/translation
+            for (size_t ki = 0; ki < na->mNumPositionKeys; ++ki) {
+                const aiVectorKey& k = na->mPositionKeys[ki];
                 times.push_back(to_ktime(k.mTime, anim));
-                values.push_back(k.mValue.x);
+                xval.push_back(k.mValue.x);
+                yval.push_back(k.mValue.y);
+                zval.push_back(k.mValue.z);
             }
-            tx.AddChild("KeyTime", times);
-            tx.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            tx.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            tx.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            tx.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            tx.Dump(outstream);
-            FBX::Node txc("C");
-            txc.AddProperties("OP", curve_uid, ids[0], "d|X");
-            connections.push_back(txc); // TODO: emplace_back
+            // one curve each for X, Y, Z
+            WriteAnimationCurve(outstream, T.x, times, xval, ids[0], "d|X");
+            WriteAnimationCurve(outstream, T.y, times, yval, ids[0], "d|Y");
+            WriteAnimationCurve(outstream, T.z, times, zval, ids[0], "d|Z");
 
-            // translation y
-            FBX::Node ty("AnimationCurve");
-            curve_uid = generate_uid();
-            ty.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            ty.AddChild("Default", double(T.y)); // default value
-            ty.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumPositionKeys; ++pki) {
-                const aiVectorKey& k = na->mPositionKeys[pki];
+            // rotation
+            times.clear(); xval.clear(); yval.clear(); zval.clear();
+            for (size_t ki = 0; ki < na->mNumRotationKeys; ++ki) {
+                const aiQuatKey& k = na->mRotationKeys[ki];
                 times.push_back(to_ktime(k.mTime, anim));
-                values.push_back(k.mValue.y);
-            }
-            ty.AddChild("KeyTime", times);
-            ty.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            ty.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            ty.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            ty.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            ty.Dump(outstream);
-            FBX::Node tyc("C");
-            tyc.AddProperties("OP", curve_uid, ids[0], "d|Y");
-            connections.push_back(tyc); // TODO: emplace_back
-
-            // translation z
-            FBX::Node tz("AnimationCurve");
-            curve_uid = generate_uid();
-            tz.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            tz.AddChild("Default", double(T.z)); // default value
-            tz.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumPositionKeys; ++pki) {
-                const aiVectorKey& k = na->mPositionKeys[pki];
-                times.push_back(to_ktime(k.mTime, anim));
-                values.push_back(k.mValue.z);
-            }
-            tz.AddChild("KeyTime", times);
-            tz.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            tz.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            tz.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            tz.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            tz.Dump(outstream);
-            FBX::Node tzc("C");
-            tzc.AddProperties("OP", curve_uid, ids[0], "d|Z");
-            connections.push_back(tzc); // TODO: emplace_back
-
-            // rotation x
-            FBX::Node rx("AnimationCurve");
-            curve_uid = generate_uid();
-            rx.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            rx.AddChild("Default", double(R.x)); // default value
-            rx.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumRotationKeys; ++pki) {
-                const aiQuatKey& k = na->mRotationKeys[pki];
-                times.push_back(to_ktime(k.mTime, anim));
-                // there must be a better way...
+                // TODO: aiQuaternion method to convert to Euler...
                 aiMatrix4x4 m(k.mValue.GetMatrix());
                 aiVector3D qs, qr, qt;
                 m.Decompose(qs, qr, qt);
                 qr *= DEG;
-                values.push_back(qr.x);
+                xval.push_back(qr.x);
+                yval.push_back(qr.y);
+                zval.push_back(qr.z);
             }
-            rx.AddChild("KeyTime", times);
-            rx.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            rx.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            rx.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            rx.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            rx.Dump(outstream);
-            FBX::Node rxc("C");
-            rxc.AddProperties("OP", curve_uid, ids[1], "d|X");
-            connections.push_back(rxc); // TODO: emplace_back
+            WriteAnimationCurve(outstream, R.x, times, xval, ids[1], "d|X");
+            WriteAnimationCurve(outstream, R.y, times, yval, ids[1], "d|Y");
+            WriteAnimationCurve(outstream, R.z, times, zval, ids[1], "d|Z");
 
-            // rotation y
-            FBX::Node ry("AnimationCurve");
-            curve_uid = generate_uid();
-            ry.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            ry.AddChild("Default", double(R.y)); // default value
-            ry.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumRotationKeys; ++pki) {
-                const aiQuatKey& k = na->mRotationKeys[pki];
+            // scaling/scale
+            times.clear(); xval.clear(); yval.clear(); zval.clear();
+            for (size_t ki = 0; ki < na->mNumScalingKeys; ++ki) {
+                const aiVectorKey& k = na->mScalingKeys[ki];
                 times.push_back(to_ktime(k.mTime, anim));
-                // there must be a better way...
-                aiMatrix4x4 m(k.mValue.GetMatrix());
-                aiVector3D qs, qr, qt;
-                m.Decompose(qs, qr, qt);
-                qr *= DEG;
-                values.push_back(qr.y);
+                xval.push_back(k.mValue.x);
+                yval.push_back(k.mValue.y);
+                zval.push_back(k.mValue.z);
             }
-            ry.AddChild("KeyTime", times);
-            ry.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            ry.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            ry.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            ry.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            ry.Dump(outstream);
-            FBX::Node ryc("C");
-            ryc.AddProperties("OP", curve_uid, ids[1], "d|Y");
-            connections.push_back(ryc); // TODO: emplace_back
-
-            // rotation z
-            FBX::Node rz("AnimationCurve");
-            curve_uid = generate_uid();
-            rz.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            rz.AddChild("Default", double(R.z)); // default value
-            rz.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumRotationKeys; ++pki) {
-                const aiQuatKey& k = na->mRotationKeys[pki];
-                times.push_back(to_ktime(k.mTime, anim));
-                // there must be a better way...
-                aiMatrix4x4 m(k.mValue.GetMatrix());
-                aiVector3D qs, qr, qt;
-                m.Decompose(qs, qr, qt);
-                qr *= DEG;
-                values.push_back(qr.z);
-            }
-            rz.AddChild("KeyTime", times);
-            rz.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            rz.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            rz.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            rz.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            rz.Dump(outstream);
-            FBX::Node rzc("C");
-            rzc.AddProperties("OP", curve_uid, ids[1], "d|Z");
-            connections.push_back(rzc); // TODO: emplace_back
-
-            // scale x
-            FBX::Node sx("AnimationCurve");
-            curve_uid = generate_uid();
-            sx.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            sx.AddChild("Default", double(S.x)); // default value
-            sx.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumScalingKeys; ++pki) {
-                const aiVectorKey& k = na->mScalingKeys[pki];
-                times.push_back(to_ktime(k.mTime, anim));
-                values.push_back(k.mValue.x);
-            }
-            sx.AddChild("KeyTime", times);
-            sx.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            sx.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            sx.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            sx.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            sx.Dump(outstream);
-            FBX::Node sxc("C");
-            sxc.AddProperties("OP", curve_uid, ids[2], "d|X");
-            connections.push_back(sxc); // TODO: emplace_back
-
-            // scale y
-            FBX::Node sy("AnimationCurve");
-            curve_uid = generate_uid();
-            sy.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            sy.AddChild("Default", double(S.y)); // default value
-            sy.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumScalingKeys; ++pki) {
-                const aiVectorKey& k = na->mScalingKeys[pki];
-                times.push_back(to_ktime(k.mTime, anim));
-                values.push_back(k.mValue.y);
-            }
-            sy.AddChild("KeyTime", times);
-            sy.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            sy.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            sy.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            sy.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            sy.Dump(outstream);
-            FBX::Node syc("C");
-            syc.AddProperties("OP", curve_uid, ids[2], "d|Y");
-            connections.push_back(syc); // TODO: emplace_back
-
-            // scale z
-            FBX::Node sz("AnimationCurve");
-            curve_uid = generate_uid();
-            sz.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
-            sz.AddChild("Default", double(S.z)); // default value
-            sz.AddChild("KeyVer", int32_t(4009));
-            times.clear();
-            values.clear();
-            for (size_t pki = 0; pki < na->mNumScalingKeys; ++pki) {
-                const aiVectorKey& k = na->mScalingKeys[pki];
-                times.push_back(to_ktime(k.mTime, anim));
-                values.push_back(k.mValue.z);
-            }
-            sz.AddChild("KeyTime", times);
-            sz.AddChild("KeyValueFloat", values);
-            // TODO: keyframe flags (STUB for now)
-            sz.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-            sz.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-            sz.AddChild("KeyAttrRefCount", std::vector<int32_t>{static_cast<int32_t>(times.size())});
-            sz.Dump(outstream);
-            FBX::Node szc("C");
-            szc.AddProperties("OP", curve_uid, ids[2], "d|Z");
-            connections.push_back(szc); // TODO: emplace_back
+            WriteAnimationCurve(outstream, S.x, times, xval, ids[2], "d|X");
+            WriteAnimationCurve(outstream, S.y, times, yval, ids[2], "d|Y");
+            WriteAnimationCurve(outstream, S.z, times, zval, ids[2], "d|Z");
         }
     }
 
@@ -2547,6 +2324,65 @@ void FBXExporter::WriteModelNodes(
         );
     }
 }
+
+
+void FBXExporter::WriteAnimationCurveNode(
+    StreamWriterLE& outstream,
+    int64_t uid,
+    std::string name, // "T", "R", or "S"
+    aiVector3D default_value,
+    std::string property_name, // "Lcl Translation" etc
+    int64_t layer_uid,
+    int64_t node_uid
+) {
+    FBX::Node n("AnimationCurveNode");
+    n.AddProperties(uid, name + FBX::SEPARATOR + "AnimCurveNode", "");
+    FBX::Node p("Properties70");
+    p.AddP70numberA("d|X", default_value.x);
+    p.AddP70numberA("d|Y", default_value.y);
+    p.AddP70numberA("d|Z", default_value.z);
+    n.AddChild(p);
+    n.Dump(outstream);
+    // connect to layer
+    FBX::Node cl("C");
+    cl.AddProperties("OO", uid, layer_uid);
+    this->connections.push_back(cl); // TODO: emplace_back
+    // connect to bone
+    FBX::Node cb("C");
+    cb.AddProperties("OP", uid, node_uid, property_name);
+    this->connections.push_back(cb); // TODO: emplace_back
+}
+
+
+void FBXExporter::WriteAnimationCurve(
+    StreamWriterLE& outstream,
+    double default_value,
+    const std::vector<int64_t>& times,
+    const std::vector<float>& values,
+    int64_t curvenode_uid,
+    const std::string& property_link // "d|X", "d|Y", etc
+) {
+    FBX::Node n("AnimationCurve");
+    int64_t curve_uid = generate_uid();
+    n.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
+    n.AddChild("Default", default_value);
+    n.AddChild("KeyVer", int32_t(4009));
+    n.AddChild("KeyTime", times);
+    n.AddChild("KeyValueFloat", values);
+    // TODO: keyattr flags and data (STUB for now)
+    n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
+    n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
+    ai_assert(times.size() <= std::numeric_limits<int32_t>::max());
+    n.AddChild(
+        "KeyAttrRefCount",
+        std::vector<int32_t>{static_cast<int32_t>(times.size())}
+    );
+    n.Dump(outstream);
+    FBX::Node c("C");
+    c.AddProperties("OP", curve_uid, curvenode_uid, property_link);
+    this->connections.push_back(c); // TODO: emplace_back
+}
+
 
 void FBXExporter::WriteConnections ()
 {

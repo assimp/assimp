@@ -63,6 +63,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctime> // localtime, tm_*
 #include <map>
 #include <set>
+#include <vector>
+#include <array>
 #include <unordered_set>
 #include <iostream> // endl
 

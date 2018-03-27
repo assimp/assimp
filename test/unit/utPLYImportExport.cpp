@@ -132,10 +132,10 @@ TEST_F( utPLYImportExport, vertexColorTest ) {
     EXPECT_EQ(true, scene->mMeshes[0]->HasVertexColors(0));
 
     auto first_face = scene->mMeshes[0]->mFaces[0];
-    EXPECT_EQ(3, first_face.mNumIndices);
-    EXPECT_EQ(0, first_face.mIndices[0]);
-    EXPECT_EQ(1, first_face.mIndices[1]);
-    EXPECT_EQ(2, first_face.mIndices[2]);
+    EXPECT_EQ(3u, first_face.mNumIndices);
+    EXPECT_EQ(0u, first_face.mIndices[0]);
+    EXPECT_EQ(1u, first_face.mIndices[1]);
+    EXPECT_EQ(2u, first_face.mIndices[2]);
 }
 
 //Test issue #623, PLY importer should not automatically create faces

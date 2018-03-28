@@ -520,7 +520,7 @@ void FBXExporter::WriteDefinitions ()
 
     // GlobalSettings
     // this seems to always be here in Maya exports
-    n = FBX::Node("ObjectType", Property("GlobalSettings"));
+    n = FBX::Node("ObjectType", "GlobalSettings");
     count = 1;
     n.AddChild("Count", count);
     object_nodes.push_back(n);
@@ -531,9 +531,9 @@ void FBXExporter::WriteDefinitions ()
     // but no harm seems to come of leaving it out.
     count = mScene->mNumAnimations;
     if (count) {
-        n = FBX::Node("ObjectType", Property("AnimationStack"));
+        n = FBX::Node("ObjectType", "AnimationStack");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxAnimStack"));
+        pt = FBX::Node("PropertyTemplate", "FbxAnimStack");
         p = FBX::Node("Properties70");
         p.AddP70string("Description", "");
         p.AddP70time("LocalStart", 0);
@@ -553,9 +553,9 @@ void FBXExporter::WriteDefinitions ()
     // so there will be one per aiAnimation
     count = mScene->mNumAnimations;
     if (count) {
-        n = FBX::Node("ObjectType", Property("AnimationLayer"));
+        n = FBX::Node("ObjectType", "AnimationLayer");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FBXAnimLayer"));
+        pt = FBX::Node("PropertyTemplate", "FBXAnimLayer");
         p = FBX::Node("Properties70");
         p.AddP70("Weight", "Number", "", "A", double(100));
         p.AddP70bool("Mute", 0);
@@ -583,9 +583,9 @@ void FBXExporter::WriteDefinitions ()
     count = 1; // TODO: select properly
     if (count) {
         // FbxSkeleton
-        n = FBX::Node("ObjectType", Property("NodeAttribute"));
+        n = FBX::Node("ObjectType", "NodeAttribute");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxSkeleton"));
+        pt = FBX::Node("PropertyTemplate", "FbxSkeleton");
         p = FBX::Node("Properties70");
         p.AddP70color("Color", 0.8, 0.8, 0.8);
         p.AddP70double("Size", 33.333333333333);
@@ -601,9 +601,9 @@ void FBXExporter::WriteDefinitions ()
     // <~~ node heirarchy
     count = int32_t(count_nodes(mScene->mRootNode)) - 1; // (not counting root node)
     if (count) {
-        n = FBX::Node("ObjectType", Property("Model"));
+        n = FBX::Node("ObjectType", "Model");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxNode"));
+        pt = FBX::Node("PropertyTemplate", "FbxNode");
         p = FBX::Node("Properties70");
         p.AddP70enum("QuaternionInterpolate", 0);
         p.AddP70vector("RotationOffset", 0.0, 0.0, 0.0);
@@ -698,9 +698,9 @@ void FBXExporter::WriteDefinitions ()
     // <~~ aiMesh
     count = mScene->mNumMeshes;
     if (count) {
-        n = FBX::Node("ObjectType", Property("Geometry"));
+        n = FBX::Node("ObjectType", "Geometry");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxMesh"));
+        pt = FBX::Node("PropertyTemplate", "FbxMesh");
         p = FBX::Node("Properties70");
         p.AddP70color("Color", 0, 0, 0);
         p.AddP70vector("BBoxMin", 0, 0, 0);
@@ -724,7 +724,7 @@ void FBXExporter::WriteDefinitions ()
     count = mScene->mNumMaterials;
     if (count) {
         bool has_phong = has_phong_mat(mScene);
-        n = FBX::Node("ObjectType", Property("Material"));
+        n = FBX::Node("ObjectType", "Material");
         n.AddChild("Count", count);
         pt = FBX::Node("PropertyTemplate");
         if (has_phong) {
@@ -771,9 +771,9 @@ void FBXExporter::WriteDefinitions ()
     // one for each image file.
     count = int32_t(count_images(mScene));
     if (count) {
-        n = FBX::Node("ObjectType", Property("Video"));
+        n = FBX::Node("ObjectType", "Video");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxVideo"));
+        pt = FBX::Node("PropertyTemplate", "FbxVideo");
         p = FBX::Node("Properties70");
         p.AddP70bool("ImageSequence", 0);
         p.AddP70int("ImageSequenceOffset", 0);
@@ -800,9 +800,9 @@ void FBXExporter::WriteDefinitions ()
     // <~~ aiTexture
     count = int32_t(count_textures(mScene));
     if (count) {
-        n = FBX::Node("ObjectType", Property("Texture"));
+        n = FBX::Node("ObjectType", "Texture");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxFileTexture"));
+        pt = FBX::Node("PropertyTemplate", "FbxFileTexture");
         p = FBX::Node("Properties70");
         p.AddP70enum("TextureTypeUse", 0);
         p.AddP70numberA("Texture alpha", 1.0);
@@ -829,9 +829,9 @@ void FBXExporter::WriteDefinitions ()
     // AnimationCurveNode / FbxAnimCurveNode
     count = mScene->mNumAnimations * 3;
     if (count) {
-        n = FBX::Node("ObjectType", Property("AnimationCurveNode"));
+        n = FBX::Node("ObjectType", "AnimationCurveNode");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property("FbxAnimCurveNode"));
+        pt = FBX::Node("PropertyTemplate", "FbxAnimCurveNode");
         p = FBX::Node("Properties70");
         p.AddP70("d", "Compound", "", "");
         pt.AddChild(p);
@@ -843,7 +843,7 @@ void FBXExporter::WriteDefinitions ()
     // AnimationCurve / FbxAnimCurve
     count = mScene->mNumAnimations * 9;
     if (count) {
-        n = FBX::Node("ObjectType", Property("AnimationCurve"));
+        n = FBX::Node("ObjectType", "AnimationCurve");
         n.AddChild("Count", count);
         object_nodes.push_back(n);
         total_count += count;
@@ -856,7 +856,7 @@ void FBXExporter::WriteDefinitions ()
         if (mesh->HasBones()) { ++count; }
     }
     if (count) {
-        n = FBX::Node("ObjectType", Property("Pose"));
+        n = FBX::Node("ObjectType", "Pose");
         n.AddChild("Count", count);
         object_nodes.push_back(n);
         total_count += count;
@@ -865,7 +865,7 @@ void FBXExporter::WriteDefinitions ()
     // Deformer
     count = int32_t(count_deformers(mScene));
     if (count) {
-        n = FBX::Node("ObjectType", Property("Deformer"));
+        n = FBX::Node("ObjectType", "Deformer");
         n.AddChild("Count", count);
         object_nodes.push_back(n);
         total_count += count;
@@ -874,9 +874,9 @@ void FBXExporter::WriteDefinitions ()
     // (template)
     count = 0;
     if (count) {
-        n = FBX::Node("ObjectType", Property(""));
+        n = FBX::Node("ObjectType", "");
         n.AddChild("Count", count);
-        pt = FBX::Node("PropertyTemplate", Property(""));
+        pt = FBX::Node("PropertyTemplate", "");
         p = FBX::Node("Properties70");
         pt.AddChild(p);
         n.AddChild(pt);
@@ -1008,7 +1008,7 @@ void FBXExporter::WriteObjects ()
 
         // normals, if any
         if (m->HasNormals()) {
-            FBX::Node normals("LayerElementNormal", Property(int32_t(0)));
+            FBX::Node normals("LayerElementNormal", int32_t(0));
             normals.Begin(outstream);
             normals.DumpProperties(outstream);
             normals.EndProperties(outstream);
@@ -1055,7 +1055,7 @@ void FBXExporter::WriteObjects ()
                 err << " but may be incorrectly interpreted on load.";
                 DefaultLogger::get()->warn(err.str());
             }
-            FBX::Node uv("LayerElementUV", Property(int32_t(uvi)));
+            FBX::Node uv("LayerElementUV", int32_t(uvi));
             uv.Begin(outstream);
             uv.DumpProperties(outstream);
             uv.EndProperties(outstream);
@@ -1100,7 +1100,7 @@ void FBXExporter::WriteObjects ()
         // i'm not really sure why this material section exists,
         // as the material is linked via "Connections".
         // it seems to always have the same "0" value.
-        FBX::Node mat("LayerElementMaterial", Property(int32_t(0)));
+        FBX::Node mat("LayerElementMaterial", int32_t(0));
         mat.AddChild("Version", int32_t(101));
         mat.AddChild("Name", "");
         mat.AddChild("MappingInformationType", "AllSame");
@@ -1112,7 +1112,7 @@ void FBXExporter::WriteObjects ()
         // finally we have the layer specifications,
         // which select the normals / UV set / etc to use.
         // TODO: handle multiple uv sets correctly?
-        FBX::Node layer("Layer", Property(int32_t(0)));
+        FBX::Node layer("Layer", int32_t(0));
         layer.AddChild("Version", int32_t(100));
         FBX::Node le("LayerElement");
         le.AddChild("Type", "LayerElementNormal");
@@ -1408,14 +1408,12 @@ void FBXExporter::WriteObjects ()
             const int64_t texture_uid = generate_uid();
 
             // link the texture to the material
-            FBX::Node c("C");
-            c.AddProperties("OP", texture_uid, material_uid, prop_name);
-            connections.push_back(c);
+            connections.emplace_back(
+                "C", "OP", texture_uid, material_uid, prop_name
+            );
 
             // link the image data to the texture
-            c = FBX::Node("C");
-            c.AddProperties("OO", image_uid, texture_uid);
-            connections.push_back(c);
+            connections.emplace_back("C", "OO", image_uid, texture_uid);
 
             // now write the actual texture node
             FBX::Node tnode("Texture");
@@ -1598,9 +1596,7 @@ void FBXExporter::WriteObjects ()
         dnode.Dump(outstream);
 
         // connect it
-        FBX::Node c("C");
-        c.AddProperties("OO", deformer_uid, mesh_uids[mi]);
-        connections.push_back(c); // TODO: emplace_back
+        connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mi]);
 
         // we will be indexing by vertex...
         // but there might be a different number of "vertices"
@@ -1744,14 +1740,14 @@ void FBXExporter::WriteObjects ()
             sdnode.Dump(outstream);
 
             // lastly, connect to the parent deformer
-            c = FBX::Node("C");
-            c.AddProperties("OO", subdeformer_uid, deformer_uid);
-            connections.push_back(c); // TODO: emplace_back
+            connections.emplace_back(
+                "C", "OO", subdeformer_uid, deformer_uid
+            );
 
             // we also need to connect the limb node to the subdeformer.
-            c = FBX::Node("C");
-            c.AddProperties("OO", node_uids[bone_node], subdeformer_uid);
-            connections.push_back(c); // TODO: emplace_back
+            connections.emplace_back(
+                "C", "OO", node_uids[bone_node], subdeformer_uid
+            );
         }
 
         // if we cannot create a valid FBX file, simply die.
@@ -1943,9 +1939,9 @@ void FBXExporter::WriteObjects ()
         alnode.End(outstream, true);
 
         // connect to the relevant animstack
-        FBX::Node c("C");
-        c.AddProperties("OO", animlayer_uid, animation_stack_uids[ai]);
-        connections.push_back(c); // TODO: emplace_back
+        connections.emplace_back(
+            "C", "OO", animlayer_uid, animation_stack_uids[ai]
+        );
     }
 
     // AnimCurveNode - three per aiNodeAnim
@@ -2240,9 +2236,7 @@ void FBXExporter::WriteModelNodes(
             node_uid = generate_uid();
             node_uids[node] = node_uid;
         }
-        FBX::Node c("C");
-        c.AddProperties("OO", node_uid, parent_uid);
-        connections.push_back(c);
+        connections.emplace_back("C", "OO", node_uid, parent_uid);
     }
 
     // what type of node is this?
@@ -2250,17 +2244,15 @@ void FBXExporter::WriteModelNodes(
         // handled later
     } else if (node->mNumMeshes == 1) {
         // connect to child mesh, which should have been written previously
-        FBX::Node c("C");
-        c.AddProperties("OO", mesh_uids[node->mMeshes[0]], node_uid);
-        connections.push_back(c);
+        connections.emplace_back(
+            "C", "OO", mesh_uids[node->mMeshes[0]], node_uid
+        );
         // also connect to the material for the child mesh
-        c = FBX::Node("C");
-        c.AddProperties(
-            "OO",
+        connections.emplace_back(
+            "C", "OO",
             material_uids[mScene->mMeshes[node->mMeshes[0]]->mMaterialIndex],
             node_uid
         );
-        connections.push_back(c);
         // write model node
         WriteModelNode(outstream, node, node_uid, "Mesh", transform_chain);
     } else if (limbnodes.count(node)) {
@@ -2274,9 +2266,7 @@ void FBXExporter::WriteModelNodes(
         na.AddChild("TypeFlags", Property("Skeleton"));
         na.Dump(outstream);
         // and connect them
-        FBX::Node c("C");
-        c.AddProperties("OO", node_attribute_uid, node_uid);
-        connections.push_back(c);
+        connections.emplace_back("C", "OO", node_attribute_uid, node_uid);
     } else {
         // generate a null node so we can add children to it
         WriteModelNode(outstream, node, node_uid, "Null", transform_chain);
@@ -2288,23 +2278,19 @@ void FBXExporter::WriteModelNodes(
             // make a new model node
             int64_t new_node_uid = generate_uid();
             // connect to parent node
-            FBX::Node c("C");
-            c.AddProperties("OO", new_node_uid, node_uid);
-            connections.push_back(c);
+            connections.emplace_back("C", "OO", new_node_uid, node_uid);
             // connect to child mesh, which should have been written previously
-            c = FBX::Node("C");
-            c.AddProperties("OO", mesh_uids[node->mMeshes[i]], new_node_uid);
-            connections.push_back(c);
+            connections.emplace_back(
+                "C", "OO", mesh_uids[node->mMeshes[i]], new_node_uid
+            );
             // also connect to the material for the child mesh
-            c = FBX::Node("C");
-            c.AddProperties(
-                "OO",
+            connections.emplace_back(
+                "C", "OO",
                 material_uids[
                     mScene->mMeshes[node->mMeshes[i]]->mMaterialIndex
                 ],
                 new_node_uid
             );
-            connections.push_back(c);
             // write model node
             FBX::Node m("Model");
             // take name from mesh name, if it exists
@@ -2346,13 +2332,9 @@ void FBXExporter::WriteAnimationCurveNode(
     n.AddChild(p);
     n.Dump(outstream);
     // connect to layer
-    FBX::Node cl("C");
-    cl.AddProperties("OO", uid, layer_uid);
-    this->connections.push_back(cl); // TODO: emplace_back
+    this->connections.emplace_back("C", "OO", uid, layer_uid);
     // connect to bone
-    FBX::Node cb("C");
-    cb.AddProperties("OP", uid, node_uid, property_name);
-    this->connections.push_back(cb); // TODO: emplace_back
+    this->connections.emplace_back("C", "OP", uid, node_uid, property_name);
 }
 
 
@@ -2380,9 +2362,9 @@ void FBXExporter::WriteAnimationCurve(
         std::vector<int32_t>{static_cast<int32_t>(times.size())}
     );
     n.Dump(outstream);
-    FBX::Node c("C");
-    c.AddProperties("OP", curve_uid, curvenode_uid, property_link);
-    this->connections.push_back(c); // TODO: emplace_back
+    this->connections.emplace_back(
+        "C", "OP", curve_uid, curvenode_uid, property_link
+    );
 }
 
 

@@ -69,11 +69,12 @@ public: // public data members
 public: // constructors
     Node() = default;
     Node(const std::string& n) : name(n) {}
-    Node(const std::string& n, const FBX::Property &p)
+
+    // convenience template to construct with properties directly
+    template <typename... More>
+    Node(const std::string& n, const More... more)
         : name(n)
-        { properties.push_back(p); }
-    Node(const std::string& n, const std::vector<FBX::Property> &pv)
-        : name(n), properties(pv) {}
+        { AddProperties(more...); }
 
 public: // functions to add properties or children
     // add a single property to the node

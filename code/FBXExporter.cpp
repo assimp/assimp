@@ -419,6 +419,7 @@ void FBXExporter::WriteReferences ()
     // always empty for now.
     // not really sure what this is for.
     FBX::Node n("References");
+    n.force_has_children = true;
     n.Dump(outfile);
 }
 
@@ -1914,11 +1915,8 @@ void FBXExporter::WriteObjects ()
 
         // this node absurdly always pretends it has children
         // (in this case it does, but just in case...)
-        asnode.Begin(outstream);
-        asnode.DumpProperties(outstream);
-        asnode.EndProperties(outstream);
-        asnode.DumpChildren(outstream);
-        asnode.End(outstream, true);
+        asnode.force_has_children = true;
+        asnode.Dump(outstream);
 
         // note: animation stacks are not connected to anything
     }
@@ -1932,11 +1930,8 @@ void FBXExporter::WriteObjects ()
         alnode.AddProperties(animlayer_uid, FBX::SEPARATOR + "AnimLayer", "");
 
         // this node absurdly always pretends it has children
-        alnode.Begin(outstream);
-        alnode.DumpProperties(outstream);
-        alnode.EndProperties(outstream);
-        alnode.DumpChildren(outstream);
-        alnode.End(outstream, true);
+        alnode.force_has_children = true;
+        alnode.Dump(outstream);
 
         // connect to the relevant animstack
         connections.emplace_back(

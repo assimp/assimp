@@ -66,6 +66,9 @@ public: // public data members
     std::vector<FBX::Property> properties; // node properties
     std::vector<FBX::Node> children; // child nodes
 
+    // some nodes always pretend they have children...
+    bool force_has_children = false;
+
 public: // constructors
     Node() = default;
     Node(const std::string& n) : name(n) {}

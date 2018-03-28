@@ -168,7 +168,7 @@ void FBX::Node::Dump(Assimp::StreamWriterLE &s)
     DumpChildren(s);
 
     // finish, filling in end offset placeholder
-    End(s, !children.empty());
+    End(s, force_has_children || !children.empty());
 }
 
 void FBX::Node::Begin(Assimp::StreamWriterLE &s)

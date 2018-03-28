@@ -1521,7 +1521,7 @@ void FBXExporter::WriteObjects ()
             tnode.AddChild("RelativeFilename", texture_path);
             tnode.AddChild("ModelUVTranslation", double(0.0), double(0.0));
             tnode.AddChild("ModelUVScaling", double(1.0), double(1.0));
-            tnode.AddChild("Texture_Alpha_Soutce", "None");
+            tnode.AddChild("Texture_Alpha_Source", "None");
             tnode.AddChild(
                 "Cropping", int32_t(0), int32_t(0), int32_t(0), int32_t(0)
             );

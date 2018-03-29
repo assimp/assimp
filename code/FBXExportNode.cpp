@@ -47,12 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StreamWriter.h> // StreamWriterLE
 #include <assimp/Exceptional.h> // DeadlyExportError
 #include <assimp/ai_assert.h>
+#include <assimp/StringUtils.h> // ai_snprintf
 
 #include <string>
 #include <ostream>
 #include <sstream> // ostringstream
 #include <memory> // shared_ptr
-#include <cstdio> // snprintf
 
 // AddP70<type> helpers... there's no usable pattern here,
 // so all are defined as separate functions.
@@ -442,7 +442,7 @@ void FBX::Node::WritePropertyNodeAscii(
     int count = 0;
     for (size_t i = 0; i < v.size(); ++i) {
         if (i > 0) { s.PutChar(','); }
-        int len = snprintf(buffer, sizeof(buffer), "%f", v[i]);
+        int len = ai_snprintf(buffer, sizeof(buffer), "%f", v[i]);
         count += len;
         if (count > 2048) { s.PutChar('\n'); count = 0; }
         if (len < 0 || len > 31) {
@@ -478,7 +478,7 @@ void FBX::Node::WritePropertyNodeAscii(
     int count = 0;
     for (size_t i = 0; i < v.size(); ++i) {
         if (i > 0) { s.PutChar(','); }
-        int len = snprintf(buffer, sizeof(buffer), "%d", v[i]);
+        int len = ai_snprintf(buffer, sizeof(buffer), "%d", v[i]);
         count += len;
         if (count > 2048) { s.PutChar('\n'); count = 0; }
         if (len < 0 || len > 31) {

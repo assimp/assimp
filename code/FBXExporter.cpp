@@ -2258,15 +2258,6 @@ void FBXExporter::WriteModelNodes(
     // first collapse any expanded transformation chains created by FBX import.
     std::string node_name(node->mName.C_Str());
     if (node_name.find(MAGIC_NODE_TAG) != std::string::npos) {
-        if (node->mNumChildren != 1) {
-            // this should never happen
-            std::stringstream err;
-            err << "FBX transformation node should have exactly 1 child,";
-            err << " but " << node->mNumChildren << " found";
-            err << " on node \"" << node_name << "\"!";
-            throw DeadlyExportError(err.str());
-        }
-        aiNode* next_node = node->mChildren[0];
         auto pos = node_name.find(MAGIC_NODE_TAG) + MAGIC_NODE_TAG.size() + 1;
         std::string type_name = node_name.substr(pos);
         auto elem = transform_types.find(type_name);
@@ -2300,10 +2291,16 @@ void FBXExporter::WriteModelNodes(
             err << elem->second.second;
             throw DeadlyExportError(err.str());
         }
-        // now just continue to the next node
-        WriteModelNodes(
-            outstream, next_node, parent_uid, limbnodes, transform_chain
-        );
+        // now continue on to any child nodes
+        for (unsigned i = 0; i < node->mNumChildren; ++i) {
+            WriteModelNodes(
+                outstream,
+                node->mChildren[i],
+                parent_uid,
+                limbnodes,
+                transform_chain
+            );
+        }
         return;
     }
 

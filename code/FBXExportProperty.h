@@ -96,7 +96,9 @@ public:
     explicit Property(const std::string& s, bool raw=false);
     explicit Property(const std::vector<uint8_t>& r);
     explicit Property(const std::vector<int32_t>& va);
+    explicit Property(const std::vector<int64_t>& va);
     explicit Property(const std::vector<double>& va);
+    explicit Property(const std::vector<float>& va);
     explicit Property(const aiMatrix4x4& vm);
 
     // this will catch any type not defined above,

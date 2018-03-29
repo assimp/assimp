@@ -63,6 +63,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctime> // localtime, tm_*
 #include <map>
 #include <set>
+#include <vector>
+#include <array>
 #include <unordered_set>
 #include <iostream> // endl
 
@@ -525,8 +527,9 @@ void FBXExporter::WriteDefinitions ()
     total_count += count;
 
     // AnimationStack / FbxAnimStack
-    // this seems to always be here in Maya exports
-    count = 0;
+    // this seems to always be here in Maya exports,
+    // but no harm seems to come of leaving it out.
+    count = mScene->mNumAnimations;
     if (count) {
         n = FBX::Node("ObjectType", Property("AnimationStack"));
         n.AddChild("Count", count);
@@ -544,8 +547,11 @@ void FBXExporter::WriteDefinitions ()
     }
 
     // AnimationLayer / FbxAnimLayer
-    // this seems to always be here in Maya exports
-    count = 0;
+    // this seems to always be here in Maya exports,
+    // but no harm seems to come of leaving it out.
+    // Assimp doesn't support animation layers,
+    // so there will be one per aiAnimation
+    count = mScene->mNumAnimations;
     if (count) {
         n = FBX::Node("ObjectType", Property("AnimationLayer"));
         n.AddChild("Count", count);
@@ -821,7 +827,7 @@ void FBXExporter::WriteDefinitions ()
     }
 
     // AnimationCurveNode / FbxAnimCurveNode
-    count = 0;
+    count = mScene->mNumAnimations * 3;
     if (count) {
         n = FBX::Node("ObjectType", Property("AnimationCurveNode"));
         n.AddChild("Count", count);
@@ -830,6 +836,15 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70("d", "Compound", "", "");
         pt.AddChild(p);
         n.AddChild(pt);
+        object_nodes.push_back(n);
+        total_count += count;
+    }
+
+    // AnimationCurve / FbxAnimCurve
+    count = mScene->mNumAnimations * 9;
+    if (count) {
+        n = FBX::Node("ObjectType", Property("AnimationCurve"));
+        n.AddChild("Count", count);
         object_nodes.push_back(n);
         total_count += count;
     }
@@ -911,6 +926,12 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
     return transform;
 }
 
+int64_t to_ktime(double ticks, const aiAnimation* anim) {
+    if (anim->mTicksPerSecond <= 0) {
+        return ticks * FBX::SECOND;
+    }
+    return (ticks / anim->mTicksPerSecond) * FBX::SECOND;
+}
 
 void FBXExporter::WriteObjects ()
 {
@@ -943,7 +964,7 @@ void FBXExporter::WriteObjects ()
         std::vector<int32_t> vertex_indices;
         // map of vertex value to its index in the data vector
         std::map<aiVector3D,size_t> index_by_vertex_value;
-		int32_t index = 0;
+        int32_t index = 0;
         for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
             aiVector3D vtx = m->mVertices[vi];
             auto elem = index_by_vertex_value.find(vtx);
@@ -1052,7 +1073,7 @@ void FBXExporter::WriteObjects ()
             std::vector<double> uv_data;
             std::vector<int32_t> uv_indices;
             std::map<aiVector3D,int32_t> index_by_uv;
-			int32_t index = 0;
+            int32_t index = 0;
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
@@ -1849,6 +1870,193 @@ void FBXExporter::WriteObjects ()
         outstream, mScene->mRootNode, 0, limbnodes
     );
 
+    // animations
+    //
+    // in FBX there are:
+    // * AnimationStack - corresponds to an aiAnimation
+    // * AnimationLayer - a combinable animation component
+    // * AnimationCurveNode - links the property to be animated
+    // * AnimationCurve - defines animation data for a single property value
+    //
+    // the CurveNode also provides the default value for a property,
+    // such as the X, Y, Z coordinates for animatable translation.
+    //
+    // the Curve only specifies values for one component of the property,
+    // so there will be a separate AnimationCurve for X, Y, and Z.
+    //
+    // Assimp has:
+    // * aiAnimation - basically corresponds to an AnimationStack
+    // * aiNodeAnim - defines all animation for one aiNode
+    // * aiVectorKey/aiQuatKey - define the keyframe data for T/R/S
+    //
+    // assimp has no equivalent for AnimationLayer,
+    // and these are flattened on FBX import.
+    // we can assume there will be one per AnimationStack.
+    //
+    // the aiNodeAnim contains all animation data for a single aiNode,
+    // which will correspond to three AnimationCurveNode's:
+    // one each for translation, rotation and scale.
+    // The data for each of these will be put in 9 AnimationCurve's,
+    // T.X, T.Y, T.Z, R.X, R.Y, R.Z, etc.
+
+    // AnimationStack / aiAnimation
+    std::vector<int64_t> animation_stack_uids(mScene->mNumAnimations);
+    for (size_t ai = 0; ai < mScene->mNumAnimations; ++ai) {
+        int64_t animstack_uid = generate_uid();
+        animation_stack_uids[ai] = animstack_uid;
+        const aiAnimation* anim = mScene->mAnimations[ai];
+
+        FBX::Node asnode("AnimationStack");
+        std::string name = anim->mName.C_Str() + FBX::SEPARATOR + "AnimStack";
+        asnode.AddProperties(animstack_uid, name, "");
+        FBX::Node p("Properties70");
+        p.AddP70time("LocalStart", 0); // assimp doesn't store this
+        p.AddP70time("LocalStop", to_ktime(anim->mDuration, anim));
+        p.AddP70time("ReferenceStart", 0);
+        p.AddP70time("ReferenceStop", to_ktime(anim->mDuration, anim));
+        asnode.AddChild(p);
+
+        // this node absurdly always pretends it has children
+        // (in this case it does, but just in case...)
+        asnode.Begin(outstream);
+        asnode.DumpProperties(outstream);
+        asnode.EndProperties(outstream);
+        asnode.DumpChildren(outstream);
+        asnode.End(outstream, true);
+
+        // note: animation stacks are not connected to anything
+    }
+
+    // AnimationLayer - one per aiAnimation
+    std::vector<int64_t> animation_layer_uids(mScene->mNumAnimations);
+    for (size_t ai = 0; ai < mScene->mNumAnimations; ++ai) {
+        int64_t animlayer_uid = generate_uid();
+        animation_layer_uids[ai] = animlayer_uid;
+        FBX::Node alnode("AnimationLayer");
+        alnode.AddProperties(animlayer_uid, FBX::SEPARATOR + "AnimLayer", "");
+
+        // this node absurdly always pretends it has children
+        alnode.Begin(outstream);
+        alnode.DumpProperties(outstream);
+        alnode.EndProperties(outstream);
+        alnode.DumpChildren(outstream);
+        alnode.End(outstream, true);
+
+        // connect to the relevant animstack
+        FBX::Node c("C");
+        c.AddProperties("OO", animlayer_uid, animation_stack_uids[ai]);
+        connections.push_back(c); // TODO: emplace_back
+    }
+
+    // AnimCurveNode - three per aiNodeAnim
+    std::vector<std::vector<std::array<int64_t,3>>> curve_node_uids;
+    for (size_t ai = 0; ai < mScene->mNumAnimations; ++ai) {
+        const aiAnimation* anim = mScene->mAnimations[ai];
+        const int64_t layer_uid = animation_layer_uids[ai];
+        std::vector<std::array<int64_t,3>> nodeanim_uids;
+        for (size_t nai = 0; nai < anim->mNumChannels; ++nai) {
+            const aiNodeAnim* na = anim->mChannels[nai];
+            // get the corresponding aiNode
+            const aiNode* node = mScene->mRootNode->FindNode(na->mNodeName);
+            // and its transform
+            const aiMatrix4x4 node_xfm = get_world_transform(node, mScene);
+            aiVector3D T, R, S;
+            node_xfm.Decompose(S, R, T);
+
+            // AnimationCurveNode uids
+            std::array<int64_t,3> ids;
+            ids[0] = generate_uid(); // T
+            ids[1] = generate_uid(); // R
+            ids[2] = generate_uid(); // S
+
+            // translation
+            WriteAnimationCurveNode(outstream,
+                ids[0], "T", T, "Lcl Translation",
+                layer_uid, node_uids[node]
+            );
+
+            // rotation
+            WriteAnimationCurveNode(outstream,
+                ids[1], "R", R, "Lcl Rotation",
+                layer_uid, node_uids[node]
+            );
+
+            // scale
+            WriteAnimationCurveNode(outstream,
+                ids[2], "S", S, "Lcl Scale",
+                layer_uid, node_uids[node]
+            );
+
+            // store the uids for later use
+            nodeanim_uids.push_back(ids);
+        }
+        curve_node_uids.push_back(nodeanim_uids);
+    }
+
+    // AnimCurve - defines actual keyframe data.
+    // there's a separate curve for every component of every vector,
+    // for example a transform curvenode will have separate X/Y/Z AnimCurve's
+    for (size_t ai = 0; ai < mScene->mNumAnimations; ++ai) {
+        const aiAnimation* anim = mScene->mAnimations[ai];
+        for (size_t nai = 0; nai < anim->mNumChannels; ++nai) {
+            const aiNodeAnim* na = anim->mChannels[nai];
+            // get the corresponding aiNode
+            const aiNode* node = mScene->mRootNode->FindNode(na->mNodeName);
+            // and its transform
+            const aiMatrix4x4 node_xfm = get_world_transform(node, mScene);
+            aiVector3D T, R, S;
+            node_xfm.Decompose(S, R, T);
+            const std::array<int64_t,3>& ids = curve_node_uids[ai][nai];
+
+            std::vector<int64_t> times;
+            std::vector<float> xval, yval, zval;
+
+            // position/translation
+            for (size_t ki = 0; ki < na->mNumPositionKeys; ++ki) {
+                const aiVectorKey& k = na->mPositionKeys[ki];
+                times.push_back(to_ktime(k.mTime, anim));
+                xval.push_back(k.mValue.x);
+                yval.push_back(k.mValue.y);
+                zval.push_back(k.mValue.z);
+            }
+            // one curve each for X, Y, Z
+            WriteAnimationCurve(outstream, T.x, times, xval, ids[0], "d|X");
+            WriteAnimationCurve(outstream, T.y, times, yval, ids[0], "d|Y");
+            WriteAnimationCurve(outstream, T.z, times, zval, ids[0], "d|Z");
+
+            // rotation
+            times.clear(); xval.clear(); yval.clear(); zval.clear();
+            for (size_t ki = 0; ki < na->mNumRotationKeys; ++ki) {
+                const aiQuatKey& k = na->mRotationKeys[ki];
+                times.push_back(to_ktime(k.mTime, anim));
+                // TODO: aiQuaternion method to convert to Euler...
+                aiMatrix4x4 m(k.mValue.GetMatrix());
+                aiVector3D qs, qr, qt;
+                m.Decompose(qs, qr, qt);
+                qr *= DEG;
+                xval.push_back(qr.x);
+                yval.push_back(qr.y);
+                zval.push_back(qr.z);
+            }
+            WriteAnimationCurve(outstream, R.x, times, xval, ids[1], "d|X");
+            WriteAnimationCurve(outstream, R.y, times, yval, ids[1], "d|Y");
+            WriteAnimationCurve(outstream, R.z, times, zval, ids[1], "d|Z");
+
+            // scaling/scale
+            times.clear(); xval.clear(); yval.clear(); zval.clear();
+            for (size_t ki = 0; ki < na->mNumScalingKeys; ++ki) {
+                const aiVectorKey& k = na->mScalingKeys[ki];
+                times.push_back(to_ktime(k.mTime, anim));
+                xval.push_back(k.mValue.x);
+                yval.push_back(k.mValue.y);
+                zval.push_back(k.mValue.z);
+            }
+            WriteAnimationCurve(outstream, S.x, times, xval, ids[2], "d|X");
+            WriteAnimationCurve(outstream, S.y, times, yval, ids[2], "d|Y");
+            WriteAnimationCurve(outstream, S.z, times, zval, ids[2], "d|Z");
+        }
+    }
+
     object_node.End(outstream, true);
 }
 
@@ -2118,6 +2326,65 @@ void FBXExporter::WriteModelNodes(
         );
     }
 }
+
+
+void FBXExporter::WriteAnimationCurveNode(
+    StreamWriterLE& outstream,
+    int64_t uid,
+    std::string name, // "T", "R", or "S"
+    aiVector3D default_value,
+    std::string property_name, // "Lcl Translation" etc
+    int64_t layer_uid,
+    int64_t node_uid
+) {
+    FBX::Node n("AnimationCurveNode");
+    n.AddProperties(uid, name + FBX::SEPARATOR + "AnimCurveNode", "");
+    FBX::Node p("Properties70");
+    p.AddP70numberA("d|X", default_value.x);
+    p.AddP70numberA("d|Y", default_value.y);
+    p.AddP70numberA("d|Z", default_value.z);
+    n.AddChild(p);
+    n.Dump(outstream);
+    // connect to layer
+    FBX::Node cl("C");
+    cl.AddProperties("OO", uid, layer_uid);
+    this->connections.push_back(cl); // TODO: emplace_back
+    // connect to bone
+    FBX::Node cb("C");
+    cb.AddProperties("OP", uid, node_uid, property_name);
+    this->connections.push_back(cb); // TODO: emplace_back
+}
+
+
+void FBXExporter::WriteAnimationCurve(
+    StreamWriterLE& outstream,
+    double default_value,
+    const std::vector<int64_t>& times,
+    const std::vector<float>& values,
+    int64_t curvenode_uid,
+    const std::string& property_link // "d|X", "d|Y", etc
+) {
+    FBX::Node n("AnimationCurve");
+    int64_t curve_uid = generate_uid();
+    n.AddProperties(curve_uid, FBX::SEPARATOR + "AnimCurve", "");
+    n.AddChild("Default", default_value);
+    n.AddChild("KeyVer", int32_t(4009));
+    n.AddChild("KeyTime", times);
+    n.AddChild("KeyValueFloat", values);
+    // TODO: keyattr flags and data (STUB for now)
+    n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
+    n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
+    ai_assert(times.size() <= std::numeric_limits<int32_t>::max());
+    n.AddChild(
+        "KeyAttrRefCount",
+        std::vector<int32_t>{static_cast<int32_t>(times.size())}
+    );
+    n.Dump(outstream);
+    FBX::Node c("C");
+    c.AddProperties("OP", curve_uid, curvenode_uid, property_link);
+    this->connections.push_back(c); // TODO: emplace_back
+}
+
 
 void FBXExporter::WriteConnections ()
 {

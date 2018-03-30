@@ -443,6 +443,8 @@ private:
 
     aiScene* const out;
     const FBX::Document& doc;
+
+    std::vector<std::string> mLightNames;
 };
 
 }

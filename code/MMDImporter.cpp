@@ -354,8 +354,11 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
   float shininess = pMat->specularlity;
   mat->AddProperty(&shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
 
-  aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
-  mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+  if(pMat->diffuse_texture_index >= 0) {
+      aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
+      mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+  }
+
   int mapping_uvwsrc = 0;
   mat->AddProperty(&mapping_uvwsrc, 1,
                    AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, 0));

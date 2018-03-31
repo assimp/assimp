@@ -2054,8 +2054,7 @@ std::string Converter::FixNodeName( const std::string& name )
         }
         node_names[ temp ] = true;
 
-        const NameNameMap::const_iterator rit = renamed_nodes.find( temp );
-        return rit == renamed_nodes.end() ? temp : ( *rit ).second;
+        return temp;
     }
 
     const NodeNameMap::const_iterator it = node_names.find( name );
@@ -2066,8 +2065,7 @@ std::string Converter::FixNodeName( const std::string& name )
     }
     node_names[ name ] = false;
 
-    const NameNameMap::const_iterator rit = renamed_nodes.find( name );
-    return rit == renamed_nodes.end() ? name : ( *rit ).second;
+    return name;
 }
 
 void Converter::ConvertAnimationStack( const AnimationStack& st )

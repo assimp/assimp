@@ -428,9 +428,6 @@ private:
     typedef std::map<std::string, bool> NodeNameMap;
     NodeNameMap node_names;
 
-    typedef std::map<std::string, std::string> NameNameMap;
-    NameNameMap renamed_nodes;
-
     NodeNameCache mNodeNames;
     double anim_fps;
 

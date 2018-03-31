@@ -95,7 +95,8 @@ namespace pmx
 			// UTF16 to UTF8
 			const uint16_t* sourceStart = (uint16_t*)buffer.data();
 			const unsigned int targetSize = size * 3; // enough to encode
-			char targetStart[targetSize] = { 0 };
+			char targetStart[targetSize];
+            std::memset(targetStart, 0, targetSize * sizeof(char));
             
             utf8::utf16to8( sourceStart, sourceStart + size/2, targetStart );
 

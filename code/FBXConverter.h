@@ -424,10 +424,6 @@ private:
     typedef std::map<std::string, unsigned int> NodeAnimBitMap;
     NodeAnimBitMap node_anim_chain_bits;
 
-    // name -> has had its prefix_stripped?
-    typedef std::map<std::string, bool> NodeNameMap;
-    NodeNameMap node_names;
-
     NodeNameCache mNodeNames;
     double anim_fps;
 

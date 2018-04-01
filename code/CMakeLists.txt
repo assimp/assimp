@@ -710,6 +710,12 @@ ADD_ASSIMP_IMPORTER( MMD
   MMDVmdParser.h
 )
 
+ADD_ASSIMP_IMPORTER( ISM2
+  ISM2FileData.h
+  ISM2Loader.cpp
+  ISM2Loader.h
+)
+
 SET( Step_SRCS
   STEPFile.h
   StepExporter.h

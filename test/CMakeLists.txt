@@ -111,6 +111,7 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utISM2Import.cpp
 )
 
 SET( MATERIAL

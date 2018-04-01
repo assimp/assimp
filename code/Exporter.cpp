@@ -98,7 +98,7 @@ void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportPrope
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneFBX(const char*, IOSystem*, const aiScene*, const ExportProperties*);
-//void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
 
 // ------------------------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
     Exporter::ExportFormatEntry( "fbx", "Autodesk FBX (binary)", "fbx", &ExportSceneFBX, 0 ),
-    //Exporter::ExportFormatEntry( "fbxa", "Autodesk FBX (ascii)", "fbx", &ExportSceneFBXA, 0 ),
+    Exporter::ExportFormatEntry( "fbxa", "Autodesk FBX (ascii)", "fbx", &ExportSceneFBXA, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER

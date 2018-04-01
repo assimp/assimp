@@ -204,6 +204,12 @@ public:
     }
 
     // ---------------------------------------------------------------------
+    /** Write a single character to the stream */
+    void PutChar(char c)    {
+        Put(c);
+    }
+
+    // ---------------------------------------------------------------------
     /** Write an aiString to the stream */
     void PutString(const aiString& s)
     {

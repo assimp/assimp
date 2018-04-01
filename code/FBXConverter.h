@@ -68,6 +68,8 @@ namespace FBX {
 
 class Document;
 
+using NodeNameCache = std::vector<std::string>;
+
 /** 
  *  Convert a FBX #Document to #aiScene
  *  @param out Empty scene to be populated
@@ -117,16 +119,19 @@ private:
     void ConvertNodes(uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform = aiMatrix4x4());
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertLights(const Model& model);
+    void ConvertLights(const Model& model, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertCameras(const Model& model);
+    void ConvertCameras(const Model& model, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertLight(const Model& model, const Light& light);
+    void ConvertLight( const Light& light, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertCamera(const Model& model, const Camera& cam);
+    void ConvertCamera( const Camera& cam, const std::string &orig_name );
+
+    // ------------------------------------------------------------------------------------------------
+    void GetUniqueName( const std::string &name, std::string uniqueName );
 
     // ------------------------------------------------------------------------------------------------
     // this returns unified names usable within assimp identifiers (i.e. no space characters -
@@ -259,18 +264,6 @@ private:
     void ConvertAnimations();
 
     // ------------------------------------------------------------------------------------------------
-    // rename a node already partially converted. fixed_name is a string previously returned by
-    // FixNodeName, new_name specifies the string FixNodeName should return on all further invocations
-    // which would previously have returned the old value.
-    //
-    // this also updates names in node animations, cameras and light sources and is thus slow.
-    //
-    // NOTE: the caller is responsible for ensuring that the new name is unique and does
-    // not collide with any other identifiers. The best way to ensure this is to only
-    // append to the old name, which is guaranteed to match these requirements.
-    void RenameNode(const std::string& fixed_name, const std::string& new_name);
-
-    // ------------------------------------------------------------------------------------------------
     // takes a fbx node name and returns the identifier to be used in the assimp output scene.
     // the function is guaranteed to provide consistent results over multiple invocations
     // UNLESS RenameNode() is called for a particular node name.
@@ -280,7 +273,6 @@ private:
 
     // XXX: better use multi_map ..
     typedef std::map<std::string, std::vector<const AnimationCurveNode*> > NodeMap;
-
 
     // ------------------------------------------------------------------------------------------------
     void ConvertAnimationStack(const AnimationStack& st);
@@ -432,13 +424,7 @@ private:
     typedef std::map<std::string, unsigned int> NodeAnimBitMap;
     NodeAnimBitMap node_anim_chain_bits;
 
-    // name -> has had its prefix_stripped?
-    typedef std::map<std::string, bool> NodeNameMap;
-    NodeNameMap node_names;
-
-    typedef std::map<std::string, std::string> NameNameMap;
-    NameNameMap renamed_nodes;
-
+    NodeNameCache mNodeNames;
     double anim_fps;
 
     aiScene* const out;

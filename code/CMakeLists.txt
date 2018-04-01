@@ -177,8 +177,6 @@ SET( Common_SRCS
   SkeletonMeshBuilder.cpp
   SplitByBoneCountProcess.cpp
   SplitByBoneCountProcess.h
-  ScaleProcess.cpp
-  ScaleProcess.h
   StandardShapes.cpp
   TargetAnimation.cpp
   TargetAnimation.h
@@ -586,6 +584,8 @@ SET( PostProcessing_SRCS
   PolyTools.h
   MakeVerboseFormat.cpp
   MakeVerboseFormat.h
+  ScaleProcess.cpp
+  ScaleProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 

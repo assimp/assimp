@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
 
 #include "FBXExportNode.h" // FBX::Node
+#include "FBXCommon.h" // FBX::TransformInheritance
 
 #include <assimp/types.h>
 //#include <assimp/material.h>
@@ -104,6 +105,9 @@ namespace Assimp
         void WriteBinaryHeader();
         void WriteBinaryFooter();
 
+        // ascii files have a comment at the top
+        void WriteAsciiHeader();
+
         // WriteAllNodes does the actual export.
         // It just calls all the Write<Section> methods below in order.
         void WriteAllNodes();
@@ -126,6 +130,7 @@ namespace Assimp
         // WriteTakes(); // deprecated since at least 2015 (fbx 7.4)
 
         // helpers
+        void WriteAsciiSectionHeader(const std::string& title);
         void WriteModelNodes(
             Assimp::StreamWriterLE& s,
             const aiNode* node,
@@ -138,6 +143,15 @@ namespace Assimp
             int64_t parent_uid,
             const std::unordered_set<const aiNode*>& limbnodes,
             std::vector<std::pair<std::string,aiVector3D>>& transform_chain
+        );
+        void WriteModelNode( // nor this
+            StreamWriterLE& s,
+            bool binary,
+            const aiNode* node,
+            int64_t node_uid,
+            const std::string& type,
+            const std::vector<std::pair<std::string,aiVector3D>>& xfm_chain,
+            FBX::TransformInheritance ti_type=FBX::TransformInheritance_RSrs
         );
         void WriteAnimationCurveNode(
             StreamWriterLE& outstream,

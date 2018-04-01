@@ -66,14 +66,18 @@ public: // public data members
     std::vector<FBX::Property> properties; // node properties
     std::vector<FBX::Node> children; // child nodes
 
+    // some nodes always pretend they have children...
+    bool force_has_children = false;
+
 public: // constructors
     Node() = default;
     Node(const std::string& n) : name(n) {}
-    Node(const std::string& n, const FBX::Property &p)
+
+    // convenience template to construct with properties directly
+    template <typename... More>
+    Node(const std::string& n, const More... more)
         : name(n)
-        { properties.push_back(p); }
-    Node(const std::string& n, const std::vector<FBX::Property> &pv)
-        : name(n), properties(pv) {}
+        { AddProperties(more...); }
 
 public: // functions to add properties or children
     // add a single property to the node
@@ -138,19 +142,48 @@ public: // support specifically for dealing with Properties70 nodes
 
 public: // member functions for writing data to a file or stream
 
-    // write the full node as binary data to the given file or stream
-    void Dump(std::shared_ptr<Assimp::IOStream> outfile);
-    void Dump(Assimp::StreamWriterLE &s);
+    // write the full node to the given file or stream
+    void Dump(
+        std::shared_ptr<Assimp::IOStream> outfile,
+        bool binary, int indent
+    );
+    void Dump(Assimp::StreamWriterLE &s, bool binary, int indent);
 
     // these other functions are for writing data piece by piece.
     // they must be used carefully.
     // for usage examples see FBXExporter.cpp.
-    void Begin(Assimp::StreamWriterLE &s);
-    void DumpProperties(Assimp::StreamWriterLE& s);
-    void EndProperties(Assimp::StreamWriterLE &s);
-    void EndProperties(Assimp::StreamWriterLE &s, size_t num_properties);
-    void DumpChildren(Assimp::StreamWriterLE& s);
-    void End(Assimp::StreamWriterLE &s, bool has_children);
+    void Begin(Assimp::StreamWriterLE &s, bool binary, int indent);
+    void DumpProperties(Assimp::StreamWriterLE& s, bool binary, int indent);
+    void EndProperties(Assimp::StreamWriterLE &s, bool binary, int indent);
+    void EndProperties(
+        Assimp::StreamWriterLE &s, bool binary, int indent,
+        size_t num_properties
+    );
+    void BeginChildren(Assimp::StreamWriterLE &s, bool binary, int indent);
+    void DumpChildren(Assimp::StreamWriterLE& s, bool binary, int indent);
+    void End(
+        Assimp::StreamWriterLE &s, bool binary, int indent,
+        bool has_children
+    );
+
+private: // internal functions used for writing
+
+    void DumpBinary(Assimp::StreamWriterLE &s);
+    void DumpAscii(Assimp::StreamWriterLE &s, int indent);
+    void DumpAscii(std::ostream &s, int indent);
+
+    void BeginBinary(Assimp::StreamWriterLE &s);
+    void DumpPropertiesBinary(Assimp::StreamWriterLE& s);
+    void EndPropertiesBinary(Assimp::StreamWriterLE &s);
+    void EndPropertiesBinary(Assimp::StreamWriterLE &s, size_t num_properties);
+    void DumpChildrenBinary(Assimp::StreamWriterLE& s);
+    void EndBinary(Assimp::StreamWriterLE &s, bool has_children);
+
+    void BeginAscii(std::ostream &s, int indent);
+    void DumpPropertiesAscii(std::ostream &s, int indent);
+    void BeginChildrenAscii(std::ostream &s, int indent);
+    void DumpChildrenAscii(std::ostream &s, int indent);
+    void EndAscii(std::ostream &s, int indent, bool has_children);
 
 private: // data used for binary dumps
     size_t start_pos; // starting position in stream
@@ -165,11 +198,12 @@ public: // static member functions
     static void WritePropertyNode(
         const std::string& name,
         const T value,
-        Assimp::StreamWriterLE& s
+        Assimp::StreamWriterLE& s,
+        bool binary, int indent
     ) {
         FBX::Property p(value);
         FBX::Node node(name, p);
-        node.Dump(s);
+        node.Dump(s, binary, indent);
     }
 
     // convenience function to create and write a property node,
@@ -178,7 +212,8 @@ public: // static member functions
     static void WritePropertyNode(
         const std::string& name,
         const std::vector<double>& v,
-        Assimp::StreamWriterLE& s
+        Assimp::StreamWriterLE& s,
+        bool binary, int indent
     );
 
     // convenience function to create and write a property node,
@@ -187,8 +222,34 @@ public: // static member functions
     static void WritePropertyNode(
         const std::string& name,
         const std::vector<int32_t>& v,
+        Assimp::StreamWriterLE& s,
+        bool binary, int indent
+    );
+
+private: // static helper functions
+    static void WritePropertyNodeAscii(
+        const std::string& name,
+        const std::vector<double>& v,
+        Assimp::StreamWriterLE& s,
+        int indent
+    );
+    static void WritePropertyNodeAscii(
+        const std::string& name,
+        const std::vector<int32_t>& v,
+        Assimp::StreamWriterLE& s,
+        int indent
+    );
+    static void WritePropertyNodeBinary(
+        const std::string& name,
+        const std::vector<double>& v,
         Assimp::StreamWriterLE& s
     );
+    static void WritePropertyNodeBinary(
+        const std::string& name,
+        const std::vector<int32_t>& v,
+        Assimp::StreamWriterLE& s
+    );
+
 };
 
 

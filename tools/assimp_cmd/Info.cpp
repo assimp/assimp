@@ -46,11 +46,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 
+#include <cstdio>
+#include <iostream>
+#include <string>
+
 const char* AICMD_MSG_INFO_HELP_E =
 "assimp info <file> [-r] [-v]\n"
 "\tPrint basic structure of a 3D model\n"
 "\t-r,--raw: No postprocessing, do a raw import\n"
 "\t-v,--verbose: Print verbose info such as node transform data\n";
+
+const std::string TREE_BRANCH_ASCII = "|-";
+const std::string TREE_BRANCH_UTF8 = "\xe2\x94\x9c\xe2\x95\xb4";
+const std::string TREE_STOP_ASCII = "'-";
+const std::string TREE_STOP_UTF8 = "\xe2\x94\x94\xe2\x95\xb4";
+const std::string TREE_CONTINUE_ASCII = "| ";
+const std::string TREE_CONTINUE_UTF8 = "\xe2\x94\x82 ";
+
+// note: by default this is outputing utf-8 text.
+// this is well supported on pretty much any linux terminal.
+// if this causes problems on some platform,
+// put an #ifdef to use the ascii version for that platform.
+const std::string TREE_BRANCH = TREE_BRANCH_UTF8;
+const std::string TREE_STOP = TREE_STOP_UTF8;
+const std::string TREE_CONTINUE = TREE_CONTINUE_UTF8;
 
 
 // -----------------------------------------------------------------------------------
@@ -184,46 +203,77 @@ std::string FindPTypes(const aiScene* scene)
 }
 
 // -----------------------------------------------------------------------------------
-void PrintHierarchy(const aiNode* root, unsigned int maxnest, unsigned int maxline,
-					unsigned int cline, bool verbose, unsigned int cnest=0)
-{
-	if (cline++ >= maxline || cnest >= maxnest) {
-		return;
+// Prettily print the node graph to stdout
+void PrintHierarchy(
+	const aiNode* node,
+	const std::string &indent,
+	bool verbose,
+	bool last = false,
+	bool first = true
+){
+	// tree visualization
+	std::string branchchar;
+	if (first) { branchchar = ""; }
+	else if (last) { branchchar = TREE_STOP; } // "'-"
+	else { branchchar = TREE_BRANCH; } // "|-"
+
+	// print the indent and the branch character and the name
+	std::cout << indent << branchchar << node->mName.C_Str();
+
+	// if there are meshes attached, indicate this
+	if (node->mNumMeshes) {
+		std::cout << " (mesh ";
+		bool sep = false;
+		for (size_t i=0; i < node->mNumMeshes; ++i) {
+			unsigned int mesh_index = node->mMeshes[i];
+			if (sep) { std::cout << ", "; }
+			std::cout << mesh_index;
+			sep = true;
+		}
+		std::cout << ")";
 	}
 
-	for(unsigned int i = 0; i < cnest; ++i) {
-		printf("-- ");
-	}
-	printf("\'%s\', meshes: %u\n",root->mName.data,root->mNumMeshes);
+	// finish the line
+	std::cout << std::endl;
 
+	// in verbose mode, print the transform data as well
 	if (verbose) {
-		// print the actual transform
-		//printf(",");
+		// indent to use
+		std::string indentadd;
+		if (last) { indentadd += "  "; }
+		else { indentadd += TREE_CONTINUE; } // "| "..
+		if (node->mNumChildren == 0) { indentadd += "  "; }
+		else { indentadd += TREE_CONTINUE; } // .."| "
 		aiVector3D s, r, t;
-		root->mTransformation.Decompose(s, r, t);
+		node->mTransformation.Decompose(s, r, t);
 		if (s.x != 1.0 || s.y != 1.0 || s.z != 1.0) {
-			for(unsigned int i = 0; i < cnest; ++i) { printf("   "); }
-			printf("      S:[%f %f %f]\n", s.x, s.y, s.z);
+			std::cout << indent << indentadd;
+			printf("  S:[%f %f %f]\n", s.x, s.y, s.z);
 		}
 		if (r.x || r.y || r.z) {
-			for(unsigned int i = 0; i < cnest; ++i) { printf("   "); }
-			printf("      R:[%f %f %f]\n", r.x, r.y, r.z);
+			std::cout << indent << indentadd;
+			printf("  R:[%f %f %f]\n", r.x, r.y, r.z);
 		}
 		if (t.x || t.y || t.z) {
-			for(unsigned int i = 0; i < cnest; ++i) { printf("   "); }
-			printf("      T:[%f %f %f]\n", t.x, t.y, t.z);
+			std::cout << indent << indentadd;
+			printf("  T:[%f %f %f]\n", t.x, t.y, t.z);
 		}
 	}
-	//printf("\n");
 
-	for (unsigned int i = 0; i < root->mNumChildren; ++i ) {
-		PrintHierarchy(root->mChildren[i],maxnest,maxline,cline,verbose,cnest+1);
-		if(i == root->mNumChildren-1) {
-			for(unsigned int i = 0; i < cnest; ++i) {
-				printf("   ");
-			}
-			printf("<--\n");
-		}
+	// and recurse
+	std::string nextIndent;
+	if (first) { nextIndent = indent; }
+	else if (last) { nextIndent = indent + "  "; }
+	else { nextIndent = indent + TREE_CONTINUE; } // "| "
+	for (size_t i = 0; i < node->mNumChildren; ++i) {
+		bool lastone = (i == node->mNumChildren - 1);
+		PrintHierarchy(
+			node->mChildren[i],
+			nextIndent,
+			verbose,
+			lastone,
+			false
+		);
 	}
 }
 
@@ -406,8 +456,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 
 	// node hierarchy
 	printf("\nNode hierarchy:\n");
-	unsigned int cline=0;
-	PrintHierarchy(scene->mRootNode,20,1000,cline,verbose);
+	PrintHierarchy(scene->mRootNode,"",verbose);
 
 	printf("\n");
 	return 0;

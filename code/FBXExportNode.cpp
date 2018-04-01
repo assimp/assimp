@@ -45,9 +45,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXCommon.h"
 
 #include <assimp/StreamWriter.h> // StreamWriterLE
+#include <assimp/Exceptional.h> // DeadlyExportError
 #include <assimp/ai_assert.h>
+#include <assimp/StringUtils.h> // ai_snprintf
 
 #include <string>
+#include <ostream>
+#include <sstream> // ostringstream
 #include <memory> // shared_ptr
 
 // AddP70<type> helpers... there's no usable pattern here,
@@ -145,33 +149,174 @@ void FBX::Node::AddP70time(
 }
 
 
+// public member functions for writing nodes to stream
+
+void FBX::Node::Dump(
+    std::shared_ptr<Assimp::IOStream> outfile,
+    bool binary, int indent
+) {
+    if (binary) {
+        Assimp::StreamWriterLE outstream(outfile);
+        DumpBinary(outstream);
+    } else {
+        std::ostringstream ss;
+        DumpAscii(ss, indent);
+        std::string s = ss.str();
+        outfile->Write(s.c_str(), s.size(), 1);
+    }
+}
+
+void FBX::Node::Dump(
+    Assimp::StreamWriterLE &outstream,
+    bool binary, int indent
+) {
+    if (binary) {
+        DumpBinary(outstream);
+    } else {
+        std::ostringstream ss;
+        DumpAscii(ss, indent);
+        outstream.PutString(ss.str());
+    }
+}
+
+
+// public member functions for low-level writing
+
+void FBX::Node::Begin(
+    Assimp::StreamWriterLE &s,
+    bool binary, int indent
+) {
+    if (binary) {
+        BeginBinary(s);
+    } else {
+        // assume we're at the correct place to start already
+        (void)indent;
+        std::ostringstream ss;
+        BeginAscii(ss, indent);
+        s.PutString(ss.str());
+    }
+}
+
+void FBX::Node::DumpProperties(
+    Assimp::StreamWriterLE& s,
+    bool binary, int indent
+) {
+    if (binary) {
+        DumpPropertiesBinary(s);
+    } else {
+        std::ostringstream ss;
+        DumpPropertiesAscii(ss, indent);
+        s.PutString(ss.str());
+    }
+}
+
+void FBX::Node::EndProperties(
+    Assimp::StreamWriterLE &s,
+    bool binary, int indent
+) {
+    EndProperties(s, binary, indent, properties.size());
+}
+
+void FBX::Node::EndProperties(
+    Assimp::StreamWriterLE &s,
+    bool binary, int indent,
+    size_t num_properties
+) {
+    if (binary) {
+        EndPropertiesBinary(s, num_properties);
+    } else {
+        // nothing to do
+        (void)indent;
+    }
+}
+
+void FBX::Node::BeginChildren(
+    Assimp::StreamWriterLE &s,
+    bool binary, int indent
+) {
+    if (binary) {
+        // nothing to do
+    } else {
+        std::ostringstream ss;
+        BeginChildrenAscii(ss, indent);
+        s.PutString(ss.str());
+    }
+}
+
+void FBX::Node::DumpChildren(
+    Assimp::StreamWriterLE& s,
+    bool binary, int indent
+) {
+    if (binary) {
+        DumpChildrenBinary(s);
+    } else {
+        std::ostringstream ss;
+        DumpChildrenAscii(ss, indent);
+        s.PutString(ss.str());
+    }
+}
+
+void FBX::Node::End(
+    Assimp::StreamWriterLE &s,
+    bool binary, int indent,
+    bool has_children
+) {
+    if (binary) {
+        EndBinary(s, has_children);
+    } else {
+        std::ostringstream ss;
+        EndAscii(ss, indent, has_children);
+        s.PutString(ss.str());
+    }
+}
+
+
 // public member functions for writing to binary fbx
 
-void FBX::Node::Dump(std::shared_ptr<Assimp::IOStream> outfile)
-{
-    Assimp::StreamWriterLE outstream(outfile);
-    Dump(outstream);
-}
-
-void FBX::Node::Dump(Assimp::StreamWriterLE &s)
+void FBX::Node::DumpBinary(Assimp::StreamWriterLE &s)
 {
     // write header section (with placeholders for some things)
-    Begin(s);
+    BeginBinary(s);
 
     // write properties
-    DumpProperties(s);
+    DumpPropertiesBinary(s);
 
     // go back and fill in property related placeholders
-    EndProperties(s, properties.size());
+    EndPropertiesBinary(s, properties.size());
 
     // write children
-    DumpChildren(s);
+    DumpChildrenBinary(s);
 
     // finish, filling in end offset placeholder
-    End(s, !children.empty());
+    EndBinary(s, force_has_children || !children.empty());
 }
 
-void FBX::Node::Begin(Assimp::StreamWriterLE &s)
+
+// public member functions for writing to ascii fbx
+
+void FBX::Node::DumpAscii(std::ostream &s, int indent)
+{
+    // write name
+    BeginAscii(s, indent);
+
+    // write properties
+    DumpPropertiesAscii(s, indent);
+
+    if (force_has_children || !children.empty()) {
+        // begin children (with a '{')
+        BeginChildrenAscii(s, indent + 1);
+        // write children
+        DumpChildrenAscii(s, indent + 1);
+    }
+
+    // finish (also closing the children bracket '}')
+    EndAscii(s, indent, force_has_children || !children.empty());
+}
+
+
+// private member functions for low-level writing to fbx
+
+void FBX::Node::BeginBinary(Assimp::StreamWriterLE &s)
 {
     // remember start pos so we can come back and write the end pos
     this->start_pos = s.Tell();
@@ -189,26 +334,14 @@ void FBX::Node::Begin(Assimp::StreamWriterLE &s)
     this->property_start = s.Tell();
 }
 
-void FBX::Node::DumpProperties(Assimp::StreamWriterLE& s)
+void FBX::Node::DumpPropertiesBinary(Assimp::StreamWriterLE& s)
 {
     for (auto &p : properties) {
-        p.Dump(s);
+        p.DumpBinary(s);
     }
 }
 
-void FBX::Node::DumpChildren(Assimp::StreamWriterLE& s)
-{
-    for (FBX::Node& child : children) {
-        child.Dump(s);
-    }
-}
-
-void FBX::Node::EndProperties(Assimp::StreamWriterLE &s)
-{
-    EndProperties(s, properties.size());
-}
-
-void FBX::Node::EndProperties(
+void FBX::Node::EndPropertiesBinary(
     Assimp::StreamWriterLE &s,
     size_t num_properties
 ) {
@@ -222,7 +355,14 @@ void FBX::Node::EndProperties(
     s.Seek(pos);
 }
 
-void FBX::Node::End(
+void FBX::Node::DumpChildrenBinary(Assimp::StreamWriterLE& s)
+{
+    for (FBX::Node& child : children) {
+        child.DumpBinary(s);
+    }
+}
+
+void FBX::Node::EndBinary(
     Assimp::StreamWriterLE &s,
     bool has_children
 ) {
@@ -237,48 +377,192 @@ void FBX::Node::End(
 }
 
 
-// static member functions
+void FBX::Node::BeginAscii(std::ostream& s, int indent)
+{
+    s << '\n';
+    for (int i = 0; i < indent; ++i) { s << '\t'; }
+    s << name << ": ";
+}
 
-// convenience function to create and write a property node,
-// holding a single property which is an array of values.
-// does not copy the data, so is efficient for large arrays.
+void FBX::Node::DumpPropertiesAscii(std::ostream &s, int indent)
+{
+    for (size_t i = 0; i < properties.size(); ++i) {
+        if (i > 0) { s << ", "; }
+        properties[i].DumpAscii(s, indent);
+    }
+}
+
+void FBX::Node::BeginChildrenAscii(std::ostream& s, int indent)
+{
+    // only call this if there are actually children
+    s << " {";
+    (void)indent;
+}
+
+void FBX::Node::DumpChildrenAscii(std::ostream& s, int indent)
+{
+    // children will need a lot of padding and corralling
+    if (children.size() || force_has_children) {
+        for (size_t i = 0; i < children.size(); ++i) {
+            // no compression in ascii files, so skip this node if it exists
+            if (children[i].name == "EncryptionType") { continue; }
+            // the child can dump itself
+            children[i].DumpAscii(s, indent);
+        }
+    }
+}
+
+void FBX::Node::EndAscii(std::ostream& s, int indent, bool has_children)
+{
+    if (!has_children) { return; } // nothing to do
+    s << '\n';
+    for (int i = 0; i < indent; ++i) { s << '\t'; }
+    s << "}";
+}
+
+// private helpers for static member functions
+
+// ascii property node from vector of doubles
+void FBX::Node::WritePropertyNodeAscii(
+    const std::string& name,
+    const std::vector<double>& v,
+    Assimp::StreamWriterLE& s,
+    int indent
+){
+    char buffer[32];
+    FBX::Node node(name);
+    node.Begin(s, false, indent);
+    std::string vsize = std::to_string(v.size());
+    // *<size> {
+    s.PutChar('*'); s.PutString(vsize); s.PutString(" {\n");
+    // indent + 1
+    for (int i = 0; i < indent + 1; ++i) { s.PutChar('\t'); }
+    // a: value,value,value,...
+    s.PutString("a: ");
+    int count = 0;
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i > 0) { s.PutChar(','); }
+        int len = ai_snprintf(buffer, sizeof(buffer), "%f", v[i]);
+        count += len;
+        if (count > 2048) { s.PutChar('\n'); count = 0; }
+        if (len < 0 || len > 31) {
+            // this should never happen
+            throw DeadlyExportError("failed to convert double to string");
+        }
+        for (int j = 0; j < len; ++j) { s.PutChar(buffer[j]); }
+    }
+    // }
+    s.PutChar('\n');
+    for (int i = 0; i < indent; ++i) { s.PutChar('\t'); }
+    s.PutChar('}'); s.PutChar(' ');
+    node.End(s, false, indent, false);
+}
+
+// ascii property node from vector of int32_t
+void FBX::Node::WritePropertyNodeAscii(
+    const std::string& name,
+    const std::vector<int32_t>& v,
+    Assimp::StreamWriterLE& s,
+    int indent
+){
+    char buffer[32];
+    FBX::Node node(name);
+    node.Begin(s, false, indent);
+    std::string vsize = std::to_string(v.size());
+    // *<size> {
+    s.PutChar('*'); s.PutString(vsize); s.PutString(" {\n");
+    // indent + 1
+    for (int i = 0; i < indent + 1; ++i) { s.PutChar('\t'); }
+    // a: value,value,value,...
+    s.PutString("a: ");
+    int count = 0;
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i > 0) { s.PutChar(','); }
+        int len = ai_snprintf(buffer, sizeof(buffer), "%d", v[i]);
+        count += len;
+        if (count > 2048) { s.PutChar('\n'); count = 0; }
+        if (len < 0 || len > 31) {
+            // this should never happen
+            throw DeadlyExportError("failed to convert double to string");
+        }
+        for (int j = 0; j < len; ++j) { s.PutChar(buffer[j]); }
+    }
+    // }
+    s.PutChar('\n');
+    for (int i = 0; i < indent; ++i) { s.PutChar('\t'); }
+    s.PutChar('}'); s.PutChar(' ');
+    node.End(s, false, indent, false);
+}
+
+// binary property node from vector of doubles
 // TODO: optional zip compression!
-void FBX::Node::WritePropertyNode(
+void FBX::Node::WritePropertyNodeBinary(
     const std::string& name,
     const std::vector<double>& v,
     Assimp::StreamWriterLE& s
 ){
-    Node node(name);
-    node.Begin(s);
+    FBX::Node node(name);
+    node.BeginBinary(s);
     s.PutU1('d');
     s.PutU4(uint32_t(v.size())); // number of elements
     s.PutU4(0); // no encoding (1 would be zip-compressed)
     s.PutU4(uint32_t(v.size()) * 8); // data size
     for (auto it = v.begin(); it != v.end(); ++it) { s.PutF8(*it); }
-    node.EndProperties(s, 1);
-    node.End(s, false);
+    node.EndPropertiesBinary(s, 1);
+    node.EndBinary(s, false);
 }
 
-// convenience function to create and write a property node,
-// holding a single property which is an array of values.
-// does not copy the data, so is efficient for large arrays.
+// binary property node from vector of int32_t
 // TODO: optional zip compression!
-void FBX::Node::WritePropertyNode(
+void FBX::Node::WritePropertyNodeBinary(
     const std::string& name,
     const std::vector<int32_t>& v,
     Assimp::StreamWriterLE& s
 ){
-    Node node(name);
-    node.Begin(s);
+    FBX::Node node(name);
+    node.BeginBinary(s);
     s.PutU1('i');
     s.PutU4(uint32_t(v.size())); // number of elements
     s.PutU4(0); // no encoding (1 would be zip-compressed)
     s.PutU4(uint32_t(v.size()) * 4); // data size
     for (auto it = v.begin(); it != v.end(); ++it) { s.PutI4(*it); }
-    node.EndProperties(s, 1);
-    node.End(s, false);
+    node.EndPropertiesBinary(s, 1);
+    node.EndBinary(s, false);
 }
 
+// public static member functions
+
+// convenience function to create and write a property node,
+// holding a single property which is an array of values.
+// does not copy the data, so is efficient for large arrays.
+void FBX::Node::WritePropertyNode(
+    const std::string& name,
+    const std::vector<double>& v,
+    Assimp::StreamWriterLE& s,
+    bool binary, int indent
+){
+    if (binary) {
+        FBX::Node::WritePropertyNodeBinary(name, v, s);
+    } else {
+        FBX::Node::WritePropertyNodeAscii(name, v, s, indent);
+    }
+}
+
+// convenience function to create and write a property node,
+// holding a single property which is an array of values.
+// does not copy the data, so is efficient for large arrays.
+void FBX::Node::WritePropertyNode(
+    const std::string& name,
+    const std::vector<int32_t>& v,
+    Assimp::StreamWriterLE& s,
+    bool binary, int indent
+){
+    if (binary) {
+        FBX::Node::WritePropertyNodeBinary(name, v, s);
+    } else {
+        FBX::Node::WritePropertyNodeAscii(name, v, s, indent);
+    }
+}
 
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

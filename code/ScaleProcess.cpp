@@ -88,13 +88,6 @@ void ScaleProcess::Execute( aiScene* pScene ) {
 
 void ScaleProcess::traverseNodes( aiNode *node ) {
     applyScaling( node );
-
-    /*for ( unsigned int i = 0; i < node->mNumChildren; ++i ) {
-        aiNode *currentNode = currentNode->mChildren[ i ];
-        if ( nullptr != currentNode ) {
-            traverseNodes( currentNode );
-        }
-    }*/
 }
 
 void ScaleProcess::applyScaling( aiNode *currentNode ) {

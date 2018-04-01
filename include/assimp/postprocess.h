@@ -537,9 +537,11 @@ enum aiPostProcessSteps
     /** <hr>This step will perform a global scale of the model.
     *
     *  Some importers are providing a mechanism to define a scaling unit for the
-    *  model. This post processing step can be used to do so.
+    *  model. This post processing step can be used to do so. You need to get the
+    *  global scaling from your importer settings like in FBX. Use the flag
+    *  AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY from the global property table to configure this.
     *
-    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to control this.
+    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaing factor.
     */
     aiProcess_GlobalScale = 0x8000000,
 

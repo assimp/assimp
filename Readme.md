@@ -35,29 +35,29 @@ Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 __Importers__:
 
 - 3D
-- 3DS
-- 3MF
+- [3DS](https://en.wikipedia.org/wiki/.3ds)
+- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format)
 - AC
-- AC3D
+- [AC3D](https://en.wikipedia.org/wiki/AC3D)
 - ACC
 - AMJ
 - ASE
 - ASK
 - B3D
-- BLEND (Blender)
-- BVH
-- COB
+- [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format))
+- [BVH](https://en.wikipedia.org/wiki/Biovision_Hierarchy)
 - CMS
-- DAE/Collada
-- DXF
+- COB
+- [DAE/Collada](https://en.wikipedia.org/wiki/COLLADA)
+- [DXF](https://en.wikipedia.org/wiki/AutoCAD_DXF)
 - ENFF
-- FBX
-- glTF 1.0 + GLB
-- glTF 2.0
+- [FBX](https://en.wikipedia.org/wiki/FBX)
+- [glTF 1.0](https://en.wikipedia.org/wiki/GlTF#glTF_1.0) + GLB
+- [glTF 2.0](https://en.wikipedia.org/wiki/GlTF#glTF_2.0)
 - HMB
 - IFC-STEP
 - IRR / IRRMESH
-- LWO
+- [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
 - LWS
 - LXO
 - MD2
@@ -70,10 +70,10 @@ __Importers__:
 - MS3D
 - NDO
 - NFF
-- OBJ
-- OFF
-- OGEX
-- PLY
+- [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+- [OFF](https://en.wikipedia.org/wiki/OFF_(file_format))
+- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange)
+- [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
 - PMX
 - PRJ
 - Q3O
@@ -82,19 +82,19 @@ __Importers__:
 - SCN
 - SIB
 - SMD
-- STL
-- STP
+- [STP](https://en.wikipedia.org/wiki/ISO_10303-21)
+- [STL](https://en.wikipedia.org/wiki/STL_(file_format))
 - TER
 - UC
 - VTA
 - X
-- X3D
+- [X3D](https://en.wikipedia.org/wiki/X3D)
 - XGL
 - ZGL
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
-- C4D (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange)
+- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange)
 
 __Exporters__:
 

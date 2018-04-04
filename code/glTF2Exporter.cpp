@@ -316,11 +316,9 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
             std::string path = tex.C_Str();
 
             if (path.size() > 0) {
-                if (path[0] != '*') {
-                    std::map<std::string, unsigned int>::iterator it = mTexturesByPath.find(path);
-                    if (it != mTexturesByPath.end()) {
-                        texture = mAsset->textures.Get(it->second);
-                    }
+                std::map<std::string, unsigned int>::iterator it = mTexturesByPath.find(path);
+                if (it != mTexturesByPath.end()) {
+                    texture = mAsset->textures.Get(it->second);
                 }
 
                 if (!texture) {

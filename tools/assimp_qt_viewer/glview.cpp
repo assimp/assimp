@@ -609,6 +609,7 @@ void CGLView::drawCoordSystem() {
     // Z, -Z
     qglColor(QColor(Qt::blue)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
     qglColor(QColor(Qt::yellow)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
+    qglColor(QColor(Qt::white));
     glEnd();
 }
 

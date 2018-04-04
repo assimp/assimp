@@ -57,6 +57,7 @@ __Importers__:
 - HMB
 - IFC-STEP
 - IRR / IRRMESH
+- [ISM2](https://www.vg-resource.com/thread-29836.html)
 - [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
 - LWS
 - LXO

@@ -560,6 +560,30 @@ void CGLView::Enable_Textures(const bool pEnable)
 	}
 }
 
+void CGLView::Enable_Axes(const bool pEnable){
+	if(pEnable)
+	{
+        this->mAxesEnabled = true;
+    }
+    else
+    {
+        this->mAxesEnabled = false;
+    }
+}
+
+void CGLView::Enable_Reload_Textures(const bool pEnable)
+{
+	if(pEnable)
+	{
+        this->mReloadTexturesEnabled = true;
+//      this->mScene->ImportTextures(this->mScene->pScenePath);
+	}
+    else
+    {
+        this->mReloadTexturesEnabled = false;
+    }
+}
+
 /********************************************************************/
 /*********************** Override functions ************************/
 /********************************************************************/
@@ -630,7 +654,10 @@ void CGLView::paintGL()
     if ( mLightingEnabled ) {
         glDisable( GL_LIGHTING );///TODO: display list
     }
-    drawCoordSystem();
+    if (this->mAxesEnabled == true)
+    {
+        drawCoordSystem();
+    }
 
 	glDisable(GL_COLOR_MATERIAL);
 	if(mLightingEnabled) glEnable(GL_LIGHTING);

@@ -75,7 +75,9 @@ private:
 	};
 
 public:
-
+    bool mAxesEnabled = true;
+	// Textures
+    bool mReloadTexturesEnabled = false; // If true then textures will reload when the window is activated.
 	/// \enum ELightType
 	/// Type of light source.
 	enum class ELightType { Directional, Point, Spot };
@@ -155,7 +157,6 @@ private:
 	GLdouble mCamera_Viewport_AspectRatio;///< Specifies the aspect ratio that determines the field of view in the x direction. The aspect ratio is the ratio of x (width) to y (height).
 	// Lighting
 	bool mLightingEnabled = false;///< If true then OpenGL lighting is enabled (glEnable(GL_LIGHTING)), if false - disabled.
-	// Textures
 	///TODO: map is goooood, but not for case when one image can be used in different materials with difference in: texture transformation, targeting of the
 	/// texture (ambient or emission, or even height map), texture properties.
 	QMap<QString, GLuint> mTexture_IDMap;///< Map image filenames to textures ID's.
@@ -305,6 +306,12 @@ public:
 	/// Control textures drawing.
 	/// \param [in] pEnable - if true then enable textures, false - disable textures.
 	void Enable_Textures(const bool pEnable);
+
+	void Enable_Axes(const bool pEnable);
+	/// \fn void Enable_Textures(const bool pEnable)
+	/// Control textures drawing.
+	/// \param [in] pEnable - if true then enable textures, false - disable textures.
+	void Enable_Reload_Textures(const bool pEnable);
 
 	/********************************************************************/
 	/******************** Lighting control functions ********************/

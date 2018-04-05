@@ -71,7 +71,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "3ds prj"
+    "3ds prj 3DS PRJ"
 };
 
 
@@ -127,7 +127,7 @@ Discreet3DSImporter::~Discreet3DSImporter() {
 // Returns whether the class can handle the format of the given file.
 bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     std::string extension = GetExtension(pFile);
-    if(extension == "3ds" || extension == "prj" ) {
+    if(extension == "3ds" || extension == "3DS" || extension == "prj"|| extension == "PRJ" ) {
         return true;
     }
 

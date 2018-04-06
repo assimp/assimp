@@ -54,4 +54,9 @@ TEST_F( utSimd, SSE2SupportedTest ) {
     bool isSupported;
 
     isSupported = CPUSupportsSSE2();
+    if ( isSupported ) {
+        std::cout << "Supported" << std::endl;
+    } else {
+        std::cout << "Not supported" << std::endl;
+    }
 }

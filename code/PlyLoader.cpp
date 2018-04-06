@@ -58,16 +58,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 static const aiImporterDesc desc = {
-  "Stanford Polygon Library (PLY) Importer",
-  "",
-  "",
-  "",
-  aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_SupportTextFlavour,
-  0,
-  0,
-  0,
-  0,
-  "ply"
+    "Stanford Polygon Library (PLY) Importer",
+    "",
+    "",
+    "",
+    aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_SupportTextFlavour,
+    0,
+    0,
+    0,
+    0,
+    "ply"
 };
 
 
@@ -92,229 +92,188 @@ namespace
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
-  : mBuffer(nullptr)
-  , pcDOM(nullptr)
-  , mGeneratedMesh(nullptr){
-  // empty
+: mBuffer(nullptr)
+, pcDOM(nullptr)
+, mGeneratedMesh(nullptr) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 PLYImporter::~PLYImporter() {
-  // empty
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool PLYImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
-  const std::string extension = GetExtension(pFile);
+bool PLYImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
+    const std::string extension = GetExtension(pFile);
 
-  if (extension == "ply")
-    return true;
-  else if (!extension.length() || checkSig)
-  {
-    if (!pIOHandler)return true;
-    const char* tokens[] = { "ply" };
-    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-  }
-  return false;
+    if ( extension == "ply" ) {
+        return true;
+    } else if (!extension.length() || checkSig) {
+        if ( !pIOHandler ) {
+            return true;
+        }
+        static const char* tokens[] = { "ply" };
+        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
+    }
+
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* PLYImporter::GetInfo() const
-{
-  return &desc;
+const aiImporterDesc* PLYImporter::GetInfo() const {
+    return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
 static bool isBigEndian(const char* szMe) {
-  ai_assert(NULL != szMe);
+    ai_assert(NULL != szMe);
 
-  // binary_little_endian
-  // binary_big_endian
-  bool isBigEndian(false);
+    // binary_little_endian
+    // binary_big_endian
+    bool isBigEndian(false);
 #if (defined AI_BUILD_BIG_ENDIAN)
-  if ( 'l' == *szMe || 'L' == *szMe ) {
-    isBigEndian = true;
-  }
+    if ( 'l' == *szMe || 'L' == *szMe ) {
+        isBigEndian = true;
+    }
 #else
-  if ('b' == *szMe || 'B' == *szMe) {
-    isBigEndian = true;
-  }
+    if ('b' == *szMe || 'B' == *szMe) {
+        isBigEndian = true;
+    }
 #endif // ! AI_BUILD_BIG_ENDIAN
 
-  return isBigEndian;
+    return isBigEndian;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void PLYImporter::InternReadFile(const std::string& pFile,
-  aiScene* pScene, IOSystem* pIOHandler)
-{
-  static const std::string mode = "rb";
-  std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
-  if (!fileStream.get()) {
-    throw DeadlyImportError("Failed to open file " + pFile + ".");
-  }
+void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
+    static const std::string mode = "rb";
+    std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
+    if (!fileStream.get()) {
+        throw DeadlyImportError("Failed to open file " + pFile + ".");
+    }
 
-  // Get the file-size
-  size_t fileSize = fileStream->FileSize();
-  if ( 0 == fileSize ) {
-      throw DeadlyImportError("File " + pFile + " is empty.");
-  }
+    // Get the file-size
+    const size_t fileSize( fileStream->FileSize() );
+    if ( 0 == fileSize ) {
+        throw DeadlyImportError("File " + pFile + " is empty.");
+    }
 
-  IOStreamBuffer<char> streamedBuffer(1024 * 1024);
-  streamedBuffer.open(fileStream.get());
+    IOStreamBuffer<char> streamedBuffer(1024 * 1024);
+    streamedBuffer.open(fileStream.get());
 
-  // the beginning of the file must be PLY - magic, magic
-  std::vector<char> headerCheck;
-  streamedBuffer.getNextLine(headerCheck);
+    // the beginning of the file must be PLY - magic, magic
+    std::vector<char> headerCheck;
+    streamedBuffer.getNextLine(headerCheck);
 
-  if ((headerCheck.size() < 3) ||
-      (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
-      (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
-      (headerCheck[2] != 'Y' && headerCheck[2] != 'y') )
-  {
-    streamedBuffer.close();
-    throw DeadlyImportError("Invalid .ply file: Magic number \'ply\' is no there");
-  }
+    if ((headerCheck.size() < 3) ||
+            (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
+            (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
+            (headerCheck[2] != 'Y' && headerCheck[2] != 'y') ) {
+        streamedBuffer.close();
+        throw DeadlyImportError("Invalid .ply file: Magic number \'ply\' is no there");
+    }
 
-  std::vector<char> mBuffer2;
-  streamedBuffer.getNextLine(mBuffer2);
-  mBuffer = (unsigned char*)&mBuffer2[0];
+    std::vector<char> mBuffer2;
+    streamedBuffer.getNextLine(mBuffer2);
+    mBuffer = (unsigned char*)&mBuffer2[0];
 
-  char* szMe = (char*)&this->mBuffer[0];
-  SkipSpacesAndLineEnd(szMe, (const char**)&szMe);
+    char* szMe = (char*)&this->mBuffer[0];
+    SkipSpacesAndLineEnd(szMe, (const char**)&szMe);
 
-  // determine the format of the file data and construct the aimesh
-  PLY::DOM sPlyDom;
-  this->pcDOM = &sPlyDom;
+    // determine the format of the file data and construct the aimesh
+    PLY::DOM sPlyDom;   
+    this->pcDOM = &sPlyDom;
 
-  if (TokenMatch(szMe, "format", 6)) {
-    if (TokenMatch(szMe, "ascii", 5)) {
-      SkipLine(szMe, (const char**)&szMe);
-      if (!PLY::DOM::ParseInstance(streamedBuffer, &sPlyDom, this))
-      {
-        if (mGeneratedMesh != NULL)
-        {
-          delete(mGeneratedMesh);
-          mGeneratedMesh = nullptr;
+    if (TokenMatch(szMe, "format", 6)) {
+        if (TokenMatch(szMe, "ascii", 5)) {
+            SkipLine(szMe, (const char**)&szMe);
+            if (!PLY::DOM::ParseInstance(streamedBuffer, &sPlyDom, this)) {
+                if (mGeneratedMesh != NULL) {
+                    delete(mGeneratedMesh);
+                    mGeneratedMesh = nullptr;
+                }
+
+                streamedBuffer.close();
+                throw DeadlyImportError("Invalid .ply file: Unable to build DOM (#1)");
+            }
+        } else if (!::strncmp(szMe, "binary_", 7)) {
+            szMe += 7;
+            const bool bIsBE(isBigEndian(szMe));
+
+            // skip the line, parse the rest of the header and build the DOM
+            if (!PLY::DOM::ParseInstanceBinary(streamedBuffer, &sPlyDom, this, bIsBE)) {
+                if (mGeneratedMesh != NULL) {
+                    delete(mGeneratedMesh);
+                    mGeneratedMesh = nullptr;
+                }
+
+                streamedBuffer.close();
+                throw DeadlyImportError("Invalid .ply file: Unable to build DOM (#2)");
+            }
+        } else {
+            if (mGeneratedMesh != NULL) {
+                delete(mGeneratedMesh);
+                mGeneratedMesh = nullptr;
+            }
+
+            streamedBuffer.close();
+            throw DeadlyImportError("Invalid .ply file: Unknown file format");
+        }
+    } else {
+        AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
+        if (mGeneratedMesh != NULL) {
+            delete(mGeneratedMesh);
+            mGeneratedMesh = nullptr;
         }
 
         streamedBuffer.close();
-        throw DeadlyImportError("Invalid .ply file: Unable to build DOM (#1)");
-      }
-    }
-    else if (!::strncmp(szMe, "binary_", 7))
-    {
-      szMe += 7;
-      const bool bIsBE(isBigEndian(szMe));
-
-      // skip the line, parse the rest of the header and build the DOM
-      if (!PLY::DOM::ParseInstanceBinary(streamedBuffer, &sPlyDom, this, bIsBE))
-      {
-        if (mGeneratedMesh != NULL)
-        {
-          delete(mGeneratedMesh);
-          mGeneratedMesh = nullptr;
-        }
-
-        streamedBuffer.close();
-        throw DeadlyImportError("Invalid .ply file: Unable to build DOM (#2)");
-      }
-    }
-    else
-    {
-      if (mGeneratedMesh != NULL)
-      {
-        delete(mGeneratedMesh);
-        mGeneratedMesh = nullptr;
-      }
-
-      streamedBuffer.close();
-      throw DeadlyImportError("Invalid .ply file: Unknown file format");
-    }
-  }
-  else
-  {
-    AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-    if (mGeneratedMesh != NULL)
-    {
-      delete(mGeneratedMesh);
-      mGeneratedMesh = nullptr;
+        throw DeadlyImportError("Invalid .ply file: Missing format specification");
     }
 
+    //free the file buffer
     streamedBuffer.close();
-    throw DeadlyImportError("Invalid .ply file: Missing format specification");
-  }
 
-  //free the file buffer
-  streamedBuffer.close();
-
-  if (mGeneratedMesh == NULL)
-  {
-    throw DeadlyImportError("Invalid .ply file: Unable to extract mesh data ");
-  }
-
-  // if no face list is existing we assume that the vertex
-  // list is containing a list of points
-  bool pointsOnly = mGeneratedMesh->mFaces == NULL ? true : false;
-  if (pointsOnly)
-  {
-    if (mGeneratedMesh->mNumVertices < 3)
-    {
-      if (mGeneratedMesh != NULL)
-      {
-        delete(mGeneratedMesh);
-        mGeneratedMesh = nullptr;
-      }
-
-      streamedBuffer.close();
-      throw DeadlyImportError("Invalid .ply file: Not enough "
-        "vertices to build a proper face list. ");
+    if (mGeneratedMesh == NULL) {
+        throw DeadlyImportError("Invalid .ply file: Unable to extract mesh data ");
     }
 
-    const unsigned int iNum = (unsigned int)mGeneratedMesh->mNumVertices / 3;
-    mGeneratedMesh->mNumFaces = iNum;
-    mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
-
-    for (unsigned int i = 0; i < iNum; ++i)
-    {
-      mGeneratedMesh->mFaces[i].mNumIndices = 3;
-      mGeneratedMesh->mFaces[i].mIndices = new unsigned int[3];
-      mGeneratedMesh->mFaces[i].mIndices[0] = (i * 3);
-      mGeneratedMesh->mFaces[i].mIndices[1] = (i * 3) + 1;
-      mGeneratedMesh->mFaces[i].mIndices[2] = (i * 3) + 2;
+    // if no face list is existing we assume that the vertex
+    // list is containing a list of points
+    bool pointsOnly = mGeneratedMesh->mFaces == NULL ? true : false;
+    if (pointsOnly) {
+      mGeneratedMesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_POINT;
     }
-  }
 
-  // now load a list of all materials
-  std::vector<aiMaterial*> avMaterials;
-  std::string defaultTexture;
-  LoadMaterial(&avMaterials, defaultTexture, pointsOnly);
+    // now load a list of all materials
+    std::vector<aiMaterial*> avMaterials;
+    std::string defaultTexture;
+    LoadMaterial(&avMaterials, defaultTexture, pointsOnly);
 
-  // now generate the output scene object. Fill the material list
-  pScene->mNumMaterials = (unsigned int)avMaterials.size();
-  pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
-  for (unsigned int i = 0; i < pScene->mNumMaterials; ++i) {
-    pScene->mMaterials[i] = avMaterials[i];
-  }
+    // now generate the output scene object. Fill the material list
+    pScene->mNumMaterials = (unsigned int)avMaterials.size();
+    pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+    for (unsigned int i = 0; i < pScene->mNumMaterials; ++i) {
+        pScene->mMaterials[i] = avMaterials[i];
+    }
 
-  // fill the mesh list
-  pScene->mNumMeshes = 1;
-  pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-  pScene->mMeshes[0] = mGeneratedMesh;
-  mGeneratedMesh = nullptr;
+    // fill the mesh list
+    pScene->mNumMeshes = 1;
+    pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+    pScene->mMeshes[0] = mGeneratedMesh;
+    mGeneratedMesh = nullptr;
 
-  // generate a simple node structure
-  pScene->mRootNode = new aiNode();
-  pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-  pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    // generate a simple node structure
+    pScene->mRootNode = new aiNode();
+    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
 
-  for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes; ++i) {
-    pScene->mRootNode->mMeshes[i] = i;
-  }
+    for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes; ++i) {
+        pScene->mRootNode->mMeshes[i] = i;
+    }
 }
 
 void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementInstance* instElement, unsigned int pos) {
@@ -521,9 +480,7 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
 
 // ------------------------------------------------------------------------------------------------
 // Convert a color component to [0...1]
-ai_real PLYImporter::NormalizeColorValue(PLY::PropertyInstance::ValueUnion val,
-  PLY::EDataType eType)
-{
+ai_real PLYImporter::NormalizeColorValue(PLY::PropertyInstance::ValueUnion val, PLY::EDataType eType) {
   switch (eType)
   {
   case EDT_Float:

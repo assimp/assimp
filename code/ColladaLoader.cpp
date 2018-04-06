@@ -131,6 +131,7 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
 {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
+    useColladaName = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES,0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1120,6 +1121,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
             continue;
 
         // now check all channels if they affect the current node
+        std::string targetID, subElement;
         for( std::vector<Collada::AnimationChannel>::const_iterator cit = pSrcAnim->mChannels.begin();
             cit != pSrcAnim->mChannels.end(); ++cit)
         {
@@ -1146,7 +1148,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
             }
             if( srcChannel.mTarget.find( '/', slashPos+1) != std::string::npos)
                 continue;
-            std::string targetID = srcChannel.mTarget.substr( 0, slashPos);
+
+            targetID.clear();
+            targetID = srcChannel.mTarget.substr( 0, slashPos);
             if( targetID != srcNode->mID)
                 continue;
 
@@ -1159,7 +1163,8 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
                 entry.mTransformId = srcChannel.mTarget.substr( slashPos+1, dotPos - slashPos - 1);
 
-                std::string subElement = srcChannel.mTarget.substr( dotPos+1);
+                subElement.clear();
+                subElement = srcChannel.mTarget.substr( dotPos+1);
                 if( subElement == "ANGLE")
                     entry.mSubElement = 3; // last number in an Axis-Angle-Transform is the angle
                 else if( subElement == "X")
@@ -1180,7 +1185,8 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
             if (bracketPos != std::string::npos)
             {
                 entry.mTransformId = srcChannel.mTarget.substr(slashPos + 1, bracketPos - slashPos - 1);
-                std::string subElement = srcChannel.mTarget.substr(bracketPos);
+                subElement.clear();
+                subElement = srcChannel.mTarget.substr(bracketPos);
 
                 if (subElement == "(0)(0)")
                     entry.mSubElement = 0;
@@ -1214,7 +1220,6 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                     entry.mSubElement = 14;
                 else if (subElement == "(3)(3)")
                     entry.mSubElement = 15;
-
             }
 
             // determine which transform step is affected by this channel
@@ -1913,6 +1918,11 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 // The name must be unique for proper node-bone association.
 std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
+    // If explicitly requested, just use the collada name.
+    if (useColladaName) {
+        return pNode->mName;
+    }
+
     // Now setup the name of the assimp node. The collada name might not be
     // unique, so we use the collada ID.
     if (!pNode->mID.empty())

@@ -61,6 +61,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <iterator>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 namespace Assimp {
 namespace FBX {
@@ -133,15 +135,14 @@ void Converter::ConvertRootNode() {
     ConvertNodes( 0L, *out->mRootNode );
 }
 
-
-void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform )
-{
+void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform ) {
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced( id, "Model" );
 
     std::vector<aiNode*> nodes;
     nodes.reserve( conns.size() );
 
     std::vector<aiNode*> nodes_chain;
+    std::vector<aiNode*> post_nodes_chain;
 
     try {
         for( const Connection* con : conns ) {
@@ -152,15 +153,16 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
             }
 
             const Object* const object = con->SourceObject();
-            if ( !object ) {
+            if ( nullptr == object ) {
                 FBXImporter::LogWarn( "failed to convert source object for Model link" );
                 continue;
             }
 
             const Model* const model = dynamic_cast<const Model*>( object );
 
-            if ( model ) {
+            if ( nullptr != model ) {
                 nodes_chain.clear();
+                post_nodes_chain.clear();
 
                 aiMatrix4x4 new_abs_transform = parent_transform;
 
@@ -168,11 +170,11 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 // assimp (or rather: the complicated transformation chain that
                 // is employed by fbx) means that we may need multiple aiNode's
                 // to represent a fbx node's transformation.
-                GenerateTransformationNodeChain( *model, nodes_chain );
+                GenerateTransformationNodeChain( *model, nodes_chain, post_nodes_chain );
 
                 ai_assert( nodes_chain.size() );
 
-                const std::string& original_name = FixNodeName( model->Name() );
+                std::string original_name = FixNodeName( model->Name() );
 
                 // check if any of the nodes in the chain has the name the fbx node
                 // is supposed to have. If there is none, add another node to
@@ -187,7 +189,15 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 }
 
                 if ( !name_carrier ) {
+                    NodeNameCache::const_iterator it( std::find( mNodeNames.begin(), mNodeNames.end(), original_name ) );
+                    if ( it != mNodeNames.end() ) {
+                        original_name = original_name + std::string( "001" );
+                    }
+
+                    mNodeNames.push_back( original_name );
                     nodes_chain.push_back( new aiNode( original_name ) );
+                } else {
+                    original_name = nodes_chain.back()->mName.C_Str();
                 }
 
                 //setup metadata on newest node
@@ -213,15 +223,46 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 // attach geometry
                 ConvertModel( *model, *nodes_chain.back(), new_abs_transform );
 
-                // attach sub-nodes
-                ConvertNodes( model->ID(), *nodes_chain.back(), new_abs_transform );
+                // check if there will be any child nodes
+                const std::vector<const Connection*>& child_conns
+                    = doc.GetConnectionsByDestinationSequenced( model->ID(), "Model" );
+
+                // if so, link the geometric transform inverse nodes
+                // before we attach any child nodes
+                if (child_conns.size()) {
+                    for( aiNode* postnode : post_nodes_chain ) {
+                        ai_assert( postnode );
+
+                        if ( last_parent != &parent ) {
+                            last_parent->mNumChildren = 1;
+                            last_parent->mChildren = new aiNode*[ 1 ];
+                            last_parent->mChildren[ 0 ] = postnode;
+                        }
+
+                        postnode->mParent = last_parent;
+                        last_parent = postnode;
+
+                        new_abs_transform *= postnode->mTransformation;
+                    }
+                } else {
+                    // free the nodes we allocated as we don't need them
+                    Util::delete_fun<aiNode> deleter;
+                    std::for_each(
+                        post_nodes_chain.begin(),
+                        post_nodes_chain.end(),
+                        deleter
+                    );
+                }
+
+                // attach sub-nodes (if any)
+                ConvertNodes( model->ID(), *last_parent, new_abs_transform );
 
                 if ( doc.Settings().readLights ) {
-                    ConvertLights( *model );
+                    ConvertLights( *model, original_name );
                 }
 
                 if ( doc.Settings().readCameras ) {
-                    ConvertCameras( *model );
+                    ConvertCameras( *model, original_name );
                 }
 
                 nodes.push_back( nodes_chain.front() );
@@ -240,38 +281,36 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
         Util::delete_fun<aiNode> deleter;
         std::for_each( nodes.begin(), nodes.end(), deleter );
         std::for_each( nodes_chain.begin(), nodes_chain.end(), deleter );
+        std::for_each( post_nodes_chain.begin(), post_nodes_chain.end(), deleter );
     }
 }
 
 
-void Converter::ConvertLights( const Model& model )
-{
+void Converter::ConvertLights( const Model& model, const std::string &orig_name ) {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
     for( const NodeAttribute* attr : node_attrs ) {
         const Light* const light = dynamic_cast<const Light*>( attr );
         if ( light ) {
-            ConvertLight( model, *light );
+            ConvertLight( *light, orig_name );
         }
     }
 }
 
-void Converter::ConvertCameras( const Model& model )
-{
+void Converter::ConvertCameras( const Model& model, const std::string &orig_name ) {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
     for( const NodeAttribute* attr : node_attrs ) {
         const Camera* const cam = dynamic_cast<const Camera*>( attr );
         if ( cam ) {
-            ConvertCamera( model, *cam );
+            ConvertCamera( *cam, orig_name );
         }
     }
 }
 
-void Converter::ConvertLight( const Model& model, const Light& light )
-{
+void Converter::ConvertLight( const Light& light, const std::string &orig_name ) {
     lights.push_back( new aiLight() );
     aiLight* const out_light = lights.back();
 
-    out_light->mName.Set( FixNodeName( model.Name() ) );
+    out_light->mName.Set( orig_name );
 
     const float intensity = light.Intensity() / 100.0f;
     const aiVector3D& col = light.Color();
@@ -344,12 +383,12 @@ void Converter::ConvertLight( const Model& model, const Light& light )
     }
 }
 
-void Converter::ConvertCamera( const Model& model, const Camera& cam )
+void Converter::ConvertCamera( const Camera& cam, const std::string &orig_name )
 {
     cameras.push_back( new aiCamera() );
     aiCamera* const out_camera = cameras.back();
 
-    out_camera->mName.Set( FixNodeName( model.Name() ) );
+    out_camera->mName.Set( orig_name );
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
@@ -361,6 +400,31 @@ void Converter::ConvertCamera( const Model& model, const Camera& cam )
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD( cam.FieldOfView() );
     out_camera->mClipPlaneNear = cam.NearPlane();
     out_camera->mClipPlaneFar = cam.FarPlane();
+}
+
+static bool HasName( NodeNameCache &cache, const std::string &name ) {
+    NodeNameCache::const_iterator it( std::find( cache.begin(), cache.end(), name ) );
+    return it != cache.end();
+
+}
+void Converter::GetUniqueName( const std::string &name, std::string uniqueName ) {
+    if ( !HasName( mNodeNames, name ) ) {
+        uniqueName = name;
+        return;
+    }
+
+    int i( 0 );
+    std::string newName;
+    while ( HasName( mNodeNames, newName ) ) {
+        ++i;
+        newName.clear();
+        newName += name;
+        std::stringstream ext;
+        ext << std::setfill( '0' ) << std::setw( 3 ) << i;
+        newName += ext.str();
+    }
+    uniqueName = newName;
+    mNodeNames.push_back( uniqueName );
 }
 
 
@@ -396,6 +460,12 @@ const char* Converter::NameTransformationComp( TransformationComp comp )
         return "GeometricRotation";
     case TransformationComp_GeometricTranslation:
         return "GeometricTranslation";
+    case TransformationComp_GeometricScalingInverse:
+        return "GeometricScalingInverse";
+    case TransformationComp_GeometricRotationInverse:
+        return "GeometricRotationInverse";
+    case TransformationComp_GeometricTranslationInverse:
+        return "GeometricTranslationInverse";
     case TransformationComp_MAXIMUM: // this is to silence compiler warnings
     default:
         break;
@@ -437,6 +507,12 @@ const char* Converter::NameTransformationCompProperty( TransformationComp comp )
         return "GeometricRotation";
     case TransformationComp_GeometricTranslation:
         return "GeometricTranslation";
+    case TransformationComp_GeometricScalingInverse:
+        return "GeometricScalingInverse";
+    case TransformationComp_GeometricRotationInverse:
+        return "GeometricRotationInverse";
+    case TransformationComp_GeometricTranslationInverse:
+        return "GeometricTranslationInverse";
     case TransformationComp_MAXIMUM: // this is to silence compiler warnings
         break;
     }
@@ -548,17 +624,25 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
     bool ok;
 
     const float zero_epsilon = 1e-6f;
+    const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for ( size_t i = 0; i < TransformationComp_MAXIMUM; ++i ) {
         const TransformationComp comp = static_cast< TransformationComp >( i );
 
-        if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
-                comp == TransformationComp_GeometricScaling || comp == TransformationComp_GeometricRotation || comp == TransformationComp_GeometricTranslation ) {
+        if ( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ) {
             continue;
         }
 
+        bool scale_compare = ( comp == TransformationComp_GeometricScaling || comp == TransformationComp_Scaling );
+
         const aiVector3D& v = PropertyGet<aiVector3D>( props, NameTransformationCompProperty( comp ), ok );
-        if ( ok && v.SquareLength() > zero_epsilon ) {
-            return true;
+        if ( ok && scale_compare ) {
+            if ( (v - all_ones).SquareLength() > zero_epsilon ) {
+                return true;
+            }
+        } else if ( ok ) {
+            if ( v.SquareLength() > zero_epsilon ) {
+                return true;
+            }
         }
     }
 
@@ -570,7 +654,7 @@ std::string Converter::NameTransformationChainNode( const std::string& name, Tra
     return name + std::string( MAGIC_NODE_TAG ) + "_" + NameTransformationComp( comp );
 }
 
-void Converter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes )
+void Converter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes )
 {
     const PropertyTable& props = model.Props();
     const Model::RotOrder rot = model.RotationOrder();
@@ -582,20 +666,21 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
 
     // generate transformation matrices for all the different transformation components
     const float zero_epsilon = 1e-6f;
+    const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     bool is_complex = false;
 
     const aiVector3D& PreRotation = PropertyGet<aiVector3D>( props, "PreRotation", ok );
     if ( ok && PreRotation.SquareLength() > zero_epsilon ) {
         is_complex = true;
 
-        GetRotationMatrix( rot, PreRotation, chain[ TransformationComp_PreRotation ] );
+        GetRotationMatrix( Model::RotOrder::RotOrder_EulerXYZ, PreRotation, chain[ TransformationComp_PreRotation ] );
     }
 
     const aiVector3D& PostRotation = PropertyGet<aiVector3D>( props, "PostRotation", ok );
     if ( ok && PostRotation.SquareLength() > zero_epsilon ) {
         is_complex = true;
 
-        GetRotationMatrix( rot, PostRotation, chain[ TransformationComp_PostRotation ] );
+        GetRotationMatrix( Model::RotOrder::RotOrder_EulerXYZ, PostRotation, chain[ TransformationComp_PostRotation ] );
     }
 
     const aiVector3D& RotationPivot = PropertyGet<aiVector3D>( props, "RotationPivot", ok );
@@ -634,7 +719,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 
     const aiVector3D& Scaling = PropertyGet<aiVector3D>( props, "Lcl Scaling", ok );
-    if ( ok && std::fabs( Scaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+    if ( ok && (Scaling - all_ones).SquareLength() > zero_epsilon ) {
         aiMatrix4x4::Scaling( Scaling, chain[ TransformationComp_Scaling ] );
     }
 
@@ -644,18 +729,38 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 
     const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>( props, "GeometricScaling", ok );
-    if ( ok && std::fabs( GeometricScaling.SquareLength() - 1.0f ) > zero_epsilon ) {
+    if ( ok && (GeometricScaling - all_ones).SquareLength() > zero_epsilon ) {
+        is_complex = true;
         aiMatrix4x4::Scaling( GeometricScaling, chain[ TransformationComp_GeometricScaling ] );
+        aiVector3D GeometricScalingInverse = GeometricScaling;
+        bool canscale = true;
+        for (unsigned int i = 0; i < 3; ++i) {
+            if ( std::fabs( GeometricScalingInverse[i] ) > zero_epsilon ) {
+                GeometricScalingInverse[i] = 1.0f / GeometricScaling[i];
+            } else {
+                FBXImporter::LogError( "cannot invert geometric scaling matrix with a 0.0 scale component" );
+                canscale = false;
+                break;
+            }
+        }
+        if (canscale) {
+            aiMatrix4x4::Scaling( GeometricScalingInverse, chain[ TransformationComp_GeometricScalingInverse ] );
+        }
     }
 
     const aiVector3D& GeometricRotation = PropertyGet<aiVector3D>( props, "GeometricRotation", ok );
     if ( ok && GeometricRotation.SquareLength() > zero_epsilon ) {
+        is_complex = true;
         GetRotationMatrix( rot, GeometricRotation, chain[ TransformationComp_GeometricRotation ] );
+        GetRotationMatrix( rot, GeometricRotation, chain[ TransformationComp_GeometricRotationInverse ] );
+        chain[ TransformationComp_GeometricRotationInverse ].Inverse();
     }
 
     const aiVector3D& GeometricTranslation = PropertyGet<aiVector3D>( props, "GeometricTranslation", ok );
     if ( ok && GeometricTranslation.SquareLength() > zero_epsilon ) {
+        is_complex = true;
         aiMatrix4x4::Translation( GeometricTranslation, chain[ TransformationComp_GeometricTranslation ] );
+        aiMatrix4x4::Translation( -GeometricTranslation, chain[ TransformationComp_GeometricTranslationInverse ] );
     }
 
     // is_complex needs to be consistent with NeedsComplexTransformationChain()
@@ -663,7 +768,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     // not be guaranteed.
     ai_assert( NeedsComplexTransformationChain( model ) == is_complex );
 
-    const std::string& name = FixNodeName( model.Name() );
+    std::string name = FixNodeName( model.Name() );
 
     // now, if we have more than just Translation, Scaling and Rotation,
     // we need to generate a full node chain to accommodate for assimp's
@@ -690,10 +795,18 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
             }
 
             aiNode* nd = new aiNode();
-            output_nodes.push_back( nd );
-
             nd->mName.Set( NameTransformationChainNode( name, comp ) );
             nd->mTransformation = chain[ i ];
+
+            // geometric inverses go in a post-node chain
+            if ( comp == TransformationComp_GeometricScalingInverse ||
+                 comp == TransformationComp_GeometricRotationInverse ||
+                 comp == TransformationComp_GeometricTranslationInverse
+            ) {
+                post_output_nodes.push_back( nd );
+            } else {
+                output_nodes.push_back( nd );
+            }
         }
 
         ai_assert( output_nodes.size() );
@@ -703,8 +816,10 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     // else, we can just multiply the matrices together
     aiNode* nd = new aiNode();
     output_nodes.push_back( nd );
+    std::string uniqueName;
+    GetUniqueName( name, uniqueName );
 
-    nd->mName.Set( name );
+    nd->mName.Set( uniqueName );
 
     for (const auto &transform : chain) {
         nd->mTransformation = nd->mTransformation * transform;
@@ -1559,9 +1674,8 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
 }
 
 void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures,
-    const std::string& propName,
-    aiTextureType target, const MeshGeometry* const mesh )
-{
+        const std::string& propName,
+        aiTextureType target, const MeshGeometry* const mesh ) {
     LayeredTextureMap::const_iterator it = layeredTextures.find( propName );
     if ( it == layeredTextures.end() ) {
         return;
@@ -1805,11 +1919,11 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
 
     // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:
     const aiColor3D& Transparent = GetColorPropertyFactored( props, "TransparentColor", "TransparencyFactor", ok );
-    float CalculatedOpacity = 1.0;
+    float CalculatedOpacity = 1.0f;
     if ( ok ) {
         out_mat->AddProperty( &Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
         // as calculated by FBX SDK 2017:
-        CalculatedOpacity = 1.0 - ((Transparent.r + Transparent.g + Transparent.b) / 3.0);
+        CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
     }
 
     // use of TransparencyFactor is inconsistent.
@@ -1923,81 +2037,17 @@ void Converter::ConvertAnimations()
     }
 }
 
-void Converter::RenameNode( const std::string& fixed_name, const std::string& new_name ) {
-    if ( node_names.find( fixed_name ) == node_names.end() ) {
-        FBXImporter::LogError( "Cannot rename node " + fixed_name + ", not existing.");
-        return;
-    }
-
-    if ( node_names.find( new_name ) != node_names.end() ) {
-        FBXImporter::LogError( "Cannot rename node " + fixed_name + " to " + new_name +", name already existing." );
-        return;
-    }
-
-    ai_assert( node_names.find( fixed_name ) != node_names.end() );
-    ai_assert( node_names.find( new_name ) == node_names.end() );
-
-    renamed_nodes[ fixed_name ] = new_name;
-
-    const aiString fn( fixed_name );
-
-    for( aiCamera* cam : cameras ) {
-        if ( cam->mName == fn ) {
-            cam->mName.Set( new_name );
-            break;
-        }
-    }
-
-    for( aiLight* light : lights ) {
-        if ( light->mName == fn ) {
-            light->mName.Set( new_name );
-            break;
-        }
-    }
-
-    for( aiAnimation* anim : animations ) {
-        for ( unsigned int i = 0; i < anim->mNumChannels; ++i ) {
-            aiNodeAnim* const na = anim->mChannels[ i ];
-            if ( na->mNodeName == fn ) {
-                na->mNodeName.Set( new_name );
-                break;
-            }
-        }
-    }
-}
-
-
-std::string Converter::FixNodeName( const std::string& name )
-{
+std::string Converter::FixNodeName( const std::string& name ) {
     // strip Model:: prefix, avoiding ambiguities (i.e. don't strip if
     // this causes ambiguities, well possible between empty identifiers,
     // such as "Model::" and ""). Make sure the behaviour is consistent
     // across multiple calls to FixNodeName().
     if ( name.substr( 0, 7 ) == "Model::" ) {
         std::string temp = name.substr( 7 );
-
-        const NodeNameMap::const_iterator it = node_names.find( temp );
-        if ( it != node_names.end() ) {
-            if ( !( *it ).second ) {
-                return FixNodeName( name + "_" );
-            }
-        }
-        node_names[ temp ] = true;
-
-        const NameNameMap::const_iterator rit = renamed_nodes.find( temp );
-        return rit == renamed_nodes.end() ? temp : ( *rit ).second;
+        return temp;
     }
 
-    const NodeNameMap::const_iterator it = node_names.find( name );
-    if ( it != node_names.end() ) {
-        if ( ( *it ).second ) {
-            return FixNodeName( name + "_" );
-        }
-    }
-    node_names[ name ] = false;
-
-    const NameNameMap::const_iterator rit = renamed_nodes.find( name );
-    return rit == renamed_nodes.end() ? name : ( *rit ).second;
+    return name;
 }
 
 void Converter::ConvertAnimationStack( const AnimationStack& st )
@@ -2209,8 +2259,7 @@ void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
 
             has_any = true;
 
-            if ( comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation &&
-                comp != TransformationComp_GeometricScaling && comp != TransformationComp_GeometricRotation && comp != TransformationComp_GeometricTranslation )
+            if ( comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation )
             {
                 has_complex = true;
             }

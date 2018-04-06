@@ -99,19 +99,19 @@ public:
     // Seek specific position
     aiReturn Seek(size_t pOffset, aiOrigin pOrigin) {
         if (aiOrigin_SET == pOrigin) {
-            if (pOffset >= length) {
+            if (pOffset > length) {
                 return AI_FAILURE;
             }
             pos = pOffset;
         }
         else if (aiOrigin_END == pOrigin) {
-            if (pOffset >= length) {
+            if (pOffset > length) {
                 return AI_FAILURE;
             }
             pos = length-pOffset;
         }
         else {
-            if (pOffset+pos >= length) {
+            if (pOffset+pos > length) {
                 return AI_FAILURE;
             }
             pos += pOffset;

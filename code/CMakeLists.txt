@@ -72,6 +72,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/matrix4x4.h
   ${HEADER_PATH}/matrix4x4.inl
   ${HEADER_PATH}/mesh.h
+  ${HEADER_PATH}/pbrmaterial.h
   ${HEADER_PATH}/postprocess.h
   ${HEADER_PATH}/quaternion.h
   ${HEADER_PATH}/quaternion.inl
@@ -176,8 +177,6 @@ SET( Common_SRCS
   SkeletonMeshBuilder.cpp
   SplitByBoneCountProcess.cpp
   SplitByBoneCountProcess.h
-  ScaleProcess.cpp
-  ScaleProcess.h
   StandardShapes.cpp
   TargetAnimation.cpp
   TargetAnimation.h
@@ -187,6 +186,8 @@ SET( Common_SRCS
   Bitmap.cpp
   Version.cpp
   CreateAnimMesh.cpp
+  simd.h
+  simd.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -484,9 +485,9 @@ ADD_ASSIMP_IMPORTER( IFC
 )
 if (ASSIMP_BUILD_IFC_IMPORTER)
   if (MSVC)
-    set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+    set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
   elseif(CMAKE_COMPILER_IS_MINGW)
-    set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
+    set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
   endif()
 endif (ASSIMP_BUILD_IFC_IMPORTER)
 
@@ -522,6 +523,13 @@ ADD_ASSIMP_IMPORTER( FBX
   FBXDeformer.cpp
   FBXBinaryTokenizer.cpp
   FBXDocumentUtil.cpp
+  FBXExporter.h
+  FBXExporter.cpp
+  FBXExportNode.h
+  FBXExportNode.cpp
+  FBXExportProperty.h
+  FBXExportProperty.cpp
+  FBXCommon.h
 )
 
 SET( PostProcessing_SRCS
@@ -578,6 +586,8 @@ SET( PostProcessing_SRCS
   PolyTools.h
   MakeVerboseFormat.cpp
   MakeVerboseFormat.h
+  ScaleProcess.cpp
+  ScaleProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
@@ -641,7 +651,7 @@ ADD_ASSIMP_IMPORTER( X
   XFileExporter.cpp
 )
 
-ADD_ASSIMP_IMPORTER(X3D
+ADD_ASSIMP_IMPORTER( X3D
   X3DExporter.cpp
   X3DExporter.hpp
   X3DImporter.cpp

@@ -115,13 +115,12 @@ void BaseImporter::SetupProperties(const Importer* /*pImp*/)
 }
 
 // ------------------------------------------------------------------------------------------------
-void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
-{
+void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
     const aiImporterDesc* desc = GetInfo();
-    ai_assert(desc != NULL);
+    ai_assert(desc != nullptr);
 
     const char* ext = desc->mFileExtensions;
-    ai_assert(ext != NULL);
+    ai_assert(ext != nullptr );
 
     const char* last = ext;
     do {
@@ -145,21 +144,19 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
     unsigned int        searchBytes /* = 200 */,
     bool                tokensSol /* false */)
 {
-    ai_assert( NULL != tokens );
+    ai_assert( nullptr != tokens );
     ai_assert( 0 != numTokens );
     ai_assert( 0 != searchBytes);
 
-    if (!pIOHandler)
+    if ( nullptr == pIOHandler ) {
         return false;
+    }
 
     std::unique_ptr<IOStream> pStream (pIOHandler->Open(pFile));
     if (pStream.get() ) {
         // read 200 characters from the file
         std::unique_ptr<char[]> _buffer (new char[searchBytes+1 /* for the '\0' */]);
         char* buffer = _buffer.get();
-        if( NULL == buffer ) {
-            return false;
-        }
 
         const size_t read = pStream->Read(buffer,1,searchBytes);
         if( !read ) {
@@ -181,9 +178,17 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
         }
         *cur2 = '\0';
 
-        for (unsigned int i = 0; i < numTokens;++i) {
-            ai_assert(NULL != tokens[i]);
-            const char* r = strstr(buffer,tokens[i]);
+        std::string token;
+        for (unsigned int i = 0; i < numTokens; ++i ) {
+            ai_assert( nullptr != tokens[i] );
+            const size_t len( strlen( tokens[ i ] ) );
+            token.clear();
+            const char *ptr( tokens[ i ] );
+            for ( size_t tokIdx = 0; tokIdx < len; ++tokIdx ) {
+                token.push_back( tolower( *ptr ) );
+                ++ptr;
+            }
+            const char* r = strstr( buffer, token.c_str() );
             if( !r ) {
                 continue;
             }
@@ -246,7 +251,8 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 /* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile,
     const void* _magic, unsigned int num, unsigned int offset, unsigned int size)
 {
-    ai_assert(size <= 16 && _magic);
+    ai_assert( size <= 16 );
+    ai_assert( _magic );
 
     if (!pIOHandler) {
         return false;

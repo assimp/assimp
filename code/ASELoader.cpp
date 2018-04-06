@@ -583,7 +583,7 @@ void ASEImporter::AddNodes (const std::vector<BaseNode*>& nodes,
         node->mTransformation = mParentAdjust*snode->mTransform;
 
         // Add sub nodes - prevent stack overflow due to recursive parenting
-        if (node->mName != node->mParent->mName) {
+        if (node->mName != node->mParent->mName && node->mName != node->mParent->mParent->mName ) {
             AddNodes(nodes,node,node->mName.data,snode->mTransform);
         }
 

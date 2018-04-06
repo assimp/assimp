@@ -58,7 +58,7 @@ namespace Assimp {
 // --------------------------------------------------------------------------------------------
 /** Wrapper class around IOStream to allow for consistent writing of binary data in both
  *  little and big endian format. Don't attempt to instance the template directly. Use
- *  StreamWriterLE to read from a little-endian stream and StreamWriterBE to read from a
+ *  StreamWriterLE to write to a little-endian stream and StreamWriterBE to write to a
  *  BE stream. Alternatively, there is StreamWriterAny if the endianness of the output
  *  stream is to be determined at runtime.
  */
@@ -104,8 +104,40 @@ public:
 
     // ---------------------------------------------------------------------
     ~StreamWriter() {
-        stream->Write(&buffer[0], 1, buffer.size());
+        stream->Write(buffer.data(), 1, buffer.size());
         stream->Flush();
+    }
+
+public:
+
+    // ---------------------------------------------------------------------
+    /** Flush the contents of the internal buffer, and the output IOStream */
+    void Flush()
+    {
+        stream->Write(buffer.data(), 1, buffer.size());
+        stream->Flush();
+        buffer.clear();
+        cursor = 0;
+    }
+
+    // ---------------------------------------------------------------------
+    /** Seek to the given offset / origin in the output IOStream.
+     *
+     *  Flushes the internal buffer and the output IOStream prior to seeking. */
+    aiReturn Seek(size_t pOffset, aiOrigin pOrigin=aiOrigin_SET)
+    {
+        Flush();
+        return stream->Seek(pOffset, pOrigin);
+    }
+
+    // ---------------------------------------------------------------------
+    /** Tell the current position in the output IOStream.
+     *
+     *  First flushes the internal buffer and the output IOStream. */
+    size_t Tell()
+    {
+        Flush();
+        return stream->Tell();
     }
 
 public:
@@ -171,6 +203,38 @@ public:
         Put(n);
     }
 
+    // ---------------------------------------------------------------------
+    /** Write a single character to the stream */
+    void PutChar(char c)    {
+        Put(c);
+    }
+
+    // ---------------------------------------------------------------------
+    /** Write an aiString to the stream */
+    void PutString(const aiString& s)
+    {
+        // as Put(T f) below
+        if (cursor + s.length >= buffer.size()) {
+            buffer.resize(cursor + s.length);
+        }
+        void* dest = &buffer[cursor];
+        ::memcpy(dest, s.C_Str(), s.length);
+        cursor += s.length;
+    }
+
+    // ---------------------------------------------------------------------
+    /** Write a std::string to the stream */
+    void PutString(const std::string& s)
+    {
+        // as Put(T f) below
+        if (cursor + s.size() >= buffer.size()) {
+            buffer.resize(cursor + s.size());
+        }
+        void* dest = &buffer[cursor];
+        ::memcpy(dest, s.c_str(), s.size());
+        cursor += s.size();
+    }
+
 public:
 
     // ---------------------------------------------------------------------
@@ -190,8 +254,6 @@ public:
     void SetCurrentPos(std::size_t new_cursor) {
         cursor = new_cursor;
     }
-
-private:
 
     // ---------------------------------------------------------------------
     /** Generic write method. ByteSwap::Swap(T*) *must* be defined */

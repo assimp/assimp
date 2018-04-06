@@ -104,8 +104,6 @@ bool ISM2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
 void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
     IOSystem* pIOHandler)
 {
-    using namespace std::string_literals;
-
     std::unique_ptr<IOStream> io(pIOHandler->Open(pFile.c_str(), "rb"));
 
     // looks like there's only one mesh per file
@@ -154,6 +152,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
             case Section_Bones:
             {
                 BoneDataHeader bdh;
+
                 io->Read(&bdh, sizeof(BoneDataHeader), 1);
                 if (!le) ByteSwap::Swap(&bdh.total);
                 uint32_t *boneOffsets = new uint32_t[bdh.total];
@@ -275,7 +274,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                                             m3[3] = sr->GetF4();
                                             break;
                                         default:
-                                            DefaultLogger::get()->warn("Unsupported/unknown bone transform section: "s +
+                                            DefaultLogger::get()->warn(std::string("Unsupported/unknown bone transform section: ") +
                                                 std::to_string(transformSectionType));
                                     }
                                 }
@@ -296,7 +295,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                                 break;
                             }
                             default:
-                                DefaultLogger::get()->warn("Unsupported/unknown bone section: "s +
+                                DefaultLogger::get()->warn(std::string("Unsupported/unknown bone section: ") +
                                     std::to_string(boneSectionType));
                         }
                     }
@@ -410,14 +409,14 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                                                             }
                                                             break;
                                                         default:
-                                                            DefaultLogger::get()->warn("Unsupported/unknown polygon type: "s +
+                                                            DefaultLogger::get()->warn(std::string("Unsupported/unknown polygon type: ") +
                                                                 std::to_string(ph.type[0]));
                                                     }
 
                                                     break;
                                                 }
                                                 default:
-                                                    DefaultLogger::get()->warn("Unsupported/unknown polygon data section: "s +
+                                                    DefaultLogger::get()->warn(std::string("Unsupported/unknown polygon data section: ") +
                                                         std::to_string(polygonDataSectionType));
                                             }
                                         }
@@ -472,7 +471,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                                                     break;
                                                 }
                                                 default:
-                                                    DefaultLogger::get()->warn("Unsupported/unknown vertex type: "s +
+                                                    DefaultLogger::get()->warn(std::string("Unsupported/unknown vertex type: ") +
                                                                 std::to_string(vh.type[0]));
                                             }
                                         }
@@ -481,7 +480,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                                         break;
                                     }
                                     default:
-                                        DefaultLogger::get()->warn("Unsupported/unknown vertex header section: "s +
+                                        DefaultLogger::get()->warn(std::string("Unsupported/unknown vertex header section: ") +
                                             std::to_string(vertexHeaderSectionType));
                                 }
                             }
@@ -490,7 +489,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                             break;
                         }
                         default:
-                            DefaultLogger::get()->warn("Unsupported/unknown vertex data section: "s +
+                            DefaultLogger::get()->warn(std::string("Unsupported/unknown vertex data section: ") +
                                 std::to_string(vertexDataSectionType));
                     }
                 }
@@ -638,7 +637,7 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
             }
 
             default:
-                DefaultLogger::get()->warn("Unsupported/unknown section: "s +
+                DefaultLogger::get()->warn(std::string("Unsupported/unknown section: ") +
                     std::to_string(sectionTypes[b]));
         }
     }

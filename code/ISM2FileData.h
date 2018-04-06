@@ -110,15 +110,15 @@ struct ModelHeaderMeta {
  *  \brief Data structure for ISM2 model header. Unlike the metadata, this is endian dependent.
  */
 struct ModelHeader {
-    uint32_t _offs08;
-    uint32_t _offs0C;
+    uint32_t _08;
+    uint32_t _0C;
     uint32_t fileSize;
 
     //! Use this field to determine endianness
     uint32_t sectionCount;
 
-    uint32_t _offs18;
-    uint32_t _offs1C;
+    uint32_t _18;
+    uint32_t _1C;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -141,17 +141,17 @@ struct BoneHeader {
     uint32_t headerSize;
     uint32_t headerTotal;
     uint32_t nameStringIndex[2];
-    uint32_t _offs14;
-    uint32_t _offs18;
+    uint32_t _14;
+    uint32_t _18;
     uint32_t parentOffset;
-    uint32_t _offs20;
-    uint32_t _offs24;
-    uint32_t _offs28;
+    uint32_t _20;
+    uint32_t _24;
+    uint32_t _28;
     int32_t id;
-    uint32_t _offs30;
-    uint32_t _offs34;
-    uint32_t _offs38;
-    uint32_t _offs3C;
+    uint32_t _30;
+    uint32_t _34;
+    uint32_t _38;
+    uint32_t _3C;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -162,8 +162,8 @@ struct SurfaceOffsetsHeader {
     uint32_t headerSize;
     uint32_t total;
     uint32_t nameStringIndex;
-    uint32_t _offs0C;
-    uint32_t _offs10;
+    uint32_t _0C;
+    uint32_t _10;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -204,11 +204,11 @@ struct VertexBlockHeader {
 struct VertexHeaderHeader {
     uint32_t headerSize;
     uint32_t headerTotal;
-    uint32_t _offs08;
-    uint32_t _offs0C;
-    uint32_t _offs10;
-    uint32_t _offs14;
-    uint32_t _offs18;
+    uint32_t _08;
+    uint32_t _0C;
+    uint32_t _10;
+    uint32_t _14;
+    uint32_t _18;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -219,9 +219,9 @@ struct PolygonBlockHeader {
     uint32_t dataSize;
     uint32_t dataTotal;
     uint32_t nameStringIndex;
-    uint32_t _offs0C; // always blank?
-    uint32_t _offs10;
-    uint32_t _offs14;
+    uint32_t _0C; // always blank?
+    uint32_t _10;
+    uint32_t _14;
     uint32_t polygonTotal;
 } PACK_STRUCT;
 
@@ -233,7 +233,7 @@ struct PolygonHeader {
     uint32_t size;
     uint32_t total;
     uint16_t type[2];
-    uint32_t _offs0C; // always blank?
+    uint32_t _0C; // always blank?
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ struct VertexHeader {
     uint16_t type[2];
     uint32_t count;
     uint32_t size;
-    uint32_t _offs14;
+    uint32_t _14;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -254,11 +254,11 @@ struct VertexHeader {
  *  \brief Data structure for ISM2 vertex offset header
  */
 struct VertexOffsetHeader {
-    uint32_t _offs00;
-    uint32_t _offs04;
-    uint32_t _offs08;
-    uint32_t _offs0C;
-    uint32_t _offs10;
+    uint32_t _00;
+    uint32_t _04;
+    uint32_t _08;
+    uint32_t _0C;
+    uint32_t _10;
     uint32_t startOffset;
 } PACK_STRUCT;
 
@@ -306,9 +306,9 @@ struct Texture {
     uint32_t sectionType;
     uint32_t dataStringIndex[3];
     uint32_t nameStringIndex;
-    uint32_t _offs18;
-    uint32_t _offs1C;
-    uint32_t _offs20;
+    uint32_t _18;
+    uint32_t _1C;
+    uint32_t _20;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -331,7 +331,7 @@ struct MaterialA {
     uint32_t total;
     uint32_t nameStringIndex;
     uint32_t stringIndex[2];
-    uint32_t _offs18; // always blank?
+    uint32_t _18; // always blank?
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ struct MaterialC {
     uint32_t headerSize;
     uint32_t total;
     uint32_t stringIndex;
-    uint32_t _offs10; // always blank?
+    uint32_t _10; // always blank?
     uint32_t dOffset;
 } PACK_STRUCT;
 
@@ -366,9 +366,9 @@ struct MaterialD {
     uint32_t sectionType;
     uint32_t headerSize;
     uint32_t total;
-    uint32_t _offs0C;
-    uint32_t _offs10;
-    uint32_t _offs14; // always blank?
+    uint32_t _0C;
+    uint32_t _10;
+    uint32_t _14; // always blank?
     uint32_t eOffset;
 } PACK_STRUCT;
 
@@ -380,9 +380,9 @@ struct MaterialE {
     uint32_t sectionType;
     uint32_t headerSize;
     uint32_t total;
-    uint32_t _offs0C;
-    uint32_t _offs10;
-    uint32_t _offs14; // always blank?
+    uint32_t _0C;
+    uint32_t _10;
+    uint32_t _14; // always blank?
     uint32_t fOffset;
 } PACK_STRUCT;
 

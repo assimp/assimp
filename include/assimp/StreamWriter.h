@@ -255,8 +255,6 @@ public:
         cursor = new_cursor;
     }
 
-private:
-
     // ---------------------------------------------------------------------
     /** Generic write method. ByteSwap::Swap(T*) *must* be defined */
     template <typename T>

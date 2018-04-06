@@ -57,6 +57,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 #include <vector>
+#include <string>
+#include <iostream>
 #include "ISM2Loader.h"
 #include "ISM2FileData.h"
 

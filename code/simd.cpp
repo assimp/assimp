@@ -5,6 +5,8 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2018, assimp team
 
+
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,70 +40,39 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
+#include "simd.h"
 
-#include <assimp/anim.h>
+namespace Assimp {
 
-using namespace Assimp;
-
-class utAnim : public ::testing::Test {
-    // empty
-};
-
-TEST_F( utAnim, aiVectorKeyCreationTest ) {
-    aiVectorKey defaultConstTest;
-    EXPECT_DOUBLE_EQ( 0.0, defaultConstTest.mTime );
-
-    aiVector3D v( 1, 2, 3 );
-    aiVectorKey constrWithValuesTest( 1, v );
-    EXPECT_DOUBLE_EQ( 1.0, constrWithValuesTest.mTime );
-    EXPECT_EQ( v, constrWithValuesTest.mValue );
-
-    EXPECT_NE( defaultConstTest, constrWithValuesTest );
-    EXPECT_TRUE( defaultConstTest != constrWithValuesTest );
-    defaultConstTest.mTime = 1;
-    constrWithValuesTest.mTime = 2;
-    EXPECT_TRUE( defaultConstTest < constrWithValuesTest );
-}
-
-TEST_F( utAnim, aiQuatKeyTest ) {
-    aiQuatKey defaultConstrTest;
-    EXPECT_DOUBLE_EQ( 0.0, defaultConstrTest.mTime );
-
-    aiQuaternion q;
-    aiQuatKey constrWithValuesTest( 1.0, q );
-    EXPECT_DOUBLE_EQ( 1.0, constrWithValuesTest.mTime );
-    EXPECT_EQ( q, constrWithValuesTest.mValue );
-}
-
-TEST_F( utAnim, aiNodeAnimTest ) {
-    bool ok( true );
-    try {
-        aiNodeAnim myAnim;
-        EXPECT_EQ( aiAnimBehaviour_DEFAULT, myAnim.mPreState );
-        EXPECT_EQ( aiAnimBehaviour_DEFAULT, myAnim.mPostState );
-    } catch ( ... ) {
-        ok = false;
+bool CPUSupportsSSE2() {
+#if defined(__x86_64__) || defined(_M_X64)
+    //* x86_64 always has SSE2 instructions */
+    return true;
+#elif defined(__GNUC__) && defined(i386)
+    // for GCC x86 we check cpuid
+    unsigned int d;
+    __asm__(
+        "pushl %%ebx\n\t"
+        "cpuid\n\t"
+        "popl %%ebx\n\t"
+        : "=d" ( d )
+        :"a" ( 1 ) );
+    return ( d & 0x04000000 ) != 0;
+#elif (defined(_MSC_VER) && defined(_M_IX86))
+    // also check cpuid for MSVC x86
+    unsigned int d;
+    __asm {
+        xor     eax, eax
+        inc eax
+        push ebx
+        cpuid
+        pop ebx
+        mov d, edx
     }
-    EXPECT_TRUE( ok );
+    return ( d & 0x04000000 ) != 0;
+#else
+    return false;
+#endif
 }
 
-TEST_F( utAnim, aiMeshAnimTest ) {
-    bool ok( true );
-    try {
-        aiMeshAnim myMeshAnim;
-    } catch ( ... ) {
-        ok = false;
-    }
-    EXPECT_TRUE( ok );
-}
-
-TEST_F( utAnim, aiAnimationTest ) {
-    bool ok( true );
-    try {
-        aiAnimation myAnimation;
-    } catch ( ... ) {
-        ok = false;
-    }
-    EXPECT_TRUE( ok );
-}
+} // Namespace Assimp

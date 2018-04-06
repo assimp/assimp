@@ -38,70 +38,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+
 #include "UnitTestPCH.h"
 
-#include <assimp/anim.h>
+#include "simd.h"
 
-using namespace Assimp;
+using namespace ::Assimp;
 
-class utAnim : public ::testing::Test {
+class utSimd : public ::testing::Test {
+protected:
     // empty
 };
 
-TEST_F( utAnim, aiVectorKeyCreationTest ) {
-    aiVectorKey defaultConstTest;
-    EXPECT_DOUBLE_EQ( 0.0, defaultConstTest.mTime );
+TEST_F( utSimd, SSE2SupportedTest ) {
+    bool isSupported;
 
-    aiVector3D v( 1, 2, 3 );
-    aiVectorKey constrWithValuesTest( 1, v );
-    EXPECT_DOUBLE_EQ( 1.0, constrWithValuesTest.mTime );
-    EXPECT_EQ( v, constrWithValuesTest.mValue );
-
-    EXPECT_NE( defaultConstTest, constrWithValuesTest );
-    EXPECT_TRUE( defaultConstTest != constrWithValuesTest );
-    defaultConstTest.mTime = 1;
-    constrWithValuesTest.mTime = 2;
-    EXPECT_TRUE( defaultConstTest < constrWithValuesTest );
-}
-
-TEST_F( utAnim, aiQuatKeyTest ) {
-    aiQuatKey defaultConstrTest;
-    EXPECT_DOUBLE_EQ( 0.0, defaultConstrTest.mTime );
-
-    aiQuaternion q;
-    aiQuatKey constrWithValuesTest( 1.0, q );
-    EXPECT_DOUBLE_EQ( 1.0, constrWithValuesTest.mTime );
-    EXPECT_EQ( q, constrWithValuesTest.mValue );
-}
-
-TEST_F( utAnim, aiNodeAnimTest ) {
-    bool ok( true );
-    try {
-        aiNodeAnim myAnim;
-        EXPECT_EQ( aiAnimBehaviour_DEFAULT, myAnim.mPreState );
-        EXPECT_EQ( aiAnimBehaviour_DEFAULT, myAnim.mPostState );
-    } catch ( ... ) {
-        ok = false;
+    isSupported = CPUSupportsSSE2();
+    if ( isSupported ) {
+        std::cout << "Supported" << std::endl;
+    } else {
+        std::cout << "Not supported" << std::endl;
     }
-    EXPECT_TRUE( ok );
-}
-
-TEST_F( utAnim, aiMeshAnimTest ) {
-    bool ok( true );
-    try {
-        aiMeshAnim myMeshAnim;
-    } catch ( ... ) {
-        ok = false;
-    }
-    EXPECT_TRUE( ok );
-}
-
-TEST_F( utAnim, aiAnimationTest ) {
-    bool ok( true );
-    try {
-        aiAnimation myAnimation;
-    } catch ( ... ) {
-        ok = false;
-    }
-    EXPECT_TRUE( ok );
 }

@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+/// @brief  Checks if the platform supports SSE2 optimization
+/// @return true, if SSE2 is supported. false if SSE2 is not supported.
 bool ASSIMP_API CPUSupportsSSE2();
 
 } // Namespace Assimp

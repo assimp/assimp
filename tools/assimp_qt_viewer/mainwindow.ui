@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>641</width>
-    <height>734</height>
+    <height>778</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -501,6 +501,23 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="cbxDrawAxes">
+            <property name="text">
+             <string>Show Axes</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="cbxReloadTextures">
+            <property name="text">
+             <string>Live Reload Textures</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </widget>
@@ -513,4 +530,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
+ <slots>
+  <signal>installEventFilter()</signal>
+ </slots>
 </ui>

@@ -190,7 +190,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         float tx = meshTex[p2].x - meshTex[p0].x, ty = meshTex[p2].y - meshTex[p0].y;
         float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
         // when t1, t2, t3 in same position in UV space, just use default UV direction.
-        if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ) {
+        if (  sx * ty == sy * tx ) {
             sx = 0.0; sy = 1.0;
             tx = 1.0; ty = 0.0;
         }

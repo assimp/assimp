@@ -90,7 +90,7 @@ protected:
 	/// \param [in] pEvent - pointer to event data.
 	void keyPressEvent(QKeyEvent* pEvent) override;
 
-
+	bool event(QEvent*);
 public:
 
 	/********************************************************************/
@@ -133,4 +133,6 @@ private slots:
 	void on_lstCamera_clicked(const QModelIndex &index);
 	void on_cbxBBox_clicked(bool checked);
 	void on_cbxTextures_clicked(bool checked);
+	void on_cbxDrawAxes_clicked(bool checked);
+	void on_cbxReloadTextures_clicked(bool checked);
 };

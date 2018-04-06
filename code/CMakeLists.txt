@@ -186,6 +186,8 @@ SET( Common_SRCS
   Bitmap.cpp
   Version.cpp
   CreateAnimMesh.cpp
+  simd.h
+  simd.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

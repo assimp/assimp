@@ -47,11 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #include "COBLoader.h"
 #include "COBScene.h"
-
+#include "ConvertToLHProcess.h"
 #include <assimp/StreamReader.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
-
 #include <assimp/LineSplitter.h>
 #include <assimp/TinyFormatter.h>
 #include <memory>
@@ -105,7 +104,7 @@ COBImporter::~COBImporter()
 bool COBImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string& extension = GetExtension(pFile);
-    if (extension == "cob" || extension == "scn") {
+    if (extension == "cob" || extension == "scn" || extension == "COB" || extension == "SCN") {
         return true;
     }
 
@@ -225,6 +224,9 @@ void COBImporter::InternReadFile( const std::string& pFile,
     }
 
     pScene->mRootNode = BuildNodes(*root.get(),scene,pScene);
+	//flip normals after import
+    FlipWindingOrderProcess flip;
+    flip.Execute( pScene );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1299,3 +1301,4 @@ void COBImporter::ReadUnit_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
 
 #endif
+

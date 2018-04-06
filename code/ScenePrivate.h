@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SCENEPRIVATE_H_INCLUDED
 #define AI_SCENEPRIVATE_H_INCLUDED
 
+#include <assimp/ai_assert.h>
 #include <assimp/scene.h>
 
 namespace Assimp {

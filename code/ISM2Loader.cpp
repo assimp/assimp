@@ -57,8 +57,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 #include <vector>
-#include <string>
-#include <iostream>
 #include "ISM2Loader.h"
 #include "ISM2FileData.h"
 
@@ -92,7 +90,10 @@ bool ISM2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
 {
     const std::string extension = GetExtension(pFile);
 
-    if (extension == "ism2" || !extension.length() || checkSig) {
+    if (extension == "ism2")
+        return true;
+
+    if (!extension.length() && checkSig) {
         uint32_t token = AI_MAKE_MAGIC(AI_ISM2_MAGIC);
 
         if (CheckMagicToken(pIOHandler, pFile, &token, 0, 4))

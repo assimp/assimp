@@ -204,6 +204,12 @@ public:
     }
 
     // ---------------------------------------------------------------------
+    /** Write a single character to the stream */
+    void PutChar(char c)    {
+        Put(c);
+    }
+
+    // ---------------------------------------------------------------------
     /** Write an aiString to the stream */
     void PutString(const aiString& s)
     {
@@ -248,8 +254,6 @@ public:
     void SetCurrentPos(std::size_t new_cursor) {
         cursor = new_cursor;
     }
-
-private:
 
     // ---------------------------------------------------------------------
     /** Generic write method. ByteSwap::Swap(T*) *must* be defined */

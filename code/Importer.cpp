@@ -147,10 +147,7 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)    {
 // ------------------------------------------------------------------------------------------------
 // Importer constructor.
 Importer::Importer()
- : pimpl( NULL ) {
-    // allocate the pimpl first
-    pimpl = new ImporterPimpl();
-
+ : pimpl( new ImporterPimpl ) {
     pimpl->mScene = NULL;
     pimpl->mErrorString = "";
 

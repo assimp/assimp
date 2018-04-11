@@ -439,8 +439,14 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent) {
     const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
 
+    aiMesh *cm( nullptr );
     for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
-        AddMesh(nd->mName, pScene->mMeshes[nd->mMeshes[i]], mAbs);
+        cm = pScene->mMeshes[nd->mMeshes[i]];
+        if (nullptr != cm) {
+            AddMesh(cm->mName, pScene->mMeshes[nd->mMeshes[i]], mAbs);
+        } else {
+            AddMesh(nd->mName, pScene->mMeshes[nd->mMeshes[i]], mAbs);
+        }
     }
 
     for(unsigned int i = 0; i < nd->mNumChildren; ++i) {

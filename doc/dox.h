@@ -173,7 +173,6 @@ cmake CMakeLists.txt
 A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated. 
 Run the build and you are done. You can find the libs at assimp/lib and the dll's / so's at bin.
 
-
 @section assimp_dll Windows DLL Build
 
 The Assimp-package can be built as DLL. You just need to run the default cmake run.

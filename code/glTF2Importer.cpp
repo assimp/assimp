@@ -412,7 +412,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         aim->mBitangents[i] = (aim->mNormals[i] ^ tangents[i].xyz) * tangents[i].w;
                     }
 
-                    delete tangents;
+                    delete [] tangents;
                 }
             }
 

@@ -56,6 +56,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Dgtest_disable_pthreads=ON")
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
 SET( COMMON
+  unit/utSimd.cpp
   unit/utIOSystem.cpp
   unit/utIOStreamBuffer.cpp
   unit/utIssues.cpp

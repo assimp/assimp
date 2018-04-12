@@ -119,9 +119,18 @@ DXFImporter::~DXFImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool DXFImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
-{
-    return SimpleExtensionCheck(pFile,"dxf");
+bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const {
+    const std::string& extension = GetExtension( pFile );
+    if ( extension == "dxf" ) {
+        return true;
+    }
+
+    if ( extension.empty() || checkSig ) {
+        static const char *pTokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
+        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 4 );
+    }
+
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------

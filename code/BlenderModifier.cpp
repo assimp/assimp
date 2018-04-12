@@ -71,34 +71,6 @@ static const fpCreateModifier creators[] = {
 };
 
 // ------------------------------------------------------------------------------------------------
-// just testing out some new macros to simplify logging
-#define ASSIMP_LOG_WARN_F(string,...)\
-    DefaultLogger::get()->warn((Formatter::format(string),__VA_ARGS__))
-
-#define ASSIMP_LOG_ERROR_F(string,...)\
-    DefaultLogger::get()->error((Formatter::format(string),__VA_ARGS__))
-
-#define ASSIMP_LOG_DEBUG_F(string,...)\
-    DefaultLogger::get()->debug((Formatter::format(string),__VA_ARGS__))
-
-#define ASSIMP_LOG_INFO_F(string,...)\
-    DefaultLogger::get()->info((Formatter::format(string),__VA_ARGS__))
-
-
-#define ASSIMP_LOG_WARN(string)\
-    DefaultLogger::get()->warn(string)
-
-#define ASSIMP_LOG_ERROR(string)\
-    DefaultLogger::get()->error(string)
-
-#define ASSIMP_LOG_DEBUG(string)\
-    DefaultLogger::get()->debug(string)
-
-#define ASSIMP_LOG_INFO(string)\
-    DefaultLogger::get()->info(string)
-
-
-// ------------------------------------------------------------------------------------------------
 struct SharedModifierData : ElemBase
 {
     ModifierData modifier;

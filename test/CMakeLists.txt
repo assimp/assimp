@@ -49,7 +49,7 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DGTEST_HAS_PTHREAD=0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Dgtest_disable_pthreads=ON")
 
 # Add the temporary output directories to the library path to make sure the
 # Assimp library can be found, even if it is not installed system-wide yet.

@@ -1884,7 +1884,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "@executable_path/..";
+				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = (
@@ -2099,7 +2099,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "@executable_path/..";
+				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = "   -fPIC  ";
@@ -2284,7 +2284,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "@executable_path/..";
+				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = (
@@ -3318,7 +3318,7 @@
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
 					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
 				);
-				INSTALL_PATH = "@executable_path/..";
+				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CFLAGS = (

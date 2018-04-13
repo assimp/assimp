@@ -109,7 +109,7 @@ ASSIMP_API unsigned int aiGetCompileFlags ()    {
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API unsigned int aiGetVersionRevision ()
 {
-    return GitVersion;
+    return 0;
 }
 
 // ------------------------------------------------------------------------------------------------

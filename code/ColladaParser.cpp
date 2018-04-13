@@ -3106,7 +3106,7 @@ const char* ColladaParser::TestTextContent()
     // read contents of the element
     if( !mReader->read() )
         return NULL;
-    if( mReader->getNodeType() != irr::io::EXN_TEXT)
+    if( mReader->getNodeType() != irr::io::EXN_TEXT && mReader->getNodeType() != irr::io::EXN_CDATA)
         return NULL;
 
     // skip leading whitespace

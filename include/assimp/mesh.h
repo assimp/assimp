@@ -130,7 +130,7 @@ struct aiFace
     //! The maximum value for this member is #AI_MAX_FACE_INDICES.
     unsigned int mNumIndices;
 
-    //! Pointer to the indices array. Size of the array is given in mNumIndices.
+    //! Pointer to the indices array. Size of the array is given in numIndices.
     unsigned int* mIndices;
 
 #ifdef __cplusplus

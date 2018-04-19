@@ -396,8 +396,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 // only extract tangents if normals are present
                 if (attr.tangent.size() > 0 && attr.tangent[0]) {
                     // generate bitangents from normals and tangents according to spec
-                    struct Tangent
-                    {
+                    struct Tangent {
                         aiVector3D xyz;
                         ai_real w;
                     } *tangents = nullptr;

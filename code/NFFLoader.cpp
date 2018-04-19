@@ -125,7 +125,7 @@ const aiImporterDesc* NFFImporter::GetInfo () const
     do \
     { \
     if (!GetNextLine(buffer,line)) \
-        {DefaultLogger::get()->warn("NFF2: Unexpected EOF, can't read next token");break;} \
+        {ASSIMP_LOG_WARN("NFF2: Unexpected EOF, can't read next token");break;} \
     SkipSpaces(line,&sz); \
     } \
     while(IsLineEnd(*sz))
@@ -346,7 +346,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                         sz3 = sz;
                         while (!IsSpaceOrNewLine(*sz))++sz;
                         const unsigned int diff = (unsigned int)(sz-sz3);
-                        if (!diff)DefaultLogger::get()->warn("NFF2: Found empty mtable token");
+                        if (!diff)ASSIMP_LOG_WARN("NFF2: Found empty mtable token");
                         else
                         {
                             // The material table has the file extension .mat.
@@ -551,11 +551,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                             case 'u':
                             case 'U':
 
-                                DefaultLogger::get()->warn("Unsupported NFF2 texture attribute: trans");
+                                ASSIMP_LOG_WARN("Unsupported NFF2 texture attribute: trans");
                             };
                             if (!sz[1] || '_' != sz[2])
                             {
-                                DefaultLogger::get()->warn("NFF2: Expected underscore after texture attributes");
+                                ASSIMP_LOG_WARN("NFF2: Expected underscore after texture attributes");
                                 continue;
                             }
                             const char* sz2 = sz+3;

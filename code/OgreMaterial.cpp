@@ -186,7 +186,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
         std::unique_ptr<IOStream> stream(materialFile);
         if (stream->FileSize() == 0)
         {
-            DefaultLogger::get()->warn(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");
+            ASSIMP_LOG_WARN(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");
             return 0;
         }
 
@@ -569,12 +569,12 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 
     if (textureRef.empty())
     {
-        DefaultLogger::get()->warn("Texture reference is empty, ignoring texture_unit.");
+        ASSIMP_LOG_WARN("Texture reference is empty, ignoring texture_unit.");
         return false;
     }
     if (textureType == aiTextureType_NONE)
     {
-        DefaultLogger::get()->warn("Failed to detect texture type for '" + textureRef  + "', ignoring texture_unit.");
+        ASSIMP_LOG_WARN("Failed to detect texture type for '" + textureRef  + "', ignoring texture_unit.");
         return false;
     }
 

@@ -485,7 +485,7 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output)
         ++reader;
     }
 
-    DefaultLogger::get()->debug((Formatter::format("DXF: got "),
+    ASSIMP_LOG_DEBUG((Formatter::format("DXF: got "),
         output.blocks.size()," entries in BLOCKS"
     ));
 }
@@ -567,7 +567,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
         ++reader;
     }
 
-    DefaultLogger::get()->debug((Formatter::format("DXF: got "),
+    ASSIMP_LOG_DEBUG((Formatter::format("DXF: got "),
         block.lines.size()," polylines and ", block.insertions.size() ," inserted blocks in ENTITIES"
     ));
 }

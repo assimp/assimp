@@ -332,7 +332,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
         i = 1;
     }
     if (1 == i)
-        DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
+        ASSIMP_LOG_WARN("Simplified dummy tracks with just one key");
 }
 
 // ------------------------------------------------------------------------------------------------

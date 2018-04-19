@@ -186,7 +186,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             // mesh, otherwise this value would normally be at least minimally
             // smaller than 3.0 ...
             ai_snprintf(szBuff,128,"Mesh %u: Not suitable for vcache optimization",meshNum);
-            DefaultLogger::get()->warn(szBuff);
+            ASSIMP_LOG_WARN(szBuff);
             return 0.f;
         }
     }

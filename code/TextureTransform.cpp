@@ -331,7 +331,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
                     }
 
                     if (mesh->mNumUVComponents[info.uvIndex] >= 3){
-                        DefaultLogger::get()->warn("UV transformations on 3D mapping channels are not supported");
+                        ASSIMP_LOG_WARN("UV transformations on 3D mapping channels are not supported");
                         continue;
                     }
 

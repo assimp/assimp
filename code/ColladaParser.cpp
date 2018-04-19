@@ -2770,7 +2770,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 // Reference to a light, name given in 'url' attribute
                 int attrID = TestAttribute("url");
                 if (-1 == attrID)
-                    DefaultLogger::get()->warn("Collada: Expected url attribute in <instance_light> element");
+                    ASSIMP_LOG_WARN("Collada: Expected url attribute in <instance_light> element");
                 else
                 {
                     const char* url = mReader->getAttributeValue( attrID);
@@ -2786,7 +2786,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 // Reference to a camera, name given in 'url' attribute
                 int attrID = TestAttribute("url");
                 if (-1 == attrID)
-                    DefaultLogger::get()->warn("Collada: Expected url attribute in <instance_camera> element");
+                    ASSIMP_LOG_WARN("Collada: Expected url attribute in <instance_camera> element");
                 else
                 {
                     const char* url = mReader->getAttributeValue( attrID);
@@ -2873,7 +2873,7 @@ void ColladaParser::ReadMaterialVertexInputBinding( Collada::SemanticMappingTabl
                 tbl.mMap[s] = vn;
             }
             else if( IsElement( "bind")) {
-                DefaultLogger::get()->warn("Collada: Found unsupported <bind> element");
+                ASSIMP_LOG_WARN("Collada: Found unsupported <bind> element");
             }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)    {
@@ -2992,9 +2992,8 @@ void ColladaParser::ReportWarning(const char* msg,...)
     ai_assert(iLen > 0);
 
     va_end(args);
-    DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
+    ASSIMP_LOG_WARN_F("Validation warning: ", std::string(szBuffer,iLen));
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the current element
@@ -3190,7 +3189,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& semantic)
 {
     if ( semantic.empty() ) {
-        DefaultLogger::get()->warn( format() << "Vertex input type is empty." );
+        ASSIMP_LOG_WARN("Vertex input type is empty." );
         return IT_Invalid;
     }
 
@@ -3209,7 +3208,7 @@ Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& semanti
     else if( semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << semantic << "\". Ignoring." );
+    ASSIMP_LOG_WARN_F( "Unknown vertex input type \"", semantic, "\". Ignoring." );
     return IT_Invalid;
 }
 

@@ -346,7 +346,7 @@ void CatmullClarkSubdivider::InternSubdivide (
         ai_snprintf(tmp, 512, "Catmull-Clark Subdivider: got %u bad edges touching only one face (totally %u edges). ",
             bad_cnt,static_cast<unsigned int>(edges.size()));
 
-        DefaultLogger::get()->debug(tmp);
+        DASSIMP_LOG_DEBUG(tmp);
     }}
 
     // ---------------------------------------------------------------------
@@ -404,7 +404,7 @@ void CatmullClarkSubdivider::InternSubdivide (
                     }
                     ai_assert(haveit);
                     if (!haveit) {
-                        DefaultLogger::get()->debug("Catmull-Clark Subdivider: Index not used");
+                        ASSIMP_LOG_DEBUG("Catmull-Clark Subdivider: Index not used");
                     }
                     break;
                 }

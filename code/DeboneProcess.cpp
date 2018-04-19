@@ -209,7 +209,7 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh)
                 if(vertexBones[vid]!=cUnowned)  {
                     if(vertexBones[vid]==i) //double entry
                     {
-                        DefaultLogger::get()->warn("Encountered double entry in bone weights");
+                        ASSIMP_LOG_WARN("Encountered double entry in bone weights");
                     }
                     else //TODO: track attraction in order to break tie
                     {
@@ -281,7 +281,7 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
                 if(vertexBones[vid]!=cUnowned)  {
                     if(vertexBones[vid]==i) //double entry
                     {
-                        //DefaultLogger::get()->warn("Encountered double entry in bone weights");
+                        ASSIMP_LOG_WARN("Encountered double entry in bone weights");
                     }
                     else //TODO: track attraction in order to break tie
                     {

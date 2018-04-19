@@ -787,7 +787,7 @@ bool PLY::ElementInstance::ParseInstance(const char* &pCur,
   {
     if (!(PLY::PropertyInstance::ParseInstance(pCur, &(*a), &(*i))))
     {
-      DefaultLogger::get()->warn("Unable to parse property instance. "
+        ASSIMP_LOG_WARN("Unable to parse property instance. "
         "Skipping this element instance");
 
       PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a).eType);
@@ -819,7 +819,7 @@ bool PLY::ElementInstance::ParseInstanceBinary(
   {
     if (!(PLY::PropertyInstance::ParseInstanceBinary(streamBuffer, buffer, pCur, bufferSize, &(*a), &(*i), p_bBE)))
     {
-      DefaultLogger::get()->warn("Unable to parse binary property instance. "
+        ASSIMP_LOG_WARN("Unable to parse binary property instance. "
         "Skipping this element instance");
 
       (*i).avList.push_back(PLY::PropertyInstance::DefaultValue((*a).eType));

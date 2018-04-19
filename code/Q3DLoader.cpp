@@ -433,7 +433,7 @@ outer:
         {
             if ((*fit).mat >= materials.size())
             {
-                DefaultLogger::get()->warn("Quick3D: Material index overflow");
+                ASSIMP_LOG_WARN("Quick3D: Material index overflow");
                 (*fit).mat = 0;
             }
             if (fidx[(*fit).mat].empty())++pScene->mNumMeshes;
@@ -528,7 +528,7 @@ outer:
             {
                 if (face.indices[n] >= m.verts.size())
                 {
-                    DefaultLogger::get()->warn("Quick3D: Vertex index overflow");
+                    ASSIMP_LOG_WARN("Quick3D: Vertex index overflow");
                     face.indices[n] = 0;
                 }
 
@@ -561,7 +561,7 @@ outer:
                     {
                         if (face.uvindices[n] >= m.uv.size())
                         {
-                            DefaultLogger::get()->warn("Quick3D: Texture coordinate index overflow");
+                            ASSIMP_LOG_WARN("Quick3D: Texture coordinate index overflow");
                             face.uvindices[n] = 0;
                         }
                         *uv = m.uv[face.uvindices[n]];

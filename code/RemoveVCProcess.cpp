@@ -242,7 +242,7 @@ void RemoveVCProcess::SetupProperties(const Importer* pImp)
     configDeleteFlags = pImp->GetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,0x0);
     if (!configDeleteFlags)
     {
-        DefaultLogger::get()->warn("RemoveVCProcess: AI_CONFIG_PP_RVC_FLAGS is zero.");
+        ASSIMP_LOG_WARN("RemoveVCProcess: AI_CONFIG_PP_RVC_FLAGS is zero.");
     }
 }
 

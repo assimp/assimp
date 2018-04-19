@@ -141,7 +141,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         DefaultLogger::get()->info("NDO file format is 1.2");
     }
     else {
-        DefaultLogger::get()->warn(std::string("Unrecognized nendo file format version, continuing happily ... :") + (head+6));
+        ASSIMP_LOG_WARN(std::string("Unrecognized nendo file format version, continuing happily ... :") + (head+6));
     }
 
     reader.IncPtr(2); /* skip flags */

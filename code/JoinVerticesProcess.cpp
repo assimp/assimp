@@ -409,7 +409,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             }
 
             --a;
-            DefaultLogger::get()->warn("Removing bone -> no weights remaining");
+            ASSIMP_LOG_WARN("Removing bone -> no weights remaining");
         }
     }
     return pMesh->mNumVertices;

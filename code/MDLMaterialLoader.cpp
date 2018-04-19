@@ -531,7 +531,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         // ***** REFERENCE TO EXTERNAL FILE *****
         if (1 != iHeight)
         {
-            DefaultLogger::get()->warn("Found a reference to an external texture, "
+            ASSIMP_LOG_WARN("Found a reference to an external texture, "
                 "but texture height is not equal to 1, which is not supported by MED");
         }
 
@@ -552,7 +552,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         pcNew.reset(new aiTexture());
         if (!iHeight || !iWidth)
         {
-            DefaultLogger::get()->warn("Found embedded texture, but its width "
+            ASSIMP_LOG_WARN("Found embedded texture, but its width "
                 "an height are both 0. Is this a joke?");
 
             // generate an empty chess pattern

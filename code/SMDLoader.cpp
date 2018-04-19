@@ -182,7 +182,7 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         {
             if (!(*i).mName.length())
             {
-                DefaultLogger::get()->warn("SMD: Not all bones have been initialized");
+                ASSIMP_LOG_WARN("SMD: Not all bones have been initialized");
                 break;
             }
         }
@@ -230,7 +230,7 @@ void SMDImporter::LogWarning(const char* msg)
     char szTemp[1024];
     ai_assert(strlen(msg) < 1000);
     ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,msg);
-    DefaultLogger::get()->warn(szTemp);
+    ASSIMP_LOG_WARN(szTemp);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -715,7 +715,7 @@ void SMDImporter::ParseFile()
             if(!SkipSpaces(szCurrent,&szCurrent)) break;
             if (1 != strtoul10(szCurrent,&szCurrent))
             {
-                DefaultLogger::get()->warn("SMD.version is not 1. This "
+                ASSIMP_LOG_WARN("SMD.version is not 1. This "
                     "file format is not known. Continuing happily ...");
             }
             continue;

@@ -603,7 +603,7 @@ void ObjFileParser::getMaterialLib() {
 
 	// Check if directive is valid.
     if ( 0 == strMatName.length() ) {
-        DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+        ASSIMP_LOG_WARN( "OBJ: no name for material library specified." );
         return;
     }
 
@@ -660,7 +660,7 @@ void ObjFileParser::getNewMaterial() {
     std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
     if ( it == m_pModel->m_MaterialMap.end() ) {
         // Show a warning, if material was not found
-        DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
+        ASSIMP_LOG_WARN("OBJ: Unsupported material requested: " + strMat);
         m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
     } else {
         // Set new material

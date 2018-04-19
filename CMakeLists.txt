@@ -457,7 +457,7 @@ INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${ASSIMP_LIB_INSTAL
 
 IF(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
   # Packing information
-  SET(CPACK_PACKAGE_NAME                    "assimp{ASSIMP_VERSION_MAJOR}")
+  SET(CPACK_PACKAGE_NAME                    "assimp{ASSIMP_VERSION_MAJOR}.{ASSIMP_VERSION_MINOR}")
   SET(CPACK_PACKAGE_CONTACT "" CACHE STRING "Package maintainer and PGP signer.")
   SET(CPACK_PACKAGE_VENDOR                  "https://github.com/assimp")
   SET(CPACK_PACKAGE_DISPLAY_NAME            "Assimp ${ASSIMP_VERSION}")
@@ -487,8 +487,8 @@ IF(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
   SET(CPACK_DEBIAN_PACKAGE_SECTION  "libs" )
   SET(CPACK_DEBIAN_PACKAGE_DEPENDS  "${CPACK_COMPONENTS_ALL}")
   SET(CPACK_DEBIAN_PACKAGE_SUGGESTS)
-  SET(CPACK_DEBIAN_PACKAGE_NAME     "assimp")
-  SET(CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES contrib/cppunit-1.12.1 contrib/cppunit_note.txt contrib/zlib workspaces test doc obj samples packaging)
+  set(cPACK_DEBIAN_PACKAGE_NAME     "assimp")
+  SET(CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES contrib/gtest contrib/zlib workspaces test doc obj samples packaging)
   SET(CPACK_DEBIAN_PACKAGE_SOURCE_COPY svn export --force)
   SET(CPACK_DEBIAN_CHANGELOG)
   execute_process(COMMAND lsb_release -is

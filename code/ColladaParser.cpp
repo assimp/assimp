@@ -152,22 +152,22 @@ void ColladaParser::ReadContents()
 
                     if (!::strncmp(version,"1.5",3)) {
                         mFormat =  FV_1_5_n;
-                        DefaultLogger::get()->debug("Collada schema version is 1.5.n");
+                        ASSIMP_LOG_DEBUG("Collada schema version is 1.5.n");
                     }
                     else if (!::strncmp(version,"1.4",3)) {
                         mFormat =  FV_1_4_n;
-                        DefaultLogger::get()->debug("Collada schema version is 1.4.n");
+                        ASSIMP_LOG_DEBUG("Collada schema version is 1.4.n");
                     }
                     else if (!::strncmp(version,"1.3",3)) {
                         mFormat =  FV_1_3_n;
-                        DefaultLogger::get()->debug("Collada schema version is 1.3.n");
+                        ASSIMP_LOG_DEBUG("Collada schema version is 1.3.n");
                     }
                 }
 
                 ReadStructure();
             } else
             {
-                DefaultLogger::get()->debug( format() << "Ignoring global element <" << mReader->getNodeName() << ">." );
+                ASSIMP_LOG_DEBUG_F( "Ignoring global element <", mReader->getNodeName(), ">." );
                 SkipElement();
             }
         } else
@@ -984,13 +984,13 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
                     // they're not skipped.
                     int attrib = TestAttribute("array_index");
                     if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
-                        DefaultLogger::get()->warn("Collada: Ignoring texture array index");
+                        ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
                         continue;
                     }
 
                     attrib = TestAttribute("mip_index");
                     if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
-                        DefaultLogger::get()->warn("Collada: Ignoring MIP map layer");
+                        ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
                         continue;
                     }
 
@@ -1011,7 +1011,7 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
                     // embedded image. get format
                     const int attrib = TestAttribute("format");
                     if (-1 == attrib)
-                        DefaultLogger::get()->warn("Collada: Unknown image file format");
+                        ASSIMP_LOG_WARN("Collada: Unknown image file format");
                     else pImage.mEmbeddedFormat = mReader->getAttributeValue(attrib);
 
                     const char* data = GetTextContent();
@@ -1590,7 +1590,7 @@ void ColladaParser::ReadSamplerProperties( Sampler& out )
                     out.mOp = aiTextureOp_Multiply;
 
                 else  {
-                    DefaultLogger::get()->warn("Collada: Unsupported MAYA texture blend mode");
+                    ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
                 }
                 TestClosing( "blend_mode");
             }
@@ -2541,7 +2541,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mPositions.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex position stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
             break;
         case IT_Normal:
             // pad to current vertex count if necessary
@@ -2552,7 +2552,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mNormals.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex normal stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
             break;
         case IT_Tangent:
             // pad to current vertex count if necessary
@@ -2563,7 +2563,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mTangents.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex tangent stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
             break;
         case IT_Bitangent:
             // pad to current vertex count if necessary
@@ -2574,7 +2574,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mBitangents.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex bitangent stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
             break;
         case IT_Texcoord:
             // up to 4 texture coord sets are fine, ignore the others
@@ -2590,7 +2590,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
                     pMesh->mNumUVComponents[pInput.mIndex]=3;
             }   else
             {
-                DefaultLogger::get()->error("Collada: too many texture coordinate sets. Skipping.");
+                ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
             }
             break;
         case IT_Color:
@@ -2610,7 +2610,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
                 pMesh->mColors[pInput.mIndex].push_back(result);
             } else
             {
-                DefaultLogger::get()->error("Collada: too many vertex color sets. Skipping.");
+                ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
             }
 
             break;
@@ -2739,7 +2739,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 {
                     const char* s = mReader->getAttributeValue(attrId);
                     if (s[0] != '#')
-                        DefaultLogger::get()->error("Collada: Unresolved reference format of camera");
+                        ASSIMP_LOG_ERROR("Collada: Unresolved reference format of camera");
                     else
                         pNode->mPrimaryCamera = s+1;
                 }
@@ -2752,7 +2752,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 {
                     const char* s = mReader->getAttributeValue(attrID);
                     if (s[0] != '#')
-                        DefaultLogger::get()->error("Collada: Unresolved reference format of node");
+                        ASSIMP_LOG_ERROR("Collada: Unresolved reference format of node");
                     else
                     {
                         pNode->mNodeInstances.push_back(NodeInstance());

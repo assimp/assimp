@@ -396,7 +396,7 @@ private:
                 return false;
             }
         }
-        DefaultLogger::get()->error("unexpected EOF, expected closing <" + closeTag + "> tag");
+        ASSIMP_LOG_ERROR("unexpected EOF, expected closing <" + closeTag + "> tag");
 
         return false;
     }

@@ -150,7 +150,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
         ThrowException("Could not found magic id: `Caligari`");
     }
 
-    DefaultLogger::get()->info("File format tag: "+std::string(head+9,6));
+    ASSIMP_LOG_INFO_F("File format tag: ",std::string(head+9,6));
     if (head[16]!='L') {
         ThrowException("File is big-endian, which is not supported");
     }
@@ -303,7 +303,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
                     }
                     std::unique_ptr<const Material> defmat;
                     if(!min) {
-                        DefaultLogger::get()->debug(format()<<"Could not resolve material index "
+                        ASSIMP_LOG_DEBUG(format()<<"Could not resolve material index "
                             <<reflist.first<<" - creating default material for this slot");
 
                         defmat.reset(min=new Material());
@@ -475,7 +475,7 @@ void COBImporter::UnsupportedChunk_Ascii(LineSplitter& splitter, const ChunkInfo
 
     // we can recover if the chunk size was specified.
     if(nfo.size != static_cast<unsigned int>(-1)) {
-        DefaultLogger::get()->error(error);
+        ASSIMP_LOG_ERROR(error);
 
         // (HACK) - our current position in the stream is the beginning of the
         // head line of the next chunk. That's fine, but the caller is going
@@ -935,7 +935,7 @@ void COBImporter::UnsupportedChunk_Binary( StreamReaderLE& reader, const ChunkIn
 
     // we can recover if the chunk size was specified.
     if(nfo.size != static_cast<unsigned int>(-1)) {
-        DefaultLogger::get()->error(error);
+        ASSIMP_LOG_ERROR(error);
         reader.IncPtr(nfo.size);
     }
     else ThrowException(error);

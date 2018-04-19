@@ -368,11 +368,11 @@ bool Importer::IsDefaultProgressHandler() const
 bool _ValidateFlags(unsigned int pFlags)
 {
     if (pFlags & aiProcess_GenSmoothNormals && pFlags & aiProcess_GenNormals)   {
-        DefaultLogger::get()->error("#aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible");
+        ASSIMP_LOG_ERROR("#aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible");
         return false;
     }
     if (pFlags & aiProcess_OptimizeGraph && pFlags & aiProcess_PreTransformVertices)    {
-        DefaultLogger::get()->error("#aiProcess_OptimizeGraph and #aiProcess_PreTransformVertices are incompatible");
+        ASSIMP_LOG_ERROR("#aiProcess_OptimizeGraph and #aiProcess_PreTransformVertices are incompatible");
         return false;
     }
     return true;
@@ -594,7 +594,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         if( !pimpl->mIOHandler->Exists( pFile)) {
 
             pimpl->mErrorString = "Unable to open file \"" + pFile + "\".";
-            DefaultLogger::get()->error(pimpl->mErrorString);
+            ASSIMP_LOG_ERROR(pimpl->mErrorString);
             return NULL;
         }
 
@@ -628,7 +628,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             // Put a proper error message if no suitable importer was found
             if( !imp)   {
                 pimpl->mErrorString = "No suitable reader found for the file format of file \"" + pFile + "\".";
-                DefaultLogger::get()->error(pimpl->mErrorString);
+                ASSIMP_LOG_ERROR(pimpl->mErrorString);
                 return NULL;
             }
         }
@@ -716,7 +716,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         pimpl->mErrorString = std::string("std::exception: ") + e.what();
 #endif
 
-        DefaultLogger::get()->error(pimpl->mErrorString);
+        ASSIMP_LOG_ERROR(pimpl->mErrorString);
         delete pimpl->mScene; pimpl->mScene = NULL;
     }
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
@@ -762,7 +762,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     if (pimpl->bExtraVerbose)
     {
 #ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
-        DefaultLogger::get()->error("Verbose Import is not available due to build settings");
+        ASSIMP_LOG_ERROR("Verbose Import is not available due to build settings");
 #endif  // no validation
         pFlags |= aiProcess_ValidateDataStructure;
     }
@@ -800,18 +800,19 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 
         // If the extra verbose mode is active, execute the ValidateDataStructureStep again - after each step
         if (pimpl->bExtraVerbose)   {
-            DefaultLogger::get()->debug("Verbose Import: revalidating data structures");
+            DefaultLogger::get()->debug("Verbose Import: re-validating data structures");
 
             ValidateDSProcess ds;
             ds.ExecuteOnScene (this);
             if( !pimpl->mScene) {
-                DefaultLogger::get()->error("Verbose Import: failed to revalidate data structures");
+                ASSIMP_LOG_ERROR("Verbose Import: failed to re-validate data structures");
                 break;
             }
         }
 #endif // ! DEBUG
     }
-    pimpl->mProgressHandler->UpdatePostProcess( static_cast<int>(pimpl->mPostProcessingSteps.size()), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
+    pimpl->mProgressHandler->UpdatePostProcess( static_cast<int>(pimpl->mPostProcessingSteps.size()), 
+        static_cast<int>(pimpl->mPostProcessingSteps.size()) );
 
     // update private scene flags
     if( pimpl->mScene )
@@ -858,7 +859,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     if ( pimpl->bExtraVerbose )
     {
 #ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
-        DefaultLogger::get()->error( "Verbose Import is not available due to build settings" );
+        ASSIMP_LOG_ERROR( "Verbose Import is not available due to build settings" );
 #endif  // no validation
     }
 #else
@@ -886,7 +887,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
         ValidateDSProcess ds;
         ds.ExecuteOnScene( this );
         if ( !pimpl->mScene ) {
-            DefaultLogger::get()->error( "Verbose Import: failed to revalidate data structures" );
+            ASSIMP_LOG_ERROR( "Verbose Import: failed to revalidate data structures" );
         }
     }
 

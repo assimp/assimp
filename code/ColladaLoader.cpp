@@ -294,7 +294,7 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
             nd = FindNode(pParser.mRootNode, nodeInst.mNode);
         }
         if (!nd)
-            DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + nodeInst.mNode);
+            ASSIMP_LOG_ERROR_F("Collada: Unable to resolve reference to instanced node ", nodeInst.mNode);
 
         else {
             //  attach this node to the list of children
@@ -311,7 +311,7 @@ void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler& sampler
     std::map<std::string, Collada::InputSemanticMapEntry>::const_iterator it = table.mMap.find(sampler.mUVChannel);
     if (it != table.mMap.end()) {
         if (it->second.mType != Collada::IT_Texcoord)
-            DefaultLogger::get()->error("Collada: Unexpected effect input mapping");
+            ASSIMP_LOG_ERROR("Collada: Unexpected effect input mapping");
 
         sampler.mUVId = it->second.mSet;
     }
@@ -327,7 +327,7 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
         ColladaParser::LightLibrary::const_iterator srcLightIt = pParser.mLightLibrary.find( lid.mLight);
         if( srcLightIt == pParser.mLightLibrary.end())
         {
-            DefaultLogger::get()->warn("Collada: Unable to find light for ID \"" + lid.mLight + "\". Skipping.");
+            ASSIMP_LOG_WARN_F("Collada: Unable to find light for ID \"" , lid.mLight , "\". Skipping.");
             continue;
         }
         const Collada::Light* srcLight = &srcLightIt->second;
@@ -395,14 +395,14 @@ void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Col
         ColladaParser::CameraLibrary::const_iterator srcCameraIt = pParser.mCameraLibrary.find( cid.mCamera);
         if( srcCameraIt == pParser.mCameraLibrary.end())
         {
-            DefaultLogger::get()->warn("Collada: Unable to find camera for ID \"" + cid.mCamera + "\". Skipping.");
+            ASSIMP_LOG_WARN_F("Collada: Unable to find camera for ID \"" , cid.mCamera , "\". Skipping.");
             continue;
         }
         const Collada::Camera* srcCamera = &srcCameraIt->second;
 
         // orthographic cameras not yet supported in Assimp
         if (srcCamera->mOrtho) {
-            DefaultLogger::get()->warn("Collada: Orthographic cameras are not supported.");
+            ASSIMP_LOG_WARN("Collada: Orthographic cameras are not supported.");
         }
 
         // now fill our ai data structure
@@ -472,7 +472,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
             if( !srcMesh)
             {
-                DefaultLogger::get()->warn( format() << "Collada: Unable to find geometry for ID \"" << mid.mMeshOrController << "\". Skipping." );
+                ASSIMP_LOG_WARN( "Collada: Unable to find geometry for ID \"", mid.mMeshOrController, "\". Skipping." );
                 continue;
             }
         } else
@@ -501,7 +501,8 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
             }
             else
             {
-                DefaultLogger::get()->warn( format() << "Collada: No material specified for subgroup <" << submesh.mMaterial << "> in geometry <" << mid.mMeshOrController << ">." );
+                ASSIMP_LOG_WARN_F( "Collada: No material specified for subgroup <", submesh.mMaterial, "> in geometry <",
+                    mid.mMeshOrController, ">." );
                 if( !mid.mMaterials.empty() )
                     meshMaterial = mid.mMaterials.begin()->second.mMatName;
             }
@@ -874,7 +875,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
             if( bnode)
                 bone->mName.Set( FindNameForNode( bnode));
             else
-                DefaultLogger::get()->warn( format() << "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"" << bone->mName.data << "\"." );
+                ASSIMP_LOG_WARN( "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"", bone->mName.data, "\"." );
 
             // and insert bone
             dstMesh->mBones[boneCount++] = bone;
@@ -1175,7 +1176,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                 else if( subElement == "Z")
                     entry.mSubElement = 2;
                 else
-                    DefaultLogger::get()->warn( format() << "Unknown anim subelement <" << subElement << ">. Ignoring" );
+                    ASSIMP_LOG_WARN( "Unknown anim subelement <", subElement, ">. Ignoring" );
             } else
             {
                 // no subelement following, transformId is remaining string
@@ -1406,7 +1407,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
               anims.push_back( dstAnim);
         } else
         {
-          DefaultLogger::get()->warn( "Collada loader: found empty animation channel, ignored. Please check your exporter.");
+            ASSIMP_LOG_WARN( "Collada loader: found empty animation channel, ignored. Please check your exporter.");
         }
 
         if( !entries.empty() && entries.front().mTimeAccessor->mCount > 0 )
@@ -1561,7 +1562,7 @@ void ColladaLoader::AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
             }
         }
         if (-1 == map) {
-            DefaultLogger::get()->warn("Collada: unable to determine UV channel for texture");
+            ASSIMP_LOG_WARN("Collada: unable to determine UV channel for texture");
             map = 0;
         }
     }
@@ -1598,7 +1599,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
                 break;
 
             default:
-                DefaultLogger::get()->warn("Collada: Unrecognized shading mode, using gouraud shading");
+                ASSIMP_LOG_WARN("Collada: Unrecognized shading mode, using gouraud shading");
                 shadeMode = aiShadingMode_Gouraud;
                 break;
             }
@@ -1752,11 +1753,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
     ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
     if( imIt == pParser.mImageLibrary.end())
     {
-        //missing texture should not stop the conversion
-        //throw DeadlyImportError( format() <<
-        //    "Collada: Unable to resolve effect texture entry \"" << pName << "\", ended up at ID \"" << name << "\"." );
-
-        DefaultLogger::get()->warn("Collada: Unable to resolve effect texture entry \"" + pName + "\", ended up at ID \"" + name + "\".");
+        ASSIMP_LOG_WARN_F("Collada: Unable to resolve effect texture entry \"", pName, "\", ended up at ID \"", name, "\".");
 
         //set default texture file name
         result.Set(name + ".jpg");
@@ -1775,7 +1772,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
 
         // setup format hint
         if (imIt->second.mEmbeddedFormat.length() > 3) {
-            DefaultLogger::get()->warn("Collada: texture format hint is too long, truncating to 3 characters");
+            ASSIMP_LOG_WARN("Collada: texture format hint is too long, truncating to 3 characters");
         }
         strncpy(tex->achFormatHint,imIt->second.mEmbeddedFormat.c_str(),3);
 

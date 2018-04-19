@@ -212,7 +212,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
         ++reader;
     }
     if (!eof) {
-        DefaultLogger::get()->warn("DXF: EOF reached, but did not encounter DXF EOF marker");
+        ASSIMP_LOG_WARN("DXF: EOF reached, but did not encounter DXF EOF marker");
     }
 
     ConvertMeshes(pScene,output);
@@ -229,7 +229,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 {
     // the process of resolving all the INSERT statements can grow the
-    // polycount excessively, so log the original number.
+    // poly-count excessively, so log the original number.
     // XXX Option to import blocks as separate nodes?
     if (!DefaultLogger::isNullLogger()) {
 
@@ -241,16 +241,14 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
             }
         }
 
-        DefaultLogger::get()->debug((Formatter::format("DXF: Unexpanded polycount is "),
-            icount,", vertex count is ",vcount
-        ));
+        ASSIMP_LOG_DEBUG("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
     }
 
     if (! output.blocks.size()  ) {
         throw DeadlyImportError("DXF: no data blocks loaded");
     }
 
-    DXF::Block* entities = 0;
+    DXF::Block* entities( nullptr );
 
     // index blocks by name
     DXF::BlockMap blocks_by_name;
@@ -375,9 +373,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // first check if the referenced blocks exists ...
         const DXF::BlockMap::const_iterator it = blocks_by_name.find(insert.name);
         if (it == blocks_by_name.end()) {
-            DefaultLogger::get()->error((Formatter::format("DXF: Failed to resolve block reference: "),
-                insert.name,"; skipping"
-            ));
+            ASSIMP_LOG_ERROR("DXF: Failed to resolve block reference: ", insert.name,"; skipping" );
             continue;
         }
 

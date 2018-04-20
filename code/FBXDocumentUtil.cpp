@@ -79,7 +79,7 @@ void DOMError(const std::string& message, const Element* element /*= NULL*/)
 void DOMWarning(const std::string& message, const Token& token)
 {
     if(DefaultLogger::get()) {
-        DefaultLogger::get()->warn(Util::AddTokenText("FBX-DOM",message,&token));
+        ASSIMP_LOG_WARN(Util::AddTokenText("FBX-DOM",message,&token));
     }
 }
 

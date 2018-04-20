@@ -1124,7 +1124,7 @@ void FBXExporter::WriteObjects ()
                 err << " has " << m->mNumUVComponents[uvi];
                 err << " components! Data will be preserved,";
                 err << " but may be incorrectly interpreted on load.";
-                DefaultLogger::get()->warn(err.str());
+                ASSIMP_LOG_WARN(err.str());
             }
             FBX::Node uv("LayerElementUV", int32_t(uvi));
             uv.Begin(outstream, binary, indent);
@@ -1449,7 +1449,7 @@ void FBXExporter::WriteObjects ()
                 err << "Multilayer textures not supported (for now),";
                 err << " skipping texture type " << j;
                 err << " of material " << i;
-                DefaultLogger::get()->warn(err.str());
+                ASSIMP_LOG_WARN(err.str());
             }
 
             // get image path for this (single-image) texture
@@ -1484,7 +1484,7 @@ void FBXExporter::WriteObjects ()
                 err << "Not sure how to handle texture of type " << j;
                 err << " on material " << i;
                 err << ", skipping...";
-                DefaultLogger::get()->warn(err.str());
+                ASSIMP_LOG_WARN(err.str());
                 continue;
             }
             const std::string& prop_name = elem2->second;

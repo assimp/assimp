@@ -107,7 +107,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 {
     char szBuffer[1024];
     ::sprintf(szBuffer,"[MD5] Line %u: %s",line,warn);
-    DefaultLogger::get()->warn(szBuffer);
+    ASSIMP_LOG_WARN(szBuffer);
 }
 
 // ------------------------------------------------------------------------------------------------

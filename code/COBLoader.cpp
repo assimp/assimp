@@ -509,22 +509,22 @@ void COBImporter::LogDebug_Ascii(const LineSplitter& splitter, const format& mes
 
 // ------------------------------------------------------------------------------------------------
 void COBImporter::LogWarn_Ascii(const Formatter::format& message)   {
-    DefaultLogger::get()->warn(std::string("COB: ")+=message);
+    ASSIMP_LOG_WARN_F( "COB: ", message );
 }
 
 // ------------------------------------------------------------------------------------------------
 void COBImporter::LogError_Ascii(const Formatter::format& message)  {
-    DefaultLogger::get()->error(std::string("COB: ")+=message);
+    ASSIMP_LOG_ERROR_F( "COB: ", message);
 }
 
 // ------------------------------------------------------------------------------------------------
 void COBImporter::LogInfo_Ascii(const Formatter::format& message)   {
-    DefaultLogger::get()->info(std::string("COB: ")+=message);
+    ASSIMP_LOG_INFO_F("COB: ", message);
 }
 
 // ------------------------------------------------------------------------------------------------
 void COBImporter::LogDebug_Ascii(const Formatter::format& message)  {
-    DefaultLogger::get()->debug(std::string("COB: ")+=message);
+    ASSIMP_LOG_DEBUG_F("COB: ", message);
 }
 
 // ------------------------------------------------------------------------------------------------

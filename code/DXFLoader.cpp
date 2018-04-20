@@ -200,7 +200,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 
         // comments
         else if (reader.Is(999)) {
-            DefaultLogger::get()->info("DXF Comment: " + reader.Value());
+            ASSIMP_LOG_INFO_F("DXF Comment: ", reader.Value());
         }
 
         // don't read past the official EOF sign
@@ -393,7 +393,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
 
                 // XXX rotation currently ignored - I didn't find an appropriate sample model.
                 if (insert.angle != 0.f) {
-                    DefaultLogger::get()->warn("DXF: BLOCK rotation not currently implemented");
+                    ASSIMP_LOG_WARN("DXF: BLOCK rotation not currently implemented");
                 }
 
                 for (aiVector3D& v : pl_out->positions) {
@@ -523,7 +523,7 @@ void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output)
 
         // XXX is this a valid case?
         if (reader.Is(0,"INSERT")) {
-            DefaultLogger::get()->warn("DXF: INSERT within a BLOCK not currently supported; skipping");
+            ASSIMP_LOG_WARN("DXF: INSERT within a BLOCK not currently supported; skipping");
             for( ;!reader.End() && !reader.Is(0,"ENDBLK"); ++reader);
             break;
         }
@@ -678,16 +678,15 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
     //}
 
     if (vguess && line.positions.size() != vguess) {
-        DefaultLogger::get()->warn((Formatter::format("DXF: unexpected vertex count in polymesh: "),
-            line.positions.size(),", expected ", vguess
-        ));
+        ASSIMP_LOG_WARN_F("DXF: unexpected vertex count in polymesh: ",
+            line.positions.size(),", expected ", vguess );
     }
 
     if (line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH ) {
         if (line.positions.size() < 3 || line.indices.size() < 3)   {
-                DefaultLogger::get()->warn("DXF: not enough vertices for polymesh; ignoring");
-                output.blocks.back().lines.pop_back();
-                return;
+            ASSIMP_LOG_WARN("DXF: not enough vertices for polymesh; ignoring");
+            output.blocks.back().lines.pop_back();
+            return;
         }
 
         // if these numbers are wrong, parsing might have gone wild.
@@ -695,13 +694,11 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
         // to set the 71 and 72 fields, respectively, to valid values.
         // So just fire a warning.
         if (iguess && line.counts.size() != iguess) {
-            DefaultLogger::get()->warn((Formatter::format("DXF: unexpected face count in polymesh: "),
-                line.counts.size(),", expected ", iguess
-            ));
+            ASSIMP_LOG_WARN_F( "DXF: unexpected face count in polymesh: ", line.counts.size(),", expected ", iguess );
         }
     }
     else if (!line.indices.size() && !line.counts.size()) {
-        // a polyline - so there are no indices yet.
+        // a poly-line - so there are no indices yet.
         size_t guess = line.positions.size() + (line.flags & DXF_POLYLINE_FLAG_CLOSED ? 1 : 0);
         line.indices.reserve(guess);
 
@@ -743,10 +740,10 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
         {
         case 8:
                 // layer to which the vertex belongs to - assume that
-                // this is always the layer the top-level polyline
+                // this is always the layer the top-level poly-line
                 // entity resides on as well.
                 if(reader.Value() != line.layer) {
-                    DefaultLogger::get()->warn("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
+                    ASSIMP_LOG_WARN("DXF: expected vertex to be part of a poly-face but the 0x128 flag isn't set");
                 }
                 break;
 
@@ -765,7 +762,7 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
         case 73:
         case 74:
             if (cnti == 4) {
-                DefaultLogger::get()->warn("DXF: more than 4 indices per face not supported; ignoring");
+                ASSIMP_LOG_WARN("DXF: more than 4 indices per face not supported; ignoring");
                 break;
             }
             indices[cnti++] = reader.ValueAsUnsignedInt();
@@ -781,7 +778,7 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
     }
 
     if (line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH && !(flags & DXF_VERTEX_FLAG_PART_OF_POLYFACE)) {
-        DefaultLogger::get()->warn("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
+        ASSIMP_LOG_WARN("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
     }
 
     if (cnti) {
@@ -789,7 +786,7 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
         for (unsigned int i = 0; i < cnti; ++i) {
             // IMPORTANT NOTE: POLYMESH indices are ONE-BASED
             if (indices[i] == 0) {
-                DefaultLogger::get()->warn("DXF: invalid vertex index, indices are one-based.");
+                ASSIMP_LOG_WARN("DXF: invalid vertex index, indices are one-based.");
                 --line.counts.back();
                 continue;
             }
@@ -906,7 +903,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 
     // sanity checks to see if we got something meaningful
     if ((b[1] && !b[0]) || !b[2] || !b[3]) {
-        DefaultLogger::get()->warn("DXF: unexpected vertex setup in 3DFACE/LINE/FACE entity; ignoring");
+        ASSIMP_LOG_WARN("DXF: unexpected vertex setup in 3DFACE/LINE/FACE entity; ignoring");
         output.blocks.back().lines.pop_back();
         return;
     }

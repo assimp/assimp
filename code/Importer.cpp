@@ -504,62 +504,50 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 // ------------------------------------------------------------------------------------------------
 void WriteLogOpening(const std::string& file)
 {
-    Logger* l = DefaultLogger::get();
-    if (!l) {
-        return;
-    }
-    l->info("Load " + file);
+    ASSIMP_LOG_INFO_F("Load ", file);
 
     // print a full version dump. This is nice because we don't
     // need to ask the authors of incoming bug reports for
     // the library version they're using - a log dump is
     // sufficient.
     const unsigned int flags = aiGetCompileFlags();
-    l->debug(format()
-        << "Assimp "
-        << aiGetVersionMajor()
-        << "."
-        << aiGetVersionMinor()
-        << "."
-        << aiGetVersionRevision()
-
-        << " "
+    ASSIMP_LOG_DEBUG_F( "Assimp ", aiGetVersionMajor(), ".", aiGetVersionMinor(), ".", aiGetVersionRevision(), " "
 #if defined(ASSIMP_BUILD_ARCHITECTURE)
-        << ASSIMP_BUILD_ARCHITECTURE
+        ,ASSIMP_BUILD_ARCHITECTURE
 #elif defined(_M_IX86) || defined(__x86_32__) || defined(__i386__)
-        << "x86"
+        , "x86"
 #elif defined(_M_X64) || defined(__x86_64__)
-        << "amd64"
+        , "amd64"
 #elif defined(_M_IA64) || defined(__ia64__)
-        << "itanium"
+        , "itanium"
 #elif defined(__ppc__) || defined(__powerpc__)
-        << "ppc32"
+        , "ppc32"
 #elif defined(__powerpc64__)
-        << "ppc64"
+        , "ppc64"
 #elif defined(__arm__)
-        << "arm"
+        , "arm"
 #else
-    << "<unknown architecture>"
+        , "<unknown architecture>"
 #endif
 
-        << " "
+        , " "
 #if defined(ASSIMP_BUILD_COMPILER)
-        << ASSIMP_BUILD_COMPILER
+        , ASSIMP_BUILD_COMPILER
 #elif defined(_MSC_VER)
-        << "msvc"
+        , "msvc"
 #elif defined(__GNUC__)
-        << "gcc"
+        , "gcc"
 #else
-        << "<unknown compiler>"
+        , "<unknown compiler>"
 #endif
 
 #ifdef ASSIMP_BUILD_DEBUG
-        << " debug"
+        , " debug"
 #endif
 
-        << (flags & ASSIMP_CFLAGS_NOBOOST ? " noboost" : "")
-        << (flags & ASSIMP_CFLAGS_SHARED  ? " shared" : "")
-        << (flags & ASSIMP_CFLAGS_SINGLETHREADED  ? " singlethreaded" : "")
+        , (flags & ASSIMP_CFLAGS_NOBOOST ? " noboost" : "")
+        , (flags & ASSIMP_CFLAGS_SHARED  ? " shared" : "")
+        , (flags & ASSIMP_CFLAGS_SINGLETHREADED  ? " singlethreaded" : "")
         );
 }
 

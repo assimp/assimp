@@ -177,7 +177,7 @@ void CatmullClarkSubdivider::Subdivide (
         aiMesh* i = smesh[s];
         // FIX - mPrimitiveTypes might not yet be initialized
         if (i->mPrimitiveTypes && (i->mPrimitiveTypes & (aiPrimitiveType_LINE|aiPrimitiveType_POINT))==i->mPrimitiveTypes) {
-            DefaultLogger::get()->debug("Catmull-Clark Subdivider: Skipping pure line/point mesh");
+            ASSIMP_LOG_DEBUG("Catmull-Clark Subdivider: Skipping pure line/point mesh");
 
             if (discard_input) {
                 out[s] = i;
@@ -198,12 +198,12 @@ void CatmullClarkSubdivider::Subdivide (
     // checking any ranges.
     ai_assert(inmeshes.size()==outmeshes.size()&&inmeshes.size()==maptbl.size());
     if (inmeshes.empty()) {
-        DefaultLogger::get()->warn("Catmull-Clark Subdivider: Pure point/line scene, I can't do anything");
+        ASSIMP_LOG_WARN("Catmull-Clark Subdivider: Pure point/line scene, I can't do anything");
         return;
     }
     InternSubdivide(&inmeshes.front(),inmeshes.size(),&outmeshes.front(),num);
     for (unsigned int i = 0; i < maptbl.size(); ++i) {
-        ai_assert(outmeshes[i]);
+        ai_assert(nullptr != outmeshes[i]);
         out[maptbl[i]] = outmeshes[i];
     }
 
@@ -563,7 +563,7 @@ void CatmullClarkSubdivider::InternSubdivide (
                             // this invariant *must* hold if the vertex-to-face adjacency table is valid
                             ai_assert(haveit);
                             if ( !haveit ) {
-                                DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+                                ASSIMP_LOG_WARN( "OBJ: no name for material library specified." );
                             }
                         }
 

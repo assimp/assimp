@@ -837,7 +837,7 @@ void COBImporter::ReadBitM_Ascii(Scene& /*out*/, LineSplitter& splitter, const C
 
     const unsigned int head = strtoul10((++splitter)[1]);
     if (head != sizeof(Bitmap::BitmapHeader)) {
-        ASSIMP_LOG_WARN_F("Unexpected ThumbNailHdrSize, skipping this chunk");
+        ASSIMP_LOG_WARN("Unexpected ThumbNailHdrSize, skipping this chunk");
         return;
     }
 

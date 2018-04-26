@@ -752,6 +752,14 @@ void glTF2Exporter::ExportMeshes()
 			}
 		}
 
+		/*************** Vertex colors ****************/
+		for (unsigned int indexColorChannel = 0; indexColorChannel < aim->GetNumColorChannels(); ++indexColorChannel)
+		{
+			Ref<Accessor> c = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mColors[indexColorChannel], AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT, false);
+			if (c)
+				p.attributes.color.push_back(c);
+		}
+		
 		/*************** Vertices indices ****************/
 		if (aim->mNumFaces > 0) {
 			std::vector<IndicesType> indices;

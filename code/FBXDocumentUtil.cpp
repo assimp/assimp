@@ -91,7 +91,7 @@ void DOMWarning(const std::string& message, const Element* element /*= NULL*/)
         return;
     }
     if(DefaultLogger::get()) {
-        DefaultLogger::get()->warn("FBX-DOM: " + message);
+        ASSIMP_LOG_WARN("FBX-DOM: " + message);
     }
 }
 

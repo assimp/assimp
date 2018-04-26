@@ -1080,7 +1080,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
                 // we have already a VMAP entry for this vertex - thus
                 // we need to duplicate the corresponding polygon.
                 if (polyIdx >= numFaces)    {
-                    DefaultLogger::get()->warn("LWO2: Failure evaluating VMAD entry \'" + name + "\', polygon index is out of range");
+                    ASSIMP_LOG_WARN_F("LWO2: Failure evaluating VMAD entry \'", name, "\', polygon index is out of range");
                     mFileBuffer += base->dims<<2u;
                     continue;
                 }
@@ -1442,17 +1442,21 @@ void LWOImporter::LoadLWO2File()
                 if (skip)
                     break;
 
-                if (mCurLayer->mFaces.empty())
-                    DefaultLogger::get()->warn("LWO2: Unexpected PTAG");
-                else LoadLWO2PolygonTags(head.length);
+                if (mCurLayer->mFaces.empty()) {
+                    ASSIMP_LOG_WARN("LWO2: Unexpected PTAG");
+                } else {
+                    LoadLWO2PolygonTags(head.length);
+                }
                 break;
             }
             // list of tags
         case AI_LWO_TAGS:
             {
-                if (!mTags->empty())
+                if (!mTags->empty()) {
                     ASSIMP_LOG_WARN("LWO2: SRFS chunk encountered twice");
-                else LoadLWOTags(head.length);
+                }   else {
+                    LoadLWOTags(head.length);
+                }
                 break;
             }
 

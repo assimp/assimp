@@ -470,7 +470,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                 }
 
                 if (curFace != faceEnd)
-                    DefaultLogger::get()->error("IRRMESH: Not enough indices");
+                    ASSIMP_LOG_ERROR("IRRMESH: Not enough indices");
 
                 // Finish processing the mesh - do some small material workarounds
                 if (curMatFlags & AI_IRRMESH_MAT_trans_vertex_alpha && !useColors)  {

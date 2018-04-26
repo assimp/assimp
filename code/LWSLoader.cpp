@@ -684,7 +684,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
             (*it).tokens[0] == "LightMotion")) {
 
             if (nodes.empty())
-                DASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'<Light|Object|Camera>Motion\'");
+                ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'<Light|Object|Camera>Motion\'");
             else {
                 ReadEnvelope_Old(it,root.children.end(),nodes.back(),version);
             }
@@ -773,7 +773,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
         // 'LightType': set type of currently active light
         else if ((*it).tokens[0] == "LightType") {
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
-                DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightType\'");
+                ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightType\'");
 
             else nodes.back().lightType = strtoul10(c);
 

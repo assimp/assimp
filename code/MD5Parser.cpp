@@ -130,7 +130,7 @@ void MD5Parser::ParseHeader()
     // FIX: can break the log length limit, so we need to be careful
     char* sz = buffer;
     while (!IsLineEnd( *buffer++));
-    DefaultLogger::get()->info(std::string(sz,std::min((uintptr_t)MAX_LOG_MESSAGE_LENGTH, (uintptr_t)(buffer-sz))));
+    ASSIMP_LOG_INFO(std::string(sz,std::min((uintptr_t)MAX_LOG_MESSAGE_LENGTH, (uintptr_t)(buffer-sz))));
     SkipSpacesAndLineEnd();
 }
 
@@ -483,6 +483,6 @@ MD5CameraParser::MD5CameraParser(SectionList& mSections)
             }
         }
     }
-    DefaultLogger::get()->debug("MD5CameraParser end");
+    ASSIMP_LOG_DEBUG("MD5CameraParser end");
 }
 

@@ -150,7 +150,7 @@ static SIBChunk ReadChunk(StreamReaderLE* stream)
     chunk.Tag = stream->GetU4();
     chunk.Size = stream->GetU4();
     if (chunk.Size > stream->GetRemainingSizeToLimit())
-        DefaultLogger::get()->error("SIB: Chunk overflow");
+        ASSIMP_LOG_ERROR("SIB: Chunk overflow");
     ByteSwap::Swap4(&chunk.Tag);
     return chunk;
 }
@@ -589,7 +589,7 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
 
         if (mtl >= meshes.size())
         {
-            DefaultLogger::get()->error("SIB: Face material index is invalid.");
+            ASSIMP_LOG_ERROR("SIB: Face material index is invalid.");
             mtl = 0;
         }
 

@@ -157,7 +157,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
     {
         if(!GetNextLine(buffer,line))
         {
-            DefaultLogger::get()->error("OFF: The number of verts in the header is incorrect");
+            ASSIMP_LOG_ERROR("OFF: The number of verts in the header is incorrect");
             break;
         }
         aiVector3D& v = tempPositions[i];
@@ -175,14 +175,14 @@ void OFFImporter::InternReadFile( const std::string& pFile,
     {
         if(!GetNextLine(buffer,line))
         {
-            DefaultLogger::get()->error("OFF: The number of faces in the header is incorrect");
+            ASSIMP_LOG_ERROR("OFF: The number of faces in the header is incorrect");
             break;
         }
         sz = line;SkipSpaces(&sz);
         faces->mNumIndices = strtoul10(sz,&sz);
         if(!(faces->mNumIndices) || faces->mNumIndices > 9)
         {
-            DefaultLogger::get()->error("OFF: Faces with zero indices aren't allowed");
+            ASSIMP_LOG_ERROR("OFF: Faces with zero indices aren't allowed");
             --mesh->mNumFaces;
             continue;
         }
@@ -217,7 +217,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
             idx = strtoul10(sz,&sz);
             if ((idx) >= numVertices)
             {
-                DefaultLogger::get()->error("OFF: Vertex index is out of range");
+                ASSIMP_LOG_ERROR("OFF: Vertex index is out of range");
                 idx = numVertices-1;
             }
             faces->mIndices[m] = p++;

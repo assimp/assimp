@@ -481,7 +481,7 @@ void MDLImporter::InternReadFile_Quake1() {
             if (iIndex >= (unsigned int)pcHeader->num_verts)
             {
                 iIndex = pcHeader->num_verts-1;
-                DefaultLogger::get()->warn("Index overflow in Q1-MDL vertex list.");
+                ASSIMP_LOG_WARN("Index overflow in Q1-MDL vertex list.");
             }
 
             aiVector3D& vec = pcMesh->mVertices[iCurrent];
@@ -1026,7 +1026,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInfo,
             if(iIndex > (unsigned int)groupInfo.pcGroup->numverts)  {
                 // (we might need to read this section a second time - to process frame vertices correctly)
                 pcGroupTris->v_index[c] = iIndex = groupInfo.pcGroup->numverts-1;
-                DASSIMP_LOG_WARN("Index overflow in MDL7 vertex list");
+                ASSIMP_LOG_WARN("Index overflow in MDL7 vertex list");
             }
 
             // write the output face index
@@ -1894,7 +1894,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                         unsigned int iBone = groupData.aiBones[ oldFace.mIndices[c] ];
                         if (UINT_MAX != iBone)  {
                             if (iBone >= iNumOutBones)  {
-                                DefaultLogger::get()->error("Bone index overflow. "
+                                ASSIMP_LOG_ERROR("Bone index overflow. "
                                     "The bone index of a vertex exceeds the allowed range. ");
                                 iBone = iNumOutBones-1;
                             }

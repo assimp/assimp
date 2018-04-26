@@ -342,11 +342,8 @@ void CatmullClarkSubdivider::InternSubdivide (
         // Report the number of bad edges. bad edges are referenced by less than two
         // faces in the mesh. They occur at outer model boundaries in non-closed
         // shapes.
-        char tmp[512];
-        ai_snprintf(tmp, 512, "Catmull-Clark Subdivider: got %u bad edges touching only one face (totally %u edges). ",
-            bad_cnt,static_cast<unsigned int>(edges.size()));
-
-        DASSIMP_LOG_DEBUG(tmp);
+        ASSIMP_LOG_DEBUG_F("Catmull-Clark Subdivider: got ", bad_cnt, " bad edges touching only one face (totally ", 
+            static_cast<unsigned int>(edges.size()), " edges). ");
     }}
 
     // ---------------------------------------------------------------------

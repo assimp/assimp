@@ -125,7 +125,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
     }
 
     // Print the file format version
-    DefaultLogger::get()->info("Quick3D File format version: " +
+    ASSIMP_LOG_INFO_F("Quick3D File format version: ",
         std::string(&((const char*)stream.GetPtr())[8],2));
 
     // ... an store it
@@ -413,7 +413,7 @@ outer:
     // If we have no materials loaded - generate a default mat
     if (materials.empty())
     {
-        DefaultLogger::get()->info("Quick3D: No material found, generating one");
+        ASSIMP_LOG_INFO("Quick3D: No material found, generating one");
         materials.push_back(Material());
         materials.back().diffuse  = fgColor ;
     }

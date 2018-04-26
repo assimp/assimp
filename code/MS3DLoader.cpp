@@ -349,9 +349,6 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         stream.CopyAndAdvance(j.parentName,32);
         j.parentName[32] = '\0';
 
-    //  DefaultLogger::get()->debug(j.name);
-    //  DefaultLogger::get()->debug(j.parentName);
-
         ReadVector(stream,j.rotation);
         ReadVector(stream,j.position);
 
@@ -386,7 +383,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 }
 
                 const std::string& s = std::string(reinterpret_cast<char*>(stream.GetPtr()),len);
-                DefaultLogger::get()->debug("MS3D: Model comment: " + s);
+                ASSIMP_LOG_DEBUG_F("MS3D: Model comment: ", s);
             }
 
             if(stream.GetRemainingSize() > 4 && inrange((stream >> subversion,subversion),1u,3u)) {

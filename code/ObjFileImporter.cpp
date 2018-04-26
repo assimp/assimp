@@ -557,7 +557,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
     const unsigned int numMaterials = (unsigned int) pModel->m_MaterialLib.size();
     pScene->mNumMaterials = 0;
     if ( pModel->m_MaterialLib.empty() ) {
-        DefaultLogger::get()->debug("OBJ: no materials specified");
+        ASSIMP_LOG_DEBUG("OBJ: no materials specified");
         return;
     }
 
@@ -591,7 +591,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
             break;
         default:
             sm = aiShadingMode_Gouraud;
-            DefaultLogger::get()->error("OBJ: unexpected illumination model (0-2 recognized)");
+            ASSIMP_LOG_ERROR("OBJ: unexpected illumination model (0-2 recognized)");
         }
 
         mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);

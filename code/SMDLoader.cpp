@@ -286,7 +286,7 @@ void SMDImporter::CreateOutputMeshes()
         if (UINT_MAX == (*iFace).iTexture)aaiFaces[(*iFace).iTexture].push_back( 0 );
         else if ((*iFace).iTexture >= aszTextures.size())
         {
-            DefaultLogger::get()->error("[SMD/VTA] Material index overflow in face");
+            ASSIMP_LOG_INFO("[SMD/VTA] Material index overflow in face");
             aaiFaces[(*iFace).iTexture].push_back((unsigned int)aszTextures.size()-1);
         }
         else aaiFaces[(*iFace).iTexture].push_back(iNum);
@@ -366,7 +366,7 @@ void SMDImporter::CreateOutputMeshes()
                     if (pairval.first >= asBones.size() ||
                         pairval.first == face.avVertices[iVert].iParentNode)
                     {
-                        DefaultLogger::get()->error("[SMD/VTA] Bone index overflow. "
+                        ASSIMP_LOG_ERROR("[SMD/VTA] Bone index overflow. "
                             "The bone index will be ignored, the weight will be assigned "
                             "to the vertex' parent node");
                         continue;
@@ -387,7 +387,7 @@ void SMDImporter::CreateOutputMeshes()
                 {
                     if (face.avVertices[iVert].iParentNode >= asBones.size())
                     {
-                        DefaultLogger::get()->error("[SMD/VTA] Bone index overflow. "
+                        ASSIMP_LOG_ERROR("[SMD/VTA] Bone index overflow. "
                             "The index of the vertex parent bone is invalid. "
                             "The remaining weights will be normalized to 1.0");
 
@@ -953,7 +953,7 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent,
     unsigned int iBone  = 0;
     if(!ParseUnsignedInt(szCurrent,&szCurrent,iBone))
     {
-        DefaultLogger::get()->error("Unexpected EOF/EOL while parsing bone index");
+        ASSIMP_LOG_ERROR("Unexpected EOF/EOL while parsing bone index");
         SMDI_PARSE_RETURN;
     }
     if (iBone >= asBones.size())

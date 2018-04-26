@@ -311,7 +311,7 @@ IF ( NOT ASSIMP_BUILD_ZLIB )
 ENDIF( NOT ASSIMP_BUILD_ZLIB )
 
 IF( NOT ZLIB_FOUND )
-  MESSAGE(STATUS "compiling zlib from souces")
+  MESSAGE(STATUS "compiling zlib from sources")
   INCLUDE(CheckIncludeFile)
   INCLUDE(CheckTypeSize)
   INCLUDE(CheckFunctionExists)

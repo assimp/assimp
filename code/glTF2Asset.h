@@ -601,6 +601,7 @@ namespace glTF2
 		/// \param [in] pReplace_Count - count of bytes in new data.
 		/// \return true - if successfully replaced, false if input arguments is out of range.
 		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
+		bool ReplaceData_joint(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
 
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);

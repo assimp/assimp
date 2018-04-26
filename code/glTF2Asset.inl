@@ -461,36 +461,38 @@ inline void Buffer::EncodedRegion_SetCurrent(const std::string& pID)
 	throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
 }
 
-inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+inline 
+bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
 {
-const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
 
-uint8_t* new_data;
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) {
+		return false;
+	}
 
-	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
-
-	new_data = new uint8_t[new_data_size];
+        const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+	uint8_t *new_data = new uint8_t[new_data_size];
 	// Copy data which place before replacing part.
-	memcpy(new_data, mData.get(), pBufferData_Offset);
+	::memcpy(new_data, mData.get(), pBufferData_Offset);
 	// Copy new data.
-	memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
+	::memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
 	// Copy data which place after replacing part.
-	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
+	::memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
 	// Apply new data
 	mData.reset(new_data, std::default_delete<uint8_t[]>());
 	byteLength = new_data_size;
 
 	return true;
 }
-inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+	
+inline 
+bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
 {
-const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) {
+		return false;
+	}
 
-uint8_t* new_data;
-
-	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
-
-	new_data = new uint8_t[new_data_size];
+	const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+	uint8_t* new_data = new uint8_t[new_data_size];
 	// Copy data which place before replacing part.
 	memcpy(new_data, mData.get(), pBufferData_Offset);
 	// Copy new data.

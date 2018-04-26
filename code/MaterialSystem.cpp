@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -43,14 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the material system of the library
  */
 
-#include "Hash.h"
-#include "fast_atof.h"
-#include "ParsingUtils.h"
+#include <assimp/Hash.h>
+#include <assimp/fast_atof.h>
+#include <assimp/ParsingUtils.h>
 #include "MaterialSystem.h"
 #include <assimp/types.h>
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
-#include "Macros.h"
+#include <assimp/Macros.h>
 
 using namespace Assimp;
 

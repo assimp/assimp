@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -64,19 +65,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Internal headers
 // ------------------------------------------------------------------------------------------------
 #include "Importer.h"
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 #include "BaseProcess.h"
 
 #include "DefaultProgressHandler.h"
-#include "GenericProperty.h"
+#include <assimp/GenericProperty.h>
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
 #include "ScenePrivate.h"
-#include "MemoryIOWrapper.h"
-#include "Profiler.h"
-#include "TinyFormatter.h"
-#include "Exceptional.h"
-#include "Profiler.h"
+#include <assimp/MemoryIOWrapper.h>
+#include <assimp/Profiler.h>
+#include <assimp/TinyFormatter.h>
+#include <assimp/Exceptional.h>
+#include <assimp/Profiler.h>
 #include <set>
 #include <memory>
 #include <cctype>
@@ -146,10 +147,7 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)    {
 // ------------------------------------------------------------------------------------------------
 // Importer constructor.
 Importer::Importer()
- : pimpl( NULL ) {
-    // allocate the pimpl first
-    pimpl = new ImporterPimpl();
-
+ : pimpl( new ImporterPimpl ) {
     pimpl->mScene = NULL;
     pimpl->mErrorString = "";
 
@@ -189,7 +187,7 @@ Importer::~Importer()
     delete pimpl->mIOHandler;
     delete pimpl->mProgressHandler;
 
-    // Kill imported scene. Destructors should do that recursivly
+    // Kill imported scene. Destructor's should do that recursively
     delete pimpl->mScene;
 
     // Delete shared post-processing data
@@ -197,18 +195,6 @@ Importer::~Importer()
 
     // and finally the pimpl itself
     delete pimpl;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Copy constructor - copies the config of another Importer, not the scene
-Importer::Importer(const Importer &other)
-	: pimpl(NULL) {
-    new(this) Importer();
-
-    pimpl->mIntProperties    = other.pimpl->mIntProperties;
-    pimpl->mFloatProperties  = other.pimpl->mFloatProperties;
-    pimpl->mStringProperties = other.pimpl->mStringProperties;
-    pimpl->mMatrixProperties = other.pimpl->mMatrixProperties;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -633,7 +619,6 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             if (s != std::string::npos) {
                 DefaultLogger::get()->info("File extension not known, trying signature-based detection");
                 for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
-
                     if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
                         imp = pimpl->mImporter[a];
                         break;
@@ -676,6 +661,8 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         if (profiler) {
             profiler->EndRegion("import");
         }
+
+        SetPropertyString("sourceFilePath", pFile);
 
         // If successful, apply all active post processing steps to the imported data
         if( pimpl->mScene)  {
@@ -956,6 +943,7 @@ BaseImporter* Importer::GetImporter (const char* szExtension) const
 size_t Importer::GetImporterIndex (const char* szExtension) const
 {
     ai_assert(szExtension);
+
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // skip over wildcard and dot characters at string head --

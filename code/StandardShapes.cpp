@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -46,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  http://geometrictools.com/Documentation/PlatonicSolids.pdf.
  */
 
-#include "StandardShapes.h"
-#include "StringComparison.h"
+#include <assimp/StandardShapes.h>
+#include <assimp/StringComparison.h>
 #include <stddef.h>
 #include <assimp/Defines.h>
 #include <assimp/mesh.h>

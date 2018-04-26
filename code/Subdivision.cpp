@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -39,11 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "Subdivision.h"
+#include <assimp/Subdivision.h>
 #include <assimp/SceneCombiner.h>
-#include "SpatialSort.h"
+#include <assimp/SpatialSort.h>
 #include "ProcessHelper.h"
-#include "Vertex.h"
+#include <assimp/Vertex.h>
 #include <assimp/ai_assert.h>
 #include <stdio.h>
 

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,13 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #include "COBLoader.h"
 #include "COBScene.h"
-
-#include "StreamReader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-
-#include "LineSplitter.h"
-#include "TinyFormatter.h"
+#include "ConvertToLHProcess.h"
+#include <assimp/StreamReader.h>
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
+#include <assimp/LineSplitter.h>
+#include <assimp/TinyFormatter.h>
 #include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
@@ -104,7 +104,7 @@ COBImporter::~COBImporter()
 bool COBImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string& extension = GetExtension(pFile);
-    if (extension == "cob" || extension == "scn") {
+    if (extension == "cob" || extension == "scn" || extension == "COB" || extension == "SCN") {
         return true;
     }
 
@@ -224,6 +224,9 @@ void COBImporter::InternReadFile( const std::string& pFile,
     }
 
     pScene->mRootNode = BuildNodes(*root.get(),scene,pScene);
+	//flip normals after import
+    FlipWindingOrderProcess flip;
+    flip.Execute( pScene );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1298,3 +1301,4 @@ void COBImporter::ReadUnit_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
 
 #endif
+

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -50,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetAnimation.h"
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 #include <memory>
 #include <cctype>
 
@@ -71,7 +72,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
     unsigned int idx( NotSet );
     for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
     {
-        std::string s = mScene->mMaterials[i].mName;
+        std::string &s = mScene->mMaterials[i].mName;
         for ( std::string::iterator it = s.begin(); it != s.end(); ++it ) {
             *it = static_cast< char >( ::tolower( *it ) );
         }
@@ -127,9 +128,8 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
     if (cnt && idx == mScene->mMaterials.size())
     {
         // We need to create our own default material
-        D3DS::Material sMat;
+        D3DS::Material sMat("%%%DEFAULT");
         sMat.mDiffuse = aiColor3D(0.3f,0.3f,0.3f);
-        sMat.mName = "%%%DEFAULT";
         mScene->mMaterials.push_back(sMat);
 
         DefaultLogger::get()->info("3DS: Generating default material");

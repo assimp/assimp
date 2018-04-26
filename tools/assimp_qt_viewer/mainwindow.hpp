@@ -52,6 +52,11 @@ private:
 	/// \param [in] pFileName - path and name of the file.
 	void ImportFile(const QString& pFileName);
 
+
+	/// \fn void ResetSceneInfos()
+	/// Reset informations about the scene
+	void ResetSceneInfos();
+
 	/********************************************************************/
 	/************************ Logging functions *************************/
 	/********************************************************************/
@@ -85,7 +90,7 @@ protected:
 	/// \param [in] pEvent - pointer to event data.
 	void keyPressEvent(QKeyEvent* pEvent) override;
 
-
+	bool event(QEvent*);
 public:
 
 	/********************************************************************/
@@ -128,4 +133,6 @@ private slots:
 	void on_lstCamera_clicked(const QModelIndex &index);
 	void on_cbxBBox_clicked(bool checked);
 	void on_cbxTextures_clicked(bool checked);
+	void on_cbxDrawAxes_clicked(bool checked);
+	void on_cbxReloadTextures_clicked(bool checked);
 };

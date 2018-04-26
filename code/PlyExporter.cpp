@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -46,12 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PlyExporter.h"
 #include <memory>
 #include <cmath>
-#include "Exceptional.h"
+#include <assimp/Exceptional.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
-#include "qnan.h"
+#include <assimp/qnan.h>
 
 
 //using namespace Assimp;
@@ -146,6 +147,17 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
         << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
         << aiGetVersionRevision() << ")" << endl;
+
+    // Look through materials for a diffuse texture, and add it if found
+    for ( unsigned int i = 0; i < pScene->mNumMaterials; ++i )
+    {
+        const aiMaterial* const mat = pScene->mMaterials[i];
+        aiString s;
+        if ( AI_SUCCESS == mat->Get( AI_MATKEY_TEXTURE_DIFFUSE( 0 ), s ) )
+        {
+            mOutput << "comment TextureFile " << s.data << endl;
+        }
+    }
 
     // TODO: probably want to check here rather than just assume something
     //       definitely not good to always write float even if we might have double precision

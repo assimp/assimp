@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -51,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "TextureTransform.h"
 #include "ASELoader.h"
-#include "fast_atof.h"
+#include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
 
 using namespace Assimp;
@@ -266,7 +267,9 @@ void Parser::Parse()
                 // at the file extension (ASE, ASK, ASC)
                 // *************************************************************
 
-                if (fmt)iFileFormat = fmt;
+                if ( fmt ) {
+                    iFileFormat = fmt;
+                }
                 continue;
             }
             // main scene information
@@ -292,7 +295,7 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"GEOMOBJECT",10))
 
             {
-                m_vMeshes.push_back(Mesh());
+                m_vMeshes.push_back(Mesh("UNNAMED"));
                 ParseLV1ObjectBlock(m_vMeshes.back());
                 continue;
             }
@@ -308,14 +311,14 @@ void Parser::Parse()
             if (TokenMatch(filePtr,"LIGHTOBJECT",11))
 
             {
-                m_vLights.push_back(Light());
+                m_vLights.push_back(Light("UNNAMED"));
                 ParseLV1ObjectBlock(m_vLights.back());
                 continue;
             }
             // camera object
             if (TokenMatch(filePtr,"CAMERAOBJECT",12))
             {
-                m_vCameras.push_back(Camera());
+                m_vCameras.push_back(Camera("UNNAMED"));
                 ParseLV1ObjectBlock(m_vCameras.back());
                 continue;
             }
@@ -426,28 +429,25 @@ void Parser::ParseLV1SoftSkinBlock()
                         // Reserve enough storage
                         vert.mBoneWeights.reserve(numWeights);
 
-                        for (unsigned int w = 0; w < numWeights;++w)
-                        {
-                            std::string bone;
+                        std::string bone;
+                        for (unsigned int w = 0; w < numWeights;++w) {
+                            bone.clear();
                             ParseString(bone,"*MESH_SOFTSKINVERTS.Bone");
 
                             // Find the bone in the mesh's list
                             std::pair<int,ai_real> me;
                             me.first = -1;
 
-                            for (unsigned int n = 0; n < curMesh->mBones.size();++n)
-                            {
-                                if (curMesh->mBones[n].mName == bone)
-                                {
+                            for (unsigned int n = 0; n < curMesh->mBones.size();++n) {
+                                if (curMesh->mBones[n].mName == bone) {
                                     me.first = n;
                                     break;
                                 }
                             }
-                            if (-1 == me.first)
-                            {
+                            if (-1 == me.first) {
                                 // We don't have this bone yet, so add it to the list
-                                me.first = (int)curMesh->mBones.size();
-                                curMesh->mBones.push_back(ASE::Bone(bone));
+                                me.first = static_cast<int>( curMesh->mBones.size() );
+                                curMesh->mBones.push_back( ASE::Bone( bone ) );
                             }
                             ParseLV4MeshFloat( me.second );
 
@@ -528,7 +528,7 @@ void Parser::ParseLV1MaterialListBlock()
                 ParseLV4MeshLong(iMaterialCount);
 
                 // now allocate enough storage to hold all materials
-                m_vMaterials.resize(iOldMaterialCount+iMaterialCount);
+                m_vMaterials.resize(iOldMaterialCount+iMaterialCount, Material("INVALID"));
                 continue;
             }
             if (TokenMatch(filePtr,"MATERIAL",8))
@@ -706,7 +706,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
                 ParseLV4MeshLong(iNumSubMaterials);
 
                 // allocate enough storage
-                mat.avSubMaterials.resize(iNumSubMaterials);
+                mat.avSubMaterials.resize(iNumSubMaterials, Material("INVALID SUBMATERIAL"));
             }
             // submaterial chunks
             if (TokenMatch(filePtr,"SUBMATERIAL",11))
@@ -744,6 +744,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
     // empty the texture won't be used later.
     // ***********************************************************
     bool parsePath = true;
+    std::string temp;
     while (true)
     {
         if ('*' == *filePtr)
@@ -752,7 +753,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
             // type of map
             if (TokenMatch(filePtr,"MAP_CLASS" ,9))
             {
-                std::string temp;
+                temp.clear();
                 if(!ParseString(temp,"*MAP_CLASS"))
                     SkipToNextToken();
                 if (temp != "Bitmap" && temp != "Normal Bump")
@@ -1553,7 +1554,7 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh& mesh)
 void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 {
     AI_ASE_PARSER_INIT();
-    mesh.mBones.resize(iNumBones);
+    mesh.mBones.resize(iNumBones, Bone("UNNAMED"));
     while (true)
     {
         if ('*' == *filePtr)

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -47,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "CalcTangentsProcess.h"
 #include "ProcessHelper.h"
-#include "TinyFormatter.h"
-#include "qnan.h"
+#include <assimp/TinyFormatter.h>
+#include <assimp/qnan.h>
 
 using namespace Assimp;
 
@@ -189,7 +190,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         float tx = meshTex[p2].x - meshTex[p0].x, ty = meshTex[p2].y - meshTex[p0].y;
         float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
         // when t1, t2, t3 in same position in UV space, just use default UV direction.
-        if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ) {
+        if (  sx * ty == sy * tx ) {
             sx = 0.0; sy = 1.0;
             tx = 1.0; ty = 0.0;
         }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -52,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "ImproveCacheLocality.h"
 #include "VertexTriangleAdjacency.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
@@ -275,8 +276,9 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 
                 // so iterate through all vertices of the current triangle
                 const aiFace* pcFace = &pMesh->mFaces[ fidx ];
-                for (unsigned int* p = pcFace->mIndices, *p2 = pcFace->mIndices+3;p != p2;++p)  {
-                    const unsigned int dp = *p;
+                unsigned nind = pcFace->mNumIndices;
+                for (unsigned ind = 0; ind < nind; ind++) {
+                    unsigned dp = pcFace->mIndices[ind];
 
                     // the current vertex won't have any free triangles after this step
                     if (ivdx != (int)dp) {
@@ -374,9 +376,11 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
     // sort the output index buffer back to the input array
     piCSIter = piIBOutput;
     for (aiFace* pcFace = pMesh->mFaces; pcFace != pcEnd;++pcFace)  {
-        pcFace->mIndices[0] = *piCSIter++;
-        pcFace->mIndices[1] = *piCSIter++;
-        pcFace->mIndices[2] = *piCSIter++;
+        unsigned nind = pcFace->mNumIndices;
+        unsigned * ind = pcFace->mIndices;
+        if (nind > 0) ind[0] = *piCSIter++;
+        if (nind > 1) ind[1] = *piCSIter++;
+        if (nind > 2) ind[2] = *piCSIter++;
     }
 
     // delete temporary storage

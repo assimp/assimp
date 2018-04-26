@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -330,6 +331,18 @@ TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
     EXPECT_EQ(vertice.z, 0.8f);
 }
 
+TEST_F(utObjImportExport, homogeneous_coordinates_divide_by_zero_Test) {
+  static const std::string ObjModel =
+    "v -0.500000 0.000000 0.400000 0.\n"
+    "v -0.500000 0.000000 -0.800000 1.00000\n"
+    "v 0.500000 1.000000 -0.800000 0.5000\n"
+    "f 1 2 3\nB";
+
+  Assimp::Importer myimporter;
+  const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), aiProcess_ValidateDataStructure);
+  EXPECT_EQ(nullptr, scene);
+}
+
 TEST_F(utObjImportExport, 0based_array_Test) {
     static const std::string ObjModel =
         "v -0.500000 0.000000 0.400000\n"
@@ -340,4 +353,17 @@ TEST_F(utObjImportExport, 0based_array_Test) {
     Assimp::Importer myimporter;
     const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), 0);
     EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F( utObjImportExport, mtllib_after_g ) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_mtllib_after_g.obj", aiProcess_ValidateDataStructure );
+    ASSERT_NE( nullptr, scene );
+
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+    const aiMesh *mesh = scene->mMeshes[0];
+    const aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
+    aiString name;
+    ASSERT_EQ(aiReturn_SUCCESS, mat->Get(AI_MATKEY_NAME, name));
+    EXPECT_STREQ("MyMaterial", name.C_Str());
 }

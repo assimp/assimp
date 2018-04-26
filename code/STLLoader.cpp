@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -47,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "STLLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
 #include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
@@ -444,28 +445,47 @@ bool STLImporter::LoadBinaryFile()
 
     pMesh->mNumVertices = pMesh->mNumFaces*3;
 
-    aiVector3D* vp,*vn;
-    vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-    vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    
+    aiVector3D *vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+    aiVector3D *vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
-    for (unsigned int i = 0; i < pMesh->mNumFaces;++i) {
-
+    typedef aiVector3t<float> aiVector3F;
+    aiVector3F* theVec;
+    aiVector3F theVec3F;
+    
+    for ( unsigned int i = 0; i < pMesh->mNumFaces; ++i ) {
         // NOTE: Blender sometimes writes empty normals ... this is not
         // our fault ... the RemoveInvalidData helper step should fix that
-        *vn = *((aiVector3D*)sz);
-        sz += sizeof(aiVector3D);
+
+        // There's one normal for the face in the STL; use it three times
+        // for vertex normals
+        theVec = (aiVector3F*) sz;
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vn->x = theVec3F.x; vn->y = theVec3F.y; vn->z = theVec3F.z;
         *(vn+1) = *vn;
         *(vn+2) = *vn;
+        ++theVec;
         vn += 3;
 
-        *vp++ = *((aiVector3D*)sz);
-        sz += sizeof(aiVector3D);
+        // vertex 1
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
+        ++theVec;
+        ++vp;
 
-        *vp++ = *((aiVector3D*)sz);
-        sz += sizeof(aiVector3D);
+        // vertex 2
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
+        ++theVec;
+        ++vp;
 
-        *vp++ = *((aiVector3D*)sz);
-        sz += sizeof(aiVector3D);
+        // vertex 3
+        ::memcpy( &theVec3F, theVec, sizeof(aiVector3F) );
+        vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
+        ++theVec;
+        ++vp;
+        
+        sz = (const unsigned char*) theVec;
 
         uint16_t color = *((uint16_t*)sz);
         sz += 2;

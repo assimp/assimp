@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -45,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MD2 importer class */
 #include "MD2Loader.h"
-#include "ByteSwapper.h"
+#include <assimp/ByteSwapper.h>
 #include "MD2NormalTable.h" // shouldn't be included by other units
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>

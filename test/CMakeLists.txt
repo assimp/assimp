@@ -1,7 +1,8 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2017, assimp team
+# Copyright (c) 2006-2018, assimp team
+
 
 # All rights reserved.
 #
@@ -38,21 +39,21 @@
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 2.6 )
 
-include( CTest )
-enable_testing()
-
 INCLUDE_DIRECTORIES(
 	../contrib/gtest/include
 	../contrib/gtest/
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
 )
-
+if (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+endif()
 # Add the temporary output directories to the library path to make sure the
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
 SET( COMMON
+  unit/utSimd.cpp
   unit/utIOSystem.cpp
   unit/utIOStreamBuffer.cpp
   unit/utIssues.cpp

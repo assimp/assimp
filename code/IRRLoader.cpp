@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -49,16 +50,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
 #include "IRRLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include "GenericProperty.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
+#include <assimp/GenericProperty.h>
 
 #include <assimp/SceneCombiner.h>
-#include "StandardShapes.h"
+#include <assimp/StandardShapes.h>
 #include "Importer.h"
 
 // We need MathFunctions.h to compute the lcm/gcd of a number
-#include "MathFunctions.h"
+#include <assimp/MathFunctions.h>
 #include <memory>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/mesh.h>
@@ -99,26 +100,22 @@ IRRImporter::~IRRImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
-    /* NOTE: A simple check for the file extension is not enough
-     * here. Irrmesh and irr are easy, but xml is too generic
-     * and could be collada, too. So we need to open the file and
-     * search for typical tokens.
-     */
+bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(pFile);
-
-    if (extension == "irr")return true;
-    else if (extension == "xml" || checkSig)
-    {
+    if ( extension == "irr" ) {
+        return true;
+    } else if (extension == "xml" || checkSig) {
         /*  If CanRead() is called in order to check whether we
          *  support a specific file extension in general pIOHandler
          *  might be NULL and it's our duty to return true here.
          */
-        if (!pIOHandler)return true;
+        if ( nullptr == pIOHandler ) {
+            return true;
+        }
         const char* tokens[] = {"irr_scene"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
+
     return false;
 }
 

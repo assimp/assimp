@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -51,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, Assimp.
 #include <assimp/SceneCombiner.h>
-#include "StandardShapes.h"
-#include "StringUtils.h"
+#include <assimp/StandardShapes.h>
+#include <assimp/StringUtils.h>
 
 // Header files, stdlib.
 #include <iterator>
@@ -155,10 +156,11 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	TextureConverted_Index = 0;
 	for(const SPP_Texture& tex_convd: mTexture_Converted)
 	{
-		if(tex_convd.ID == TextureConverted_ID)
-			return TextureConverted_Index;
-		else
-			TextureConverted_Index++;
+        if ( tex_convd.ID == TextureConverted_ID ) {
+            return TextureConverted_Index;
+        } else {
+            ++TextureConverted_Index;
+        }
 	}
 
 	//

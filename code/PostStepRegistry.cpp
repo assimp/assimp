@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -91,6 +92,9 @@ corresponding preprocessor flag to selectively disable steps.
 #ifndef ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS
 #   include "RemoveRedundantMaterials.h"
 #endif
+#if (!defined ASSIMP_BUILD_NO_EMBEDTEXTURES_PROCESS)
+#   include "EmbedTexturesProcess.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
 #   include "FindInvalidDataProcess.h"
 #endif
@@ -121,6 +125,9 @@ corresponding preprocessor flag to selectively disable steps.
 #ifndef ASSIMP_BUILD_NO_DEBONE_PROCESS
 #   include "DeboneProcess.h"
 #endif
+#if (!defined ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS)
+#   include "ScaleProcess.h"
+#endif
 
 namespace Assimp {
 
@@ -132,7 +139,7 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
     // of sequence it is executed. Steps that are added here are not
     // validated - as RegisterPPStep() does - all dependencies must be given.
     // ----------------------------------------------------------------------------
-    out.reserve(25);
+    out.reserve(31);
 #if (!defined ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS)
     out.push_back( new MakeLeftHandedProcess());
 #endif
@@ -147,6 +154,9 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
 #endif
 #if (!defined ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS)
     out.push_back( new RemoveRedundantMatsProcess());
+#endif
+#if (!defined ASSIMP_BUILD_NO_EMBEDTEXTURES_PROCESS)
+    out.push_back( new EmbedTexturesProcess());
 #endif
 #if (!defined ASSIMP_BUILD_NO_FINDINSTANCES_PROCESS)
     out.push_back( new FindInstancesProcess());
@@ -190,7 +200,9 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
 #if (!defined ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS)
     out.push_back( new GenFaceNormalsProcess());
 #endif
-
+#if (!defined ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS)
+    out.push_back( new ScaleProcess());
+#endif
     // .........................................................................
     // DON'T change the order of these five ..
     // XXX this is actually a design weakness that dates back to the time

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -49,13 +50,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdarg.h>
 #include "ColladaParser.h"
-#include "fast_atof.h"
-#include "ParsingUtils.h"
-#include "StringUtils.h"
+#include <assimp/fast_atof.h>
+#include <assimp/ParsingUtils.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/light.h>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 #include <memory>
 
@@ -221,6 +222,7 @@ void ColladaParser::ReadStructure()
     }
 
 	PostProcessRootAnimations();
+    PostProcessControllers();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -357,6 +359,21 @@ void ColladaParser::ReadAnimationClipLibrary()
 			break;
 		}
 	}
+}
+
+void ColladaParser::PostProcessControllers()
+{
+  for (ControllerLibrary::iterator it = mControllerLibrary.begin(); it != mControllerLibrary.end(); ++it)
+  {
+    std::string meshId = it->second.mMeshId;
+    ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);
+    while(findItr != mControllerLibrary.end()) {
+      meshId = findItr->second.mMeshId;
+      findItr = mControllerLibrary.find(meshId);
+    }
+    
+    it->second.mMeshId = meshId;
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3089,7 +3106,7 @@ const char* ColladaParser::TestTextContent()
     // read contents of the element
     if( !mReader->read() )
         return NULL;
-    if( mReader->getNodeType() != irr::io::EXN_TEXT)
+    if( mReader->getNodeType() != irr::io::EXN_TEXT && mReader->getNodeType() != irr::io::EXN_CDATA)
         return NULL;
 
     // skip leading whitespace

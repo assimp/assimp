@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -47,9 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include "BlenderDNA.h"
-#include "StreamReader.h"
-#include "fast_atof.h"
-#include "TinyFormatter.h"
+#include <assimp/StreamReader.h>
+#include <assimp/fast_atof.h>
+#include <assimp/TinyFormatter.h>
 
 using namespace Assimp;
 using namespace Assimp::Blender;
@@ -57,12 +58,11 @@ using namespace Assimp::Formatter;
 
 static bool match4(StreamReaderAny& stream, const char* string) {
     ai_assert( nullptr != string );
-    char tmp[] = {
-        (const char)(stream).GetI1(),
-        (const char)(stream).GetI1(),
-        (const char)(stream).GetI1(),
-        (const char)(stream).GetI1()
-    };
+    char tmp[4];
+    tmp[ 0 ] = ( stream ).GetI1();
+    tmp[ 1 ] = ( stream ).GetI1();
+    tmp[ 2 ] = ( stream ).GetI1();
+    tmp[ 3 ] = ( stream ).GetI1();
     return (tmp[0]==string[0] && tmp[1]==string[1] && tmp[2]==string[2] && tmp[3]==string[3]);
 }
 

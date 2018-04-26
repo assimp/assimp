@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -47,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_DNA_INL
 
 #include <memory>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 namespace Assimp {
 namespace Blender {
@@ -501,7 +502,7 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
 {
     // the file blocks appear in list sorted by
     // with ascending base addresses so we can run a
-    // binary search to locate the pointee quickly.
+    // binary search to locate the pointer quickly.
 
     // NOTE: Blender seems to distinguish between side-by-side
     // data (stored in the same data block) and far pointers,

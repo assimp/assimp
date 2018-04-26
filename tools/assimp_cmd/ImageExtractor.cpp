@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -45,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "Main.h"
-#include <../code/fast_atof.h>
-#include <../code/StringComparison.h>
+#include <assimp/fast_atof.h>
+#include <assimp/StringComparison.h>
 
 const char* AICMD_MSG_DUMP_HELP_E = 
 "assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]\n"

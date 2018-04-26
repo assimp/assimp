@@ -1037,7 +1037,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
     if (!DefaultLogger::isNullLogger()) {
         for (std::list< Q3Shader::SkinData::TextureEntry>::const_iterator it = skins.textures.begin();it != skins.textures.end(); ++it) {
             if (!(*it).resolved) {
-                ASSIMP_LOG_ERROR("MD3: Failed to match skin ", (*it).first, " to surface ", (*it).second);
+                ASSIMP_LOG_ERROR_F("MD3: Failed to match skin ", (*it).first, " to surface ", (*it).second);
             }
         }
     }

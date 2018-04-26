@@ -71,7 +71,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
 // https://wiki.blender.org/index.php/User:Mont29/Foundation/FBX_File_Structure
 
-const double DEG = 57.29577951308232087679815481; // degrees per radian
+const ai_real DEG = ai_real( 57.29577951308232087679815481 ); // degrees per radian
 
 // some constants that we'll use for writing metadata
 namespace FBX {
@@ -980,9 +980,9 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
 
 int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (anim->mTicksPerSecond <= 0) {
-        return ticks * FBX::SECOND;
+        return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
-    return (ticks / anim->mTicksPerSecond) * FBX::SECOND;
+    return (static_cast<int64_t>(ticks) / static_cast<int64_t>(anim->mTicksPerSecond)) * FBX::SECOND;
 }
 
 void FBXExporter::WriteObjects ()
@@ -2440,7 +2440,7 @@ void FBXExporter::WriteAnimationCurve(
     // TODO: keyattr flags and data (STUB for now)
     n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
     n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-    ai_assert(times.size() <= std::numeric_limits<int32_t>::max());
+    ai_assert(static_cast<int32_t>(times.size()) <= std::numeric_limits<int32_t>::max());
     n.AddChild(
         "KeyAttrRefCount",
         std::vector<int32_t>{static_cast<int32_t>(times.size())}

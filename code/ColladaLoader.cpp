@@ -472,7 +472,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
             if( !srcMesh)
             {
-                ASSIMP_LOG_WARN( "Collada: Unable to find geometry for ID \"", mid.mMeshOrController, "\". Skipping." );
+                ASSIMP_LOG_WARN_F( "Collada: Unable to find geometry for ID \"", mid.mMeshOrController, "\". Skipping." );
                 continue;
             }
         } else
@@ -875,7 +875,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
             if( bnode)
                 bone->mName.Set( FindNameForNode( bnode));
             else
-                ASSIMP_LOG_WARN( "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"", bone->mName.data, "\"." );
+                ASSIMP_LOG_WARN_F( "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"", bone->mName.data, "\"." );
 
             // and insert bone
             dstMesh->mBones[boneCount++] = bone;
@@ -1176,9 +1176,8 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                 else if( subElement == "Z")
                     entry.mSubElement = 2;
                 else
-                    ASSIMP_LOG_WARN( "Unknown anim subelement <", subElement, ">. Ignoring" );
-            } else
-            {
+                    ASSIMP_LOG_WARN_F( "Unknown anim subelement <", subElement, ">. Ignoring" );
+            } else {
                 // no subelement following, transformId is remaining string
                 entry.mTransformId = srcChannel.mTarget.substr( slashPos+1);
             }
@@ -1658,9 +1657,10 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
         }
 
         // add textures, if given
-        if( !effect.mTexAmbient.mName.empty())
-             /* It is merely a lightmap */
-            AddTexture( mat, pParser, effect, effect.mTexAmbient, aiTextureType_LIGHTMAP);
+        if (!effect.mTexAmbient.mName.empty()) {
+            // It is merely a light-map
+            AddTexture(mat, pParser, effect, effect.mTexAmbient, aiTextureType_LIGHTMAP);
+        }
 
         if( !effect.mTexEmissive.mName.empty())
             AddTexture( mat, pParser, effect, effect.mTexEmissive, aiTextureType_EMISSIVE);
@@ -1688,8 +1688,8 @@ void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
 {
     newMats.reserve(pParser.mMaterialLibrary.size());
 
-    for( ColladaParser::MaterialLibrary::const_iterator matIt = pParser.mMaterialLibrary.begin(); matIt != pParser.mMaterialLibrary.end(); ++matIt)
-    {
+    for( ColladaParser::MaterialLibrary::const_iterator matIt = pParser.mMaterialLibrary.begin(); 
+        matIt != pParser.mMaterialLibrary.end(); ++matIt) {
         const Collada::Material& material = matIt->second;
         // a material is only a reference to an effect
         ColladaParser::EffectLibrary::iterator effIt = pParser.mEffectLibrary.find( material.mEffect);
@@ -1808,7 +1808,7 @@ void ColladaLoader::ConvertPath (aiString& ss)
 {
     // TODO: collada spec, p 22. Handle URI correctly.
     // For the moment we're just stripping the file:// away to make it work.
-    // Windoes doesn't seem to be able to find stuff like
+    // Windows doesn't seem to be able to find stuff like
     // 'file://..\LWO\LWO2\MappingModes\earthSpherical.jpg'
     if (0 == strncmp(ss.data,"file://",7))
     {
@@ -1822,7 +1822,7 @@ void ColladaLoader::ConvertPath (aiString& ss)
   if( ss.data[0] == '/' && isalpha( ss.data[1]) && ss.data[2] == ':' )
   {
     ss.length--;
-    memmove( ss.data, ss.data+1, ss.length);
+    ::memmove( ss.data, ss.data+1, ss.length);
     ss.data[ss.length] = 0;
   }
 
@@ -1872,9 +1872,9 @@ const std::string& ColladaLoader::ReadString( const Collada::Accessor& pAccessor
 void ColladaLoader::CollectNodes( const aiNode* pNode, std::vector<const aiNode*>& poNodes) const
 {
     poNodes.push_back( pNode);
-
-    for( size_t a = 0; a < pNode->mNumChildren; ++a)
-        CollectNodes( pNode->mChildren[a], poNodes);
+    for (size_t a = 0; a < pNode->mNumChildren; ++a) {
+        CollectNodes(pNode->mChildren[a], poNodes);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -75,7 +75,7 @@ void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
     {
         if (pcStream->FileSize() >= 768)
         {
-            constexpr size_t len = 256 * 3;
+            size_t len = 256 * 3;
             unsigned char* colorMap = new unsigned char[len];
             szColorMap = colorMap;
             pcStream->Read(colorMap, len,1);

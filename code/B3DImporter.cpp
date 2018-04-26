@@ -614,7 +614,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
         if (!DefaultLogger::isNullLogger()) {
             char dmp[128];
             ai_snprintf(dmp, 128, "B3D file format version: %i",version);
-            DefaultLogger::get()->info(dmp);
+            ASSIMP_LOG_INFO(dmp);
         }
 
         while( ChunkSize() ){

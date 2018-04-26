@@ -251,7 +251,7 @@ public:
             }
         }
         if (!master) {
-            DefaultLogger::get()->error("BlobIOSystem: no data written or master file was not closed properly.");
+            ASSIMP_LOG_ERROR("BlobIOSystem: no data written or master file was not closed properly.");
             return NULL;
         }
 

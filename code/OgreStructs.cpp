@@ -611,7 +611,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
         }
         else
         {
-            DefaultLogger::get()->warn(Formatter::format() << "Ogre imported UV0 type " << uv1Element->TypeToString() << " is not compatible with Assimp. Ignoring UV.");
+            ASSIMP_LOG_WARN(Formatter::format() << "Ogre imported UV0 type " << uv1Element->TypeToString() << " is not compatible with Assimp. Ignoring UV.");
             uv1 = 0;
         }
     }
@@ -624,7 +624,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
         }
         else
         {
-            DefaultLogger::get()->warn(Formatter::format() << "Ogre imported UV0 type " << uv2Element->TypeToString() << " is not compatible with Assimp. Ignoring UV.");
+            ASSIMP_LOG_WARN(Formatter::format() << "Ogre imported UV0 type " << uv2Element->TypeToString() << " is not compatible with Assimp. Ignoring UV.");
             uv2 = 0;
         }
     }

@@ -79,7 +79,7 @@ bool JoinVerticesProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void JoinVerticesProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("JoinVerticesProcess begin");
+    ASSIMP_LOG_DEBUG("JoinVerticesProcess begin");
 
     // get the total number of vertices BEFORE the step is executed
     int iNumOldVertices = 0;
@@ -95,19 +95,13 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
         iNumVertices += ProcessMesh( pScene->mMeshes[a],a);
 
     // if logging is active, print detailed statistics
-    if (!DefaultLogger::isNullLogger())
-    {
-        if (iNumOldVertices == iNumVertices)
-        {
-            DefaultLogger::get()->debug("JoinVerticesProcess finished ");
-        } else
-        {
-            char szBuff[128]; // should be sufficiently large in every case
-            ::ai_snprintf(szBuff,128,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
-                iNumOldVertices,
-                iNumVertices,
-                ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f);
-            DefaultLogger::get()->info(szBuff);
+    if (!DefaultLogger::isNullLogger()) {
+        if (iNumOldVertices == iNumVertices) {
+            ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
+        } else {
+            ASSIMP_LOG_INFO_F("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
+                " out: ", iNumVertices, " | ~",
+                ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f );
         }
     }
 
@@ -274,7 +268,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)    {
-        DefaultLogger::get()->debug((Formatter::format(),
+        ASSIMP_LOG_DEBUG_F(
             "Mesh ",meshIndex,
             " (",
             (pMesh->mName.length ? pMesh->mName.data : "unnamed"),
@@ -284,7 +278,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             " | ~",
             ((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f,
             "%"
-        ));
+        );
     }
 
     // replace vertex data with the unique data sets
@@ -375,7 +369,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
                 }
             }
         } else {
-            DefaultLogger::get()->error( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
+            ASSIMP_LOG_ERROR( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
         }
 
         if (newWeights.size() > 0) {
@@ -409,7 +403,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             }
 
             --a;
-            DefaultLogger::get()->warn("Removing bone -> no weights remaining");
+            ASSIMP_LOG_WARN("Removing bone -> no weights remaining");
         }
     }
     return pMesh->mNumVertices;

@@ -137,11 +137,11 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 {
     if (!pScene->mNumMeshes)
     {
-        DefaultLogger::get()->debug("SortByPTypeProcess skipped, there are no meshes");
+        ASSIMP_LOG_DEBUG("SortByPTypeProcess skipped, there are no meshes");
         return;
     }
 
-    DefaultLogger::get()->debug("SortByPTypeProcess begin");
+    ASSIMP_LOG_DEBUG("SortByPTypeProcess begin");
 
     unsigned int aiNumMeshesPerPType[4] = {0,0,0,0};
 
@@ -404,8 +404,8 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
             aiNumMeshesPerPType[1], ((configRemoveMeshes & aiPrimitiveType_LINE)      ? "X" : ""),
             aiNumMeshesPerPType[2], ((configRemoveMeshes & aiPrimitiveType_TRIANGLE)  ? "X" : ""),
             aiNumMeshesPerPType[3], ((configRemoveMeshes & aiPrimitiveType_POLYGON)   ? "X" : ""));
-        DefaultLogger::get()->info(buffer);
-        DefaultLogger::get()->debug("SortByPTypeProcess finished");
+        ASSIMP_LOG_INFO(buffer);
+        ASSIMP_LOG_DEBUG("SortByPTypeProcess finished");
     }
 }
 

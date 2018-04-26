@@ -373,7 +373,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // first check if the referenced blocks exists ...
         const DXF::BlockMap::const_iterator it = blocks_by_name.find(insert.name);
         if (it == blocks_by_name.end()) {
-            ASSIMP_LOG_ERROR("DXF: Failed to resolve block reference: ", insert.name,"; skipping" );
+            ASSIMP_LOG_ERROR_F("DXF: Failed to resolve block reference: ", insert.name,"; skipping" );
             continue;
         }
 
@@ -406,7 +406,6 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& /*output*/)
 {
@@ -433,7 +432,6 @@ void DXFImporter::GenerateMaterials(aiScene* pScene, DXF::FileData& /*output*/)
     pScene->mMaterials[0] = pcMat;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& /*output*/)
 {
@@ -444,9 +442,7 @@ void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& /*output*/)
     if (1 == pScene->mNumMeshes)    {
         pScene->mRootNode->mMeshes = new unsigned int[ pScene->mRootNode->mNumMeshes = 1 ];
         pScene->mRootNode->mMeshes[0] = 0;
-    }
-    else
-    {
+    } else {
         pScene->mRootNode->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren = pScene->mNumMeshes ];
         for (unsigned int m = 0; m < pScene->mRootNode->mNumChildren;++m)   {
             aiNode* p = pScene->mRootNode->mChildren[m] = new aiNode();

@@ -777,7 +777,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 
             for(unsigned int cur = 0; cur < cnt && ++splitter ;++cur) {
                 if (splitter.match_start("Hole")) {
-                    ASSIMP_LOG_WARN_F( "Skipping unsupported `Hole` line" );
+                    ASSIMP_LOG_WARN( "Skipping unsupported `Hole` line" );
                     continue;
                 }
 

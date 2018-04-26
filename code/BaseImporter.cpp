@@ -595,7 +595,7 @@ void BatchLoader::LoadAll()
         if (!DefaultLogger::isNullLogger())
         {
             ASSIMP_LOG_INFO("%%% BEGIN EXTERNAL FILE %%%");
-            ASSIMP_LOG_INFO("File: ", (*it).file);
+            ASSIMP_LOG_INFO_F("File: ", (*it).file);
         }
         m_data->pImporter->ReadFile((*it).file,pp);
         (*it).scene = m_data->pImporter->GetOrphanedScene();

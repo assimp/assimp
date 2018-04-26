@@ -241,7 +241,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
             }
         }
 
-        ASSIMP_LOG_DEBUG("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
+        ASSIMP_LOG_DEBUG_F("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
     }
 
     if (! output.blocks.size()  ) {
@@ -457,22 +457,17 @@ void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& /*output*/)
 
 
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::SkipSection(DXF::LineReader& reader)
-{
+void DXFImporter::SkipSection(DXF::LineReader& reader) {
     for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::ParseHeader(DXF::LineReader& reader, DXF::FileData& /*output*/)
-{
+void DXFImporter::ParseHeader(DXF::LineReader& reader, DXF::FileData& ) {
     for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output)
-{
+void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output) {
     while( !reader.End() && !reader.Is(0,"ENDSEC")) {
         if (reader.Is(0,"BLOCK")) {
             ParseBlock(++reader,output);
@@ -481,15 +476,11 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output)
         ++reader;
     }
 
-    ASSIMP_LOG_DEBUG((Formatter::format("DXF: got "),
-        output.blocks.size()," entries in BLOCKS"
-    ));
+    ASSIMP_LOG_DEBUG_F("DXF: got ", output.blocks.size()," entries in BLOCKS" );
 }
 
-
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output)
-{
+void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output) {
     // push a new block onto the stack.
     output.blocks.push_back( DXF::Block() );
     DXF::Block& block = output.blocks.back();
@@ -533,7 +524,6 @@ void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output)
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
 {
@@ -563,11 +553,9 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
         ++reader;
     }
 
-    ASSIMP_LOG_DEBUG((Formatter::format("DXF: got "),
-        block.lines.size()," polylines and ", block.insertions.size() ," inserted blocks in ENTITIES"
-    ));
+    ASSIMP_LOG_DEBUG_F( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(), 
+        " inserted blocks in ENTITIES" );
 }
-
 
 void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 {
@@ -575,7 +563,6 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
     DXF::InsertBlock& bl = output.blocks.back().insertions.back();
 
     while( !reader.End() && !reader.Is(0)) {
-
         switch(reader.GroupCode())
         {
             // name of referenced block
@@ -620,8 +607,7 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 #define DXF_POLYLINE_FLAG_POLYFACEMESH  0x40
 
 // ------------------------------------------------------------------------------------------------
-void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
-{
+void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) {
     output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
@@ -788,8 +774,7 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
             }
             line.indices.push_back(indices[i]-1);
         }
-    }
-    else {
+    } else {
         line.positions.push_back(out);
         line.colors.push_back(clr);
     }
@@ -915,4 +900,3 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 }
 
 #endif // !! ASSIMP_BUILD_NO_DXF_IMPORTER
-

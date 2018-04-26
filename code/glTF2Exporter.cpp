@@ -638,6 +638,26 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     Mesh::Primitive& p = meshRef->primitives.back();
     Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
     if ( vertexJointAccessor ) {
+        unsigned int offset = vertexJointAccessor->bufferView->byteOffset;
+        unsigned int bytesLen = vertexJointAccessor->bufferView->byteLength;
+        unsigned int s_bytesPerComp= ComponentTypeSize(ComponentType_UNSIGNED_SHORT);
+        unsigned int bytesPerComp = ComponentTypeSize(vertexJointAccessor->componentType);
+        unsigned int s_bytesLen = bytesLen * s_bytesPerComp / bytesPerComp;
+        Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
+        uint8_t* arrys = new uint8_t[s_bytesLen];
+        unsigned int i = 0;
+        for ( unsigned int j = 0; j <= bytesLen; j += bytesPerComp ){
+            size_t len_p = offset + j;
+            float f_value = *(float *)&buf->GetPointer()[len_p];
+            unsigned short c = static_cast<unsigned short>(f_value);
+            uint8_t* data = new uint8_t[s_bytesPerComp];
+            data = (uint8_t*)&c;
+            memcpy(&arrys[i*s_bytesPerComp], data, s_bytesPerComp);
+            ++i;
+        }
+        buf->ReplaceData_joint(offset, bytesLen, arrys, s_bytesLen);
+        vertexJointAccessor->componentType = ComponentType_UNSIGNED_SHORT;
+
         p.attributes.joint.push_back( vertexJointAccessor );
     }
 

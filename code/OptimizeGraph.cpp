@@ -242,7 +242,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 // ------------------------------------------------------------------------------------------------
 // Execute the post-processing step on the given scene
 void OptimizeGraphProcess::Execute( aiScene* pScene) {
-    DefaultLogger::get()->debug("OptimizeGraphProcess begin");
+    ASSIMP_LOG_DEBUG("OptimizeGraphProcess begin");
     nodes_in = nodes_out = count_merged = 0;
     mScene = pScene;
 
@@ -329,12 +329,10 @@ void OptimizeGraphProcess::Execute( aiScene* pScene) {
     pScene->mRootNode->mParent = NULL;
     if (!DefaultLogger::isNullLogger()) {
         if ( nodes_in != nodes_out) {
-
-            char buf[512];
-            ::ai_snprintf(buf,512,"OptimizeGraphProcess finished; Input nodes: %u, Output nodes: %u",nodes_in,nodes_out);
-            DefaultLogger::get()->info(buf);
+            ASSIMP_LOG_INFO_F("OptimizeGraphProcess finished; Input nodes: ", nodes_in, ", Output nodes: ", nodes_out);
+        } else {
+            ASSIMP_LOG_DEBUG("OptimizeGraphProcess finished");
         }
-        else DefaultLogger::get()->debug("OptimizeGraphProcess finished");
     }
     meshes.clear();
     locked.clear();

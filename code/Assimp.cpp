@@ -146,7 +146,7 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 void ReportSceneNotFoundError() {
-    DefaultLogger::get()->error("Unable to find the Assimp::Importer for this aiScene. "
+    ASSIMP_LOG_ERROR("Unable to find the Assimp::Importer for this aiScene. "
         "The C-API does not accept scenes produced by the C++ API and vice versa");
 
     ai_assert(false);

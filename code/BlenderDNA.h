@@ -381,7 +381,7 @@ template <>  struct Structure :: _defaultInitializer<ErrorPolicy_Warn> {
 
     template <typename T>
     void operator ()(T& out, const char* reason = "<add reason>") {
-        DefaultLogger::get()->warn(reason);
+        ASSIMP_LOG_WARN(reason);
 
         // ... and let the show go on
         _defaultInitializer<0 /*ErrorPolicy_Igno*/>()(out);

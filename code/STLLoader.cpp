@@ -286,14 +286,14 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
             if(!SkipSpacesAndLineEnd(&sz))
             {
                 // seems we're finished although there was no end marker
-                DefaultLogger::get()->warn("STL: unexpected EOF. \'endsolid\' keyword was expected");
+                ASSIMP_LOG_WARN("STL: unexpected EOF. \'endsolid\' keyword was expected");
                 break;
             }
             // facet normal -0.13 -0.13 -0.98
             if (!strncmp(sz,"facet",5) && IsSpaceOrNewLine(*(sz+5)) && *(sz + 5) != '\0')    {
 
                 if (faceVertexCounter != 3) {
-                    DefaultLogger::get()->warn("STL: A new facet begins but the old is not yet complete");
+                    ASSIMP_LOG_WARN("STL: A new facet begins but the old is not yet complete");
                 }
                 faceVertexCounter = 0;
                 normalBuffer.push_back(aiVector3D());
@@ -302,7 +302,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
                 sz += 6;
                 SkipSpaces(&sz);
                 if (strncmp(sz,"normal",6))    {
-                    DefaultLogger::get()->warn("STL: a facet normal vector was expected but not found");
+                    ASSIMP_LOG_WARN("STL: a facet normal vector was expected but not found");
                 } else {
                     if (sz[6] == '\0') {
                         throw DeadlyImportError("STL: unexpected EOF while parsing facet");
@@ -319,7 +319,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
                 }
             } else if (!strncmp(sz,"vertex",6) && ::IsSpaceOrNewLine(*(sz+6))) { // vertex 1.50000 1.50000 0.00000
                 if (faceVertexCounter >= 3) {
-                    DefaultLogger::get()->error("STL: a facet with more than 3 vertices has been found");
+                    ASSIMP_LOG_ERROR("STL: a facet with more than 3 vertices has been found");
                     ++sz;
                 } else {
                     if (sz[6] == '\0') {
@@ -418,7 +418,7 @@ bool STLImporter::LoadBinaryFile()
 
             // read the default vertex color for facets
             bIsMaterialise = true;
-            DefaultLogger::get()->info("STL: Taking code path for Materialise files");
+            ASSIMP_LOG_INFO("STL: Taking code path for Materialise files");
             const ai_real invByte = (ai_real)1.0 / ( ai_real )255.0;
             clrColorDefault.r = (*sz2++) * invByte;
             clrColorDefault.g = (*sz2++) * invByte;
@@ -500,7 +500,7 @@ bool STLImporter::LoadBinaryFile()
                     *pMesh->mColors[0]++ = this->clrColorDefault;
                 pMesh->mColors[0] -= pMesh->mNumVertices;
 
-                DefaultLogger::get()->info("STL: Mesh has vertex colors");
+                ASSIMP_LOG_INFO("STL: Mesh has vertex colors");
             }
             aiColor4D* clr = &pMesh->mColors[0][i*3];
             clr->a = 1.0;

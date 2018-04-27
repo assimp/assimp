@@ -146,7 +146,7 @@ public:
                 for(;splitter->length() && splitter->at(0) != '}'; splitter++, cnt++);
 
                 splitter++;
-                DefaultLogger::get()->debug((Formatter::format("DXF: skipped over control group ("),cnt," lines)"));
+                ASSIMP_LOG_DEBUG((Formatter::format("DXF: skipped over control group ("),cnt," lines)"));
             }
         } catch(std::logic_error&) {
             ai_assert(!splitter);

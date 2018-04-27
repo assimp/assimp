@@ -88,7 +88,7 @@ void SplitByBoneCountProcess::SetupProperties(const Importer* pImp)
 // Executes the post processing step on the given imported data.
 void SplitByBoneCountProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("SplitByBoneCountProcess begin");
+    ASSIMP_LOG_DEBUG("SplitByBoneCountProcess begin");
 
     // early out
     bool isNecessary = false;
@@ -98,7 +98,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
 
     if( !isNecessary )
     {
-        DefaultLogger::get()->debug( format() << "SplitByBoneCountProcess early-out: no meshes with more than " << mMaxBoneCount << " bones." );
+        ASSIMP_LOG_DEBUG( format() << "SplitByBoneCountProcess early-out: no meshes with more than " << mMaxBoneCount << " bones." );
         return;
     }
 
@@ -146,7 +146,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
     // recurse through all nodes and translate the node's mesh indices to fit the new mesh array
     UpdateNode( pScene->mRootNode);
 
-    DefaultLogger::get()->debug( format() << "SplitByBoneCountProcess end: split " << mSubMeshIndices.size() << " meshes into " << meshes.size() << " submeshes." );
+    ASSIMP_LOG_DEBUG( format() << "SplitByBoneCountProcess end: split " << mSubMeshIndices.size() << " meshes into " << meshes.size() << " submeshes." );
 }
 
 // ------------------------------------------------------------------------------------------------

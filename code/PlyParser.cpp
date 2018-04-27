@@ -97,7 +97,7 @@ PLY::EDataType PLY::Property::ParseDataType(std::vector<char> &buffer) {
   }
   if (PLY::EDT_INVALID == eOut)
   {
-    DefaultLogger::get()->info("Found unknown data type in PLY file. This is OK");
+      ASSIMP_LOG_INFO("Found unknown data type in PLY file. This is OK");
   }
 
   return eOut;
@@ -229,7 +229,7 @@ PLY::ESemantic PLY::Property::ParseSemantic(std::vector<char> &buffer) {
     eOut = PLY::EST_ZNormal;
   }
   else {
-    DefaultLogger::get()->info("Found unknown property semantic in file. This is ok");
+      ASSIMP_LOG_INFO("Found unknown property semantic in file. This is ok");
     PLY::DOM::SkipLine(buffer);
   }
   return eOut;
@@ -295,7 +295,7 @@ bool PLY::Property::ParseProperty(std::vector<char> &buffer, PLY::Property* pOut
 
   if (PLY::EST_INVALID == pOut->Semantic)
   {
-    DefaultLogger::get()->info("Found unknown semantic in PLY file. This is OK");
+    ASSIMP_LOG_INFO("Found unknown semantic in PLY file. This is OK");
     std::string(&buffer[0], &buffer[0] + strlen(&buffer[0]));
   }
 
@@ -514,7 +514,7 @@ bool PLY::DOM::SkipComments(std::vector<char> &buffer)
 
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer, bool isBinary) {
-  DefaultLogger::get()->debug("PLY::DOM::ParseHeader() begin");
+    ASSIMP_LOG_DEBUG("PLY::DOM::ParseHeader() begin");
 
   // parse all elements
   while (!buffer.empty())
@@ -543,14 +543,14 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
   if (!isBinary) // it would occur an error, if binary data start with values as space or line end.
     SkipSpacesAndLineEnd(buffer);
 
-  DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseHeader() succeeded");
   return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseElementInstanceLists(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer, PLYImporter* loader)
 {
-  DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() begin");
+    ASSIMP_LOG_DEBUG("PLY::DOM::ParseElementInstanceLists() begin");
   alElementData.resize(alElements.size());
 
   std::vector<PLY::Element>::const_iterator i = alElements.begin();
@@ -571,7 +571,7 @@ bool PLY::DOM::ParseElementInstanceLists(IOStreamBuffer<char> &streamBuffer, std
     }
   }
 
-  DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() succeeded");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseElementInstanceLists() succeeded");
   return true;
 }
 
@@ -582,7 +582,7 @@ bool PLY::DOM::ParseElementInstanceListsBinary(IOStreamBuffer<char> &streamBuffe
     PLYImporter* loader,
     bool p_bBE)
 {
-  DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() begin");
+    ASSIMP_LOG_DEBUG("PLY::DOM::ParseElementInstanceListsBinary() begin");
   alElementData.resize(alElements.size());
 
   std::vector<PLY::Element>::const_iterator i = alElements.begin();
@@ -602,7 +602,7 @@ bool PLY::DOM::ParseElementInstanceListsBinary(IOStreamBuffer<char> &streamBuffe
     }
   }
 
-  DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() succeeded");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseElementInstanceListsBinary() succeeded");
   return true;
 }
 
@@ -615,11 +615,11 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM* p_pc
   std::vector<char> buffer;
   streamBuffer.getNextLine(buffer);
 
-  DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstanceBinary() begin");
 
   if (!p_pcOut->ParseHeader(streamBuffer, buffer, true))
   {
-    DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
+      ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstanceBinary() failure");
     return false;
   }
 
@@ -628,10 +628,10 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM* p_pc
   const char* pCur = (char*)&buffer[0];
   if (!p_pcOut->ParseElementInstanceListsBinary(streamBuffer, buffer, pCur, bufferSize, loader, p_bBE))
   {
-    DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
+      ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstanceBinary() failure");
     return false;
   }
-  DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() succeeded");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstanceBinary() succeeded");
   return true;
 }
 
@@ -644,11 +644,11 @@ bool PLY::DOM::ParseInstance(IOStreamBuffer<char> &streamBuffer, DOM* p_pcOut, P
   std::vector<char> buffer;
   streamBuffer.getNextLine(buffer);
 
-  DefaultLogger::get()->debug("PLY::DOM::ParseInstance() begin");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstance() begin");
 
   if (!p_pcOut->ParseHeader(streamBuffer, buffer, false))
   {
-    DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
+      ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstance() failure");
     return false;
   }
 
@@ -656,10 +656,10 @@ bool PLY::DOM::ParseInstance(IOStreamBuffer<char> &streamBuffer, DOM* p_pcOut, P
   streamBuffer.getNextLine(buffer);
   if (!p_pcOut->ParseElementInstanceLists(streamBuffer, buffer, loader))
   {
-    DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
+      ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstance() failure");
     return false;
   }
-  DefaultLogger::get()->debug("PLY::DOM::ParseInstance() succeeded");
+  ASSIMP_LOG_DEBUG("PLY::DOM::ParseInstance() succeeded");
   return true;
 }
 
@@ -787,7 +787,7 @@ bool PLY::ElementInstance::ParseInstance(const char* &pCur,
   {
     if (!(PLY::PropertyInstance::ParseInstance(pCur, &(*a), &(*i))))
     {
-      DefaultLogger::get()->warn("Unable to parse property instance. "
+        ASSIMP_LOG_WARN("Unable to parse property instance. "
         "Skipping this element instance");
 
       PLY::PropertyInstance::ValueUnion v = PLY::PropertyInstance::DefaultValue((*a).eType);
@@ -819,7 +819,7 @@ bool PLY::ElementInstance::ParseInstanceBinary(
   {
     if (!(PLY::PropertyInstance::ParseInstanceBinary(streamBuffer, buffer, pCur, bufferSize, &(*a), &(*i), p_bBE)))
     {
-      DefaultLogger::get()->warn("Unable to parse binary property instance. "
+        ASSIMP_LOG_WARN("Unable to parse binary property instance. "
         "Skipping this element instance");
 
       (*i).avList.push_back(PLY::PropertyInstance::DefaultValue((*a).eType));

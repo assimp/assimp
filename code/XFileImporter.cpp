@@ -587,7 +587,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
             }
 
             if( oldMat.sceneIndex == SIZE_MAX ) {
-                DefaultLogger::get()->warn( format() << "Could not resolve global material reference \"" << oldMat.mName << "\"" );
+                ASSIMP_LOG_WARN_F( "Could not resolve global material reference \"", oldMat.mName, "\"" );
                 oldMat.sceneIndex = 0;
             }
 

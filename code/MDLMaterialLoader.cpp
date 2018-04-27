@@ -64,7 +64,7 @@ using namespace Assimp;
 static aiTexel* const bad_texel = reinterpret_cast<aiTexel*>(SIZE_MAX);
 
 // ------------------------------------------------------------------------------------------------
-// Find a suitable pallette file or take the default one
+// Find a suitable palette file or take the default one
 void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 {
     // now try to find the color map in the current directory
@@ -75,10 +75,11 @@ void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
     {
         if (pcStream->FileSize() >= 768)
         {
-            unsigned char* colorMap = new unsigned char[256*3];
+            size_t len = 256 * 3;
+            unsigned char* colorMap = new unsigned char[len];
             szColorMap = colorMap;
-            pcStream->Read(colorMap,256*3,1);
-            DefaultLogger::get()->info("Found valid colormap.lmp in directory. "
+            pcStream->Read(colorMap, len,1);
+            ASSIMP_LOG_INFO("Found valid colormap.lmp in directory. "
                 "It will be used to decode embedded textures in palletized formats.");
         }
         delete pcStream;
@@ -186,7 +187,7 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 
     if (iType == 1 || iType > 3)
     {
-        DefaultLogger::get()->error("Unsupported texture file format");
+        ASSIMP_LOG_ERROR("Unsupported texture file format");
         return;
     }
 
@@ -508,7 +509,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         // ***** EMBEDDED DDS FILE *****
         if (1 != iHeight)
         {
-            DefaultLogger::get()->warn("Found a reference to an embedded DDS texture, "
+            ASSIMP_LOG_WARN("Found a reference to an embedded DDS texture, "
                 "but texture height is not equal to 1, which is not supported by MED");
         }
 
@@ -531,7 +532,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         // ***** REFERENCE TO EXTERNAL FILE *****
         if (1 != iHeight)
         {
-            DefaultLogger::get()->warn("Found a reference to an external texture, "
+            ASSIMP_LOG_WARN("Found a reference to an external texture, "
                 "but texture height is not equal to 1, which is not supported by MED");
         }
 
@@ -552,7 +553,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         pcNew.reset(new aiTexture());
         if (!iHeight || !iWidth)
         {
-            DefaultLogger::get()->warn("Found embedded texture, but its width "
+            ASSIMP_LOG_WARN("Found embedded texture, but its width "
                 "an height are both 0. Is this a joke?");
 
             // generate an empty chess pattern

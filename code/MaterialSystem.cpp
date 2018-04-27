@@ -160,7 +160,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
                 break;
             }
             if ( !IsSpace(*cur) ) {
-                DefaultLogger::get()->error("Material property" + std::string(pKey) +
+                ASSIMP_LOG_ERROR("Material property" + std::string(pKey) +
                     " is a string; failed to parse a float array out of it.");
                 return AI_FAILURE;
             }
@@ -233,7 +233,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
                 break;
             }
             if(!IsSpace(*cur)) {
-                DefaultLogger::get()->error("Material property" + std::string(pKey) +
+                ASSIMP_LOG_ERROR("Material property" + std::string(pKey) +
                     " is a string; failed to parse an integer array out of it.");
                 return AI_FAILURE;
             }
@@ -305,7 +305,7 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
     }
     else {
         // TODO - implement lexical cast as well
-        DefaultLogger::get()->error("Material property" + std::string(pKey) +
+        ASSIMP_LOG_ERROR("Material property" + std::string(pKey) +
             " was found, but is no string" );
         return AI_FAILURE;
     }

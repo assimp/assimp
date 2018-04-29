@@ -95,11 +95,11 @@ void ImproveCacheLocalityProcess::SetupProperties(const Importer* pImp)
 void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
 {
     if (!pScene->mNumMeshes) {
-        DefaultLogger::get()->debug("ImproveCacheLocalityProcess skipped; there are no meshes");
+        ASSIMP_LOG_DEBUG("ImproveCacheLocalityProcess skipped; there are no meshes");
         return;
     }
 
-    DefaultLogger::get()->debug("ImproveCacheLocalityProcess begin");
+    ASSIMP_LOG_DEBUG("ImproveCacheLocalityProcess begin");
 
     float out = 0.f;
     unsigned int numf = 0, numm = 0;
@@ -112,12 +112,8 @@ void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
         }
     }
     if (!DefaultLogger::isNullLogger()) {
-        char szBuff[128]; // should be sufficiently large in every case
-        ai_snprintf(szBuff,128,"Cache relevant are %u meshes (%u faces). Average output ACMR is %f",
-            numm,numf,out/numf);
-
-        DefaultLogger::get()->info(szBuff);
-        DefaultLogger::get()->debug("ImproveCacheLocalityProcess finished. ");
+        ASSIMP_LOG_INFO_F("Cache relevant are ", numm, " meshes (", numf," faces). Average output ACMR is ", out / numf );
+        ASSIMP_LOG_DEBUG("ImproveCacheLocalityProcess finished. ");
     }
 }
 
@@ -135,7 +131,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
         return 0.f;
 
     if (pMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) {
-        DefaultLogger::get()->error("This algorithm works on triangle meshes only");
+        ASSIMP_LOG_ERROR("This algorithm works on triangle meshes only");
         return 0.f;
     }
 
@@ -186,7 +182,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             // mesh, otherwise this value would normally be at least minimally
             // smaller than 3.0 ...
             ai_snprintf(szBuff,128,"Mesh %u: Not suitable for vcache optimization",meshNum);
-            DefaultLogger::get()->warn(szBuff);
+            ASSIMP_LOG_WARN(szBuff);
             return 0.f;
         }
     }
@@ -364,11 +360,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 
         // very intense verbose logging ... prepare for much text if there are many meshes
         if ( DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE) {
-            char szBuff[128]; // should be sufficiently large in every case
-
-            ai_snprintf(szBuff,128,"Mesh %u | ACMR in: %f out: %f | ~%.1f%%",meshNum,fACMR,fACMR2,
-                ((fACMR - fACMR2) / fACMR) * 100.f);
-            DefaultLogger::get()->debug(szBuff);
+            ASSIMP_LOG_DEBUG_F("Mesh %u | ACMR in: ", meshNum, " out: ", fACMR, " | ~", fACMR2, ((fACMR - fACMR2) / fACMR) * 100.f);
         }
 
         fACMR2 *= pMesh->mNumFaces;

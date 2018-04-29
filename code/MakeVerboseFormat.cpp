@@ -65,7 +65,7 @@ MakeVerboseFormatProcess::~MakeVerboseFormatProcess()
 void MakeVerboseFormatProcess::Execute( aiScene* pScene)
 {
     ai_assert(NULL != pScene);
-    DefaultLogger::get()->debug("MakeVerboseFormatProcess begin");
+    ASSIMP_LOG_DEBUG("MakeVerboseFormatProcess begin");
 
     bool bHas = false;
     for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
@@ -73,12 +73,15 @@ void MakeVerboseFormatProcess::Execute( aiScene* pScene)
         if( MakeVerboseFormat( pScene->mMeshes[a]))
             bHas = true;
     }
-    if (bHas) DefaultLogger::get()->info("MakeVerboseFormatProcess finished. There was much work to do ...");
-    else DefaultLogger::get()->debug("MakeVerboseFormatProcess. There was nothing to do.");
+    if (bHas) {
+        ASSIMP_LOG_INFO("MakeVerboseFormatProcess finished. There was much work to do ...");
+    } else {
+        ASSIMP_LOG_DEBUG("MakeVerboseFormatProcess. There was nothing to do.");
+    }
 
     pScene->mFlags &= ~AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-
 }
+
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)

@@ -106,7 +106,7 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
     ai_assert(iLen > 0);
 
     va_end(args);
-    DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
+    ASSIMP_LOG_WARN("Validation warning: " + std::string(szBuffer,iLen));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ inline void ValidateDSProcess::DoValidationWithNameCheck(T** array,
 void ValidateDSProcess::Execute( aiScene* pScene)
 {
     this->mScene = pScene;
-    DefaultLogger::get()->debug("ValidateDataStructureProcess begin");
+    ASSIMP_LOG_DEBUG("ValidateDataStructureProcess begin");
 
     // validate the node graph of the scene
     Validate(pScene->mRootNode);
@@ -273,7 +273,7 @@ void ValidateDSProcess::Execute( aiScene* pScene)
     }
 
 //  if (!has)ReportError("The aiScene data structure is empty");
-    DefaultLogger::get()->debug("ValidateDataStructureProcess end");
+    ASSIMP_LOG_DEBUG("ValidateDataStructureProcess end");
 }
 
 // ------------------------------------------------------------------------------------------------

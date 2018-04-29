@@ -85,11 +85,11 @@ void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void FindDegeneratesProcess::Execute( aiScene* pScene) {
-    DefaultLogger::get()->debug("FindDegeneratesProcess begin");
+    ASSIMP_LOG_DEBUG("FindDegeneratesProcess begin");
     for (unsigned int i = 0; i < pScene->mNumMeshes;++i){
         ExecuteOnMesh( pScene->mMeshes[ i ] );
     }
-    DefaultLogger::get()->debug("FindDegeneratesProcess finished");
+    ASSIMP_LOG_DEBUG("FindDegeneratesProcess finished");
 }
 
 static ai_real heron( ai_real a, ai_real b, ai_real c ) {
@@ -242,7 +242,7 @@ evil_jump_outside:
         if (!mesh->mNumFaces) {
             // WTF!?
             // OK ... for completeness and because I'm not yet tired,
-            // let's write code that willl hopefully never be called
+            // let's write code that will hopefully never be called
             // (famous last words)
 
             // OK ... bad idea.
@@ -250,10 +250,7 @@ evil_jump_outside:
         }
     }
 
-    if (deg && !DefaultLogger::isNullLogger())
-    {
-        char s[64];
-        ASSIMP_itoa10(s,deg);
-        DefaultLogger::get()->warn(std::string("Found ") + s + " degenerated primitives");
+    if (deg && !DefaultLogger::isNullLogger()) {
+        ASSIMP_LOG_WARN_F( "Found ", deg, " degenerated primitives");
     }
 }

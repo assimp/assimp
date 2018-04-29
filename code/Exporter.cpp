@@ -363,7 +363,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                     }
 
                     if (verbosify || (exp.mEnforcePP & aiProcess_JoinIdenticalVertices)) {
-                        DefaultLogger::get()->debug("export: Scene data not in verbose format, applying MakeVerboseFormat step first");
+                        ASSIMP_LOG_DEBUG("export: Scene data not in verbose format, applying MakeVerboseFormat step first");
 
                         MakeVerboseFormatProcess proc;
                         proc.Execute(scenecopy.get());

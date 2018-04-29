@@ -82,28 +82,35 @@ bool FixInfacingNormalsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void FixInfacingNormalsProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("FixInfacingNormalsProcess begin");
+    ASSIMP_LOG_DEBUG("FixInfacingNormalsProcess begin");
 
-    bool bHas = false;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-        if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
+    bool bHas( false );
+    for (unsigned int a = 0; a < pScene->mNumMeshes; ++a) {
+        if (ProcessMesh(pScene->mMeshes[a], a)) {
+            bHas = true;
+        }
+    }
 
-    if (bHas)
-         DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. Found issues.");
-    else DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. No changes to the scene.");
+    if (bHas) {
+        ASSIMP_LOG_DEBUG("FixInfacingNormalsProcess finished. Found issues.");
+    } else {
+        ASSIMP_LOG_DEBUG("FixInfacingNormalsProcess finished. No changes to the scene.");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Apply the step to the mesh
 bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 {
-    ai_assert(NULL != pcMesh);
+    ai_assert(nullptr != pcMesh);
 
     // Nothing to do if there are no model normals
-    if (!pcMesh->HasNormals())return false;
+    if (!pcMesh->HasNormals()) {
+        return false;
+    }
 
     // Compute the bounding box of both the model vertices + normals and
-    // the umodified model vertices. Then check whether the first BB
+    // the unmodified model vertices. Then check whether the first BB
     // is smaller than the second. In this case we can assume that the
     // normals need to be flipped, although there are a few special cases ..
     // convex, concave, planar models ...
@@ -155,14 +162,9 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
     if (fDelta1_z < 0.05f * std::sqrt( fDelta1_y * fDelta1_x ))return false;
 
     // now compare the volumes of the bounding boxes
-    if (std::fabs(fDelta0_x * fDelta0_y * fDelta0_z) <
-        std::fabs(fDelta1_x * fDelta1_yz))
-    {
-        if (!DefaultLogger::isNullLogger())
-        {
-            char buffer[128]; // should be sufficiently large
-            ai_snprintf(buffer,128,"Mesh %u: Normals are facing inwards (or the mesh is planar)",index);
-            DefaultLogger::get()->info(buffer);
+    if (std::fabs(fDelta0_x * fDelta0_y * fDelta0_z) < std::fabs(fDelta1_x * fDelta1_yz)) {
+        if (!DefaultLogger::isNullLogger()) {
+            ASSIMP_LOG_INFO_F("Mesh ", index, ": Normals are facing inwards (or the mesh is planar)", index);
         }
 
         // Invert normals

@@ -366,7 +366,7 @@ void ObjFileMtlImporter::getTexture() {
         out = & m_pModel->m_pCurrentMaterial->textureSpecularity;
         clampIndex = ObjFile::Material::TextureSpecularityType;
     } else {
-        DefaultLogger::get()->error("OBJ/MTL: Encountered unknown texture type");
+        ASSIMP_LOG_ERROR("OBJ/MTL: Encountered unknown texture type");
         return;
     }
 

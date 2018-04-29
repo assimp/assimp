@@ -126,7 +126,7 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream)
 
                 // XXX need support for multiple schemas?
                 if (list->GetSize() > 1)    {
-                    DefaultLogger::get()->warn(AddLineNumber("multiple schemas currently not supported",line));
+                    ASSIMP_LOG_WARN(AddLineNumber("multiple schemas currently not supported",line));
                 }
                 const EXPRESS::STRING* string( nullptr );
                 if (!list->GetSize() || !(string=dynamic_cast<const EXPRESS::STRING*>( (*list)[0].get() ))) {
@@ -192,7 +192,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
         // LineSplitter already ignores empty lines
         ai_assert(s.length());
         if (s[0] != '#') {
-            DefaultLogger::get()->warn(AddLineNumber("expected token \'#\'",line));
+            ASSIMP_LOG_WARN(AddLineNumber("expected token \'#\'",line));
             ++splitter;
             continue;
         }
@@ -202,14 +202,14 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
         // ---
         const std::string::size_type n0 = s.find_first_of('=');
         if (n0 == std::string::npos) {
-            DefaultLogger::get()->warn(AddLineNumber("expected token \'=\'",line));
+            ASSIMP_LOG_WARN(AddLineNumber("expected token \'=\'",line));
             ++splitter;
             continue;
         }
 
         const uint64_t id = strtoul10_64(s.substr(1,n0-1).c_str());
         if (!id) {
-            DefaultLogger::get()->warn(AddLineNumber("expected positive, numeric entity id",line));
+            ASSIMP_LOG_WARN(AddLineNumber("expected positive, numeric entity id",line));
             ++splitter;
             continue;
         }
@@ -236,7 +236,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
             }
 
             if(!ok) {
-                DefaultLogger::get()->warn(AddLineNumber("expected token \'(\'",line));
+                ASSIMP_LOG_WARN(AddLineNumber("expected token \'(\'",line));
                 continue;
             }
         }
@@ -263,13 +263,13 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
                 }
             }
             if(!ok) {
-                DefaultLogger::get()->warn(AddLineNumber("expected token \')\'",line));
+                ASSIMP_LOG_WARN(AddLineNumber("expected token \')\'",line));
                 continue;
             }
         }
 
         if (map.find(id) != map.end()) {
-            DefaultLogger::get()->warn(AddLineNumber((Formatter::format(),"an object with the id #",id," already exists"),line));
+            ASSIMP_LOG_WARN(AddLineNumber((Formatter::format(),"an object with the id #",id," already exists"),line));
         }
 
         std::string::size_type ns = n0;
@@ -292,11 +292,11 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
     }
 
     if (!splitter) {
-        DefaultLogger::get()->warn("STEP: ignoring unexpected EOF");
+        ASSIMP_LOG_WARN("STEP: ignoring unexpected EOF");
     }
 
     if ( !DefaultLogger::isNullLogger()){
-        DefaultLogger::get()->debug((Formatter::format(),"STEP: got ",map.size()," object records with ",
+        ASSIMP_LOG_DEBUG((Formatter::format(),"STEP: got ",map.size()," object records with ",
             db.GetRefs().size()," inverse index entries"));
     }
 }
@@ -392,7 +392,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
         std::string stemp = std::string(start, static_cast<size_t>(cur - start));
         if(!StringToUTF8(stemp)) {
             // TODO: route this to a correct logger with line numbers etc., better error messages
-            DefaultLogger::get()->error("an error occurred reading escape sequences in ASCII text");
+            ASSIMP_LOG_ERROR("an error occurred reading escape sequences in ASCII text");
         }
 
         return std::make_shared<EXPRESS::STRING>(stemp);

@@ -267,6 +267,24 @@ TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
 #endif // ASSIMP_BUILD_NO_EXPORT
 }
 
+TEST_F( utObjImportExport, issue1923_vertex_color_Test ) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors_uni.obj", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    ::Assimp::Exporter exporter;
+    const aiExportDataBlob* blob = exporter.ExportToBlob( scene, "obj");
+    EXPECT_NE( nullptr, blob );
+
+    const aiScene *sceneReImport = importer.ReadFileFromMemory( blob->data, blob->size, aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+
+    SceneDiffer differ;
+    EXPECT_TRUE( differ.isEqual( scene, sceneReImport ) );
+#endif // ASSIMP_BUILD_NO_EXPORT
+}
+
 TEST_F( utObjImportExport, issue1453_segfault ) {
     static const std::string ObjModel =
         "v  0.0  0.0  0.0\n"

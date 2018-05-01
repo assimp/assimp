@@ -141,13 +141,15 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
             mOutput << " facet normal " << nor.x << " " << nor.y << " " << nor.z << endl;
             for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
                 aiMesh *mesh = pScene->mMeshes[i];
-                if (mesh->mNormals) {
-                    for (unsigned int a = 0; a < mesh->mNumVertices; ++a) {
-                        const aiVector3D& v = mesh->mVertices[a];
-                        mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
-                        mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
-                        mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
-                    }
+                if (nullptr == mesh) {
+                    continue;
+                }
+
+                for (unsigned int a = 0; a < mesh->mNumVertices; ++a) {
+                    const aiVector3D& v = mesh->mVertices[a];
+                    mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
+                    mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
+                    mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
                 }
             }
             mOutput << "endsolid " << name << endl;
@@ -163,7 +165,7 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
 }
 
 // ------------------------------------------------------------------------------------------------
-void STLExporter :: WriteMesh(const aiMesh* m)
+void STLExporter::WriteMesh(const aiMesh* m)
 {
     for (unsigned int i = 0; i < m->mNumFaces; ++i) {
         const aiFace& f = m->mFaces[i];

@@ -62,6 +62,7 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "JoinVerticesProcess.h"
 #include "MakeVerboseFormat.h"
 #include "ConvertToLHProcess.h"
+#include "PretransformVertices.h"
 #include <assimp/Exceptional.h>
 #include "ScenePrivate.h"
 #include <memory>
@@ -397,6 +398,11 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                         }
                     }
 
+                    bool exportPointCloud(false);
+                    if (nullptr != pProperties) {
+                        exportPointCloud = pProperties->GetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS);
+                    }
+
                     // dispatch other processes
                     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
                         BaseProcess* const p = pimpl->mPostProcessingSteps[a];
@@ -405,7 +411,9 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                             && !dynamic_cast<FlipUVsProcess*>(p)
                             && !dynamic_cast<FlipWindingOrderProcess*>(p)
                             && !dynamic_cast<MakeLeftHandedProcess*>(p)) {
-
+                            if (dynamic_cast<PretransformVertices*>(p) && exportPointCloud) {
+                                continue;
+                            }
                             p->Execute(scenecopy.get());
                         }
                     }
@@ -440,7 +448,6 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
 const char* Exporter::GetErrorString() const {
     return pimpl->mError.c_str();
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void Exporter::FreeBlob() {
@@ -495,7 +502,8 @@ aiReturn Exporter::RegisterExporter(const ExportFormatEntry& desc) {
 
 // ------------------------------------------------------------------------------------------------
 void Exporter::UnregisterExporter(const char* id) {
-    for(std::vector<ExportFormatEntry>::iterator it = pimpl->mExporters.begin(); it != pimpl->mExporters.end(); ++it) {
+    for(std::vector<ExportFormatEntry>::iterator it = pimpl->mExporters.begin();
+            it != pimpl->mExporters.end(); ++it) {
         if (!strcmp((*it).mDescription.id,id)) {
             pimpl->mExporters.erase(it);
             break;

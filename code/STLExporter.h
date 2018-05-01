@@ -52,8 +52,7 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to a STL file. */

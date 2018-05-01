@@ -272,6 +272,8 @@ TEST_F( utObjImportExport, issue1923_vertex_color_Test ) {
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors_uni.obj", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 
+    scene = importer.GetOrphanedScene();
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
     ::Assimp::Exporter exporter;
     const aiExportDataBlob* blob = exporter.ExportToBlob( scene, "obj");
@@ -283,6 +285,8 @@ TEST_F( utObjImportExport, issue1923_vertex_color_Test ) {
     SceneDiffer differ;
     EXPECT_TRUE( differ.isEqual( scene, sceneReImport ) );
 #endif // ASSIMP_BUILD_NO_EXPORT
+
+    delete scene;
 }
 
 TEST_F( utObjImportExport, issue1453_segfault ) {

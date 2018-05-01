@@ -67,7 +67,7 @@ public:
     std::ostringstream mOutput;
 
 private:
-
+    void WritePointCloud(const std::string &name, const aiScene* pScene);
     void WriteMesh(const aiMesh* m);
     void WriteMeshBinary(const aiMesh* m);
 

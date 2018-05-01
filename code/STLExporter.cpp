@@ -100,6 +100,8 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
 
 } // end of namespace Assimp
 
+static const char *SolidToken = "solid";
+static const char *EndSolidToken = "endsolid";
 
 // ------------------------------------------------------------------------------------------------
 STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool exportPointClouds, bool binary)
@@ -132,36 +134,42 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
             WriteMeshBinary(pScene->mMeshes[i]);
         }
     } else {
-        const std::string& name = "AssimpScene";
 
         // Exporting only point clouds
         if (exportPointClouds) {
-            mOutput << "solid " << name << endl;
-            aiVector3D nor;
-            mOutput << " facet normal " << nor.x << " " << nor.y << " " << nor.z << endl;
-            for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-                aiMesh *mesh = pScene->mMeshes[i];
-                if (nullptr == mesh) {
-                    continue;
-                }
-
-                for (unsigned int a = 0; a < mesh->mNumVertices; ++a) {
-                    const aiVector3D& v = mesh->mVertices[a];
-                    mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
-                    mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
-                    mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
-                }
-            }
-            mOutput << "endsolid " << name << endl;
+            WritePointCloud("Assimp_Pointcloud", pScene );
             return;
         } 
 
-        mOutput << "solid " << name << endl;
+        // Export the assimp mesh 
+        const std::string name = "AssimpScene";
+        mOutput << SolidToken << name << endl;
         for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-            WriteMesh(pScene->mMeshes[i]);
+            WriteMesh(pScene->mMeshes[ i ]);
         }
-        mOutput << "endsolid " << name << endl;
+        mOutput << EndSolidToken << name << endl;
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+void STLExporter::WritePointCloud(const std::string &name, const aiScene* pScene) {
+    mOutput << " " << SolidToken << " " << name << endl;
+    aiVector3D nor;
+    mOutput << " facet normal " << nor.x << " " << nor.y << " " << nor.z << endl;
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        aiMesh *mesh = pScene->mMeshes[i];
+        if (nullptr == mesh) {
+            continue;
+        }
+
+        for (unsigned int a = 0; a < mesh->mNumVertices; ++a) {
+            const aiVector3D& v = mesh->mVertices[a];
+            mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
+            mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
+            mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
+        }
+    }
+    mOutput << EndSolidToken << name << endl;
 }
 
 // ------------------------------------------------------------------------------------------------

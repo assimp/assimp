@@ -75,6 +75,17 @@ TEST_F( utSTLImporterExporter, test_with_two_solids ) {
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
+TEST_F(utSTLImporterExporter, exporterTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
+
+    Assimp::Exporter mAiExporter;
+    mAiExporter.Export( scene, "stl", "spiderExport.stl" );
+
+    const aiScene *scene2 = importer.ReadFile("spiderExport.stl", aiProcess_ValidateDataStructure);
+    //EXPECT_NE(nullptr, scene2);
+}
+
 TEST_F(utSTLImporterExporter, test_export_pointclouds) {
     struct XYZ {
         float x, y, z;
@@ -126,6 +137,8 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
     ExportProperties *properties = new ExportProperties;
     properties->SetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS, true);
     mAiExporter.Export(&scene, "stl", "testExport.stl", 0, properties );
+
+    delete properties;
 }
 
 #endif

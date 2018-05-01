@@ -143,7 +143,7 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
 
         // Export the assimp mesh 
         const std::string name = "AssimpScene";
-        mOutput << SolidToken << name << endl;
+        mOutput << SolidToken << " " << name << endl;
         for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
             WriteMesh(pScene->mMeshes[ i ]);
         }
@@ -169,7 +169,7 @@ void STLExporter::WritePointCloud(const std::string &name, const aiScene* pScene
             mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
         }
     }
-    mOutput << EndSolidToken << name << endl;
+    mOutput << EndSolidToken << " " << name << endl;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ void STLExporter::WriteMesh(const aiMesh* m)
             for(unsigned int a = 0; a < f.mNumIndices; ++a) {
                 nor += m->mNormals[f.mIndices[a]];
             }
-            nor.Normalize();
+            nor.NormalizeSafe();
         }
         mOutput << " facet normal " << nor.x << " " << nor.y << " " << nor.z << endl;
         mOutput << "  outer loop" << endl;
@@ -199,7 +199,7 @@ void STLExporter::WriteMesh(const aiMesh* m)
     }
 }
 
-void STLExporter :: WriteMeshBinary(const aiMesh* m)
+void STLExporter::WriteMeshBinary(const aiMesh* m)
 {
     for (unsigned int i = 0; i < m->mNumFaces; ++i) {
         const aiFace& f = m->mFaces[i];

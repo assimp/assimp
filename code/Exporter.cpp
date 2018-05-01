@@ -477,7 +477,7 @@ size_t Exporter::GetExportFormatCount() const {
 // ------------------------------------------------------------------------------------------------
 const aiExportFormatDesc* Exporter::GetExportFormatDescription( size_t index ) const {
     if (index >= GetExportFormatCount()) {
-        return NULL;
+        return nullptr;
     }
 
     // Return from static storage if the requested index is built-in.
@@ -539,8 +539,7 @@ bool ExportProperties::SetPropertyFloat(const char* szName, ai_real iValue) {
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool ExportProperties :: SetPropertyString(const char* szName, const std::string& value)
-{
+bool ExportProperties::SetPropertyString(const char* szName, const std::string& value) {
     return SetGenericProperty<std::string>(mStringProperties, szName,value);
 }
 

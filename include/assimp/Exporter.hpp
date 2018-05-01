@@ -115,8 +115,14 @@ public:
         }
     };
 
-public:
+    /**
+     *  @brief  The class constructor.
+     */
     Exporter();
+
+    /**
+    *  @brief  The class destructor.
+    */
     ~Exporter();
 
     // -------------------------------------------------------------------

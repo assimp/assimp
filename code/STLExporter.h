@@ -62,9 +62,7 @@ class STLExporter
 {
 public:
     /// Constructor for a specific scene to export
-    STLExporter(const char* filename, const aiScene* pScene, bool binary = false);
-
-public:
+    STLExporter(const char* filename, const aiScene* pScene, bool exportPOintClouds, bool binary = false);
 
     /// public stringstreams to write all output into
     std::ostringstream mOutput;

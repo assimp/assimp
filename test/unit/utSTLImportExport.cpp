@@ -83,7 +83,7 @@ TEST_F(utSTLImporterExporter, exporterTest) {
     mAiExporter.Export( scene, "stl", "spiderExport.stl" );
 
     const aiScene *scene2 = importer.ReadFile("spiderExport.stl", aiProcess_ValidateDataStructure);
-    //EXPECT_NE(nullptr, scene2);
+    EXPECT_NE(nullptr, scene2);
 }
 
 TEST_F(utSTLImporterExporter, test_export_pointclouds) {

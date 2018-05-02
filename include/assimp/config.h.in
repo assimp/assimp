@@ -954,6 +954,11 @@ enum aiComponent
 #define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
 
 /**
+ *
+ */
+#define AI_CONFIG_EXPORT_POINT_CLOUDS "EXPORT_POINT_CLOUDS"
+
+/**
  *  @brief  Specifies a gobal key factor for scale, float value
  */
 #define AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY "GLOBAL_SCALE_FACTOR"

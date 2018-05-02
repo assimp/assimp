@@ -80,7 +80,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "gltf glb"
+    "gltf2 glb2"
 };
 
 glTF2Importer::glTF2Importer()
@@ -104,13 +104,13 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 {
     const std::string &extension = GetExtension(pFile);
 
-    if (extension != "gltf" && extension != "glb")
+    if (extension != "gltf2" && extension != "glb2")
         return false;
 
     if (pIOHandler) {
         glTF2::Asset asset(pIOHandler);
         try {
-            asset.Load(pFile, extension == "glb");
+            asset.Load(pFile, extension == "glb2");
             std::string version = asset.asset.version;
             return !version.empty() && version[0] == '2';
         } catch (...) {
@@ -698,7 +698,7 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
 
     // read the asset file
     glTF2::Asset asset(pIOHandler);
-    asset.Load(pFile, GetExtension(pFile) == "glb");
+    asset.Load(pFile, GetExtension(pFile) == "glb2");
 
     //
     // Copy the data out

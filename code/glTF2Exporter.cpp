@@ -759,7 +759,7 @@ void glTF2Exporter::ExportMeshes()
 			if (c)
 				p.attributes.color.push_back(c);
 		}
-		
+
 		/*************** Vertices indices ****************/
 		if (aim->mNumFaces > 0) {
 			std::vector<IndicesType> indices;
@@ -890,6 +890,8 @@ void glTF2Exporter::MergeMeshes()
 unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode* n)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
+
+    node->name = n->mName.C_Str();
 
     if (!n->mTransformation.IsIdentity()) {
         node->matrix.isPresent = true;

@@ -194,16 +194,16 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 
     for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
         if (!c) {
-            mOutput << "property " << typeName << " r" << endl;
-            mOutput << "property " << typeName << " g" << endl;
-            mOutput << "property " << typeName << " b" << endl;
-            mOutput << "property " << typeName << " a" << endl;
+            mOutput << "property " << "uchar" << " red" << endl;
+            mOutput << "property " << "uchar" << " green" << endl;
+            mOutput << "property " << "uchar" << " blue" << endl;
+            mOutput << "property " << "uchar" << " alpha" << endl;
         }
         else {
-            mOutput << "property " << typeName << " r" << c << endl;
-            mOutput << "property " << typeName << " g" << c << endl;
-            mOutput << "property " << typeName << " b" << c << endl;
-            mOutput << "property " << typeName << " a" << c << endl;
+            mOutput << "property " << "uchar" << " red" << c << endl;
+            mOutput << "property " << "uchar" << " green" << c << endl;
+            mOutput << "property " << "uchar" << " blue" << c << endl;
+            mOutput << "property " << "uchar" << " alpha" << c << endl;
         }
     }
 
@@ -288,13 +288,13 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
         for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
             if (m->HasVertexColors(c)) {
                 mOutput <<
-                    " " << m->mColors[c][i].r <<
-                    " " << m->mColors[c][i].g <<
-                    " " << m->mColors[c][i].b <<
-                    " " << m->mColors[c][i].a;
+                    " " << (int)(m->mColors[c][i].r * 255) <<
+                    " " << (int)(m->mColors[c][i].g * 255) <<
+                    " " << (int)(m->mColors[c][i].b * 255) <<
+                    " " << (int)(m->mColors[c][i].a * 255);
             }
             else {
-                mOutput << " -1.0 -1.0 -1.0 -1.0";
+                mOutput << " 0 0 0";
             }
         }
 

@@ -874,7 +874,7 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
 
         const MeshGeometry* const mesh = dynamic_cast< const MeshGeometry* >( geo );
         if ( mesh ) {
-            const std::vector<unsigned int>& indices = ConvertMesh( *mesh, model, node_global_transform );
+            const std::vector<unsigned int>& indices = ConvertMesh( *mesh, model, node_global_transform, nd);
             std::copy( indices.begin(), indices.end(), std::back_inserter( meshes ) );
         }
         else {
@@ -891,7 +891,7 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
 }
 
 std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, const Model& model,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     std::vector<unsigned int> temp;
 
@@ -915,17 +915,17 @@ std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, cons
         const MatIndexArray::value_type base = mindices[ 0 ];
         for( MatIndexArray::value_type index : mindices ) {
             if ( index != base ) {
-                return ConvertMeshMultiMaterial( mesh, model, node_global_transform );
+                return ConvertMeshMultiMaterial( mesh, model, node_global_transform, nd);
             }
         }
     }
 
     // faster code-path, just copy the data
-    temp.push_back( ConvertMeshSingleMaterial( mesh, model, node_global_transform ) );
+    temp.push_back( ConvertMeshSingleMaterial( mesh, model, node_global_transform, nd) );
     return temp;
 }
 
-aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
+aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh, aiNode& nd)
 {
     aiMesh* const out_mesh = new aiMesh();
     meshes.push_back( out_mesh );
@@ -940,15 +940,19 @@ aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
     if ( name.length() ) {
         out_mesh->mName.Set( name );
     }
+    else
+    {
+        out_mesh->mName = nd.mName;
+    }
 
     return out_mesh;
 }
 
 unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, const Model& model,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
-    aiMesh* const out_mesh = SetupEmptyMesh( mesh );
+    aiMesh* const out_mesh = SetupEmptyMesh(mesh, nd);
 
     const std::vector<aiVector3D>& vertices = mesh.GetVertices();
     const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
@@ -1072,7 +1076,7 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
 }
 
 std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
     ai_assert( mindices.size() );
@@ -1083,7 +1087,7 @@ std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometr
     for( MatIndexArray::value_type index : mindices ) {
         if ( had.find( index ) == had.end() ) {
 
-            indices.push_back( ConvertMeshMultiMaterial( mesh, model, index, node_global_transform ) );
+            indices.push_back( ConvertMeshMultiMaterial( mesh, model, index, node_global_transform, nd) );
             had.insert( index );
         }
     }
@@ -1093,9 +1097,10 @@ std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometr
 
 unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
     MatIndexArray::value_type index,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform,
+    aiNode& nd)
 {
-    aiMesh* const out_mesh = SetupEmptyMesh( mesh );
+    aiMesh* const out_mesh = SetupEmptyMesh(mesh, nd);
 
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
     const std::vector<aiVector3D>& vertices = mesh.GetVertices();

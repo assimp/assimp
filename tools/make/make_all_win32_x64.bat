@@ -1,4 +1,5 @@
 rem @echo off
+setlocal
 call build_env_win32.bat
 
 set BUILD_CONFIG=release
@@ -14,3 +15,4 @@ pushd ..\..\
 cmake CMakeLists.txt -G "Visual Studio 15 2017 Win64"
 %MSBUILD% assimp.sln %CONFIG_PARAMETER% %PLATFORM_PARAMETER% %CPU_PARAMETER% %PLATFORM_TOOLSET%
 popd
+endlocal

@@ -638,11 +638,11 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     Mesh::Primitive& p = meshRef->primitives.back();
     Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
     if ( vertexJointAccessor ) {
-        unsigned int offset = vertexJointAccessor->bufferView->byteOffset;
-        unsigned int bytesLen = vertexJointAccessor->bufferView->byteLength;
+        size_t offset = vertexJointAccessor->bufferView->byteOffset;
+        size_t bytesLen = vertexJointAccessor->bufferView->byteLength;
         unsigned int s_bytesPerComp= ComponentTypeSize(ComponentType_UNSIGNED_SHORT);
         unsigned int bytesPerComp = ComponentTypeSize(vertexJointAccessor->componentType);
-        unsigned int s_bytesLen = bytesLen * s_bytesPerComp / bytesPerComp;
+        size_t s_bytesLen = bytesLen * s_bytesPerComp / bytesPerComp;
         Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
         uint8_t* arrys = new uint8_t[s_bytesLen];
         unsigned int i = 0;

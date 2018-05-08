@@ -149,7 +149,8 @@ struct aiMetadata {
             mValues[ i ].mType = rhs.mValues[ i ].mType;
             switch ( rhs.mValues[ i ].mType ) {
             case AI_BOOL:
-                mValues[ i ].mData = new bool( rhs.mValues[i].mData );
+                mValues[ i ].mData = new bool;
+                ::memcpy( mValues[ i ].mData, rhs.mValues[ i ].mData, sizeof(bool) );
                 break;
             case AI_INT32: {
                 int32_t v;

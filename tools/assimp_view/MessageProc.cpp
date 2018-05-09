@@ -45,7 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <windowsx.h>
 #include <commdlg.h>
+
+#ifdef __MINGW32__
+#include <mmsystem.h>
+#else
 #include <timeapi.h>
+#endif
 
 namespace AssimpView {
 
@@ -1050,9 +1055,9 @@ void DoExport(size_t formatId)
         ai_assert(strlen(szFileName) <= MAX_PATH);
 
         // invent a nice default file name
-        char* sz = max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
+        char* sz = std::max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
         if (sz) {
-            strncpy(sz,max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
+            strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
         }
     }
     else {

@@ -80,7 +80,7 @@ bool DefaultIOSystem::Exists( const char* pFile) const
     if (isUnicode) {
 
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, pFile, -1, fileName16, PATHLIMIT);
-        struct _stat64 filestat;
+        struct __stat64 filestat;
         if (0 != _wstat64(fileName16, &filestat)) {
             return false;
         }

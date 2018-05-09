@@ -96,8 +96,9 @@ D3DXVECTOR4 g_aclNormalColors[14] =
 void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 {
     *piCnt = *piCnt+1;
-    for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
-        GetNodeCount(pcNode->mChildren[i],piCnt);
+    for (unsigned int i = 0; i < pcNode->mNumChildren; ++i) {
+        GetNodeCount(pcNode->mChildren[i], piCnt);
+    }
 }
 
 //-------------------------------------------------------------------------------
@@ -1042,16 +1043,23 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         switch (pcNew->eOp)
         {
         case aiTextureOp_Add:
-            szOp = "add";break;
+            szOp = "add";
+            break;
         case aiTextureOp_Subtract:
-            szOp = "sub";break;
+            szOp = "sub";
+            break;
         case aiTextureOp_Divide:
-            szOp = "div";break;
+            szOp = "div";
+            break;
         case aiTextureOp_SignedAdd:
-            szOp = "addsign";break;
+            szOp = "addsign";
+            break;
         case aiTextureOp_SmoothAdd:
-            szOp = "addsmooth";break;
-        default: szOp = "mul";
+            szOp = "addsmooth";
+            break;
+        default: 
+            szOp = "mul";
+            break;
         };
         SetWindowText(GetDlgItem(g_hDlg,IDC_ELOAD),szOp);
 

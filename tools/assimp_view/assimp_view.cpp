@@ -143,7 +143,7 @@ float g_fLoadTime = 0.0f;
 
 //-------------------------------------------------------------------------------
 // Entry point for the loader thread
-// The laoder thread loads the asset while the progress dialog displays the
+// The loader thread loads the asset while the progress dialog displays the
 // smart progress bar
 //-------------------------------------------------------------------------------
 DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
@@ -200,9 +200,9 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 // load the current asset
 // THe path to the asset is specified in the global path variable
 //-------------------------------------------------------------------------------
-int LoadAsset(void)
+int LoadAsset()
 {
-    // set the world and world rotation matrices to the identuty
+    // set the world and world rotation matrices to the identity
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 
@@ -1130,8 +1130,6 @@ int GetProjectionMatrix (aiMatrix4x4& p_mOut)
     return 1;
 }
 
-
-//-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut)
 {

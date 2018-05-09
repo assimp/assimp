@@ -72,16 +72,14 @@ GenFaceNormalsProcess::~GenFaceNormalsProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const
-{
+bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const {
     return  (pFlags & aiProcess_GenNormals) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void GenFaceNormalsProcess::Execute( aiScene* pScene)
-{
-    DefaultLogger::get()->debug("GenFaceNormalsProcess begin");
+void GenFaceNormalsProcess::Execute( aiScene* pScene) {
+    ASSIMP_LOG_DEBUG("GenFaceNormalsProcess begin");
 
     if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
         throw DeadlyImportError("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
@@ -94,11 +92,12 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene)
         }
     }
     if (bHas)   {
-        DefaultLogger::get()->info("GenFaceNormalsProcess finished. "
+        ASSIMP_LOG_INFO("GenFaceNormalsProcess finished. "
             "Face normals have been calculated");
+    } else {
+        ASSIMP_LOG_DEBUG("GenFaceNormalsProcess finished. "
+            "Normals are already there");
     }
-    else DefaultLogger::get()->debug("GenFaceNormalsProcess finished. "
-        "Normals are already there");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -113,7 +112,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
     // triangles or higher-order polygons the normal vectors
     // are undefined.
     if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))   {
-        DefaultLogger::get()->info("Normal vectors are undefined for line and point meshes");
+        ASSIMP_LOG_INFO("Normal vectors are undefined for line and point meshes");
         return false;
     }
 

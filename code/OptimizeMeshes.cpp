@@ -107,11 +107,11 @@ void OptimizeMeshesProcess::Execute( aiScene* pScene)
 {
     const unsigned int num_old = pScene->mNumMeshes;
     if (num_old <= 1) {
-        DefaultLogger::get()->debug("Skipping OptimizeMeshesProcess");
+        ASSIMP_LOG_DEBUG("Skipping OptimizeMeshesProcess");
         return;
     }
 
-    DefaultLogger::get()->debug("OptimizeMeshesProcess begin");
+    ASSIMP_LOG_DEBUG("OptimizeMeshesProcess begin");
     mScene = pScene;
 
     // need to clear persistent members from previous runs
@@ -151,11 +151,9 @@ void OptimizeMeshesProcess::Execute( aiScene* pScene)
     std::copy(output.begin(),output.end(),mScene->mMeshes);
 
     if (output.size() != num_old) {
-        char tmp[512];
-        ::ai_snprintf(tmp,512,"OptimizeMeshesProcess finished. Input meshes: %u, Output meshes: %u",num_old,pScene->mNumMeshes);
-        DefaultLogger::get()->info(tmp);
+        ASSIMP_LOG_DEBUG_F("OptimizeMeshesProcess finished. Input meshes: ", num_old, ", Output meshes: ", pScene->mNumMeshes);
     } else {
-        DefaultLogger::get()->debug( "OptimizeMeshesProcess finished" );
+        ASSIMP_LOG_DEBUG( "OptimizeMeshesProcess finished" );
     }
 }
 

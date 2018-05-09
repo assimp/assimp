@@ -426,7 +426,7 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
 
         if ( *m_DataIt =='/' ) {
             if (type == aiPrimitiveType_POINT) {
-                DefaultLogger::get()->error("Obj: Separator unexpected in point statement");
+                ASSIMP_LOG_ERROR("Obj: Separator unexpected in point statement");
             }
             if (iPos == 0) {
                 //if there are no texture coordinates in the file, but normals
@@ -486,7 +486,7 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     }
 
     if ( face->m_vertices.empty() ) {
-        DefaultLogger::get()->error("Obj: Ignoring empty face");
+        ASSIMP_LOG_ERROR("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
         delete face;
@@ -556,7 +556,7 @@ void ObjFileParser::getMaterialDesc() {
 			// This may be the case if the material library is missing. We don't want to lose all
 			// materials if that happens, so create a new named material instead of discarding it
 			// completely.
-			DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", creating new material");
+            ASSIMP_LOG_ERROR("OBJ: failed to locate material " + strName + ", creating new material");
 			m_pModel->m_pCurrentMaterial = new ObjFile::Material();
 			m_pModel->m_pCurrentMaterial->MaterialName.Set(strName);
 			m_pModel->m_MaterialLib.push_back(strName);
@@ -603,7 +603,7 @@ void ObjFileParser::getMaterialLib() {
 
 	// Check if directive is valid.
     if ( 0 == strMatName.length() ) {
-        DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+        ASSIMP_LOG_WARN( "OBJ: no name for material library specified." );
         return;
     }
 
@@ -620,12 +620,12 @@ void ObjFileParser::getMaterialLib() {
 
     IOStream *pFile = m_pIO->Open( absName );
     if ( nullptr == pFile ) {
-        DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName);
+        ASSIMP_LOG_ERROR("OBJ: Unable to locate material file " + strMatName);
         std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
-        DefaultLogger::get()->info("OBJ: Opening fallback material file " + strMatFallbackName);
+        ASSIMP_LOG_INFO("OBJ: Opening fallback material file " + strMatFallbackName);
         pFile = m_pIO->Open(strMatFallbackName);
         if (!pFile) {
-            DefaultLogger::get()->error("OBJ: Unable to locate fallback material file " + strMatFallbackName);
+            ASSIMP_LOG_ERROR("OBJ: Unable to locate fallback material file " + strMatFallbackName);
             m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             return;
         }
@@ -660,7 +660,7 @@ void ObjFileParser::getNewMaterial() {
     std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
     if ( it == m_pModel->m_MaterialMap.end() ) {
         // Show a warning, if material was not found
-        DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
+        ASSIMP_LOG_WARN("OBJ: Unsupported material requested: " + strMat);
         m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
     } else {
         // Set new material
@@ -817,7 +817,7 @@ void ObjFileParser::createMesh( const std::string &meshName )
     }
     else
     {
-        DefaultLogger::get()->error("OBJ: No object detected to attach a new mesh instance.");
+        ASSIMP_LOG_ERROR("OBJ: No object detected to attach a new mesh instance.");
     }
 }
 
@@ -851,7 +851,7 @@ bool ObjFileParser::needsNewMesh( const std::string &materialName )
 void ObjFileParser::reportErrorTokenInFace()
 {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-    DefaultLogger::get()->error("OBJ: Not supported token in face description detected");
+    ASSIMP_LOG_ERROR("OBJ: Not supported token in face description detected");
 }
 
 // -------------------------------------------------------------------

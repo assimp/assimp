@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 
 class RemoveRedundantMatsTest;
+
 namespace Assimp    {
 
 // ---------------------------------------------------------------------------

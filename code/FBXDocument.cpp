@@ -214,7 +214,7 @@ const Object* LazyObject::Get(bool dieOnError)
 
         // note: the error message is already formatted, so raw logging is ok
         if(!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->error(ex.what());
+            ASSIMP_LOG_ERROR(ex.what());
         }
         return NULL;
     }

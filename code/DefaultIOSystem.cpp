@@ -76,11 +76,11 @@ bool DefaultIOSystem::Exists( const char* pFile) const
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
 
-    bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL);
+    bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL) != 0;
     if (isUnicode) {
 
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, pFile, -1, fileName16, PATHLIMIT);
-        struct _stat64 filestat;
+        struct __stat64 filestat;
         if (0 != _wstat64(fileName16, &filestat)) {
             return false;
         }
@@ -110,7 +110,7 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     FILE* file;
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
-    bool isUnicode = IsTextUnicode(strFile, static_cast<int>(strlen(strFile)), NULL );
+    bool isUnicode = IsTextUnicode(strFile, static_cast<int>(strlen(strFile)), NULL) != 0;
     if (isUnicode) {
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, strFile, -1, fileName16, PATHLIMIT);
         std::string mode8(strMode);
@@ -158,7 +158,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
-    bool isUnicode = IsTextUnicode(in, static_cast<int>(strlen(in)), NULL);
+    bool isUnicode = IsTextUnicode(in, static_cast<int>(strlen(in)), NULL) != 0;
     if (isUnicode) {
         wchar_t out16[PATHLIMIT];
         wchar_t in16[PATHLIMIT];
@@ -170,7 +170,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
         if (!ret) {
             // preserve the input path, maybe someone else is able to fix
             // the path before it is accessed (e.g. our file system filter)
-            DefaultLogger::get()->warn("Invalid path: " + std::string(in));
+            ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
             strcpy(_out, in);
         }
 
@@ -179,7 +179,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
         if (!ret) {
             // preserve the input path, maybe someone else is able to fix
             // the path before it is accessed (e.g. our file system filter)
-            DefaultLogger::get()->warn("Invalid path: " + std::string(in));
+            ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
             strcpy(_out, in);
         }
     }
@@ -189,7 +189,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
     if(!ret) {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
-        DefaultLogger::get()->warn("Invalid path: "+std::string(in));
+        ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
         strcpy(_out,in);
     }
 #endif

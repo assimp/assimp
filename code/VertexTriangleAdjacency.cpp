@@ -88,10 +88,13 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
     *piEnd++ = 0u;
 
     // first pass: compute the number of faces referencing each vertex
-    for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace) {
-        pi[pcFace->mIndices[0]]++;
-        pi[pcFace->mIndices[1]]++;
-        pi[pcFace->mIndices[2]]++;
+    for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)
+    {
+        unsigned nind = pcFace->mNumIndices;
+        unsigned * ind = pcFace->mIndices;
+        if (nind > 0) pi[ind[0]]++;
+        if (nind > 1) pi[ind[1]]++;
+        if (nind > 2) pi[ind[2]]++;
     }
 
     // second pass: compute the final offset table
@@ -109,15 +112,12 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
     this->mAdjacencyTable = new unsigned int[iSum];
     iSum = 0;
     for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace,++iSum)    {
+        unsigned nind = pcFace->mNumIndices;
+        unsigned * ind = pcFace->mIndices;
 
-        unsigned int idx = pcFace->mIndices[0];
-        mAdjacencyTable[pi[idx]++] = iSum;
-
-        idx = pcFace->mIndices[1];
-        mAdjacencyTable[pi[idx]++] = iSum;
-
-        idx = pcFace->mIndices[2];
-        mAdjacencyTable[pi[idx]++] = iSum;
+        if (nind > 0) mAdjacencyTable[pi[ind[0]]++] = iSum;
+        if (nind > 1) mAdjacencyTable[pi[ind[1]]++] = iSum;
+        if (nind > 2) mAdjacencyTable[pi[ind[2]]++] = iSum;
     }
     // fourth pass: undo the offset computations made during the third pass
     // We could do this in a separate buffer, but this would be TIMES slower.

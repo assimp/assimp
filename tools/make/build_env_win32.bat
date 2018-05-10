@@ -1,5 +1,4 @@
 @echo off
-
 set "initialdir=%cd%"
 goto:main
 

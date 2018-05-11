@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @brief Definition of in-memory structs for Compile Heart's ISM2 file format
  *
  * The specification has been taken from:
- * - Random Talking Bush's ISM2 3DS Max import script
+ * - https://github.com/haolink/ISM2Import/
  */
 
 #ifndef AI_ISM2FILEHELPER_H_INC
@@ -57,15 +57,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace ISM2 {
 
-#define AI_ISM2_MAGIC "ISM2"
+#define AI_ISM2_MAGIC 0x324D5349
 
 // -------------------------------------------------------------------------------------
 /** \enum Section
  *  \brief Known section IDs for ISM2's various data sections. Not all are yet known.
  */
-enum Section {
+enum Section: uint32_t {
     Section_Bones = 3,
-    Section_VertexHeaderHeader = 10,
+    Section_VertexMetaHeader = 10,
     Section_VertexBlockHeader,
     Section_BoneTranslation = 20,
     Section_BoneScale,
@@ -97,28 +97,21 @@ enum Section {
 };
 
 // -------------------------------------------------------------------------------------
-/** \struct ModelHeaderMeta
- *  \brief Data structure for ISM2 model header metadata
- */
-struct ModelHeaderMeta {
-    char ISM2[4];
-    uint8_t version[4];
-} PACK_STRUCT;
-
-// -------------------------------------------------------------------------------------
 /** \struct ModelHeader
- *  \brief Data structure for ISM2 model header. Unlike the metadata, this is endian dependent.
+ *  \brief Data structure for ISM2 model header
  */
 struct ModelHeader {
-    uint32_t _08;
-    uint32_t _0C;
+    char ISM2[4];
+    uint8_t version[4];
+    uint32_t _3;
+    uint32_t _4;
     uint32_t fileSize;
 
     //! Use this field to determine endianness
     uint32_t sectionCount;
 
-    uint32_t _18;
-    uint32_t _1C;
+    uint32_t _7;
+    uint32_t _8;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -141,17 +134,17 @@ struct BoneHeader {
     uint32_t headerSize;
     uint32_t headerTotal;
     uint32_t nameStringIndex[2];
-    uint32_t _14;
-    uint32_t _18;
+    uint32_t _1;
+    uint32_t _2;
     uint32_t parentOffset;
-    uint32_t _20;
-    uint32_t _24;
-    uint32_t _28;
+    uint32_t _4;
+    uint32_t _5;
+    uint32_t _6;
     int32_t id;
-    uint32_t _30;
-    uint32_t _34;
-    uint32_t _38;
-    uint32_t _3C;
+    uint32_t _8;
+    uint32_t _9;
+    uint32_t _10;
+    uint32_t _11;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -162,8 +155,8 @@ struct SurfaceOffsetsHeader {
     uint32_t headerSize;
     uint32_t total;
     uint32_t nameStringIndex;
-    uint32_t _0C;
-    uint32_t _10;
+    uint32_t _1;
+    uint32_t _2;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -198,17 +191,17 @@ struct VertexBlockHeader {
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
-/** \struct VertexHeaderHeader
- *  \brief Data structure for ISM2 *vertex header* header.
+/** \struct VertexMetaHeader
+ *  \brief Data structure for ISM2 vertex meta header.
  */
-struct VertexHeaderHeader {
+struct VertexMetaHeader {
     uint32_t headerSize;
     uint32_t headerTotal;
-    uint32_t _08;
-    uint32_t _0C;
-    uint32_t _10;
-    uint32_t _14;
-    uint32_t _18;
+    uint32_t _1;
+    uint32_t _2;
+    uint32_t _3;
+    uint32_t _4;
+    uint32_t _5;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -219,9 +212,9 @@ struct PolygonBlockHeader {
     uint32_t dataSize;
     uint32_t dataTotal;
     uint32_t nameStringIndex;
-    uint32_t _0C; // always blank?
-    uint32_t _10;
-    uint32_t _14;
+    uint32_t _blank;
+    uint32_t _1;
+    uint32_t _2;
     uint32_t polygonTotal;
 } PACK_STRUCT;
 
@@ -233,7 +226,7 @@ struct PolygonHeader {
     uint32_t size;
     uint32_t total;
     uint16_t type[2];
-    uint32_t _0C; // always blank?
+    uint32_t _blank;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -246,7 +239,7 @@ struct VertexHeader {
     uint16_t type[2];
     uint32_t count;
     uint32_t size;
-    uint32_t _14;
+    uint32_t _stuff;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -254,19 +247,19 @@ struct VertexHeader {
  *  \brief Data structure for ISM2 vertex offset header
  */
 struct VertexOffsetHeader {
-    uint32_t _00;
-    uint32_t _04;
-    uint32_t _08;
-    uint32_t _0C;
-    uint32_t _10;
+    uint32_t _1;
+    uint32_t _2;
+    uint32_t _3;
+    uint32_t _4;
+    uint32_t _5;
     uint32_t startOffset;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
-/** \struct Vertex
+/** \struct Vertex1
  *  \brief Data structure for ISM2 vertex
  */
-struct Vertex {
+struct Vertex1 {
     float position[3];
     uint16_t normal1[3];
     uint16_t textureCoordX;
@@ -276,6 +269,45 @@ struct Vertex {
     uint8_t green;
     uint8_t blue;
     uint8_t alpha;
+} PACK_STRUCT;
+
+// -------------------------------------------------------------------------------------
+/** \struct Vertex3Size16
+ *  \brief Data structure for ISM2 vertex
+ */
+struct Vertex3Size16 {
+    uint8_t bones[4];
+    uint16_t weights[4];
+    uint8_t _3[4];
+} PACK_STRUCT;
+
+// -------------------------------------------------------------------------------------
+/** \struct Vertex3Size32V1
+ *  \brief Data structure for ISM2 vertex
+ */
+struct Vertex3Size32V1 {
+    uint8_t bones[4];
+    float weights[4];
+    uint8_t _3[12];
+} PACK_STRUCT;
+
+// -------------------------------------------------------------------------------------
+/** \struct Vertex3Size32V2
+ *  \brief Data structure for ISM2 vertex
+ */
+struct Vertex3Size32V2 {
+    uint16_t bones[4];
+    float weights[4];
+    uint8_t _3[8];
+} PACK_STRUCT;
+
+// -------------------------------------------------------------------------------------
+/** \struct Vertex3Size48
+ *  \brief Data structure for ISM2 vertex
+ */
+struct Vertex3Size48 {
+    uint16_t bones[8];
+    float weights[8];
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -306,9 +338,9 @@ struct Texture {
     uint32_t sectionType;
     uint32_t dataStringIndex[3];
     uint32_t nameStringIndex;
-    uint32_t _18;
-    uint32_t _1C;
-    uint32_t _20;
+    uint32_t _1;
+    uint32_t _2;
+    uint32_t _3;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -331,7 +363,7 @@ struct MaterialA {
     uint32_t total;
     uint32_t nameStringIndex;
     uint32_t stringIndex[2];
-    uint32_t _18; // always blank?
+    uint32_t _blank;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -354,7 +386,7 @@ struct MaterialC {
     uint32_t headerSize;
     uint32_t total;
     uint32_t stringIndex;
-    uint32_t _10; // always blank?
+    uint32_t _blank;
     uint32_t dOffset;
 } PACK_STRUCT;
 
@@ -366,9 +398,9 @@ struct MaterialD {
     uint32_t sectionType;
     uint32_t headerSize;
     uint32_t total;
-    uint32_t _0C;
-    uint32_t _10;
-    uint32_t _14; // always blank?
+    uint32_t _a;
+    uint32_t _b;
+    uint32_t _blank;
     uint32_t eOffset;
 } PACK_STRUCT;
 
@@ -380,13 +412,253 @@ struct MaterialE {
     uint32_t sectionType;
     uint32_t headerSize;
     uint32_t total;
-    uint32_t _0C;
-    uint32_t _10;
-    uint32_t _14; // always blank?
+    uint32_t _a;
+    uint32_t _b;
+    uint32_t _blank;
     uint32_t fOffset;
 } PACK_STRUCT;
 
 #include <assimp/Compiler/poppack1.h>
+
+struct SectionData {
+    uint32_t *types;
+    uint32_t *offsets;
+
+    SectionData(): types(nullptr), offsets(nullptr)
+    {
+    }
+
+    ~SectionData() {
+        if (types) delete[] types;
+        if (offsets) delete[] offsets;
+    }
+};
+
+struct StringBlock {
+    StringHeader header;
+    uint32_t *offsets;
+    std::string *strings;
+
+    StringBlock(): offsets(nullptr), strings(nullptr)
+    {
+    }
+
+    ~StringBlock() {
+        if (offsets) delete[] offsets;
+        if (strings) delete[] strings;
+    }
+};
+
+union TransformSectionData {
+    float translation[3];
+    float scale[3];
+    float x[4];
+    float y[4];
+    float z[4];
+    float xRotate[4];
+    float yRotate[4];
+    float zRotate[4];
+};
+
+struct TransformSection {
+    uint32_t type;
+    TransformSectionData data;
+};
+
+struct BoneSection {
+    uint32_t type;
+    SurfaceOffsetsHeader surfaceOffsetsHeader;
+    uint32_t *surfaceOffsets;
+    SurfaceHeader *surfaces;
+    TransformHeader transformHeader;
+    uint32_t *transformOffsets;
+    TransformSection *transformSections;
+
+    BoneSection(): surfaceOffsets(nullptr), surfaces(nullptr),
+        transformOffsets(nullptr), transformSections(nullptr)
+    {
+    }
+
+    ~BoneSection() {
+        if (surfaceOffsets) delete[] surfaceOffsets;
+        if (surfaces) delete[] surfaces;
+        if (transformOffsets) delete[] transformOffsets;
+        if (transformSections) delete[] transformSections;
+    }
+};
+
+struct Bone {
+    BoneHeader header;
+    uint32_t *sectionOffsets;
+    BoneSection *sections;
+
+    Bone(): sectionOffsets(nullptr), sections(nullptr)
+    {
+    }
+
+    ~Bone() {
+        if (sectionOffsets) delete[] sectionOffsets;
+        if (sections) delete[] sections;
+    }
+};
+
+struct BoneBlock {
+    BoneDataHeader header;
+    uint32_t *offsets;
+    Bone *bones;
+
+    BoneBlock(): offsets(nullptr), bones(nullptr) {
+    }
+    ~BoneBlock() {
+        if (offsets) delete[] offsets;
+        if (bones) delete[] bones;
+    }
+};
+
+struct Polygon {
+    uint32_t type;
+    PolygonHeader header;
+    uint32_t (*faces)[3];
+
+    Polygon(): faces(nullptr)
+    {
+    }
+
+    ~Polygon() {
+        if (faces) delete[] faces;
+    }
+};
+
+struct PolygonBlock {
+    PolygonBlockHeader header;
+    uint32_t *offsets;
+    Polygon *polygons;
+
+    PolygonBlock(): offsets(nullptr), polygons(nullptr)
+    {
+    }
+
+    ~PolygonBlock() {
+        if (offsets) delete[] offsets;
+        if (polygons) delete[] polygons;
+    }
+};
+
+union Vertex {
+    Vertex1 type1;
+    Vertex3Size16 type3Size16;
+    Vertex3Size32V1 type3Size32V1;
+    Vertex3Size32V2 type3Size32V2;
+    Vertex3Size48 type3Size48;
+};
+
+struct VertexData {
+    VertexHeader header;
+    uint32_t *offsets;
+    VertexOffsetHeader *offsetHeaders;
+    Vertex *vertices;
+
+    VertexData(): offsets(nullptr), offsetHeaders(nullptr), vertices(nullptr)
+    {
+    }
+
+    ~VertexData() {
+        if (offsets) delete[] offsets;
+        if (offsetHeaders) delete[] offsetHeaders;
+        if (vertices) delete[] vertices;
+    }
+};
+
+struct VertexHeaderSection {
+    uint32_t type;
+    PolygonBlock polygonBlock;
+    VertexData data;
+};
+
+struct VertexBlockSection {
+    uint32_t type;
+    VertexMetaHeader header;
+    uint32_t *offsets;
+    VertexHeaderSection *sections;
+
+    VertexBlockSection(): offsets(nullptr), sections(nullptr)
+    {
+    }
+
+    ~VertexBlockSection() {
+        if (offsets) delete[] offsets;
+        if (sections) delete[] sections;
+    }
+};
+
+struct VertexBlock {
+    VertexBlockHeader header;
+    uint32_t *offsets;
+    VertexBlockSection *sections;
+
+    VertexBlock(): offsets(nullptr), sections(nullptr)
+    {
+    }
+
+    ~VertexBlock() {
+        if (offsets) delete[] offsets;
+        if (sections) delete[] sections;
+    }
+};
+
+struct TextureBlock {
+    TextureHeader header;
+    uint32_t *offsets;
+    Texture *textures;
+
+    TextureBlock(): offsets(nullptr), textures(nullptr)
+    {
+    }
+
+    ~TextureBlock() {
+        if (offsets) delete[] offsets;
+        if (textures) delete[] textures;
+    }
+};
+
+struct Material {
+    MaterialA a;
+    uint32_t bOffset;
+    MaterialB b;
+    MaterialC c;
+    MaterialD d;
+    MaterialE e;
+    uint32_t textureNameStringIndex;
+};
+
+struct MaterialBlock {
+    MaterialHeader header;
+    uint32_t *offsets;
+    Material *materials;
+
+    MaterialBlock(): offsets(nullptr), materials(nullptr)
+    {
+    }
+
+    ~MaterialBlock() {
+        if (offsets) delete[] offsets;
+        if (materials) delete[] materials;
+    }
+};
+
+struct Model {
+    ModelHeader header;
+    SectionData sectionData;
+    StringBlock stringBlock;
+    BoneBlock boneBlock;
+    VertexBlock vertexBlock;
+    TextureBlock textureBlock;
+    MaterialBlock materialBlock;
+    uint32_t numPolygons;
+
+    Model(): numPolygons(1) {
+    }
+};
 
 inline
 float wtof(uint16_t input16)

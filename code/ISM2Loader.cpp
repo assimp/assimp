@@ -54,9 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
 #include <assimp/StreamReader.h>
-#include <map>
 #include <memory>
-#include <vector>
 #include "ISM2Loader.h"
 #include "ISM2FileData.h"
 
@@ -94,7 +92,7 @@ bool ISM2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
         return true;
 
     if (!extension.length() && checkSig) {
-        uint32_t token = AI_MAKE_MAGIC(AI_ISM2_MAGIC);
+        uint32_t token = AI_ISM2_MAGIC;
 
         if (CheckMagicToken(pIOHandler, pFile, &token, 0, 4))
             return true;
@@ -108,357 +106,299 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
     IOSystem* pIOHandler)
 {
     std::unique_ptr<IOStream> io(pIOHandler->Open(pFile.c_str(), "rb"));
+    Logger *log = DefaultLogger::get();
 
-    // looks like there's only one mesh per file
-    pScene->mRootNode = new aiNode();
-    pScene->mRootNode->mNumMeshes = 1;
-    pScene->mRootNode->mMeshes = new unsigned int[1];
-    pScene->mRootNode->mMeshes[0] = 0;
-    pScene->mNumMeshes = 1;
-    pScene->mMeshes = new aiMesh*[1];
+    Model model;
+    ModelHeader *mh = &model.header;
+    SectionData *msd = &model.sectionData;
+    StringBlock *msb = &model.stringBlock;
+    BoneBlock *mbb = &model.boneBlock;
+    VertexBlock *mvb = &model.vertexBlock;
+    MaterialBlock *mmb = &model.materialBlock;
 
-    aiMesh *pcMesh = new aiMesh();
-    pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
-    pScene->mMeshes[0] = pcMesh;
+    io->Read(mh, sizeof(ModelHeader), 1);
+    io->Seek(0, aiOrigin_SET);
 
-    std::vector<SurfaceHeader> surfaces; // for material index match-ups
-    std::vector<aiString> strings;
-    //std::vector<Texture> textures;
-    std::map<uint32_t, aiBone*> boneIdDict;
-    std::vector<Vertex> vertices; // type 1 only
+    bool le = mh->sectionCount > 0 && mh->sectionCount < 65535;
+    StreamReaderAny sr(io.get(), le);
 
-    // Header
-    ModelHeaderMeta mhm;
-    io->Read(&mhm, sizeof(ModelHeaderMeta), 1);
+    sr.SetCurrentPos(sizeof(ModelHeader));
+    if (!le) ByteSwap::Swap(&mh->sectionCount);
 
-    ModelHeader mh;
-    io->Read(&mh, sizeof(ModelHeader), 1);
+    msd->offsets = new uint32_t[mh->sectionCount];
+    msd->types = new uint32_t[mh->sectionCount];
+    for (uint32_t b = 0; b < mh->sectionCount; b++)
+        sr >> msd->types[b] >> msd->offsets[b];
 
-    bool le = mh.sectionCount > 0 && mh.sectionCount < 65535 ? true : false;
-    StreamReaderAny *sr = new StreamReaderAny(io.get(), le);
-    if (le) ByteSwap::Swap(&mh.sectionCount);
-
-    uint32_t *sectionOffsets = new uint32_t[mh.sectionCount];
-    uint32_t *sectionTypes = new uint32_t[mh.sectionCount];
-    for (uint32_t b = 0; b < mh.sectionCount; b++)
+    // populate the strings array first, otherwise we'll get undefined references
+    for (uint32_t b = 0; b < mh->sectionCount; b++)
     {
-        sectionTypes[b] = sr->GetU4();
-        sectionOffsets[b] = sr->GetU4();
-    }
-
-    for (uint32_t b = 0; b < mh.sectionCount; b++)
-    {
-        io->Seek(sectionOffsets[b], aiOrigin_SET);
-
-        switch (sectionTypes[b])
+        if (msd->types[b] == Section_Strings)
         {
-            case Section_Bones:
+            sr.SetCurrentPos(msd->offsets[b]);
+            sr.CopyAndAdvance(&msb->header, sizeof(StringHeader));
+            if (!le) ByteSwap::Swap(&msb->header.total);
+            msb->offsets = new uint32_t[msb->header.total];
+            msb->strings = new std::string[msb->header.total + 1];
+
+            for (uint32_t c = 0; c < msb->header.total; c++)
+                sr >> msb->offsets[c];
+
+            for (uint32_t c = 0; c < msb->header.total; c++)
             {
-                BoneDataHeader bdh;
+                char txt = 0;
 
-                io->Read(&bdh, sizeof(BoneDataHeader), 1);
-                if (!le) ByteSwap::Swap(&bdh.total);
-                uint32_t *boneOffsets = new uint32_t[bdh.total];
-                pcMesh->mNumBones = bdh.total;
-                pcMesh->mBones = new aiBone*[bdh.total];
-
-                for (uint32_t c = 0; c < bdh.total; c++)
-                    boneOffsets[c] = sr->GetU4();
-
-                for (uint32_t c = 0; c < bdh.total; c++)
-                {
-                    aiBone *pBone = new aiBone();
-                    BoneHeader bh;
-
-                    io->Seek(boneOffsets[c], aiOrigin_SET);
-                    io->Read(&bh, sizeof(BoneHeader), 1);
-                    if (!le) {
-                        ByteSwap::Swap(&bh.nameStringIndex[0]);
-                        ByteSwap::Swap(&bh.id);
-                    }
-
-                    uint32_t *boneSectionOffsets = new uint32_t[bh.headerTotal];
-                    for (uint32_t d = 0; c < bh.headerTotal; d++)
-                        boneSectionOffsets[d] = sr->GetU4();
-
-                    for (uint32_t d = 0; d < bh.headerTotal; d++)
-                    {
-                        uint32_t boneSectionType = sr->GetU4();
-
-                        switch (boneSectionType) {
-                            case Section_SurfaceOffsets:
-                            {
-                                SurfaceOffsetsHeader soh;
-
-                                io->Read(&soh, sizeof(SurfaceOffsetsHeader), 1);
-                                if (!le) ByteSwap::Swap(&soh.total);
-                                uint32_t *surfaceOffsets = new uint32_t[soh.total];
-
-                                for (uint32_t e = 0; e < soh.total; e++)
-                                    surfaceOffsets[e] = sr->GetU4();
-
-                                for (uint32_t e = 0; e < soh.total; e++)
-                                {
-                                    SurfaceHeader sh;
-
-                                    io->Seek(surfaceOffsets[e], aiOrigin_SET);
-                                    io->Read(&sh, sizeof(SurfaceHeader), 1);
-                                    if (!le) ByteSwap::Swap(&sh.textureNameStringIndex);
-                                    surfaces.push_back(sh);
-                                }
-
-                                break;
-                            }
-                            case Section_BoneTransforms:
-                            {
-                                TransformHeader tfh;
-                                io->Read(&tfh, sizeof(TransformHeader), 1);
-                                if (!le) {
-                                    ByteSwap::Swap(&tfh.size);
-                                    ByteSwap::Swap(&tfh.total);
-                                }
-
-                                uint32_t *transformIndices = new uint32_t[tfh.total];
-                                for (uint32_t e = 0; e < tfh.total; e++)
-                                    transformIndices[e] = sr->GetU4();
-
-                                aiVector3D scale;
-                                float m1[8], m2[8], m3[8], position[3];
-
-                                for (uint32_t t = 0; t < tfh.total; t++)
-                                {
-                                    io->Seek(transformIndices[t], aiOrigin_SET);
-                                    uint32_t transformSectionType = sr->GetU4();
-
-                                    switch (transformSectionType)
-                                    {
-                                        case Section_BoneTranslation:
-                                            position[0] = sr->GetF4();
-                                            position[1] = sr->GetF4();
-                                            position[2] = sr->GetF4();
-                                            break;
-                                        case Section_BoneScale:
-                                            scale = aiVector3D(sr->GetF4(), sr->GetF4(), sr->GetF4());
-                                            break;
-                                        case Section_BoneX:
-                                            m1[4] = sr->GetF4();
-                                            m1[5] = sr->GetF4();
-                                            m1[6] = sr->GetF4();
-                                            m1[7] = sr->GetF4();
-                                            break;
-                                        case Section_BoneY:
-                                            m2[4] = sr->GetF4();
-                                            m2[5] = sr->GetF4();
-                                            m2[6] = sr->GetF4();
-                                            m2[7] = sr->GetF4();
-                                            break;
-                                        case Section_BoneZ:
-                                            m3[4] = sr->GetF4();
-                                            m3[5] = sr->GetF4();
-                                            m3[6] = sr->GetF4();
-                                            m3[7] = sr->GetF4();
-                                            break;
-                                        case Section_BoneRotationX:
-                                            m1[0] = sr->GetF4();
-                                            m1[1] = sr->GetF4();
-                                            m1[2] = sr->GetF4();
-                                            m1[3] = sr->GetF4();
-                                            break;
-                                        case Section_BoneRotationY:
-                                            m2[0] = sr->GetF4();
-                                            m2[1] = sr->GetF4();
-                                            m2[2] = sr->GetF4();
-                                            m2[3] = sr->GetF4();
-                                            break;
-                                        case Section_BoneRotationZ:
-                                            m3[0] = sr->GetF4();
-                                            m3[1] = sr->GetF4();
-                                            m3[2] = sr->GetF4();
-                                            m3[3] = sr->GetF4();
-                                            break;
-                                        default:
-                                            DefaultLogger::get()->warn(std::string("Unsupported/unknown bone transform section: ") +
-                                                std::to_string(transformSectionType));
-                                    }
-                                }
-
-                                delete[] transformIndices;
-
-                                aiMatrix4x4 transform2;
-
-                                aiMatrix4x4::Scaling(scale, pBone->mOffsetMatrix);
-                                pBone->mOffsetMatrix *= aiMatrix4x4().FromEulerAnglesXYZ(m1[7], m2[7], m3[7]);
-                                aiMatrix4x4::Scaling(scale, transform2);
-                                transform2 *= aiMatrix4x4().FromEulerAnglesXYZ(m1[3], m2[3], m3[3]);
-                                pBone->mOffsetMatrix *= transform2;
-                                pBone->mOffsetMatrix[3][0] = position[0];
-                                pBone->mOffsetMatrix[3][1] = position[1];
-                                pBone->mOffsetMatrix[3][2] = position[2];
-
-                                break;
-                            }
-                            default:
-                                DefaultLogger::get()->warn(std::string("Unsupported/unknown bone section: ") +
-                                    std::to_string(boneSectionType));
-                        }
-                    }
-
-                    delete[] boneSectionOffsets;
-
-                    pBone->mName = strings[bh.nameStringIndex[0]];
-                    pcMesh->mBones[c] = pBone;
-                    boneIdDict[bh.id] = pBone;
+                sr.SetCurrentPos(msb->offsets[c]);
+                sr >> txt;
+                while (txt != 0) {
+                    msb->strings[c] += txt;
+                    sr >> txt;
                 }
-
-                delete[] boneOffsets;
-                break;
             }
 
-            case Section_VertexBlockHeader:
-            {
-                VertexBlockHeader vbh;
+            // for materials with no submats
+            msb->strings[msb->header.total] = std::string("Tex_c.dds");
 
-                io->Read(&vbh, sizeof(VertexBlockHeader), 1);
-                if (!le) ByteSwap::Swap(&vbh.headerTotal);
-                uint32_t *vertexDataOffsets = new uint32_t[vbh.headerTotal];
+            break;
+        }
+    }
 
-                for (uint32_t c = 0; c < vbh.headerTotal; c++)
-                    vertexDataOffsets[c] = sr->GetU4();
+    for (uint32_t b = 0; b < mh->sectionCount; b++)
+    {
+        sr.SetCurrentPos(msd->offsets[b]);
 
-                for (uint32_t c = 0; c < vbh.headerTotal; c++)
+        switch (msd->types[b])
+        {
+            case Section_Bones:
+                sr.CopyAndAdvance(&mbb->header, sizeof(BoneDataHeader));
+                if (!le) ByteSwap::Swap(&mbb->header.total);
+                mbb->offsets = new uint32_t[mbb->header.total];
+                mbb->bones = new Bone[mbb->header.total];
+
+                for (uint32_t c = 0; c < mbb->header.total; c++)
+                    sr >> mbb->offsets[c];
+
+                for (uint32_t c = 0; c < mbb->header.total; c++)
                 {
-                    io->Seek(vertexDataOffsets[c], aiOrigin_SET);
-                    uint32_t vertexDataSectionType = sr->GetU4();
+                    Bone *bone = &mbb->bones[c];
 
-                    switch (vertexDataSectionType)
+                    sr.SetCurrentPos(mbb->offsets[c]);
+                    sr.CopyAndAdvance(&bone->header, sizeof(BoneHeader));
+                    if (!le) {
+                        ByteSwap::Swap(&bone->header.nameStringIndex[0]);
+                        ByteSwap::Swap(&bone->header.id);
+                    }
+                    bone->sectionOffsets = new uint32_t[bone->header.headerTotal];
+                    bone->sections = new BoneSection[bone->header.headerTotal];
+
+                    for (uint32_t d = 0; d < bone->header.headerTotal; d++)
+                        sr >> bone->sectionOffsets[d];
+
+                    for (uint32_t d = 0; d < bone->header.headerTotal; d++)
                     {
-                        case Section_VertexHeaderHeader:
-                        {
-                            VertexHeaderHeader vhh;
+                        BoneSection *bs = &bone->sections[d];
 
-                            io->Read(&vhh, sizeof(VertexHeaderHeader), 1);
-                            if (!le) ByteSwap::Swap(&vhh.headerTotal);
-                            uint32_t *vertexHeaderOffsets = new uint32_t[vhh.headerTotal];
+                        sr.SetCurrentPos(bone->sectionOffsets[d]);
+                        sr >> bs->type;
 
-                            for (uint32_t d = 0; d < vhh.headerTotal; d++)
-                                vertexHeaderOffsets[d] = sr->GetU4();
+                        switch (bs->type) {
+                            case Section_SurfaceOffsets:
+                                sr.CopyAndAdvance(&bs->surfaceOffsetsHeader, sizeof(SurfaceOffsetsHeader));
+                                if (!le) ByteSwap::Swap(&bs->surfaceOffsetsHeader.total);
+                                bs->surfaceOffsets = new uint32_t[bs->surfaceOffsetsHeader.total];
+                                bs->surfaces = new SurfaceHeader[bs->surfaceOffsetsHeader.total];
 
-                            for (uint32_t d = 0; d < vhh.headerTotal; d++)
+                                for (uint32_t e = 0; e < bs->surfaceOffsetsHeader.total; e++)
+                                    sr >> bs->surfaceOffsets[e];
+
+                                for (uint32_t e = 0; e < bs->surfaceOffsetsHeader.total; e++)
+                                {
+                                    sr.SetCurrentPos(bs->surfaceOffsets[e]);
+                                    sr.CopyAndAdvance(&bs->surfaces[e], sizeof(SurfaceHeader));
+                                    if (!le) ByteSwap::Swap(&bs->surfaces[e].textureNameStringIndex);
+                                }
+
+                                break;
+                            case Section_BoneTransforms:
+                                sr.CopyAndAdvance(&bs->transformHeader, sizeof(TransformHeader));
+                                if (!le) ByteSwap::Swap(&bs->transformHeader.total);
+                                bs->transformOffsets = new uint32_t[bs->transformHeader.total];
+                                bs->transformSections = new TransformSection[bs->transformHeader.total];
+
+                                for (uint32_t e = 0; e < bs->transformHeader.total; e++)
+                                    sr >> bs->transformOffsets[e];
+
+                                for (uint32_t t = 0; t < bs->transformHeader.total; t++)
+                                {
+                                    TransformSectionData *tsd = &bs->transformSections[t].data;
+
+                                    sr.SetCurrentPos(bs->transformOffsets[t]);
+                                    sr >> bs->transformSections[t].type;
+
+                                    switch (bs->transformSections[t].type)
+                                    {
+                                        case Section_BoneTranslation:
+                                            sr >> tsd->translation[0] >> tsd->translation[1] >> tsd->translation[2];
+                                            break;
+                                        case Section_BoneScale:
+                                            sr >> tsd->scale[0] >> tsd->scale[1]>> tsd->scale[2];
+                                            break;
+                                        case Section_BoneX:
+                                            sr >> tsd->x[0] >> tsd->x[1] >> tsd->x[2] >> tsd->x[3];
+                                            break;
+                                        case Section_BoneY:
+                                            sr >> tsd->y[0] >> tsd->y[1] >> tsd->y[2] >> tsd->y[3];
+                                            break;
+                                        case Section_BoneZ:
+                                            sr >> tsd->z[0] >> tsd->z[1] >> tsd->z[2] >> tsd->z[3];
+                                            break;
+                                        case Section_BoneRotationX:
+                                            sr >> tsd->xRotate[0] >> tsd->xRotate[1] >> tsd->xRotate[2] >> tsd->xRotate[3];
+                                            break;
+                                        case Section_BoneRotationY:
+                                            sr >> tsd->yRotate[0] >> tsd->yRotate[1] >> tsd->yRotate[2] >> tsd->yRotate[3];
+                                            break;
+                                        case Section_BoneRotationZ:
+                                            sr >> tsd->zRotate[0] >> tsd->zRotate[1] >> tsd->zRotate[2] >> tsd->zRotate[3];
+                                            break;
+                                        default:
+                                            log->warn(std::string("Unsupported/unknown bone transform section: ") +
+                                                std::to_string(bs->transformSections[t].type));
+                                    }
+                                }
+                                break;
+                            default:
+                                log->warn(std::string("Unsupported/unknown bone section: ") +
+                                    std::to_string(bs->type));
+                        }
+                    }
+                }
+
+                break;
+
+            case Section_VertexBlockHeader:
+                sr.CopyAndAdvance(&mvb->header, sizeof(VertexBlockHeader));
+                if (!le) ByteSwap::Swap(&mvb->header.headerTotal);
+                mvb->offsets = new uint32_t[mvb->header.headerTotal];
+                mvb->sections = new VertexBlockSection[mvb->header.headerTotal];
+
+                for (uint32_t c = 0; c < mvb->header.headerTotal; c++)
+                    sr >> mvb->offsets[c];
+
+                for (uint32_t c = 0; c < mvb->header.headerTotal; c++)
+                {
+                    VertexBlockSection *vbs = &mvb->sections[c];
+
+                    sr.SetCurrentPos(mvb->offsets[c]);
+                    sr >> vbs->type;
+
+                    switch (vbs->type)
+                    {
+                        case Section_VertexMetaHeader:
+                            sr.CopyAndAdvance(&vbs->header, sizeof(VertexMetaHeader));
+                            if (!le) ByteSwap::Swap(&vbs->header.headerTotal);
+                            vbs->offsets = new uint32_t[vbs->header.headerTotal];
+                            vbs->sections = new VertexHeaderSection[vbs->header.headerTotal];
+
+                            for (uint32_t d = 0; d < vbs->header.headerTotal; d++)
+                                sr >> vbs->offsets[d];
+
+                            for (uint32_t d = 0; d < vbs->header.headerTotal; d++)
                             {
-                                io->Seek(vertexHeaderOffsets[c], aiOrigin_SET);
-                                uint32_t vertexHeaderSectionType = sr->GetU4();
+                                VertexHeaderSection *vhs = &vbs->sections[d];
+                                VertexData *vd = &vhs->data;
 
-                                switch (vertexHeaderSectionType)
+                                sr.SetCurrentPos(vbs->offsets[d]);
+                                sr >> vhs->type;
+
+                                switch (vhs->type)
                                 {
                                     case Section_Polygon:
-                                    {
-                                        PolygonBlockHeader pbh;
-
-                                        io->Read(&pbh, sizeof(PolygonBlockHeader), 1);
+                                        sr.CopyAndAdvance(&vhs->polygonBlock.header, sizeof(PolygonBlockHeader));
                                         if (!le) {
-                                            ByteSwap::Swap(&pbh.dataTotal);
-                                            ByteSwap::Swap(&pbh.nameStringIndex);
+                                            ByteSwap::Swap(&vhs->polygonBlock.header.dataTotal);
+                                            ByteSwap::Swap(&vhs->polygonBlock.header.nameStringIndex);
                                         }
-                                        uint32_t *polygonDataOffsets = new uint32_t[pbh.dataTotal];
+                                        vhs->polygonBlock.offsets = new uint32_t[vhs->polygonBlock.header.dataTotal];
+                                        vhs->polygonBlock.polygons = new Polygon[vhs->polygonBlock.header.dataTotal];
 
-                                        for (uint32_t e = 0; e < pbh.dataTotal; e++)
-                                            polygonDataOffsets[e] = sr->GetU4();
+                                        for (uint32_t e = 0; e < vhs->polygonBlock.header.dataTotal; e++)
+                                            sr >> vhs->polygonBlock.offsets[e];
 
-                                        for (uint32_t e = 0; e < pbh.dataTotal; e++)
+                                        for (uint32_t e = 0; e < vhs->polygonBlock.header.dataTotal; e++)
                                         {
-                                            uint32_t polygonDataSectionType = sr->GetU4();
+                                            Polygon *p = &vhs->polygonBlock.polygons[e];
 
-                                            switch (polygonDataSectionType)
+                                            sr.SetCurrentPos(vhs->polygonBlock.offsets[e]);
+                                            sr >> p->type;
+
+                                            switch (p->type)
                                             {
                                                 case Section_PolygonBlock:
-                                                {
-                                                    PolygonHeader ph;
-
-                                                    io->Read(&ph, sizeof(PolygonHeader), 1);
+                                                    sr.CopyAndAdvance(&p->header, sizeof(PolygonHeader));
                                                     if (!le) {
-                                                        ByteSwap::Swap(&ph.total);
-                                                        ByteSwap::Swap(&ph.type[0]);
+                                                        ByteSwap::Swap(&p->header.total);
+                                                        ByteSwap::Swap(&p->header.type[0]);
                                                     }
+                                                    p->faces = new uint32_t[p->header.total / 3][3];
 
-                                                    pcMesh->mNumFaces = ph.total / 3;
-                                                    pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
-
-                                                    switch (ph.type[0])
+                                                    switch (p->header.type[0])
                                                     {
                                                         case 5:
-                                                            for (uint32_t g = 0; g < pcMesh->mNumFaces; g++)
-                                                            {
-                                                                aiFace f;
-
-                                                                f.mNumIndices = 3;
-                                                                f.mIndices = new unsigned int[3];
-                                                                f.mIndices[0] = sr->GetU2();
-                                                                f.mIndices[1] = sr->GetU2();
-                                                                f.mIndices[2] = sr->GetU2();
-                                                                pcMesh->mFaces[g] = f;
+                                                            for (uint32_t g = 0; g < p->header.total / 3; g++) {
+                                                                p->faces[g][0] = sr.GetU2();
+                                                                p->faces[g][1] = sr.GetU2();
+                                                                p->faces[g][2] = sr.GetU2();
                                                             }
                                                             break;
                                                         case 7:
-                                                            for (uint32_t g = 0; g < pcMesh->mNumFaces; g++)
-                                                            {
-                                                                aiFace f;
-
-                                                                f.mNumIndices = 3;
-                                                                f.mIndices = new unsigned int[3];
-                                                                f.mIndices[0] = sr->GetU4();
-                                                                f.mIndices[1] = sr->GetU4();
-                                                                f.mIndices[2] = sr->GetU4();
-                                                                pcMesh->mFaces[g] = f;
-                                                            }
+                                                            for (uint32_t g = 0; g < p->header.total / 3; g++)
+                                                                sr >> p->faces[g][0] >> p->faces[g][1] >> p->faces[g][2];
                                                             break;
                                                         default:
-                                                            DefaultLogger::get()->warn(std::string("Unsupported/unknown polygon type: ") +
-                                                                std::to_string(ph.type[0]));
+                                                            log->warn(std::string("Unsupported/unknown polygon type: ") +
+                                                                std::to_string(p->header.type[0]));
                                                     }
 
                                                     break;
-                                                }
                                                 default:
-                                                    DefaultLogger::get()->warn(std::string("Unsupported/unknown polygon data section: ") +
-                                                        std::to_string(polygonDataSectionType));
+                                                    log->warn(std::string("Unsupported/unknown polygon data section: ") +
+                                                        std::to_string(p->type));
                                             }
                                         }
 
-                                        delete[] polygonDataOffsets;
                                         break;
-                                    }
                                     case Section_VertexBlock:
-                                    {
-                                        VertexHeader vh;
-
-                                        io->Read(&vh, sizeof(VertexHeader), 1);
+                                        sr.CopyAndAdvance(&vd->header, sizeof(VertexHeader));
                                         if (!le) {
-                                            ByteSwap::Swap(&vh.total);
-                                            ByteSwap::Swap(&vh.count);
-                                            ByteSwap::Swap(&vh.type[0]);
+                                            ByteSwap::Swap(&vd->header.total);
+                                            ByteSwap::Swap(&vd->header.count);
+                                            ByteSwap::Swap(&vd->header.type[0]);
                                         }
-                                        uint32_t *vertexOffsets = new uint32_t[vh.total];
+                                        vd->offsets = new uint32_t[vd->header.total];
+                                        vd->offsetHeaders = new VertexOffsetHeader[vd->header.total];
+                                        vd->vertices = new Vertex[vd->header.count];
 
-                                        for (uint32_t e = 0; e < vh.total; e++)
-                                            vertexOffsets[e] = sr->GetU4();
+                                        for (uint32_t e = 0; e < vd->header.total; e++)
+                                            sr >> vd->offsets[e];
 
-                                        VertexOffsetHeader *vertexOffsetHeaders = new VertexOffsetHeader[vh.total];
-                                        for (uint32_t e = 0; e < vh.total; e++)
+                                        for (uint32_t e = 0; e < vd->header.total; e++)
                                         {
-                                            io->Read(&vertexOffsetHeaders[e], sizeof(VertexOffsetHeader), 1);
-                                            if (!le) ByteSwap::Swap(&vertexOffsetHeaders[e].startOffset);
-                                            io->Seek(vertexOffsetHeaders[e].startOffset, aiOrigin_SET);
+                                            sr.SetCurrentPos(vd->offsets[e]);
+                                            sr.CopyAndAdvance(&vd->offsetHeaders[e], sizeof(VertexOffsetHeader));
+                                            if (!le) ByteSwap::Swap(&vd->offsetHeaders[e].startOffset);
+                                            sr.SetCurrentPos(vd->offsetHeaders[e].startOffset);
                                         }
 
-                                        for (uint32_t e = 0; e < vh.count; e++)
+                                        for (uint32_t e = 0; e < vd->header.count; e++)
                                         {
-                                            switch (vh.type[0])
+                                            switch (vd->header.type[0])
                                             {
                                                 case 1:
                                                 {
-                                                    Vertex v;
+                                                    Vertex1 v;
 
-                                                    io->Read(&v, sizeof(Vertex), 1);
+                                                    sr.CopyAndAdvance(&v, sizeof(Vertex1));
                                                     if (!le) {
                                                         ByteSwap::Swap(&v.position[0]);
                                                         ByteSwap::Swap(&v.position[1]);
@@ -469,88 +409,91 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
                                                         ByteSwap::Swap(&v.textureCoordX);
                                                         ByteSwap::Swap(&v.textureCoordY);
                                                     }
-                                                    vertices.push_back(v);
-
+                                                    vd->vertices[e].type1 = v;
                                                     break;
                                                 }
+                                                case 3:
+                                                {
+                                                    switch (vd->header.size)
+                                                    {
+                                                        case 16:
+                                                        {
+                                                            Vertex3Size16 v;
+
+                                                            for (uint32_t g = 0; g < 4; g++)
+                                                                sr >> v.bones[g];
+                                                            for (uint32_t g = 0; g < 4; g++)
+                                                                sr >> v.weights[g];
+
+                                                            vd->vertices[e].type3Size16 = v;
+                                                            break;
+                                                        }
+                                                        case 32:
+                                                            if (mh->version[0] == 1) {
+                                                                Vertex3Size32V1 v;
+
+                                                                for (uint32_t g = 0; g < 4; g++)
+                                                                    sr >> v.bones[g];
+                                                                for (uint32_t g = 0; g < 4; g++)
+                                                                    sr >> v.weights[g];
+
+                                                                vd->vertices[e].type3Size32V1 = v;
+                                                            } else if (mh->version[0] == 2) {
+                                                                Vertex3Size32V2 v;
+
+                                                                for (uint32_t g = 0; g < 4; g++)
+                                                                    sr >> v.bones[g];
+                                                                for (uint32_t g = 0; g < 4; g++)
+                                                                    sr >> v.weights[g];
+
+                                                                vd->vertices[e].type3Size32V2 = v;
+                                                            } else {
+                                                                log->warn(std::string("Unsupported/unknown vertex structure version: ") +
+                                                                    std::to_string(static_cast<unsigned>(mh->version[0])));
+                                                            }
+                                                            break;
+                                                        case 48:
+                                                        {
+                                                            Vertex3Size48 v;
+
+                                                            for (uint32_t g = 0; g < 8; g++)
+                                                                sr >> v.bones[g];
+                                                            for (uint32_t g = 0; g < 8; g++)
+                                                                sr >> v.weights[g];
+
+                                                            vd->vertices[e].type3Size48 = v;
+                                                            break;
+                                                        }
+                                                        default:
+                                                            log->warn(std::string("Unsupported/unknown vertex size: ") +
+                                                                std::to_string(vd->header.size));
+                                                    }
+                                                }
                                                 default:
-                                                    DefaultLogger::get()->warn(std::string("Unsupported/unknown vertex type: ") +
-                                                                std::to_string(vh.type[0]));
+                                                    log->warn(std::string("Unsupported/unknown vertex type: ") +
+                                                        std::to_string(vd->header.type[0]));
                                             }
                                         }
-
-                                        delete[] vertexOffsets;
                                         break;
-                                    }
                                     default:
-                                        DefaultLogger::get()->warn(std::string("Unsupported/unknown vertex header section: ") +
-                                            std::to_string(vertexHeaderSectionType));
+                                        log->warn(std::string("Unsupported/unknown vertex header section: ") +
+                                            std::to_string(vhs->type));
                                 }
                             }
-
-                            delete[] vertexHeaderOffsets;
                             break;
-                        }
                         default:
-                            DefaultLogger::get()->warn(std::string("Unsupported/unknown vertex data section: ") +
-                                std::to_string(vertexDataSectionType));
+                            log->warn(std::string("Unsupported/unknown vertex data section: ") +
+                                std::to_string(vbs->type));
                     }
                 }
-
-                delete[] vertexDataOffsets;
-
-                pcMesh->mNumVertices = vertices.size();
-                pcMesh->mVertices = new aiVector3D[vertices.size()];
-                pcMesh->mTextureCoords[0] = new aiVector3D[vertices.size()];
-                pcMesh->mColors[0] = new aiColor4D[vertices.size()];
-                pcMesh->mNormals = new aiVector3D[vertices.size()];
-
-                for (uint32_t i = 0; i < vertices.size(); i++)
-                {
-                    pcMesh->mVertices[i] = aiVector3D(vertices[i].position[0], vertices[i].position[1],
-                        vertices[i].position[2]);
-                    pcMesh->mTextureCoords[0][i] = aiVector3D(vertices[i].textureCoordX, vertices[i].textureCoordY, 0);
-                    pcMesh->mColors[0][i] = aiColor4D(vertices[i].red / 255, vertices[i].green / 255,
-                        vertices[i].blue / 255, vertices[i].alpha / 255);
-                    pcMesh->mNormals[i] = aiVector3D(wtof(vertices[i].normal1[0]), wtof(vertices[i].normal1[1]),
-                        wtof(vertices[i].normal1[2]));
-                }
-
                 break;
-            }
 
-            case Section_Strings:
-            {
-                StringHeader sh;
-
-                io->Read(&sh, sizeof(StringHeader), 1);
-                if (!le) ByteSwap::Swap(&sh.total);
-                uint32_t *stringOffsets = new uint32_t[sh.total];
-
-                for (uint32_t c = 0; c < sh.total; c++)
-                    stringOffsets[c] = sr->GetU4();
-
-                for (uint32_t c = 0; c < sh.total; c++)
-                {
-                    std::string s = "";
-                    char txt = 0;
-
-                    io->Seek(stringOffsets[c], aiOrigin_SET);
-                    while ((txt = sr->GetI1()) != 0)
-                        s += txt;
-                    strings.push_back(aiString(s));
-                }
-
-                strings.push_back(aiString("Tex_c.dds")); // for materials with no submats
-
-                delete[] stringOffsets;
+            case Section_Strings: // already done
                 break;
-            }
 
             // Seems redundant as material data also points to tex name, which is all we'd
             // grab from here for now, pending any more info on Texture struct being found
             case Section_Textures:
-            {
                 /*TextureHeader th;
 
                 io->Read(&th, sizeof(TextureHeader), 1);
@@ -572,82 +515,55 @@ void ISM2Importer::InternReadFile( const std::string& pFile, aiScene* pScene,
 
                 delete[] textureOffsets;*/
                 break;
-            }
             case Section_Materials:
-            {
-                MaterialHeader matH;
+                sr.CopyAndAdvance(&mmb->header, sizeof(MaterialHeader));
+                if (!le) ByteSwap::Swap(&mmb->header.total);
+                mmb->offsets = new uint32_t[mmb->header.total];
+                mmb->materials = new Material[mmb->header.total];
 
-                io->Read(&matH, sizeof(MaterialHeader), 1);
-                if (!le) ByteSwap::Swap(&matH.total);
-                uint32_t *materialOffsets = new uint32_t[matH.total];
-                pScene->mNumMaterials = matH.total;
-                pScene->mMaterials = new aiMaterial*[matH.total];
+                for (uint32_t z = 0; z < mmb->header.total; z++)
+                    sr >> mmb->offsets[z];
 
-                for (uint32_t z = 0; z < matH.total; z++)
-                    materialOffsets[z] = sr->GetU4();
-
-                for (uint32_t z = 0; z < matH.total; z++)
+                for (uint32_t z = 0; z < mmb->header.total; z++)
                 {
-                    MaterialA ma;
-                    aiMaterial *pMat = new aiMaterial();
+                    Material *m = &mmb->materials[z];
 
-                    io->Seek(materialOffsets[z], aiOrigin_SET);
-                    io->Read(&ma, sizeof(MaterialA), 1);
+                    sr.SetCurrentPos(mmb->offsets[z]);
+                    sr.CopyAndAdvance(&m->a, sizeof(MaterialA));
                     if (!le) {
-                        ByteSwap::Swap(&ma.nameStringIndex);
-                        ByteSwap::Swap(&ma.total);
+                        ByteSwap::Swap(&m->a.nameStringIndex);
+                        ByteSwap::Swap(&m->a.total);
                     }
 
-                    pMat->AddProperty(&strings[ma.nameStringIndex], AI_MATKEY_NAME);
-
-                    if (ma.total > 0)
+                    if (m->a.total > 0)
                     {
-                        MaterialB mb;
-                        MaterialC mc;
-                        MaterialD md;
-                        MaterialE me;
-                        uint32_t mbOffset = sr->GetU4();
+                        sr >> m->bOffset;
+                        sr.SetCurrentPos(m->bOffset);
+                        sr.CopyAndAdvance(&m->b, sizeof(MaterialB));
+                        if (!le) ByteSwap::Swap(&m->b.cOffset);
 
-                        io->Seek(mbOffset, aiOrigin_SET);
-                        io->Read(&mb, sizeof(MaterialB), 1);
-                        if (!le) ByteSwap::Swap(&mb.cOffset);
+                        sr.SetCurrentPos(m->b.cOffset);
+                        sr.CopyAndAdvance(&m->c, sizeof(MaterialC));
+                        if (!le) ByteSwap::Swap(&m->c.dOffset);
 
-                        io->Seek(mb.cOffset, aiOrigin_SET);
-                        io->Read(&mc, sizeof(MaterialC), 1);
-                        if (!le) ByteSwap::Swap(&mc.dOffset);
+                        sr.SetCurrentPos(m->c.dOffset);
+                        sr.CopyAndAdvance(&m->d, sizeof(MaterialD));
+                        if (!le) ByteSwap::Swap(&m->d.eOffset);
 
-                        io->Seek(mc.dOffset, aiOrigin_SET);
-                        io->Read(&md, sizeof(MaterialD), 1);
-                        if (!le) ByteSwap::Swap(&md.eOffset);
+                        sr.SetCurrentPos(m->d.eOffset);
+                        sr.CopyAndAdvance(&m->e, sizeof(MaterialE));
+                        if (!le) ByteSwap::Swap(&m->e.fOffset);
 
-                        io->Seek(md.eOffset, aiOrigin_SET);
-                        io->Read(&me, sizeof(MaterialE), 1);
-                        if (!le) ByteSwap::Swap(&me.fOffset);
-
-                        io->Seek(me.fOffset, aiOrigin_SET);
-                        uint32_t matTexNameStringIndex = sr->GetU4();
-                        pMat->AddProperty(&strings[matTexNameStringIndex],
-                            AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+                        sr.SetCurrentPos(m->e.fOffset);
+                        sr >> m->textureNameStringIndex;
                     }
-                    else
-                        pMat->AddProperty(&strings[strings.size()-1], AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
-
-                    pScene->mMaterials[z] = pMat;
                 }
-
-                delete[] materialOffsets;
                 break;
-            }
-
             default:
-                DefaultLogger::get()->warn(std::string("Unsupported/unknown section: ") +
-                    std::to_string(sectionTypes[b]));
+                log->warn(std::string("Unsupported/unknown section: ") +
+                    std::to_string(msd->types[b]));
         }
     }
-
-    delete[] sectionOffsets;
-    delete[] sectionTypes;
-    delete sr;
 }
 
 #endif // ASSIMP_BUILD_NO_ISM2_IMPORTER

@@ -89,4 +89,5 @@ TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );
 }
+
 #endif // ASSIMP_BUILD_NO_EXPORT

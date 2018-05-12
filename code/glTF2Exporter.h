@@ -118,7 +118,7 @@ namespace Assimp
         const char* mFilename;
         IOSystem* mIOSystem;
         const aiScene* mScene;
-        const ExportProperties* mProperties
+        const ExportProperties* mProperties;
         std::map<std::string, unsigned int> mTexturesByPath;
         std::shared_ptr<glTF2::Asset> mAsset;
         std::vector<unsigned char> mBodyData;

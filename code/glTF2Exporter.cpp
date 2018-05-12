@@ -728,8 +728,10 @@ void glTF2Exporter::ExportMeshes()
 
 		/******************** Normals ********************/
         // Normalize all normals as the validator can emit a warning otherwise
-        for (auto i = 0u; i < aim->mNumVertices; ++i) {
-            aim->mNormals[i].Normalize();
+        if ( nullptr != aim->mNormals) {
+            for ( auto i = 0u; i < aim->mNumVertices; ++i ) {
+                aim->mNormals[ i ].Normalize();
+            }
         }
 
 		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);

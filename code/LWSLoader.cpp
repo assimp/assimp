@@ -410,7 +410,7 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
         // name to attach light to node -> unique due to LWs indexing system
         lit->mName = nd->mName;
 
-        // detemine light type and setup additional members
+        // determine light type and setup additional members
         if (src.lightType == 2) { /* spot light */
 
             lit->mType = aiLightSource_SPOT;

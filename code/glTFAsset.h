@@ -381,7 +381,7 @@ namespace glTF
     };
 
 
-    //! Base classe for all glTF top-level objects
+    //! Base class for all glTF top-level objects
     struct Object
     {
         std::string id;   //!< The globally unique ID used to reference this object

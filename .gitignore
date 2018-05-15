@@ -38,6 +38,7 @@ tools/assimp_cmd/Makefile
 
 # Tests
 test/results
+test/readlinetest*
 
 # Python
 __pycache__

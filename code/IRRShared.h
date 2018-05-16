@@ -91,7 +91,7 @@ protected:
 
     // -------------------------------------------------------------------
     /** Read a property of the specified type from the current XML element.
-     *  @param out Recives output data
+     *  @param out Receives output data
      */
     void ReadHexProperty    (HexProperty&    out);
     void ReadStringProperty (StringProperty& out);

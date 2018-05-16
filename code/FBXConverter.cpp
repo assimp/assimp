@@ -1564,7 +1564,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
                 if (textureReady) {
                     // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
                     // In FBX files textures are now stored internally by Assimp with their filename included
-                    // Now Assimp can lookup thru the loaded textures after all data is processed
+                    // Now Assimp can lookup through the loaded textures after all data is processed
                     // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
                     // This may occur on this case too, it has to be studied
                     path.data[0] = '*';

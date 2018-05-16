@@ -141,7 +141,7 @@ void MDLImporter::SetupProperties(const Importer* pImp)
         configFrameID =  pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
     }
 
-    // AI_CONFIG_IMPORT_MDL_COLORMAP - pallette file
+    // AI_CONFIG_IMPORT_MDL_COLORMAP - palette file
     configPalette =  pImp->GetPropertyString(AI_CONFIG_IMPORT_MDL_COLORMAP,"colormap.lmp");
 }
 
@@ -1496,7 +1496,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
                 groupData.vTextureCoords1.resize(iNumVertices,aiVector3D());
 
                 // check whether the triangle data structure is large enough
-                // to contain a second UV coodinate set
+                // to contain a second UV coordinate set
                 if (pcHeader->triangle_stc_size >= AI_MDL7_TRIANGLE_STD_SIZE_TWO_UV)    {
                     groupData.vTextureCoords2.resize(iNumVertices,aiVector3D());
                     groupData.bNeed2UV = true;

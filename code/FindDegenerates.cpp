@@ -286,14 +286,8 @@ evil_jump_outside:
         if (!mesh->mNumFaces) {
             //The whole mesh consists of degenerated faces
             //signal upward, that this mesh should be deleted.
+            ASSIMP_LOG_DEBUG("FindDegeneratesProcess removed a mesh full of degenerated primitives");
             return true;
-            // WTF!?
-            // OK ... for completeness and because I'm not yet tired,
-            // let's write code that will hopefully never be called
-            // (famous last words)
-
-            // OK ... bad idea.
-            throw DeadlyImportError("Mesh is empty after removal of degenerated primitives ... WTF!?");
         }
     }
 

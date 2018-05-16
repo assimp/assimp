@@ -386,7 +386,7 @@ namespace glTF2
     };
 
 
-    //! Base classe for all glTF top-level objects
+    //! Base class for all glTF top-level objects
     struct Object
     {
         int index;        //!< The index of this object within its property container

@@ -42,3 +42,5 @@ else()
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
+install(TARGETS assimp_qt_viewer DESTINATION "${ASSIMP_BIN_INSTALL_DIR}")

@@ -212,7 +212,7 @@ template <> struct MinMaxChooser<aiVertexWeight> {
 // -------------------------------------------------------------------------------
 /** @brief Find the min/max values of an array of Ts
  *  @param in Input array
- *  @param size Numebr of elements to process
+ *  @param size Number of elements to process
  *  @param[out] min minimum value
  *  @param[out] max maximum value
  */

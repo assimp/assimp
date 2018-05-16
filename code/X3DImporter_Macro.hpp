@@ -76,7 +76,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 
 /// \def MACRO_ATTRREAD_CHECK_REF
-/// Check curent attribute name and if it equal to requested then read value. Result write to output variable by reference. If result was read then
+/// Check current attribute name and if it equal to requested then read value. Result write to output variable by reference. If result was read then
 /// "continue" will called.
 /// \param [in] pAttrName - attribute name.
 /// \param [out] pVarName - output variable name.
@@ -89,7 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 
 /// \def MACRO_ATTRREAD_CHECK_RET
-/// Check curent attribute name and if it equal to requested then read value. Result write to output variable using return value of \ref pFunction.
+/// Check current attribute name and if it equal to requested then read value. Result write to output variable using return value of \ref pFunction.
 /// If result was read then  "continue" will called.
 /// \param [in] pAttrName - attribute name.
 /// \param [out] pVarName - output variable name.

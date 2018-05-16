@@ -317,7 +317,7 @@ void TempMesh::FixupFaceOrientation()
         IfcVector3 farthestCenter = std::accumulate(mVerts.begin() + faceStartIndices[farthestIndex],
             mVerts.begin() + faceStartIndices[farthestIndex] + mVertcnt[farthestIndex], IfcVector3(0.0))
             / IfcFloat(mVertcnt[farthestIndex]);
-        // We accapt a bit of negative orientation without reversing. In case of doubt, prefer the orientation given in
+        // We accept a bit of negative orientation without reversing. In case of doubt, prefer the orientation given in
         // the file.
         if( (farthestNormal * (farthestCenter - vavg).Normalize()) < -0.4 )
         {

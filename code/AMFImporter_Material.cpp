@@ -99,7 +99,7 @@ CAMFImporter_NodeElement* ne;
 		ParseHelper_Node_Exit();
 		// check that all components was defined
 		if(!(read_flag[0] && read_flag[1] && read_flag[2])) throw DeadlyImportError("Not all color components are defined.");
-		// check if <a> is absent. Then manualy add "a == 1".
+		// check if <a> is absent. Then manually add "a == 1".
 		if(!read_flag[3]) als.Color.a = 1;
 
 	}// if(!mReader->isEmptyElement())

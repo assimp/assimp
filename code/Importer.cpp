@@ -997,33 +997,33 @@ bool Importer::SetPropertyInteger(const char* szName, int iValue)
 // Set a configuration property
 bool Importer::SetPropertyFloat(const char* szName, ai_real iValue)
 {
-    bool exising;
+    bool existing;
     ASSIMP_BEGIN_EXCEPTION_REGION();
-        exising = SetGenericProperty<ai_real>(pimpl->mFloatProperties, szName,iValue);
+        existing = SetGenericProperty<ai_real>(pimpl->mFloatProperties, szName,iValue);
     ASSIMP_END_EXCEPTION_REGION(bool);
-    return exising;
+    return existing;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
 bool Importer::SetPropertyString(const char* szName, const std::string& value)
 {
-    bool exising;
+    bool existing;
     ASSIMP_BEGIN_EXCEPTION_REGION();
-        exising = SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value);
+        existing = SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value);
     ASSIMP_END_EXCEPTION_REGION(bool);
-    return exising;
+    return existing;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
 bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value)
 {
-    bool exising;
+    bool existing;
     ASSIMP_BEGIN_EXCEPTION_REGION();
-        exising = SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value);
+        existing = SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value);
     ASSIMP_END_EXCEPTION_REGION(bool);
-    return exising;
+    return existing;
 }
 
 // ------------------------------------------------------------------------------------------------

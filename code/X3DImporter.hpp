@@ -522,7 +522,7 @@ private:
 	/// \param [in] pStartAngle - angle in radians of start of the arc.
 	/// \param [in] pEndAngle - angle in radians of end of the arc.
 	/// \param [in] pRadius - radius of the arc.
-	/// \param [out] pNumSegments - number of segments in arc. In other words - tesselation factor.
+	/// \param [out] pNumSegments - number of segments in arc. In other words - tessellation factor.
 	/// \param [out] pVertices - generated vertices.
 	void GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments, std::list<aiVector3D>& pVertices);
 

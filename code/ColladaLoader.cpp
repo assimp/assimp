@@ -956,7 +956,7 @@ void ColladaLoader::StoreSceneMaterials( aiScene* pScene)
 // Stores all animations
 void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pParser)
 {
-    // recursivly collect all animations from the collada scene
+    // recursively collect all animations from the collada scene
     StoreAnimations( pScene, pParser, &pParser.mAnims, "");
 
     // catch special case: many animations with the same length, each affecting only a single node.
@@ -1784,7 +1784,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
 
         // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
         // In FBX files textures are now stored internally by Assimp with their filename included
-        // Now Assimp can lookup thru the loaded textures after all data is processed
+        // Now Assimp can lookup through the loaded textures after all data is processed
         // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
         // This may occur on this case too, it has to be studied
         // setup texture reference string

@@ -205,7 +205,7 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
 
                     // NOTE: we set the removed vertex index to an unique value
                     // to make sure the developer gets notified when his
-                    // application attemps to access this data.
+                    // application attempts to access this data.
                     face.mIndices[ face.mNumIndices ] = 0xdeadbeef;
 
                     if(first) {

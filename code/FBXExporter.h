@@ -90,7 +90,7 @@ namespace Assimp
         const ExportProperties* mProperties; // currently unused
         std::shared_ptr<IOStream> outfile; // file to write to
 
-        std::vector<FBX::Node> connections; // conection storage
+        std::vector<FBX::Node> connections; // connection storage
 
         std::vector<int64_t> mesh_uids;
         std::vector<int64_t> material_uids;

@@ -663,7 +663,7 @@ public:
     /** Check whether a specific item is in the cache.
      *  @param s Data type of the item
      *  @param out Output pointer. Unchanged if the
-     *   cache doens't know the item yet.
+     *   cache doesn't know the item yet.
      *  @param ptr Item address to look for. */
     template <typename T> void get (
         const Structure& s,

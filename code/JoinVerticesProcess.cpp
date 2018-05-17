@@ -118,7 +118,7 @@ bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
     // Squared because we check against squared length of the vector difference
     static const float squareEpsilon = epsilon * epsilon;
 
-    // Square compare is useful for animeshes vertexes compare
+    // Square compare is useful for animeshes vertices compare
     if ((lhs.position - rhs.position).SquareLength() > squareEpsilon) {
         return false;
     }

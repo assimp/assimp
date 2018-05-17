@@ -85,8 +85,7 @@ void SaveHistory();
 // File associations are registered in HKCU\Software\Classes. They might
 // be overwritten by global file associations.
 //-------------------------------------------------------------------------------
-void MakeFileAssociations()
-    {
+void MakeFileAssociations() {
     char szTemp2[MAX_PATH];
     char szTemp[MAX_PATH + 10];
 
@@ -1404,7 +1403,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
             g_hDlg = hwndDlg;
 
-            // load the state of the usr interface
+            // load the state of the user interface
             InitUI();
 
             // load the file history
@@ -1648,11 +1647,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
             xPos = xPos2 = sPoint.x;
             yPos = yPos2 = sPoint.y;
 
-        /*  xPos -= 10;
-            yPos -= 10;
-            xPos2 = xPos-3;
-            yPos2 = yPos-5;*/
-
             RECT sRect;
             GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
             sRect.right -= sRect.left;
@@ -1835,7 +1829,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
             return TRUE;
 
         case WM_COMMAND:
-
             HMENU hMenu = GetMenu(g_hDlg);
             if (ID_VIEWER_QUIT == LOWORD(wParam))
                 {
@@ -2366,7 +2359,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR    lpCmdLine,
                        int       nCmdShow)
-    {
+{
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -2376,14 +2369,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     // load windows common controls library to get XP style
     InitCommonControls();
 
-    // intiailize the IDirect3D9 interface
+    // initialize the IDirect3D9 interface
     g_hInstance = hInstance;
-    if (0 == InitD3D())
-        {
+    if (0 == InitD3D()) {
         MessageBox(NULL,"Failed to initialize Direct3D 9",
             "ASSIMP ModelViewer",MB_OK);
         return -6;
-        }
+    }
 
     // create the main dialog
     HWND hDlg = CreateDialog(hInstance,MAKEINTRESOURCE(IDD_DIALOGMAIN),
@@ -2400,12 +2392,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         Assimp::DefaultLogger::Debugging | Assimp::DefaultLogger::Info |
         Assimp::DefaultLogger::Err | Assimp::DefaultLogger::Warn);
 
-    if (NULL == hDlg)
-        {
+    if (NULL == hDlg) {
         MessageBox(NULL,"Failed to create dialog from resource",
             "ASSIMP ModelViewer",MB_OK);
         return -5;
-        }
+    }
 
     // display the window
     g_hDlg = hDlg;
@@ -2415,12 +2406,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     UpdateWindow( hDlg );
 
     // create the D3D device object
-    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true))
-        {
+    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true)) {
         MessageBox(NULL,"Failed to initialize Direct3D 9 (2)",
             "ASSIMP ModelViewer",MB_OK);
         return -4;
-        }
+    }
+    
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
     // create the log window

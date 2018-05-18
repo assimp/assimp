@@ -860,6 +860,8 @@ inline void Material::Read(Value& material, Asset& r)
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
+
+        unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
 
@@ -882,6 +884,7 @@ inline void Material::SetDefaults()
     alphaMode = "OPAQUE";
     alphaCutoff = 0.5;
     doubleSided = false;
+    unlit = false;
 }
 
 inline void PbrSpecularGlossiness::SetDefaults()
@@ -1253,6 +1256,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
         if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
+    CHECK_EXT(KHR_materials_unlit);
 
     #undef CHECK_EXT
 }

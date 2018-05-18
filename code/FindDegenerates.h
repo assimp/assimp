@@ -74,7 +74,8 @@ public:
 
     // -------------------------------------------------------------------
     // Execute step on a given mesh
-    void ExecuteOnMesh( aiMesh* mesh);
+    ///@returns true if the current mesh should be deleted, false otherwise
+    bool ExecuteOnMesh( aiMesh* mesh);
 
     // -------------------------------------------------------------------
     /// @brief Enable the instant removal of degenerated primitives

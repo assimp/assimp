@@ -138,28 +138,29 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     }
 }
 
+glTF2Exporter::~glTF2Exporter() {
+    // empty
+}
+
 /*
  * Copy a 4x4 matrix from struct aiMatrix to typedef mat4.
  * Also converts from row-major to column-major storage.
  */
-static void CopyValue(const aiMatrix4x4& v, mat4& o)
-{
+static void CopyValue(const aiMatrix4x4& v, mat4& o) {
     o[ 0] = v.a1; o[ 1] = v.b1; o[ 2] = v.c1; o[ 3] = v.d1;
     o[ 4] = v.a2; o[ 5] = v.b2; o[ 6] = v.c2; o[ 7] = v.d2;
     o[ 8] = v.a3; o[ 9] = v.b3; o[10] = v.c3; o[11] = v.d3;
     o[12] = v.a4; o[13] = v.b4; o[14] = v.c4; o[15] = v.d4;
 }
 
-static void CopyValue(const aiMatrix4x4& v, aiMatrix4x4& o)
-{
+static void CopyValue(const aiMatrix4x4& v, aiMatrix4x4& o) {
     o.a1 = v.a1; o.a2 = v.a2; o.a3 = v.a3; o.a4 = v.a4;
     o.b1 = v.b1; o.b2 = v.b2; o.b3 = v.b3; o.b4 = v.b4;
     o.c1 = v.c1; o.c2 = v.c2; o.c3 = v.c3; o.c4 = v.c4;
     o.d1 = v.d1; o.d2 = v.d2; o.d3 = v.d3; o.d4 = v.d4;
 }
 
-static void IdentityMatrix4(mat4& o)
-{
+static void IdentityMatrix4(mat4& o) {
     o[ 0] = 1; o[ 1] = 0; o[ 2] = 0; o[ 3] = 0;
     o[ 4] = 0; o[ 5] = 1; o[ 6] = 0; o[ 7] = 0;
     o[ 8] = 0; o[ 9] = 0; o[10] = 1; o[11] = 0;
@@ -169,7 +170,9 @@ static void IdentityMatrix4(mat4& o)
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
     unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
-    if (!count || !data) return Ref<Accessor>();
+    if (!count || !data) {
+        return Ref<Accessor>();
+    }
 
     unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
     unsigned int numCompsOut = AttribType::GetNumComponents(typeOut);
@@ -523,6 +526,12 @@ void glTF2Exporter::ExportMaterials()
 
             m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }
+
+        bool unlit;
+        if (mat->Get(AI_MATKEY_GLTF_UNLIT, unlit) == AI_SUCCESS && unlit) {
+            mAsset->extensionsUsed.KHR_materials_unlit = true;
+            m->unlit = true;
+        }
     }
 }
 
@@ -729,8 +738,10 @@ void glTF2Exporter::ExportMeshes()
 
 		/******************** Normals ********************/
         // Normalize all normals as the validator can emit a warning otherwise
-        for (auto i = 0u; i < aim->mNumVertices; ++i) {
-            aim->mNormals[i].Normalize();
+        if ( nullptr != aim->mNormals) {
+            for ( auto i = 0u; i < aim->mNumVertices; ++i ) {
+                aim->mNormals[ i ].Normalize();
+            }
         }
 
 		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);

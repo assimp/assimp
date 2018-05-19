@@ -59,9 +59,9 @@ build_arch()
     $XCODE_ROOT_DIR/Developer/usr/bin/make clean
     $XCODE_ROOT_DIR/Developer/usr/bin/make assimp -j 8 -l
 
-    echo "[!] Moving built library into: $BUILD_DIR/$1/"
+    echo "[!] Moving built libraries into: $BUILD_DIR/$1/"
 
-    mv ./lib/libassimp.a $BUILD_DIR/$1/
+    mv ./lib/*.a $BUILD_DIR/$1/
 }
 
 echo "[!] $0 - assimp iOS build script"
@@ -110,14 +110,27 @@ for ARCH_TARGET in $DEPLOY_ARCHS; do
     #rm ./lib/libassimp.a
 done
 
-if [[ "$DEPLOY_FAT" -eq 1 ]]; then
-    echo '[+] Creating fat binary ...'
+
+make_fat_binary()
+{
+	LIB_NAME=$1
+	LIPO_ARGS=''
     for ARCH_TARGET in $DEPLOY_ARCHS; do
-        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
+        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.a "
     done
-    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
+    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/$LIB_NAME-fat.a"
     lipo $LIPO_ARGS
-    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
+}
+
+if [[ "$DEPLOY_FAT" -eq 1 ]]; then
+    echo '[+] Creating fat binaries ...'
+    
+    make_fat_binary 'libassimp'
+    make_fat_binary 'libIrrXML'
+    make_fat_binary 'libzlibstatic'
+    
+    echo "[!] Done! The fat binaries can be found at $BUILD_DIR"
 fi
+
 
 

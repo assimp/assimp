@@ -164,7 +164,7 @@ If done correctly you should now be able to compile, link, run and use the appli
 @section install_own Building the library from scratch
 
 First you need to install cmake. Now just get the code from github or download the latest version from the webside.
-to buil the library just open a command-prompt / bash, navigate into the repo-folder and run cmake via:
+to build the library just open a command-prompt / bash, navigate into the repo-folder and run cmake via:
 
 @code
 cmake CMakeLists.txt
@@ -653,7 +653,7 @@ To apply such an animation you need to identify the animation tracks that refer 
 in your mesh. Then for every track: <br>
 a) Find the keys that lay right before the current anim time. <br>
 b) Optional: interpolate between these and the following keys. <br>
-c) Combine the calculated position, rotation and scaling to a tranformation matrix <br>
+c) Combine the calculated position, rotation and scaling to a transformation matrix <br>
 d) Set the affected node's transformation to the calculated matrix. <br>
 
 If you need hints on how to convert to or from quaternions, have a look at the
@@ -669,7 +669,7 @@ Such textures are loaded into an aiTexture structure.
 
 In previous versions, the path from the query for `AI_MATKEY_TEXTURE(textureType, index)` would be
 `*<index>` where `<index>` is the index of the texture in aiScene::mTextures. Now this call will
-return a file path for embedded textures in FBX files. To test if it is an embdedded texture use
+return a file path for embedded textures in FBX files. To test if it is an embedded texture use
 aiScene::GetEmbeddedTexture. If the returned pointer is not null, it is embedded und can be loaded
 from the data structure. If it is null, search for a separate file. Other file types still use the
 old behaviour.<br>
@@ -794,7 +794,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td><tt>COLOR_REFLECTIVE</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-    <td>Defines the reflective color of the material. This is typically scaled by the amount of incoming light from the direction of mirror reflection. Usually combined with an enviroment lightmap of some kind for real-time applications.</td>
+    <td>Defines the reflective color of the material. This is typically scaled by the amount of incoming light from the direction of mirror reflection. Usually combined with an environment lightmap of some kind for real-time applications.</td>
     <td>---</td>
   </tr>
 
@@ -819,7 +819,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td>int</td>
     <td>false</td>
     <td>Specifies whether meshes using this material must be rendered without backface culling. 0 for false, !0 for true. </td>
-    <td>Some importers set this property if they don't know whether the output face oder is right. As long as it is not set, you may safely enable backface culling.</tt></td>
+    <td>Some importers set this property if they don't know whether the output face order is right. As long as it is not set, you may safely enable backface culling.</tt></td>
   </tr>
 
   <tr>

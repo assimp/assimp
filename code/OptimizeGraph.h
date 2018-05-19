@@ -102,7 +102,7 @@ public:
     }
 
     // -------------------------------------------------------------------
-    /** @brief Rmeove a node from the list of locked nodes.
+    /** @brief Remove a node from the list of locked nodes.
      *  @param name Name to be unlocked
      */
     inline void RemoveLockedNode(std::string& name)

@@ -3,7 +3,7 @@ project(assimp_qt_viewer)
 
 cmake_minimum_required(VERSION 2.6)
 
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Gui Widgets OpenGL REQUIRED)
 find_package(DevIL REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -25,9 +25,8 @@ qt5_wrap_ui(UISrcs mainwindow.ui)
 qt5_wrap_cpp(MOCrcs mainwindow.hpp glview.hpp)
 
 add_executable(${PROJECT_NAME} ${assimp_qt_viewer_SRCS} ${UISrcs} ${MOCrcs})
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
+target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Widgets Qt5::OpenGL ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
 
-qt5_use_modules(${PROJECT_NAME} Widgets OpenGL)
 if(WIN32) # Check if we are on Windows
 	if(MSVC) # Check if we are using the Visual Studio compiler
 		#set_target_properties(TestProject PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
@@ -43,3 +42,5 @@ else()
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
+install(TARGETS assimp_qt_viewer DESTINATION "${ASSIMP_BIN_INSTALL_DIR}")

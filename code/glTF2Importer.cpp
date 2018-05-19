@@ -281,6 +281,9 @@ static aiMaterial* ImportMaterial(std::vector<int>& embeddedTexIdxs, Asset& r, M
 
         SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.specularGlossinessTexture, aimat, aiTextureType_SPECULAR);
     }
+    if (mat.unlit) {
+        aimat->AddProperty(&mat.unlit, 1, AI_MATKEY_GLTF_UNLIT);
+    }
 
     return aimat;
 }

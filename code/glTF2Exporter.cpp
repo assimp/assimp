@@ -526,6 +526,12 @@ void glTF2Exporter::ExportMaterials()
 
             m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }
+
+        bool unlit;
+        if (mat->Get(AI_MATKEY_GLTF_UNLIT, unlit) == AI_SUCCESS && unlit) {
+            mAsset->extensionsUsed.KHR_materials_unlit = true;
+            m->unlit = true;
+        }
     }
 }
 

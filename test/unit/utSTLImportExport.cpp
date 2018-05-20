@@ -73,6 +73,16 @@ TEST_F( utSTLImporterExporter, test_with_two_solids ) {
     EXPECT_NE( nullptr, scene );
 }
 
+TEST_F(utSTLImporterExporter, test_with_empty_solid) {
+    Assimp::Importer importer;
+    //STL File with empty mesh. We should still be able to import other meshes in this file. ValidateDataStructure should fail.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_empty_solid.stl", 0);
+    EXPECT_NE(nullptr, scene);
+
+    const aiScene *scene2 = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_empty_solid.stl", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene2);
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utSTLImporterExporter, exporterTest) {

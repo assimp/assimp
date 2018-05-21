@@ -301,7 +301,7 @@ QMap<QString, const aiExportFormatDesc*> exportersMap;
 		return;
 	}
 
-	for (int i = 0; i < exporter.GetExportFormatCount(); ++i)
+	for (size_t i = 0; i < exporter.GetExportFormatCount(); ++i)
 	{
 		const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(i);
 		exportersList.push_back(desc->id + QString(": ") + desc->description);

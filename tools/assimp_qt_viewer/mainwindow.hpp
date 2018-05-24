@@ -36,6 +36,7 @@ private:
 	CLoggerView* mLoggerView;///< Pointer to logging object.
 	Assimp::Importer mImporter;///< Assimp importer.
 	const aiScene* mScene;///< Pointer to loaded scene (\ref aiScene).
+	bool mPosition_Pressed_Valid;///< Mouse button pressed on GLView.
 	QPoint mPosition_Pressed_LMB;///< Position where was pressed left mouse button.
 	QPoint mPosition_Pressed_RMB;///< Position where was pressed right mouse button.
 

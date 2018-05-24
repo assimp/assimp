@@ -560,30 +560,6 @@ void CGLView::Enable_Textures(const bool pEnable)
 	}
 }
 
-void CGLView::Enable_Axes(const bool pEnable){
-	if(pEnable)
-	{
-        this->mAxesEnabled = true;
-    }
-    else
-    {
-        this->mAxesEnabled = false;
-    }
-}
-
-void CGLView::Enable_Reload_Textures(const bool pEnable)
-{
-	if(pEnable)
-	{
-        this->mReloadTexturesEnabled = true;
-//      this->mScene->ImportTextures(this->mScene->pScenePath);
-	}
-    else
-    {
-        this->mReloadTexturesEnabled = false;
-    }
-}
-
 /********************************************************************/
 /*********************** Override functions ************************/
 /********************************************************************/
@@ -619,7 +595,11 @@ void CGLView::resizeGL(int pWidth, int pHeight)
 }
 
 void CGLView::drawCoordSystem() {
-    glBindTexture(GL_TEXTURE_1D, 0);
+	// Disable lighting. Colors must be bright and colorful)
+	if ( mLightingEnabled ) glDisable( GL_LIGHTING );///TODO: display list
+
+	// For same reason - disable textures.
+	glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_3D, 0);
     glEnable(GL_COLOR_MATERIAL);
@@ -635,6 +615,8 @@ void CGLView::drawCoordSystem() {
     qglColor(QColor(Qt::yellow)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
     qglColor(QColor(Qt::white));
     glEnd();
+	// Restore previous state of lighting.
+	if(mLightingEnabled) glEnable(GL_LIGHTING);
 }
 
 void CGLView::paintGL()
@@ -651,17 +633,12 @@ void CGLView::paintGL()
 	glTranslatef(-mHelper_Camera.Translation_ToScene.x, -mHelper_Camera.Translation_ToScene.y, -mHelper_Camera.Translation_ToScene.z);
 	glMultMatrixf((GLfloat*)&mHelper_Camera.Rotation_Scene);
 	// Coordinate system
-    if ( mLightingEnabled ) {
-        glDisable( GL_LIGHTING );///TODO: display list
-    }
-    if (this->mAxesEnabled == true)
+	if (mScene_AxesEnabled == true)
     {
         drawCoordSystem();
     }
 
 	glDisable(GL_COLOR_MATERIAL);
-	if(mLightingEnabled) glEnable(GL_LIGHTING);
-
 	// Scene
 	if(mScene != nullptr)
 	{

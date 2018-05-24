@@ -75,9 +75,7 @@ private:
 	};
 
 public:
-    bool mAxesEnabled = true;
-	// Textures
-    bool mReloadTexturesEnabled = false; // If true then textures will reload when the window is activated.
+
 	/// \enum ELightType
 	/// Type of light source.
 	enum class ELightType { Directional, Point, Spot };
@@ -146,6 +144,7 @@ private:
 	SBBox mScene_BBox;///< Bounding box of scene.
 	aiVector3D mScene_Center;///< Coordinates of center of the scene.
 	bool mScene_DrawBBox = false;///< Flag which control drawing scene BBox.
+	bool mScene_AxesEnabled = true;///< Flag which control drawing axes of the coordinate system.
 	// Meshes
 	size_t mHelper_Mesh_Quantity = 0;///< Quantity of meshes in scene.
 	SHelper_Mesh** mHelper_Mesh = nullptr;///< Array of pointers to helper objects for drawing mesh. Sequence of meshes are equivalent to \ref aiScene::mMeshes.
@@ -254,7 +253,11 @@ private:
 	/********************************************************************/
 
 protected:
+
+	/// \fn void drawCoordSystem()
+	/// Draw axes of the coordinate system.
     void drawCoordSystem();
+
 	/// \fn void initializeGL() override
 	/// Override function to initialise OpenGL.
 	void initializeGL() override;
@@ -307,11 +310,8 @@ public:
 	/// \param [in] pEnable - if true then enable textures, false - disable textures.
 	void Enable_Textures(const bool pEnable);
 
-	void Enable_Axes(const bool pEnable);
-	/// \fn void Enable_Textures(const bool pEnable)
-	/// Control textures drawing.
-	/// \param [in] pEnable - if true then enable textures, false - disable textures.
-	void Enable_Reload_Textures(const bool pEnable);
+	///TODO: doc
+	void Enable_Axes(const bool pEnable) { this->mScene_AxesEnabled = pEnable; }
 
 	/********************************************************************/
 	/******************** Lighting control functions ********************/

@@ -48,7 +48,7 @@ QTime time_begin = QTime::currentTime();
 		ui->cbxLighting->setChecked(true);	mGLView->Lighting_Enable();
 		ui->cbxBBox->setChecked(false);		mGLView->Enable_SceneBBox(false);
 		ui->cbxTextures->setChecked(true);	mGLView->Enable_Textures(true);
-		ui->cbxReloadTextures->setChecked(true);	mGLView->Enable_Reload_Textures(false);
+
 		//
 		// Fill info labels
 		//
@@ -195,13 +195,6 @@ GLfloat step;
 /********************************************************************/
 /********************** Constructor/Destructor **********************/
 /********************************************************************/
-bool MainWindow::event(QEvent *e)
-{
-    if (e->type() == QEvent::WindowActivate && this->mGLView->mReloadTexturesEnabled == true) {
-	    qInfo() << "Window Activated";
-    }
-    return QWidget::event(e);
-}
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::MainWindow),
@@ -375,12 +368,6 @@ void MainWindow::on_cbxBBox_clicked(bool checked)
 void MainWindow::on_cbxDrawAxes_clicked(bool checked)
 {
 	mGLView->Enable_Axes(checked);
-	mGLView->updateGL();
-}
-
-void MainWindow::on_cbxReloadTextures_clicked(bool checked)
-{
-	mGLView->Enable_Reload_Textures(checked);
 	mGLView->updateGL();
 }
 

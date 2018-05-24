@@ -310,7 +310,9 @@ public:
 	/// \param [in] pEnable - if true then enable textures, false - disable textures.
 	void Enable_Textures(const bool pEnable);
 
-	///TODO: doc
+	/// \fn void Enable_Axes(const bool pEnable)
+	/// Control axes drawing.
+	/// \param [in] pEnable - if true then enable axes, false - disable axes.
 	void Enable_Axes(const bool pEnable) { this->mScene_AxesEnabled = pEnable; }
 
 	/********************************************************************/
@@ -350,19 +352,23 @@ public:
 	/// \param [in] pCamera_Index - index of the camera (\ref aiScene::mCameras).
 	void Camera_Set(const size_t pCameraNumber);
 
-	/// \fn void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+	/// \fn void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
 	/// Rotate scene around axisees.
 	/// \param [in] pAngle_X - specifies the angle of rotation around axis oX, in degrees.
 	/// \param [in] pAngle_Y - specifies the angle of rotation around axis oY, in degrees.
 	/// \param [in] pAngle_Z - specifies the angle of rotation around axis oZ, in degrees.
-	void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z);
+	/// \param [in] pMatrix_Rotation_Initial - matrix from which calculates new transformation matrix. If not set (equal to nullptr) then current transformation matrix
+	/// will be used.
+	void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial = nullptr);
 
-	/// \fn void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+	/// \fn void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial = nullptr)
 	/// Rotate camera around axisees.
 	/// \param [in] pAngle_X - specifies the angle of rotation around axis oX, in degrees.
 	/// \param [in] pAngle_Y - specifies the angle of rotation around axis oY, in degrees.
 	/// \param [in] pAngle_Z - specifies the angle of rotation around axis oZ, in degrees.
-	void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z);
+	/// \param [in] pMatrix_Rotation_Initial - matrix from which calculates new transformation matrix. If not set (equal to nullptr) then current transformation matrix
+	/// will be used.
+	void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial = nullptr);
 
 	/// \fn void Camera_Translate(const size_t pTranslate_X, const size_t pTranslate_Y, const size_t pTranslate_Z)
 	/// Translate camera along axises. In local coordinates.
@@ -370,6 +376,13 @@ public:
 	/// \param [in] pTranslate_Y - specifies the Y coordinate of translation vector.
 	/// \param [in] pTranslate_Z - specifies the Z coordinate of translation vector.
 	void Camera_Translate(const GLfloat pTranslate_X, const GLfloat pTranslate_Y, const GLfloat pTranslate_Z);
+
+	/// \fn void Camera_Matrix(aiMatrix4x4& pRotation_Camera, aiMatrix4x4& pRotation_Scene, aiVector3D& pTranslation_Camera)
+	/// Return data about camera position in world.
+	/// \param [out] pRotation_Camera - rotation matrix which set rotation angles of the scene around camera.
+	/// \param [out] pRotation_Scene - rotation matrix which set rotation angles of the scene around own center.
+	/// \param [out] pTranslation_Camera - translation vector from camera to the scene.
+	void Camera_Matrix(aiMatrix4x4& pRotation_Camera, aiMatrix4x4& pRotation_Scene, aiVector3D& pTranslation_Camera);
 
 signals:
 

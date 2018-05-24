@@ -130,51 +130,63 @@ void MainWindow::mousePressEvent(QMouseEvent* pEvent)
 {
 const QPoint ms_pt = pEvent->pos();
 
+__unused aiVector3D temp_v3;
+
 	// Check if GLView is pointed.
 	if(childAt(ms_pt) == mGLView)
 	{
-		mPosition_Pressed_Valid = true;
+		if(!mMouse_Transformation.Position_Pressed_Valid)
+		{
+			mMouse_Transformation.Position_Pressed_Valid = true;// set flag
+			// Store current transformation matrices.
+			mGLView->Camera_Matrix(mMouse_Transformation.Rotation_AroundCamera, mMouse_Transformation.Rotation_Scene, temp_v3);
+		}
+
 		if(pEvent->button() & Qt::LeftButton)
-			mPosition_Pressed_LMB = ms_pt;
+			mMouse_Transformation.Position_Pressed_LMB = ms_pt;
 		else if(pEvent->button() & Qt::RightButton)
-			mPosition_Pressed_RMB = ms_pt;
+			mMouse_Transformation.Position_Pressed_RMB = ms_pt;
 	}
 	else
 	{
-		mPosition_Pressed_Valid = false;
+		mMouse_Transformation.Position_Pressed_Valid = false;
 	}
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *pEvent)
+{
+	if(pEvent->buttons() == 0) mMouse_Transformation.Position_Pressed_Valid = false;
+
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent* pEvent)
 {
-	if(mPosition_Pressed_Valid)
+	if(mMouse_Transformation.Position_Pressed_Valid)
 	{
 		if(pEvent->buttons() & Qt::LeftButton)
 		{
-			GLfloat dx = 180 * GLfloat(pEvent->x() - mPosition_Pressed_LMB.x()) / mGLView->width();
-			GLfloat dy = 180 * GLfloat(pEvent->y() - mPosition_Pressed_LMB.y()) / mGLView->height();
+			GLfloat dx = 180 * GLfloat(pEvent->x() - mMouse_Transformation.Position_Pressed_LMB.x()) / mGLView->width();
+			GLfloat dy = 180 * GLfloat(pEvent->y() - mMouse_Transformation.Position_Pressed_LMB.y()) / mGLView->height();
 
 			if(pEvent->modifiers() & Qt::ShiftModifier)
-				mGLView->Camera_RotateScene(dy, 0, dx);// Rotate around oX and oZ axises.
+				mGLView->Camera_RotateScene(dy, 0, dx, &mMouse_Transformation.Rotation_Scene);// Rotate around oX and oZ axises.
 			else
-				mGLView->Camera_RotateScene(dy, dx, 0);// Rotate around oX and oY axises.
+				mGLView->Camera_RotateScene(dy, dx, 0, &mMouse_Transformation.Rotation_Scene);// Rotate around oX and oY axises.
 
 			mGLView->updateGL();
-			mPosition_Pressed_LMB = pEvent->pos();
 		}
 
 		if(pEvent->buttons() & Qt::RightButton)
 		{
-			GLfloat dx = 180 * GLfloat(pEvent->x() - mPosition_Pressed_RMB.x()) / mGLView->width();
-			GLfloat dy = 180 * GLfloat(pEvent->y() - mPosition_Pressed_RMB.y()) / mGLView->height();
+			GLfloat dx = 180 * GLfloat(pEvent->x() - mMouse_Transformation.Position_Pressed_RMB.x()) / mGLView->width();
+			GLfloat dy = 180 * GLfloat(pEvent->y() - mMouse_Transformation.Position_Pressed_RMB.y()) / mGLView->height();
 
 			if(pEvent->modifiers() & Qt::ShiftModifier)
-				mGLView->Camera_Rotate(dy, 0, dx);// Rotate around oX and oZ axises.
+				mGLView->Camera_Rotate(dy, 0, dx, &mMouse_Transformation.Rotation_AroundCamera);// Rotate around oX and oZ axises.
 			else
-				mGLView->Camera_Rotate(dy, dx, 0);// Rotate around oX and oY axises.
+				mGLView->Camera_Rotate(dy, dx, 0, &mMouse_Transformation.Rotation_AroundCamera);// Rotate around oX and oY axises.
 
 			mGLView->updateGL();
-			mPosition_Pressed_RMB = pEvent->pos();
 		}
 	}
 }
@@ -212,9 +224,12 @@ GLfloat step;
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::MainWindow),
-		mScene(nullptr), mPosition_Pressed_Valid(false)
+		mScene(nullptr)
 {
 using namespace Assimp;
+
+	// other variables
+	mMouse_Transformation.Position_Pressed_Valid = false;
 
 	ui->setupUi(this);
 	// Create OpenGL widget

@@ -36,9 +36,17 @@ private:
 	CLoggerView* mLoggerView;///< Pointer to logging object.
 	Assimp::Importer mImporter;///< Assimp importer.
 	const aiScene* mScene;///< Pointer to loaded scene (\ref aiScene).
-	bool mPosition_Pressed_Valid;///< Mouse button pressed on GLView.
-	QPoint mPosition_Pressed_LMB;///< Position where was pressed left mouse button.
-	QPoint mPosition_Pressed_RMB;///< Position where was pressed right mouse button.
+
+	/// \struct SMouse_Transformation
+	/// Holds data about transformation of the scene/camera when mouse us used.
+	struct SMouse_Transformation
+	{
+		bool Position_Pressed_Valid;///< Mouse button pressed on GLView.
+		QPoint Position_Pressed_LMB;///< Position where was pressed left mouse button.
+		QPoint Position_Pressed_RMB;///< Position where was pressed right mouse button.
+		aiMatrix4x4 Rotation_AroundCamera;///< Rotation matrix which set rotation angles of the scene around camera.
+		aiMatrix4x4 Rotation_Scene;///< Rotation matrix which set rotation angles of the scene around own center.
+	} mMouse_Transformation;
 
 	/**********************************/
 	/************ Functions ***********/
@@ -80,6 +88,11 @@ protected:
 	/// Override function which handles mouse event "button pressed".
 	/// \param [in] pEvent - pointer to event data.
 	void mousePressEvent(QMouseEvent* pEvent) override;
+
+	/// \fn void mouseReleaseEvent(QMouseEvent *pEvent) override
+	/// Override function which handles mouse event "button released".
+	/// \param [in] pEvent - pointer to event data.
+	void mouseReleaseEvent(QMouseEvent *pEvent) override;
 
 	/// \fn void mouseMoveEvent(QMouseEvent* pEvent) override
 	/// Override function which handles mouse event "move".

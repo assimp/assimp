@@ -1073,24 +1073,30 @@ void CGLView::Camera_Set(const size_t pCameraNumber)
 	gluLookAt(hcam.Position.x, hcam.Position.y, hcam.Position.z, hcam.Target.x, hcam.Target.y, hcam.Target.z, up.x, up.y, up.z);
 }
 
-void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
 {
 auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 180.0; };
 
 	aiMatrix4x4 mat_rot;
 
 	mat_rot.FromEulerAnglesXYZ(deg2rad(pAngle_X), deg2rad(pAngle_Y), deg2rad(pAngle_Z));
-	mHelper_Camera.Rotation_Scene *= mat_rot;
+	if(pMatrix_Rotation_Initial != nullptr)
+		mHelper_Camera.Rotation_Scene = *pMatrix_Rotation_Initial * mat_rot;
+	else
+		mHelper_Camera.Rotation_Scene *= mat_rot;
 }
 
-void CGLView::Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+void CGLView::Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
 {
 auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 180.0; };
 
 	aiMatrix4x4 mat_rot;
 
 	mat_rot.FromEulerAnglesXYZ(deg2rad(pAngle_X), deg2rad(pAngle_Y), deg2rad(pAngle_Z));
-	mHelper_Camera.Rotation_AroundCamera *= mat_rot;
+	if(pMatrix_Rotation_Initial != nullptr)
+		mHelper_Camera.Rotation_AroundCamera = *pMatrix_Rotation_Initial * mat_rot;
+	else
+		mHelper_Camera.Rotation_AroundCamera *= mat_rot;
 }
 
 void CGLView::Camera_Translate(const GLfloat pTranslate_X, const GLfloat pTranslate_Y, const GLfloat pTranslate_Z)
@@ -1099,4 +1105,11 @@ aiVector3D vect_tr(pTranslate_X, pTranslate_Y, pTranslate_Z);
 
 	vect_tr *= mHelper_Camera.Rotation_AroundCamera;
 	mHelper_Camera.Translation_ToScene += vect_tr;
+}
+
+void CGLView::Camera_Matrix(aiMatrix4x4& pRotation_Camera, aiMatrix4x4& pRotation_Scene, aiVector3D& pTranslation_Camera)
+{
+	pRotation_Camera = mHelper_Camera.Rotation_AroundCamera;
+	pRotation_Scene = mHelper_Camera.Rotation_Scene;
+	pTranslation_Camera = mHelper_Camera.Translation_ToScene;
 }

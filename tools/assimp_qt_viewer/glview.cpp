@@ -440,7 +440,6 @@ void CGLView::BBox_GetFromVertices(const aiVector3D* pVertices, const size_t pVe
 		const ai_real y = pVertices[idx_vert].y;
 		const ai_real z = pVertices[idx_vert].z;
 
-		printf("vert[%lu]=%g,%g,%g\r\n", idx_vert, x, y, z);///TODO: dbg
 		// search minimal...
 		AssignIfLesser(&pBBox.Minimum.x, x);
 		AssignIfLesser(&pBBox.Minimum.y, y);
@@ -470,22 +469,12 @@ void CGLView::LogError(const QString& pMessage)
 /************************** Draw functions **************************/
 /********************************************************************/
 
-static void print_matrix(const aiMatrix4x4 pMatrix)///TODO: dbg
-{
-	printf("Matrix:\r\n");
-	printf("\t%g,%g,%g%g\r\n", pMatrix.a1, pMatrix.a2, pMatrix.a3, pMatrix.a4);
-	printf("\t%g,%g,%g%g\r\n", pMatrix.b1, pMatrix.b2, pMatrix.b3, pMatrix.b4);
-	printf("\t%g,%g,%g%g\r\n", pMatrix.c1, pMatrix.c2, pMatrix.c3, pMatrix.c4);
-	printf("\t%g,%g,%g%g\r\n", pMatrix.d1, pMatrix.d2, pMatrix.d3, pMatrix.d4);
-}
-
 void CGLView::Draw_Node(const aiNode* pNode)
 {
     aiMatrix4x4 mat_node = pNode->mTransformation;
 
 	// Apply node transformation matrix.
 	mat_node.Transpose();
-	print_matrix(mat_node);
 	glPushMatrix();
 #if ASSIMP_DOUBLE_PRECISION
 	glMultMatrixd((GLdouble*)mat_node[0]);

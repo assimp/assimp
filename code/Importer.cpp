@@ -971,8 +971,7 @@ void Importer::GetExtensionList(aiString& szOut) const
     }
 
 	// List can be empty
-	if(str.size() > 0)
-	{
+	if( !str.empty() ) {
 		for (std::set<std::string>::const_iterator it = str.begin();; ) {
 			szOut.Append("*.");
 			szOut.Append((*it).c_str());

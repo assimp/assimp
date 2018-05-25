@@ -84,7 +84,11 @@ QTime time_begin = QTime::currentTime();
 		mGLView->Camera_Set(0);
 		// Scene is loaded, do first rendering.
 		LogInfo("Scene is ready for rendering.");
+#if ASSIMP_QT4_VIEWER
 		mGLView->updateGL();
+#else
+		mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 	}
 	else
 	{
@@ -173,7 +177,11 @@ void MainWindow::mouseMoveEvent(QMouseEvent* pEvent)
 			else
 				mGLView->Camera_RotateScene(dy, dx, 0, &mMouse_Transformation.Rotation_Scene);// Rotate around oX and oY axises.
 
+	#if ASSIMP_QT4_VIEWER
 			mGLView->updateGL();
+	#else
+			mGLView->update();
+	#endif // ASSIMP_QT4_VIEWER
 		}
 
 		if(pEvent->buttons() & Qt::RightButton)
@@ -186,7 +194,11 @@ void MainWindow::mouseMoveEvent(QMouseEvent* pEvent)
 			else
 				mGLView->Camera_Rotate(dy, dx, 0, &mMouse_Transformation.Rotation_AroundCamera);// Rotate around oX and oY axises.
 
+	#if ASSIMP_QT4_VIEWER
 			mGLView->updateGL();
+	#else
+			mGLView->update();
+	#endif // ASSIMP_QT4_VIEWER
 		}
 	}
 }
@@ -215,7 +227,11 @@ GLfloat step;
 	else if(pEvent->key() == Qt::Key_Down)
 		mGLView->Camera_Translate(0, 0, step);
 
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 /********************************************************************/
@@ -303,7 +319,6 @@ QString filename, filter;
 	if(!filename.isEmpty()) ImportFile(filename);
 }
 
-
 void MainWindow::on_butExport_clicked()
 {
 using namespace Assimp;
@@ -367,7 +382,11 @@ void MainWindow::on_cbxLighting_clicked(bool pChecked)
 	else
 		mGLView->Lighting_Disable();
 
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_lstLight_itemSelectionChanged()
@@ -379,29 +398,49 @@ bool selected = ui->lstLight->isItemSelected(ui->lstLight->currentItem());
 	else
 		mGLView->Lighting_DisableSource(ui->lstLight->currentRow());
 
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_lstCamera_clicked( const QModelIndex &)
 {
 	mGLView->Camera_Set(ui->lstLight->currentRow());
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_cbxBBox_clicked(bool checked)
 {
 	mGLView->Enable_SceneBBox(checked);
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_cbxDrawAxes_clicked(bool checked)
 {
 	mGLView->Enable_Axes(checked);
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_cbxTextures_clicked(bool checked)
 {
 	mGLView->Enable_Textures(checked);
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }

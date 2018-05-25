@@ -6,7 +6,11 @@
 #pragma once
 
 // Header files, Qt.
-#include <QtWidgets>
+#if ASSIMP_QT4_VIEWER
+#	include <QMainWindow>
+#else
+#	include <QtWidgets>
+#endif
 
 // Header files, project.
 #include "glview.hpp"

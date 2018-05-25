@@ -6,14 +6,24 @@
 #pragma once
 
 // Header files, Qt.
-#include <QtOpenGL>
+#include <QMap>
+#if ASSIMP_QT4_VIEWER
+#	include <QtOpenGL>
+#else
+#	include <QOpenGLWidget>
+#	include <QOpenGLFunctions>
+#endif // ASSIMP_QT4_VIEWER
 
 // Header files Assimp
 #include <assimp/scene.h>
 
 /// \class CGLView
 /// Class which hold and render scene.
+#if ASSIMP_QT4_VIEWER
 class CGLView : public QGLWidget
+#else
+class CGLView : public QOpenGLWidget, protected QOpenGLFunctions
+#endif // ASSIMP_QT4_VIEWER
 {
 	Q_OBJECT
 
@@ -139,6 +149,10 @@ public:
 
 private:
 
+#if !ASSIMP_QT4_VIEWER
+	// Qt5 widget has another behavior, so you must to know that you already made context are current. Yes, its a dirty hack. Better decision are welcome.
+	bool mGLContext_Current;///< Widget's GL-context made current.
+#endif // ASSIMP_QT4_VIEWER
 	// Scene
 	const aiScene* mScene = nullptr;///< Copy of pointer to scene (\ref aiScene).
 	SBBox mScene_BBox;///< Bounding box of scene.

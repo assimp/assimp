@@ -970,15 +970,19 @@ void Importer::GetExtensionList(aiString& szOut) const
         (*i)->GetExtensionList(str);
     }
 
-    for (std::set<std::string>::const_iterator it = str.begin();; ) {
-        szOut.Append("*.");
-        szOut.Append((*it).c_str());
+	// List can be empty
+	if(str.size() > 0)
+	{
+		for (std::set<std::string>::const_iterator it = str.begin();; ) {
+			szOut.Append("*.");
+			szOut.Append((*it).c_str());
 
-        if (++it == str.end()) {
-            break;
-        }
-        szOut.Append(";");
-    }
+			if (++it == str.end()) {
+				break;
+			}
+			szOut.Append(";");
+		}
+	}
     ASSIMP_END_EXCEPTION_REGION(void);
 }
 

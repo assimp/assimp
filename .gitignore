@@ -12,6 +12,8 @@ build
 bin/
 lib/
 
+# QtCreator
+CMakeLists.txt.user
 
 # Generated
 assimp.pc

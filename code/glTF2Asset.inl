@@ -1216,12 +1216,15 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
+    unsigned int sceneIndex = 0;
     if (Value* scene = FindUInt(doc, "scene")) {
-        unsigned int sceneIndex = scene->GetUint();
+        sceneIndex = scene->GetUint();
+    }
 
-        Ref<Scene> s = scenes.Retrieve(sceneIndex);
-
-        this->scene = s;
+    if (Value* scenesArray = FindArray(doc, "scenes")) {
+        if (sceneIndex < scenesArray->Size()) {
+            this->scene = scenes.Retrieve(sceneIndex);
+        }
     }
 
     // Clean up

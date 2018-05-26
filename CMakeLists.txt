@@ -412,32 +412,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   ENDIF ( WIN32 AND DirectX_D3DX9_LIBRARY )
 
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
-
-  # Check dependencies for assimp_qt_viewer.
-  # Why here? Maybe user do not want Qt viewer and have no Qt.
-  # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
-  # Because viewer can be build independently of Assimp.
-  FIND_PACKAGE(Qt5Widgets QUIET)
-  FIND_PACKAGE(DevIL QUIET)
-  FIND_PACKAGE(OpenGL QUIET)
-  IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
-    ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
-  ELSE()
-    SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "")
-    IF (NOT Qt5_FOUND)
-      SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} Qt5")
-    ENDIF (NOT Qt5_FOUND)
-
-    IF (NOT IL_FOUND)
-      SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} DevIL")
-    ENDIF (NOT IL_FOUND)
-
-    IF (NOT OPENGL_FOUND)
-      SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} OpengGL")
-    ENDIF (NOT OPENGL_FOUND)
-
-    MESSAGE (WARNING "Build of assimp_qt_viewer is disabled. Unsatisfied dendencies: ${ASSIMP_QT_VIEWER_DEPENDENCIES}")
-  ENDIF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
+  ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
 IF ( ASSIMP_BUILD_SAMPLES)

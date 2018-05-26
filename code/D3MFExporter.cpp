@@ -222,7 +222,7 @@ void D3MFExporter::writeMetaData() {
         return;
     }
 
-    const aiString *key;
+	const aiString *key = nullptr;
     const aiMetadataEntry *entry(nullptr);
     for ( size_t i = 0; i < numMetaEntries; ++i ) {
         mScene->mMetaData->Get( i, key, entry );

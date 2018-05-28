@@ -48,7 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include <vector>
-#include <sstream> // stringstream
+#include <ostream>
+#include <locale>
+#include <sstream> // ostringstream
 
 
 // constructors for single element properties
@@ -116,6 +118,20 @@ FBX::Property::Property(const std::vector<int32_t>& va)
     for (size_t i = 0; i < va.size(); ++i) { d[i] = va[i]; }
 }
 
+FBX::Property::Property(const std::vector<int64_t>& va)
+    : type('l'), data(8*va.size())
+{
+    int64_t* d = reinterpret_cast<int64_t*>(data.data());
+    for (size_t i = 0; i < va.size(); ++i) { d[i] = va[i]; }
+}
+
+FBX::Property::Property(const std::vector<float>& va)
+    : type('f'), data(4*va.size())
+{
+    float* d = reinterpret_cast<float*>(data.data());
+    for (size_t i = 0; i < va.size(); ++i) { d[i] = va[i]; }
+}
+
 FBX::Property::Property(const std::vector<double>& va)
     : type('d'), data(8*va.size())
 {
@@ -127,8 +143,8 @@ FBX::Property::Property(const aiMatrix4x4& vm)
     : type('d'), data(8*16)
 {
     double* d = reinterpret_cast<double*>(data.data());
-    for (size_t c = 0; c < 4; ++c) {
-        for (size_t r = 0; r < 4; ++r) {
+    for (unsigned int c = 0; c < 4; ++c) {
+        for (unsigned int r = 0; r < 4; ++r) {
             d[4*c+r] = vm[r][c];
         }
     }
@@ -150,50 +166,197 @@ size_t FBX::Property::size()
     }
 }
 
-void FBX::Property::Dump(Assimp::StreamWriterLE &s)
+void FBX::Property::DumpBinary(Assimp::StreamWriterLE &s)
 {
     s.PutU1(type);
-    uint8_t* d;
+    uint8_t* d = data.data();
     size_t N;
     switch (type) {
-    case 'C': s.PutU1(*(reinterpret_cast<uint8_t*>(data.data()))); return;
-    case 'Y': s.PutI2(*(reinterpret_cast<int16_t*>(data.data()))); return;
-    case 'I': s.PutI4(*(reinterpret_cast<int32_t*>(data.data()))); return;
-    case 'F': s.PutF4(*(reinterpret_cast<float*>(data.data()))); return;
-    case 'D': s.PutF8(*(reinterpret_cast<double*>(data.data()))); return;
-    case 'L': s.PutI8(*(reinterpret_cast<int64_t*>(data.data()))); return;
+    case 'C': s.PutU1(*(reinterpret_cast<uint8_t*>(d))); return;
+    case 'Y': s.PutI2(*(reinterpret_cast<int16_t*>(d))); return;
+    case 'I': s.PutI4(*(reinterpret_cast<int32_t*>(d))); return;
+    case 'F': s.PutF4(*(reinterpret_cast<float*>(d))); return;
+    case 'D': s.PutF8(*(reinterpret_cast<double*>(d))); return;
+    case 'L': s.PutI8(*(reinterpret_cast<int64_t*>(d))); return;
     case 'S':
     case 'R':
-        s.PutU4(data.size());
+        s.PutU4(uint32_t(data.size()));
         for (size_t i = 0; i < data.size(); ++i) { s.PutU1(data[i]); }
         return;
     case 'i':
         N = data.size() / 4;
-        s.PutU4(N); // number of elements
+        s.PutU4(uint32_t(N)); // number of elements
         s.PutU4(0); // no encoding (1 would be zip-compressed)
         // TODO: compress if large?
-        s.PutU4(data.size()); // data size
-        d = data.data();
+        s.PutU4(uint32_t(data.size())); // data size
         for (size_t i = 0; i < N; ++i) {
             s.PutI4((reinterpret_cast<int32_t*>(d))[i]);
         }
         return;
-    case 'd':
+    case 'l':
         N = data.size() / 8;
-        s.PutU4(N); // number of elements
+        s.PutU4(uint32_t(N)); // number of elements
         s.PutU4(0); // no encoding (1 would be zip-compressed)
         // TODO: compress if large?
-        s.PutU4(data.size()); // data size
-        d = data.data();
+        s.PutU4(uint32_t(data.size())); // data size
+        for (size_t i = 0; i < N; ++i) {
+            s.PutI8((reinterpret_cast<int64_t*>(d))[i]);
+        }
+        return;
+    case 'f':
+        N = data.size() / 4;
+        s.PutU4(uint32_t(N)); // number of elements
+        s.PutU4(0); // no encoding (1 would be zip-compressed)
+        // TODO: compress if large?
+        s.PutU4(uint32_t(data.size())); // data size
+        for (size_t i = 0; i < N; ++i) {
+            s.PutF4((reinterpret_cast<float*>(d))[i]);
+        }
+        return;
+    case 'd':
+        N = data.size() / 8;
+        s.PutU4(uint32_t(N)); // number of elements
+        s.PutU4(0); // no encoding (1 would be zip-compressed)
+        // TODO: compress if large?
+        s.PutU4(uint32_t(data.size())); // data size
         for (size_t i = 0; i < N; ++i) {
             s.PutF8((reinterpret_cast<double*>(d))[i]);
         }
         return;
     default:
-        std::stringstream err;
+        std::ostringstream err;
         err << "Tried to dump property with invalid type '";
         err << type << "'!";
         throw DeadlyExportError(err.str());
+    }
+}
+
+void FBX::Property::DumpAscii(Assimp::StreamWriterLE &outstream, int indent)
+{
+    std::ostringstream ss;
+    ss.imbue(std::locale::classic());
+    ss.precision(15); // this seems to match official FBX SDK exports
+    DumpAscii(ss, indent);
+    outstream.PutString(ss.str());
+}
+
+void FBX::Property::DumpAscii(std::ostream& s, int indent)
+{
+    // no writing type... or anything. just shove it into the stream.
+    uint8_t* d = data.data();
+    size_t N;
+    size_t swap = data.size();
+    size_t count = 0;
+    switch (type) {
+    case 'C':
+        if (*(reinterpret_cast<uint8_t*>(d))) { s << 'T'; }
+        else { s << 'F'; }
+        return;
+    case 'Y': s << *(reinterpret_cast<int16_t*>(d)); return;
+    case 'I': s << *(reinterpret_cast<int32_t*>(d)); return;
+    case 'F': s << *(reinterpret_cast<float*>(d)); return;
+    case 'D': s << *(reinterpret_cast<double*>(d)); return;
+    case 'L': s << *(reinterpret_cast<int64_t*>(d)); return;
+    case 'S':
+        // first search to see if it has "\x00\x01" in it -
+        // which separates fields which are reversed in the ascii version.
+        // yeah.
+        // FBX, yeah.
+        for (size_t i = 0; i < data.size(); ++i) {
+            if (data[i] == '\0') {
+                swap = i;
+                break;
+            }
+        }
+    case 'R':
+        s << '"';
+        // we might as well check this now,
+        // probably it will never happen
+        for (size_t i = 0; i < data.size(); ++i) {
+            char c = data[i];
+            if (c == '"') {
+                throw runtime_error("can't handle quotes in property string");
+            }
+        }
+        // first write the SWAPPED member (if any)
+        for (size_t i = swap + 2; i < data.size(); ++i) {
+            char c = data[i];
+            s << c;
+        }
+        // then a separator
+        if (swap != data.size()) {
+            s << "::";
+        }
+        // then the initial member
+        for (size_t i = 0; i < swap; ++i) {
+            char c = data[i];
+            s << c;
+        }
+        s << '"';
+        return;
+    case 'i':
+        N = data.size() / 4; // number of elements
+        s << '*' << N << " {\n";
+        for (int i = 0; i < indent + 1; ++i) { s << '\t'; }
+        s << "a: ";
+        for (size_t i = 0; i < N; ++i) {
+            if (i > 0) { s << ','; }
+            if (count++ > 120) { s << '\n'; count = 0; }
+            s << (reinterpret_cast<int32_t*>(d))[i];
+        }
+        s << '\n';
+        for (int i = 0; i < indent; ++i) { s << '\t'; }
+        s << "} ";
+        return;
+    case 'l':
+        N = data.size() / 8;
+        s << '*' << N << " {\n";
+        for (int i = 0; i < indent + 1; ++i) { s << '\t'; }
+        s << "a: ";
+        for (size_t i = 0; i < N; ++i) {
+            if (i > 0) { s << ','; }
+            if (count++ > 120) { s << '\n'; count = 0; }
+            s << (reinterpret_cast<int64_t*>(d))[i];
+        }
+        s << '\n';
+        for (int i = 0; i < indent; ++i) { s << '\t'; }
+        s << "} ";
+        return;
+    case 'f':
+        N = data.size() / 4;
+        s << '*' << N << " {\n";
+        for (int i = 0; i < indent + 1; ++i) { s << '\t'; }
+        s << "a: ";
+        for (size_t i = 0; i < N; ++i) {
+            if (i > 0) { s << ','; }
+            if (count++ > 120) { s << '\n'; count = 0; }
+            s << (reinterpret_cast<float*>(d))[i];
+        }
+        s << '\n';
+        for (int i = 0; i < indent; ++i) { s << '\t'; }
+        s << "} ";
+        return;
+    case 'd':
+        N = data.size() / 8;
+        s << '*' << N << " {\n";
+        for (int i = 0; i < indent + 1; ++i) { s << '\t'; }
+        s << "a: ";
+        // set precision to something that can handle doubles
+        s.precision(15);
+        for (size_t i = 0; i < N; ++i) {
+            if (i > 0) { s << ','; }
+            if (count++ > 120) { s << '\n'; count = 0; }
+            s << (reinterpret_cast<double*>(d))[i];
+        }
+        s << '\n';
+        for (int i = 0; i < indent; ++i) { s << '\t'; }
+        s << "} ";
+        return;
+    default:
+        std::ostringstream err;
+        err << "Tried to dump property with invalid type '";
+        err << type << "'!";
+        throw runtime_error(err.str());
     }
 }
 

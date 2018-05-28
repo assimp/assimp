@@ -72,7 +72,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
     unsigned int idx( NotSet );
     for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
     {
-        std::string s = mScene->mMaterials[i].mName;
+        std::string &s = mScene->mMaterials[i].mName;
         for ( std::string::iterator it = s.begin(); it != s.end(); ++it ) {
             *it = static_cast< char >( ::tolower( *it ) );
         }
@@ -120,7 +120,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
             else if ( (*a) >= mScene->mMaterials.size())
             {
                 (*a) = idx;
-                DefaultLogger::get()->warn("Material index overflow in 3DS file. Using default material");
+                ASSIMP_LOG_WARN("Material index overflow in 3DS file. Using default material");
                 ++cnt;
             }
         }
@@ -132,7 +132,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
         sMat.mDiffuse = aiColor3D(0.3f,0.3f,0.3f);
         mScene->mMaterials.push_back(sMat);
 
-        DefaultLogger::get()->info("3DS: Generating default material");
+        ASSIMP_LOG_INFO("3DS: Generating default material");
     }
 }
 
@@ -147,12 +147,12 @@ void Discreet3DSImporter::CheckIndices(D3DS::Mesh& sMesh)
         {
             if ((*i).mIndices[a] >= sMesh.mPositions.size())
             {
-                DefaultLogger::get()->warn("3DS: Vertex index overflow)");
+                ASSIMP_LOG_WARN("3DS: Vertex index overflow)");
                 (*i).mIndices[a] = (uint32_t)sMesh.mPositions.size()-1;
             }
             if ( !sMesh.mTexCoords.empty() && (*i).mIndices[a] >= sMesh.mTexCoords.size())
             {
-                DefaultLogger::get()->warn("3DS: Texture coordinate index overflow)");
+                ASSIMP_LOG_WARN("3DS: Texture coordinate index overflow)");
                 (*i).mIndices[a] = (uint32_t)sMesh.mTexCoords.size()-1;
             }
         }
@@ -497,7 +497,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
                         pvCurrent->x *= -1.f;
                         t2->x *= -1.f;
                     }
-                    DefaultLogger::get()->info("3DS: Flipping mesh X-Axis");
+                    ASSIMP_LOG_INFO("3DS: Flipping mesh X-Axis");
                 }
 
                 // Handle pivot point
@@ -573,11 +573,11 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
         pcIn->aTargetPositionKeys.size() > 1)
     {
         aiAnimation* anim = pcSOut->mAnimations[0];
-        ai_assert(NULL != anim);
+        ai_assert(nullptr != anim);
 
         if (pcIn->aCameraRollKeys.size() > 1)
         {
-            DefaultLogger::get()->debug("3DS: Converting camera roll track ...");
+            ASSIMP_LOG_DEBUG("3DS: Converting camera roll track ...");
 
             // Camera roll keys - in fact they're just rotations
             // around the camera's z axis. The angles are given
@@ -597,7 +597,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 #if 0
         if (pcIn->aTargetPositionKeys.size() > 1)
         {
-            DefaultLogger::get()->debug("3DS: Converting target track ...");
+            ASSIMP_LOG_DEBUG("3DS: Converting target track ...");
 
             // Camera or spot light - need to convert the separate
             // target position channel to our representation
@@ -743,7 +743,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
         //   |       |       |            |         |
         // MESH_0  MESH_1  MESH_2  ...  MESH_N    CAMERA_0 ....
         //
-        DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
+        ASSIMP_LOG_WARN("No hierarchy information has been found in the file. ");
 
         pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes +
             static_cast<unsigned int>(mScene->mCameras.size() + mScene->mLights.size());

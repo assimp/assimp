@@ -281,6 +281,9 @@ static aiMaterial* ImportMaterial(std::vector<int>& embeddedTexIdxs, Asset& r, M
 
         SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.specularGlossinessTexture, aimat, aiTextureType_SPECULAR);
     }
+    if (mat.unlit) {
+        aimat->AddProperty(&mat.unlit, 1, AI_MATKEY_GLTF_UNLIT);
+    }
 
     return aimat;
 }
@@ -396,8 +399,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 // only extract tangents if normals are present
                 if (attr.tangent.size() > 0 && attr.tangent[0]) {
                     // generate bitangents from normals and tangents according to spec
-                    struct Tangent
-                    {
+                    struct Tangent {
                         aiVector3D xyz;
                         ai_real w;
                     } *tangents = nullptr;
@@ -412,7 +414,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         aim->mBitangents[i] = (aim->mNormals[i] ^ tangents[i].xyz) * tangents[i].w;
                     }
 
-                    delete tangents;
+                    delete [] tangents;
                 }
             }
 

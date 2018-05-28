@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include <vector>
+#include <ostream>
 #include <type_traits> // is_void
 
 namespace FBX {
@@ -96,7 +97,9 @@ public:
     explicit Property(const std::string& s, bool raw=false);
     explicit Property(const std::vector<uint8_t>& r);
     explicit Property(const std::vector<int32_t>& va);
+    explicit Property(const std::vector<int64_t>& va);
     explicit Property(const std::vector<double>& va);
+    explicit Property(const std::vector<float>& va);
     explicit Property(const aiMatrix4x4& vm);
 
     // this will catch any type not defined above,
@@ -111,7 +114,10 @@ public:
     size_t size();
 
     // write this property node as binary data to the given stream
-    void Dump(Assimp::StreamWriterLE &s);
+    void DumpBinary(Assimp::StreamWriterLE &s);
+    void DumpAscii(Assimp::StreamWriterLE &s, int indent=0);
+    void DumpAscii(std::ostream &s, int indent=0);
+    // note: make sure the ostream is in classic "C" locale
 
 private:
     char type;

@@ -192,7 +192,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
         {
             mode = reader.GetI1();
             if (0 != mode)
-                DefaultLogger::get()->error("TER: Unsupported mapping mode, a flat terrain is returned");
+                ASSIMP_LOG_ERROR("TER: Unsupported mapping mode, a flat terrain is returned");
         }
         // actual terrain data
         else if (!::strncmp(head,AI_TERR_CHUNK_ALTW,4))

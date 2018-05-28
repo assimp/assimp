@@ -210,8 +210,7 @@ void DNAParser::Parse ()
         s.size = offset;
     }
 
-    DefaultLogger::get()->debug((format(),"BlenderDNA: Got ",dna.structures.size(),
-        " structures with totally ",fields," fields"));
+    ASSIMP_LOG_DEBUG_F( "BlenderDNA: Got ", dna.structures.size()," structures with totally ",fields," fields");
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
     dna.DumpToFile();
@@ -228,12 +227,12 @@ void DNAParser::Parse ()
 // ------------------------------------------------------------------------------------------------
 void DNA :: DumpToFile()
 {
-    // we dont't bother using the VFS here for this is only for debugging.
+    // we don't bother using the VFS here for this is only for debugging.
     // (and all your bases are belong to us).
 
     std::ofstream f("dna.txt");
     if (f.fail()) {
-        DefaultLogger::get()->error("Could not dump dna to dna.txt");
+        ASSIMP_LOG_ERROR("Could not dump dna to dna.txt");
         return;
     }
     f << "Field format: type name offset size" << "\n";
@@ -248,7 +247,7 @@ void DNA :: DumpToFile()
     }
     f << std::flush;
 
-    DefaultLogger::get()->info("BlenderDNA: Dumped dna to dna.txt");
+    ASSIMP_LOG_INFO("BlenderDNA: Dumped dna to dna.txt");
 }
 #endif
 
@@ -367,7 +366,7 @@ void SectionParser :: Next()
     }
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
-    DefaultLogger::get()->debug(current.id);
+    ASSIMP_LOG_DEBUG(current.id);
 #endif
 }
 

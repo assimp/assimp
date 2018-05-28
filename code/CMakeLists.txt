@@ -177,8 +177,6 @@ SET( Common_SRCS
   SkeletonMeshBuilder.cpp
   SplitByBoneCountProcess.cpp
   SplitByBoneCountProcess.h
-  ScaleProcess.cpp
-  ScaleProcess.h
   StandardShapes.cpp
   TargetAnimation.cpp
   TargetAnimation.h
@@ -188,6 +186,8 @@ SET( Common_SRCS
   Bitmap.cpp
   Version.cpp
   CreateAnimMesh.cpp
+  simd.h
+  simd.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -208,8 +208,15 @@ OPTION(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_
 # macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
 # this way selective loaders can be compiled (reduces filesize + compile time)
 MACRO(ADD_ASSIMP_IMPORTER name)
-  OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" ${ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT})
-  IF(ASSIMP_BUILD_${name}_IMPORTER)
+  IF (ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT)
+    set(ASSIMP_IMPORTER_ENABLED TRUE)
+    IF (DEFINED ASSIMP_BUILD_${name}_IMPORTER AND NOT ASSIMP_BUILD_${name}_IMPORTER)
+      set(ASSIMP_IMPORTER_ENABLED FALSE)
+    ENDIF ()
+  ELSE ()
+    set(ASSIMP_IMPORTER_ENABLED ${ASSIMP_BUILD_${name}_IMPORTER})
+  ENDIF ()
+  IF (ASSIMP_IMPORTER_ENABLED)
     LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
     SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")
     SET(${name}_SRCS ${ARGN})
@@ -485,9 +492,9 @@ ADD_ASSIMP_IMPORTER( IFC
 )
 if (ASSIMP_BUILD_IFC_IMPORTER)
   if (MSVC)
-    set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+    set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
   elseif(CMAKE_COMPILER_IS_MINGW)
-    set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
+    set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
   endif()
 endif (ASSIMP_BUILD_IFC_IMPORTER)
 
@@ -586,6 +593,8 @@ SET( PostProcessing_SRCS
   PolyTools.h
   MakeVerboseFormat.cpp
   MakeVerboseFormat.h
+  ScaleProcess.cpp
+  ScaleProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 

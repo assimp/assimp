@@ -327,12 +327,12 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
     ss.Convert(out,file);
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
-    DefaultLogger::get()->info((format(),
+    ASSIMP_LOG_INFO_F(
         "(Stats) Fields read: " ,file.stats().fields_read,
         ", pointers resolved: " ,file.stats().pointers_resolved,
         ", cache hits: "        ,file.stats().cache_hits,
         ", cached objects: "    ,file.stats().cached_objects
-    ));
+    );
 #endif
 }
 

@@ -288,8 +288,8 @@ bool D3MFZipArchive::Exists(const char* pFile) const {
         return false;
     }
 
-    std::string rFile(pFile);
-    std::map<std::string, ZipFile*>::const_iterator it = m_ArchiveMap.find(rFile);
+    std::string filename(pFile);
+    std::map<std::string, ZipFile*>::const_iterator it = m_ArchiveMap.find(filename);
     bool exist( false );
     if(it != m_ArchiveMap.end()) {
         exist = true;
@@ -465,7 +465,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
                 }
             }
 
-            DefaultLogger::get()->debug(rootFile);
+            ASSIMP_LOG_DEBUG(rootFile);
 
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert( mRootStream != nullptr );

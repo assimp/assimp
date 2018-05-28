@@ -93,29 +93,27 @@ void EmbedTexturesProcess::Execute(aiScene* pScene) {
         }
     }
 
-    char stringBuffer[128];
-    ::ai_snprintf(stringBuffer, 128, "EmbedTexturesProcess finished. Embedded %u textures.", embeddedTexturesCount);
-    DefaultLogger::get()->info(stringBuffer);
+    ASSIMP_LOG_INFO_F("EmbedTexturesProcess finished. Embedded ", embeddedTexturesCount, " textures." );
 }
 
 bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
-    uint32_t imageSize = 0;
-    std::string imagePath = path;
+    std::streampos imageSize = 0;
+    std::string    imagePath = path;
 
     // Test path directly
     std::ifstream file(imagePath, std::ios::binary | std::ios::ate);
-    if ((imageSize = file.tellg()) == -1u) {
-        DefaultLogger::get()->warn("EmbedTexturesProcess: Cannot find image: " + imagePath + ". Will try to find it in root folder.");
+    if ((imageSize = file.tellg()) == std::streampos(-1)) {
+        ASSIMP_LOG_WARN_F("EmbedTexturesProcess: Cannot find image: ", imagePath, ". Will try to find it in root folder.");
 
         // Test path in root path
         imagePath = mRootPath + path;
         file.open(imagePath, std::ios::binary | std::ios::ate);
-        if ((imageSize = file.tellg()) == -1u) {
+        if ((imageSize = file.tellg()) == std::streampos(-1)) {
             // Test path basename in root path
             imagePath = mRootPath + path.substr(path.find_last_of("\\/") + 1u);
             file.open(imagePath, std::ios::binary | std::ios::ate);
-            if ((imageSize = file.tellg()) == -1u) {
-                DefaultLogger::get()->error("EmbedTexturesProcess: Unable to embed texture: " + path + ".");
+            if ((imageSize = file.tellg()) == std::streampos(-1)) {
+                ASSIMP_LOG_ERROR_F("EmbedTexturesProcess: Unable to embed texture: ", path, ".");
                 return false;
             }
         }
@@ -134,7 +132,7 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     // Add the new texture
     auto pTexture = new aiTexture();
     pTexture->mHeight = 0; // Means that this is still compressed
-    pTexture->mWidth = imageSize;
+    pTexture->mWidth = static_cast<uint32_t>(imageSize);
     pTexture->pcData = imageContent;
 
     auto extension = path.substr(path.find_last_of('.') + 1u);

@@ -61,6 +61,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <iterator>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 namespace Assimp {
 namespace FBX {
@@ -133,9 +135,7 @@ void Converter::ConvertRootNode() {
     ConvertNodes( 0L, *out->mRootNode );
 }
 
-
-void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform )
-{
+void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform ) {
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced( id, "Model" );
 
     std::vector<aiNode*> nodes;
@@ -153,14 +153,14 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
             }
 
             const Object* const object = con->SourceObject();
-            if ( !object ) {
+            if ( nullptr == object ) {
                 FBXImporter::LogWarn( "failed to convert source object for Model link" );
                 continue;
             }
 
             const Model* const model = dynamic_cast<const Model*>( object );
 
-            if ( model ) {
+            if ( nullptr != model ) {
                 nodes_chain.clear();
                 post_nodes_chain.clear();
 
@@ -174,7 +174,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 
                 ai_assert( nodes_chain.size() );
 
-                const std::string& original_name = FixNodeName( model->Name() );
+                std::string original_name = FixNodeName( model->Name() );
 
                 // check if any of the nodes in the chain has the name the fbx node
                 // is supposed to have. If there is none, add another node to
@@ -189,7 +189,15 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 }
 
                 if ( !name_carrier ) {
+                    NodeNameCache::const_iterator it( std::find( mNodeNames.begin(), mNodeNames.end(), original_name ) );
+                    if ( it != mNodeNames.end() ) {
+                        original_name = original_name + std::string( "001" );
+                    }
+
+                    mNodeNames.push_back( original_name );
                     nodes_chain.push_back( new aiNode( original_name ) );
+                } else {
+                    original_name = nodes_chain.back()->mName.C_Str();
                 }
 
                 //setup metadata on newest node
@@ -250,11 +258,11 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 ConvertNodes( model->ID(), *last_parent, new_abs_transform );
 
                 if ( doc.Settings().readLights ) {
-                    ConvertLights( *model );
+                    ConvertLights( *model, original_name );
                 }
 
                 if ( doc.Settings().readCameras ) {
-                    ConvertCameras( *model );
+                    ConvertCameras( *model, original_name );
                 }
 
                 nodes.push_back( nodes_chain.front() );
@@ -278,34 +286,31 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 }
 
 
-void Converter::ConvertLights( const Model& model )
-{
+void Converter::ConvertLights( const Model& model, const std::string &orig_name ) {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
     for( const NodeAttribute* attr : node_attrs ) {
         const Light* const light = dynamic_cast<const Light*>( attr );
         if ( light ) {
-            ConvertLight( model, *light );
+            ConvertLight( *light, orig_name );
         }
     }
 }
 
-void Converter::ConvertCameras( const Model& model )
-{
+void Converter::ConvertCameras( const Model& model, const std::string &orig_name ) {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
     for( const NodeAttribute* attr : node_attrs ) {
         const Camera* const cam = dynamic_cast<const Camera*>( attr );
         if ( cam ) {
-            ConvertCamera( model, *cam );
+            ConvertCamera( *cam, orig_name );
         }
     }
 }
 
-void Converter::ConvertLight( const Model& model, const Light& light )
-{
+void Converter::ConvertLight( const Light& light, const std::string &orig_name ) {
     lights.push_back( new aiLight() );
     aiLight* const out_light = lights.back();
 
-    out_light->mName.Set( FixNodeName( model.Name() ) );
+    out_light->mName.Set( orig_name );
 
     const float intensity = light.Intensity() / 100.0f;
     const aiVector3D& col = light.Color();
@@ -378,12 +383,12 @@ void Converter::ConvertLight( const Model& model, const Light& light )
     }
 }
 
-void Converter::ConvertCamera( const Model& model, const Camera& cam )
+void Converter::ConvertCamera( const Camera& cam, const std::string &orig_name )
 {
     cameras.push_back( new aiCamera() );
     aiCamera* const out_camera = cameras.back();
 
-    out_camera->mName.Set( FixNodeName( model.Name() ) );
+    out_camera->mName.Set( orig_name );
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
@@ -395,6 +400,31 @@ void Converter::ConvertCamera( const Model& model, const Camera& cam )
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD( cam.FieldOfView() );
     out_camera->mClipPlaneNear = cam.NearPlane();
     out_camera->mClipPlaneFar = cam.FarPlane();
+}
+
+static bool HasName( NodeNameCache &cache, const std::string &name ) {
+    NodeNameCache::const_iterator it( std::find( cache.begin(), cache.end(), name ) );
+    return it != cache.end();
+
+}
+void Converter::GetUniqueName( const std::string &name, std::string uniqueName ) {
+    if ( !HasName( mNodeNames, name ) ) {
+        uniqueName = name;
+        return;
+    }
+
+    int i( 0 );
+    std::string newName;
+    while ( HasName( mNodeNames, newName ) ) {
+        ++i;
+        newName.clear();
+        newName += name;
+        std::stringstream ext;
+        ext << std::setfill( '0' ) << std::setw( 3 ) << i;
+        newName += ext.str();
+    }
+    uniqueName = newName;
+    mNodeNames.push_back( uniqueName );
 }
 
 
@@ -704,7 +734,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
         aiMatrix4x4::Scaling( GeometricScaling, chain[ TransformationComp_GeometricScaling ] );
         aiVector3D GeometricScalingInverse = GeometricScaling;
         bool canscale = true;
-        for (size_t i = 0; i < 3; ++i) {
+        for (unsigned int i = 0; i < 3; ++i) {
             if ( std::fabs( GeometricScalingInverse[i] ) > zero_epsilon ) {
                 GeometricScalingInverse[i] = 1.0f / GeometricScaling[i];
             } else {
@@ -738,7 +768,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     // not be guaranteed.
     ai_assert( NeedsComplexTransformationChain( model ) == is_complex );
 
-    const std::string& name = FixNodeName( model.Name() );
+    std::string name = FixNodeName( model.Name() );
 
     // now, if we have more than just Translation, Scaling and Rotation,
     // we need to generate a full node chain to accommodate for assimp's
@@ -786,8 +816,10 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     // else, we can just multiply the matrices together
     aiNode* nd = new aiNode();
     output_nodes.push_back( nd );
+    std::string uniqueName;
+    GetUniqueName( name, uniqueName );
 
-    nd->mName.Set( name );
+    nd->mName.Set( uniqueName );
 
     for (const auto &transform : chain) {
         nd->mTransformation = nd->mTransformation * transform;
@@ -842,7 +874,7 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
 
         const MeshGeometry* const mesh = dynamic_cast< const MeshGeometry* >( geo );
         if ( mesh ) {
-            const std::vector<unsigned int>& indices = ConvertMesh( *mesh, model, node_global_transform );
+            const std::vector<unsigned int>& indices = ConvertMesh( *mesh, model, node_global_transform, nd);
             std::copy( indices.begin(), indices.end(), std::back_inserter( meshes ) );
         }
         else {
@@ -859,7 +891,7 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
 }
 
 std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, const Model& model,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     std::vector<unsigned int> temp;
 
@@ -883,17 +915,17 @@ std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, cons
         const MatIndexArray::value_type base = mindices[ 0 ];
         for( MatIndexArray::value_type index : mindices ) {
             if ( index != base ) {
-                return ConvertMeshMultiMaterial( mesh, model, node_global_transform );
+                return ConvertMeshMultiMaterial( mesh, model, node_global_transform, nd);
             }
         }
     }
 
     // faster code-path, just copy the data
-    temp.push_back( ConvertMeshSingleMaterial( mesh, model, node_global_transform ) );
+    temp.push_back( ConvertMeshSingleMaterial( mesh, model, node_global_transform, nd) );
     return temp;
 }
 
-aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
+aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh, aiNode& nd)
 {
     aiMesh* const out_mesh = new aiMesh();
     meshes.push_back( out_mesh );
@@ -908,15 +940,19 @@ aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
     if ( name.length() ) {
         out_mesh->mName.Set( name );
     }
+    else
+    {
+        out_mesh->mName = nd.mName;
+    }
 
     return out_mesh;
 }
 
 unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, const Model& model,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
-    aiMesh* const out_mesh = SetupEmptyMesh( mesh );
+    aiMesh* const out_mesh = SetupEmptyMesh(mesh, nd);
 
     const std::vector<aiVector3D>& vertices = mesh.GetVertices();
     const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
@@ -1040,7 +1076,7 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
 }
 
 std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
     ai_assert( mindices.size() );
@@ -1051,7 +1087,7 @@ std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometr
     for( MatIndexArray::value_type index : mindices ) {
         if ( had.find( index ) == had.end() ) {
 
-            indices.push_back( ConvertMeshMultiMaterial( mesh, model, index, node_global_transform ) );
+            indices.push_back( ConvertMeshMultiMaterial( mesh, model, index, node_global_transform, nd) );
             had.insert( index );
         }
     }
@@ -1061,9 +1097,10 @@ std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometr
 
 unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
     MatIndexArray::value_type index,
-    const aiMatrix4x4& node_global_transform )
+    const aiMatrix4x4& node_global_transform,
+    aiNode& nd)
 {
-    aiMesh* const out_mesh = SetupEmptyMesh( mesh );
+    aiMesh* const out_mesh = SetupEmptyMesh(mesh, nd);
 
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
     const std::vector<aiVector3D>& vertices = mesh.GetVertices();
@@ -1527,7 +1564,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
                 if (textureReady) {
                     // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
                     // In FBX files textures are now stored internally by Assimp with their filename included
-                    // Now Assimp can lookup thru the loaded textures after all data is processed
+                    // Now Assimp can lookup through the loaded textures after all data is processed
                     // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
                     // This may occur on this case too, it has to be studied
                     path.data[0] = '*';
@@ -1642,9 +1679,8 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
 }
 
 void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures,
-    const std::string& propName,
-    aiTextureType target, const MeshGeometry* const mesh )
-{
+        const std::string& propName,
+        aiTextureType target, const MeshGeometry* const mesh ) {
     LayeredTextureMap::const_iterator it = layeredTextures.find( propName );
     if ( it == layeredTextures.end() ) {
         return;
@@ -1888,11 +1924,11 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
 
     // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:
     const aiColor3D& Transparent = GetColorPropertyFactored( props, "TransparentColor", "TransparencyFactor", ok );
-    float CalculatedOpacity = 1.0;
+    float CalculatedOpacity = 1.0f;
     if ( ok ) {
         out_mat->AddProperty( &Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
         // as calculated by FBX SDK 2017:
-        CalculatedOpacity = 1.0 - ((Transparent.r + Transparent.g + Transparent.b) / 3.0);
+        CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
     }
 
     // use of TransparencyFactor is inconsistent.
@@ -2006,81 +2042,17 @@ void Converter::ConvertAnimations()
     }
 }
 
-void Converter::RenameNode( const std::string& fixed_name, const std::string& new_name ) {
-    if ( node_names.find( fixed_name ) == node_names.end() ) {
-        FBXImporter::LogError( "Cannot rename node " + fixed_name + ", not existing.");
-        return;
-    }
-
-    if ( node_names.find( new_name ) != node_names.end() ) {
-        FBXImporter::LogError( "Cannot rename node " + fixed_name + " to " + new_name +", name already existing." );
-        return;
-    }
-
-    ai_assert( node_names.find( fixed_name ) != node_names.end() );
-    ai_assert( node_names.find( new_name ) == node_names.end() );
-
-    renamed_nodes[ fixed_name ] = new_name;
-
-    const aiString fn( fixed_name );
-
-    for( aiCamera* cam : cameras ) {
-        if ( cam->mName == fn ) {
-            cam->mName.Set( new_name );
-            break;
-        }
-    }
-
-    for( aiLight* light : lights ) {
-        if ( light->mName == fn ) {
-            light->mName.Set( new_name );
-            break;
-        }
-    }
-
-    for( aiAnimation* anim : animations ) {
-        for ( unsigned int i = 0; i < anim->mNumChannels; ++i ) {
-            aiNodeAnim* const na = anim->mChannels[ i ];
-            if ( na->mNodeName == fn ) {
-                na->mNodeName.Set( new_name );
-                break;
-            }
-        }
-    }
-}
-
-
-std::string Converter::FixNodeName( const std::string& name )
-{
+std::string Converter::FixNodeName( const std::string& name ) {
     // strip Model:: prefix, avoiding ambiguities (i.e. don't strip if
     // this causes ambiguities, well possible between empty identifiers,
     // such as "Model::" and ""). Make sure the behaviour is consistent
     // across multiple calls to FixNodeName().
     if ( name.substr( 0, 7 ) == "Model::" ) {
         std::string temp = name.substr( 7 );
-
-        const NodeNameMap::const_iterator it = node_names.find( temp );
-        if ( it != node_names.end() ) {
-            if ( !( *it ).second ) {
-                return FixNodeName( name + "_" );
-            }
-        }
-        node_names[ temp ] = true;
-
-        const NameNameMap::const_iterator rit = renamed_nodes.find( temp );
-        return rit == renamed_nodes.end() ? temp : ( *rit ).second;
+        return temp;
     }
 
-    const NodeNameMap::const_iterator it = node_names.find( name );
-    if ( it != node_names.end() ) {
-        if ( ( *it ).second ) {
-            return FixNodeName( name + "_" );
-        }
-    }
-    node_names[ name ] = false;
-
-    const NameNameMap::const_iterator rit = renamed_nodes.find( name );
-    return rit == renamed_nodes.end() ? name : ( *rit ).second;
+    return name;
 }
 
 void Converter::ConvertAnimationStack( const AnimationStack& st )

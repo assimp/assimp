@@ -50,7 +50,7 @@ static const unsigned int MajorVersion = 4;
 static const unsigned int MinorVersion = 1;
 
 // --------------------------------------------------------------------------------
-// Legal information string - dont't remove this.
+// Legal information string - don't remove this.
 static const char* LEGAL_INFORMATION =
 
 "Open Asset Import Library (Assimp).\n"

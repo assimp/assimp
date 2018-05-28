@@ -105,7 +105,7 @@ for i in "$@"; do
     -n|--no-fat)
         DEPLOY_FAT=0
         echo "[!] Fat binary will not be created."
-        ;;
+    ;;
     -h|--help)
         echo " - don't build fat library (--no-fat)."
         echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
@@ -127,41 +127,31 @@ for ARCH_TARGET in $DEPLOY_ARCHS; do
     #rm ./lib/libassimp.a
 done
 
-if [[ "$DEPLOY_FAT" -eq 1 ]]; then
-    echo '[+] Creating fat libassimp binary ...'
-    for ARCH_TARGET in $DEPLOY_ARCHS; do
-	if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
-		LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.dylib "
-	else
-		LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
-	fi        
-    done
-	if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
-		LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.dylib"
-	else
-    	LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
-	fi
-    lipo $LIPO_ARGS
-    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
-    LIPO_ARGS=""
 
-    echo '[+] Creating fat libIrrXML binary ...'
+make_fat_binary()
+{
+	LIB_NAME=$1
+	LIPO_ARGS=''
     for ARCH_TARGET in $DEPLOY_ARCHS; do
-        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libIrrXML.a "
+        if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
+            LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.dylib "
+        else
+            LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.a "
+        fi
     done
-    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libIrrXML-fat.a"
+    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/$LIB_NAME-fat.a"
     lipo $LIPO_ARGS
-    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
-    LIPO_ARGS=""
+}
+
+if [[ "$DEPLOY_FAT" -eq 1 ]]; then
+    echo '[+] Creating fat binaries ...'
     
-    echo '[+] Creating fat libzlibstatic binary ...'
-    for ARCH_TARGET in $DEPLOY_ARCHS; do
-        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libzlibstatic.a "
-    done
-    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libzlibstatic-fat.a"
-    lipo $LIPO_ARGS
-    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
-    LIPO_ARGS=""
+    make_fat_binary 'libassimp'
+    make_fat_binary 'libIrrXML'
+    make_fat_binary 'libzlibstatic'
+    
+    echo "[!] Done! The fat binaries can be found at $BUILD_DIR"
 fi
+
 
 

@@ -381,7 +381,7 @@ template <>  struct Structure :: _defaultInitializer<ErrorPolicy_Warn> {
 
     template <typename T>
     void operator ()(T& out, const char* reason = "<add reason>") {
-        DefaultLogger::get()->warn(reason);
+        ASSIMP_LOG_WARN(reason);
 
         // ... and let the show go on
         _defaultInitializer<0 /*ErrorPolicy_Igno*/>()(out);
@@ -663,7 +663,7 @@ public:
     /** Check whether a specific item is in the cache.
      *  @param s Data type of the item
      *  @param out Output pointer. Unchanged if the
-     *   cache doens't know the item yet.
+     *   cache doesn't know the item yet.
      *  @param ptr Item address to look for. */
     template <typename T> void get (
         const Structure& s,

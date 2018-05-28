@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness full
+ *   KHR_materials_unlit full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -386,7 +387,7 @@ namespace glTF2
     };
 
 
-    //! Base classe for all glTF top-level objects
+    //! Base class for all glTF top-level objects
     struct Object
     {
         int index;        //!< The index of this object within its property container
@@ -581,6 +582,7 @@ namespace glTF2
 		/// \param [in] pReplace_Count - count of bytes in new data.
 		/// \return true - if successfully replaced, false if input arguments is out of range.
 		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
+		bool ReplaceData_joint(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
 
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
@@ -739,6 +741,9 @@ namespace glTF2
 
         //extension: KHR_materials_pbrSpecularGlossiness
         Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
+
+        //extension: KHR_materials_unlit 
+        bool unlit;
 
         Material() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
@@ -1036,6 +1041,7 @@ namespace glTF2
         struct Extensions
         {
             bool KHR_materials_pbrSpecularGlossiness;
+            bool KHR_materials_unlit;
 
         } extensionsUsed;
 

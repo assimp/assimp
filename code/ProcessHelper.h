@@ -212,7 +212,7 @@ template <> struct MinMaxChooser<aiVertexWeight> {
 // -------------------------------------------------------------------------------
 /** @brief Find the min/max values of an array of Ts
  *  @param in Input array
- *  @param size Numebr of elements to process
+ *  @param size Number of elements to process
  *  @param[out] min minimum value
  *  @param[out] max maximum value
  */
@@ -348,7 +348,7 @@ class ComputeSpatialSortProcess : public BaseProcess
     void Execute( aiScene* pScene)
     {
         typedef std::pair<SpatialSort, ai_real> _Type;
-        DefaultLogger::get()->debug("Generate spatially-sorted vertex cache");
+        ASSIMP_LOG_DEBUG("Generate spatially-sorted vertex cache");
 
         std::vector<_Type>* p = new std::vector<_Type>(pScene->mNumMeshes);
         std::vector<_Type>::iterator it = p->begin();

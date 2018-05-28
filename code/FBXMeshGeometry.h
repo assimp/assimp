@@ -68,7 +68,6 @@ private:
     const Skin* skin;
 };
 
-
 typedef std::vector<int> MatIndexArray;
 
 
@@ -95,8 +94,8 @@ public:
     *  if no tangents are specified */
     const std::vector<aiVector3D>& GetTangents() const;
 
-    /** Get a list of all vertex binormals or an empty array
-    *  if no binormals are specified */
+    /** Get a list of all vertex bi-normals or an empty array
+    *  if no bi-normals are specified */
     const std::vector<aiVector3D>& GetBinormals() const;
 
     /** Return list of faces - each entry denotes a face and specifies

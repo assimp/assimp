@@ -365,10 +365,10 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
         pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
         pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+        memcpy(pMesh->mVertices, positionBuffer.data(), pMesh->mNumVertices * sizeof(aiVector3D));
         positionBuffer.clear();
         pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+        memcpy(pMesh->mNormals, normalBuffer.data(), pMesh->mNumVertices * sizeof(aiVector3D));
         normalBuffer.clear();
 
         // now copy faces

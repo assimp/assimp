@@ -5,15 +5,8 @@ SET (CMAKE_SYSTEM_NAME      "Darwin")
 SET (CMAKE_SYSTEM_PROCESSOR "armv6")
 SET (IOS TRUE)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
 SET (CC "${DEVROOT}/usr/bin/clang")
 SET (CXX "${DEVROOT}/usr/bin/clang++")
-
-CMAKE_FORCE_C_COMPILER          (${CC} LLVM)
-CMAKE_FORCE_CXX_COMPILER        (${CXX} LLVM)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")

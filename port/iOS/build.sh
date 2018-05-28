@@ -12,21 +12,25 @@ BUILD_DIR="./lib/iOS"
 IOS_SDK_VERSION=$(xcodebuild -version -sdk iphoneos | grep SDKVersion | cut -f2 -d ':' | tr -d '[[:space:]]')
 ###################################
 
+###################################
+# 		 BUILD Configuration
+###################################
+
 BUILD_SHARED_LIBS=OFF
-BUILD_TYPE=Release
+BUILD_TYPE=Debug
 
 ################################################
 # 		 Minimum iOS deployment target version
 ################################################
-MIN_IOS_VERSION="8.0"
+MIN_IOS_VERSION="6.0"
 
 IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
 TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 
-BUILD_ARCHS_DEVICE="arm64 armv7"
+BUILD_ARCHS_DEVICE="arm64 armv7s armv7"
 BUILD_ARCHS_SIMULATOR="x86_64 i386"
-BUILD_ARCHS_ALL=(armv7 arm64 x86_64 i386)
+BUILD_ARCHS_ALL=(armv7 armv7s arm64 x86_64 i386)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
@@ -62,7 +66,7 @@ build_arch()
 
     rm CMakeCache.txt
 
-    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
+    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
 
     echo "[!] Building $1 library"
 
@@ -102,12 +106,22 @@ for i in "$@"; do
         DEPLOY_ARCHS=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
         echo "[!] Selecting architectures: $DEPLOY_ARCHS"
     ;;
+    -r=*|--release=*)
+    	BUILD_TYPE=Release        
+        echo "[!] Selecting build type: Release"
+    ;;
+    -s=*|--shared-lib=*)
+    	BUILD_SHARED_LIBS=ON        
+        echo "[!] Will generate dynamic libraries"
+    ;;
     -n|--no-fat)
         DEPLOY_FAT=0
         echo "[!] Fat binary will not be created."
     ;;
     -h|--help)
         echo " - don't build fat library (--no-fat)."
+        echo " - don't include debug information and apply compiler optimizations (--release)."
+        echo " - generate dynamic libraries rather than static ones (--shared-lib)."
         echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
         echo " - supported C++ STD libs (--stdlib): $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"
         echo " - supported C++ standards (--std): $(echo $(join , ${CPP_STD_LIST[*]}) | sed 's/,/, /g')"

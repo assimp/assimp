@@ -1,5 +1,5 @@
-PyAssimp Readme
-===============
+PyAssimp: Python bindings for libassimp
+=======================================
 
 A simple Python wrapper for Assimp using `ctypes` to access the library.
 Requires Python >= 2.6.

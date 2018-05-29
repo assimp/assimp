@@ -4,11 +4,11 @@ import os
 from distutils.core import setup
 
 def readme():
-    with open('README.md') as f:
+    with open('README.rst') as f:
         return f.read()
 
 setup(name='pyassimp',
-      version='4.1.2',
+      version='4.1.3',
       license='ISC',
       description='Python bindings for the Open Asset Import Library (ASSIMP)',
       long_description=readme(),
@@ -19,7 +19,7 @@ setup(name='pyassimp',
       maintainer_email='severin@guakamole.org',
       packages=['pyassimp'],
       data_files=[
-                  ('share/pyassimp', ['README.md']),
+                  ('share/pyassimp', ['README.rst']),
                   ('share/examples/pyassimp', ['scripts/' + f for f in os.listdir('scripts/')])
                  ],
       requires=['numpy']

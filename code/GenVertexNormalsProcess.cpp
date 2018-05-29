@@ -112,8 +112,10 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 // Executes the post processing step on the given imported data.
 bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int meshIndex)
 {
-    if (NULL != pMesh->mNormals)
-        return false;
+    if (NULL != pMesh->mNormals) {
+        delete[] pMesh->mNormals;
+    }
+//        return false;
 
     // If the mesh consists of lines and/or points but not of
     // triangles or higher-order polygons the normal vectors

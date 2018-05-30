@@ -28,9 +28,9 @@ IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
 TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 
-BUILD_ARCHS_DEVICE="arm64 armv7"
+BUILD_ARCHS_DEVICE="arm64 armv7s armv7"
 BUILD_ARCHS_SIMULATOR="x86_64 i386"
-BUILD_ARCHS_ALL=(armv7 arm64 x86_64 i386)
+BUILD_ARCHS_ALL=($BUILD_ARCHS_DEVICE $BUILD_ARCHS_SIMULATOR)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
@@ -55,10 +55,10 @@ build_arch()
         echo '[!] Target SDK set to DEVICE.'
     fi
 
-    unset CC CPP DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
+    unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
            
-	export CC="$(xcrun -sdk iphoneos -find clang)"
-    export CPP="$CC -E"
+	#export CC="$(xcrun -sdk iphoneos -find clang)"
+    #export CPP="$CC -E"
     export DEVROOT=$XCODE_ROOT_DIR/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
     export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -I$SDKROOT/usr/include/ -miphoneos-version-min=$IOS_SDK_TARGET"
@@ -132,7 +132,9 @@ cd ../../
 rm -rf $BUILD_DIR
 
 for ARCH_TARGET in $DEPLOY_ARCHS; do
+	echo "Creating folder: $BUILD_DIR/$ARCH_TARGET"
     mkdir -p $BUILD_DIR/$ARCH_TARGET
+    echo "Building for arc: $ARCH_TARGET" 
     build_arch $ARCH_TARGET
     #rm ./lib/libassimp.a
 done

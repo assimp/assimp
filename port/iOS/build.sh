@@ -17,7 +17,7 @@ IOS_SDK_VERSION=$(xcodebuild -version -sdk iphoneos | grep SDKVersion | cut -f2 
 ###################################
 
 BUILD_SHARED_LIBS=OFF
-BUILD_TYPE=Debug
+BUILD_TYPE=Release
 
 ################################################
 # 		 Minimum iOS deployment target version
@@ -28,9 +28,9 @@ IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
 TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 
-BUILD_ARCHS_DEVICE="arm64 armv7s armv7"
+BUILD_ARCHS_DEVICE="arm64 armv7"
 BUILD_ARCHS_SIMULATOR="x86_64 i386"
-BUILD_ARCHS_ALL=(armv7 armv7s arm64 x86_64 i386)
+BUILD_ARCHS_ALL=(armv7 arm64 x86_64 i386)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
@@ -55,12 +55,14 @@ build_arch()
         echo '[!] Target SDK set to DEVICE.'
     fi
 
-    unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
-
+    unset CC CPP DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
+           
+	export CC="$(xcrun -sdk iphoneos -find clang)"
+    export CPP="$CC -E"
     export DEVROOT=$XCODE_ROOT_DIR/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
-    export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -$CPP_DEV_TARGET=$IOS_SDK_TARGET -I$SDKROOT/usr/include/"
-    export LDFLAGS="-L$SDKROOT/usr/lib/"
+    export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -I$SDKROOT/usr/include/ -miphoneos-version-min=$IOS_SDK_TARGET"
+    export LDFLAGS="-arch $1 -isysroot $SDKROOT -L$SDKROOT/usr/lib/"
     export CPPFLAGS=$CFLAGS
     export CXXFLAGS="$CFLAGS -std=$CPP_STD"
 
@@ -74,15 +76,9 @@ build_arch()
     $XCODE_ROOT_DIR/usr/bin/make assimp -j 8 -l
 
     echo "[!] Moving built libraries into: $BUILD_DIR/$1/"
-
-	if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
-   	 mv ./lib/libassimp*.dylib  $BUILD_DIR/$1/
-	else
-    	mv ./lib/libassimp.a $BUILD_DIR/$1/
-	fi
-
-    mv ./lib/libIrrXML.a $BUILD_DIR/$1/
-    mv ./lib/libzlibstatic.a $BUILD_DIR/$1/
+    
+    mv ./lib/*.dylib  $BUILD_DIR/$1/
+    mv ./lib/*.a $BUILD_DIR/$1/	
 }
 
 echo "[!] $0 - assimp iOS build script"
@@ -106,9 +102,9 @@ for i in "$@"; do
         DEPLOY_ARCHS=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
         echo "[!] Selecting architectures: $DEPLOY_ARCHS"
     ;;
-    -r=*|--release=*)
-    	BUILD_TYPE=Release        
-        echo "[!] Selecting build type: Release"
+    -d=*|--debug=*)
+    	BUILD_TYPE=Debug        
+        echo "[!] Selecting build type: Debug"
     ;;
     -s=*|--shared-lib=*)
     	BUILD_SHARED_LIBS=ON        
@@ -120,7 +116,7 @@ for i in "$@"; do
     ;;
     -h|--help)
         echo " - don't build fat library (--no-fat)."
-        echo " - don't include debug information and apply compiler optimizations (--release)."
+        echo " - Include debug information and symbols, no compiler optimizations (--debug)."
         echo " - generate dynamic libraries rather than static ones (--shared-lib)."
         echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
         echo " - supported C++ STD libs (--stdlib): $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"

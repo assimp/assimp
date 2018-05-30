@@ -287,7 +287,8 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // We project it onto a plane to get a 2d triangle.
 
             // Collect all vertices of of the polygon.
-            for (tmp = 0; tmp < MIN(max,max_out+2); ++tmp) {
+            int smallerMax = (max<=((int)max_out+2))?(max):((int)max_out+2);
+            for (tmp = 0; tmp < smallerMax; ++tmp) {
                 temp_verts3d[tmp] = verts[idx[tmp]];
             }
 

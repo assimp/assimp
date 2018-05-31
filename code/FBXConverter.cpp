@@ -1532,7 +1532,7 @@ aiString Converter::GetTexturePath(const Texture* tex)
     path.Set(tex->RelativeFilename());
 
     const Video* media = tex->Media();
-    if (media != 0) {
+    if (media != nullptr) {
         bool textureReady = false; //tells if our texture is ready (if it was loaded or if it was found)
         unsigned int index;
 

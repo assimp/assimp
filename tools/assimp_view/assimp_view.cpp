@@ -178,7 +178,6 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     // get the end time of zje operation, calculate delta t
     double fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
-//	char szTemp[128];
     g_bLoadingFinished = true;
 
     // check whether the loading process has failed ...
@@ -202,7 +201,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 //-------------------------------------------------------------------------------
 int LoadAsset(void)
 {
-    // set the world and world rotation matrices to the identuty
+    // set the world and world rotation matrices to the identity
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 

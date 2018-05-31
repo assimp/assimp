@@ -362,9 +362,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
             *tex = piTexture;
             m_pcCurrentTexture->piTexture = tex;
 
-            //if (!pcMesh->bSharedFX){
-                pcMesh->piEffect->SetTexture(tex_string,piTexture);
-            //}
+            pcMesh->piEffect->SetTexture(tex_string,piTexture);
         }
     }
 
@@ -562,7 +560,6 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
     tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
     tvi.lParam = (LPARAM)10;
-    //tvi.state = TVIS_EXPANDED | TVIS_EXPANDEDONCE ;
 
     sNew.itemex = tvi;
     sNew.hInsertAfter = TVI_LAST;
@@ -629,7 +626,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     return 1;
 }
 //-------------------------------------------------------------------------------
-// Expand all elements in the treeview
+// Expand all elements in the tree-view
 int CDisplay::ExpandTree()
 {
     // expand all materials
@@ -779,7 +776,7 @@ int CDisplay::OnRender()
     // Now render the log display in the upper right corner of the window
     CLogDisplay::Instance().OnRender();
 
-    // present the backbuffer
+    // present the back-buffer
     g_piDevice->EndScene();
     g_piDevice->Present(NULL,NULL,NULL,NULL);
 
@@ -1593,7 +1590,7 @@ int CDisplay::HandleInput()
     return 1;
 }
 //-------------------------------------------------------------------------------
-// Process input for an empty scen view to allow for skybox rotations
+// Process input for an empty scene view to allow for sky-box rotations
 int CDisplay::HandleInputEmptyScene()
 {
     if(CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
@@ -2035,7 +2032,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
             g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
 
             if (g_sOptions.bNoAlphaBlending) {
-                // manually disable alphablending
+                // manually disable alpha-blending
                 g_piDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
             }
 
@@ -2199,9 +2196,6 @@ int CDisplay::RenderTextureView()
     // it might be that there is no texture ...
     if (!m_pcCurrentTexture->piTexture)
     {
-        // FIX: no such log message. it would be repeated to often
-        //CLogDisplay::Instance().AddEntry("Unable to display texture. Image is unreachable.",
-        //  D3DCOLOR_ARGB(0xFF,0xFF,0,0));
         return 0;
     }
 
@@ -2296,5 +2290,6 @@ int CDisplay::RenderTextureView()
     // do we need to draw UV coordinates?
     return 1;
 }
-};
+
+}
 

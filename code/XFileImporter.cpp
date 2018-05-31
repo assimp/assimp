@@ -332,6 +332,11 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                 // collect vertex data for indices of this face
                 for( unsigned int d = 0; d < df.mNumIndices; ++d ) {
                     df.mIndices[d] = newIndex;
+                    const unsigned int newIdx( pf.mIndices[ d ] );
+                    if ( newIdx > sourceMesh->mPositions.size() ) {
+                        continue;
+                    }
+
                     orgPoints[newIndex] = pf.mIndices[d];
 
                     // Position
@@ -459,7 +464,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
             nbone->mNodeName.Set( bone->mBoneName);
             nanim->mChannels[b] = nbone;
 
-            // keyframes are given as combined transformation matrix keys
+            // key-frames are given as combined transformation matrix keys
             if( !bone->mTrafoKeys.empty() )
             {
                 nbone->mNumPositionKeys = (unsigned int)bone->mTrafoKeys.size();

@@ -1526,6 +1526,46 @@ unsigned int Converter::ConvertVideo( const Video& video )
     return static_cast<unsigned int>( textures.size() - 1 );
 }
 
+aiString Converter::GetTexturePath(const Texture* tex)
+{
+    aiString path;
+    path.Set(tex->RelativeFilename());
+
+    const Video* media = tex->Media();
+    if (media != nullptr) {
+        bool textureReady = false; //tells if our texture is ready (if it was loaded or if it was found)
+        unsigned int index;
+
+        VideoMap::const_iterator it = textures_converted.find(media);
+        if (it != textures_converted.end()) {
+            index = (*it).second;
+            textureReady = true;
+        }
+        else {
+            if (media->ContentLength() > 0) {
+                index = ConvertVideo(*media);
+                textures_converted[media] = index;
+                textureReady = true;
+            }
+        }
+
+        // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture), if the texture is ready
+        if (doc.Settings().useLegacyEmbeddedTextureNaming) {
+            if (textureReady) {
+                // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
+                // In FBX files textures are now stored internally by Assimp with their filename included
+                // Now Assimp can lookup through the loaded textures after all data is processed
+                // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
+                // This may occur on this case too, it has to be studied
+                path.data[0] = '*';
+                path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
+            }
+        }
+    }
+
+    return path;
+}
+
 void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& textures,
     const std::string& propName,
     aiTextureType target, const MeshGeometry* const mesh )
@@ -1538,41 +1578,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
     const Texture* const tex = ( *it ).second;
     if ( tex != 0 )
     {
-        aiString path;
-        path.Set( tex->RelativeFilename() );
-
-        const Video* media = tex->Media();
-        if (media != 0) {
-			bool textureReady = false; //tells if our texture is ready (if it was loaded or if it was found)
-			unsigned int index;
-
-			VideoMap::const_iterator it = textures_converted.find(media);
-			if (it != textures_converted.end()) {
-				index = (*it).second;
-				textureReady = true;
-			}
-			else {
-				if (media->ContentLength() > 0) {
-					index = ConvertVideo(*media);
-					textures_converted[media] = index;
-					textureReady = true;
-				}
-			}
-
-			// setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture), if the texture is ready
-			if (doc.Settings().useLegacyEmbeddedTextureNaming) {
-                if (textureReady) {
-                    // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
-                    // In FBX files textures are now stored internally by Assimp with their filename included
-                    // Now Assimp can lookup through the loaded textures after all data is processed
-                    // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
-                    // This may occur on this case too, it has to be studied
-                    path.data[0] = '*';
-                    path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
-                }
-			}
-		}  
-
+        aiString path = GetTexturePath(tex);
         out_mat->AddProperty( &path, _AI_MATKEY_TEXTURE_BASE, target, 0 );
 
         aiUVTransform uvTrafo;
@@ -1696,9 +1702,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextu
     
         const Texture* const tex = ( *it ).second->getTexture(texIndex);
 
-        aiString path;
-        path.Set( tex->RelativeFilename() );
-
+        aiString path = GetTexturePath(tex);
         out_mat->AddProperty( &path, _AI_MATKEY_TEXTURE_BASE, target, texIndex );
 
         aiUVTransform uvTrafo;

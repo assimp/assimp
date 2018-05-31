@@ -1,1 +1,1 @@
-See https://code.google.com/p/assimp-net/ and https://github.com/assimp/assimp-net for a Github mirror.
+Please check the following github-repo for the source: https://github.com/kebby/assimp-net

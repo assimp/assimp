@@ -72,6 +72,7 @@ GenVertexNormalsProcess::~GenVertexNormalsProcess() {
 // Returns whether the processing step is present in the given flag field.
 bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 {
+    force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
     return (pFlags & aiProcess_GenSmoothNormals) != 0;
 }
 
@@ -113,9 +114,9 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int meshIndex)
 {
     if (NULL != pMesh->mNormals) {
-        delete[] pMesh->mNormals;
+        if (force_) delete[] pMesh->mNormals;
+        else return false;
     }
-//        return false;
 
     // If the mesh consists of lines and/or points but not of
     // triangles or higher-order polygons the normal vectors
@@ -147,7 +148,18 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
         const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1));
+
+        auto pV12 = *pV2 - *pV1;
+        auto pV31 = *pV3 - *pV1;
+
+        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+
+        if (std::isnan(vNor.x) || std::isnan(vNor.y) || std::isnan(vNor.z)) {
+            for (unsigned int i = 0; i < face.mNumIndices; ++i) {
+                pMesh->mNormals[face.mIndices[i]] = aiVector3D(0.0f, 0.0f, 0.0f);
+            }
+            continue;
+        }
 
         for (unsigned int i = 0;i < face.mNumIndices;++i) {
             pMesh->mNormals[face.mIndices[i]] = vNor;

@@ -74,6 +74,7 @@ GenFaceNormalsProcess::~GenFaceNormalsProcess()
 // Returns whether the processing step is present in the given flag field.
 bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const
 {
+    force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
     return  (pFlags & aiProcess_GenNormals) != 0;
 }
 
@@ -106,8 +107,8 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene)
 bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
     if (NULL != pMesh->mNormals) {
-        // return false;
-        delete[] pMesh->mNormals;
+        if (force_) delete[] pMesh->mNormals;
+        else return false;
     }
 
     // If the mesh consists of lines and/or points but not of

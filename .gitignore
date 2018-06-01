@@ -87,3 +87,6 @@ lib64/assimp-vc120-mt.exp
 xcuserdata
 
 cmake-build-debug
+/.vs
+/code/assimp.vcxproj.user
+*.user

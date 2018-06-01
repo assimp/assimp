@@ -354,8 +354,9 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
         return AI_FAILURE;
     }
     // Determine mapping type
-    aiTextureMapping mapping = aiTextureMapping_UV;
-    aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index),(int*)&mapping);
+    int mapping_ = static_cast<int>(aiTextureMapping_UV);
+    aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index), &mapping_);
+    aiTextureMapping mapping = static_cast<aiTextureMapping>(mapping_);
     if (_mapping)
         *_mapping = mapping;
 

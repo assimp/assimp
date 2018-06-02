@@ -204,8 +204,9 @@ void CopyTexture(aiMaterial& mat, D3DS::Texture& texture, aiTextureType type)
         mat.AddProperty<ai_real>( &texture.mTextureBlend, 1, AI_MATKEY_TEXBLEND(type,0));
 
     // Setup the texture mapping mode
-    mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_U(type,0));
-    mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_V(type,0));
+    int mapMode = static_cast<int>(texture.mMapMode);
+    mat.AddProperty<int>(&mapMode,1,AI_MATKEY_MAPPINGMODE_U(type,0));
+    mat.AddProperty<int>(&mapMode,1,AI_MATKEY_MAPPINGMODE_V(type,0));
 
     // Mirroring - double the scaling values
     // FIXME: this is not really correct ...
@@ -313,7 +314,8 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
         case D3DS::Discreet3DS::Blinn :
             eShading = aiShadingMode_Blinn; break;
     }
-    mat.AddProperty<int>( (int*)&eShading,1,AI_MATKEY_SHADING_MODEL);
+    int eShading_ = static_cast<int>(eShading);
+    mat.AddProperty<int>(&eShading_, 1, AI_MATKEY_SHADING_MODEL);
 
     // DIFFUSE texture
     if( oldMat.sTexDiffuse.mMapName.length() > 0)

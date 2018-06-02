@@ -253,7 +253,8 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
         pcMat->AddProperty<int>((int*)&temp,1,AI_MATKEY_TEXOP(type,cur));
 
         // setup the mapping mode
-        pcMat->AddProperty<int>((int*)&mapping,1,AI_MATKEY_MAPPING(type,cur));
+        int mapping_ = static_cast<int>(mapping);
+        pcMat->AddProperty<int>(&mapping_, 1, AI_MATKEY_MAPPING(type, cur));
 
         // add the u-wrapping
         temp = (unsigned int)GetMapMode(texture.wrapModeWidth);
@@ -365,7 +366,8 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
     }
     if (surf.mMaximumSmoothAngle <= 0.0)
         m = aiShadingMode_Flat;
-    pcMat->AddProperty((int*)&m,1,AI_MATKEY_SHADING_MODEL);
+    int m_ = static_cast<int>(m);
+    pcMat->AddProperty(&m_, 1, AI_MATKEY_SHADING_MODEL);
 
     // (the diffuse value is just a scaling factor)
     // If a diffuse texture is set, we set this value to 1.0

@@ -30,16 +30,12 @@ Name: "help";        Description: "Help Files"; Types: full compact
 Name: "samples";     Description: "Samples"; Types: full
 Name: "test";        Description: "Test Models (BSD-licensed)"; Types: full
 Name: "test_nonbsd"; Description: "Test Models (other (free) licenses)"; Types: full
-Name: "pyassimp";    Description: "Python Bindings"; Types: full
-Name: "dassimp";     Description: "D Bindings"; Types: full
-Name: "assimp_net";  Description: "C#/.NET Bindings"; Types: full
 
 [Run]
 ;Filename: "{app}\stub\vc_redist.x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2017 redistributable package (32 Bit)"; Check: not IsWin64
 Filename: "{app}\stub\vc_redist.x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2017 redistributable package (64 Bit)"; Check: IsWin64
 
 [Files]
-
 Source: "readme_installer.txt"; DestDir: "{app}"; Flags: isreadme
 
 ; Installer stub
@@ -55,15 +51,15 @@ Source: "WEB"; DestDir: "{app}"
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-;Source: "..\..\bin\release\x86\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x86"
-;Source: "..\..\bin\release\x86\assimp_viewer.exe";      DestDir: "{app}\bin\x86"; Components: tools
+;Source: "..\..\bin\release\x86\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x86"
+;Source: "..\..\bin\release\x86\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "D3DCompiler_42.dll";                         DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "D3DX9_42.dll";                               DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "..\..\bin\release\x86\assimp.exe";           DestDir: "{app}\bin\x86"; Components: tools
 
 ; x64 binaries
-Source: "..\..\bin\release\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x64"
-Source: "..\..\bin\release\assimp_viewer.exe";      DestDir: "{app}\bin\x64"; Components: tools
+Source: "..\..\bin\release\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x64"
+Source: "..\..\bin\release\assimp_viewer.exe";    DestDir: "{app}\bin\x64"; Components: tools
 Source: "D3DCompiler_42.dll";                     DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
 Source: "D3DX9_42.dll";                           DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools
 Source: "..\..\bin\release\assimp.exe";           DestDir: "{app}\bin\x64"; Components: tools
@@ -75,7 +71,7 @@ Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
 
 ; Import libraries
 ;Source: "..\..\lib\release\x86\assimp.lib"; DestDir: "{app}\lib\x86"
-Source: "..\..\lib\release\assimp-vc140-mt.lib"; DestDir: "{app}\lib\x64"
+Source: "..\..\lib\release\assimp-vc141-mt.lib"; DestDir: "{app}\lib\x64"
 
 ; Samples
 Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples

@@ -60,18 +60,18 @@ Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 ; x64 binaries
 Source: "..\..\bin\release\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x64"
 Source: "..\..\bin\release\assimp_viewer.exe";    DestDir: "{app}\bin\x64"; Components: tools
-Source: "D3DCompiler_42.dll";                     DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
-Source: "D3DX9_42.dll";                           DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools
+Source: "C:\Program Files (x86)\Microsoft DirectX SDK)\D3DCompiler_42.dll";                     DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
+Source: "C:\Program Files (x86)\Microsoft DirectX SDK)\D3DX9_42.dll";                           DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools
 Source: "..\..\bin\release\assimp.exe";           DestDir: "{app}\bin\x64"; Components: tools
 
 ; Documentation
-Source: "..\..\doc\AssimpDoc_Html\AssimpDoc.chm"; DestDir: "{app}\doc"; Components: help
-Source: "..\..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm"; DestDir: "{app}\doc"; Components: help
-Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
+;Source: "..\..\doc\AssimpDoc_Html\AssimpDoc.chm"; DestDir: "{app}\doc"; Components: help
+;Source: "..\..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm"; DestDir: "{app}\doc"; Components: help
+:Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
 
 ; Import libraries
 ;Source: "..\..\lib\release\x86\assimp.lib"; DestDir: "{app}\lib\x86"
-Source: "..\..\lib\release\assimp-vc141-mt.lib"; DestDir: "{app}\lib\x64"
+Source: "..\..\lib\release\assimp-vc140-mt.lib"; DestDir: "{app}\lib\x64"
 
 ; Samples
 Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples
@@ -92,15 +92,6 @@ Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; 
 ;Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
 ;Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
 ;Source: "..\..\test\models-nonbsd\*"; DestDir: "{app}\test\models-nonbsd"; Flags: recursesubdirs; Components: test_nonbsd
-
-; Source Code & Workspaces
-;Source: "..\..\code\*"; Excludes: "*.o"; DestDir: "{app}\code"; Flags: recursesubdirs; Components: wsource
-;Source: "..\..\workspaces\vc8\*.sln"; DestDir: "{app}\workspaces\vc8"; Components: wsource and vc8
-;Source: "..\..\workspaces\vc8\*.vcproj"; DestDir: "{app}\workspaces\vc8"; Components: wsource and vc8
-;Source: "..\..\workspaces\vc9\*.sln"; DestDir: "{app}\workspaces\vc9"; Components: wsource and vc9
-;Source: "..\..\workspaces\vc9\*.vcproj"; DestDir: "{app}\workspaces\vc9"; Components: wsource and vc9
-
-; Source: "Readme.txt"; DestDir: "{app}"; Flags: isreadme
 
 [Icons]
 Name: "{group}\Assimp Manual"; Filename: "{app}\doc\AssimpDoc.chm" ; Components: help

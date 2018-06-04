@@ -1309,23 +1309,12 @@ inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
 
     for (unsigned int i = 0; i < extsUsed->Size(); ++i) {
         if ((*extsUsed)[i].IsString()) {
-            exts[(*extsUsed)[i].GetString()] = true;
             IdMap::iterator it = extensionsUsed.find((*extsUsed)[i].GetString());
             if (it != extensionsUsed.end()) {
                 it->second = true;
             }
         }
     }
-    //
-    // #define CHECK_EXT(EXT) \
-    //     if (requiredExtsMap.find(#EXT) != requiredExtsMap.end()) extensionsRequired[#EXT] = true; \
-    //     if (extensionsUsed.find(#EXT) != extensionsUsed.end()) extensionsUsed[#EXT] = true;
-    //
-    // CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
-    // CHECK_EXT(KHR_materials_unlit);
-    // CHECK_EXT(KHR_materials_common);
-    //
-    // #undef CHECK_EXT
 }
 
 inline IOStream* Asset::OpenFile(std::string path, const char* mode, bool /*absolute*/)

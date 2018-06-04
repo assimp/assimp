@@ -1531,6 +1531,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
     // sample the NodeAnims to build a transformation matrix for each time key
     auto sampledNodeAnims = PrepareNodeAnimations(anim);
 
+    std::string node_idstr;
     for (auto nodeAnim = sampledNodeAnims.cbegin(), nodeAnimEnd = sampledNodeAnims.cend(); nodeAnim!=nodeAnimEnd; ++nodeAnim) {
 
 		// sanity check

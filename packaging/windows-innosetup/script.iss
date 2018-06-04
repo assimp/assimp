@@ -53,8 +53,8 @@ Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 ; x86 binaries
 ;Source: "..\..\bin\release\x86\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x86"
 ;Source: "..\..\bin\release\x86\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
-;Source: "D3DCompiler_42.dll";                         DestDir: "{app}\bin\x86"; Components: tools
-;Source: "D3DX9_42.dll";                               DestDir: "{app}\bin\x86"; Components: tools
+;Source: "C:\Program Files (x86)\Microsoft DirectX SDK)\D3DCompiler_42.dll";                         DestDir: "{app}\bin\x86"; Components: tools
+;Source: "C:\Program Files (x86)\Microsoft DirectX SDK)\D3DX9_42.dll";                               DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "..\..\bin\release\x86\assimp.exe";           DestDir: "{app}\bin\x86"; Components: tools
 
 ; x64 binaries

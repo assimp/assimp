@@ -1117,6 +1117,7 @@ namespace glTF2
             , textures      (*this, "textures")
         {
             extensionsUsed["KHR_materials_pbrSpecularGlossiness"] = false;
+            extensionsUsed["KHR_materials_unlit"] = false;
             extensionsUsed["KHR_materials_common"] = false;
 
             extensionsRequired = extensionsUsed;

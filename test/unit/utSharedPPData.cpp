@@ -78,7 +78,7 @@ TEST_F(SharedPPDataTest, testPODProperty)
 {
     int i = 5;
     shared->AddProperty("test",i);
-    int o;
+	int o = 0;
     EXPECT_TRUE(shared->GetProperty("test",o));
     EXPECT_EQ(5, o);
     EXPECT_FALSE(shared->GetProperty("test2",o));

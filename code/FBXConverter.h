@@ -229,6 +229,10 @@ private:
     unsigned int ConvertVideo(const Video& video);
 
     // ------------------------------------------------------------------------------------------------
+    // convert embedded texture if necessary and return actual texture path
+    aiString GetTexturePath(const Texture* tex);
+
+    // ------------------------------------------------------------------------------------------------
     void TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures,
         const std::string& propName,
         aiTextureType target, const MeshGeometry* const mesh);

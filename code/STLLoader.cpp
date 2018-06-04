@@ -352,7 +352,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
 
         if (positionBuffer.empty())    {
             pMesh->mNumFaces = 0;
-            throw DeadlyImportError("STL: ASCII file is empty or invalid; no data loaded");
+            ASSIMP_LOG_WARN("STL: mesh is empty or invalid; no data loaded");
         }
         if (positionBuffer.size() % 3 != 0)    {
             pMesh->mNumFaces = 0;
@@ -365,10 +365,10 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
         pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
         pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+        memcpy(pMesh->mVertices, positionBuffer.data(), pMesh->mNumVertices * sizeof(aiVector3D));
         positionBuffer.clear();
         pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+        memcpy(pMesh->mNormals, normalBuffer.data(), pMesh->mNumVertices * sizeof(aiVector3D));
         normalBuffer.clear();
 
         // now copy faces

@@ -87,28 +87,15 @@ namespace Assimp
     // ------------------------------------------------------------------------------------------------
     /** Helper class to export a given scene to an glTF file. */
     // ------------------------------------------------------------------------------------------------
-    class glTF2Exporter
-    {
+    class glTF2Exporter {
     public:
         /// Constructor for a specific scene to export
         glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
             const ExportProperties* pProperties, bool binary);
+        ~glTF2Exporter();
 
-    private:
-
-        const char* mFilename;
-        IOSystem* mIOSystem;
-        const aiScene* mScene;
-        const ExportProperties* mProperties;
-
-        std::map<std::string, unsigned int> mTexturesByPath;
-
-        std::shared_ptr<glTF2::Asset> mAsset;
-
-        std::vector<unsigned char> mBodyData;
-
+    protected:
         void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
-
         void GetTexSampler(const aiMaterial* mat, glTF2::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
         void GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int idx);
         void GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int idx);
@@ -126,6 +113,15 @@ namespace Assimp
         unsigned int ExportNode(const aiNode* node, glTF2::Ref<glTF2::Node>& parent);
         void ExportScene();
         void ExportAnimations();
+
+    private:
+        const char* mFilename;
+        IOSystem* mIOSystem;
+        const aiScene* mScene;
+        const ExportProperties* mProperties;
+        std::map<std::string, unsigned int> mTexturesByPath;
+        std::shared_ptr<glTF2::Asset> mAsset;
+        std::vector<unsigned char> mBodyData;
     };
 
 }

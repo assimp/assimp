@@ -88,7 +88,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 {
     /*  This function tries to simplify the input UV transformation.
      *  That's very important as it allows us to reduce the number
-     *  of output UV channels. The oder in which the transformations
+     *  of output UV channels. The order in which the transformations
      *  are applied is - as always - scaling, rotation, translation.
      */
 

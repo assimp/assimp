@@ -227,7 +227,7 @@ void DNAParser::Parse ()
 // ------------------------------------------------------------------------------------------------
 void DNA :: DumpToFile()
 {
-    // we dont't bother using the VFS here for this is only for debugging.
+    // we don't bother using the VFS here for this is only for debugging.
     // (and all your bases are belong to us).
 
     std::ofstream f("dna.txt");

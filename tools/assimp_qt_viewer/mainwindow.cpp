@@ -48,7 +48,7 @@ QTime time_begin = QTime::currentTime();
 		ui->cbxLighting->setChecked(true);	mGLView->Lighting_Enable();
 		ui->cbxBBox->setChecked(false);		mGLView->Enable_SceneBBox(false);
 		ui->cbxTextures->setChecked(true);	mGLView->Enable_Textures(true);
-		ui->cbxReloadTextures->setChecked(true);	mGLView->Enable_Reload_Textures(false);
+
 		//
 		// Fill info labels
 		//
@@ -84,7 +84,11 @@ QTime time_begin = QTime::currentTime();
 		mGLView->Camera_Set(0);
 		// Scene is loaded, do first rendering.
 		LogInfo("Scene is ready for rendering.");
+#if ASSIMP_QT4_VIEWER
 		mGLView->updateGL();
+#else
+		mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 	}
 	else
 	{
@@ -128,40 +132,74 @@ void MainWindow::LogError(const QString& pMessage)
 
 void MainWindow::mousePressEvent(QMouseEvent* pEvent)
 {
-	if(pEvent->button() & Qt::LeftButton)
-		mPosition_Pressed_LMB = pEvent->pos();
-	else if(pEvent->button() & Qt::RightButton)
-		mPosition_Pressed_RMB = pEvent->pos();
+const QPoint ms_pt = pEvent->pos();
+
+__unused aiVector3D temp_v3;
+
+	// Check if GLView is pointed.
+	if(childAt(ms_pt) == mGLView)
+	{
+		if(!mMouse_Transformation.Position_Pressed_Valid)
+		{
+			mMouse_Transformation.Position_Pressed_Valid = true;// set flag
+			// Store current transformation matrices.
+			mGLView->Camera_Matrix(mMouse_Transformation.Rotation_AroundCamera, mMouse_Transformation.Rotation_Scene, temp_v3);
+		}
+
+		if(pEvent->button() & Qt::LeftButton)
+			mMouse_Transformation.Position_Pressed_LMB = ms_pt;
+		else if(pEvent->button() & Qt::RightButton)
+			mMouse_Transformation.Position_Pressed_RMB = ms_pt;
+	}
+	else
+	{
+		mMouse_Transformation.Position_Pressed_Valid = false;
+	}
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *pEvent)
+{
+	if(pEvent->buttons() == 0) mMouse_Transformation.Position_Pressed_Valid = false;
+
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent* pEvent)
 {
-	if(pEvent->buttons() & Qt::LeftButton)
+	if(mMouse_Transformation.Position_Pressed_Valid)
 	{
-		GLfloat dx = 180 * GLfloat(pEvent->x() - mPosition_Pressed_LMB.x()) / mGLView->width();
-		GLfloat dy = 180 * GLfloat(pEvent->y() - mPosition_Pressed_LMB.y()) / mGLView->height();
+		if(pEvent->buttons() & Qt::LeftButton)
+		{
+			GLfloat dx = 180 * GLfloat(pEvent->x() - mMouse_Transformation.Position_Pressed_LMB.x()) / mGLView->width();
+			GLfloat dy = 180 * GLfloat(pEvent->y() - mMouse_Transformation.Position_Pressed_LMB.y()) / mGLView->height();
 
-		if(pEvent->modifiers() & Qt::ShiftModifier)
-			mGLView->Camera_RotateScene(dy, 0, dx);// Rotate around oX and oZ axises.
-		else
-			mGLView->Camera_RotateScene(dy, dx, 0);// Rotate around oX and oY axises.
+			if(pEvent->modifiers() & Qt::ShiftModifier)
+				mGLView->Camera_RotateScene(dy, 0, dx, &mMouse_Transformation.Rotation_Scene);// Rotate around oX and oZ axises.
+			else
+				mGLView->Camera_RotateScene(dy, dx, 0, &mMouse_Transformation.Rotation_Scene);// Rotate around oX and oY axises.
 
-		mGLView->updateGL();
-		mPosition_Pressed_LMB = pEvent->pos();
-	}
+	#if ASSIMP_QT4_VIEWER
+			mGLView->updateGL();
+	#else
+			mGLView->update();
+	#endif // ASSIMP_QT4_VIEWER
+		}
 
-	if(pEvent->buttons() & Qt::RightButton)
-	{
-		GLfloat dx = 180 * GLfloat(pEvent->x() - mPosition_Pressed_RMB.x()) / mGLView->width();
-		GLfloat dy = 180 * GLfloat(pEvent->y() - mPosition_Pressed_RMB.y()) / mGLView->height();
+		if(pEvent->buttons() & Qt::RightButton)
+		{
+			GLfloat dx = 180 * GLfloat(pEvent->x() - mMouse_Transformation.Position_Pressed_RMB.x()) / mGLView->width();
+			GLfloat dy = 180 * GLfloat(pEvent->y() - mMouse_Transformation.Position_Pressed_RMB.y()) / mGLView->height();
 
-		if(pEvent->modifiers() & Qt::ShiftModifier)
-			mGLView->Camera_Rotate(dy, 0, dx);// Rotate around oX and oZ axises.
-		else
-			mGLView->Camera_Rotate(dy, dx, 0);// Rotate around oX and oY axises.
+			if(pEvent->modifiers() & Qt::ShiftModifier)
+				mGLView->Camera_Rotate(dy, 0, dx, &mMouse_Transformation.Rotation_AroundCamera);// Rotate around oX and oZ axises.
+			else
+				mGLView->Camera_Rotate(dy, dx, 0, &mMouse_Transformation.Rotation_AroundCamera);// Rotate around oX and oY axises.
 
-		mGLView->updateGL();
-		mPosition_Pressed_RMB = pEvent->pos();
+	#if ASSIMP_QT4_VIEWER
+			mGLView->updateGL();
+	#else
+			mGLView->update();
+	#endif // ASSIMP_QT4_VIEWER
+		}
 	}
 }
 
@@ -189,25 +227,25 @@ GLfloat step;
 	else if(pEvent->key() == Qt::Key_Down)
 		mGLView->Camera_Translate(0, 0, step);
 
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 /********************************************************************/
 /********************** Constructor/Destructor **********************/
 /********************************************************************/
-bool MainWindow::event(QEvent *e)
-{
-    if (e->type() == QEvent::WindowActivate && this->mGLView->mReloadTexturesEnabled == true) {
-	    qInfo() << "Window Activated";
-    }
-    return QWidget::event(e);
-}
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::MainWindow),
 		mScene(nullptr)
 {
 using namespace Assimp;
+
+	// other variables
+	mMouse_Transformation.Position_Pressed_Valid = false;
 
 	ui->setupUi(this);
 	// Create OpenGL widget
@@ -281,7 +319,6 @@ QString filename, filter;
 	if(!filename.isEmpty()) ImportFile(filename);
 }
 
-
 void MainWindow::on_butExport_clicked()
 {
 using namespace Assimp;
@@ -301,7 +338,7 @@ QMap<QString, const aiExportFormatDesc*> exportersMap;
 		return;
 	}
 
-	for (int i = 0; i < exporter.GetExportFormatCount(); ++i)
+	for (size_t i = 0; i < exporter.GetExportFormatCount(); ++i)
 	{
 		const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(i);
 		exportersList.push_back(desc->id + QString(": ") + desc->description);
@@ -345,7 +382,11 @@ void MainWindow::on_cbxLighting_clicked(bool pChecked)
 	else
 		mGLView->Lighting_Disable();
 
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_lstLight_itemSelectionChanged()
@@ -357,35 +398,49 @@ bool selected = ui->lstLight->isItemSelected(ui->lstLight->currentItem());
 	else
 		mGLView->Lighting_DisableSource(ui->lstLight->currentRow());
 
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_lstCamera_clicked( const QModelIndex &)
 {
 	mGLView->Camera_Set(ui->lstLight->currentRow());
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_cbxBBox_clicked(bool checked)
 {
 	mGLView->Enable_SceneBBox(checked);
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_cbxDrawAxes_clicked(bool checked)
 {
 	mGLView->Enable_Axes(checked);
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
-}
-
-void MainWindow::on_cbxReloadTextures_clicked(bool checked)
-{
-	mGLView->Enable_Reload_Textures(checked);
-	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_cbxTextures_clicked(bool checked)
 {
 	mGLView->Enable_Textures(checked);
+#if ASSIMP_QT4_VIEWER
 	mGLView->updateGL();
+#else
+	mGLView->update();
+#endif // ASSIMP_QT4_VIEWER
 }

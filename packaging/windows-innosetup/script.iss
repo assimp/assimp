@@ -51,14 +51,14 @@ Source: "WEB"; DestDir: "{app}"
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-;Source: "..\..\bin\release\x86\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x86"
+;Source: "..\..\bin\release\x86\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x86"
 ;Source: "..\..\bin\release\x86\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "D3DCompiler_42.dll";                         DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "D3DX9_42.dll";                               DestDir: "{app}\bin\x86"; Components: tools
 ;Source: "..\..\bin\release\x86\assimp.exe";           DestDir: "{app}\bin\x86"; Components: tools
 
 ; x64 binaries
-Source: "..\..\bin\release\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x64"
+Source: "..\..\bin\release\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x64"
 Source: "..\..\bin\release\assimp_viewer.exe";    DestDir: "{app}\bin\x64"; Components: tools
 Source: "D3DCompiler_42.dll";                     DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
 Source: "D3DX9_42.dll";                           DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools

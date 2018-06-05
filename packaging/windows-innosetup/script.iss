@@ -67,7 +67,7 @@ Source: "..\..\bin\release\assimp.exe";           DestDir: "{app}\bin\x64"; Comp
 ; Documentation
 ;Source: "..\..\doc\AssimpDoc_Html\AssimpDoc.chm"; DestDir: "{app}\doc"; Components: help
 ;Source: "..\..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm"; DestDir: "{app}\doc"; Components: help
-:Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
+;Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
 
 ; Import libraries
 ;Source: "..\..\lib\release\x86\assimp.lib"; DestDir: "{app}\lib\x86"

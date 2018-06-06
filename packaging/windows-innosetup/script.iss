@@ -30,6 +30,9 @@ Name: "help";        Description: "Help Files"; Types: full compact
 Name: "samples";     Description: "Samples"; Types: full
 Name: "test";        Description: "Test Models (BSD-licensed)"; Types: full
 Name: "test_nonbsd"; Description: "Test Models (other (free) licenses)"; Types: full
+;Name: "pyassimp";    Description: "Python Bindings"; Types: full
+;Name: "dassimp";     Description: "D Bindings"; Types: full
+;Name: "assimp_net";  Description: "C#/.NET Bindings"; Types: full
 
 [Run]
 ;Filename: "{app}\stub\vc_redist.x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2017 redistributable package (32 Bit)"; Check: not IsWin64
@@ -80,7 +83,7 @@ Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Comp
 Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 
 ; dAssimp
-Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; Components: dassimp
+;Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; Components: dassimp
 
 ; Assimp.NET
 ;Source: "..\..\port\Assimp.NET\*"; DestDir: "{app}\port\C#"; Flags: recursesubdirs; Components: assimp_net

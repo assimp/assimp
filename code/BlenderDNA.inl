@@ -310,10 +310,8 @@ void Structure :: ReadField(T& out, const char* name, const FileDatabase& db) co
 //--------------------------------------------------------------------------------
 // field parsing for raw untyped data (like CustomDataLayer.data)
 template <int error_policy>
-bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const char* name, const FileDatabase& db) const
-{
-	if (!isValidCustomDataType(cdtype))
-	{
+bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const char* name, const FileDatabase& db) const {
+	if (!isValidCustomDataType(cdtype))	{
 		ASSIMP_LOG_ERROR("given rawtype out of index");
 		return false;
 	}
@@ -322,13 +320,11 @@ bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const c
 
 	Pointer ptrval;
 	const Field* f;
-	try
-	{
+	try	{
 		f = &(*this)[name];
 
 		// sanity check, should never happen if the genblenddna script is right
-		if (!(f->flags & FieldFlag_Pointer))
-		{
+		if (!(f->flags & FieldFlag_Pointer)) {
 			throw Error((Formatter::format(), "Field `", name, "` of structure `",
 				this->name, "` ought to be a pointer"));
 		}
@@ -338,15 +334,13 @@ bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const c
 		// actually it is meaningless on which Structure the Convert is called
 		// because the `Pointer` argument triggers a special implementation.
 	}
-	catch (const Error& e)
-	{
+	catch (const Error& e) {
 		_defaultInitializer<error_policy>()(out, e.what());
 		out.reset();
 	}
 
 	bool readOk = true;
-	if (ptrval.val)
-	{
+	if (ptrval.val)	{
 		// get block for ptr
 		const FileBlockHead* block = LocateFileBlockForAddress(ptrval, db);
 		db.reader->SetCurrentPos(block->start + static_cast<size_t>((ptrval.val - block->address.val)));
@@ -366,21 +360,18 @@ bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const c
 
 //--------------------------------------------------------------------------------
 template <int error_policy, template <typename> class TOUT, typename T>
-bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const FileDatabase& db) const
-{
+bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const FileDatabase& db) const {
 	out.clear();
 
 	const StreamReaderAny::pos old = db.reader->GetCurrentPos();
 
 	Pointer ptrval;
 	const Field* f;
-	try
-	{
+	try	{
 		f = &(*this)[name];
 
 		// sanity check, should never happen if the genblenddna script is right
-		if (!(f->flags & FieldFlag_Pointer))
-		{
+		if (!(f->flags & FieldFlag_Pointer)) {
 			throw Error((Formatter::format(), "Field `", name, "` of structure `",
 				this->name, "` ought to be a pointer"));
 		}
@@ -390,16 +381,14 @@ bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const 
 		// actually it is meaningless on which Structure the Convert is called
 		// because the `Pointer` argument triggers a special implementation.
 	}
-	catch (const Error& e)
-	{
+	catch (const Error& e) {
 		_defaultInitializer<error_policy>()(out, e.what());
 		out.clear();
 		return false;
 	}
 
 
-	if (ptrval.val)
-	{
+	if (ptrval.val)	{
 		// find the file block the pointer is pointing to
 		const FileBlockHead* block = LocateFileBlockForAddress(ptrval, db);
 		db.reader->SetCurrentPos(block->start + static_cast<size_t>((ptrval.val - block->address.val)));
@@ -407,8 +396,7 @@ bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const 
 		// I really ought to improve StreamReader to work with 64 bit indices exclusively.
 
 		const Structure& s = db.dna[f->type];
-		for (size_t i = 0; i < block->num; ++i)
-		{
+		for (size_t i = 0; i < block->num; ++i)	{
 			TOUT<T> p(new T);
 			s.Convert(*p, db);
 			out.push_back(p);

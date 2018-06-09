@@ -4,8 +4,7 @@
 #include <array>
 
 namespace Assimp {
-    namespace Blender
-    {
+    namespace Blender {
         /**
         *   @brief  read/convert of Structure array to memory
         */
@@ -84,8 +83,7 @@ namespace Assimp {
         /**
         *   @brief  describes the size of data and the read function to be used for single CustomerData.type
         */
-        struct CustomDataTypeDescription
-        {
+        struct CustomDataTypeDescription {
             PRead Read;                         ///< function to read one CustomData type element
             PAlloc Alloc;                       ///< function to allocate n type elements
         };
@@ -114,8 +112,7 @@ namespace Assimp {
         *           other (like CD_ORCO, ...) uses arrays of rawtypes or even arrays of Structures
         *           use a special readfunction for that cases
         */
-        CustomDataTypeDescriptions customDataTypeDescriptions =
-        {
+        CustomDataTypeDescriptions customDataTypeDescriptions =  {
             DECL_STRUCT_CUSTOMDATATYPEDESCRIPTION(MVert),
             DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
             DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
@@ -165,21 +162,17 @@ namespace Assimp {
         };
 
 
-        bool isValidCustomDataType(const int cdtype)
-        {
+        bool isValidCustomDataType(const int cdtype) {
             return cdtype >= 0 && cdtype < CD_NUMTYPES;
         }
 
-        bool readCustomData(std::shared_ptr<void> &out, const CustomDataType cdtype, const size_t cnt, const FileDatabase &db)
-        {
-            if (!isValidCustomDataType(cdtype))
-            {
+        bool readCustomData(std::shared_ptr<void> &out, const CustomDataType cdtype, const size_t cnt, const FileDatabase &db) {
+            if (!isValidCustomDataType(cdtype)) {
                 throw Error((Formatter::format(), "CustomData.type ", cdtype, " out of index"));
             }
 
             const CustomDataTypeDescription cdtd = customDataTypeDescriptions[cdtype];
-            if (cdtd.Read && cdtd.Alloc)
-            {
+            if (cdtd.Read && cdtd.Alloc) {
                 // allocate cnt elements and parse them from file 
                 out.reset(cdtd.Alloc(cnt));
                 return cdtd.Read(out.get(), cnt, db);
@@ -187,23 +180,18 @@ namespace Assimp {
             return false;
         }
 
-        std::shared_ptr<CustomDataLayer> getCustomDataLayer(const CustomData &customdata, const CustomDataType cdtype, const std::string &name)
-        {
-            for (auto it = customdata.layers.begin(); it != customdata.layers.end(); ++it)
-            {
-                if (it->get()->type == cdtype && name == it->get()->name)
-                {
+        std::shared_ptr<CustomDataLayer> getCustomDataLayer(const CustomData &customdata, const CustomDataType cdtype, const std::string &name) {
+            for (auto it = customdata.layers.begin(); it != customdata.layers.end(); ++it) {
+                if (it->get()->type == cdtype && name == it->get()->name) {
                     return *it;
                 }
             }
             return nullptr;
         }
 
-        const void * getCustomDataLayerData(const CustomData &customdata, const CustomDataType cdtype, const std::string &name)
-        {
+        const void * getCustomDataLayerData(const CustomData &customdata, const CustomDataType cdtype, const std::string &name) {
             const std::shared_ptr<CustomDataLayer> pLayer = getCustomDataLayer(customdata, cdtype, name);
-            if (pLayer && pLayer->data)
-            {
+            if (pLayer && pLayer->data) {
                 return pLayer->data.get();
             }
             return nullptr;

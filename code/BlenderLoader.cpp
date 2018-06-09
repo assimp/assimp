@@ -1031,20 +1031,16 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
     typedef std::map<uint32_t, TextureUVMapping> MaterialTextureUVMappings;
     MaterialTextureUVMappings matTexUvMappings;
     const uint32_t maxMat = static_cast<const uint32_t>(mesh->mat.size());
-    for (uint32_t m = 0; m < maxMat; ++m)
-    {
+    for (uint32_t m = 0; m < maxMat; ++m) {
         // get material by index
         const std::shared_ptr<Material> pMat = mesh->mat[m];
         TextureUVMapping texuv;
         const uint32_t maxTex = sizeof(pMat->mtex) / sizeof(pMat->mtex[0]);
-        for (uint32_t t = 0; t < maxTex; ++t)
-        {
-            if (pMat->mtex[t] && pMat->mtex[t]->uvname[0])
-            {
+        for (uint32_t t = 0; t < maxTex; ++t) {
+            if (pMat->mtex[t] && pMat->mtex[t]->uvname[0]) {
                 // get the CustomData layer for given uvname and correct type
                 const MLoopUV *pLoop = static_cast<const MLoopUV*>(getCustomDataLayerData(mesh->ldata, CD_MLOOPUV, pMat->mtex[t]->uvname));
-                if (pLoop)
-                {
+                if (pLoop) {
                     texuv.insert(std::make_pair(t, pLoop));
                 }
             }
@@ -1114,8 +1110,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
                     }
                     // only update written mNumVertices in last loop
                     // TODO why must the numVertices be incremented here?
-                    if (m == itMatTexUvMapping->second.size() - 1)
-                    {
+                    if (m == itMatTexUvMapping->second.size() - 1) {
                         out->mNumVertices += j;
                     }
                 }

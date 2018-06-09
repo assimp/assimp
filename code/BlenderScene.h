@@ -389,8 +389,7 @@ CustomDataLayer 104
     char name 32 64
     void *data 96 8
 */
-struct CustomDataLayer : ElemBase
-{
+struct CustomDataLayer : ElemBase {
     int type;
     int offset;
     int flag;
@@ -430,8 +429,7 @@ CustomData 208
     BLI_mempool *pool 192 8
     CustomDataExternal *external 200 8
 */
-struct CustomData : ElemBase
-{
+struct CustomData : ElemBase {
     vector<std::shared_ptr<struct CustomDataLayer> > layers;
     int typemap[42];    // CD_NUMTYPES
     int pad_i1;

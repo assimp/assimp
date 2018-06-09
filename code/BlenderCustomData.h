@@ -5,11 +5,9 @@
 #include <memory>
 
 namespace Assimp {
-    namespace Blender
-    {
+    namespace Blender {
         /* CustomData.type from Blender (2.79b) */
-        enum CustomDataType
-        {
+        enum CustomDataType {
             CD_AUTO_FROM_NAME = -1,
             CD_MVERT = 0,
 #ifdef DNA_DEPRECATED

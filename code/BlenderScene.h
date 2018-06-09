@@ -399,7 +399,7 @@ struct CustomDataLayer : ElemBase {
     int active_mask;
     int uid;
     char name[64];
-    std::shared_ptr<void> data;  // must be converted to real type according type member
+    std::shared_ptr<uint8_t> data;  // must be converted to real type according type member, usage of uint8_t since 
 
     CustomDataLayer()
         : ElemBase()

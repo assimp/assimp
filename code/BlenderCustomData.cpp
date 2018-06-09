@@ -24,7 +24,7 @@ namespace Assimp {
         /**
         *   @brief  pointer to function read memory for cnt CustomData types
         */
-        typedef void *(*PAlloc)(const size_t cnt);
+        typedef uint8_t *(*PAlloc)(const size_t cnt);
 
         /**
         *   @brief  helper macro to define Structure specific read function
@@ -56,7 +56,7 @@ namespace Assimp {
         *               }
         */
 #define IMPL_STRUCT_ALLOC(ty)                                                   \
-        void *alloc##ty(const size_t cnt) {                                     \
+        uint8_t *alloc##ty(const size_t cnt) {                                  \
             return new uint8_t[cnt * sizeof(ty)];                               \
         }
 
@@ -84,6 +84,11 @@ namespace Assimp {
         struct CustomDataTypeDescription {
             PRead Read;                         ///< function to read one CustomData type element
             PAlloc Alloc;                       ///< function to allocate n type elements
+
+            CustomDataTypeDescription(PRead read, PAlloc alloc)
+                : Read(read)
+                , Alloc(alloc)
+            {}
         };
 
         /**
@@ -96,13 +101,13 @@ namespace Assimp {
         *   @note   IMPL_STRUCT_READ for same ty must be used earlier to implement the typespecific read function
         */
 #define DECL_STRUCT_CUSTOMDATATYPEDESCRIPTION(ty)           \
-        CustomDataTypeDescription{ &read##ty, &alloc##ty }
+        CustomDataTypeDescription(&read##ty, &alloc##ty)
 
         /**
         *   @brief  helper macro to define CustomDataTypeDescription for UNSUPPORTED type
         */
 #define DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION          \
-        CustomDataTypeDescription{ nullptr, nullptr }
+        CustomDataTypeDescription(nullptr, nullptr)
 
         /**
         *   @brief  descriptors for data pointed to from CustomDataLayer.data
@@ -164,7 +169,7 @@ namespace Assimp {
             return cdtype >= 0 && cdtype < CD_NUMTYPES;
         }
 
-        bool readCustomData(std::shared_ptr<void> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
+        bool readCustomData(std::shared_ptr<uint8_t> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
             if (!isValidCustomDataType(cdtype)) {
                 throw Error((Formatter::format(), "CustomData.type ", cdtype, " out of index"));
             }

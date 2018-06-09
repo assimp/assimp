@@ -310,7 +310,7 @@ void Structure :: ReadField(T& out, const char* name, const FileDatabase& db) co
 //--------------------------------------------------------------------------------
 // field parsing for raw untyped data (like CustomDataLayer.data)
 template <int error_policy>
-bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const char* name, const FileDatabase& db) const {
+bool Structure::ReadCustomDataPtr(std::shared_ptr<uint8_t>&out, int cdtype, const char* name, const FileDatabase& db) const {
 
 	const StreamReaderAny::pos old = db.reader->GetCurrentPos();
 

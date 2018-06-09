@@ -1,5 +1,3 @@
-#pragma once
-
 #include "BlenderCustomData.h"
 #include <array>
 
@@ -59,7 +57,7 @@ namespace Assimp {
         */
 #define IMPL_STRUCT_ALLOC(ty)                                                   \
         void *alloc##ty(const size_t cnt) {                                     \
-            return new uint8_t[cnt * sizeof ty];                                \
+            return new uint8_t[cnt * sizeof(ty)];                               \
         }
 
         /**

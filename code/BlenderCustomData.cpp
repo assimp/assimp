@@ -155,7 +155,7 @@ namespace Assimp {
             }
 
             const CustomDataTypeDescription cdtd = customDataTypeDescriptions[cdtype];
-            if (cdtd.Read && cdtd.Create && cdtd.Destroy) {
+            if (cdtd.Read && cdtd.Create && cdtd.Destroy && cnt > 0) {
                 // allocate cnt elements and parse them from file
                 out.reset(cdtd.Create(cnt), cdtd.Destroy);
                 return cdtd.Read(out.get(), cnt, db);

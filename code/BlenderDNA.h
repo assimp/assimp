@@ -329,7 +329,7 @@ public:
     *   @return true when read was successful
     */
     template <int error_policy>
-    bool ReadCustomDataPtr(std::shared_ptr<uint8_t>&out, int cdtype, const char* name, const FileDatabase& db) const;
+    bool ReadCustomDataPtr(std::shared_ptr<ElemBase>&out, int cdtype, const char* name, const FileDatabase& db) const;
 
 private:
 
@@ -833,7 +833,7 @@ private:
 *   @param[in]  db to read elements from
 *   @return true when ok
 */
-bool readCustomData(std::shared_ptr<uint8_t> &out, int cdtype, size_t cnt, const FileDatabase &db);
+bool readCustomData(std::shared_ptr<ElemBase> &out, int cdtype, size_t cnt, const FileDatabase &db);
 
 
     } // end Blend

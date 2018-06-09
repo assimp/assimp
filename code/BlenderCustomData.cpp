@@ -1,5 +1,7 @@
 #include "BlenderCustomData.h"
+#include "BlenderDNA.h"
 #include <array>
+#include <functional>
 
 namespace Assimp {
     namespace Blender {
@@ -20,52 +22,32 @@ namespace Assimp {
         /**
         *   @brief  pointer to function read memory for n CustomData types
         */
-        typedef bool(*PRead)(void *pOut, const size_t cnt, const FileDatabase &db);
-        /**
-        *   @brief  pointer to function read memory for cnt CustomData types
-        */
-        typedef uint8_t *(*PAlloc)(const size_t cnt);
+        typedef bool        (*PRead)(ElemBase *pOut, const size_t cnt, const FileDatabase &db);
+        typedef ElemBase *  (*PCreate)(const size_t cnt);
+        typedef void        (*PDestroy)(ElemBase *);
 
-        /**
-        *   @brief  helper macro to define Structure specific read function
-        *           for ex: when used like
-        *
-        *               IMPL_STRUCT_READ(MLoop)
-        *
-        *           following function is implemented
-        *
-        *               bool readMLoop(void *v, const size_t cnt, const FileDatabase &db) {
-        *                   return read<MLoop>(db.dna["MLoop"], static_cast<MLoop *>(v), cnt, db);
-        *               }
-        */
 #define IMPL_STRUCT_READ(ty)                                                    \
-        bool read##ty(void *v, const size_t cnt, const FileDatabase &db) {      \
+        bool read##ty(ElemBase *v, const size_t cnt, const FileDatabase &db) {  \
             return read<ty>(db.dna[#ty], static_cast<ty *>(v), cnt, db);        \
         }
 
-        /**
-        *   @brief  helper macro to define Structure specific alloc function
-        *           for ex: when used like
-        *
-        *               IMPL_STRUCT_ALLOC(MLoop)
-        *
-        *           following function is implemented
-        *
-        *               void * allocMLoop(const size_t cnt) {
-        *                   return new uint8_t[cnt * sizeof MLoop];
-        *               }
-        */
-#define IMPL_STRUCT_ALLOC(ty)                                                   \
-        uint8_t *alloc##ty(const size_t cnt) {                                  \
-            return static_cast<uint8_t *>(malloc(cnt * sizeof(ty)));            \
+#define IMPL_STRUCT_CREATE(ty)                                                  \
+        ElemBase *create##ty(const size_t cnt) {                                \
+            return new ty[cnt];                                                 \
+        }
+
+#define IMPL_STRUCT_DESTROY(ty)                                                 \
+        void destroy##ty(ElemBase *p) {                                         \
+            delete[]p;                                                          \
         }
 
         /**
         *   @brief  helper macro to define Structure functions
         */
 #define IMPL_STRUCT(ty)                                                         \
-        IMPL_STRUCT_ALLOC(ty)                                                   \
-        IMPL_STRUCT_READ(ty)
+        IMPL_STRUCT_READ(ty)                                                    \
+        IMPL_STRUCT_CREATE(ty)                                                  \
+        IMPL_STRUCT_DESTROY(ty)
 
         // supported structures for CustomData
         IMPL_STRUCT(MVert)
@@ -83,26 +65,29 @@ namespace Assimp {
         */
         struct CustomDataTypeDescription {
             PRead Read;                         ///< function to read one CustomData type element
-            PAlloc Alloc;                       ///< function to allocate n type elements
+            PCreate Create;                       ///< function to allocate n type elements
+            PDestroy Destroy;
 
-            CustomDataTypeDescription(PRead read, PAlloc alloc)
+            CustomDataTypeDescription(PRead read, PCreate create, PDestroy destroy)
                 : Read(read)
-                , Alloc(alloc)
+                , Create(create)
+                , Destroy(destroy)
             {}
         };
+
 
         /**
         *   @brief  helper macro to define Structure type specific CustomDataTypeDescription
         *   @note   IMPL_STRUCT_READ for same ty must be used earlier to implement the typespecific read function
         */
 #define DECL_STRUCT_CUSTOMDATATYPEDESCRIPTION(ty)           \
-        CustomDataTypeDescription(&read##ty, &alloc##ty)
+        CustomDataTypeDescription{&read##ty, &create##ty, &destroy##ty}
 
         /**
         *   @brief  helper macro to define CustomDataTypeDescription for UNSUPPORTED type
         */
 #define DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION          \
-        CustomDataTypeDescription(nullptr, nullptr)
+        CustomDataTypeDescription{nullptr, nullptr, nullptr}
 
         /**
         *   @brief  descriptors for data pointed to from CustomDataLayer.data
@@ -164,15 +149,15 @@ namespace Assimp {
             return cdtype >= 0 && cdtype < CD_NUMTYPES;
         }
 
-        bool readCustomData(std::shared_ptr<uint8_t> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
+        bool readCustomData(std::shared_ptr<ElemBase> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
             if (!isValidCustomDataType(cdtype)) {
                 throw Error((Formatter::format(), "CustomData.type ", cdtype, " out of index"));
             }
 
             const CustomDataTypeDescription cdtd = customDataTypeDescriptions[cdtype];
-            if (cdtd.Read && cdtd.Alloc) {
-                // allocate cnt elements and parse them from file 
-                out.reset(cdtd.Alloc(cnt), free);
+            if (cdtd.Read && cdtd.Create && cdtd.Destroy) {
+                // allocate cnt elements and parse them from file
+                out.reset(cdtd.Create(cnt), cdtd.Destroy);
                 return cdtd.Read(out.get(), cnt, db);
             }
             return false;

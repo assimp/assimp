@@ -69,16 +69,6 @@ namespace Assimp {
         bool isValidCustomDataType(const int cdtype);
 
         /**
-        *   @brief  read CustomData's data to ptr to mem
-        *   @param[out] out memory ptr to set
-        *   @param[in]  cdtype  to read
-        *   @param[in]  cnt cnt of elements to read
-        *   @param[in]  db to read elements from
-        *   @return true when ok
-        */
-        bool readCustomData(std::shared_ptr<void> &out, int cdtype, size_t cnt, const FileDatabase &db);
-
-        /**
         *   @brief  returns CustomDataLayer ptr for given cdtype and name
         *   @param[in]  customdata CustomData to search for wanted layer
         *   @param[in]  cdtype to search for

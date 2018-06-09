@@ -163,8 +163,8 @@ struct MVert : ElemBase {
     int bweight;
 
     MVert() : ElemBase()
-        , mat_nr(0)
         , flag(0)
+        , mat_nr(0)
         , bweight(0)
     {}
 };

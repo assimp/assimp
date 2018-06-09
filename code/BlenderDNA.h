@@ -825,6 +825,17 @@ private:
     FileDatabase& db;
 };
 
+/**
+*   @brief  read CustomData's data to ptr to mem
+*   @param[out] out memory ptr to set
+*   @param[in]  cdtype  to read
+*   @param[in]  cnt cnt of elements to read
+*   @param[in]  db to read elements from
+*   @return true when ok
+*/
+bool readCustomData(std::shared_ptr<void> &out, int cdtype, size_t cnt, const FileDatabase &db);
+
+
     } // end Blend
 } // end Assimp
 

@@ -76,7 +76,7 @@ namespace Assimp {
         *   @param[in]  db to read elements from
         *   @return true when ok
         */
-        bool readCustomData(std::shared_ptr<void> &out, CustomDataType cdtype, size_t cnt, const FileDatabase &db);
+        bool readCustomData(std::shared_ptr<void> &out, int cdtype, size_t cnt, const FileDatabase &db);
 
         /**
         *   @brief  returns CustomDataLayer ptr for given cdtype and name

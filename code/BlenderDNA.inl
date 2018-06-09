@@ -311,10 +311,6 @@ void Structure :: ReadField(T& out, const char* name, const FileDatabase& db) co
 // field parsing for raw untyped data (like CustomDataLayer.data)
 template <int error_policy>
 bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const char* name, const FileDatabase& db) const {
-	if (!isValidCustomDataType(cdtype))	{
-		ASSIMP_LOG_ERROR("given rawtype out of index");
-		return false;
-	}
 
 	const StreamReaderAny::pos old = db.reader->GetCurrentPos();
 
@@ -345,7 +341,7 @@ bool Structure::ReadCustomDataPtr(std::shared_ptr<void>&out, int cdtype, const c
 		const FileBlockHead* block = LocateFileBlockForAddress(ptrval, db);
 		db.reader->SetCurrentPos(block->start + static_cast<size_t>((ptrval.val - block->address.val)));
 		// read block->num instances of given type to out
-		readOk = readCustomData(out, static_cast<CustomDataType>(cdtype), block->num, db);
+		readOk = readCustomData(out, cdtype, block->num, db);
 	}
 
 	// and recover the previous stream position

@@ -166,7 +166,7 @@ namespace Assimp {
             return cdtype >= 0 && cdtype < CD_NUMTYPES;
         }
 
-        bool readCustomData(std::shared_ptr<void> &out, const CustomDataType cdtype, const size_t cnt, const FileDatabase &db) {
+        bool readCustomData(std::shared_ptr<void> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
             if (!isValidCustomDataType(cdtype)) {
                 throw Error((Formatter::format(), "CustomData.type ", cdtype, " out of index"));
             }

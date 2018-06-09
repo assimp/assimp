@@ -92,11 +92,6 @@ namespace Assimp {
         };
 
         /**
-        *   @brief  shortcut for array of CustomDataTypeDescription
-        */
-        typedef std::array<CustomDataTypeDescription, CD_NUMTYPES> CustomDataTypeDescriptions;
-
-        /**
         *   @brief  helper macro to define Structure type specific CustomDataTypeDescription
         *   @note   IMPL_STRUCT_READ for same ty must be used earlier to implement the typespecific read function
         */
@@ -115,7 +110,7 @@ namespace Assimp {
         *           other (like CD_ORCO, ...) uses arrays of rawtypes or even arrays of Structures
         *           use a special readfunction for that cases
         */
-        CustomDataTypeDescriptions customDataTypeDescriptions =  {
+        std::array<CustomDataTypeDescription, CD_NUMTYPES> customDataTypeDescriptions = { {
             DECL_STRUCT_CUSTOMDATATYPEDESCRIPTION(MVert),
             DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
             DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
@@ -162,7 +157,7 @@ namespace Assimp {
 
             DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
             DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION
-        };
+        }};
 
 
         bool isValidCustomDataType(const int cdtype) {

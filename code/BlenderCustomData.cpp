@@ -57,7 +57,7 @@ namespace Assimp {
         */
 #define IMPL_STRUCT_ALLOC(ty)                                                   \
         uint8_t *alloc##ty(const size_t cnt) {                                  \
-            return new uint8_t[cnt * sizeof(ty)];                               \
+            return static_cast<uint8_t *>(malloc(cnt * sizeof(ty)));            \
         }
 
         /**
@@ -172,7 +172,7 @@ namespace Assimp {
             const CustomDataTypeDescription cdtd = customDataTypeDescriptions[cdtype];
             if (cdtd.Read && cdtd.Alloc) {
                 // allocate cnt elements and parse them from file 
-                out.reset(cdtd.Alloc(cnt));
+                out.reset(cdtd.Alloc(cnt), free);
                 return cdtd.Read(out.get(), cnt, db);
             }
             return false;

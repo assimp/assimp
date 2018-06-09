@@ -469,6 +469,8 @@ ADD_ASSIMP_IMPORTER( BLEND
   BlenderBMesh.cpp
   BlenderTessellator.h
   BlenderTessellator.cpp
+  BlenderCustomData.h
+  BlenderCustomData.cpp
 )
 
 ADD_ASSIMP_IMPORTER( IFC

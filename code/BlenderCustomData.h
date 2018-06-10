@@ -82,8 +82,8 @@ namespace Assimp {
         *   @param[in]  customdata CustomData to search for wanted layer
         *   @param[in]  cdtype to search for
         *   @param[in]  name to search for
-        *   @return CustomDataLayer * or nullptr if not found
+        *   @return * to struct data or nullptr if not found
         */
-        const void * getCustomDataLayerData(const CustomData &customdata, CustomDataType cdtype, const std::string &name);
+        const ElemBase * getCustomDataLayerData(const CustomData &customdata, CustomDataType cdtype, const std::string &name);
     }
 }

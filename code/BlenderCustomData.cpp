@@ -24,11 +24,11 @@ namespace Assimp {
         */
         typedef bool        (*PRead)(ElemBase *pOut, const size_t cnt, const FileDatabase &db);
         typedef ElemBase *  (*PCreate)(const size_t cnt);
-        typedef void        (*PDestroy)(ElemBase *);
+        typedef void(*PDestroy)(ElemBase *);
 
 #define IMPL_STRUCT_READ(ty)                                                    \
         bool read##ty(ElemBase *v, const size_t cnt, const FileDatabase &db) {  \
-            return read<ty>(db.dna[#ty], static_cast<ty *>(v), cnt, db);        \
+            return read<ty>(db.dna[#ty], dynamic_cast<ty *>(v), cnt, db);       \
         }
 
 #define IMPL_STRUCT_CREATE(ty)                                                  \
@@ -37,7 +37,8 @@ namespace Assimp {
         }
 
 #define IMPL_STRUCT_DESTROY(ty)                                                 \
-        void destroy##ty(ElemBase *p) {                                         \
+        void destroy##ty(ElemBase *pE) {                                        \
+            ty *p = dynamic_cast<ty *>(pE);                                     \
             delete[]p;                                                          \
         }
 
@@ -172,7 +173,8 @@ namespace Assimp {
             return nullptr;
         }
 
-        const void * getCustomDataLayerData(const CustomData &customdata, const CustomDataType cdtype, const std::string &name) {
+        const ElemBase * getCustomDataLayerData(const CustomData &customdata, const CustomDataType cdtype, const std::string &name)
+        {
             const std::shared_ptr<CustomDataLayer> pLayer = getCustomDataLayer(customdata, cdtype, name);
             if (pLayer && pLayer->data) {
                 return pLayer->data.get();

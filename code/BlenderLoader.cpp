@@ -1039,9 +1039,9 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         for (uint32_t t = 0; t < maxTex; ++t) {
             if (pMat->mtex[t] && pMat->mtex[t]->uvname[0]) {
                 // get the CustomData layer for given uvname and correct type
-                const MLoopUV *pLoop = static_cast<const MLoopUV*>(getCustomDataLayerData(mesh->ldata, CD_MLOOPUV, pMat->mtex[t]->uvname));
+                const ElemBase *pLoop = getCustomDataLayerData(mesh->ldata, CD_MLOOPUV, pMat->mtex[t]->uvname);
                 if (pLoop) {
-                    texuv.insert(std::make_pair(t, pLoop));
+                    texuv.insert(std::make_pair(t, dynamic_cast<const MLoopUV *>(pLoop)));
                 }
             }
         }

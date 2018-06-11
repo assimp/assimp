@@ -119,7 +119,7 @@ void UpdateMeshIndices(aiNode* node, unsigned int* lookup)
 // Executes the post processing step on the given imported data.
 void FindInstancesProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("FindInstancesProcess begin");
+    ASSIMP_LOG_DEBUG("FindInstancesProcess begin");
     if (pScene->mNumMeshes) {
 
         // use a pseudo hash for all meshes in the scene to quickly find
@@ -267,13 +267,11 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 
             // write to log
             if (!DefaultLogger::isNullLogger()) {
-
-                char buffer[512];
-                ::ai_snprintf(buffer,512,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
-                DefaultLogger::get()->info(buffer);
+                ASSIMP_LOG_INFO_F( "FindInstancesProcess finished. Found ", (pScene->mNumMeshes - numMeshesOut), " instances" );
             }
             pScene->mNumMeshes = numMeshesOut;
+        } else {
+            ASSIMP_LOG_DEBUG("FindInstancesProcess finished. No instanced meshes found");
         }
-        else DefaultLogger::get()->debug("FindInstancesProcess finished. No instanced meshes found");
     }
 }

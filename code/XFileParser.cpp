@@ -255,7 +255,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 
         // FIXME: we don't need the compressed data anymore, could release
         // it already for better memory usage. Consider breaking const-co.
-        DefaultLogger::get()->info("Successfully decompressed MSZIP-compressed file");
+        ASSIMP_LOG_INFO("Successfully decompressed MSZIP-compressed file");
 #endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
     }
     else
@@ -322,11 +322,11 @@ void XFileParser::ParseFile()
         if( objectName == "}")
         {
             // whatever?
-            DefaultLogger::get()->warn("} found in dataObject");
+            ASSIMP_LOG_WARN("} found in dataObject");
         } else
         {
             // unknown format
-            DefaultLogger::get()->warn("Unknown data object in animation of .x file");
+            ASSIMP_LOG_WARN("Unknown data object in animation of .x file");
             ParseUnknownDataObject();
         }
     }
@@ -422,7 +422,7 @@ void XFileParser::ParseDataObjectFrame( Node* pParent)
             ParseDataObjectMesh( mesh);
         } else
         {
-            DefaultLogger::get()->warn("Unknown data object in frame in x file");
+            ASSIMP_LOG_WARN("Unknown data object in frame in x file");
             ParseUnknownDataObject();
         }
     }
@@ -512,7 +512,7 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
             ParseDataObjectSkinWeights( pMesh);
         else
         {
-            DefaultLogger::get()->warn("Unknown data object in mesh in x file");
+            ASSIMP_LOG_WARN("Unknown data object in mesh in x file");
             ParseUnknownDataObject();
         }
     }
@@ -722,7 +722,7 @@ void XFileParser::ParseDataObjectMeshMaterialList( Mesh* pMesh)
             // ignore
         } else
         {
-            DefaultLogger::get()->warn("Unknown data object in material list in x file");
+            ASSIMP_LOG_WARN("Unknown data object in material list in x file");
             ParseUnknownDataObject();
         }
     }
@@ -770,7 +770,7 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
             pMaterial->mTextures.push_back( TexEntry( texname, true));
         } else
         {
-            DefaultLogger::get()->warn("Unknown data object in material in x file");
+            ASSIMP_LOG_WARN("Unknown data object in material in x file");
             ParseUnknownDataObject();
         }
     }
@@ -808,7 +808,7 @@ void XFileParser::ParseDataObjectAnimationSet()
             ParseDataObjectAnimation( anim);
         else
         {
-            DefaultLogger::get()->warn("Unknown data object in animation set in x file");
+            ASSIMP_LOG_WARN("Unknown data object in animation set in x file");
             ParseUnknownDataObject();
         }
     }
@@ -845,7 +845,7 @@ void XFileParser::ParseDataObjectAnimation( Animation* pAnim)
             CheckForClosingBrace();
         } else
         {
-            DefaultLogger::get()->warn("Unknown data object in animation in x file");
+            ASSIMP_LOG_WARN("Unknown data object in animation in x file");
             ParseUnknownDataObject();
         }
     }
@@ -953,7 +953,7 @@ void XFileParser::ParseDataObjectTextureFilename( std::string& pName)
     // FIX: some files (e.g. AnimationTest.x) have "" as texture file name
     if (!pName.length())
     {
-        DefaultLogger::get()->warn("Length of texture file name is zero. Skipping this texture.");
+        ASSIMP_LOG_WARN("Length of texture file name is zero. Skipping this texture.");
     }
 
     // some exporters write double backslash paths out. We simply replace them if we find them
@@ -1079,8 +1079,8 @@ std::string XFileParser::GetNextToken() {
                     return s;
                 }
                 len = ReadBinDWord();
-                const int bounds( mEnd - mP );
-                const int iLen( len );
+                const int bounds = int( mEnd - mP );
+                const int iLen   = int( len );
                 if ( iLen < 0 ) {
                     return s;
                 }

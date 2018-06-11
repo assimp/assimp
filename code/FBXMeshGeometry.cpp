@@ -79,13 +79,12 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
 // ------------------------------------------------------------------------------------------------
 Geometry::~Geometry()
 {
-
+    // empty
 }
 
 const Skin* Geometry::DeformerSkin() const {
     return skin;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
@@ -186,9 +185,8 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 }
 
 // ------------------------------------------------------------------------------------------------
-MeshGeometry::~MeshGeometry()
-{
-
+MeshGeometry::~MeshGeometry() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -308,7 +306,6 @@ void MeshGeometry::ReadLayerElement(const Scope& layerElement)
         << type << ", index: " << typedIndex);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scope& source)
 {
@@ -412,7 +409,6 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Lengthy utility function to read and resolve a FBX vertex data array - that is, the
 // output is in polygon vertex order. This logic is used for reading normals, UVs, colors,
@@ -428,16 +424,19 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     const std::vector<unsigned int>& mapping_offsets,
     const std::vector<unsigned int>& mappings)
 {
+    bool isDirect = ReferenceInformationType == "Direct";
+    bool isIndexToDirect = ReferenceInformationType == "IndexToDirect";
 
+    // fall-back to direct data if there is no index data element
+    if ( isIndexToDirect && !HasElement( source, indexDataElementName ) ) {
+        isDirect = true;
+        isIndexToDirect = false;
+    }
 
     // handle permutations of Mapping and Reference type - it would be nice to
     // deal with this more elegantly and with less redundancy, but right
     // now it seems unavoidable.
-    if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {
-        if ( !HasElement( source, indexDataElementName ) ) {
-            return;
-        }
-
+    if (MappingInformationType == "ByVertice" && isDirect) {
         std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -450,14 +449,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             }
         }
     }
-    else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {
+    else if (MappingInformationType == "ByVertice" && isIndexToDirect) {
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         data_out.resize(vertex_count);
-        if ( !HasElement( source, indexDataElementName ) ) {
-            return;
-        }
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
@@ -472,7 +468,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             }
         }
     }
-    else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {
+    else if (MappingInformationType == "ByPolygonVertex" && isDirect) {
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -485,7 +481,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 
 		data_out.swap(tempData);
     }
-    else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {
+    else if (MappingInformationType == "ByPolygonVertex" && isIndexToDirect) {
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -499,9 +495,14 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             return;
         }
 
+        const T empty;
         unsigned int next = 0;
         for(int i : uvIndices) {
-			if (static_cast<size_t>(i) >= tempData.size()) {
+            if ( -1 == i ) {
+                data_out[ next++ ] = empty;
+                continue;
+            }
+            if (static_cast<size_t>(i) >= tempData.size()) {
                 DOMError("index out of range",&GetRequiredElement(source,indexDataElementName));
             }
 
@@ -528,7 +529,6 @@ void MeshGeometry::ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, c
         m_mappings);
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source,
     const std::string& MappingInformationType,
@@ -542,7 +542,6 @@ void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope
         m_mapping_offsets,
         m_mappings);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source,

@@ -275,7 +275,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                         for (unsigned int i = 0; i < iSizeFound;++i)
                             info.cFileName[i] = (CHAR)tolower(info.cFileName[i]);
 
-                        if (0 == memcmp(info.cFileName,szFile2, min(iSizeFound,iSize)))
+                        if (0 == memcmp(info.cFileName,szFile2, std::min(iSizeFound,iSize)))
                         {
                             // we have it. Build the full path ...
                             char* sz = strrchr(szTempB,'*');

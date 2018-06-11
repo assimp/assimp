@@ -156,10 +156,11 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	TextureConverted_Index = 0;
 	for(const SPP_Texture& tex_convd: mTexture_Converted)
 	{
-		if(tex_convd.ID == TextureConverted_ID)
-			return TextureConverted_Index;
-		else
-			TextureConverted_Index++;
+        if ( tex_convd.ID == TextureConverted_ID ) {
+            return TextureConverted_Index;
+        } else {
+            ++TextureConverted_Index;
+        }
 	}
 
 	//
@@ -769,7 +770,7 @@ std::list<aiNode*> ch_node;
 		// find referenced object
 		if(!Find_ConvertedNode(als.ObjectID, pNodeList, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
-		// create node for apllying transformation
+		// create node for applying transformation
 		t_node = new aiNode;
 		t_node->mParent = con_node;
 		// apply transformation

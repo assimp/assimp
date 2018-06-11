@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <assimp/IOStream.hpp>
+
 #include "ParsingUtils.h"
 
 #include <vector>
@@ -248,9 +249,9 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
         }
     }
 
-    bool continuationFound( false ), endOfDataLine( false );
+    bool continuationFound( false );
     size_t i = 0;
-    while ( !endOfDataLine ) {
+    for( ;; ) {
         if ( continuationToken == m_cache[ m_cachePos ] ) {
             continuationFound = true;
             ++m_cachePos;
@@ -270,8 +271,8 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
         }
 
         buffer[ i ] = m_cache[ m_cachePos ];
-        m_cachePos++;
-        i++;
+        ++m_cachePos;
+        ++i;
         if ( m_cachePos >= m_cacheSize ) {
             if ( !readNextBlock() ) {
                 return false;
@@ -280,13 +281,12 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
     }
     
     buffer[ i ] = '\n';
-    m_cachePos++;
+    ++m_cachePos;
 
     return true;
 }
 
-static 
-inline
+static inline
 bool isEndOfCache( size_t pos, size_t cacheSize ) {
     return ( pos == cacheSize );
 }
@@ -314,11 +314,11 @@ bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
         }
     }
 
-    size_t i = 0;
+    size_t i( 0 );
     while (!IsLineEnd(m_cache[ m_cachePos ])) {
         buffer[i] = m_cache[ m_cachePos ];
-        m_cachePos++;
-        i++;
+        ++m_cachePos;
+        ++i;
         if (m_cachePos >= m_cacheSize) {
             if (!readNextBlock()) {
                 return false;
@@ -326,7 +326,7 @@ bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
         }
     }
     buffer[i] = '\n';
-    m_cachePos++;
+    ++m_cachePos;
 
     return true;
 }
@@ -334,18 +334,19 @@ bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
 template<class T>
 inline
 bool IOStreamBuffer<T>::getNextBlock( std::vector<T> &buffer) {
-  //just return the last blockvalue if getNextLine was used before
-  if ( m_cachePos !=  0) {      
-      buffer = std::vector<T>(m_cache.begin() + m_cachePos, m_cache.end());
-      m_cachePos = 0;
-  }
-  else {
-      if ( !readNextBlock() )
-          return false;
+    // Return the last block-value if getNextLine was used before
+    if ( 0 != m_cachePos ) {      
+        buffer = std::vector<T>( m_cache.begin() + m_cachePos, m_cache.end() );
+        m_cachePos = 0;
+    } else {
+        if ( !readNextBlock() ) {
+            return false;
+        }
 
-      buffer = std::vector<T>(m_cache.begin(), m_cache.end());
-  }
-  return true;
+        buffer = std::vector<T>(m_cache.begin(), m_cache.end());
+    }
+
+    return true;
 }
 
 } // !ns Assimp

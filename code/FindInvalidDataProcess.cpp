@@ -118,7 +118,7 @@ void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMap
 // Executes the post processing step on the given imported data.
 void FindInvalidDataProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("FindInvalidDataProcess begin");
+    ASSIMP_LOG_DEBUG("FindInvalidDataProcess begin");
 
     bool out = false;
     std::vector<unsigned int> meshMapping(pScene->mNumMeshes);
@@ -163,9 +163,10 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
             pScene->mNumMeshes = real;
         }
 
-        DefaultLogger::get()->info("FindInvalidDataProcess finished. Found issues ...");
+        ASSIMP_LOG_INFO("FindInvalidDataProcess finished. Found issues ...");
+    } else {
+        ASSIMP_LOG_DEBUG("FindInvalidDataProcess finished. Everything seems to be OK.");
     }
-    else DefaultLogger::get()->debug("FindInvalidDataProcess finished. Everything seems to be OK.");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -212,8 +213,7 @@ inline bool ProcessArray(T*& in, unsigned int num,const char* name,
 {
     const char* err = ValidateArrayContents(in,num,dirtyMask,mayBeIdentical,mayBeZero);
     if (err)    {
-        DefaultLogger::get()->error(std::string("FindInvalidDataProcess fails on mesh ") + name + ": " + err);
-
+        ASSIMP_LOG_ERROR_F( "FindInvalidDataProcess fails on mesh ", name, ": ", err);
         delete[] in;
         in = NULL;
         return true;
@@ -332,7 +332,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
         i = 1;
     }
     if (1 == i)
-        DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
+        ASSIMP_LOG_WARN("Simplified dummy tracks with just one key");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 
     // Process vertex positions
     if (pMesh->mVertices && ProcessArray(pMesh->mVertices, pMesh->mNumVertices, "positions", dirtyMask)) {
-        DefaultLogger::get()->error("Deleting mesh: Unable to continue without vertex positions");
+        ASSIMP_LOG_ERROR("Deleting mesh: Unable to continue without vertex positions");
 
         return 2;
     }

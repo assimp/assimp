@@ -184,7 +184,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
 } // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* scene)
+Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, const aiScene* scene)
 : scene(scene)
 , writer(outfile)
 {
@@ -381,7 +381,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type
 
     // TODO: handle embedded textures properly
     if (path.data[0] == '*') {
-        DefaultLogger::get()->error("Ignoring embedded texture for export: " + std::string(path.C_Str()));
+        ASSIMP_LOG_ERROR("Ignoring embedded texture for export: " + std::string(path.C_Str()));
         return;
     }
 

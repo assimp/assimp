@@ -728,7 +728,7 @@ void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, TempMesh&
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned int matid, std::vector<unsigned int>& mesh_indices,
+bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned int matid, std::set<unsigned int>& mesh_indices,
     ConversionData& conv)
 {
     bool fix_orientation = false;
@@ -810,7 +810,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
     aiMesh* const mesh = meshtmp->ToMesh();
     if(mesh) {
         mesh->mMaterialIndex = matid;
-        mesh_indices.push_back(static_cast<unsigned int>(conv.meshes.size()));
+        mesh_indices.insert(static_cast<unsigned int>(conv.meshes.size()));
         conv.meshes.push_back(mesh);
         return true;
     }
@@ -818,33 +818,31 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
 }
 
 // ------------------------------------------------------------------------------------------------
-void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
+void AssignAddedMeshes(std::set<unsigned int>& mesh_indices,aiNode* nd,
     ConversionData& /*conv*/)
 {
     if (!mesh_indices.empty()) {
+		std::set<unsigned int>::const_iterator it = mesh_indices.cbegin();
+		std::set<unsigned int>::const_iterator end = mesh_indices.cend();
 
-        // make unique
-        std::sort(mesh_indices.begin(),mesh_indices.end());
-        std::vector<unsigned int>::iterator it_end = std::unique(mesh_indices.begin(),mesh_indices.end());
-
-        nd->mNumMeshes = static_cast<unsigned int>(std::distance(mesh_indices.begin(),it_end));
+        nd->mNumMeshes = static_cast<unsigned int>(mesh_indices.size());
 
         nd->mMeshes = new unsigned int[nd->mNumMeshes];
-        for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
-            nd->mMeshes[i] = mesh_indices[i];
+        for(unsigned int i = 0; it != end && i < nd->mNumMeshes; ++i, ++it) {
+            nd->mMeshes[i] = *it;
         }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 bool TryQueryMeshCache(const Schema_2x3::IfcRepresentationItem& item,
-    std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
+    std::set<unsigned int>& mesh_indices, unsigned int mat_index,
     ConversionData& conv)
 {
     ConversionData::MeshCacheIndex idx(&item, mat_index);
     ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(idx);
     if (it != conv.cached_meshes.end()) {
-        std::copy((*it).second.begin(),(*it).second.end(),std::back_inserter(mesh_indices));
+        std::copy((*it).second.begin(),(*it).second.end(),std::inserter(mesh_indices, mesh_indices.end()));
         return true;
     }
     return false;
@@ -852,7 +850,7 @@ bool TryQueryMeshCache(const Schema_2x3::IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 void PopulateMeshCache(const Schema_2x3::IfcRepresentationItem& item,
-    const std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
+    const std::set<unsigned int>& mesh_indices, unsigned int mat_index,
     ConversionData& conv)
 {
     ConversionData::MeshCacheIndex idx(&item, mat_index);
@@ -861,7 +859,7 @@ void PopulateMeshCache(const Schema_2x3::IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, unsigned int matid,
-    std::vector<unsigned int>& mesh_indices,
+    std::set<unsigned int>& mesh_indices,
     ConversionData& conv)
 {
     // determine material

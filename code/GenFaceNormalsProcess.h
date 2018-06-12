@@ -78,7 +78,8 @@ public:
 
 
 private:
-    bool GenMeshFaceNormals (aiMesh* pcMesh);
+    bool GenMeshFaceNormals(aiMesh* pcMesh);
+    mutable bool force_ = false;
 };
 
 } // end of namespace Assimp

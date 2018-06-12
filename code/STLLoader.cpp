@@ -362,14 +362,23 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
             pMesh->mNumFaces = 0;
             throw DeadlyImportError("Normal buffer size does not match position buffer size");
         }
-        pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
-        pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
-        pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mVertices, positionBuffer.data(), pMesh->mNumVertices * sizeof(aiVector3D));
-        positionBuffer.clear();
-        pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mNormals, normalBuffer.data(), pMesh->mNumVertices * sizeof(aiVector3D));
-        normalBuffer.clear();
+
+        // only process positionbuffer when filled, else exception when accessing with index operator
+        // see line 353: only warning is triggered
+        // see line 373(now): access to empty positionbuffer with index operator forced exception
+        if (!positionBuffer.empty()) {
+            pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
+            pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
+            pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+            memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            positionBuffer.clear();
+        }
+        // also only process normalBuffer when filled, else exception when accessing with index operator
+        if (!normalBuffer.empty()) {
+            pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+            memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            normalBuffer.clear();
+        }
 
         // now copy faces
         addFacesToMesh(pMesh);

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -60,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <vector>
 #include <sstream>
-#include "StringComparison.h"
+#include <assimp/StringComparison.h>
 
 static const aiImporterDesc desc = {
     "Quake III BSP Importer",
@@ -447,6 +448,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
         pMesh->mTextureCoords[ 0 ][ rVertIdx ].Set( pVertex->vTexCoord.x, pVertex->vTexCoord.y, 0.0f );
         pMesh->mTextureCoords[ 1 ][ rVertIdx ].Set( pVertex->vLightmap.x, pVertex->vLightmap.y, 0.0f );
 
+        ai_assert( m_pCurrentFace );
         m_pCurrentFace->mIndices[ idx ] = rVertIdx;
         rVertIdx++;
 

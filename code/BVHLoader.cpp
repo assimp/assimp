@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -45,11 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
 
 #include "BVHLoader.h"
-#include "fast_atof.h"
-#include "SkeletonMeshBuilder.h"
+#include <assimp/fast_atof.h>
+#include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/Importer.hpp>
 #include <memory>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
@@ -198,6 +199,7 @@ aiNode* BVHLoader::ReadNode()
     Node& internNode = mNodes.back();
 
     // now read the node's contents
+    std::string siteToken;
     while( 1)
     {
         std::string token = GetNextToken();
@@ -217,7 +219,8 @@ aiNode* BVHLoader::ReadNode()
         else if( token == "End")
         {
             // The real symbol is "End Site". Second part comes in a separate token
-            std::string siteToken = GetNextToken();
+            siteToken.clear();
+            siteToken = GetNextToken();
             if( siteToken != "Site")
                 ThrowException( format() << "Expected \"End Site\" keyword, but found \"" << token << " " << siteToken << "\"." );
 
@@ -261,21 +264,18 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
     aiNode* node = new aiNode( "EndSite_" + pParentName);
 
     // now read the node's contents. Only possible entry is "OFFSET"
-    while( 1)
-    {
-        std::string token = GetNextToken();
+    std::string token;
+    while( 1) {
+        token.clear();
+        token = GetNextToken();
 
         // end node's offset
-        if( token == "OFFSET")
-        {
+        if( token == "OFFSET") {
             ReadNodeOffset( node);
-        }
-        else if( token == "}")
-        {
+        } else if( token == "}") {
             // we're done with the end node
             break;
-        } else
-        {
+        } else {
             // everything else is a parse error
             ThrowException( format() << "Unknown keyword \"" << token << "\"." );
         }
@@ -295,8 +295,10 @@ void BVHLoader::ReadNodeOffset( aiNode* pNode)
     offset.z = GetNextTokenAsFloat();
 
     // build a transformation matrix from it
-    pNode->mTransformation = aiMatrix4x4( 1.0f, 0.0f, 0.0f, offset.x, 0.0f, 1.0f, 0.0f, offset.y,
-        0.0f, 0.0f, 1.0f, offset.z, 0.0f, 0.0f, 0.0f, 1.0f);
+    pNode->mTransformation = aiMatrix4x4( 1.0f, 0.0f, 0.0f, offset.x,
+                                          0.0f, 1.0f, 0.0f, offset.y,
+                                          0.0f, 0.0f, 1.0f, offset.z,
+                                          0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 // ------------------------------------------------------------------------------------------------

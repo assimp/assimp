@@ -33,9 +33,10 @@ env:
 
 matrix:
   include:
-    - os: linux
-      compiler: clang
-      env: ANALYZE=ON
+    # disabled until clang 5.0 analyzer issues are fixed
+    # - os: linux
+    #   compiler: clang
+    #   env: ANALYZE=ON
     - os: linux
       compiler: clang
       env: ASAN=ON

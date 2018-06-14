@@ -94,8 +94,9 @@ class Type:
         self.enums = enums
         
 
-def read(filename,silent=False):
+def read(filename, silent=False):
     schema = Schema()
+    print( "Try to read EXPRESS schema file" + filename)
     with open(filename,'rt') as inp: 
         contents = inp.read()
         types = re.findall(re_match_type,contents)

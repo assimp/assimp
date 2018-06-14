@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -178,6 +179,12 @@ struct aiTexture
      * data. Good luck, have fun!
      */
     C_STRUCT aiTexel* pcData;
+
+    /** Texture original filename
+    *
+    * Used to get the texture reference
+    */
+    C_STRUCT aiString mFilename;
 
 #ifdef __cplusplus
 

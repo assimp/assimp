@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -161,7 +162,10 @@ struct aiMeshKey
 
 #ifdef __cplusplus
 
-    aiMeshKey() {
+    aiMeshKey()
+    : mTime(0.0)
+    , mValue(0)
+    {
     }
 
     /** Construction from a given time and key value */

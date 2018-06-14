@@ -6,7 +6,11 @@
 #pragma once
 
 // Header files, Qt.
-#include <QtWidgets>
+#if ASSIMP_QT4_VIEWER
+#	include <QMainWindow>
+#else
+#	include <QtWidgets>
+#endif
 
 // Header files, project.
 #include "glview.hpp"
@@ -36,8 +40,17 @@ private:
 	CLoggerView* mLoggerView;///< Pointer to logging object.
 	Assimp::Importer mImporter;///< Assimp importer.
 	const aiScene* mScene;///< Pointer to loaded scene (\ref aiScene).
-	QPoint mPosition_Pressed_LMB;///< Position where was pressed left mouse button.
-	QPoint mPosition_Pressed_RMB;///< Position where was pressed right mouse button.
+
+	/// \struct SMouse_Transformation
+	/// Holds data about transformation of the scene/camera when mouse us used.
+	struct SMouse_Transformation
+	{
+		bool Position_Pressed_Valid;///< Mouse button pressed on GLView.
+		QPoint Position_Pressed_LMB;///< Position where was pressed left mouse button.
+		QPoint Position_Pressed_RMB;///< Position where was pressed right mouse button.
+		aiMatrix4x4 Rotation_AroundCamera;///< Rotation matrix which set rotation angles of the scene around camera.
+		aiMatrix4x4 Rotation_Scene;///< Rotation matrix which set rotation angles of the scene around own center.
+	} mMouse_Transformation;
 
 	/**********************************/
 	/************ Functions ***********/
@@ -51,6 +64,11 @@ private:
 	/// Import scene from file.
 	/// \param [in] pFileName - path and name of the file.
 	void ImportFile(const QString& pFileName);
+
+
+	/// \fn void ResetSceneInfos()
+	/// Reset informations about the scene
+	void ResetSceneInfos();
 
 	/********************************************************************/
 	/************************ Logging functions *************************/
@@ -75,6 +93,11 @@ protected:
 	/// \param [in] pEvent - pointer to event data.
 	void mousePressEvent(QMouseEvent* pEvent) override;
 
+	/// \fn void mouseReleaseEvent(QMouseEvent *pEvent) override
+	/// Override function which handles mouse event "button released".
+	/// \param [in] pEvent - pointer to event data.
+	void mouseReleaseEvent(QMouseEvent *pEvent) override;
+
 	/// \fn void mouseMoveEvent(QMouseEvent* pEvent) override
 	/// Override function which handles mouse event "move".
 	/// \param [in] pEvent - pointer to event data.
@@ -84,7 +107,6 @@ protected:
 	/// Override function which handles key event "key pressed".
 	/// \param [in] pEvent - pointer to event data.
 	void keyPressEvent(QKeyEvent* pEvent) override;
-
 
 public:
 
@@ -128,4 +150,5 @@ private slots:
 	void on_lstCamera_clicked(const QModelIndex &index);
 	void on_cbxBBox_clicked(bool checked);
 	void on_cbxTextures_clicked(bool checked);
+	void on_cbxDrawAxes_clicked(bool checked);
 };

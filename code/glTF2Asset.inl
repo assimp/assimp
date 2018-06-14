@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -39,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
@@ -460,21 +461,46 @@ inline void Buffer::EncodedRegion_SetCurrent(const std::string& pID)
 	throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
 }
 
-inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+inline
+bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
 {
-const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
 
-uint8_t* new_data;
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) {
+		return false;
+	}
 
-	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
+        const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+	uint8_t *new_data = new uint8_t[new_data_size];
+	// Copy data which place before replacing part.
+	::memcpy(new_data, mData.get(), pBufferData_Offset);
+	// Copy new data.
+	::memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
+	// Copy data which place after replacing part.
+	::memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
+	// Apply new data
+	mData.reset(new_data, std::default_delete<uint8_t[]>());
+	byteLength = new_data_size;
 
-	new_data = new uint8_t[new_data_size];
+	return true;
+}
+
+inline
+bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+{
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) {
+		return false;
+	}
+
+	const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+	uint8_t* new_data = new uint8_t[new_data_size];
 	// Copy data which place before replacing part.
 	memcpy(new_data, mData.get(), pBufferData_Offset);
 	// Copy new data.
 	memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
 	// Copy data which place after replacing part.
-	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
+    memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count]
+            , new_data_size - (pBufferData_Offset + pReplace_Count)
+          );
 	// Apply new data
 	mData.reset(new_data, std::default_delete<uint8_t[]>());
 	byteLength = new_data_size;
@@ -485,7 +511,8 @@ uint8_t* new_data;
 inline size_t Buffer::AppendData(uint8_t* data, size_t length)
 {
     size_t offset = this->byteLength;
-    Grow(length);
+    // Force alignment to 4 bits
+    Grow((length + 3) & ~3);
     memcpy(mData.get() + offset, data, length);
     return offset;
 }
@@ -667,7 +694,7 @@ inline Image::Image()
 
 }
 
-inline void Image::Read(Value& obj, Asset& /*r*/)
+inline void Image::Read(Value& obj, Asset& r)
 {
     if (!mDataLength) {
         if (Value* uri = FindString(obj, "uri")) {
@@ -682,6 +709,19 @@ inline void Image::Read(Value& obj, Asset& /*r*/)
             }
             else {
                 this->uri = uristr;
+            }
+        }
+        else if (Value* bufferViewVal = FindUInt(obj, "bufferView")) {
+            this->bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+            Ref<Buffer> buffer = this->bufferView->buffer;
+
+            this->mDataLength = this->bufferView->byteLength;
+            // maybe this memcpy could be avoided if aiTexture does not delete[] pcData at destruction.
+            this->mData = new uint8_t [this->mDataLength];
+            memcpy(this->mData, buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
+
+            if (Value* mtype = FindString(obj, "mimeType")) {
+                this->mimeType = mtype->GetString();
             }
         }
     }
@@ -820,22 +860,24 @@ inline void Material::Read(Value& material, Asset& r)
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
-        
+
+        unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
+
         if (r.extensionsUsed.at("KHR_materials_common")) {
             if (Value* commonMaterial = FindObject(*extensions, "KHR_materials_common")) {
-                
+
                 std::string technique;
                 ReadMember(*commonMaterial, "technique", technique);
-                
+
                 if (Value* commonValues = FindObject(*commonMaterial, "values")) {
                     Common commonComponent;
                     commonComponent.technique = technique;
-                    
+
                     ReadMember(*commonValues, "ambientFactor", commonComponent.ambientFactor);
                     ReadMember(*commonValues, "diffuseFactor", commonComponent.diffuseFactor);
                     ReadMember(*commonValues, "emissiveFactor", commonComponent.emissiveFactor);
                     ReadMember(*commonValues, "specularFactor", commonComponent.specularFactor);
-                    
+
                     ReadTextureProperty(r, *commonValues, "ambientTexture", commonComponent.ambientTexture);
                     ReadTextureProperty(r, *commonValues, "diffuseTexture", commonComponent.diffuseTexture);
                     ReadTextureProperty(r, *commonValues, "emissiveTexture", commonComponent.emissiveTexture);
@@ -844,7 +886,7 @@ inline void Material::Read(Value& material, Asset& r)
                     ReadMember(*commonValues, "shininess", commonComponent.shininess);
                     ReadMember(*commonValues, "transparency", commonComponent.transparency);
                     ReadMember(*commonValues, "transparent", commonComponent.transparent);
-                    
+
                     this->common = Nullable<Common>(commonComponent);
                 }
             }
@@ -871,6 +913,7 @@ inline void Material::SetDefaults()
     alphaMode = "OPAQUE";
     alphaCutoff = 0.5;
     doubleSided = false;
+    unlit = false;
 }
 
 inline void PbrSpecularGlossiness::SetDefaults()
@@ -1215,12 +1258,15 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
+    unsigned int sceneIndex = 0;
     if (Value* scene = FindUInt(doc, "scene")) {
-        unsigned int sceneIndex = scene->GetUint();
+        sceneIndex = scene->GetUint();
+    }
 
-        Ref<Scene> s = scenes.Retrieve(sceneIndex);
-
-        this->scene = s;
+    if (Value* scenesArray = FindArray(doc, "scenes")) {
+        if (sceneIndex < scenesArray->Size()) {
+            this->scene = scenes.Retrieve(sceneIndex);
+        }
     }
 
     // Clean up
@@ -1241,7 +1287,7 @@ inline void Asset::SetAsBinary()
 inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
 {
     Value* extsRequired = FindArray(doc, "extensionsRequired");
-    
+
     if (extsRequired) {
         for (unsigned int i = 0; i < extsRequired->Size(); ++i) {
             if ((*extsRequired)[i].IsString()) {
@@ -1257,7 +1303,7 @@ inline void Asset::ReadExtensionsUsedAndRequired(Document& doc)
             }
         }
     }
-    
+
     Value* extsUsed = FindArray(doc, "extensionsUsed");
     if (!extsUsed) return;
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -83,6 +84,14 @@ TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
 
 TEST_F( utD3MFImporterExporter, export3MFtoMemTest ) {
     EXPECT_TRUE( exporterTest() );
+}
+
+TEST_F( utD3MFImporterExporter, roundtrip3MFtoMemTest ) {
+    EXPECT_TRUE( exporterTest() );
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( "test.3mf", 0 );
+    EXPECT_NE( nullptr, scene );
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

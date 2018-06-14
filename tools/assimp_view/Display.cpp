@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 #include "AnimEvaluator.h"
 #include "SceneAnimator.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 #include <commdlg.h>
 
@@ -96,8 +96,9 @@ D3DXVECTOR4 g_aclNormalColors[14] =
 void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 {
     *piCnt = *piCnt+1;
-    for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
-        GetNodeCount(pcNode->mChildren[i],piCnt);
+    for (unsigned int i = 0; i < pcNode->mNumChildren; ++i) {
+        GetNodeCount(pcNode->mChildren[i], piCnt);
+    }
 }
 
 //-------------------------------------------------------------------------------
@@ -1042,16 +1043,23 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         switch (pcNew->eOp)
         {
         case aiTextureOp_Add:
-            szOp = "add";break;
+            szOp = "add";
+            break;
         case aiTextureOp_Subtract:
-            szOp = "sub";break;
+            szOp = "sub";
+            break;
         case aiTextureOp_Divide:
-            szOp = "div";break;
+            szOp = "div";
+            break;
         case aiTextureOp_SignedAdd:
-            szOp = "addsign";break;
+            szOp = "addsign";
+            break;
         case aiTextureOp_SmoothAdd:
-            szOp = "addsmooth";break;
-        default: szOp = "mul";
+            szOp = "addsmooth";
+            break;
+        default: 
+            szOp = "mul";
+            break;
         };
         SetWindowText(GetDlgItem(g_hDlg,IDC_ELOAD),szOp);
 
@@ -2251,7 +2259,7 @@ int CDisplay::RenderTextureView()
         const float ny = (float)sRect.bottom;
         const float  x = (float)sDesc.Width;
         const float  y = (float)sDesc.Height;
-        float f = min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
+        float f = std::min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
 
         float fHalfX = (nx - (f * x)) / 2.0f;
         float fHalfY = (ny - (f * y)) / 2.0f;

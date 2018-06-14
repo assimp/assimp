@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -46,6 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/types.h>
 
 using namespace Assimp;
 
@@ -60,4 +64,49 @@ public:
 
 TEST_F( utFBXImporterExporter, importXFromFileTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+TEST_F( utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+}
+
+TEST_F( utFBXImporterExporter, importPhongMaterial ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/phong_cube.fbx", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+    EXPECT_EQ( (unsigned int)1, scene->mNumMaterials );
+    const aiMaterial *mat = scene->mMaterials[0];
+    EXPECT_NE( nullptr, mat );
+    float f; aiColor3D c;
+    // phong_cube.fbx has all properties defined
+    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_DIFFUSE, c), aiReturn_SUCCESS );
+    EXPECT_EQ( c, aiColor3D(0.5, 0.25, 0.25) );
+    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_SPECULAR, c), aiReturn_SUCCESS );
+    EXPECT_EQ( c, aiColor3D(0.25, 0.25, 0.5) );
+    EXPECT_EQ( mat->Get(AI_MATKEY_SHININESS_STRENGTH, f), aiReturn_SUCCESS );
+    EXPECT_EQ( f, 0.5 );
+    EXPECT_EQ( mat->Get(AI_MATKEY_SHININESS, f), aiReturn_SUCCESS );
+    EXPECT_EQ( f, 10.0 );
+    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_AMBIENT, c), aiReturn_SUCCESS );
+    EXPECT_EQ( c, aiColor3D(0.125, 0.25, 0.25) );
+    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_EMISSIVE, c), aiReturn_SUCCESS );
+    EXPECT_EQ( c, aiColor3D(0.25, 0.125, 0.25) );
+    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_TRANSPARENT, c), aiReturn_SUCCESS );
+    EXPECT_EQ( c, aiColor3D(0.75, 0.5, 0.25) );
+    EXPECT_EQ( mat->Get(AI_MATKEY_OPACITY, f), aiReturn_SUCCESS );
+    EXPECT_EQ( f, 0.5 );
+}
+
+TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/global_settings.fbx", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMetaData);
+
+    double factor(0.0);
+    scene->mMetaData->Get("UnitScaleFactor", factor);
+    EXPECT_DOUBLE_EQ(500.0, factor);
 }

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -47,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_DNA_INL
 
 #include <memory>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 namespace Assimp {
 namespace Blender {
@@ -467,9 +468,7 @@ template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shar
         // this might happen if DNA::RegisterConverters hasn't been called so far
         // or if the target type is not contained in `our` DNA.
         out.reset();
-        DefaultLogger::get()->warn((Formatter::format(),
-            "Failed to find a converter for the `",s.name,"` structure"
-            ));
+        ASSIMP_LOG_WARN_F( "Failed to find a converter for the `",s.name,"` structure" );
         return false;
     }
 
@@ -501,7 +500,7 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
 {
     // the file blocks appear in list sorted by
     // with ascending base addresses so we can run a
-    // binary search to locate the pointee quickly.
+    // binary search to locate the pointer quickly.
 
     // NOTE: Blender seems to distinguish between side-by-side
     // data (stored in the same data block) and far pointers,

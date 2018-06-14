@@ -105,7 +105,7 @@ inline const T* ProcessSimpleConnection(const Connection& con,
 
     const Object* const ob = con.SourceObject();
     if(!ob) {
-        DOMWarning("failed to read source object for incoming" + std::string(name) +
+        DOMWarning("failed to read source object for incoming " + std::string(name) +
             " link, ignoring",
             &element);
         return NULL;

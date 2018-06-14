@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -56,8 +57,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
 #include "assimp/types.h"
-#include "BaseImporter.h"
-#include "irrXMLWrapper.h"
+#include <assimp/BaseImporter.h>
+#include <assimp/irrXMLWrapper.h>
 
 // Header files, stdlib.
 #include <set>
@@ -356,18 +357,6 @@ private:
 	/***********************************************/
 	/************** Functions: LOG set *************/
 	/***********************************************/
-
-	/// \fn void LogInfo(const std::string& pMessage)
-	/// Short variant for calling \ref DefaultLogger::get()->info()
-	void LogInfo(const std::string& pMessage) { DefaultLogger::get()->info(pMessage); }
-
-	/// \fn void LogWarning(const std::string& pMessage)
-	/// Short variant for calling \ref DefaultLogger::get()->warn()
-	void LogWarning(const std::string& pMessage) { DefaultLogger::get()->warn(pMessage); }
-
-	/// \fn void LogError(const std::string& pMessage)
-	/// Short variant for calling \ref DefaultLogger::get()->error()
-	void LogError(const std::string& pMessage) { DefaultLogger::get()->error(pMessage); }
 
 	/***********************************************/
 	/************** Functions: XML set *************/

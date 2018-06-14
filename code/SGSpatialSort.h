@@ -57,7 +57,7 @@ namespace Assimp    {
  *  implementation to handle all details of its file format correctly.
  */
 // ----------------------------------------------------------------------------------
-class SGSpatialSort
+class ASSIMP_API SGSpatialSort
 {
 public:
 

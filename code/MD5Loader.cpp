@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -48,11 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
 
 // internal headers
-#include "RemoveComments.h"
+#include <assimp/RemoveComments.h>
 #include "MD5Loader.h"
-#include "StringComparison.h"
-#include "fast_atof.h"
-#include "SkeletonMeshBuilder.h"
+#include <assimp/StringComparison.h>
+#include <assimp/fast_atof.h>
+#include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
@@ -358,7 +359,7 @@ void MD5Importer::LoadMD5MeshFile ()
 
     // Check whether we can read from the file
     if( file.get() == NULL || !file->FileSize())    {
-        DefaultLogger::get()->warn("Failed to access MD5MESH file: " + pFile);
+        ASSIMP_LOG_WARN("Failed to access MD5MESH file: " + pFile);
         return;
     }
     bHadMD5Mesh = true;
@@ -481,7 +482,7 @@ void MD5Importer::LoadMD5MeshFile ()
                 for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
                     fSum += meshSrc.mWeights[w].mWeight;
                 if (!fSum) {
-                    DefaultLogger::get()->error("MD5MESH: The sum of all vertex bone weights is 0");
+                    ASSIMP_LOG_ERROR("MD5MESH: The sum of all vertex bone weights is 0");
                     continue;
                 }
 
@@ -573,7 +574,7 @@ void MD5Importer::LoadMD5AnimFile ()
 
     // Check whether we can read from the file
     if( !file.get() || !file->FileSize())   {
-        DefaultLogger::get()->warn("Failed to read MD5ANIM file: " + pFile);
+        ASSIMP_LOG_WARN("Failed to read MD5ANIM file: " + pFile);
         return;
     }
     LoadFileIntoMemory(file.get());
@@ -587,8 +588,7 @@ void MD5Importer::LoadMD5AnimFile ()
     // generate and fill the output animation
     if (animParser.mAnimatedBones.empty() || animParser.mFrames.empty() ||
         animParser.mBaseFrames.size() != animParser.mAnimatedBones.size())  {
-
-        DefaultLogger::get()->error("MD5ANIM: No frames or animated bones loaded");
+        ASSIMP_LOG_ERROR("MD5ANIM: No frames or animated bones loaded");
     }
     else {
         bHadMD5Anim = true;

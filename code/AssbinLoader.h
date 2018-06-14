@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -46,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASSBINIMPORTER_H_INC
 #define AI_ASSBINIMPORTER_H_INC
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 struct aiMesh;
 struct aiNode;

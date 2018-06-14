@@ -73,6 +73,7 @@ GenFaceNormalsProcess::~GenFaceNormalsProcess()
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const {
+    force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
     return  (pFlags & aiProcess_GenNormals) != 0;
 }
 
@@ -105,7 +106,8 @@ void GenFaceNormalsProcess::Execute( aiScene* pScene) {
 bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
     if (NULL != pMesh->mNormals) {
-        return false;
+        if (force_) delete[] pMesh->mNormals;
+        else return false;
     }
 
     // If the mesh consists of lines and/or points but not of
@@ -134,7 +136,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
         const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 
         for (unsigned int i = 0;i < face.mNumIndices;++i) {
             pMesh->mNormals[face.mIndices[i]] = vNor;

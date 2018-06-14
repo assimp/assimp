@@ -346,55 +346,6 @@ namespace glTF2 {
         if (m.common.isPresent) {
             Value common;
             common.SetObject();
-            
-            Common &materialCommon = m.common.value;
-            
-            //common
-            //technique
-            if (!materialCommon.technique.empty()) {
-                common.AddMember("technique", materialCommon.technique, w.mAl);
-            }
-            
-            //values
-            Value values;
-            values.SetObject();
-            WriteVec(values, materialCommon.ambientFactor, "ambientFactor", defaultCommonAmbientFactor, w.mAl);
-            WriteVec(values, materialCommon.diffuseFactor, "diffuseFactor", defaultCommonDiffuseFactor, w.mAl);
-            WriteVec(values, materialCommon.emissiveFactor, "emissiveFactor", defaultCommonEmissiveFactor, w.mAl);
-            WriteVec(values, materialCommon.specularFactor, "specularFactor", defaultCommonSpecularFactor, w.mAl);
-            
-            WriteTex(values, materialCommon.ambientTexture, "ambientTexture", w.mAl);
-            WriteTex(values, materialCommon.diffuseTexture, "diffuseTexture", w.mAl);
-            WriteTex(values, materialCommon.emissiveTexture, "emissiveTexture", w.mAl);
-            WriteTex(values, materialCommon.specularTexture, "specularTexture", w.mAl);
-            
-            if (materialCommon.doubleSided) {
-                values.AddMember("doubleSided", materialCommon.doubleSided, w.mAl);
-            }
-            
-            if (materialCommon.shininess!=0.0f) {
-                WriteFloat(values, materialCommon.shininess, "shininess", w.mAl);
-            }
-            
-            if (materialCommon.transparency!=1.0f) {
-                WriteFloat(values, materialCommon.transparency, "transparency", w.mAl);
-            }
-            
-            if (materialCommon.transparent) {
-                values.AddMember("transparent", materialCommon.transparent, w.mAl);
-            }
-            
-            if (!values.ObjectEmpty()) {
-                common.AddMember("values", values, w.mAl);
-            }
-            if (!common.ObjectEmpty()) {
-                exts.AddMember("KHR_materials_common", common, w.mAl);
-            }
-        }
-
-        if (m.common.isPresent) {
-            Value common;
-            common.SetObject();
 
             Common &materialCommon = m.common.value;
 

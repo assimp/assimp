@@ -106,6 +106,31 @@ inline Char_T getNextToken( Char_T pBuffer, Char_T pEnd )
     return getNextWord( pBuffer, pEnd );
 }
 
+/** @brief  Returns true, if the current entry of the buffer corresponds to an end of line.
+ *  @param  it  Iterator of current position.
+ *  @return true, if the end of a line is reached.
+*/
+template <class char_t>
+AI_FORCE_INLINE bool isLineEnd( char_t it)
+{
+    return *it=='\r'||*it=='\n'||*it=='\0'||*it=='\f';
+}
+
+/** @brief  Skip the characters of the buffer which correspond to spaces
+ *  @param  itIn    Iterator set to current position
+ *  @param  itOut   Iterator which will be set to the first position located after the spaces
+ *  @return true if the end of line is not reached
+ */
+template <class char_t>
+AI_FORCE_INLINE bool skipSpaces( const char_t itIn, char_t& itOut)
+{
+    itOut = itIn;
+    while( *itOut == ' ' || *itOut == '\t' ) {
+        ++itOut;
+    }
+    return !isLineEnd<char_t>( itOut );
+}
+
 /** @brief  Skips a line
  *  @param  it      Iterator set to current position
  *  @param  end     Iterator set to end of scratch buffer for readout

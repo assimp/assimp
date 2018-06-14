@@ -772,9 +772,6 @@ namespace glTF2
         //extension: KHR_materials_common
         Nullable<Common> common;
 
-        //extension: KHR_materials_common
-        Nullable<Common> common;
-
         //extension: KHR_materials_unlit
         bool unlit;
 

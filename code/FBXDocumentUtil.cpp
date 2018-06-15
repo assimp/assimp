@@ -115,7 +115,7 @@ std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
         }
     }
 
-    if(!Properties70) {
+    if(!Properties70 || !Properties70->Compound()) {
         if(!no_warn) {
             DOMWarning("property table (Properties70) not found",&element);
         }

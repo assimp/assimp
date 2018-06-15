@@ -62,3 +62,10 @@ public:
 TEST_F( utDXFImporterExporter, importDXFFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+TEST_F( utDXFImporterExporter, importerWithoutExtensionTest ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/DXF/lineTest", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+}
+

@@ -691,7 +691,7 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene * 
 void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
-    // ownership is transfered but a reference remains in m_currentMesh
+    // ownership is transferred but a reference remains in m_currentMesh
     m_meshCache.emplace_back( m_currentMesh );
 
     Property *prop = node->getProperties();
@@ -708,7 +708,7 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
             } else if ( "quads" == propKey ) {
                 m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             } else {
-                DefaultLogger::get()->warn( propKey + " is not supported primitive type." );
+                ASSIMP_LOG_WARN_F( propKey, " is not supported primitive type." );
             }
         }
     }
@@ -731,17 +731,22 @@ enum MeshAttribute {
     TexCoord
 };
 
+static const std::string PosToken = "position";
+static const std::string ColToken = "color";
+static const std::string NormalToken = "normal";
+static const std::string TexCoordToken = "texcoord";
+
 //------------------------------------------------------------------------------------------------
 static MeshAttribute getAttributeByName( const char *attribName ) {
     ai_assert( nullptr != attribName  );
 
-    if ( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
+    if ( 0 == strncmp( PosToken.c_str(), attribName, PosToken.size() ) ) {
         return Position;
-    } else if ( 0 == strncmp( "color", attribName, strlen( "color" ) ) ) {
+    } else if ( 0 == strncmp( ColToken.c_str(), attribName, ColToken.size() ) ) {
         return Color;
-    } else if( 0 == strncmp( "normal", attribName, strlen( "normal" ) ) ) {
+    } else if( 0 == strncmp( NormalToken.c_str(), attribName, NormalToken.size() ) ) {
         return Normal;
-    } else if( 0 == strncmp( "texcoord", attribName, strlen( "texcoord" ) ) ) {
+    } else if( 0 == strncmp( TexCoordToken.c_str(), attribName, TexCoordToken.size() ) ) {
         return TexCoord;
     }
 
@@ -1098,14 +1103,12 @@ void OpenGEXImporter::handleParamNode( ODDLParser::DDLNode *node, aiScene * /*pS
             return;
         }
         const float floatVal( val->getFloat() );
-        if ( prop->m_value  != nullptr ) {
-            if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mHorizontalFOV = floatVal;
-            } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mClipPlaneNear = floatVal;
-            } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
-                m_currentCamera->mClipPlaneFar = floatVal;
-            }
+        if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
+            m_currentCamera->mHorizontalFOV = floatVal;
+        } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 4 ) ) {
+            m_currentCamera->mClipPlaneNear = floatVal;
+        } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
+            m_currentCamera->mClipPlaneFar = floatVal;
         }
     }
 }
@@ -1210,12 +1213,11 @@ void OpenGEXImporter::resolveReferences() {
                         if ( nullptr != m_currentMesh ) {
                             unsigned int matIdx = static_cast< unsigned int >( m_material2refMap[ name ] );
                             if ( m_currentMesh->mMaterialIndex != 0 ) {
-                                DefaultLogger::get()->warn( "Override of material reference in current mesh by material reference." );
+                                ASSIMP_LOG_WARN( "Override of material reference in current mesh by material reference." );
                             }
                             m_currentMesh->mMaterialIndex = matIdx;
                         }  else {
-                            DefaultLogger::get()->warn( "Cannot resolve material reference, because no current mesh is there." );
-
+                            ASSIMP_LOG_WARN( "Cannot resolve material reference, because no current mesh is there." );
                         }
                     }
                 }

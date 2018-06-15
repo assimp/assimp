@@ -66,56 +66,57 @@ static const unsigned int BufferSize = 4096;
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE char_t ToLower( char_t in)
-{
+AI_FORCE_INLINE
+char_t ToLower( char_t in ) {
     return (in >= (char_t)'A' && in <= (char_t)'Z') ? (char_t)(in+0x20) : in;
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE char_t ToUpper( char_t in) {
+AI_FORCE_INLINE
+char_t ToUpper( char_t in) {
     return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in-0x20) : in;
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsUpper( char_t in)
-{
+AI_FORCE_INLINE
+bool IsUpper( char_t in) {
     return (in >= (char_t)'A' && in <= (char_t)'Z');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsLower( char_t in)
-{
+AI_FORCE_INLINE
+bool IsLower( char_t in) {
     return (in >= (char_t)'a' && in <= (char_t)'z');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsSpace( char_t in)
-{
+AI_FORCE_INLINE
+bool IsSpace( char_t in) {
     return (in == (char_t)' ' || in == (char_t)'\t');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsLineEnd( char_t in)
-{
+AI_FORCE_INLINE
+bool IsLineEnd( char_t in) {
     return (in==(char_t)'\r'||in==(char_t)'\n'||in==(char_t)'\0'||in==(char_t)'\f');
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool IsSpaceOrNewLine( char_t in)
-{
+AI_FORCE_INLINE
+bool IsSpaceOrNewLine( char_t in) {
     return IsSpace<char_t>(in) || IsLineEnd<char_t>(in);
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool SkipSpaces( const char_t* in, const char_t** out)
-{
+AI_FORCE_INLINE
+bool SkipSpaces( const char_t* in, const char_t** out) {
     while( *in == ( char_t )' ' || *in == ( char_t )'\t' ) {
         ++in;
     }
@@ -125,15 +126,15 @@ AI_FORCE_INLINE bool SkipSpaces( const char_t* in, const char_t** out)
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool SkipSpaces( const char_t** inout)
-{
+AI_FORCE_INLINE
+bool SkipSpaces( const char_t** inout) {
     return SkipSpaces<char_t>(*inout,inout);
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool SkipLine( const char_t* in, const char_t** out)
-{
+AI_FORCE_INLINE
+bool SkipLine( const char_t* in, const char_t** out) {
     while( *in != ( char_t )'\r' && *in != ( char_t )'\n' && *in != ( char_t )'\0' ) {
         ++in;
     }
@@ -148,15 +149,15 @@ AI_FORCE_INLINE bool SkipLine( const char_t* in, const char_t** out)
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool SkipLine( const char_t** inout)
-{
+AI_FORCE_INLINE
+bool SkipLine( const char_t** inout) {
     return SkipLine<char_t>(*inout,inout);
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
-{
+AI_FORCE_INLINE
+bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out) {
     while( *in == ( char_t )' ' || *in == ( char_t )'\t' || *in == ( char_t )'\r' || *in == ( char_t )'\n' ) {
         ++in;
     }
@@ -166,15 +167,15 @@ AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t** inout)
-{
+AI_FORCE_INLINE
+bool SkipSpacesAndLineEnd( const char_t** inout) {
     return SkipSpacesAndLineEnd<char_t>(*inout,inout);
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool GetNextLine( const char_t*& buffer, char_t out[ BufferSize ] )
-{
+AI_FORCE_INLINE
+bool GetNextLine( const char_t*& buffer, char_t out[ BufferSize ] ) {
     if( ( char_t )'\0' == *buffer ) {
         return false;
     }
@@ -202,7 +203,8 @@ AI_FORCE_INLINE bool IsNumeric( char_t in)
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool TokenMatch(char_t*& in, const char* token, unsigned int len)
+AI_FORCE_INLINE
+bool TokenMatch(char_t*& in, const char* token, unsigned int len)
 {
     if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len])) {
         if (in[len] != '\0') {
@@ -222,26 +224,32 @@ AI_FORCE_INLINE bool TokenMatch(char_t*& in, const char* token, unsigned int len
  *  @param token Token to check for
  *  @param len Number of characters to check
  */
-AI_FORCE_INLINE bool TokenMatchI(const char*& in, const char* token, unsigned int len)
-{
+AI_FORCE_INLINE
+bool TokenMatchI(const char*& in, const char* token, unsigned int len) {
     if (!ASSIMP_strincmp(token,in,len) && IsSpaceOrNewLine(in[len])) {
         in += len+1;
         return true;
     }
     return false;
 }
+
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE void SkipToken(const char*& in)
-{
+AI_FORCE_INLINE
+void SkipToken(const char*& in) {
     SkipSpaces(&in);
-    while (!IsSpaceOrNewLine(*in))++in;
+    while ( !IsSpaceOrNewLine( *in ) ) {
+        ++in;
+    }
 }
+
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE std::string GetNextToken(const char*& in)
-{
+AI_FORCE_INLINE
+std::string GetNextToken(const char*& in) {
     SkipSpacesAndLineEnd(&in);
     const char* cur = in;
-    while (!IsSpaceOrNewLine(*in))++in;
+    while ( !IsSpaceOrNewLine( *in ) ) {
+        ++in;
+    }
     return std::string(cur,(size_t)(in-cur));
 }
 

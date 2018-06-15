@@ -137,7 +137,7 @@ public:
      * If this Importer owns a scene it won't be copied.
      * Call ReadFile() to start the import process.
      */
-    Importer(const Importer& other);
+    Importer(const Importer& other)=delete;
 
     // -------------------------------------------------------------------
     /** Assignment operator has been deleted

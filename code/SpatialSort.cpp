@@ -294,7 +294,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
         index++;
 
     // Now start iterating from there until the first position lays outside of the distance range.
-    // Add all positions inside the distance range within the tolerance to the result aray
+    // Add all positions inside the distance range within the tolerance to the result array
     std::vector<Entry>::const_iterator it = mPositions.begin() + index;
     while( ToBinary(it->mDistance) < maxDistBinary)
     {

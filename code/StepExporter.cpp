@@ -162,7 +162,7 @@ void StepExporter::WriteFile()
     // see http://shodhganga.inflibnet.ac.in:8080/jspui/bitstream/10603/14116/11/11_chapter%203.pdf
     // note, that all realnumber values must be comma separated in x files
     mOutput.setf(std::ios::fixed);
-    // precission for double
+    // precision for double
     // see http://stackoverflow.com/questions/554063/how-do-i-print-a-double-value-with-full-precision-using-cout
     mOutput.precision(16);
 

@@ -73,6 +73,7 @@ TEST_F(BlenderWorkTest,work_279) {
     ASSERT_TRUE(pTest->HasMaterials());
     ASSERT_TRUE(pTest->HasMeshes());
     ASSERT_TRUE(pTest->mMeshes[0]->mNumVertices > 0);
+    ASSERT_EQ(44, pTest->mMeshes[0]->mNumFaces);
     EXPECT_EQ(1, pTest->mNumMaterials);
 }
 

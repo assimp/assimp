@@ -1045,8 +1045,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
                 }
             }
         }
-        if (texuv.size())
-        {
+        if (texuv.size()) {
             matTexUvMappings.insert(std::make_pair(m, texuv));
         }
     }

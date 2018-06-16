@@ -283,7 +283,6 @@ public:
         return *this;
     }
 
-private:
     // ---------------------------------------------------------------------
     /** Generic read method. ByteSwap::Swap(T*) *must* be defined */
     template <typename T>
@@ -300,6 +299,7 @@ private:
         return f;
     }
 
+private:
     // ---------------------------------------------------------------------
     void InternBegin() {
         if (!stream) {

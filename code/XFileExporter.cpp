@@ -132,7 +132,7 @@ void XFileExporter::WriteFile()
 {
     // note, that all realnumber values must be comma separated in x files
     mOutput.setf(std::ios::fixed);
-    mOutput.precision(16); // precission for double
+    mOutput.precision(16); // precision for double
 
     // entry of writing the file
     WriteHeader();

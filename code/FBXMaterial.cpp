@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXProperties.h"
 #include <assimp/ByteSwapper.h>
 
+#include <algorithm> // std::transform
+
 namespace Assimp {
 namespace FBX {
 
@@ -82,11 +84,12 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     std::string templateName;
 
-    const char* const sh = shading.c_str();
-    if(!strcmp(sh,"phong")) {
+    // lower-case shading because Blender (for example) writes "Phong"
+    std::transform(shading.begin(), shading.end(), shading.begin(), ::tolower);
+    if(shading == "phong") {
         templateName = "Material.FbxSurfacePhong";
     }
-    else if(!strcmp(sh,"lambert")) {
+    else if(shading == "lambert") {
         templateName = "Material.FbxSurfaceLambert";
     }
     else {
@@ -299,7 +302,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
     }
 
     if(Content) {
-        //this field is ommited when the embedded texture is already loaded, let's ignore if it's not found
+        //this field is omitted when the embedded texture is already loaded, let's ignore if it's not found
         try {
             const Token& token = GetRequiredToken(*Content, 0);
             const char* data = token.begin();

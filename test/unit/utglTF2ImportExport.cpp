@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -54,7 +55,21 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+        EXPECT_NE( scene, nullptr );
+        if ( !scene ) return false;
+
+        EXPECT_TRUE( scene->HasMaterials() );
+        if ( !scene->HasMaterials() ) return false;
+        const aiMaterial *material = scene->mMaterials[0];
+
+        aiString path;
+        aiTextureMapMode modes[2];
+        EXPECT_EQ( aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes) );
+        EXPECT_STREQ( path.C_Str(), "CesiumLogoFlat.png" );
+        EXPECT_EQ( modes[0], aiTextureMapMode_Mirror );
+        EXPECT_EQ( modes[1], aiTextureMapMode_Clamp );
+
+        return true;
     }
 
     virtual bool binaryImporterTest() {
@@ -89,4 +104,5 @@ TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );
 }
+
 #endif // ASSIMP_BUILD_NO_EXPORT

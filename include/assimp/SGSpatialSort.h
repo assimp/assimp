@@ -123,7 +123,7 @@ protected:
 
         Entry() { /** intentionally not initialized.*/ }
         Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG)
-            :
+        :
             mIndex( pIndex),
             mPosition( pPosition),
             mSmoothGroups (pSG),

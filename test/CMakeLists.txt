@@ -106,6 +106,7 @@ SET( IMPORTERS
   unit/utBlendImportAreaLight.cpp
   unit/utBlenderImportExport.cpp
   unit/utBlendImportMaterials.cpp
+  unit/utBlenderWork.cpp
   unit/utBVHImportExport.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp

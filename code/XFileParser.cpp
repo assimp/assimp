@@ -1296,8 +1296,7 @@ unsigned int XFileParser::ReadBinDWord() {
 // ------------------------------------------------------------------------------------------------
 unsigned int XFileParser::ReadInt()
 {
-:
-cd if( mIsBinaryFormat)
+   if( mIsBinaryFormat)
     {
         if( mBinaryNumCount == 0 && mEnd - mP >= 2)
         {

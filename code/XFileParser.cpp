@@ -472,7 +472,7 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
         Face& face = pMesh->mPosFaces[a];
         for (unsigned int b = 0; b < numIndices; ++b) {
             const int idx( ReadInt() );
-            if ( idx <= numVertices ) {
+            if ( static_cast<unsigned int>( idx ) <= numVertices ) {
                 face.mIndices.push_back( idx );
             }
         }
@@ -1296,8 +1296,7 @@ unsigned int XFileParser::ReadBinDWord() {
 // ------------------------------------------------------------------------------------------------
 unsigned int XFileParser::ReadInt()
 {
-:
-cd if( mIsBinaryFormat)
+   if( mIsBinaryFormat)
     {
         if( mBinaryNumCount == 0 && mEnd - mP >= 2)
         {
@@ -1310,7 +1309,7 @@ cd if( mIsBinaryFormat)
 
         --mBinaryNumCount;
         const size_t len( mEnd - mP );
-        if ( mEnd - mP >= 4) {
+        if ( len >= 4) {
             return ReadBinDWord();
         } else {
             mP = mEnd;

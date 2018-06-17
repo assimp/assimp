@@ -132,9 +132,8 @@ void MainWindow::LogError(const QString& pMessage)
 
 void MainWindow::mousePressEvent(QMouseEvent* pEvent)
 {
-const QPoint ms_pt = pEvent->pos();
-
-__unused aiVector3D temp_v3;
+    const QPoint ms_pt = pEvent->pos();
+    aiVector3D temp_v3;
 
 	// Check if GLView is pointed.
 	if(childAt(ms_pt) == mGLView)
@@ -305,30 +304,32 @@ void MainWindow::SceneObject_LightSource(const QString& pName)
 	ui->lstLight->selectAll();
 }
 
-void MainWindow::on_butOpenFile_clicked()
-{
-aiString filter_temp;
-QString filename, filter;
+void MainWindow::on_butOpenFile_clicked() {
+    aiString filter_temp;
+    mImporter.GetExtensionList( filter_temp );
 
-	mImporter.GetExtensionList(filter_temp);
-	filter = filter_temp.C_Str();
+    QString filename, filter;
+    filter = filter_temp.C_Str();
 	filter.replace(';', ' ');
 	filter.append(" ;; All (*.*)");
 	filename = QFileDialog::getOpenFileName(this, "Choose the file", "", filter);
 
-	if(!filename.isEmpty()) ImportFile(filename);
+    if (!filename.isEmpty()) {
+        ImportFile( filename );
+    }
 }
 
 void MainWindow::on_butExport_clicked()
 {
-using namespace Assimp;
+    using namespace Assimp;
 
-QString filename, filter, format_id;
-Exporter exporter;
-QTime time_begin;
-aiReturn rv;
-QStringList exportersList;
-QMap<QString, const aiExportFormatDesc*> exportersMap;
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    QString filename, filter, format_id;
+    Exporter exporter;
+    QTime time_begin;
+    aiReturn rv;
+    QStringList exportersList;
+    QMap<QString, const aiExportFormatDesc*> exportersMap;
 
 
 	if(mScene == nullptr)
@@ -373,6 +374,7 @@ QMap<QString, const aiExportFormatDesc*> exportersMap;
 		LogError(errorMessage);
 		QMessageBox::critical(this, "Export error", errorMessage);
 	}
+#endif
 }
 
 void MainWindow::on_cbxLighting_clicked(bool pChecked)
@@ -382,11 +384,7 @@ void MainWindow::on_cbxLighting_clicked(bool pChecked)
 	else
 		mGLView->Lighting_Disable();
 
-#if ASSIMP_QT4_VIEWER
-	mGLView->updateGL();
-#else
 	mGLView->update();
-#endif // ASSIMP_QT4_VIEWER
 }
 
 void MainWindow::on_lstLight_itemSelectionChanged()
@@ -438,9 +436,5 @@ void MainWindow::on_cbxDrawAxes_clicked(bool checked)
 void MainWindow::on_cbxTextures_clicked(bool checked)
 {
 	mGLView->Enable_Textures(checked);
-#if ASSIMP_QT4_VIEWER
-	mGLView->updateGL();
-#else
 	mGLView->update();
-#endif // ASSIMP_QT4_VIEWER
 }

@@ -1261,9 +1261,10 @@ void CGLView::Camera_Set(const size_t pCameraNumber)
 	gluLookAt(hcam.Position.x, hcam.Position.y, hcam.Position.z, hcam.Target.x, hcam.Target.y, hcam.Target.z, up.x, up.y, up.z);
 }
 
-void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
-{
-auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 180.0; };
+void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial) {
+    auto deg2rad = [](const GLfloat pDegree) -> GLfloat { 
+        return pDegree * AI_MATH_PI / 180.0;
+    };
 
 	aiMatrix4x4 mat_rot;
 
@@ -1276,7 +1277,7 @@ auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 18
 
 void CGLView::Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
 {
-auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 180.0; };
+    auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * AI_MATH_PI / 180.0; };
 
 	aiMatrix4x4 mat_rot;
 
@@ -1289,7 +1290,7 @@ auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 18
 
 void CGLView::Camera_Translate(const GLfloat pTranslate_X, const GLfloat pTranslate_Y, const GLfloat pTranslate_Z)
 {
-aiVector3D vect_tr(pTranslate_X, pTranslate_Y, pTranslate_Z);
+    aiVector3D vect_tr(pTranslate_X, pTranslate_Y, pTranslate_Z);
 
 	vect_tr *= mHelper_Camera.Rotation_AroundCamera;
 	mHelper_Camera.Translation_ToScene += vect_tr;

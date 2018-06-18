@@ -1045,7 +1045,9 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
                 }
             }
         }
-        matTexUvMappings.insert(std::make_pair(m, texuv));
+        if (texuv.size()) {
+            matTexUvMappings.insert(std::make_pair(m, texuv));
+        }
     }
 
     // collect texture coordinates, they're stored in a separate per-face buffer

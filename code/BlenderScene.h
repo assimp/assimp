@@ -432,7 +432,6 @@ CustomData 208
 struct CustomData : ElemBase {
     vector<std::shared_ptr<struct CustomDataLayer> > layers;
     int typemap[42];    // CD_NUMTYPES
-    int pad_i1;
     int totlayer;
     int maxlayer;
     int totsize;

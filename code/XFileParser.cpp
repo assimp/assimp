@@ -471,7 +471,10 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
         unsigned int numIndices = ReadInt();
         Face& face = pMesh->mPosFaces[a];
         for (unsigned int b = 0; b < numIndices; ++b) {
-            face.mIndices.push_back( ReadInt() );
+            const int idx( ReadInt() );
+            if ( static_cast<unsigned int>( idx ) <= numVertices ) {
+                face.mIndices.push_back( idx );
+            }
         }
         TestForSeparator();
     }
@@ -1293,7 +1296,7 @@ unsigned int XFileParser::ReadBinDWord() {
 // ------------------------------------------------------------------------------------------------
 unsigned int XFileParser::ReadInt()
 {
-    if( mIsBinaryFormat)
+   if( mIsBinaryFormat)
     {
         if( mBinaryNumCount == 0 && mEnd - mP >= 2)
         {
@@ -1305,7 +1308,8 @@ unsigned int XFileParser::ReadInt()
         }
 
         --mBinaryNumCount;
-        if ( mEnd - mP >= 4) {
+        const size_t len( mEnd - mP );
+        if ( len >= 4) {
             return ReadBinDWord();
         } else {
             mP = mEnd;
@@ -1340,6 +1344,7 @@ unsigned int XFileParser::ReadInt()
         }
 
         CheckForSeparator();
+
         return isNegative ? ((unsigned int) -int( number)) : number;
     }
 }

@@ -183,7 +183,6 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     // get the end time of zje operation, calculate delta t
     double fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
-//	char szTemp[128];
     g_bLoadingFinished = true;
 
     // check whether the loading process has failed ...

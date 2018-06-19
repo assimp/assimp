@@ -150,13 +150,13 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
-    Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
-    Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
     Exporter::ExportFormatEntry( "gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
     Exporter::ExportFormatEntry( "glb2", "GL Transmission Format v. 2 (binary)", "glb", &ExportSceneGLB2,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
+    Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
+    Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
 #endif
 

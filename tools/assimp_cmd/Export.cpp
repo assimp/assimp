@@ -130,9 +130,14 @@ int Assimp_Export(const char* const* params, unsigned int num)
 			outfi = GetMatchingFormat(outext,true);
 
 			if (outfi == SIZE_MAX) {
-				// still no match -> failure
-				printf("assimp export: no output format specified and I failed to guess it\n");
-				return -23;
+				// retry to see if the file extension match a format id
+				outfi = GetMatchingFormat(outext);
+
+				if (outfi == SIZE_MAX) {
+					// still no match -> failure
+					printf("assimp export: no output format specified and I failed to guess it\n");
+					return -23;
+				}
 			}
 		}
 		else {

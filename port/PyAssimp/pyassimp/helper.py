@@ -232,7 +232,6 @@ def search_library():
                     break
                 if is_out:
                   continue
-                ##### Modified Code --- to correctly select extension files #####
                 
                 library_path = os.path.join(curfolder, filename)
                 logger.debug('Try ' + library_path)

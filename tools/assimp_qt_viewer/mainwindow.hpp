@@ -6,7 +6,7 @@
 #pragma once
 
 // Header files, Qt.
-#if ASSIMP_QT4_VIEWER
+#if defined ASSIMP_QT4_VIEWER
 #	include <QMainWindow>
 #else
 #	include <QtWidgets>

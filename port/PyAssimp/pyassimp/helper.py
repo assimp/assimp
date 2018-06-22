@@ -222,15 +222,7 @@ def search_library():
             for filename in os.listdir(curfolder):
                 # our minimum requirement for candidates is that
                 # they should contain 'assimp' somewhere in
-                # their name
-                
-                
-                #if filename.lower().find('assimp')==-1 or\                  
-                #    os.path.splitext(filename)[-1].lower() not in ext_whitelist:  ### this line had bugs, failed to select files with extensions .so.x  [.so.1  .so.2  .so.3.1]
-                #    continue                                                      ### worked on simple extensions only. like- .so .dll
-                
-                
-                ##### Modified Code --- to correctly select extension files #####
+                # their name                                  
                 if filename.lower().find('assimp')==-1 : 
                     continue
                 is_out=1

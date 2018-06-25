@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -97,8 +98,8 @@ private:
     void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest);
 
     template<typename T>
-    T ReadAttribute(const std::string &name) const;
-    bool HasAttribute(const std::string &name) const;
+    T ReadAttribute(const char *name) const;
+    bool HasAttribute(const char *name) const;
 
     std::string &NextNode();
     std::string &SkipCurrentNode();

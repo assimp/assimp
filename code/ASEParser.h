@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -426,7 +427,7 @@ public:
 
     // -------------------------------------------------------------------
     //! Construct a parser from a given input file which is
-    //! guaranted to be terminated with zero.
+    //! guaranteed to be terminated with zero.
     //! @param szFile Input file
     //! @param fileFormatDefault Assumed file format version. If the
     //!   file format is specified in the file the new value replaces

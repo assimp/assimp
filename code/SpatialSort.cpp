@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -293,7 +294,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
         index++;
 
     // Now start iterating from there until the first position lays outside of the distance range.
-    // Add all positions inside the distance range within the tolerance to the result aray
+    // Add all positions inside the distance range within the tolerance to the result array
     std::vector<Entry>::const_iterator it = mPositions.begin() + index;
     while( ToBinary(it->mDistance) < maxDistBinary)
     {

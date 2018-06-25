@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -247,6 +248,7 @@ protected:
 
     bool noSkeletonMesh;
     bool ignoreUpDirection;
+    bool useColladaName;
 
     /** Used by FindNameForNode() to generate unique node names */
     unsigned int mNodeNameCounter;

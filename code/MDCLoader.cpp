@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -158,8 +159,9 @@ void MDCImporter::ValidateHeader()
             "magic word found is " + std::string( szBuffer ));
     }
 
-    if (pcHeader->ulVersion != AI_MDC_VERSION)
-        DefaultLogger::get()->warn("Unsupported MDC file version (2 (AI_MDC_VERSION) was expected)");
+    if (pcHeader->ulVersion != AI_MDC_VERSION) {
+        ASSIMP_LOG_WARN("Unsupported MDC file version (2 (AI_MDC_VERSION) was expected)");
+    }
 
     if (pcHeader->ulOffsetBorderFrames + pcHeader->ulNumFrames * sizeof(MDC::Frame) > this->fileSize ||
         pcHeader->ulOffsetSurfaces + pcHeader->ulNumSurfaces * sizeof(MDC::Surface) > this->fileSize)
@@ -168,8 +170,9 @@ void MDCImporter::ValidateHeader()
             "and point to something behind the file.");
     }
 
-    if (this->configFrameID >= this->pcHeader->ulNumFrames)
+    if (this->configFrameID >= this->pcHeader->ulNumFrames) {
         throw DeadlyImportError("The requested frame is not available");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -387,7 +390,7 @@ void MDCImporter::InternReadFile(
                 uint32_t quak = pcTriangle->aiIndices[iIndex];
                 if (quak >= pcSurface->ulNumVertices)
                 {
-                    DefaultLogger::get()->error("MDC vertex index is out of range");
+                    ASSIMP_LOG_ERROR("MDC vertex index is out of range");
                     quak = pcSurface->ulNumVertices-1;
                 }
 

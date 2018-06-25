@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -193,9 +194,16 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
             aimat->AddProperty(&str, AI_MATKEY_NAME);
         }
 
-        SetMaterialColorProperty(embeddedTexIdxs, r, mat.diffuse, aimat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
+        SetMaterialColorProperty(embeddedTexIdxs, r, mat.ambient,  aimat, aiTextureType_AMBIENT,  AI_MATKEY_COLOR_AMBIENT );
+        SetMaterialColorProperty(embeddedTexIdxs, r, mat.diffuse,  aimat, aiTextureType_DIFFUSE,  AI_MATKEY_COLOR_DIFFUSE );
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.specular, aimat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
-        SetMaterialColorProperty(embeddedTexIdxs, r, mat.ambient, aimat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
+        SetMaterialColorProperty(embeddedTexIdxs, r, mat.emission, aimat, aiTextureType_EMISSIVE, AI_MATKEY_COLOR_EMISSIVE);
+
+        aimat->AddProperty(&mat.doubleSided, 1, AI_MATKEY_TWOSIDED);
+
+        if (mat.transparent && (mat.transparency != 1.0f)) {
+            aimat->AddProperty(&mat.transparency, 1, AI_MATKEY_OPACITY);
+        }
 
         if (mat.shininess > 0.f) {
             aimat->AddProperty(&mat.shininess, 1, AI_MATKEY_SHININESS);

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -63,28 +64,28 @@ public:
     // ------------------------------------------------------------------------------------------------
     static void LogWarn(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->warn(Prefix()+(std::string)message);
+            ASSIMP_LOG_WARN(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogError(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->error(Prefix()+(std::string)message);
+            ASSIMP_LOG_ERROR(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogInfo(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->info(Prefix()+(std::string)message);
+            ASSIMP_LOG_INFO(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogDebug(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->debug(Prefix()+(std::string)message);
+            ASSIMP_LOG_DEBUG(Prefix()+(std::string)message);
         }
     }
 
@@ -125,6 +126,6 @@ private:
     static const char* Prefix();
 
 };
-
 } // ! Assimp
+
 #endif

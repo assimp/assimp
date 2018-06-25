@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -61,6 +62,7 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "JoinVerticesProcess.h"
 #include "MakeVerboseFormat.h"
 #include "ConvertToLHProcess.h"
+#include "PretransformVertices.h"
 #include <assimp/Exceptional.h>
 #include "ScenePrivate.h"
 #include <memory>
@@ -96,6 +98,8 @@ void ExportSceneGLB2(const char*, IOSystem*, const aiScene*, const ExportPropert
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneFBX(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
 
 // ------------------------------------------------------------------------------------------------
@@ -146,13 +150,13 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
+    Exporter::ExportFormatEntry( "gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
+    Exporter::ExportFormatEntry( "glb2", "GL Transmission Format v. 2 (binary)", "glb", &ExportSceneGLB2,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
     Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
     Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
-    Exporter::ExportFormatEntry( "gltf2", "GL Transmission Format v. 2", "gltf2", &ExportSceneGLTF2,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
-    Exporter::ExportFormatEntry( "glb2", "GL Transmission Format v. 2 (binary)", "glb2", &ExportSceneGLB2,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType ),
 #endif
 
@@ -166,6 +170,11 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
     Exporter::ExportFormatEntry( "x3d", "Extensible 3D", "x3d" , &ExportSceneX3D, 0 ),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
+    Exporter::ExportFormatEntry( "fbx", "Autodesk FBX (binary)", "fbx", &ExportSceneFBX, 0 ),
+    Exporter::ExportFormatEntry( "fbxa", "Autodesk FBX (ascii)", "fbx", &ExportSceneFBXA, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
@@ -300,7 +309,8 @@ bool IsVerboseFormat(const aiScene* pScene) {
 }
 
 // ------------------------------------------------------------------------------------------------
-aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing, const ExportProperties* pProperties) {
+aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const char* pPath,
+        unsigned int pPreprocessing, const ExportProperties* pProperties) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // when they create scenes from scratch, users will likely create them not in verbose
@@ -354,7 +364,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                     }
 
                     if (verbosify || (exp.mEnforcePP & aiProcess_JoinIdenticalVertices)) {
-                        DefaultLogger::get()->debug("export: Scene data not in verbose format, applying MakeVerboseFormat step first");
+                        ASSIMP_LOG_DEBUG("export: Scene data not in verbose format, applying MakeVerboseFormat step first");
 
                         MakeVerboseFormatProcess proc;
                         proc.Execute(scenecopy.get());
@@ -388,6 +398,11 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                         }
                     }
 
+                    bool exportPointCloud(false);
+                    if (nullptr != pProperties) {
+                        exportPointCloud = pProperties->GetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS);
+                    }
+
                     // dispatch other processes
                     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
                         BaseProcess* const p = pimpl->mPostProcessingSteps[a];
@@ -396,7 +411,9 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                             && !dynamic_cast<FlipUVsProcess*>(p)
                             && !dynamic_cast<FlipWindingOrderProcess*>(p)
                             && !dynamic_cast<MakeLeftHandedProcess*>(p)) {
-
+                            if (dynamic_cast<PretransformVertices*>(p) && exportPointCloud) {
+                                continue;
+                            }
                             p->Execute(scenecopy.get());
                         }
                     }
@@ -432,7 +449,6 @@ const char* Exporter::GetErrorString() const {
     return pimpl->mError.c_str();
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void Exporter::FreeBlob() {
     delete pimpl->blob;
@@ -461,7 +477,7 @@ size_t Exporter::GetExportFormatCount() const {
 // ------------------------------------------------------------------------------------------------
 const aiExportFormatDesc* Exporter::GetExportFormatDescription( size_t index ) const {
     if (index >= GetExportFormatCount()) {
-        return NULL;
+        return nullptr;
     }
 
     // Return from static storage if the requested index is built-in.
@@ -486,7 +502,8 @@ aiReturn Exporter::RegisterExporter(const ExportFormatEntry& desc) {
 
 // ------------------------------------------------------------------------------------------------
 void Exporter::UnregisterExporter(const char* id) {
-    for(std::vector<ExportFormatEntry>::iterator it = pimpl->mExporters.begin(); it != pimpl->mExporters.end(); ++it) {
+    for(std::vector<ExportFormatEntry>::iterator it = pimpl->mExporters.begin();
+            it != pimpl->mExporters.end(); ++it) {
         if (!strcmp((*it).mDescription.id,id)) {
             pimpl->mExporters.erase(it);
             break;
@@ -522,8 +539,7 @@ bool ExportProperties::SetPropertyFloat(const char* szName, ai_real iValue) {
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool ExportProperties :: SetPropertyString(const char* szName, const std::string& value)
-{
+bool ExportProperties::SetPropertyString(const char* szName, const std::string& value) {
     return SetGenericProperty<std::string>(mStringProperties, szName,value);
 }
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -356,18 +357,6 @@ private:
 	/***********************************************/
 	/************** Functions: LOG set *************/
 	/***********************************************/
-
-	/// \fn void LogInfo(const std::string& pMessage)
-	/// Short variant for calling \ref DefaultLogger::get()->info()
-	void LogInfo(const std::string& pMessage) { DefaultLogger::get()->info(pMessage); }
-
-	/// \fn void LogWarning(const std::string& pMessage)
-	/// Short variant for calling \ref DefaultLogger::get()->warn()
-	void LogWarning(const std::string& pMessage) { DefaultLogger::get()->warn(pMessage); }
-
-	/// \fn void LogError(const std::string& pMessage)
-	/// Short variant for calling \ref DefaultLogger::get()->error()
-	void LogError(const std::string& pMessage) { DefaultLogger::get()->error(pMessage); }
 
 	/***********************************************/
 	/************** Functions: XML set *************/

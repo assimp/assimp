@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -213,7 +214,7 @@ const Object* LazyObject::Get(bool dieOnError)
 
         // note: the error message is already formatted, so raw logging is ok
         if(!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->error(ex.what());
+            ASSIMP_LOG_ERROR(ex.what());
         }
         return NULL;
     }
@@ -350,7 +351,9 @@ void Document::ReadGlobalSettings()
         return;
     }
 
-    std::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
+    std::shared_ptr<const PropertyTable> props = GetPropertyTable( *this, "", *ehead, *ehead->Compound(), true );
+
+    //double v = PropertyGet<float>( *props.get(), std::string("UnitScaleFactor"), 1.0 );
 
     if(!props) {
         DOMError("GlobalSettings dictionary contains no property table");
@@ -572,11 +575,11 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
     ai_assert( count != 0 );
     ai_assert( count <= MAX_CLASSNAMES);
 
-    size_t lenghts[MAX_CLASSNAMES];
+    size_t lengths[MAX_CLASSNAMES];
 
     const size_t c = count;
     for (size_t i = 0; i < c; ++i) {
-        lenghts[ i ] = strlen(classnames[i]);
+        lengths[ i ] = strlen(classnames[i]);
     }
 
     std::vector<const Connection*> temp;
@@ -594,7 +597,7 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
 
         for (size_t i = 0; i < c; ++i) {
             ai_assert(classnames[i]);
-            if(static_cast<size_t>(std::distance(key.begin(),key.end())) == lenghts[i] && !strncmp(classnames[i],obtype,lenghts[i])) {
+            if(static_cast<size_t>(std::distance(key.begin(),key.end())) == lengths[i] && !strncmp(classnames[i],obtype,lengths[i])) {
                 obtype = NULL;
                 break;
             }

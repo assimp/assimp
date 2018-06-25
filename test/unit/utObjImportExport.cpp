@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -266,6 +267,28 @@ TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
 #endif // ASSIMP_BUILD_NO_EXPORT
 }
 
+TEST_F( utObjImportExport, issue1923_vertex_color_Test ) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors_uni.obj", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+
+    scene = importer.GetOrphanedScene();
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    ::Assimp::Exporter exporter;
+    const aiExportDataBlob* blob = exporter.ExportToBlob( scene, "obj");
+    EXPECT_NE( nullptr, blob );
+
+    const aiScene *sceneReImport = importer.ReadFileFromMemory( blob->data, blob->size, aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+
+    SceneDiffer differ;
+    EXPECT_TRUE( differ.isEqual( scene, sceneReImport ) );
+#endif // ASSIMP_BUILD_NO_EXPORT
+
+    delete scene;
+}
+
 TEST_F( utObjImportExport, issue1453_segfault ) {
     static const std::string ObjModel =
         "v  0.0  0.0  0.0\n"
@@ -352,4 +375,17 @@ TEST_F(utObjImportExport, 0based_array_Test) {
     Assimp::Importer myimporter;
     const aiScene *scene = myimporter.ReadFileFromMemory(ObjModel.c_str(), ObjModel.size(), 0);
     EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F( utObjImportExport, mtllib_after_g ) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_mtllib_after_g.obj", aiProcess_ValidateDataStructure );
+    ASSERT_NE( nullptr, scene );
+
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+    const aiMesh *mesh = scene->mMeshes[0];
+    const aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
+    aiString name;
+    ASSERT_EQ(aiReturn_SUCCESS, mat->Get(AI_MATKEY_NAME, name));
+    EXPECT_STREQ("MyMaterial", name.C_Str());
 }

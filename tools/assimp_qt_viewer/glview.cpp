@@ -5,6 +5,9 @@
 
 #include "glview.hpp"
 
+// Header files, Qt.
+#include <QTime>
+
 // Header files, OpenGL.
 #if defined(__APPLE__)
 # include <OpenGL/glu.h>
@@ -58,6 +61,33 @@ void CGLView::SHelper_Camera::SetDefault()
 /************ CGLView *************/
 /**********************************/
 
+#if !ASSIMP_QT4_VIEWER
+#	define ConditionalContextControl_Begin \
+		bool ContextEnabledHere; \
+		\
+		if(mGLContext_Current) \
+		{ \
+			ContextEnabledHere = false; \
+		} \
+		else \
+		{ \
+			makeCurrent(); \
+			mGLContext_Current = true; \
+			ContextEnabledHere = true; \
+		} \
+		\
+		do {} while(false)
+
+#	define ConditionalContextControl_End \
+		if(ContextEnabledHere) \
+		{ \
+			doneCurrent(); \
+			mGLContext_Current = false; \
+		} \
+		\
+		do {} while(false)
+#endif // ASSIMP_QT4_VIEWER
+
 void CGLView::Material_Apply(const aiMaterial* pMaterial)
 {
     GLfloat tcol[4];
@@ -105,7 +135,7 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, tcol);
 	// Shininess
-	float shininess, strength;
+	ai_real shininess, strength;
 
 	max = 1;
 	ret1 = aiGetMaterialFloatArray(pMaterial, AI_MATKEY_SHININESS, &shininess, &max);
@@ -406,9 +436,9 @@ void CGLView::BBox_GetFromVertices(const aiVector3D* pVertices, const size_t pVe
 
 	for(size_t idx_vert = 1; idx_vert < pVerticesQuantity; idx_vert++)
 	{
-		const GLfloat x = pVertices[idx_vert].x;
-		const GLfloat y = pVertices[idx_vert].y;
-		const GLfloat z = pVertices[idx_vert].z;
+		const ai_real x = pVertices[idx_vert].x;
+		const ai_real y = pVertices[idx_vert].y;
+		const ai_real z = pVertices[idx_vert].z;
 
 		// search minimal...
 		AssignIfLesser(&pBBox.Minimum.x, x);
@@ -446,7 +476,12 @@ void CGLView::Draw_Node(const aiNode* pNode)
 	// Apply node transformation matrix.
 	mat_node.Transpose();
 	glPushMatrix();
+#if ASSIMP_DOUBLE_PRECISION
+	glMultMatrixd((GLdouble*)mat_node[0]);
+#else
 	glMultMatrixf((GLfloat*)&mat_node);
+#endif // ASSIMP_DOUBLE_PRECISION
+
 	// Draw all meshes assigned to this node
 	for(size_t idx_mesh_arr = 0; idx_mesh_arr < pNode->mNumMeshes; idx_mesh_arr++) Draw_Mesh(pNode->mMeshes[idx_mesh_arr]);
 
@@ -473,13 +508,21 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 	// Vertices array
 	//
 	glEnableClientState(GL_VERTEX_ARRAY);
+#if ASSIMP_DOUBLE_PRECISION
+	glVertexPointer(3, GL_DOUBLE, 0, mesh_cur.mVertices);
+#else
 	glVertexPointer(3, GL_FLOAT, 0, mesh_cur.mVertices);
+#endif // ASSIMP_DOUBLE_PRECISION
 
 	if(mesh_cur.HasVertexColors(0))
 	{
 		glEnable(GL_COLOR_MATERIAL);///TODO: cache
 		glEnableClientState(GL_COLOR_ARRAY);
+#if ASSIMP_DOUBLE_PRECISION
+		glColorPointer(4, GL_DOUBLE, 0, mesh_cur.mColors[0]);
+#else
 		glColorPointer(4, GL_FLOAT, 0, mesh_cur.mColors[0]);
+#endif // ASSIMP_DOUBLE_PRECISION
 	}
 
 	//
@@ -488,7 +531,11 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 	if(mesh_cur.HasTextureCoords(0))
 	{
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+#if ASSIMP_DOUBLE_PRECISION
+		glTexCoordPointer(2, GL_DOUBLE, sizeof(aiVector3D), mesh_cur.mTextureCoords[0]);
+#else
 		glTexCoordPointer(2, GL_FLOAT, sizeof(aiVector3D), mesh_cur.mTextureCoords[0]);
+#endif // ASSIMP_DOUBLE_PRECISION
 	}
 
 	//
@@ -497,7 +544,11 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 	if(mesh_cur.HasNormals())
 	{
 		glEnableClientState(GL_NORMAL_ARRAY);
+#if ASSIMP_DOUBLE_PRECISION
+		glNormalPointer(GL_DOUBLE, 0, mesh_cur.mNormals);
+#else
 		glNormalPointer(GL_FLOAT, 0, mesh_cur.mNormals);
+#endif // ASSIMP_DOUBLE_PRECISION
 	}
 
 	//
@@ -530,22 +581,46 @@ void CGLView::Draw_BBox(const SBBox& pBBox)
 	glBindTexture(GL_TEXTURE_1D, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindTexture(GL_TEXTURE_3D, 0);
+#if ASSIMP_QT4_VIEWER
 	qglColor(QColor(Qt::white));
+#else
+	const QColor c_w(Qt::white);
+
+	glColor3f(c_w.redF(), c_w.greenF(), c_w.blueF());
+#endif // ASSIMP_QT4_VIEWER
+
 	glBegin(GL_LINE_STRIP);
+#	if ASSIMP_DOUBLE_PRECISION
+		glVertex3dv(&vertex[0][0]), glVertex3dv(&vertex[1][0]), glVertex3dv(&vertex[2][0]), glVertex3dv(&vertex[3][0]), glVertex3dv(&vertex[0][0]);// "Minimum" side.
+		glVertex3dv(&vertex[4][0]), glVertex3dv(&vertex[5][0]), glVertex3dv(&vertex[6][0]), glVertex3dv(&vertex[7][0]), glVertex3dv(&vertex[4][0]);// Edge and "maximum" side.
+#	else
 		glVertex3fv(&vertex[0][0]), glVertex3fv(&vertex[1][0]), glVertex3fv(&vertex[2][0]), glVertex3fv(&vertex[3][0]), glVertex3fv(&vertex[0][0]);// "Minimum" side.
 		glVertex3fv(&vertex[4][0]), glVertex3fv(&vertex[5][0]), glVertex3fv(&vertex[6][0]), glVertex3fv(&vertex[7][0]), glVertex3fv(&vertex[4][0]);// Edge and "maximum" side.
+#	endif // ASSIMP_DOUBLE_PRECISION
 	glEnd();
+
 	glBegin(GL_LINES);
+#	if ASSIMP_DOUBLE_PRECISION
+		glVertex3dv(&vertex[1][0]), glVertex3dv(&vertex[5][0]);
+		glVertex3dv(&vertex[2][0]), glVertex3dv(&vertex[6][0]);
+		glVertex3dv(&vertex[3][0]), glVertex3dv(&vertex[7][0]);
+#	else
 		glVertex3fv(&vertex[1][0]), glVertex3fv(&vertex[5][0]);
 		glVertex3fv(&vertex[2][0]), glVertex3fv(&vertex[6][0]);
 		glVertex3fv(&vertex[3][0]), glVertex3fv(&vertex[7][0]);
+#	endif // ASSIMP_DOUBLE_PRECISION
 	glEnd();
 	glDisable(GL_COLOR_MATERIAL);
 	if(mLightingEnabled) glEnable(GL_LIGHTING);
+
 }
 
 void CGLView::Enable_Textures(const bool pEnable)
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	if(pEnable)
 	{
 		glEnable(GL_TEXTURE_1D);
@@ -558,6 +633,10 @@ void CGLView::Enable_Textures(const bool pEnable)
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_TEXTURE_3D);
 	}
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 /********************************************************************/
@@ -566,7 +645,13 @@ void CGLView::Enable_Textures(const bool pEnable)
 
 void CGLView::initializeGL()
 {
+#if ASSIMP_QT4_VIEWER
 	qglClearColor(Qt::gray);
+#else
+	mGLContext_Current = true;
+	initializeOpenGLFunctions();
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+#endif // ASSIMP_QT4_VIEWER
 	glShadeModel(GL_SMOOTH);
 
 	glEnable(GL_DEPTH_TEST);
@@ -583,24 +668,39 @@ void CGLView::initializeGL()
 	glCullFace(GL_BACK);
 
 	glFrontFace(GL_CCW);
+
+#if !ASSIMP_QT4_VIEWER
+	mGLContext_Current = false;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::resizeGL(int pWidth, int pHeight)
 {
+#if !ASSIMP_QT4_VIEWER
+	mGLContext_Current = true;
+#endif // ASSIMP_QT4_VIEWER
 	mCamera_Viewport_AspectRatio = (GLdouble)pWidth / pHeight;
 	glViewport(0, 0, pWidth, pHeight);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(mCamera_FOVY, mCamera_Viewport_AspectRatio, 1.0, 100000.0);///TODO: znear/zfar depend on scene size.
+#if !ASSIMP_QT4_VIEWER
+	mGLContext_Current = false;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::drawCoordSystem() {
-    glBindTexture(GL_TEXTURE_1D, 0);
+	// Disable lighting. Colors must be bright and colorful)
+	if ( mLightingEnabled ) glDisable( GL_LIGHTING );///TODO: display list
+
+	// For same reason - disable textures.
+	glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_3D, 0);
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_LINES);
-    // X, -X
+#if ASSIMP_QT4_VIEWER
+	// X, -X
     qglColor(QColor(Qt::red)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(100000.0, 0.0, 0.0);
     qglColor(QColor(Qt::cyan)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(-100000.0, 0.0, 0.0);
     // Y, -Y
@@ -609,12 +709,32 @@ void CGLView::drawCoordSystem() {
     // Z, -Z
     qglColor(QColor(Qt::blue)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
     qglColor(QColor(Qt::yellow)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
-    glEnd();
+    qglColor(QColor(Qt::white));
+#else
+	// X, -X
+	glColor3f(1.0f, 0.0f, 0.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(100000.0, 0.0, 0.0);
+	glColor3f(0.5f, 0.5f, 1.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(-100000.0, 0.0, 0.0);
+	// Y, -Y
+	glColor3f(0.0f, 1.0f, 0.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 100000.0, 0.0);
+	glColor3f(1.0f, 0.0f, 1.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, -100000.0, 0.0);
+	// Z, -Z
+	glColor3f(0.0f, 0.0f, 1.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
+	glColor3f(1.0f, 1.0f, 0.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
+	glColor3f(1.0f, 1.0f, 1.0f);
+#endif // ASSIMP_QT4_VIEWER
+	glEnd();
+	// Restore previous state of lighting.
+	if(mLightingEnabled) glEnable(GL_LIGHTING);
+
 }
 
 void CGLView::paintGL()
 {
-    QTime time_paintbegin;
+#if !ASSIMP_QT4_VIEWER
+	mGLContext_Current = true;
+#endif // ASSIMP_QT4_VIEWER
+
+	QTime time_paintbegin;
 
 	time_paintbegin = QTime::currentTime();
 
@@ -622,27 +742,36 @@ void CGLView::paintGL()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	// Apply current camera transformations.
+#if ASSIMP_DOUBLE_PRECISION
+	glMultMatrixd((GLdouble*)&mHelper_Camera.Rotation_AroundCamera);
+	glTranslated(-mHelper_Camera.Translation_ToScene.x, -mHelper_Camera.Translation_ToScene.y, -mHelper_Camera.Translation_ToScene.z);
+	glMultMatrixd((GLdouble*)&mHelper_Camera.Rotation_Scene);
+#else
 	glMultMatrixf((GLfloat*)&mHelper_Camera.Rotation_AroundCamera);
 	glTranslatef(-mHelper_Camera.Translation_ToScene.x, -mHelper_Camera.Translation_ToScene.y, -mHelper_Camera.Translation_ToScene.z);
 	glMultMatrixf((GLfloat*)&mHelper_Camera.Rotation_Scene);
+#endif // ASSIMP_DOUBLE_PRECISION
+
 	// Coordinate system
-    if ( mLightingEnabled ) {
-        glDisable( GL_LIGHTING );///TODO: display list
+	if (mScene_AxesEnabled == true)
+    {
+        drawCoordSystem();
     }
-    drawCoordSystem();
 
 	glDisable(GL_COLOR_MATERIAL);
-	if(mLightingEnabled) glEnable(GL_LIGHTING);
-
 	// Scene
 	if(mScene != nullptr)
 	{
 		Draw_Node(mScene->mRootNode);
 		// Scene BBox
 		if(mScene_DrawBBox) Draw_BBox(mScene_BBox);
+
 	}
 
 	emit Paint_Finished((size_t)time_paintbegin.msecsTo(QTime::currentTime()), mHelper_Camera.Translation_ToScene.Length());
+#if !ASSIMP_QT4_VIEWER
+	mGLContext_Current = false;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 /********************************************************************/
@@ -650,10 +779,12 @@ void CGLView::paintGL()
 /********************************************************************/
 
 CGLView::CGLView(QWidget *pParent)
+#if ASSIMP_QT4_VIEWER
 	: QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::DepthBuffer), pParent)
+#else
+	: QOpenGLWidget(pParent), mGLContext_Current(false)
+#endif // ASSIMP_QT4_VIEWER
 {
-	static_assert(sizeof(GLfloat) == sizeof(ai_real), "ai_real in Assimp must be equal to GLfloat/float.");///TODO: may be templates can be used.
-
 	// set initial view
 	mHelper_CameraDefault.SetDefault();
 	Camera_Set(0);
@@ -670,6 +801,10 @@ CGLView::~CGLView()
 
 void CGLView::FreeScene()
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	// Set scene to null and after that \ref paintGL will not try to render it.
 	mScene = nullptr;
 	// Clean helper objects.
@@ -699,10 +834,18 @@ void CGLView::FreeScene()
 		mTexture_IDMap.clear();
 		delete [] id_tex;
 	}
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	FreeScene();// Clear old data
 	// Why checking here, not at begin of function. Because old scene may not exist at know. So, need cleanup.
 	if(pScene == nullptr) return;
@@ -929,6 +1072,10 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 			emit SceneObject_Camera(mScene->mCameras[idx_cam]->mName.C_Str());
 		}
 	}// if(!mScene->HasCameras()) else
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 /********************************************************************/
@@ -937,39 +1084,65 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 
 void CGLView::Lighting_Enable()
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	mLightingEnabled = true;
 	glEnable(GL_LIGHTING);
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::Lighting_Disable()
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	glDisable(GL_LIGHTING);
 	mLightingEnabled = false;
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::Lighting_EditSource(const size_t pLightNumber, const SLightParameters& pLightParameters)
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 const size_t light_num = GL_LIGHT0 + pLightNumber;
 
 GLfloat farr[4];
 
 	if(pLightNumber >= GL_MAX_LIGHTS) return;///TODO: return value;
 
-	glLightfv(light_num, GL_AMBIENT, &pLightParameters.Ambient.r);// Ambient color
-	glLightfv(light_num, GL_DIFFUSE, &pLightParameters.Diffuse.r);// Diffuse color
-	glLightfv(light_num, GL_SPECULAR, &pLightParameters.Specular.r);// Specular color
+	// Ambient color
+	farr[0] = pLightParameters.Ambient.r, farr[1] = pLightParameters.Ambient.g; farr[2] = pLightParameters.Ambient.b; farr[3] = pLightParameters.Ambient.a;
+	glLightfv(light_num, GL_AMBIENT, farr);
+	// Diffuse color
+	farr[0] = pLightParameters.Diffuse.r, farr[1] = pLightParameters.Diffuse.g; farr[2] = pLightParameters.Diffuse.b; farr[3] = pLightParameters.Diffuse.a;
+	glLightfv(light_num, GL_DIFFUSE, farr);
+	// Specular color
+	farr[0] = pLightParameters.Specular.r, farr[1] = pLightParameters.Specular.g; farr[2] = pLightParameters.Specular.b; farr[3] = pLightParameters.Specular.a;
+	glLightfv(light_num, GL_SPECULAR, farr);
 	// Other parameters
 	switch(pLightParameters.Type)
 	{
 		case aiLightSource_DIRECTIONAL:
 			// Direction
-			farr[0] = pLightParameters.For.Directional.Direction.x, farr[2] = pLightParameters.For.Directional.Direction.y;
+			farr[0] = pLightParameters.For.Directional.Direction.x, farr[1] = pLightParameters.For.Directional.Direction.y;
 			farr[2] = pLightParameters.For.Directional.Direction.z; farr[3] = 0;
 			glLightfv(light_num, GL_POSITION, farr);
 			break;
 		case aiLightSource_POINT:
 			// Position
-			farr[0] = pLightParameters.For.Point.Position.x, farr[2] = pLightParameters.For.Point.Position.y;
+			farr[0] = pLightParameters.For.Point.Position.x, farr[1] = pLightParameters.For.Point.Position.y;
 			farr[2] = pLightParameters.For.Point.Position.z; farr[3] = 1;
 			glLightfv(light_num, GL_POSITION, farr);
 			// Attenuation
@@ -980,20 +1153,20 @@ GLfloat farr[4];
 			break;
 		case aiLightSource_SPOT:
 			// Position
-			farr[0] = pLightParameters.For.Spot.Position.x, farr[2] = pLightParameters.For.Spot.Position.y, farr[2] = pLightParameters.For.Spot.Position.z; farr[3] = 1;
+			farr[0] = pLightParameters.For.Spot.Position.x, farr[1] = pLightParameters.For.Spot.Position.y, farr[2] = pLightParameters.For.Spot.Position.z; farr[3] = 1;
 			glLightfv(light_num, GL_POSITION, farr);
 			// Attenuation
 			glLightf(light_num, GL_CONSTANT_ATTENUATION, pLightParameters.For.Spot.Attenuation_Constant);
 			glLightf(light_num, GL_LINEAR_ATTENUATION, pLightParameters.For.Spot.Attenuation_Linear);
 			glLightf(light_num, GL_QUADRATIC_ATTENUATION, pLightParameters.For.Spot.Attenuation_Quadratic);
 			// Spot specific
-			farr[0] = pLightParameters.For.Spot.Direction.x, farr[2] = pLightParameters.For.Spot.Direction.y, farr[2] = pLightParameters.For.Spot.Direction.z; farr[3] = 0;
+			farr[0] = pLightParameters.For.Spot.Direction.x, farr[1] = pLightParameters.For.Spot.Direction.y, farr[2] = pLightParameters.For.Spot.Direction.z; farr[3] = 0;
 			glLightfv(light_num, GL_SPOT_DIRECTION, farr);
 			glLightf(light_num, GL_SPOT_CUTOFF, pLightParameters.For.Spot.CutOff);
 			break;
 		default:// For unknown light source types use point source.
 			// Position
-			farr[0] = pLightParameters.For.Point.Position.x, farr[2] = pLightParameters.For.Point.Position.y;
+			farr[0] = pLightParameters.For.Point.Position.x, farr[1] = pLightParameters.For.Point.Position.y;
 			farr[2] = pLightParameters.For.Point.Position.z; farr[3] = 1;
 			glLightfv(light_num, GL_POSITION, farr);
 			// Attenuation
@@ -1003,20 +1176,40 @@ GLfloat farr[4];
 			glLightf(light_num, GL_SPOT_CUTOFF, 180.0);
 			break;
 	}// switch(pLightParameters.Type)
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::Lighting_EnableSource(const size_t pLightNumber)
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	if(pLightNumber >= GL_MAX_LIGHTS) return;///TODO: return value;
 
 	glEnable(GL_LIGHT0 + pLightNumber);
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::Lighting_DisableSource(const size_t pLightNumber)
 {
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_Begin;
+#endif // ASSIMP_QT4_VIEWER
+
 	if(pLightNumber >= GL_MAX_LIGHTS) return;///TODO: return value;
 
 	glDisable(GL_LIGHT0 + pLightNumber);
+
+#if !ASSIMP_QT4_VIEWER
+	ConditionalContextControl_End;
+#endif // ASSIMP_QT4_VIEWER
 }
 
 /********************************************************************/
@@ -1068,30 +1261,44 @@ void CGLView::Camera_Set(const size_t pCameraNumber)
 	gluLookAt(hcam.Position.x, hcam.Position.y, hcam.Position.z, hcam.Target.x, hcam.Target.y, hcam.Target.z, up.x, up.y, up.z);
 }
 
-void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
-{
-auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 180.0; };
+void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial) {
+    auto deg2rad = [](const GLfloat pDegree) -> GLfloat { 
+        return pDegree * AI_MATH_PI / 180.0;
+    };
 
 	aiMatrix4x4 mat_rot;
 
 	mat_rot.FromEulerAnglesXYZ(deg2rad(pAngle_X), deg2rad(pAngle_Y), deg2rad(pAngle_Z));
-	mHelper_Camera.Rotation_Scene *= mat_rot;
+	if(pMatrix_Rotation_Initial != nullptr)
+		mHelper_Camera.Rotation_Scene = *pMatrix_Rotation_Initial * mat_rot;
+	else
+		mHelper_Camera.Rotation_Scene *= mat_rot;
 }
 
-void CGLView::Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+void CGLView::Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
 {
-auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * M_PI / 180.0; };
+    auto deg2rad = [](const GLfloat pDegree) -> GLfloat { return pDegree * AI_MATH_PI / 180.0; };
 
 	aiMatrix4x4 mat_rot;
 
 	mat_rot.FromEulerAnglesXYZ(deg2rad(pAngle_X), deg2rad(pAngle_Y), deg2rad(pAngle_Z));
-	mHelper_Camera.Rotation_AroundCamera *= mat_rot;
+	if(pMatrix_Rotation_Initial != nullptr)
+		mHelper_Camera.Rotation_AroundCamera = *pMatrix_Rotation_Initial * mat_rot;
+	else
+		mHelper_Camera.Rotation_AroundCamera *= mat_rot;
 }
 
 void CGLView::Camera_Translate(const GLfloat pTranslate_X, const GLfloat pTranslate_Y, const GLfloat pTranslate_Z)
 {
-aiVector3D vect_tr(pTranslate_X, pTranslate_Y, pTranslate_Z);
+    aiVector3D vect_tr(pTranslate_X, pTranslate_Y, pTranslate_Z);
 
 	vect_tr *= mHelper_Camera.Rotation_AroundCamera;
 	mHelper_Camera.Translation_ToScene += vect_tr;
+}
+
+void CGLView::Camera_Matrix(aiMatrix4x4& pRotation_Camera, aiMatrix4x4& pRotation_Scene, aiVector3D& pTranslation_Camera)
+{
+	pRotation_Camera = mHelper_Camera.Rotation_AroundCamera;
+	pRotation_Scene = mHelper_Camera.Rotation_Scene;
+	pTranslation_Camera = mHelper_Camera.Translation_ToScene;
 }

@@ -77,8 +77,9 @@ extern "C" {
   the consistency of the compressed data, so the library should never crash
   even in the case of corrupted input.
 */
-#ifdef __ANDROID__     
-using zcrc_t = unsigned_long; 
+
+#ifdef __ANDROID__
+typedef unsigned long zcrc_t;
 #endif
 
 typedef voidpf (*alloc_func) OF((voidpf opaque, uInt items, uInt size));

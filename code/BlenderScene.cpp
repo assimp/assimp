@@ -800,7 +800,6 @@ template <> void Structure::Convert<CustomData>(
     ) const
 {
     ReadFieldArray<ErrorPolicy_Warn>(dest.typemap, "typemap", db);
-    ReadField<ErrorPolicy_Igno>(dest.pad_i1, "pad_i1", db);
     ReadField<ErrorPolicy_Warn>(dest.totlayer, "totlayer", db);
     ReadField<ErrorPolicy_Warn>(dest.maxlayer, "maxlayer", db);
     ReadField<ErrorPolicy_Warn>(dest.totsize, "totsize", db);

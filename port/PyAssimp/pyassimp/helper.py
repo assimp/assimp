@@ -27,7 +27,7 @@ additional_dirs, ext_whitelist = [],[]
 if os.name=='posix':
     additional_dirs.append('./')
     additional_dirs.append('/usr/lib/')
-    additional_dirs.append('/usr/lib/x86_64-linux-gnu')
+    additional_dirs.append('/usr/lib/x86_64-linux-gnu/')
     additional_dirs.append('/usr/local/lib/')
 
     if 'LD_LIBRARY_PATH' in os.environ:
@@ -222,11 +222,17 @@ def search_library():
             for filename in os.listdir(curfolder):
                 # our minimum requirement for candidates is that
                 # they should contain 'assimp' somewhere in
-                # their name
-                if filename.lower().find('assimp')==-1 or\
-                    os.path.splitext(filename)[-1].lower() not in ext_whitelist:
+                # their name                                  
+                if filename.lower().find('assimp')==-1 : 
                     continue
-
+                is_out=1
+                for et in ext_whitelist:
+                  if et in filename.lower():
+                    is_out=0
+                    break
+                if is_out:
+                  continue
+                
                 library_path = os.path.join(curfolder, filename)
                 logger.debug('Try ' + library_path)
                 try:

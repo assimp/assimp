@@ -227,7 +227,7 @@ public:
      *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
      */
     static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
-        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
+        unsigned int flags = 0, std::vector<aiMatrix4x4> trans = std::vector<aiMatrix4x4>());
 
     // -------------------------------------------------------------------
     /** Merges two or more scenes and attaches all scenes to a specific
@@ -245,7 +245,7 @@ public:
      */
     static void MergeScenes(aiScene** dest, aiScene* master,
         std::vector<AttachmentInfo>& src,
-        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
+        unsigned int flags = 0, std::vector<aiMatrix4x4> trans = std::vector<aiMatrix4x4>());
 
     // -------------------------------------------------------------------
     /** Merges two or more meshes

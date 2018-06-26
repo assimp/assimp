@@ -162,7 +162,7 @@ void SceneCombiner::OffsetNodeMeshIndices (aiNode* node, unsigned int offset) {
 // ------------------------------------------------------------------------------------------------
 // Merges two scenes.
 void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
-    unsigned int flags, std::vector<aiMatrix4x4> &trans)
+    unsigned int flags, std::vector<aiMatrix4x4> trans)
 {
     if ( nullptr == _dest ) {
         return;
@@ -244,7 +244,7 @@ void SceneCombiner::AttachToGraph ( aiScene* master, std::vector<NodeAttachmentI
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master, std::vector<AttachmentInfo>& srcList,
-    unsigned int flags, std::vector<aiMatrix4x4> &trans) {
+    unsigned int flags, std::vector<aiMatrix4x4> trans) {
     if ( nullptr == _dest ) {
         return;
     }

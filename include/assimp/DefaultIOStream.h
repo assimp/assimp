@@ -106,7 +106,7 @@ public:
     /// Flush file contents
     void Flush();
 
-protected:
+private:
     //  File data-structure, using clib
     FILE* mFile;
     //  Filename

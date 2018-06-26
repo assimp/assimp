@@ -117,22 +117,21 @@ static const aiImporterDesc desc = {
     "ifc ifczip stp"
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-IFCImporter::IFCImporter()
-{}
+IFCImporter::IFCImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-IFCImporter::~IFCImporter()
-{
+IFCImporter::~IFCImporter() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
+bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     const std::string& extension = GetExtension(pFile);
     if (extension == "ifc" || extension == "ifczip" || extension == "stp" ) {
         return true;
@@ -149,8 +148,7 @@ bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // List all extensions handled by this loader
-const aiImporterDesc* IFCImporter::GetInfo () const
-{
+const aiImporterDesc* IFCImporter::GetInfo () const {
     return &desc;
 }
 

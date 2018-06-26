@@ -144,6 +144,13 @@ struct NodeAttachmentInfo
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
+/** @def AI_INT_MERGE_SCENE_DELETE_SOURCES
+ * Can be combined with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES.
+ * Unique names are generated, but only if this is absolutely
+ * required to avoid name conflicts.
+ */
+#define AI_INT_MERGE_SCENE_DELETE_SOURCES 0x20
+
 typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
 
 // ---------------------------------------------------------------------------
@@ -220,7 +227,7 @@ public:
      *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
      */
     static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
-        unsigned int flags = 0);
+        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
 
     // -------------------------------------------------------------------
     /** Merges two or more scenes and attaches all scenes to a specific
@@ -238,7 +245,7 @@ public:
      */
     static void MergeScenes(aiScene** dest, aiScene* master,
         std::vector<AttachmentInfo>& src,
-        unsigned int flags = 0);
+        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
 
     // -------------------------------------------------------------------
     /** Merges two or more meshes

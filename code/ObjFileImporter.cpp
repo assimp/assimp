@@ -461,9 +461,9 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
             {
                 const unsigned int tex = pSourceFace->m_texturCoords.at( vertexIndex );
 
-                if ( tex >= pModel->m_TextureCoord.size() )
+                if (tex >= pModel->m_TextureCoord.size()) {
                     throw DeadlyImportError("OBJ: texture coordinate index out of range");
-
+                }
                 const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
                 pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
             }
@@ -474,7 +474,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
             const bool last = ( vertexIndex == pSourceFace->m_vertices.size() - 1 );
             if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last) {
                 pDestFace->mIndices[ outVertexIndex ] = newIndex;
-                outVertexIndex++;
+                ++outVertexIndex;
             }
 
             if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT) {

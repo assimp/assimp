@@ -58,18 +58,19 @@ namespace EXPRESS = STEP::EXPRESS;
 #include <functional>
 
 // ------------------------------------------------------------------------------------------------
-std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = "")
-{
-    return line == STEP::SyntaxError::LINE_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,") ",s) );
+std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = "") {
+    return line == STEP::SyntaxError::LINE_NOT_SPECIFIED ? prefix+s : static_cast<std::string>(
+            (Formatter::format(), prefix,"(line ",line,") ",s)
+        );
 }
-
 
 // ------------------------------------------------------------------------------------------------
 std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = "")
 {
-    return entity == STEP::TypeError::ENTITY_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(entity #",entity,") ",s));
+    return entity == STEP::TypeError::ENTITY_NOT_SPECIFIED ? prefix+s : static_cast<std::string>(
+            (Formatter::format(),prefix,"(entity #",entity,") ",s)
+        );
 }
-
 
 // ------------------------------------------------------------------------------------------------
 STEP::SyntaxError::SyntaxError (const std::string& s,uint64_t line /* = LINE_NOT_SPECIFIED */)

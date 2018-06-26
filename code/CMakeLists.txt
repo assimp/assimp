@@ -153,7 +153,6 @@ SET( Logging_SRCS
 SOURCE_GROUP(Logging FILES ${Logging_SRCS})
 
 SET( Common_SRCS
-  UnicodeIOStream.h
   BaseImporter.cpp
   BaseProcess.cpp
   BaseProcess.h

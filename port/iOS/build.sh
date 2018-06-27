@@ -28,6 +28,9 @@ IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
 TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 
+CMAKE_C_COMPILER=$(xcrun -find cc)
+CMAKE_CXX_COMPILER=$(xcrun -find c++)
+
 BUILD_ARCHS_DEVICE="arm64 armv7s armv7"
 BUILD_ARCHS_SIMULATOR="x86_64 i386"
 BUILD_ARCHS_ALL=($BUILD_ARCHS_DEVICE $BUILD_ARCHS_SIMULATOR)
@@ -37,7 +40,7 @@ CPP_DEV_TARGET=
 CPP_STD_LIB_LIST=(libc++ libstdc++)
 CPP_STD_LIB=
 CPP_STD_LIST=(c++11 c++14)
-CPP_STD=
+CPP_STD=c++11
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
@@ -68,12 +71,12 @@ build_arch()
 
     rm CMakeCache.txt
 
-    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
+    cmake  -G 'Unix Makefiles' -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
 
     echo "[!] Building $1 library"
 
-    $XCODE_ROOT_DIR/usr/bin/make clean
-    $XCODE_ROOT_DIR/usr/bin/make assimp -j 8 -l
+    xcrun -run make clean
+    xcrun -run make assimp -j 8 -l
 
     echo "[!] Moving built libraries into: $BUILD_DIR/$1/"
     

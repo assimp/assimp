@@ -65,6 +65,11 @@ build_arch()
     export DEVROOT=$XCODE_ROOT_DIR/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
     export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -I$SDKROOT/usr/include/ -miphoneos-version-min=$IOS_SDK_TARGET"
+     if [[ "$BUILD_TYPE" =~ "Debug" ]]; then
+      export CFLAGS="$CFLAGS -Og"
+     else
+	     export CFLAGS="$CFLAGS -O3"
+     fi
     export LDFLAGS="-arch $1 -isysroot $SDKROOT -L$SDKROOT/usr/lib/"
     export CPPFLAGS="$CFLAGS"
     export CXXFLAGS="$CFLAGS -std=$CPP_STD"
@@ -80,12 +85,15 @@ build_arch()
     echo "[!] Building $1 library"
 
     xcrun -run make clean
-    xcrun -run make assimp -j 8 -l
-
-    echo "[!] Moving built libraries into: $BUILD_DIR/$1/"
+    xcrun -run make assimp -j 8 -l    
     
-    mv ./lib/*.dylib  $BUILD_DIR/$1/
-    mv ./lib/*.a $BUILD_DIR/$1/	
+    if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
+    	echo "[!] Moving built dynamic libraries into: $BUILD_DIR/$1/"
+    	mv ./lib/*.dylib  $BUILD_DIR/$1/
+    else
+    	echo "[!] Moving built static libraries into: $BUILD_DIR/$1/"
+    	mv ./lib/*.a $BUILD_DIR/$1/	    	
+    fi    
 }
 
 echo "[!] $0 - assimp iOS build script"

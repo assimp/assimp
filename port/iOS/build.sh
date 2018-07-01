@@ -90,10 +90,10 @@ build_arch()
     if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
     	echo "[!] Moving built dynamic libraries into: $BUILD_DIR/$1/"
     	mv ./lib/*.dylib  $BUILD_DIR/$1/
-    else
-    	echo "[!] Moving built static libraries into: $BUILD_DIR/$1/"
-    	mv ./lib/*.a $BUILD_DIR/$1/	    	
-    fi    
+    fi
+    
+    echo "[!] Moving built static libraries into: $BUILD_DIR/$1/"
+    mv ./lib/*.a $BUILD_DIR/$1/	   
 }
 
 echo "[!] $0 - assimp iOS build script"
@@ -117,11 +117,11 @@ for i in "$@"; do
         DEPLOY_ARCHS=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
         echo "[!] Selecting architectures: $DEPLOY_ARCHS"
     ;;
-    -d=*|--debug=*)
+    --debug)
     	BUILD_TYPE=Debug        
         echo "[!] Selecting build type: Debug"
     ;;
-    -s=*|--shared-lib=*)
+    --shared-lib)
     	BUILD_SHARED_LIBS=ON        
         echo "[!] Will generate dynamic libraries"
     ;;
@@ -155,7 +155,7 @@ for ARCH_TARGET in $DEPLOY_ARCHS; do
 done
 
 
-make_fat_binary()
+make_fat_static_or_shared_binary()
 {
 	LIB_NAME=$1
 	LIPO_ARGS=''
@@ -166,16 +166,31 @@ make_fat_binary()
             LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.a "
         fi
     done
-    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/$LIB_NAME-fat.a"
+    if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
+    	LIPO_ARGS="$LIPO_ARGS -create -output $BUILD_DIR/$LIB_NAME-fat.dylib"
+    else
+    	LIPO_ARGS="$LIPO_ARGS -create -output $BUILD_DIR/$LIB_NAME-fat.a"
+    fi
+    lipo $LIPO_ARGS
+}
+
+make_fat_static_binary()
+{
+	LIB_NAME=$1
+	LIPO_ARGS=''
+    for ARCH_TARGET in $DEPLOY_ARCHS; do
+        LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.a "
+    done
+    LIPO_ARGS="$LIPO_ARGS -create -output $BUILD_DIR/$LIB_NAME-fat.a"
     lipo $LIPO_ARGS
 }
 
 if [[ "$DEPLOY_FAT" -eq 1 ]]; then
     echo '[+] Creating fat binaries ...'
     
-    make_fat_binary 'libassimp'
-    make_fat_binary 'libIrrXML'
-    make_fat_binary 'libzlibstatic'
+    make_fat_static_or_shared_binary 'libassimp'
+    make_fat_static_binary 'libIrrXML'
+    make_fat_static_binary 'libzlibstatic'
     
     echo "[!] Done! The fat binaries can be found at $BUILD_DIR"
 fi

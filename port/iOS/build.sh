@@ -188,9 +188,15 @@ make_fat_static_binary()
 if [[ "$DEPLOY_FAT" -eq 1 ]]; then
     echo '[+] Creating fat binaries ...'
     
-    make_fat_static_or_shared_binary 'libassimp'
-    make_fat_static_binary 'libIrrXML'
-    make_fat_static_binary 'libzlibstatic'
+    if [[ "$BUILD_TYPE" =~ "Debug" ]]; then
+    	make_fat_static_or_shared_binary 'libassimpd'
+	    make_fat_static_binary 'libIrrXMLd'
+	    make_fat_static_binary 'libzlibstaticd'
+	else
+		make_fat_static_or_shared_binary 'libassimp'
+	    make_fat_static_binary 'libIrrXML'
+	    make_fat_static_binary 'libzlibstatic'
+	fi
     
     echo "[!] Done! The fat binaries can be found at $BUILD_DIR"
 fi

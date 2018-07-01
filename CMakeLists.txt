@@ -40,10 +40,6 @@ PROJECT( Assimp )
 
 # All supported options ###############################################
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
 OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
@@ -340,9 +336,7 @@ ENDIF(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # Search for unzip
-IF (NOT IOS)
 use_pkgconfig(UNZIP minizip)
-ENDIF (NOT IOS)
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)

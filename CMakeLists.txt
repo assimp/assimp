@@ -322,7 +322,7 @@ IF( NOT ZLIB_FOUND )
   SET(ZLIB_FOUND 1)
   SET(ZLIB_LIBRARIES zlibstatic)
   SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
-  # need to also build minizip otherwise it will link with system zlib as well.
+  # need to make sure we don't link with system zlib as well.
   SET(ASSIMP_BUILD_MINIZIP 1)
 else(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
@@ -330,7 +330,7 @@ else(NOT ZLIB_FOUND)
 ENDIF(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
-# Search for unzip
+# Search for unzip if not building ourselves
 IF( NOT ASSIMP_BUILD_MINIZIP )
   use_pkgconfig(UNZIP minizip)
 ENDIF( NOT ASSIMP_BUILD_MINIZIP )

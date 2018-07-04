@@ -351,10 +351,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
             }
 
 
-            if (prim.indices) {
-				aiFace* faces = 0;
-                unsigned int nFaces = 0;
+            aiFace* faces = 0;
+            unsigned int nFaces = 0;
 
+            if (prim.indices) {
                 unsigned int count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
@@ -419,16 +419,8 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                         }
                         break;
                 }
-
-                if (faces) {
-                    aim->mFaces = faces;
-                    aim->mNumFaces = nFaces;
-                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
-                }
             }
             else { // no indices provided so directly generate from counts
-                aiFace* faces = 0;
-                unsigned int nFaces = 0;
 
                 // use the already determined count as it includes checks 
                 unsigned int count = aim->mNumVertices;
@@ -492,14 +484,13 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                     }
                     break;
                 }
-
-                if (faces) {
-                    aim->mFaces = faces;
-                    aim->mNumFaces = nFaces;
-                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
-                }
             }
 
+            if (faces) {
+                aim->mFaces = faces;
+                aim->mNumFaces = nFaces;
+                ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+            }
 
             if (prim.material) {
                 aim->mMaterialIndex = prim.material.GetIndex();

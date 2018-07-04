@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -188,7 +189,7 @@ protected:
      {}
   };
 
-  // summarize a material in an convinient way.
+  // summarize a material in an convenient way.
   struct Material
   {
     std::string name;

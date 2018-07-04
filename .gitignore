@@ -12,6 +12,8 @@ build
 bin/
 lib/
 
+# QtCreator
+CMakeLists.txt.user
 
 # Generated
 assimp.pc
@@ -38,6 +40,7 @@ tools/assimp_cmd/Makefile
 
 # Tests
 test/results
+test/readlinetest*
 
 # Python
 __pycache__

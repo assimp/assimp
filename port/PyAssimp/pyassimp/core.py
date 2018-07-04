@@ -312,7 +312,7 @@ def load(filename,
                                      file_type)
     else:
         # a filename string has been passed
-        model = _assimp_lib.load(filename.encode("ascii"), processing)
+        model = _assimp_lib.load(filename.encode(sys.getfilesystemencoding()), processing)
 
     if not model:
         raise AssimpError('Could not import file!')
@@ -342,7 +342,7 @@ def export(scene,
     '''
 
     from ctypes import pointer
-    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode("ascii"), processing)
+    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode(sys.getfilesystemencoding()), processing)
 
     if exportStatus != 0:
         raise AssimpError('Could not export scene!')

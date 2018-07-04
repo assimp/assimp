@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -380,7 +381,7 @@ namespace glTF
     };
 
 
-    //! Base classe for all glTF top-level objects
+    //! Base class for all glTF top-level objects
     struct Object
     {
         std::string id;   //!< The globally unique ID used to reference this object

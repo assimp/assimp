@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -282,7 +283,6 @@ public:
         return *this;
     }
 
-private:
     // ---------------------------------------------------------------------
     /** Generic read method. ByteSwap::Swap(T*) *must* be defined */
     template <typename T>
@@ -299,6 +299,7 @@ private:
         return f;
     }
 
+private:
     // ---------------------------------------------------------------------
     void InternBegin() {
         if (!stream) {

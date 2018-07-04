@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -775,10 +776,10 @@ namespace STEP {
 
             // XXX is this really how the EXPRESS notation ([?:3],[1:3]) is intended?
             if (max_cnt && inp->GetSize() > max_cnt) {
-                DefaultLogger::get()->warn("too many aggregate elements");
+                ASSIMP_LOG_WARN("too many aggregate elements");
             }
             else if (inp->GetSize() < min_cnt) {
-                DefaultLogger::get()->warn("too few aggregate elements");
+                ASSIMP_LOG_WARN("too few aggregate elements");
             }
 
             out.reserve(inp->GetSize());

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -145,7 +146,7 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 void ReportSceneNotFoundError() {
-    DefaultLogger::get()->error("Unable to find the Assimp::Importer for this aiScene. "
+    ASSIMP_LOG_ERROR("Unable to find the Assimp::Importer for this aiScene. "
         "The C-API does not accept scenes produced by the C++ API and vice versa");
 
     ai_assert(false);

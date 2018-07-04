@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -45,10 +46,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 
+#include <cstdio>
+#include <iostream>
+#include <string>
+
 const char* AICMD_MSG_INFO_HELP_E =
-"assimp info <file> [-r]\n"
+"assimp info <file> [-r] [-v]\n"
 "\tPrint basic structure of a 3D model\n"
-"\t-r,--raw: No postprocessing, do a raw import\n";
+"\t-r,--raw: No postprocessing, do a raw import\n"
+"\t-v,--verbose: Print verbose info such as node transform data\n";
+
+const std::string TREE_BRANCH_ASCII = "|-";
+const std::string TREE_BRANCH_UTF8 = "\xe2\x94\x9c\xe2\x95\xb4";
+const std::string TREE_STOP_ASCII = "'-";
+const std::string TREE_STOP_UTF8 = "\xe2\x94\x94\xe2\x95\xb4";
+const std::string TREE_CONTINUE_ASCII = "| ";
+const std::string TREE_CONTINUE_UTF8 = "\xe2\x94\x82 ";
+
+// note: by default this is outputing utf-8 text.
+// this is well supported on pretty much any linux terminal.
+// if this causes problems on some platform,
+// put an #ifdef to use the ascii version for that platform.
+const std::string TREE_BRANCH = TREE_BRANCH_UTF8;
+const std::string TREE_STOP = TREE_STOP_UTF8;
+const std::string TREE_CONTINUE = TREE_CONTINUE_UTF8;
 
 
 // -----------------------------------------------------------------------------------
@@ -182,25 +203,77 @@ std::string FindPTypes(const aiScene* scene)
 }
 
 // -----------------------------------------------------------------------------------
-void PrintHierarchy(const aiNode* root, unsigned int maxnest, unsigned int maxline,
-					unsigned int cline, unsigned int cnest=0)
-{
-	if (cline++ >= maxline || cnest >= maxnest) {
-		return;
+// Prettily print the node graph to stdout
+void PrintHierarchy(
+	const aiNode* node,
+	const std::string &indent,
+	bool verbose,
+	bool last = false,
+	bool first = true
+){
+	// tree visualization
+	std::string branchchar;
+	if (first) { branchchar = ""; }
+	else if (last) { branchchar = TREE_STOP; } // "'-"
+	else { branchchar = TREE_BRANCH; } // "|-"
+
+	// print the indent and the branch character and the name
+	std::cout << indent << branchchar << node->mName.C_Str();
+
+	// if there are meshes attached, indicate this
+	if (node->mNumMeshes) {
+		std::cout << " (mesh ";
+		bool sep = false;
+		for (size_t i=0; i < node->mNumMeshes; ++i) {
+			unsigned int mesh_index = node->mMeshes[i];
+			if (sep) { std::cout << ", "; }
+			std::cout << mesh_index;
+			sep = true;
+		}
+		std::cout << ")";
 	}
 
-	for(unsigned int i = 0; i < cnest; ++i) {
-		printf("-- ");
-	}
-	printf("\'%s\', meshes: %u\n",root->mName.data,root->mNumMeshes);
-	for (unsigned int i = 0; i < root->mNumChildren; ++i ) {
-		PrintHierarchy(root->mChildren[i],maxnest,maxline,cline,cnest+1);
-		if(i == root->mNumChildren-1) {
-			for(unsigned int i = 0; i < cnest; ++i) {
-				printf("   ");
-			}
-			printf("<--\n");
+	// finish the line
+	std::cout << std::endl;
+
+	// in verbose mode, print the transform data as well
+	if (verbose) {
+		// indent to use
+		std::string indentadd;
+		if (last) { indentadd += "  "; }
+		else { indentadd += TREE_CONTINUE; } // "| "..
+		if (node->mNumChildren == 0) { indentadd += "  "; }
+		else { indentadd += TREE_CONTINUE; } // .."| "
+		aiVector3D s, r, t;
+		node->mTransformation.Decompose(s, r, t);
+		if (s.x != 1.0 || s.y != 1.0 || s.z != 1.0) {
+			std::cout << indent << indentadd;
+			printf("  S:[%f %f %f]\n", s.x, s.y, s.z);
 		}
+		if (r.x || r.y || r.z) {
+			std::cout << indent << indentadd;
+			printf("  R:[%f %f %f]\n", r.x, r.y, r.z);
+		}
+		if (t.x || t.y || t.z) {
+			std::cout << indent << indentadd;
+			printf("  T:[%f %f %f]\n", t.x, t.y, t.z);
+		}
+	}
+
+	// and recurse
+	std::string nextIndent;
+	if (first) { nextIndent = indent; }
+	else if (last) { nextIndent = indent + "  "; }
+	else { nextIndent = indent + TREE_CONTINUE; } // "| "
+	for (size_t i = 0; i < node->mNumChildren; ++i) {
+		bool lastone = (i == node->mNumChildren - 1);
+		PrintHierarchy(
+			node->mChildren[i],
+			nextIndent,
+			verbose,
+			lastone,
+			false
+		);
 	}
 }
 
@@ -229,10 +302,23 @@ int Assimp_Info (const char* const* params, unsigned int num)
 
 	const std::string in  = std::string(params[0]);
 
+	// get -r and -v arguments
+	bool raw = false;
+	bool verbose = false;
+	for(unsigned int i = 1; i < num; ++i) {
+		if (!strcmp(params[i],"--raw")||!strcmp(params[i],"-r")) {
+			raw = true;
+		}
+		if (!strcmp(params[i],"--verbose")||!strcmp(params[i],"-v")) {
+			verbose = true;
+		}
+	}
+
 	// do maximum post-processing unless -r was specified
 	ImportData import;
-	import.ppFlags = num>1&&(!strcmp(params[1],"--raw")||!strcmp(params[1],"-r")) ? 0
-		: aiProcessPreset_TargetRealtime_MaxQuality;
+	if (!raw) {
+		import.ppFlags = aiProcessPreset_TargetRealtime_MaxQuality;
+	}
 
 	// import the main model
 	const aiScene* scene = ImportModel(import,in);
@@ -293,6 +379,29 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		special_points[2][0],special_points[2][1],special_points[2][2]
 		)
 	;
+
+	// meshes
+	if (scene->mNumMeshes) {
+		printf("\nMeshes:  (name) [vertices / bones / faces | primitive_types]\n");
+	}
+	for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+		const aiMesh* mesh = scene->mMeshes[i];
+		printf("    %d (%s)", i, mesh->mName.C_Str());
+		printf(
+			": [%d / %d / %d |",
+			mesh->mNumVertices,
+			mesh->mNumBones,
+			mesh->mNumFaces
+		);
+		const unsigned int ptypes = mesh->mPrimitiveTypes;
+		if (ptypes & aiPrimitiveType_POINT) { printf(" point"); }
+		if (ptypes & aiPrimitiveType_LINE) { printf(" line"); }
+		if (ptypes & aiPrimitiveType_TRIANGLE) { printf(" triangle"); }
+		if (ptypes & aiPrimitiveType_POLYGON) { printf(" polygon"); }
+		printf("]\n");
+	}
+
+	// materials
 	unsigned int total=0;
 	for(unsigned int i = 0;i < scene->mNumMaterials; ++i) {
 		aiString name;
@@ -304,6 +413,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		printf("\n");
 	}
 
+	// textures
 	total=0;
 	for(unsigned int i = 0;i < scene->mNumMaterials; ++i) {
 		aiString name;
@@ -333,6 +443,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		printf("\n");
 	}
 
+	// animations
 	total=0;
 	for(unsigned int i = 0;i < scene->mNumAnimations; ++i) {
 		if (scene->mAnimations[i]->mName.length) {
@@ -343,9 +454,9 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		printf("\n");
 	}
 
+	// node hierarchy
 	printf("\nNode hierarchy:\n");
-	unsigned int cline=0;
-	PrintHierarchy(scene->mRootNode,20,1000,cline);
+	PrintHierarchy(scene->mRootNode,"",verbose);
 
 	printf("\n");
 	return 0;

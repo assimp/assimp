@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -340,6 +341,12 @@ namespace glTF2 {
             if (!pbrSpecularGlossiness.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_pbrSpecularGlossiness", pbrSpecularGlossiness, w.mAl);
             }
+        }
+
+        if (m.unlit) {
+          Value unlit;
+          unlit.SetObject();
+          exts.AddMember("KHR_materials_unlit", unlit, w.mAl);
         }
 
         if (!exts.ObjectEmpty()) {
@@ -681,6 +688,10 @@ namespace glTF2 {
             // This is used to export pbrSpecularGlossiness materials with GLTF 2.
             if (this->mAsset.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
                 exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_unlit) {
+              exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
             }
         }
 

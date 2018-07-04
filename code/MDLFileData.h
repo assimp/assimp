@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -843,11 +844,11 @@ struct IntGroupInfo_MDL7
 struct IntGroupData_MDL7
 {
     IntGroupData_MDL7()
-        : pcFaces(NULL), bNeed2UV(false)
+        : bNeed2UV(false)
     {}
 
     //! Array of faces that belong to the group
-    MDL::IntFace_MDL7* pcFaces;
+    std::vector<MDL::IntFace_MDL7> pcFaces;
 
     //! Array of vertex positions
     std::vector<aiVector3D>     vPositions;

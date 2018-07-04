@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -360,6 +361,11 @@ enum aiPostProcessSteps
      *       and line meshes from the scene.
      *   </li>
      * </ul>
+     *
+     * This step also removes very small triangles with a surface area smaller
+     * than 10^-6. If you rely on having these small triangles, or notice holes
+     * in your model, set the property <tt>#AI_CONFIG_PP_FD_CHECKAREA</tt> to
+     * false.
      * @note Degenerate polygons are not necessarily evil and that's why
      * they're not removed by default. There are several file formats which
      * don't support lines or points, and some exporters bypass the
@@ -531,9 +537,11 @@ enum aiPostProcessSteps
     /** <hr>This step will perform a global scale of the model.
     *
     *  Some importers are providing a mechanism to define a scaling unit for the
-    *  model. This post processing step can be used to do so.
+    *  model. This post processing step can be used to do so. You need to get the
+    *  global scaling from your importer settings like in FBX. Use the flag
+    *  AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY from the global property table to configure this.
     *
-    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to control this.
+    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaing factor.
     */
     aiProcess_GlobalScale = 0x8000000,
 
@@ -547,10 +555,13 @@ enum aiPostProcessSteps
      *  of the imported model. And if so, it uses that.
      */
     aiProcess_EmbedTextures  = 0x10000000,
-
+        
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000
     // aiProcess_FixTexturePaths = 0x200000
+
+
+    aiProcess_ForceGenNormals = 0x20000000,
 };
 
 

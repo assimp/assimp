@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -75,10 +76,12 @@ public:
 
 protected:
     void writeHeader();
+    void writeMetaData();
+    void writeBaseMaterials();
     void writeObjects();
     void writeMesh( aiMesh *mesh );
     void writeVertex( const aiVector3D &pos );
-    void writeFaces( aiMesh *mesh );
+    void writeFaces( aiMesh *mesh, unsigned int matIdx );
     void writeBuild();
     void exportContentTyp( const std::string &filename );
     void writeModelToArchive( const std::string &folder, const std::string &modelName );

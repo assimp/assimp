@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -326,6 +327,16 @@ struct aiScene
     */
     C_STRUCT aiCamera** mCameras;
 
+    /**
+     *  @brief  The global metadata assigned to the scene itself.
+     *
+     *  This data contains global metadata which belongs to the scene like 
+     *  unit-conversions, versions, vendors or other model-specific data. This 
+     *  can be used to store format-specific metadata as well.
+     */
+    C_STRUCT aiMetadata* mMetaData;
+
+
 #ifdef __cplusplus
 
     //! Default constructor - set everything to 0/NULL
@@ -377,7 +388,7 @@ struct aiScene
     }
 
     //! Returns an embedded texture
-    const aiTexture* GetEmbeddedTexture(const char* filename) {
+    const aiTexture* GetEmbeddedTexture(const char* filename) const {
         const char* shortFilename = GetShortFilename(filename);
         for (unsigned int i = 0; i < mNumTextures; i++) {
             const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());

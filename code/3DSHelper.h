@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -370,9 +371,14 @@ struct Texture
 /** Helper structure representing a 3ds material */
 struct Material
 {
-    //! Default constructor. Builds a default name for the material
-    Material()
-    : mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
+    //! Default constructor has been deleted
+    Material() = delete;
+
+
+    //! Constructor with explicit name
+    explicit Material(const std::string &name)
+    : mName(name)
+    , mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
     , mSpecularExponent   ( ai_real( 0.0 ) )
     , mShininessStrength  ( ai_real( 1.0 ) )
     , mShading(Discreet3DS::Gouraud)
@@ -380,12 +386,69 @@ struct Material
     , mBumpHeight         ( ai_real( 1.0 ) )
     , mTwoSided           (false)
     {
-        static int iCnt = 0;
-
-        char szTemp[128];
-        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
     }
+
+
+    Material(const Material &other)            = default;
+    Material &operator=(const Material &other) = default;
+
+
+    //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
+    Material(Material &&other)
+    : mName(std::move(other.mName))
+    , mDiffuse(std::move(other.mDiffuse))
+    , mSpecularExponent(std::move(other.mSpecularExponent))
+    , mShininessStrength(std::move(other.mShininessStrength))
+    , mSpecular(std::move(other.mSpecular))
+    , mAmbient(std::move(other.mAmbient))
+    , mShading(std::move(other.mShading))
+    , mTransparency(std::move(other.mTransparency))
+    , sTexDiffuse(std::move(other.sTexDiffuse))
+    , sTexOpacity(std::move(other.sTexOpacity))
+    , sTexSpecular(std::move(other.sTexSpecular))
+    , sTexReflective(std::move(other.sTexReflective))
+    , sTexBump(std::move(other.sTexBump))
+    , sTexEmissive(std::move(other.sTexEmissive))
+    , sTexShininess(std::move(other.sTexShininess))
+    , mBumpHeight(std::move(other.mBumpHeight))
+    , mEmissive(std::move(other.mEmissive))
+    , sTexAmbient(std::move(other.sTexAmbient))
+    , mTwoSided(std::move(other.mTwoSided))
+    {
+    }
+
+
+    Material &operator=(Material &&other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        mName = std::move(other.mName);
+        mDiffuse = std::move(other.mDiffuse);
+        mSpecularExponent = std::move(other.mSpecularExponent);
+        mShininessStrength = std::move(other.mShininessStrength),
+        mSpecular = std::move(other.mSpecular);
+        mAmbient = std::move(other.mAmbient);
+        mShading = std::move(other.mShading);
+        mTransparency = std::move(other.mTransparency);
+        sTexDiffuse = std::move(other.sTexDiffuse);
+        sTexOpacity = std::move(other.sTexOpacity);
+        sTexSpecular = std::move(other.sTexSpecular);
+        sTexReflective = std::move(other.sTexReflective);
+        sTexBump = std::move(other.sTexBump);
+        sTexEmissive = std::move(other.sTexEmissive);
+        sTexShininess = std::move(other.sTexShininess);
+        mBumpHeight = std::move(other.mBumpHeight);
+        mEmissive = std::move(other.mEmissive);
+        sTexAmbient = std::move(other.sTexAmbient);
+        mTwoSided = std::move(other.mTwoSided);
+
+        return *this;
+    }
+
+
+    ~Material() {}
+
 
     //! Name of the material
     std::string mName;
@@ -432,16 +495,15 @@ struct Material
 /** Helper structure to represent a 3ds file mesh */
 struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 {
-    //! Default constructor
-    Mesh()
-    {
-        static int iCnt = 0;
+    //! Default constructor has been deleted
+    Mesh() = delete;
 
-        // Generate a default name for the mesh
-        char szTemp[128];
-        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
+    //! Constructor with explicit name
+    explicit Mesh(const std::string &name)
+    : mName(name)
+    {
     }
+
 
     //! Name of the mesh
     std::string mName;
@@ -488,24 +550,21 @@ struct aiFloatKey
 /** Helper structure to represent a 3ds file node */
 struct Node
 {
-    Node():
-    	mParent(NULL)
-		,	mInstanceNumber(0)
-		,	mHierarchyPos		(0)
-		,	mHierarchyIndex		(0)
-		,	mInstanceCount		(1)
+    Node() = delete;
+
+    explicit Node(const std::string &name)
+    : mParent(NULL)
+    , mName(name)
+    , mInstanceNumber(0)
+    , mHierarchyPos       (0)
+    , mHierarchyIndex     (0)
+    , mInstanceCount      (1)
     {
-        static int iCnt = 0;
-
-        // Generate a default name for the node
-        char szTemp[128];
-        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
-        mName = szTemp;
-
         aRotationKeys.reserve (20);
         aPositionKeys.reserve (20);
         aScalingKeys.reserve  (20);
     }
+
 
     ~Node()
     {

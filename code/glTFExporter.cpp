@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -567,7 +568,7 @@ void glTFExporter::ExportMeshes()
 			else
 				msg = "mesh must has vertices and faces.";
 
-			DefaultLogger::get()->warn("GLTF: can not use Open3DGC-compression: " + msg);
+            ASSIMP_LOG_WARN_F("GLTF: can not use Open3DGC-compression: ", msg);
             comp_allow = false;
 		}
 
@@ -702,7 +703,7 @@ void glTFExporter::ExportMeshes()
 			// Coordinates indices
 			comp_o3dgc_ifs.SetNCoordIndex(aim->mNumFaces);
 			comp_o3dgc_ifs.SetCoordIndex((IndicesType* const)&b->GetPointer()[idx_srcdata_ind]);
-			// Prepare to enconding
+			// Prepare to encoding
 			comp_o3dgc_params.SetNumFloatAttributes(comp_o3dgc_ifs.GetNumFloatAttributes());
 			if(mProperties->GetPropertyBool("extensions.Open3DGC.binary", true))
 				comp_o3dgc_params.SetStreamType(o3dgc::O3DGC_STREAM_TYPE_BINARY);

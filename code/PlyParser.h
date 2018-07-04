@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,11 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
 /** @file Defines the helper data structures for importing PLY files  */
+#pragma once
 #ifndef AI_PLYFILEHELPER_H_INC
 #define AI_PLYFILEHELPER_H_INC
-
 
 #include <assimp/ParsingUtils.h>
 #include <assimp/IOStreamBuffer.h>
@@ -57,8 +57,7 @@ class PLYImporter;
 // http://local.wasp.uwa.edu.au/~pbourke/dataformats/ply/
 // http://w3.impa.br/~lvelho/outgoing/sossai/old/ViHAP_D4.4.2_PLY_format_v1.1.pdf
 // http://www.okino.com/conv/exp_ply.htm
-namespace PLY
-{
+namespace PLY {
 
 // ---------------------------------------------------------------------------------
 /*
@@ -77,8 +76,7 @@ int8
 int16
 uint8 ... forms are also used
 */
-enum EDataType
-{
+enum EDataType {
     EDT_Char = 0x0u,
     EDT_UChar,
     EDT_Short,
@@ -97,8 +95,7 @@ enum EDataType
  *
  * Semantics define the usage of a property, e.g. x coordinate
 */
-enum ESemantic
-{
+enum ESemantic {
     //! vertex position x coordinate
     EST_XCoord = 0x0u,
     //! vertex position x coordinate
@@ -181,15 +178,14 @@ enum ESemantic
  *
  * Semantics define the usage of an element, e.g. vertex or material
 */
-enum EElementSemantic
-{
+enum EElementSemantic {
     //! The element is a vertex
     EEST_Vertex = 0x0u,
 
     //! The element is a face description (index table)
     EEST_Face,
 
-    //! The element is a tristrip description (index table)
+    //! The element is a triangle-strip description (index table)
     EEST_TriStrip,
 
     //! The element is an edge description (ignored)
@@ -210,17 +206,16 @@ enum EElementSemantic
  *
  * This can e.g. be a part of the vertex declaration
  */
-class Property
-{
+class Property {
 public:
-
     //! Default constructor
     Property()
-        : eType (EDT_Int),
-        Semantic(),
-        bIsList(false),
-        eFirstType(EDT_UChar)
-    {}
+    : eType (EDT_Int)
+    , Semantic()
+    , bIsList(false)
+    , eFirstType(EDT_UChar) {
+        // empty
+    }
 
     //! Data type of the property
     EDataType eType;
@@ -259,15 +254,14 @@ public:
  * This can e.g. be the vertex declaration. Elements contain a
  * well-defined number of properties.
  */
-class Element
-{
+class Element {
 public:
-
     //! Default constructor
     Element()
-        :   eSemantic (EEST_INVALID)
-        ,   NumOccur(0)
-    {}
+    : eSemantic (EEST_INVALID)
+    , NumOccur(0) {
+        // empty
+    }
 
     //! List of properties assigned to the element
     //! std::vector to support operator[]

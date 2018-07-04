@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -46,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
+
+#include <vector>
 
 using namespace Assimp;
 
@@ -67,3 +72,83 @@ TEST_F( utSTLImporterExporter, test_with_two_solids ) {
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 }
+
+TEST_F(utSTLImporterExporter, test_with_empty_solid) {
+    Assimp::Importer importer;
+    //STL File with empty mesh. We should still be able to import other meshes in this file. ValidateDataStructure should fail.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_empty_solid.stl", 0);
+    EXPECT_NE(nullptr, scene);
+
+    const aiScene *scene2 = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_empty_solid.stl", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene2);
+}
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utSTLImporterExporter, exporterTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
+
+    Assimp::Exporter mAiExporter;
+    mAiExporter.Export( scene, "stl", "spiderExport.stl" );
+
+    const aiScene *scene2 = importer.ReadFile("spiderExport.stl", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene2);
+}
+
+TEST_F(utSTLImporterExporter, test_export_pointclouds) {
+    struct XYZ {
+        float x, y, z;
+    };
+
+    std::vector<XYZ> points;
+
+    for (size_t i = 0; i < 10; ++i) {
+        XYZ current;
+        current.x = static_cast<float>(i);
+        current.y = static_cast<float>(i);
+        current.z = static_cast<float>(i);
+        points.push_back(current);
+    }
+    aiScene scene;
+    scene.mRootNode = new aiNode();
+
+    scene.mMeshes = new aiMesh*[1];
+    scene.mMeshes[0] = nullptr;
+    scene.mNumMeshes = 1;
+
+    scene.mMaterials = new aiMaterial*[1];
+    scene.mMaterials[0] = nullptr;
+    scene.mNumMaterials = 1;
+
+    scene.mMaterials[0] = new aiMaterial();
+
+    scene.mMeshes[0] = new aiMesh();
+    scene.mMeshes[0]->mMaterialIndex = 0;
+
+    scene.mRootNode->mMeshes = new unsigned int[1];
+    scene.mRootNode->mMeshes[0] = 0;
+    scene.mRootNode->mNumMeshes = 1;
+
+    auto pMesh = scene.mMeshes[0];
+
+    long numValidPoints = points.size();
+
+    pMesh->mVertices = new aiVector3D[numValidPoints];
+    pMesh->mNumVertices = numValidPoints;
+
+    int i = 0;
+    for (XYZ &p : points) {
+        pMesh->mVertices[i] = aiVector3D(p.x, p.y, p.z);
+        ++i;
+    }
+
+    Assimp::Exporter mAiExporter;
+    ExportProperties *properties = new ExportProperties;
+    properties->SetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS, true);
+    mAiExporter.Export(&scene, "stl", "testExport.stl", 0, properties );
+
+    delete properties;
+}
+
+#endif

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -120,6 +121,21 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
     return false;
 }
 
+static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode)
+{
+    switch (gltfWrapMode) {
+        case SamplerWrap::Mirrored_Repeat:
+            return aiTextureMapMode_Mirror;
+
+        case SamplerWrap::Clamp_To_Edge:
+            return aiTextureMapMode_Clamp;
+
+        case SamplerWrap::UNSET:
+        case SamplerWrap::Repeat:
+        default:
+            return aiTextureMapMode_Wrap;
+    }
+}
 
 //static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
 //{
@@ -197,8 +213,10 @@ inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset&
             mat->AddProperty(&name, AI_MATKEY_GLTF_MAPPINGNAME(texType, texSlot));
             mat->AddProperty(&id, AI_MATKEY_GLTF_MAPPINGID(texType, texSlot));
 
-            mat->AddProperty(&sampler->wrapS, 1, AI_MATKEY_MAPPINGMODE_U(texType, texSlot));
-            mat->AddProperty(&sampler->wrapT, 1, AI_MATKEY_MAPPINGMODE_V(texType, texSlot));
+            aiTextureMapMode wrapS = ConvertWrappingMode(sampler->wrapS);
+            aiTextureMapMode wrapT = ConvertWrappingMode(sampler->wrapT);
+            mat->AddProperty(&wrapS, 1, AI_MATKEY_MAPPINGMODE_U(texType, texSlot));
+            mat->AddProperty(&wrapT, 1, AI_MATKEY_MAPPINGMODE_V(texType, texSlot));
 
             if (sampler->magFilter != SamplerMagFilter::UNSET) {
                 mat->AddProperty(&sampler->magFilter, 1, AI_MATKEY_GLTF_MAPPINGFILTER_MAG(texType, texSlot));
@@ -279,6 +297,9 @@ static aiMaterial* ImportMaterial(std::vector<int>& embeddedTexIdxs, Asset& r, M
         SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.diffuseTexture, aimat, aiTextureType_DIFFUSE);
 
         SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.specularGlossinessTexture, aimat, aiTextureType_SPECULAR);
+    }
+    if (mat.unlit) {
+        aimat->AddProperty(&mat.unlit, 1, AI_MATKEY_GLTF_UNLIT);
     }
 
     return aimat;
@@ -395,8 +416,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 // only extract tangents if normals are present
                 if (attr.tangent.size() > 0 && attr.tangent[0]) {
                     // generate bitangents from normals and tangents according to spec
-                    struct Tangent
-                    {
+                    struct Tangent {
                         aiVector3D xyz;
                         ai_real w;
                     } *tangents = nullptr;
@@ -411,7 +431,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         aim->mBitangents[i] = (aim->mNormals[i] ^ tangents[i].xyz) * tangents[i].w;
                     }
 
-                    delete tangents;
+                    delete [] tangents;
                 }
             }
 

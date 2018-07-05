@@ -462,7 +462,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     if (target.position.size() > 0) {
                         aiVector3D *positionDiff = nullptr;
                         target.position[0]->ExtractData(positionDiff);
-                        for(int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                        for(unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                             aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
                         }
                         delete [] positionDiff;
@@ -470,7 +470,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     if (target.normal.size() > 0) {
                         aiVector3D *normalDiff = nullptr;
                         target.normal[0]->ExtractData(normalDiff);
-                        for(int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                        for(unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                             aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
                         }
                         delete [] normalDiff;

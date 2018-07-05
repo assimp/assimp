@@ -377,7 +377,7 @@ void StandardShapes::MakeSphere(unsigned int    tess,
     MakeIcosahedron(positions);
 
     // ... and subdivide it until the requested output
-    // tesselation is reached
+    // tessellation is reached
     for (unsigned int i = 0; i<tess;++i)
         Subdivide(positions);
 }

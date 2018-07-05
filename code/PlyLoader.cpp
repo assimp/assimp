@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
 
-using namespace Assimp;
+using namespace ::Assimp;
 
 static const aiImporterDesc desc = {
     "Stanford Polygon Library (PLY) Importer",
@@ -73,21 +73,19 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Internal stuff
-namespace
-{
-  // ------------------------------------------------------------------------------------------------
-  // Checks that property index is within range
-  template <class T>
-  const T &GetProperty(const std::vector<T> &props, int idx)
-  {
-    if (static_cast<size_t>(idx) >= props.size()) {
-      throw DeadlyImportError("Invalid .ply file: Property index is out of range.");
+namespace {
+    // ------------------------------------------------------------------------------------------------
+    // Checks that property index is within range
+    template <class T>
+    inline
+    const T &GetProperty(const std::vector<T> &props, int idx) {
+        if (static_cast<size_t>(idx) >= props.size()) {
+            throw DeadlyImportError("Invalid .ply file: Property index is out of range.");
+        }
+
+        return props[idx];
     }
-
-    return props[idx];
-  }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -129,7 +127,7 @@ const aiImporterDesc* PLYImporter::GetInfo() const {
 
 // ------------------------------------------------------------------------------------------------
 static bool isBigEndian(const char* szMe) {
-    ai_assert(NULL != szMe);
+    ai_assert(nullptr != szMe);
 
     // binary_little_endian
     // binary_big_endian
@@ -150,7 +148,7 @@ static bool isBigEndian(const char* szMe) {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
-    static const std::string mode = "rb";
+    const std::string mode = "rb";
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
     if (!fileStream.get()) {
         throw DeadlyImportError("Failed to open file " + pFile + ".");
@@ -184,7 +182,7 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
     char* szMe = (char*)&this->mBuffer[0];
     SkipSpacesAndLineEnd(szMe, (const char**)&szMe);
 
-    // determine the format of the file data and construct the aimesh
+    // determine the format of the file data and construct the aiMesh
     PLY::DOM sPlyDom;   
     this->pcDOM = &sPlyDom;
 
@@ -192,7 +190,7 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
         if (TokenMatch(szMe, "ascii", 5)) {
             SkipLine(szMe, (const char**)&szMe);
             if (!PLY::DOM::ParseInstance(streamedBuffer, &sPlyDom, this)) {
-                if (mGeneratedMesh != NULL) {
+                if (mGeneratedMesh != nullptr) {
                     delete(mGeneratedMesh);
                     mGeneratedMesh = nullptr;
                 }
@@ -206,7 +204,7 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 
             // skip the line, parse the rest of the header and build the DOM
             if (!PLY::DOM::ParseInstanceBinary(streamedBuffer, &sPlyDom, this, bIsBE)) {
-                if (mGeneratedMesh != NULL) {
+                if (mGeneratedMesh != nullptr) {
                     delete(mGeneratedMesh);
                     mGeneratedMesh = nullptr;
                 }
@@ -215,7 +213,7 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
                 throw DeadlyImportError("Invalid .ply file: Unable to build DOM (#2)");
             }
         } else {
-            if (mGeneratedMesh != NULL) {
+            if (mGeneratedMesh != nullptr) {
                 delete(mGeneratedMesh);
                 mGeneratedMesh = nullptr;
             }
@@ -225,7 +223,7 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
         }
     } else {
         AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
-        if (mGeneratedMesh != NULL) {
+        if (mGeneratedMesh != nullptr) {
             delete(mGeneratedMesh);
             mGeneratedMesh = nullptr;
         }
@@ -237,13 +235,13 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
     //free the file buffer
     streamedBuffer.close();
 
-    if (mGeneratedMesh == NULL) {
+    if (mGeneratedMesh == nullptr) {
         throw DeadlyImportError("Invalid .ply file: Unable to extract mesh data ");
     }
 
     // if no face list is existing we assume that the vertex
     // list is containing a list of points
-    bool pointsOnly = mGeneratedMesh->mFaces == NULL ? true : false;
+    bool pointsOnly = mGeneratedMesh->mFaces == nullptr ? true : false;
     if (pointsOnly) {
       mGeneratedMesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_POINT;
     }
@@ -277,8 +275,8 @@ void PLYImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 }
 
 void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementInstance* instElement, unsigned int pos) {
-    ai_assert(NULL != pcElement);
-    ai_assert(NULL != instElement);
+    ai_assert(nullptr != pcElement);
+    ai_assert(nullptr != instElement);
 
     ai_uint aiPositions[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
     PLY::EDataType aiTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
@@ -416,7 +414,7 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
             haveColor = true;
         }
 
-        // assume 1.0 for the alpha channel ifit is not set
+        // assume 1.0 for the alpha channel if it is not set
         if (0xFFFFFFFF == aiColors[3]) {
             cOut.a = 1.0;
         } else {
@@ -481,225 +479,205 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
 // ------------------------------------------------------------------------------------------------
 // Convert a color component to [0...1]
 ai_real PLYImporter::NormalizeColorValue(PLY::PropertyInstance::ValueUnion val, PLY::EDataType eType) {
-  switch (eType)
-  {
-  case EDT_Float:
-    return val.fFloat;
-  case EDT_Double:
-    return (ai_real)val.fDouble;
+    switch (eType) {
+        case EDT_Float:
+            return val.fFloat;
+        case EDT_Double:
+            return (ai_real)val.fDouble;
+        case EDT_UChar:
+            return (ai_real)val.iUInt / (ai_real)0xFF;
+        case EDT_Char:
+            return (ai_real)(val.iInt + (0xFF / 2)) / (ai_real)0xFF;
+        case EDT_UShort:
+            return (ai_real)val.iUInt / (ai_real)0xFFFF;
+        case EDT_Short:
+            return (ai_real)(val.iInt + (0xFFFF / 2)) / (ai_real)0xFFFF;
+        case EDT_UInt:
+            return (ai_real)val.iUInt / (ai_real)0xFFFF;
+        case EDT_Int:
+            return ((ai_real)val.iInt / (ai_real)0xFF) + 0.5f;
+        default:
+            break;
+    }
 
-  case EDT_UChar:
-    return (ai_real)val.iUInt / (ai_real)0xFF;
-  case EDT_Char:
-    return (ai_real)(val.iInt + (0xFF / 2)) / (ai_real)0xFF;
-  case EDT_UShort:
-    return (ai_real)val.iUInt / (ai_real)0xFFFF;
-  case EDT_Short:
-    return (ai_real)(val.iInt + (0xFFFF / 2)) / (ai_real)0xFFFF;
-  case EDT_UInt:
-    return (ai_real)val.iUInt / (ai_real)0xFFFF;
-  case EDT_Int:
-    return ((ai_real)val.iInt / (ai_real)0xFF) + 0.5f;
-  default:;
-  };
-  return 0.0f;
+    return 0.0f;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Try to extract proper faces from the PLY DOM
-void PLYImporter::LoadFace(const PLY::Element* pcElement, const PLY::ElementInstance* instElement, unsigned int pos)
-{
-  ai_assert(NULL != pcElement);
-  ai_assert(NULL != instElement);
+void PLYImporter::LoadFace(const PLY::Element* pcElement, const PLY::ElementInstance* instElement,
+        unsigned int pos) {
+    ai_assert(nullptr != pcElement);
+    ai_assert(nullptr != instElement);
 
-  if (mGeneratedMesh == NULL)
-    throw DeadlyImportError("Invalid .ply file: Vertices should be declared before faces");
-
-  bool bOne = false;
-
-  // index of the vertex index list
-  unsigned int iProperty = 0xFFFFFFFF;
-  PLY::EDataType eType = EDT_Char;
-  bool bIsTriStrip = false;
-
-  // index of the material index property
-  //unsigned int iMaterialIndex = 0xFFFFFFFF;
-  //PLY::EDataType eType2 = EDT_Char;
-
-  // texture coordinates
-  unsigned int iTextureCoord = 0xFFFFFFFF;
-  PLY::EDataType eType3 = EDT_Char;
-
-  // face = unique number of vertex indices
-  if (PLY::EEST_Face == pcElement->eSemantic)
-  {
-    unsigned int _a = 0;
-    for (std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
-      a != pcElement->alProperties.end(); ++a, ++_a)
-    {
-      if (PLY::EST_VertexIndex == (*a).Semantic)
-      {
-        // must be a dynamic list!
-        if (!(*a).bIsList)
-          continue;
-
-        iProperty = _a;
-        bOne = true;
-        eType = (*a).eType;
-      }
-      /*else if (PLY::EST_MaterialIndex == (*a).Semantic)
-      {
-      if ((*a).bIsList)
-      continue;
-      iMaterialIndex = _a;
-      bOne = true;
-      eType2 = (*a).eType;
-      }*/
-      else if (PLY::EST_TextureCoordinates == (*a).Semantic)
-      {
-        // must be a dynamic list!
-        if (!(*a).bIsList)
-          continue;
-        iTextureCoord = _a;
-        bOne = true;
-        eType3 = (*a).eType;
-      }
-    }
-  }
-  // triangle strip
-  // TODO: triangle strip and material index support???
-  else if (PLY::EEST_TriStrip == pcElement->eSemantic)
-  {
-    unsigned int _a = 0;
-    for (std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
-      a != pcElement->alProperties.end(); ++a, ++_a)
-    {
-      // must be a dynamic list!
-      if (!(*a).bIsList)
-        continue;
-      iProperty = _a;
-      bOne = true;
-      bIsTriStrip = true;
-      eType = (*a).eType;
-      break;
-    }
-  }
-
-  // check whether we have at least one per-face information set
-  if (bOne)
-  {
-    if (mGeneratedMesh->mFaces == NULL)
-    {
-      mGeneratedMesh->mNumFaces = pcElement->NumOccur;
-      mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
+    if (mGeneratedMesh == nullptr) {
+        throw DeadlyImportError("Invalid .ply file: Vertices should be declared before faces");
     }
 
-    if (!bIsTriStrip)
-    {
-      // parse the list of vertex indices
-      if (0xFFFFFFFF != iProperty)
-      {
-        const unsigned int iNum = (unsigned int)GetProperty(instElement->alProperties, iProperty).avList.size();
-        mGeneratedMesh->mFaces[pos].mNumIndices = iNum;
-        mGeneratedMesh->mFaces[pos].mIndices = new unsigned int[iNum];
+    bool bOne = false;
 
-        std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p =
-          GetProperty(instElement->alProperties, iProperty).avList.begin();
+    // index of the vertex index list
+    unsigned int iProperty = 0xFFFFFFFF;
+    PLY::EDataType eType = EDT_Char;
+    bool bIsTriStrip = false;
 
-        for (unsigned int a = 0; a < iNum; ++a, ++p)
-        {
-          mGeneratedMesh->mFaces[pos].mIndices[a] = PLY::PropertyInstance::ConvertTo<unsigned int>(*p, eType);
-        }
-      }
+    // index of the material index property
+    //unsigned int iMaterialIndex = 0xFFFFFFFF;
+    //PLY::EDataType eType2 = EDT_Char;
 
-      // parse the material index
-      // cannot be handled without processing the whole file first
-      /*if (0xFFFFFFFF != iMaterialIndex)
-      {
-      mGeneratedMesh->mFaces[pos]. = PLY::PropertyInstance::ConvertTo<unsigned int>(
-      GetProperty(instElement->alProperties, iMaterialIndex).avList.front(), eType2);
-      }*/
+    // texture coordinates
+    unsigned int iTextureCoord = 0xFFFFFFFF;
+    PLY::EDataType eType3 = EDT_Char;
 
-      if (0xFFFFFFFF != iTextureCoord)
-      {
-        const unsigned int iNum = (unsigned int)GetProperty(instElement->alProperties, iTextureCoord).avList.size();
+    // face = unique number of vertex indices
+    if (PLY::EEST_Face == pcElement->eSemantic) {
+        unsigned int _a = 0;
+        for (std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
+                a != pcElement->alProperties.end(); ++a, ++_a) {
+            if (PLY::EST_VertexIndex == (*a).Semantic) {
+                // must be a dynamic list!
+                if (!(*a).bIsList) {
+                    continue;
+                }
 
-        //should be 6 coords
-        std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p =
-          GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
-
-        if ((iNum / 3) == 2) // X Y coord
-        {
-          for (unsigned int a = 0; a < iNum; ++a, ++p)
-          {
-            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[a / 2];
-            if (vindex < mGeneratedMesh->mNumVertices)
-            {
-              if (mGeneratedMesh->mTextureCoords[0] == NULL)
-              {
-                mGeneratedMesh->mNumUVComponents[0] = 2;
-                mGeneratedMesh->mTextureCoords[0] = new aiVector3D[mGeneratedMesh->mNumVertices];
-              }
-
-              if (a % 2 == 0)
-                mGeneratedMesh->mTextureCoords[0][vindex].x = PLY::PropertyInstance::ConvertTo<ai_real>(*p, eType3);
-              else
-                mGeneratedMesh->mTextureCoords[0][vindex].y = PLY::PropertyInstance::ConvertTo<ai_real>(*p, eType3);
-
-              mGeneratedMesh->mTextureCoords[0][vindex].z = 0;
+                iProperty = _a;
+                bOne = true;
+                eType = (*a).eType;
+            } else if (PLY::EST_TextureCoordinates == (*a).Semantic) {
+                // must be a dynamic list!
+                if (!(*a).bIsList) {
+                    continue;
+                }
+                iTextureCoord = _a;
+                bOne = true;
+                eType3 = (*a).eType;
             }
-          }
         }
-      }
     }
-    else // triangle strips
-    {
-      // normally we have only one triangle strip instance where
-      // a value of -1 indicates a restart of the strip
-      bool flip = false;
-      const std::vector<PLY::PropertyInstance::ValueUnion>& quak = GetProperty(instElement->alProperties, iProperty).avList;
-      //pvOut->reserve(pvOut->size() + quak.size() + (quak.size()>>2u)); //Limits memory consumption
-
-      int aiTable[2] = { -1, -1 };
-      for (std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator a = quak.begin(); a != quak.end(); ++a)  {
-        const int p = PLY::PropertyInstance::ConvertTo<int>(*a, eType);
-
-        if (-1 == p)    {
-          // restart the strip ...
-          aiTable[0] = aiTable[1] = -1;
-          flip = false;
-          continue;
+    // triangle strip
+    // TODO: triangle strip and material index support???
+    else if (PLY::EEST_TriStrip == pcElement->eSemantic) {
+        unsigned int _a = 0;
+        for (std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
+                a != pcElement->alProperties.end(); ++a, ++_a) {
+            // must be a dynamic list!
+            if (!(*a).bIsList) {
+                continue;
+            }
+            iProperty = _a;
+            bOne = true;
+            bIsTriStrip = true;
+            eType = (*a).eType;
+            break;
         }
-        if (-1 == aiTable[0]) {
-          aiTable[0] = p;
-          continue;
-        }
-        if (-1 == aiTable[1]) {
-          aiTable[1] = p;
-          continue;
+    }
+
+    // check whether we have at least one per-face information set
+    if (bOne) {
+        if (mGeneratedMesh->mFaces == nullptr) {
+            mGeneratedMesh->mNumFaces = pcElement->NumOccur;
+            mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
         }
 
-        if (mGeneratedMesh->mFaces == NULL)
+        if (!bIsTriStrip) {
+            // parse the list of vertex indices
+            if (0xFFFFFFFF != iProperty) {
+                const unsigned int iNum = (unsigned int)GetProperty(instElement->alProperties, iProperty).avList.size();
+                mGeneratedMesh->mFaces[pos].mNumIndices = iNum;
+                mGeneratedMesh->mFaces[pos].mIndices = new unsigned int[iNum];
+
+                std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p =
+                GetProperty(instElement->alProperties, iProperty).avList.begin();
+
+                for (unsigned int a = 0; a < iNum; ++a, ++p) {
+                    mGeneratedMesh->mFaces[pos].mIndices[a] = PLY::PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                }
+            }
+
+        // parse the material index
+        // cannot be handled without processing the whole file first
+        /*if (0xFFFFFFFF != iMaterialIndex)
         {
-          mGeneratedMesh->mNumFaces = pcElement->NumOccur;
-          mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
+            mGeneratedMesh->mFaces[pos]. = PLY::PropertyInstance::ConvertTo<unsigned int>(
+            GetProperty(instElement->alProperties, iMaterialIndex).avList.front(), eType2);
+        }*/
+
+            if (0xFFFFFFFF != iTextureCoord) {
+                const unsigned int iNum = (unsigned int)GetProperty(instElement->alProperties, iTextureCoord).avList.size();
+
+                //should be 6 coords
+                std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p =
+                GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
+
+                if ((iNum / 3) == 2) // X Y coord
+                {
+                    for (unsigned int a = 0; a < iNum; ++a, ++p) {
+                        unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[a / 2];
+                        if (vindex < mGeneratedMesh->mNumVertices) {
+                            if (mGeneratedMesh->mTextureCoords[0] == nullptr ) {
+                                mGeneratedMesh->mNumUVComponents[0] = 2;
+                                mGeneratedMesh->mTextureCoords[0] = new aiVector3D[mGeneratedMesh->mNumVertices];
+                            }
+
+                            if (a % 2 == 0) {
+                                mGeneratedMesh->mTextureCoords[0][vindex].x = PLY::PropertyInstance::ConvertTo<ai_real>(*p, eType3);
+                            } else {
+                                mGeneratedMesh->mTextureCoords[0][vindex].y = PLY::PropertyInstance::ConvertTo<ai_real>(*p, eType3);
+                            }
+
+                            mGeneratedMesh->mTextureCoords[0][vindex].z = 0;
+                        }
+                    }
+                }
+            }
+        } else { // triangle strips
+            // normally we have only one triangle strip instance where
+            // a value of -1 indicates a restart of the strip
+            bool flip = false;
+            const std::vector<PLY::PropertyInstance::ValueUnion>& quak = GetProperty(instElement->alProperties, iProperty).avList;
+            //pvOut->reserve(pvOut->size() + quak.size() + (quak.size()>>2u)); //Limits memory consumption
+
+            int aiTable[2] = { -1, -1 };
+            for (std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator a = quak.begin(); a != quak.end(); ++a)  {
+                const int p = PLY::PropertyInstance::ConvertTo<int>(*a, eType);
+
+                if (-1 == p) {
+                    // restart the strip ...
+                    aiTable[0] = aiTable[1] = -1;
+                    flip = false;
+                    continue;
+                }
+                if (-1 == aiTable[0]) {
+                    aiTable[0] = p;
+                    continue;
+                }
+                if (-1 == aiTable[1]) {
+                    aiTable[1] = p;
+                    continue;
+                }
+
+                if (mGeneratedMesh->mFaces == nullptr) {
+                    mGeneratedMesh->mNumFaces = pcElement->NumOccur;
+                    mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
+                }
+
+                mGeneratedMesh->mFaces[pos].mNumIndices = 3;
+                mGeneratedMesh->mFaces[pos].mIndices = new unsigned int[3];
+                mGeneratedMesh->mFaces[pos].mIndices[0] = aiTable[0];
+                mGeneratedMesh->mFaces[pos].mIndices[1] = aiTable[1];
+                mGeneratedMesh->mFaces[pos].mIndices[2] = p;
+
+                // every second pass swap the indices.
+                flip = !flip;
+                if ( flip ) {
+                    std::swap(mGeneratedMesh->mFaces[pos].mIndices[0], mGeneratedMesh->mFaces[pos].mIndices[1]);
+                }
+
+                aiTable[0] = aiTable[1];
+                aiTable[1] = p;
+            }
         }
-
-        mGeneratedMesh->mFaces[pos].mNumIndices = 3;
-        mGeneratedMesh->mFaces[pos].mIndices = new unsigned int[3];
-        mGeneratedMesh->mFaces[pos].mIndices[0] = aiTable[0];
-        mGeneratedMesh->mFaces[pos].mIndices[1] = aiTable[1];
-        mGeneratedMesh->mFaces[pos].mIndices[2] = p;
-
-        if ((flip = !flip)) {
-          std::swap(mGeneratedMesh->mFaces[pos].mIndices[0], mGeneratedMesh->mFaces[pos].mIndices[1]);
-        }
-
-        aiTable[0] = aiTable[1];
-        aiTable[1] = p;
-      }
     }
-  }
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -172,23 +172,23 @@ private:
     // ------------------------------------------------------------------------------------------------
     // MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
     std::vector<unsigned int> ConvertMesh(const MeshGeometry& mesh, const Model& model,
-        const aiMatrix4x4& node_global_transform);
+        const aiMatrix4x4& node_global_transform, aiNode& nd);
 
     // ------------------------------------------------------------------------------------------------
-    aiMesh* SetupEmptyMesh(const MeshGeometry& mesh);
+    aiMesh* SetupEmptyMesh(const MeshGeometry& mesh, aiNode& nd);
 
     // ------------------------------------------------------------------------------------------------
     unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model,
-        const aiMatrix4x4& node_global_transform);
+        const aiMatrix4x4& node_global_transform, aiNode& nd);
 
     // ------------------------------------------------------------------------------------------------
     std::vector<unsigned int> ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model,
-        const aiMatrix4x4& node_global_transform);
+        const aiMatrix4x4& node_global_transform, aiNode& nd);
 
     // ------------------------------------------------------------------------------------------------
     unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model,
         MatIndexArray::value_type index,
-        const aiMatrix4x4& node_global_transform);
+        const aiMatrix4x4& node_global_transform, aiNode& nd);
 
     // ------------------------------------------------------------------------------------------------
     static const unsigned int NO_MATERIAL_SEPARATION = /* std::numeric_limits<unsigned int>::max() */
@@ -227,6 +227,10 @@ private:
     // ------------------------------------------------------------------------------------------------
     // Video -> aiTexture
     unsigned int ConvertVideo(const Video& video);
+
+    // ------------------------------------------------------------------------------------------------
+    // convert embedded texture if necessary and return actual texture path
+    aiString GetTexturePath(const Texture* tex);
 
     // ------------------------------------------------------------------------------------------------
     void TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures,

@@ -70,6 +70,10 @@ TEST_F( utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
+    EXPECT_EQ(scene->mNumMeshes, 1);
+    aiMesh* mesh = scene->mMeshes[0];
+    EXPECT_EQ(mesh->mNumFaces, 12);
+    EXPECT_EQ(mesh->mNumVertices, 36);
 }
 
 TEST_F( utFBXImporterExporter, importPhongMaterial ) {

@@ -76,41 +76,36 @@ using namespace std;
 
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
-ObjFileImporter::ObjFileImporter() :
-    m_Buffer(),
-    m_pRootObject( NULL ),
-    m_strAbsPath( "" )
-{
+ObjFileImporter::ObjFileImporter()
+: m_Buffer()
+, m_pRootObject( nullptr )
+, m_strAbsPath( "" ) {
     DefaultIOSystem io;
     m_strAbsPath = io.getOsSeparator();
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
-ObjFileImporter::~ObjFileImporter()
-{
+ObjFileImporter::~ObjFileImporter() {
     delete m_pRootObject;
-    m_pRootObject = NULL;
+    m_pRootObject = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an obj file.
-bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const
-{
-    if(!checkSig) //Check File Extension
-    {
+bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const {
+    if(!checkSig)  {
+        //Check File Extension
         return SimpleExtensionCheck(pFile,"obj");
-    }
-    else //Check file Header
-    {
+    } else {
+        // Check file Header
         static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9 );
+        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9, 200, false, true );
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* ObjFileImporter::GetInfo () const
-{
+const aiImporterDesc* ObjFileImporter::GetInfo () const {
     return &desc;
 }
 
@@ -557,7 +552,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
     const unsigned int numMaterials = (unsigned int) pModel->m_MaterialLib.size();
     pScene->mNumMaterials = 0;
     if ( pModel->m_MaterialLib.empty() ) {
-        DefaultLogger::get()->debug("OBJ: no materials specified");
+        ASSIMP_LOG_DEBUG("OBJ: no materials specified");
         return;
     }
 
@@ -591,7 +586,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
             break;
         default:
             sm = aiShadingMode_Gouraud;
-            DefaultLogger::get()->error("OBJ: unexpected illumination model (0-2 recognized)");
+            ASSIMP_LOG_ERROR("OBJ: unexpected illumination model (0-2 recognized)");
         }
 
         mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);

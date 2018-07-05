@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness: full
+ *   KHR_materials_unlit: full
  */
 #ifndef GLTF2ASSETWRITER_H_INC
 #define GLTF2ASSETWRITER_H_INC

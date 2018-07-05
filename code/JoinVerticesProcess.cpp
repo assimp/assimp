@@ -79,7 +79,7 @@ bool JoinVerticesProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void JoinVerticesProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("JoinVerticesProcess begin");
+    ASSIMP_LOG_DEBUG("JoinVerticesProcess begin");
 
     // get the total number of vertices BEFORE the step is executed
     int iNumOldVertices = 0;
@@ -95,19 +95,13 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
         iNumVertices += ProcessMesh( pScene->mMeshes[a],a);
 
     // if logging is active, print detailed statistics
-    if (!DefaultLogger::isNullLogger())
-    {
-        if (iNumOldVertices == iNumVertices)
-        {
-            DefaultLogger::get()->debug("JoinVerticesProcess finished ");
-        } else
-        {
-            char szBuff[128]; // should be sufficiently large in every case
-            ::ai_snprintf(szBuff,128,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
-                iNumOldVertices,
-                iNumVertices,
-                ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f);
-            DefaultLogger::get()->info(szBuff);
+    if (!DefaultLogger::isNullLogger()) {
+        if (iNumOldVertices == iNumVertices) {
+            ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
+        } else {
+            ASSIMP_LOG_INFO_F("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
+                " out: ", iNumVertices, " | ~",
+                ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f );
         }
     }
 
@@ -118,118 +112,118 @@ namespace {
 
 bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
 {
-  // A little helper to find locally close vertices faster.
-  // Try to reuse the lookup table from the last step.
-  const static float epsilon = 1e-5f;
-  // Squared because we check against squared length of the vector difference
-  static const float squareEpsilon = epsilon * epsilon;
+    // A little helper to find locally close vertices faster.
+    // Try to reuse the lookup table from the last step.
+    const static float epsilon = 1e-5f;
+    // Squared because we check against squared length of the vector difference
+    static const float squareEpsilon = epsilon * epsilon;
 
-  // Square compare is useful for animeshes vertexes compare
-  if ((lhs.position - rhs.position).SquareLength() > squareEpsilon) {
-    return false;
-  }
-
-  // We just test the other attributes even if they're not present in the mesh.
-  // In this case they're initialized to 0 so the comparison succeeds.
-  // By this method the non-present attributes are effectively ignored in the comparison.
-  if ((lhs.normal - rhs.normal).SquareLength() > squareEpsilon) {
-    return false;
-  }
-
-  if ((lhs.texcoords[0] - rhs.texcoords[0]).SquareLength() > squareEpsilon) {
-    return false;
-  }
-
-  if ((lhs.tangent - rhs.tangent).SquareLength() > squareEpsilon) {
-    return false;
-  }
-
-  if ((lhs.bitangent - rhs.bitangent).SquareLength() > squareEpsilon) {
-    return false;
-  }
-
-  // Usually we won't have vertex colors or multiple UVs, so we can skip from here
-  // Actually this increases runtime performance slightly, at least if branch
-  // prediction is on our side.
-  if (complex) {
-    for (int i = 0; i < 8; i++) {
-      if (i > 0 && (lhs.texcoords[i] - rhs.texcoords[i]).SquareLength() > squareEpsilon) {
+    // Square compare is useful for animeshes vertices compare
+    if ((lhs.position - rhs.position).SquareLength() > squareEpsilon) {
         return false;
-      }
-      if (GetColorDifference(lhs.colors[i], rhs.colors[i]) > squareEpsilon) {
-        return false;
-      }
     }
-  }
-  return true;
+
+    // We just test the other attributes even if they're not present in the mesh.
+    // In this case they're initialized to 0 so the comparison succeeds.
+    // By this method the non-present attributes are effectively ignored in the comparison.
+    if ((lhs.normal - rhs.normal).SquareLength() > squareEpsilon) {
+        return false;
+    }
+
+    if ((lhs.texcoords[0] - rhs.texcoords[0]).SquareLength() > squareEpsilon) {
+        return false;
+    }
+
+    if ((lhs.tangent - rhs.tangent).SquareLength() > squareEpsilon) {
+        return false;
+    }
+
+    if ((lhs.bitangent - rhs.bitangent).SquareLength() > squareEpsilon) {
+        return false;
+    }
+
+    // Usually we won't have vertex colors or multiple UVs, so we can skip from here
+    // Actually this increases runtime performance slightly, at least if branch
+    // prediction is on our side.
+    if (complex) {
+        for (int i = 0; i < 8; i++) {
+            if (i > 0 && (lhs.texcoords[i] - rhs.texcoords[i]).SquareLength() > squareEpsilon) {
+                return false;
+            }
+            if (GetColorDifference(lhs.colors[i], rhs.colors[i]) > squareEpsilon) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 template<class XMesh>
 void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
-  // replace vertex data with the unique data sets
-  pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
+    // replace vertex data with the unique data sets
+    pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
 
-  // ----------------------------------------------------------------------------
-  // NOTE - we're *not* calling Vertex::SortBack() because it would check for
-  // presence of every single vertex component once PER VERTEX. And our CPU
-  // dislikes branches, even if they're easily predictable.
-  // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // NOTE - we're *not* calling Vertex::SortBack() because it would check for
+    // presence of every single vertex component once PER VERTEX. And our CPU
+    // dislikes branches, even if they're easily predictable.
+    // ----------------------------------------------------------------------------
 
-  // Position, if present (check made for aiAnimMesh)
-  if (pMesh->mVertices)
-  {
-    delete [] pMesh->mVertices;
-    pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-    for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
-      pMesh->mVertices[a] = uniqueVertices[a].position;
+    // Position, if present (check made for aiAnimMesh)
+    if (pMesh->mVertices)
+    {
+        delete [] pMesh->mVertices;
+        pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+        for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
+            pMesh->mVertices[a] = uniqueVertices[a].position;
+        }
     }
-  }
 
-  // Normals, if present
-  if (pMesh->mNormals)
-  {
-    delete [] pMesh->mNormals;
-    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-    for( unsigned int a = 0; a < pMesh->mNumVertices; a++) {
-      pMesh->mNormals[a] = uniqueVertices[a].normal;
+    // Normals, if present
+    if (pMesh->mNormals)
+    {
+        delete [] pMesh->mNormals;
+        pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+        for( unsigned int a = 0; a < pMesh->mNumVertices; a++) {
+            pMesh->mNormals[a] = uniqueVertices[a].normal;
+        }
     }
-  }
-  // Tangents, if present
-  if (pMesh->mTangents)
-  {
-    delete [] pMesh->mTangents;
-    pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
-    for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
-      pMesh->mTangents[a] = uniqueVertices[a].tangent;
+    // Tangents, if present
+    if (pMesh->mTangents)
+    {
+        delete [] pMesh->mTangents;
+        pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
+        for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
+            pMesh->mTangents[a] = uniqueVertices[a].tangent;
+        }
     }
-  }
-  // Bitangents as well
-  if (pMesh->mBitangents)
-  {
-    delete [] pMesh->mBitangents;
-    pMesh->mBitangents = new aiVector3D[pMesh->mNumVertices];
-    for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
-      pMesh->mBitangents[a] = uniqueVertices[a].bitangent;
+    // Bitangents as well
+    if (pMesh->mBitangents)
+    {
+        delete [] pMesh->mBitangents;
+        pMesh->mBitangents = new aiVector3D[pMesh->mNumVertices];
+        for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
+            pMesh->mBitangents[a] = uniqueVertices[a].bitangent;
+        }
     }
-  }
-  // Vertex colors
-  for (unsigned int a = 0; pMesh->HasVertexColors(a); a++)
-  {
-    delete [] pMesh->mColors[a];
-    pMesh->mColors[a] = new aiColor4D[pMesh->mNumVertices];
-    for( unsigned int b = 0; b < pMesh->mNumVertices; b++) {
-      pMesh->mColors[a][b] = uniqueVertices[b].colors[a];
+    // Vertex colors
+    for (unsigned int a = 0; pMesh->HasVertexColors(a); a++)
+    {
+        delete [] pMesh->mColors[a];
+        pMesh->mColors[a] = new aiColor4D[pMesh->mNumVertices];
+        for( unsigned int b = 0; b < pMesh->mNumVertices; b++) {
+            pMesh->mColors[a][b] = uniqueVertices[b].colors[a];
+        }
     }
-  }
-  // Texture coords
-  for (unsigned int a = 0; pMesh->HasTextureCoords(a); a++)
-  {
-    delete [] pMesh->mTextureCoords[a];
-    pMesh->mTextureCoords[a] = new aiVector3D[pMesh->mNumVertices];
-    for (unsigned int b = 0; b < pMesh->mNumVertices; b++) {
-      pMesh->mTextureCoords[a][b] = uniqueVertices[b].texcoords[a];
+    // Texture coords
+    for (unsigned int a = 0; pMesh->HasTextureCoords(a); a++)
+    {
+        delete [] pMesh->mTextureCoords[a];
+        pMesh->mTextureCoords[a] = new aiVector3D[pMesh->mNumVertices];
+        for (unsigned int b = 0; b < pMesh->mNumVertices; b++) {
+            pMesh->mTextureCoords[a][b] = uniqueVertices[b].texcoords[a];
+        }
     }
-  }
 }
 } // namespace
 
@@ -288,8 +282,9 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     const bool hasAnimMeshes = pMesh->mNumAnimMeshes > 0;
 
     // We'll never have more vertices afterwards.
-    std::vector<Vertex> uniqueAnimatedVertices[pMesh->mNumAnimMeshes];
+    std::vector<std::vector<Vertex>> uniqueAnimatedVertices;
     if (hasAnimMeshes) {
+        uniqueAnimatedVertices.resize(pMesh->mNumAnimMeshes);
         for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
             uniqueAnimatedVertices[animMeshIndex].reserve(pMesh->mNumVertices);
         }
@@ -360,7 +355,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)    {
-        DefaultLogger::get()->debug((Formatter::format(),
+        ASSIMP_LOG_DEBUG_F(
             "Mesh ",meshIndex,
             " (",
             (pMesh->mName.length ? pMesh->mName.data : "unnamed"),
@@ -370,7 +365,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             " | ~",
             ((pMesh->mNumVertices - uniqueVertices.size()) / (float)pMesh->mNumVertices) * 100.f,
             "%"
-        ));
+        );
     }
 
     updateXMeshVertices(pMesh, uniqueVertices);
@@ -407,7 +402,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
                 }
             }
         } else {
-            DefaultLogger::get()->error( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
+            ASSIMP_LOG_ERROR( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
         }
 
         if (newWeights.size() > 0) {
@@ -441,7 +436,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             }
 
             --a;
-            DefaultLogger::get()->warn("Removing bone -> no weights remaining");
+            ASSIMP_LOG_WARN("Removing bone -> no weights remaining");
         }
     }
     return pMesh->mNumVertices;

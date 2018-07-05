@@ -465,7 +465,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
                 }
             }
 
-            DefaultLogger::get()->debug(rootFile);
+            ASSIMP_LOG_DEBUG(rootFile);
 
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert( mRootStream != nullptr );

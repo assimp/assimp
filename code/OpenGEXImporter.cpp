@@ -691,7 +691,7 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene * 
 void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
-    // ownership is transfered but a reference remains in m_currentMesh
+    // ownership is transferred but a reference remains in m_currentMesh
     m_meshCache.emplace_back( m_currentMesh );
 
     Property *prop = node->getProperties();
@@ -708,7 +708,7 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
             } else if ( "quads" == propKey ) {
                 m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             } else {
-                DefaultLogger::get()->warn( propKey + " is not supported primitive type." );
+                ASSIMP_LOG_WARN_F( propKey, " is not supported primitive type." );
             }
         }
     }
@@ -1213,12 +1213,11 @@ void OpenGEXImporter::resolveReferences() {
                         if ( nullptr != m_currentMesh ) {
                             unsigned int matIdx = static_cast< unsigned int >( m_material2refMap[ name ] );
                             if ( m_currentMesh->mMaterialIndex != 0 ) {
-                                DefaultLogger::get()->warn( "Override of material reference in current mesh by material reference." );
+                                ASSIMP_LOG_WARN( "Override of material reference in current mesh by material reference." );
                             }
                             m_currentMesh->mMaterialIndex = matIdx;
                         }  else {
-                            DefaultLogger::get()->warn( "Cannot resolve material reference, because no current mesh is there." );
-
+                            ASSIMP_LOG_WARN( "Cannot resolve material reference, because no current mesh is there." );
                         }
                     }
                 }

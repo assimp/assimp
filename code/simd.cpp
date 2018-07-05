@@ -75,4 +75,5 @@ bool CPUSupportsSSE2() {
 #endif
 }
 
+
 } // Namespace Assimp

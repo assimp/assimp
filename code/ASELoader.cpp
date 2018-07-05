@@ -200,7 +200,7 @@ void ASEImporter::InternReadFile( const std::string& pFile,
             ConvertMeshes(*i,avOutMeshes);
         }
         if (tookNormals)    {
-            DefaultLogger::get()->debug("ASE: Taking normals from the file. Use "
+            ASSIMP_LOG_DEBUG("ASE: Taking normals from the file. Use "
                 "the AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS setting if you "
                 "experience problems");
         }
@@ -297,15 +297,15 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode*>& nodes)
 
         // TODO: Implement Bezier & TCB support
         if ((*i)->mAnim.mPositionType != ASE::Animation::TRACK) {
-            DefaultLogger::get()->warn("ASE: Position controller uses Bezier/TCB keys. "
+            ASSIMP_LOG_WARN("ASE: Position controller uses Bezier/TCB keys. "
                 "This is not supported.");
         }
         if ((*i)->mAnim.mRotationType != ASE::Animation::TRACK) {
-            DefaultLogger::get()->warn("ASE: Rotation controller uses Bezier/TCB keys. "
+            ASSIMP_LOG_WARN("ASE: Rotation controller uses Bezier/TCB keys. "
                 "This is not supported.");
         }
         if ((*i)->mAnim.mScalingType != ASE::Animation::TRACK)  {
-            DefaultLogger::get()->warn("ASE: Position controller uses Bezier/TCB keys. "
+            ASSIMP_LOG_WARN("ASE: Position controller uses Bezier/TCB keys. "
                 "This is not supported.");
         }
 
@@ -624,7 +624,7 @@ void ASEImporter::AddNodes (const std::vector<BaseNode*>& nodes,
             node->mNumChildren++;
 
             // What we did is so great, it is at least worth a debug message
-            DefaultLogger::get()->debug("ASE: Generating separate target node ("+snode->mName+")");
+            ASSIMP_LOG_DEBUG("ASE: Generating separate target node ("+snode->mName+")");
         }
     }
 
@@ -947,7 +947,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
     // validate the material index of the mesh
     if (mesh.iMaterialIndex >= mParser->m_vMaterials.size())    {
         mesh.iMaterialIndex = (unsigned int)mParser->m_vMaterials.size()-1;
-        DefaultLogger::get()->warn("Material index is out of range");
+        ASSIMP_LOG_WARN("Material index is out of range");
     }
 
     // If the material the mesh is assigned to is consisting of submeshes, split it
@@ -957,11 +957,11 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 
         std::vector<unsigned int>* aiSplit = new std::vector<unsigned int>[vSubMaterials.size()];
 
-        // build a list of all faces per submaterial
+        // build a list of all faces per sub-material
         for (unsigned int i = 0; i < mesh.mFaces.size();++i)    {
             // check range
             if (mesh.mFaces[i].iMaterial >= vSubMaterials.size()) {
-                DefaultLogger::get()->warn("Submaterial index is out of range");
+                ASSIMP_LOG_WARN("Submaterial index is out of range");
 
                 // use the last material instead
                 aiSplit[vSubMaterials.size()-1].push_back(i);

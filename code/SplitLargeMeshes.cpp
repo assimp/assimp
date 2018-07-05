@@ -78,7 +78,7 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 {
     if (0xffffffff == this->LIMIT)return;
 
-    DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle begin");
+    ASSIMP_LOG_DEBUG("SplitLargeMeshesProcess_Triangle begin");
     std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
     for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
@@ -96,10 +96,11 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene)
 
         // now we need to update all nodes
         this->UpdateNode(pScene->mRootNode,avList);
-        DefaultLogger::get()->info("SplitLargeMeshesProcess_Triangle finished. Meshes have been split");
+        ASSIMP_LOG_INFO("SplitLargeMeshesProcess_Triangle finished. Meshes have been split");
     }
-    else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Triangle finished. There was nothing to do");
-    return;
+    else {
+        ASSIMP_LOG_DEBUG("SplitLargeMeshesProcess_Triangle finished. There was nothing to do");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -154,7 +155,7 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 {
     if (pMesh->mNumFaces > SplitLargeMeshesProcess_Triangle::LIMIT)
     {
-        DefaultLogger::get()->info("Mesh exceeds the triangle limit. It will be split ...");
+        ASSIMP_LOG_INFO("Mesh exceeds the triangle limit. It will be split ...");
 
         // we need to split this mesh into sub meshes
         // determine the size of a submesh
@@ -378,7 +379,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 
     if (0xffffffff == this->LIMIT)return;
 
-    DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex begin");
+    ASSIMP_LOG_DEBUG("SplitLargeMeshesProcess_Vertex begin");
     for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
         this->SplitMesh(a, pScene->mMeshes[a],avList);
 
@@ -394,10 +395,10 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 
         // now we need to update all nodes
         SplitLargeMeshesProcess_Triangle::UpdateNode(pScene->mRootNode,avList);
-        DefaultLogger::get()->info("SplitLargeMeshesProcess_Vertex finished. Meshes have been split");
+        ASSIMP_LOG_INFO("SplitLargeMeshesProcess_Vertex finished. Meshes have been split");
+    } else {
+        ASSIMP_LOG_DEBUG("SplitLargeMeshesProcess_Vertex finished. There was nothing to do");
     }
-    else DefaultLogger::get()->debug("SplitLargeMeshesProcess_Vertex finished. There was nothing to do");
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------

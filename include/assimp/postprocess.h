@@ -555,10 +555,13 @@ enum aiPostProcessSteps
      *  of the imported model. And if so, it uses that.
      */
     aiProcess_EmbedTextures  = 0x10000000,
-
+        
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000
     // aiProcess_FixTexturePaths = 0x200000
+
+
+    aiProcess_ForceGenNormals = 0x20000000,
 };
 
 

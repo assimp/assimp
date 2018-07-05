@@ -43,9 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "assimp_view.h"
-#include <timeapi.h>
 #include <assimp/StringUtils.h>
 #include <map>
+
+#ifdef __MINGW32__
+#include <mmsystem.h>
+#else
+#include <timeapi.h>
+#endif
 
 using namespace std;
 
@@ -143,7 +148,7 @@ float g_fLoadTime = 0.0f;
 
 //-------------------------------------------------------------------------------
 // Entry point for the loader thread
-// The laoder thread loads the asset while the progress dialog displays the
+// The loader thread loads the asset while the progress dialog displays the
 // smart progress bar
 //-------------------------------------------------------------------------------
 DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
@@ -178,7 +183,6 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     // get the end time of zje operation, calculate delta t
     double fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
-//	char szTemp[128];
     g_bLoadingFinished = true;
 
     // check whether the loading process has failed ...
@@ -200,9 +204,9 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 // load the current asset
 // THe path to the asset is specified in the global path variable
 //-------------------------------------------------------------------------------
-int LoadAsset(void)
+int LoadAsset()
 {
-    // set the world and world rotation matrices to the identuty
+    // set the world and world rotation matrices to the identity
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 
@@ -1130,8 +1134,6 @@ int GetProjectionMatrix (aiMatrix4x4& p_mOut)
     return 1;
 }
 
-
-//-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut)
 {

@@ -208,8 +208,15 @@ OPTION(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_
 # macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
 # this way selective loaders can be compiled (reduces filesize + compile time)
 MACRO(ADD_ASSIMP_IMPORTER name)
-  OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" ${ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT})
-  IF(ASSIMP_BUILD_${name}_IMPORTER)
+  IF (ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT)
+    set(ASSIMP_IMPORTER_ENABLED TRUE)
+    IF (DEFINED ASSIMP_BUILD_${name}_IMPORTER AND NOT ASSIMP_BUILD_${name}_IMPORTER)
+      set(ASSIMP_IMPORTER_ENABLED FALSE)
+    ENDIF ()
+  ELSE ()
+    set(ASSIMP_IMPORTER_ENABLED ${ASSIMP_BUILD_${name}_IMPORTER})
+  ENDIF ()
+  IF (ASSIMP_IMPORTER_ENABLED)
     LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
     SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")
     SET(${name}_SRCS ${ARGN})
@@ -462,6 +469,8 @@ ADD_ASSIMP_IMPORTER( BLEND
   BlenderBMesh.cpp
   BlenderTessellator.h
   BlenderTessellator.cpp
+  BlenderCustomData.h
+  BlenderCustomData.cpp
 )
 
 ADD_ASSIMP_IMPORTER( IFC

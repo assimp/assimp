@@ -71,7 +71,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "3ds prj 3DS PRJ"
+	"3ds prj"
 };
 
 
@@ -127,7 +127,7 @@ Discreet3DSImporter::~Discreet3DSImporter() {
 // Returns whether the class can handle the format of the given file.
 bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     std::string extension = GetExtension(pFile);
-    if(extension == "3ds" || extension == "3DS" || extension == "prj"|| extension == "PRJ" ) {
+	if(extension == "3ds" || extension == "prj") {
         return true;
     }
 
@@ -258,8 +258,9 @@ void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk* pcOut)
     if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize())
         throw DeadlyImportError("Chunk is too large");
 
-    if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit())
-        DefaultLogger::get()->error("3DS: Chunk overflow");
+    if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit()) {
+        ASSIMP_LOG_ERROR("3DS: Chunk overflow");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -320,7 +321,7 @@ void Discreet3DSImporter::ParseEditorChunk()
         // print the version number
         char buff[10];
         ASSIMP_itoa10(buff,stream->GetI2());
-        DefaultLogger::get()->info(std::string("3DS file format version: ") + buff);
+        ASSIMP_LOG_INFO_F(std::string("3DS file format version: "), buff);
         }
         break;
     };
@@ -361,7 +362,7 @@ void Discreet3DSImporter::ParseObjectChunk()
         if (is_qnan(mClrAmbient.r))
         {
             // We failed to read the ambient base color.
-            DefaultLogger::get()->error("3DS: Failed to read ambient base color");
+            ASSIMP_LOG_ERROR("3DS: Failed to read ambient base color");
             mClrAmbient.r = mClrAmbient.g = mClrAmbient.b = 0.0f;
         }
         break;
@@ -463,7 +464,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
         if (len < 1e-5) {
 
             // There are some files with lookat == position. Don't know why or whether it's ok or not.
-            DefaultLogger::get()->error("3DS: Unable to read proper camera look-at vector");
+            ASSIMP_LOG_ERROR("3DS: Unable to read proper camera look-at vector");
             camera->mLookAt = aiVector3D(0.0,1.0,0.0);
 
         }
@@ -629,9 +630,9 @@ void Discreet3DSImporter::SkipTCBInfo()
     if (!flags) {
         // Currently we can't do anything with these values. They occur
         // quite rare, so it wouldn't be worth the effort implementing
-        // them. 3DS ist not really suitable for complex animations,
+        // them. 3DS is not really suitable for complex animations,
         // so full support is not required.
-        DefaultLogger::get()->warn("3DS: Skipping TCB animation info");
+        ASSIMP_LOG_WARN("3DS: Skipping TCB animation info");
     }
 
     if (flags & Discreet3DS::KEY_USE_TENS) {
@@ -732,7 +733,6 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
             // If object name is DUMMY, take this one instead
             if (mCurrentNode->mName == "$$$DUMMY")  {
-                //DefaultLogger::get()->warn("3DS: Skipping dummy object name for non-dummy object");
                 mCurrentNode->mName = std::string(sz);
                 break;
             }
@@ -743,7 +743,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
         if ( Discreet3DS::CHUNK_TRACKINFO != parent)
         {
-            DefaultLogger::get()->warn("3DS: Skipping pivot subchunk for non usual object");
+            ASSIMP_LOG_WARN("3DS: Skipping pivot subchunk for non usual object");
             break;
         }
 
@@ -805,7 +805,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
         {
         // roll keys are accepted for cameras only
         if (parent != Discreet3DS::CHUNK_TRACKCAMERA)   {
-            DefaultLogger::get()->warn("3DS: Ignoring roll track for non-camera object");
+            ASSIMP_LOG_WARN("3DS: Ignoring roll track for non-camera object");
             break;
         }
         bool sortKeys = false;
@@ -845,7 +845,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
         // CAMERA FOV KEYFRAME
     case Discreet3DS::CHUNK_TRACKFOV:
         {
-            DefaultLogger::get()->error("3DS: Skipping FOV animation track. "
+            ASSIMP_LOG_ERROR("3DS: Skipping FOV animation track. "
                 "This is not supported");
         }
         break;
@@ -985,7 +985,7 @@ void Discreet3DSImporter::ParseFaceChunk()
             }
         }
         if (0xcdcdcdcd == idx)  {
-            DefaultLogger::get()->error(std::string("3DS: Unknown material: ") + sz);
+            ASSIMP_LOG_ERROR_F( "3DS: Unknown material: ", sz);
         }
 
         // Now continue and read all material indices
@@ -995,7 +995,7 @@ void Discreet3DSImporter::ParseFaceChunk()
 
             // check range
             if (fidx >= mMesh.mFaceMaterials.size())    {
-                DefaultLogger::get()->error("3DS: Invalid face index in face material list");
+                ASSIMP_LOG_ERROR("3DS: Invalid face index in face material list");
             }
             else mMesh.mFaceMaterials[fidx] = idx;
         }}
@@ -1110,7 +1110,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
 
         if (!cnt)   {
             // This may not be, we use the default name instead
-            DefaultLogger::get()->error("3DS: Empty material name");
+            ASSIMP_LOG_ERROR("3DS: Empty material name");
         }
         else mScene->mMaterials.back().mName = std::string(sz,cnt);
         }
@@ -1123,7 +1123,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
         ParseColorChunk(pc);
         if (is_qnan(pc->r)) {
             // color chunk is invalid. Simply ignore it
-            DefaultLogger::get()->error("3DS: Unable to read DIFFUSE chunk");
+            ASSIMP_LOG_ERROR("3DS: Unable to read DIFFUSE chunk");
             pc->r = pc->g = pc->b = 1.0f;
         }}
         break;
@@ -1135,7 +1135,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
         ParseColorChunk(pc);
         if (is_qnan(pc->r)) {
             // color chunk is invalid. Simply ignore it
-            DefaultLogger::get()->error("3DS: Unable to read SPECULAR chunk");
+            ASSIMP_LOG_ERROR("3DS: Unable to read SPECULAR chunk");
             pc->r = pc->g = pc->b = 1.0f;
         }}
         break;
@@ -1147,7 +1147,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
         ParseColorChunk(pc);
         if (is_qnan(pc->r)) {
             // color chunk is invalid. Simply ignore it
-            DefaultLogger::get()->error("3DS: Unable to read AMBIENT chunk");
+            ASSIMP_LOG_ERROR("3DS: Unable to read AMBIENT chunk");
             pc->r = pc->g = pc->b = 0.0f;
         }}
         break;
@@ -1159,7 +1159,7 @@ void Discreet3DSImporter::ParseMaterialChunk()
         ParseColorChunk(pc);
         if (is_qnan(pc->r)) {
             // color chunk is invalid. Simply ignore it
-            DefaultLogger::get()->error("3DS: Unable to read EMISSIVE chunk");
+            ASSIMP_LOG_ERROR("3DS: Unable to read EMISSIVE chunk");
             pc->r = pc->g = pc->b = 0.0f;
         }}
         break;
@@ -1293,7 +1293,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
         pcOut->mScaleU = stream->GetF4();
         if (0.0f == pcOut->mScaleU)
         {
-            DefaultLogger::get()->warn("Texture coordinate scaling in the x direction is zero. Assuming 1.");
+            ASSIMP_LOG_WARN("Texture coordinate scaling in the x direction is zero. Assuming 1.");
             pcOut->mScaleU = 1.0f;
         }
         break;
@@ -1302,7 +1302,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
         pcOut->mScaleV = stream->GetF4();
         if (0.0f == pcOut->mScaleV)
         {
-            DefaultLogger::get()->warn("Texture coordinate scaling in the y direction is zero. Assuming 1.");
+            ASSIMP_LOG_WARN("Texture coordinate scaling in the y direction is zero. Assuming 1.");
             pcOut->mScaleV = 1.0f;
         }
         break;

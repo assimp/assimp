@@ -71,7 +71,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
 // https://wiki.blender.org/index.php/User:Mont29/Foundation/FBX_File_Structure
 
-const double DEG = 57.29577951308232087679815481; // degrees per radian
+const ai_real DEG = ai_real( 57.29577951308232087679815481 ); // degrees per radian
 
 // some constants that we'll use for writing metadata
 namespace FBX {
@@ -450,7 +450,7 @@ void FBXExporter::WriteDocuments ()
     p.AddP70string("ActiveAnimStackName", ""); // should do this properly?
     doc.AddChild(p);
 
-    // UID for root node in scene heirarchy.
+    // UID for root node in scene hierarchy.
     // always set to 0 in the case of a single document.
     // not sure what happens if more than one document exists,
     // but that won't matter to us as we're exporting a single scene.
@@ -650,7 +650,7 @@ void FBXExporter::WriteDefinitions ()
     }
 
     // Model / FbxNode
-    // <~~ node heirarchy
+    // <~~ node hierarchy
     count = int32_t(count_nodes(mScene->mRootNode)) - 1; // (not counting root node)
     if (count) {
         n = FBX::Node("ObjectType", "Model");
@@ -980,9 +980,13 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
 
 int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (anim->mTicksPerSecond <= 0) {
-        return ticks * FBX::SECOND;
+        return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
-    return (ticks / anim->mTicksPerSecond) * FBX::SECOND;
+    return (static_cast<int64_t>(ticks) / static_cast<int64_t>(anim->mTicksPerSecond)) * FBX::SECOND;
+}
+
+int64_t to_ktime(double time) {
+    return (static_cast<int64_t>(time * FBX::SECOND));
 }
 
 void FBXExporter::WriteObjects ()
@@ -1124,7 +1128,7 @@ void FBXExporter::WriteObjects ()
                 err << " has " << m->mNumUVComponents[uvi];
                 err << " components! Data will be preserved,";
                 err << " but may be incorrectly interpreted on load.";
-                DefaultLogger::get()->warn(err.str());
+                ASSIMP_LOG_WARN(err.str());
             }
             FBX::Node uv("LayerElementUV", int32_t(uvi));
             uv.Begin(outstream, binary, indent);
@@ -1223,7 +1227,7 @@ void FBXExporter::WriteObjects ()
         // it's all about this material
         aiMaterial* m = mScene->mMaterials[i];
 
-        // these are used to recieve material data
+        // these are used to receive material data
         float f; aiColor3D c;
 
         // start the node record
@@ -1311,7 +1315,7 @@ void FBXExporter::WriteObjects ()
         // Now the legacy system.
         // For safety let's include it.
         // thrse values don't exist in the property template,
-        // and usualy are completely ignored when loading.
+        // and usually are completely ignored when loading.
         // One notable exception is the "Opacity" property,
         // which Blender uses as (1.0 - alpha).
         c.r = 0.0f; c.g = 0.0f; c.b = 0.0f;
@@ -1449,7 +1453,7 @@ void FBXExporter::WriteObjects ()
                 err << "Multilayer textures not supported (for now),";
                 err << " skipping texture type " << j;
                 err << " of material " << i;
-                DefaultLogger::get()->warn(err.str());
+                ASSIMP_LOG_WARN(err.str());
             }
 
             // get image path for this (single-image) texture
@@ -1484,7 +1488,7 @@ void FBXExporter::WriteObjects ()
                 err << "Not sure how to handle texture of type " << j;
                 err << " on material " << i;
                 err << ", skipping...";
-                DefaultLogger::get()->warn(err.str());
+                ASSIMP_LOG_WARN(err.str());
                 continue;
             }
             const std::string& prop_name = elem2->second;
@@ -1532,7 +1536,7 @@ void FBXExporter::WriteObjects ()
     // bones.
     //
     // output structure:
-    // subset of node heirarchy that are "skeleton",
+    // subset of node hierarchy that are "skeleton",
     // i.e. do not have meshes but only bones.
     // but.. i'm not sure how anyone could guarantee that...
     //
@@ -1544,7 +1548,7 @@ void FBXExporter::WriteObjects ()
     //
     // well. we can assume a sane input, i suppose.
     //
-    // so input is the bone node heirarchy,
+    // so input is the bone node hierarchy,
     // with an extra thing for the transformation of the MESH in BONE space.
     //
     // output is a set of bone nodes,
@@ -1556,7 +1560,7 @@ void FBXExporter::WriteObjects ()
     // and represents the influence of that bone on the grandparent mesh.
     // the subdeformer has a list of indices, and weights,
     // with indices specifying vertex indices,
-    // and weights specifying the correspoding influence of this bone.
+    // and weights specifying the corresponding influence of this bone.
     // it also has Transform and TransformLink elements,
     // specifying the transform of the MESH in BONE space,
     // and the transformation of the BONE in WORLD space,
@@ -1806,7 +1810,7 @@ void FBXExporter::WriteObjects ()
             // and a correct skeleton would still be output.
 
             // transformlink should be the position of the bone in world space.
-            // if the bone is in the bind pose (or nonexistant),
+            // if the bone is in the bind pose (or nonexistent),
             // we can just use the matrix we already calculated
             if (bone_xform_okay) {
                 sdnode.AddChild("TransformLink", bone_xform);
@@ -1945,7 +1949,7 @@ void FBXExporter::WriteObjects ()
 
     // TODO: cameras, lights
 
-    // write nodes (i.e. model heirarchy)
+    // write nodes (i.e. model hierarchy)
     // start at root node
     WriteModelNodes(
         outstream, mScene->mRootNode, 0, limbnodes
@@ -2089,7 +2093,7 @@ void FBXExporter::WriteObjects ()
             // position/translation
             for (size_t ki = 0; ki < na->mNumPositionKeys; ++ki) {
                 const aiVectorKey& k = na->mPositionKeys[ki];
-                times.push_back(to_ktime(k.mTime, anim));
+                times.push_back(to_ktime(k.mTime));
                 xval.push_back(k.mValue.x);
                 yval.push_back(k.mValue.y);
                 zval.push_back(k.mValue.z);
@@ -2103,7 +2107,7 @@ void FBXExporter::WriteObjects ()
             times.clear(); xval.clear(); yval.clear(); zval.clear();
             for (size_t ki = 0; ki < na->mNumRotationKeys; ++ki) {
                 const aiQuatKey& k = na->mRotationKeys[ki];
-                times.push_back(to_ktime(k.mTime, anim));
+                times.push_back(to_ktime(k.mTime));
                 // TODO: aiQuaternion method to convert to Euler...
                 aiMatrix4x4 m(k.mValue.GetMatrix());
                 aiVector3D qs, qr, qt;
@@ -2121,7 +2125,7 @@ void FBXExporter::WriteObjects ()
             times.clear(); xval.clear(); yval.clear(); zval.clear();
             for (size_t ki = 0; ki < na->mNumScalingKeys; ++ki) {
                 const aiVectorKey& k = na->mScalingKeys[ki];
-                times.push_back(to_ktime(k.mTime, anim));
+                times.push_back(to_ktime(k.mTime));
                 xval.push_back(k.mValue.x);
                 yval.push_back(k.mValue.y);
                 zval.push_back(k.mValue.z);
@@ -2203,8 +2207,8 @@ void FBXExporter::WriteModelNode(
     } else {
         // apply the transformation chain.
         // these transformation elements are created when importing FBX,
-        // which has a complex transformation heirarchy for each node.
-        // as such we can bake the heirarchy back into the node on export.
+        // which has a complex transformation hierarchy for each node.
+        // as such we can bake the hierarchy back into the node on export.
         for (auto &item : transform_chain) {
             auto elem = transform_types.find(item.first);
             if (elem == transform_types.end()) {
@@ -2440,7 +2444,7 @@ void FBXExporter::WriteAnimationCurve(
     // TODO: keyattr flags and data (STUB for now)
     n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
     n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-    ai_assert(times.size() <= std::numeric_limits<int32_t>::max());
+    ai_assert(static_cast<int32_t>(times.size()) <= std::numeric_limits<int32_t>::max());
     n.AddChild(
         "KeyAttrRefCount",
         std::vector<int32_t>{static_cast<int32_t>(times.size())}

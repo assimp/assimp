@@ -115,10 +115,10 @@ public:
         // import the metadata
         if ( !mMetaData.empty() ) {
             const size_t numMeta( mMetaData.size() );
-            scene->mMetaData = aiMetadata::Alloc( numMeta );
+            scene->mMetaData = aiMetadata::Alloc(static_cast<unsigned int>( numMeta ) );
             for ( size_t i = 0; i < numMeta; ++i ) {
                 aiString val( mMetaData[ i ].value );
-                scene->mMetaData->Set( i, mMetaData[ i ].name, val );
+                scene->mMetaData->Set(static_cast<unsigned int>( i ), mMetaData[ i ].name, val );
             }
         }
 
@@ -396,7 +396,7 @@ private:
                 return false;
             }
         }
-        DefaultLogger::get()->error("unexpected EOF, expected closing <" + closeTag + "> tag");
+        ASSIMP_LOG_ERROR("unexpected EOF, expected closing <" + closeTag + "> tag");
 
         return false;
     }

@@ -244,7 +244,8 @@ public: // static utilities
         const char** tokens,
         unsigned int numTokens,
         unsigned int searchBytes = 200,
-        bool tokensSol = false);
+        bool tokensSol = false,
+        bool noAlphaBeforeTokens = false);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has a specific file extension

@@ -160,7 +160,7 @@ void RAWImporter::InternReadFile( const std::string& pFile,
             }
             if (num != 12 && num != 9)
             {
-                DefaultLogger::get()->error("A line may have either 9 or 12 floats and an optional texture");
+                ASSIMP_LOG_ERROR("A line may have either 9 or 12 floats and an optional texture");
                 continue;
             }
 

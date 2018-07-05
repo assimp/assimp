@@ -860,6 +860,8 @@ inline void Material::Read(Value& material, Asset& r)
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
+
+        unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
 
@@ -882,6 +884,7 @@ inline void Material::SetDefaults()
     alphaMode = "OPAQUE";
     alphaCutoff = 0.5;
     doubleSided = false;
+    unlit = false;
 }
 
 inline void PbrSpecularGlossiness::SetDefaults()
@@ -1213,12 +1216,15 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
+    unsigned int sceneIndex = 0;
     if (Value* scene = FindUInt(doc, "scene")) {
-        unsigned int sceneIndex = scene->GetUint();
+        sceneIndex = scene->GetUint();
+    }
 
-        Ref<Scene> s = scenes.Retrieve(sceneIndex);
-
-        this->scene = s;
+    if (Value* scenesArray = FindArray(doc, "scenes")) {
+        if (sceneIndex < scenesArray->Size()) {
+            this->scene = scenes.Retrieve(sceneIndex);
+        }
     }
 
     // Clean up
@@ -1253,6 +1259,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
         if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
+    CHECK_EXT(KHR_materials_unlit);
 
     #undef CHECK_EXT
 }

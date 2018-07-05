@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/CreateAnimMesh.h>
 
 #include <memory>
 
@@ -65,6 +66,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace glTF2;
 
+namespace {
+    // generate bitangents from normals and tangents according to spec
+    struct Tangent {
+        aiVector3D xyz;
+        ai_real w;
+    };
+} // namespace
 
 //
 // glTF2Importer
@@ -416,10 +424,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 // only extract tangents if normals are present
                 if (attr.tangent.size() > 0 && attr.tangent[0]) {
                     // generate bitangents from normals and tangents according to spec
-                    struct Tangent {
-                        aiVector3D xyz;
-                        ai_real w;
-                    } *tangents = nullptr;
+                    Tangent *tangents = nullptr;
 
                     attr.tangent[0]->ExtractData(tangents);
 
@@ -442,6 +447,52 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 aiVector3D* values = aim->mTextureCoords[tc];
                 for (unsigned int i = 0; i < aim->mNumVertices; ++i) {
                     values[i].y = 1 - values[i].y; // Flip Y coords
+                }
+            }
+
+            std::vector<Mesh::Primitive::Target>& targets = prim.targets;
+            if (targets.size() > 0) {
+                aim->mNumAnimMeshes = targets.size();
+                aim->mAnimMeshes = new aiAnimMesh*[aim->mNumAnimMeshes];
+                for (size_t i = 0; i < targets.size(); i++) {
+                    aim->mAnimMeshes[i] = aiCreateAnimMesh(aim);
+                    aiAnimMesh& aiAnimMesh = *(aim->mAnimMeshes[i]);
+                    Mesh::Primitive::Target& target = targets[i];
+
+                    if (target.position.size() > 0) {
+                        aiVector3D *positionDiff == nullptr;
+                        target.position[0]->ExtractData(positionDiff);
+                        for(int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                            aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
+                        }
+                        delete [] positionDiff;
+                    }
+                    if (target.normal.size() > 0) {
+                        aiVector3D *normalDiff == nullptr;
+                        target.normal[0]->ExtractData(normalDiff);
+                        for(int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                            aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
+                        }
+                        delete [] normalDiff;
+                    }
+                    if (target.tangent.size() > 0) {
+                        Tangent *tangent = nullptr;
+                        attr.tangent[0]->ExtractData(tangent);
+
+                        aiVector3D *tangentDiff = nullptr;
+                        target.tangent[0]->ExtractData(tangentDiff);
+
+                        for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
+                            tangent[vertexId].xyz += tangentDiff[vertexId];
+                            aiAnimMesh.mTangents[vertexId] = tangent[vertexId];
+                            aiAnimMesh.mBitangents[vertexId] = (aiAnimMesh.mNormals[vertexId] ^ tangent[vertexId].xyz) * tangent[vertexId].w;
+                        }
+                        delete [] tangent;
+                        delete [] tangentDiff;
+                    }
+                    if (mesh.weights.size() > i) {
+                        aiAnimMesh.mWeight = mesh.weights[i];
+                    }
                 }
             }
 

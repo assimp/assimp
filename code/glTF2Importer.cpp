@@ -460,7 +460,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     Mesh::Primitive::Target& target = targets[i];
 
                     if (target.position.size() > 0) {
-                        aiVector3D *positionDiff == nullptr;
+                        aiVector3D *positionDiff = nullptr;
                         target.position[0]->ExtractData(positionDiff);
                         for(int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                             aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
@@ -468,7 +468,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         delete [] positionDiff;
                     }
                     if (target.normal.size() > 0) {
-                        aiVector3D *normalDiff == nullptr;
+                        aiVector3D *normalDiff = nullptr;
                         target.normal[0]->ExtractData(normalDiff);
                         for(int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                             aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
@@ -484,7 +484,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
 
                         for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
                             tangent[vertexId].xyz += tangentDiff[vertexId];
-                            aiAnimMesh.mTangents[vertexId] = tangent[vertexId];
+                            aiAnimMesh.mTangents[vertexId] = tangent[vertexId].xyz;
                             aiAnimMesh.mBitangents[vertexId] = (aiAnimMesh.mNormals[vertexId] ^ tangent[vertexId].xyz) * tangent[vertexId].w;
                         }
                         delete [] tangent;

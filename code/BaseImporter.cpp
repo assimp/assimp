@@ -143,7 +143,8 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
     const char**        tokens,
     unsigned int        numTokens,
     unsigned int        searchBytes /* = 200 */,
-    bool                tokensSol /* false */)
+    bool                tokensSol /* false */,
+    bool                noAlphaBeforeTokens /* false */)
 {
     ai_assert( nullptr != tokens );
     ai_assert( 0 != numTokens );
@@ -191,6 +192,11 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
             }
             const char* r = strstr( buffer, token.c_str() );
             if( !r ) {
+                continue;
+            }
+            // We need to make sure that we didn't accidentially identify the end of another token as our token,
+            // e.g. in a previous version the "gltf " present in some gltf files was detected as "f "
+            if (noAlphaBeforeTokens && (r != buffer && isalpha(r[-1]))) {
                 continue;
             }
             // We got a match, either we don't care where it is, or it happens to

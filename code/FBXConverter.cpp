@@ -407,14 +407,15 @@ static bool HasName( NodeNameCache &cache, const std::string &name ) {
     return it != cache.end();
 
 }
-void Converter::GetUniqueName( const std::string &name, std::string uniqueName ) {
+void Converter::GetUniqueName( const std::string &name, std::string& uniqueName ) {
     if ( !HasName( mNodeNames, name ) ) {
         uniqueName = name;
+        mNodeNames.push_back( uniqueName );
         return;
     }
 
     int i( 0 );
-    std::string newName;
+    std::string newName (name);
     while ( HasName( mNodeNames, newName ) ) {
         ++i;
         newName.clear();

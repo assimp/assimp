@@ -73,10 +73,6 @@ using namespace Util;
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-// XXX vc9's debugger won't step into anonymous namespaces
-//namespace {
-
-
 Converter::Converter( aiScene* out, const Document& doc )
 : defaultMaterialIndex()
 , out( out )
@@ -3100,8 +3096,6 @@ void Converter::TransferDataToScene()
         std::swap_ranges( textures.begin(), textures.end(), out->mTextures );
     }
 }
-
-//} // !anon
 
 // ------------------------------------------------------------------------------------------------
 void ConvertToAssimpScene(aiScene* out, const Document& doc)

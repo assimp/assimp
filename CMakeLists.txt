@@ -39,10 +39,12 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 PROJECT( Assimp )
 
 # All supported options ###############################################
+
 OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
 )
+
 OPTION( BUILD_FRAMEWORK
   "Build package as Mac OS X Framework bundle."
   OFF
@@ -103,6 +105,12 @@ OPTION ( BUILD_DOCS
   "Build documentation using Doxygen."
   OFF
 )
+
+IF (IOS)
+	IF (NOT CMAKE_BUILD_TYPE)
+ 		SET(CMAKE_BUILD_TYPE "Release")
+	ENDIF (NOT CMAKE_BUILD_TYPE)
+ENDIF (IOS)
 
 # Use subset of Windows.h
 if (WIN32)
@@ -220,10 +228,17 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
-IF (IOS)
-  SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fembed-bitcode -O3")
+IF ( IOS )
+
+IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -Og")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -Og")
+ELSE()
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -O3")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -O3")
 ENDIF()
+
+ENDIF( IOS )
 
 IF (ASSIMP_COVERALLS)
   MESSAGE(STATUS "Coveralls enabled")
@@ -320,6 +335,8 @@ IF( NOT ZLIB_FOUND )
   SET(ZLIB_FOUND 1)
   SET(ZLIB_LIBRARIES zlibstatic)
   SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
+  # need to ensure we don't link with system zlib or minizip as well.
+  SET(ASSIMP_BUILD_MINIZIP 1)
 ELSE(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
   SET(ZLIB_LIBRARIES_LINKED -lz)
@@ -327,7 +344,17 @@ ENDIF(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # Search for unzip
-use_pkgconfig(UNZIP minizip)
+IF ( NOT IOS )
+  IF( NOT ASSIMP_BUILD_MINIZIP )
+	  use_pkgconfig(UNZIP minizip)
+  ENDIF( NOT ASSIMP_BUILD_MINIZIP )
+ELSE ( NOT IOS )
+	IF(NOT BUILD_SHARED_LIBS)
+    IF( NOT ASSIMP_BUILD_MINIZIP )
+		  use_pkgconfig(UNZIP minizip)
+    ENDIF( NOT ASSIMP_BUILD_MINIZIP )
+	ENDIF (NOT BUILD_SHARED_LIBS)
+ENDIF ( NOT IOS )
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)
@@ -412,7 +439,9 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   ENDIF ( WIN32 AND DirectX_D3DX9_LIBRARY )
 
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
+IF (NOT IOS)
   ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
+ENDIF (NOT IOS)
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
 IF ( ASSIMP_BUILD_SAMPLES)

@@ -105,8 +105,10 @@ void TriangulateProcess::Execute( aiScene* pScene)
     bool bHas = false;
     for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
     {
-        if ( TriangulateMesh( pScene->mMeshes[ a ] ) ) {
-            bHas = true;
+        if (pScene->mMeshes[ a ]) {
+            if ( TriangulateMesh( pScene->mMeshes[ a ] ) ) {
+                bHas = true;
+            }
         }
     }
     if ( bHas ) {
@@ -285,7 +287,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // We project it onto a plane to get a 2d triangle.
 
             // Collect all vertices of of the polygon.
-            for (tmp = 0; tmp < max; ++tmp) {
+           for (tmp = 0; tmp < max; ++tmp) {
                 temp_verts3d[tmp] = verts[idx[tmp]];
             }
 

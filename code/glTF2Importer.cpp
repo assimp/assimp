@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/CreateAnimMesh.h>
 
 #include <memory>
 
@@ -65,6 +66,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace glTF2;
 
+namespace {
+    // generate bitangents from normals and tangents according to spec
+    struct Tangent {
+        aiVector3D xyz;
+        ai_real w;
+    };
+} // namespace
 
 //
 // glTF2Importer
@@ -416,10 +424,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 // only extract tangents if normals are present
                 if (attr.tangent.size() > 0 && attr.tangent[0]) {
                     // generate bitangents from normals and tangents according to spec
-                    struct Tangent {
-                        aiVector3D xyz;
-                        ai_real w;
-                    } *tangents = nullptr;
+                    Tangent *tangents = nullptr;
 
                     attr.tangent[0]->ExtractData(tangents);
 
@@ -445,11 +450,57 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 }
             }
 
+            std::vector<Mesh::Primitive::Target>& targets = prim.targets;
+            if (targets.size() > 0) {
+                aim->mNumAnimMeshes = targets.size();
+                aim->mAnimMeshes = new aiAnimMesh*[aim->mNumAnimMeshes];
+                for (size_t i = 0; i < targets.size(); i++) {
+                    aim->mAnimMeshes[i] = aiCreateAnimMesh(aim);
+                    aiAnimMesh& aiAnimMesh = *(aim->mAnimMeshes[i]);
+                    Mesh::Primitive::Target& target = targets[i];
+
+                    if (target.position.size() > 0) {
+                        aiVector3D *positionDiff = nullptr;
+                        target.position[0]->ExtractData(positionDiff);
+                        for(unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                            aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
+                        }
+                        delete [] positionDiff;
+                    }
+                    if (target.normal.size() > 0) {
+                        aiVector3D *normalDiff = nullptr;
+                        target.normal[0]->ExtractData(normalDiff);
+                        for(unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                            aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
+                        }
+                        delete [] normalDiff;
+                    }
+                    if (target.tangent.size() > 0) {
+                        Tangent *tangent = nullptr;
+                        attr.tangent[0]->ExtractData(tangent);
+
+                        aiVector3D *tangentDiff = nullptr;
+                        target.tangent[0]->ExtractData(tangentDiff);
+
+                        for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
+                            tangent[vertexId].xyz += tangentDiff[vertexId];
+                            aiAnimMesh.mTangents[vertexId] = tangent[vertexId].xyz;
+                            aiAnimMesh.mBitangents[vertexId] = (aiAnimMesh.mNormals[vertexId] ^ tangent[vertexId].xyz) * tangent[vertexId].w;
+                        }
+                        delete [] tangent;
+                        delete [] tangentDiff;
+                    }
+                    if (mesh.weights.size() > i) {
+                        aiAnimMesh.mWeight = mesh.weights[i];
+                    }
+                }
+            }
+
+
+            aiFace* faces = 0;
+            unsigned int nFaces = 0;
 
             if (prim.indices) {
-                aiFace* faces = 0;
-                unsigned int nFaces = 0;
-
                 unsigned int count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
@@ -514,14 +565,78 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         }
                         break;
                 }
+            }
+            else { // no indices provided so directly generate from counts
 
-                if (faces) {
-                    aim->mFaces = faces;
-                    aim->mNumFaces = nFaces;
-                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+                // use the already determined count as it includes checks 
+                unsigned int count = aim->mNumVertices;
+
+                switch (prim.mode) {
+                case PrimitiveMode_POINTS: {
+                    nFaces = count;
+                    faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; ++i) {
+                        SetFace(faces[i], i);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_LINES: {
+                    nFaces = count / 2;
+                    faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 2) {
+                        SetFace(faces[i / 2], i, i + 1);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_LINE_LOOP:
+                case PrimitiveMode_LINE_STRIP: {
+                    nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
+                    faces = new aiFace[nFaces];
+                    SetFace(faces[0], 0, 1);
+                    for (unsigned int i = 2; i < count; ++i) {
+                        SetFace(faces[i - 1], faces[i - 2].mIndices[1], i);
+                    }
+                    if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
+                        SetFace(faces[count - 1], faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_TRIANGLES: {
+                    nFaces = count / 3;
+                    faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 3) {
+                        SetFace(faces[i / 3], i, i + 1, i + 2);
+                    }
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_STRIP: {
+                    nFaces = count - 2;
+                    faces = new aiFace[nFaces];
+                    SetFace(faces[0], 0, 1, 2);
+                    for (unsigned int i = 3; i < count; ++i) {
+                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], i);
+                    }
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_FAN:
+                    nFaces = count - 2;
+                    faces = new aiFace[nFaces];
+                    SetFace(faces[0], 0, 1, 2);
+                    for (unsigned int i = 3; i < count; ++i) {
+                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], i);
+                    }
+                    break;
                 }
             }
 
+            if (faces) {
+                aim->mFaces = faces;
+                aim->mNumFaces = nFaces;
+                ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+            }
 
             if (prim.material) {
                 aim->mMaterialIndex = prim.material.GetIndex();

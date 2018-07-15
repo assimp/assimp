@@ -411,7 +411,7 @@ void Converter::GetUniqueName( const std::string &name, std::string &uniqueName 
     }
 
     int i( 0 );
-    std::string newName (name);
+    std::string newName( name );
     while ( HasName( mNodeNames, newName ) ) {
         ++i;
         newName.clear();

@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Vertex.h>
 #include <assimp/TinyFormatter.h>
 #include <stdio.h>
+#include <unordered_set>
 
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
@@ -239,6 +240,19 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         return 0;
     }
 
+    // We should care only about used vertices, not all of them
+    // (this can happen due to original file vertices buffer being used by
+    // multiple meshes)
+    std::unordered_set<unsigned int> usedVertexIndices;
+    usedVertexIndices.reserve(pMesh->mNumVertices);
+    for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
+    {
+        aiFace& face = pMesh->mFaces[a];
+        for( unsigned int b = 0; b < face.mNumIndices; b++) {
+            usedVertexIndices.insert(face.mIndices[b]);
+        }
+    }
+
     // We'll never have more vertices afterwards.
     std::vector<Vertex> uniqueVertices;
     uniqueVertices.reserve( pMesh->mNumVertices);
@@ -292,6 +306,10 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
     // Now check each vertex if it brings something new to the table
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
+        if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
+            continue;
+        }
+
         // collect the vertex data
         Vertex v(pMesh,a);
 

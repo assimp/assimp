@@ -490,9 +490,9 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
     SetIOHandler(new MemoryIOSystem((const uint8_t*)pBuffer,pLength));
 
     // read the file and recover the previous IOSystem
-    static const size_t BufferSize(Importer::MaxLenHint + 28);
-    char fbuff[ BufferSize ];
-    ai_snprintf(fbuff, BufferSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
+    static const size_t BufSize(Importer::MaxLenHint + 28);
+    char fbuff[BufSize];
+    ai_snprintf(fbuff, BufSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
 
     ReadFile(fbuff,pFlags);
     SetIOHandler(io);
@@ -930,20 +930,19 @@ BaseImporter* Importer::GetImporter (const char* szExtension) const
 
 // ------------------------------------------------------------------------------------------------
 // Find a loader plugin for a given file extension
-size_t Importer::GetImporterIndex (const char* szExtension) const
-{
-    ai_assert(szExtension);
+size_t Importer::GetImporterIndex (const char* szExtension) const {
+    ai_assert(nullptr != szExtension);
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // skip over wildcard and dot characters at string head --
-    for(;*szExtension == '*' || *szExtension == '.'; ++szExtension);
+    for ( ; *szExtension == '*' || *szExtension == '.'; ++szExtension );
 
     std::string ext(szExtension);
     if (ext.empty()) {
         return static_cast<size_t>(-1);
     }
-    std::transform(ext.begin(),ext.end(), ext.begin(), tolower);
+    std::transform( ext.begin(), ext.end(), ext.begin(), ToLower<char> );
 
     std::set<std::string> str;
     for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)  {

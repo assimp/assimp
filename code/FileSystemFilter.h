@@ -67,7 +67,7 @@ public:
     FileSystemFilter(const std::string& file, IOSystem* old)
     : mWrapped  (old)
     , mSrc_file(file)
-    , sep(mWrapped->getOsSeparator()) {
+    , mSep(mWrapped->getOsSeparator()) {
         ai_assert(nullptr != mWrapped);
 
         // Determine base directory
@@ -116,7 +116,7 @@ public:
     // -------------------------------------------------------------------
     /** Returns the directory separator. */
     char getOsSeparator() const {
-        return sep;
+        return mSep;
     }
 
     // -------------------------------------------------------------------
@@ -256,7 +256,7 @@ private:
 
             while(true) {
                 tmp = mBase;
-                tmp += sep;
+                tmp += mSep;
 
                 std::string::size_type dirsep = in.rfind('/', last_dirsep);
                 if (std::string::npos == dirsep) {
@@ -298,7 +298,7 @@ private:
             in.erase(in.begin(),it+1);
         }
 
-        const char sep = getOsSeparator();
+        const char separator = getOsSeparator();
         for (it = in.begin(); it != in.end(); ++it) {
             // Exclude :// and \\, which remain untouched.
             // https://sourceforge.net/tracker/?func=detail&aid=3031725&group_id=226462&atid=1067632
@@ -313,7 +313,7 @@ private:
 
             // Cleanup path delimiters
             if (*it == '/' || (*it) == '\\') {
-                *it = sep;
+                *it = separator;
 
                 // And we're removing double delimiters, frequent issue with
                 // incorrectly composited paths ...
@@ -337,7 +337,7 @@ private:
 private:
     IOSystem *mWrapped;
     std::string mSrc_file, mBase;
-    char sep;
+    char mSep;
 };
 
 } //!ns Assimp

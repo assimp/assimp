@@ -73,10 +73,6 @@ using namespace Util;
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-// XXX vc9's debugger won't step into anonymous namespaces
-//namespace {
-
-
 Converter::Converter( aiScene* out, const Document& doc )
 : defaultMaterialIndex()
 , out( out )
@@ -407,14 +403,15 @@ static bool HasName( NodeNameCache &cache, const std::string &name ) {
     return it != cache.end();
 
 }
-void Converter::GetUniqueName( const std::string &name, std::string uniqueName ) {
+void Converter::GetUniqueName( const std::string &name, std::string &uniqueName ) {
     if ( !HasName( mNodeNames, name ) ) {
         uniqueName = name;
+        mNodeNames.push_back( uniqueName );
         return;
     }
 
     int i( 0 );
-    std::string newName;
+    std::string newName( name );
     while ( HasName( mNodeNames, newName ) ) {
         ++i;
         newName.clear();
@@ -3099,8 +3096,6 @@ void Converter::TransferDataToScene()
         std::swap_ranges( textures.begin(), textures.end(), out->mTextures );
     }
 }
-
-//} // !anon
 
 // ------------------------------------------------------------------------------------------------
 void ConvertToAssimpScene(aiScene* out, const Document& doc)

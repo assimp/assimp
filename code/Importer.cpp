@@ -178,6 +178,7 @@ Importer::~Importer()
 {
     // Delete all import plugins
 	DeleteImporterInstanceList(pimpl->mImporter);
+    aiReleaseDefaultMaterial();
 
     // Delete all post-processing plug-ins
     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)
@@ -383,6 +384,8 @@ bool _ValidateFlags(unsigned int pFlags)
 void Importer::FreeScene( )
 {
     ASSIMP_BEGIN_EXCEPTION_REGION();
+
+    aiReleaseDefaultMaterial();
     delete pimpl->mScene;
     pimpl->mScene = NULL;
 

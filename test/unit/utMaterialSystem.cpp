@@ -134,6 +134,8 @@ TEST_F(MaterialSystemTest, testDefaultMaterialAccess) {
     aiMaterial *mat = aiCreateAndRegisterDefaultMaterial();
     EXPECT_NE(nullptr, mat);
     aiReleaseDefaultMaterial();
+
+    delete mat;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -144,4 +146,6 @@ TEST_F(MaterialSystemTest, testMaterialNameAccess) {
     aiString name = mat->GetName();
     const int retValue(strncmp(name.C_Str(), AI_DEFAULT_MATERIAL_NAME, name.length));
     EXPECT_EQ(0, retValue );
+
+    delete mat;
 }

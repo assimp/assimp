@@ -84,8 +84,6 @@ static const std::string BumpOption         = "-bm";
 static const std::string ChannelOption      = "-imfchan";
 static const std::string TypeOption         = "-type";
 
-
-
 // -------------------------------------------------------------------
 //  Constructor
 ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,

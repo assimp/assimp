@@ -63,7 +63,7 @@ public:
     }
 };
 
-TEST_F( utSTLImporterExporter, importXFromFileTest ) {
+TEST_F( utSTLImporterExporter, importSTLFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
 

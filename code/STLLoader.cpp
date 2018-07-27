@@ -539,11 +539,21 @@ bool STLImporter::LoadBinaryFile()
     // now copy faces
     addFacesToMesh(pMesh);
 
+    aiNode* root = pScene->mRootNode;
+
+    // allocate one node
+    aiNode* node = new aiNode();
+    node->mParent = root;
+
+    root->mNumChildren = 1u;
+    root->mChildren = new aiNode*[root->mNumChildren];
+    root->mChildren[0] = node;
+
     // add all created meshes to the single node
-    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    node->mNumMeshes = pScene->mNumMeshes;
+    node->mMeshes = new unsigned int[pScene->mNumMeshes];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
-        pScene->mRootNode->mMeshes[i] = i;
+        node->mMeshes[i] = i;
 
     if (bIsMaterialise && !pMesh->mColors[0])
     {

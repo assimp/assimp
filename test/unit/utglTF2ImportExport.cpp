@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <array>
 
 using namespace Assimp;
 
@@ -98,6 +99,50 @@ TEST_F( utglTF2ImportExport, importglTF2FromFileTest ) {
 
 TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
     EXPECT_TRUE( binaryImporterTest() );
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
+    Assimp::Importer importer;
+    //Triangles fan
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_12.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    std::array<int, 3> f1 = { 0, 3, 2 };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = { 0, 2, 1 };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStrip) {
+    Assimp::Importer importer;
+    //Triangles strip
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_11.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 3> f1 = { 0, 3, 1 };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = { 1, 3, 2 };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

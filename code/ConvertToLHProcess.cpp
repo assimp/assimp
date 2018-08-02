@@ -59,6 +59,25 @@ using namespace Assimp;
 
 #ifndef ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS
 
+namespace {
+
+template <typename aiMeshType>
+void flipUVs(aiMeshType* pMesh) {
+    if (pMesh == nullptr) { return; }
+    // mirror texture y coordinate
+    for (unsigned int tcIdx = 0; tcIdx < AI_MAX_NUMBER_OF_TEXTURECOORDS; tcIdx++) {
+        if (!pMesh->HasTextureCoords(tcIdx)) {
+            break;
+        }
+
+        for (unsigned int vIdx = 0; vIdx < pMesh->mNumVertices; vIdx++) {
+            pMesh->mTextureCoords[tcIdx][vIdx].y = 1.0f - pMesh->mTextureCoords[tcIdx][vIdx].y;
+        }
+    }
+}
+
+} // namespace
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MakeLeftHandedProcess::MakeLeftHandedProcess()
@@ -282,15 +301,9 @@ void FlipUVsProcess::ProcessMaterial (aiMaterial* _mat)
 // Converts a single mesh
 void FlipUVsProcess::ProcessMesh( aiMesh* pMesh)
 {
-    // mirror texture y coordinate
-    for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)   {
-        if( !pMesh->HasTextureCoords( a ) ) {
-            break;
-        }
-
-        for( unsigned int b = 0; b < pMesh->mNumVertices; b++ ) {
-            pMesh->mTextureCoords[ a ][ b ].y = 1.0f - pMesh->mTextureCoords[ a ][ b ].y;
-        }
+    flipUVs(pMesh);
+    for (unsigned int idx = 0; idx < pMesh->mNumAnimMeshes; idx++) {
+        flipUVs(pMesh->mAnimMeshes[idx]);
     }
 }
 

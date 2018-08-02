@@ -145,6 +145,51 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStrip) {
     }
 }
 
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineLoop) {
+    Assimp::Importer importer;
+    //Line loop
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_09.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 5> l1 = { 0, 3, 2, 1, 0};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i+1]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLines) {
+    Assimp::Importer importer;
+    //Lines
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_08.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 5> l1 = { 0, 3, 2, 1, 0 };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineStrip) {
+    Assimp::Importer importer;
+    //Lines Strip
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_10.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 5> l1 = { 0, 3, 2, 1, 0 };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
+    }
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );

@@ -212,7 +212,7 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   ADD_COMPILE_OPTIONS(/MP)
-  IF("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     ADD_COMPILE_OPTIONS( /bigobj )
   ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013

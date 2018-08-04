@@ -117,13 +117,9 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 
     if (pIOHandler) {
         glTF2::Asset asset(pIOHandler);
-        try {
-            asset.Load(pFile, extension == "glb");
-            std::string version = asset.asset.version;
-            return !version.empty() && version[0] == '2';
-        } catch (...) {
-            return false;
-        }
+        asset.Load(pFile, extension == "glb");
+        std::string version = asset.asset.version;
+        return !version.empty() && version[0] == '2';
     }
 
     return false;

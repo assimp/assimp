@@ -135,7 +135,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLinesLoopWithoutIndices) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
 
-    std::array<int, 5> l1 = { 0, 1, 2, 3, 0 };
+    std::array<int, 5> l1 = {{ 0, 1, 2, 3, 0 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
     {
@@ -168,14 +168,14 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStripWithoutIndices
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
-    std::array<int, 3> f1 = { 0, 1, 2 };
+    std::array<int, 3> f1 = {{ 0, 1, 2 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<int, 3> f2 = { 2, 1, 3 };
+    std::array<int, 3> f2 = {{ 2, 1, 3 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
@@ -190,14 +190,14 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFanWithoutIndices) 
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
-    std::array<int, 3> f1 = { 0, 1, 2 };
+    std::array<int, 3> f1 = {{ 0, 1, 2 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<int, 3> f2 = { 0, 2, 3 };
+    std::array<int, 3> f2 = {{ 0, 2, 3 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
@@ -212,14 +212,14 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesWithoutIndices) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 6);
-    std::array<int, 3> f1 = { 0, 1, 2 };
+    std::array<int, 3> f1 = {{ 0, 1, 2 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<int, 3> f2 = { 3, 4, 5 };
+    std::array<int, 3> f2 = {{ 3, 4, 5 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
@@ -246,7 +246,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLines) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_08.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
-    std::array<int, 5> l1 = { 0, 3, 2, 1, 0 };
+    std::array<int, 5> l1 = {{ 0, 3, 2, 1, 0 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
     {
@@ -261,7 +261,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineLoop) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_09.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
-    std::array<int, 5> l1 = { 0, 3, 2, 1, 0};
+    std::array<int, 5> l1 = {{ 0, 3, 2, 1, 0 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
     {
@@ -276,7 +276,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineStrip) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_10.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
-    std::array<int, 5> l1 = { 0, 3, 2, 1, 0 };
+    std::array<int, 5> l1 = {{ 0, 3, 2, 1, 0 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
     {
@@ -292,14 +292,14 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStrip) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
-    std::array<int, 3> f1 = { 0, 3, 1 };
+    std::array<int, 3> f1 = {{ 0, 3, 1 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<int, 3> f2 = { 1, 3, 2 };
+    std::array<int, 3> f2 = {{ 1, 3, 2 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
@@ -314,14 +314,14 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
-    std::array<int, 3> f1 = { 0, 3, 2 };
+    std::array<int, 3> f1 = {{ 0, 3, 2 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<int, 3> f2 = { 0, 2, 1 };
+    std::array<int, 3> f2 = {{ 0, 2, 1 }};
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
     for (int i = 0; i < 3; ++i)
     {

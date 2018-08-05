@@ -740,11 +740,6 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
 
     ImportNodes(asset);
 
-    // TODO: it does not split the loaded vertices, should it?
-    //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-	MakeVerboseFormatProcess process;
-    process.Execute(pScene);
-
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

@@ -117,13 +117,9 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 
     if (pIOHandler) {
         glTF2::Asset asset(pIOHandler);
-        try {
-            asset.Load(pFile, extension == "glb");
-            std::string version = asset.asset.version;
-            return !version.empty() && version[0] == '2';
-        } catch (...) {
-            return false;
-        }
+        asset.Load(pFile, extension == "glb");
+        std::string version = asset.asset.version;
+        return !version.empty() && version[0] == '2';
     }
 
     return false;
@@ -550,9 +546,18 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     case PrimitiveMode_TRIANGLE_STRIP: {
                         nFaces = count - 2;
                         faces = new aiFace[nFaces];
-                        SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
-                        for (unsigned int i = 3; i < count; ++i) {
-                            SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], data.GetUInt(i));
+                        for (unsigned int i = 0; i < nFaces; ++i) {
+                            //The ordering is to ensure that the triangles are all drawn with the same orientation
+                            if ((i + 1) % 2 == 0)
+                            {
+                                //For even n, vertices n + 1, n, and n + 2 define triangle n
+                                SetFace(faces[i], data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
+                            }
+                            else
+                            {
+                                //For odd n, vertices n, n+1, and n+2 define triangle n
+                                SetFace(faces[i], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                            }
                         }
                         break;
                     }
@@ -560,8 +565,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         nFaces = count - 2;
                         faces = new aiFace[nFaces];
                         SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
-                        for (unsigned int i = 3; i < count; ++i) {
-                            SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i));
+                        for (unsigned int i = 1; i < nFaces; ++i) {
+                            SetFace(faces[i], faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i + 2));
                         }
                         break;
                 }
@@ -615,9 +620,18 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 case PrimitiveMode_TRIANGLE_STRIP: {
                     nFaces = count - 2;
                     faces = new aiFace[nFaces];
-                    SetFace(faces[0], 0, 1, 2);
-                    for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], i);
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        //The ordering is to ensure that the triangles are all drawn with the same orientation
+                        if ((i+1) % 2 == 0)
+                        {
+                            //For even n, vertices n + 1, n, and n + 2 define triangle n
+                            SetFace(faces[i], i+1, i, i+2);
+                        }
+                        else
+                        {
+                            //For odd n, vertices n, n+1, and n+2 define triangle n
+                            SetFace(faces[i], i, i+1, i+2);
+                        }
                     }
                     break;
                 }
@@ -625,8 +639,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     nFaces = count - 2;
                     faces = new aiFace[nFaces];
                     SetFace(faces[0], 0, 1, 2);
-                    for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], i);
+                    for (unsigned int i = 1; i < nFaces; ++i) {
+                        SetFace(faces[i], faces[0].mIndices[0], faces[i - 1].mIndices[2], i + 2);
                     }
                     break;
                 }
@@ -847,12 +861,6 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
     ImportCameras(asset);
 
     ImportNodes(asset);
-
-    // TODO: it does not split the loaded vertices, should it?
-    //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-    MakeVerboseFormatProcess process;
-    process.Execute(pScene);
-
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

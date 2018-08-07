@@ -105,6 +105,10 @@ OPTION ( BUILD_DOCS
   "Build documentation using Doxygen."
   OFF
 )
+OPTION( INJECT_DEBUG_POSTFIX
+  "Inject debug postfix in .a/.so lib names"
+  ON
+)
 
 IF (IOS)
 	IF (NOT CMAKE_BUILD_TYPE)

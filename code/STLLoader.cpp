@@ -90,6 +90,9 @@ static bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
     return expectedBinaryFileSize == fileSize;
 }
 
+static const size_t BufferSize = 500;
+static const char UnicodeBoundary = 127;
+
 // An ascii STL buffer will begin with "solid NAME", where NAME is optional.
 // Note: The "solid NAME" check is necessary, but not sufficient, to determine
 // if the buffer is ASCII; a binary header could also begin with "solid NAME".
@@ -108,10 +111,10 @@ static bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
     bool isASCII( strncmp( buffer, "solid", 5 ) == 0 );
     if( isASCII ) {
         // A lot of importers are write solid even if the file is binary. So we have to check for ASCII-characters.
-        if( fileSize >= 500 ) {
+        if( fileSize >= BufferSize) {
             isASCII = true;
-            for( unsigned int i = 0; i < 500; i++ ) {
-                if( buffer[ i ] > 127 ) {
+            for( unsigned int i = 0; i < BufferSize; i++ ) {
+                if( buffer[ i ] > UnicodeBoundary) {
                     isASCII = false;
                     break;
                 }
@@ -211,10 +214,11 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
     // create a single default material, using a white diffuse color for consistency with
     // other geometric types (e.g., PLY).
-    aiMaterial* pcMat = new aiMaterial();
+    aiMaterial* pcMat = aiCreateAndRegisterDefaultMaterial();
+    /*aiMaterial* pcMat = new aiMaterial();
     aiString s;
     s.Set(AI_DEFAULT_MATERIAL_NAME);
-    pcMat->AddProperty(&s, AI_MATKEY_NAME);
+    pcMat->AddProperty(&s, AI_MATKEY_NAME);*/
 
     aiColor4D clrDiffuse(ai_real(1.0),ai_real(1.0),ai_real(1.0),ai_real(1.0));
     if (bMatClr) {
@@ -535,11 +539,21 @@ bool STLImporter::LoadBinaryFile()
     // now copy faces
     addFacesToMesh(pMesh);
 
+    aiNode* root = pScene->mRootNode;
+
+    // allocate one node
+    aiNode* node = new aiNode();
+    node->mParent = root;
+
+    root->mNumChildren = 1u;
+    root->mChildren = new aiNode*[root->mNumChildren];
+    root->mChildren[0] = node;
+
     // add all created meshes to the single node
-    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    node->mNumMeshes = pScene->mNumMeshes;
+    node->mMeshes = new unsigned int[pScene->mNumMeshes];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
-        pScene->mRootNode->mMeshes[i] = i;
+        node->mMeshes[i] = i;
 
     if (bIsMaterialise && !pMesh->mColors[0])
     {

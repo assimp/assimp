@@ -68,7 +68,7 @@ namespace FBX {
 
 class Document;
 
-using NodeNameCache = std::vector<std::string>;
+using NodeNameCache = std::set<std::string>;
 
 /** 
  *  Convert a FBX #Document to #aiScene

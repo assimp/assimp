@@ -317,7 +317,7 @@ void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, Tem
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid solid, TempMesh& result, ConversionData& conv)
+void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh& result, ConversionData& conv)
 {
     const Curve* const curve = Curve::Convert(*solid.Directrix, conv);
     if(!curve) {

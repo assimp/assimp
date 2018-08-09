@@ -2806,16 +2806,14 @@ KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
 }
 
 void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
-    const aiVector3D& def_value,
-    double& max_time,
-    double& min_time )
-
-{
-    ai_assert( keys.size() );
-    ai_assert( valOut );
+        const aiVector3D& def_value,
+        double& max_time,
+        double& min_time ) {
+    ai_assert( !keys.empty() );
+    ai_assert( nullptr != valOut );
 
     std::vector<unsigned int> next_pos;
-    const size_t count = inputs.size();
+    const size_t count( inputs.size() );
 
     next_pos.resize( inputs.size(), 0 );
 
@@ -2826,6 +2824,9 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
             const KeyFrameList& kfl = inputs[ i ];
 
             const size_t ksize = std::get<0>(kfl)->size();
+            if (ksize == 0) {
+                continue;
+            }
             if ( ksize > next_pos[ i ] && std::get<0>(kfl)->at( next_pos[ i ] ) == time ) {
                 ++next_pos[ i ];
             }

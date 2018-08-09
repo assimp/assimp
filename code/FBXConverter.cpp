@@ -413,97 +413,95 @@ void FBXConverter::GetUniqueName( const std::string &name, std::string &uniqueNa
 }
 
 
-const char* FBXConverter::NameTransformationComp( TransformationComp comp )
-{
-    switch ( comp )
-    {
-    case TransformationComp_Translation:
-        return "Translation";
-    case TransformationComp_RotationOffset:
-        return "RotationOffset";
-    case TransformationComp_RotationPivot:
-        return "RotationPivot";
-    case TransformationComp_PreRotation:
-        return "PreRotation";
-    case TransformationComp_Rotation:
-        return "Rotation";
-    case TransformationComp_PostRotation:
-        return "PostRotation";
-    case TransformationComp_RotationPivotInverse:
-        return "RotationPivotInverse";
-    case TransformationComp_ScalingOffset:
-        return "ScalingOffset";
-    case TransformationComp_ScalingPivot:
-        return "ScalingPivot";
-    case TransformationComp_Scaling:
-        return "Scaling";
-    case TransformationComp_ScalingPivotInverse:
-        return "ScalingPivotInverse";
-    case TransformationComp_GeometricScaling:
-        return "GeometricScaling";
-    case TransformationComp_GeometricRotation:
-        return "GeometricRotation";
-    case TransformationComp_GeometricTranslation:
-        return "GeometricTranslation";
-    case TransformationComp_GeometricScalingInverse:
-        return "GeometricScalingInverse";
-    case TransformationComp_GeometricRotationInverse:
-        return "GeometricRotationInverse";
-    case TransformationComp_GeometricTranslationInverse:
-        return "GeometricTranslationInverse";
-    case TransformationComp_MAXIMUM: // this is to silence compiler warnings
-    default:
-        break;
+const char* FBXConverter::NameTransformationComp( TransformationComp comp ) {
+    switch ( comp ) {
+        case TransformationComp_Translation:
+            return "Translation";
+        case TransformationComp_RotationOffset:
+            return "RotationOffset";
+        case TransformationComp_RotationPivot:
+            return "RotationPivot";
+        case TransformationComp_PreRotation:
+            return "PreRotation";
+        case TransformationComp_Rotation:
+            return "Rotation";
+        case TransformationComp_PostRotation:
+            return "PostRotation";
+        case TransformationComp_RotationPivotInverse:
+            return "RotationPivotInverse";
+        case TransformationComp_ScalingOffset:
+            return "ScalingOffset";
+        case TransformationComp_ScalingPivot:
+            return "ScalingPivot";
+        case TransformationComp_Scaling:
+            return "Scaling";
+        case TransformationComp_ScalingPivotInverse:
+            return "ScalingPivotInverse";
+        case TransformationComp_GeometricScaling:
+            return "GeometricScaling";
+        case TransformationComp_GeometricRotation:
+            return "GeometricRotation";
+        case TransformationComp_GeometricTranslation:
+            return "GeometricTranslation";
+        case TransformationComp_GeometricScalingInverse:
+            return "GeometricScalingInverse";
+        case TransformationComp_GeometricRotationInverse:
+            return "GeometricRotationInverse";
+        case TransformationComp_GeometricTranslationInverse:
+            return "GeometricTranslationInverse";
+        case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+        default:
+            break;
     }
 
     ai_assert( false );
-    return NULL;
+
+    return nullptr;
 }
 
-const char* FBXConverter::NameTransformationCompProperty( TransformationComp comp )
-{
-    switch ( comp )
-    {
-    case TransformationComp_Translation:
-        return "Lcl Translation";
-    case TransformationComp_RotationOffset:
-        return "RotationOffset";
-    case TransformationComp_RotationPivot:
-        return "RotationPivot";
-    case TransformationComp_PreRotation:
-        return "PreRotation";
-    case TransformationComp_Rotation:
-        return "Lcl Rotation";
-    case TransformationComp_PostRotation:
-        return "PostRotation";
-    case TransformationComp_RotationPivotInverse:
-        return "RotationPivotInverse";
-    case TransformationComp_ScalingOffset:
-        return "ScalingOffset";
-    case TransformationComp_ScalingPivot:
-        return "ScalingPivot";
-    case TransformationComp_Scaling:
-        return "Lcl Scaling";
-    case TransformationComp_ScalingPivotInverse:
-        return "ScalingPivotInverse";
-    case TransformationComp_GeometricScaling:
-        return "GeometricScaling";
-    case TransformationComp_GeometricRotation:
-        return "GeometricRotation";
-    case TransformationComp_GeometricTranslation:
-        return "GeometricTranslation";
-    case TransformationComp_GeometricScalingInverse:
-        return "GeometricScalingInverse";
-    case TransformationComp_GeometricRotationInverse:
-        return "GeometricRotationInverse";
-    case TransformationComp_GeometricTranslationInverse:
-        return "GeometricTranslationInverse";
-    case TransformationComp_MAXIMUM: // this is to silence compiler warnings
-        break;
+const char* FBXConverter::NameTransformationCompProperty( TransformationComp comp ) {
+    switch ( comp ) {
+        case TransformationComp_Translation:
+            return "Lcl Translation";
+        case TransformationComp_RotationOffset:
+            return "RotationOffset";
+        case TransformationComp_RotationPivot:
+            return "RotationPivot";
+        case TransformationComp_PreRotation:
+            return "PreRotation";
+        case TransformationComp_Rotation:
+            return "Lcl Rotation";
+        case TransformationComp_PostRotation:
+            return "PostRotation";
+        case TransformationComp_RotationPivotInverse:
+            return "RotationPivotInverse";
+        case TransformationComp_ScalingOffset:
+            return "ScalingOffset";
+        case TransformationComp_ScalingPivot:
+            return "ScalingPivot";
+        case TransformationComp_Scaling:
+            return "Lcl Scaling";
+        case TransformationComp_ScalingPivotInverse:
+            return "ScalingPivotInverse";
+        case TransformationComp_GeometricScaling:
+            return "GeometricScaling";
+        case TransformationComp_GeometricRotation:
+            return "GeometricRotation";
+        case TransformationComp_GeometricTranslation:
+            return "GeometricTranslation";
+        case TransformationComp_GeometricScalingInverse:
+            return "GeometricScalingInverse";
+        case TransformationComp_GeometricRotationInverse:
+            return "GeometricRotationInverse";
+        case TransformationComp_GeometricTranslationInverse:
+            return "GeometricTranslationInverse";
+        case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+            break;
     }
 
     ai_assert( false );
-    return NULL;
+
+    return nullptr;
 }
 
 aiVector3D FBXConverter::TransformationCompDefaultValue( TransformationComp comp )
@@ -584,11 +582,15 @@ void FBXConverter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& ro
 
     default:
         ai_assert( false );
+        break;
     }
 
-    ai_assert( ( order[ 0 ] >= 0 ) && ( order[ 0 ] <= 2 ) );
-    ai_assert( ( order[ 1 ] >= 0 ) && ( order[ 1 ] <= 2 ) );
-    ai_assert( ( order[ 2 ] >= 0 ) && ( order[ 2 ] <= 2 ) );
+    ai_assert( order[ 0 ] >= 0 );
+    ai_assert( order[ 0 ] <= 2 );
+    ai_assert( order[ 1 ] >= 0 );
+    ai_assert( order[ 1 ] <= 2 );
+    ai_assert( order[ 2 ] >= 0 );
+    ai_assert( order[ 2 ] <= 2 );
 
     if ( !is_id[ order[ 0 ] ] ) {
         out = temp[ order[ 0 ] ];
@@ -639,8 +641,8 @@ std::string FBXConverter::NameTransformationChainNode( const std::string& name, 
     return name + std::string( MAGIC_NODE_TAG ) + "_" + NameTransformationComp( comp );
 }
 
-void FBXConverter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes )
-{
+void FBXConverter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes,
+        std::vector<aiNode*>& post_output_nodes ) {
     const PropertyTable& props = model.Props();
     const Model::RotOrder rot = model.RotationOrder();
 
@@ -1965,55 +1967,55 @@ void FBXConverter::SetShadingPropertiesCommon( aiMaterial* out_mat, const Proper
 }
 
 
-double FBXConverter::FrameRateToDouble( FileGlobalSettings::FrameRate fp, double customFPSVal )
-{
+double FBXConverter::FrameRateToDouble( FileGlobalSettings::FrameRate fp, double customFPSVal ) {
     switch ( fp ) {
-    case FileGlobalSettings::FrameRate_DEFAULT:
-        return 1.0;
+        case FileGlobalSettings::FrameRate_DEFAULT:
+            return 1.0;
 
-    case FileGlobalSettings::FrameRate_120:
-        return 120.0;
+        case FileGlobalSettings::FrameRate_120:
+            return 120.0;
 
-    case FileGlobalSettings::FrameRate_100:
-        return 100.0;
+        case FileGlobalSettings::FrameRate_100:
+            return 100.0;
 
-    case FileGlobalSettings::FrameRate_60:
-        return 60.0;
+        case FileGlobalSettings::FrameRate_60:
+            return 60.0;
 
-    case FileGlobalSettings::FrameRate_50:
-        return 50.0;
+        case FileGlobalSettings::FrameRate_50:
+            return 50.0;
 
-    case FileGlobalSettings::FrameRate_48:
-        return 48.0;
+        case FileGlobalSettings::FrameRate_48:
+            return 48.0;
 
-    case FileGlobalSettings::FrameRate_30:
-    case FileGlobalSettings::FrameRate_30_DROP:
-        return 30.0;
+        case FileGlobalSettings::FrameRate_30:
+        case FileGlobalSettings::FrameRate_30_DROP:
+            return 30.0;
 
-    case FileGlobalSettings::FrameRate_NTSC_DROP_FRAME:
-    case FileGlobalSettings::FrameRate_NTSC_FULL_FRAME:
-        return 29.9700262;
+        case FileGlobalSettings::FrameRate_NTSC_DROP_FRAME:
+        case FileGlobalSettings::FrameRate_NTSC_FULL_FRAME:
+            return 29.9700262;
 
-    case FileGlobalSettings::FrameRate_PAL:
-        return 25.0;
+        case FileGlobalSettings::FrameRate_PAL:
+            return 25.0;
 
-    case FileGlobalSettings::FrameRate_CINEMA:
-        return 24.0;
+        case FileGlobalSettings::FrameRate_CINEMA:
+            return 24.0;
 
-    case FileGlobalSettings::FrameRate_1000:
-        return 1000.0;
+        case FileGlobalSettings::FrameRate_1000:
+            return 1000.0;
 
-    case FileGlobalSettings::FrameRate_CINEMA_ND:
-        return 23.976;
+        case FileGlobalSettings::FrameRate_CINEMA_ND:
+            return 23.976;
 
-    case FileGlobalSettings::FrameRate_CUSTOM:
-        return customFPSVal;
+        case FileGlobalSettings::FrameRate_CUSTOM:
+            return customFPSVal;
 
-    case FileGlobalSettings::FrameRate_MAX: // this is to silence compiler warnings
-        break;
+        case FileGlobalSettings::FrameRate_MAX: // this is to silence compiler warnings
+            break;
     }
 
     ai_assert( false );
+
     return -1.0f;
 }
 
@@ -2421,9 +2423,8 @@ void FBXConverter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
 }
 
 bool FBXConverter::IsRedundantAnimationData( const Model& target,
-    TransformationComp comp,
-    const std::vector<const AnimationCurveNode*>& curves )
-{
+        TransformationComp comp,
+        const std::vector<const AnimationCurveNode*>& curves ) {
     ai_assert( curves.size() );
 
     // look for animation nodes with
@@ -2526,16 +2527,14 @@ aiNodeAnim* FBXConverter::GenerateScalingNodeAnim( const std::string& name,
     return na.release();
 }
 
-
 aiNodeAnim* FBXConverter::GenerateTranslationNodeAnim( const std::string& name,
-    const Model& /*target*/,
-    const std::vector<const AnimationCurveNode*>& curves,
-    const LayerMap& layer_map,
-    int64_t start, int64_t stop,
-    double& max_time,
-    double& min_time,
-    bool inverse )
-{
+        const Model& /*target*/,
+        const std::vector<const AnimationCurveNode*>& curves,
+        const LayerMap& layer_map,
+        int64_t start, int64_t stop,
+        double& max_time,
+        double& min_time,
+        bool inverse ) {
     std::unique_ptr<aiNodeAnim> na( new aiNodeAnim() );
     na->mNodeName.Set( name );
 
@@ -2756,12 +2755,11 @@ FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList( const std::vector<
 }
 
 
-KeyTimeList FBXConverter::GetKeyTimeList( const KeyFrameListList& inputs )
-{
-    ai_assert( inputs.size() );
+KeyTimeList FBXConverter::GetKeyTimeList( const KeyFrameListList& inputs ) {
+    ai_assert( !inputs.empty() );
 
-    // reserve some space upfront - it is likely that the keyframe lists
-    // have matching time values, so max(of all keyframe lists) should
+    // reserve some space upfront - it is likely that the key-frame lists
+    // have matching time values, so max(of all key-frame lists) should
     // be a good estimate.
     KeyTimeList keys;
 

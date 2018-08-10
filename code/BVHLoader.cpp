@@ -490,11 +490,19 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 						throw DeadlyImportError("Missing position channel in node " + nodeName);
 					else {
 						int channelIdx = mapIter->second;
-						switch (channel)
-						{
-						case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; break;
-						case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; break;
-						case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; break;
+						switch (channel) {
+						    case Channel_PositionX: 
+                                poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; 
+                                break;
+						    case Channel_PositionY: 
+                                poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; 
+                                break;
+						    case Channel_PositionZ: 
+                                poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; 
+                                break;
+                                
+                            default:
+                                break;
 						}
 
 					}
@@ -537,9 +545,16 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 						// Compute rotation transformations in the right order
 						switch (channel)
 						{
-							case Channel_RotationX: aiMatrix4x4::RotationX(angle, temp); rotMatrix *= aiMatrix3x3(temp); break;
-							case Channel_RotationY: aiMatrix4x4::RotationY(angle, temp); rotMatrix *= aiMatrix3x3(temp);  break;
-							case Channel_RotationZ: aiMatrix4x4::RotationZ(angle, temp); rotMatrix *= aiMatrix3x3(temp); break;
+							case Channel_RotationX: 
+                                aiMatrix4x4::RotationX(angle, temp); rotMatrix *= aiMatrix3x3(temp); 
+                                break;
+							case Channel_RotationY: 
+                                aiMatrix4x4::RotationY(angle, temp); rotMatrix *= aiMatrix3x3(temp);  
+                                break;
+							case Channel_RotationZ: aiMatrix4x4::RotationZ(angle, temp); rotMatrix *= aiMatrix3x3(temp); 
+                                break;
+                            default:
+                                break;
 						}
 					}
                 }

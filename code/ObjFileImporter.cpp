@@ -244,12 +244,14 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
         mesh->mNumVertices = n;
 
         mesh->mVertices = new aiVector3D[n];
-        memcpy_s(mesh->mVertices, n*sizeof(aiVector3D), pModel->m_Vertices.data(), pModel->m_Vertices.size()*sizeof(aiVector3D) );
+        memcpy(mesh->mVertices, pModel->m_Vertices.data(), n*sizeof(aiVector3D) );
 
-        // Allocate memory for attributes
         if ( !pModel->m_Normals.empty() ) {
             mesh->mNormals = new aiVector3D[n];
-            memcpy_s(mesh->mNormals, n*sizeof(aiVector3D), pModel->m_Normals.data(), pModel->m_Normals.size()*sizeof(aiVector3D));
+            if (pModel->m_Normals.size() < n) {
+                throw DeadlyImportError("OBJ: vertex normal index out of range");
+            }
+            memcpy(mesh->mNormals, pModel->m_Normals.data(), n*sizeof(aiVector3D));
         }
 
         if ( !pModel->m_VertexColors.empty() ){
@@ -259,7 +261,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
                     const aiVector3D& color = pModel->m_VertexColors[i];
                     mesh->mColors[0][i] = aiColor4D(color.x, color.y, color.z, 1.0);
                 }else {
-                    mesh->mColors[0][i] = aiColor4D( 1.0, 1.0, 1.0, 1.0 ); // Any other ideas what to use as default color?
+                    throw DeadlyImportError("OBJ: vertex color index out of range");
                 }
             }
         }       

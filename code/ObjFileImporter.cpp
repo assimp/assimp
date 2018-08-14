@@ -228,18 +228,12 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
         // Create all materials
         createMaterials(pModel, pScene);
     }else {
-        if (pModel->m_Vertices.empty())
-            return;
+		if (pModel->m_Vertices.empty()){
+			return;
+		}
 
-        aiMesh* mesh = new aiMesh();
+		std::unique_ptr<aiMesh> mesh( new aiMesh );
         mesh->mPrimitiveTypes = aiPrimitiveType_POINT;
-        pScene->mRootNode->mNumMeshes = 1;
-        pScene->mRootNode->mMeshes = new unsigned int[1];
-        pScene->mRootNode->mMeshes[0] = 0;
-        pScene->mMeshes = new aiMesh*[1];
-        pScene->mNumMeshes = 1;
-        pScene->mMeshes[0] = mesh;
-
         unsigned int n = pModel->m_Vertices.size();
         mesh->mNumVertices = n;
 
@@ -264,7 +258,14 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
                     throw DeadlyImportError("OBJ: vertex color index out of range");
                 }
             }
-        }       
+        }
+
+        pScene->mRootNode->mNumMeshes = 1;
+        pScene->mRootNode->mMeshes = new unsigned int[1];
+        pScene->mRootNode->mMeshes[0] = 0;
+        pScene->mMeshes = new aiMesh*[1];
+        pScene->mNumMeshes = 1;
+        pScene->mMeshes[0] = mesh.release();
     }
 }
 

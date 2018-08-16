@@ -393,7 +393,7 @@ void SplitByBoneCountProcess::UpdateNode( aiNode* pNode) const
             newMeshList.insert( newMeshList.end(), replaceMeshes.begin(), replaceMeshes.end());
         }
 
-        delete pNode->mMeshes;
+        delete [] pNode->mMeshes;
         pNode->mNumMeshes = static_cast<unsigned int>(newMeshList.size());
         pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
         std::copy( newMeshList.begin(), newMeshList.end(), pNode->mMeshes);

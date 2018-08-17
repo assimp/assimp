@@ -181,26 +181,27 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
     // ... then fill the materials with the now adjusted settings
     FillMaterials(parser, pScene);
 
-        // Apply unitsize scale calculation
-        pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0,  0,  0,
-                                                          0,  parser.mUnitSize,  0,  0,
-                                                          0,  0,  parser.mUnitSize,  0,
-                                                          0,  0,  0,  1);
-        if( !ignoreUpDirection ) {
-        // Convert to Y_UP, if different orientation
-        if( parser.mUpDirection == ColladaParser::UP_X)
-            pScene->mRootNode->mTransformation *= aiMatrix4x4(
-                 0, -1,  0,  0,
-                 1,  0,  0,  0,
-                 0,  0,  1,  0,
-                 0,  0,  0,  1);
-        else if( parser.mUpDirection == ColladaParser::UP_Z)
-            pScene->mRootNode->mTransformation *= aiMatrix4x4(
-                 1,  0,  0,  0,
-                 0,  0,  1,  0,
-                 0, -1,  0,  0,
-                 0,  0,  0,  1);
-        }
+    // Apply unitsize scale calculation
+    pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0,  0,  0,
+                                                        0,  parser.mUnitSize,  0,  0,
+                                                        0,  0,  parser.mUnitSize,  0,
+                                                        0,  0,  0,  1);
+    if( !ignoreUpDirection ) {
+    // Convert to Y_UP, if different orientation
+    if( parser.mUpDirection == ColladaParser::UP_X)
+        pScene->mRootNode->mTransformation *= aiMatrix4x4(
+                0, -1,  0,  0,
+                1,  0,  0,  0,
+                0,  0,  1,  0,
+                0,  0,  0,  1);
+    else if( parser.mUpDirection == ColladaParser::UP_Z)
+        pScene->mRootNode->mTransformation *= aiMatrix4x4(
+                1,  0,  0,  0,
+                0,  0,  1,  0,
+                0, -1,  0,  0,
+                0,  0,  0,  1);
+    }
+
     // store all meshes
     StoreSceneMeshes( pScene);
 
@@ -740,10 +741,6 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     // create bones if given
     if( pSrcController && pSrcController->mType == Collada::Skin)
     {
-        // refuse if the vertex count does not match
-//      if( pSrcController->mWeightCounts.size() != dstMesh->mNumVertices)
-//          throw DeadlyImportError( "Joint Controller vertex count does not match mesh vertex count");
-
         // resolve references - joint names
         const Collada::Accessor& jointNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mJointNameSource);
         const Collada::Data& jointNames = pParser.ResolveLibraryReference( pParser.mDataLibrary, jointNamesAcc.mSource);
@@ -971,7 +968,8 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
             for( size_t b = a+1; b < mAnims.size(); ++b)
             {
                 aiAnimation* other = mAnims[b];
-                if( other->mNumChannels == 1 && other->mDuration == templateAnim->mDuration && other->mTicksPerSecond == templateAnim->mTicksPerSecond )
+                if( other->mNumChannels == 1 && other->mDuration == templateAnim->mDuration && 
+                        other->mTicksPerSecond == templateAnim->mTicksPerSecond )
                     collectedAnimIndices.push_back( b);
             }
 

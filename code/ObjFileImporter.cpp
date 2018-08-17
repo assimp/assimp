@@ -76,41 +76,36 @@ using namespace std;
 
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
-ObjFileImporter::ObjFileImporter() :
-    m_Buffer(),
-    m_pRootObject( NULL ),
-    m_strAbsPath( "" )
-{
+ObjFileImporter::ObjFileImporter()
+: m_Buffer()
+, m_pRootObject( nullptr )
+, m_strAbsPath( "" ) {
     DefaultIOSystem io;
     m_strAbsPath = io.getOsSeparator();
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
-ObjFileImporter::~ObjFileImporter()
-{
+ObjFileImporter::~ObjFileImporter() {
     delete m_pRootObject;
-    m_pRootObject = NULL;
+    m_pRootObject = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an obj file.
-bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const
-{
-    if(!checkSig) //Check File Extension
-    {
+bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const {
+    if(!checkSig)  {
+        //Check File Extension
         return SimpleExtensionCheck(pFile,"obj");
-    }
-    else //Check file Header
-    {
+    } else {
+        // Check file Header
         static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9 );
+        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9, 200, false, true );
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* ObjFileImporter::GetInfo () const
-{
+const aiImporterDesc* ObjFileImporter::GetInfo () const {
     return &desc;
 }
 
@@ -215,22 +210,63 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
         ai_assert(false);
     }
 
-    // Create nodes for the whole scene
-    std::vector<aiMesh*> MeshArray;
-    for (size_t index = 0; index < pModel->m_Objects.size(); ++index ) {
-        createNodes(pModel, pModel->m_Objects[ index ], pScene->mRootNode, pScene, MeshArray);
-    }
-
-    // Create mesh pointer buffer for this scene
-    if (pScene->mNumMeshes > 0) {
-        pScene->mMeshes = new aiMesh*[ MeshArray.size() ];
-        for (size_t index =0; index < MeshArray.size(); ++index ) {
-            pScene->mMeshes[ index ] = MeshArray[ index ];
+    if (pModel->m_Objects.size() > 0) {
+        // Create nodes for the whole scene
+        std::vector<aiMesh*> MeshArray;
+        for (size_t index = 0; index < pModel->m_Objects.size(); ++index) {
+            createNodes(pModel, pModel->m_Objects[index], pScene->mRootNode, pScene, MeshArray);
         }
-    }
 
-    // Create all materials
-    createMaterials( pModel, pScene );
+        // Create mesh pointer buffer for this scene
+        if (pScene->mNumMeshes > 0) {
+            pScene->mMeshes = new aiMesh*[MeshArray.size()];
+            for (size_t index = 0; index < MeshArray.size(); ++index) {
+                pScene->mMeshes[index] = MeshArray[index];
+            }
+        }
+
+        // Create all materials
+        createMaterials(pModel, pScene);
+    }else {
+		if (pModel->m_Vertices.empty()){
+			return;
+		}
+
+		std::unique_ptr<aiMesh> mesh( new aiMesh );
+        mesh->mPrimitiveTypes = aiPrimitiveType_POINT;
+        unsigned int n = pModel->m_Vertices.size();
+        mesh->mNumVertices = n;
+
+        mesh->mVertices = new aiVector3D[n];
+        memcpy(mesh->mVertices, pModel->m_Vertices.data(), n*sizeof(aiVector3D) );
+
+        if ( !pModel->m_Normals.empty() ) {
+            mesh->mNormals = new aiVector3D[n];
+            if (pModel->m_Normals.size() < n) {
+                throw DeadlyImportError("OBJ: vertex normal index out of range");
+            }
+            memcpy(mesh->mNormals, pModel->m_Normals.data(), n*sizeof(aiVector3D));
+        }
+
+        if ( !pModel->m_VertexColors.empty() ){
+            mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
+            for (unsigned int i = 0; i < n; ++i) {
+                if (i < pModel->m_VertexColors.size() ) {
+                    const aiVector3D& color = pModel->m_VertexColors[i];
+                    mesh->mColors[0][i] = aiColor4D(color.x, color.y, color.z, 1.0);
+                }else {
+                    throw DeadlyImportError("OBJ: vertex color index out of range");
+                }
+            }
+        }
+
+        pScene->mRootNode->mNumMeshes = 1;
+        pScene->mRootNode->mMeshes = new unsigned int[1];
+        pScene->mRootNode->mMeshes[0] = 0;
+        pScene->mMeshes = new aiMesh*[1];
+        pScene->mNumMeshes = 1;
+        pScene->mMeshes[0] = mesh.release();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -457,7 +493,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
             // Copy all vertex colors
             if ( !pModel->m_VertexColors.empty())
             {
-                const aiVector3D color = pModel->m_VertexColors[ vertex ];
+                const aiVector3D& color = pModel->m_VertexColors[ vertex ];
                 pMesh->mColors[0][ newIndex ] = aiColor4D(color.x, color.y, color.z, 1.0);
             }
 

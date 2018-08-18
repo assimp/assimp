@@ -3,6 +3,7 @@
 /// \author smal.root@gmail.com
 /// \date   2016
 
+
 #include "glview.hpp"
 
 // Header files, Qt.
@@ -16,22 +17,26 @@
 #endif
 
 // Header files, DevIL.
-#include <il.h>
 
 // Header files, Assimp.
 #include <assimp/DefaultLogger.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+/*
 #ifndef __unused
 	#define __unused	__attribute__((unused))
 #endif // __unused
-
+*/
 /**********************************/
 /********** SHelper_Mesh **********/
 /**********************************/
 
 CGLView::SHelper_Mesh::SHelper_Mesh(const size_t pQuantity_Point, const size_t pQuantity_Line, const size_t pQuantity_Triangle, const SBBox& pBBox)
-	: Quantity_Point(pQuantity_Point), Quantity_Line(pQuantity_Line), Quantity_Triangle(pQuantity_Triangle), BBox(pBBox)
-{
+: Quantity_Point(pQuantity_Point)
+, Quantity_Line(pQuantity_Line)
+, Quantity_Triangle(pQuantity_Triangle)
+, BBox(pBBox) {
 	Index_Point = pQuantity_Point ? new GLuint[pQuantity_Point * 1] : nullptr;
 	Index_Line = pQuantity_Line ? new GLuint[pQuantity_Line * 2] : nullptr;
 	Index_Triangle = pQuantity_Triangle ? new GLuint[pQuantity_Triangle * 3] : nullptr;
@@ -88,6 +93,20 @@ void CGLView::SHelper_Camera::SetDefault()
 		do {} while(false)
 #endif // ASSIMP_QT4_VIEWER
 
+static void set_float4(float f[4], float a, float b, float c, float d) {
+    f[0] = a;
+    f[1] = b;
+    f[2] = c;
+    f[3] = d;
+}
+
+static void color4_to_float4(const aiColor4D *c, float f[4]) {
+    f[0] = c->r;
+    f[1] = c->g;
+    f[2] = c->b;
+    f[3] = c->a;
+}
+
 void CGLView::Material_Apply(const aiMaterial* pMaterial)
 {
     GLfloat tcol[4];
@@ -96,9 +115,6 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
     int ret1, ret2;
     int texture_index = 0;
     aiString texture_path;
-
-    auto set_float4 = [](float f[4], float a, float b, float c, float d) { f[0] = a, f[1] = b, f[2] = c, f[3] = d; };
-    auto color4_to_float4 = [](const aiColor4D *c, float f[4]) { f[0] = c->r, f[1] = c->g, f[2] = c->b, f[3] = c->a; };
 
 	///TODO: cache materials
 	// Disable color material because glMaterial is used.
@@ -203,20 +219,17 @@ void CGLView::ImportTextures(const QString& pScenePath)
 {
     auto LoadTexture = [&](const QString& pFileName) -> bool ///TODO: IME texture mode, operation.
     {
-        ILboolean success;
         GLuint id_ogl_texture;// OpenGL texture ID.
 
 	    if(!pFileName.startsWith(AI_EMBEDDED_TEXNAME_PREFIX))
 	    {
-		    ILuint id_image;// DevIL image ID.
 		    QString basepath = pScenePath.left(pScenePath.lastIndexOf('/') + 1);// path with '/' at the end.
 		    QString fileloc = (basepath + pFileName);
 
 		    fileloc.replace('\\', "/");
-		    ilGenImages(1, &id_image);// Generate DevIL image ID.
-		    ilBindImage(id_image);
-		    success = ilLoadImage(fileloc.toLocal8Bit());
-		    if(!success)
+            int x, y, n;
+            unsigned char *data = stbi_load(fileloc.toLocal8Bit(), &x, &y, &n, STBI_rgb_alpha );
+            if(nullptr==data)
 		    {
 			    LogError(QString("Couldn't load Image: %1").arg(fileloc));
 
@@ -224,13 +237,6 @@ void CGLView::ImportTextures(const QString& pScenePath)
 		    }
 
 		    // Convert every colour component into unsigned byte. If your image contains alpha channel you can replace IL_RGB with IL_RGBA.
-		    success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-		    if(!success)
-		    {
-			    LogError("Couldn't convert image.");
-
-			    return false;
-		    }
 
 		    glGenTextures(1, &id_ogl_texture);// Texture ID generation.
 		    mTexture_IDMap[pFileName] = id_ogl_texture;// save texture ID for filename in map
@@ -238,11 +244,9 @@ void CGLView::ImportTextures(const QString& pScenePath)
 		    // Redefine standard texture values
 		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// We will use linear interpolation for magnification filter.
 		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// We will use linear interpolation for minifying filter.
-		    glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0,
-						    ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData());// Texture specification.
+            glTexImage2D(GL_TEXTURE_2D, 0, n, x, y, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, data );// Texture specification.
 
-		    //Cleanup
-		    ilDeleteImages(1, &id_image);// Because we have already copied image data into texture data we can release memory used by image.
+            // Cleanup
 	    }
 	    else
 	    {
@@ -321,27 +325,18 @@ void CGLView::ImportTextures(const QString& pScenePath)
 		return;
 	}
 
-	// Before calling ilInit() version should be checked.
-	if(ilGetInteger(IL_VERSION_NUM) < IL_VERSION)
-	{
-		LogError("Wrong DevIL version.");
-
-		return;
-	}
-
-	ilInit();// Initialization of DevIL.
 	//
 	// Load textures.
 	//
 	// Get textures file names and number of textures.
-	for(size_t idx_material = 0; idx_material < mScene->mNumMaterials; idx_material++)
-	{
+	for(size_t idx_material = 0; idx_material < mScene->mNumMaterials; idx_material++) {
 		int idx_texture = 0;
 		aiString path;
 
-		do
-		{
-			if(mScene->mMaterials[idx_material]->GetTexture(aiTextureType_DIFFUSE, idx_texture, &path) != AI_SUCCESS) break;
+		do {
+            if (mScene->mMaterials[ idx_material ]->GetTexture( aiTextureType_DIFFUSE, idx_texture, &path ) != AI_SUCCESS) {
+                break;
+            }
 
 			LoadTexture(QString(path.C_Str()));
 			idx_texture++;
@@ -349,11 +344,8 @@ void CGLView::ImportTextures(const QString& pScenePath)
 	}// for(size_t idx_material = 0; idx_material < mScene->mNumMaterials; idx_material++)
 
 	// Textures list is empty, exit.
-	if(mTexture_IDMap.size() == 0)
-	{
+	if(mTexture_IDMap.empty()) {
 		LogInfo("No textures for import.");
-
-		return;
 	}
 }
 
@@ -476,7 +468,7 @@ void CGLView::Draw_Node(const aiNode* pNode)
 	// Apply node transformation matrix.
 	mat_node.Transpose();
 	glPushMatrix();
-#if ASSIMP_DOUBLE_PRECISION
+#ifdef ASSIMP_DOUBLE_PRECISION
 	glMultMatrixd((GLdouble*)mat_node[0]);
 #else
 	glMultMatrixf((GLfloat*)&mat_node);
@@ -518,7 +510,7 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 	{
 		glEnable(GL_COLOR_MATERIAL);///TODO: cache
 		glEnableClientState(GL_COLOR_ARRAY);
-#if ASSIMP_DOUBLE_PRECISION
+#ifdef ASSIMP_DOUBLE_PRECISION
 		glColorPointer(4, GL_DOUBLE, 0, mesh_cur.mColors[0]);
 #else
 		glColorPointer(4, GL_FLOAT, 0, mesh_cur.mColors[0]);
@@ -531,7 +523,7 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 	if(mesh_cur.HasTextureCoords(0))
 	{
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-#if ASSIMP_DOUBLE_PRECISION
+#ifdef ASSIMP_DOUBLE_PRECISION
 		glTexCoordPointer(2, GL_DOUBLE, sizeof(aiVector3D), mesh_cur.mTextureCoords[0]);
 #else
 		glTexCoordPointer(2, GL_FLOAT, sizeof(aiVector3D), mesh_cur.mTextureCoords[0]);
@@ -544,7 +536,7 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 	if(mesh_cur.HasNormals())
 	{
 		glEnableClientState(GL_NORMAL_ARRAY);
-#if ASSIMP_DOUBLE_PRECISION
+#ifdef ASSIMP_DOUBLE_PRECISION
 		glNormalPointer(GL_DOUBLE, 0, mesh_cur.mNormals);
 #else
 		glNormalPointer(GL_FLOAT, 0, mesh_cur.mNormals);
@@ -590,7 +582,7 @@ void CGLView::Draw_BBox(const SBBox& pBBox)
 #endif // ASSIMP_QT4_VIEWER
 
 	glBegin(GL_LINE_STRIP);
-#	if ASSIMP_DOUBLE_PRECISION
+#	ifdef ASSIMP_DOUBLE_PRECISION
 		glVertex3dv(&vertex[0][0]), glVertex3dv(&vertex[1][0]), glVertex3dv(&vertex[2][0]), glVertex3dv(&vertex[3][0]), glVertex3dv(&vertex[0][0]);// "Minimum" side.
 		glVertex3dv(&vertex[4][0]), glVertex3dv(&vertex[5][0]), glVertex3dv(&vertex[6][0]), glVertex3dv(&vertex[7][0]), glVertex3dv(&vertex[4][0]);// Edge and "maximum" side.
 #	else
@@ -600,7 +592,7 @@ void CGLView::Draw_BBox(const SBBox& pBBox)
 	glEnd();
 
 	glBegin(GL_LINES);
-#	if ASSIMP_DOUBLE_PRECISION
+#	ifdef ASSIMP_DOUBLE_PRECISION
 		glVertex3dv(&vertex[1][0]), glVertex3dv(&vertex[5][0]);
 		glVertex3dv(&vertex[2][0]), glVertex3dv(&vertex[6][0]);
 		glVertex3dv(&vertex[3][0]), glVertex3dv(&vertex[7][0]);
@@ -1113,25 +1105,37 @@ void CGLView::Lighting_Disable()
 void CGLView::Lighting_EditSource(const size_t pLightNumber, const SLightParameters& pLightParameters)
 {
 #if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
+    ConditionalContextControl_Begin;
 #endif // ASSIMP_QT4_VIEWER
 
-const size_t light_num = GL_LIGHT0 + pLightNumber;
+    const size_t light_num = GL_LIGHT0 + pLightNumber;
 
-GLfloat farr[4];
+    GLfloat farr[4];
 
 	if(pLightNumber >= GL_MAX_LIGHTS) return;///TODO: return value;
 
 	// Ambient color
-	farr[0] = pLightParameters.Ambient.r, farr[1] = pLightParameters.Ambient.g; farr[2] = pLightParameters.Ambient.b; farr[3] = pLightParameters.Ambient.a;
+    farr[0] = pLightParameters.Ambient.r;
+    farr[1] = pLightParameters.Ambient.g;
+    farr[2] = pLightParameters.Ambient.b;
+    farr[3] = pLightParameters.Ambient.a;
 	glLightfv(light_num, GL_AMBIENT, farr);
-	// Diffuse color
-	farr[0] = pLightParameters.Diffuse.r, farr[1] = pLightParameters.Diffuse.g; farr[2] = pLightParameters.Diffuse.b; farr[3] = pLightParameters.Diffuse.a;
+
+    // Diffuse color
+    farr[0] = pLightParameters.Diffuse.r;
+    farr[1] = pLightParameters.Diffuse.g;
+    farr[2] = pLightParameters.Diffuse.b;
+    farr[3] = pLightParameters.Diffuse.a;
 	glLightfv(light_num, GL_DIFFUSE, farr);
-	// Specular color
-	farr[0] = pLightParameters.Specular.r, farr[1] = pLightParameters.Specular.g; farr[2] = pLightParameters.Specular.b; farr[3] = pLightParameters.Specular.a;
+
+    // Specular color
+    farr[0] = pLightParameters.Specular.r;
+    farr[1] = pLightParameters.Specular.g;
+    farr[2] = pLightParameters.Specular.b;
+    farr[3] = pLightParameters.Specular.a;
 	glLightfv(light_num, GL_SPECULAR, farr);
-	// Other parameters
+
+    // Other parameters
 	switch(pLightParameters.Type)
 	{
 		case aiLightSource_DIRECTIONAL:
@@ -1193,7 +1197,7 @@ void CGLView::Lighting_EnableSource(const size_t pLightNumber)
 	glEnable(GL_LIGHT0 + pLightNumber);
 
 #if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
+    ConditionalContextControl_End;
 #endif // ASSIMP_QT4_VIEWER
 }
 
@@ -1263,7 +1267,7 @@ void CGLView::Camera_Set(const size_t pCameraNumber)
 
 void CGLView::Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial) {
     auto deg2rad = [](const GLfloat pDegree) -> GLfloat { 
-        return pDegree * AI_MATH_PI / 180.0;
+        return pDegree * AI_MATH_PI / 180.0f;
     };
 
 	aiMatrix4x4 mat_rot;

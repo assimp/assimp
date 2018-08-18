@@ -73,7 +73,7 @@ using namespace Util;
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-Converter::Converter( aiScene* out, const Document& doc )
+FBXConverter::FBXConverter( aiScene* out, const Document& doc )
 : defaultMaterialIndex()
 , out( out )
 , doc( doc ) {
@@ -114,7 +114,7 @@ Converter::Converter( aiScene* out, const Document& doc )
 }
 
 
-Converter::~Converter() {
+FBXConverter::~FBXConverter() {
     std::for_each( meshes.begin(), meshes.end(), Util::delete_fun<aiMesh>() );
     std::for_each( materials.begin(), materials.end(), Util::delete_fun<aiMaterial>() );
     std::for_each( animations.begin(), animations.end(), Util::delete_fun<aiAnimation>() );
@@ -123,7 +123,7 @@ Converter::~Converter() {
     std::for_each( textures.begin(), textures.end(), Util::delete_fun<aiTexture>() );
 }
 
-void Converter::ConvertRootNode() {
+void FBXConverter::ConvertRootNode() {
     out->mRootNode = new aiNode();
     out->mRootNode->mName.Set( "RootNode" );
 
@@ -131,7 +131,7 @@ void Converter::ConvertRootNode() {
     ConvertNodes( 0L, *out->mRootNode );
 }
 
-void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform ) {
+void FBXConverter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform ) {
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced( id, "Model" );
 
     std::vector<aiNode*> nodes;
@@ -282,7 +282,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 }
 
 
-void Converter::ConvertLights( const Model& model, const std::string &orig_name ) {
+void FBXConverter::ConvertLights( const Model& model, const std::string &orig_name ) {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
     for( const NodeAttribute* attr : node_attrs ) {
         const Light* const light = dynamic_cast<const Light*>( attr );
@@ -292,7 +292,7 @@ void Converter::ConvertLights( const Model& model, const std::string &orig_name 
     }
 }
 
-void Converter::ConvertCameras( const Model& model, const std::string &orig_name ) {
+void FBXConverter::ConvertCameras( const Model& model, const std::string &orig_name ) {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
     for( const NodeAttribute* attr : node_attrs ) {
         const Camera* const cam = dynamic_cast<const Camera*>( attr );
@@ -302,7 +302,7 @@ void Converter::ConvertCameras( const Model& model, const std::string &orig_name
     }
 }
 
-void Converter::ConvertLight( const Light& light, const std::string &orig_name ) {
+void FBXConverter::ConvertLight( const Light& light, const std::string &orig_name ) {
     lights.push_back( new aiLight() );
     aiLight* const out_light = lights.back();
 
@@ -379,7 +379,7 @@ void Converter::ConvertLight( const Light& light, const std::string &orig_name )
     }
 }
 
-void Converter::ConvertCamera( const Camera& cam, const std::string &orig_name )
+void FBXConverter::ConvertCamera( const Camera& cam, const std::string &orig_name )
 {
     cameras.push_back( new aiCamera() );
     aiCamera* const out_camera = cameras.back();
@@ -398,7 +398,7 @@ void Converter::ConvertCamera( const Camera& cam, const std::string &orig_name )
     out_camera->mClipPlaneFar = cam.FarPlane();
 }
 
-void Converter::GetUniqueName( const std::string &name, std::string &uniqueName )
+void FBXConverter::GetUniqueName( const std::string &name, std::string &uniqueName )
 {
     int i = 0;
     uniqueName = name;
@@ -413,107 +413,105 @@ void Converter::GetUniqueName( const std::string &name, std::string &uniqueName 
 }
 
 
-const char* Converter::NameTransformationComp( TransformationComp comp )
-{
-    switch ( comp )
-    {
-    case TransformationComp_Translation:
-        return "Translation";
-    case TransformationComp_RotationOffset:
-        return "RotationOffset";
-    case TransformationComp_RotationPivot:
-        return "RotationPivot";
-    case TransformationComp_PreRotation:
-        return "PreRotation";
-    case TransformationComp_Rotation:
-        return "Rotation";
-    case TransformationComp_PostRotation:
-        return "PostRotation";
-    case TransformationComp_RotationPivotInverse:
-        return "RotationPivotInverse";
-    case TransformationComp_ScalingOffset:
-        return "ScalingOffset";
-    case TransformationComp_ScalingPivot:
-        return "ScalingPivot";
-    case TransformationComp_Scaling:
-        return "Scaling";
-    case TransformationComp_ScalingPivotInverse:
-        return "ScalingPivotInverse";
-    case TransformationComp_GeometricScaling:
-        return "GeometricScaling";
-    case TransformationComp_GeometricRotation:
-        return "GeometricRotation";
-    case TransformationComp_GeometricTranslation:
-        return "GeometricTranslation";
-    case TransformationComp_GeometricScalingInverse:
-        return "GeometricScalingInverse";
-    case TransformationComp_GeometricRotationInverse:
-        return "GeometricRotationInverse";
-    case TransformationComp_GeometricTranslationInverse:
-        return "GeometricTranslationInverse";
-    case TransformationComp_MAXIMUM: // this is to silence compiler warnings
-    default:
-        break;
+const char* FBXConverter::NameTransformationComp( TransformationComp comp ) {
+    switch ( comp ) {
+        case TransformationComp_Translation:
+            return "Translation";
+        case TransformationComp_RotationOffset:
+            return "RotationOffset";
+        case TransformationComp_RotationPivot:
+            return "RotationPivot";
+        case TransformationComp_PreRotation:
+            return "PreRotation";
+        case TransformationComp_Rotation:
+            return "Rotation";
+        case TransformationComp_PostRotation:
+            return "PostRotation";
+        case TransformationComp_RotationPivotInverse:
+            return "RotationPivotInverse";
+        case TransformationComp_ScalingOffset:
+            return "ScalingOffset";
+        case TransformationComp_ScalingPivot:
+            return "ScalingPivot";
+        case TransformationComp_Scaling:
+            return "Scaling";
+        case TransformationComp_ScalingPivotInverse:
+            return "ScalingPivotInverse";
+        case TransformationComp_GeometricScaling:
+            return "GeometricScaling";
+        case TransformationComp_GeometricRotation:
+            return "GeometricRotation";
+        case TransformationComp_GeometricTranslation:
+            return "GeometricTranslation";
+        case TransformationComp_GeometricScalingInverse:
+            return "GeometricScalingInverse";
+        case TransformationComp_GeometricRotationInverse:
+            return "GeometricRotationInverse";
+        case TransformationComp_GeometricTranslationInverse:
+            return "GeometricTranslationInverse";
+        case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+        default:
+            break;
     }
 
     ai_assert( false );
-    return NULL;
+
+    return nullptr;
 }
 
-const char* Converter::NameTransformationCompProperty( TransformationComp comp )
-{
-    switch ( comp )
-    {
-    case TransformationComp_Translation:
-        return "Lcl Translation";
-    case TransformationComp_RotationOffset:
-        return "RotationOffset";
-    case TransformationComp_RotationPivot:
-        return "RotationPivot";
-    case TransformationComp_PreRotation:
-        return "PreRotation";
-    case TransformationComp_Rotation:
-        return "Lcl Rotation";
-    case TransformationComp_PostRotation:
-        return "PostRotation";
-    case TransformationComp_RotationPivotInverse:
-        return "RotationPivotInverse";
-    case TransformationComp_ScalingOffset:
-        return "ScalingOffset";
-    case TransformationComp_ScalingPivot:
-        return "ScalingPivot";
-    case TransformationComp_Scaling:
-        return "Lcl Scaling";
-    case TransformationComp_ScalingPivotInverse:
-        return "ScalingPivotInverse";
-    case TransformationComp_GeometricScaling:
-        return "GeometricScaling";
-    case TransformationComp_GeometricRotation:
-        return "GeometricRotation";
-    case TransformationComp_GeometricTranslation:
-        return "GeometricTranslation";
-    case TransformationComp_GeometricScalingInverse:
-        return "GeometricScalingInverse";
-    case TransformationComp_GeometricRotationInverse:
-        return "GeometricRotationInverse";
-    case TransformationComp_GeometricTranslationInverse:
-        return "GeometricTranslationInverse";
-    case TransformationComp_MAXIMUM: // this is to silence compiler warnings
-        break;
+const char* FBXConverter::NameTransformationCompProperty( TransformationComp comp ) {
+    switch ( comp ) {
+        case TransformationComp_Translation:
+            return "Lcl Translation";
+        case TransformationComp_RotationOffset:
+            return "RotationOffset";
+        case TransformationComp_RotationPivot:
+            return "RotationPivot";
+        case TransformationComp_PreRotation:
+            return "PreRotation";
+        case TransformationComp_Rotation:
+            return "Lcl Rotation";
+        case TransformationComp_PostRotation:
+            return "PostRotation";
+        case TransformationComp_RotationPivotInverse:
+            return "RotationPivotInverse";
+        case TransformationComp_ScalingOffset:
+            return "ScalingOffset";
+        case TransformationComp_ScalingPivot:
+            return "ScalingPivot";
+        case TransformationComp_Scaling:
+            return "Lcl Scaling";
+        case TransformationComp_ScalingPivotInverse:
+            return "ScalingPivotInverse";
+        case TransformationComp_GeometricScaling:
+            return "GeometricScaling";
+        case TransformationComp_GeometricRotation:
+            return "GeometricRotation";
+        case TransformationComp_GeometricTranslation:
+            return "GeometricTranslation";
+        case TransformationComp_GeometricScalingInverse:
+            return "GeometricScalingInverse";
+        case TransformationComp_GeometricRotationInverse:
+            return "GeometricRotationInverse";
+        case TransformationComp_GeometricTranslationInverse:
+            return "GeometricTranslationInverse";
+        case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+            break;
     }
 
     ai_assert( false );
-    return NULL;
+
+    return nullptr;
 }
 
-aiVector3D Converter::TransformationCompDefaultValue( TransformationComp comp )
+aiVector3D FBXConverter::TransformationCompDefaultValue( TransformationComp comp )
 {
     // XXX a neat way to solve the never-ending special cases for scaling
     // would be to do everything in log space!
     return comp == TransformationComp_Scaling ? aiVector3D( 1.f, 1.f, 1.f ) : aiVector3D();
 }
 
-void Converter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotation, aiMatrix4x4& out )
+void FBXConverter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotation, aiMatrix4x4& out )
 {
     if ( mode == Model::RotOrder_SphericXYZ ) {
         FBXImporter::LogError( "Unsupported RotationMode: SphericXYZ" );
@@ -584,11 +582,15 @@ void Converter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotat
 
     default:
         ai_assert( false );
+        break;
     }
 
-    ai_assert( ( order[ 0 ] >= 0 ) && ( order[ 0 ] <= 2 ) );
-    ai_assert( ( order[ 1 ] >= 0 ) && ( order[ 1 ] <= 2 ) );
-    ai_assert( ( order[ 2 ] >= 0 ) && ( order[ 2 ] <= 2 ) );
+    ai_assert( order[ 0 ] >= 0 );
+    ai_assert( order[ 0 ] <= 2 );
+    ai_assert( order[ 1 ] >= 0 );
+    ai_assert( order[ 1 ] <= 2 );
+    ai_assert( order[ 2 ] >= 0 );
+    ai_assert( order[ 2 ] <= 2 );
 
     if ( !is_id[ order[ 0 ] ] ) {
         out = temp[ order[ 0 ] ];
@@ -603,7 +605,7 @@ void Converter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotat
     }
 }
 
-bool Converter::NeedsComplexTransformationChain( const Model& model )
+bool FBXConverter::NeedsComplexTransformationChain( const Model& model )
 {
     const PropertyTable& props = model.Props();
     bool ok;
@@ -634,13 +636,13 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
     return false;
 }
 
-std::string Converter::NameTransformationChainNode( const std::string& name, TransformationComp comp )
+std::string FBXConverter::NameTransformationChainNode( const std::string& name, TransformationComp comp )
 {
     return name + std::string( MAGIC_NODE_TAG ) + "_" + NameTransformationComp( comp );
 }
 
-void Converter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes )
-{
+void FBXConverter::GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes,
+        std::vector<aiNode*>& post_output_nodes ) {
     const PropertyTable& props = model.Props();
     const Model::RotOrder rot = model.RotationOrder();
 
@@ -811,7 +813,7 @@ void Converter::GenerateTransformationNodeChain( const Model& model, std::vector
     }
 }
 
-void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
+void FBXConverter::SetupNodeMetadata( const Model& model, aiNode& nd )
 {
     const PropertyTable& props = model.Props();
     DirectPropertyMap unparsedProperties = props.GetUnparsedProperties();
@@ -848,7 +850,7 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
     }
 }
 
-void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4& node_global_transform )
+void FBXConverter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4& node_global_transform )
 {
     const std::vector<const Geometry*>& geos = model.GetGeometry();
 
@@ -875,7 +877,7 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
     }
 }
 
-std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, const Model& model,
+std::vector<unsigned int> FBXConverter::ConvertMesh( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     std::vector<unsigned int> temp;
@@ -910,7 +912,7 @@ std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, cons
     return temp;
 }
 
-aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh, aiNode& nd)
+aiMesh* FBXConverter::SetupEmptyMesh( const MeshGeometry& mesh, aiNode& nd)
 {
     aiMesh* const out_mesh = new aiMesh();
     meshes.push_back( out_mesh );
@@ -933,7 +935,7 @@ aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh, aiNode& nd)
     return out_mesh;
 }
 
-unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, const Model& model,
+unsigned int FBXConverter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
@@ -1060,7 +1062,7 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
     return static_cast<unsigned int>( meshes.size() - 1 );
 }
 
-std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
+std::vector<unsigned int> FBXConverter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform, aiNode& nd)
 {
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
@@ -1080,7 +1082,7 @@ std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometr
     return indices;
 }
 
-unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
+unsigned int FBXConverter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, const Model& model,
     MatIndexArray::value_type index,
     const aiMatrix4x4& node_global_transform,
     aiNode& nd)
@@ -1256,7 +1258,7 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
     return static_cast<unsigned int>( meshes.size() - 1 );
 }
 
-void Converter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeometry& geo,
+void FBXConverter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeometry& geo,
     const aiMatrix4x4& node_global_transform ,
     unsigned int materialIndex,
     std::vector<unsigned int>* outputVertStartIndices  )
@@ -1361,7 +1363,7 @@ void Converter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeome
     std::swap_ranges( bones.begin(), bones.end(), out->mBones );
 }
 
-void Converter::ConvertCluster( std::vector<aiBone*>& bones, const Model& /*model*/, const Cluster& cl,
+void FBXConverter::ConvertCluster( std::vector<aiBone*>& bones, const Model& /*model*/, const Cluster& cl,
         std::vector<size_t>& out_indices,
         std::vector<size_t>& index_out_indices,
         std::vector<size_t>& count_out_indices,
@@ -1402,7 +1404,7 @@ void Converter::ConvertCluster( std::vector<aiBone*>& bones, const Model& /*mode
     }
 }
 
-void Converter::ConvertMaterialForMesh( aiMesh* out, const Model& model, const MeshGeometry& geo,
+void FBXConverter::ConvertMaterialForMesh( aiMesh* out, const Model& model, const MeshGeometry& geo,
     MatIndexArray::value_type materialIndex )
 {
     // locate source materials for this mesh
@@ -1424,7 +1426,7 @@ void Converter::ConvertMaterialForMesh( aiMesh* out, const Model& model, const M
     materials_converted[ mat ] = out->mMaterialIndex;
 }
 
-unsigned int Converter::GetDefaultMaterial()
+unsigned int FBXConverter::GetDefaultMaterial()
 {
     if ( defaultMaterialIndex ) {
         return defaultMaterialIndex - 1;
@@ -1446,7 +1448,7 @@ unsigned int Converter::GetDefaultMaterial()
 }
 
 
-unsigned int Converter::ConvertMaterial( const Material& material, const MeshGeometry* const mesh )
+unsigned int FBXConverter::ConvertMaterial( const Material& material, const MeshGeometry* const mesh )
 {
     const PropertyTable& props = material.Props();
 
@@ -1481,7 +1483,7 @@ unsigned int Converter::ConvertMaterial( const Material& material, const MeshGeo
     return static_cast<unsigned int>( materials.size() - 1 );
 }
 
-unsigned int Converter::ConvertVideo( const Video& video )
+unsigned int FBXConverter::ConvertVideo( const Video& video )
 {
     // generate empty output texture
     aiTexture* out_tex = new aiTexture();
@@ -1511,7 +1513,7 @@ unsigned int Converter::ConvertVideo( const Video& video )
     return static_cast<unsigned int>( textures.size() - 1 );
 }
 
-aiString Converter::GetTexturePath(const Texture* tex)
+aiString FBXConverter::GetTexturePath(const Texture* tex)
 {
     aiString path;
     path.Set(tex->RelativeFilename());
@@ -1551,7 +1553,7 @@ aiString Converter::GetTexturePath(const Texture* tex)
     return path;
 }
 
-void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& textures,
+void FBXConverter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& textures,
     const std::string& propName,
     aiTextureType target, const MeshGeometry* const mesh )
 {
@@ -1669,7 +1671,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
     }
 }
 
-void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures,
+void FBXConverter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures,
         const std::string& propName,
         aiTextureType target, const MeshGeometry* const mesh ) {
     LayeredTextureMap::const_iterator it = layeredTextures.find( propName );
@@ -1792,7 +1794,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextu
     }
 }
 
-void Converter::SetTextureProperties( aiMaterial* out_mat, const TextureMap& textures, const MeshGeometry* const mesh )
+void FBXConverter::SetTextureProperties( aiMaterial* out_mat, const TextureMap& textures, const MeshGeometry* const mesh )
 {
     TrySetTextureProperties( out_mat, textures, "DiffuseColor", aiTextureType_DIFFUSE, mesh );
     TrySetTextureProperties( out_mat, textures, "AmbientColor", aiTextureType_AMBIENT, mesh );
@@ -1807,7 +1809,7 @@ void Converter::SetTextureProperties( aiMaterial* out_mat, const TextureMap& tex
     TrySetTextureProperties( out_mat, textures, "ShininessExponent", aiTextureType_SHININESS, mesh );
 }
 
-void Converter::SetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh )
+void FBXConverter::SetTextureProperties( aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh )
 {
     TrySetTextureProperties( out_mat, layeredTextures, "DiffuseColor", aiTextureType_DIFFUSE, mesh );
     TrySetTextureProperties( out_mat, layeredTextures, "AmbientColor", aiTextureType_AMBIENT, mesh );
@@ -1822,7 +1824,7 @@ void Converter::SetTextureProperties( aiMaterial* out_mat, const LayeredTextureM
     TrySetTextureProperties( out_mat, layeredTextures, "ShininessExponent", aiTextureType_SHININESS, mesh );
 }
 
-aiColor3D Converter::GetColorPropertyFactored( const PropertyTable& props, const std::string& colorName,
+aiColor3D FBXConverter::GetColorPropertyFactored( const PropertyTable& props, const std::string& colorName,
     const std::string& factorName, bool& result, bool useTemplate )
 {
     result = true;
@@ -1847,13 +1849,13 @@ aiColor3D Converter::GetColorPropertyFactored( const PropertyTable& props, const
     return aiColor3D( BaseColor.x, BaseColor.y, BaseColor.z );
 }
 
-aiColor3D Converter::GetColorPropertyFromMaterial( const PropertyTable& props, const std::string& baseName,
+aiColor3D FBXConverter::GetColorPropertyFromMaterial( const PropertyTable& props, const std::string& baseName,
     bool& result )
 {
     return GetColorPropertyFactored( props, baseName + "Color", baseName + "Factor", result, true );
 }
 
-aiColor3D Converter::GetColorProperty( const PropertyTable& props, const std::string& colorName,
+aiColor3D FBXConverter::GetColorProperty( const PropertyTable& props, const std::string& colorName,
     bool& result, bool useTemplate )
 {
     result = true;
@@ -1866,7 +1868,7 @@ aiColor3D Converter::GetColorProperty( const PropertyTable& props, const std::st
     return aiColor3D( ColorVec.x, ColorVec.y, ColorVec.z );
 }
 
-void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyTable& props )
+void FBXConverter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyTable& props )
 {
     // Set shading properties.
     // Modern FBX Files have two separate systems for defining these,
@@ -1965,60 +1967,60 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
 }
 
 
-double Converter::FrameRateToDouble( FileGlobalSettings::FrameRate fp, double customFPSVal )
-{
+double FBXConverter::FrameRateToDouble( FileGlobalSettings::FrameRate fp, double customFPSVal ) {
     switch ( fp ) {
-    case FileGlobalSettings::FrameRate_DEFAULT:
-        return 1.0;
+        case FileGlobalSettings::FrameRate_DEFAULT:
+            return 1.0;
 
-    case FileGlobalSettings::FrameRate_120:
-        return 120.0;
+        case FileGlobalSettings::FrameRate_120:
+            return 120.0;
 
-    case FileGlobalSettings::FrameRate_100:
-        return 100.0;
+        case FileGlobalSettings::FrameRate_100:
+            return 100.0;
 
-    case FileGlobalSettings::FrameRate_60:
-        return 60.0;
+        case FileGlobalSettings::FrameRate_60:
+            return 60.0;
 
-    case FileGlobalSettings::FrameRate_50:
-        return 50.0;
+        case FileGlobalSettings::FrameRate_50:
+            return 50.0;
 
-    case FileGlobalSettings::FrameRate_48:
-        return 48.0;
+        case FileGlobalSettings::FrameRate_48:
+            return 48.0;
 
-    case FileGlobalSettings::FrameRate_30:
-    case FileGlobalSettings::FrameRate_30_DROP:
-        return 30.0;
+        case FileGlobalSettings::FrameRate_30:
+        case FileGlobalSettings::FrameRate_30_DROP:
+            return 30.0;
 
-    case FileGlobalSettings::FrameRate_NTSC_DROP_FRAME:
-    case FileGlobalSettings::FrameRate_NTSC_FULL_FRAME:
-        return 29.9700262;
+        case FileGlobalSettings::FrameRate_NTSC_DROP_FRAME:
+        case FileGlobalSettings::FrameRate_NTSC_FULL_FRAME:
+            return 29.9700262;
 
-    case FileGlobalSettings::FrameRate_PAL:
-        return 25.0;
+        case FileGlobalSettings::FrameRate_PAL:
+            return 25.0;
 
-    case FileGlobalSettings::FrameRate_CINEMA:
-        return 24.0;
+        case FileGlobalSettings::FrameRate_CINEMA:
+            return 24.0;
 
-    case FileGlobalSettings::FrameRate_1000:
-        return 1000.0;
+        case FileGlobalSettings::FrameRate_1000:
+            return 1000.0;
 
-    case FileGlobalSettings::FrameRate_CINEMA_ND:
-        return 23.976;
+        case FileGlobalSettings::FrameRate_CINEMA_ND:
+            return 23.976;
 
-    case FileGlobalSettings::FrameRate_CUSTOM:
-        return customFPSVal;
+        case FileGlobalSettings::FrameRate_CUSTOM:
+            return customFPSVal;
 
-    case FileGlobalSettings::FrameRate_MAX: // this is to silence compiler warnings
-        break;
+        case FileGlobalSettings::FrameRate_MAX: // this is to silence compiler warnings
+            break;
     }
 
     ai_assert( false );
+
     return -1.0f;
 }
 
 
-void Converter::ConvertAnimations()
+void FBXConverter::ConvertAnimations()
 {
     // first of all determine framerate
     const FileGlobalSettings::FrameRate fps = doc.GlobalSettings().TimeMode();
@@ -2031,7 +2033,7 @@ void Converter::ConvertAnimations()
     }
 }
 
-std::string Converter::FixNodeName( const std::string& name ) {
+std::string FBXConverter::FixNodeName( const std::string& name ) {
     // strip Model:: prefix, avoiding ambiguities (i.e. don't strip if
     // this causes ambiguities, well possible between empty identifiers,
     // such as "Model::" and ""). Make sure the behaviour is consistent
@@ -2044,7 +2046,7 @@ std::string Converter::FixNodeName( const std::string& name ) {
     return name;
 }
 
-void Converter::ConvertAnimationStack( const AnimationStack& st )
+void FBXConverter::ConvertAnimationStack( const AnimationStack& st )
 {
     const AnimationLayerList& layers = st.Layers();
     if ( layers.empty() ) {
@@ -2186,7 +2188,7 @@ static void validateAnimCurveNodes( const std::vector<const AnimationCurveNode*>
 #endif // ASSIMP_BUILD_DEBUG
 
 // ------------------------------------------------------------------------------------------------
-void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
+void FBXConverter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
     const std::string& fixed_name,
     const std::vector<const AnimationCurveNode*>& curves,
     const LayerMap& layer_map,
@@ -2420,10 +2422,9 @@ void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
     node_anim_chain_bits[ fixed_name ] = flags;
 }
 
-bool Converter::IsRedundantAnimationData( const Model& target,
-    TransformationComp comp,
-    const std::vector<const AnimationCurveNode*>& curves )
-{
+bool FBXConverter::IsRedundantAnimationData( const Model& target,
+        TransformationComp comp,
+        const std::vector<const AnimationCurveNode*>& curves ) {
     ai_assert( curves.size() );
 
     // look for animation nodes with
@@ -2466,7 +2467,7 @@ bool Converter::IsRedundantAnimationData( const Model& target,
 }
 
 
-aiNodeAnim* Converter::GenerateRotationNodeAnim( const std::string& name,
+aiNodeAnim* FBXConverter::GenerateRotationNodeAnim( const std::string& name,
     const Model& target,
     const std::vector<const AnimationCurveNode*>& curves,
     const LayerMap& layer_map,
@@ -2496,7 +2497,7 @@ aiNodeAnim* Converter::GenerateRotationNodeAnim( const std::string& name,
     return na.release();
 }
 
-aiNodeAnim* Converter::GenerateScalingNodeAnim( const std::string& name,
+aiNodeAnim* FBXConverter::GenerateScalingNodeAnim( const std::string& name,
     const Model& /*target*/,
     const std::vector<const AnimationCurveNode*>& curves,
     const LayerMap& layer_map,
@@ -2526,16 +2527,14 @@ aiNodeAnim* Converter::GenerateScalingNodeAnim( const std::string& name,
     return na.release();
 }
 
-
-aiNodeAnim* Converter::GenerateTranslationNodeAnim( const std::string& name,
-    const Model& /*target*/,
-    const std::vector<const AnimationCurveNode*>& curves,
-    const LayerMap& layer_map,
-    int64_t start, int64_t stop,
-    double& max_time,
-    double& min_time,
-    bool inverse )
-{
+aiNodeAnim* FBXConverter::GenerateTranslationNodeAnim( const std::string& name,
+        const Model& /*target*/,
+        const std::vector<const AnimationCurveNode*>& curves,
+        const LayerMap& layer_map,
+        int64_t start, int64_t stop,
+        double& max_time,
+        double& min_time,
+        bool inverse ) {
     std::unique_ptr<aiNodeAnim> na( new aiNodeAnim() );
     na->mNodeName.Set( name );
 
@@ -2564,7 +2563,7 @@ aiNodeAnim* Converter::GenerateTranslationNodeAnim( const std::string& name,
     return na.release();
 }
 
-aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
+aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim( const std::string& name,
     const Model& target,
     NodeMap::const_iterator chain[ TransformationComp_MAXIMUM ],
     NodeMap::const_iterator iter_end,
@@ -2700,7 +2699,7 @@ aiNodeAnim* Converter::GenerateSimpleNodeAnim( const std::string& name,
     return na.release();
 }
 
-Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop )
+FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList( const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop )
 {
     KeyFrameListList inputs;
     inputs.reserve( nodes.size() * 3 );
@@ -2756,12 +2755,11 @@ Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const 
 }
 
 
-KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
-{
-    ai_assert( inputs.size() );
+KeyTimeList FBXConverter::GetKeyTimeList( const KeyFrameListList& inputs ) {
+    ai_assert( !inputs.empty() );
 
-    // reserve some space upfront - it is likely that the keyframe lists
-    // have matching time values, so max(of all keyframe lists) should
+    // reserve some space upfront - it is likely that the key-frame lists
+    // have matching time values, so max(of all key-frame lists) should
     // be a good estimate.
     KeyTimeList keys;
 
@@ -2805,17 +2803,15 @@ KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
     return keys;
 }
 
-void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
-    const aiVector3D& def_value,
-    double& max_time,
-    double& min_time )
-
-{
-    ai_assert( keys.size() );
-    ai_assert( valOut );
+void FBXConverter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
+        const aiVector3D& def_value,
+        double& max_time,
+        double& min_time ) {
+    ai_assert( !keys.empty() );
+    ai_assert( nullptr != valOut );
 
     std::vector<unsigned int> next_pos;
-    const size_t count = inputs.size();
+    const size_t count( inputs.size() );
 
     next_pos.resize( inputs.size(), 0 );
 
@@ -2826,6 +2822,9 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
             const KeyFrameList& kfl = inputs[ i ];
 
             const size_t ksize = std::get<0>(kfl)->size();
+            if (ksize == 0) {
+                continue;
+            }
             if ( ksize > next_pos[ i ] && std::get<0>(kfl)->at( next_pos[ i ] ) == time ) {
                 ++next_pos[ i ];
             }
@@ -2860,14 +2859,14 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
     }
 }
 
-void Converter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
+void FBXConverter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
     const aiVector3D& def_value,
     double& maxTime,
     double& minTime,
     Model::RotOrder order )
 {
-    ai_assert( keys.size() );
-    ai_assert( valOut );
+    ai_assert( !keys.empty() );
+    ai_assert( nullptr != valOut );
 
     std::unique_ptr<aiVectorKey[]> temp( new aiVectorKey[ keys.size() ] );
     InterpolateKeys( temp.get(), keys, inputs, def_value, maxTime, minTime );
@@ -2898,7 +2897,7 @@ void Converter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, con
     }
 }
 
-void Converter::ConvertTransformOrder_TRStoSRT( aiQuatKey* out_quat, aiVectorKey* out_scale,
+void FBXConverter::ConvertTransformOrder_TRStoSRT( aiQuatKey* out_quat, aiVectorKey* out_scale,
     aiVectorKey* out_translation,
     const KeyFrameListList& scaling,
     const KeyFrameListList& translation,
@@ -2956,7 +2955,7 @@ void Converter::ConvertTransformOrder_TRStoSRT( aiQuatKey* out_quat, aiVectorKey
     }
 }
 
-aiQuaternion Converter::EulerToQuaternion( const aiVector3D& rot, Model::RotOrder order )
+aiQuaternion FBXConverter::EulerToQuaternion( const aiVector3D& rot, Model::RotOrder order )
 {
     aiMatrix4x4 m;
     GetRotationMatrix( order, rot, m );
@@ -2964,7 +2963,7 @@ aiQuaternion Converter::EulerToQuaternion( const aiVector3D& rot, Model::RotOrde
     return aiQuaternion( aiMatrix3x3( m ) );
 }
 
-void Converter::ConvertScaleKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
+void FBXConverter::ConvertScaleKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
     int64_t start, int64_t stop,
     double& maxTime,
     double& minTime )
@@ -2984,7 +2983,7 @@ void Converter::ConvertScaleKeys( aiNodeAnim* na, const std::vector<const Animat
         InterpolateKeys( na->mScalingKeys, keys, inputs, aiVector3D( 1.0f, 1.0f, 1.0f ), maxTime, minTime );
 }
 
-void Converter::ConvertTranslationKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
+void FBXConverter::ConvertTranslationKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
     const LayerMap& /*layers*/,
     int64_t start, int64_t stop,
     double& maxTime,
@@ -3002,7 +3001,7 @@ void Converter::ConvertTranslationKeys( aiNodeAnim* na, const std::vector<const 
         InterpolateKeys( na->mPositionKeys, keys, inputs, aiVector3D( 0.0f, 0.0f, 0.0f ), maxTime, minTime );
 }
 
-void Converter::ConvertRotationKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
+void FBXConverter::ConvertRotationKeys( aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
     const LayerMap& /*layers*/,
     int64_t start, int64_t stop,
     double& maxTime,
@@ -3022,7 +3021,7 @@ void Converter::ConvertRotationKeys( aiNodeAnim* na, const std::vector<const Ani
     }
 }
 
-void Converter::ConvertGlobalSettings() {
+void FBXConverter::ConvertGlobalSettings() {
     if (nullptr == out) {
         return;
     }
@@ -3033,7 +3032,7 @@ void Converter::ConvertGlobalSettings() {
     out->mMetaData->Set(index, "UnitScaleFactor", unitScalFactor);
 }
 
-void Converter::TransferDataToScene()
+void FBXConverter::TransferDataToScene()
 {
     ai_assert( !out->mMeshes );
     ai_assert( !out->mNumMeshes );
@@ -3088,7 +3087,7 @@ void Converter::TransferDataToScene()
 // ------------------------------------------------------------------------------------------------
 void ConvertToAssimpScene(aiScene* out, const Document& doc)
 {
-    Converter converter(out,doc);
+    FBXConverter converter(out,doc);
 }
 
 } // !FBX

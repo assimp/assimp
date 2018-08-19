@@ -58,7 +58,15 @@ IF(VIEWER_BUILD)
 	LINK_DIRECTORIES(${Assimp_BINARY_DIR})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pedantic -Wall")
 
-	SET(assimp_qt_viewer_SRCS main.cpp loggerview.cpp glview.cpp mainwindow.cpp)
+	SET(assimp_qt_viewer_SRCS 
+        main.cpp 
+        loggerview.hpp
+        loggerview.cpp 
+        glview.hpp
+        glview.cpp 
+        mainwindow.hpp
+        mainwindow.cpp
+    )
 
 	IF(ASSIMP_QT4_VIEWER)
 		MESSAGE("assimp_qt_viewer use Qt4")

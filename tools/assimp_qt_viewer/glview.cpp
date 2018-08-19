@@ -1,9 +1,45 @@
-﻿/// \file   glview.cpp
-/// \brief  OpenGL visualisation. Implementation file.
-/// \author smal.root@gmail.com
-/// \date   2016
+﻿/*
+---------------------------------------------------------------------------
+Open Asset Import Library (assimp)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2018, assimp team
 
 
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
+conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
 #include "glview.hpp"
 
 // Header files, Qt.
@@ -42,11 +78,10 @@ CGLView::SHelper_Mesh::SHelper_Mesh(const size_t pQuantity_Point, const size_t p
 	Index_Triangle = pQuantity_Triangle ? new GLuint[pQuantity_Triangle * 3] : nullptr;
 }
 
-CGLView::SHelper_Mesh::~SHelper_Mesh()
-{
-	if(Index_Point != nullptr) delete [] Index_Point;
-	if(Index_Line != nullptr) delete [] Index_Line;
-	if(Index_Triangle != nullptr) delete [] Index_Triangle;
+CGLView::SHelper_Mesh::~SHelper_Mesh() {
+	delete [] Index_Point;
+	delete [] Index_Line;
+	delete [] Index_Triangle;
 }
 
 /**********************************/
@@ -215,22 +250,20 @@ void CGLView::Matrix_NodeToRoot(const aiNode* pNode, aiMatrix4x4& pOutMatrix)
     }
 }
 
-void CGLView::ImportTextures(const QString& pScenePath)
-{
+void CGLView::ImportTextures(const QString& scenePath) {
     auto LoadTexture = [&](const QString& pFileName) -> bool ///TODO: IME texture mode, operation.
     {
         GLuint id_ogl_texture;// OpenGL texture ID.
 
 	    if(!pFileName.startsWith(AI_EMBEDDED_TEXNAME_PREFIX))
 	    {
-		    QString basepath = pScenePath.left(pScenePath.lastIndexOf('/') + 1);// path with '/' at the end.
+		    QString basepath = scenePath.left(scenePath.lastIndexOf('/') + 1);// path with '/' at the end.
 		    QString fileloc = (basepath + pFileName);
 
 		    fileloc.replace('\\', "/");
             int x, y, n;
             unsigned char *data = stbi_load(fileloc.toLocal8Bit(), &x, &y, &n, STBI_rgb_alpha );
-            if(nullptr==data)
-		    {
+            if ( nullptr == data ) {
 			    LogError(QString("Couldn't load Image: %1").arg(fileloc));
 
 			    return false;
@@ -649,6 +682,7 @@ void CGLView::initializeGL()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_TEXTURE_2D);
+    //glEnable( GL_MULTISAMPLE );
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);

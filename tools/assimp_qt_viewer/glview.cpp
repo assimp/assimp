@@ -59,14 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-/*
-#ifndef __unused
-	#define __unused	__attribute__((unused))
-#endif // __unused
-*/
-/**********************************/
-/********** SHelper_Mesh **********/
-/**********************************/
 
 CGLView::SHelper_Mesh::SHelper_Mesh(const size_t pQuantity_Point, const size_t pQuantity_Line, const size_t pQuantity_Triangle, const SBBox& pBBox)
 : Quantity_Point(pQuantity_Point)
@@ -84,49 +76,13 @@ CGLView::SHelper_Mesh::~SHelper_Mesh() {
 	delete [] Index_Triangle;
 }
 
-/**********************************/
-/********** SHelper_Mesh **********/
-/**********************************/
-
-void CGLView::SHelper_Camera::SetDefault()
-{
+void CGLView::SHelper_Camera::SetDefault() {
 	Position.Set(0, 0, 0);
 	Target.Set(0, 0, -1);
 	Rotation_AroundCamera = aiMatrix4x4();
 	Rotation_Scene = aiMatrix4x4();
 	Translation_ToScene.Set(0, 0, 2);
 }
-
-/**********************************/
-/************ CGLView *************/
-/**********************************/
-
-#if !ASSIMP_QT4_VIEWER
-#	define ConditionalContextControl_Begin \
-		bool ContextEnabledHere; \
-		\
-		if(mGLContext_Current) \
-		{ \
-			ContextEnabledHere = false; \
-		} \
-		else \
-		{ \
-			makeCurrent(); \
-			mGLContext_Current = true; \
-			ContextEnabledHere = true; \
-		} \
-		\
-		do {} while(false)
-
-#	define ConditionalContextControl_End \
-		if(ContextEnabledHere) \
-		{ \
-			doneCurrent(); \
-			mGLContext_Current = false; \
-		} \
-		\
-		do {} while(false)
-#endif // ASSIMP_QT4_VIEWER
 
 static void set_float4(float f[4], float a, float b, float c, float d) {
     f[0] = a;
@@ -142,8 +98,7 @@ static void color4_to_float4(const aiColor4D *c, float f[4]) {
     f[3] = c->a;
 }
 
-void CGLView::Material_Apply(const aiMaterial* pMaterial)
-{
+void CGLView::Material_Apply(const aiMaterial* pMaterial) {
     GLfloat tcol[4];
     aiColor4D taicol;
     unsigned int max;
@@ -154,9 +109,9 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
 	///TODO: cache materials
 	// Disable color material because glMaterial is used.
 	glDisable(GL_COLOR_MATERIAL);///TODO: cache
-	// Set texture. If assigned.
-	if(AI_SUCCESS == pMaterial->GetTexture(aiTextureType_DIFFUSE, texture_index, &texture_path))
-	{
+	
+                                 // Set texture. If assigned.
+	if(AI_SUCCESS == pMaterial->GetTexture(aiTextureType_DIFFUSE, texture_index, &texture_path)) {
 		//bind texture
 		unsigned int texture_ID = mTexture_IDMap.value(texture_path.data, 0);
 
@@ -167,20 +122,27 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
 	//
 	// Diffuse
 	set_float4(tcol, 0.8f, 0.8f, 0.8f, 1.0f);
-	if(AI_SUCCESS == aiGetMaterialColor(pMaterial, AI_MATKEY_COLOR_DIFFUSE, &taicol)) color4_to_float4(&taicol, tcol);
+    if ( AI_SUCCESS == aiGetMaterialColor( pMaterial, AI_MATKEY_COLOR_DIFFUSE, &taicol )) {
+        color4_to_float4( &taicol, tcol );
+    }
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tcol);
-	// Specular
+	
+    // Specular
 	set_float4(tcol, 0.0f, 0.0f, 0.0f, 1.0f);
-	if(AI_SUCCESS == aiGetMaterialColor(pMaterial, AI_MATKEY_COLOR_SPECULAR, &taicol)) color4_to_float4(&taicol, tcol);
+    if ( AI_SUCCESS == aiGetMaterialColor( pMaterial, AI_MATKEY_COLOR_SPECULAR, &taicol )) {
+        color4_to_float4( &taicol, tcol );
+    }
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tcol);
 	// Ambient
 	set_float4(tcol, 0.2f, 0.2f, 0.2f, 1.0f);
-	if(AI_SUCCESS == aiGetMaterialColor(pMaterial, AI_MATKEY_COLOR_AMBIENT, &taicol)) color4_to_float4(&taicol, tcol);
-
+    if ( AI_SUCCESS == aiGetMaterialColor( pMaterial, AI_MATKEY_COLOR_AMBIENT, &taicol )) {
+        color4_to_float4( &taicol, tcol );
+    }
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, tcol);
-	// Emission
+	
+    // Emission
 	set_float4(tcol, 0.0f, 0.0f, 0.0f, 1.0f);
 	if(AI_SUCCESS == aiGetMaterialColor(pMaterial, AI_MATKEY_COLOR_EMISSIVE, &taicol)) color4_to_float4(&taicol, tcol);
 
@@ -193,12 +155,9 @@ void CGLView::Material_Apply(const aiMaterial* pMaterial)
 	// Shininess strength
 	max = 1;
 	ret2 = aiGetMaterialFloatArray(pMaterial, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
-	if((ret1 == AI_SUCCESS) && (ret2 == AI_SUCCESS))
-	{
+	if((ret1 == AI_SUCCESS) && (ret2 == AI_SUCCESS)) {
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess * strength);///TODO: cache
-	}
-	else
-	{
+	} else {
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);///TODO: cache
 		set_float4(tcol, 0.0f, 0.0f, 0.0f, 0.0f);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tcol);
@@ -476,26 +435,15 @@ void CGLView::BBox_GetFromVertices(const aiVector3D* pVertices, const size_t pVe
 	}
 }
 
-/********************************************************************/
-/************************ Logging functions *************************/
-/********************************************************************/
-
-void CGLView::LogInfo(const QString& pMessage)
-{
+void CGLView::LogInfo(const QString& pMessage) {
 	Assimp::DefaultLogger::get()->info(pMessage.toStdString());
 }
 
-void CGLView::LogError(const QString& pMessage)
-{
+void CGLView::LogError(const QString& pMessage) {
 	Assimp::DefaultLogger::get()->error(pMessage.toStdString());
 }
 
-/********************************************************************/
-/************************** Draw functions **************************/
-/********************************************************************/
-
-void CGLView::Draw_Node(const aiNode* pNode)
-{
+void CGLView::Draw_Node(const aiNode* pNode) {
     aiMatrix4x4 mat_node = pNode->mTransformation;
 
 	// Apply node transformation matrix.
@@ -606,13 +554,9 @@ void CGLView::Draw_BBox(const SBBox& pBBox)
 	glBindTexture(GL_TEXTURE_1D, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindTexture(GL_TEXTURE_3D, 0);
-#if ASSIMP_QT4_VIEWER
-	qglColor(QColor(Qt::white));
-#else
 	const QColor c_w(Qt::white);
 
 	glColor3f(c_w.redF(), c_w.greenF(), c_w.blueF());
-#endif // ASSIMP_QT4_VIEWER
 
 	glBegin(GL_LINE_STRIP);
 #	ifdef ASSIMP_DOUBLE_PRECISION
@@ -640,49 +584,28 @@ void CGLView::Draw_BBox(const SBBox& pBBox)
 
 }
 
-void CGLView::Enable_Textures(const bool pEnable)
-{
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
-	if(pEnable)
-	{
+void CGLView::Enable_Textures(const bool pEnable) {
+	if(pEnable) {
 		glEnable(GL_TEXTURE_1D);
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_TEXTURE_3D);
-	}
-	else
-	{
+	} else {
 		glDisable(GL_TEXTURE_1D);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_TEXTURE_3D);
 	}
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
-/********************************************************************/
-/*********************** Override functions ************************/
-/********************************************************************/
-
-void CGLView::initializeGL()
-{
-#if ASSIMP_QT4_VIEWER
-	qglClearColor(Qt::gray);
-#else
+void CGLView::initializeGL() {
 	mGLContext_Current = true;
 	initializeOpenGLFunctions();
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-#endif // ASSIMP_QT4_VIEWER
 	glShadeModel(GL_SMOOTH);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_TEXTURE_2D);
-    //glEnable( GL_MULTISAMPLE );
+    glEnable( GL_MULTISAMPLE );
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
@@ -694,25 +617,14 @@ void CGLView::initializeGL()
 	glCullFace(GL_BACK);
 
 	glFrontFace(GL_CCW);
-
-#if !ASSIMP_QT4_VIEWER
-	mGLContext_Current = false;
-#endif // ASSIMP_QT4_VIEWER
 }
 
-void CGLView::resizeGL(int pWidth, int pHeight)
-{
-#if !ASSIMP_QT4_VIEWER
-	mGLContext_Current = true;
-#endif // ASSIMP_QT4_VIEWER
-	mCamera_Viewport_AspectRatio = (GLdouble)pWidth / pHeight;
-	glViewport(0, 0, pWidth, pHeight);
+void CGLView::resizeGL(int width, int height) {
+	mCamera_Viewport_AspectRatio = (GLdouble)width / height;
+	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(mCamera_FOVY, mCamera_Viewport_AspectRatio, 1.0, 100000.0);///TODO: znear/zfar depend on scene size.
-#if !ASSIMP_QT4_VIEWER
-	mGLContext_Current = false;
-#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::drawCoordSystem() {
@@ -725,19 +637,8 @@ void CGLView::drawCoordSystem() {
     glBindTexture(GL_TEXTURE_3D, 0);
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_LINES);
-#if ASSIMP_QT4_VIEWER
-	// X, -X
-    qglColor(QColor(Qt::red)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(100000.0, 0.0, 0.0);
-    qglColor(QColor(Qt::cyan)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(-100000.0, 0.0, 0.0);
-    // Y, -Y
-    qglColor(QColor(Qt::green)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 100000.0, 0.0);
-    qglColor(QColor(Qt::magenta)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, -100000.0, 0.0);
-    // Z, -Z
-    qglColor(QColor(Qt::blue)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
-    qglColor(QColor(Qt::yellow)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
-    qglColor(QColor(Qt::white));
-#else
-	// X, -X
+
+    // X, -X
 	glColor3f(1.0f, 0.0f, 0.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(100000.0, 0.0, 0.0);
 	glColor3f(0.5f, 0.5f, 1.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(-100000.0, 0.0, 0.0);
 	// Y, -Y
@@ -747,19 +648,15 @@ void CGLView::drawCoordSystem() {
 	glColor3f(0.0f, 0.0f, 1.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
 	glColor3f(1.0f, 1.0f, 0.0f), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
 	glColor3f(1.0f, 1.0f, 1.0f);
-#endif // ASSIMP_QT4_VIEWER
-	glEnd();
-	// Restore previous state of lighting.
-	if(mLightingEnabled) glEnable(GL_LIGHTING);
 
+    glEnd();
+	// Restore previous state of lighting.
+    if (mLightingEnabled) {
+        glEnable( GL_LIGHTING );
+    }
 }
 
-void CGLView::paintGL()
-{
-#if !ASSIMP_QT4_VIEWER
-	mGLContext_Current = true;
-#endif // ASSIMP_QT4_VIEWER
-
+void CGLView::paintGL() {
 	QTime time_paintbegin;
 
 	time_paintbegin = QTime::currentTime();
@@ -767,6 +664,7 @@ void CGLView::paintGL()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
 	// Apply current camera transformations.
 #if ASSIMP_DOUBLE_PRECISION
 	glMultMatrixd((GLdouble*)&mHelper_Camera.Rotation_AroundCamera);
@@ -779,58 +677,38 @@ void CGLView::paintGL()
 #endif // ASSIMP_DOUBLE_PRECISION
 
 	// Coordinate system
-	if (mScene_AxesEnabled == true)
-    {
+	if ( mScene_AxesEnabled ) {
         drawCoordSystem();
     }
 
 	glDisable(GL_COLOR_MATERIAL);
-	// Scene
-	if(mScene != nullptr)
-	{
+	
+    // Scene
+	if(mScene != nullptr) {
 		Draw_Node(mScene->mRootNode);
 		// Scene BBox
-		if(mScene_DrawBBox) Draw_BBox(mScene_BBox);
-
+        if (mScene_DrawBBox) {
+            Draw_BBox( mScene_BBox );
+        }
 	}
 
-	emit Paint_Finished((size_t)time_paintbegin.msecsTo(QTime::currentTime()), mHelper_Camera.Translation_ToScene.Length());
-#if !ASSIMP_QT4_VIEWER
-	mGLContext_Current = false;
-#endif // ASSIMP_QT4_VIEWER
+	emit Paint_Finished((size_t) time_paintbegin.msecsTo(QTime::currentTime()), mHelper_Camera.Translation_ToScene.Length());
 }
 
-/********************************************************************/
-/********************** Constructor/Destructor **********************/
-/********************************************************************/
 
-CGLView::CGLView(QWidget *pParent)
-#if ASSIMP_QT4_VIEWER
-	: QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::DepthBuffer), pParent)
-#else
-	: QOpenGLWidget(pParent), mGLContext_Current(false)
-#endif // ASSIMP_QT4_VIEWER
-{
-	// set initial view
-	mHelper_CameraDefault.SetDefault();
-	Camera_Set(0);
+CGLView::CGLView( QWidget *pParent )
+: QOpenGLWidget( pParent )
+, mGLContext_Current( false ) {
+    // set initial view
+    mHelper_CameraDefault.SetDefault();
+    Camera_Set( 0 );
 }
 
-CGLView::~CGLView()
-{
+CGLView::~CGLView() {
 	FreeScene();
 }
 
-/********************************************************************/
-/********************* Scene control functions **********************/
-/********************************************************************/
-
-void CGLView::FreeScene()
-{
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
+void CGLView::FreeScene() {
 	// Set scene to null and after that \ref paintGL will not try to render it.
 	mScene = nullptr;
 	// Clean helper objects.
@@ -860,21 +738,14 @@ void CGLView::FreeScene()
 		mTexture_IDMap.clear();
 		delete [] id_tex;
 	}
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
-void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
-{
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
-	FreeScene();// Clear old data
+void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath) {
+    FreeScene();// Clear old data
 	// Why checking here, not at begin of function. Because old scene may not exist at know. So, need cleanup.
-	if(pScene == nullptr) return;
+    if (pScene == nullptr) {
+        return;
+    }
 
 	mScene = pScene;// Copy pointer of new scene.
 
@@ -900,7 +771,7 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 
 			BBox_GetFromVertices(mesh_cur.mVertices, mesh_cur.mNumVertices, mesh_bbox);
 			//
-			// Create vertices indices arrays splited by primitive type.
+			// Create vertices indices arrays splitted by primitive type.
 			//
 			size_t indcnt_p = 0;// points quantity
 			size_t indcnt_l = 0;// lines quantity
@@ -1065,7 +936,10 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 			}// switch(light_cur.mType)
 
 			// Add light source
-			if(name.isEmpty()) name += QString("%1").arg(idx_light);// Use index if name is empty.
+            // Use index if name is empty.
+            if (name.isEmpty()) {
+                name += QString( "%1" ).arg( idx_light );
+            }
 
 			Lighting_EditSource(idx_light, lp);
 			emit SceneObject_LightSource(name);// Light source will be enabled in signal handler.
@@ -1098,50 +972,20 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 			emit SceneObject_Camera(mScene->mCameras[idx_cam]->mName.C_Str());
 		}
 	}// if(!mScene->HasCameras()) else
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
-/********************************************************************/
-/******************** Lighting control functions ********************/
-/********************************************************************/
-
-void CGLView::Lighting_Enable()
-{
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
+void CGLView::Lighting_Enable() {
 	mLightingEnabled = true;
 	glEnable(GL_LIGHTING);
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
-void CGLView::Lighting_Disable()
-{
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
-	glDisable(GL_LIGHTING);
+void CGLView::Lighting_Disable() {
+    glDisable( GL_LIGHTING );
 	mLightingEnabled = false;
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::Lighting_EditSource(const size_t pLightNumber, const SLightParameters& pLightParameters)
 {
-#if !ASSIMP_QT4_VIEWER
-    ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
     const size_t light_num = GL_LIGHT0 + pLightNumber;
 
     GLfloat farr[4];
@@ -1214,45 +1058,20 @@ void CGLView::Lighting_EditSource(const size_t pLightNumber, const SLightParamet
 			glLightf(light_num, GL_SPOT_CUTOFF, 180.0);
 			break;
 	}// switch(pLightParameters.Type)
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
-void CGLView::Lighting_EnableSource(const size_t pLightNumber)
-{
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
+void CGLView::Lighting_EnableSource(const size_t pLightNumber) {
 	if(pLightNumber >= GL_MAX_LIGHTS) return;///TODO: return value;
 
 	glEnable(GL_LIGHT0 + pLightNumber);
-
-#if !ASSIMP_QT4_VIEWER
-    ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
 
 void CGLView::Lighting_DisableSource(const size_t pLightNumber)
 {
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_Begin;
-#endif // ASSIMP_QT4_VIEWER
-
 	if(pLightNumber >= GL_MAX_LIGHTS) return;///TODO: return value;
 
 	glDisable(GL_LIGHT0 + pLightNumber);
-
-#if !ASSIMP_QT4_VIEWER
-	ConditionalContextControl_End;
-#endif // ASSIMP_QT4_VIEWER
 }
-
-/********************************************************************/
-/******************** Cameras control functions *********************/
-/********************************************************************/
 
 void CGLView::Camera_Set(const size_t pCameraNumber)
 {

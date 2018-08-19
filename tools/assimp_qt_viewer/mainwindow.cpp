@@ -54,22 +54,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-/**********************************/
-/************ Functions ***********/
-/**********************************/
 
-/********************************************************************/
-/********************* Import/Export functions **********************/
-/********************************************************************/
+void MainWindow::ImportFile(const QString &pFileName) {
+    QTime time_begin = QTime::currentTime();
 
-void MainWindow::ImportFile(const QString &pFileName)
-{
-using namespace Assimp;
-
-QTime time_begin = QTime::currentTime();
-
-	if(mScene != nullptr)
-	{
+	if ( mScene != nullptr ) {
 		mImporter.FreeScene();
 		mGLView->FreeScene();
 	}
@@ -77,8 +66,7 @@ QTime time_begin = QTime::currentTime();
 	// Try to import scene.
 	mScene = mImporter.ReadFile(pFileName.toStdString(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_ValidateDataStructure | \
 															aiProcess_GenUVCoords | aiProcess_TransformUVCoords | aiProcess_FlipUVs);
-	if(mScene != nullptr)
-	{
+	if ( mScene != nullptr ) {
 		ui->lblLoadTime->setText(QString::number(time_begin.secsTo(QTime::currentTime())));
 		LogInfo("Import done: " + pFileName);
 		// Prepare widgets for new scene.
@@ -100,8 +88,7 @@ QTime time_begin = QTime::currentTime();
 		size_t qty_face = 0;
 		size_t qty_vert = 0;
 
-		for(size_t idx_mesh = 0; idx_mesh < mScene->mNumMeshes; idx_mesh++)
-		{
+		for(size_t idx_mesh = 0; idx_mesh < mScene->mNumMeshes; idx_mesh++) {
 			qty_face += mScene->mMeshes[idx_mesh]->mNumFaces;
 			qty_vert += mScene->mMeshes[idx_mesh]->mNumVertices;
 		}

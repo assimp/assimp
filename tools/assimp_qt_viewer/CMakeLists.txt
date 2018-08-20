@@ -3,52 +3,28 @@ project(assimp_qt_viewer)
 
 cmake_minimum_required(VERSION 2.6)
 
-OPTION( ASSIMP_QT4_VIEWER
-	"Set to ON to enable Qt4 against Qt5 for assimp_qt_viewer"
-	OFF
-)
-
-FIND_PACKAGE(DevIL QUIET)
 FIND_PACKAGE(OpenGL QUIET)
 
-IF(ASSIMP_QT4_VIEWER)
-	# Qt4 version
-	FIND_PACKAGE(Qt4 QUIET)
-ELSE(ASSIMP_QT4_VIEWER)
-	# Qt5 version
-	FIND_PACKAGE(Qt5 COMPONENTS Gui Widgets OpenGL QUIET)
-ENDIF(ASSIMP_QT4_VIEWER)
+# Qt5 version
+FIND_PACKAGE(Qt5 COMPONENTS Gui Widgets OpenGL QUIET)
 
 SET(VIEWER_BUILD:BOOL FALSE)
 
-IF((Qt4_FOUND OR Qt5Widgets_FOUND) AND IL_FOUND AND OPENGL_FOUND)
+IF(  Qt5Widgets_FOUND AND OPENGL_FOUND)
 	SET(VIEWER_BUILD TRUE)
-
-ELSE((Qt4_FOUND OR Qt5Widgets_FOUND) AND IL_FOUND AND OPENGL_FOUND)
+ELSE( Qt5Widgets_FOUND AND OPENGL_FOUND)
 	SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "")
 
-	IF(ASSIMP_QT4_VIEWER)
-		IF (NOT Qt4_FOUND)
-			SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} Qt4")
-		ENDIF (NOT Qt4_FOUND)
-
-	ELSE(ASSIMP_QT4_VIEWER)
-		IF (NOT Qt5_FOUND)
-			SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} Qt5")
-		ENDIF (NOT Qt5_FOUND)
-
-	ENDIF(ASSIMP_QT4_VIEWER)
-
-	IF (NOT IL_FOUND)
-		SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} DevIL")
-	ENDIF (NOT IL_FOUND)
+	IF (NOT Qt5_FOUND)
+		SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} Qt5")
+	ENDIF (NOT Qt5_FOUND)
 
 	IF (NOT OPENGL_FOUND)
 		SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} OpengGL")
 	ENDIF (NOT OPENGL_FOUND)
 
 	MESSAGE (WARNING "Build of assimp_qt_viewer is disabled. Unsatisfied dendencies: ${ASSIMP_QT_VIEWER_DEPENDENCIES}")
-ENDIF((Qt4_FOUND OR Qt5Widgets_FOUND) AND IL_FOUND AND OPENGL_FOUND)
+ENDIF( Qt5Widgets_FOUND AND OPENGL_FOUND)
 
 IF(VIEWER_BUILD)
 	INCLUDE_DIRECTORIES(
@@ -63,28 +39,23 @@ IF(VIEWER_BUILD)
 	LINK_DIRECTORIES(${Assimp_BINARY_DIR})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pedantic -Wall")
 
-	SET(assimp_qt_viewer_SRCS main.cpp loggerview.cpp glview.cpp mainwindow.cpp)
+	SET(assimp_qt_viewer_SRCS 
+        main.cpp 
+        loggerview.hpp
+        loggerview.cpp 
+        glview.hpp
+        glview.cpp 
+        mainwindow.hpp
+        mainwindow.cpp
+    )
 
-	IF(ASSIMP_QT4_VIEWER)
-		MESSAGE("assimp_qt_viewer use Qt4")
-		ADD_DEFINITIONS( -DASSIMP_QT4_VIEWER )
-		INCLUDE_DIRECTORIES(${QT_INCLUDES})
-		qt4_wrap_ui(UISrcs mainwindow.ui)
-		qt4_wrap_cpp(MOCrcs mainwindow.hpp glview.hpp)
-	ELSE()
-		MESSAGE("assimp_qt_viewer use Qt5")
-		INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDES})
-		qt5_wrap_ui(UISrcs mainwindow.ui)
-		qt5_wrap_cpp(MOCrcs mainwindow.hpp glview.hpp)
-	ENDIF()
+	MESSAGE("assimp_qt_viewer use Qt5")
+	INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDES})
+	qt5_wrap_ui(UISrcs mainwindow.ui)
+	qt5_wrap_cpp(MOCrcs mainwindow.hpp glview.hpp)
 
 	add_executable(${PROJECT_NAME} ${assimp_qt_viewer_SRCS} ${UISrcs} ${MOCrcs})
-
-	IF(ASSIMP_QT4_VIEWER)
-		target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
-	ELSE()
-		target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Widgets Qt5::OpenGL ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
-	ENDIF()
+	target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Widgets Qt5::OpenGL ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
 
 	IF(WIN32) # Check if we are on Windows
 		IF(MSVC) # Check if we are using the Visual Studio compiler

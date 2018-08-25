@@ -931,6 +931,21 @@ namespace {
         else return false;
         return true;
     }
+
+    inline bool GetAttribTargetVector(Mesh::Primitive& p, const int targetIndex, const char* attr, Mesh::AccessorList*& v, int& pos)
+    {
+        if ((pos = Compare(attr, "POSITION"))) {
+            v = &(p.targets[targetIndex].position);
+        }
+        else if ((pos = Compare(attr, "NORMAL"))) {
+            v = &(p.targets[targetIndex].normal);
+        }
+        else if ((pos = Compare(attr, "TANGENT"))) {
+            v = &(p.targets[targetIndex].tangent);
+        }
+        else return false;
+        return true;
+    }
 }
 
 inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
@@ -965,6 +980,26 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
                 }
             }
 
+            if (Value* targetsArray = FindArray(primitive, "targets")) {
+                prim.targets.resize(targetsArray->Size());
+                for (unsigned int i = 0; i < targetsArray->Size(); ++i) {
+                    Value& target = (*targetsArray)[i];
+                    if (!target.IsObject()) continue;
+                    for (Value::MemberIterator it = target.MemberBegin(); it != target.MemberEnd(); ++it) {
+                        if (!it->value.IsUint()) continue;
+                        const char* attr = it->name.GetString();
+                        // Valid attribute semantics include POSITION, NORMAL, TANGENT
+                        int undPos = 0;
+                        Mesh::AccessorList* vec = 0;
+                        if (GetAttribTargetVector(prim, i, attr, vec, undPos)) {
+                            size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
+                            if ((*vec).size() <= idx) (*vec).resize(idx + 1);
+                            (*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
+                        }
+                    }
+                }
+            }
+
             if (Value* indices = FindUInt(primitive, "indices")) {
 				prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
             }
@@ -972,6 +1007,16 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
             if (Value* material = FindUInt(primitive, "material")) {
 				prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
             }
+        }
+    }
+
+    if (Value* weights = FindArray(pJSON_Object, "weights")) {
+        this->weights.resize(weights->Size());
+        for (unsigned int i = 0; i < weights->Size(); ++i) {
+          Value& weightValue = (*weights)[i];
+          if (weightValue.IsNumber()) {
+            this->weights[i] = weightValue.GetFloat();
+          }
         }
     }
 }

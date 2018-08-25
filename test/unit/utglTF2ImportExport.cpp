@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <array>
 
 using namespace Assimp;
 
@@ -98,6 +99,234 @@ TEST_F( utglTF2ImportExport, importglTF2FromFileTest ) {
 
 TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
     EXPECT_TRUE( binaryImporterTest() );
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModePointsWithoutIndices) {
+    Assimp::Importer importer;
+    //Points without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_00.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 1024);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 1);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], i);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLinesWithoutIndices) {
+    Assimp::Importer importer;
+    //Lines without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_01.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 8);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], i*2);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], i*2 + 1);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLinesLoopWithoutIndices) {
+    Assimp::Importer importer;
+    //Lines loop without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_02.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+
+    std::array<int, 5> l1 = {{ 0, 1, 2, 3, 0 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLinesStripWithoutIndices) {
+    Assimp::Importer importer;
+    //Lines strip without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_03.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 5);
+
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], i);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], i + 1);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStripWithoutIndices) {
+    Assimp::Importer importer;
+    //Triangles strip without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_04.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 3> f1 = {{ 0, 1, 2 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = {{ 2, 1, 3 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFanWithoutIndices) {
+    Assimp::Importer importer;
+    //Triangles fan without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_05.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 3> f1 = {{ 0, 1, 2 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = {{ 0, 2, 3 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesWithoutIndices) {
+    Assimp::Importer importer;
+    //Triangles without indices
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_06.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 6);
+    std::array<int, 3> f1 = {{ 0, 1, 2 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = {{ 3, 4, 5 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModePoints) {
+    Assimp::Importer importer;
+    //Line loop
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_07.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 1024);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 1);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], i);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLines) {
+    Assimp::Importer importer;
+    //Lines
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_08.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 5> l1 = {{ 0, 3, 2, 1, 0 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineLoop) {
+    Assimp::Importer importer;
+    //Line loop
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_09.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 5> l1 = {{ 0, 3, 2, 1, 0 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i+1]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineStrip) {
+    Assimp::Importer importer;
+    //Lines Strip
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_10.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 5> l1 = {{ 0, 3, 2, 1, 0 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStrip) {
+    Assimp::Importer importer;
+    //Triangles strip
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_11.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    std::array<int, 3> f1 = {{ 0, 3, 1 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = {{ 1, 3, 2 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
+    Assimp::Importer importer;
+    //Triangles fan
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_12.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2);
+    std::array<int, 3> f1 = {{ 0, 3, 2 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
+    }
+
+    std::array<int, 3> f2 = {{ 0, 2, 1 }};
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3);
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
+    }
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

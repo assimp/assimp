@@ -505,7 +505,6 @@ ADD_ASSIMP_IMPORTER( XGL
   XGLLoader.h
 )
 
-
 ADD_ASSIMP_IMPORTER( FBX
   FBXImporter.cpp
   FBXCompileConfig.h
@@ -722,9 +721,11 @@ ADD_ASSIMP_IMPORTER( MMD
 )
 
 SET( Step_SRCS
-  STEPFile.h
-  StepExporter.h
-  StepExporter.cpp
+    STEPFile.h
+    Importer/StepFile/StepFileImporter.h
+    Importer/StepFile/StepFileImporter.cpp
+    StepExporter.h
+    StepExporter.cpp
 )
 SOURCE_GROUP( Step FILES ${Step_SRCS})
 

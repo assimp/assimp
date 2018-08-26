@@ -416,7 +416,6 @@ namespace STEP {
             }
 
         private:
-
             ConverterMap converters;
         };
     }

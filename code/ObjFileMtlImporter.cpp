@@ -84,8 +84,6 @@ static const std::string BumpOption         = "-bm";
 static const std::string ChannelOption      = "-imfchan";
 static const std::string TypeOption         = "-type";
 
-
-
 // -------------------------------------------------------------------
 //  Constructor
 ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
@@ -334,6 +332,11 @@ void ObjFileMtlImporter::getTexture() {
         // Specular texture
         out = & m_pModel->m_pCurrentMaterial->textureSpecular;
         clampIndex = ObjFile::Material::TextureSpecularType;
+    } else if ( !ASSIMP_strincmp( pPtr, DisplacementTexture1.c_str(), static_cast<unsigned int>(DisplacementTexture1.size()) ) ||
+                !ASSIMP_strincmp( pPtr, DisplacementTexture2.c_str(), static_cast<unsigned int>(DisplacementTexture2.size()) ) ) {
+        // Displacement texture
+        out = &m_pModel->m_pCurrentMaterial->textureDisp;
+        clampIndex = ObjFile::Material::TextureDispType;
     } else if ( !ASSIMP_strincmp( pPtr, OpacityTexture.c_str(), static_cast<unsigned int>(OpacityTexture.size()) ) ) {
         // Opacity texture
         out = & m_pModel->m_pCurrentMaterial->textureOpacity;
@@ -356,11 +359,6 @@ void ObjFileMtlImporter::getTexture() {
         // Reflection texture(s)
         //Do nothing here
         return;
-    } else if ( !ASSIMP_strincmp( pPtr, DisplacementTexture1.c_str(), static_cast<unsigned int>(DisplacementTexture1.size()) ) ||
-                !ASSIMP_strincmp( pPtr, DisplacementTexture2.c_str(), static_cast<unsigned int>(DisplacementTexture2.size()) ) ) {
-        // Displacement texture
-        out = &m_pModel->m_pCurrentMaterial->textureDisp;
-        clampIndex = ObjFile::Material::TextureDispType;
     } else if ( !ASSIMP_strincmp( pPtr, SpecularityTexture.c_str(), static_cast<unsigned int>(SpecularityTexture.size()) ) ) {
         // Specularity scaling (glossiness)
         out = & m_pModel->m_pCurrentMaterial->textureSpecularity;

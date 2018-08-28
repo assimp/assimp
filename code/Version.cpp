@@ -150,9 +150,11 @@ ASSIMP_API aiScene::~aiScene() {
             delete mMeshes[a];
     delete [] mMeshes;
 
-    if (mNumMaterials && mMaterials)
-        for( unsigned int a = 0; a < mNumMaterials; a++)
-            delete mMaterials[a];
+    if (mNumMaterials && mMaterials) {
+        for (unsigned int a = 0; a < mNumMaterials; ++a ) {
+            delete mMaterials[ a ];
+        }
+    }
     delete [] mMaterials;
 
     if (mNumAnimations && mAnimations)

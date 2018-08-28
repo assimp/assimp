@@ -94,19 +94,7 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     , mIOSystem(pIOSystem)
     , mProperties(pProperties)
 {
-    aiScene* sceneCopy_tmp;
-    SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
-    std::unique_ptr<aiScene> sceneCopy(sceneCopy_tmp);
-
-    SplitLargeMeshesProcess_Triangle tri_splitter;
-    tri_splitter.SetLimit(0xffff);
-    tri_splitter.Execute(sceneCopy.get());
-
-    SplitLargeMeshesProcess_Vertex vert_splitter;
-    vert_splitter.SetLimit(0xffff);
-    vert_splitter.Execute(sceneCopy.get());
-
-    mScene = sceneCopy.get();
+    mScene = pScene;
 
     mAsset.reset( new Asset( pIOSystem ) );
 
@@ -681,12 +669,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
 
 void glTF2Exporter::ExportMeshes()
 {
-    // Not for
-    //     using IndicesType = decltype(aiFace::mNumIndices);
-    // But yes for
-    //     using IndicesType = unsigned short;
-    // because "ComponentType_UNSIGNED_SHORT" used for indices. And it's a maximal type according to glTF specification.
-    typedef unsigned short IndicesType;
+    typedef decltype(aiFace::mNumIndices) IndicesType;
 
     std::string fname = std::string(mFilename);
     std::string bufferIdPrefix = fname.substr(0, fname.rfind(".gltf"));
@@ -778,11 +761,11 @@ void glTF2Exporter::ExportMeshes()
             indices.resize(aim->mNumFaces * nIndicesPerFace);
             for (size_t i = 0; i < aim->mNumFaces; ++i) {
                 for (size_t j = 0; j < nIndicesPerFace; ++j) {
-                    indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
+                    indices[i*nIndicesPerFace + j] = IndicesType(aim->mFaces[i].mIndices[j]);
                 }
             }
 
-			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
+			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
 		}
 
         switch (aim->mPrimitiveTypes) {

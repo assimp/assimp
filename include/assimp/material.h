@@ -608,16 +608,17 @@ struct aiMaterialProperty
 #ifdef __cplusplus
 
     aiMaterialProperty()
-        : mSemantic( 0 )
-        , mIndex( 0 )
-        , mDataLength( 0 )
-        , mType( aiPTI_Float )
-        , mData( NULL )
-    {
+    : mSemantic( 0 )
+    , mIndex( 0 )
+    , mDataLength( 0 )
+    , mType( aiPTI_Float )
+    , mData(nullptr) {
+        // empty
     }
 
     ~aiMaterialProperty()   {
         delete[] mData;
+        mData = nullptr;
     }
 
 #endif
@@ -650,6 +651,14 @@ public:
 
     aiMaterial();
     ~aiMaterial();
+
+    // -------------------------------------------------------------------
+    /**
+      * @brief  Returns the name of the material.
+      * @return The name of the material.
+      */
+    // -------------------------------------------------------------------
+    aiString GetName();
 
     // -------------------------------------------------------------------
     /** @brief Retrieve an array of Type values with a specific key
@@ -1556,10 +1565,32 @@ C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     unsigned int* flags                 /*= NULL*/);
 #endif // !#ifdef __cplusplus
 
+// ---------------------------------------------------------------------------
+/** @brief  Helper function to get all values pertaining to a particular
+*  texture slot from a material structure.
+*
+*  @return Pointer showing to the default material.
+*/
+// ---------------------------------------------------------------------------
+#ifdef __cplusplus
+ASSIMP_API aiMaterial *aiCreateAndRegisterDefaultMaterial(void);
+#else
+C_STRUCT aiMaterial *aiCreateAndRegisterDefaultMaterial(void);
+#endif // !#ifdef __cplusplus
+
+// ---------------------------------------------------------------------------
+/**
+  * @brief  Helper function to release the default material instance, the
+  *         instance will not be destroyed.
+  */
+// ---------------------------------------------------------------------------
+ASSIMP_API void aiReleaseDefaultMaterial();
+
 #ifdef __cplusplus
 }
 
 #include "material.inl"
 
 #endif //!__cplusplus
+
 #endif //!!AI_MATERIAL_H_INC

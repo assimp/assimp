@@ -124,8 +124,8 @@ def _init(self, target = None, parent = None):
             except:
                 uni = str(obj.data, errors='ignore')
             target.name = str( uni )
-            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + x.name + ")"
-            target.__class__.__str__ = lambda x: x.name
+            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + getattr(x, 'name','') + ")"
+            target.__class__.__str__ = lambda x: getattr(x, 'name', '')
             continue
 
         name = m[1:].lower()

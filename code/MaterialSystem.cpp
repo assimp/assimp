@@ -63,9 +63,9 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
     unsigned int index,
     const aiMaterialProperty** pPropOut)
 {
-    ai_assert (pMat != NULL);
-    ai_assert (pKey != NULL);
-    ai_assert (pPropOut != NULL);
+    ai_assert( pMat != NULL );
+    ai_assert( pKey != NULL );
+    ai_assert( pPropOut != NULL );
 
     /*  Just search for a property with exactly this name ..
      *  could be improved by hashing, but it's possibly
@@ -76,7 +76,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 
         if (prop /* just for safety ... */
             && 0 == strcmp( prop->mKey.data, pKey )
-            && (UINT_MAX == type  || prop->mSemantic == type) /* UINT_MAX is a wildcard, but this is undocumented :-) */
+            && (UINT_MAX == type  || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
             && (UINT_MAX == index || prop->mIndex == index))
         {
             *pPropOut = pMat->mProperties[i];
@@ -96,8 +96,8 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
     ai_real* pOut,
     unsigned int* pMax)
 {
-    ai_assert (pOut != NULL);
-    ai_assert (pMat != NULL);
+    ai_assert( pOut != NULL );
+    ai_assert( pMat != NULL );
 
     const aiMaterialProperty* prop;
     aiGetMaterialProperty(pMat,pKey,type,index, (const aiMaterialProperty**) &prop);
@@ -182,8 +182,8 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
     int* pOut,
     unsigned int* pMax)
 {
-    ai_assert (pOut != NULL);
-    ai_assert (pMat != NULL);
+    ai_assert( pOut != NULL );
+    ai_assert( pMat != NULL );
 
     const aiMaterialProperty* prop;
     aiGetMaterialProperty(pMat,pKey,type,index,(const aiMaterialProperty**) &prop);
@@ -274,7 +274,7 @@ aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
     aiUVTransform* pOut)
 {
     unsigned int iMax = 4;
-    return  aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
+    return aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get the number of textures on a particular texture stack
-ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
+unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
     C_ENUM aiTextureType type)
 {
     ai_assert (pMat != NULL);
@@ -347,12 +347,14 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     unsigned int* flags         /*= NULL*/
     )
 {
-    ai_assert(NULL != mat && NULL != path);
+    ai_assert( NULL != mat );
+    ai_assert( NULL != path );
 
     // Get the path to the texture
     if (AI_SUCCESS != aiGetMaterialString(mat,AI_MATKEY_TEXTURE(type,index),path))  {
         return AI_FAILURE;
     }
+
     // Determine mapping type
     int mapping_ = static_cast<int>(aiTextureMapping_UV);
     aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index), &mapping_);
@@ -381,7 +383,29 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     if (flags){
         aiGetMaterialInteger(mat,AI_MATKEY_TEXFLAGS(type,index),(int*)flags);
     }
+
     return AI_SUCCESS;
+}
+
+static aiMaterial *DefaultMaterial = nullptr;
+
+// ------------------------------------------------------------------------------------------------
+// Will return the default material.
+aiMaterial *aiCreateAndRegisterDefaultMaterial() {
+    if (nullptr == DefaultMaterial) {
+        DefaultMaterial = new aiMaterial;
+        aiString s;
+        s.Set(AI_DEFAULT_MATERIAL_NAME);
+        DefaultMaterial->AddProperty(&s, AI_MATKEY_NAME);
+    }
+
+    return DefaultMaterial;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Will return the default material.
+void aiReleaseDefaultMaterial() {
+    DefaultMaterial = nullptr;
 }
 
 static const unsigned int DefaultNumAllocated = 5;
@@ -389,7 +413,7 @@ static const unsigned int DefaultNumAllocated = 5;
 // ------------------------------------------------------------------------------------------------
 // Construction. Actually the one and only way to get an aiMaterial instance
 aiMaterial::aiMaterial() 
-: mProperties( NULL )
+: mProperties( nullptr )
 , mNumProperties( 0 )
 , mNumAllocated( DefaultNumAllocated ) {
     // Allocate 5 entries by default
@@ -405,11 +429,19 @@ aiMaterial::~aiMaterial()
 }
 
 // ------------------------------------------------------------------------------------------------
+aiString aiMaterial::GetName() {
+    aiString name;
+    Get(AI_MATKEY_NAME, name);
+
+    return name;
+}
+
+// ------------------------------------------------------------------------------------------------
 void aiMaterial::Clear()
 {
-    for (unsigned int i = 0; i < mNumProperties;++i)    {
+    for ( unsigned int i = 0; i < mNumProperties; ++i )    {
         // delete this entry
-        delete mProperties[i];
+        delete mProperties[ i ];
         AI_DEBUG_INVALIDATE_PTR(mProperties[i]);
     }
     mNumProperties = 0;
@@ -418,11 +450,9 @@ void aiMaterial::Clear()
 }
 
 // ------------------------------------------------------------------------------------------------
-aiReturn aiMaterial::RemoveProperty (const char* pKey,unsigned int type,
-    unsigned int index
-    )
+aiReturn aiMaterial::RemoveProperty ( const char* pKey,unsigned int type, unsigned int index )
 {
-    ai_assert(NULL != pKey);
+    ai_assert( nullptr != pKey );
 
     for (unsigned int i = 0; i < mNumProperties;++i) {
         aiMaterialProperty* prop = mProperties[i];
@@ -454,17 +484,18 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     aiPropertyTypeInfo pType
     )
 {
-    ai_assert (pInput != NULL);
-    ai_assert (pKey != NULL);
-    ai_assert (0 != pSizeInBytes);
+    ai_assert( pInput != NULL );
+    ai_assert( pKey != NULL );
+    ai_assert( 0 != pSizeInBytes );
 
     if ( 0 == pSizeInBytes ) {
 
     }
+
     // first search the list whether there is already an entry with this key
-    unsigned int iOutIndex = UINT_MAX;
-    for (unsigned int i = 0; i < mNumProperties;++i)    {
-        aiMaterialProperty* prop = mProperties[i];
+    unsigned int iOutIndex( UINT_MAX );
+    for ( unsigned int i = 0; i < mNumProperties; ++i ) {
+        aiMaterialProperty *prop( mProperties[ i ] );
 
         if (prop /* just for safety */ && !strcmp( prop->mKey.data, pKey ) &&
             prop->mSemantic == type && prop->mIndex == index){
@@ -516,6 +547,7 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     }
     // push back ...
     mProperties[mNumProperties++] = pcNew;
+
     return AI_SUCCESS;
 }
 

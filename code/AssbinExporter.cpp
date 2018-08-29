@@ -62,33 +62,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <time.h>
 
-using namespace Assimp;
-
-namespace Assimp    {
+namespace Assimp {
 
 template <typename T>
-size_t Write(IOStream * stream, const T& v)
-{
+size_t Write(IOStream * stream, const T& v) {
     return stream->Write( &v, sizeof(T), 1 );
 }
-
 
 // -----------------------------------------------------------------------------------
 // Serialize an aiString
 template <>
-inline size_t Write<aiString>(IOStream * stream, const aiString& s)
-{
+inline
+size_t Write<aiString>(IOStream * stream, const aiString& s) {
     const size_t s2 = (uint32_t)s.length;
     stream->Write(&s,4,1);
     stream->Write(s.data,s2,1);
+
     return s2+4;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize an unsigned int as uint32_t
 template <>
-inline size_t Write<unsigned int>(IOStream * stream, const unsigned int& w)
-{
+inline
+size_t Write<unsigned int>(IOStream * stream, const unsigned int& w) {
     const uint32_t t = (uint32_t)w;
     if (w > t) {
         // this shouldn't happen, integers in Assimp data structures never exceed 2^32
@@ -96,114 +93,123 @@ inline size_t Write<unsigned int>(IOStream * stream, const unsigned int& w)
     }
 
     stream->Write(&t,4,1);
+
     return 4;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize an unsigned int as uint16_t
 template <>
-inline size_t Write<uint16_t>(IOStream * stream, const uint16_t& w)
-{
+inline
+size_t Write<uint16_t>(IOStream * stream, const uint16_t& w) {
     static_assert(sizeof(uint16_t)==2, "sizeof(uint16_t)==2");
     stream->Write(&w,2,1);
+
     return 2;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a float
 template <>
-inline size_t Write<float>(IOStream * stream, const float& f)
-{
+inline
+size_t Write<float>(IOStream * stream, const float& f) {
     static_assert(sizeof(float)==4, "sizeof(float)==4");
     stream->Write(&f,4,1);
+
     return 4;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a double
 template <>
-inline size_t Write<double>(IOStream * stream, const double& f)
-{
+inline
+size_t Write<double>(IOStream * stream, const double& f) {
     static_assert(sizeof(double)==8, "sizeof(double)==8");
     stream->Write(&f,8,1);
+
     return 8;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a vec3
 template <>
-inline size_t Write<aiVector3D>(IOStream * stream, const aiVector3D& v)
-{
+inline
+size_t Write<aiVector3D>(IOStream * stream, const aiVector3D& v) {
     size_t t = Write<float>(stream,v.x);
     t += Write<float>(stream,v.y);
     t += Write<float>(stream,v.z);
+
     return t;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
-inline size_t Write<aiColor3D>(IOStream * stream, const aiColor3D& v)
-{
+inline
+size_t Write<aiColor3D>(IOStream * stream, const aiColor3D& v) {
     size_t t = Write<float>(stream,v.r);
     t += Write<float>(stream,v.g);
     t += Write<float>(stream,v.b);
+
     return t;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
-inline size_t Write<aiColor4D>(IOStream * stream, const aiColor4D& v)
-{
+inline
+size_t Write<aiColor4D>(IOStream * stream, const aiColor4D& v) {
     size_t t = Write<float>(stream,v.r);
     t += Write<float>(stream,v.g);
     t += Write<float>(stream,v.b);
     t += Write<float>(stream,v.a);
+
     return t;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a quaternion
 template <>
-inline size_t Write<aiQuaternion>(IOStream * stream, const aiQuaternion& v)
-{
+inline
+size_t Write<aiQuaternion>(IOStream * stream, const aiQuaternion& v) {
     size_t t = Write<float>(stream,v.w);
     t += Write<float>(stream,v.x);
     t += Write<float>(stream,v.y);
     t += Write<float>(stream,v.z);
     ai_assert(t == 16);
+
     return 16;
 }
-
 
 // -----------------------------------------------------------------------------------
 // Serialize a vertex weight
 template <>
-inline size_t Write<aiVertexWeight>(IOStream * stream, const aiVertexWeight& v)
-{
+inline
+size_t Write<aiVertexWeight>(IOStream * stream, const aiVertexWeight& v) {
     size_t t = Write<unsigned int>(stream,v.mVertexId);
+
     return t+Write<float>(stream,v.mWeight);
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize a mat4x4
 template <>
-inline size_t Write<aiMatrix4x4>(IOStream * stream, const aiMatrix4x4& m)
-{
+inline
+size_t Write<aiMatrix4x4>(IOStream * stream, const aiMatrix4x4& m) {
     for (unsigned int i = 0; i < 4;++i) {
         for (unsigned int i2 = 0; i2 < 4;++i2) {
             Write<float>(stream,m[i][i2]);
         }
     }
+
     return 64;
 }
 
 // -----------------------------------------------------------------------------------
 // Serialize an aiVectorKey
 template <>
-inline size_t Write<aiVectorKey>(IOStream * stream, const aiVectorKey& v)
-{
+inline
+size_t Write<aiVectorKey>(IOStream * stream, const aiVectorKey& v) {
     const size_t t = Write<double>(stream,v.mTime);
     return t + Write<aiVector3D>(stream,v.mValue);
 }
@@ -211,16 +217,16 @@ inline size_t Write<aiVectorKey>(IOStream * stream, const aiVectorKey& v)
 // -----------------------------------------------------------------------------------
 // Serialize an aiQuatKey
 template <>
-inline size_t Write<aiQuatKey>(IOStream * stream, const aiQuatKey& v)
-{
+inline
+size_t Write<aiQuatKey>(IOStream * stream, const aiQuatKey& v) {
     const size_t t = Write<double>(stream,v.mTime);
     return t + Write<aiQuaternion>(stream,v.mValue);
 }
 
 template <typename T>
-inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
-{
-    T minc,maxc;
+inline
+size_t WriteBounds(IOStream * stream, const T* in, unsigned int size) {
+    T minc, maxc;
     ArrayBounds(in,size,minc,maxc);
 
     const size_t t = Write<T>(stream,minc);
@@ -230,10 +236,11 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 // We use this to write out non-byte arrays so that we write using the specializations.
 // This way we avoid writing out extra bytes that potentially come from struct alignment.
 template <typename T>
-inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
-{
+inline
+size_t WriteArray(IOStream * stream, const T* in, unsigned int size) {
     size_t n = 0;
     for (unsigned int i=0; i<size; i++) n += Write<T>(stream,in[i]);
+
     return n;
 }
 
@@ -293,19 +300,25 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         void * GetBufferPointer() { return buffer; }
 
         // -------------------------------------------------------------------
-        virtual size_t Read(void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) { return 0; }
-        virtual aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) { return aiReturn_FAILURE; }
-        virtual size_t Tell() const { return cursor; }
-        virtual void Flush() { }
+        virtual size_t Read(void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) {
+            return 0;
+        }
+        virtual aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) {
+            return aiReturn_FAILURE;
+        }
+        virtual size_t Tell() const {
+            return cursor;
+        }
+        virtual void Flush() {
+            // not implemented
+        }
 
-        virtual size_t FileSize() const
-        {
+        virtual size_t FileSize() const {
             return cursor;
         }
 
         // -------------------------------------------------------------------
-        virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount)
-        {
+        virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) {
             pSize *= pCount;
             if (cursor + pSize > cur_size) {
                 Grow(cursor + pSize);
@@ -332,7 +345,6 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         bool compressed;
 
     protected:
-
         // -----------------------------------------------------------------------------------
         void WriteBinaryNode( IOStream * container, const aiNode* node)
         {

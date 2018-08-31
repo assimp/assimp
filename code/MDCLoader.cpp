@@ -434,10 +434,12 @@ void MDCImporter::InternReadFile(
     else if (1 == pScene->mNumMeshes)
     {
         pScene->mRootNode = new aiNode();
-        pScene->mRootNode->mName = pScene->mMeshes[0]->mName;
-        pScene->mRootNode->mNumMeshes = 1;
-        pScene->mRootNode->mMeshes = new unsigned int[1];
-        pScene->mRootNode->mMeshes[0] = 0;
+        if ( nullptr != pScene->mMeshes[0] ) {
+            pScene->mRootNode->mName = pScene->mMeshes[0]->mName;
+            pScene->mRootNode->mNumMeshes = 1;
+            pScene->mRootNode->mMeshes = new unsigned int[1];
+            pScene->mRootNode->mMeshes[0] = 0;
+        }
     }
     else
     {

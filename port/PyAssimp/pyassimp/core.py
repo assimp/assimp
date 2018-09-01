@@ -66,6 +66,13 @@ def make_tuple(ai_obj, type = None):
 
     return res
 
+# Returns unicode object for Python 2, and str object for Python 3.
+def _convert_assimp_string(assimp_string):
+    try:
+        return unicode(assimp_string.data, errors='ignore')
+    except:
+        return str(assimp_string.data, errors='ignore')
+
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
     aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
@@ -118,12 +125,7 @@ def _init(self, target = None, parent = None):
                 continue
 
         if m == 'mName':
-            obj = self.mName
-            try:
-                uni = unicode(obj.data, errors='ignore')
-            except:
-                uni = str(obj.data, errors='ignore')
-            target.name = str( uni )
+            target.name = str(_convert_assimp_string(self.mName))
             target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + getattr(x, 'name','') + ")"
             target.__class__.__str__ = lambda x: getattr(x, 'name', '')
             continue
@@ -443,11 +445,8 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        try:
-            uni = unicode(p.mKey.data, errors='ignore')
-        except:
-            uni = str(p.mKey.data, errors='ignore')
-        key = (str(uni).split('.')[1], p.mSemantic)
+        key = str(_convert_assimp_string(p.mKey))
+        key = (key.split('.')[1], p.mSemantic)
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
@@ -455,11 +454,7 @@ def _get_properties(properties, length):
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            try:
-                uni = unicode(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
-            except:
-                uni = str(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
-            value = uni
+            value = _convert_assimp_string(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents)
 
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents

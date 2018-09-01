@@ -222,6 +222,9 @@ def _init(self, target = None, parent = None):
     if isinstance(self, structs.Texture):
         _finalize_texture(self, target)
 
+    if isinstance(self, structs.Metadata):
+        _finalize_metadata(self, target)
+
 
     return self
 
@@ -414,6 +417,43 @@ def _finalize_mesh(mesh, target):
         faces = [f.indices for f in target.faces]
     setattr(target, 'faces', faces)
 
+def _init_metadata_entry(entry):
+    from ctypes import POINTER, c_bool, c_int32, c_uint64, c_float, c_double, cast
+
+    entry.type = entry.mType
+    if entry.type == structs.MetadataEntry.AI_BOOL:
+        entry.data = cast(entry.mData, POINTER(c_bool)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_INT32:
+        entry.data = cast(entry.mData, POINTER(c_int32)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_UINT64:
+        entry.data = cast(entry.mData, POINTER(c_uint64)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_FLOAT:
+        entry.data = cast(entry.mData, POINTER(c_float)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_DOUBLE:
+        entry.data = cast(entry.mData, POINTER(c_double)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_AISTRING:
+        assimp_string = cast(entry.mData, POINTER(structs.String)).contents
+        entry.data = _convert_assimp_string(assimp_string)
+    elif entry.type == structs.MetadataEntry.AI_AIVECTOR3D:
+        assimp_vector = cast(entry.mData, POINTER(structs.Vector3D)).contents
+        entry.data = make_tuple(assimp_vector)
+
+    return entry
+
+def _finalize_metadata(metadata, target):
+    """ Building the metadata object is a bit specific.
+
+    Firstly, there are two separate arrays: one with metadata keys and one
+    with metadata values, and there are no corresponding mNum* attributes,
+    so the C arrays are not converted to Python arrays using the generic
+    code in the _init function.
+
+    Secondly, a metadata entry value has to be cast according to declared
+    metadata entry type.
+    """
+    length = metadata.mNumProperties
+    setattr(target, 'keys', [str(_convert_assimp_string(metadata.mKeys[i])) for i in range(length)])
+    setattr(target, 'values', [_init_metadata_entry(metadata.mValues[i]) for i in range(length)])
 
 class PropertyGetter(dict):
     def __getitem__(self, key):

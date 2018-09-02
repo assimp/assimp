@@ -291,7 +291,7 @@ Node._fields_ = [
 
             # Metadata associated with this node or NULL if there is no metadata.
             # Whether any metadata is generated depends on the source file format.
-            ("mMetadata", POINTER(POINTER(Metadata))),
+            ("mMetadata", POINTER(Metadata)),
         ]
 
 class Light(Structure):
@@ -939,7 +939,7 @@ class Scene(Structure):
             # This data contains global metadata which belongs to the scene like
             # unit-conversions, versions, vendors or other model-specific data. This
             # can be used to store format-specific metadata as well.
-            ("mMetadata", POINTER(POINTER(Metadata))),
+            ("mMetadata", POINTER(Metadata)),
         ]
 
 assimp_structs_as_tuple = (Matrix4x4,

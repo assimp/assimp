@@ -549,4 +549,3 @@ void STEP::LazyObject::LazyInit() const
     // store the original id in the object instance
     obj->SetID(id);
 }
-

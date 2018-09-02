@@ -363,8 +363,7 @@ namespace STEP {
          * to extract valid C++ objects out of a STEP file. Those conversion functions
          * may, however, perform further schema validations. */
         // -------------------------------------------------------------------------------
-        class ConversionSchema
-        {
+        class ConversionSchema {
         public:
             struct SchemaEntry {
                 SchemaEntry( const char *name, ConvertObjectProc func )
@@ -379,22 +378,19 @@ namespace STEP {
 
             typedef std::map<std::string,ConvertObjectProc> ConverterMap;
 
-        public:
-
             template <size_t N>
             explicit ConversionSchema( const SchemaEntry (& schemas)[N]) {
                 *this = schemas;
             }
 
-            ConversionSchema() {}
+            ConversionSchema() {
 
-        public:
+            }
 
             ConvertObjectProc GetConverterProc(const std::string& name) const {
                 ConverterMap::const_iterator it = converters.find(name);
-                return it == converters.end() ? NULL : (*it).second;
+                return it == converters.end() ? nullptr : (*it).second;
             }
-
 
             bool IsKnownToken(const std::string& name) const {
                 return converters.find(name) != converters.end();
@@ -402,7 +398,7 @@ namespace STEP {
 
             const char* GetStaticStringForToken(const std::string& token) const {
                 ConverterMap::const_iterator it = converters.find(token);
-                return it == converters.end() ? NULL : (*it).first.c_str();
+                return it == converters.end() ? nullptr : (*it).first.c_str();
             }
 
 
@@ -450,8 +446,6 @@ namespace STEP {
             // empty
         }
 
-    public:
-
         // utilities to simplify casting to concrete types
         template <typename T>
         const T& To() const {
@@ -473,7 +467,6 @@ namespace STEP {
             return dynamic_cast<T*>(this);
         }
 
-    public:
         uint64_t GetID() const {
             return id;
         }
@@ -500,9 +493,11 @@ namespace STEP {
     /** CRTP shared base class for use by concrete entity implementation classes */
     // ------------------------------------------------------------------------------
     template <typename TDerived, size_t arg_count>
-    struct ObjectHelper : virtual Object
-    {
-        ObjectHelper() : aux_is_derived(0) {}
+    struct ObjectHelper : virtual Object {
+        ObjectHelper()
+        : aux_is_derived(0) {
+            // empty
+        }
 
         static Object* Construct(const STEP::DB& db, const EXPRESS::LIST& params) {
             // make sure we don't leak if Fill() throws an exception
@@ -531,10 +526,16 @@ namespace STEP {
     /** Class template used to represent OPTIONAL data members in the converted schema */
     // ------------------------------------------------------------------------------
     template <typename T>
-    struct Maybe
-    {
-        Maybe() : have() {}
-        explicit Maybe(const T& ptr) : ptr(ptr), have(true) {
+    struct Maybe {
+        Maybe()
+        : have() {
+            // empty
+        }
+
+        explicit Maybe(const T& ptr)
+        : ptr(ptr)
+        , have(true) {
+            // empty
         }
 
 
@@ -571,7 +572,6 @@ namespace STEP {
         }
 
     private:
-
         template <typename T2> friend struct InternGenericConvert;
 
         operator T&() {
@@ -586,15 +586,12 @@ namespace STEP {
     /** A LazyObject is created when needed. Before this happens, we just keep
        the text line that contains the object definition. */
     // -------------------------------------------------------------------------------
-    class LazyObject
-    {
+    class LazyObject {
         friend class DB;
-    public:
 
+    public:
         LazyObject(DB& db, uint64_t id, uint64_t line, const char* type,const char* args);
         ~LazyObject();
-
-    public:
 
         Object& operator * () {
             if (!obj) {
@@ -653,38 +650,37 @@ namespace STEP {
         }
 
     private:
-
         void LazyInit() const;
 
     private:
-
         mutable uint64_t id;
         const char* const type;
         DB& db;
-
         mutable const char* args;
         mutable Object* obj;
     };
 
     template <typename T>
-    inline bool operator==( std::shared_ptr<LazyObject> lo, T whatever ) {
+    inline
+    bool operator==( std::shared_ptr<LazyObject> lo, T whatever ) {
         return *lo == whatever; // XXX use std::forward if we have 0x
     }
 
     template <typename T>
-    inline bool operator==( const std::pair<uint64_t, std::shared_ptr<LazyObject> >& lo, T whatever ) {
+    inline
+    bool operator==( const std::pair<uint64_t, std::shared_ptr<LazyObject> >& lo, T whatever ) {
         return *(lo.second) == whatever; // XXX use std::forward if we have 0x
     }
-
 
     // ------------------------------------------------------------------------------
     /** Class template used to represent lazily evaluated object references in the converted schema */
     // ------------------------------------------------------------------------------
     template <typename T>
-    struct Lazy
-    {
+    struct Lazy {
         typedef Lazy Out;
-        Lazy(const LazyObject* obj = NULL) : obj(obj) {
+        Lazy(const LazyObject* obj = nullptr)
+        : obj(obj) {
+            // empty
         }
 
         operator const T*() const {
@@ -710,18 +706,14 @@ namespace STEP {
     /** Class template used to represent LIST and SET data members in the converted schema */
     // ------------------------------------------------------------------------------
     template <typename T, uint64_t min_cnt, uint64_t max_cnt=0uL>
-    struct ListOf : public std::vector<typename T::Out>
-    {
+    struct ListOf : public std::vector<typename T::Out> {
         typedef typename T::Out OutScalar;
         typedef ListOf Out;
-
 
         ListOf() {
             static_assert(min_cnt <= max_cnt || !max_cnt, "min_cnt <= max_cnt || !max_cnt");
         }
-
     };
-
 
     // ------------------------------------------------------------------------------
     template <typename TOut>
@@ -734,7 +726,8 @@ namespace STEP {
         typedef EXPRESS::ENTITY Type;
     };
 
-    template <> struct PickBaseType< std::shared_ptr< const EXPRESS::DataType > >;
+    template<>
+    struct PickBaseType< std::shared_ptr< const EXPRESS::DataType > >;
 
     // ------------------------------------------------------------------------------
     template <typename T>
@@ -742,8 +735,7 @@ namespace STEP {
         void operator()(T& out, const std::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& /*db*/) {
             try{
                 out = dynamic_cast< const typename PickBaseType<T>::Type& > ( *in );
-            }
-            catch(std::bad_cast&) {
+            } catch(std::bad_cast&) {
                 throw TypeError("type error reading literal field");
             }
         }
@@ -816,7 +808,6 @@ namespace STEP {
         return InternGenericConvertList<T1,N1,N2>()(a,b,db);
     }
 
-
     // ------------------------------------------------------------------------------
     /** Lightweight manager class that holds the map of all objects in a
      *  STEP file. DB's are exclusively maintained by the functions in
@@ -833,7 +824,6 @@ namespace STEP {
         friend class LazyObject;
 
     public:
-
         // objects indexed by ID - this can grow pretty large (i.e some hundred million
         // entries), so use raw pointers to avoid *any* overhead.
         typedef std::map<uint64_t,const LazyObject* > ObjectMap;
@@ -858,18 +848,15 @@ namespace STEP {
             : reader(reader)
             , splitter(*reader,true,true)
             , evaluated_count()
-            , schema( NULL )
+            , schema( nullptr )
         {}
 
     public:
-
         ~DB() {
             for(ObjectMap::value_type& o : objects) {
                 delete o.second;
             }
         }
-
-    public:
 
         uint64_t GetObjectCount() const {
             return objects.size();
@@ -899,7 +886,6 @@ namespace STEP {
             return refs;
         }
 
-
         bool KeepInverseIndicesForType(const char* const type) const {
             return inv_whitelist.find(type) != inv_whitelist.end();
         }
@@ -911,7 +897,7 @@ namespace STEP {
             if (it != objects.end()) {
                 return (*it).second;
             }
-            return NULL;
+            return nullptr;
         }
 
 

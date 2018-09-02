@@ -241,4 +241,5 @@ private:
 };
 
 }
+
 #endif // INCLUDED_LINE_SPLITTER_H

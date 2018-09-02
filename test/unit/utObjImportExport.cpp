@@ -389,3 +389,10 @@ TEST_F( utObjImportExport, mtllib_after_g ) {
     ASSERT_EQ(aiReturn_SUCCESS, mat->Get(AI_MATKEY_NAME, name));
     EXPECT_STREQ("MyMaterial", name.C_Str());
 }
+
+TEST_F(utObjImportExport, import_point_cloud) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/point_cloud.obj", 0 );
+    ASSERT_NE(nullptr, scene);
+}
+

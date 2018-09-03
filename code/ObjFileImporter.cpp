@@ -211,11 +211,28 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
     }
 
     if (pModel->m_Objects.size() > 0) {
+
+        unsigned int meshCount = 0;
+        unsigned int childCount = 0;
+
+        for(size_t index = 0; index < pModel->m_Objects.size(); ++index) {
+            if(pModel->m_Objects[index] > 0) {
+                ++childCount;
+                meshCount += (unsigned int)pModel->m_Objects[index]->m_Meshes.size();
+            }
+        }
+
+        // Allocate space for the child nodes on the root node
+        pScene->mRootNode->mChildren = new aiNode*[ childCount ];
+
         // Create nodes for the whole scene
         std::vector<aiMesh*> MeshArray;
+        MeshArray.reserve(meshCount);
         for (size_t index = 0; index < pModel->m_Objects.size(); ++index) {
             createNodes(pModel, pModel->m_Objects[index], pScene->mRootNode, pScene, MeshArray);
         }
+
+        ai_assert(pScene->mRootNode->mNumChildren == childCount);
 
         // Create mesh pointer buffer for this scene
         if (pScene->mNumMeshes > 0) {
@@ -287,9 +304,8 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
     pNode->mName = pObject->m_strObjName;
 
     // If we have a parent node, store it
-    if( pParent != NULL ) {
-        appendChildToParentNode( pParent, pNode );
-    }
+    ai_assert( NULL != pParent );
+    appendChildToParentNode( pParent, pNode );
 
     for ( size_t i=0; i< pObject->m_Meshes.size(); ++i ) {
         unsigned int meshId = pObject->m_Meshes[ i ];
@@ -442,8 +458,8 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
     pMesh->mNumVertices = numIndices;
     if (pMesh->mNumVertices == 0) {
         throw DeadlyImportError( "OBJ: no vertices" );
-    } else if (pMesh->mNumVertices > AI_MAX_ALLOC(aiVector3D)) {
-        throw DeadlyImportError( "OBJ: Too many vertices, would run out of memory" );
+    } else if (pMesh->mNumVertices > AI_MAX_VERTICES) {
+        throw DeadlyImportError( "OBJ: Too many vertices" );
     }
     pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
 
@@ -770,25 +786,8 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
     // Assign parent to child
     pChild->mParent = pParent;
 
-    // If already children was assigned to the parent node, store them in a
-    std::vector<aiNode*> temp;
-    if (pParent->mChildren != NULL)
-    {
-        ai_assert( 0 != pParent->mNumChildren );
-        for (size_t index = 0; index < pParent->mNumChildren; index++)
-        {
-            temp.push_back(pParent->mChildren [ index ] );
-        }
-        delete [] pParent->mChildren;
-    }
-
     // Copy node instances into parent node
     pParent->mNumChildren++;
-    pParent->mChildren = new aiNode*[ pParent->mNumChildren ];
-    for (size_t index = 0; index < pParent->mNumChildren-1; index++)
-    {
-        pParent->mChildren[ index ] = temp [ index ];
-    }
     pParent->mChildren[ pParent->mNumChildren-1 ] = pChild;
 }
 

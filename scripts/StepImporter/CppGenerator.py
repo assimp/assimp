@@ -5,7 +5,7 @@
 # Open Asset Import Library (ASSIMP)
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) 2006-2010, ASSIMP Development Team
+# Copyright (c) 2006-2018, ASSIMP Development Team
 #
 # All rights reserved.
 #
@@ -48,11 +48,21 @@ if sys.version_info < (3, 0):
     print("must use python 3.0 or greater")
     sys.exit(-2)
 
-input_template_h = 'IFCReaderGen.h.template'
-input_template_cpp = 'IFCReaderGen.cpp.template'
+use_ifc_template = False
+	
+input_step_template_h   = 'StepReaderGen.h.template'
+input_step_template_cpp = 'StepReaderGen.cpp.template'
+input_template_h        = 'IFCReaderGen.h.template'
+input_template_cpp      = 'IFCReaderGen.cpp.template'
 
-output_file_h = os.path.join('..','..','code','IFCReaderGen.h')
-output_file_cpp = os.path.join('..','..','code','IFCReaderGen.cpp')
+output_file_h = ""
+output_file_cpp = ""
+if (use_ifc_template ):
+    output_file_h = os.path.join('..','..','code','IFCReaderGen.h')
+    output_file_cpp = os.path.join('..','..','code','IFCReaderGen.cpp')
+else:
+    output_file_h = os.path.join('..','..','code','StepReaderGen.h')
+    output_file_cpp = os.path.join('..','..','code','StepReaderGen.cpp')
 
 template_entity_predef = '\tstruct {entity};\n'
 template_entity_predef_ni = '\ttypedef NotImplemented {entity}; // (not currently used by Assimp)\n'
@@ -221,7 +231,9 @@ def work(filename):
     schema = ExpressReader.read(filename,silent=True)
     entities, stub_decls, schema_table, converters, typedefs, predefs = '','',[],'','',''
 
-    
+    entitylist = 'ifc_entitylist.txt'
+    if not use_ifc_template:
+        entitylist = 'step_entitylist.txt'
     whitelist = []
     with open('entitylist.txt', 'rt') as inp:
         whitelist = [n.strip() for n in inp.read().split('\n') if n[:1]!='#' and n.strip()]
@@ -280,8 +292,3 @@ def work(filename):
 
 if __name__ == "__main__":
     sys.exit(work(sys.argv[1] if len(sys.argv)>1 else 'schema.exp'))
-
-
-
-    
-    

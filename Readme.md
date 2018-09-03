@@ -30,6 +30,8 @@ One-off donations via PayPal:
 
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
+If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
+
 #### Supported file formats ####
 
 __Importers__:

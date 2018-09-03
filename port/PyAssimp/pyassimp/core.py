@@ -66,6 +66,13 @@ def make_tuple(ai_obj, type = None):
 
     return res
 
+# Returns unicode object for Python 2, and str object for Python 3.
+def _convert_assimp_string(assimp_string):
+    try:
+        return unicode(assimp_string.data, errors='ignore')
+    except:
+        return str(assimp_string.data, errors='ignore')
+
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
     aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
@@ -118,14 +125,9 @@ def _init(self, target = None, parent = None):
                 continue
 
         if m == 'mName':
-            obj = self.mName
-            try:
-                uni = unicode(obj.data, errors='ignore')
-            except:
-                uni = str(obj.data, errors='ignore')
-            target.name = str( uni )
-            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + x.name + ")"
-            target.__class__.__str__ = lambda x: x.name
+            target.name = str(_convert_assimp_string(self.mName))
+            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + getattr(x, 'name','') + ")"
+            target.__class__.__str__ = lambda x: getattr(x, 'name', '')
             continue
 
         name = m[1:].lower()
@@ -219,6 +221,9 @@ def _init(self, target = None, parent = None):
 
     if isinstance(self, structs.Texture):
         _finalize_texture(self, target)
+
+    if isinstance(self, structs.Metadata):
+        _finalize_metadata(self, target)
 
 
     return self
@@ -412,6 +417,43 @@ def _finalize_mesh(mesh, target):
         faces = [f.indices for f in target.faces]
     setattr(target, 'faces', faces)
 
+def _init_metadata_entry(entry):
+    from ctypes import POINTER, c_bool, c_int32, c_uint64, c_float, c_double, cast
+
+    entry.type = entry.mType
+    if entry.type == structs.MetadataEntry.AI_BOOL:
+        entry.data = cast(entry.mData, POINTER(c_bool)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_INT32:
+        entry.data = cast(entry.mData, POINTER(c_int32)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_UINT64:
+        entry.data = cast(entry.mData, POINTER(c_uint64)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_FLOAT:
+        entry.data = cast(entry.mData, POINTER(c_float)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_DOUBLE:
+        entry.data = cast(entry.mData, POINTER(c_double)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_AISTRING:
+        assimp_string = cast(entry.mData, POINTER(structs.String)).contents
+        entry.data = _convert_assimp_string(assimp_string)
+    elif entry.type == structs.MetadataEntry.AI_AIVECTOR3D:
+        assimp_vector = cast(entry.mData, POINTER(structs.Vector3D)).contents
+        entry.data = make_tuple(assimp_vector)
+
+    return entry
+
+def _finalize_metadata(metadata, target):
+    """ Building the metadata object is a bit specific.
+
+    Firstly, there are two separate arrays: one with metadata keys and one
+    with metadata values, and there are no corresponding mNum* attributes,
+    so the C arrays are not converted to Python arrays using the generic
+    code in the _init function.
+
+    Secondly, a metadata entry value has to be cast according to declared
+    metadata entry type.
+    """
+    length = metadata.mNumProperties
+    setattr(target, 'keys', [str(_convert_assimp_string(metadata.mKeys[i])) for i in range(length)])
+    setattr(target, 'values', [_init_metadata_entry(metadata.mValues[i]) for i in range(length)])
 
 class PropertyGetter(dict):
     def __getitem__(self, key):
@@ -443,11 +485,8 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        try:
-            uni = unicode(p.mKey.data, errors='ignore')
-        except:
-            uni = str(p.mKey.data, errors='ignore')
-        key = (str(uni).split('.')[1], p.mSemantic)
+        key = str(_convert_assimp_string(p.mKey))
+        key = (key.split('.')[1], p.mSemantic)
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
@@ -455,11 +494,7 @@ def _get_properties(properties, length):
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            try:
-                uni = unicode(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
-            except:
-                uni = str(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
-            value = uni
+            value = _convert_assimp_string(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents)
 
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents

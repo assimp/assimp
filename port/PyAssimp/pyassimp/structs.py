@@ -214,6 +214,41 @@ class MeshKey(Structure):
             ("mValue", c_uint),
         ]
 
+class MetadataEntry(Structure):
+    """
+    See 'metadata.h' for details
+    """
+    AI_BOOL       = 0
+    AI_INT32      = 1
+    AI_UINT64     = 2
+    AI_FLOAT      = 3
+    AI_DOUBLE     = 4
+    AI_AISTRING   = 5
+    AI_AIVECTOR3D = 6
+    AI_META_MAX   = 7
+    _fields_ = [
+            # The type field uniquely identifies the underlying type of the data field
+            ("mType", c_uint),
+            ("mData", c_void_p),
+    ]
+
+class Metadata(Structure):
+    """
+    See 'metadata.h' for details
+    """
+    _fields_ = [
+            # Length of the mKeys and mValues arrays, respectively
+            ("mNumProperties", c_uint),
+
+            # Arrays of keys, may not be NULL. Entries in this array may not be NULL
+            # as well.
+            ("mKeys", POINTER(String)),
+
+            # Arrays of values, may not be NULL. Entries in this array may be NULL
+            # if the corresponding property key has no assigned value.
+            ("mValues", POINTER(MetadataEntry)),
+    ]
+
 class Node(Structure):
     """
     See 'aiScene.h' for details.
@@ -253,6 +288,10 @@ Node._fields_ = [
             
             # The meshes of this node. Each entry is an index into the mesh
             ("mMeshes", POINTER(c_uint)),
+
+            # Metadata associated with this node or NULL if there is no metadata.
+            # Whether any metadata is generated depends on the source file format.
+            ("mMetadata", POINTER(Metadata)),
         ]
 
 class Light(Structure):
@@ -896,6 +935,11 @@ class Scene(Structure):
             # array (if existing) is the default camera view into
             # the scene.
             ("mCameras", POINTER(POINTER(Camera))),
+
+            # This data contains global metadata which belongs to the scene like
+            # unit-conversions, versions, vendors or other model-specific data. This
+            # can be used to store format-specific metadata as well.
+            ("mMetadata", POINTER(Metadata)),
         ]
 
 assimp_structs_as_tuple = (Matrix4x4,

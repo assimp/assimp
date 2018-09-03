@@ -696,8 +696,12 @@ void AssbinImporter::InternReadFile( const std::string& pFile, aiScene* pScene, 
 
     stream->Seek( 44, aiOrigin_CUR ); // signature
 
-    /*unsigned int versionMajor =*/ Read<unsigned int>(stream);
-    /*unsigned int versionMinor =*/ Read<unsigned int>(stream);
+    unsigned int versionMajor = Read<unsigned int>(stream);
+    unsigned int versionMinor = Read<unsigned int>(stream);
+    if (versionMinor != ASSBIN_VERSION_MINOR || versionMajor != ASSBIN_VERSION_MAJOR) {
+        throw DeadlyImportError( "Invalid version, data format not compatible!" );
+    }
+
     /*unsigned int versionRevision =*/ Read<unsigned int>(stream);
     /*unsigned int compileFlags =*/ Read<unsigned int>(stream);
 

@@ -50,14 +50,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
-
 #include <assimp/GenericProperty.h>
+#include <assimp/Exceptional.h>
+#include <assimp/BaseImporter.h>
+
 #include "CInterfaceIOWrapper.h"
 #include "Importer.h"
-#include <assimp/Exceptional.h>
 #include "ScenePrivate.h"
-#include <assimp/BaseImporter.h>
-#include <list>
+//#include <list>
 
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_SINGLETHREADED

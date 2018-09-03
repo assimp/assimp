@@ -216,7 +216,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
         unsigned int childCount = 0;
 
         for(size_t index = 0; index < pModel->m_Objects.size(); ++index) {
-            if(pModel->m_Objects[index] > 0) {
+            if(pModel->m_Objects[index]) {
                 ++childCount;
                 meshCount += (unsigned int)pModel->m_Objects[index]->m_Meshes.size();
             }

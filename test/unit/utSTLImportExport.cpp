@@ -67,6 +67,20 @@ TEST_F( utSTLImporterExporter, importSTLFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
 
+
+TEST_F(utSTLImporterExporter, test_multiple) {
+    // import same file twice, each with its own importer
+    // must work both times and not crash
+    Assimp::Importer importer1;
+    const aiScene *scene1 = importer1.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+    EXPECT_NE(nullptr, scene1);
+
+    Assimp::Importer importer2;
+    const aiScene *scene2 = importer2.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+    EXPECT_NE(nullptr, scene2);
+}
+
+
 TEST_F( utSTLImporterExporter, test_with_two_solids ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", aiProcess_ValidateDataStructure );

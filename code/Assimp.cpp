@@ -272,8 +272,6 @@ void aiReleaseImport( const aiScene* pScene)
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
-    aiReleaseDefaultMaterial();
-
     // find the importer associated with this data
     const ScenePrivateData* priv = ScenePriv(pScene);
     if( !priv || !priv->mOrigImporter)  {

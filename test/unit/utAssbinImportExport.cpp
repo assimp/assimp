@@ -54,6 +54,7 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
+
         Exporter exporter;
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin" ) );
         const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin", aiProcess_ValidateDataStructure );
@@ -62,6 +63,12 @@ public:
     }
 };
 
-TEST_F( utAssbinImportExport, import3DFromFileTest ) {
+TEST_F( utAssbinImportExport, exportAssbin3DFromFileTest ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
+}
+
+TEST_F( utAssbinImportExport, import3ExportAssbinDFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }

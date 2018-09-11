@@ -213,10 +213,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
-#error Currently, Borland is unsupported. Feel free to port Assimp.
-
-// "W8059 Packgröße der Struktur geändert"
-
+#   error Currently, Borland is unsupported. Feel free to port Assimp.
 #endif
 
 
@@ -265,6 +262,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Tiny macro to convert from radians to degrees and back */
 #define AI_DEG_TO_RAD(x) ((x)*(ai_real)0.0174532925)
 #define AI_RAD_TO_DEG(x) ((x)*(ai_real)57.2957795)
+
+/* Numerical limits */
+static const ai_real ai_epsilon = (ai_real) 0.00001;
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)

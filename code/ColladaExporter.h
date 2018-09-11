@@ -150,7 +150,6 @@ public:
     /// Stringstream to write all output into
     std::stringstream mOutput;
 
-protected:
     /// The IOSystem for output
     IOSystem* mIOSystem;
 
@@ -204,7 +203,7 @@ protected:
 
   std::map<unsigned int, std::string> textures;
 
-protected:
+public:
   /// Dammit C++ - y u no compile two-pass? No I have to add all methods below the struct definitions
   /// Reads a single surface entry from the given material keys
   void ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex);

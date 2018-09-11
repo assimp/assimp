@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 class utAssbinImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
@@ -72,3 +74,5 @@ TEST_F( utAssbinImportExport, exportAssbin3DFromFileTest ) {
 TEST_F( utAssbinImportExport, import3ExportAssbinDFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+#endif // #ifndef ASSIMP_BUILD_NO_EXPORT

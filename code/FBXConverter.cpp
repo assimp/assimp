@@ -185,12 +185,8 @@ void FBXConverter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4&
                 }
 
                 if ( !name_carrier ) {
-                    NodeNameCache::const_iterator it = mNodeNames.find(original_name);
-                    if ( it != mNodeNames.end() ) {
-                        original_name = original_name + std::string( "001" );
-                    }
-
-                    mNodeNames.insert( original_name );
+                    std::string old_original_name = original_name;
+                    GetUniqueName(old_original_name, original_name);
                     nodes_chain.push_back( new aiNode( original_name ) );
                 } else {
                     original_name = nodes_chain.back()->mName.C_Str();

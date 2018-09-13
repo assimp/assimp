@@ -1023,7 +1023,12 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
 inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
-    type = MemberOrDefault(obj, "type", Camera::Perspective);
+    std::string type_string = std::string(MemberOrDefault(obj, "type", "perspective"));
+    if (type_string == "orthographic") {
+        type = Camera::Orthographic;
+    } else {
+        type = Camera::Perspective;
+    }
 
     const char* subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 

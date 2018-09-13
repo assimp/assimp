@@ -113,6 +113,8 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utMDCImportExport.cpp
+  unit/utAssbinImportExport.cpp
 )
 
 SET( MATERIAL

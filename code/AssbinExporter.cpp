@@ -824,8 +824,7 @@ public:
     }
 };
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
-{
+void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
     AssbinExport exporter;
     exporter.WriteBinaryDump( pFile, pIOSystem, pScene );
 }

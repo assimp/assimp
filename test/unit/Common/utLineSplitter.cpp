@@ -52,8 +52,6 @@ class utLineSplitter : public ::testing::Test {
     // empty
 };
 
-
-
 TEST_F(utLineSplitter, tokenizetest) {
     DefaultIOSystem fs;
     IOStream* file = fs.Open(ASSIMP_TEST_MODELS_DIR"/ParsingFiles/linesplitter_tokenizetest.txt", "rb");

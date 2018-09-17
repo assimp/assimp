@@ -547,7 +547,6 @@ void AssbinImporter::ReadBinaryTexture(IOStream * stream, aiTexture* tex) {
             stream->Read(tex->pcData,1,tex->mWidth*tex->mHeight*4);
         }
     }
-
 }
 
 // -----------------------------------------------------------------------------------

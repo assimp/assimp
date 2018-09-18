@@ -1565,26 +1565,6 @@ C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     unsigned int* flags                 /*= NULL*/);
 #endif // !#ifdef __cplusplus
 
-// ---------------------------------------------------------------------------
-/** @brief  Helper function to get all values pertaining to a particular
-*  texture slot from a material structure.
-*
-*  @return Pointer showing to the default material.
-*/
-// ---------------------------------------------------------------------------
-#ifdef __cplusplus
-ASSIMP_API aiMaterial *aiCreateAndRegisterDefaultMaterial(void);
-#else
-C_STRUCT aiMaterial *aiCreateAndRegisterDefaultMaterial(void);
-#endif // !#ifdef __cplusplus
-
-// ---------------------------------------------------------------------------
-/**
-  * @brief  Helper function to release the default material instance, the
-  *         instance will not be destroyed.
-  */
-// ---------------------------------------------------------------------------
-ASSIMP_API void aiReleaseDefaultMaterial();
 
 #ifdef __cplusplus
 }

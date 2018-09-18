@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -40,25 +40,32 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "loggerview.hpp"
+#include "UnitTestPCH.h"
 
-// Header files, Qt.
-#include <QTime>
-#include <QTextBrowser>
+#include <assimp/LineSplitter.h>
+#include <assimp/DefaultIOSystem.h>
+#include <string>
 
-CLoggerView::CLoggerView(QTextBrowser* pOutputWidget)
-: mOutputWidget(pOutputWidget) {
+using namespace Assimp;
+
+class utLineSplitter : public ::testing::Test {
     // empty
+};
+
+TEST_F(utLineSplitter, tokenizetest) {
+    DefaultIOSystem fs;
+    IOStream* file = fs.Open(ASSIMP_TEST_MODELS_DIR"/ParsingFiles/linesplitter_tokenizetest.txt", "rb");
+
+    StreamReaderLE stream(file);
+    LineSplitter myLineSplitter(stream);
 }
 
-CLoggerView::~CLoggerView() {
-    mOutputWidget = nullptr;
-}
+TEST_F( utLineSplitter, issue212Test) {
+    DefaultIOSystem fs;
+    IOStream* file = fs.Open(ASSIMP_TEST_MODELS_DIR"/ParsingFiles/linesplitter_emptyline_test.txt", "rb");
 
-void CLoggerView::write(const char *pMessage) {
-    if (nullptr == mOutputWidget) {
-        return;
-    }
-
-	mOutputWidget->insertPlainText(QString("[%1] %2").arg(QTime::currentTime().toString()).arg(pMessage));
+    StreamReaderLE stream(file);
+    LineSplitter myLineSplitter(stream);
+    myLineSplitter++;
+    EXPECT_THROW( myLineSplitter++, std::logic_error );
 }

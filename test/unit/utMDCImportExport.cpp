@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -40,25 +40,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "loggerview.hpp"
 
-// Header files, Qt.
-#include <QTime>
-#include <QTextBrowser>
+#include "UnitTestPCH.h"
+#include "AbstractImportExportBase.h"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
-CLoggerView::CLoggerView(QTextBrowser* pOutputWidget)
-: mOutputWidget(pOutputWidget) {
-    // empty
-}
+using namespace Assimp;
 
-CLoggerView::~CLoggerView() {
-    mOutputWidget = nullptr;
-}
-
-void CLoggerView::write(const char *pMessage) {
-    if (nullptr == mOutputWidget) {
-        return;
+class utMDCImportExport : public AbstractImportExportBase {
+public:
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0);
+        return true;
+        return nullptr != scene;
     }
+};
 
-	mOutputWidget->insertPlainText(QString("[%1] %2").arg(QTime::currentTime().toString()).arg(pMessage));
+TEST_F( utMDCImportExport, importMDCFromFileTest ) {
+    EXPECT_TRUE( importerTest() );
 }

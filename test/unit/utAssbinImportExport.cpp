@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -40,25 +40,39 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "loggerview.hpp"
+#include "UnitTestPCH.h"
+#include "SceneDiffer.h"
+#include "AbstractImportExportBase.h"
+#include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/postprocess.h>
 
-// Header files, Qt.
-#include <QTime>
-#include <QTextBrowser>
+using namespace Assimp;
 
-CLoggerView::CLoggerView(QTextBrowser* pOutputWidget)
-: mOutputWidget(pOutputWidget) {
-    // empty
-}
+#ifndef ASSIMP_BUILD_NO_EXPORT
 
-CLoggerView::~CLoggerView() {
-    mOutputWidget = nullptr;
-}
+class utAssbinImportExport : public AbstractImportExportBase {
+public:
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
 
-void CLoggerView::write(const char *pMessage) {
-    if (nullptr == mOutputWidget) {
-        return;
+        Exporter exporter;
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin" ) );
+        const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin", aiProcess_ValidateDataStructure );
+
+        return newScene != nullptr;
     }
+};
 
-	mOutputWidget->insertPlainText(QString("[%1] %2").arg(QTime::currentTime().toString()).arg(pMessage));
+TEST_F( utAssbinImportExport, exportAssbin3DFromFileTest ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
 }
+
+TEST_F( utAssbinImportExport, import3ExportAssbinDFromFileTest ) {
+    EXPECT_TRUE( importerTest() );
+}
+
+#endif // #ifndef ASSIMP_BUILD_NO_EXPORT

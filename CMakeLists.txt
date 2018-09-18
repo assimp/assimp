@@ -111,9 +111,9 @@ OPTION( INJECT_DEBUG_POSTFIX
 )
 
 IF (IOS)
-	IF (NOT CMAKE_BUILD_TYPE)
- 		SET(CMAKE_BUILD_TYPE "Release")
-	ENDIF (NOT CMAKE_BUILD_TYPE)
+  IF (NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "Release")
+  ENDIF (NOT CMAKE_BUILD_TYPE)
 ENDIF (IOS)
 
 # Use subset of Windows.h
@@ -210,8 +210,8 @@ ENDIF( UNIX )
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -std=c++0x")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -std=c++0x ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
@@ -224,11 +224,11 @@ ELSEIF(MSVC)
     ADD_COMPILE_OPTIONS(/wd4351)
   ENDIF()
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -std=c++11" )
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -Wno-long-long -std=c++11 ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -std=c++11" )
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET( CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -std=c++11 -Wa,-mbig-obj ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS} ")
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 

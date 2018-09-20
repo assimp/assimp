@@ -377,14 +377,22 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene)
 {
     std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
-    if (0xffffffff == this->LIMIT)return;
+    if (0xffffffff == this->LIMIT)
+        return;
 
     ASSIMP_LOG_DEBUG("SplitLargeMeshesProcess_Vertex begin");
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-        this->SplitMesh(a, pScene->mMeshes[a],avList);
 
-    if (avList.size() != pScene->mNumMeshes)
-    {
+    //Check for point cloud first, 
+    //Do not process point cloud, splitMesh works only with faces data
+    for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
+        if ((pScene->mMeshes[a]->mPrimitiveTypes == aiPrimitiveType::aiPrimitiveType_POINT))
+            return;
+    }
+
+    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+        this->SplitMesh(a, pScene->mMeshes[a], avList);
+
+    if (avList.size() != pScene->mNumMeshes) {
         // it seems something has been split. rebuild the mesh list
         delete[] pScene->mMeshes;
         pScene->mNumMeshes = (unsigned int)avList.size();

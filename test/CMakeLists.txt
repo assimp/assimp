@@ -40,8 +40,9 @@
 cmake_minimum_required( VERSION 2.6 )
 
 INCLUDE_DIRECTORIES(
-	../contrib/gtest/include
-	../contrib/gtest/
+	${Assimp_SOURCE_DIR}/contrib/gtest/include
+	${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
 )
@@ -74,6 +75,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utLineSplitter.cpp
 )
 
 SET( IMPORTERS

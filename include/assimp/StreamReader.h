@@ -67,16 +67,13 @@ namespace Assimp {
  *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?*/
 // --------------------------------------------------------------------------------------------
 template <bool SwapEndianess = false, bool RuntimeSwitch = false>
-class StreamReader
-{
+class StreamReader {
 public:
     // FIXME: use these data types throughout the whole library,
     // then change them to 64 bit values :-)
+    using diff = int;
+    using pos  = unsigned int;
 
-    typedef int diff;
-    typedef unsigned int pos;
-
-public:
     // ---------------------------------------------------------------------
     /** Construction from a given stream with a well-defined endianness.
      *
@@ -110,8 +107,6 @@ public:
     ~StreamReader() {
         delete[] buffer;
     }
-
-public:
 
     // deprecated, use overloaded operator>> instead
 
@@ -176,7 +171,6 @@ public:
         return Get<uint64_t>();
     }
 
-public:
     // ---------------------------------------------------------------------
     /** Get the remaining stream size (to the end of the stream) */
     unsigned int GetRemainingSize() const {

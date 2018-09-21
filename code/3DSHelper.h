@@ -66,7 +66,7 @@ namespace D3DS  {
 */
 class Discreet3DS {
 private:
-    Discreet3DS() noexcept {
+    Discreet3DS() AI_NO_EXCEPT {
         // empty
     }
 
@@ -330,7 +330,7 @@ struct Face : public FaceWithSmoothingGroup
 /** Helper structure representing a texture */
 struct Texture {
     //! Default constructor
-    Texture() noexcept
+    Texture() AI_NO_EXCEPT
     : mOffsetU  (0.0)
     , mOffsetV  (0.0)
     , mScaleU   (1.0)
@@ -392,7 +392,7 @@ struct Material
 
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
-    Material(Material &&other) noexcept
+    Material(Material &&other) AI_NO_EXCEPT
     : mName(std::move(other.mName))
     , mDiffuse(std::move(other.mDiffuse))
     , mSpecularExponent(std::move(other.mSpecularExponent))
@@ -416,7 +416,7 @@ struct Material
     }
 
 
-    Material &operator=(Material &&other) noexcept {
+    Material &operator=(Material &&other) AI_NO_EXCEPT {
         if (this == &other) {
             return *this;
         }

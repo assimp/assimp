@@ -122,7 +122,7 @@ extern "C" {
 struct aiPlane
 {
 #ifdef __cplusplus
-    aiPlane () noexcept : a(0.f), b(0.f), c(0.f), d(0.f) {
+    aiPlane () AI_NO_EXCEPT : a(0.f), b(0.f), c(0.f), d(0.f) {
     }
     aiPlane (ai_real _a, ai_real _b, ai_real _c, ai_real _d)
         : a(_a), b(_b), c(_c), d(_d) {}
@@ -141,7 +141,7 @@ struct aiPlane
 struct aiRay
 {
 #ifdef __cplusplus
-    aiRay () noexcept {}
+    aiRay () AI_NO_EXCEPT {}
     aiRay (const aiVector3D& _pos, const aiVector3D& _dir)
         : pos(_pos), dir(_dir) {}
 
@@ -159,7 +159,7 @@ struct aiRay
 struct aiColor3D
 {
 #ifdef __cplusplus
-    aiColor3D () noexcept : r(0.0f), g(0.0f), b(0.0f) {}
+    aiColor3D () AI_NO_EXCEPT : r(0.0f), g(0.0f), b(0.0f) {}
     aiColor3D (ai_real _r, ai_real _g, ai_real _b) : r(_r), g(_g), b(_b) {}
     explicit aiColor3D (ai_real _r) : r(_r), g(_r), b(_r) {}
     aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
@@ -254,7 +254,7 @@ struct aiString
 {
 #ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
-    aiString() noexcept
+    aiString() AI_NO_EXCEPT
     : length( 0 )
     , data {0} {
         data[0] = '\0';
@@ -480,7 +480,7 @@ struct aiMemoryInfo
 #ifdef __cplusplus
 
     /** Default constructor */
-    aiMemoryInfo() noexcept
+    aiMemoryInfo() AI_NO_EXCEPT
         : textures   (0)
         , materials  (0)
         , meshes     (0)

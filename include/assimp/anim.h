@@ -70,7 +70,7 @@ struct aiVectorKey
 #ifdef __cplusplus
 
     /// @brief  The default constructor.
-    aiVectorKey() noexcept
+    aiVectorKey() AI_NO_EXCEPT
     : mTime( 0.0 )
     , mValue() {
         // empty
@@ -116,7 +116,7 @@ struct aiQuatKey
     C_STRUCT aiQuaternion mValue;
 
 #ifdef __cplusplus
-    aiQuatKey() noexcept
+    aiQuatKey() AI_NO_EXCEPT
     : mTime( 0.0 )
     , mValue() {
         // empty
@@ -163,7 +163,7 @@ struct aiMeshKey
 
 #ifdef __cplusplus
 
-    aiMeshKey() noexcept
+    aiMeshKey() AI_NO_EXCEPT
     : mTime(0.0)
     , mValue(0)
     {
@@ -210,7 +210,7 @@ struct aiMeshMorphKey
     /** The number of values and weights */
     unsigned int mNumValuesAndWeights;
 #ifdef __cplusplus
-	aiMeshMorphKey() noexcept
+	aiMeshMorphKey() AI_NO_EXCEPT
 		: mTime(0.0)
 		, mValues(nullptr)
 		, mWeights(nullptr)
@@ -324,7 +324,7 @@ struct aiNodeAnim {
     C_ENUM aiAnimBehaviour mPostState;
 
 #ifdef __cplusplus
-    aiNodeAnim() noexcept
+    aiNodeAnim() AI_NO_EXCEPT
     : mNumPositionKeys( 0 )
     , mPositionKeys( nullptr )
     , mNumRotationKeys( 0 )
@@ -366,7 +366,7 @@ struct aiMeshAnim
 
 #ifdef __cplusplus
 
-    aiMeshAnim() noexcept
+    aiMeshAnim() AI_NO_EXCEPT
         : mNumKeys()
         , mKeys()
     {}
@@ -397,7 +397,7 @@ struct aiMeshMorphAnim
 
 #ifdef __cplusplus
 
-    aiMeshMorphAnim() noexcept
+    aiMeshMorphAnim() AI_NO_EXCEPT
         : mNumKeys()
         , mKeys()
     {}
@@ -451,7 +451,7 @@ struct aiAnimation {
     C_STRUCT aiMeshMorphAnim **mMorphMeshChannels;
 
 #ifdef __cplusplus
-    aiAnimation() noexcept
+    aiAnimation() AI_NO_EXCEPT
     : mDuration(-1.)
     , mTicksPerSecond(0.)
     , mNumChannels(0)

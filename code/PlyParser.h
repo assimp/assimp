@@ -209,7 +209,7 @@ enum EElementSemantic {
 class Property {
 public:
     //! Default constructor
-    Property() noexcept
+    Property() AI_NO_EXCEPT
     : eType (EDT_Int)
     , Semantic()
     , bIsList(false)
@@ -257,7 +257,7 @@ public:
 class Element {
 public:
     //! Default constructor
-    Element() noexcept
+    Element() AI_NO_EXCEPT
     : eSemantic (EEST_INVALID)
     , NumOccur(0) {
         // empty
@@ -297,7 +297,7 @@ class PropertyInstance
 public:
 
     //! Default constructor
-    PropertyInstance() noexcept {
+    PropertyInstance() AI_NO_EXCEPT {
         // empty
     }
 
@@ -360,7 +360,7 @@ public:
 class ElementInstance {
 public:
     //! Default constructor
-    ElementInstance()  noexcept
+    ElementInstance()  AI_NO_EXCEPT
     : alProperties() {
         // empty
     }
@@ -387,7 +387,7 @@ class ElementInstanceList
 public:
 
     //! Default constructor
-    ElementInstanceList() noexcept
+    ElementInstanceList() AI_NO_EXCEPT
     : alInstances() {
         // empty
     }
@@ -414,7 +414,7 @@ class DOM
 public:
 
     //! Default constructor
-    DOM() noexcept
+    DOM() AI_NO_EXCEPT
     : alElements()
     , alElementData() {
 

@@ -120,7 +120,7 @@ protected:
         uint32_t mSmoothGroups;
         float mDistance;        ///< Distance of this vertex to the sorting plane
 
-        Entry() noexcept
+        Entry() AI_NO_EXCEPT
         : mIndex(0)
         , mPosition()
         , mSmoothGroups(0)

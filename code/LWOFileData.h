@@ -263,7 +263,7 @@ namespace LWO {
  */
 struct Face : public aiFace {
     //! Default construction
-    Face() noexcept
+    Face() AI_NO_EXCEPT
     : surfaceIndex( 0 )
     , smoothGroup( 0 )
     , type( AI_LWO_FACE ) {

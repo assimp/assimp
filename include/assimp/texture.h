@@ -201,7 +201,7 @@ struct aiTexture {
     }
 
     // Construction
-    aiTexture() noexcept
+    aiTexture() AI_NO_EXCEPT
     : mWidth(0)
     , mHeight(0)
     , achFormatHint{ 0 }

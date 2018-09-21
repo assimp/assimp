@@ -83,7 +83,7 @@ class ASSIMP_API BaseImporter {
 public:
 
     /** Constructor to be privately used by #Importer */
-    BaseImporter() noexcept;
+    BaseImporter() AI_NO_EXCEPT;
 
     /** Destructor, private as well */
     virtual ~BaseImporter();

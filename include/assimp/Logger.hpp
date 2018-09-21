@@ -161,7 +161,7 @@ protected:
     /**
      *  Default constructor
      */
-    Logger() noexcept;
+    Logger() AI_NO_EXCEPT;
 
     /**
      *  Construction with a given log severity
@@ -215,7 +215,7 @@ protected:
 // ----------------------------------------------------------------------------------
 //  Default constructor
 inline
-Logger::Logger() noexcept
+Logger::Logger() AI_NO_EXCEPT
 : m_Severity(NORMAL) {
     // empty
 }

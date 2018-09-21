@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-aiMatrix4x4t<TReal>::aiMatrix4x4t() noexcept :
+aiMatrix4x4t<TReal>::aiMatrix4x4t() AI_NO_EXCEPT :
     a1(1.0f), a2(), a3(), a4(),
     b1(), b2(1.0f), b3(), b4(),
     c1(), c2(), c3(1.0f), c4(),

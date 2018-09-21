@@ -114,7 +114,7 @@ enum PrePostBehaviour
 /** \brief Data structure for a LWO animation keyframe
  */
 struct Key {
-    Key() noexcept 
+    Key() AI_NO_EXCEPT 
     : time()
     , value()
     , inter(IT_LINE)
@@ -145,7 +145,7 @@ struct Key {
 /** \brief Data structure for a LWO animation envelope
  */
 struct Envelope {
-    Envelope() noexcept
+    Envelope() AI_NO_EXCEPT
     : index()
     , type(EnvelopeType_Unknown)
     , pre(PrePostBehaviour_Constant)

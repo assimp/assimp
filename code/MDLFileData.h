@@ -717,7 +717,7 @@ struct GroupFrame
  */
 struct IntFace_MDL7 {
     // provide a constructor for our own convenience
-    IntFace_MDL7() noexcept
+    IntFace_MDL7() AI_NO_EXCEPT
     : mIndices { 0 }
     , iMatIndex{ 0 } {
         // empty
@@ -738,7 +738,7 @@ struct IntFace_MDL7 {
  */
 struct IntMaterial_MDL7 {
     // provide a constructor for our own convenience
-    IntMaterial_MDL7() noexcept
+    IntMaterial_MDL7() AI_NO_EXCEPT
     : pcMat( nullptr )
     , iOldMatIndices{ 0 } {
         //  empty
@@ -759,7 +759,7 @@ struct IntMaterial_MDL7 {
 struct IntBone_MDL7 : aiBone
 {
     //! Default constructor
-    IntBone_MDL7() noexcept : iParent (0xffff)
+    IntBone_MDL7() AI_NO_EXCEPT : iParent (0xffff)
     {
         pkeyPositions.reserve(30);
         pkeyScalings.reserve(30);
@@ -804,7 +804,7 @@ struct IntFrameInfo_MDL7
 struct IntGroupInfo_MDL7
 {
     //! Default constructor
-    IntGroupInfo_MDL7() noexcept
+    IntGroupInfo_MDL7() AI_NO_EXCEPT
         :   iIndex(0)
         ,   pcGroup(nullptr)
         ,   pcGroupUVs(nullptr)
@@ -841,7 +841,7 @@ struct IntGroupInfo_MDL7
 //! Holds the data that belongs to a MDL7 mesh group
 struct IntGroupData_MDL7
 {
-    IntGroupData_MDL7() noexcept
+    IntGroupData_MDL7() AI_NO_EXCEPT
         : bNeed2UV(false)
     {}
 
@@ -872,7 +872,7 @@ struct IntGroupData_MDL7
 //! Holds data from an MDL7 file that is shared by all mesh groups
 struct IntSharedData_MDL7 {
     //! Default constructor
-    IntSharedData_MDL7() noexcept
+    IntSharedData_MDL7() AI_NO_EXCEPT
         : apcOutBones(),
         iNum()
     {

@@ -68,7 +68,7 @@ struct TexEntry {
     std::string mName;
     bool mIsNormalMap; // true if the texname was specified in a NormalmapFilename tag
 
-    TexEntry() noexcept
+    TexEntry() AI_NO_EXCEPT
     : mName()
     , mIsNormalMap(false) {
         // empty
@@ -91,7 +91,7 @@ struct Material {
     std::vector<TexEntry> mTextures;
     size_t sceneIndex; ///< the index under which it was stored in the scene's material list
 
-    Material() noexcept
+    Material() AI_NO_EXCEPT
     : mIsReference(false)
     , mSpecularExponent()
     , sceneIndex(SIZE_MAX) {
@@ -130,7 +130,7 @@ struct Mesh {
 
     std::vector<Bone> mBones;
 
-    explicit Mesh(const std::string &pName = "") noexcept
+    explicit Mesh(const std::string &pName = "") AI_NO_EXCEPT
     : mName( pName )
     , mPositions()
     , mPosFaces()
@@ -155,7 +155,7 @@ struct Node {
     std::vector<Node*> mChildren;
     std::vector<Mesh*> mMeshes;
 
-    Node() noexcept
+    Node() AI_NO_EXCEPT
     : mName()
     , mTrafoMatrix()
     , mParent(nullptr)
@@ -220,7 +220,7 @@ struct Scene
     std::vector<Animation*> mAnims;
     unsigned int mAnimTicksPerSecond;
 
-    Scene() noexcept
+    Scene() AI_NO_EXCEPT
     : mRootNode(nullptr)
     , mGlobalMeshes()
     , mGlobalMaterials()

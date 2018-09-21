@@ -85,7 +85,7 @@ struct Material : public D3DS::Material
 
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
-    Material(Material &&other) noexcept
+    Material(Material &&other) AI_NO_EXCEPT
     : D3DS::Material(std::move(other))
     , avSubMaterials(std::move(other.avSubMaterials))
     , pcInstance(std::move(other.pcInstance))
@@ -95,7 +95,7 @@ struct Material : public D3DS::Material
     }
 
 
-    Material &operator=(Material &&other) noexcept {
+    Material &operator=(Material &&other) AI_NO_EXCEPT {
         if (this == &other) {
             return *this;
         }
@@ -129,7 +129,7 @@ struct Material : public D3DS::Material
 /** Helper structure to represent an ASE file face */
 struct Face : public FaceWithSmoothingGroup {
     //! Default constructor. Initializes everything with 0
-    Face() noexcept
+    Face() AI_NO_EXCEPT
     : amUVIndices{0}
     , mColorIndices{0}
     , iMaterial(DEFAULT_MATINDEX)
@@ -197,7 +197,7 @@ struct Animation
         TCB     = 0x2
     } mRotationType, mScalingType, mPositionType;
 
-    Animation() noexcept
+    Animation() AI_NO_EXCEPT
         :   mRotationType   (TRACK)
         ,   mScalingType    (TRACK)
         ,   mPositionType   (TRACK)
@@ -218,7 +218,7 @@ struct Animation
 /** Helper structure to represent the inheritance information of an ASE node */
 struct InheritanceInfo {
     //! Default constructor
-    InheritanceInfo() noexcept
+    InheritanceInfo() AI_NO_EXCEPT
     : abInheritPosition{true}
     , abInheritRotation{true}
     , abInheritScaling{true} {
@@ -389,7 +389,7 @@ struct Camera : public BaseNode
 /** Helper structure to represent an ASE helper object (dummy) */
 struct Dummy : public BaseNode {
     //! Constructor
-    Dummy() noexcept
+    Dummy() AI_NO_EXCEPT
     : BaseNode  (BaseNode::Dummy, "DUMMY") {
         // empty
     }
@@ -408,7 +408,7 @@ struct Dummy : public BaseNode {
  */
 class Parser {
 private:
-    Parser() noexcept {
+    Parser() AI_NO_EXCEPT {
         // empty
     }
 

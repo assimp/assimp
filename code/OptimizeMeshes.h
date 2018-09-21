@@ -77,7 +77,7 @@ public:
     /** @brief Internal utility to store additional mesh info
      */
     struct MeshInfo {
-        MeshInfo() noexcept
+        MeshInfo() AI_NO_EXCEPT
         : instance_cnt(0)
         , vertex_format(0)
         , output_id(0xffffffff) {

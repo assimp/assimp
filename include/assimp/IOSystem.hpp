@@ -95,7 +95,7 @@ public:
      *  Create an instance of your derived class and assign it to an
      *  #Assimp::Importer instance by calling Importer::SetIOHandler().
      */
-    IOSystem() noexcept;
+    IOSystem() AI_NO_EXCEPT;
 
     // -------------------------------------------------------------------
     /** @brief Virtual destructor.
@@ -230,7 +230,7 @@ private:
 
 // ----------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOSystem::IOSystem() noexcept
+IOSystem::IOSystem() AI_NO_EXCEPT
 : m_pathStack() {
     // empty
 }

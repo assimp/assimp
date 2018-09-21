@@ -69,7 +69,7 @@ class ASSIMP_API DefaultIOStream : public IOStream
 #endif // __ANDROID__
 
 protected:
-    DefaultIOStream() noexcept;
+    DefaultIOStream() AI_NO_EXCEPT;
     DefaultIOStream(FILE* pFile, const std::string &strFilename);
 
 public:
@@ -117,7 +117,7 @@ private:
 
 // ----------------------------------------------------------------------------------
 inline
-DefaultIOStream::DefaultIOStream() noexcept
+DefaultIOStream::DefaultIOStream() AI_NO_EXCEPT
 : mFile(nullptr)
 , mFilename("")
 , mCachedSize(SIZE_MAX) {

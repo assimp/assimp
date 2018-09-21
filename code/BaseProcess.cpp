@@ -53,7 +53,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-BaseProcess::BaseProcess() noexcept
+BaseProcess::BaseProcess() AI_NO_EXCEPT
 : shared()
 , progress()
 {

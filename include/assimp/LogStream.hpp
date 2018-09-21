@@ -65,7 +65,7 @@ class ASSIMP_API LogStream
 {
 protected:
     /** @brief  Default constructor */
-    LogStream() noexcept;
+    LogStream() AI_NO_EXCEPT;
 
 public:
     /** @brief  Virtual destructor  */
@@ -96,7 +96,7 @@ public:
 }; // !class LogStream
 
 inline
-LogStream::LogStream() noexcept {
+LogStream::LogStream() AI_NO_EXCEPT {
     // empty
 }
 

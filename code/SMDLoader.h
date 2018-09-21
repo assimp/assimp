@@ -69,7 +69,7 @@ namespace SMD {
 /** Data structure for a vertex in a SMD file
 */
 struct Vertex {
-    Vertex() noexcept
+    Vertex() AI_NO_EXCEPT
     : iParentNode(UINT_MAX) {
         // empty
     }
@@ -91,7 +91,7 @@ struct Vertex {
 /** Data structure for a face in a SMD file
 */
 struct Face {
-    Face() noexcept
+    Face() AI_NO_EXCEPT
     : iTexture(0x0)
     , avVertices{} {
         // empty
@@ -109,7 +109,7 @@ struct Face {
 */
 struct Bone {
     //! Default constructor
-    Bone() noexcept
+    Bone() AI_NO_EXCEPT
     : iParent(UINT_MAX)
     , bIsUsed(false) {
         // empty
@@ -129,7 +129,7 @@ struct Bone {
     //! Animation of the bone
     struct Animation {
         //! Public default constructor
-        Animation() noexcept
+        Animation() AI_NO_EXCEPT
         : iFirstTimeKey() {
             asKeys.reserve(20);
         }

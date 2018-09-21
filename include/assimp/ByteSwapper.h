@@ -61,7 +61,7 @@ namespace Assimp    {
  * and vice versa. Direct use of this class is DEPRECATED. Use #StreamReader instead. */
 // --------------------------------------------------------------------------------------
 class ByteSwap {
-    ByteSwap() noexcept {}
+    ByteSwap() AI_NO_EXCEPT {}
 
 public:
 

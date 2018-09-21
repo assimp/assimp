@@ -392,7 +392,7 @@ private:
 
 public:
 	/// Default constructor.
-	AMFImporter() noexcept
+	AMFImporter() AI_NO_EXCEPT
     : mNodeElement_Cur(nullptr)
     , mReader(nullptr) {
         // empty

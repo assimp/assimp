@@ -53,7 +53,7 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 // ---------------------------------------------------------------------------
 /** Helper structure representing a face with smoothing groups assigned */
 struct FaceWithSmoothingGroup {
-    FaceWithSmoothingGroup() noexcept
+    FaceWithSmoothingGroup() AI_NO_EXCEPT
     : mIndices()
     , iSmoothGroup(0) {
         // in debug builds set all indices to a common magic value

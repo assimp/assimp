@@ -136,7 +136,7 @@ struct aiFace
 #ifdef __cplusplus
 
     //! Default constructor
-    aiFace() noexcept
+    aiFace() AI_NO_EXCEPT
     : mNumIndices( 0 )
     , mIndices( nullptr ) {
         // empty
@@ -220,7 +220,7 @@ struct aiVertexWeight {
 #ifdef __cplusplus
 
     //! Default constructor
-    aiVertexWeight() noexcept
+    aiVertexWeight() AI_NO_EXCEPT
     : mVertexId(0)
     , mWeight(0.0f) {
         // empty
@@ -282,7 +282,7 @@ struct aiBone {
 #ifdef __cplusplus
 
     //! Default constructor
-    aiBone() noexcept
+    aiBone() AI_NO_EXCEPT
     : mName()
     , mNumWeights( 0 )
     , mWeights( nullptr )
@@ -454,7 +454,7 @@ struct aiAnimMesh
 
 #ifdef __cplusplus
 
-    aiAnimMesh() noexcept
+    aiAnimMesh() AI_NO_EXCEPT
         : mVertices( nullptr )
         , mNormals(nullptr)
         , mTangents(nullptr)
@@ -715,7 +715,7 @@ struct aiMesh
 #ifdef __cplusplus
 
     //! Default constructor. Initializes all members to 0
-    aiMesh() noexcept
+    aiMesh() AI_NO_EXCEPT
     : mPrimitiveTypes( 0 )
     , mNumVertices( 0 )
     , mNumFaces( 0 )

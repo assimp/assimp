@@ -216,7 +216,7 @@ class ASSIMP_API_WINONLY BaseProcess {
 
 public:
     /** Constructor to be privately used by Importer */
-    BaseProcess() noexcept;
+    BaseProcess() AI_NO_EXCEPT;
 
     /** Destructor, private as well */
     virtual ~BaseProcess();

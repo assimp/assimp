@@ -129,7 +129,7 @@ struct aiMetadata {
     /** 
      *  @brief  The default constructor, set all members to zero by default.
      */
-    aiMetadata() noexcept
+    aiMetadata() AI_NO_EXCEPT
     : mNumProperties(0)
     , mKeys(nullptr)
     , mValues(nullptr) {

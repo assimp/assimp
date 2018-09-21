@@ -118,7 +118,7 @@ struct Surface
     uint32_t ulOffsetFrameBaseFrames ;
     uint32_t ulOffsetFrameCompFrames ;
     uint32_t ulOffsetEnd;
-    Surface() noexcept
+    Surface() AI_NO_EXCEPT
     : ulIdent()
     , ucName{ 0 }
     , ulFlags()

@@ -66,7 +66,7 @@ namespace Assimp    {
  *  to be able to update some values quickly.
 */
 struct TTUpdateInfo {
-    TTUpdateInfo() noexcept
+    TTUpdateInfo() AI_NO_EXCEPT
     : directShortcut(nullptr)
     , mat(nullptr)
     , semantic(0)
@@ -89,7 +89,7 @@ struct TTUpdateInfo {
 /** Helper class representing texture coordinate transformations
 */
 struct STransformVecInfo : public aiUVTransform {
-    STransformVecInfo() noexcept
+    STransformVecInfo() AI_NO_EXCEPT
     : uvIndex(0)
     , mapU(aiTextureMapMode_Wrap)
     , mapV(aiTextureMapMode_Wrap)

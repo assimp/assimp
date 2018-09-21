@@ -71,14 +71,13 @@ struct Material : public D3DS::Material
     //! Default constructor has been deleted
     Material() = delete;
 
-
     //! Constructor with explicit name
     explicit Material(const std::string &name)
     : D3DS::Material(name)
     , pcInstance(NULL)
-    , bNeed (false)
-    {}
-
+    , bNeed (false) {
+        // empty
+    }
 
     Material(const Material &other)            = default;
     Material &operator=(const Material &other) = default;
@@ -130,9 +129,7 @@ struct Material : public D3DS::Material
 struct Face : public FaceWithSmoothingGroup {
     //! Default constructor. Initializes everything with 0
     Face() AI_NO_EXCEPT
-    : amUVIndices{0}
-    , mColorIndices{0}
-    , iMaterial(DEFAULT_MATINDEX)
+    : iMaterial(DEFAULT_MATINDEX)
     , iFace(0) {
         // empty
     }
@@ -159,15 +156,15 @@ struct Face : public FaceWithSmoothingGroup {
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file bone */
-struct Bone
-{
+struct Bone {
     //! Constructor
     Bone() = delete;
 
     //! Construction from an existing name
     explicit Bone( const std::string& name)
-        :   mName   (name)
-    {}
+    : mName(name) {
+        // empty
+    }
 
     //! Name of the bone
     std::string mName;
@@ -175,23 +172,16 @@ struct Bone
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file bone vertex */
-struct BoneVertex
-{
+struct BoneVertex {
     //! Bone and corresponding vertex weight.
     //! -1 for unrequired bones ....
     std::vector<std::pair<int,float> > mBoneWeights;
-
-    //! Position of the bone vertex.
-    //! MUST be identical to the vertex position
-    //aiVector3D mPosition;
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file animation */
-struct Animation
-{
-    enum Type
-    {
+struct Animation {
+    enum Type {
         TRACK   = 0x0,
         BEZIER  = 0x1,
         TCB     = 0x2
@@ -211,18 +201,16 @@ struct Animation
 
     //! List of track scaling keyframes
     std::vector< aiVectorKey > akeyScaling;
-
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent the inheritance information of an ASE node */
 struct InheritanceInfo {
     //! Default constructor
-    InheritanceInfo() AI_NO_EXCEPT
-    : abInheritPosition{true}
-    , abInheritRotation{true}
-    , abInheritScaling{true} {
-        // empty
+    InheritanceInfo() AI_NO_EXCEPT {
+        for ( size_t i=0; i<3; ++i ) {
+            abInheritPosition[i] = abInheritRotation[i] = abInheritScaling[i] = true;
+        }
     }
 
     //! Inherit the parent's position?, axis order is x,y,z
@@ -237,17 +225,19 @@ struct InheritanceInfo {
 
 // ---------------------------------------------------------------------------
 /** Represents an ASE file node. Base class for mesh, light and cameras */
-struct BaseNode
-{
-    enum Type {Light, Camera, Mesh, Dummy} mType;
-
+struct BaseNode {
+    enum Type {
+        Light, 
+        Camera, 
+        Mesh, 
+        Dummy
+    } mType;
 
     //! Construction from an existing name
     BaseNode(Type _mType, const std::string &name)
     : mType         (_mType)
     , mName         (name)
-    , mProcessed    (false)
-    {
+    , mProcessed    (false) {
         // Set mTargetPosition to qnan
         const ai_real qnan = get_qnan();
         mTargetPosition.x = qnan;
@@ -290,14 +280,14 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode {
     //! Construction from an existing name
     explicit Mesh(const std::string &name)
     : BaseNode( BaseNode::Mesh, name )
-    , amTexCoords{ }
     , mVertexColors()
     , mBoneVertices()
     , mBones()
     , iMaterialIndex(Face::DEFAULT_MATINDEX)
-    , mNumUVComponents{ 2 }
     , bSkip     (false) {
-        // empty
+        for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c) {
+            this->mNumUVComponents[c] = 2;
+        }
     }
 
     //! List of all texture coordinate sets

@@ -370,7 +370,7 @@ def export_blob(scene,
                               pyassimp.postprocess.aiProcess_OptimizeMeshes)
     Returns
     ---------
-    ExportBlob
+    Pointer to structs.ExportDataBlob
     '''
     from ctypes import pointer
     exportBlobPtr = _assimp_lib.export_blob(pointer(scene), file_type.encode("ascii"), processing)

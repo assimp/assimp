@@ -999,6 +999,8 @@ class Animation(Structure):
 class ExportDataBlob(Structure):
     """
     See 'cexport.h' for details.
+
+    Note that the '_fields_' definition is outside the class to allow the 'next' field to be recursive
     """
     pass
 

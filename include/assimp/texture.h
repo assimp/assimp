@@ -204,7 +204,6 @@ struct aiTexture {
     aiTexture() AI_NO_EXCEPT
     : mWidth(0)
     , mHeight(0)
-    , achFormatHint{ 0 }
     , pcData(nullptr)
     , mFilename() {
         achFormatHint[0] = achFormatHint[1] = 0;

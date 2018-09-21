@@ -206,6 +206,7 @@ def search_library():
     Returns: tuple, (load from filename function,
                      load from memory function,
                      export to filename function,
+                     export to blob function,
                      release function,
                      dll)
     '''

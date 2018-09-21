@@ -119,11 +119,9 @@ extern "C" {
 // ----------------------------------------------------------------------------------
 /** Represents a plane in a three-dimensional, euclidean space
 */
-struct aiPlane
-{
+struct aiPlane {
 #ifdef __cplusplus
-    aiPlane () AI_NO_EXCEPT : a(0.f), b(0.f), c(0.f), d(0.f) {
-    }
+    aiPlane () AI_NO_EXCEPT : a(0.f), b(0.f), c(0.f), d(0.f) {}
     aiPlane (ai_real _a, ai_real _b, ai_real _c, ai_real _d)
         : a(_a), b(_b), c(_c), d(_d) {}
 
@@ -138,8 +136,7 @@ struct aiPlane
 // ----------------------------------------------------------------------------------
 /** Represents a ray
 */
-struct aiRay
-{
+struct aiRay {
 #ifdef __cplusplus
     aiRay () AI_NO_EXCEPT {}
     aiRay (const aiVector3D& _pos, const aiVector3D& _dir)
@@ -255,8 +252,7 @@ struct aiString
 #ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
     aiString() AI_NO_EXCEPT
-    : length( 0 )
-    , data {0} {
+    : length( 0 ) {
         data[0] = '\0';
 
 #ifdef ASSIMP_BUILD_DEBUG

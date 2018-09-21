@@ -717,10 +717,9 @@ struct GroupFrame
  */
 struct IntFace_MDL7 {
     // provide a constructor for our own convenience
-    IntFace_MDL7() AI_NO_EXCEPT
-    : mIndices { 0 }
-    , iMatIndex{ 0 } {
-        // empty
+    IntFace_MDL7() AI_NO_EXCEPT {
+        ::memset( mIndices, 0, sizeof(uint32_t) *3);
+        ::memset( iMatIndex, 0, sizeof( unsigned int) *2);
     }
 
     //! Vertex indices
@@ -739,9 +738,8 @@ struct IntFace_MDL7 {
 struct IntMaterial_MDL7 {
     // provide a constructor for our own convenience
     IntMaterial_MDL7() AI_NO_EXCEPT
-    : pcMat( nullptr )
-    , iOldMatIndices{ 0 } {
-        //  empty
+    : pcMat( nullptr ) {
+        ::memset( iOldMatIndices, 0, sizeof(unsigned int) *2);
     }
 
     //! Material instance

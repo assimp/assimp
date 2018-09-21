@@ -483,7 +483,7 @@ struct aiUVTransform
 
 
 #ifdef __cplusplus
-    aiUVTransform()
+    aiUVTransform() AI_NO_EXCEPT
         :   mTranslation (0.0,0.0)
         ,   mScaling    (1.0,1.0)
         ,   mRotation   (0.0)
@@ -607,7 +607,7 @@ struct aiMaterialProperty
 
 #ifdef __cplusplus
 
-    aiMaterialProperty()
+    aiMaterialProperty() AI_NO_EXCEPT
     : mSemantic( 0 )
     , mIndex( 0 )
     , mDataLength( 0 )

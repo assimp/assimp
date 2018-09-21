@@ -117,6 +117,7 @@ SET( IMPORTERS
   unit/utB3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
+  unit/ImportExport/utCOBImportExport.cpp
 )
 
 SET( MATERIAL

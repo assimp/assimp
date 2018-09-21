@@ -70,7 +70,7 @@ struct aiVectorKey
 #ifdef __cplusplus
 
     /// @brief  The default constructor.
-    aiVectorKey() 
+    aiVectorKey() noexcept
     : mTime( 0.0 )
     , mValue() {
         // empty
@@ -116,7 +116,7 @@ struct aiQuatKey
     C_STRUCT aiQuaternion mValue;
 
 #ifdef __cplusplus
-    aiQuatKey()
+    aiQuatKey() noexcept
     : mTime( 0.0 )
     , mValue() {
         // empty
@@ -163,7 +163,7 @@ struct aiMeshKey
 
 #ifdef __cplusplus
 
-    aiMeshKey()
+    aiMeshKey() noexcept
     : mTime(0.0)
     , mValue(0)
     {
@@ -210,10 +210,10 @@ struct aiMeshMorphKey
     /** The number of values and weights */
     unsigned int mNumValuesAndWeights;
 #ifdef __cplusplus
-	aiMeshMorphKey()
+	aiMeshMorphKey() noexcept
 		: mTime(0.0)
-		, mValues(NULL)
-		, mWeights(NULL)
+		, mValues(nullptr)
+		, mWeights(nullptr)
 		, mNumValuesAndWeights(0)
 	{
 
@@ -324,13 +324,13 @@ struct aiNodeAnim {
     C_ENUM aiAnimBehaviour mPostState;
 
 #ifdef __cplusplus
-    aiNodeAnim() 
+    aiNodeAnim() noexcept
     : mNumPositionKeys( 0 )
-    , mPositionKeys( NULL )
+    , mPositionKeys( nullptr )
     , mNumRotationKeys( 0 )
-    , mRotationKeys( NULL )
+    , mRotationKeys( nullptr )
     , mNumScalingKeys( 0 )
-    , mScalingKeys( NULL )
+    , mScalingKeys( nullptr )
     , mPreState( aiAnimBehaviour_DEFAULT )
     , mPostState( aiAnimBehaviour_DEFAULT ) {
          // empty
@@ -366,7 +366,7 @@ struct aiMeshAnim
 
 #ifdef __cplusplus
 
-    aiMeshAnim()
+    aiMeshAnim() noexcept
         : mNumKeys()
         , mKeys()
     {}
@@ -397,7 +397,7 @@ struct aiMeshMorphAnim
 
 #ifdef __cplusplus
 
-    aiMeshMorphAnim()
+    aiMeshMorphAnim() noexcept
         : mNumKeys()
         , mKeys()
     {}
@@ -451,15 +451,15 @@ struct aiAnimation {
     C_STRUCT aiMeshMorphAnim **mMorphMeshChannels;
 
 #ifdef __cplusplus
-    aiAnimation()
+    aiAnimation() noexcept
     : mDuration(-1.)
     , mTicksPerSecond(0.)
     , mNumChannels(0)
-    , mChannels(NULL)
+    , mChannels(nullptr)
     , mNumMeshChannels(0)
-    , mMeshChannels(NULL)
+    , mMeshChannels(nullptr)
     , mNumMorphMeshChannels(0)
-    , mMorphMeshChannels(NULL) {
+    , mMorphMeshChannels(nullptr) {
         // empty
     }
 

@@ -118,23 +118,23 @@ struct Surface
     uint32_t ulOffsetFrameBaseFrames ;
     uint32_t ulOffsetFrameCompFrames ;
     uint32_t ulOffsetEnd;
-    Surface()
-        : ulIdent(),
-        ulFlags(),
-        ulNumCompFrames(),
-        ulNumBaseFrames(),
-        ulNumShaders(),
-        ulNumVertices(),
-        ulNumTriangles(),
-        ulOffsetTriangles(),
-        ulOffsetShaders(),
-        ulOffsetTexCoords(),
-        ulOffsetBaseVerts(),
-        ulOffsetCompVerts(),
-        ulOffsetFrameBaseFrames(),
-        ulOffsetFrameCompFrames(),
-        ulOffsetEnd()
-    {
+    Surface() noexcept
+    : ulIdent()
+    , ucName{ 0 }
+    , ulFlags()
+    , ulNumCompFrames()
+    , ulNumBaseFrames()
+    , ulNumShaders() 
+    , ulNumVertices()
+    , ulNumTriangles()
+    , ulOffsetTriangles()
+    , ulOffsetShaders()
+    , ulOffsetTexCoords()
+    , ulOffsetBaseVerts() 
+    , ulOffsetCompVerts()
+    , ulOffsetFrameBaseFrames()
+    , ulOffsetFrameCompFrames()
+    , ulOffsetEnd() {
         ucName[AI_MDC_MAXQPATH-1] = '\0';
     }
 } PACK_STRUCT;

@@ -65,7 +65,7 @@ class ASSIMP_API LogStream
 {
 protected:
     /** @brief  Default constructor */
-    LogStream();
+    LogStream() noexcept;
 
 public:
     /** @brief  Virtual destructor  */
@@ -91,12 +91,12 @@ public:
      *  @return New LogStream instance.  */
     static LogStream* createDefaultStream(aiDefaultLogStream stream,
         const char* name = "AssimpLog.txt",
-        IOSystem* io = NULL);
+        IOSystem* io = nullptr );
 
 }; // !class LogStream
 
 inline
-LogStream::LogStream() {
+LogStream::LogStream() noexcept {
     // empty
 }
 

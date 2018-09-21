@@ -71,7 +71,7 @@ class ASSIMP_API IOStream
 {
 protected:
     /** Constructor protected, use IOSystem::Open() to create an instance. */
-    IOStream();
+    IOStream() noexcept;
 
 public:
     // -------------------------------------------------------------------
@@ -126,7 +126,7 @@ public:
 
 // ----------------------------------------------------------------------------------
 inline
-IOStream::IOStream() {
+IOStream::IOStream() noexcept {
     // empty
 }
 

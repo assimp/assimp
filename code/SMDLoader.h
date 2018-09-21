@@ -62,17 +62,17 @@ struct aiNode;
 // STL headers
 #include <vector>
 
-namespace Assimp    {
-
-namespace SMD   {
+namespace Assimp {
+namespace SMD {
 
 // ---------------------------------------------------------------------------
 /** Data structure for a vertex in a SMD file
 */
-struct Vertex
-{
-    Vertex() : iParentNode(UINT_MAX)
-     {}
+struct Vertex {
+    Vertex() noexcept
+    : iParentNode(UINT_MAX) {
+        // empty
+    }
 
     //! Vertex position, normal and texture coordinate
     aiVector3D pos,nor,uv;
@@ -90,10 +90,12 @@ struct Vertex
 // ---------------------------------------------------------------------------
 /** Data structure for a face in a SMD file
 */
-struct Face
-{
-    Face() : iTexture(0x0)
-     {}
+struct Face {
+    Face() noexcept
+    : iTexture(0x0)
+    , avVertices{} {
+        // empty
+    }
 
     //! Texture index for the face
     unsigned int iTexture;
@@ -105,11 +107,12 @@ struct Face
 // ---------------------------------------------------------------------------
 /** Data structure for a bone in a SMD file
 */
-struct Bone
-{
+struct Bone {
     //! Default constructor
-    Bone() : iParent(UINT_MAX), bIsUsed(false)
-    {
+    Bone() noexcept
+    : iParent(UINT_MAX)
+    , bIsUsed(false) {
+        // empty
     }
 
     //! Destructor
@@ -124,12 +127,10 @@ struct Bone
     uint32_t iParent;
 
     //! Animation of the bone
-    struct Animation
-    {
+    struct Animation {
         //! Public default constructor
-        Animation()
-            : iFirstTimeKey()
-        {
+        Animation() noexcept
+        : iFirstTimeKey() {
             asKeys.reserve(20);
         }
 

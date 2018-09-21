@@ -85,7 +85,7 @@ struct Material : public D3DS::Material
 
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
-    Material(Material &&other)
+    Material(Material &&other) noexcept
     : D3DS::Material(std::move(other))
     , avSubMaterials(std::move(other.avSubMaterials))
     , pcInstance(std::move(other.pcInstance))
@@ -95,7 +95,7 @@ struct Material : public D3DS::Material
     }
 
 
-    Material &operator=(Material &&other) {
+    Material &operator=(Material &&other) noexcept {
         if (this == &other) {
             return *this;
         }
@@ -127,27 +127,20 @@ struct Material : public D3DS::Material
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file face */
-struct Face : public FaceWithSmoothingGroup
-{
+struct Face : public FaceWithSmoothingGroup {
     //! Default constructor. Initializes everything with 0
-    Face()
-    {
-        mColorIndices[0] = mColorIndices[1] = mColorIndices[2] = 0;
-        for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-        {
-            amUVIndices[i][0] = amUVIndices[i][1] = amUVIndices[i][2] = 0;
-        }
-
-        iMaterial = DEFAULT_MATINDEX;
-        iFace = 0;
+    Face() noexcept
+    : amUVIndices{0}
+    , mColorIndices{0}
+    , iMaterial(DEFAULT_MATINDEX)
+    , iFace(0) {
+        // empty
     }
 
     //! special value to indicate that no material index has
     //! been assigned to a face. The default material index
     //! will replace this value later.
     static const unsigned int DEFAULT_MATINDEX = 0xFFFFFFFF;
-
-
 
     //! Indices into each list of texture coordinates
     unsigned int amUVIndices[AI_MAX_NUMBER_OF_TEXTURECOORDS][3];
@@ -204,7 +197,7 @@ struct Animation
         TCB     = 0x2
     } mRotationType, mScalingType, mPositionType;
 
-    Animation()
+    Animation() noexcept
         :   mRotationType   (TRACK)
         ,   mScalingType    (TRACK)
         ,   mPositionType   (TRACK)
@@ -223,14 +216,13 @@ struct Animation
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent the inheritance information of an ASE node */
-struct InheritanceInfo
-{
+struct InheritanceInfo {
     //! Default constructor
-    InheritanceInfo()
-    {
-        // set the inheritance flag for all axes by default to true
-        for (unsigned int i = 0; i < 3;++i)
-            abInheritPosition[i] = abInheritRotation[i] = abInheritScaling[i] = true;
+    InheritanceInfo() noexcept
+    : abInheritPosition{true}
+    , abInheritRotation{true}
+    , abInheritScaling{true} {
+        // empty
     }
 
     //! Inherit the parent's position?, axis order is x,y,z
@@ -291,23 +283,22 @@ struct BaseNode
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file mesh */
-struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode
-{
+struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode {
     //! Default constructor has been deleted
     Mesh() = delete;
 
-
     //! Construction from an existing name
     explicit Mesh(const std::string &name)
-    : BaseNode  (BaseNode::Mesh, name)
+    : BaseNode( BaseNode::Mesh, name )
+    , amTexCoords{ }
+    , mVertexColors()
+    , mBoneVertices()
+    , mBones()
     , iMaterialIndex(Face::DEFAULT_MATINDEX)
-    , bSkip     (false)
-    {
-        // use 2 texture vertex components by default
-        for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c)
-            this->mNumUVComponents[c] = 2;
+    , mNumUVComponents{ 2 }
+    , bSkip     (false) {
+        // empty
     }
-
 
     //! List of all texture coordinate sets
     std::vector<aiVector3D> amTexCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
@@ -396,12 +387,11 @@ struct Camera : public BaseNode
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE helper object (dummy) */
-struct Dummy : public BaseNode
-{
+struct Dummy : public BaseNode {
     //! Constructor
-    Dummy()
-        : BaseNode  (BaseNode::Dummy, "DUMMY")
-    {
+    Dummy() noexcept
+    : BaseNode  (BaseNode::Dummy, "DUMMY") {
+        // empty
     }
 };
 
@@ -416,12 +406,11 @@ struct Dummy : public BaseNode
 // -------------------------------------------------------------------------------
 /** \brief Class to parse ASE files
  */
-class Parser
-{
-
+class Parser {
 private:
-
-    Parser() {}
+    Parser() noexcept {
+        // empty
+    }
 
 public:
 

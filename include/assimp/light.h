@@ -237,7 +237,7 @@ struct aiLight
 
 #ifdef __cplusplus
 
-    aiLight()
+    aiLight() noexcept
         :   mType                 (aiLightSource_UNDEFINED)
         ,   mAttenuationConstant  (0.f)
         ,   mAttenuationLinear    (1.f)

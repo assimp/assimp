@@ -62,7 +62,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// \class CAMFImporter_NodeElement
 /// Base class for elements of nodes.
 class CAMFImporter_NodeElement {
-
 public:
 	/// Define what data type contain node element.
 	enum EType {
@@ -96,15 +95,11 @@ public:                                               /// Destructor, virtual..
         // empty
     }
 
-private:
-	/// Disabled copy constructor.
-	CAMFImporter_NodeElement(const CAMFImporter_NodeElement& pNodeElement);
-
-	/// Disabled assign operator.
-	CAMFImporter_NodeElement& operator=(const CAMFImporter_NodeElement& pNodeElement);
-
-	/// Disabled default constructor.
-	CAMFImporter_NodeElement();
+	/// Disabled copy constructor and co.
+	CAMFImporter_NodeElement(const CAMFImporter_NodeElement& pNodeElement) = delete;
+    CAMFImporter_NodeElement(CAMFImporter_NodeElement&&) = delete;
+    CAMFImporter_NodeElement& operator=(const CAMFImporter_NodeElement& pNodeElement) = delete;
+	CAMFImporter_NodeElement() = delete;
 
 protected:
 	/// In constructor inheritor must set element type.
@@ -200,30 +195,27 @@ struct CAMFImporter_NodeElement_Root : public CAMFImporter_NodeElement
 
 /// \struct CAMFImporter_NodeElement_Color
 /// Structure that define object node.
-struct CAMFImporter_NodeElement_Color : public CAMFImporter_NodeElement
-{
-	/****************** Variables ******************/
+struct CAMFImporter_NodeElement_Color : public CAMFImporter_NodeElement {
+	bool Composed;                  ///< Type of color stored: if true then look for formula in \ref Color_Composed[4], else - in \ref Color.
+	std::string Color_Composed[4];  ///< By components formulas of composed color. [0..3] - RGBA.
+	aiColor4D Color;                ///< Constant color.
+	std::string Profile;            ///< The ICC color space used to interpret the three color channels r, g and b..
 
-	bool Composed;///< Type of color stored: if true then look for formula in \ref Color_Composed[4], else - in \ref Color.
-	std::string Color_Composed[4];///< By components formulas of composed color. [0..3] => RGBA.
-	aiColor4D Color;///< Constant color.
-	std::string Profile;///< The ICC color space used to interpret the three color channels <r>, <g> and <b>..
-
-	/****************** Functions ******************/
-
-	/// \fn CAMFImporter_NodeElement_Color(CAMFImporter_NodeElement* pParent)
-	/// Constructor.
-	/// \param [in] pParent - pointer to parent node.
+	/// @brief  Constructor.
+	/// @param [in] pParent - pointer to parent node.
 	CAMFImporter_NodeElement_Color(CAMFImporter_NodeElement* pParent)
-		: CAMFImporter_NodeElement(ENET_Color, pParent)
-	{}
-
-};// struct CAMFImporter_NodeElement_Color
+	: CAMFImporter_NodeElement(ENET_Color, pParent)
+    , Composed( false )
+    , Color_Composed{""}
+    , Color()
+    , Profile() {
+        // empty
+    }
+};
 
 /// \struct CAMFImporter_NodeElement_Material
 /// Structure that define material node.
-struct CAMFImporter_NodeElement_Material : public CAMFImporter_NodeElement
-{
+struct CAMFImporter_NodeElement_Material : public CAMFImporter_NodeElement {
 	/// \fn CAMFImporter_NodeElement_Material(CAMFImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
@@ -339,43 +331,39 @@ struct CAMFImporter_NodeElement_Coordinates : public CAMFImporter_NodeElement
 
 /// \struct CAMFImporter_NodeElement_TexMap
 /// Structure that define texture coordinates node.
-struct CAMFImporter_NodeElement_TexMap : public CAMFImporter_NodeElement
-{
-	/****************** Variables ******************/
-
+struct CAMFImporter_NodeElement_TexMap : public CAMFImporter_NodeElement {
 	aiVector3D TextureCoordinate[3];///< Texture coordinates.
 	std::string TextureID_R;///< Texture ID for red color component.
 	std::string TextureID_G;///< Texture ID for green color component.
 	std::string TextureID_B;///< Texture ID for blue color component.
 	std::string TextureID_A;///< Texture ID for alpha color component.
 
-	/****************** Functions ******************/
-
-	/// \fn CAMFImporter_NodeElement_TexMap(CAMFImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	CAMFImporter_NodeElement_TexMap(CAMFImporter_NodeElement* pParent)
-		: CAMFImporter_NodeElement(ENET_TexMap, pParent)
-	{}
-
-};// struct CAMFImporter_NodeElement_TexMap
+	: CAMFImporter_NodeElement(ENET_TexMap, pParent)
+    , TextureCoordinate{}
+    , TextureID_R()
+    , TextureID_G()
+    , TextureID_B()
+    , TextureID_A()	{
+        // empty
+    }
+};
 
 /// \struct CAMFImporter_NodeElement_Triangle
 /// Structure that define triangle node.
-struct CAMFImporter_NodeElement_Triangle : public CAMFImporter_NodeElement
-{
-	/****************** Variables ******************/
+struct CAMFImporter_NodeElement_Triangle : public CAMFImporter_NodeElement {
 
 	size_t V[3];///< Triangle vertices.
 
-	/****************** Functions ******************/
-
-	/// \fn CAMFImporter_NodeElement_Triangle(CAMFImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	CAMFImporter_NodeElement_Triangle(CAMFImporter_NodeElement* pParent)
-		: CAMFImporter_NodeElement(ENET_Triangle, pParent)
-	{}
+	: CAMFImporter_NodeElement(ENET_Triangle, pParent)
+    , V{}{
+        // empty
+    }
 
 };// struct CAMFImporter_NodeElement_Triangle
 

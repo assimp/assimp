@@ -120,11 +120,11 @@ public:
     SharedPostProcessInfo* mPPShared;
 
     /// The default class constructor.
-    ImporterPimpl();
+    ImporterPimpl() noexcept;
 };
 
 inline
-ImporterPimpl::ImporterPimpl()
+ImporterPimpl::ImporterPimpl() noexcept
 : mIOHandler( nullptr )
 , mIsDefaultHandler( false )
 , mProgressHandler( nullptr )

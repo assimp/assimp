@@ -56,7 +56,7 @@ class Importer;
 
 struct ScenePrivateData {
     //  The struct constructor.
-    ScenePrivateData();
+    ScenePrivateData() noexcept;
 
     // Importer that originally loaded the scene though the C-API
     // If set, this object is owned by this private data instance.
@@ -74,7 +74,7 @@ struct ScenePrivateData {
 };
 
 inline
-ScenePrivateData::ScenePrivateData()
+ScenePrivateData::ScenePrivateData() noexcept
 : mOrigImporter( nullptr )
 , mPPStepsApplied( 0 )
 , mIsCopy( false ) {

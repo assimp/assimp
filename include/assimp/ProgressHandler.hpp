@@ -63,7 +63,7 @@ class ASSIMP_API ProgressHandler
 {
 protected:
     /** @brief  Default constructor */
-    ProgressHandler () {
+    ProgressHandler () noexcept  {
     }
 public:
     /** @brief  Virtual destructor  */

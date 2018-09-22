@@ -94,16 +94,15 @@ namespace pmx
 		if (encoding == 0)
 		{
 			// UTF16 to UTF8
-			std::string result;
-
-			const char* sourceStart = buffer.data();
+			const uint16_t* sourceStart = (uint16_t*)buffer.data();
 			const unsigned int targetSize = size * 3; // enough to encode
-			char* targetStart = new char[targetSize]();
-			const char* targetReserved = targetStart;
-            utf8::utf16to8( sourceStart, sourceStart + size, targetStart );
+			char *targetStart = new char[targetSize];
+            std::memset(targetStart, 0, targetSize * sizeof(char));
+            
+            utf8::utf16to8( sourceStart, sourceStart + size/2, targetStart );
 
-			result.assign(targetReserved, targetStart - targetReserved);
-			delete[] targetReserved;
+			std::string result(targetStart);
+            delete [] targetStart;
 			return result;
 		}
 		else
@@ -475,7 +474,6 @@ namespace pmx
 
     void PmxSoftBody::Read(std::istream * /*stream*/, PmxSetting * /*setting*/)
 	{
-		// 未実装
 		std::cerr << "Not Implemented Exception" << std::endl;
         throw DeadlyImportError("MMD: Not Implemented Exception");
     }
@@ -511,31 +509,27 @@ namespace pmx
 
 	void PmxModel::Read(std::istream *stream)
 	{
-		// マジック
 		char magic[4];
 		stream->read((char*) magic, sizeof(char) * 4);
 		if (magic[0] != 0x50 || magic[1] != 0x4d || magic[2] != 0x58 || magic[3] != 0x20)
 		{
 			std::cerr << "invalid magic number." << std::endl;
-            throw DeadlyImportError("MMD: invalid magic number.");
-        }
-		// バージョン
+      throw DeadlyImportError("MMD: invalid magic number.");
+    }
 		stream->read((char*) &version, sizeof(float));
 		if (version != 2.0f && version != 2.1f)
 		{
 			std::cerr << "this is not ver2.0 or ver2.1 but " << version << "." << std::endl;
             throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but " + to_string(version));
-        }
-		// ファイル設定
+    }
 		this->setting.Read(stream);
 
-		// モデル情報
 		this->model_name = ReadString(stream, setting.encoding);
 		this->model_english_name = ReadString(stream, setting.encoding);
 		this->model_comment = ReadString(stream, setting.encoding);
 		this->model_english_comment = ReadString(stream, setting.encoding);
 
-		// 頂点
+		// read vertices
 		stream->read((char*) &vertex_count, sizeof(int));
 		this->vertices = mmd::make_unique<PmxVertex []>(vertex_count);
 		for (int i = 0; i < vertex_count; i++)
@@ -543,7 +537,7 @@ namespace pmx
 			vertices[i].Read(stream, &setting);
 		}
 
-		// 面
+		// read indices
 		stream->read((char*) &index_count, sizeof(int));
 		this->indices = mmd::make_unique<int []>(index_count);
 		for (int i = 0; i < index_count; i++)
@@ -551,7 +545,7 @@ namespace pmx
 			this->indices[i] = ReadIndex(stream, setting.vertex_index_size);
 		}
 
-		// テクスチャ
+		// read texture names
 		stream->read((char*) &texture_count, sizeof(int));
 		this->textures = mmd::make_unique<std::string []>(texture_count);
 		for (int i = 0; i < texture_count; i++)
@@ -559,7 +553,7 @@ namespace pmx
 			this->textures[i] = ReadString(stream, setting.encoding);
 		}
 
-		// マテリアル
+		// read materials
 		stream->read((char*) &material_count, sizeof(int));
 		this->materials = mmd::make_unique<PmxMaterial []>(material_count);
 		for (int i = 0; i < material_count; i++)
@@ -567,7 +561,7 @@ namespace pmx
 			this->materials[i].Read(stream, &setting);
 		}
 
-		// ボーン
+		// read bones
 		stream->read((char*) &this->bone_count, sizeof(int));
 		this->bones = mmd::make_unique<PmxBone []>(this->bone_count);
 		for (int i = 0; i < this->bone_count; i++)
@@ -575,7 +569,7 @@ namespace pmx
 			this->bones[i].Read(stream, &setting);
 		}
 
-		// モーフ
+		// read morphs
 		stream->read((char*) &this->morph_count, sizeof(int));
 		this->morphs = mmd::make_unique<PmxMorph []>(this->morph_count);
 		for (int i = 0; i < this->morph_count; i++)
@@ -583,7 +577,7 @@ namespace pmx
 			this->morphs[i].Read(stream, &setting);
 		}
 
-		// 表示枠
+		// read display frames
 		stream->read((char*) &this->frame_count, sizeof(int));
 		this->frames = mmd::make_unique<PmxFrame []>(this->frame_count);
 		for (int i = 0; i < this->frame_count; i++)
@@ -591,7 +585,7 @@ namespace pmx
 			this->frames[i].Read(stream, &setting);
 		}
 
-		// 剛体
+		// read rigid bodies
 		stream->read((char*) &this->rigid_body_count, sizeof(int));
 		this->rigid_bodies = mmd::make_unique<PmxRigidBody []>(this->rigid_body_count);
 		for (int i = 0; i < this->rigid_body_count; i++)
@@ -599,7 +593,7 @@ namespace pmx
 			this->rigid_bodies[i].Read(stream, &setting);
 		}
 
-		// ジョイント
+		// read joints
 		stream->read((char*) &this->joint_count, sizeof(int));
 		this->joints = mmd::make_unique<PmxJoint []>(this->joint_count);
 		for (int i = 0; i < this->joint_count; i++)

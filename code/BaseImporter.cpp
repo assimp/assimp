@@ -65,7 +65,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-BaseImporter::BaseImporter()
+BaseImporter::BaseImporter() AI_NO_EXCEPT
 : m_progress() {
     // nothing to do here
 }

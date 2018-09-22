@@ -95,7 +95,7 @@ public:
      *  Create an instance of your derived class and assign it to an
      *  #Assimp::Importer instance by calling Importer::SetIOHandler().
      */
-    IOSystem();
+    IOSystem() AI_NO_EXCEPT;
 
     // -------------------------------------------------------------------
     /** @brief Virtual destructor.
@@ -104,9 +104,6 @@ public:
      *  on Assimp's heap.
      */
     virtual ~IOSystem();
-
-
-public:
 
     // -------------------------------------------------------------------
     /** @brief For backward compatibility
@@ -233,7 +230,7 @@ private:
 
 // ----------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOSystem::IOSystem()
+IOSystem::IOSystem() AI_NO_EXCEPT
 : m_pathStack() {
     // empty
 }

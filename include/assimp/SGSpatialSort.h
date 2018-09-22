@@ -111,26 +111,34 @@ protected:
 
     // -------------------------------------------------------------------
     /** An entry in a spatially sorted position array. Consists of a
-     *  vertex index, its position and its precalculated distance from
+     *  vertex index, its position and its pre-calculated distance from
      *  the reference plane */
     // -------------------------------------------------------------------
-    struct Entry
-    {
+    struct Entry {
         unsigned int mIndex;    ///< The vertex referred by this entry
         aiVector3D mPosition;   ///< Position
         uint32_t mSmoothGroups;
         float mDistance;        ///< Distance of this vertex to the sorting plane
 
-        Entry() { /** intentionally not initialized.*/ }
-        Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG)
-        :
-            mIndex( pIndex),
-            mPosition( pPosition),
-            mSmoothGroups (pSG),
-            mDistance( pDistance)
-            {   }
+        Entry() AI_NO_EXCEPT
+        : mIndex(0)
+        , mPosition()
+        , mSmoothGroups(0)
+        , mDistance(0.0f) {
+            // empty
+        }
 
-        bool operator < (const Entry& e) const { return mDistance < e.mDistance; }
+        Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG)
+        : mIndex( pIndex)
+        , mPosition( pPosition)
+        , mSmoothGroups(pSG)
+        , mDistance( pDistance) {
+            // empty
+        }
+
+        bool operator < (const Entry& e) const {
+            return mDistance < e.mDistance;
+        }
     };
 
     // all positions, sorted by distance to the sorting plane

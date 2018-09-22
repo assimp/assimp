@@ -5,7 +5,7 @@
 # Open Asset Import Library (ASSIMP)
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) 2006-2010, ASSIMP Development Team
+# Copyright (c) 2006-2018, ASSIMP Development Team
 #
 # All rights reserved.
 #
@@ -280,8 +280,3 @@ def work(filename):
 
 if __name__ == "__main__":
     sys.exit(work(sys.argv[1] if len(sys.argv)>1 else 'schema.exp'))
-
-
-
-    
-    

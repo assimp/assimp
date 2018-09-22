@@ -118,6 +118,8 @@ SET( IMPORTERS
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utCOBImportExport.cpp
+  unit/ImportExport/utOgreImportExport.cpp
+  unit/ImportExport/utQ3BSPFileImportExport.cpp
 )
 
 SET( MATERIAL
@@ -175,6 +177,7 @@ add_executable( unit
 )
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
 
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 

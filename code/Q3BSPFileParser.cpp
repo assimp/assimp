@@ -103,8 +103,7 @@ bool Q3BSPFileParser::readData( const std::string &rMapName )
     m_Data.resize( size );
 
     const size_t readSize = pMapFile->Read( &m_Data[0], sizeof( char ), size );
-    if ( readSize != size )
-    {
+    if ( readSize != size ) {
         m_Data.clear();
         return false;
     }

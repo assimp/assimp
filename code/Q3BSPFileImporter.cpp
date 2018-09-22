@@ -82,39 +82,39 @@ using namespace Q3BSP;
 
 // ------------------------------------------------------------------------------------------------
 //  Local function to create a material key name.
-static void createKey( int id1, int id2, std::string &rKey )
-{
+static void createKey( int id1, int id2, std::string &key ) {
     std::ostringstream str;
     str << id1 << "." << id2;
-    rKey = str.str();
+    key = str.str();
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Local function to extract the texture ids from a material key-name.
-static void extractIds( const std::string &rKey, int &rId1, int &rId2 )
-{
-    rId1 = -1;
-    rId2 = -1;
-    if ( rKey.empty() )
+static void extractIds( const std::string &key, int &id1, int &id2 ) {
+    id1 = -1;
+    id2 = -1;
+    if (key.empty()) {
         return;
+    }
 
-    std::string::size_type pos = rKey.find( "." );
-    if ( std::string::npos == pos )
+    const std::string::size_type pos = key.find( "." );
+    if (std::string::npos == pos) {
         return;
+    }
 
-    std::string tmp1 = rKey.substr( 0, pos );
-    std::string tmp2 = rKey.substr( pos + 1, rKey.size() - pos - 1 );
-    rId1 = atoi( tmp1.c_str() );
-    rId2 = atoi( tmp2.c_str() );
+    std::string tmp1 = key.substr( 0, pos );
+    std::string tmp2 = key.substr( pos + 1, key.size() - pos - 1 );
+    id1 = atoi( tmp1.c_str() );
+    id2 = atoi( tmp2.c_str() );
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Local helper function to normalize filenames.
-static void normalizePathName( const std::string &rPath, std::string &rNormalizedPath )
-{
-    rNormalizedPath = "";
-    if ( rPath.empty() )
+static void normalizePathName( const std::string &rPath, std::string &normalizedPath ) {
+    normalizedPath = "";
+    if (rPath.empty()) {
         return;
+    }
 
 #ifdef _WIN32
     std::string sep = "\\";
@@ -124,14 +124,11 @@ static void normalizePathName( const std::string &rPath, std::string &rNormalize
 
     static const unsigned int numDelimiters = 2;
     const char delimiters[ numDelimiters ] = { '/', '\\' };
-    rNormalizedPath = rPath;
-    for (const char delimiter : delimiters)
-    {
-        for ( size_t j=0; j<rNormalizedPath.size(); j++ )
-        {
-            if ( rNormalizedPath[j] == delimiter )
-            {
-                rNormalizedPath[ j ] = sep[ 0 ];
+    normalizedPath = rPath;
+    for (const char delimiter : delimiters) {
+        for ( size_t j=0; j<normalizedPath.size(); ++j ) {
+            if ( normalizedPath[j] == delimiter ) {
+                normalizedPath[ j ] = sep[ 0 ];
             }
         }
     }
@@ -139,9 +136,10 @@ static void normalizePathName( const std::string &rPath, std::string &rNormalize
 
 // ------------------------------------------------------------------------------------------------
 //  Constructor.
-Q3BSPFileImporter::Q3BSPFileImporter() :
-    m_pCurrentMesh( NULL ),
-    m_pCurrentFace( NULL ),
+Q3BSPFileImporter::Q3BSPFileImporter()
+:
+    m_pCurrentMesh( nullptr ),
+    m_pCurrentFace(nullptr),
     m_MaterialLookupMap(),
     mTextures()
 {
@@ -151,8 +149,8 @@ Q3BSPFileImporter::Q3BSPFileImporter() :
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 Q3BSPFileImporter::~Q3BSPFileImporter() {
-    m_pCurrentMesh = NULL;
-    m_pCurrentFace = NULL;
+    m_pCurrentMesh = nullptr;
+    m_pCurrentFace = nullptr;
 
     // Clear face-to-material map
     for ( FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it ) {

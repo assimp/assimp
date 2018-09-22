@@ -72,18 +72,16 @@ using namespace std;
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
 MMDImporter::MMDImporter()
-    : m_Buffer(),
-      // m_pRootObject( NULL ),
-      m_strAbsPath("") {
-  DefaultIOSystem io;
-  m_strAbsPath = io.getOsSeparator();
+: m_Buffer()
+, m_strAbsPath("") {
+    DefaultIOSystem io;
+    m_strAbsPath = io.getOsSeparator();
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 MMDImporter::~MMDImporter() {
-  // delete m_pRootObject;
-  // m_pRootObject = NULL;
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -96,8 +94,7 @@ bool MMDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler,
   } else // Check file Header
   {
     static const char *pTokens[] = {"PMX "};
-    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens,
-                                                  1);
+    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 1);
   }
 }
 

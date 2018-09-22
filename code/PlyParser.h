@@ -209,7 +209,7 @@ enum EElementSemantic {
 class Property {
 public:
     //! Default constructor
-    Property()
+    Property() AI_NO_EXCEPT
     : eType (EDT_Int)
     , Semantic()
     , bIsList(false)
@@ -257,7 +257,7 @@ public:
 class Element {
 public:
     //! Default constructor
-    Element()
+    Element() AI_NO_EXCEPT
     : eSemantic (EEST_INVALID)
     , NumOccur(0) {
         // empty
@@ -297,8 +297,9 @@ class PropertyInstance
 public:
 
     //! Default constructor
-    PropertyInstance ()
-    {}
+    PropertyInstance() AI_NO_EXCEPT {
+        // empty
+    }
 
     union ValueUnion
     {
@@ -356,13 +357,13 @@ public:
 // ---------------------------------------------------------------------------------
 /** \brief Class for an element instance in a PLY file
  */
-class ElementInstance
-{
+class ElementInstance {
 public:
-
     //! Default constructor
-    ElementInstance ()
-    {}
+    ElementInstance()  AI_NO_EXCEPT
+    : alProperties() {
+        // empty
+    }
 
     //! List of all parsed properties
     std::vector< PropertyInstance > alProperties;
@@ -386,8 +387,10 @@ class ElementInstanceList
 public:
 
     //! Default constructor
-    ElementInstanceList ()
-    {}
+    ElementInstanceList() AI_NO_EXCEPT
+    : alInstances() {
+        // empty
+    }
 
     //! List of all element instances
     std::vector< ElementInstance > alInstances;
@@ -411,8 +414,11 @@ class DOM
 public:
 
     //! Default constructor
-    DOM()
-    {}
+    DOM() AI_NO_EXCEPT
+    : alElements()
+    , alElementData() {
+
+    }
 
 
     //! Contains all elements of the file format

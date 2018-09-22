@@ -351,10 +351,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
             }
 
 
-            if (prim.indices) {
-				aiFace* faces = 0;
-                unsigned int nFaces = 0;
+            aiFace* faces = 0;
+            unsigned int nFaces = 0;
 
+            if (prim.indices) {
                 unsigned int count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
@@ -419,14 +419,78 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                         }
                         break;
                 }
+            }
+            else { // no indices provided so directly generate from counts
 
-                if (faces) {
-                    aim->mFaces = faces;
-                    aim->mNumFaces = nFaces;
-                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+                // use the already determined count as it includes checks 
+                unsigned int count = aim->mNumVertices;
+
+                switch (prim.mode) {
+                case PrimitiveMode_POINTS: {
+                    nFaces = count;
+                    faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; ++i) {
+                        SetFace(faces[i], i);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_LINES: {
+                    nFaces = count / 2;
+                    faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 2) {
+                        SetFace(faces[i / 2], i, i + 1);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_LINE_LOOP:
+                case PrimitiveMode_LINE_STRIP: {
+                    nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
+                    faces = new aiFace[nFaces];
+                    SetFace(faces[0], 0, 1);
+                    for (unsigned int i = 2; i < count; ++i) {
+                        SetFace(faces[i - 1], faces[i - 2].mIndices[1], i);
+                    }
+                    if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
+                        SetFace(faces[count - 1], faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_TRIANGLES: {
+                    nFaces = count / 3;
+                    faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 3) {
+                        SetFace(faces[i / 3], i, i + 1, i + 2);
+                    }
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_STRIP: {
+                    nFaces = count - 2;
+                    faces = new aiFace[nFaces];
+                    SetFace(faces[0], 0, 1, 2);
+                    for (unsigned int i = 3; i < count; ++i) {
+                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], i);
+                    }
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_FAN:
+                    nFaces = count - 2;
+                    faces = new aiFace[nFaces];
+                    SetFace(faces[0], 0, 1, 2);
+                    for (unsigned int i = 3; i < count; ++i) {
+                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], i);
+                    }
+                    break;
                 }
             }
 
+            if (faces) {
+                aim->mFaces = faces;
+                aim->mNumFaces = nFaces;
+                ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+            }
 
             if (prim.material) {
                 aim->mMaterialIndex = prim.material.GetIndex();
@@ -675,11 +739,6 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportLights(asset);
 
     ImportNodes(asset);
-
-    // TODO: it does not split the loaded vertices, should it?
-    //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-	MakeVerboseFormatProcess process;
-    process.Execute(pScene);
 
 
     if (pScene->mNumMeshes == 0) {

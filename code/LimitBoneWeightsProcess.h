@@ -120,7 +120,7 @@ public:
     {
         unsigned int mBone; ///< Index of the bone
         float mWeight;      ///< Weight of that bone on this vertex
-        Weight()
+        Weight() AI_NO_EXCEPT
         : mBone(0)
         , mWeight(0.0f)
         { }

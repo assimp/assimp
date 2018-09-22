@@ -369,7 +369,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 
     // positions must always be there ...
     if (!pMesh->mNumVertices || (!pMesh->mVertices && !mScene->mFlags)) {
-        ReportError("The mesh contains no vertices");
+        ReportError("The mesh %s contains no vertices", pMesh->mName.C_Str());
     }
 
     if (pMesh->mNumVertices > AI_MAX_VERTICES) {
@@ -386,7 +386,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 
     // faces, too
     if (!pMesh->mNumFaces || (!pMesh->mFaces && !mScene->mFlags))   {
-        ReportError("Mesh contains no faces");
+        ReportError("Mesh %s contains no faces", pMesh->mName.C_Str());
     }
 
     // now check whether the face indexing layout is correct:

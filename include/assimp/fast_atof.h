@@ -195,7 +195,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
             break;
         }
 
-        const uint64_t new_value = ( value * 10 ) + ( *in - '0' );
+        const uint64_t new_value = ( value * (uint64_t) 10 ) + ( (uint64_t) ( *in - '0' ) );
 
         // numeric overflow, we rely on you
         if ( new_value < value ) {

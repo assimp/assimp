@@ -105,8 +105,10 @@ void TriangulateProcess::Execute( aiScene* pScene)
     bool bHas = false;
     for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
     {
-        if ( TriangulateMesh( pScene->mMeshes[ a ] ) ) {
-            bHas = true;
+        if (pScene->mMeshes[ a ]) {
+            if ( TriangulateMesh( pScene->mMeshes[ a ] ) ) {
+                bHas = true;
+            }
         }
     }
     if ( bHas ) {
@@ -285,7 +287,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // We project it onto a plane to get a 2d triangle.
 
             // Collect all vertices of of the polygon.
-            for (tmp = 0; tmp < max; ++tmp) {
+           for (tmp = 0; tmp < max; ++tmp) {
                 temp_verts3d[tmp] = verts[idx[tmp]];
             }
 
@@ -485,21 +487,22 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         for(aiFace* f = last_face; f != curOut; ) {
             unsigned int* i = f->mIndices;
 
-            //  drop dumb 0-area triangles
-            if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
-                ASSIMP_LOG_DEBUG("Dropping triangle with area 0");
-                --curOut;
+            //  drop dumb 0-area triangles - deactivated for now:
+            //FindDegenerates post processing step can do the same thing
+            //if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
+            //    ASSIMP_LOG_DEBUG("Dropping triangle with area 0");
+            //    --curOut;
 
-                delete[] f->mIndices;
-                f->mIndices = NULL;
+            //    delete[] f->mIndices;
+            //    f->mIndices = nullptr;
 
-                for(aiFace* ff = f; ff != curOut; ++ff) {
-                    ff->mNumIndices = (ff+1)->mNumIndices;
-                    ff->mIndices = (ff+1)->mIndices;
-                    (ff+1)->mIndices = NULL;
-                }
-                continue;
-            }
+            //    for(aiFace* ff = f; ff != curOut; ++ff) {
+            //        ff->mNumIndices = (ff+1)->mNumIndices;
+            //        ff->mIndices = (ff+1)->mIndices;
+            //        (ff+1)->mIndices = nullptr;
+            //    }
+            //    continue;
+            //}
 
             i[0] = idx[i[0]];
             i[1] = idx[i[1]];

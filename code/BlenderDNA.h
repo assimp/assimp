@@ -309,6 +309,28 @@ public:
     void ReadField(T& out, const char* name,
         const FileDatabase& db) const;
 
+    // --------------------------------------------------------
+    /**
+    *   @brief  field parsing for dynamic vectors
+    *   @param[in]  out vector of struct to be filled
+    *   @param[in]  name of field
+    *   @param[in]  db to access the file, dna, ...
+    *   @return true when read was successful
+    */
+    template <int error_policy, template <typename> class TOUT, typename T>
+    bool ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const FileDatabase& db) const;
+
+    /**
+    *   @brief  parses raw customdata
+    *   @param[in]  out shared_ptr to be filled
+    *   @param[in]  cdtype customdata type to read
+    *   @param[in]  name of field ptr
+    *   @param[in]  db to access the file, dna, ...
+    *   @return true when read was successful
+    */
+    template <int error_policy>
+    bool ReadCustomDataPtr(std::shared_ptr<ElemBase>&out, int cdtype, const char* name, const FileDatabase& db) const;
+
 private:
 
     // --------------------------------------------------------
@@ -802,6 +824,17 @@ private:
 
     FileDatabase& db;
 };
+
+/**
+*   @brief  read CustomData's data to ptr to mem
+*   @param[out] out memory ptr to set
+*   @param[in]  cdtype  to read
+*   @param[in]  cnt cnt of elements to read
+*   @param[in]  db to read elements from
+*   @return true when ok
+*/
+bool readCustomData(std::shared_ptr<ElemBase> &out, int cdtype, size_t cnt, const FileDatabase &db);
+
 
     } // end Blend
 } // end Assimp

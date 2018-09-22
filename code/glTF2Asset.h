@@ -766,9 +766,16 @@ namespace glTF2
             Ref<Accessor> indices;
 
             Ref<Material> material;
+
+            struct Target {
+                AccessorList position, normal, tangent;
+            };
+            std::vector<Target> targets;
         };
 
         std::vector<Primitive> primitives;
+
+        std::vector<float> weights;
 
         Mesh() {}
 

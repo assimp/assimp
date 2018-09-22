@@ -98,8 +98,10 @@ AI_FORCE_INLINE bool is_qnan(float in)
     //   compare <register-with-different-width> against <in>
 
     // FIXME: Use <float> stuff instead? I think fpclassify needs C99
-    return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1 &&
-        reinterpret_cast<_IEEESingle*>(&in)->IEEE.Frac);
+    _IEEESingle temp;
+    memcpy(&temp, &in, sizeof(float));
+    return (temp.IEEE.Exp == (1u << 8)-1 &&
+        temp.IEEE.Frac);
 }
 
 // ---------------------------------------------------------------------------
@@ -114,8 +116,10 @@ AI_FORCE_INLINE bool is_qnan(double in)
     //   compare <register-with-different-width> against <in>
 
     // FIXME: Use <float> stuff instead? I think fpclassify needs C99
-    return (reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Exp == (1u << 11)-1 &&
-        reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Frac);
+    _IEEEDouble temp;
+    memcpy(&temp, &in, sizeof(in));
+    return (temp.IEEE.Exp == (1u << 11)-1 &&
+        temp.IEEE.Frac);
 }
 
 // ---------------------------------------------------------------------------
@@ -125,7 +129,9 @@ AI_FORCE_INLINE bool is_qnan(double in)
  *  @param in Input value */
 AI_FORCE_INLINE bool is_special_float(float in)
 {
-    return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1);
+    _IEEESingle temp;
+    memcpy(&temp, &in, sizeof(float));
+    return (temp.IEEE.Exp == (1u << 8)-1);
 }
 
 // ---------------------------------------------------------------------------
@@ -135,7 +141,9 @@ AI_FORCE_INLINE bool is_special_float(float in)
  *  @param in Input value */
 AI_FORCE_INLINE bool is_special_float(double in)
 {
-    return (reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Exp == (1u << 11)-1);
+   _IEEESingle temp;
+    memcpy(&temp, &in, sizeof(float));
+    return (temp.IEEE.Exp == (1u << 11)-1);
 }
 
 // ---------------------------------------------------------------------------

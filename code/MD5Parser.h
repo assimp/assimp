@@ -192,14 +192,14 @@ typedef std::vector< FrameDesc > FrameList;
 // ---------------------------------------------------------------------------
 /** Represents a vertex  descriptor in a MD5 file
 */
-struct VertexDesc
-{
-    VertexDesc()
-        : mFirstWeight  (0)
-        , mNumWeights   (0)
-    {}
+struct VertexDesc {
+    VertexDesc() AI_NO_EXCEPT
+    : mFirstWeight(0)
+    , mNumWeights(0) {
+        // empty
+    }
 
-    //! UV cordinate of the vertex
+    //! UV coordinate of the vertex
     aiVector2D mUV;
 
     //! Index of the first weight of the vertex in

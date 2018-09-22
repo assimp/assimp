@@ -77,19 +77,17 @@ class IOStream;
  * imports the given file. ReadFile is not overridable, it just calls
  * InternReadFile() and catches any ImportErrorException that might occur.
  */
-class ASSIMP_API BaseImporter
-{
+class ASSIMP_API BaseImporter {
     friend class Importer;
 
 public:
 
     /** Constructor to be privately used by #Importer */
-    BaseImporter();
+    BaseImporter() AI_NO_EXCEPT;
 
     /** Destructor, private as well */
     virtual ~BaseImporter();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      *
@@ -244,7 +242,8 @@ public: // static utilities
         const char** tokens,
         unsigned int numTokens,
         unsigned int searchBytes = 200,
-        bool tokensSol = false);
+        bool tokensSol = false,
+        bool noAlphaBeforeTokens = false);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has a specific file extension

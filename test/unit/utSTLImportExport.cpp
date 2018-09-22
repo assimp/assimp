@@ -63,14 +63,38 @@ public:
     }
 };
 
-TEST_F( utSTLImporterExporter, importXFromFileTest ) {
+TEST_F( utSTLImporterExporter, importSTLFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+
+TEST_F(utSTLImporterExporter, test_multiple) {
+    // import same file twice, each with its own importer
+    // must work both times and not crash
+    Assimp::Importer importer1;
+    const aiScene *scene1 = importer1.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+    EXPECT_NE(nullptr, scene1);
+
+    Assimp::Importer importer2;
+    const aiScene *scene2 = importer2.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+    EXPECT_NE(nullptr, scene2);
+}
+
 
 TEST_F( utSTLImporterExporter, test_with_two_solids ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
+}
+
+TEST_F(utSTLImporterExporter, test_with_empty_solid) {
+    Assimp::Importer importer;
+    //STL File with empty mesh. We should still be able to import other meshes in this file. ValidateDataStructure should fail.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_empty_solid.stl", 0);
+    EXPECT_NE(nullptr, scene);
+
+    const aiScene *scene2 = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_empty_solid.stl", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene2);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

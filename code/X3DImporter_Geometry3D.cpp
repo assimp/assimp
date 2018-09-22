@@ -136,7 +136,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 	}
 	else
 	{
-		const unsigned int tess = 30;///TODO: IME tesselation factor through ai_property
+		const unsigned int tess = 30;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
@@ -209,7 +209,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 	}
 	else
 	{
-		const unsigned int tess = 30;///TODO: IME tesselation factor through ai_property
+		const unsigned int tess = 30;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tside;// temp array for vertices of side.
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
@@ -480,7 +480,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx
 			tvec = pSpine[1] - pSpine[0];
 		}
 		else
-		{// The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about droping tail) spine[n - 1] is
+		{// The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about dropping tail) spine[n - 1] is
 			// the spine[0].
 			tvec = pSpine[spine_idx_last] - pSpine[spine_idx_last - 1];
 		}
@@ -967,7 +967,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 	}
 	else
 	{
-		const unsigned int tess = 3;///TODO: IME tesselation factor through ai_property
+		const unsigned int tess = 3;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tlist;
 

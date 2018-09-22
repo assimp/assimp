@@ -50,7 +50,7 @@ static const unsigned int MajorVersion = 4;
 static const unsigned int MinorVersion = 1;
 
 // --------------------------------------------------------------------------------
-// Legal information string - dont't remove this.
+// Legal information string - don't remove this.
 static const char* LEGAL_INFORMATION =
 
 "Open Asset Import Library (Assimp).\n"
@@ -150,9 +150,11 @@ ASSIMP_API aiScene::~aiScene() {
             delete mMeshes[a];
     delete [] mMeshes;
 
-    if (mNumMaterials && mMaterials)
-        for( unsigned int a = 0; a < mNumMaterials; a++)
-            delete mMaterials[a];
+    if (mNumMaterials && mMaterials) {
+        for (unsigned int a = 0; a < mNumMaterials; ++a ) {
+            delete mMaterials[ a ];
+        }
+    }
     delete [] mMaterials;
 
     if (mNumAnimations && mAnimations)

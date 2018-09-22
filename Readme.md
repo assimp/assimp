@@ -30,6 +30,8 @@ One-off donations via PayPal:
 
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
+If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
+
 #### Supported file formats ####
 
 __Importers__:
@@ -140,8 +142,6 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 	/tools		Tools (old assimp viewer, command line `assimp`)
 	/samples	A small number of samples to illustrate possible
                         use cases for Assimp
-	/workspaces	Build environments for vc,xcode,... (deprecated,
-			CMake has superseeded all legacy build options!)
 
 
 ### Where to get help ###

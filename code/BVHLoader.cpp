@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
+#include <map>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
@@ -461,6 +462,13 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
         aiNodeAnim* nodeAnim = new aiNodeAnim;
         anim->mChannels[a] = nodeAnim;
         nodeAnim->mNodeName.Set( nodeName);
+		std::map<BVHLoader::ChannelType, int> channelMap;
+
+		//Build map of channels 
+		for (unsigned int channel = 0; channel < node.mChannels.size(); ++channel)
+		{
+			channelMap[node.mChannels[channel]] = channel;
+		}
 
         // translational part, if given
         if( node.mChannels.size() == 6)
@@ -472,16 +480,32 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
             {
                 poskey->mTime = double( fr);
 
-                // Now compute all translations in the right order
-                for( unsigned int channel = 0; channel < 3; ++channel)
+                // Now compute all translations 
+                for(BVHLoader::ChannelType channel = Channel_PositionX; channel <= Channel_PositionZ; channel = (BVHLoader::ChannelType)(channel +1))
                 {
-                    switch( node.mChannels[channel])
-                    {
-                    case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-                    case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-                    case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
-                    default: throw DeadlyImportError( "Unexpected animation channel setup at node " + nodeName );
-                    }
+					//Find channel in node
+					std::map<BVHLoader::ChannelType, int>::iterator mapIter = channelMap.find(channel);
+
+					if (mapIter == channelMap.end())
+						throw DeadlyImportError("Missing position channel in node " + nodeName);
+					else {
+						int channelIdx = mapIter->second;
+						switch (channel) {
+						    case Channel_PositionX: 
+                                poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; 
+                                break;
+						    case Channel_PositionY: 
+                                poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; 
+                                break;
+						    case Channel_PositionZ: 
+                                poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channelIdx]; 
+                                break;
+                                
+                            default:
+                                break;
+						}
+
+					}
                 }
                 ++poskey;
             }
@@ -497,12 +521,6 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 
         // rotation part. Always present. First find value offsets
         {
-            unsigned int rotOffset  = 0;
-            if( node.mChannels.size() == 6)
-            {
-                // Offset all further calculations
-                rotOffset = 3;
-            }
 
             // Then create the number of rotation keys
             nodeAnim->mNumRotationKeys = mAnimNumFrames;
@@ -512,20 +530,33 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
             {
                 aiMatrix4x4 temp;
                 aiMatrix3x3 rotMatrix;
+				for (BVHLoader::ChannelType channel = Channel_RotationX; channel <= Channel_RotationZ; channel = (BVHLoader::ChannelType)(channel + 1))
+				{
+					//Find channel in node
+					std::map<BVHLoader::ChannelType, int>::iterator mapIter = channelMap.find(channel);
 
-                for( unsigned int channel = 0; channel < 3; ++channel)
-                {
-                    // translate ZXY euler angels into a quaternion
-                    const float angle = node.mChannelValues[fr * node.mChannels.size() + rotOffset + channel] * float( AI_MATH_PI) / 180.0f;
+					if (mapIter == channelMap.end())
+						throw DeadlyImportError("Missing rotation channel in node " + nodeName);
+					else {
+						int channelIdx = mapIter->second;
+						// translate ZXY euler angels into a quaternion
+						const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
 
-                    // Compute rotation transformations in the right order
-                    switch (node.mChannels[rotOffset+channel])
-                    {
-                    case Channel_RotationX: aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
-                    case Channel_RotationY: aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);  break;
-                    case Channel_RotationZ: aiMatrix4x4::RotationZ( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
-                    default: throw DeadlyImportError( "Unexpected animation channel setup at node " + nodeName );
-                    }
+						// Compute rotation transformations in the right order
+						switch (channel)
+						{
+							case Channel_RotationX: 
+                                aiMatrix4x4::RotationX(angle, temp); rotMatrix *= aiMatrix3x3(temp); 
+                                break;
+							case Channel_RotationY: 
+                                aiMatrix4x4::RotationY(angle, temp); rotMatrix *= aiMatrix3x3(temp);  
+                                break;
+							case Channel_RotationZ: aiMatrix4x4::RotationZ(angle, temp); rotMatrix *= aiMatrix3x3(temp); 
+                                break;
+                            default:
+                                break;
+						}
+					}
                 }
 
                 rotkey->mTime = double( fr);

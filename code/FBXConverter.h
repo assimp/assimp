@@ -68,7 +68,7 @@ namespace FBX {
 
 class Document;
 
-using NodeNameCache = std::vector<std::string>;
+using NodeNameCache = std::set<std::string>;
 
 /** 
  *  Convert a FBX #Document to #aiScene
@@ -78,7 +78,7 @@ using NodeNameCache = std::vector<std::string>;
 void ConvertToAssimpScene(aiScene* out, const Document& doc);
 
 /** Dummy class to encapsulate the conversion process */
-class Converter {
+class FBXConverter {
 public:
     /**
     *  The different parts that make up the final local transformation of a fbx-node
@@ -106,8 +106,8 @@ public:
     };
 
 public:
-    Converter(aiScene* out, const Document& doc);
-    ~Converter();
+    FBXConverter(aiScene* out, const Document& doc);
+    ~FBXConverter();
 
 private:
     // ------------------------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ private:
     void ConvertCamera( const Camera& cam, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
-    void GetUniqueName( const std::string &name, std::string uniqueName );
+    void GetUniqueName( const std::string &name, std::string& uniqueName );
 
     // ------------------------------------------------------------------------------------------------
     // this returns unified names usable within assimp identifiers (i.e. no space characters -
@@ -227,6 +227,10 @@ private:
     // ------------------------------------------------------------------------------------------------
     // Video -> aiTexture
     unsigned int ConvertVideo(const Video& video);
+
+    // ------------------------------------------------------------------------------------------------
+    // convert embedded texture if necessary and return actual texture path
+    aiString GetTexturePath(const Texture* tex);
 
     // ------------------------------------------------------------------------------------------------
     void TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures,

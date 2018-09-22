@@ -271,7 +271,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
     ShadingInfo s; // current material info
 
-    // degree of tesselation
+    // degree of tessellation
     unsigned int iTesselation = 4;
 
     // some temporary variables we need to parse the file
@@ -988,7 +988,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                     ::ai_snprintf(currentMesh.name,128,"cone_%i",cone++);
                 else ::ai_snprintf(currentMesh.name,128,"cylinder_%i",cylinder++);
             }
-            // 'tess' - tesselation
+            // 'tess' - tessellation
             else if (TokenMatch(sz,"tess",4))
             {
                 SkipSpaces(&sz);

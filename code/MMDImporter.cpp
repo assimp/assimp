@@ -217,7 +217,7 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
   pMesh->mNumFaces = indexCount / 3;
   pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 
-  const int numIndices = 3; // trianglular face
+  const int numIndices = 3; // triangular face
   for (unsigned int index = 0; index < pMesh->mNumFaces; index++) {
     pMesh->mFaces[index].mNumIndices = numIndices;
     unsigned int *indices = new unsigned int[numIndices];

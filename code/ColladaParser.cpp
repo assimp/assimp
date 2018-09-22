@@ -68,7 +68,7 @@ using namespace Assimp::Formatter;
 // Constructor to be privately used by Importer
 ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     : mFileName( pFile )
-    , mReader( NULL )
+    , mReader( nullptr )
     , mDataLibrary()
     , mAccessorLibrary()
     , mMeshLibrary()
@@ -79,20 +79,20 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     , mLightLibrary()
     , mCameraLibrary()
     , mControllerLibrary()
-    , mRootNode( NULL )
+    , mRootNode( nullptr )
     , mAnims()
     , mUnitSize( 1.0f )
     , mUpDirection( UP_Y )
     , mFormat(FV_1_5_n )    // We assume the newest file format by default
 {
     // validate io-handler instance
-    if ( NULL == pIOHandler ) {
+    if (nullptr == pIOHandler ) {
         throw DeadlyImportError("IOSystem is NULL." );
     }
 
     // open the file
     std::unique_ptr<IOStream> file( pIOHandler->Open(pFile ) );
-    if (file.get() == NULL) {
+    if (file.get() == nullptr) {
         throw DeadlyImportError( "Failed to open file " + pFile + "." );
     }
 
@@ -363,17 +363,17 @@ void ColladaParser::ReadAnimationClipLibrary()
 
 void ColladaParser::PostProcessControllers()
 {
-  for (ControllerLibrary::iterator it = mControllerLibrary.begin(); it != mControllerLibrary.end(); ++it)
-  {
-    std::string meshId = it->second.mMeshId;
-    ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);
-    while(findItr != mControllerLibrary.end()) {
-      meshId = findItr->second.mMeshId;
-      findItr = mControllerLibrary.find(meshId);
-    }
+    std::string meshId;
+    for (ControllerLibrary::iterator it = mControllerLibrary.begin(); it != mControllerLibrary.end(); ++it) {
+        meshId = it->second.mMeshId;
+        ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);
+        while(findItr != mControllerLibrary.end()) {
+            meshId = findItr->second.mMeshId;
+            findItr = mControllerLibrary.find(meshId);
+        }
     
-    it->second.mMeshId = meshId;
-  }
+        it->second.mMeshId = meshId;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -297,8 +297,9 @@ private:
             return false;
         }
 
+        //format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
         const size_t len( strlen( color ) );
-        if ( 9 != len ) {
+        if ( 9 != len && 7 != len) {
             return false;
         }
 
@@ -313,26 +314,28 @@ private:
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.r = static_cast<ai_real>( strtol( comp, NULL, 16 ) );
+        diffuse.r = static_cast<ai_real>( strtol( comp, NULL, 16 ) ) / 255.0;
 
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.g = static_cast< ai_real >( strtol( comp, NULL, 16 ) );
+        diffuse.g = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / 255.0;
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.b = static_cast< ai_real >( strtol( comp, NULL, 16 ) );
+        diffuse.b = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / 255.0;
 
+        if(7 == len)
+            return true;
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.a = static_cast< ai_real >( strtol( comp, NULL, 16 ) );
+        diffuse.a = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / 255.0;
 
         return true;
     }

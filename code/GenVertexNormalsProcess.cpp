@@ -72,6 +72,7 @@ GenVertexNormalsProcess::~GenVertexNormalsProcess() {
 // Returns whether the processing step is present in the given flag field.
 bool GenVertexNormalsProcess::IsActive( unsigned int pFlags) const
 {
+    force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
     return (pFlags & aiProcess_GenSmoothNormals) != 0;
 }
 
@@ -113,8 +114,10 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 // Executes the post processing step on the given imported data.
 bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int meshIndex)
 {
-    if (NULL != pMesh->mNormals)
-        return false;
+    if (NULL != pMesh->mNormals) {
+        if (force_) delete[] pMesh->mNormals;
+        else return false;
+    }
 
     // If the mesh consists of lines and/or points but not of
     // triangles or higher-order polygons the normal vectors
@@ -146,7 +149,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
         const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1));
+        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 
         for (unsigned int i = 0;i < face.mNumIndices;++i) {
             pMesh->mNormals[face.mIndices[i]] = vNor;
@@ -214,17 +217,15 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
             vertexFinder->FindPositions( pMesh->mVertices[i] , posEpsilon, verticesFound);
 
             aiVector3D vr = pMesh->mNormals[i];
-            ai_real vrlen = vr.Length();
 
             aiVector3D pcNor;
             for (unsigned int a = 0; a < verticesFound.size(); ++a) {
                 aiVector3D v = pMesh->mNormals[verticesFound[a]];
 
-                // check whether the angle between the two normals is not too large
-                // HACK: if v.x is qnan the dot product will become qnan, too
-                //   therefore the comparison against fLimit should be false
-                //   in every case.
-                if (v * vr >= fLimit * vrlen * v.Length())
+                // Check whether the angle between the two normals is not too large.
+                // Skip the angle check on our own normal to avoid false negatives
+                // (v*v is not guaranteed to be 1.0 for all unit vectors v)
+                if (is_not_qnan(v.x) && (verticesFound[a] == i || (v * vr >= fLimit)))
                     pcNor += v;
             }
             pcNew[i] = pcNor.NormalizeSafe();

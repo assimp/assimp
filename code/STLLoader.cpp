@@ -90,6 +90,9 @@ static bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
     return expectedBinaryFileSize == fileSize;
 }
 
+static const size_t BufferSize = 500;
+static const char UnicodeBoundary = 127;
+
 // An ascii STL buffer will begin with "solid NAME", where NAME is optional.
 // Note: The "solid NAME" check is necessary, but not sufficient, to determine
 // if the buffer is ASCII; a binary header could also begin with "solid NAME".
@@ -108,10 +111,10 @@ static bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
     bool isASCII( strncmp( buffer, "solid", 5 ) == 0 );
     if( isASCII ) {
         // A lot of importers are write solid even if the file is binary. So we have to check for ASCII-characters.
-        if( fileSize >= 500 ) {
+        if( fileSize >= BufferSize) {
             isASCII = true;
-            for( unsigned int i = 0; i < 500; i++ ) {
-                if( buffer[ i ] > 127 ) {
+            for( unsigned int i = 0; i < BufferSize; i++ ) {
+                if( buffer[ i ] > UnicodeBoundary) {
                     isASCII = false;
                     break;
                 }
@@ -352,7 +355,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
 
         if (positionBuffer.empty())    {
             pMesh->mNumFaces = 0;
-            throw DeadlyImportError("STL: ASCII file is empty or invalid; no data loaded");
+            ASSIMP_LOG_WARN("STL: mesh is empty or invalid; no data loaded");
         }
         if (positionBuffer.size() % 3 != 0)    {
             pMesh->mNumFaces = 0;
@@ -362,14 +365,23 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
             pMesh->mNumFaces = 0;
             throw DeadlyImportError("Normal buffer size does not match position buffer size");
         }
-        pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
-        pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
-        pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
-        positionBuffer.clear();
-        pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-        memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
-        normalBuffer.clear();
+
+        // only process positionbuffer when filled, else exception when accessing with index operator
+        // see line 353: only warning is triggered
+        // see line 373(now): access to empty positionbuffer with index operator forced exception
+        if (!positionBuffer.empty()) {
+            pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
+            pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
+            pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+            memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            positionBuffer.clear();
+        }
+        // also only process normalBuffer when filled, else exception when accessing with index operator
+        if (!normalBuffer.empty()) {
+            pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+            memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            normalBuffer.clear();
+        }
 
         // now copy faces
         addFacesToMesh(pMesh);
@@ -526,11 +538,21 @@ bool STLImporter::LoadBinaryFile()
     // now copy faces
     addFacesToMesh(pMesh);
 
+    aiNode* root = pScene->mRootNode;
+
+    // allocate one node
+    aiNode* node = new aiNode();
+    node->mParent = root;
+
+    root->mNumChildren = 1u;
+    root->mChildren = new aiNode*[root->mNumChildren];
+    root->mChildren[0] = node;
+
     // add all created meshes to the single node
-    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-    pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+    node->mNumMeshes = pScene->mNumMeshes;
+    node->mMeshes = new unsigned int[pScene->mNumMeshes];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
-        pScene->mRootNode->mMeshes[i] = i;
+        node->mMeshes[i] = i;
 
     if (bIsMaterialise && !pMesh->mColors[0])
     {

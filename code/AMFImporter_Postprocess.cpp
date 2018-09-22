@@ -770,7 +770,7 @@ std::list<aiNode*> ch_node;
 		// find referenced object
 		if(!Find_ConvertedNode(als.ObjectID, pNodeList, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
-		// create node for apllying transformation
+		// create node for applying transformation
 		t_node = new aiNode;
 		t_node->mParent = con_node;
 		// apply transformation

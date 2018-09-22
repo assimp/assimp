@@ -55,12 +55,8 @@ namespace Assimp {
 class Importer;
 
 struct ScenePrivateData {
-    ScenePrivateData()
-    : mOrigImporter( nullptr )
-    , mPPStepsApplied( 0 )
-    , mIsCopy( false ) {
-        // empty
-    }
+    //  The struct constructor.
+    ScenePrivateData() AI_NO_EXCEPT;
 
     // Importer that originally loaded the scene though the C-API
     // If set, this object is owned by this private data instance.
@@ -76,6 +72,14 @@ struct ScenePrivateData {
     // serve informative purposes.
     bool mIsCopy;
 };
+
+inline
+ScenePrivateData::ScenePrivateData() AI_NO_EXCEPT
+: mOrigImporter( nullptr )
+, mPPStepsApplied( 0 )
+, mIsCopy( false ) {
+    // empty
+}
 
 // Access private data stored in the scene
 inline

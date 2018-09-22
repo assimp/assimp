@@ -39,10 +39,12 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 PROJECT( Assimp )
 
 # All supported options ###############################################
+
 OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
 )
+
 OPTION( BUILD_FRAMEWORK
   "Build package as Mac OS X Framework bundle."
   OFF
@@ -103,6 +105,16 @@ OPTION ( BUILD_DOCS
   "Build documentation using Doxygen."
   OFF
 )
+OPTION( INJECT_DEBUG_POSTFIX
+  "Inject debug postfix in .a/.so lib names"
+  ON
+)
+
+IF (IOS)
+  IF (NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "Release")
+  ENDIF (NOT CMAKE_BUILD_TYPE)
+ENDIF (IOS)
 
 # Use subset of Windows.h
 if (WIN32)
@@ -152,7 +164,7 @@ EXECUTE_PROCESS(
 
 # Get the latest abbreviated commit hash of the working branch
 EXECUTE_PROCESS(
-  COMMAND git log -1 --format=%h
+  COMMAND git log -1 --format=%h --no-show-signature
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_COMMIT_HASH
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -198,13 +210,13 @@ ENDIF( UNIX )
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -std=c++0x")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -std=c++0x ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   ADD_COMPILE_OPTIONS(/MP)
-  IF("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     ADD_COMPILE_OPTIONS( /bigobj )
   ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
@@ -212,18 +224,25 @@ ELSEIF(MSVC)
     ADD_COMPILE_OPTIONS(/wd4351)
   ENDIF()
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -Wno-long-long -std=c++11" )
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -Wno-long-long -std=c++11 ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -std=c++11" )
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  SET( CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -std=c++11 -Wa,-mbig-obj ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS} ")
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
-IF (IOS)
-  SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fembed-bitcode -O3")
+IF ( IOS )
+
+IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -Og")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -Og")
+ELSE()
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -O3")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -O3")
 ENDIF()
+
+ENDIF( IOS )
 
 IF (ASSIMP_COVERALLS)
   MESSAGE(STATUS "Coveralls enabled")
@@ -320,6 +339,8 @@ IF( NOT ZLIB_FOUND )
   SET(ZLIB_FOUND 1)
   SET(ZLIB_LIBRARIES zlibstatic)
   SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
+  # need to ensure we don't link with system zlib or minizip as well.
+  SET(ASSIMP_BUILD_MINIZIP 1)
 ELSE(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
   SET(ZLIB_LIBRARIES_LINKED -lz)
@@ -327,7 +348,17 @@ ENDIF(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # Search for unzip
-use_pkgconfig(UNZIP minizip)
+IF ( NOT IOS )
+  IF( NOT ASSIMP_BUILD_MINIZIP )
+	  use_pkgconfig(UNZIP minizip)
+  ENDIF( NOT ASSIMP_BUILD_MINIZIP )
+ELSE ( NOT IOS )
+	IF(NOT BUILD_SHARED_LIBS)
+    IF( NOT ASSIMP_BUILD_MINIZIP )
+		  use_pkgconfig(UNZIP minizip)
+    ENDIF( NOT ASSIMP_BUILD_MINIZIP )
+	ENDIF (NOT BUILD_SHARED_LIBS)
+ENDIF ( NOT IOS )
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)
@@ -412,32 +443,9 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   ENDIF ( WIN32 AND DirectX_D3DX9_LIBRARY )
 
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
-
-  # Check dependencies for assimp_qt_viewer.
-  # Why here? Maybe user do not want Qt viewer and have no Qt.
-  # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
-  # Because viewer can be build independently of Assimp.
-  FIND_PACKAGE(Qt5Widgets QUIET)
-  FIND_PACKAGE(DevIL QUIET)
-  FIND_PACKAGE(OpenGL QUIET)
-  IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
-    ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
-  ELSE()
-    SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "")
-    IF (NOT Qt5_FOUND)
-      SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} Qt5")
-    ENDIF (NOT Qt5_FOUND)
-
-    IF (NOT IL_FOUND)
-      SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} DevIL")
-    ENDIF (NOT IL_FOUND)
-
-    IF (NOT OPENGL_FOUND)
-      SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "${ASSIMP_QT_VIEWER_DEPENDENCIES} OpengGL")
-    ENDIF (NOT OPENGL_FOUND)
-
-    MESSAGE (WARNING "Build of assimp_qt_viewer is disabled. Unsatisfied dendencies: ${ASSIMP_QT_VIEWER_DEPENDENCIES}")
-  ENDIF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
+IF (NOT IOS)
+  ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
+ENDIF (NOT IOS)
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
 IF ( ASSIMP_BUILD_SAMPLES)

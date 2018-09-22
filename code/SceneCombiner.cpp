@@ -707,30 +707,30 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
     // we work with hashes to make the comparisons MUCH faster,
     // at least if we have many bones.
     std::list<BoneWithHash> asBones;
-    BuildUniqueBoneList(asBones, it,end);
+    BuildUniqueBoneList( asBones, it, end );
 
     // now create the output bones
     out->mNumBones = 0;
     out->mBones = new aiBone*[asBones.size()];
 
-    for (std::list<BoneWithHash>::const_iterator it = asBones.begin(),end = asBones.end(); it != end;++it)  {
+    for (std::list<BoneWithHash>::const_iterator boneIt = asBones.begin(),boneEnd = asBones.end(); boneIt != boneEnd; ++boneIt )  {
         // Allocate a bone and setup it's name
         aiBone* pc = out->mBones[out->mNumBones++] = new aiBone();
-        pc->mName = aiString( *((*it).second ));
+        pc->mName = aiString( *( boneIt->second ));
 
-        std::vector< BoneSrcIndex >::const_iterator wend = (*it).pSrcBones.end();
+        std::vector< BoneSrcIndex >::const_iterator wend = boneIt->pSrcBones.end();
 
         // Loop through all bones to be joined for this bone
-        for (std::vector< BoneSrcIndex >::const_iterator wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)  {
+        for (std::vector< BoneSrcIndex >::const_iterator wmit = boneIt->pSrcBones.begin(); wmit != wend; ++wmit)  {
             pc->mNumWeights += (*wmit).first->mNumWeights;
 
             // NOTE: different offset matrices for bones with equal names
             // are - at the moment - not handled correctly.
-            if (wmit != (*it).pSrcBones.begin() && pc->mOffsetMatrix != (*wmit).first->mOffsetMatrix)   {
+            if (wmit != boneIt->pSrcBones.begin() && pc->mOffsetMatrix != wmit->first->mOffsetMatrix) {
                 ASSIMP_LOG_WARN("Bones with equal names but different offset matrices can't be joined at the moment");
                 continue;
             }
-            pc->mOffsetMatrix = (*wmit).first->mOffsetMatrix;
+            pc->mOffsetMatrix = wmit->first->mOffsetMatrix;
         }
 
         // Allocate the vertex weight array
@@ -738,7 +738,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 
         // And copy the final weights - adjust the vertex IDs by the
         // face index offset of the corresponding mesh.
-        for (std::vector< BoneSrcIndex >::const_iterator wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)  {
+        for (std::vector< BoneSrcIndex >::const_iterator wmit = (*boneIt).pSrcBones.begin(); wmit != wend; ++wmit)  {
             aiBone* pip = (*wmit).first;
             for (unsigned int mp = 0; mp < pip->mNumWeights;++mp,++avw) {
                 const aiVertexWeight& vfi = pip->mWeights[mp];
@@ -849,14 +849,14 @@ void SceneCombiner::MergeMeshes(aiMesh** _out, unsigned int /*flags*/,
         // copy vertex colors
         n = 0;
         while ((**begin).HasVertexColors(n))    {
-            aiColor4D* pv2 = out->mColors[n] = new aiColor4D[out->mNumVertices];
-            for (std::vector<aiMesh*>::const_iterator it = begin; it != end;++it)   {
+            aiColor4D *pVec2 = out->mColors[n] = new aiColor4D[out->mNumVertices];
+            for ( std::vector<aiMesh*>::const_iterator it = begin; it != end; ++it )   {
                 if ((*it)->mColors[n])  {
-                    ::memcpy(pv2,(*it)->mColors[n],(*it)->mNumVertices*sizeof(aiColor4D));
+                    ::memcpy( pVec2, (*it)->mColors[ n ], (*it)->mNumVertices * sizeof( aiColor4D ) ) ;
                 } else {
                     ASSIMP_LOG_WARN( "JoinMeshes: VCs expected but input mesh contains no VCs" );
                 }
-                pv2 += (*it)->mNumVertices;
+                pVec2 += (*it)->mNumVertices;
             }
             ++n;
         }

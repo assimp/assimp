@@ -129,7 +129,7 @@ struct aiMetadata {
     /** 
      *  @brief  The default constructor, set all members to zero by default.
      */
-    aiMetadata()
+    aiMetadata() AI_NO_EXCEPT
     : mNumProperties(0)
     , mKeys(nullptr)
     , mValues(nullptr) {
@@ -141,11 +141,11 @@ struct aiMetadata {
     , mKeys( nullptr )
     , mValues( nullptr ) {
         mKeys = new aiString[ mNumProperties ];
-        for ( unsigned int i = 0; i < mNumProperties; ++i ) {
+        for ( size_t i = 0; i < static_cast<size_t>( mNumProperties ); ++i ) {
             mKeys[ i ] = rhs.mKeys[ i ];
         }
         mValues = new aiMetadataEntry[ mNumProperties ];
-        for ( unsigned int i = 0; i < mNumProperties; ++i ) {
+        for ( size_t i = 0; i < static_cast<size_t>(mNumProperties); ++i ) {
             mValues[ i ].mType = rhs.mValues[ i ].mType;
             switch ( rhs.mValues[ i ].mType ) {
             case AI_BOOL:

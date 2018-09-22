@@ -272,12 +272,13 @@ struct Node
     /** Node instances at this node */
     std::vector<NodeInstance> mNodeInstances;
 
-    /** Rootnodes: Name of primary camera, if any */
+    /** Root-nodes: Name of primary camera, if any */
     std::string mPrimaryCamera;
 
     //! Constructor. Begin with a zero parent
-    Node() {
-        mParent = NULL;
+    Node()
+    : mParent( nullptr ){
+        // empty
     }
 
     //! Destructor: delete all children subsequently

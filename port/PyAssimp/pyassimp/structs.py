@@ -996,6 +996,39 @@ class Animation(Structure):
 
         ]
 
+class ExportDataBlob(Structure):
+    """
+    See 'cexport.h' for details.
+
+    Note that the '_fields_' definition is outside the class to allow the 'next' field to be recursive
+    """
+    pass
+
+ExportDataBlob._fields_ = [
+            # Size of the data in bytes
+            ("size", c_size_t),
+
+            # The data.
+            ("data", c_void_p),
+
+            # Name of the blob. An empty string always
+            # indicates the first (and primary) blob,
+            # which contains the actual file data.
+            # Any other blobs are auxiliary files produced
+            # by exporters (i.e. material files). Existence
+            # of such files depends on the file format. Most
+            # formats don't split assets across multiple files.
+            #
+            # If used, blob names usually contain the file
+            # extension that should be used when writing
+            # the data to disc.
+            ("name", String),
+
+            # Pointer to the next blob in the chain or NULL if there is none.
+            ("next", POINTER(ExportDataBlob)),
+        ]
+
+
 class Scene(Structure):
     """
     See 'aiScene.h' for details.

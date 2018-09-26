@@ -659,7 +659,7 @@ namespace glTF2
         int width, height;
 
     private:
-        uint8_t* mData;
+        std::unique_ptr<uint8_t[]> mData;
         size_t mDataLength;
 
     public:
@@ -674,7 +674,7 @@ namespace glTF2
             { return mDataLength; }
 
         inline const uint8_t* GetData() const
-            { return mData; }
+            { return mData.get(); }
 
         inline uint8_t* StealData();
 

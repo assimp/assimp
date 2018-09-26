@@ -252,14 +252,13 @@ bool Q3BSPFileImporter::findFirstMapInArchive( Q3BSPZipArchive &rArchive, std::s
 // ------------------------------------------------------------------------------------------------
 //  Creates the assimp specific data.
 void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
-                                             Q3BSPZipArchive *pArchive )
-{
-    if ( NULL == pModel || NULL == pScene )
+        Q3BSPZipArchive *pArchive ) {
+    if (nullptr == pModel || nullptr == pScene) {
         return;
+    }
 
     pScene->mRootNode = new aiNode;
-    if ( !pModel->m_ModelName.empty() )
-    {
+    if ( !pModel->m_ModelName.empty() ) {
         pScene->mRootNode->mName.Set( pModel->m_ModelName );
     }
 
@@ -276,32 +275,24 @@ void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, a
 // ------------------------------------------------------------------------------------------------
 //  Creates all assimp nodes.
 void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
-                                    aiNode *pParent )
-{
-    ai_assert( NULL != pModel );
-    if ( NULL == pModel )
-    {
+        aiNode *pParent ) {
+    if ( nullptr == pModel ) {
         return;
     }
 
-    unsigned int matIdx = 0;
+    unsigned int matIdx( 0 );
     std::vector<aiMesh*> MeshArray;
     std::vector<aiNode*> NodeArray;
-    for ( FaceMapIt it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it )
-    {
+    for ( FaceMapIt it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it ) {
         std::vector<Q3BSP::sQ3BSPFace*> *pArray = (*it).second;
         size_t numVerts = countData( *pArray );
-        if ( 0 != numVerts )
-        {
+        if ( 0 != numVerts ) {
             aiMesh* pMesh = new aiMesh;
             aiNode *pNode = CreateTopology( pModel, matIdx, *pArray, pMesh );
-            if ( NULL != pNode )
-            {
+            if ( nullptr != pNode ) {
                 NodeArray.push_back( pNode );
                 MeshArray.push_back( pMesh );
-            }
-            else
-            {
+            } else {
                 delete pMesh;
             }
         }
@@ -419,6 +410,14 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
         if ( nullptr == pVertex ) {
             continue;
         }
+        if (idx > 2) {
+            idx = 0;
+            m_pCurrentFace = getNextFace(pMesh, faceIdx);
+            if (nullptr != m_pCurrentFace) {
+                m_pCurrentFace->mNumIndices = 3;
+                m_pCurrentFace->mIndices = new unsigned int[3];
+            }
+        }
 
         pMesh->mVertices[ vertIdx ].Set( pVertex->vPosition.x, pVertex->vPosition.y, pVertex->vPosition.z );
         pMesh->mNormals[ vertIdx ].Set( pVertex->vNormal.x, pVertex->vNormal.y, pVertex->vNormal.z );
@@ -430,14 +429,6 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
         vertIdx++;
 
         idx++;
-        if ( idx > 2 ) {
-            idx = 0;
-            m_pCurrentFace = getNextFace( pMesh, faceIdx );
-            if ( nullptr != m_pCurrentFace ) {
-                m_pCurrentFace->mNumIndices = 3;
-                m_pCurrentFace->mIndices = new unsigned int[ 3 ];
-            }
-        }
     }
     //faceIdx--;
 }

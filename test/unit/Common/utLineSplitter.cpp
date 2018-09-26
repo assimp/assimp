@@ -40,33 +40,32 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
-#include "AbstractImportExportBase.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include <assimp/LineSplitter.h>
+#include <assimp/DefaultIOSystem.h>
+#include <string>
 
 using namespace Assimp;
 
-class utAMFImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/AMF/test1.amf", aiProcess_ValidateDataStructure );
-        return nullptr != scene;
-    }
+class utLineSplitter : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utAMFImportExport, importAMFFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utLineSplitter, tokenizetest) {
+    DefaultIOSystem fs;
+    IOStream* file = fs.Open(ASSIMP_TEST_MODELS_DIR"/ParsingFiles/linesplitter_tokenizetest.txt", "rb");
+
+    StreamReaderLE stream(file);
+    LineSplitter myLineSplitter(stream);
 }
 
+TEST_F( utLineSplitter, issue212Test) {
+    DefaultIOSystem fs;
+    IOStream* file = fs.Open(ASSIMP_TEST_MODELS_DIR"/ParsingFiles/linesplitter_emptyline_test.txt", "rb");
 
-
-TEST_F(utAMFImportExport, importAMFWithMatFromFileTest) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test_with_mat.amf", aiProcess_ValidateDataStructure);
-    EXPECT_NE(nullptr, scene);
+    StreamReaderLE stream(file);
+    LineSplitter myLineSplitter(stream);
+    myLineSplitter++;
+    EXPECT_THROW( myLineSplitter++, std::logic_error );
 }

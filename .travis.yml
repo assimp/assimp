@@ -51,7 +51,8 @@ matrix:
       env: ANALYZE=ON
     - os: linux
       compiler: gcc
-      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
+#      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
+      env: ENABLE_COVERALLS=ON
     - os: linux
       compiler: gcc
       env: SHARED_BUILD=ON

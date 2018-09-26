@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 
 #include <map>
+#include <string>
 
 struct aiMesh;
 struct aiNode;
@@ -53,6 +54,7 @@ struct aiMaterial;
 struct aiTexture;
 
 namespace Assimp {
+
 namespace Q3BSP {
     class Q3BSPZipArchive;
     struct Q3BSPModel;
@@ -71,12 +73,11 @@ public:
     /// @brief  Destructor.
     ~Q3BSPFileImporter();
 
-public:
     /// @brief  Returns whether the class can handle the format of the given file.
     /// @remark See BaseImporter::CanRead() for details.
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
 
-private:
+protected:
     typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>*> FaceMap;
     typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>* >::iterator FaceMapIt;
     typedef std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>*>::const_iterator FaceMapConstIt;
@@ -88,7 +89,7 @@ private:
     void CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, Q3BSP::Q3BSPZipArchive *pArchive );
     void CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, aiNode *pParent );
     aiNode *CreateTopology( const Q3BSP::Q3BSPModel *pModel, unsigned int materialIdx,
-        std::vector<Q3BSP::sQ3BSPFace*> &rArray, aiMesh* pMesh );
+        std::vector<Q3BSP::sQ3BSPFace*> &rArray, aiMesh  **pMesh );
     void createTriangleTopology( const Q3BSP::Q3BSPModel *pModel, Q3BSP::sQ3BSPFace *pQ3BSPFace, aiMesh* pMesh, unsigned int &rFaceIdx,
         unsigned int &rVertIdx  );
     void createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, Q3BSP::Q3BSPZipArchive *pArchive );
@@ -114,6 +115,5 @@ private:
 // ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
-
 
 #endif // ASSIMP_Q3BSPFILEIMPORTER_H_INC

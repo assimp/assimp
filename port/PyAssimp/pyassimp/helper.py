@@ -176,6 +176,7 @@ def try_load_functions(library_path, dll):
                           load from filename function,
                           load from memory function,
                           export to filename function,
+                          export to blob function,
                           release function,
                           ctypes handle to assimp library)
     '''
@@ -185,15 +186,17 @@ def try_load_functions(library_path, dll):
         release  = dll.aiReleaseImport
         load_mem = dll.aiImportFileFromMemory
         export   = dll.aiExportScene
+        export2blob = dll.aiExportSceneToBlob
     except AttributeError:
         #OK, this is a library, but it doesn't have the functions we need
         return None
 
     # library found!
-    from .structs import Scene
+    from .structs import Scene, ExportDataBlob
     load.restype = POINTER(Scene)
     load_mem.restype = POINTER(Scene)
-    return (library_path, load, load_mem, export, release, dll)
+    export2blob.restype = POINTER(ExportDataBlob)
+    return (library_path, load, load_mem, export, export2blob, release, dll)
 
 def search_library():
     '''
@@ -203,6 +206,7 @@ def search_library():
     Returns: tuple, (load from filename function,
                      load from memory function,
                      export to filename function,
+                     export to blob function,
                      release function,
                      dll)
     '''

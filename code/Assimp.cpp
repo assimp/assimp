@@ -57,7 +57,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CInterfaceIOWrapper.h"
 #include "Importer.h"
 #include "ScenePrivate.h"
-//#include <list>
+
+#include <list>
 
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_SINGLETHREADED
@@ -106,7 +107,6 @@ namespace Assimp {
 /** Global mutex to manage the access to the log-stream map */
 static std::mutex gLogStreamMutex;
 #endif
-
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API

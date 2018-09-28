@@ -113,14 +113,14 @@ enum PrePostBehaviour
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO animation keyframe
  */
-struct Key
-{
-    Key()
-        : time(),
-        value(),
-        inter   (IT_LINE),
-        params()
-    {}
+struct Key {
+    Key() AI_NO_EXCEPT 
+    : time()
+    , value()
+    , inter(IT_LINE)
+    , params() {
+        // empty
+    }
 
     //! Current time
     double time;
@@ -144,17 +144,16 @@ struct Key
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO animation envelope
  */
-struct Envelope
-{
-    Envelope()
-        :   index()
-        ,   type    (EnvelopeType_Unknown)
-        ,   pre     (PrePostBehaviour_Constant)
-        ,   post    (PrePostBehaviour_Constant)
-
-        ,   old_first (0)
-        ,   old_last  (0)
-    {}
+struct Envelope {
+    Envelope() AI_NO_EXCEPT
+    : index()
+    , type(EnvelopeType_Unknown)
+    , pre(PrePostBehaviour_Constant)
+    , post(PrePostBehaviour_Constant)
+    , old_first(0)
+    , old_last(0) {
+        // empty
+    }
 
     //! Index of this envelope
     unsigned int index;
@@ -162,7 +161,7 @@ struct Envelope
     //! Type of envelope
     EnvelopeType type;
 
-    //! Pre and post-behaviour
+    //! Pre- and post-behavior
     PrePostBehaviour pre,post;
 
     //! Keyframes for this envelope

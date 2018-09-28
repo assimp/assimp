@@ -129,18 +129,10 @@ TEST_F(MaterialSystemTest, testStringProperty) {
     EXPECT_STREQ("Hello, this is a small test", s.data);
 }
 
-// ------------------------------------------------------------------------------------------------
-TEST_F(MaterialSystemTest, testDefaultMaterialAccess) {
-    aiMaterial *mat = aiCreateAndRegisterDefaultMaterial();
-    EXPECT_NE(nullptr, mat);
-    aiReleaseDefaultMaterial();
-
-    delete mat;
-}
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testMaterialNameAccess) {
-    aiMaterial *mat = aiCreateAndRegisterDefaultMaterial();
+    aiMaterial *mat = new aiMaterial();
     EXPECT_NE(nullptr, mat);
 
     aiString name = mat->GetName();

@@ -688,7 +688,6 @@ T Accessor::Indexer::GetValue(int i)
 inline Image::Image()
     : width(0)
     , height(0)
-    , mData(0)
     , mDataLength(0)
 {
 
@@ -704,7 +703,9 @@ inline void Image::Read(Value& obj, Asset& r)
             if (ParseDataURI(uristr, uri->GetStringLength(), dataURI)) {
                 mimeType = dataURI.mediaType;
                 if (dataURI.base64) {
-                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, mData);
+                    uint8_t *ptr = nullptr;
+                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
+                    mData.reset(ptr);
                 }
             }
             else {
@@ -717,8 +718,9 @@ inline void Image::Read(Value& obj, Asset& r)
 
             this->mDataLength = this->bufferView->byteLength;
             // maybe this memcpy could be avoided if aiTexture does not delete[] pcData at destruction.
-            this->mData = new uint8_t [this->mDataLength];
-            memcpy(this->mData, buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
+			
+			this->mData.reset(new uint8_t[this->mDataLength]);
+			memcpy(this->mData.get(), buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
 
             if (Value* mtype = FindString(obj, "mimeType")) {
                 this->mimeType = mtype->GetString();
@@ -729,10 +731,8 @@ inline void Image::Read(Value& obj, Asset& r)
 
 inline uint8_t* Image::StealData()
 {
-    uint8_t* data = mData;
-    mDataLength = 0;
-    mData = 0;
-    return data;
+	mDataLength = 0;
+	return mData.release();
 }
 
 inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
@@ -747,8 +747,8 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
         bufferView->byteOffset = b->AppendData(data, length);
     }
     else { // text file: will be stored as a data uri
-        this->mData = data;
-        this->mDataLength = length;
+		this->mData.reset(data);
+		this->mDataLength = length;
     }
 }
 
@@ -1023,7 +1023,12 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
 inline void Camera::Read(Value& obj, Asset& /*r*/)
 {
-    type = MemberOrDefault(obj, "type", Camera::Perspective);
+    std::string type_string = std::string(MemberOrDefault(obj, "type", "perspective"));
+    if (type_string == "orthographic") {
+        type = Camera::Orthographic;
+    } else {
+        type = Camera::Perspective;
+    }
 
     const char* subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 

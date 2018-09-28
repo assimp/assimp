@@ -35,7 +35,7 @@ class AssimpLib(object):
     """
     Assimp-Singleton
     """
-    load, load_mem, export, release, dll = helper.search_library()
+    load, load_mem, export, export_blob, release, dll = helper.search_library()
 _assimp_lib = AssimpLib()
 
 def make_tuple(ai_obj, type = None):
@@ -351,6 +351,33 @@ def export(scene,
 
     if exportStatus != 0:
         raise AssimpError('Could not export scene!')
+
+def export_blob(scene,
+                file_type = None,
+                processing = postprocess.aiProcess_Triangulate):
+    '''
+    Export a scene and return a blob in the correct format. On failure throws AssimpError.
+
+    Arguments
+    ---------
+    scene: scene to export.
+    file_type: string of file exporter to use. For example "collada".
+    processing: assimp postprocessing parameters. Verbose keywords are imported
+                from postprocessing, and the parameters can be combined bitwise to
+                generate the final processing value. Note that the default value will
+                triangulate quad faces. Example of generating other possible values:
+                processing = (pyassimp.postprocess.aiProcess_Triangulate |
+                              pyassimp.postprocess.aiProcess_OptimizeMeshes)
+    Returns
+    ---------
+    Pointer to structs.ExportDataBlob
+    '''
+    from ctypes import pointer
+    exportBlobPtr = _assimp_lib.export_blob(pointer(scene), file_type.encode("ascii"), processing)
+
+    if exportBlobPtr == 0:
+        raise AssimpError('Could not export scene to blob!')
+    return exportBlobPtr
 
 def release(scene):
     from ctypes import pointer

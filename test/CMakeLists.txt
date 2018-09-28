@@ -40,8 +40,9 @@
 cmake_minimum_required( VERSION 2.6 )
 
 INCLUDE_DIRECTORIES(
-	../contrib/gtest/include
-	../contrib/gtest/
+	${Assimp_SOURCE_DIR}/contrib/gtest/include
+	${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
 )
@@ -74,6 +75,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utLineSplitter.cpp
 )
 
 SET( IMPORTERS
@@ -114,6 +116,10 @@ SET( IMPORTERS
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
   unit/utMDCImportExport.cpp
+  unit/utAssbinImportExport.cpp
+  unit/ImportExport/utCOBImportExport.cpp
+  unit/ImportExport/utOgreImportExport.cpp
+  unit/ImportExport/utQ3BSPFileImportExport.cpp
 )
 
 SET( MATERIAL
@@ -171,6 +177,7 @@ add_executable( unit
 )
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
 
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 

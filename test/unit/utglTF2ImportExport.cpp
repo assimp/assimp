@@ -101,6 +101,24 @@ TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
     EXPECT_TRUE( binaryImporterTest() );
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F(utglTF2ImportExport, importglTF2AndExportToOBJ) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.obj"));
+}
+
+TEST_F(utglTF2ImportExport, importglTF2EmbeddedAndExportToOBJ) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Embedded/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Embedded/BoxTextured_out.obj"));
+}
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 TEST_F(utglTF2ImportExport, importglTF2PrimitiveModePointsWithoutIndices) {
     Assimp::Importer importer;
     //Points without indices

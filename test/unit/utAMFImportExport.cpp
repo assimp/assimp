@@ -59,6 +59,14 @@ public:
     }
 };
 
-TEST_F( utAMFImportExport, importACFromFileTest ) {
+TEST_F( utAMFImportExport, importAMFFromFileTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+
+
+TEST_F(utAMFImportExport, importAMFWithMatFromFileTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test_with_mat.amf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
 }

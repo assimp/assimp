@@ -214,11 +214,10 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
     // create a single default material, using a white diffuse color for consistency with
     // other geometric types (e.g., PLY).
-    aiMaterial* pcMat = aiCreateAndRegisterDefaultMaterial();
-    /*aiMaterial* pcMat = new aiMaterial();
+    aiMaterial* pcMat = new aiMaterial();
     aiString s;
     s.Set(AI_DEFAULT_MATERIAL_NAME);
-    pcMat->AddProperty(&s, AI_MATKEY_NAME);*/
+    pcMat->AddProperty(&s, AI_MATKEY_NAME);
 
     aiColor4D clrDiffuse(ai_real(1.0),ai_real(1.0),ai_real(1.0),ai_real(1.0));
     if (bMatClr) {

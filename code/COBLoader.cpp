@@ -137,9 +137,7 @@ void COBImporter::SetupProperties(const Importer* /*pImp*/)
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void COBImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
-{
+void COBImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
     COB::Scene scene;
     std::unique_ptr<StreamReaderLE> stream(new StreamReaderLE( pIOHandler->Open(pFile,"rb")) );
 

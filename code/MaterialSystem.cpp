@@ -387,26 +387,6 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     return AI_SUCCESS;
 }
 
-static aiMaterial *DefaultMaterial = nullptr;
-
-// ------------------------------------------------------------------------------------------------
-// Will return the default material.
-aiMaterial *aiCreateAndRegisterDefaultMaterial() {
-    if (nullptr == DefaultMaterial) {
-        DefaultMaterial = new aiMaterial;
-        aiString s;
-        s.Set(AI_DEFAULT_MATERIAL_NAME);
-        DefaultMaterial->AddProperty(&s, AI_MATKEY_NAME);
-    }
-
-    return DefaultMaterial;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Will return the default material.
-void aiReleaseDefaultMaterial() {
-    DefaultMaterial = nullptr;
-}
 
 static const unsigned int DefaultNumAllocated = 5;
 

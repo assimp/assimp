@@ -235,7 +235,7 @@ def work(filename):
     if not use_ifc_template:
         entitylist = 'step_entitylist.txt'
     whitelist = []
-    with open('entitylist.txt', 'rt') as inp:
+    with open(entitylist, 'rt') as inp:
         whitelist = [n.strip() for n in inp.read().split('\n') if n[:1]!='#' and n.strip()]
 
     schema.whitelist = set()

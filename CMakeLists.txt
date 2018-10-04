@@ -110,6 +110,11 @@ OPTION( INJECT_DEBUG_POSTFIX
   ON
 )
 
+OPTION ( IGNORE_GIT_HASH
+   "Don't call git to get the hash."
+   OFF
+)
+
 IF (IOS)
   IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Release")
@@ -153,23 +158,25 @@ SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used 
 # Enable C++1 globally
 set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
 
-# Get the current working branch
-EXECUTE_PROCESS(
-  COMMAND git rev-parse --abbrev-ref HEAD
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_BRANCH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_QUIET
-)
+IF(NOT IGNORE_GIT_HASH)
+  # Get the current working branch
+  EXECUTE_PROCESS(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
 
-# Get the latest abbreviated commit hash of the working branch
-EXECUTE_PROCESS(
-  COMMAND git log -1 --format=%h --no-show-signature
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_COMMIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_QUIET
-)
+  # Get the latest abbreviated commit hash of the working branch
+  EXECUTE_PROCESS(
+    COMMAND git log -1 --format=%h --no-show-signature
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+ENDIF()
 
 IF(NOT GIT_COMMIT_HASH)
   SET(GIT_COMMIT_HASH 0)
@@ -309,8 +316,18 @@ ENDIF()
 
 # cmake configuration files
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets.cmake" @ONLY IMMEDIATE)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets-debug.cmake.in"   "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets-debug.cmake" @ONLY IMMEDIATE)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets-release.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets-release.cmake" @ONLY IMMEDIATE)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config-version.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" @ONLY IMMEDIATE)
-INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake"             "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" DESTINATION "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT ${LIBASSIMP-DEV_COMPONENT})
+#we should generated these scripts after CMake VERSION 3.0.2 using export(EXPORT ...) and write_basic_package_version_file(...)
+INSTALL(FILES 
+  "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets-debug.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets-release.cmake"
+  DESTINATION "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 
 FIND_PACKAGE( DirectX )
 

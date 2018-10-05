@@ -1,1 +1,1 @@
-Please check the following github-repo for the source: https://github.com/kebby/assimp-net
+Please check the following git-repo for the source: https://bitbucket.org/Starnick/assimpnet

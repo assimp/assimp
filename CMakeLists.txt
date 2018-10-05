@@ -217,7 +217,7 @@ ENDIF( UNIX )
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -std=c++0x -mbig-obj ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -std=c++0x -Wa,-mbig-obj ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)

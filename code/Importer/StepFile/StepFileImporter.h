@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 
 namespace Assimp {
-namespace STEP {
+namespace StepFile {
 
 class StepFileImporter : public BaseImporter {
 public:
@@ -63,7 +63,7 @@ protected:
 private:
 };
 
-} // Namespace STEP
+} // Namespace StepFile
 } // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_STEPFILE_IMPORTER

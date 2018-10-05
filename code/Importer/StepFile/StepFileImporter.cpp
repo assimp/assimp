@@ -49,7 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultIOSystem.h>
 
 namespace Assimp {
-namespace STEP {
+namespace StepFile {
+
+using namespace STEP;
 
 static const aiImporterDesc desc = { "StepFile Importer",
                                 "",
@@ -105,7 +107,7 @@ void StepFileImporter::InternReadFile(const std::string &file, aiScene* pScene, 
     }
 }
 
-} // Namespace STEP
+} // Namespace StepFile
 } // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_STEPFILE_IMPORTER

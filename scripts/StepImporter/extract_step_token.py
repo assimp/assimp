@@ -43,6 +43,7 @@
 import sys
 
 Entity_token = "ENTITY"
+Type_token   = "TYPE"
 token = []
 file = open(sys.argv[1])
 output = open("step_entitylist.txt", "a")
@@ -55,6 +56,7 @@ for line in lines:
             name = token[1]
             print( "Writing entity " + name)
             output.write(name)
+
 output.close()
 file.close()
 

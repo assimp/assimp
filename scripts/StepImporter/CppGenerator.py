@@ -52,17 +52,23 @@ use_ifc_template = False
 	
 input_step_template_h   = 'StepReaderGen.h.template'
 input_step_template_cpp = 'StepReaderGen.cpp.template'
-input_template_h        = 'IFCReaderGen.h.template'
-input_template_cpp      = 'IFCReaderGen.cpp.template'
+input_ifc_template_h        = 'IFCReaderGen.h.template'
+input_ifc_template_cpp      = 'IFCReaderGen.cpp.template'
+
+cpp_keywords = "class"
 
 output_file_h = ""
 output_file_cpp = ""
 if (use_ifc_template ):
+    input_template_h = input_ifc_template_h
+    input_template_cpp = input_ifc_template_cpp
     output_file_h = os.path.join('..','..','code','IFCReaderGen.h')
     output_file_cpp = os.path.join('..','..','code','IFCReaderGen.cpp')
 else:
-    output_file_h = os.path.join('..','..','code','StepReaderGen.h')
-    output_file_cpp = os.path.join('..','..','code','StepReaderGen.cpp')
+    input_template_h = input_step_template_h
+    input_template_cpp = input_step_template_cpp
+    output_file_h = os.path.join('..','..','code/Importer/StepFile','StepReaderGen.h')
+    output_file_cpp = os.path.join('..','..','code/Importer/StepFile','StepReaderGen.cpp')
 
 template_entity_predef = '\tstruct {entity};\n'
 template_entity_predef_ni = '\ttypedef NotImplemented {entity}; // (not currently used by Assimp)\n'
@@ -108,7 +114,6 @@ template_converter_omitted = '// this data structure is not used yet, so there i
 template_converter_epilogue = '\treturn base;'
 
 import ExpressReader
-
 
 def get_list_bounds(collection_spec):
     start,end = [(int(n) if n!='?' else 0) for n in re.findall(r'(\d+|\?)',collection_spec)]
@@ -254,12 +259,14 @@ def work(filename):
     schema.blacklist_partial -= schema.whitelist
     schema.whitelist |= schema.blacklist_partial
 
+    # Generate list with reserved keywords from c++
+    cpp_types = cpp_keywords.split(',')
+
     # uncomment this to disable automatic code reduction based on whitelisting all used entities
     # (blacklisted entities are those who are in the whitelist and may be instanced, but will
     # only be accessed through a pointer to a base-class.
     #schema.whitelist = set(schema.entities.keys())
     #schema.blacklist_partial = set()
-
     for ntype in schema.types.values():
         typedefs += gen_type_struct(ntype,schema)
         schema_table.append(template_schema_type.format(normalized_name=ntype.name.lower()))
@@ -268,6 +275,9 @@ def work(filename):
     for entity in sorted_entities:
         parent = entity.parent+',' if entity.parent else ''
 
+        if ( entity.name in cpp_types ):
+            entity.name = entity.name + "_t"
+            print( "renaming " + entity.name)
         if entity.name in schema.whitelist:
             converters += template_converter.format(type=entity.name,contents=gen_converter(entity,schema))
             schema_table.append(template_schema.format(type=entity.name,normalized_name=entity.name.lower(),argcnt=len(entity.members)))

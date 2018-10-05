@@ -356,7 +356,7 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
     out.push_back( new MMDImporter() );
 #endif
 #ifndef ASSIMP_BUILD_NO_STEPFILE_IMPORTER
-    out.push_back(new STEP::StepFileImporter());
+    out.push_back(new StepFile::StepFileImporter());
 #endif
 }
 

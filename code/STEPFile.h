@@ -164,7 +164,6 @@ namespace STEP {
         class DataType
         {
         public:
-
             typedef std::shared_ptr<const DataType> Out;
 
         public:
@@ -357,6 +356,18 @@ namespace STEP {
             MemberList members;
         };
 
+        class BINARY : public PrimitiveDataType<uint32_t> {
+        public:
+            BINARY(uint32_t val)
+            : PrimitiveDataType<uint32_t>(val) {
+                // empty
+            }
+
+            BINARY()
+            : PrimitiveDataType<uint32_t>(TypeError::ENTITY_NOT_SPECIFIED) {
+                // empty
+            }
+        };
 
         // -------------------------------------------------------------------------------
         /* Not exactly a full EXPRESS schema but rather a list of conversion functions

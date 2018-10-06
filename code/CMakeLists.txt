@@ -726,6 +726,7 @@ SET( Step_SRCS
     Importer/StepFile/StepFileImporter.cpp
     Importer/StepFile/StepFileGen1.cpp
     Importer/StepFile/StepFileGen2.cpp
+    Importer/StepFile/StepFileGen3.cpp
     Importer/StepFile/StepReaderGen.h
     StepExporter.h
     StepExporter.cpp

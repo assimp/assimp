@@ -131,7 +131,7 @@ struct Vertex_HMP7
     int8_t normal_x,normal_y;
 } PACK_STRUCT;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 } //! namespace HMP
 } //! namespace Assimp

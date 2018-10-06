@@ -363,7 +363,7 @@ struct Texture {
     int iUVSrc;
 };
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */

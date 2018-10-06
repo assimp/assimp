@@ -170,7 +170,7 @@ namespace glTF2
 	#include <assimp/pbrmaterial.h>
 
     #ifdef ASSIMP_API
-        #include "./../include/assimp/Compiler/pushpack1.h"
+        #include <assimp/Compiler/pushpack1.h>
     #endif
 
     //! For binary .glb files
@@ -189,7 +189,7 @@ namespace glTF2
     } PACK_STRUCT;
 
     #ifdef ASSIMP_API
-        #include "./../include/assimp/Compiler/poppack1.h"
+        #include <assimp/Compiler/poppack1.h>
     #endif
 
 

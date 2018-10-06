@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp    {
 namespace HMP   {
 
-#include "./../include/assimp/Compiler/pushpack1.h"
+#include <assimp/Compiler/pushpack1.h>
 #include <stdint.h>
 
 // to make it easier for us, we test the magic word against both "endianesses"

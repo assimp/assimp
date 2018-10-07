@@ -314,20 +314,20 @@ private:
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.r = static_cast<ai_real>( strtol( comp, NULL, 16 ) ) / 255.0;
+        diffuse.r = static_cast<ai_real>( strtol( comp, NULL, 16 ) ) / ai_real(255.0);
 
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.g = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / 255.0;
+        diffuse.g = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / ai_real(255.0);
 
         comp[ 0 ] = *buf;
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.b = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / 255.0;
+        diffuse.b = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / ai_real(255.0);
 
         if(7 == len)
             return true;
@@ -335,7 +335,7 @@ private:
         ++buf;
         comp[ 1 ] = *buf;
         ++buf;
-        diffuse.a = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / 255.0;
+        diffuse.a = static_cast< ai_real >( strtol( comp, NULL, 16 ) ) / ai_real(255.0);
 
         return true;
     }

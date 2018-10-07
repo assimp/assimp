@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // some long includes ....
 #include <irrXML.h>
-#include "./../include/assimp/IOStream.hpp"
+#include "IOStream.hpp"
 #include "BaseImporter.h"
 #include <vector>
 

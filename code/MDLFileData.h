@@ -709,7 +709,7 @@ struct GroupFrame
     SimpleFrame *frames;
 } PACK_STRUCT;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 // -------------------------------------------------------------------------------------
 /** \struct IntFace_MDL7

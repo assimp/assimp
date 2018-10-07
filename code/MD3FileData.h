@@ -246,7 +246,7 @@ struct Vertex
     uint16_t  NORMAL;
 } /*PACK_STRUCT*/;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 // -------------------------------------------------------------------------------
 /** @brief Unpack a Q3 16 bit vector to its full float3 representation

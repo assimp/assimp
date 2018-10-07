@@ -139,10 +139,10 @@ namespace STEP {
      *  error (i.e. an entity expects a string but receives a bool) occurs.
      *  It is typically coupled with both an entity id and a line number.*/
     // -------------------------------------------------------------------------------
-    struct TypeError : DeadlyImportError
-    {
+    struct TypeError : DeadlyImportError {
         enum {
-            ENTITY_NOT_SPECIFIED = 0xffffffffffffffffLL
+            ENTITY_NOT_SPECIFIED = 0xffffffffffffffffLL,
+            ENTITY_NOT_SPECIFIED_32 = -1u
         };
 
         TypeError (const std::string& s,uint64_t entity = ENTITY_NOT_SPECIFIED, uint64_t line = SyntaxError::LINE_NOT_SPECIFIED);
@@ -364,7 +364,7 @@ namespace STEP {
             }
 
             BINARY()
-            : PrimitiveDataType<uint32_t>(TypeError::ENTITY_NOT_SPECIFIED) {
+            : PrimitiveDataType<uint32_t>(TypeError::ENTITY_NOT_SPECIFIED_32) {
                 // empty
             }
         };

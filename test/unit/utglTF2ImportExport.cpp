@@ -347,6 +347,32 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
     }
 }
 
+std::vector<char> ReadFile(const char* name)
+{
+    std::vector<char> ret;
+
+    FILE* p = ::fopen(name, "r");
+    if (p)
+    {
+        ::fseek(p, 0, SEEK_END);
+        const auto size = ::ftell(p);
+        ::fseek(p, 0, SEEK_SET);
+
+        ret.resize(size);
+        ::fread(&ret[0], 1, size, p);
+        ::fclose(p);
+    }
+    return ret;
+}
+
+TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
+    const auto flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_RemoveComponent |
+        aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices | aiProcess_FixInfacingNormals |
+        aiProcess_FindDegenerates | aiProcess_GenUVCoords | aiProcess_SortByPType;
+    const auto& buff = ReadFile("C:\\Users\\kimkulling\\Downloads\\camel\\camel\\scene.gltf");
+    const aiScene* Scene = ::aiImportFileFromMemory(&buff[0], buff.size(), flags, ".gltf");
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );

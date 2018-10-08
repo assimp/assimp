@@ -134,7 +134,7 @@ IFCImporter::~IFCImporter()
 bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string& extension = GetExtension(pFile);
-    if (extension == "ifc" || extension == "ifczip" /*|| extension == "stp" */) {
+    if (extension == "ifc" || extension == "ifczip" ) {
         return true;
     } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this is the common identification for STEP-encoded files, so

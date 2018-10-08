@@ -347,21 +347,22 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
     }
 }
 
-std::vector<char> ReadFile(const char* name)
-{
+std::vector<char> ReadFile(const char* name) {
     std::vector<char> ret;
 
     FILE* p = ::fopen(name, "r");
-    if (p)
-    {
-        ::fseek(p, 0, SEEK_END);
-        const auto size = ::ftell(p);
-        ::fseek(p, 0, SEEK_SET);
-
-        ret.resize(size);
-        ::fread(&ret[0], 1, size, p);
-        ::fclose(p);
+    if (nullptr == p) {
+        return ret;
     }
+
+    ::fseek(p, 0, SEEK_END);
+    const auto size = ::ftell(p);
+    ::fseek(p, 0, SEEK_SET);
+
+    ret.resize(size);
+    ::fread(&ret[0], 1, size, p);
+    ::fclose(p);
+
     return ret;
 }
 

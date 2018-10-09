@@ -371,8 +371,8 @@ TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
         aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices | aiProcess_FixInfacingNormals |
         aiProcess_FindDegenerates | aiProcess_GenUVCoords | aiProcess_SortByPType;
     const auto& buff = ReadFile("C:\\Users\\kimkulling\\Downloads\\camel\\camel\\scene.gltf");
-    const aiScene* Scene = ::aiImportFileFromMemory(&buff[0], buff.size(), flags, ".gltf");
-    EXPECT_EQ( nullptr, Scene );
+    /*const aiScene* Scene = ::aiImportFileFromMemory(&buff[0], buff.size(), flags, ".gltf");
+    EXPECT_EQ( nullptr, Scene );*/
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

@@ -69,7 +69,7 @@ bool SplitLargeMeshesProcess_Triangle::IsActive( unsigned int pFlags) const {
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene) {
-    if (0xffffffff == this->LIMIT || nullprt == pScene ) {
+    if (0xffffffff == this->LIMIT || nullptr == pScene ) {
         return;
     }
 

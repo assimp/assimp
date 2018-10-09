@@ -1,15 +1,17 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -36,36 +38,32 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
 
-#ifndef INCLUDED_AI_STEPFILEREADER_H
-#define INCLUDED_AI_STEPFILEREADER_H
+#pragma once
 
-#include "code/STEPFile.h"
+#ifndef ASSIMP_BUILD_NO_STEPFILE_IMPORTER
+
+#include <assimp/BaseImporter.h>
 
 namespace Assimp {
-namespace STEP {
+namespace StepFile {
 
-// --------------------------------------------------------------------------
-/// @brief  Parsing a STEP file is a twofold procedure.
-/// 1) read file header and return to caller, who checks if the
-///    file is of a supported schema ..
-DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
+class StepFileImporter : public BaseImporter {
+public:
+    StepFileImporter();
+    ~StepFileImporter();
+    bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
+    const aiImporterDesc* GetInfo() const override;
 
-/// 2) read the actual file contents using a user-supplied set of
-///    conversion functions to interpret the data.
-void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len, const char* const* inverse_indices_to_track, size_t len2);
+protected:
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler ) override;
 
-/// @brief  Helper to read a file.
-template <size_t N, size_t N2>
-inline
-void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
-    return ReadFile(db,scheme,arr,N,arr2,N2);
-}
+private:
+};
 
-} // ! STEP
-} // ! Assimp
+} // Namespace StepFile
+} // Namespace Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_STEPFILE_IMPORTER

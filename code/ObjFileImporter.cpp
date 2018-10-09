@@ -105,7 +105,7 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler ,
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* ObjFileImporter::GetInfo () const {
+const aiImporterDesc* ObjFileImporter::GetInfo() const {
     return &desc;
 }
 

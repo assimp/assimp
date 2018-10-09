@@ -125,7 +125,7 @@ enum AlphaTestFunc
  */
 struct ShaderMapBlock
 {
-    ShaderMapBlock()
+    ShaderMapBlock() AI_NO_EXCEPT
          :  blend_src   (BLEND_NONE)
          ,  blend_dest  (BLEND_NONE)
          ,  alpha_test  (AT_NONE)
@@ -150,7 +150,7 @@ struct ShaderMapBlock
  */
 struct ShaderDataBlock
 {
-    ShaderDataBlock()
+    ShaderDataBlock() AI_NO_EXCEPT
         :   cull    (CULL_CW)
     {}
 

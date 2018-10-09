@@ -50,23 +50,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-class utAMFImportExport : public AbstractImportExportBase {
+class utOgreImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/AMF/test1.amf", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Ogre/TheThing/Mesh.mesh.xml", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utAMFImportExport, importAMFFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
-}
-
-
-
-TEST_F(utAMFImportExport, importAMFWithMatFromFileTest) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test_with_mat.amf", aiProcess_ValidateDataStructure);
-    EXPECT_NE(nullptr, scene);
+TEST_F(utOgreImportExport, importerTest ) {
+    EXPECT_TRUE(importerTest());
 }

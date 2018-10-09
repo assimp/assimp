@@ -153,7 +153,7 @@ protected:
         aiVector3D mPosition; ///< Position
         ai_real mDistance; ///< Distance of this vertex to the sorting plane
 
-        Entry()
+        Entry() AI_NO_EXCEPT
         : mIndex( 999999999 ), mPosition(), mDistance( 99999. ) {
             // empty        
         }

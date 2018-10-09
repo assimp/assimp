@@ -405,7 +405,7 @@ bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const 
 	++db.stats().fields_read;
 #endif
 
-	return false;
+	return true;
 }
 
 

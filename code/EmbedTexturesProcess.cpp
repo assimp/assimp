@@ -119,7 +119,7 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
         }
     }
 
-    aiTexel* imageContent = new aiTexel[1u + imageSize / sizeof(aiTexel)];
+    aiTexel* imageContent = new aiTexel[ 1ul + static_cast<unsigned long>( imageSize ) / sizeof(aiTexel)];
     file.seekg(0, std::ios::beg);
     file.read(reinterpret_cast<char*>(imageContent), imageSize);
 

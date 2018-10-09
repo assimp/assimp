@@ -119,10 +119,9 @@ extern "C" {
 // ----------------------------------------------------------------------------------
 /** Represents a plane in a three-dimensional, euclidean space
 */
-struct aiPlane
-{
+struct aiPlane {
 #ifdef __cplusplus
-    aiPlane () : a(0.f), b(0.f), c(0.f), d(0.f) {}
+    aiPlane () AI_NO_EXCEPT : a(0.f), b(0.f), c(0.f), d(0.f) {}
     aiPlane (ai_real _a, ai_real _b, ai_real _c, ai_real _d)
         : a(_a), b(_b), c(_c), d(_d) {}
 
@@ -137,10 +136,9 @@ struct aiPlane
 // ----------------------------------------------------------------------------------
 /** Represents a ray
 */
-struct aiRay
-{
+struct aiRay {
 #ifdef __cplusplus
-    aiRay () {}
+    aiRay () AI_NO_EXCEPT {}
     aiRay (const aiVector3D& _pos, const aiVector3D& _dir)
         : pos(_pos), dir(_dir) {}
 
@@ -158,7 +156,7 @@ struct aiRay
 struct aiColor3D
 {
 #ifdef __cplusplus
-    aiColor3D () : r(0.0f), g(0.0f), b(0.0f) {}
+    aiColor3D () AI_NO_EXCEPT : r(0.0f), g(0.0f), b(0.0f) {}
     aiColor3D (ai_real _r, ai_real _g, ai_real _b) : r(_r), g(_g), b(_b) {}
     explicit aiColor3D (ai_real _r) : r(_r), g(_r), b(_r) {}
     aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
@@ -253,9 +251,8 @@ struct aiString
 {
 #ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
-    aiString() :
-        length(0)
-    {
+    aiString() AI_NO_EXCEPT
+    : length( 0 ) {
         data[0] = '\0';
 
 #ifdef ASSIMP_BUILD_DEBUG
@@ -305,7 +302,7 @@ struct aiString
     }
 
 
-    /** Assigment operator */
+    /** Assignment operator */
     aiString& operator = (const aiString &rOther) {
         if (this == &rOther) {
             return *this;
@@ -373,7 +370,7 @@ struct aiString
 #endif // !__cplusplus
 
     /** Binary length of the string excluding the terminal 0. This is NOT the
-     *  logical length of strings containing UTF-8 multibyte sequences! It's
+     *  logical length of strings containing UTF-8 multi-byte sequences! It's
      *  the number of bytes from the beginning of the string to its end.*/
     size_t length;
 
@@ -479,7 +476,7 @@ struct aiMemoryInfo
 #ifdef __cplusplus
 
     /** Default constructor */
-    aiMemoryInfo()
+    aiMemoryInfo() AI_NO_EXCEPT
         : textures   (0)
         , materials  (0)
         , meshes     (0)

@@ -71,7 +71,7 @@ class aiMatrix4x4t
 public:
 
     /** set to identity */
-    aiMatrix4x4t ();
+    aiMatrix4x4t() AI_NO_EXCEPT;
 
     /** construction from single values */
     aiMatrix4x4t (  TReal _a1, TReal _a2, TReal _a3, TReal _a4,

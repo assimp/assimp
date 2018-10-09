@@ -367,10 +367,10 @@ std::vector<char> ReadFile(const char* name) {
 }
 
 TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
-    const auto flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_RemoveComponent |
+    /*const auto flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_RemoveComponent |
         aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices | aiProcess_FixInfacingNormals |
         aiProcess_FindDegenerates | aiProcess_GenUVCoords | aiProcess_SortByPType;
-    const auto& buff = ReadFile("C:\\Users\\kimkulling\\Downloads\\camel\\camel\\scene.gltf");
+    const auto& buff = ReadFile("C:\\Users\\kimkulling\\Downloads\\camel\\camel\\scene.gltf");*/
     /*const aiScene* Scene = ::aiImportFileFromMemory(&buff[0], buff.size(), flags, ".gltf");
     EXPECT_EQ( nullptr, Scene );*/
 }

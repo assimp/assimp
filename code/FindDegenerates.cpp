@@ -91,8 +91,10 @@ void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
 // Executes the post processing step on the given imported data.
 void FindDegeneratesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess begin");
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i){
-        if (ExecuteOnMesh(pScene->mMeshes[i])) {
+    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+    {
+        //Do not process point cloud, ExecuteOnMesh works only with faces data
+        if ((pScene->mMeshes[i]->mPrimitiveTypes != aiPrimitiveType::aiPrimitiveType_POINT) && ExecuteOnMesh(pScene->mMeshes[i])) {
             removeMesh(pScene, i);
             --i; //the current i is removed, do not skip the next one
         }

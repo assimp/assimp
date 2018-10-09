@@ -356,7 +356,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene) {
     //Check for point cloud first, 
     //Do not process point cloud, splitMesh works only with faces data
     for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
-        if ((pScene->mMeshes[a]->mPrimitiveTypes == aiPrimitiveType_POINT)) {
+        if ( pScene->mMeshes[a]->mPrimitiveTypes == aiPrimitiveType_POINT ) {
             return;
         }
     }

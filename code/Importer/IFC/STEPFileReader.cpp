@@ -85,16 +85,16 @@ STEP::TypeError::TypeError (const std::string& s,uint64_t entity /* = ENTITY_NOT
 
 }
 
-
+static const char *ISO_Token         = "ISO-10303-21;";
+static const char *FILE_SCHEMA_Token = "FILE_SCHEMA";
 // ------------------------------------------------------------------------------------------------
-STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream)
-{
+STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
     std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
     std::unique_ptr<STEP::DB> db = std::unique_ptr<STEP::DB>(new STEP::DB(reader));
 
-    LineSplitter& splitter = db->GetSplitter();
-    if (!splitter || *splitter != "ISO-10303-21;") {
-        throw STEP::SyntaxError("expected magic token: ISO-10303-21",1);
+    LineSplitter &splitter = db->GetSplitter();
+    if (!splitter || *splitter != ISO_Token ) {
+        throw STEP::SyntaxError("expected magic token: " + std::string( ISO_Token ), 1);
     }
 
     HeaderInfo& head = db->GetHeader();
@@ -109,7 +109,7 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream)
         // want one-based line numbers for human readers, so +1
         const uint64_t line = splitter.get_index()+1;
 
-        if (s.substr(0,11) == "FILE_SCHEMA") {
+        if (s.substr(0,11) == FILE_SCHEMA_Token) {
             const char* sz = s.c_str()+11;
             SkipSpaces(sz,&sz);
             std::shared_ptr< const EXPRESS::DataType > schema = EXPRESS::DataType::Parse(sz);
@@ -549,4 +549,3 @@ void STEP::LazyObject::LazyInit() const
     // store the original id in the object instance
     obj->SetID(id);
 }
-

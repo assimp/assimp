@@ -105,7 +105,7 @@ bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler ,
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* ObjFileImporter::GetInfo () const {
+const aiImporterDesc* ObjFileImporter::GetInfo() const {
     return &desc;
 }
 
@@ -251,7 +251,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 
 		std::unique_ptr<aiMesh> mesh( new aiMesh );
         mesh->mPrimitiveTypes = aiPrimitiveType_POINT;
-        unsigned int n = pModel->m_Vertices.size();
+        unsigned int n = (unsigned int)pModel->m_Vertices.size();
         mesh->mNumVertices = n;
 
         mesh->mVertices = new aiVector3D[n];

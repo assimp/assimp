@@ -272,7 +272,8 @@ static aiMaterial* ImportMaterial(std::vector<int>& embeddedTexIdxs, Asset& r, M
     aimat->AddProperty(&mat.pbrMetallicRoughness.metallicFactor, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
     aimat->AddProperty(&mat.pbrMetallicRoughness.roughnessFactor, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR);
 
-    float roughnessAsShininess = (1 - mat.pbrMetallicRoughness.roughnessFactor) * 1000;
+    float roughnessAsShininess = 1 - mat.pbrMetallicRoughness.roughnessFactor;
+    roughnessAsShininess *= roughnessAsShininess * 1000;
     aimat->AddProperty(&roughnessAsShininess, 1, AI_MATKEY_SHININESS);
 
     SetMaterialTextureProperty(embeddedTexIdxs, r, mat.normalTexture, aimat, aiTextureType_NORMALS);

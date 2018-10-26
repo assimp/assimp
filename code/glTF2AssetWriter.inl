@@ -113,10 +113,10 @@ namespace glTF2 {
         /****************** Channels *******************/
         Value channels;
         channels.SetArray();
-        channels.Reserve(unsigned(a.Channels.size()), w.mAl);
+        channels.Reserve(unsigned(a.channels.size()), w.mAl);
 
-        for (size_t i = 0; i < unsigned(a.Channels.size()); ++i) {
-            Animation::AnimChannel& c = a.Channels[i];
+        for (size_t i = 0; i < unsigned(a.channels.size()); ++i) {
+            Animation::Channel& c = a.channels[i];
             Value valChannel;
             valChannel.SetObject();
             {
@@ -126,7 +126,20 @@ namespace glTF2 {
                 valTarget.SetObject();
                 {
                     valTarget.AddMember("node", c.target.node->index, w.mAl);
-                    valTarget.AddMember("path", c.target.path, w.mAl);
+                    switch (c.target.path) {
+                        case AnimationPath_TRANSLATION:
+                            valTarget.AddMember("path", "translation", w.mAl);
+                            break;
+                        case AnimationPath_ROTATION:
+                            valTarget.AddMember("path", "rotation", w.mAl);
+                            break;
+                        case AnimationPath_SCALE:
+                            valTarget.AddMember("path", "scale", w.mAl);
+                            break;
+                        case AnimationPath_WEIGHTS:
+                            valTarget.AddMember("path", "weights", w.mAl);
+                            break;
+                    }
                 }
                 valChannel.AddMember("target", valTarget, w.mAl);
             }
@@ -138,16 +151,24 @@ namespace glTF2 {
         Value valSamplers;
         valSamplers.SetArray();
 
-        for (size_t i = 0; i < unsigned(a.Samplers.size()); ++i) {
-            Animation::AnimSampler& s = a.Samplers[i];
+        for (size_t i = 0; i < unsigned(a.samplers.size()); ++i) {
+            Animation::Sampler& s = a.samplers[i];
             Value valSampler;
             valSampler.SetObject();
             {
-                Ref<Accessor> inputAccessor = a.GetAccessor(s.input);
-                Ref<Accessor> outputAccessor = a.GetAccessor(s.output);
-                valSampler.AddMember("input", inputAccessor->index, w.mAl);
-                valSampler.AddMember("interpolation", s.interpolation, w.mAl);
-                valSampler.AddMember("output", outputAccessor->index, w.mAl);
+                valSampler.AddMember("input", s.input->index, w.mAl);
+                switch (s.interpolation) {
+                    case Interpolation_LINEAR:
+                        valSampler.AddMember("path", "LINEAR", w.mAl);
+                        break;
+                    case Interpolation_STEP:
+                        valSampler.AddMember("path", "STEP", w.mAl);
+                        break;
+                    case Interpolation_CUBICSPLINE:
+                        valSampler.AddMember("path", "CUBICSPLINE", w.mAl);
+                        break;
+                }
+                valSampler.AddMember("output", s.output->index, w.mAl);
             }
             valSamplers.PushBack(valSampler, w.mAl);
         }

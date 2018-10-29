@@ -98,7 +98,7 @@ void DropFaceNormalsProcess::Execute( aiScene* pScene) {
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-bool DropFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh) {
+bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* pMesh) {
     if (NULL == pMesh->mNormals) {
         return false;
     }

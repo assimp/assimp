@@ -557,6 +557,8 @@ SET( PostProcessing_SRCS
   FindInvalidDataProcess.h
   FixNormalsStep.cpp
   FixNormalsStep.h
+  DropFaceNormalsProcess.cpp
+  DropFaceNormalsProcess.h
   GenFaceNormalsProcess.cpp
   GenFaceNormalsProcess.h
   GenVertexNormalsProcess.cpp

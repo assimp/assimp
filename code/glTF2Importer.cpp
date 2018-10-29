@@ -751,9 +751,15 @@ static void BuildVertexWeightMapping(Ref<Mesh>& mesh, std::vector<std::vector<ai
     attr.weight[0]->ExtractData(weights);
     attr.joint[0]->ExtractData(indices);
 
+<<<<<<< HEAD
     for (int i = 0; i < num_vertices; ++i) {
         for (int j = 0; j < 4; ++j) {
             const unsigned int bone = indices[i].values[j];
+=======
+    for (unsigned int i = 0; i < num_vertices; ++i) {
+        for (unsigned int j = 0; j < 4; ++j) {
+            const int bone = indices[i].values[j];
+>>>>>>> 57d3d71b6ec68f41a10c1da2f01d096f1308e88c
             const float weight = weights[i].values[j];
             if (weight > 0 && bone >= 0 && bone < map.size()) {
                 map[bone].reserve(8);
@@ -894,7 +900,11 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         samplers.translation->output->ExtractData(values);
         anim->mNumPositionKeys = samplers.translation->input->count;
         anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+<<<<<<< HEAD
         for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
+=======
+        for (int i = 0; i < anim->mNumPositionKeys; ++i) {
+>>>>>>> 57d3d71b6ec68f41a10c1da2f01d096f1308e88c
             anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
             anim->mPositionKeys[i].mValue = values[i];
         }
@@ -916,7 +926,11 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         samplers.rotation->output->ExtractData(values);
         anim->mNumRotationKeys = samplers.rotation->input->count;
         anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+<<<<<<< HEAD
         for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
+=======
+        for (int i = 0; i < anim->mNumRotationKeys; ++i) {
+>>>>>>> 57d3d71b6ec68f41a10c1da2f01d096f1308e88c
             anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
             anim->mRotationKeys[i].mValue.x = values[i].w;
             anim->mRotationKeys[i].mValue.y = values[i].x;
@@ -942,7 +956,11 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         samplers.scale->output->ExtractData(values);
         anim->mNumScalingKeys = samplers.scale->input->count;
         anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
+<<<<<<< HEAD
         for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
+=======
+        for (int i = 0; i < anim->mNumScalingKeys; ++i) {
+>>>>>>> 57d3d71b6ec68f41a10c1da2f01d096f1308e88c
             anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
             anim->mScalingKeys[i].mValue = values[i];
         }
@@ -965,7 +983,11 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation& an
     std::unordered_map<unsigned int, AnimationSamplers> samplers;
     for (unsigned int c = 0; c < anim.channels.size(); ++c) {
         Animation::Channel& channel = anim.channels[c];
+<<<<<<< HEAD
         if (channel.sampler >= static_cast<int>(anim.samplers.size())) {
+=======
+        if (channel.sampler >= anim.samplers.size()) {
+>>>>>>> 57d3d71b6ec68f41a10c1da2f01d096f1308e88c
             continue;
         }
 

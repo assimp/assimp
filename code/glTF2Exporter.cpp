@@ -974,7 +974,7 @@ inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buf
     }
 
     std::vector<float> times(numKeyframes);
-    std::vector<vec3> values(numKeyframes * 3);
+    std::vector<float> values(numKeyframes * 3);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiVectorKey& key = nodeChannel->mPositionKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
@@ -997,7 +997,7 @@ inline void ExtractScaleSampler(Asset& asset, std::string& animId, Ref<Buffer>& 
     }
 
     std::vector<float> times(numKeyframes);
-    std::vector<vec3> values(numKeyframes * 3);
+    std::vector<float> values(numKeyframes * 3);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiVectorKey& key = nodeChannel->mScalingKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
@@ -1020,7 +1020,7 @@ inline void ExtractRotationSampler(Asset& asset, std::string& animId, Ref<Buffer
     }
 
     std::vector<float> times(numKeyframes);
-    std::vector<vec4> values(numKeyframes * 4);
+    std::vector<float> values(numKeyframes * 4);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiQuatKey& key = nodeChannel->mRotationKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.

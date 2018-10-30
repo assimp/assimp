@@ -203,7 +203,7 @@ template <> void Structure :: Convert<Lamp> (
     int temp = 0;
     ReadField<ErrorPolicy_Fail>(temp,"type",db);
     dest.type = static_cast<Assimp::Blender::Lamp::Type>(temp);
-    ReadField<ErrorPolicy_Igno>(dest.flags,"flags",db);
+    ReadField<ErrorPolicy_Igno>(dest.flags,"flag",db);
     ReadField<ErrorPolicy_Igno>(dest.colormodel,"colormodel",db);
     ReadField<ErrorPolicy_Igno>(dest.totex,"totex",db);
     ReadField<ErrorPolicy_Warn>(dest.r,"r",db);

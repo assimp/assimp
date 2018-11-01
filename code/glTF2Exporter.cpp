@@ -979,9 +979,9 @@ inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buf
         const aiVectorKey& key = nodeChannel->mPositionKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[i * 3][0] = key.mValue.x;
-        values[i * 3][1] = key.mValue.y;
-        values[i * 3][2] = key.mValue.z;
+        values[(i * 3) + 0] = key.mValue.x;
+        values[(i * 3) + 1] = key.mValue.y;
+        values[(i * 3) + 2] = key.mValue.z;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1002,9 +1002,9 @@ inline void ExtractScaleSampler(Asset& asset, std::string& animId, Ref<Buffer>& 
         const aiVectorKey& key = nodeChannel->mScalingKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[i * 3][0] = key.mValue.x;
-        values[i * 3][1] = key.mValue.y;
-        values[i * 3][2] = key.mValue.z;
+        values[(i * 3) + 0] = key.mValue.x;
+        values[(i * 3) + 1] = key.mValue.y;
+        values[(i * 3) + 2] = key.mValue.z;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1025,10 +1025,10 @@ inline void ExtractRotationSampler(Asset& asset, std::string& animId, Ref<Buffer
         const aiQuatKey& key = nodeChannel->mRotationKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[i * 4][0] = key.mValue.x;
-        values[i * 4][1] = key.mValue.y;
-        values[i * 4][2] = key.mValue.z;
-        values[i * 4][3] = key.mValue.w;
+        values[(i * 4) + 0] = key.mValue.x;
+        values[(i * 4) + 1] = key.mValue.y;
+        values[(i * 4) + 2] = key.mValue.z;
+        values[(i * 4) + 3] = key.mValue.w;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);

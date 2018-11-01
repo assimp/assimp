@@ -788,11 +788,10 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
     GetNodeTransform(ainode->mTransformation, node);
 
     if (!node.meshes.empty()) {
-        int mesh_idx = node.meshes[0].GetIndex();
-        int count = meshOffsets[mesh_idx + 1] - meshOffsets[mesh_idx];
         // GLTF files contain at most 1 mesh per node.
         assert(node.meshes.size() == 1);
-        assert(count == 1);
+        int mesh_idx = node.meshes[0].GetIndex();
+        int count = meshOffsets[mesh_idx + 1] - meshOffsets[mesh_idx];
 
         ainode->mNumMeshes = count;
         ainode->mMeshes = new unsigned int[count];

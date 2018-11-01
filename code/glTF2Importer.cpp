@@ -755,7 +755,7 @@ static void BuildVertexWeightMapping(Ref<Mesh>& mesh, std::vector<std::vector<ai
         for (int j = 0; j < 4; ++j) {
             const unsigned int bone = indices[i].values[j];
             const float weight = weights[i].values[j];
-            if (weight > 0 && bone >= 0 && bone < map.size()) {
+            if (weight > 0 && bone < map.size()) {
                 map[bone].reserve(8);
                 map[bone].emplace_back(i, weight);
             }

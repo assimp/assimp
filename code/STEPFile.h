@@ -166,12 +166,9 @@ namespace STEP {
         public:
             typedef std::shared_ptr<const DataType> Out;
 
-        public:
 
             virtual ~DataType() {
             }
-
-        public:
 
             template <typename T>
             const T& To() const {
@@ -289,7 +286,6 @@ namespace STEP {
         typedef PrimitiveDataType<std::string>      STRING;
 
 
-
         // -------------------------------------------------------------------------------
         /** Generic base class for all enumerated types */
         // -------------------------------------------------------------------------------
@@ -309,10 +305,8 @@ namespace STEP {
         // -------------------------------------------------------------------------------
         /** This is just a reference to an entity/object somewhere else */
         // -------------------------------------------------------------------------------
-        class ENTITY : public PrimitiveDataType<uint64_t>
-        {
+        class ENTITY : public PrimitiveDataType<uint64_t> {
         public:
-
             ENTITY(uint64_t val)
                 : PrimitiveDataType<uint64_t>(val)
             {
@@ -506,11 +500,11 @@ namespace STEP {
     template <typename TDerived, size_t arg_count>
     struct ObjectHelper : virtual Object {
         ObjectHelper()
-        : aux_is_derived(0) {
+        : aux_is_derived( 0 ) {
             // empty
         }
 
-        static Object* Construct(const STEP::DB& db, const EXPRESS::LIST& params) {
+        static Object* Construct(const STEP::DB &db, const EXPRESS::LIST& params) {
             // make sure we don't leak if Fill() throws an exception
             std::unique_ptr<TDerived> impl(new TDerived());
 
@@ -549,7 +543,6 @@ namespace STEP {
             // empty
         }
 
-
         void flag_invalid() {
             have = false;
         }
@@ -557,7 +550,6 @@ namespace STEP {
         void flag_valid() {
             have = true;
         }
-
 
         bool operator! () const {
             return !have;

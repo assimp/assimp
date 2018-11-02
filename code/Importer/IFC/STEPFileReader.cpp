@@ -51,8 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/fast_atof.h>
 #include <memory>
 
-
 using namespace Assimp;
+
 namespace EXPRESS = STEP::EXPRESS;
 
 #include <functional>
@@ -87,6 +87,7 @@ STEP::TypeError::TypeError (const std::string& s,uint64_t entity /* = ENTITY_NOT
 
 static const char *ISO_Token         = "ISO-10303-21;";
 static const char *FILE_SCHEMA_Token = "FILE_SCHEMA";
+
 // ------------------------------------------------------------------------------------------------
 STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
     std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
@@ -124,7 +125,7 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
                     throw STEP::SyntaxError("expected FILE_SCHEMA to be a list",line);
                 }
 
-                // XXX need support for multiple schemas?
+                // XXX need support for multiple schema?
                 if (list->GetSize() > 1)    {
                     ASSIMP_LOG_WARN(AddLineNumber("multiple schemas currently not supported",line));
                 }
@@ -302,10 +303,10 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 }
 
 // ------------------------------------------------------------------------------------------------
-std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
-{
-    const char* cur = inout;
-    SkipSpaces(&cur);
+std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line,
+        const EXPRESS::ConversionSchema* schema /*= NULL*/) {
+    const char* cur( inout );
+    SkipSpaces( &cur );
     if (*cur == ',' || IsSpaceOrNewLine(*cur)) {
         throw STEP::SyntaxError("unexpected token, expected parameter",line);
     }
@@ -424,10 +425,9 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
     return std::make_shared<EXPRESS::INTEGER>(neg?-num:num);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
-{
+std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line,
+        const EXPRESS::ConversionSchema* schema /*= NULL*/) {
     const std::shared_ptr<EXPRESS::LIST> list = std::make_shared<EXPRESS::LIST>();
     EXPRESS::LIST::MemberList& members = list->members;
 
@@ -468,9 +468,8 @@ std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uin
     return list;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t /*line*/, const char* const type,const char* args)
+STEP::LazyObject::LazyObject(DB& db, uint64_t id, uint64_t , const char* const type,const char* args)
     : id(id)
     , type(type)
     , db(db)
@@ -498,9 +497,7 @@ STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t /*line*/, const char* 
 					const char* tmp;
 					const int64_t num = static_cast<int64_t>(strtoul10_64(a + 1, &tmp));
 					db.MarkRef(num, id);
-				}
-				else
-				{
+				} else {
 					++a;
 				}
             }

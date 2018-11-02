@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StepFileImporter.h"
 #include "../../Importer/IFC/STEPFileReader.h"
+#include "StepReaderGen.h"
 #include <assimp/importerdesc.h>
 #include <assimp/DefaultIOSystem.h>
 
@@ -65,7 +66,7 @@ static const aiImporterDesc desc = { "StepFile Importer",
                                 "stp" };
 
 StepFileImporter::StepFileImporter()
-: BaseImporter() {
+    : BaseImporter() {
 
 }
 
@@ -75,9 +76,10 @@ StepFileImporter::~StepFileImporter() {
 
 bool StepFileImporter::CanRead(const std::string& file, IOSystem* pIOHandler, bool checkSig) const {
     const std::string &extension = GetExtension(file);
-    if ( extension == "stp" || extension == "step" ) {
+    if (extension == "stp" || extension == "step") {
         return true;
-    } else if ((!extension.length() || checkSig) && pIOHandler) {
+    }
+    else if ((!extension.length() || checkSig) && pIOHandler) {
         const char* tokens[] = { "ISO-10303-21" };
         const bool found(SearchFileHeaderForToken(pIOHandler, file, tokens, 1));
         return found;
@@ -105,10 +107,11 @@ void StepFileImporter::InternReadFile(const std::string &file, aiScene* pScene, 
     if (!head.fileSchema.size() || head.fileSchema != StepFileSchema) {
         DeadlyImportError("Unrecognized file schema: " + head.fileSchema);
     }
+    ::Assimp::STEP::EXPRESS::ConversionSchema schema;
+    GetSchema(schema);
 }
 
 } // Namespace StepFile
 } // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_STEPFILE_IMPORTER
-

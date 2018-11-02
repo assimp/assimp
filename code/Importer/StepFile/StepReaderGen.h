@@ -55,6 +55,7 @@ namespace StepFile {
 		
 	};
 	
+    //void GetSchema(EXPRESS::ConversionSchema& out);
 
 	// ******************************************************************************
 	// StepFile Custom data types

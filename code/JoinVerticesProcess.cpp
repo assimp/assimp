@@ -59,50 +59,48 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 JoinVerticesProcess::JoinVerticesProcess()
-{
+: BaseProcess() {
     // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-JoinVerticesProcess::~JoinVerticesProcess()
-{
+JoinVerticesProcess::~JoinVerticesProcess() {
     // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool JoinVerticesProcess::IsActive( unsigned int pFlags) const
-{
+bool JoinVerticesProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_JoinIdenticalVertices) != 0;
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void JoinVerticesProcess::Execute( aiScene* pScene)
-{
+void JoinVerticesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("JoinVerticesProcess begin");
 
     // get the total number of vertices BEFORE the step is executed
-    int iNumOldVertices = 0;
+    unsigned int numOldVertices( 0 );
     if (!DefaultLogger::isNullLogger()) {
-        for( unsigned int a = 0; a < pScene->mNumMeshes; a++)   {
-            iNumOldVertices +=  pScene->mMeshes[a]->mNumVertices;
+        for( unsigned int a = 0; a < pScene->mNumMeshes; ++a )   {
+            numOldVertices +=  pScene->mMeshes[ a ]->mNumVertices;
         }
     }
 
     // execute the step
-    int iNumVertices = 0;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-        iNumVertices += ProcessMesh( pScene->mMeshes[a],a);
+    unsigned int numVertices( 0 );
+    for (unsigned int a = 0; a < pScene->mNumMeshes; ++a) {
+        numVertices += ProcessMesh(pScene->mMeshes[a], a);
+    }
 
     // if logging is active, print detailed statistics
     if (!DefaultLogger::isNullLogger()) {
-        if (iNumOldVertices == iNumVertices) {
+        if (numOldVertices == numVertices) {
             ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
         } else {
-            ASSIMP_LOG_INFO_F("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
-                " out: ", iNumVertices, " | ~",
-                ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f );
+            ASSIMP_LOG_INFO_F("JoinVerticesProcess finished | Verts in: ", numOldVertices,
+                " out: ", numVertices, " | ~",
+                ((numOldVertices - numVertices) / static_cast<float>( numOldVertices) ) * 100.f );
         }
     }
 
@@ -111,15 +109,15 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 
 namespace {
 
-bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
-{
-    // A little helper to find locally close vertices faster.
-    // Try to reuse the lookup table from the last step.
-    const static float epsilon = 1e-5f;
-    // Squared because we check against squared length of the vector difference
-    static const float squareEpsilon = epsilon * epsilon;
+// A little helper to find locally close vertices faster.
+// Try to reuse the lookup table from the last step.
+const static float epsilon = 1e-5f;
 
-    // Square compare is useful for animeshes vertices compare
+bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex) {
+    // Squared because we check against squared length of the vector difference
+    const float squareEpsilon = epsilon * epsilon;
+
+    // Square compare is useful for ani-meshes vertices compare
     if ((lhs.position - rhs.position).SquareLength() > squareEpsilon) {
         return false;
     }
@@ -156,6 +154,7 @@ bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
             }
         }
     }
+
     return true;
 }
 
@@ -258,7 +257,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     uniqueVertices.reserve( pMesh->mNumVertices);
 
     // For each vertex the index of the vertex it was replaced by.
-    // Since the maximal number of vertices is 2^31-1, the most significand bit can be used to mark
+    // Since the maximal number of vertices is 2^31-1, the most significant bit can be used to mark
     //  whether a new vertex was created for the index (true) or if it was replaced by an existing
     //  unique vertex (false). This saves an additional std::vector<bool> and greatly enhances
     //  branching performance.
@@ -332,7 +331,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
             if (hasAnimMeshes) {
                 // If given vertex is animated, then it has to be preserver 1 to 1 (base mesh and animated mesh require same topology)
-                // NOTE: not doing this totaly breaks anim meshes as they don't have their own faces (they use pMesh->mFaces)
+                // NOTE: not doing this totally breaks anim meshes as they don't have their own faces (they use pMesh->mFaces)
                 bool breaksAnimMesh = false;
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
                     const Vertex& animatedUV = uniqueAnimatedVertices[animMeshIndex][ uidx];
@@ -394,9 +393,9 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     // adjust the indices in all faces
-    for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
+    for( unsigned int a = 0; a < pMesh->mNumFaces; ++a )
     {
-        aiFace& face = pMesh->mFaces[a];
+        aiFace& face = pMesh->mFaces[ a ];
         for( unsigned int b = 0; b < face.mNumIndices; b++) {
             face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~0x80000000;
         }
@@ -457,6 +456,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             ASSIMP_LOG_WARN("Removing bone -> no weights remaining");
         }
     }
+
     return pMesh->mNumVertices;
 }
 

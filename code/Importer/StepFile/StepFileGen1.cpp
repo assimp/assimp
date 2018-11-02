@@ -52,7 +52,7 @@ namespace {
 	typedef EXPRESS::ConversionSchema::SchemaEntry SchemaEntry;
 
 	const SchemaEntry schema_raw[] =  {
-		SchemaEntry("absorbed_dose_measure",NULL )
+        SchemaEntry("absorbed_dose_measure",NULL )
 ,		SchemaEntry("acceleration_measure",NULL )
 ,		SchemaEntry("action_items",NULL )
 ,		SchemaEntry("action_method_items",NULL )
@@ -1303,9 +1303,11 @@ namespace {
 }
 
 // -----------------------------------------------------------------------------------------------------------
-void StepFile::GetSchema(EXPRESS::ConversionSchema& out)
-{
-	out = EXPRESS::ConversionSchema(schema_raw);
+namespace StepFile {
+    void GetSchema(EXPRESS::ConversionSchema& out)
+    {
+        out = EXPRESS::ConversionSchema(schema_raw);
+    }
 }
 
 namespace STEP {

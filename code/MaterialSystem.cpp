@@ -194,12 +194,18 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
     // data is given in ints, simply copy it
     unsigned int iWrite = 0;
     if( aiPTI_Integer == prop->mType || aiPTI_Buffer == prop->mType)    {
-        iWrite = prop->mDataLength / sizeof(int32_t);
+        iWrite = std::max(static_cast<unsigned int>(prop->mDataLength / sizeof(int32_t)), 1u);
         if (pMax) {
-            iWrite = std::min(*pMax,iWrite); ;
+            iWrite = std::min(*pMax,iWrite);
         }
-        for (unsigned int a = 0; a < iWrite;++a) {
-            pOut[a] = static_cast<int>(reinterpret_cast<int32_t*>(prop->mData)[a]);
+        if (1 == prop->mDataLength) {
+            // bool type, 1 byte
+            *pOut = static_cast<int>(*prop->mData);
+        }
+        else {
+            for (unsigned int a = 0; a < iWrite;++a) {
+                pOut[a] = static_cast<int>(reinterpret_cast<int32_t*>(prop->mData)[a]);
+            }
         }
         if (pMax) {
             *pMax = iWrite;

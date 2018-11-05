@@ -562,6 +562,18 @@ enum aiPostProcessSteps
 
 
     aiProcess_ForceGenNormals = 0x20000000,
+
+    // -------------------------------------------------------------------------
+    /** <hr>Drops normals for all faces of all meshes.
+     *
+     * This is ignored if no normals are present.
+     * Face normals are shared between all points of a single face,
+     * so a single point can have multiple normals, which
+     * forces the library to duplicate vertices in some cases.
+     * #aiProcess_JoinIdenticalVertices is *senseless* then.
+     * This process gives sense back to aiProcess_JoinIdenticalVertices
+     */
+    aiProcess_DropNormals = 0x40000000,
 };
 
 

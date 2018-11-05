@@ -397,6 +397,9 @@ int ProcessStandardArguments(
 		else if (! strcmp( param, "-gsn") || ! strcmp( param, "--gen-smooth-normals")) {
 			fill.ppFlags |= aiProcess_GenSmoothNormals;
 		}
+    else if (! strcmp( param, "-dn") || ! strcmp( param, "--drop-normals")) {
+			fill.ppFlags |= aiProcess_DropNormals;
+		}
 		else if (! strcmp( param, "-gn") || ! strcmp( param, "--gen-normals")) {
 			fill.ppFlags |= aiProcess_GenNormals;
 		}

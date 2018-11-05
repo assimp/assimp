@@ -62,6 +62,9 @@ corresponding preprocessor flag to selectively disable steps.
 #ifndef ASSIMP_BUILD_NO_TRIANGULATE_PROCESS
 #   include "TriangulateProcess.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_DROPFACENORMALS_PROCESS
+#   include "DropFaceNormalsProcess.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS
 #   include "GenFaceNormalsProcess.h"
 #endif

@@ -8,7 +8,7 @@ clone_folder: c:\projects\assimp
 branches:
   # whitelist
   only:
-    - master
+    - clang_on_Windows
 
 matrix:
   fast_finish: true

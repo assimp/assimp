@@ -204,6 +204,9 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
     out.push_back( new SplitLargeMeshesProcess_Triangle());
 #endif
 #if (!defined ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS)
+    out.push_back( new DropFaceNormalsProcess());
+#endif
+#if (!defined ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS)
     out.push_back( new GenFaceNormalsProcess());
 #endif
 #if (!defined ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS)

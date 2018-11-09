@@ -491,7 +491,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             {
                 if (pMesh->mBones[i]->mName == pMesh->mBones[a]->mName)
                 {
-                    std::string name;
+                    const char *name = "unknown";
                     if (nullptr != pMesh->mBones[ i ]->mName.C_Str()) {
                         name = pMesh->mBones[ i ]->mName.C_Str();
                     }

@@ -491,8 +491,12 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             {
                 if (pMesh->mBones[i]->mName == pMesh->mBones[a]->mName)
                 {
-                    ReportError("aiMesh::mBones[%i] has the same name as "
-                        "aiMesh::mBones[%i]",i,a);
+                    const char *name = "unknown";
+                    if (nullptr != pMesh->mBones[ i ]->mName.C_Str()) {
+                        name = pMesh->mBones[ i ]->mName.C_Str();
+                    }
+                    ReportError("aiMesh::mBones[%i], name = \"%s\" has the same name as "
+                        "aiMesh::mBones[%i]", i, name, a );
                 }
             }
         }

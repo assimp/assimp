@@ -57,6 +57,7 @@ namespace Assimp {
     
 class ExporterPimpl;
 class IOSystem;
+class ProgressHandler;
 
 // ----------------------------------------------------------------------------------
 /** CPP-API: The Exporter class forms an C++ interface to the export functionality
@@ -84,8 +85,7 @@ public:
     typedef void (*fpExportFunc)(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
     /** Internal description of an Assimp export format option */
-    struct ExportFormatEntry
-    {
+    struct ExportFormatEntry {
         /// Public description structure to be returned by aiGetExportFormatDescription()
         aiExportFormatDesc mDescription;
 
@@ -157,6 +157,19 @@ public:
      * supply its own custom IO handler via #SetIOHandler().
      * @return true by default */
     bool IsDefaultIOHandler() const;
+
+    // -------------------------------------------------------------------
+    /** Supplies a custom progress handler to the exporter. This
+     *  interface exposes an #Update() callback, which is called
+     *  more or less periodically (please don't sue us if it
+     *  isn't as periodically as you'd like it to have ...).
+     *  This can be used to implement progress bars and loading
+     *  timeouts.
+     *  @param pHandler Progress callback interface. Pass nullptr to
+     *    disable progress reporting.
+     *  @note Progress handlers can be used to abort the loading
+     *    at almost any time.*/
+    void SetProgressHandler(ProgressHandler* pHandler);
 
     // -------------------------------------------------------------------
     /** Exports the given scene to a chosen file format. Returns the exported

@@ -732,9 +732,9 @@ static void GetNodeTransform(aiMatrix4x4& matrix, const glTF2::Node& node) {
     }
 }
 
-static void BuildVertexWeightMapping(Ref<Mesh>& mesh, std::vector<std::vector<aiVertexWeight>>& map)
+static void BuildVertexWeightMapping(Mesh::Primitive& primitive, std::vector<std::vector<aiVertexWeight>>& map)
 {
-    Mesh::Primitive::Attributes& attr = mesh->primitives[0].attributes;
+    Mesh::Primitive::Attributes& attr = primitive.attributes;
     if (attr.weight.empty() || attr.joint.empty()) {
         return;
     }
@@ -745,15 +745,22 @@ static void BuildVertexWeightMapping(Ref<Mesh>& mesh, std::vector<std::vector<ai
     const int num_vertices = attr.weight[0]->count;
 
     struct Weights { float values[4]; };
-    struct Indices { uint8_t values[4]; };
     Weights* weights = nullptr;
-    Indices* indices = nullptr;
     attr.weight[0]->ExtractData(weights);
-    attr.joint[0]->ExtractData(indices);
+
+    struct Indices8 { uint8_t values[4]; };
+    struct Indices16 { uint16_t values[4]; };
+    Indices8* indices8 = nullptr;
+    Indices16* indices16 = nullptr;
+    if (attr.joint[0]->GetElementSize() == 4) {
+        attr.joint[0]->ExtractData(indices8);
+    }else {
+        attr.joint[0]->ExtractData(indices16);
+    }
 
     for (int i = 0; i < num_vertices; ++i) {
         for (int j = 0; j < 4; ++j) {
-            const unsigned int bone = indices[i].values[j];
+            const unsigned int bone = (indices8!=nullptr) ? indices8[i].values[j] : indices16[i].values[j];
             const float weight = weights[i].values[j];
             if (weight > 0 && bone < map.size()) {
                 map[bone].reserve(8);
@@ -763,7 +770,8 @@ static void BuildVertexWeightMapping(Ref<Mesh>& mesh, std::vector<std::vector<ai
     }
 
     delete[] weights;
-    delete[] indices;
+    delete[] indices8;
+    delete[] indices16;
 }
 
 aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& meshOffsets, glTF2::Ref<glTF2::Node>& ptr)
@@ -797,37 +805,39 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
         ainode->mMeshes = new unsigned int[count];
 
         if (node.skin) {
-            aiMesh* mesh = pScene->mMeshes[meshOffsets[mesh_idx]];
-            mesh->mNumBones = node.skin->jointNames.size();
-            mesh->mBones = new aiBone*[mesh->mNumBones];
+            for (int primitiveNo = 0; primitiveNo < count; ++primitiveNo) {
+                aiMesh* mesh = pScene->mMeshes[meshOffsets[mesh_idx]+primitiveNo];
+                mesh->mNumBones = node.skin->jointNames.size();
+                mesh->mBones = new aiBone*[mesh->mNumBones];
 
-            // GLTF and Assimp choose to store bone weights differently.
-            // GLTF has each vertex specify which bones influence the vertex.
-            // Assimp has each bone specify which vertices it has influence over.
-            // To convert this data, we first read over the vertex data and pull
-            // out the bone-to-vertex mapping.  Then, when creating the aiBones,
-            // we copy the bone-to-vertex mapping into the bone.  This is unfortunate
-            // both because it's somewhat slow and because, for many applications,
-            // we then need to reconvert the data back into the vertex-to-bone
-            // mapping which makes things doubly-slow.
-            std::vector<std::vector<aiVertexWeight>> weighting(mesh->mNumBones);
-            BuildVertexWeightMapping(node.meshes[0], weighting);
+                // GLTF and Assimp choose to store bone weights differently.
+                // GLTF has each vertex specify which bones influence the vertex.
+                // Assimp has each bone specify which vertices it has influence over.
+                // To convert this data, we first read over the vertex data and pull
+                // out the bone-to-vertex mapping.  Then, when creating the aiBones,
+                // we copy the bone-to-vertex mapping into the bone.  This is unfortunate
+                // both because it's somewhat slow and because, for many applications,
+                // we then need to reconvert the data back into the vertex-to-bone
+                // mapping which makes things doubly-slow.
+                std::vector<std::vector<aiVertexWeight>> weighting(mesh->mNumBones);
+                BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
 
-            for (size_t i = 0; i < mesh->mNumBones; ++i) {
-                aiBone* bone = new aiBone();
+                for (size_t i = 0; i < mesh->mNumBones; ++i) {
+                    aiBone* bone = new aiBone();
 
-                Ref<Node> joint = node.skin->jointNames[i];
-                bone->mName = joint->name;
-                GetNodeTransform(bone->mOffsetMatrix, *joint);
+                    Ref<Node> joint = node.skin->jointNames[i];
+                    bone->mName = joint->name;
+                    GetNodeTransform(bone->mOffsetMatrix, *joint);
 
-                std::vector<aiVertexWeight>& weights = weighting[i];
+                    std::vector<aiVertexWeight>& weights = weighting[i];
 
-                bone->mNumWeights = weights.size();
-                if (bone->mNumWeights > 0) {
-                    bone->mWeights = new aiVertexWeight[bone->mNumWeights];
-                    memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                    bone->mNumWeights = weights.size();
+                    if (bone->mNumWeights > 0) {
+                        bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+                        memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                    }
+                    mesh->mBones[i] = bone;
                 }
-                mesh->mBones[i] = bone;
             }
         }
 

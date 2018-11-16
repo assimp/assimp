@@ -315,22 +315,19 @@ void Importer::SetIOHandler( IOSystem* pIOHandler)
 
 // ------------------------------------------------------------------------------------------------
 // Get the currently set IO handler
-IOSystem* Importer::GetIOHandler() const
-{
+IOSystem* Importer::GetIOHandler() const {
     return pimpl->mIOHandler;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Check whether a custom IO handler is currently set
-bool Importer::IsDefaultIOHandler() const
-{
+bool Importer::IsDefaultIOHandler() const {
     return pimpl->mIsDefaultHandler;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Supplies a custom progress handler to get regular callbacks during importing
-void Importer::SetProgressHandler ( ProgressHandler* pHandler )
-{
+void Importer::SetProgressHandler ( ProgressHandler* pHandler ) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     // If the new handler is zero, allocate a default implementation.
     if (!pHandler)
@@ -351,15 +348,13 @@ void Importer::SetProgressHandler ( ProgressHandler* pHandler )
 
 // ------------------------------------------------------------------------------------------------
 // Get the currently set progress handler
-ProgressHandler* Importer::GetProgressHandler() const
-{
+ProgressHandler* Importer::GetProgressHandler() const {
     return pimpl->mProgressHandler;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Check whether a custom progress handler is currently set
-bool Importer::IsDefaultProgressHandler() const
-{
+bool Importer::IsDefaultProgressHandler() const {
     return pimpl->mIsDefaultProgressHandler;
 }
 

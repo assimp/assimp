@@ -62,9 +62,7 @@ namespace Assimp {
 // to convert the data to the target data type.
 class LineReader
 {
-
 public:
-
     LineReader(StreamReaderLE& reader)
          // do NOT skip empty lines. In DXF files, they count as valid data.
         : splitter(reader,false,true)
@@ -73,9 +71,6 @@ public:
         , end()
     {
     }
-
-public:
-
 
     // -----------------------------------------
     bool Is(int gc, const char* what) const {
@@ -101,8 +96,6 @@ public:
     bool End() const {
         return !((bool)*this);
     }
-
-public:
 
     // -----------------------------------------
     unsigned int ValueAsUnsignedInt() const {
@@ -228,9 +221,7 @@ struct FileData
     std::vector<Block> blocks;
 };
 
+}
+} // Namespace Assimp
 
-
-
-
-}}
 #endif

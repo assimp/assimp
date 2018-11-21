@@ -72,10 +72,6 @@ public:
     DXFImporter();
     ~DXFImporter();
 
-
-
-public:
-
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
@@ -83,7 +79,6 @@ public:
         bool checkSig) const;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details*/

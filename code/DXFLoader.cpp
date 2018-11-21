@@ -63,11 +63,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // AutoCAD Binary DXF<CR><LF><SUB><NULL>
-#define AI_DXF_BINARY_IDENT ("AutoCAD Binary DXF\r\n\x1a\0")
-#define AI_DXF_BINARY_IDENT_LEN (24)
+const std::string AI_DXF_BINARY_IDENT = std::string("AutoCAD Binary DXF\r\n\x1a\0");
+const size_t AI_DXF_BINARY_IDENT_LEN = 24u;
 
 // default vertex color that all uncolored vertices will receive
-#define AI_DXF_DEFAULT_COLOR aiColor4D(0.6f,0.6f,0.6f,0.6f)
+const aiColor4D AI_DXF_DEFAULT_COLOR(aiColor4D(0.6f, 0.6f, 0.6f, 0.6f));
 
 // color indices for DXF - 16 are supported, the table is
 // taken directly from the DXF spec.
@@ -93,7 +93,6 @@ static aiColor4D g_aclrDxfIndexColors[] =
 #define AI_DXF_NUM_INDEX_COLORS (sizeof(g_aclrDxfIndexColors)/sizeof(g_aclrDxfIndexColors[0]))
 #define AI_DXF_ENTITIES_MAGIC_BLOCK "$ASSIMP_ENTITIES_MAGIC"
 
-
 static const aiImporterDesc desc = {
     "Drawing Interchange Format (DXF) Importer",
     "",
@@ -110,24 +109,27 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 DXFImporter::DXFImporter()
-{}
+: BaseImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-DXFImporter::~DXFImporter()
-{}
+DXFImporter::~DXFImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool DXFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const {
-    const std::string& extension = GetExtension( pFile );
+bool DXFImporter::CanRead( const std::string& filename, IOSystem* pIOHandler, bool checkSig ) const {
+    const std::string& extension = GetExtension( filename );
     if ( extension == "dxf" ) {
         return true;
     }
 
     if ( extension.empty() || checkSig ) {
         static const char *pTokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 4, 32 );
+        return BaseImporter::SearchFileHeaderForToken(pIOHandler, filename, pTokens, 4, 32 );
     }
 
     return false;
@@ -157,7 +159,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
     char buff[AI_DXF_BINARY_IDENT_LEN+1] = {0};
     file->Read(buff,AI_DXF_BINARY_IDENT_LEN,1);
 
-    if (!strncmp(AI_DXF_BINARY_IDENT,buff,AI_DXF_BINARY_IDENT_LEN)) {
+    if (!strncmp(AI_DXF_BINARY_IDENT.c_str(),buff,AI_DXF_BINARY_IDENT_LEN)) {
         throw DeadlyImportError("DXF: Binary files are not supported at the moment");
     }
 
@@ -734,9 +736,17 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
                 break;
 
         // VERTEX COORDINATES
-        case 10: out.x = reader.ValueAsFloat();break;
-        case 20: out.y = reader.ValueAsFloat();break;
-        case 30: out.z = reader.ValueAsFloat();break;
+        case 10:
+            out.x = reader.ValueAsFloat();
+            break;
+
+        case 20:
+            out.y = reader.ValueAsFloat();
+            break;
+
+        case 30:
+            out.z = reader.ValueAsFloat();
+            break;
 
         // POLYFACE vertex indices
         case 71:
@@ -770,6 +780,9 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
             if (indices[i] == 0) {
                 ASSIMP_LOG_WARN("DXF: invalid vertex index, indices are one-based.");
                 --line.counts.back();
+                if (line.counts.back() == 0) {
+                    line.counts.pop_back();
+                }
                 continue;
             }
             line.indices.push_back(indices[i]-1);

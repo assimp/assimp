@@ -443,7 +443,7 @@ D3MFImporter::~D3MFImporter() {
 
 bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig) const {
     const std::string extension( GetExtension( filename ) );
-    if(extension == "3mf" ) {
+    if(extension == desc.mFileExtensions ) {
         return true;
     } else if ( !extension.length() || checkSig ) {
         if ( nullptr == pIOHandler ) {

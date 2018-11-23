@@ -54,7 +54,12 @@ namespace Assimp {
     }
 
 namespace StepFile {
-    struct cartesian_point;
+
+struct cartesian_point;
+
+struct Point3D {
+    ai_real x, y, z;
+};
 
 class StepFileImporter : public BaseImporter {
 public:
@@ -69,6 +74,7 @@ protected:
     void ReadSpatialData(std::unique_ptr<STEP::DB> &db);
 
 private:
+    std::vector<Point3D> mCarthesianPoints;
 };
 
 } // Namespace StepFile

@@ -64,12 +64,13 @@ static const aiImporterDesc desc = { "StepFile Importer",
                                 "stp" };
 
 StepFileImporter::StepFileImporter()
-    : BaseImporter() {
-
+: BaseImporter()
+, mCarthesianPoints() {
+    // empty
 }
 
 StepFileImporter::~StepFileImporter() {
-
+    // empty
 }
 
 bool StepFileImporter::CanRead(const std::string& file, IOSystem* pIOHandler, bool checkSig) const {
@@ -110,7 +111,14 @@ void StepFileImporter::InternReadFile(const std::string &file, aiScene* pScene, 
 
     // tell the reader which entity types to track with special care
     static const char* const types_to_track[] = {
-        "product"
+        "product",
+        "vertex_point",
+        "line",
+        "face_outer_bound",
+        "edge_loop",
+        "edge_courve",
+        "b_spline_surface_with_knots",
+        "cartesian_point"
     };
 
     // tell the reader for which types we need to simulate STEPs reverse indices
@@ -119,7 +127,7 @@ void StepFileImporter::InternReadFile(const std::string &file, aiScene* pScene, 
     };
 
     // feed the IFC schema into the reader and pre-parse all lines
-    STEP::ReadFile(*db, schema, types_to_track, 1, nullptr, 0);
+    STEP::ReadFile(*db, schema, types_to_track, 8, nullptr, 0);
 
     //STEP::ReadFile(*db, schema, types_to_track, nullptr, 0);
     const STEP::LazyObject *proj = db->GetObject("product");
@@ -133,7 +141,43 @@ void StepFileImporter::InternReadFile(const std::string &file, aiScene* pScene, 
 void StepFileImporter::ReadCarthesianData(const cartesian_point *pt ) {
     ai_assert(nullptr != pt);
 
+    Point3D point;
+    point.x = static_cast<ai_real>(pt->coordinates.at(0));
+    point.y = static_cast<ai_real>(pt->coordinates.at(1));
+    point.z = static_cast<ai_real>(pt->coordinates.at(2));
+    mCarthesianPoints.push_back(point);
+}
 
+enum TokenType {
+    CarthesianType =0,
+    VertexPointType,
+    LineType,
+    FaceOuterBoundType,
+    EdgeLoopType,
+    EdgeCurveType,
+    BSplineSurfaceWithKnotsType,
+
+    NoneType
+};
+
+TokenType translate(const std::string &key) {
+    if (key == "cartesian_point") {
+        return CarthesianType;
+    } else if (key == "vertex_point") {
+        return VertexPointType;
+    } else if (key == "line") {
+        return LineType;
+    } else if (key == "face_outer_bound") {
+        return FaceOuterBoundType;
+    } else if (key == "edge_loop") {
+        return EdgeLoopType;
+    } else if (key == "edge_courve") {
+        return EdgeCurveType;
+    } else if (key == "b_spline_surface_with_knots") {
+        return BSplineSurfaceWithKnotsType;
+    }
+
+    return NoneType;
 }
 
 void StepFileImporter::ReadSpatialData(std::unique_ptr<STEP::DB> &db) {
@@ -143,13 +187,20 @@ void StepFileImporter::ReadSpatialData(std::unique_ptr<STEP::DB> &db) {
     }
     STEP::DB::ObjectMapByType::const_iterator it( map.begin() );
     for (it; it != map.end(); ++it) {
-        if (it->first == "cartesian_point") {
-            const STEP::DB::ObjectSet* data = &it->second;
+        const STEP::DB::ObjectSet* data(nullptr);
+        const std::string &key(it->first);
+        TokenType type = translate(key);
+        switch (type) {
+        case CarthesianType:
+            data = &it->second;
             for (const STEP::LazyObject *lz : *data) {
                 const cartesian_point* const pt = lz->ToPtr<cartesian_point>();
-                ReadCarthesianData( pt );
+                ReadCarthesianData(pt);
             }
+            break;
 
+        default:
+            break;
         }
     }
 }

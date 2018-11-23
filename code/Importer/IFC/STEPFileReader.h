@@ -56,7 +56,8 @@ DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
 
 /// 2) read the actual file contents using a user-supplied set of
 ///    conversion functions to interpret the data.
-void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len, const char* const* inverse_indices_to_track, size_t len2);
+void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len,
+    const char* const* inverse_indices_to_track, size_t len2);
 
 /// @brief  Helper to read a file.
 template <size_t N, size_t N2>

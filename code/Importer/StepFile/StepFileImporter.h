@@ -48,7 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 
 namespace Assimp {
+    namespace STEP {
+        class DB;
+
+    }
+
 namespace StepFile {
+    struct cartesian_point;
 
 class StepFileImporter : public BaseImporter {
 public:
@@ -59,6 +65,8 @@ public:
 
 protected:
     void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler ) override;
+    void ReadCarthesianData(const cartesian_point *pt);
+    void ReadSpatialData(std::unique_ptr<STEP::DB> &db);
 
 private:
 };

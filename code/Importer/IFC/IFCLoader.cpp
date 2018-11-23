@@ -378,7 +378,6 @@ void SetUnits(ConversionData& conv)
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void SetCoordinateSpace(ConversionData& conv)
 {
@@ -887,7 +886,8 @@ void ProcessSpatialStructures(ConversionData& conv)
         if(!prod) {
             continue;
         }
-        IFCImporter::LogDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`" + (prod->ObjectType? " which is of type " + prod->ObjectType.Get():""));
+        IFCImporter::LogDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`"
+                + (prod->ObjectType? " which is of type " + prod->ObjectType.Get():""));
 
         // the primary sites are referenced by an IFCRELAGGREGATES element which assigns them to the IFCPRODUCT
         const STEP::DB::RefMap& refs = conv.db.GetRefs();

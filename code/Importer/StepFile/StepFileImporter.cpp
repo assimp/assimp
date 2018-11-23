@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2018, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -109,6 +107,51 @@ void StepFileImporter::InternReadFile(const std::string &file, aiScene* pScene, 
     }
     ::Assimp::STEP::EXPRESS::ConversionSchema schema;
     GetSchema(schema);
+
+    // tell the reader which entity types to track with special care
+    static const char* const types_to_track[] = {
+        "product"
+    };
+
+    // tell the reader for which types we need to simulate STEPs reverse indices
+    static const char* const inverse_indices_to_track[] = {
+        "PRODUCT_DEFINITION"
+    };
+
+    // feed the IFC schema into the reader and pre-parse all lines
+    STEP::ReadFile(*db, schema, types_to_track, 1, nullptr, 0);
+
+    //STEP::ReadFile(*db, schema, types_to_track, nullptr, 0);
+    const STEP::LazyObject *proj = db->GetObject("product");
+    if (!proj) {
+        DeadlyImportError("missing IfcProject entity");
+    }
+
+    ReadSpatialData( db );
+}
+
+void StepFileImporter::ReadCarthesianData(const cartesian_point *pt ) {
+    ai_assert(nullptr != pt);
+
+
+}
+
+void StepFileImporter::ReadSpatialData(std::unique_ptr<STEP::DB> &db) {
+    const STEP::DB::ObjectMapByType &map = db->GetObjectsByType();
+    if (map.empty()) {
+        return;
+    }
+    STEP::DB::ObjectMapByType::const_iterator it( map.begin() );
+    for (it; it != map.end(); ++it) {
+        if (it->first == "cartesian_point") {
+            const STEP::DB::ObjectSet* data = &it->second;
+            for (const STEP::LazyObject *lz : *data) {
+                const cartesian_point* const pt = lz->ToPtr<cartesian_point>();
+                ReadCarthesianData( pt );
+            }
+
+        }
+    }
 }
 
 } // Namespace StepFile

@@ -1,5 +1,8 @@
 # Install CMake
-Asset-Importer-Lib can be buildfor a lot of different OS'es and platforms. We are using cmake to generate the build environment for these via cmake. So you have to make sure that you have a working cmake-installation on your system. You can download it at https://cmake.org/
+Asset-Importer-Lib can be build for a lot of different platforms. We are using cmake to generate the build environment for these via cmake. So you have to make sure that you have a working cmake-installation on your system. You can download it at https://cmake.org/ or for linux install it via
+```
+sudo apt-get install cmake
+```
 
 # Get the source
 Make sure you have a working git-installation. Open a command prompt and clone the Asset-Importer-Lib via:
@@ -11,11 +14,10 @@ git clone https://github.com/assimp/assimp.git
 
 First you have to install Visual-Studio on your windows-system. You can get the Community-Version for free here: https://visualstudio.microsoft.com/de/downloads/
 To generate the build environment for your IDE open a command prompt, navigate to your repo and type:
-
 ```
 > cmake CMakeLists.txt
 ```
-This will generate the project files.
+This will generate the project files for the visual studio. All dependencies used to build Asset-IMporter-Lib shall be part of the repo. If you want to use you own zlib.installation this is possible as well. Check the options for it.
 
 # Build instructions for Windows with UWP
 See https://stackoverflow.com/questions/40803170/cmake-uwp-using-cmake-to-build-universal-windows-app

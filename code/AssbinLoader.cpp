@@ -241,9 +241,9 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** onode, aiNode* 
         node->mChildren = new aiNode*[numChildren];
         for (unsigned int i = 0; i < numChildren; ++i) {
             ReadBinaryNode( stream, &node->mChildren[i], node.get() );
+            node->mNumChildren++;
         }
     }
-    *onode = node.release();
 
     if ( nb_metadata > 0 ) {
         node->mMetaData = aiMetadata::Alloc(nb_metadata);
@@ -284,6 +284,7 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** onode, aiNode* 
 			node->mMetaData->mValues[i].mData = data;
 		}
 	}
+    *onode = node.release();
 }
 
 // -----------------------------------------------------------------------------------

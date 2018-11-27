@@ -81,7 +81,7 @@ SMDImporter::SMDImporter()
 mBuffer(),
 pScene( nullptr ),
 iFileSize( 0 ),
-iSmallestFrame( -1 ),
+iSmallestFrame( INT_MAX ),
 dLengthOfAnim( 0.0 ),
 bHasUVs(false ),
 iLineNumber(-1) {
@@ -141,7 +141,7 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     mBuffer.resize( iFileSize + 1 );
     TextFileToBuffer(file.get(), mBuffer );
 
-    iSmallestFrame = (1 << 31);
+    iSmallestFrame = INT_MAX;
     bHasUVs = true;
     iLineNumber = 1;
 
@@ -499,7 +499,7 @@ void SMDImporter::CreateOutputNodes()
     }
 
     // now add all bones as dummy sub nodes to the graph
-    // AddBoneChildren(pScene->mRootNode,(uint32_t)-1);
+    AddBoneChildren(pScene->mRootNode,(uint32_t)-1);
 
     // if we have only one bone we can even remove the root node
     if (pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE &&
@@ -523,26 +523,12 @@ void SMDImporter::CreateOutputNodes()
 // create output animations
 void SMDImporter::CreateOutputAnimations()
 {
-    unsigned int iNumBones = 0;
-    for (std::vector<SMD::Bone>::const_iterator
-        i =  asBones.begin();
-        i != asBones.end();++i)
-    {
-        if ((*i).bIsUsed)++iNumBones;
-    }
-    if (!iNumBones)
-    {
-        // just make sure this case doesn't occur ... (it could occur
-        // if the file was invalid)
-        return;
-    }
-
     pScene->mNumAnimations = 1;
     pScene->mAnimations = new aiAnimation*[1];
     aiAnimation*& anim = pScene->mAnimations[0] = new aiAnimation();
 
     anim->mDuration = dLengthOfAnim;
-    anim->mNumChannels = iNumBones;
+    anim->mNumChannels = asBones.size();
     anim->mTicksPerSecond = 25.0; // FIXME: is this correct?
 
     aiNodeAnim** pp = anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
@@ -553,8 +539,6 @@ void SMDImporter::CreateOutputAnimations()
         i =  asBones.begin();
         i != asBones.end();++i)
     {
-        if (!(*i).bIsUsed)continue;
-
         aiNodeAnim* p = pp[a] = new aiNodeAnim();
 
         // copy the name of the bone
@@ -865,7 +849,6 @@ void SMDImporter::ParseSkeletonSection(const char* szCurrent,
         // "time <n>\n" - Specifies the current animation frame
         else if (TokenMatch(szCurrent,"time",4))
         {
-            // NOTE: The doc says that time values COULD be negative ...
             if(!ParseSignedInt(szCurrent,&szCurrent,iTime))break;
 
             iSmallestFrame = std::min(iSmallestFrame,iTime);
@@ -1006,7 +989,8 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent,
         mTemp.c4 = vPos.z;
         key.matrix = key.matrix * mTemp;
     }
-
+    key.vPos = vPos;
+    key.vRot = vRot;
     // go to the beginning of the next line
     SMDI_PARSE_RETURN;
 }

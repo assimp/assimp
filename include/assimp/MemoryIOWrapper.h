@@ -80,7 +80,8 @@ public:
     // -------------------------------------------------------------------
     // Read from stream
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount)    {
-        ai_assert(pvBuffer && pSize);
+        ai_assert(pvBuffer);
+        ai_assert(pSize);
         const size_t cnt = std::min(pCount,(length-pos)/pSize), ofs = pSize*cnt;
 
         memcpy(pvBuffer,buffer+pos,ofs);

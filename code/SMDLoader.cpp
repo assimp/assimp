@@ -558,7 +558,8 @@ void SMDImporter::CreateOutputAnimations()
                 pRotKeys->mTime = pVecKeys->mTime = (*qq).dTime;
 
                 // compute the rotation quaternion from the euler angles
-                pRotKeys->mValue = aiQuaternion( (*qq).vRot.x, (*qq).vRot.y, (*qq).vRot.z );
+                // aiQuaternion: The order of the parameters is yzx?
+                pRotKeys->mValue = aiQuaternion( (*qq).vRot.y, (*qq).vRot.z, (*qq).vRot.x );
                 pVecKeys->mValue = (*qq).vPos;
 
                 ++pVecKeys; ++pRotKeys;
@@ -987,7 +988,7 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent,
         mTemp.a4 = vPos.x;
         mTemp.b4 = vPos.y;
         mTemp.c4 = vPos.z;
-        key.matrix = key.matrix * mTemp;
+        key.matrix = mTemp * key.matrix;
     }
     key.vPos = vPos;
     key.vRot = vRot;

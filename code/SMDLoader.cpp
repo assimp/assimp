@@ -58,6 +58,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
 #include <memory>
+#include <assimp/DefaultIOSystem.h>
+#include <tuple>
+
+#ifndef _WIN32
+#define strtok_s strtok_r
+#endif
 
 using namespace Assimp;
 
@@ -120,43 +126,17 @@ void SMDImporter::SetupProperties(const Importer* pImp)
     if(static_cast<unsigned int>(-1) == configFrameID)  {
         configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_GLOBAL_KEYFRAME,0);
     }
+
+    bLoadAnimationList = pImp->GetPropertyBool(AI_CONFIG_IMPORT_SMD_LOAD_ANIMATION_LIST, true);
+    noSkeletonMesh = pImp->GetPropertyBool(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, false);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
-
-    // Check whether we can read from the file
-    if( file.get() == NULL) {
-        throw DeadlyImportError( "Failed to open SMD/VTA file " + pFile + ".");
-    }
-
-    iFileSize = (unsigned int)file->FileSize();
-
-    // Allocate storage and copy the contents of the file to a memory buffer
     this->pScene = pScene;
-
-    mBuffer.resize( iFileSize + 1 );
-    TextFileToBuffer(file.get(), mBuffer );
-
-    iSmallestFrame = INT_MAX;
-    bHasUVs = true;
-    iLineNumber = 1;
-
-    // Reserve enough space for ... hm ... 10 textures
-    aszTextures.reserve(10);
-
-    // Reserve enough space for ... hm ... 1000 triangles
-    asTriangles.reserve(1000);
-
-    // Reserve enough space for ... hm ... 20 bones
-    asBones.reserve(20);
-
-
-    // parse the file ...
-    ParseFile();
+    ReadSmd(pFile, pIOHandler);
 
     // If there are no triangles it seems to be an animation SMD,
     // containing only the animation skeleton.
@@ -203,13 +183,13 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         CreateOutputMaterials();
     }
 
-    // build the output animation
-    CreateOutputAnimations();
-
     // build output nodes (bones are added as empty dummy nodes)
     CreateOutputNodes();
 
-    if (pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)
+    // build the output animation
+    CreateOutputAnimations(pFile, pIOHandler);
+
+    if ((pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) && !noSkeletonMesh)
     {
         SkeletonMeshBuilder skeleton(pScene);
     }
@@ -521,12 +501,35 @@ void SMDImporter::CreateOutputNodes()
 
 // ------------------------------------------------------------------------------------------------
 // create output animations
-void SMDImporter::CreateOutputAnimations()
+void SMDImporter::CreateOutputAnimations(const std::string &pFile, IOSystem* pIOHandler)
 {
-    pScene->mNumAnimations = 1;
-    pScene->mAnimations = new aiAnimation*[1];
-    aiAnimation*& anim = pScene->mAnimations[0] = new aiAnimation();
+    std::vector<std::tuple<std::string, std::string>> animFileList;
 
+    if (bLoadAnimationList) GetAnimationFileList(pFile, pIOHandler, animFileList);
+    int animCount = animFileList.size() + 1;
+    pScene->mNumAnimations = 1;
+    pScene->mAnimations = new aiAnimation*[animCount];
+    memset(pScene->mAnimations, 0, sizeof(aiAnimation*)*animCount);
+    CreateOutputAnimation(0, "");
+
+    for (auto &animFile : animFileList)
+    {
+        ReadSmd(std::get<1>(animFile), pIOHandler);
+        if (asBones.empty()) continue;
+
+        FixTimeValues();
+        CreateOutputAnimation(pScene->mNumAnimations++, std::get<0>(animFile));
+    }
+}
+
+void SMDImporter::CreateOutputAnimation(int index, const std::string &name)
+{
+    aiAnimation*& anim = pScene->mAnimations[index] = new aiAnimation();
+
+    if (name.length())
+    {
+        anim->mName.Set(name.c_str());
+    }
     anim->mDuration = dLengthOfAnim;
     anim->mNumChannels = asBones.size();
     anim->mTicksPerSecond = 25.0; // FIXME: is this correct?
@@ -536,15 +539,15 @@ void SMDImporter::CreateOutputAnimations()
     // now build valid keys
     unsigned int a = 0;
     for (std::vector<SMD::Bone>::const_iterator
-        i =  asBones.begin();
-        i != asBones.end();++i)
+        i = asBones.begin();
+        i != asBones.end(); ++i)
     {
         aiNodeAnim* p = pp[a] = new aiNodeAnim();
 
         // copy the name of the bone
-        p->mNodeName.Set( i->mName);
+        p->mNodeName.Set(i->mName);
 
-        p->mNumRotationKeys = (unsigned int) (*i).sAnim.asKeys.size();
+        p->mNumRotationKeys = (unsigned int)(*i).sAnim.asKeys.size();
         if (p->mNumRotationKeys)
         {
             p->mNumPositionKeys = p->mNumRotationKeys;
@@ -552,14 +555,14 @@ void SMDImporter::CreateOutputAnimations()
             aiQuatKey* pRotKeys = p->mRotationKeys = new aiQuatKey[p->mNumRotationKeys];
 
             for (std::vector<SMD::Bone::Animation::MatrixKey>::const_iterator
-                qq =  (*i).sAnim.asKeys.begin();
+                qq = (*i).sAnim.asKeys.begin();
                 qq != (*i).sAnim.asKeys.end(); ++qq)
             {
                 pRotKeys->mTime = pVecKeys->mTime = (*qq).dTime;
 
                 // compute the rotation quaternion from the euler angles
                 // aiQuaternion: The order of the parameters is yzx?
-                pRotKeys->mValue = aiQuaternion( (*qq).vRot.y, (*qq).vRot.z, (*qq).vRot.x );
+                pRotKeys->mValue = aiQuaternion((*qq).vRot.y, (*qq).vRot.z, (*qq).vRot.x);
                 pVecKeys->mValue = (*qq).vPos;
 
                 ++pVecKeys; ++pRotKeys;
@@ -568,6 +571,56 @@ void SMDImporter::CreateOutputAnimations()
         ++a;
 
         // there are no scaling keys ...
+    }
+}
+
+void SMDImporter::GetAnimationFileList(const std::string &pFile, IOSystem* pIOHandler, std::vector<std::tuple<std::string, std::string>>& outList)
+{
+    auto base = DefaultIOSystem::absolutePath(pFile);
+    auto name = DefaultIOSystem::completeBaseName(pFile);
+    auto path = base + "/" + name + "_animation.txt";
+
+    std::unique_ptr<IOStream> file(pIOHandler->Open(path.c_str(), "rb"));
+    if (file.get() == NULL) return;
+
+    // Allocate storage and copy the contents of the file to a memory buffer
+    std::vector<char> buf;
+    size_t fileSize = file->FileSize();
+    buf.resize(fileSize + 1);
+    TextFileToBuffer(file.get(), buf);
+
+    /*
+        *_animation.txt format:
+        name path
+        idle idle.smd
+        jump anim/jump.smd
+        walk.smd
+        ...
+    */
+    std::string animName, animPath;
+    char *tok1, *tok2;
+    char *context1, *context2;
+
+    tok1 = strtok_s(&buf[0], "\r\n", &context1);
+    while (tok1 != NULL) {
+        tok2 = strtok_s(tok1, " \t", &context2);
+        if (tok2)
+        {
+            char *p = tok2;
+            tok2 = strtok_s(NULL, " \t", &context2);
+            if (tok2)
+            {
+                animPath = tok2;
+                animName = p;
+            }
+            else // No name
+            {
+                animPath = p;
+                animName = DefaultIOSystem::completeBaseName(animPath);
+            }
+            outList.push_back(std::make_tuple(animName, base + "/" + animPath));
+        }
+        tok1 = strtok_s(NULL, "\r\n", &context1);
     }
 }
 
@@ -733,6 +786,42 @@ void SMDImporter::ParseFile()
         SkipLine(szCurrent,&szCurrent);
     }
     return;
+}
+
+void SMDImporter::ReadSmd(const std::string &pFile, IOSystem* pIOHandler)
+{
+    std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
+
+    // Check whether we can read from the file
+    if (file.get() == NULL) {
+        throw DeadlyImportError("Failed to open SMD/VTA file " + pFile + ".");
+    }
+
+    iFileSize = (unsigned int)file->FileSize();
+
+    // Allocate storage and copy the contents of the file to a memory buffer
+    mBuffer.resize(iFileSize + 1);
+    TextFileToBuffer(file.get(), mBuffer);
+
+    iSmallestFrame = INT_MAX;
+    bHasUVs = true;
+    iLineNumber = 1;
+
+    // Reserve enough space for ... hm ... 10 textures
+    aszTextures.reserve(10);
+
+    // Reserve enough space for ... hm ... 1000 triangles
+    asTriangles.reserve(1000);
+
+    // Reserve enough space for ... hm ... 20 bones
+    asBones.reserve(20);
+
+    aszTextures.clear();
+    asTriangles.clear();
+    asBones.clear();
+
+    // parse the file ...
+    ParseFile();
 }
 
 // ------------------------------------------------------------------------------------------------

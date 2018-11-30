@@ -291,13 +291,6 @@ protected:
     unsigned int GetTextureIndex(const std::string& filename);
 
     // -------------------------------------------------------------------
-    /** Computes absolute bone transformations
-     * All output transformations are in worldspace.
-     */
-    void ComputeAbsoluteBoneTransformations();
-
-
-    // -------------------------------------------------------------------
     /** Parse a line in the skeleton section
      */
     void ParseSkeletonElement(const char* szCurrent,

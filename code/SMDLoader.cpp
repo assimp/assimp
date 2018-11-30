@@ -169,10 +169,10 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
         // now fix invalid time values and make sure the animation starts at frame 0
         FixTimeValues();
-
-        // compute absolute bone transformation matrices
-    //  ComputeAbsoluteBoneTransformations();
     }
+
+    // build output nodes (bones are added as empty dummy nodes)
+    CreateOutputNodes();
 
     if (!(pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
     {
@@ -181,10 +181,13 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
         // build an output material list
         CreateOutputMaterials();
-    }
 
-    // build output nodes (bones are added as empty dummy nodes)
-    CreateOutputNodes();
+        // use root node that renders all meshes
+        pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+        pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
+        for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
+            pScene->mRootNode->mMeshes[i] = i;
+    }
 
     // build the output animation
     CreateOutputAnimations(pFile, pIOHandler);
@@ -397,7 +400,7 @@ void SMDImporter::CreateOutputMeshes()
         for (unsigned int iBone = 0; iBone < asBones.size();++iBone)
             if (!aaiBones[iBone].empty())++iNum;
 
-        if (false && iNum)
+        if (iNum)
         {
             pcMesh->mNumBones = iNum;
             pcMesh->mBones = new aiBone*[pcMesh->mNumBones];
@@ -456,7 +459,14 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
         pc->mName.Set(bone.mName);
 
         // store the local transformation matrix of the bind pose
-        pc->mTransformation = bone.sAnim.asKeys[bone.sAnim.iFirstTimeKey].matrix;
+        if (bone.sAnim.asKeys.size())
+            pc->mTransformation = bone.sAnim.asKeys[0].matrix;
+
+        if (bone.iParent == -1)
+            bone.mOffsetMatrix = pc->mTransformation;
+        else
+            bone.mOffsetMatrix = asBones[bone.iParent].mOffsetMatrix * pc->mTransformation;
+
         pc->mParent = pcNode;
 
         // add children to this node, too
@@ -469,17 +479,11 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 void SMDImporter::CreateOutputNodes()
 {
     pScene->mRootNode = new aiNode();
-    if (!(pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
-    {
-        // create one root node that renders all meshes
-        pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
-        pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
-        for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-            pScene->mRootNode->mMeshes[i] = i;
-    }
 
     // now add all bones as dummy sub nodes to the graph
     AddBoneChildren(pScene->mRootNode,(uint32_t)-1);
+    for (auto &bone : asBones)
+        bone.mOffsetMatrix.Inverse();
 
     // if we have only one bone we can even remove the root node
     if (pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE &&
@@ -624,67 +628,6 @@ void SMDImporter::GetAnimationFileList(const std::string &pFile, IOSystem* pIOHa
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-void SMDImporter::ComputeAbsoluteBoneTransformations()
-{
-    // For each bone: determine the key with the lowest time value
-    // theoretically the SMD format should have all keyframes
-    // in order. However, I've seen a file where this wasn't true.
-    for (unsigned int i = 0; i < asBones.size();++i)
-    {
-        SMD::Bone& bone = asBones[i];
-
-        uint32_t iIndex = 0;
-        double dMin = 10e10;
-        for (unsigned int i = 0; i < bone.sAnim.asKeys.size();++i)
-        {
-            double d = std::min(bone.sAnim.asKeys[i].dTime,dMin);
-            if (d < dMin)
-            {
-                dMin = d;
-                iIndex = i;
-            }
-        }
-        bone.sAnim.iFirstTimeKey = iIndex;
-    }
-
-    unsigned int iParent = 0;
-    while (iParent < asBones.size())
-    {
-        for (unsigned int iBone = 0; iBone < asBones.size();++iBone)
-        {
-            SMD::Bone& bone = asBones[iBone];
-
-            if (iParent == bone.iParent)
-            {
-                SMD::Bone& parentBone = asBones[iParent];
-
-
-                uint32_t iIndex = bone.sAnim.iFirstTimeKey;
-                const aiMatrix4x4& mat = bone.sAnim.asKeys[iIndex].matrix;
-                aiMatrix4x4& matOut = bone.sAnim.asKeys[iIndex].matrixAbsolute;
-
-                // The same for the parent bone ...
-                iIndex = parentBone.sAnim.iFirstTimeKey;
-                const aiMatrix4x4& mat2 = parentBone.sAnim.asKeys[iIndex].matrixAbsolute;
-
-                // Compute the absolute transformation matrix
-                matOut = mat * mat2;
-            }
-        }
-        ++iParent;
-    }
-
-    // Store the inverse of the absolute transformation matrix
-    // of the first key as bone offset matrix
-    for (iParent = 0; iParent < asBones.size();++iParent)
-    {
-        SMD::Bone& bone = asBones[iParent];
-        bone.mOffsetMatrix = bone.sAnim.asKeys[bone.sAnim.iFirstTimeKey].matrixAbsolute;
-        bone.mOffsetMatrix.Inverse();
-    }
-}
-\
 // ------------------------------------------------------------------------------------------------
 // create output materials
 void SMDImporter::CreateOutputMaterials()

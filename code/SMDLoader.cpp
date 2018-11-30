@@ -989,7 +989,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
             ++szEnd;
             break;
         }
-        else if (IsSpaceOrNewLine(*szEnd))
+        else if (!bQuota && IsSpaceOrNewLine(*szEnd))
         {
             iBone = (unsigned int)(szEnd - szCurrent);
             break;

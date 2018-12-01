@@ -82,15 +82,18 @@ void CompressBinaryDump(const char* file, unsigned int head_size)
 	uint8_t* data = new uint8_t[size];
 	fread(data,1,size,p);
 
-	uLongf out_size = (uLongf)((size-head_size) * 1.001 + 12.);
+	uint32_t uncompressed_size = size-head_size;
+	uLongf out_size = (uLongf)compressBound(uncompressed_size);
 	uint8_t* out = new uint8_t[out_size];
 
-	compress2(out,&out_size,data+head_size,size-head_size,9);
+	int res = compress2(out,&out_size,data+head_size,uncompressed_size,9);
+	if(res != Z_OK)
+		fprintf(stderr, "compress2: error\n");
 	fclose(p);
 	p = fopen(file,"w");
 
 	fwrite(data,head_size,1,p);
-	fwrite(&out_size,4,1,p); // write size of uncompressed data
+	fwrite(&uncompressed_size,4,1,p); // write size of uncompressed data
 	fwrite(out,out_size,1,p);
 
 	fclose(p);

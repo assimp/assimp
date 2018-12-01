@@ -87,6 +87,7 @@ SET( IMPORTERS
   unit/utIFCImportExport.cpp
   unit/utFBXImporterExporter.cpp
   unit/utImporter.cpp
+  unit/ImportExport/utExporter.cpp
   unit/ut3DImportExport.cpp
   unit/ut3DSImportExport.cpp
   unit/utACImportExport.cpp

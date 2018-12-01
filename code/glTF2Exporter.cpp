@@ -961,92 +961,89 @@ void glTF2Exporter::ExportMetadata()
     asset.generator = buffer;
 }
 
-inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)
+inline Ref<Accessor> GetSamplerInputRef(Asset& asset, std::string& animId, Ref<Buffer>& buffer, std::vector<float>& times)
 {
-    // Loop over the data and check to see if it exactly matches an existing buffer.
-    //    If yes, then reference the existing corresponding accessor.
-    //    Otherwise, add to the buffer and create a new accessor.
+    return ExportData(asset, animId, buffer, times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+}
 
-    size_t counts[3] = {
-        nodeChannel->mNumPositionKeys,
-        nodeChannel->mNumScalingKeys,
-        nodeChannel->mNumRotationKeys,
-    };
-    size_t numKeyframes = 1;
-    for (int i = 0; i < 3; ++i) {
-        if (counts[i] > numKeyframes) {
-            numKeyframes = counts[i];
-        }
+inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)
+{
+    const unsigned int numKeyframes = nodeChannel->mNumPositionKeys;
+    if (numKeyframes == 0) {
+        return;
     }
 
-    //-------------------------------------------------------
-    // Extract TIME parameter data.
-    // Check if the timeStamps are the same for mPositionKeys, mRotationKeys, and mScalingKeys.
-    if(nodeChannel->mNumPositionKeys > 0) {
-        typedef float TimeType;
-        std::vector<TimeType> timeData;
-        timeData.resize(numKeyframes);
-        for (size_t i = 0; i < numKeyframes; ++i) {
-            size_t frameIndex = i * nodeChannel->mNumPositionKeys / numKeyframes;
-            // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
-            // Check if we have to cast type here. e.g. uint16_t()
-            timeData[i] = static_cast<float>(nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond);
-        }
-
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
-        if (timeAccessor) animRef->Parameters.TIME = timeAccessor;
+    std::vector<float> times(numKeyframes);
+    std::vector<float> values(numKeyframes * 3);
+    for (unsigned int i = 0; i < numKeyframes; ++i) {
+        const aiVectorKey& key = nodeChannel->mPositionKeys[i];
+        // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
+        times[i] = static_cast<float>(key.mTime / ticksPerSecond);
+        values[(i * 3) + 0] = key.mValue.x;
+        values[(i * 3) + 1] = key.mValue.y;
+        values[(i * 3) + 2] = key.mValue.z;
     }
 
-    //-------------------------------------------------------
-    // Extract translation parameter data
-    if(nodeChannel->mNumPositionKeys > 0) {
-        C_STRUCT aiVector3D* translationData = new aiVector3D[numKeyframes];
-        for (size_t i = 0; i < numKeyframes; ++i) {
-            size_t frameIndex = i * nodeChannel->mNumPositionKeys / numKeyframes;
-            translationData[i] = nodeChannel->mPositionKeys[frameIndex].mValue;
-        }
+    sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
+    sampler.output = ExportData(asset, animId, buffer, numKeyframes, &values[0], AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+    sampler.interpolation = Interpolation_LINEAR;
+}
 
-        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        if ( tranAccessor ) {
-            animRef->Parameters.translation = tranAccessor;
-        }
-        delete[] translationData;
+inline void ExtractScaleSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)
+{
+    const unsigned int numKeyframes = nodeChannel->mNumScalingKeys;
+    if (numKeyframes == 0) {
+        return;
     }
 
-    //-------------------------------------------------------
-    // Extract scale parameter data
-    if(nodeChannel->mNumScalingKeys > 0) {
-        C_STRUCT aiVector3D* scaleData = new aiVector3D[numKeyframes];
-        for (size_t i = 0; i < numKeyframes; ++i) {
-            size_t frameIndex = i * nodeChannel->mNumScalingKeys / numKeyframes;
-            scaleData[i] = nodeChannel->mScalingKeys[frameIndex].mValue;
-        }
-
-        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        if ( scaleAccessor ) {
-            animRef->Parameters.scale = scaleAccessor;
-        }
-        delete[] scaleData;
+    std::vector<float> times(numKeyframes);
+    std::vector<float> values(numKeyframes * 3);
+    for (unsigned int i = 0; i < numKeyframes; ++i) {
+        const aiVectorKey& key = nodeChannel->mScalingKeys[i];
+        // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
+        times[i] = static_cast<float>(key.mTime / ticksPerSecond);
+        values[(i * 3) + 0] = key.mValue.x;
+        values[(i * 3) + 1] = key.mValue.y;
+        values[(i * 3) + 2] = key.mValue.z;
     }
 
-    //-------------------------------------------------------
-    // Extract rotation parameter data
-    if(nodeChannel->mNumRotationKeys > 0) {
-        vec4* rotationData = new vec4[numKeyframes];
-        for (size_t i = 0; i < numKeyframes; ++i) {
-            size_t frameIndex = i * nodeChannel->mNumRotationKeys / numKeyframes;
-            rotationData[i][0] = nodeChannel->mRotationKeys[frameIndex].mValue.x;
-            rotationData[i][1] = nodeChannel->mRotationKeys[frameIndex].mValue.y;
-            rotationData[i][2] = nodeChannel->mRotationKeys[frameIndex].mValue.z;
-            rotationData[i][3] = nodeChannel->mRotationKeys[frameIndex].mValue.w;
-        }
+    sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
+    sampler.output = ExportData(asset, animId, buffer, numKeyframes, &values[0], AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+    sampler.interpolation = Interpolation_LINEAR;
+}
 
-        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-        if ( rotAccessor ) {
-            animRef->Parameters.rotation = rotAccessor;
-        }
-        delete[] rotationData;
+inline void ExtractRotationSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)
+{
+    const unsigned int numKeyframes = nodeChannel->mNumRotationKeys;
+    if (numKeyframes == 0) {
+        return;
     }
+
+    std::vector<float> times(numKeyframes);
+    std::vector<float> values(numKeyframes * 4);
+    for (unsigned int i = 0; i < numKeyframes; ++i) {
+        const aiQuatKey& key = nodeChannel->mRotationKeys[i];
+        // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
+        times[i] = static_cast<float>(key.mTime / ticksPerSecond);
+        values[(i * 4) + 0] = key.mValue.x;
+        values[(i * 4) + 1] = key.mValue.y;
+        values[(i * 4) + 2] = key.mValue.z;
+        values[(i * 4) + 3] = key.mValue.w;
+    }
+
+    sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
+    sampler.output = ExportData(asset, animId, buffer, numKeyframes, &values[0], AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    sampler.interpolation = Interpolation_LINEAR;
+}
+
+static void AddSampler(Ref<Animation>& animRef, Ref<Node>& nodeRef, Animation::Sampler& sampler, AnimationPath path)
+{
+      Animation::Channel channel;
+      channel.sampler = static_cast<int>(animRef->samplers.size());
+      channel.target.path = path;
+      channel.target.node = nodeRef;
+      animRef->channels.push_back(channel);
+      animRef->samplers.push_back(sampler);
 }
 
 void glTF2Exporter::ExportAnimations()
@@ -1055,6 +1052,7 @@ void glTF2Exporter::ExportAnimations()
 
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation* anim = mScene->mAnimations[i];
+        const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
 
         std::string nameAnim = "anim";
         if (anim->mName.length > 0) {
@@ -1070,46 +1068,19 @@ void glTF2Exporter::ExportAnimations()
             name = mAsset->FindUniqueID(name, "animation");
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
-            // Parameters
-            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, static_cast<float>(anim->mTicksPerSecond));
+            Ref<Node> animNode = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
 
-            for (unsigned int j = 0; j < 3; ++j) {
-                std::string channelType;
-                int channelSize;
-                switch (j) {
-                    case 0:
-                        channelType = "rotation";
-                        channelSize = nodeChannel->mNumRotationKeys;
-                        break;
-                    case 1:
-                        channelType = "scale";
-                        channelSize = nodeChannel->mNumScalingKeys;
-                        break;
-                    case 2:
-                        channelType = "translation";
-                        channelSize = nodeChannel->mNumPositionKeys;
-                        break;
-                }
+            Animation::Sampler translationSampler;
+            ExtractTranslationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, translationSampler);
+            AddSampler(animRef, animNode, translationSampler, AnimationPath_TRANSLATION);
 
-                if (channelSize < 1) { continue; }
+            Animation::Sampler rotationSampler;
+            ExtractRotationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, rotationSampler);
+            AddSampler(animRef, animNode, rotationSampler, AnimationPath_ROTATION);
 
-                Animation::AnimChannel tmpAnimChannel;
-                Animation::AnimSampler tmpAnimSampler;
-
-                tmpAnimChannel.sampler = static_cast<int>(animRef->Samplers.size());
-                tmpAnimChannel.target.path = channelType;
-                tmpAnimSampler.output = channelType;
-                tmpAnimSampler.id = name + "_" + channelType;
-
-                tmpAnimChannel.target.node = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
-
-                tmpAnimSampler.input = "TIME";
-                tmpAnimSampler.interpolation = "LINEAR";
-
-                animRef->Channels.push_back(tmpAnimChannel);
-                animRef->Samplers.push_back(tmpAnimSampler);
-            }
-
+            Animation::Sampler scaleSampler;
+            ExtractScaleSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, scaleSampler);
+            AddSampler(animRef, animNode, scaleSampler, AnimationPath_SCALE);
         }
 
         // Assimp documentation staes this is not used (not implemented)

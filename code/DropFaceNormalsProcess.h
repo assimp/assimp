@@ -40,26 +40,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file ProgressHandler.hpp
- *  @brief Abstract base class 'ProgressHandler'.
- */
-#ifndef INCLUDED_AI_DEFAULTPROGRESSHANDLER_H
-#define INCLUDED_AI_DEFAULTPROGRESSHANDLER_H
+/** @file Defines a post processing step to compute face normals for all loaded faces*/
+#ifndef AI_DROPFACENORMALPROCESS_H_INC
+#define AI_DROPFACENORMALPROCESS_H_INC
 
-#include <assimp/ProgressHandler.hpp>
+#include "BaseProcess.h"
+#include <assimp/mesh.h>
 
-namespace Assimp    {
+namespace Assimp
+{
 
-// ------------------------------------------------------------------------------------
-/** @brief Internal default implementation of the #ProgressHandler interface. */
-class DefaultProgressHandler : public ProgressHandler    {
+// ---------------------------------------------------------------------------
+/** The DropFaceNormalsProcess computes face normals for all faces of all meshes
+*/
+class ASSIMP_API_WINONLY DropFaceNormalsProcess : public BaseProcess
+{
+public:
 
-    virtual bool Update(float /*percentage*/) {
-        return false;
-    }
+    DropFaceNormalsProcess();
+    ~DropFaceNormalsProcess();
+
+public:
+    // -------------------------------------------------------------------
+    /** Returns whether the processing step is present in the given flag field.
+    * @param pFlags The processing flags the importer was called with. A bitwise
+    *   combination of #aiPostProcessSteps.
+    * @return true if the process is present in this flag fields, false if not.
+    */
+    bool IsActive( unsigned int pFlags) const;
+
+    // -------------------------------------------------------------------
+    /** Executes the post processing step on the given imported data.
+    * At the moment a process is not supposed to fail.
+    * @param pScene The imported data to work at.
+    */
+    void Execute( aiScene* pScene);
 
 
-}; // !class DefaultProgressHandler
-} // Namespace Assimp
+private:
+    bool DropMeshFaceNormals(aiMesh* pcMesh);
+};
 
-#endif
+} // end of namespace Assimp
+
+#endif // !!AI_DROPFACENORMALPROCESS_H_INC

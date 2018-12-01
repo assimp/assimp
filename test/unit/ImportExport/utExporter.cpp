@@ -70,5 +70,4 @@ TEST_F(ExporterTest, ProgressHandlerTest) {
     Exporter exporter;
     TestProgressHandler *ph(new TestProgressHandler);
     exporter.SetProgressHandler(ph);
-    delete ph;
 }

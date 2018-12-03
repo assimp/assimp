@@ -598,6 +598,7 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
         TestForSeparator();
         CheckForClosingBrace();
         return;
+    }
 
     // normal face creation
     pMesh->mNormFaces.resize( pMesh->mNormFaces.size() + numFaces );

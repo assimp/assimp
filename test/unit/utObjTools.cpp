@@ -115,4 +115,3 @@ TEST_F( utObjTools, countComponents_TwoLines_Success ) {
     size_t numComps = test_parser.testGetNumComponentsInDataDefinition();
     EXPECT_EQ( 3U, numComps );
 }
-

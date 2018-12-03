@@ -583,22 +583,31 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
     pMesh->mNormals.resize( numNormals);
 
     // read normal vectors
-    for( unsigned int a = 0; a < numNormals; a++)
+    for( unsigned int a = 0; a < numNormals; ++a) {
         pMesh->mNormals[a] = ReadVector3();
+    }
 
     // read normal indices
     unsigned int numFaces = ReadInt();
-    if( numFaces != pMesh->mPosFaces.size())
+    if( numFaces != pMesh->mPosFaces.size()) {
         ThrowException( "Normal face count does not match vertex face count.");
+    }
 
-    for( unsigned int a = 0; a < numFaces; a++)
-    {
+    // do not crah when no face definitions are there
+    if (numFaces == 0) {
+        TestForSeparator();
+        CheckForClosingBrace();
+        return;
+
+    // normal face creation
+    pMesh->mNormFaces.resize( pMesh->mNormFaces.size() + numFaces );
+    for( unsigned int a = 0; a < numFaces; ++a ) {
         unsigned int numIndices = ReadInt();
-        pMesh->mNormFaces.push_back( Face());
+        pMesh->mNormFaces.push_back( Face() );
         Face& face = pMesh->mNormFaces.back();
-
-        for( unsigned int b = 0; b < numIndices; b++)
+        for( unsigned int b = 0; b < numIndices; ++b ) {
             face.mIndices.push_back( ReadInt());
+        }
 
         TestForSeparator();
     }

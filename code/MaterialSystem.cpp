@@ -194,12 +194,18 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
     // data is given in ints, simply copy it
     unsigned int iWrite = 0;
     if( aiPTI_Integer == prop->mType || aiPTI_Buffer == prop->mType)    {
-        iWrite = prop->mDataLength / sizeof(int32_t);
+        iWrite = std::max(static_cast<unsigned int>(prop->mDataLength / sizeof(int32_t)), 1u);
         if (pMax) {
-            iWrite = std::min(*pMax,iWrite); ;
+            iWrite = std::min(*pMax,iWrite);
         }
-        for (unsigned int a = 0; a < iWrite;++a) {
-            pOut[a] = static_cast<int>(reinterpret_cast<int32_t*>(prop->mData)[a]);
+        if (1 == prop->mDataLength) {
+            // bool type, 1 byte
+            *pOut = static_cast<int>(*prop->mData);
+        }
+        else {
+            for (unsigned int a = 0; a < iWrite;++a) {
+                pOut[a] = static_cast<int>(reinterpret_cast<int32_t*>(prop->mData)[a]);
+            }
         }
         if (pMax) {
             *pMax = iWrite;
@@ -387,26 +393,6 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     return AI_SUCCESS;
 }
 
-static aiMaterial *DefaultMaterial = nullptr;
-
-// ------------------------------------------------------------------------------------------------
-// Will return the default material.
-aiMaterial *aiCreateAndRegisterDefaultMaterial() {
-    if (nullptr == DefaultMaterial) {
-        DefaultMaterial = new aiMaterial;
-        aiString s;
-        s.Set(AI_DEFAULT_MATERIAL_NAME);
-        DefaultMaterial->AddProperty(&s, AI_MATKEY_NAME);
-    }
-
-    return DefaultMaterial;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Will return the default material.
-void aiReleaseDefaultMaterial() {
-    DefaultMaterial = nullptr;
-}
 
 static const unsigned int DefaultNumAllocated = 5;
 

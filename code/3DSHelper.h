@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp    {
 namespace D3DS  {
 
-#include "./../include/assimp/Compiler/pushpack1.h"
+#include <assimp/Compiler/pushpack1.h>
 
 // ---------------------------------------------------------------------------
 /** Discreet3DS class: Helper class for loading 3ds files. Defines chunks
@@ -66,7 +66,7 @@ namespace D3DS  {
 */
 class Discreet3DS {
 private:
-    Discreet3DS() {
+    Discreet3DS() AI_NO_EXCEPT {
         // empty
     }
 
@@ -328,19 +328,17 @@ struct Face : public FaceWithSmoothingGroup
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
-struct Texture
-{
+struct Texture {
     //! Default constructor
-    Texture()
-        : mOffsetU  (0.0)
-        , mOffsetV  (0.0)
-        , mScaleU   (1.0)
-        , mScaleV   (1.0)
-        , mRotation (0.0)
-        , mMapMode  (aiTextureMapMode_Wrap)
-        , bPrivate()
-        , iUVSrc    (0)
-    {
+    Texture() AI_NO_EXCEPT
+    : mOffsetU  (0.0)
+    , mOffsetV  (0.0)
+    , mScaleU   (1.0)
+    , mScaleV   (1.0)
+    , mRotation (0.0)
+    , mMapMode  (aiTextureMapMode_Wrap)
+    , bPrivate()
+    , iUVSrc    (0) {
         mTextureBlend = get_qnan();
     }
 
@@ -365,7 +363,7 @@ struct Texture
     int iUVSrc;
 };
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */
@@ -394,7 +392,7 @@ struct Material
 
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
-    Material(Material &&other)
+    Material(Material &&other) AI_NO_EXCEPT
     : mName(std::move(other.mName))
     , mDiffuse(std::move(other.mDiffuse))
     , mSpecularExponent(std::move(other.mSpecularExponent))
@@ -418,7 +416,7 @@ struct Material
     }
 
 
-    Material &operator=(Material &&other) {
+    Material &operator=(Material &&other) AI_NO_EXCEPT {
         if (this == &other) {
             return *this;
         }
@@ -447,7 +445,7 @@ struct Material
     }
 
 
-    ~Material() {}
+    virtual ~Material() {}
 
 
     //! Name of the material

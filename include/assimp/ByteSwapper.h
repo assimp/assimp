@@ -60,9 +60,8 @@ namespace Assimp    {
  * This is required to read big-endian model formats on little-endian machines,
  * and vice versa. Direct use of this class is DEPRECATED. Use #StreamReader instead. */
 // --------------------------------------------------------------------------------------
-class ByteSwap
-{
-    ByteSwap() {}
+class ByteSwap {
+    ByteSwap() AI_NO_EXCEPT {}
 
 public:
 

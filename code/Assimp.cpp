@@ -50,13 +50,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
-
 #include <assimp/GenericProperty.h>
+#include <assimp/Exceptional.h>
+#include <assimp/BaseImporter.h>
+
 #include "CInterfaceIOWrapper.h"
 #include "Importer.h"
-#include <assimp/Exceptional.h>
 #include "ScenePrivate.h"
-#include <assimp/BaseImporter.h>
+
 #include <list>
 
 // ------------------------------------------------------------------------------------------------
@@ -106,7 +107,6 @@ namespace Assimp {
 /** Global mutex to manage the access to the log-stream map */
 static std::mutex gLogStreamMutex;
 #endif
-
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API
@@ -271,8 +271,6 @@ void aiReleaseImport( const aiScene* pScene)
     }
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
-
-    aiReleaseDefaultMaterial();
 
     // find the importer associated with this data
     const ScenePrivateData* priv = ScenePriv(pScene);

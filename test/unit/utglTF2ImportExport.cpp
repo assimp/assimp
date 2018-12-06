@@ -101,6 +101,24 @@ TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
     EXPECT_TRUE( binaryImporterTest() );
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F(utglTF2ImportExport, importglTF2AndExportToOBJ) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.obj"));
+}
+
+TEST_F(utglTF2ImportExport, importglTF2EmbeddedAndExportToOBJ) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Embedded/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Embedded/BoxTextured_out.obj"));
+}
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 TEST_F(utglTF2ImportExport, importglTF2PrimitiveModePointsWithoutIndices) {
     Assimp::Importer importer;
     //Points without indices
@@ -327,6 +345,34 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
     {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
     }
+}
+
+std::vector<char> ReadFile(const char* name) {
+    std::vector<char> ret;
+
+    FILE* p = ::fopen(name, "r");
+    if (nullptr == p) {
+        return ret;
+    }
+
+    ::fseek(p, 0, SEEK_END);
+    const auto size = ::ftell(p);
+    ::fseek(p, 0, SEEK_SET);
+
+    ret.resize(size);
+    ::fread(&ret[0], 1, size, p);
+    ::fclose(p);
+
+    return ret;
+}
+
+TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
+    /*const auto flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_RemoveComponent |
+        aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices | aiProcess_FixInfacingNormals |
+        aiProcess_FindDegenerates | aiProcess_GenUVCoords | aiProcess_SortByPType;
+    const auto& buff = ReadFile("C:\\Users\\kimkulling\\Downloads\\camel\\camel\\scene.gltf");*/
+    /*const aiScene* Scene = ::aiImportFileFromMemory(&buff[0], buff.size(), flags, ".gltf");
+    EXPECT_EQ( nullptr, Scene );*/
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

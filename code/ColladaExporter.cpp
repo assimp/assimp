@@ -1533,7 +1533,23 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 
     // write transformation - we can directly put the matrix there
     // TODO: (thom) decompose into scale - rot - quad to allow addressing it by animations afterwards
-    const aiMatrix4x4& mat = pNode->mTransformation;
+    aiMatrix4x4 mat = pNode->mTransformation;
+
+    // If this node is a Camera node, the camera coordinate system needs to be multiplied in.
+    // When importing from Collada, the mLookAt is set to 0, 0, -1, and the node transform is unchanged.
+    // When importing from a different format, mLookAt is set to 0, 0, 1. Therefore, the local camera
+    // coordinate system must be changed to matche the Collada specification.
+    for (size_t i = 0; i<mScene->mNumCameras; i++){
+        if (mScene->mCameras[i]->mName == pNode->mName){
+            aiMatrix4x4 sourceView;
+            mScene->mCameras[i]->GetCameraMatrix(sourceView);
+
+            aiMatrix4x4 colladaView;
+            colladaView.a1 = colladaView.c3 = -1; // move into -z space.
+            mat *= (sourceView * colladaView);
+            break;
+        }
+    }
 	
 	// customized, sid should be 'matrix' to match with loader code.
     //mOutput << startstr << "<matrix sid=\"transform\">";

@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Some runtime headers
 #include <sys/types.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <limits.h>
 

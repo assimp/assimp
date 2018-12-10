@@ -539,12 +539,8 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
 
 // ------------------------------------------------------------------------------------------------
 aiReturn aiMaterial::AddProperty (const aiString* pInput, const char* pKey, unsigned int type, unsigned int index) {
-    aiString copy = *pInput;
-    uint32_t* s = &copy.length;
-    s[1] = pInput->length;
-
-    return AddBinaryProperty(s+1,
-        static_cast<unsigned int>(pInput->length+1+4),
+    return AddBinaryProperty(pInput,
+        static_cast<unsigned int>(pInput->length + 1 + 4),
         pKey,
         type,
         index,

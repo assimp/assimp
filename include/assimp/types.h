@@ -347,7 +347,7 @@ struct aiString
             return;
         }
 
-        memcpy(&data[length],app,len+1);
+        ::memcpy(&data[length],app,len+1);
         length += len;
     }
 
@@ -372,7 +372,7 @@ struct aiString
     /** Binary length of the string excluding the terminal 0. This is NOT the
      *  logical length of strings containing UTF-8 multi-byte sequences! It's
      *  the number of bytes from the beginning of the string to its end.*/
-    size_t length;
+    uint32_t length;
 
     /** String buffer. Size limit is MAXLEN */
     char data[MAXLEN];

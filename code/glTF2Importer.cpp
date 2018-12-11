@@ -832,15 +832,29 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                     aiBone* bone = new aiBone();
 
                     Ref<Node> joint = node.skin->jointNames[i];
-                    bone->mName = joint->name;
+                    if (!joint->name.empty()) {
+                      bone->mName = joint->name;
+                    } else {
+                      // Assimp expects each bone to have a unique name.
+                      static const std::string kDefaultName = "bone_";
+                      char postfix[10] = {0};
+                      ASSIMP_itoa10(postfix, i);
+                      bone->mName = (kDefaultName + postfix);
+                    }
                     GetNodeTransform(bone->mOffsetMatrix, *joint);
 
                     std::vector<aiVertexWeight>& weights = weighting[i];
 
                     bone->mNumWeights = weights.size();
                     if (bone->mNumWeights > 0) {
-                        bone->mWeights = new aiVertexWeight[bone->mNumWeights];
-                        memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                      bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+                      memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                    } else {
+                      // Assimp expects all bones to have at least 1 weight.
+                      bone->mWeights = new aiVertexWeight[1];
+                      bone->mNumWeights = 1;
+                      bone->mWeights->mVertexId = 0;
+                      bone->mWeights->mWeight = 0.f;
                     }
                     mesh->mBones[i] = bone;
                 }
@@ -1028,7 +1042,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
                 ++j;
             }
         }
-        
+
         // Use the latest keyframe for the duration of the animation
         double maxDuration = 0;
         for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
@@ -1053,7 +1067,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
             }
         }
         ai_anim->mDuration = maxDuration;
-        
+
         mScene->mAnimations[i] = ai_anim;
     }
 }

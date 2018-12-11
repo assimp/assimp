@@ -727,7 +727,7 @@ ADD_ASSIMP_IMPORTER( MMD
   MMDVmdParser.h
 )
 
-SET( Step_SRCS
+ADD_ASSIMP_IMPORTER( STEP
     STEPFile.h
     Importer/StepFile/StepFileImporter.h
     Importer/StepFile/StepFileImporter.cpp
@@ -738,7 +738,6 @@ SET( Step_SRCS
     StepExporter.h
     StepExporter.cpp
 )
-SOURCE_GROUP( Step FILES ${Step_SRCS})
 
 SET( Exporter_SRCS
   Exporter.cpp

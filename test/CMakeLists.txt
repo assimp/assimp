@@ -81,6 +81,7 @@ SET( COMMON
 
 SET( IMPORTERS
   unit/utLWSImportExport.cpp
+  unit/utLWOImportExport.cpp
   unit/utSMDImportExport.cpp
   unit/utglTFImportExport.cpp
   unit/utglTF2ImportExport.cpp

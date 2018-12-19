@@ -397,6 +397,9 @@ int ProcessStandardArguments(
 		else if (! strcmp( param, "-gsn") || ! strcmp( param, "--gen-smooth-normals")) {
 			fill.ppFlags |= aiProcess_GenSmoothNormals;
 		}
+    else if (! strcmp( param, "-dn") || ! strcmp( param, "--drop-normals")) {
+			fill.ppFlags |= aiProcess_DropNormals;
+		}
 		else if (! strcmp( param, "-gn") || ! strcmp( param, "--gen-normals")) {
 			fill.ppFlags |= aiProcess_GenNormals;
 		}
@@ -465,6 +468,9 @@ int ProcessStandardArguments(
 		}
 		else if (! strcmp( param, "-sbc") || ! strcmp( param, "--split-by-bone-count")) {
 			fill.ppFlags |= aiProcess_SplitByBoneCount;
+		}
+		else if (!strcmp(param, "-embtex") || ! strcmp(param, "--embed-textures")) {
+			fill.ppFlags |= aiProcess_EmbedTextures;
 		}
 		else if (! strncmp( param, "-c",2) || ! strncmp( param, "--config=",9)) {
 			const unsigned int ofs = (params[i][1] == '-' ? 9 : 2);

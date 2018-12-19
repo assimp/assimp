@@ -48,18 +48,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace STEP {
 
-    // ### Parsing a STEP file is a twofold procedure ###
-    // --------------------------------------------------------------------------
-    // 1) read file header and return to caller, who checks if the
-    //    file is of a supported schema ..
-    DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
-    // --------------------------------------------------------------------------
-    // 2) read the actual file contents using a user-supplied set of
-    //    conversion functions to interpret the data.
-    void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len, const char* const* inverse_indices_to_track, size_t len2);
-    template <size_t N, size_t N2> inline void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
-        return ReadFile(db,scheme,arr,N,arr2,N2);
-    }
+// --------------------------------------------------------------------------
+/// @brief  Parsing a STEP file is a twofold procedure.
+/// 1) read file header and return to caller, who checks if the
+///    file is of a supported schema ..
+DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
+
+/// 2) read the actual file contents using a user-supplied set of
+///    conversion functions to interpret the data.
+void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len, const char* const* inverse_indices_to_track, size_t len2);
+
+/// @brief  Helper to read a file.
+template <size_t N, size_t N2>
+inline
+void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
+    return ReadFile(db,scheme,arr,N,arr2,N2);
+}
+
 } // ! STEP
 } // ! Assimp
 

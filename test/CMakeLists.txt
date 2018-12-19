@@ -40,14 +40,16 @@
 cmake_minimum_required( VERSION 2.6 )
 
 INCLUDE_DIRECTORIES(
-	../contrib/gtest/include
-	../contrib/gtest/
+	${Assimp_SOURCE_DIR}/contrib/gtest/include
+	${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
 )
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
 endif()
+
 # Add the temporary output directories to the library path to make sure the
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
@@ -74,10 +76,12 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utLineSplitter.cpp
 )
 
 SET( IMPORTERS
   unit/utLWSImportExport.cpp
+  unit/utLWOImportExport.cpp
   unit/utSMDImportExport.cpp
   unit/utglTFImportExport.cpp
   unit/utglTF2ImportExport.cpp
@@ -85,6 +89,7 @@ SET( IMPORTERS
   unit/utIFCImportExport.cpp
   unit/utFBXImporterExporter.cpp
   unit/utImporter.cpp
+  unit/ImportExport/utExporter.cpp
   unit/ut3DImportExport.cpp
   unit/ut3DSImportExport.cpp
   unit/utACImportExport.cpp
@@ -113,6 +118,12 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utMDCImportExport.cpp
+  unit/utAssbinImportExport.cpp
+  unit/ImportExport/utCOBImportExport.cpp
+  unit/ImportExport/utOgreImportExport.cpp
+  unit/ImportExport/utQ3BSPFileImportExport.cpp
+  unit/ImportExport/utOFFImportExport.cpp
 )
 
 SET( MATERIAL
@@ -170,6 +181,7 @@ add_executable( unit
 )
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
 
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 

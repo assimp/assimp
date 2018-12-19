@@ -197,6 +197,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
 #   include "MMDImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
+#   include "Importer/StepFile/StepFileImporter.h"
+#endif
 
 namespace Assimp {
 
@@ -351,6 +354,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
     out.push_back( new MMDImporter() );
+#endif
+#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
+    out.push_back(new StepFile::StepFileImporter());
 #endif
 }
 

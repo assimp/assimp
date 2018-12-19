@@ -68,7 +68,7 @@ namespace FBX {
 
 class Document;
 
-using NodeNameCache = std::vector<std::string>;
+using NodeNameCache = std::set<std::string>;
 
 /** 
  *  Convert a FBX #Document to #aiScene
@@ -78,7 +78,7 @@ using NodeNameCache = std::vector<std::string>;
 void ConvertToAssimpScene(aiScene* out, const Document& doc);
 
 /** Dummy class to encapsulate the conversion process */
-class Converter {
+class FBXConverter {
 public:
     /**
     *  The different parts that make up the final local transformation of a fbx-node
@@ -106,8 +106,8 @@ public:
     };
 
 public:
-    Converter(aiScene* out, const Document& doc);
-    ~Converter();
+    FBXConverter(aiScene* out, const Document& doc);
+    ~FBXConverter();
 
 private:
     // ------------------------------------------------------------------------------------------------

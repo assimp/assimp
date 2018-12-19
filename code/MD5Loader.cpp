@@ -420,6 +420,9 @@ void MD5Importer::LoadMD5MeshFile ()
         // generate unique vertices in our internal verbose format
         MakeDataUnique(meshSrc);
 
+        std::string name( meshSrc.mShader.C_Str() );
+        name += ".msh";
+        mesh->mName = name;
         mesh->mNumVertices = (unsigned int) meshSrc.mVertices.size();
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
         mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
@@ -471,7 +474,6 @@ void MD5Importer::LoadMD5MeshFile ()
                 MD5::ConvertQuaternion( boneSrc.mRotationQuat, boneSrc.mRotationQuatConverted );
             }
 
-            //unsigned int g = 0;
             pv = mesh->mVertices;
             for (MD5::VertexList::const_iterator iter =  meshSrc.mVertices.begin();iter != meshSrc.mVertices.end();++iter,++pv) {
                 // compute the final vertex position from all single weights
@@ -559,7 +561,9 @@ void MD5Importer::LoadMD5MeshFile ()
             // set this also as material name
             mat->AddProperty(&meshSrc.mShader,AI_MATKEY_NAME);
         }
-        else mat->AddProperty(&meshSrc.mShader,AI_MATKEY_TEXTURE_DIFFUSE(0));
+        else {
+            mat->AddProperty(&meshSrc.mShader, AI_MATKEY_TEXTURE_DIFFUSE(0));
+        }
         mesh->mMaterialIndex = n++;
     }
 #endif

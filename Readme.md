@@ -30,6 +30,8 @@ One-off donations via PayPal:
 
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
+If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
+
 #### Supported file formats ####
 
 __Importers__:
@@ -113,7 +115,7 @@ __Exporters__:
 - FBX ( experimental )
 
 ### Building ###
-Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
+Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
 
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)

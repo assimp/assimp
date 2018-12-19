@@ -72,18 +72,16 @@ using namespace std;
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
 MMDImporter::MMDImporter()
-    : m_Buffer(),
-      // m_pRootObject( NULL ),
-      m_strAbsPath("") {
-  DefaultIOSystem io;
-  m_strAbsPath = io.getOsSeparator();
+: m_Buffer()
+, m_strAbsPath("") {
+    DefaultIOSystem io;
+    m_strAbsPath = io.getOsSeparator();
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 MMDImporter::~MMDImporter() {
-  // delete m_pRootObject;
-  // m_pRootObject = NULL;
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -96,8 +94,7 @@ bool MMDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler,
   } else // Check file Header
   {
     static const char *pTokens[] = {"PMX "};
-    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens,
-                                                  1);
+    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 1);
   }
 }
 
@@ -354,8 +351,11 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
   float shininess = pMat->specularlity;
   mat->AddProperty(&shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
 
-  aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
-  mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+  if(pMat->diffuse_texture_index >= 0) {
+      aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
+      mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+  }
+
   int mapping_uvwsrc = 0;
   mat->AddProperty(&mapping_uvwsrc, 1,
                    AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, 0));

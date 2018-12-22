@@ -319,6 +319,12 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		}
 	}
 
+	// Verbose and silent at the same time are not allowed
+	if ( verbose && silent ) {
+		printf("assimp info: Invalid arguments, verbose and silent at the same time are forbitten. ");
+		return 1;
+	}
+	
 	// do maximum post-processing unless -r was specified
 	ImportData import;
 	if (!raw) {

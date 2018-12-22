@@ -1033,12 +1033,12 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
 
         std::unordered_map<unsigned int, AnimationSamplers> samplers = GatherSamplers(anim);
 
-        ai_anim->mNumChannels = r.skins[0].jointNames.size();
+        ai_anim->mNumChannels = samplers.size();
         if (ai_anim->mNumChannels > 0) {
             ai_anim->mChannels = new aiNodeAnim*[ai_anim->mNumChannels];
             int j = 0;
-            for (auto& iter : r.skins[0].jointNames) {
-                ai_anim->mChannels[j] = CreateNodeAnim(r, *iter, samplers[iter.GetIndex()]);
+            for (auto& iter : samplers) {
+                ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
                 ++j;
             }
         }

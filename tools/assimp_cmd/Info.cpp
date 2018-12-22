@@ -54,7 +54,8 @@ const char* AICMD_MSG_INFO_HELP_E =
 "assimp info <file> [-r] [-v]\n"
 "\tPrint basic structure of a 3D model\n"
 "\t-r,--raw: No postprocessing, do a raw import\n"
-"\t-v,--verbose: Print verbose info such as node transform data\n";
+"\t-v,--verbose: Print verbose info such as node transform data\n"
+"\t-s, --silent: Print only minimal info\n";
 
 const std::string TREE_BRANCH_ASCII = "|-";
 const std::string TREE_BRANCH_UTF8 = "\xe2\x94\x9c\xe2\x95\xb4";
@@ -305,6 +306,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 	// get -r and -v arguments
 	bool raw = false;
 	bool verbose = false;
+	bool silent = false;
 	for(unsigned int i = 1; i < num; ++i) {
 		if (!strcmp(params[i],"--raw")||!strcmp(params[i],"-r")) {
 			raw = true;
@@ -312,8 +314,17 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		if (!strcmp(params[i],"--verbose")||!strcmp(params[i],"-v")) {
 			verbose = true;
 		}
+		if (!strcmp(params[i], "--silent") || !strcmp(params[i], "-s")) {
+			silent = true;
+		}
 	}
 
+	// Verbose and silent at the same time are not allowed
+	if ( verbose && silent ) {
+		printf("assimp info: Invalid arguments, verbose and silent at the same time are forbitten. ");
+		return 1;
+	}
+	
 	// do maximum post-processing unless -r was specified
 	ImportData import;
 	if (!raw) {
@@ -379,6 +390,12 @@ int Assimp_Info (const char* const* params, unsigned int num)
 		special_points[2][0],special_points[2][1],special_points[2][2]
 		)
 	;
+
+	if (silent)
+	{
+		printf("\n");
+		return 0;
+	}
 
 	// meshes
 	if (scene->mNumMeshes) {

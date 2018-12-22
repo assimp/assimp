@@ -40,36 +40,41 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
-
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
-class ut3DSImportExport : public AbstractImportExportBase {
+
+class utLWOImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", aiProcess_ValidateDataStructure );
-#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/boxuv.lwo", aiProcess_ValidateDataStructure);
+
+        EXPECT_EQ(1u, scene->mNumMeshes);
+        EXPECT_NE(nullptr, scene->mMeshes[0]);
+        EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
+
+        //This test model is using n-gons, so 6 faces instead of 12 tris
+        EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
+        EXPECT_EQ(aiPrimitiveType_POLYGON, scene->mMeshes[0]->mPrimitiveTypes);
+        EXPECT_EQ(true, scene->mMeshes[0]->HasTextureCoords(0));
+
         return nullptr != scene;
-#else
-        return nullptr == scene;
-#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
     }
 };
 
-TEST_F( ut3DSImportExport, import3DSFromFileTest ) {
+TEST_F( utLWOImportExport, importLWObox_uv ) {
     EXPECT_TRUE( importerTest() );
 }
 
-TEST_F( ut3DSImportExport, import3DSformatdetection) {
+TEST_F(utLWOImportExport, importLWOformatdetection) {
     ::Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/testFormatDetection", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/formatDetection", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
 }

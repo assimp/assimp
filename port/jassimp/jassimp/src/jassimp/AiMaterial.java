@@ -71,6 +71,17 @@ import java.util.Set;
  */
 public final class AiMaterial {
     /**
+     * List of properties.
+     */
+    private final List<Property> m_properties = new ArrayList<Property>();
+       
+    /**
+     * Number of textures for each type.
+     */
+    private final Map<AiTextureType, Integer> m_numTextures = 
+            new EnumMap<AiTextureType, Integer>(AiTextureType.class);
+	
+    /**
      * Enumerates all supported material properties.
      */
     public static enum PropertyKey {
@@ -1185,18 +1196,5 @@ public final class AiMaterial {
     @SuppressWarnings("unused")
     private void setTextureNumber(int type, int number) {
         m_numTextures.put(AiTextureType.fromRawValue(type), number);
-    }
-    
-    
-    /**
-     * List of properties.
-     */
-    private final List<Property> m_properties = new ArrayList<Property>();
-    
-    
-    /**
-     * Number of textures for each type.
-     */
-    private final Map<AiTextureType, Integer> m_numTextures = 
-            new EnumMap<AiTextureType, Integer>(AiTextureType.class);
+    }    
 }

@@ -328,7 +328,36 @@ public final class AiMaterial {
      * properties easily. 
      */
     public static final class Property {
+		/**
+         * Key.
+         */
+        private final String m_key;
+        
+        
         /**
+         * Semantic.
+         */
+        private final int m_semantic;
+        
+        
+        /**
+         * Index.
+         */
+        private final int m_index;
+        
+        
+        /**
+         * Type.
+         */
+        private final PropertyType m_type;
+        
+        
+        /**
+         * Data.
+         */
+        private final Object m_data;
+
+		/**
          * Constructor.
          * 
          * @param key
@@ -428,39 +457,9 @@ public final class AiMaterial {
          * 
          * @return the data
          */
-        Object getData() {
+        private Object getData() {
             return m_data;
         }
-        
-        
-        /**
-         * Key.
-         */
-        private final String m_key;
-        
-        
-        /**
-         * Semantic.
-         */
-        private final int m_semantic;
-        
-        
-        /**
-         * Index.
-         */
-        private final int m_index;
-        
-        
-        /**
-         * Type.
-         */
-        private final PropertyType m_type;
-        
-        
-        /**
-         * Data.
-         */
-        private final Object m_data;
     }
     
     

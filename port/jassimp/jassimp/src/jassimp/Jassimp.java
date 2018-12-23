@@ -260,7 +260,7 @@ public final class Jassimp {
      * @param data the matrix data
      * @return the wrapped matrix
      */
-    private static Object wrapMatrix(float[] data) {
+    static Object wrapMatrix(float[] data) {
         return s_wrapperProvider.wrapMatrix4f(data);
     }
     
@@ -275,7 +275,7 @@ public final class Jassimp {
      * @param blue blue component
      * @return the wrapped color
      */
-    private static Object wrapColor3(float red, float green, float blue) {
+    static Object wrapColor3(float red, float green, float blue) {
         return wrapColor4(red, green, blue, 1.0f);
     }
     
@@ -291,7 +291,7 @@ public final class Jassimp {
      * @param alpha alpha component
      * @return the wrapped color
      */
-    private static Object wrapColor4(float red, float green, float blue, float alpha) {
+    static Object wrapColor4(float red, float green, float blue, float alpha) {
         ByteBuffer temp = ByteBuffer.allocate(4 * 4);
         temp.putFloat(red);
         temp.putFloat(green);
@@ -312,7 +312,7 @@ public final class Jassimp {
      * @param z z component
      * @return the wrapped vector
      */
-    private static Object wrapVec3(float x, float y, float z) {
+    static Object wrapVec3(float x, float y, float z) {
         ByteBuffer temp = ByteBuffer.allocate(3 * 4);
         temp.putFloat(x);
         temp.putFloat(y);

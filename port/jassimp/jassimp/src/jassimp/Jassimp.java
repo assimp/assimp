@@ -333,7 +333,7 @@ public final class Jassimp {
      * @param name the name of the node
      * @return the wrapped matrix
      */
-    private static Object wrapSceneNode(Object parent, Object matrix, int[] meshRefs,
+    static Object wrapSceneNode(Object parent, Object matrix, int[] meshRefs,
             String name) {
         
         return s_wrapperProvider.wrapSceneNode(parent, matrix, meshRefs, name);

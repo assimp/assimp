@@ -74,4 +74,4 @@ addons:
     notification_email: kim.kulling@googlemail.com
     build_command_prepend: "cmake"
     build_command: "make"
-    branch_pattern: master
+    branch_pattern: coverity_scan

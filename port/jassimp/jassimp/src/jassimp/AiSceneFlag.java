@@ -48,6 +48,11 @@ import java.util.Set;
  */
 public enum AiSceneFlag {
     /**
+     * The mapped c/c++ integer enum value.
+     */
+    private final int m_rawValue;
+
+    /**
      * Specifies that the scene data structure that was imported is not 
      * complete.<p>
      * 
@@ -143,11 +148,5 @@ public enum AiSceneFlag {
      */
     private AiSceneFlag(int rawValue) {
         m_rawValue = rawValue;
-    }
-    
-    
-    /**
-     * The mapped c/c++ integer enum value.
-     */
-    private final int m_rawValue;
+    }    
 }

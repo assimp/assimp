@@ -124,6 +124,8 @@ SET( IMPORTERS
   unit/ImportExport/utOgreImportExport.cpp
   unit/ImportExport/utQ3BSPFileImportExport.cpp
   unit/ImportExport/utOFFImportExport.cpp
+  unit/ImportExport/utNFFImportExport.cpp
+  unit/ImportExport/utXGLImportExport.cpp
 )
 
 SET( MATERIAL

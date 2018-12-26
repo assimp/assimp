@@ -29,7 +29,6 @@ from . import structs
 from . import helper
 from . import postprocess
 from .errors import AssimpError
-from .formats import available_formats
 
 class AssimpLib(object):
     """
@@ -300,14 +299,12 @@ def load(filename,
     '''
 
     if hasattr(filename, 'read'):
-        '''
-        This is the case where a file object has been passed to load.
-        It is calling the following function:
-        const aiScene* aiImportFileFromMemory(const char* pBuffer,
-                                              unsigned int pLength,
-                                              unsigned int pFlags,
-                                              const char* pHint)
-        '''
+        # This is the case where a file object has been passed to load.
+        # It is calling the following function:
+        # const aiScene* aiImportFileFromMemory(const char* pBuffer,
+        #                                      unsigned int pLength,
+        #                                      unsigned int pFlags,
+        #                                      const char* pHint)
         if file_type == None:
             raise AssimpError('File type must be specified when passing file objects!')
         data  = filename.read()

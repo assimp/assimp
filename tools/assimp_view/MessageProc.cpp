@@ -45,7 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <windowsx.h>
 #include <commdlg.h>
+
+#ifdef __MINGW32__
+#include <mmsystem.h>
+#else
 #include <timeapi.h>
+#endif
 
 namespace AssimpView {
 
@@ -80,8 +85,7 @@ void SaveHistory();
 // File associations are registered in HKCU\Software\Classes. They might
 // be overwritten by global file associations.
 //-------------------------------------------------------------------------------
-void MakeFileAssociations()
-    {
+void MakeFileAssociations() {
     char szTemp2[MAX_PATH];
     char szTemp[MAX_PATH + 10];
 
@@ -118,7 +122,7 @@ void MakeFileAssociations()
         D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 
     CLogDisplay::Instance().AddEntry(tmp.data,D3DCOLOR_ARGB(0xFF,0,0xFF,0));
-    }
+}
 
 
 //-------------------------------------------------------------------------------
@@ -128,17 +132,16 @@ void MakeFileAssociations()
 // Other command line parameters are not handled
 //-------------------------------------------------------------------------------
 void HandleCommandLine(char* p_szCommand)
-    {
+{
     char* sz = p_szCommand;
     //bool bQuak = false;
 
     if (strlen(sz) < 2)return;
 
-    if (*sz == '\"')
-  {
+    if (*sz == '\"') {
         char* sz2 = strrchr(sz,'\"');
         if (sz2)*sz2 = 0;
-    sz++; // skip the starting quote
+        sz++; // skip the starting quote
     }
 
     strcpy( g_szFileName, sz );
@@ -149,8 +152,7 @@ void HandleCommandLine(char* p_szCommand)
 
     // Save the list of previous files to the registry
     SaveHistory();
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Load the light colors from the registry
@@ -158,15 +160,10 @@ void HandleCommandLine(char* p_szCommand)
 void LoadLightColors()
 {
     DWORD dwTemp = 4;
-    RegQueryValueEx(g_hRegistry,"LightColor0",NULL,NULL,
-        (BYTE*)&g_avLightColors[0],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor1",NULL,NULL,
-        (BYTE*)&g_avLightColors[1],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor2",NULL,NULL,
-        (BYTE*)&g_avLightColors[2],&dwTemp);
-    return;
+    RegQueryValueEx(g_hRegistry,"LightColor0",NULL,NULL, (BYTE*)&g_avLightColors[0],&dwTemp);
+    RegQueryValueEx(g_hRegistry,"LightColor1",NULL,NULL, (BYTE*)&g_avLightColors[1],&dwTemp);
+    RegQueryValueEx(g_hRegistry,"LightColor2",NULL,NULL, (BYTE*)&g_avLightColors[2],&dwTemp);
 }
-
 
 //-------------------------------------------------------------------------------
 // Save the light colors to the registry
@@ -177,7 +174,6 @@ void SaveLightColors()
     RegSetValueExA(g_hRegistry,"LightColor1",0,REG_DWORD,(const BYTE*)&g_avLightColors[1],4);
     RegSetValueExA(g_hRegistry,"LightColor2",0,REG_DWORD,(const BYTE*)&g_avLightColors[2],4);
 }
-
 
 //-------------------------------------------------------------------------------
 // Save the checker pattern colors to the registry
@@ -1058,9 +1054,9 @@ void DoExport(size_t formatId)
         ai_assert(strlen(szFileName) <= MAX_PATH);
 
         // invent a nice default file name
-        char* sz = max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
+        char* sz = std::max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
         if (sz) {
-            strncpy(sz,max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
+            strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
         }
     }
     else {
@@ -1407,7 +1403,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
             g_hDlg = hwndDlg;
 
-            // load the state of the usr interface
+            // load the state of the user interface
             InitUI();
 
             // load the file history
@@ -1651,11 +1647,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
             xPos = xPos2 = sPoint.x;
             yPos = yPos2 = sPoint.y;
 
-        /*  xPos -= 10;
-            yPos -= 10;
-            xPos2 = xPos-3;
-            yPos2 = yPos-5;*/
-
             RECT sRect;
             GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
             sRect.right -= sRect.left;
@@ -1838,7 +1829,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
             return TRUE;
 
         case WM_COMMAND:
-
             HMENU hMenu = GetMenu(g_hDlg);
             if (ID_VIEWER_QUIT == LOWORD(wParam))
                 {
@@ -2369,7 +2359,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR    lpCmdLine,
                        int       nCmdShow)
-    {
+{
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -2379,14 +2369,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     // load windows common controls library to get XP style
     InitCommonControls();
 
-    // intiailize the IDirect3D9 interface
+    // initialize the IDirect3D9 interface
     g_hInstance = hInstance;
-    if (0 == InitD3D())
-        {
+    if (0 == InitD3D()) {
         MessageBox(NULL,"Failed to initialize Direct3D 9",
             "ASSIMP ModelViewer",MB_OK);
         return -6;
-        }
+    }
 
     // create the main dialog
     HWND hDlg = CreateDialog(hInstance,MAKEINTRESOURCE(IDD_DIALOGMAIN),
@@ -2403,12 +2392,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         Assimp::DefaultLogger::Debugging | Assimp::DefaultLogger::Info |
         Assimp::DefaultLogger::Err | Assimp::DefaultLogger::Warn);
 
-    if (NULL == hDlg)
-        {
+    if (NULL == hDlg) {
         MessageBox(NULL,"Failed to create dialog from resource",
             "ASSIMP ModelViewer",MB_OK);
         return -5;
-        }
+    }
 
     // display the window
     g_hDlg = hDlg;
@@ -2418,12 +2406,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     UpdateWindow( hDlg );
 
     // create the D3D device object
-    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true))
-        {
+    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true)) {
         MessageBox(NULL,"Failed to initialize Direct3D 9 (2)",
             "ASSIMP ModelViewer",MB_OK);
         return -4;
-        }
+    }
+    
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
     // create the log window

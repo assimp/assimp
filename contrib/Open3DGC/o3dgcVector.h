@@ -88,8 +88,8 @@ namespace o3dgc
                                     assert(m_size < m_allocated);
                                     m_buffer[m_size++] = value;
                                 }
-        const T * const         GetBuffer() const { return m_buffer;};
-        T * const               GetBuffer()       { return m_buffer;};
+        const T *               GetBuffer() const { return m_buffer;};
+        T *                     GetBuffer()       { return m_buffer;};
         unsigned long                  GetSize()   const { return m_size;};
         void                    SetSize(unsigned long size)
                                 { 

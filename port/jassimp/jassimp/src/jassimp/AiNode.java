@@ -41,7 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package jassimp;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -53,6 +55,34 @@ import java.util.List;
  * the imported scene consists of only a single root node without children.
  */
 public final class AiNode {
+    /**
+     * Parent node.
+     */
+    private final AiNode m_parent;
+    
+    
+    /**
+     * Mesh references.
+     */
+    private final int[] m_meshReferences;
+    
+    
+    /**
+     * List of children.
+     */
+    private final List<AiNode> m_children = new ArrayList<AiNode>();
+
+    /**
+     * List of metadata entries.
+     */
+     private final Map<String, AiMetadataEntry> m_metaData = new HashMap<String, AiMetadataEntry>();
+    
+    
+    /**
+     * Buffer for transformation matrix.
+     */
+    private final Object m_transformationMatrix;
+
     /**
      * Constructor.
      * 
@@ -185,6 +215,18 @@ public final class AiNode {
     public int[] getMeshes() {
         return m_meshReferences;
     }
+
+    /**
+     * Returns the metadata entries for this node.<p>
+     *
+     * Consult the original Doxygen for importer_notes to
+     * see which formats have metadata and what to expect.
+     *
+     * @return A map of metadata names to entries.
+     */
+    public Map<String, AiMetadataEntry> getMetadata() {
+        return m_metaData;
+    }
     
     
     /**
@@ -200,29 +242,5 @@ public final class AiNode {
     /**
      * Name.
      */
-    private final String m_name;
-    
-    
-    /**
-     * Parent node.
-     */
-    private final AiNode m_parent;
-    
-    
-    /**
-     * Mesh references.
-     */
-    private final int[] m_meshReferences;
-    
-    
-    /**
-     * List of children.
-     */
-    private final List<AiNode> m_children = new ArrayList<AiNode>();
-    
-    
-    /**
-     * Buffer for transformation matrix.
-     */
-    private final Object m_transformationMatrix;
+    private final String m_name;    
 }

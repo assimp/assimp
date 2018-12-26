@@ -2,7 +2,8 @@
  Open Asset Import Library (assimp)
  ----------------------------------------------------------------------
 
- Copyright (c) 2006-2017, assimp team
+ Copyright (c) 2006-2018, assimp team
+
 
  All rights reserved.
 
@@ -46,10 +47,10 @@
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 
-#include "irrXMLWrapper.h"
+#include <assimp/irrXMLWrapper.h>
 #include "ColladaHelper.h"
 #include <assimp/ai_assert.h>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 namespace Assimp
 {
@@ -77,7 +78,7 @@ namespace Assimp
         /** Reads the structure of the file */
         void ReadStructure();
 
-        /** Reads asset informations such as coordinate system informations and legal blah */
+        /** Reads asset information such as coordinate system information and legal blah */
         void ReadAssetInfo();
 
         /** Reads the animation library */
@@ -86,6 +87,9 @@ namespace Assimp
 		/** Reads the animation clip library */
 		void ReadAnimationClipLibrary();
 
+        /** Unwrap controllers dependency hierarchy */
+        void PostProcessControllers();
+    
 		/** Re-build animations from animation clip library, if present, otherwise combine single-channel animations */
 		void PostProcessRootAnimations();
 

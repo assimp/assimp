@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "assimp_view.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 namespace AssimpView {
 

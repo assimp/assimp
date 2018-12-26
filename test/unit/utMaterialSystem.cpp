@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -73,7 +74,7 @@ TEST_F(MaterialSystemTest, testFloatArrayProperty)
 {
     float pf[] = {0.0f,1.0f,2.0f,3.0f};
     unsigned int pMax = sizeof(pf) / sizeof(float);
-    this->pcMat->AddProperty(&pf,pMax,"testKey2");
+    this->pcMat->AddProperty(pf,pMax,"testKey2");
     pf[0] = pf[1] = pf[2] = pf[3] = 12.0f;
 
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey2",0,0,pf,&pMax));
@@ -97,7 +98,7 @@ TEST_F(MaterialSystemTest, testIntArrayProperty)
 {
     int pf[] = {0,1,2,3};
     unsigned int pMax = sizeof(pf) / sizeof(int);
-    this->pcMat->AddProperty(&pf,pMax,"testKey4");
+    this->pcMat->AddProperty(pf,pMax,"testKey4");
     pf[0] = pf[1] = pf[2] = pf[3] = 12;
 
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey4",0,0,pf,&pMax));
@@ -119,12 +120,24 @@ TEST_F(MaterialSystemTest, testColorProperty)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(MaterialSystemTest, testStringProperty)
-{
+TEST_F(MaterialSystemTest, testStringProperty) {
     aiString s;
     s.Set("Hello, this is a small test");
     this->pcMat->AddProperty(&s,"testKey6");
     s.Set("358358");
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey6",0,0,s));
     EXPECT_STREQ("Hello, this is a small test", s.data);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testMaterialNameAccess) {
+    aiMaterial *mat = new aiMaterial();
+    EXPECT_NE(nullptr, mat);
+
+    aiString name = mat->GetName();
+    const int retValue(strncmp(name.C_Str(), AI_DEFAULT_MATERIAL_NAME, name.length));
+    EXPECT_EQ(0, retValue );
+
+    delete mat;
 }

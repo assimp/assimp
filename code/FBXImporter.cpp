@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -53,13 +54,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXConverter.h"
 
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
+#include <assimp/StreamReader.h>
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
 
 namespace Assimp {
-    template<> const std::string LogFunctions<FBXImporter>::log_prefix = "FBX: ";
+    template<> const char* LogFunctions<FBXImporter>::Prefix()
+    {
+        static auto prefix = "FBX: ";
+        return prefix;
+    }
 }
 
 using namespace Assimp;
@@ -131,12 +136,12 @@ void FBXImporter::SetupProperties(const Importer* pImp)
     settings.strictMode = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, false);
     settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
     settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
+    settings.useLegacyEmbeddedTextureNaming = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING, false);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void FBXImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
+void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     std::unique_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
     if (!stream) {

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -81,15 +82,18 @@ void CompressBinaryDump(const char* file, unsigned int head_size)
 	uint8_t* data = new uint8_t[size];
 	fread(data,1,size,p);
 
-	uLongf out_size = (uLongf)((size-head_size) * 1.001 + 12.);
+	uint32_t uncompressed_size = size-head_size;
+	uLongf out_size = (uLongf)compressBound(uncompressed_size);
 	uint8_t* out = new uint8_t[out_size];
 
-	compress2(out,&out_size,data+head_size,size-head_size,9);
+	int res = compress2(out,&out_size,data+head_size,uncompressed_size,9);
+	if(res != Z_OK)
+		fprintf(stderr, "compress2: error\n");
 	fclose(p);
 	p = fopen(file,"w");
 
 	fwrite(data,head_size,1,p);
-	fwrite(&out_size,4,1,p); // write size of uncompressed data
+	fwrite(&uncompressed_size,4,1,p); // write size of uncompressed data
 	fwrite(out,out_size,1,p);
 
 	fclose(p);
@@ -180,6 +184,17 @@ inline uint32_t Write<aiVector3D>(const aiVector3D& v)
 // -----------------------------------------------------------------------------------
 // Serialize a color value
 template <>
+inline uint32_t Write<aiColor3D>(const aiColor3D& v)
+{
+	uint32_t t = Write<float>(v.r);
+	t += Write<float>(v.g);
+	t += Write<float>(v.b);
+	return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
 inline uint32_t Write<aiColor4D>(const aiColor4D& v)
 {
 	uint32_t t = Write<float>(v.r);
@@ -198,6 +213,7 @@ inline uint32_t Write<aiQuaternion>(const aiQuaternion& v)
 	t += Write<float>(v.x);
 	t += Write<float>(v.y);
 	t += Write<float>(v.z);
+	ai_assert(t == 16);
 	return 16;
 }
 
@@ -565,9 +581,9 @@ uint32_t WriteBinaryLight(const aiLight* l)
 		len += Write<float>(l->mAttenuationQuadratic);
 	}
 
-	len += Write<aiVector3D>((const aiVector3D&)l->mColorDiffuse);
-	len += Write<aiVector3D>((const aiVector3D&)l->mColorSpecular);
-	len += Write<aiVector3D>((const aiVector3D&)l->mColorAmbient);
+	len += Write<aiColor3D>(l->mColorDiffuse);
+	len += Write<aiColor3D>(l->mColorSpecular);
+	len += Write<aiColor3D>(l->mColorAmbient);
 
 	if (l->mType == aiLightSource_SPOT) {
 		len += Write<float>(l->mAngleInnerCone);

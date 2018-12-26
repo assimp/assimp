@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -48,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 
-#include "StreamWriter.h"
+#include <assimp/StreamWriter.h>
 #include <assimp/material.h>
 
 struct aiScene;
@@ -60,23 +61,21 @@ namespace Assimp
 {
 
 // ------------------------------------------------------------------------------------------------
-/** Helper class to export a given scene to a 3DS file. */
+/**
+ *  @brief  Helper class to export a given scene to a 3DS file.
+ */
 // ------------------------------------------------------------------------------------------------
-class Discreet3DSExporter
-{
+class Discreet3DSExporter {
 public:
-    Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* pScene);
+    Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, const aiScene* pScene);
+    ~Discreet3DSExporter();
 
 private:
-
     void WriteMeshes();
     void WriteMaterials();
     void WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags);
-
     void WriteFaceMaterialChunk(const aiMesh& mesh);
-
     int WriteHierarchy(const aiNode& node, int level, int sibling_level);
-
     void WriteString(const std::string& s);
     void WriteString(const aiString& s);
     void WriteColor(const aiColor3D& color);
@@ -84,7 +83,6 @@ private:
     void WritePercentChunk(double f);
 
 private:
-
     const aiScene* const scene;
     StreamWriterLE writer;
 
@@ -95,6 +93,6 @@ private:
 
 };
 
-}
+} // Namespace Assimp
 
-#endif
+#endif // AI_3DSEXPORTER_H_INC

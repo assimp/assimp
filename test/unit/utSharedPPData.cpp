@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -77,7 +78,7 @@ TEST_F(SharedPPDataTest, testPODProperty)
 {
     int i = 5;
     shared->AddProperty("test",i);
-    int o;
+	int o = 0;
     EXPECT_TRUE(shared->GetProperty("test",o));
     EXPECT_EQ(5, o);
     EXPECT_FALSE(shared->GetProperty("test2",o));
@@ -92,7 +93,7 @@ TEST_F(SharedPPDataTest, testPODProperty)
 // ------------------------------------------------------------------------------------------------
 TEST_F(SharedPPDataTest, testPropertyPointer)
 {
-    int *i = new int[35];
+    int *i = new int;
     shared->AddProperty("test16",i);
     int* o;
     EXPECT_TRUE(shared->GetProperty("test16",o));

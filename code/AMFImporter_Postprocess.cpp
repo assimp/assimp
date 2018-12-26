@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -51,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, Assimp.
 #include <assimp/SceneCombiner.h>
-#include "StandardShapes.h"
-#include "StringUtils.h"
+#include <assimp/StandardShapes.h>
+#include <assimp/StringUtils.h>
 
 // Header files, stdlib.
 #include <iterator>
@@ -60,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
-aiColor4D AMFImporter::SPP_Material::GetColor(const float pX, const float pY, const float pZ) const
+aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*pY*/, const float /*pZ*/) const
 {
     aiColor4D tcol;
 
@@ -155,10 +156,11 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	TextureConverted_Index = 0;
 	for(const SPP_Texture& tex_convd: mTexture_Converted)
 	{
-		if(tex_convd.ID == TextureConverted_ID)
-			return TextureConverted_Index;
-		else
-			TextureConverted_Index++;
+        if ( tex_convd.ID == TextureConverted_ID ) {
+            return TextureConverted_Index;
+        } else {
+            ++TextureConverted_Index;
+        }
 	}
 
 	//
@@ -281,8 +283,11 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& 
 	{
 		if(!pID.empty())
 		{
-			for(size_t idx_target = pOffset, idx_src = 0; idx_target < tex_size; idx_target += pStep, idx_src++)
-				converted_texture.Data[idx_target] = src_texture[pSrcTexNum]->Data.at(idx_src);
+			for(size_t idx_target = pOffset, idx_src = 0; idx_target < tex_size; idx_target += pStep, idx_src++) {
+				CAMFImporter_NodeElement_Texture* tex = src_texture[pSrcTexNum];
+				ai_assert(tex);
+				converted_texture.Data[idx_target] = tex->Data.at(idx_src);
+			}
 		}
 	};// auto CopyTextureData = [&](const size_t pOffset, const size_t pStep, const uint8_t pSrcTexNum) -> void
 
@@ -686,7 +691,6 @@ std::list<unsigned int> mesh_idx;
 				tmesh->mNumVertices = static_cast<unsigned int>(vert_arr.size());
 				tmesh->mVertices = new aiVector3D[tmesh->mNumVertices];
 				tmesh->mColors[0] = new aiColor4D[tmesh->mNumVertices];
-				tmesh->mFaces = new aiFace[face_list_cur.size()];
 
 				memcpy(tmesh->mVertices, vert_arr.data(), tmesh->mNumVertices * sizeof(aiVector3D));
 				memcpy(tmesh->mColors[0], col_arr.data(), tmesh->mNumVertices * sizeof(aiColor4D));
@@ -766,7 +770,7 @@ std::list<aiNode*> ch_node;
 		// find referenced object
 		if(!Find_ConvertedNode(als.ObjectID, pNodeList, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
-		// create node for apllying transformation
+		// create node for applying transformation
 		t_node = new aiNode;
 		t_node->mParent = con_node;
 		// apply transformation

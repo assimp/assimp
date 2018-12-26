@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -64,12 +65,11 @@ class ASSIMP_API LogStream
 {
 protected:
     /** @brief  Default constructor */
-    LogStream() {
-    }
+    LogStream() AI_NO_EXCEPT;
+
 public:
     /** @brief  Virtual destructor  */
-    virtual ~LogStream() {
-    }
+    virtual ~LogStream();
 
     // -------------------------------------------------------------------
     /** @brief  Overwrite this for your own output methods
@@ -91,9 +91,20 @@ public:
      *  @return New LogStream instance.  */
     static LogStream* createDefaultStream(aiDefaultLogStream stream,
         const char* name = "AssimpLog.txt",
-        IOSystem* io = NULL);
+        IOSystem* io = nullptr );
 
 }; // !class LogStream
+
+inline
+LogStream::LogStream() AI_NO_EXCEPT {
+    // empty
+}
+
+inline
+LogStream::~LogStream() {
+    // empty
+}
+
 // ------------------------------------------------------------------------------------
 } // Namespace Assimp
 

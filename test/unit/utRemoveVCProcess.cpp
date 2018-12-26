@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -70,6 +71,7 @@ TEST_F( utRevmoveVCProcess, issue1266_ProcessMeshTest_NoCrash ) {
     mesh->mNumVertices = 1;
     mesh->mColors[ 0 ] = new aiColor4D[ 2 ];
     scene->mMeshes[ 0 ] = mesh;
-    RemoveVCProcess *process = new RemoveVCProcess;
+    std::unique_ptr<RemoveVCProcess> process(new RemoveVCProcess);
     process->Execute( scene );
+    delete scene;
 }

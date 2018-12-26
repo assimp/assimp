@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -56,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/anim.h>
 #include <assimp/mesh.h>
 #include <assimp/Compiler/pushpack1.h>
-#include "ByteSwapper.h"
+#include <assimp/ByteSwapper.h>
 #include <stdint.h>
 #include <vector>
 
@@ -126,16 +127,16 @@ struct Header {
     int32_t version;
 
     //! scale factors for each axis
-    aiVector3D scale;
+    ai_real scale[3];
 
     //! translation factors for each axis
-    aiVector3D translate;
+    ai_real translate[3];
 
     //! bounding radius of the mesh
     float boundingradius;
 
     //! Position of the viewer's exe. Ignored
-    aiVector3D vEyePos;
+    ai_real vEyePos[3];
 
     //! Number of textures
     int32_t num_skins;
@@ -164,7 +165,7 @@ struct Header {
 
     //! Could be the total size of the file (and not a float)
     float size;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------
@@ -223,7 +224,7 @@ struct Header_MDL7 {
 
     //! Size of the Frame_MDL7 data structure used in the file
     uint16_t frame_stc_size;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------
@@ -242,7 +243,7 @@ struct Bone_MDL7 {
 
     //! Optional name of the bone
     char name[1 /* DUMMY SIZE */];
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 #if (!defined AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_20_CHARS)
 #   define AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_20_CHARS (16 + 20)
@@ -290,7 +291,7 @@ struct Group_MDL7 {
 
     //! Number of frames
     int32_t numframes;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 #define AI_MDL7_SKINTYPE_MIPFLAG                0x08
 #define AI_MDL7_SKINTYPE_MATERIAL               0x10
@@ -312,7 +313,7 @@ struct Deformer_MDL7 {
     int32_t group_index;
     int32_t elements;
     int32_t deformerdata_size;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------
@@ -324,7 +325,7 @@ struct DeformerElement_MDL7 {
     int32_t element_index;
     char    element_name[AI_MDL7_MAX_BONENAMESIZE];
     int32_t weights;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct DeformerWeight_MDL7
@@ -334,7 +335,7 @@ struct DeformerWeight_MDL7 {
     //! for deformer_typ==0 (==bones) index == vertex index
     int32_t index;
     float   weight;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // don't know why this was in the original headers ...
 typedef int32_t MD7_MATERIAL_ASCDEFSIZE;
@@ -345,7 +346,7 @@ typedef int32_t MD7_MATERIAL_ASCDEFSIZE;
  */
 struct ColorValue_MDL7 {
     float r,g,b,a;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct Material_MDL7
@@ -366,7 +367,7 @@ struct Material_MDL7 {
 
     //! Phong power
     float           Power;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct Skin
@@ -388,7 +389,7 @@ struct Skin {
 
     //! Texture data
     uint8_t *data;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------
@@ -399,7 +400,7 @@ struct Skin {
 struct Skin_MDL5 {
     int32_t size, width, height;
     uint8_t *data;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // maximum length of texture file name
 #if (!defined AI_MDL7_MAX_TEXNAMESIZE)
@@ -416,7 +417,7 @@ struct Skin_MDL7 {
     int32_t         width;
     int32_t         height;
     char            texture_name[AI_MDL7_MAX_TEXNAMESIZE];
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct RGB565
@@ -426,7 +427,7 @@ struct RGB565 {
     uint16_t r : 5;
     uint16_t g : 6;
     uint16_t b : 5;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct ARGB4
@@ -455,7 +456,7 @@ struct GroupSkin {
 
     //! Data of each image
     uint8_t **data;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct TexCoord
@@ -470,7 +471,7 @@ struct TexCoord {
 
     //! Texture coordinate in the ty direction
     int32_t t;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct TexCoord_MDL3
@@ -482,7 +483,7 @@ struct TexCoord_MDL3 {
 
     //! position, vertically in range 0..skinheight-1
     int16_t v;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct TexCoord_MDL7
@@ -494,7 +495,7 @@ struct TexCoord_MDL7 {
 
     //! position, vertically in range 0..1
     float v;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct SkinSet_MDL7
@@ -510,7 +511,7 @@ struct SkinSet_MDL7
 
     //! Material index
     int32_t     material;    // size 4
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct Triangle
@@ -523,7 +524,7 @@ struct Triangle
 
     //! Vertex indices
     int32_t vertex[3];
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct Triangle_MDL3
@@ -536,7 +537,7 @@ struct Triangle_MDL3
 
     //! Index of 3 skin vertices in range 0..numskinverts
     uint16_t index_uv[3];
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct Triangle_MDL7
@@ -549,7 +550,7 @@ struct Triangle_MDL7
 
     //! Two skinsets. The second will be used for multi-texturing
     SkinSet_MDL7  skinsets[2];
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 #if (!defined AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV)
 #   define AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV (6+sizeof(SkinSet_MDL7)-sizeof(uint32_t))
@@ -577,7 +578,7 @@ struct Vertex
 {
     uint8_t v[3];
     uint8_t normalIndex;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------
@@ -603,7 +604,7 @@ struct Vertex_MDL7
         uint8_t norm162index;
         float norm[3];
     };
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct BoneTransform_MDL7
@@ -620,7 +621,7 @@ struct BoneTransform_MDL7
     //! I HATE 3DGS AND THE SILLY DEVELOPER WHO DESIGNED
     //! THIS STUPID FILE FORMAT!
     int8_t _unused_[2];
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 #define AI_MDL7_MAX_FRAMENAMESIZE       16
@@ -654,7 +655,7 @@ struct SimpleFrame
 
     //! Vertex list of the frame
     Vertex *verts;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct Frame
@@ -667,7 +668,7 @@ struct Frame
 
     //! Frame data
     SimpleFrame frame;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------
@@ -684,7 +685,7 @@ struct SimpleFrame_MDLn_SP
 
     //! Vertex list of the frame
     Vertex_MDL4 *verts;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
 /** \struct GroupFrame
@@ -706,9 +707,9 @@ struct GroupFrame
 
     //! List of single frames
     SimpleFrame *frames;
-} /* PACK_STRUCT */;
+} PACK_STRUCT;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 // -------------------------------------------------------------------------------------
 /** \struct IntFace_MDL7
@@ -716,11 +717,9 @@ struct GroupFrame
  */
 struct IntFace_MDL7 {
     // provide a constructor for our own convenience
-    IntFace_MDL7()
-    {
-        // set everything to zero
-        mIndices[0] = mIndices[1] = mIndices[2] = 0;
-        iMatIndex[0] = iMatIndex[1] = 0;
+    IntFace_MDL7() AI_NO_EXCEPT {
+        ::memset( mIndices, 0, sizeof(uint32_t) *3);
+        ::memset( iMatIndex, 0, sizeof( unsigned int) *2);
     }
 
     //! Vertex indices
@@ -736,13 +735,11 @@ struct IntFace_MDL7 {
  *  which has been created from two single materials along with the
  *  original material indices.
  */
-struct IntMaterial_MDL7
-{
+struct IntMaterial_MDL7 {
     // provide a constructor for our own convenience
-    IntMaterial_MDL7()
-    {
-        pcMat = NULL;
-        iOldMatIndices[0] = iOldMatIndices[1] = 0;
+    IntMaterial_MDL7() AI_NO_EXCEPT
+    : pcMat( nullptr ) {
+        ::memset( iOldMatIndices, 0, sizeof(unsigned int) *2);
     }
 
     //! Material instance
@@ -760,7 +757,7 @@ struct IntMaterial_MDL7
 struct IntBone_MDL7 : aiBone
 {
     //! Default constructor
-    IntBone_MDL7() : iParent (0xffff)
+    IntBone_MDL7() AI_NO_EXCEPT : iParent (0xffff)
     {
         pkeyPositions.reserve(30);
         pkeyScalings.reserve(30);
@@ -805,12 +802,12 @@ struct IntFrameInfo_MDL7
 struct IntGroupInfo_MDL7
 {
     //! Default constructor
-    IntGroupInfo_MDL7()
+    IntGroupInfo_MDL7() AI_NO_EXCEPT
         :   iIndex(0)
-        ,   pcGroup(NULL)
-        ,   pcGroupUVs(NULL)
-        ,   pcGroupTris(NULL)
-        ,   pcGroupVerts(NULL)
+        ,   pcGroup(nullptr)
+        ,   pcGroupUVs(nullptr)
+        ,   pcGroupTris(nullptr)
+        ,   pcGroupVerts(nullptr)
         {}
 
     //! Construction from an existing group header
@@ -842,12 +839,12 @@ struct IntGroupInfo_MDL7
 //! Holds the data that belongs to a MDL7 mesh group
 struct IntGroupData_MDL7
 {
-    IntGroupData_MDL7()
-        : pcFaces(NULL), bNeed2UV(false)
+    IntGroupData_MDL7() AI_NO_EXCEPT
+        : bNeed2UV(false)
     {}
 
     //! Array of faces that belong to the group
-    MDL::IntFace_MDL7* pcFaces;
+    std::vector<MDL::IntFace_MDL7> pcFaces;
 
     //! Array of vertex positions
     std::vector<aiVector3D>     vPositions;
@@ -871,10 +868,9 @@ struct IntGroupData_MDL7
 
 // -------------------------------------------------------------------------------------
 //! Holds data from an MDL7 file that is shared by all mesh groups
-struct IntSharedData_MDL7
-{
+struct IntSharedData_MDL7 {
     //! Default constructor
-    IntSharedData_MDL7()
+    IntSharedData_MDL7() AI_NO_EXCEPT
         : apcOutBones(),
         iNum()
     {

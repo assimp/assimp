@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -55,17 +56,14 @@ namespace FBX {
 // Forward declarations
 class Element;
 
-
 /** Represents a dynamic property. Type info added by deriving classes,
  *  see #TypedProperty.
  Example:
  @verbatim
    P: "ShininessExponent", "double", "Number", "",0.5
  @endvebatim
-
 */
-class Property
-{
+class Property {
 protected:
     Property();
 
@@ -79,17 +77,14 @@ public:
     }
 };
 
-
 template<typename T>
-class TypedProperty : public Property
-{
+class TypedProperty : public Property {
 public:
     explicit TypedProperty(const T& value)
-        : value(value)
-    {
+    : value(value) {
+        // empty
     }
 
-public:
     const T& Value() const {
         return value;
     }
@@ -100,21 +95,19 @@ private:
 
 
 typedef std::fbx_unordered_map<std::string,std::shared_ptr<Property> > DirectPropertyMap;
-typedef std::fbx_unordered_map<std::string,const Property*> PropertyMap;
-typedef std::fbx_unordered_map<std::string,const Element*> LazyPropertyMap;
+typedef std::fbx_unordered_map<std::string,const Property*>            PropertyMap;
+typedef std::fbx_unordered_map<std::string,const Element*>             LazyPropertyMap;
 
 /** 
  *  Represents a property table as can be found in the newer FBX files (Properties60, Properties70)
  */
-class PropertyTable
-{
+class PropertyTable {
 public:
     // in-memory property table with no source element
     PropertyTable();
     PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps);
     ~PropertyTable();
 
-public:
     const Property* Get(const std::string& name) const;
 
     // PropertyTable's need not be coupled with FBX elements so this can be NULL
@@ -135,41 +128,49 @@ private:
     const Element* const element;
 };
 
-
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline T PropertyGet(const PropertyTable& in, const std::string& name,
-    const T& defaultValue)
-{
+inline 
+T PropertyGet(const PropertyTable& in, const std::string& name, const T& defaultValue) {
     const Property* const prop = in.Get(name);
-    if(!prop) {
+    if( nullptr == prop) {
         return defaultValue;
     }
 
     // strong typing, no need to be lenient
     const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
-    if(!tprop) {
+    if( nullptr == tprop) {
         return defaultValue;
     }
 
     return tprop->Value();
 }
 
-
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline T PropertyGet(const PropertyTable& in, const std::string& name,
-    bool& result)
-{
-    const Property* const prop = in.Get(name);
-    if(!prop) {
-        result = false;
-        return T();
+inline 
+T PropertyGet(const PropertyTable& in, const std::string& name, bool& result, bool useTemplate=false ) {
+    const Property* prop = in.Get(name);
+    if( nullptr == prop) {
+        if ( ! useTemplate ) {
+            result = false;
+            return T();
+        }
+        const PropertyTable* templ = in.TemplateProps();
+        if ( nullptr == templ ) {
+            result = false;
+            return T();
+        }
+        prop = templ->Get(name);
+        if ( nullptr == prop ) {
+            result = false;
+            return T();
+        }
     }
 
     // strong typing, no need to be lenient
     const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
-    if(!tprop) {
+    if( nullptr == tprop) {
         result = false;
         return T();
     }
@@ -177,7 +178,6 @@ inline T PropertyGet(const PropertyTable& in, const std::string& name,
     result = true;
     return tprop->Value();
 }
-
 
 } //! FBX
 } //! Assimp

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -50,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "FindInvalidDataProcess.h"
 #include "ProcessHelper.h"
-#include "Macros.h"
-#include "Exceptional.h"
-#include "qnan.h"
+#include <assimp/Macros.h>
+#include <assimp/Exceptional.h>
+#include <assimp/qnan.h>
 
 using namespace Assimp;
 
@@ -117,7 +118,7 @@ void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMap
 // Executes the post processing step on the given imported data.
 void FindInvalidDataProcess::Execute( aiScene* pScene)
 {
-    DefaultLogger::get()->debug("FindInvalidDataProcess begin");
+    ASSIMP_LOG_DEBUG("FindInvalidDataProcess begin");
 
     bool out = false;
     std::vector<unsigned int> meshMapping(pScene->mNumMeshes);
@@ -162,15 +163,16 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
             pScene->mNumMeshes = real;
         }
 
-        DefaultLogger::get()->info("FindInvalidDataProcess finished. Found issues ...");
+        ASSIMP_LOG_INFO("FindInvalidDataProcess finished. Found issues ...");
+    } else {
+        ASSIMP_LOG_DEBUG("FindInvalidDataProcess finished. Everything seems to be OK.");
     }
-    else DefaultLogger::get()->debug("FindInvalidDataProcess finished. Everything seems to be OK.");
 }
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline const char* ValidateArrayContents(const T* arr, unsigned int size,
-    const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
+inline const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/,
+    const std::vector<bool>& /*dirtyMask*/, bool /*mayBeIdentical = false*/, bool /*mayBeZero = true*/)
 {
     return NULL;
 }
@@ -211,8 +213,7 @@ inline bool ProcessArray(T*& in, unsigned int num,const char* name,
 {
     const char* err = ValidateArrayContents(in,num,dirtyMask,mayBeIdentical,mayBeZero);
     if (err)    {
-        DefaultLogger::get()->error(std::string("FindInvalidDataProcess fails on mesh ") + name + ": " + err);
-
+        ASSIMP_LOG_ERROR_F( "FindInvalidDataProcess fails on mesh ", name, ": ", err);
         delete[] in;
         in = NULL;
         return true;
@@ -331,7 +332,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
         i = 1;
     }
     if (1 == i)
-        DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
+        ASSIMP_LOG_WARN("Simplified dummy tracks with just one key");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -339,32 +340,37 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
     bool ret = false;
-    std::vector<bool> dirtyMask(pMesh->mNumVertices,(pMesh->mNumFaces ? true : false));
+    std::vector<bool> dirtyMask(pMesh->mNumVertices, pMesh->mNumFaces != 0);
 
     // Ignore elements that are not referenced by vertices.
     // (they are, for example, caused by the FindDegenerates step)
-    for (unsigned int m = 0; m < pMesh->mNumFaces;++m)  {
+    for (unsigned int m = 0; m < pMesh->mNumFaces; ++m) {
         const aiFace& f = pMesh->mFaces[m];
 
-        for (unsigned int i = 0; i < f.mNumIndices;++i) {
+        for (unsigned int i = 0; i < f.mNumIndices; ++i) {
             dirtyMask[f.mIndices[i]] = false;
         }
     }
 
     // Process vertex positions
-    if(pMesh->mVertices && ProcessArray(pMesh->mVertices,pMesh->mNumVertices,"positions",dirtyMask))    {
-        DefaultLogger::get()->error("Deleting mesh: Unable to continue without vertex positions");
+    if (pMesh->mVertices && ProcessArray(pMesh->mVertices, pMesh->mNumVertices, "positions", dirtyMask)) {
+        ASSIMP_LOG_ERROR("Deleting mesh: Unable to continue without vertex positions");
+
         return 2;
     }
 
     // process texture coordinates
-    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i];++i)    {
-        if (ProcessArray(pMesh->mTextureCoords[i],pMesh->mNumVertices,"uvcoords",dirtyMask))    {
+    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i]; ++i) {
+        if (ProcessArray(pMesh->mTextureCoords[i], pMesh->mNumVertices, "uvcoords", dirtyMask)) {
+            pMesh->mNumUVComponents[i] = 0;
 
             // delete all subsequent texture coordinate sets.
-            for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)  {
-                delete[] pMesh->mTextureCoords[a]; pMesh->mTextureCoords[a] = NULL;
+            for (unsigned int a = i + 1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+                delete[] pMesh->mTextureCoords[a];
+                pMesh->mTextureCoords[a] = NULL;
+                pMesh->mNumUVComponents[a] = 0;
             }
+
             ret = true;
         }
     }

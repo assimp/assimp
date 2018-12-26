@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -44,19 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Collada parser helper
  */
 
-
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include <sstream>
 #include <stdarg.h>
 #include "ColladaParser.h"
-#include "fast_atof.h"
-#include "ParsingUtils.h"
-#include "StringUtils.h"
+#include <assimp/fast_atof.h>
+#include <assimp/ParsingUtils.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/light.h>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 #include <memory>
 
@@ -68,7 +68,7 @@ using namespace Assimp::Formatter;
 // Constructor to be privately used by Importer
 ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     : mFileName( pFile )
-    , mReader( NULL )
+    , mReader( nullptr )
     , mDataLibrary()
     , mAccessorLibrary()
     , mMeshLibrary()
@@ -79,20 +79,20 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     , mLightLibrary()
     , mCameraLibrary()
     , mControllerLibrary()
-    , mRootNode( NULL )
+    , mRootNode( nullptr )
     , mAnims()
     , mUnitSize( 1.0f )
     , mUpDirection( UP_Y )
     , mFormat(FV_1_5_n )    // We assume the newest file format by default
 {
     // validate io-handler instance
-    if ( NULL == pIOHandler ) {
+    if (nullptr == pIOHandler ) {
         throw DeadlyImportError("IOSystem is NULL." );
     }
 
     // open the file
     std::unique_ptr<IOStream> file( pIOHandler->Open(pFile ) );
-    if (file.get() == NULL) {
+    if (file.get() == nullptr) {
         throw DeadlyImportError( "Failed to open file " + pFile + "." );
     }
 
@@ -152,22 +152,22 @@ void ColladaParser::ReadContents()
 
                     if (!::strncmp(version,"1.5",3)) {
                         mFormat =  FV_1_5_n;
-                        DefaultLogger::get()->debug("Collada schema version is 1.5.n");
+                        ASSIMP_LOG_DEBUG("Collada schema version is 1.5.n");
                     }
                     else if (!::strncmp(version,"1.4",3)) {
                         mFormat =  FV_1_4_n;
-                        DefaultLogger::get()->debug("Collada schema version is 1.4.n");
+                        ASSIMP_LOG_DEBUG("Collada schema version is 1.4.n");
                     }
                     else if (!::strncmp(version,"1.3",3)) {
                         mFormat =  FV_1_3_n;
-                        DefaultLogger::get()->debug("Collada schema version is 1.3.n");
+                        ASSIMP_LOG_DEBUG("Collada schema version is 1.3.n");
                     }
                 }
 
                 ReadStructure();
             } else
             {
-                DefaultLogger::get()->debug( format() << "Ignoring global element <" << mReader->getNodeName() << ">." );
+                ASSIMP_LOG_DEBUG_F( "Ignoring global element <", mReader->getNodeName(), ">." );
                 SkipElement();
             }
         } else
@@ -222,10 +222,11 @@ void ColladaParser::ReadStructure()
     }
 
 	PostProcessRootAnimations();
+    PostProcessControllers();
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads asset informations such as coordinate system informations and legal blah
+// Reads asset information such as coordinate system information and legal blah
 void ColladaParser::ReadAssetInfo()
 {
     if( mReader->isEmptyElement())
@@ -358,6 +359,21 @@ void ColladaParser::ReadAnimationClipLibrary()
 			break;
 		}
 	}
+}
+
+void ColladaParser::PostProcessControllers()
+{
+    std::string meshId;
+    for (ControllerLibrary::iterator it = mControllerLibrary.begin(); it != mControllerLibrary.end(); ++it) {
+        meshId = it->second.mMeshId;
+        ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);
+        while(findItr != mControllerLibrary.end()) {
+            meshId = findItr->second.mMeshId;
+            findItr = mControllerLibrary.find(meshId);
+        }
+    
+        it->second.mMeshId = meshId;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -968,13 +984,13 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
                     // they're not skipped.
                     int attrib = TestAttribute("array_index");
                     if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
-                        DefaultLogger::get()->warn("Collada: Ignoring texture array index");
+                        ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
                         continue;
                     }
 
                     attrib = TestAttribute("mip_index");
                     if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
-                        DefaultLogger::get()->warn("Collada: Ignoring MIP map layer");
+                        ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
                         continue;
                     }
 
@@ -995,7 +1011,7 @@ void ColladaParser::ReadImage( Collada::Image& pImage)
                     // embedded image. get format
                     const int attrib = TestAttribute("format");
                     if (-1 == attrib)
-                        DefaultLogger::get()->warn("Collada: Unknown image file format");
+                        ASSIMP_LOG_WARN("Collada: Unknown image file format");
                     else pImage.mEmbeddedFormat = mReader->getAttributeValue(attrib);
 
                     const char* data = GetTextContent();
@@ -1574,7 +1590,7 @@ void ColladaParser::ReadSamplerProperties( Sampler& out )
                     out.mOp = aiTextureOp_Multiply;
 
                 else  {
-                    DefaultLogger::get()->warn("Collada: Unsupported MAYA texture blend mode");
+                    ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
                 }
                 TestClosing( "blend_mode");
             }
@@ -1866,7 +1882,7 @@ void ColladaParser::ReadMesh( Mesh* pMesh)
                 ReadIndexData( pMesh);
             } else
             {
-                // ignore the rest
+                // ignore the restf
                 SkipElement();
             }
         }
@@ -2216,8 +2232,9 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
             else if (IsElement("extra"))
             {
                 SkipElement("extra");
-            } else
-            {
+            } else if ( IsElement("ph")) {                
+                SkipElement("ph");
+            } else {
                 ThrowException( format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">" );
             }
         }
@@ -2231,7 +2248,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
     }
 
 #ifdef ASSIMP_BUILD_DEBUG
-	if (primType != Prim_TriFans && primType != Prim_TriStrips &&
+	if (primType != Prim_TriFans && primType != Prim_TriStrips && primType != Prim_LineStrip &&
         primType != Prim_Lines) { // this is ONLY to workaround a bug in SketchUp 15.3.331 where it writes the wrong 'count' when it writes out the 'lines'.
         ai_assert(actualPrimitives == numPrimitives);
     }
@@ -2400,6 +2417,10 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
         size_t numberOfVertices = indices.size() / numOffsets;
         numPrimitives = numberOfVertices - 2;
     }
+    if (pPrimType == Prim_LineStrip) {
+        size_t numberOfVertices = indices.size() / numOffsets;
+        numPrimitives = numberOfVertices - 1;
+    }
 
     pMesh->mFaceSize.reserve( numPrimitives);
     pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);
@@ -2415,6 +2436,11 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
                 numPoints = 2;
                 for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
                     CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+                break;
+            case Prim_LineStrip:
+                numPoints = 2;
+                for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+                    CopyVertex(currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
                 break;
             case Prim_Triangles:
                 numPoints = 3;
@@ -2460,8 +2486,7 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
     size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
 
     // don't overrun the boundaries of the index list
-    size_t maxIndexRequested = baseOffset + numOffsets - 1;
-    ai_assert(maxIndexRequested < indices.size());
+    ai_assert((baseOffset + numOffsets - 1) < indices.size());
 
     // extract per-vertex channels using the global per-vertex offset
     for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
@@ -2516,7 +2541,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mPositions.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex position stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
             break;
         case IT_Normal:
             // pad to current vertex count if necessary
@@ -2527,7 +2552,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mNormals.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex normal stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
             break;
         case IT_Tangent:
             // pad to current vertex count if necessary
@@ -2538,7 +2563,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mTangents.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex tangent stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
             break;
         case IT_Bitangent:
             // pad to current vertex count if necessary
@@ -2549,7 +2574,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
             if( pInput.mIndex == 0)
                 pMesh->mBitangents.push_back( aiVector3D( obj[0], obj[1], obj[2]));
             else
-                DefaultLogger::get()->error("Collada: just one vertex bitangent stream supported");
+                ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
             break;
         case IT_Texcoord:
             // up to 4 texture coord sets are fine, ignore the others
@@ -2565,7 +2590,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
                     pMesh->mNumUVComponents[pInput.mIndex]=3;
             }   else
             {
-                DefaultLogger::get()->error("Collada: too many texture coordinate sets. Skipping.");
+                ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
             }
             break;
         case IT_Color:
@@ -2585,7 +2610,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
                 pMesh->mColors[pInput.mIndex].push_back(result);
             } else
             {
-                DefaultLogger::get()->error("Collada: too many vertex color sets. Skipping.");
+                ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
             }
 
             break;
@@ -2714,7 +2739,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 {
                     const char* s = mReader->getAttributeValue(attrId);
                     if (s[0] != '#')
-                        DefaultLogger::get()->error("Collada: Unresolved reference format of camera");
+                        ASSIMP_LOG_ERROR("Collada: Unresolved reference format of camera");
                     else
                         pNode->mPrimaryCamera = s+1;
                 }
@@ -2727,7 +2752,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 {
                     const char* s = mReader->getAttributeValue(attrID);
                     if (s[0] != '#')
-                        DefaultLogger::get()->error("Collada: Unresolved reference format of node");
+                        ASSIMP_LOG_ERROR("Collada: Unresolved reference format of node");
                     else
                     {
                         pNode->mNodeInstances.push_back(NodeInstance());
@@ -2745,7 +2770,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 // Reference to a light, name given in 'url' attribute
                 int attrID = TestAttribute("url");
                 if (-1 == attrID)
-                    DefaultLogger::get()->warn("Collada: Expected url attribute in <instance_light> element");
+                    ASSIMP_LOG_WARN("Collada: Expected url attribute in <instance_light> element");
                 else
                 {
                     const char* url = mReader->getAttributeValue( attrID);
@@ -2761,7 +2786,7 @@ void ColladaParser::ReadSceneNode( Node* pNode)
                 // Reference to a camera, name given in 'url' attribute
                 int attrID = TestAttribute("url");
                 if (-1 == attrID)
-                    DefaultLogger::get()->warn("Collada: Expected url attribute in <instance_camera> element");
+                    ASSIMP_LOG_WARN("Collada: Expected url attribute in <instance_camera> element");
                 else
                 {
                     const char* url = mReader->getAttributeValue( attrID);
@@ -2848,7 +2873,7 @@ void ColladaParser::ReadMaterialVertexInputBinding( Collada::SemanticMappingTabl
                 tbl.mMap[s] = vn;
             }
             else if( IsElement( "bind")) {
-                DefaultLogger::get()->warn("Collada: Found unsupported <bind> element");
+                ASSIMP_LOG_WARN("Collada: Found unsupported <bind> element");
             }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)    {
@@ -2967,9 +2992,8 @@ void ColladaParser::ReportWarning(const char* msg,...)
     ai_assert(iLen > 0);
 
     va_end(args);
-    DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
+    ASSIMP_LOG_WARN_F("Validation warning: ", std::string(szBuffer,iLen));
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the current element
@@ -3081,7 +3105,7 @@ const char* ColladaParser::TestTextContent()
     // read contents of the element
     if( !mReader->read() )
         return NULL;
-    if( mReader->getNodeType() != irr::io::EXN_TEXT)
+    if( mReader->getNodeType() != irr::io::EXN_TEXT && mReader->getNodeType() != irr::io::EXN_CDATA)
         return NULL;
 
     // skip leading whitespace
@@ -3165,7 +3189,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& semantic)
 {
     if ( semantic.empty() ) {
-        DefaultLogger::get()->warn( format() << "Vertex input type is empty." );
+        ASSIMP_LOG_WARN("Vertex input type is empty." );
         return IT_Invalid;
     }
 
@@ -3184,7 +3208,7 @@ Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& semanti
     else if( semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << semantic << "\". Ignoring." );
+    ASSIMP_LOG_WARN_F( "Unknown vertex input type \"", semantic, "\". Ignoring." );
     return IT_Invalid;
 }
 

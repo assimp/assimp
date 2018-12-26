@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -49,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter_Macro.hpp"
 
 // Header files, Assimp.
-#include "StandardShapes.h"
+#include <assimp/StandardShapes.h>
 
 namespace Assimp
 {
@@ -135,7 +136,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 	}
 	else
 	{
-		const unsigned int tess = 30;///TODO: IME tesselation factor through ai_property
+		const unsigned int tess = 30;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
@@ -208,7 +209,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 	}
 	else
 	{
-		const unsigned int tess = 30;///TODO: IME tesselation factor through ai_property
+		const unsigned int tess = 30;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tside;// temp array for vertices of side.
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
@@ -285,7 +286,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
     bool ccw = true;
     bool colorPerVertex = true;
     float creaseAngle = 0;
-    std::list<float> height;
+    std::vector<float> height;
     bool normalPerVertex = true;
     bool solid = true;
     int32_t xDimension = 0;
@@ -301,7 +302,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("creaseAngle", creaseAngle, XML_ReadNode_GetAttrVal_AsFloat);
-		MACRO_ATTRREAD_CHECK_REF("height", height, XML_ReadNode_GetAttrVal_AsListF);
+		MACRO_ATTRREAD_CHECK_REF("height", height, XML_ReadNode_GetAttrVal_AsArrF);
 		MACRO_ATTRREAD_CHECK_RET("xDimension", xDimension, XML_ReadNode_GetAttrVal_AsI32);
 		MACRO_ATTRREAD_CHECK_RET("xSpacing", xSpacing, XML_ReadNode_GetAttrVal_AsFloat);
 		MACRO_ATTRREAD_CHECK_RET("zDimension", zDimension, XML_ReadNode_GetAttrVal_AsI32);
@@ -326,7 +327,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		CX3DImporter_NodeElement_ElevationGrid& grid_alias = *((CX3DImporter_NodeElement_ElevationGrid*)ne);// create alias for conveience
 
 		{// create grid vertices list
-			std::list<float>::const_iterator he_it = height.begin();
+			std::vector<float>::const_iterator he_it = height.begin();
 
 			for(int32_t zi = 0; zi < zDimension; zi++)// rows
 			{
@@ -479,7 +480,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx
 			tvec = pSpine[1] - pSpine[0];
 		}
 		else
-		{// The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about droping tail) spine[n - 1] is
+		{// The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about dropping tail) spine[n - 1] is
 			// the spine[0].
 			tvec = pSpine[spine_idx_last] - pSpine[spine_idx_last - 1];
 		}
@@ -863,29 +864,29 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 {
     std::string use, def;
     bool ccw = true;
-    std::list<int32_t> colorIndex;
+    std::vector<int32_t> colorIndex;
     bool colorPerVertex = true;
     bool convex = true;
-    std::list<int32_t> coordIndex;
+    std::vector<int32_t> coordIndex;
     float creaseAngle = 0;
-    std::list<int32_t> normalIndex;
+    std::vector<int32_t> normalIndex;
     bool normalPerVertex = true;
     bool solid = true;
-    std::list<int32_t> texCoordIndex;
+    std::vector<int32_t> texCoordIndex;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("ccw", ccw, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("colorIndex", colorIndex, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("colorIndex", colorIndex, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("colorPerVertex", colorPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("convex", convex, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("coordIndex", coordIndex, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("coordIndex", coordIndex, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("creaseAngle", creaseAngle, XML_ReadNode_GetAttrVal_AsFloat);
-		MACRO_ATTRREAD_CHECK_REF("normalIndex", normalIndex, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("normalIndex", normalIndex, XML_ReadNode_GetAttrVal_AsArrI32);
 		MACRO_ATTRREAD_CHECK_RET("normalPerVertex", normalPerVertex, XML_ReadNode_GetAttrVal_AsBool);
 		MACRO_ATTRREAD_CHECK_RET("solid", solid, XML_ReadNode_GetAttrVal_AsBool);
-		MACRO_ATTRREAD_CHECK_REF("texCoordIndex", texCoordIndex, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("texCoordIndex", texCoordIndex, XML_ReadNode_GetAttrVal_AsArrI32);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
@@ -949,7 +950,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 void X3DImporter::ParseNode_Geometry3D_Sphere()
 {
     std::string use, def;
-    float radius = 1;
+    ai_real radius = 1;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
 
@@ -966,7 +967,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 	}
 	else
 	{
-		const unsigned int tess = 3;///TODO: IME tesselation factor through ai_property
+		const unsigned int tess = 3;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tlist;
 

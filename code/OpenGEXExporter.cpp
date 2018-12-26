@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,7 @@ OpenGEXExporter::OpenGEXExporter() {
 OpenGEXExporter::~OpenGEXExporter() {
 }
 
-bool OpenGEXExporter::exportScene( const char *filename, const aiScene* pScene ) {
+bool OpenGEXExporter::exportScene( const char * /*filename*/, const aiScene* /*pScene*/ ) {
     return true;
 }
 

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -42,25 +43,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_D3MFLOADER_H_INCLUDED
 #define AI_D3MFLOADER_H_INCLUDED
 
-#include "BaseImporter.h"
+#include <assimp/BaseImporter.h>
 
 namespace Assimp {
 
-class D3MFImporter : public BaseImporter
-{
+class D3MFImporter : public BaseImporter {
 public:
+    // BaseImporter interface
     D3MFImporter();
     ~D3MFImporter();
-
-    // BaseImporter interface
-public:
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
     void SetupProperties(const Importer *pImp);
     const aiImporterDesc *GetInfo() const;
 
 protected:
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
-
 };
-}
+
+} // Namespace Assimp
+
 #endif // AI_D3MFLOADER_H_INCLUDED

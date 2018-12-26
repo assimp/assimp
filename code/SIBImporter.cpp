@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 
 All rights reserved.
@@ -55,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "SIBImporter.h"
-#include "ByteSwapper.h"
-#include "StreamReader.h"
-#include "TinyFormatter.h"
+#include <assimp/ByteSwapper.h>
+#include <assimp/StreamReader.h>
+#include <assimp/TinyFormatter.h>
 //#include "../contrib/ConvertUTF/ConvertUTF.h"
 #include "../contrib/utf8cpp/source/utf8.h"
 #include <assimp/IOSystem.hpp>
@@ -149,7 +150,7 @@ static SIBChunk ReadChunk(StreamReaderLE* stream)
     chunk.Tag = stream->GetU4();
     chunk.Size = stream->GetU4();
     if (chunk.Size > stream->GetRemainingSizeToLimit())
-        DefaultLogger::get()->error("SIB: Chunk overflow");
+        ASSIMP_LOG_ERROR("SIB: Chunk overflow");
     ByteSwap::Swap4(&chunk.Tag);
     return chunk;
 }
@@ -163,7 +164,7 @@ static aiColor3D ReadColor(StreamReaderLE* stream)
     return aiColor3D(r, g, b);
 }
 
-static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
+static void UnknownChunk(StreamReaderLE* /*stream*/, const SIBChunk& chunk)
 {
     char temp[5] = {
         static_cast<char>(( chunk.Tag>>24 ) & 0xff),
@@ -172,40 +173,33 @@ static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
         static_cast<char>(chunk.Tag & 0xff), '\0'
     };
 
-    DefaultLogger::get()->warn((Formatter::format(), "SIB: Skipping unknown '",temp,"' chunk."));
+    ASSIMP_LOG_WARN((Formatter::format(), "SIB: Skipping unknown '",temp,"' chunk."));
 }
 
 // Reads a UTF-16LE string and returns it at UTF-8.
-static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
-{
-    if ( 0 == numWChars ) {
+static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
+    if ( nullptr == stream || 0 == numWChars ) {
         static const aiString empty;
         return empty;
     }
+
     // Allocate buffers (max expansion is 1 byte -> 4 bytes for UTF-8)
-    //UTF16* temp = new UTF16[numWChars];
     std::vector<unsigned char> str;
-    str.reserve(numWChars * 4 + 1);
-    //unsigned char* str = new unsigned char[numWChars * 4 + 1];
-    uint16_t *temp = new uint16_t[numWChars];
-    for (uint32_t n=0;n<numWChars;n++)
-        temp[n] = stream->GetU2();
+    str.reserve( numWChars * 4 + 1 );
+    uint16_t *temp = new uint16_t[ numWChars ];
+    for ( uint32_t n = 0; n < numWChars; ++n ) {
+        temp[ n ] = stream->GetU2();
+    }
 
     // Convert it and NUL-terminate.
-    //const UTF16 *start = temp, *end = temp + numWChars;
+    const uint16_t *start( temp ), *end( temp + numWChars );
+    utf8::utf16to8( start, end, back_inserter( str ) );
+    str[ str.size() - 1 ] = '\0';
 
-    const uint16_t *start = temp, *end = temp + numWChars;
-    utf8::utf16to8(start, end, back_inserter(str));
-
-    //UTF8 *dest = str, *limit = str + numWChars*4;
-    //ConvertUTF16toUTF8(&start, end, &dest, limit, lenientConversion);
-    //*dest = '\0';
-
-    str[str.size()-1] = '\0';
     // Return the final string.
     aiString result = aiString((const char *)&str[0]);
-    //delete[] str;
     delete[] temp;
+
     return result;
 }
 
@@ -223,26 +217,26 @@ SIBImporter::~SIBImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool SIBImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
-{
+bool SIBImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const {
     return SimpleExtensionCheck(pFile, "sib");
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* SIBImporter::GetInfo () const
-{
+const aiImporterDesc* SIBImporter::GetInfo () const {
     return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
-static void ReadVerts(SIBMesh* mesh, StreamReaderLE* stream, uint32_t count)
-{
-    mesh->pos.resize(count);
+static void ReadVerts(SIBMesh* mesh, StreamReaderLE* stream, uint32_t count) {
+    if ( nullptr == mesh || nullptr == stream ) {
+        return;
+    }
 
-    for (uint32_t n=0;n<count;n++) {
-        mesh->pos[n].x = stream->GetF4();
-        mesh->pos[n].y = stream->GetF4();
-        mesh->pos[n].z = stream->GetF4();
+    mesh->pos.resize(count);
+    for ( uint32_t n=0; n<count; ++n ) {
+        mesh->pos[ n ].x = stream->GetF4();
+        mesh->pos[ n ].y = stream->GetF4();
+        mesh->pos[ n ].z = stream->GetF4();
     }
 }
 
@@ -595,7 +589,7 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
 
         if (mtl >= meshes.size())
         {
-            DefaultLogger::get()->error("SIB: Face material index is invalid.");
+            ASSIMP_LOG_ERROR("SIB: Face material index is invalid.");
             mtl = 0;
         }
 
@@ -827,7 +821,7 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
 static void CheckVersion(StreamReaderLE* stream)
 {
     uint32_t version = stream->GetU4();
-    if ( version != 1 ) {
+    if ( version < 1 || version > 2 ) {
         throw DeadlyImportError( "SIB: Unsupported file version." );
     }
 }
@@ -909,6 +903,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     // Add nodes for each object.
     for (size_t n=0;n<sib.objs.size();n++)
     {
+        ai_assert(root->mChildren);
         SIBObject& obj = sib.objs[n];
         aiNode* node = new aiNode;
         root->mChildren[childIdx++] = node;
@@ -933,6 +928,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     // (no transformation as the light is already in world space)
     for (size_t n=0;n<sib.lights.size();n++)
     {
+        ai_assert(root->mChildren);
         aiLight* light = sib.lights[n];
         if ( nullptr != light ) {
             aiNode* node = new aiNode;

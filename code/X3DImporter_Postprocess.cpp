@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2018, assimp team
+
 
 All rights reserved.
 
@@ -48,8 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 
 // Header files, Assimp.
-#include "StandardShapes.h"
-#include "StringUtils.h"
+#include <assimp/ai_assert.h>
+#include <assimp/StandardShapes.h>
+#include <assimp/StringUtils.h>
 
 // Header files, stdlib.
 #include <algorithm>
@@ -357,6 +359,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			ai_assert(*pMesh);
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)
@@ -389,6 +392,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			ai_assert(*pMesh);
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)
@@ -446,6 +450,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			ai_assert(*pMesh);
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)
@@ -475,6 +480,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			ai_assert(*pMesh);
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)
@@ -550,6 +556,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			ai_assert(*pMesh);
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)
@@ -584,6 +591,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			ai_assert(*pMesh);
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)

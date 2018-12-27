@@ -131,13 +131,15 @@ namespace Assimp {
 
 } // end of namespace Assimp
 
-FBXExporter::FBXExporter (
-    const aiScene* pScene,
-    const ExportProperties* pProperties
-)
-    : mScene(pScene)
-    , mProperties(pProperties)
-{
+FBXExporter::FBXExporter ( const aiScene* pScene, const ExportProperties* pProperties )
+: binary(false)
+, mScene(pScene)
+, mProperties(pProperties)
+, outfile()
+, connections()
+, mesh_uids()
+, material_uids()
+, node_uids() {
     // will probably need to determine UIDs, connections, etc here.
     // basically anything that needs to be known
     // before we start writing sections to the stream.

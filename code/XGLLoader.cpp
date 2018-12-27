@@ -731,11 +731,10 @@ unsigned int XGLImporter::ResolveMaterialRef(TempScope& scope)
 }
 
 // ------------------------------------------------------------------------------------------------
-void XGLImporter::ReadMaterial(TempScope& scope)
-{
+void XGLImporter::ReadMaterial(TempScope& scope) {
     const unsigned int mat_id = ReadIDAttr();
 
-    std::unique_ptr<aiMaterial> mat(new aiMaterial());
+    aiMaterial *mat(new aiMaterial );
     while (ReadElementUpToClosing("mat"))  {
         const std::string& s = GetElementName();
         if (s == "amb") {
@@ -764,10 +763,9 @@ void XGLImporter::ReadMaterial(TempScope& scope)
         }
     }
 
-    scope.materials[mat_id] = mat.get();
-    scope.materials_linear.push_back(mat.release());
+    scope.materials[mat_id] = mat;
+    scope.materials_linear.push_back(mat);
 }
-
 
 // ----------------------------------------------------------------------------------------------
 void XGLImporter::ReadFaceVertex(const TempMesh& t, TempFace& out)

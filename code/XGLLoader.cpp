@@ -370,7 +370,7 @@ aiLight* XGLImporter::ReadDirectionalLight()
 // ------------------------------------------------------------------------------------------------
 aiNode* XGLImporter::ReadObject(TempScope& scope, bool skipFirst, const char* closetag)
 {
-    std::unique_ptr<aiNode> nd(new aiNode());
+    aiNode *nd = new aiNode;
     std::vector<aiNode*> children;
     std::vector<unsigned int> meshes;
 
@@ -453,11 +453,11 @@ aiNode* XGLImporter::ReadObject(TempScope& scope, bool skipFirst, const char* cl
         nd->mChildren = new aiNode*[nd->mNumChildren]();
         for(unsigned int i = 0; i < nd->mNumChildren; ++i) {
             nd->mChildren[i] = children[i];
-            children[i]->mParent = nd.get();
+            children[i]->mParent = nd;
         }
     }
 
-    return nd.release();
+    return nd;
 }
 
 // ------------------------------------------------------------------------------------------------

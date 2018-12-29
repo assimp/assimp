@@ -1500,24 +1500,18 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     // otherwise it is a normal node (NODE)
     const char * node_type;
     bool is_joint, is_skeleton_root = false;
-    if (NULL == findBone(pScene, pNode->mName.C_Str())) {
+    if (nullptr == findBone(pScene, pNode->mName.C_Str())) {
         node_type = "NODE";
         is_joint = false;
     } else {
         node_type = "JOINT";
         is_joint = true;
-        if(!pNode->mParent || NULL == findBone(pScene, pNode->mParent->mName.C_Str()))
+        if (!pNode->mParent || nullptr == findBone(pScene, pNode->mParent->mName.C_Str())) {
             is_skeleton_root = true;
+        }
     }
 
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
-	/* // customized, Note! the id field is crucial for inter-xml look up, it cannot be replaced with sid ?!
-    mOutput << startstr
-            << "<node ";
-    if(is_skeleton_root)
-        mOutput << "id=\"" << "skeleton_root" << "\" "; // For now, only support one skeleton in a scene.
-    mOutput << (is_joint ? "s" : "") << "id=\"" << node_name_escaped;
-	 */
 	mOutput << startstr << "<node ";
 	if(is_skeleton_root) {
 		mOutput << "id=\"" << node_name_escaped << "\" " << (is_joint ? "sid=\"" + node_name_escaped +"\"" : "") ; // For now, only support one skeleton in a scene.

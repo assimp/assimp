@@ -28,7 +28,11 @@ namespace Assimp {
 
 #define IMPL_STRUCT_READ(ty)                                                    \
         bool read##ty(ElemBase *v, const size_t cnt, const FileDatabase &db) {  \
-            return read<ty>(db.dna[#ty], dynamic_cast<ty *>(v), cnt, db);       \
+        ty *ptr = dynamic_cast<ty*>(v);                                         \
+        if (nullptr == ptr) {                                                   \
+            return false;                                                       \
+        }                                                                       \
+        return read<ty>(db.dna[#ty], ptr, cnt, db);                             \
         }
 
 #define IMPL_STRUCT_CREATE(ty)                                                  \

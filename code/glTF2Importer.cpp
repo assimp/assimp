@@ -763,6 +763,12 @@ static void BuildVertexWeightMapping(Mesh::Primitive& primitive, std::vector<std
     }else {
         attr.joint[0]->ExtractData(indices16);
     }
+    // 
+    if (nullptr == indices8 && nullptr == indices16) {
+        // Something went completely wrong!
+        ai_assert(false);
+        return;
+    }
 
     for (int i = 0; i < num_vertices; ++i) {
         for (int j = 0; j < 4; ++j) {

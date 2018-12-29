@@ -656,7 +656,11 @@ namespace glTF2
             } ortographic;
         } cameraProperties;
 
-        Camera() {}
+        Camera()
+        : type(Perspective)
+        , cameraProperties() {
+            // empty
+        }
         void Read(Value& obj, Asset& r);
     };
 

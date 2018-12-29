@@ -131,13 +131,15 @@ namespace Assimp {
 
 } // end of namespace Assimp
 
-FBXExporter::FBXExporter (
-    const aiScene* pScene,
-    const ExportProperties* pProperties
-)
-    : mScene(pScene)
-    , mProperties(pProperties)
-{
+FBXExporter::FBXExporter ( const aiScene* pScene, const ExportProperties* pProperties )
+: binary(false)
+, mScene(pScene)
+, mProperties(pProperties)
+, outfile()
+, connections()
+, mesh_uids()
+, material_uids()
+, node_uids() {
     // will probably need to determine UIDs, connections, etc here.
     // basically anything that needs to be known
     // before we start writing sections to the stream.
@@ -2444,7 +2446,6 @@ void FBXExporter::WriteAnimationCurve(
     // TODO: keyattr flags and data (STUB for now)
     n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
     n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
-    ai_assert(static_cast<int32_t>(times.size()) <= std::numeric_limits<int32_t>::max());
     n.AddChild(
         "KeyAttrRefCount",
         std::vector<int32_t>{static_cast<int32_t>(times.size())}

@@ -744,6 +744,9 @@ namespace glTF2 {
         if (!(dict = FindArray(*container, d.mDictId))) {
             container->AddMember(StringRef(d.mDictId), Value().SetArray().Move(), mDoc.GetAllocator());
             dict = FindArray(*container, d.mDictId);
+            if (nullptr == dict) {
+                return;
+            }
         }
 
         for (size_t i = 0; i < d.mObjs.size(); ++i) {

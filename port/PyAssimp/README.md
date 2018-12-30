@@ -20,7 +20,7 @@ model using a shader-based OpenGL pipeline.
 
 To use it, from within `/port/PyAssimp`:
 
-```
+```console
 $ cd scripts
 $ python ./3D-viewer <path to your model>
 ```
@@ -82,9 +82,9 @@ $ python setup.py install
 
 PyAssimp requires a assimp dynamic library (`DLL` on windows,
 `.so` on linux, `.dynlib` on macOS) in order to work. The default search directories are:
-- the current directory
-- on linux additionally: `/usr/lib`, `/usr/local/lib`,
-  `/usr/lib/x86_64-linux-gnu`
+  - the current directory
+  - on linux additionally: `/usr/lib`, `/usr/local/lib`,
+    `/usr/lib/x86_64-linux-gnu`
 
 To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./pyassimp/helper.py`.

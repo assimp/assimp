@@ -643,14 +643,11 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
         Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
         uint8_t* arrys = new uint8_t[bytesLen];
         unsigned int i = 0;
-        uint8_t* data = new uint8_t[s_bytesPerComp];
         for ( unsigned int j = 0; j <= bytesLen; j += bytesPerComp ){
             size_t len_p = offset + j;
             float f_value = *(float *)&buf->GetPointer()[len_p];
             unsigned short c = static_cast<unsigned short>(f_value);
-            ::memset(data, 0, s_bytesPerComp * sizeof(uint8_t));
-            data = (uint8_t*)&c;
-            memcpy(&arrys[i*s_bytesPerComp], data, s_bytesPerComp);
+            memcpy(&arrys[i*s_bytesPerComp], &c, s_bytesPerComp);
             ++i;
         }
         buf->ReplaceData_joint(offset, bytesLen, arrys, bytesLen);
@@ -659,7 +656,6 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
 
         p.attributes.joint.push_back( vertexJointAccessor );
         delete[] arrys;
-        delete[] data;
     }
 
     Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);

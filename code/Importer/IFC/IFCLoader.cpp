@@ -842,7 +842,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const Schema_2x3::IfcProduct& el
             nd->mChildren = new aiNode*[subnodes.size()]();
             for(aiNode* nd2 : subnodes) {
                 nd->mChildren[nd->mNumChildren++] = nd2;
-                nd2->mParent = nd.get();
+                nd2->mParent = nd;
             }
         }
     } catch(...) {

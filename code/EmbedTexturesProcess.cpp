@@ -138,7 +138,11 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     auto extension = path.substr(path.find_last_of('.') + 1u);
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
     if (extension == "jpeg") extension = "jpg";
-    strcpy(pTexture->achFormatHint, extension.c_str());
+    size_t len = extension.size();
+    if (len > HINTMAXTEXTURELEN -1) {
+        len = HINTMAXTEXTURELEN - 1;
+    }
+    strncpy(pTexture->achFormatHint, extension.c_str(), len);
 
     pScene->mTextures[textureId] = pTexture;
 

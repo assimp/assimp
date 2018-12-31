@@ -400,6 +400,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
             if (nullptr != m_pCurrentFace) {
                 m_pCurrentFace->mNumIndices = 3;
                 m_pCurrentFace->mIndices = new unsigned int[3];
+                m_pCurrentFace->mIndices[ idx ] = vertIdx;
             }
         }
 
@@ -409,9 +410,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
         pMesh->mTextureCoords[ 0 ][ vertIdx ].Set( pVertex->vTexCoord.x, pVertex->vTexCoord.y, 0.0f );
         pMesh->mTextureCoords[ 1 ][ vertIdx ].Set( pVertex->vLightmap.x, pVertex->vLightmap.y, 0.0f );
 
-        m_pCurrentFace->mIndices[ idx ] = vertIdx;
         vertIdx++;
-
         idx++;
     }
 }

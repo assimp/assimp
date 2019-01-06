@@ -438,13 +438,16 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 }
             }
 
-            for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
-                if (!attr.texcoord[tc]) {
-                    DefaultLogger::get()->warn("NULL texcoord encountered in mesh \"" + mesh.name +
-                        "\" and will be ignored");
+            for (size_t c = 0; c < attr.color.size() && c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c) {
+                if (attr.color[c]->count != aim->mNumVertices) {
+                    DefaultLogger::get()->warn("Color stream size in mesh \"" + mesh.name +
+                        "\" does not match the vertex count");
                     continue;
                 }
-
+                aim->mColors[c] = new aiColor4D[attr.color[c]->count];
+                attr.color[c]->ExtractData(aim->mColors[c]);
+            }
+            for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 if (attr.texcoord[tc]->count != aim->mNumVertices) {
                     DefaultLogger::get()->warn("Texcoord stream size in mesh \"" + mesh.name +
                                                "\" does not match the vertex count");

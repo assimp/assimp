@@ -221,7 +221,7 @@ void IFCImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
                     free(buffer);
                 } while (read > 0);
                 size_t filesize = fileInfo.uncompressed_size;
-                if (total < 0 || size_t(total) != filesize)
+                if (total == 0 || size_t(total) != filesize)
                 {
                     delete[] buff;
                     ThrowException("Failed to decompress IFC ZIP file");

@@ -3208,7 +3208,7 @@ namespace Assimp {
             out->mMetaData->Set(5, "CoordAxisSign", doc.GlobalSettings().CoordAxisSign());
             out->mMetaData->Set(6, "OriginalUpAxis", doc.GlobalSettings().OriginalUpAxis());
             out->mMetaData->Set(7, "OriginalUpAxisSign", doc.GlobalSettings().OriginalUpAxisSign());
-            out->mMetaData->Set(8, "UnitScaleFactor", doc.GlobalSettings().UnitScaleFactor());
+            out->mMetaData->Set(8, "UnitScaleFactor", (double)doc.GlobalSettings().UnitScaleFactor());
             out->mMetaData->Set(9, "OriginalUnitScaleFactor", doc.GlobalSettings().OriginalUnitScaleFactor());
             out->mMetaData->Set(10, "AmbientColor", doc.GlobalSettings().AmbientColor());
             out->mMetaData->Set(11, "FrameRate", (int)doc.GlobalSettings().TimeMode());

@@ -63,6 +63,12 @@ struct aiScene;
 struct aiNode;
 struct aiMaterial;
 
+struct morphKeyData {
+    std::vector<unsigned int> values;
+    std::vector<float> weights;
+};
+typedef std::map<int64_t, morphKeyData*> morphAnimData;
+
 namespace Assimp {
 namespace FBX {
 
@@ -272,6 +278,7 @@ private:
     // the function is guaranteed to provide consistent results over multiple invocations
     // UNLESS RenameNode() is called for a particular node name.
     std::string FixNodeName(const std::string& name);
+    std::string FixAnimMeshName(const std::string& name);
 
     typedef std::map<const AnimationCurveNode*, const AnimationLayer*> LayerMap;
 
@@ -280,6 +287,9 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     void ConvertAnimationStack(const AnimationStack& st);
+
+    // ------------------------------------------------------------------------------------------------
+    void ProcessMorphAnimDatas(std::map<std::string, morphAnimData*>* morphAnimDatas, const BlendShapeChannel* bsc, const AnimationCurveNode* node);
 
     // ------------------------------------------------------------------------------------------------
     void GenerateNodeAnimations(std::vector<aiNodeAnim*>& node_anims,

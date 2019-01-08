@@ -105,8 +105,8 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
     const Scope& sc = GetRequiredScope(element);
 
     // find target node
-    const char* whitelist[] = {"Model","NodeAttribute"};
-    const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,2);
+    const char* whitelist[] = {"Model","NodeAttribute","Deformer"};
+    const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,3);
 
     for(const Connection* con : conns) {
 

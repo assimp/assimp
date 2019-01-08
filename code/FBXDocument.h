@@ -65,6 +65,7 @@ struct ImportSettings;
 class PropertyTable;
 class Document;
 class Material;
+class ShapeGeometry;
 class Geometry;
 
 class Video;
@@ -74,6 +75,8 @@ class AnimationCurveNode;
 class AnimationLayer;
 class AnimationStack;
 
+class BlendShapeChannel;
+class BlendShape;
 class Skin;
 class Cluster;
 
@@ -868,6 +871,46 @@ private:
 
 typedef std::vector<float> WeightArray;
 typedef std::vector<unsigned int> WeightIndexArray;
+
+
+/** DOM class for BlendShapeChannel deformers */
+class BlendShapeChannel : public Deformer
+{
+public:
+    BlendShapeChannel(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+    virtual ~BlendShapeChannel();
+
+    float DeformPercent() const {
+        return percent;
+    }
+
+    const WeightArray& GetFullWeights() const {
+        return fullWeights;
+    }
+
+    const std::vector<const ShapeGeometry*>& GetShapeGeometries() const {
+        return shapeGeometries;
+    }
+private:
+    float percent;
+    WeightArray fullWeights;
+    std::vector<const ShapeGeometry*> shapeGeometries;
+};
+
+/** DOM class for BlendShape deformers */
+class BlendShape : public Deformer
+{
+public:
+    BlendShape(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+    virtual ~BlendShape();
+
+    const std::vector<const BlendShapeChannel*>& BlendShapeChannels() const {
+        return blendShapeChannels;
+    }
+
+private:
+    std::vector<const BlendShapeChannel*> blendShapeChannels;
+};
 
 /** DOM class for skin deformer clusters (aka subdeformers) */
 class Cluster : public Deformer

@@ -264,6 +264,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     void SetShadingPropertiesCommon(aiMaterial* out_mat, const PropertyTable& props);
+    void SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTable& props, const TextureMap& textures, const MeshGeometry* const mesh);
 
     // ------------------------------------------------------------------------------------------------
     // get the number of fps for a FrameRate enumerated value

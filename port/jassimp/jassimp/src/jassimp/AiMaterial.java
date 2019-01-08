@@ -457,7 +457,7 @@ public final class AiMaterial {
          * 
          * @return the data
          */
-        private Object getData() {
+        Object getData() {
             return m_data;
         }
     }

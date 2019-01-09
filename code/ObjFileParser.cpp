@@ -118,7 +118,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     size_t lastFilePos( 0 );
 
     std::vector<char> buffer;
-    while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
+    while ( streamBuffer.getNextDataLine( buffer, '\0' ) ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 

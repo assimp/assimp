@@ -966,6 +966,9 @@ if( MSVC )
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+    set(WindowsStore TRUE)
+endif()
 SET_TARGET_PROPERTIES( assimp PROPERTIES
   VERSION ${ASSIMP_VERSION}
   SOVERSION ${ASSIMP_SOVERSION} # use full version

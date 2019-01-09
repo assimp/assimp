@@ -728,8 +728,11 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         std::vector<aiAnimMesh*> animMeshes;
         for (unsigned int i = 0; i < targetMeshes.size(); i++)
         {
-            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMeshes.at(i));
-            animMesh->mWeight = targetWeights[i];
+            aiMesh* targetMesh = targetMeshes.at(i);
+            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMesh);
+            float weight = targetWeights[i];
+            animMesh->mWeight = weight == 0 ? 1.0f : weight;
+            animMesh->mName = targetMesh->mName;
             animMeshes.push_back(animMesh);
         }
         dstMesh->mMethod = (method == Collada::Relative)

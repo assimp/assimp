@@ -113,8 +113,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
     unsigned int progressCounter = 0;
     const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
-    const unsigned int progressTotal = 3 * bytesToProcess;
-    const unsigned int progressOffset = bytesToProcess;
+    const unsigned int progressTotal = bytesToProcess;
     unsigned int processed = 0;
     size_t lastFilePos( 0 );
 
@@ -126,10 +125,10 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         // Handle progress reporting
         const size_t filePos( streamBuffer.getFilePos() );
         if ( lastFilePos < filePos ) {
-            processed += static_cast<unsigned int>(filePos);
+            processed = static_cast<unsigned int>(filePos);
             lastFilePos = filePos;
             progressCounter++;
-            m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
+            m_progress->UpdateFileRead( processed, progressTotal );
         }
 
         // parse line

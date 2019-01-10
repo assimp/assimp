@@ -133,6 +133,8 @@ IF(MSVC)
     "Install MSVC debug files."
     ON
   )
+  # Multibyte character set is deprecated, but default
+  ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
 ENDIF(MSVC)
 
 IF (BUILD_FRAMEWORK)

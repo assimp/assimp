@@ -56,6 +56,7 @@ namespace Assimp {
 namespace StepFile {
 
 struct cartesian_point;
+struct vertex_point;
 
 struct Point3D {
     ai_real x, y, z;
@@ -71,6 +72,7 @@ public:
 protected:
     void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler ) override;
     void ReadCarthesianData(const cartesian_point *pt);
+    void ReadVertexPointData(const vertex_point *vp);
     void ReadSpatialData(std::unique_ptr<STEP::DB> &db);
 
 private:

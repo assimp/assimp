@@ -148,6 +148,12 @@ void StepFileImporter::ReadCarthesianData(const cartesian_point *pt ) {
     mCarthesianPoints.push_back(point);
 }
 
+void StepFileImporter::ReadVertexPointData( const vertex_point *vp ) {
+    ai_assert(nullptr != vp);
+
+
+}
+
 enum TokenType {
     CarthesianType =0,
     VertexPointType,
@@ -191,16 +197,24 @@ void StepFileImporter::ReadSpatialData(std::unique_ptr<STEP::DB> &db) {
         const std::string &key(it->first);
         TokenType type = translate(key);
         switch (type) {
-        case CarthesianType:
-            data = &it->second;
-            for (const STEP::LazyObject *lz : *data) {
-                const cartesian_point* const pt = lz->ToPtr<cartesian_point>();
-                ReadCarthesianData(pt);
-            }
-            break;
+            case CarthesianType:
+                data = &it->second;
+                for (const STEP::LazyObject *lz : *data) {
+                    const cartesian_point* const pt = lz->ToPtr<cartesian_point>();
+                    ReadCarthesianData(pt);
+                }
+                break;
 
-        default:
-            break;
+            case VertexPointType:
+                data = &it->second;
+                for (const STEP::LazyObject *lz : *data) {
+                    const vertex_point* const vp = lz->ToPtr<vertex_point>();
+                    ReadVertexPointData( vp );
+                }
+                break;
+
+            default:
+                break;
         }
     }
 }

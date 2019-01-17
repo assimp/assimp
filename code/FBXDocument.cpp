@@ -149,6 +149,9 @@ const Object* LazyObject::Get(bool dieOnError)
             if (!strcmp(classtag.c_str(), "Shape")) {
                 object.reset(new ShapeGeometry(id, element, name, doc));
             }
+            if (!strcmp(classtag.c_str(), "Line")) {
+                object.reset(new LineGeometry(id, element, name, doc));
+            }
         }
         else if (!strncmp(obtype,"NodeAttribute",length)) {
             if (!strcmp(classtag.c_str(),"Camera")) {

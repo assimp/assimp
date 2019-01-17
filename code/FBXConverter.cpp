@@ -870,8 +870,13 @@ namespace Assimp {
             for (const Geometry* geo : geos) {
 
                 const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
+                const LineGeometry* const line = dynamic_cast<const LineGeometry*>(geo);
                 if (mesh) {
                     const std::vector<unsigned int>& indices = ConvertMesh(*mesh, model, node_global_transform, nd);
+                    std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
+                }
+                else if (line) {
+                    const std::vector<unsigned int>& indices = ConvertLine(*line, model, node_global_transform, nd);
                     std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
                 }
                 else {
@@ -922,7 +927,52 @@ namespace Assimp {
             return temp;
         }
 
-        aiMesh* FBXConverter::SetupEmptyMesh(const MeshGeometry& mesh, aiNode& nd)
+        std::vector<unsigned int> FBXConverter::ConvertLine(const LineGeometry& line, const Model& model,
+            const aiMatrix4x4& node_global_transform, aiNode& nd)
+        {
+            std::vector<unsigned int> temp;
+
+            const std::vector<aiVector3D>& vertices = line.GetVertices();
+            const std::vector<int>& indices = line.GetIndices();
+            if (vertices.empty() || indices.empty()) {
+                FBXImporter::LogWarn("ignoring empty line: " + line.Name());
+                return temp;
+            }
+
+            aiMesh* const out_mesh = SetupEmptyMesh(line, nd);
+            out_mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+
+            // copy vertices
+            out_mesh->mNumVertices = static_cast<unsigned int>(vertices.size());
+            out_mesh->mVertices = new aiVector3D[out_mesh->mNumVertices];
+            std::copy(vertices.begin(), vertices.end(), out_mesh->mVertices);
+
+            //Number of line segments (faces) is "Number of Points - Number of Endpoints"
+            //N.B.: Endpoints in FbxLine are denoted by negative indices.
+            //If such an Index is encountered, add 1 and multiply by -1 to get the real index.
+            unsigned int epcount = 0;
+            for (unsigned i = 0; i < indices.size(); i++)
+            {
+                if (indices[i] < 0) epcount++;
+            }
+            unsigned int pcount = indices.size();
+            unsigned int scount = out_mesh->mNumFaces = pcount - epcount;
+
+            aiFace* fac = out_mesh->mFaces = new aiFace[scount]();
+            for (unsigned int i = 0; i < pcount; ++i) {
+                if (indices[i] < 0) continue;
+                aiFace& f = *fac++;
+                f.mNumIndices = 2; //2 == aiPrimitiveType_LINE 
+                f.mIndices = new unsigned int[2];
+                f.mIndices[0] = indices[i];
+                int segid = indices[(i + 1 == pcount ? 0 : i + 1)];   //If we have reached he last point, wrap around
+                f.mIndices[1] = (segid < 0 ? (segid + 1)*-1 : segid); //Convert EndPoint Index to normal Index
+            }
+            temp.push_back(static_cast<unsigned int>(meshes.size() - 1));
+            return temp;
+        }
+
+        aiMesh* FBXConverter::SetupEmptyMesh(const Geometry& mesh, aiNode& nd)
         {
             aiMesh* const out_mesh = new aiMesh();
             meshes.push_back(out_mesh);
@@ -957,6 +1007,7 @@ namespace Assimp {
             // copy vertices
             out_mesh->mNumVertices = static_cast<unsigned int>(vertices.size());
             out_mesh->mVertices = new aiVector3D[vertices.size()];
+
             std::copy(vertices.begin(), vertices.end(), out_mesh->mVertices);
 
             // generate dummy faces

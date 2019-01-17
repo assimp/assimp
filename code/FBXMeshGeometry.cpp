@@ -679,6 +679,32 @@ const std::vector<aiVector3D>& ShapeGeometry::GetNormals() const {
 const std::vector<unsigned int>& ShapeGeometry::GetIndices() const {
     return m_indices;
 }
+// ------------------------------------------------------------------------------------------------
+LineGeometry::LineGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
+    : Geometry(id, element, name, doc)
+{
+    const Scope* sc = element.Compound();
+    if (!sc) {
+        DOMError("failed to read Geometry object (class: Line), no data scope found");
+    }
+    const Element& Points = GetRequiredElement(*sc, "Points", &element);
+    const Element& PointsIndex = GetRequiredElement(*sc, "PointsIndex", &element);
+    ParseVectorDataArray(m_vertices, Points);
+    ParseVectorDataArray(m_indices, PointsIndex);
+}
+
+// ------------------------------------------------------------------------------------------------
+LineGeometry::~LineGeometry() {
+    // empty
+}
+// ------------------------------------------------------------------------------------------------
+const std::vector<aiVector3D>& LineGeometry::GetVertices() const {
+    return m_vertices;
+}
+// ------------------------------------------------------------------------------------------------
+const std::vector<int>& LineGeometry::GetIndices() const {
+    return m_indices;
+}
 } // !FBX
 } // !Assimp
 #endif

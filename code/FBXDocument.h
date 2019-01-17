@@ -66,6 +66,7 @@ class PropertyTable;
 class Document;
 class Material;
 class ShapeGeometry;
+class LineGeometry;
 class Geometry;
 
 class Video;

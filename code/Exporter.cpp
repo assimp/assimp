@@ -288,7 +288,7 @@ void Exporter::SetProgressHandler(ProgressHandler* pHandler) {
 
 // ------------------------------------------------------------------------------------------------
 const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const char* pFormatId,
-                                                unsigned int, const ExportProperties* /*pProperties*/ ) {
+                                                unsigned int pPreprocessing, const ExportProperties* pProperties) {
     if (pimpl->blob) {
         delete pimpl->blob;
         pimpl->blob = nullptr;
@@ -298,7 +298,7 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
     BlobIOSystem* blobio = new BlobIOSystem();
     pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
-    if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName())) {
+    if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName(), pPreprocessing, pProperties)) {
         pimpl->mIOSystem = old;
         return nullptr;
     }

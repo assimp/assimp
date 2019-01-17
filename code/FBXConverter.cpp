@@ -1007,10 +1007,7 @@ namespace Assimp {
             // copy vertices
             out_mesh->mNumVertices = static_cast<unsigned int>(vertices.size());
             out_mesh->mVertices = new aiVector3D[vertices.size()];
-            // for (unsigned int i = 0; i < vertices.size(); i++)
-            // {
-            //     aiMatrix4x4::Translation(vertices[i], nd);
-            // }
+
             std::copy(vertices.begin(), vertices.end(), out_mesh->mVertices);
 
             // generate dummy faces

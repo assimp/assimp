@@ -151,9 +151,8 @@ class MemoryIOSystem : public IOSystem
 {
 public:
     /** Constructor. */
-    MemoryIOSystem (const uint8_t* buff, size_t len)
-        : buffer (buff), length(len) {
-    }
+    MemoryIOSystem(const uint8_t* buff, size_t len, IOSystem* io)
+     : buffer(buff), length(len), existing_io(io), created_stream(NULL) {}
 
     /** Destructor. */
     ~MemoryIOSystem() {
@@ -161,40 +160,52 @@ public:
 
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
-    bool Exists( const char* pFile) const {
-        return !strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH);
+    bool Exists(const char* pFile) const {
+        if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+            return true;
+        }
+        return existing_io ? existing_io->Exists(pFile) : false;
     }
 
     // -------------------------------------------------------------------
     /** Returns the directory separator. */
     char getOsSeparator() const {
-        return '/'; // why not? it doesn't care
+        return existing_io ? existing_io->getOsSeparator()
+                         : '/';  // why not? it doesn't care
     }
 
     // -------------------------------------------------------------------
     /** Open a new file with a given path. */
-    IOStream* Open( const char* pFile, const char* /*pMode*/ = "rb") {
-        if (strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
-            return NULL;
+    IOStream* Open(const char* pFile, const char* pMode = "rb") {
+        if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+            created_stream = new MemoryIOStream(buffer, length);
+            return created_stream;
         }
-        return new MemoryIOStream(buffer,length);
+        return existing_io ? existing_io->Open(pFile, pMode) : NULL;
     }
 
     // -------------------------------------------------------------------
     /** Closes the given file and releases all resources associated with it. */
     void Close( IOStream* pFile) {
-    	delete pFile;
+        if (pFile == created_stream) {
+            delete pFile;
+            created_stream = NULL;
+        } else if (existing_io) {
+            existing_io->Close(pFile);
+        }
     }
 
     // -------------------------------------------------------------------
     /** Compare two paths */
-    bool ComparePaths (const char* /*one*/, const char* /*second*/) const {
-        return false;
+    bool ComparePaths(const char* one, const char* second) const {
+        return existing_io ? existing_io->ComparePaths(one, second) : false;
     }
 
 private:
     const uint8_t* buffer;
     size_t length;
+    IOSystem* existing_io;
+    IOStream* created_stream;
 };
 } // end namespace Assimp
 

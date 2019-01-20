@@ -890,7 +890,7 @@ SET( assimp_src
   ${PostProcessing_SRCS}
   ${MaterialSystem_SRCS}
   ${STEPParser_SRCS}
-  ${Step_SRCS}
+#  ${Step_SRCS} check if we need a different approach
 
   # Model Support
   ${ASSIMP_LOADER_SRCS}

@@ -152,7 +152,7 @@ class MemoryIOSystem : public IOSystem
 public:
     /** Constructor. */
     MemoryIOSystem(const uint8_t* buff, size_t len, IOSystem* io)
-     : buffer(buff), length(len), existing_io(io), created_stream(NULL) {}
+     : buffer(buff), length(len), existing_io(io), created_stream() {}
 
     /** Destructor. */
     ~MemoryIOSystem() {
@@ -160,7 +160,7 @@ public:
 
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
-    bool Exists(const char* pFile) const {
+    bool Exists(const char* pFile) const override {
         if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
             return true;
         }
@@ -169,27 +169,26 @@ public:
 
     // -------------------------------------------------------------------
     /** Returns the directory separator. */
-    char getOsSeparator() const {
+    char getOsSeparator() const override {
         return existing_io ? existing_io->getOsSeparator()
-                         : '/';  // why not? it doesn't care
+                           : '/';  // why not? it doesn't care
     }
 
     // -------------------------------------------------------------------
     /** Open a new file with a given path. */
-    IOStream* Open(const char* pFile, const char* pMode = "rb") {
+    IOStream* Open(const char* pFile, const char* pMode = "rb") override {
         if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
-            created_stream = new MemoryIOStream(buffer, length);
-            return created_stream;
+            created_stream.reset(new MemoryIOStream(buffer, length));
+            return created_stream.get();
         }
         return existing_io ? existing_io->Open(pFile, pMode) : NULL;
     }
 
     // -------------------------------------------------------------------
     /** Closes the given file and releases all resources associated with it. */
-    void Close( IOStream* pFile) {
-        if (pFile == created_stream) {
-            delete pFile;
-            created_stream = NULL;
+    void Close( IOStream* pFile) override {
+        if (pFile == created_stream.get()) {
+            created_stream.reset();
         } else if (existing_io) {
             existing_io->Close(pFile);
         }
@@ -197,15 +196,44 @@ public:
 
     // -------------------------------------------------------------------
     /** Compare two paths */
-    bool ComparePaths(const char* one, const char* second) const {
+    bool ComparePaths(const char* one, const char* second) const override {
         return existing_io ? existing_io->ComparePaths(one, second) : false;
+    }
+
+    bool PushDirectory( const std::string &path ) override { 
+        return existing_io ? existing_io->PushDirectory(path) : false;
+    }
+
+    const std::string &CurrentDirectory() const override {
+        static std::string empty;
+        return existing_io ? existing_io->CurrentDirectory() : empty;
+    }
+
+    size_t StackSize() const override {
+        return existing_io ? existing_io->StackSize() : 0;
+    }
+
+    bool PopDirectory() override {
+        return existing_io ? existing_io->PopDirectory() : false;
+    }
+
+    bool CreateDirectory( const std::string &path ) override {
+        return existing_io ? existing_io->CreateDirectory(path) : false;
+    }
+
+    bool ChangeDirectory( const std::string &path ) override {
+        return existing_io ? existing_io->ChangeDirectory(path) : false;
+    }
+
+    bool DeleteFile( const std::string &file ) override {
+        return existing_io ? existing_io->DeleteFile(file) : false;
     }
 
 private:
     const uint8_t* buffer;
     size_t length;
     IOSystem* existing_io;
-    IOStream* created_stream;
+    std::unique_ptr<IOStream> created_stream;
 };
 } // end namespace Assimp
 

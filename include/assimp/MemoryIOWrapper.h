@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 
 namespace Assimp    {
+    
 #define AI_MEMORYIO_MAGIC_FILENAME "$$$___magic___$$$"
 #define AI_MEMORYIO_MAGIC_FILENAME_LENGTH 17
 
@@ -78,9 +79,11 @@ public:
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount)    {
         ai_assert(nullptr != pvBuffer);
         ai_assert(0 != pSize);
-        const size_t cnt = std::min(pCount,(length-pos)/pSize), ofs = pSize*cnt;
+        
+        const size_t cnt = std::min( pCount, (length-pos) / pSize);
+        const size_t ofs = pSize * cnt;
 
-        memcpy(pvBuffer,buffer+pos,ofs);
+        ::memcpy(pvBuffer,buffer+pos,ofs);
         pos += ofs;
 
         return cnt;
@@ -161,7 +164,7 @@ public:
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
     bool Exists(const char* pFile) const override {
-        if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+        if (0 == strncmp( pFile, AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH ) ) {
             return true;
         }
         return existing_io ? existing_io->Exists(pFile) : false;
@@ -177,7 +180,7 @@ public:
     // -------------------------------------------------------------------
     /** Open a new file with a given path. */
     IOStream* Open(const char* pFile, const char* pMode = "rb") override {
-        if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+        if ( 0 == strncmp( pFile, AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH ) ) {
             created_stream = new MemoryIOStream(buffer, length);
             return created_stream;
         }

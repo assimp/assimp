@@ -57,19 +57,15 @@ namespace Assimp    {
 // ----------------------------------------------------------------------------------
 /** Implementation of IOStream to read directly from a memory buffer */
 // ----------------------------------------------------------------------------------
-class MemoryIOStream : public IOStream
-{
-    //friend class MemoryIOSystem;
+class MemoryIOStream : public IOStream {
 public:
     MemoryIOStream (const uint8_t* buff, size_t len, bool own = false)
-        : buffer (buff)
-        , length(len)
-        , pos((size_t)0)
-        , own(own)
-    {
+    : buffer (buff)
+    , length(len)
+    , pos((size_t)0)
+    , own(own) {
+        // empty
     }
-
-public:
 
     ~MemoryIOStream ()  {
         if(own) {
@@ -80,8 +76,8 @@ public:
     // -------------------------------------------------------------------
     // Read from stream
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount)    {
-        ai_assert(pvBuffer);
-        ai_assert(pSize);
+        ai_assert(nullptr != pvBuffer);
+        ai_assert(0 != pSize);
         const size_t cnt = std::min(pCount,(length-pos)/pSize), ofs = pSize*cnt;
 
         memcpy(pvBuffer,buffer+pos,ofs);
@@ -105,14 +101,12 @@ public:
                 return AI_FAILURE;
             }
             pos = pOffset;
-        }
-        else if (aiOrigin_END == pOrigin) {
+        } else if (aiOrigin_END == pOrigin) {
             if (pOffset > length) {
                 return AI_FAILURE;
             }
             pos = length-pOffset;
-        }
-        else {
+        } else {
             if (pOffset+pos > length) {
                 return AI_FAILURE;
             }
@@ -147,15 +141,21 @@ private:
 
 // ---------------------------------------------------------------------------
 /** Dummy IO system to read from a memory buffer */
-class MemoryIOSystem : public IOSystem
-{
+class MemoryIOSystem : public IOSystem {
 public:
     /** Constructor. */
     MemoryIOSystem(const uint8_t* buff, size_t len, IOSystem* io)
-     : buffer(buff), length(len), existing_io(io), created_stream() {}
+    : buffer(buff)
+    , length(len)
+    , existing_io(io)
+    , created_stream() {
+        // empty
+    }
 
     /** Destructor. */
     ~MemoryIOSystem() {
+        delete created_stream;
+        created_stream = nullptr;
     }
 
     // -------------------------------------------------------------------
@@ -178,8 +178,8 @@ public:
     /** Open a new file with a given path. */
     IOStream* Open(const char* pFile, const char* pMode = "rb") override {
         if (!strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
-            created_stream.reset(new MemoryIOStream(buffer, length));
-            return created_stream.get();
+            created_stream = new MemoryIOStream(buffer, length);
+            return created_stream;
         }
         return existing_io ? existing_io->Open(pFile, pMode) : NULL;
     }
@@ -187,8 +187,9 @@ public:
     // -------------------------------------------------------------------
     /** Closes the given file and releases all resources associated with it. */
     void Close( IOStream* pFile) override {
-        if (pFile == created_stream.get()) {
-            created_stream.reset();
+        if (pFile == created_stream) {
+            delete created_stream;
+            created_stream = nullptr;
         } else if (existing_io) {
             existing_io->Close(pFile);
         }
@@ -233,8 +234,9 @@ private:
     const uint8_t* buffer;
     size_t length;
     IOSystem* existing_io;
-    std::unique_ptr<IOStream> created_stream;
+    IOStream *created_stream;
 };
+
 } // end namespace Assimp
 
 #endif

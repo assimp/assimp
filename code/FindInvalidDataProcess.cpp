@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "FindInvalidDataProcess.h"
 #include "ProcessHelper.h"
+
 #include <assimp/Macros.h>
 #include <assimp/Exceptional.h>
 #include <assimp/qnan.h>
@@ -60,8 +61,8 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindInvalidDataProcess::FindInvalidDataProcess()
-    : configEpsilon(0.0)
-{
+: configEpsilon(0.0)
+, mIgnoreTexCoods( false ){
     // nothing to do here
 }
 
@@ -85,6 +86,7 @@ void FindInvalidDataProcess::SetupProperties(const Importer* pImp)
 {
     // Get the current value of AI_CONFIG_PP_FID_ANIM_ACCURACY
     configEpsilon = (0 != pImp->GetPropertyFloat(AI_CONFIG_PP_FID_ANIM_ACCURACY,0.f));
+    mIgnoreTexCoods = pImp->GetPropertyBool(AI_CONFIG_PP_FID_IGNORE_TEXTURECOORDS, false);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -171,7 +173,8 @@ void FindInvalidDataProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/,
+inline
+const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/,
     const std::vector<bool>& /*dirtyMask*/, bool /*mayBeIdentical = false*/, bool /*mayBeZero = true*/)
 {
     return NULL;
@@ -179,7 +182,8 @@ inline const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/
 
 // ------------------------------------------------------------------------------------------------
 template <>
-inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsigned int size,
+inline
+const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsigned int size,
     const std::vector<bool>& dirtyMask, bool mayBeIdentical , bool mayBeZero )
 {
     bool b = false;
@@ -251,8 +255,8 @@ bool EpsilonCompare<aiQuatKey>(const aiQuatKey& n, const aiQuatKey& s, ai_real e
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline bool AllIdentical(T* in, unsigned int num, ai_real epsilon)
-{
+inline
+bool AllIdentical(T* in, unsigned int num, ai_real epsilon) {
     if (num <= 1) {
         return true;
     }
@@ -361,17 +365,19 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 
     // process texture coordinates
     for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i]; ++i) {
-        if (ProcessArray(pMesh->mTextureCoords[i], pMesh->mNumVertices, "uvcoords", dirtyMask)) {
-            pMesh->mNumUVComponents[i] = 0;
+        if (!mIgnoreTexCoods) {
+            if (ProcessArray(pMesh->mTextureCoords[i], pMesh->mNumVertices, "uvcoords", dirtyMask)) {
+                pMesh->mNumUVComponents[i] = 0;
 
-            // delete all subsequent texture coordinate sets.
-            for (unsigned int a = i + 1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
-                delete[] pMesh->mTextureCoords[a];
-                pMesh->mTextureCoords[a] = NULL;
-                pMesh->mNumUVComponents[a] = 0;
+                // delete all subsequent texture coordinate sets.
+                for (unsigned int a = i + 1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+                    delete[] pMesh->mTextureCoords[a];
+                    pMesh->mTextureCoords[a] = NULL;
+                    pMesh->mNumUVComponents[a] = 0;
+                }
+
+                ret = true;
             }
-
-            ret = true;
         }
     }
 

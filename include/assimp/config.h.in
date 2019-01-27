@@ -498,6 +498,13 @@ enum aiComponent
 #define AI_CONFIG_PP_FID_ANIM_ACCURACY              \
     "PP_FID_ANIM_ACCURACY"
 
+// ---------------------------------------------------------------------------
+/** @brief Input parameter to the #aiProcess_FindInvalidData step:
+ *  Set to true to ignore texture coordinates. This may be useful if you have
+ *  to assign different kind of textures like one for the summer or one for the winter.
+ */
+#define AI_CONFIG_PP_FID_IGNORE_TEXTURECOORDS        \
+    "PP_FID_IGNORE_TEXTURECOORDS"
 
 // TransformUVCoords evaluates UV scalings
 #define AI_UVTRAFO_SCALING 0x1

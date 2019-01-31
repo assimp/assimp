@@ -1597,21 +1597,17 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
         case WM_DROPFILES:
             {
                 HDROP hDrop = (HDROP)wParam;
-
                 char szFile[MAX_PATH];
                 DragQueryFile(hDrop,0,szFile,sizeof(szFile));
-
                 const char* sz = strrchr(szFile,'.');
-                if (!sz)
+                if (!sz) {
                     sz = szFile;
+                }
 
-                if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode())
-                {
+                if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode()) {
                     // replace the selected texture with the new one ...
                     CDisplay::Instance().ReplaceCurrentTexture(szFile);
-                }
-                else
-                {
+                } else {
                     // check whether it is a typical texture file format ...
                     ++sz;
                     if (0 == ASSIMP_stricmp(sz,"png") ||
@@ -1653,19 +1649,17 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         fseek(pFile,112,SEEK_SET);
                         fread(&dwCaps,4,1,pFile);
 
-                        if (dwCaps & 0x00000400L /* DDSCAPS2_CUBEMAP_POSITIVEX */)
-                        {
+                        if (dwCaps & 0x00000400L /* DDSCAPS2_CUBEMAP_POSITIVEX */) {
                             CLogDisplay::Instance().AddEntry(
                                 "[INFO] Assuming this dds file is a skybox ...",
                                 D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
 
                             CBackgroundPainter::Instance().SetCubeMapBG(szFile);
+                        } else {
+                            CBackgroundPainter::Instance().SetTextureBG(szFile);
                         }
-                        else CBackgroundPainter::Instance().SetTextureBG(szFile);
                         fclose(pFile);
-                    }
-                    else
-                    {
+                    } else {
                         strcpy(g_szFileName,szFile);
 
                         DeleteAsset();
@@ -1731,44 +1725,31 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 ChooseBGColor();
             } else if (ID_BACKGROUND_LOADTEXTURE == LOWORD(wParam)) {
                 LoadBGTexture();
-                }
-            else if (ID_BACKGROUND_LOADSKYBOX == LOWORD(wParam))
-                {
+            } else if (ID_BACKGROUND_LOADSKYBOX == LOWORD(wParam)) {
                 LoadSkybox();
-                }
-            else if (ID_VIEWER_SAVESCREENSHOTTOFILE == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_SAVESCREENSHOTTOFILE == LOWORD(wParam)) {
                 SaveScreenshot();
-                }
-            else if (ID_VIEWER_OPEN == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_OPEN == LOWORD(wParam)) {
                 OpenAsset();
-                }
-            else if (ID_TOOLS_FLIPNORMALS == LOWORD(wParam))
-                {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_FLIPNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->FlipNormals();
-                    }
                 }
-
+            }
             // this is ugly. anyone willing to rewrite it from scratch using wxwidgets or similar?
             else if (ID_VIEWER_PP_JIV == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_JoinIdenticalVertices;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_CTS == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_CTS == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_CalcTangentSpace;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FD == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_FD == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_FindDegenerates;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FID == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_FID == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_FindInvalidData;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();

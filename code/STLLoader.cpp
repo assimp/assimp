@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -182,7 +182,7 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
-    if( file.get() == NULL) {
+    if( file.get() == nullptr) {
         throw DeadlyImportError( "Failed to open STL file " + pFile + ".");
     }
 
@@ -190,11 +190,11 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
     // allocate storage and copy the contents of the file to a memory buffer
     // (terminate it with zero)
-    std::vector<char> mBuffer2;
-    TextFileToBuffer(file.get(),mBuffer2);
+    std::vector<char> buffer2;
+    TextFileToBuffer(file.get(),buffer2);
 
     this->pScene = pScene;
-    this->mBuffer = &mBuffer2[0];
+    this->mBuffer = &buffer2[0];
 
     // the default vertex color is light gray.
     clrColorDefault.r = clrColorDefault.g = clrColorDefault.b = clrColorDefault.a = (ai_real) 0.6;
@@ -231,6 +231,8 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     pScene->mNumMaterials = 1;
     pScene->mMaterials = new aiMaterial*[1];
     pScene->mMaterials[0] = pcMat;
+
+    mBuffer = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -166,12 +166,30 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh) {
     for( size_t a = 0; a < pMesh->mNumVertices; ++a)
     {
         pMesh->mVertices[a].z *= -1.0f;
-        if( pMesh->HasNormals())
+        if (pMesh->HasNormals()) {
             pMesh->mNormals[a].z *= -1.0f;
+        }
         if( pMesh->HasTangentsAndBitangents())
         {
             pMesh->mTangents[a].z *= -1.0f;
             pMesh->mBitangents[a].z *= -1.0f;
+        }
+    }
+
+    // mirror anim meshes positions, normals and stuff along the Z axis
+    for (size_t m = 0; m < pMesh->mNumAnimMeshes; ++m)
+    {
+        for (size_t a = 0; a < pMesh->mAnimMeshes[m]->mNumVertices; ++a)
+        {
+            pMesh->mAnimMeshes[m]->mVertices[a].z *= -1.0f;
+            if (pMesh->mAnimMeshes[m]->HasNormals()) {
+                pMesh->mAnimMeshes[m]->mNormals[a].z *= -1.0f;
+            }
+            if (pMesh->mAnimMeshes[m]->HasTangentsAndBitangents())
+            {
+                pMesh->mAnimMeshes[m]->mTangents[a].z *= -1.0f;
+                pMesh->mAnimMeshes[m]->mBitangents[a].z *= -1.0f;
+            }
         }
     }
 
@@ -346,8 +364,50 @@ void FlipWindingOrderProcess::ProcessMesh( aiMesh* pMesh)
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
     {
         aiFace& face = pMesh->mFaces[a];
-        for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
-            std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
+        for (unsigned int b = 0; b < face.mNumIndices / 2; b++) {
+            std::swap(face.mIndices[b], face.mIndices[face.mNumIndices - 1 - b]);
+        }
+    }
+
+    // invert the order of all components in this mesh anim meshes
+    for (unsigned int m = 0; m < pMesh->mNumAnimMeshes; m++) {
+        aiAnimMesh* animMesh = pMesh->mAnimMeshes[m];
+        unsigned int numVertices = animMesh->mNumVertices;
+        if (animMesh->HasPositions()) {
+            for (unsigned int a = 0; a < numVertices; a++)
+            {
+                std::swap(animMesh->mVertices[a], animMesh->mVertices[numVertices - 1 - a]);
+            }
+        }
+        if (animMesh->HasNormals()) {
+            for (unsigned int a = 0; a < numVertices; a++)
+            {
+                std::swap(animMesh->mNormals[a], animMesh->mNormals[numVertices - 1 - a]);
+            }
+        }
+        for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++) {
+            if (animMesh->HasTextureCoords(i)) {
+                for (unsigned int a = 0; a < numVertices; a++)
+                {
+                    std::swap(animMesh->mTextureCoords[i][a], animMesh->mTextureCoords[i][numVertices - 1 - a]);
+                }
+            }
+        }
+        if (animMesh->HasTangentsAndBitangents()) {
+            for (unsigned int a = 0; a < numVertices; a++)
+            {
+                std::swap(animMesh->mTangents[a], animMesh->mTangents[numVertices - 1 - a]);
+                std::swap(animMesh->mBitangents[a], animMesh->mBitangents[numVertices - 1 - a]);
+            }
+        }
+        for (unsigned int v = 0; v < AI_MAX_NUMBER_OF_COLOR_SETS; v++) {
+            if (animMesh->HasVertexColors(v)) {
+                for (unsigned int a = 0; a < numVertices; a++)
+                {
+                    std::swap(animMesh->mColors[v][a], animMesh->mColors[v][numVertices - 1 - a]);
+                }
+            }
+        }
     }
 }
 

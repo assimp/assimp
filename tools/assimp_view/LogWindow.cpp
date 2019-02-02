@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -101,13 +101,11 @@ INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
     }
 
 //-------------------------------------------------------------------------------
-void CLogWindow::Init ()
-{
+void CLogWindow::Init () {
     this->hwnd = ::CreateDialog(g_hInstance,MAKEINTRESOURCE(IDD_LOGVIEW),
         NULL,&LogDialogProc);
 
-    if (!this->hwnd)
-    {
+    if (!this->hwnd) {
         CLogDisplay::Instance().AddEntry("[ERROR] Unable to create logger window",
             D3DCOLOR_ARGB(0xFF,0,0xFF,0));
     }
@@ -116,11 +114,10 @@ void CLogWindow::Init ()
     this->szText = AI_VIEW_RTF_LOG_HEADER;;
     this->szPlainText = "";
 }
+
 //-------------------------------------------------------------------------------
-void CLogWindow::Show()
-{
-    if (this->hwnd)
-    {
+void CLogWindow::Show() {
+    if (this->hwnd) {
         ShowWindow(this->hwnd,SW_SHOW);
         this->bIsVisible = true;
 
@@ -128,24 +125,23 @@ void CLogWindow::Show()
         this->Update();
     }
 }
+
 //-------------------------------------------------------------------------------
-void CMyLogStream::write(const char* message)
-{
+void CMyLogStream::write(const char* message) {
     CLogWindow::Instance().WriteLine(message);
 }
+
 //-------------------------------------------------------------------------------
-void CLogWindow::Clear()
-{
+void CLogWindow::Clear() {
     this->szText = AI_VIEW_RTF_LOG_HEADER;;
     this->szPlainText = "";
 
     this->Update();
 }
+
 //-------------------------------------------------------------------------------
-void CLogWindow::Update()
-{
-    if (this->bIsVisible)
-    {
+void CLogWindow::Update() {
+    if (this->bIsVisible) {
         SETTEXTEX sInfo;
         sInfo.flags = ST_DEFAULT;
         sInfo.codepage = CP_ACP;
@@ -154,20 +150,16 @@ void CLogWindow::Update()
             EM_SETTEXTEX,(WPARAM)&sInfo,( LPARAM)this->szText.c_str());
     }
 }
+
 //-------------------------------------------------------------------------------
-void CLogWindow::Save()
-{
+void CLogWindow::Save() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LogDestination",NULL,NULL,
-        (BYTE*)szFileName,&dwTemp))
-    {
+    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LogDestination",NULL,NULL,(BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
         strcpy(szFileName,"");
-    }
-    else
-    {
+    } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
         if (!sz)
@@ -196,14 +188,13 @@ void CLogWindow::Save()
     CLogDisplay::Instance().AddEntry("[INFO] The log file has been saved",
             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
 }
+
 //-------------------------------------------------------------------------------
-void CLogWindow::WriteLine(const char* message)
-{
+void CLogWindow::WriteLine(const char* message) {
     this->szPlainText.append(message);
     this->szPlainText.append("\r\n");
 
-    if (0 != this->szText.length())
-    {
+    if (0 != this->szText.length()) {
         this->szText.resize(this->szText.length()-1);
     }
 
@@ -231,12 +222,10 @@ void CLogWindow::WriteLine(const char* message)
     }
 
     std::string _message = message;
-    for (unsigned int i = 0; i < _message.length();++i)
-    {
+    for (unsigned int i = 0; i < _message.length();++i) {
         if ('\\' == _message[i] ||
             '}'  == _message[i] ||
-            '{'  == _message[i])
-        {
+            '{'  == _message[i]) {
             _message.insert(i++,"\\");
         }
     }
@@ -244,8 +233,7 @@ void CLogWindow::WriteLine(const char* message)
     this->szText.append(_message);
     this->szText.append("\\par}}");
 
-    if (this->bIsVisible && this->bUpdate)
-    {
+    if (this->bIsVisible && this->bUpdate) {
         SETTEXTEX sInfo;
         sInfo.flags = ST_DEFAULT;
         sInfo.codepage = CP_ACP;
@@ -253,7 +241,6 @@ void CLogWindow::WriteLine(const char* message)
         SendDlgItemMessage(this->hwnd,IDC_EDIT1,
             EM_SETTEXTEX,(WPARAM)&sInfo,( LPARAM)this->szText.c_str());
     }
-    return;
 }
 
-}; //! AssimpView
+} //! AssimpView

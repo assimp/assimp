@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -85,24 +85,27 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-    : mFileName()
-	, mMeshIndexByID()
-	, mMaterialIndexByName()
-	, mMeshes()
-	, newMats()
-	, mCameras()
-	, mLights()
-	, mTextures()
-	, mAnims()
-	, noSkeletonMesh( false )
-    , ignoreUpDirection(false)
-    , mNodeNameCounter( 0 )
-{}
+: mFileName()
+, mMeshIndexByID()
+, mMaterialIndexByName()
+, mMeshes()
+, newMats()
+, mCameras()
+, mLights()
+, mTextures()
+, mAnims()
+, noSkeletonMesh( false )
+, ignoreUpDirection(false)
+, useColladaName( false )
+, mNodeNameCounter( 0 ) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ColladaLoader::~ColladaLoader()
-{}
+ColladaLoader::~ColladaLoader() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -725,8 +728,11 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         std::vector<aiAnimMesh*> animMeshes;
         for (unsigned int i = 0; i < targetMeshes.size(); i++)
         {
-            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMeshes.at(i));
-            animMesh->mWeight = targetWeights[i];
+            aiMesh* targetMesh = targetMeshes.at(i);
+            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMesh);
+            float weight = targetWeights[i];
+            animMesh->mWeight = weight == 0 ? 1.0f : weight;
+            animMesh->mName = targetMesh->mName;
             animMeshes.push_back(animMesh);
         }
         dstMesh->mMethod = (method == Collada::Relative)

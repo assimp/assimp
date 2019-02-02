@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -744,6 +744,9 @@ namespace glTF2 {
         if (!(dict = FindArray(*container, d.mDictId))) {
             container->AddMember(StringRef(d.mDictId), Value().SetArray().Move(), mDoc.GetAllocator());
             dict = FindArray(*container, d.mDictId);
+            if (nullptr == dict) {
+                return;
+            }
         }
 
         for (size_t i = 0; i < d.mObjs.size(); ++i) {

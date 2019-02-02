@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2018, assimp team
+# Copyright (c) 2006-2019, assimp team
 
 
 # All rights reserved.
@@ -727,7 +727,7 @@ ADD_ASSIMP_IMPORTER( MMD
   MMDVmdParser.h
 )
 
-SET( Step_SRCS
+ADD_ASSIMP_IMPORTER( STEP
     STEPFile.h
     Importer/StepFile/StepFileImporter.h
     Importer/StepFile/StepFileImporter.cpp
@@ -738,7 +738,6 @@ SET( Step_SRCS
     StepExporter.h
     StepExporter.cpp
 )
-SOURCE_GROUP( Step FILES ${Step_SRCS})
 
 SET( Exporter_SRCS
   Exporter.cpp
@@ -891,7 +890,7 @@ SET( assimp_src
   ${PostProcessing_SRCS}
   ${MaterialSystem_SRCS}
   ${STEPParser_SRCS}
-  ${Step_SRCS}
+#  ${Step_SRCS} check if we need a different approach
 
   # Model Support
   ${ASSIMP_LOADER_SRCS}
@@ -923,7 +922,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
 ADD_LIBRARY( assimp ${assimp_src} )
-ADD_LIBRARY(assimp::asimp ALIAS assimp)
+ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
@@ -967,6 +966,9 @@ if( MSVC )
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+    set(WindowsStore TRUE)
+endif()
 SET_TARGET_PROPERTIES( assimp PROPERTIES
   VERSION ${ASSIMP_VERSION}
   SOVERSION ${ASSIMP_SOVERSION} # use full version

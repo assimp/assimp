@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -732,6 +732,9 @@ void glTF2Exporter::ExportMeshes()
 
 		/************** Texture coordinates **************/
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+			if (!aim->HasTextureCoords(i))
+				continue;
+			
             // Flip UV y coords
             if (aim -> mNumUVComponents[i] > 1) {
                 for (unsigned int j = 0; j < aim->mNumVertices; ++j) {
@@ -967,7 +970,7 @@ void glTF2Exporter::ExportMetadata()
 
 inline Ref<Accessor> GetSamplerInputRef(Asset& asset, std::string& animId, Ref<Buffer>& buffer, std::vector<float>& times)
 {
-    return ExportData(asset, animId, buffer, times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+    return ExportData(asset, animId, buffer, (unsigned int)times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
 }
 
 inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)

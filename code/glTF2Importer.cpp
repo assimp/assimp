@@ -446,7 +446,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
             Mesh::Primitive::Attributes& attr = prim.attributes;
 
             if (attr.position.size() > 0 && attr.position[0]) {
-                aim->mNumVertices = attr.position[0]->count;
+                aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->count);
                 attr.position[0]->ExtractData(aim->mVertices);
             }
 
@@ -488,9 +488,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
 
             if (prim.indices) {
                 aiFace* faces = 0;
-                unsigned int nFaces = 0;
+                size_t nFaces = 0;
 
-                unsigned int count = prim.indices->count;
+                size_t count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
                 ai_assert(data.IsValid());
@@ -557,11 +557,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
 
                 if (faces) {
                     aim->mFaces = faces;
-                    aim->mNumFaces = nFaces;
-                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+                    aim->mNumFaces = static_cast<unsigned int>(nFaces);
+                    ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
                 }
             }
-
 
             if (prim.material) {
                 aim->mMaterialIndex = prim.material.GetIndex();

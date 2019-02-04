@@ -85,6 +85,14 @@ namespace {
         return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
     }};
 
+    template<> struct ReadHelper<uint64_t> { static bool Read(Value& val, uint64_t& out) {
+        return val.IsUint64() ? out = val.GetUint64(), true : false;
+    }};
+
+    template<> struct ReadHelper<int64_t> { static bool Read(Value& val, int64_t& out) {
+        return val.IsInt64() ? out = val.GetInt64(), true : false;
+    }};
+
     template<class T> struct ReadHelper< Nullable<T> > { static bool Read(Value& val, Nullable<T>& out) {
         return out.isPresent = ReadHelper<T>::Read(val, out.value);
     }};
@@ -520,7 +528,17 @@ inline size_t Buffer::AppendData(uint8_t* data, size_t length)
 inline void Buffer::Grow(size_t amount)
 {
     if (amount <= 0) return;
-    uint8_t* b = new uint8_t[byteLength + amount];
+    if (capacity >= byteLength + amount)
+    {
+        byteLength += amount;
+        return;
+    }
+
+    // Shift operation is standard way to divide integer by 2, it doesn't cast it to float back and forth, also works for odd numbers,
+    // originally it would look like: static_cast<size_t>(capacity * 1.5f)
+    capacity = std::max(capacity + (capacity >> 1), byteLength + amount);
+
+    uint8_t* b = new uint8_t[capacity];
     if (mData) memcpy(b, mData.get(), byteLength);
     mData.reset(b, std::default_delete<uint8_t[]>());
     byteLength += amount;
@@ -537,8 +555,8 @@ inline void BufferView::Read(Value& obj, Asset& r)
         buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
 
-    byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
-    byteLength = MemberOrDefault(obj, "byteLength", 0u);
+    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
+    byteLength = MemberOrDefault(obj, "byteLength", size_t(0));
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
 }
 
@@ -553,9 +571,9 @@ inline void Accessor::Read(Value& obj, Asset& r)
         bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }
 
-    byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
+    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
-    count = MemberOrDefault(obj, "count", 0u);
+    count = MemberOrDefault(obj, "count", size_t(0));
 
     const char* typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;

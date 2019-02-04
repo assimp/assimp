@@ -114,9 +114,9 @@ namespace {
     private:
         DataType* _data;
     };
-    
+
     static std::pair<std::vector<float>, std::vector<float>> minMaxElements(void* data, size_t elementCount, ComponentType compType, size_t componentCountIn, size_t componentCountOut){
-        
+
         std::unique_ptr<IDataReader> dataReader;
         switch(compType){
             case ComponentType_BYTE:{
@@ -145,18 +145,18 @@ namespace {
                 break;
             }
         }
-        
+
         std::pair<std::vector<float>, std::vector<float>> minMaxValues;
         auto& minValues = minMaxValues.first;
         auto& maxValues = minMaxValues.second;
         minValues.reserve(componentCountOut);
         maxValues.reserve(componentCountOut);
-        
+
         for (size_t i=0; i<componentCountOut; ++i){
             minValues.push_back(std::numeric_limits<float>::max());
             maxValues.push_back(-std::numeric_limits<float>::max());
         }
-        
+
         float value;
         size_t offset = std::max(componentCountIn - componentCountOut, size_t(0));
         for (size_t i=0; i<elementCount; ++i) {
@@ -172,10 +172,10 @@ namespace {
             }
             dataReader->increment(offset);
         }
-        
+
         return minMaxValues;
     }
-    
+
     class AKeyExtraction {
     public:
         size_t keyCount;
@@ -184,7 +184,7 @@ namespace {
         ComponentType componentType;
         Ref<Accessor>& targetTimeAccessor;
         Ref<Accessor>& targetValueAccessor;
-        
+
         AKeyExtraction(size_t iKeyCount,
                        AttribType::Value& iAttribInType,
                        AttribType::Value& iAttribOutType,
@@ -198,17 +198,17 @@ namespace {
                         componentType(iComponentType),
                         targetTimeAccessor(iTargetTimeAccessor),
                         targetValueAccessor(iTargetValueAccessor) {
-            
+
         }
-        
+
         virtual void* getTimeData() = 0;
         virtual void* getValueData() = 0;
         virtual void extract() = 0;
     };
-    
+
     template <typename DataTypeIn, typename DataTypeOut>
     class KeyExtraction : public AKeyExtraction {
-        
+
     public:
         KeyExtraction(DataTypeIn* iKeyData,
                       size_t iDataCount,
@@ -224,15 +224,15 @@ namespace {
             timeData.resize(iDataCount);
             valueData.resize(iValueDataCount);
         }
-        
+
         void* getTimeData() {
             return timeData.data();
         }
-        
+
         void* getValueData() {
             return valueData.data();
         }
-        
+
         inline void extract() {
             DataTypeIn* key = _keyData;
             for (size_t i = 0, iend = timeData.size(); i < iend; ++i, ++key){
@@ -240,14 +240,14 @@ namespace {
                 valueData[i] = key->mValue;
             }
         }
-        
+
     private:
         DataTypeIn* _keyData;
         double _timeCoef;
         std::vector<float> timeData;
         std::vector<DataTypeOut> valueData;
     };
-    
+
     template<>
     void KeyExtraction<aiQuatKey, float>::extract() {
         aiQuatKey* key = _keyData;
@@ -343,7 +343,7 @@ static void IdentityMatrix4(mat4& o) {
 }
 
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
-    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
+    size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
     if (!count || !data) {
         return Ref<Accessor>();
@@ -363,7 +363,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
     bv->buffer = buffer;
-    bv->byteOffset = unsigned(offset);
+    bv->byteOffset = offset;
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->byteStride = 0;
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
@@ -1016,7 +1016,7 @@ void glTF2Exporter::ExportMeshes()
                 }
             }
 
-			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
+			p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
 		}
 
         switch (aim->mPrimitiveTypes) {
@@ -1221,12 +1221,12 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
         size_t position = 0;
         size_t rotation = 1;
         size_t scaling = 2;
-        
+
         Ref<Accessor>& getTimeAccessor(glTF2::Animation::AnimParameters& parameters, size_t timeChannel) {
             return timeChannel==0 ? parameters.TIME : (timeChannel==1 ? parameters.TIME2 : parameters.TIME3);
         }
     } timeChannels;
-    
+
     std::vector<std::unique_ptr<AKeyExtraction>> keyExtractions;
     keyExtractions.push_back(std::unique_ptr<AKeyExtraction>(new KeyExtraction<aiVectorKey, aiVector3D>(nodeChannel->mPositionKeys, nodeChannel->mNumPositionKeys, nodeChannel->mNumPositionKeys, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.position), animRef->Parameters.translation, ticksPerSecond
                                                                                                         )));
@@ -1234,15 +1234,15 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
                                                                                                         )));
     keyExtractions.push_back(std::unique_ptr<AKeyExtraction>(new KeyExtraction<aiQuatKey, float>(nodeChannel->mRotationKeys, nodeChannel->mNumRotationKeys, 4*nodeChannel->mNumRotationKeys, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT, timeChannels.getTimeAccessor(animRef->Parameters, timeChannels.rotation), animRef->Parameters.rotation, ticksPerSecond
                                                                                                         )));
-    
+
     //-------------------------------------------------------
     // Extract the parameter data
     for (auto& keyExtraction : keyExtractions) {
         keyExtraction->extract();
-        
+
         Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyExtraction->keyCount), keyExtraction->getTimeData(), AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
         Ref<Accessor> valueAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(keyExtraction->keyCount), keyExtraction->getValueData(), keyExtraction->attribInType, keyExtraction->attribOutType, keyExtraction->componentType);
-        
+
         if (timeAccessor) {
             keyExtraction->targetTimeAccessor = timeAccessor;
         }

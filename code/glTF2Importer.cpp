@@ -666,7 +666,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
             if (faces) {
                 aim->mFaces = faces;
                 aim->mNumFaces = static_cast<unsigned int>(nFaces);
-                ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+                ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
             }
 
             if (prim.material) {
@@ -773,13 +773,13 @@ static void BuildVertexWeightMapping(Mesh::Primitive& primitive, std::vector<std
         return;
     }
 
-    for (int i = 0; i < num_vertices; ++i) {
+    for (size_t i = 0; i < num_vertices; ++i) {
         for (int j = 0; j < 4; ++j) {
             const unsigned int bone = (indices8!=nullptr) ? indices8[i].values[j] : indices16[i].values[j];
             const float weight = weights[i].values[j];
             if (weight > 0 && bone < map.size()) {
                 map[bone].reserve(8);
-                map[bone].emplace_back(i, weight);
+                map[bone].emplace_back(static_cast<unsigned int>(i), weight);
             }
         }
     }

@@ -156,7 +156,7 @@ static void IdentityMatrix4(mat4& o) {
 }
 
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
-    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
+    size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
     if (!count || !data) {
         return Ref<Accessor>();
@@ -176,7 +176,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
     bv->buffer = buffer;
-    bv->byteOffset = unsigned(offset);
+    bv->byteOffset = offset;
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->byteStride = 0;
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
@@ -768,7 +768,7 @@ void glTF2Exporter::ExportMeshes()
                 }
             }
 
-			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
+			p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
 		}
 
         switch (aim->mPrimitiveTypes) {

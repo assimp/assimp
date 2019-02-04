@@ -852,31 +852,6 @@ void OpenAsset() {
     strcpy(szCur,"*.*");
     szCur[4] = 0;
 
-    /*DWORD        lStructSize;
-    HWND         hwndOwner;
-    HINSTANCE    hInstance;
-    LPCWSTR      lpstrFilter;
-    LPWSTR       lpstrCustomFilter;
-    DWORD        nMaxCustFilter;
-    DWORD        nFilterIndex;
-    LPWSTR       lpstrFile;
-    DWORD        nMaxFile;
-    LPWSTR       lpstrFileTitle;
-    DWORD        nMaxFileTitle;
-    LPCWSTR      lpstrInitialDir;
-    LPCWSTR      lpstrTitle;
-    DWORD        Flags;
-    WORD         nFileOffset;
-    WORD         nFileExtension;
-    LPCWSTR      lpstrDefExt;
-    LPARAM       lCustData;
-    LPOFNHOOKPROC lpfnHook;
-    LPCWSTR      lpTemplateName;
-#ifdef _MAC
-    LPEDITMENU   lpEditInfo;
-    LPCSTR       lpstrPrompt;*/
-
-
     OPENFILENAME sFilename1;
     ZeroMemory(&sFilename1, sizeof(sFilename1));
     sFilename1.lStructSize = sizeof(sFilename1);
@@ -891,14 +866,6 @@ void OpenAsset() {
     sFilename1.nMaxFileTitle = 0;
     sFilename1.lpstrInitialDir = NULL;
     sFilename1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
-    /*OPENFILENAME sFilename1 = {
-        sizeof(OPENFILENAME),
-        g_hDlg, GetModuleHandle(NULL), szList, NULL, 0, 1,
-        szFileName, MAX_PATH, NULL, 0, NULL,
-        "Import Asset into ASSIMP",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
-        0, 1, ".x", 0, NULL, NULL
-    };*/
     if (GetOpenFileName(&sFilename1) == 0) {
         return;
     }

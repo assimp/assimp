@@ -333,8 +333,7 @@ void ToggleWireFrame() {
 //-------------------------------------------------------------------------------
 // Toggle the "MultiSample" state
 //-------------------------------------------------------------------------------
-void ToggleMS()
-{
+void ToggleMS() {
     g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
     DeleteAssetData();
     ShutdownDevice();
@@ -389,7 +388,7 @@ void ToggleUIState() {
 }
 
 //-------------------------------------------------------------------------------
-// Load the background texture for the cviewer
+// Load the background texture for the viewer
 //-------------------------------------------------------------------------------
 void LoadBGTexture() {
     char szFileName[MAX_PATH];
@@ -853,14 +852,53 @@ void OpenAsset() {
     strcpy(szCur,"*.*");
     szCur[4] = 0;
 
-    OPENFILENAME sFilename1 = {
+    /*DWORD        lStructSize;
+    HWND         hwndOwner;
+    HINSTANCE    hInstance;
+    LPCWSTR      lpstrFilter;
+    LPWSTR       lpstrCustomFilter;
+    DWORD        nMaxCustFilter;
+    DWORD        nFilterIndex;
+    LPWSTR       lpstrFile;
+    DWORD        nMaxFile;
+    LPWSTR       lpstrFileTitle;
+    DWORD        nMaxFileTitle;
+    LPCWSTR      lpstrInitialDir;
+    LPCWSTR      lpstrTitle;
+    DWORD        Flags;
+    WORD         nFileOffset;
+    WORD         nFileExtension;
+    LPCWSTR      lpstrDefExt;
+    LPARAM       lCustData;
+    LPOFNHOOKPROC lpfnHook;
+    LPCWSTR      lpTemplateName;
+#ifdef _MAC
+    LPEDITMENU   lpEditInfo;
+    LPCSTR       lpstrPrompt;*/
+
+
+    OPENFILENAME sFilename1;
+    ZeroMemory(&sFilename1, sizeof(sFilename1));
+    sFilename1.lStructSize = sizeof(sFilename1);
+    sFilename1.hwndOwner = g_hDlg;
+    sFilename1.hInstance = GetModuleHandle(NULL);
+    sFilename1.lpstrFile = szFileName;
+    sFilename1.lpstrFile[0] = '\0';
+    sFilename1.nMaxFile = sizeof(szList);
+    sFilename1.lpstrFilter = szList;
+    sFilename1.nFilterIndex = 1;
+    sFilename1.lpstrFileTitle = NULL;
+    sFilename1.nMaxFileTitle = 0;
+    sFilename1.lpstrInitialDir = NULL;
+    sFilename1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
+    /*OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), szList, NULL, 0, 1,
+        g_hDlg, GetModuleHandle(NULL), szList, NULL, 0, 1,
         szFileName, MAX_PATH, NULL, 0, NULL,
         "Import Asset into ASSIMP",
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".x", 0, NULL, NULL
-    };
+    };*/
     if (GetOpenFileName(&sFilename1) == 0) {
         return;
     }

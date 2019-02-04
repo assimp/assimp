@@ -102,17 +102,16 @@ void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 }
 
 //-------------------------------------------------------------------------------
-int CDisplay::EnableAnimTools(BOOL hm)
-{
+int CDisplay::EnableAnimTools(BOOL hm) {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
+    
     return 1;
 }
 
 //-------------------------------------------------------------------------------
 // Fill animation combo box
-int CDisplay::FillAnimList(void)
-{
+int CDisplay::FillAnimList(void) {
     if (0 != g_pcAsset->pcScene->mNumAnimations)
     {
         // now fill in all animation names

@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exceptional.h>
 #include <assimp/ByteSwapper.h>
 
-
 namespace Assimp {
 namespace FBX {
 

@@ -97,10 +97,10 @@ namespace glTF2 {
     inline void Write(Value& obj, Accessor& a, AssetWriter& w)
     {
         obj.AddMember("bufferView", a.bufferView->index, w.mAl);
-        obj.AddMember("byteOffset", a.byteOffset, w.mAl);
+        obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
 
         obj.AddMember("componentType", int(a.componentType), w.mAl);
-        obj.AddMember("count", a.count, w.mAl);
+        obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
 
         Value vTmpMax, vTmpMin;

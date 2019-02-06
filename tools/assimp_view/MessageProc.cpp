@@ -866,7 +866,6 @@ void OpenAsset() {
     sFilename1.nMaxFileTitle = 0;
     sFilename1.lpstrInitialDir = NULL;
     sFilename1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
-
     if (GetOpenFileName(&sFilename1) == 0) {
         return;
     }
@@ -930,6 +929,7 @@ void PopulateExportMenu() {
 }
 
 //-------------------------------------------------------------------------------
+// Export function
 //-------------------------------------------------------------------------------
 void DoExport(size_t formatId) {
     if (!g_szFileName[0]) {

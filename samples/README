@@ -12,21 +12,24 @@ use in various real-world environments. Workspaces to build the
 samples can be found in the respective directories. The VC workspaces
 copy the created executables to the ./bin directory.
 
-All GL-based samples depend on GLUT, some on DevIL. For convenience,
-these libraries are included in the repository in their respective
- Windows/x86 prebuilt versions. To build on linux, install the
- required packages using the package manager of your choice.
+All GL-based samples depend on FreeGLUT, the image loading will be done 
+by a header-only library. For convenience, these libraries are included
+in the repository in their respective Windows/x86 prebuilt versions.
+To build on linux, install freeglut using the package manager of your 
+choice. For instance on Ubuntu to install freeglut you can use the following
+command:
 
-Also note that the VS workspaces link against the DLL version of the 
-Assimp library, thus you need to build it in the first place ( 
-assimp-release-dll build configuration). The Assimp DLL needs to be
-copied to ./bin as well (the VS workspaces will try to do this
-automatically).
+> sudo apt install freeglut
+
+All samples will be placed at 
+
+Win32: <assimp_repo>/<config>/bin
+
+or Linux : <assimp_repo>/bin
 
 
 2. List of samples
 ------------------
-
 
 SimpleOpenGL
 

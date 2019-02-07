@@ -60,7 +60,6 @@ ASSIMP_API size_t aiGetExportFormatCount(void)
     return Exporter().GetExportFormatCount();
 }
 
-
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t index)
 {

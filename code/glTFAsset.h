@@ -537,7 +537,7 @@ namespace glTF
 
 		shared_ptr<uint8_t> mData; //!< Pointer to the data
 		bool mIsSpecial; //!< Set to true for special cases (e.g. the body buffer)
-
+        size_t capacity = 0; //!< The capacity of the buffer in bytes. (default: 0)
 		/// \var EncodedRegion_List
 		/// List of encoded regions.
 		std::list<SEncodedRegion*> EncodedRegion_List;

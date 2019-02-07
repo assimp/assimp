@@ -760,7 +760,12 @@ public:
         if (!out) return;
 
         time_t tt = time(NULL);
+#if _WIN32
         tm* p     = gmtime(&tt);
+#else
+        struct tm now;
+        tm* p = gmtime_r(&tt, &now);
+#endif
 
         // header
         char s[64];

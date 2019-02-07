@@ -194,7 +194,7 @@ void HandleMouseInputSkyBox( void )
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleMouseInputLightIntensityAndColor( void )
+void HandleMouseInputLightIntensityAndColor()
     {
     POINT mousePos;
     GetCursorPos( &mousePos );

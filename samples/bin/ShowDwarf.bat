@@ -1,1 +1,0 @@
-SimpleOpenGL.exe ..\..\test\models-nonbsd\X\dwarf.X

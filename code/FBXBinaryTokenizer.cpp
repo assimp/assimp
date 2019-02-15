@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -83,7 +83,7 @@ namespace FBX {
 //   e_unknown_21 = 1 << 21,
 //   e_unknown_22 = 1 << 22,
 //   e_unknown_23 = 1 << 23,
-//   e_flag_field_size_64_bit = 1 << 24, // Not sure what is 
+//   e_flag_field_size_64_bit = 1 << 24, // Not sure what is
 //   e_unknown_25 = 1 << 25,
 //   e_unknown_26 = 1 << 26,
 //   e_unknown_27 = 1 << 27,
@@ -276,8 +276,8 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
     case 'f':
     case 'd':
     case 'l':
-    case 'i':   {
-
+    case 'i':
+    case 'c':   {
         const uint32_t length = ReadWord(input, cursor, end);
         const uint32_t encoding = ReadWord(input, cursor, end);
 
@@ -296,6 +296,10 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
             case 'd':
             case 'l':
                 stride = 8;
+                break;
+
+            case 'c':
+                stride = 1;
                 break;
 
             default:

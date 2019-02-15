@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -68,4 +68,4 @@ void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const 
 } // ! STEP
 } // ! Assimp
 
-#endif
+#endif // INCLUDED_AI_STEPFILEREADER_H

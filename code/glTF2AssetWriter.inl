@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -97,10 +97,10 @@ namespace glTF2 {
     inline void Write(Value& obj, Accessor& a, AssetWriter& w)
     {
         obj.AddMember("bufferView", a.bufferView->index, w.mAl);
-        obj.AddMember("byteOffset", a.byteOffset, w.mAl);
+        obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
 
         obj.AddMember("componentType", int(a.componentType), w.mAl);
-        obj.AddMember("count", a.count, w.mAl);
+        obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
 
         Value vTmpMax, vTmpMin;

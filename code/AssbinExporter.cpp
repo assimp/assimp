@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -760,7 +760,12 @@ public:
         if (!out) return;
 
         time_t tt = time(NULL);
+#if _WIN32
         tm* p     = gmtime(&tt);
+#else
+        struct tm now;
+        tm* p = gmtime_r(&tt, &now);
+#endif
 
         // header
         char s[64];

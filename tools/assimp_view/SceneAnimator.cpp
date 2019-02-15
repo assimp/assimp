@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -47,21 +47,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace AssimpView;
 
+const aiMatrix4x4 IdentityMatrix;
+
 // ------------------------------------------------------------------------------------------------
 // Constructor for a given scene.
 SceneAnimator::SceneAnimator( const aiScene* pScene, size_t pAnimIndex)
-{
-    mScene = pScene;
-    mCurrentAnimIndex = -1;
-    mAnimEvaluator = NULL;
-    mRootNode = NULL;
-
+: mScene( pScene )
+, mCurrentAnimIndex( -1 )
+, mAnimEvaluator( nullptr )
+, mRootNode( nullptr ) {
     // build the nodes-for-bones table
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-    {
+    for (unsigned int i = 0; i < pScene->mNumMeshes;++i) {
         const aiMesh* mesh = pScene->mMeshes[i];
-        for (unsigned int n = 0; n < mesh->mNumBones;++n)
-        {
+        for (unsigned int n = 0; n < mesh->mNumBones;++n) {
             const aiBone* bone = mesh->mBones[n];
 
             mBoneNodesByName[bone->mName.data] = pScene->mRootNode->FindNode(bone->mName);
@@ -74,34 +72,34 @@ SceneAnimator::SceneAnimator( const aiScene* pScene, size_t pAnimIndex)
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SceneAnimator::~SceneAnimator()
-{
+SceneAnimator::~SceneAnimator() {
     delete mRootNode;
     delete mAnimEvaluator;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Sets the animation to use for playback.
-void SceneAnimator::SetAnimIndex( size_t pAnimIndex)
-{
+void SceneAnimator::SetAnimIndex( size_t pAnimIndex) {
     // no change
-    if( pAnimIndex == mCurrentAnimIndex)
+    if (pAnimIndex == static_cast<unsigned int>( mCurrentAnimIndex ) ) {
         return;
+    }
 
     // kill data of the previous anim
-    delete mRootNode;  mRootNode = NULL;
-    delete mAnimEvaluator;  mAnimEvaluator = NULL;
+    delete mRootNode;  mRootNode = nullptr;
+    delete mAnimEvaluator;  mAnimEvaluator = nullptr;
     mNodesByName.clear();
 
     mCurrentAnimIndex = pAnimIndex;
 
     // create the internal node tree. Do this even in case of invalid animation index
     // so that the transformation matrices are properly set up to mimic the current scene
-    mRootNode = CreateNodeTree( mScene->mRootNode, NULL);
+    mRootNode = CreateNodeTree( mScene->mRootNode, nullptr);
 
     // invalid anim index
-    if( mCurrentAnimIndex >= mScene->mNumAnimations)
+    if (static_cast<unsigned int>( mCurrentAnimIndex )>= mScene->mNumAnimations) {
         return;
+    }
 
     // create an evaluator for this animation
     mAnimEvaluator = new AnimEvaluator( mScene->mAnimations[mCurrentAnimIndex]);
@@ -109,11 +107,11 @@ void SceneAnimator::SetAnimIndex( size_t pAnimIndex)
 
 // ------------------------------------------------------------------------------------------------
 // Calculates the node transformations for the scene.
-void SceneAnimator::Calculate( double pTime)
-{
+void SceneAnimator::Calculate( double pTime) {
     // invalid anim
-    if( !mAnimEvaluator)
+    if (!mAnimEvaluator) {
         return;
+    }
 
     // calculate current local transformations
     mAnimEvaluator->Evaluate( pTime);
@@ -124,36 +122,35 @@ void SceneAnimator::Calculate( double pTime)
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves the most recent local transformation matrix for the given node.
-const aiMatrix4x4& SceneAnimator::GetLocalTransform( const aiNode* node) const
-{
+const aiMatrix4x4& SceneAnimator::GetLocalTransform( const aiNode* node) const {
     NodeMap::const_iterator it = mNodesByName.find( node);
-    if( it == mNodesByName.end())
-        return mIdentityMatrix;
+    if (it == mNodesByName.end()) {
+        return IdentityMatrix;
+    }
 
     return it->second->mLocalTransform;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves the most recent global transformation matrix for the given node.
-const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const aiNode* node) const
-{
+const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const aiNode* node) const {
     NodeMap::const_iterator it = mNodesByName.find( node);
-    if( it == mNodesByName.end())
-        return mIdentityMatrix;
+    if (it == mNodesByName.end()) {
+        return IdentityMatrix;
+    }
 
     return it->second->mGlobalTransform;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Calculates the bone matrices for the given mesh.
-const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pNode, size_t pMeshIndex /* = 0 */)
-{
+const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pNode, size_t pMeshIndex /* = 0 */) {
     ai_assert( pMeshIndex < pNode->mNumMeshes);
     size_t meshIndex = pNode->mMeshes[pMeshIndex];
     ai_assert( meshIndex < mScene->mNumMeshes);
     const aiMesh* mesh = mScene->mMeshes[meshIndex];
 
-    // resize array and initialise it with identity matrices
+    // resize array and initialize it with identity matrices
     mTransforms.resize( mesh->mNumBones, aiMatrix4x4());
 
     // calculate the mesh's inverse global transform
@@ -162,8 +159,7 @@ const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pN
 
     // Bone matrices transform from mesh coordinates in bind pose to mesh coordinates in skinned pose
     // Therefore the formula is offsetMatrix * currentGlobalTransform * inverseCurrentMeshTransform
-    for( size_t a = 0; a < mesh->mNumBones; ++a)
-    {
+    for( size_t a = 0; a < mesh->mNumBones; ++a) {
         const aiBone* bone = mesh->mBones[a];
         const aiMatrix4x4& currentGlobalTransform = GetGlobalTransform( mBoneNodesByName[ bone->mName.data ]);
         mTransforms[a] = globalInverseMeshTransform * currentGlobalTransform * bone->mOffsetMatrix;
@@ -175,8 +171,7 @@ const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pN
 
 // ------------------------------------------------------------------------------------------------
 // Recursively creates an internal node structure matching the current scene and animation.
-SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pParent)
-{
+SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pParent) {
     // create a node
     SceneAnimNode* internalNode = new SceneAnimNode( pNode->mName.data);
     internalNode->mParent = pParent;
@@ -187,14 +182,11 @@ SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pPar
     CalculateGlobalTransform( internalNode);
 
     // find the index of the animation track affecting this node, if any
-    if( mCurrentAnimIndex < mScene->mNumAnimations)
-    {
+    if(static_cast<unsigned int>( mCurrentAnimIndex ) < mScene->mNumAnimations) {
         internalNode->mChannelIndex = -1;
         const aiAnimation* currentAnim = mScene->mAnimations[mCurrentAnimIndex];
-        for( unsigned int a = 0; a < currentAnim->mNumChannels; a++)
-        {
-            if( currentAnim->mChannels[a]->mNodeName.data == internalNode->mName)
-            {
+        for( unsigned int a = 0; a < currentAnim->mNumChannels; a++) {
+            if( currentAnim->mChannels[a]->mNodeName.data == internalNode->mName) {
                 internalNode->mChannelIndex = a;
                 break;
             }
@@ -202,8 +194,7 @@ SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pPar
     }
 
     // continue for all child nodes and assign the created internal nodes as our children
-    for( unsigned int a = 0; a < pNode->mNumChildren; a++)
-    {
+    for( unsigned int a = 0; a < pNode->mNumChildren; ++a ) {
         SceneAnimNode* childNode = CreateNodeTree( pNode->mChildren[a], internalNode);
         internalNode->mChildren.push_back( childNode);
     }
@@ -213,12 +204,10 @@ SceneAnimNode* SceneAnimator::CreateNodeTree( aiNode* pNode, SceneAnimNode* pPar
 
 // ------------------------------------------------------------------------------------------------
 // Recursively updates the internal node transformations from the given matrix array
-void SceneAnimator::UpdateTransforms( SceneAnimNode* pNode, const std::vector<aiMatrix4x4>& pTransforms)
-{
+void SceneAnimator::UpdateTransforms( SceneAnimNode* pNode, const std::vector<aiMatrix4x4>& pTransforms) {
     // update node local transform
-    if( pNode->mChannelIndex != -1)
-    {
-        ai_assert( pNode->mChannelIndex < pTransforms.size());
+    if( pNode->mChannelIndex != -1) {
+        ai_assert(static_cast<unsigned int>( pNode->mChannelIndex ) < pTransforms.size());
         pNode->mLocalTransform = pTransforms[pNode->mChannelIndex];
     }
 
@@ -226,19 +215,18 @@ void SceneAnimator::UpdateTransforms( SceneAnimNode* pNode, const std::vector<ai
     CalculateGlobalTransform( pNode);
 
     // continue for all children
-    for( std::vector<SceneAnimNode*>::iterator it = pNode->mChildren.begin(); it != pNode->mChildren.end(); ++it)
-        UpdateTransforms( *it, pTransforms);
+    for (std::vector<SceneAnimNode*>::iterator it = pNode->mChildren.begin(); it != pNode->mChildren.end(); ++it) {
+        UpdateTransforms(*it, pTransforms);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Calculates the global transformation matrix for the given internal node
-void SceneAnimator::CalculateGlobalTransform( SceneAnimNode* pInternalNode)
-{
+void SceneAnimator::CalculateGlobalTransform( SceneAnimNode* pInternalNode) {
     // concatenate all parent transforms to get the global transform for this node
     pInternalNode->mGlobalTransform = pInternalNode->mLocalTransform;
     SceneAnimNode* node = pInternalNode->mParent;
-    while( node)
-    {
+    while( node) {
         pInternalNode->mGlobalTransform = node->mLocalTransform * pInternalNode->mGlobalTransform;
         node = node->mParent;
     }

@@ -1291,8 +1291,7 @@ namespace Assimp {
             unsigned int cursor = 0, in_cursor = 0;
 
             itf = faces.begin();
-            for (MatIndexArray::const_iterator it = mindices.begin(),
-                end = mindices.end(); it != end; ++it, ++itf)
+            for (MatIndexArray::const_iterator it = mindices.begin(), end = mindices.end(); it != end; ++it, ++itf)
             {
                 const unsigned int pcount = *itf;
                 if ((*it) != index) {

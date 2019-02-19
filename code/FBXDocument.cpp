@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -146,6 +146,12 @@ const Object* LazyObject::Get(bool dieOnError)
             if (!strcmp(classtag.c_str(),"Mesh")) {
                 object.reset(new MeshGeometry(id,element,name,doc));
             }
+            if (!strcmp(classtag.c_str(), "Shape")) {
+                object.reset(new ShapeGeometry(id, element, name, doc));
+            }
+            if (!strcmp(classtag.c_str(), "Line")) {
+                object.reset(new LineGeometry(id, element, name, doc));
+            }
         }
         else if (!strncmp(obtype,"NodeAttribute",length)) {
             if (!strcmp(classtag.c_str(),"Camera")) {
@@ -170,6 +176,12 @@ const Object* LazyObject::Get(bool dieOnError)
             }
             else if (!strcmp(classtag.c_str(),"Skin")) {
                 object.reset(new Skin(id,element,doc,name));
+            }
+            else if (!strcmp(classtag.c_str(), "BlendShape")) {
+                object.reset(new BlendShape(id, element, doc, name));
+            }
+            else if (!strcmp(classtag.c_str(), "BlendShapeChannel")) {
+                object.reset(new BlendShapeChannel(id, element, doc, name));
             }
         }
         else if ( !strncmp( obtype, "Model", length ) ) {

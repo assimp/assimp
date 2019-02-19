@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXParser.h"
 #include "FBXDocument.h"
+#include "FBXMeshGeometry.h"
 #include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
 
@@ -158,9 +159,55 @@ Skin::~Skin()
 {
 
 }
+// ------------------------------------------------------------------------------------------------
+BlendShape::BlendShape(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+    : Deformer(id, element, doc, name)
+{
+    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(), "Deformer");
+    blendShapeChannels.reserve(conns.size());
+    for (const Connection* con : conns) {
+        const BlendShapeChannel* const bspc = ProcessSimpleConnection<BlendShapeChannel>(*con, false, "BlendShapeChannel -> BlendShape", element);
+        if (bspc) {
+            blendShapeChannels.push_back(bspc);
+            continue;
+        }
+    }
+}
+// ------------------------------------------------------------------------------------------------
+BlendShape::~BlendShape()
+{
 
 }
+// ------------------------------------------------------------------------------------------------
+BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+    : Deformer(id, element, doc, name)
+{
+    const Scope& sc = GetRequiredScope(element);
+    const Element* const DeformPercent = sc["DeformPercent"];
+    if (DeformPercent) {
+        percent = ParseTokenAsFloat(GetRequiredToken(*DeformPercent, 0));
+    }
+    const Element* const FullWeights = sc["FullWeights"];
+    if (FullWeights) {
+        ParseVectorDataArray(fullWeights, *FullWeights);
+    }
+    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(), "Geometry");
+    shapeGeometries.reserve(conns.size());
+    for (const Connection* con : conns) {
+        const ShapeGeometry* const sg = ProcessSimpleConnection<ShapeGeometry>(*con, false, "Shape -> BlendShapeChannel", element);
+        if (sg) {
+            shapeGeometries.push_back(sg);
+            continue;
+        }
+    }
 }
+// ------------------------------------------------------------------------------------------------
+BlendShapeChannel::~BlendShapeChannel()
+{
 
+}
+// ------------------------------------------------------------------------------------------------
+}
+}
 #endif
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -56,6 +56,9 @@ public:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
         EXPECT_EQ( 1u, scene->mNumMeshes );
         EXPECT_NE( nullptr, scene->mMeshes[0] );
+        if (nullptr == scene->mMeshes[0]) {
+            return false;
+        }
         EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
         EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
         

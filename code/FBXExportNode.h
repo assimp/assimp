@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -70,14 +70,27 @@ public: // public data members
     bool force_has_children = false;
 
 public: // constructors
+    /// The default class constructor.
     Node() = default;
-    Node(const std::string& n) : name(n) {}
+
+    /// The class constructor with the name.
+    Node(const std::string& n)
+    : name(n)
+    , properties()
+    , children()
+    , force_has_children( false ) {
+        // empty
+    }
 
     // convenience template to construct with properties directly
     template <typename... More>
     Node(const std::string& n, const More... more)
-        : name(n)
-        { AddProperties(more...); }
+    : name(n)
+    , properties()
+    , children()
+    , force_has_children(false) {
+        AddProperties(more...);
+    }
 
 public: // functions to add properties or children
     // add a single property to the node

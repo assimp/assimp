@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -1500,24 +1500,18 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     // otherwise it is a normal node (NODE)
     const char * node_type;
     bool is_joint, is_skeleton_root = false;
-    if (NULL == findBone(pScene, pNode->mName.C_Str())) {
+    if (nullptr == findBone(pScene, pNode->mName.C_Str())) {
         node_type = "NODE";
         is_joint = false;
     } else {
         node_type = "JOINT";
         is_joint = true;
-        if(!pNode->mParent || NULL == findBone(pScene, pNode->mParent->mName.C_Str()))
+        if (!pNode->mParent || nullptr == findBone(pScene, pNode->mParent->mName.C_Str())) {
             is_skeleton_root = true;
+        }
     }
 
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
-	/* // customized, Note! the id field is crucial for inter-xml look up, it cannot be replaced with sid ?!
-    mOutput << startstr
-            << "<node ";
-    if(is_skeleton_root)
-        mOutput << "id=\"" << "skeleton_root" << "\" "; // For now, only support one skeleton in a scene.
-    mOutput << (is_joint ? "s" : "") << "id=\"" << node_name_escaped;
-	 */
 	mOutput << startstr << "<node ";
 	if(is_skeleton_root) {
 		mOutput << "id=\"" << node_name_escaped << "\" " << (is_joint ? "sid=\"" + node_name_escaped +"\"" : "") ; // For now, only support one skeleton in a scene.
@@ -1533,7 +1527,23 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 
     // write transformation - we can directly put the matrix there
     // TODO: (thom) decompose into scale - rot - quad to allow addressing it by animations afterwards
-    const aiMatrix4x4& mat = pNode->mTransformation;
+    aiMatrix4x4 mat = pNode->mTransformation;
+
+    // If this node is a Camera node, the camera coordinate system needs to be multiplied in.
+    // When importing from Collada, the mLookAt is set to 0, 0, -1, and the node transform is unchanged.
+    // When importing from a different format, mLookAt is set to 0, 0, 1. Therefore, the local camera
+    // coordinate system must be changed to matche the Collada specification.
+    for (size_t i = 0; i<mScene->mNumCameras; i++){
+        if (mScene->mCameras[i]->mName == pNode->mName){
+            aiMatrix4x4 sourceView;
+            mScene->mCameras[i]->GetCameraMatrix(sourceView);
+
+            aiMatrix4x4 colladaView;
+            colladaView.a1 = colladaView.c3 = -1; // move into -z space.
+            mat *= (sourceView * colladaView);
+            break;
+        }
+    }
 	
 	// customized, sid should be 'matrix' to match with loader code.
     //mOutput << startstr << "<matrix sid=\"transform\">";

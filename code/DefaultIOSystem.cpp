@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -76,6 +76,7 @@ bool DefaultIOSystem::Exists( const char* pFile) const
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
 
+#ifndef WindowsStore
     bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL) != 0;
     if (isUnicode) {
 
@@ -85,12 +86,15 @@ bool DefaultIOSystem::Exists( const char* pFile) const
             return false;
         }
     } else {
+#endif
         FILE* file = ::fopen(pFile, "rb");
         if (!file)
             return false;
 
         ::fclose(file);
+#ifndef WindowsStore
     }
+#endif
 #else
     FILE* file = ::fopen( pFile, "rb");
     if( !file)
@@ -110,14 +114,18 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     FILE* file;
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
+#ifndef WindowsStore
     bool isUnicode = IsTextUnicode(strFile, static_cast<int>(strlen(strFile)), NULL) != 0;
     if (isUnicode) {
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, strFile, -1, fileName16, PATHLIMIT);
         std::string mode8(strMode);
         file = ::_wfopen(fileName16, std::wstring(mode8.begin(), mode8.end()).c_str());
     } else {
+#endif
         file = ::fopen(strFile, strMode);
+#ifndef WindowsStore
     }
+#endif
 #else
     file = ::fopen(strFile, strMode);
 #endif
@@ -158,6 +166,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
+#ifndef WindowsStore
     bool isUnicode = IsTextUnicode(in, static_cast<int>(strlen(in)), NULL) != 0;
     if (isUnicode) {
         wchar_t out16[PATHLIMIT];
@@ -175,6 +184,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
         }
 
     } else {
+#endif
         char* ret = :: _fullpath(_out, in, PATHLIMIT);
         if (!ret) {
             // preserve the input path, maybe someone else is able to fix
@@ -182,7 +192,9 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
             ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
             strcpy(_out, in);
         }
+#ifndef WindowsStore
     }
+#endif
 #else
     // use realpath
     char* ret = realpath(in, _out);

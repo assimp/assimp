@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -184,8 +184,13 @@ static std::string encodeXML(const std::string& data) {
 static
 void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
     time_t tt = ::time( NULL );
-    tm* p     = ::gmtime( &tt );
-    ai_assert( nullptr != p );
+#if _WIN32
+    tm* p = gmtime(&tt);
+#else
+    struct tm now;
+    tm* p = gmtime_r(&tt, &now);
+#endif
+    ai_assert(nullptr != p);
 
     // write header
     std::string header(

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -156,7 +156,7 @@ static void IdentityMatrix4(mat4& o) {
 }
 
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
-    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
+    size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
     if (!count || !data) {
         return Ref<Accessor>();
@@ -176,7 +176,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
     bv->buffer = buffer;
-    bv->byteOffset = unsigned(offset);
+    bv->byteOffset = offset;
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->byteStride = 0;
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
@@ -647,9 +647,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
             size_t len_p = offset + j;
             float f_value = *(float *)&buf->GetPointer()[len_p];
             unsigned short c = static_cast<unsigned short>(f_value);
-            uint8_t* data = new uint8_t[s_bytesPerComp];
-            data = (uint8_t*)&c;
-            memcpy(&arrys[i*s_bytesPerComp], data, s_bytesPerComp);
+            memcpy(&arrys[i*s_bytesPerComp], &c, s_bytesPerComp);
             ++i;
         }
         buf->ReplaceData_joint(offset, bytesLen, arrys, bytesLen);
@@ -657,9 +655,11 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
         vertexJointAccessor->bufferView->byteLength = s_bytesLen;
 
         p.attributes.joint.push_back( vertexJointAccessor );
+        delete[] arrys;
     }
 
-    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices,
+            vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
     if ( vertexWeightAccessor ) {
         p.attributes.weight.push_back( vertexWeightAccessor );
     }
@@ -732,6 +732,9 @@ void glTF2Exporter::ExportMeshes()
 
 		/************** Texture coordinates **************/
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+			if (!aim->HasTextureCoords(i))
+				continue;
+			
             // Flip UV y coords
             if (aim -> mNumUVComponents[i] > 1) {
                 for (unsigned int j = 0; j < aim->mNumVertices; ++j) {
@@ -748,8 +751,7 @@ void glTF2Exporter::ExportMeshes()
 		}
 
 		/*************** Vertex colors ****************/
-		for (unsigned int indexColorChannel = 0; indexColorChannel < aim->GetNumColorChannels(); ++indexColorChannel)
-		{
+		for (unsigned int indexColorChannel = 0; indexColorChannel < aim->GetNumColorChannels(); ++indexColorChannel) {
 			Ref<Accessor> c = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mColors[indexColorChannel], AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT, false);
 			if (c)
 				p.attributes.color.push_back(c);
@@ -766,7 +768,7 @@ void glTF2Exporter::ExportMeshes()
                 }
             }
 
-			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
+			p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
 		}
 
         switch (aim->mPrimitiveTypes) {
@@ -795,8 +797,12 @@ void glTF2Exporter::ExportMeshes()
             CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
         }
 
-        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, static_cast<unsigned int>(inverseBindMatricesData.size()), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
-        if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
+        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b,
+                static_cast<unsigned int>(inverseBindMatricesData.size()),
+            invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+        if (invBindMatrixAccessor) {
+            skinRef->inverseBindMatrices = invBindMatrixAccessor;
+        }
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
@@ -824,10 +830,11 @@ void glTF2Exporter::ExportMeshes()
             meshNode->skeletons.push_back(rootJoint);
             meshNode->skin = skinRef;
         }
+        delete[] invBindMatrixData;
     }
 }
 
-//merges a node's multiple meshes (with one primitive each) into one mesh with multiple primitives
+// Merges a node's multiple meshes (with one primitive each) into one mesh with multiple primitives
 void glTF2Exporter::MergeMeshes()
 {
     for (unsigned int n = 0; n < mAsset->nodes.Size(); ++n) {
@@ -963,7 +970,7 @@ void glTF2Exporter::ExportMetadata()
 
 inline Ref<Accessor> GetSamplerInputRef(Asset& asset, std::string& animId, Ref<Buffer>& buffer, std::vector<float>& times)
 {
-    return ExportData(asset, animId, buffer, times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+    return ExportData(asset, animId, buffer, (unsigned int)times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
 }
 
 inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)

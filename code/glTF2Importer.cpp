@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -412,7 +412,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
             Mesh::Primitive::Attributes& attr = prim.attributes;
 
             if (attr.position.size() > 0 && attr.position[0]) {
-                aim->mNumVertices = attr.position[0]->count;
+                aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->count);
                 attr.position[0]->ExtractData(aim->mVertices);
             }
 
@@ -438,6 +438,15 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 }
             }
 
+            for (size_t c = 0; c < attr.color.size() && c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c) {
+                if (attr.color[c]->count != aim->mNumVertices) {
+                    DefaultLogger::get()->warn("Color stream size in mesh \"" + mesh.name +
+                        "\" does not match the vertex count");
+                    continue;
+                }
+                aim->mColors[c] = new aiColor4D[attr.color[c]->count];
+                attr.color[c]->ExtractData(aim->mColors[c]);
+            }
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 if (attr.texcoord[tc]->count != aim->mNumVertices) {
                     DefaultLogger::get()->warn("Texcoord stream size in mesh \"" + mesh.name +
@@ -502,10 +511,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
 
 
             aiFace* faces = 0;
-            unsigned int nFaces = 0;
+            size_t nFaces = 0;
 
             if (prim.indices) {
-                unsigned int count = prim.indices->count;
+                size_t count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
                 ai_assert(data.IsValid());
@@ -656,8 +665,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
 
             if (faces) {
                 aim->mFaces = faces;
-                aim->mNumFaces = nFaces;
-                ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+                aim->mNumFaces = static_cast<unsigned int>(nFaces);
+                ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
             }
 
             if (prim.material) {
@@ -742,7 +751,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive& primitive, std::vector<std
         return;
     }
 
-    const int num_vertices = attr.weight[0]->count;
+    size_t num_vertices = attr.weight[0]->count;
 
     struct Weights { float values[4]; };
     Weights* weights = nullptr;
@@ -757,14 +766,20 @@ static void BuildVertexWeightMapping(Mesh::Primitive& primitive, std::vector<std
     }else {
         attr.joint[0]->ExtractData(indices16);
     }
+    // 
+    if (nullptr == indices8 && nullptr == indices16) {
+        // Something went completely wrong!
+        ai_assert(false);
+        return;
+    }
 
-    for (int i = 0; i < num_vertices; ++i) {
+    for (size_t i = 0; i < num_vertices; ++i) {
         for (int j = 0; j < 4; ++j) {
             const unsigned int bone = (indices8!=nullptr) ? indices8[i].values[j] : indices16[i].values[j];
             const float weight = weights[i].values[j];
             if (weight > 0 && bone < map.size()) {
                 map[bone].reserve(8);
-                map[bone].emplace_back(i, weight);
+                map[bone].emplace_back(static_cast<unsigned int>(i), weight);
             }
         }
     }
@@ -807,7 +822,7 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
         if (node.skin) {
             for (int primitiveNo = 0; primitiveNo < count; ++primitiveNo) {
                 aiMesh* mesh = pScene->mMeshes[meshOffsets[mesh_idx]+primitiveNo];
-                mesh->mNumBones = node.skin->jointNames.size();
+                mesh->mNumBones = static_cast<unsigned int>(node.skin->jointNames.size());
                 mesh->mBones = new aiBone*[mesh->mNumBones];
 
                 // GLTF and Assimp choose to store bone weights differently.
@@ -822,19 +837,33 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                 std::vector<std::vector<aiVertexWeight>> weighting(mesh->mNumBones);
                 BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
 
-                for (size_t i = 0; i < mesh->mNumBones; ++i) {
+                for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
                     aiBone* bone = new aiBone();
 
                     Ref<Node> joint = node.skin->jointNames[i];
-                    bone->mName = joint->name;
+                    if (!joint->name.empty()) {
+                      bone->mName = joint->name;
+                    } else {
+                      // Assimp expects each bone to have a unique name.
+                      static const std::string kDefaultName = "bone_";
+                      char postfix[10] = {0};
+                      ASSIMP_itoa10(postfix, i);
+                      bone->mName = (kDefaultName + postfix);
+                    }
                     GetNodeTransform(bone->mOffsetMatrix, *joint);
 
                     std::vector<aiVertexWeight>& weights = weighting[i];
 
-                    bone->mNumWeights = weights.size();
+                    bone->mNumWeights = static_cast<uint32_t>(weights.size());
                     if (bone->mNumWeights > 0) {
-                        bone->mWeights = new aiVertexWeight[bone->mNumWeights];
-                        memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                      bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+                      memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                    } else {
+                      // Assimp expects all bones to have at least 1 weight.
+                      bone->mWeights = new aiVertexWeight[1];
+                      bone->mNumWeights = 1;
+                      bone->mWeights->mVertexId = 0;
+                      bone->mWeights->mWeight = 0.f;
                     }
                     mesh->mBones[i] = bone;
                 }
@@ -901,7 +930,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         samplers.translation->input->ExtractData(times);
         aiVector3D* values = nullptr;
         samplers.translation->output->ExtractData(values);
-        anim->mNumPositionKeys = samplers.translation->input->count;
+        anim->mNumPositionKeys = static_cast<uint32_t>(samplers.translation->input->count);
         anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
         for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
             anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
@@ -923,7 +952,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         samplers.rotation->input->ExtractData(times);
         aiQuaternion* values = nullptr;
         samplers.rotation->output->ExtractData(values);
-        anim->mNumRotationKeys = samplers.rotation->input->count;
+        anim->mNumRotationKeys = static_cast<uint32_t>(samplers.rotation->input->count);
         anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
         for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
             anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
@@ -949,7 +978,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         samplers.scale->input->ExtractData(times);
         aiVector3D* values = nullptr;
         samplers.scale->output->ExtractData(values);
-        anim->mNumScalingKeys = samplers.scale->input->count;
+        anim->mNumScalingKeys = static_cast<uint32_t>(samplers.scale->input->count);
         anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
         for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
             anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
@@ -1013,35 +1042,41 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
 
         std::unordered_map<unsigned int, AnimationSamplers> samplers = GatherSamplers(anim);
 
-        ai_anim->mNumChannels = r.skins[0].jointNames.size();
+        ai_anim->mNumChannels = static_cast<uint32_t>(samplers.size());
         if (ai_anim->mNumChannels > 0) {
             ai_anim->mChannels = new aiNodeAnim*[ai_anim->mNumChannels];
             int j = 0;
-            for (auto& iter : r.skins[0].jointNames) {
-                ai_anim->mChannels[j] = CreateNodeAnim(r, *iter, samplers[iter.GetIndex()]);
+            for (auto& iter : samplers) {
+                ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
                 ++j;
             }
         }
-        
+
         // Use the latest keyframe for the duration of the animation
-        unsigned int maxDuration = 0;
+        double maxDuration = 0;
         for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
             auto chan = ai_anim->mChannels[j];
             if (chan->mNumPositionKeys) {
                 auto lastPosKey = chan->mPositionKeys[chan->mNumPositionKeys - 1];
-                if (lastPosKey.mTime > maxDuration) maxDuration = lastPosKey.mTime;
+                if (lastPosKey.mTime > maxDuration) {
+                    maxDuration = lastPosKey.mTime;
+                }
             }
             if (chan->mNumRotationKeys) {
                 auto lastRotKey = chan->mRotationKeys[chan->mNumRotationKeys - 1];
-                if (lastRotKey.mTime > maxDuration) maxDuration = lastRotKey.mTime;
+                if (lastRotKey.mTime > maxDuration) {
+                    maxDuration = lastRotKey.mTime;
+                }
             }
             if (chan->mNumScalingKeys) {
                 auto lastScaleKey = chan->mScalingKeys[chan->mNumScalingKeys - 1];
-                if (lastScaleKey.mTime > maxDuration) maxDuration = lastScaleKey.mTime;
+                if (lastScaleKey.mTime > maxDuration) {
+                    maxDuration = lastScaleKey.mTime;
+                }
             }
         }
         ai_anim->mDuration = maxDuration;
-        
+
         mScene->mAnimations[i] = ai_anim;
     }
 }

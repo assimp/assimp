@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -64,8 +64,13 @@ public:
     /** Get the Skin attached to this geometry or NULL */
     const Skin* DeformerSkin() const;
 
+    /** Get the BlendShape attached to this geometry or NULL */
+    const std::vector<const BlendShape*>& GetBlendShapes() const;
+
 private:
     const Skin* skin;
+    std::vector<const BlendShape*> blendShapes;
+
 };
 
 typedef std::vector<int> MatIndexArray;
@@ -125,7 +130,6 @@ public:
     /** Determine the face to which a particular output vertex index belongs.
     *  This mapping is always unique. */
     unsigned int FaceForVertexIndex( unsigned int in_index ) const;
-
 private:
     void ReadLayer( const Scope& layer );
     void ReadLayerElement( const Scope& layerElement );
@@ -172,6 +176,56 @@ private:
     std::vector<unsigned int> m_mapping_counts;
     std::vector<unsigned int> m_mapping_offsets;
     std::vector<unsigned int> m_mappings;
+};
+
+/**
+*  DOM class for FBX geometry of type "Shape"
+*/
+class ShapeGeometry : public Geometry
+{
+public:
+    /** The class constructor */
+    ShapeGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+
+    /** The class destructor */
+    virtual ~ShapeGeometry();
+
+    /** Get a list of all vertex points, non-unique*/
+    const std::vector<aiVector3D>& GetVertices() const;
+
+    /** Get a list of all vertex normals or an empty array if
+    *  no normals are specified. */
+    const std::vector<aiVector3D>& GetNormals() const;
+
+    /** Return list of vertex indices. */
+    const std::vector<unsigned int>& GetIndices() const;
+
+private:
+    std::vector<aiVector3D> m_vertices;
+    std::vector<aiVector3D> m_normals;
+    std::vector<unsigned int> m_indices;
+};
+/**
+*  DOM class for FBX geometry of type "Line"
+*/
+class LineGeometry : public Geometry
+{
+public:
+    /** The class constructor */
+    LineGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+
+    /** The class destructor */
+    virtual ~LineGeometry();
+
+    /** Get a list of all vertex points, non-unique*/
+    const std::vector<aiVector3D>& GetVertices() const;
+
+    /** Return list of vertex indices. */
+    const std::vector<int>& GetIndices() const;
+
+private:
+    std::vector<aiVector3D> m_vertices;
+    std::vector<int> m_indices;
 };
 
 }

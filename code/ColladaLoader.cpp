@@ -109,13 +109,13 @@ ColladaLoader::~ColladaLoader() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
+bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     // check file extension
     std::string extension = GetExtension(pFile);
 
-    if( extension == "dae")
+    if (extension == "dae") {
         return true;
+    }
 
     // XML - too generic, we need to open the file and search for typical keywords
     if( extension == "xml" || !extension.length() || checkSig)  {
@@ -123,10 +123,13 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
          *  support a specific file extension in general pIOHandler
          *  might be NULL and it's our duty to return true here.
          */
-        if (!pIOHandler)return true;
+        if (!pIOHandler) {
+            return true;
+        }
         const char* tokens[] = {"<collada"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
+
     return false;
 }
 
@@ -147,8 +150,7 @@ const aiImporterDesc* ColladaLoader::GetInfo () const
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
+void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
     mFileName = pFile;
 
     // clean all member arrays - just for safety, it should work even if we did not
@@ -184,7 +186,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
     // ... then fill the materials with the now adjusted settings
     FillMaterials(parser, pScene);
 
-    // Apply unitsize scale calculation
+    // Apply unit-size scale calculation
     pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0,  0,  0,
                                                         0,  parser.mUnitSize,  0,  0,
                                                         0,  0,  parser.mUnitSize,  0,

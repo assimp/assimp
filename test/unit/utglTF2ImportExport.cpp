@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -356,11 +356,12 @@ std::vector<char> ReadFile(const char* name) {
     }
 
     ::fseek(p, 0, SEEK_END);
-    const auto size = ::ftell(p);
+    const size_t size = ::ftell(p);
     ::fseek(p, 0, SEEK_SET);
 
     ret.resize(size);
-    ::fread(&ret[0], 1, size, p);
+    const size_t readSize = ::fread(&ret[0], 1, size, p);
+    EXPECT_EQ(readSize, size);
     ::fclose(p);
 
     return ret;

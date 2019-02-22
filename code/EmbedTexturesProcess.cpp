@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -124,22 +124,28 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     file.read(reinterpret_cast<char*>(imageContent), imageSize);
 
     // Enlarging the textures table
-    auto textureId = pScene->mNumTextures++;
+    unsigned int textureId = pScene->mNumTextures++;
     auto oldTextures = pScene->mTextures;
     pScene->mTextures = new aiTexture*[pScene->mNumTextures];
-    memmove(pScene->mTextures, oldTextures, sizeof(aiTexture*) * (pScene->mNumTextures - 1u));
+    ::memmove(pScene->mTextures, oldTextures, sizeof(aiTexture*) * (pScene->mNumTextures - 1u));
 
     // Add the new texture
-    auto pTexture = new aiTexture();
+    auto pTexture = new aiTexture;
     pTexture->mHeight = 0; // Means that this is still compressed
     pTexture->mWidth = static_cast<uint32_t>(imageSize);
     pTexture->pcData = imageContent;
 
     auto extension = path.substr(path.find_last_of('.') + 1u);
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-    if (extension == "jpeg") extension = "jpg";
-    strcpy(pTexture->achFormatHint, extension.c_str());
+    if (extension == "jpeg") {
+        extension = "jpg";
+    }
 
+    size_t len = extension.size();
+    if (len > HINTMAXTEXTURELEN -1 ) {
+        len = HINTMAXTEXTURELEN - 1;
+    }
+    ::strncpy(pTexture->achFormatHint, extension.c_str(), len);
     pScene->mTextures[textureId] = pTexture;
 
     return true;

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 
 #ifdef __MINGW32__
-#include <mmsystem.h>
+#   include <mmsystem.h>
 #else
-#include <timeapi.h>
+#   include <timeapi.h>
 #endif
 
 using namespace std;
@@ -310,9 +310,10 @@ int LoadAsset()
 // Delete the loaded asset
 // The function does nothing is no asset is loaded
 //-------------------------------------------------------------------------------
-int DeleteAsset(void)
-{
-    if (!g_pcAsset)return 0;
+int DeleteAsset(void) {
+    if (!g_pcAsset) {
+        return 0;
+    }
 
     // don't anymore know why this was necessary ...
     CDisplay::Instance().OnRender();
@@ -349,9 +350,7 @@ int DeleteAsset(void)
 // p_avOut Receives the min/max boundaries. Must point to 2 vec3s
 // piMatrix Transformation matrix of the graph at this position
 //-------------------------------------------------------------------------------
-int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut, 
-    const aiMatrix4x4& piMatrix)
-{
+int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut, const aiMatrix4x4& piMatrix) {
     ai_assert(NULL != piNode);
     ai_assert(NULL != p_avOut);
 
@@ -509,19 +508,28 @@ int CreateAssetData()
         unsigned int nidx;
         switch (mesh->mPrimitiveTypes) {
             case aiPrimitiveType_POINT:
-                nidx = 1;break;
+                nidx = 1;
+                break;
             case aiPrimitiveType_LINE:
-                nidx = 2;break;
+                nidx = 2;
+                break;
             case aiPrimitiveType_TRIANGLE:
-                nidx = 3;break;
-            default: ai_assert(false);
+                nidx = 3;
+                break;
+            default: 
+                ai_assert(false);
+                break;
         };
 
+        unsigned int numIndices = mesh->mNumFaces * 3;
+        if (0 == numIndices && nidx == 1) {
+            numIndices = mesh->mNumVertices;
+        }
         // check whether we can use 16 bit indices
-        if (mesh->mNumFaces * 3 >= 65536)	{
+        if (numIndices >= 65536)	{
             // create 32 bit index buffer
             if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
-                mesh->mNumFaces * nidx,
+                numIndices,
                 D3DUSAGE_WRITEONLY | dwUsage,
                 D3DFMT_INDEX32,
                 D3DPOOL_DEFAULT, 
@@ -547,7 +555,7 @@ int CreateAssetData()
         else	{
             // create 16 bit index buffer
             if(FAILED( g_piDevice->CreateIndexBuffer( 2 *
-                mesh->mNumFaces * nidx,
+                numIndices,
                 D3DUSAGE_WRITEONLY | dwUsage,
                 D3DFMT_INDEX16,
                 D3DPOOL_DEFAULT,
@@ -739,7 +747,7 @@ int DeleteAssetData(bool bNoMaterials)
 
 
 //-------------------------------------------------------------------------------
-// Switch beetween zoom/rotate view and the standatd FPS view
+// Switch between zoom/rotate view and the standard FPS view
 // g_bFPSView specifies the view mode to setup
 //-------------------------------------------------------------------------------
 int SetupFPSView()
@@ -982,7 +990,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
         sParams.MultiSampleType = sMSOut;
     }
 
-    // preget the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
+    // get the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
     g_piD3D->GetDeviceCaps( 0, D3DDEVTYPE_HAL, &g_sCaps);
     DWORD creationFlags = D3DCREATE_MULTITHREADED;
     if( g_sCaps.VertexShaderVersion >= D3DVS_VERSION( 2, 0))
@@ -1099,17 +1107,13 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     return 1;
 }
 
-
 //-------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------
-int CreateDevice (void)
+int CreateDevice()
 {
     return CreateDevice(g_sOptions.bMultiSample,
         g_sOptions.bSuperSample);
 }
 
-
-//-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 int GetProjectionMatrix (aiMatrix4x4& p_mOut)
 {

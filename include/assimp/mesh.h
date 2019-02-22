@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -402,7 +402,7 @@ enum aiPrimitiveType
 
 
 // ---------------------------------------------------------------------------
-/** @brief NOT CURRENTLY IN USE. An AnimMesh is an attachment to an #aiMesh stores per-vertex
+/** @brief An AnimMesh is an attachment to an #aiMesh stores per-vertex
  *  animations for a particular frame.
  *
  *  You may think of an #aiAnimMesh as a `patch` for the host mesh, which
@@ -414,6 +414,9 @@ enum aiPrimitiveType
 */
 struct aiAnimMesh
 {
+    /**Anim Mesh name */
+    C_STRUCT aiString mName;
+
     /** Replacement for aiMesh::mVertices. If this array is non-NULL,
      *  it *must* contain mNumVertices entries. The corresponding
      *  array in the host mesh must be non-NULL as well - animation

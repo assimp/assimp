@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -738,7 +738,11 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 
         // And copy the final weights - adjust the vertex IDs by the
         // face index offset of the corresponding mesh.
-        for (std::vector< BoneSrcIndex >::const_iterator wmit = (*boneIt).pSrcBones.begin(); wmit != wend; ++wmit)  {
+        for (std::vector< BoneSrcIndex >::const_iterator wmit = (*boneIt).pSrcBones.begin(); wmit != (*boneIt).pSrcBones.end(); ++wmit) {
+            if (wmit == wend) {
+                break;
+            }
+
             aiBone* pip = (*wmit).first;
             for (unsigned int mp = 0; mp < pip->mNumWeights;++mp,++avw) {
                 const aiVertexWeight& vfi = pip->mWeights[mp];

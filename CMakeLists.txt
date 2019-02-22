@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2018, assimp team
+# Copyright (c) 2006-2019, assimp team
 
 # All rights reserved.
 #
@@ -119,12 +119,14 @@ IF (IOS)
   IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Release")
   ENDIF (NOT CMAKE_BUILD_TYPE)
+  ADD_DEFINITIONS(-DENABLE_BITCODE)
 ENDIF (IOS)
 
 # Use subset of Windows.h
 if (WIN32)
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 endif()
+
 
 IF(MSVC)
   OPTION( ASSIMP_INSTALL_PDB

@@ -249,13 +249,14 @@ void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene)
 // Reads a new chunk from the file
 void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk* pcOut)
 {
-    ai_assert(pcOut != NULL);
+    ai_assert(pcOut != nullptr);
 
     pcOut->Flag = stream->GetI2();
     pcOut->Size = stream->GetI4();
 
-    if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize())
+    if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize()) {
         throw DeadlyImportError("Chunk is too large");
+    }
 
     if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit()) {
         ASSIMP_LOG_ERROR("3DS: Chunk overflow");
@@ -1343,15 +1344,16 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 
 // ------------------------------------------------------------------------------------------------
 // Read a percentage chunk
-ai_real Discreet3DSImporter::ParsePercentageChunk()
-{
+ai_real Discreet3DSImporter::ParsePercentageChunk() {
     Discreet3DS::Chunk chunk;
     ReadChunk(&chunk);
 
-    if (Discreet3DS::CHUNK_PERCENTF == chunk.Flag)
-        return stream->GetF4();
-    else if (Discreet3DS::CHUNK_PERCENTW == chunk.Flag)
+    if (Discreet3DS::CHUNK_PERCENTF == chunk.Flag) {
+        return stream->GetF4() * ai_real(100) / ai_real(0xFFFF);
+    } else if (Discreet3DS::CHUNK_PERCENTW == chunk.Flag) {
         return (ai_real)((uint16_t)stream->GetI2()) / (ai_real)0xFFFF;
+    }
+
     return get_qnan();
 }
 

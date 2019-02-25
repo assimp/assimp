@@ -390,9 +390,18 @@ namespace Assimp {
             out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
             //cameras are defined along positive x direction
-            out_camera->mPosition = cam.Position();
+            /*out_camera->mPosition = cam.Position();
             out_camera->mLookAt = (cam.InterestPosition() - out_camera->mPosition).Normalize();
-            out_camera->mUp = cam.UpVector();
+            out_camera->mUp = cam.UpVector();*/
+
+            out_camera->mPosition = aiVector3D(0.0f);
+            out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
+            out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
+
+            out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
+
+            out_camera->mClipPlaneNear = cam.NearPlane();
+            out_camera->mClipPlaneFar = cam.FarPlane();
 
             out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
             out_camera->mClipPlaneNear = cam.NearPlane();
@@ -1291,8 +1300,7 @@ namespace Assimp {
             unsigned int cursor = 0, in_cursor = 0;
 
             itf = faces.begin();
-            for (MatIndexArray::const_iterator it = mindices.begin(),
-                end = mindices.end(); it != end; ++it, ++itf)
+            for (MatIndexArray::const_iterator it = mindices.begin(), end = mindices.end(); it != end; ++it, ++itf)
             {
                 const unsigned int pcount = *itf;
                 if ((*it) != index) {

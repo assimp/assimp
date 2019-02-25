@@ -1160,7 +1160,7 @@ namespace Assimp {
                     }
                 }
             }
-            size_t numAnimMeshes = animMeshes.size();
+            const size_t numAnimMeshes = animMeshes.size();
             if (numAnimMeshes > 0) {
                 out_mesh->mNumAnimMeshes = static_cast<unsigned int>(numAnimMeshes);
                 out_mesh->mAnimMeshes = new aiAnimMesh*[numAnimMeshes];

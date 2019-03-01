@@ -1926,21 +1926,28 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
     // If explicitly requested, just use the collada name.
-    if (useColladaName) {
-        return pNode->mName;
-    }
-
-    // Now setup the name of the assimp node. The collada name might not be
-    // unique, so we use the collada ID.
-    if (!pNode->mID.empty())
-        return pNode->mID;
-    else if (!pNode->mSID.empty())
-    return pNode->mSID;
-  else
+    if (useColladaName)
     {
-        // No need to worry. Unnamed nodes are no problem at all, except
-        // if cameras or lights need to be assigned to them.
-    return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
+        if (!pNode->mName.empty()) {
+            return pNode->mName;
+        } else {
+            return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
+        }
+    }
+    else
+    {
+        // Now setup the name of the assimp node. The collada name might not be
+        // unique, so we use the collada ID.
+        if (!pNode->mID.empty())
+            return pNode->mID;
+        else if (!pNode->mSID.empty())
+            return pNode->mSID;
+        else
+        {
+            // No need to worry. Unnamed nodes are no problem at all, except
+            // if cameras or lights need to be assigned to them.
+            return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
+        }
     }
 }
 

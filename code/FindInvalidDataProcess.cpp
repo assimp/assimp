@@ -282,9 +282,11 @@ void FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim) {
 
 // ------------------------------------------------------------------------------------------------
 void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim) {
-    ai_assert( 0 != anim->mPositionKeys );
-    ai_assert( 0 != anim->mRotationKeys );
-    ai_assert( 0 != anim->mScalingKeys );
+    ai_assert( nullptr != anim );
+    if (anim->mNumPositionKeys == 0 && anim->mNumRotationKeys == 0 && anim->mNumScalingKeys == 0) {
+        ai_assert_entry();
+        return;
+    }
 
     // Check whether all values in a tracks are identical - in this case
     // we can remove al keys except one.
@@ -328,7 +330,7 @@ void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim) {
 
 // ------------------------------------------------------------------------------------------------
 // Search a mesh for invalid contents
-int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
+int FindInvalidDataProcess::ProcessMesh(aiMesh* pMesh)
 {
     bool ret = false;
     std::vector<bool> dirtyMask(pMesh->mNumVertices, pMesh->mNumFaces != 0);

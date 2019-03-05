@@ -469,10 +469,10 @@ struct aiAnimMesh
     {
         // fixme consider moving this to the ctor initializer list as well
         for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++){
-            mTextureCoords[a] = NULL;
+            mTextureCoords[a] = nullptr;
         }
         for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
-            mColors[a] = NULL;
+            mColors[a] = nullptr;
         }
     }
 
@@ -493,34 +493,34 @@ struct aiAnimMesh
     /** Check whether the anim mesh overrides the vertex positions
      *  of its host mesh*/
     bool HasPositions() const {
-        return mVertices != NULL;
+        return mVertices != nullptr;
     }
 
     /** Check whether the anim mesh overrides the vertex normals
      *  of its host mesh*/
     bool HasNormals() const {
-        return mNormals != NULL;
+        return mNormals != nullptr;
     }
 
     /** Check whether the anim mesh overrides the vertex tangents
      *  and bitangents of its host mesh. As for aiMesh,
      *  tangents and bitangents always go together. */
     bool HasTangentsAndBitangents() const {
-        return mTangents != NULL;
+        return mTangents != nullptr;
     }
 
     /** Check whether the anim mesh overrides a particular
      * set of vertex colors on his host mesh.
      *  @param pIndex 0<index<AI_MAX_NUMBER_OF_COLOR_SETS */
     bool HasVertexColors( unsigned int pIndex) const    {
-        return pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS ? false : mColors[pIndex] != NULL;
+        return pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS ? false : mColors[pIndex] != nullptr;
     }
 
     /** Check whether the anim mesh overrides a particular
      * set of texture coordinates on his host mesh.
      *  @param pIndex 0<index<AI_MAX_NUMBER_OF_TEXTURECOORDS */
     bool HasTextureCoords( unsigned int pIndex) const   {
-        return pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? false : mTextureCoords[pIndex] != NULL;
+        return pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? false : mTextureCoords[pIndex] != nullptr;
     }
 
 #endif

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -204,6 +204,28 @@ private:
     std::vector<aiVector3D> m_vertices;
     std::vector<aiVector3D> m_normals;
     std::vector<unsigned int> m_indices;
+};
+/**
+*  DOM class for FBX geometry of type "Line"
+*/
+class LineGeometry : public Geometry
+{
+public:
+    /** The class constructor */
+    LineGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+
+    /** The class destructor */
+    virtual ~LineGeometry();
+
+    /** Get a list of all vertex points, non-unique*/
+    const std::vector<aiVector3D>& GetVertices() const;
+
+    /** Return list of vertex indices. */
+    const std::vector<int>& GetIndices() const;
+
+private:
+    std::vector<aiVector3D> m_vertices;
+    std::vector<int> m_indices;
 };
 
 }

@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -46,21 +46,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tuple>
 #include <vector>
 
-namespace AssimpView
-{
+namespace AssimpView {
 
-/** Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
- * better use the AnimPlayer class.
+/** 
+ *  @brief  Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
+ *          better use the AnimPlayer class.
  */
-class AnimEvaluator
-{
+class AnimEvaluator {
 public:
-    /** Constructor on a given animation. The animation is fixed throughout the lifetime of
-     * the object.
-     * @param pAnim The animation to calculate poses for. Ownership of the animation object stays
-     *   at the caller, the evaluator just keeps a reference to it as long as it persists.
-     */
+    /// @brief  Constructor on a given animation. The animation is fixed throughout the lifetime of
+    /// the object.
+    /// @param pAnim    The animation to calculate poses for. Ownership of the animation object stays
+    ///                 at the caller, the evaluator just keeps a reference to it as long as it persists.
     AnimEvaluator( const aiAnimation* pAnim);
+
+    /// @brief  The class destructor.
+    ~AnimEvaluator();
 
     /** Evaluates the animation tracks for a given time stamp. The calculated pose can be retrieved as a
      * array of transformation matrices afterwards by calling GetTransformations().
@@ -74,16 +75,9 @@ public:
     const std::vector<aiMatrix4x4>& GetTransformations() const { return mTransforms; }
 
 protected:
-    /** The animation we're working on */
     const aiAnimation* mAnim;
-
-    /** At which frame the last evaluation happened for each channel.
-     * Useful to quickly find the corresponding frame for slightly increased time stamps
-     */
     double mLastTime;
     std::vector<std::tuple<unsigned int, unsigned int, unsigned int> > mLastPositions;
-
-    /** The array to store the transformations results of the evaluation */
     std::vector<aiMatrix4x4> mTransforms;
 };
 

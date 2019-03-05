@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2018, assimp team
+# Copyright (c) 2006-2019, assimp team
 
 # All rights reserved.
 #
@@ -198,7 +198,7 @@ CONFIGURE_FILE(
   ${CMAKE_CURRENT_BINARY_DIR}/include/assimp/config.h
 )
 
-INCLUDE_DIRECTORIES(
+INCLUDE_DIRECTORIES( BEFORE
   ./
   include
   ${CMAKE_CURRENT_BINARY_DIR}

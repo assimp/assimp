@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -374,6 +374,12 @@ TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
     const auto& buff = ReadFile("C:\\Users\\kimkulling\\Downloads\\camel\\camel\\scene.gltf");*/
     /*const aiScene* Scene = ::aiImportFileFromMemory(&buff[0], buff.size(), flags, ".gltf");
     EXPECT_EQ( nullptr, Scene );*/
+}
+
+TEST_F( utglTF2ImportExport, bug_import_simple_skin ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/simple_skin.gltf", aiProcess_ValidateDataStructure );
+    EXPECT_NE( nullptr, scene );
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -60,11 +60,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 
 namespace Assimp {
-    template<> const char* LogFunctions<FBXImporter>::Prefix()
-    {
-        static auto prefix = "FBX: ";
-        return prefix;
-    }
+
+template<>
+const char* LogFunctions<FBXImporter>::Prefix() {
+    static auto prefix = "FBX: ";
+    return prefix;
+}
+
 }
 
 using namespace Assimp;
@@ -72,6 +74,7 @@ using namespace Assimp::Formatter;
 using namespace Assimp::FBX;
 
 namespace {
+
 static const aiImporterDesc desc = {
     "Autodesk FBX Importer",
     "",

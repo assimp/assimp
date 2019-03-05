@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -679,7 +679,13 @@ void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const ch
 	shortened = _shortened;
 
 	time_t tt = time(NULL);
-	tm* p     = gmtime(&tt);
+#if _WIN32
+    tm* p = gmtime(&tt);
+#else
+    struct tm now;
+    tm* p = gmtime_r(&tt, &now);
+#endif
+    ai_assert(nullptr != p);
 
 	// header
 	fprintf(out,"ASSIMP.binary-dump.%s",asctime(p));
@@ -861,7 +867,13 @@ static std::string encodeXML(const std::string& data) {
 void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd, bool shortened)
 {
 	time_t tt = ::time(NULL);
-	tm* p     = ::gmtime(&tt);
+#if _WIN32
+    tm* p = gmtime(&tt);
+#else
+    struct tm now;
+    tm* p = gmtime_r(&tt, &now);
+#endif
+    ai_assert(nullptr != p);
 
 	std::string c = cmd;
 	std::string::size_type s; 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -2362,7 +2362,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     if( expectedPointCount > 0 && indices.size() != expectedPointCount * numOffsets) {
         if (pPrimType == Prim_Lines) {
             // HACK: We just fix this number since SketchUp 15.3.331 writes the wrong 'count' for 'lines'
-            ReportWarning( "Expected different index count in <p> element, %d instead of %d.", indices.size(), expectedPointCount * numOffsets);
+            ReportWarning( "Expected different index count in <p> element, %zu instead of %zu.", indices.size(), expectedPointCount * numOffsets);
             pNumPrimitives = (indices.size() / numOffsets) / 2;
         } else
             ThrowException( "Expected different index count in <p> element.");

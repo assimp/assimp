@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -89,9 +89,8 @@ extern Assimp::Exporter* globalExporter;
 #endif
 
 // ------------------------------------------------------------------------------
-/** Defines common import parameters */
-struct ImportData
-{
+/// Defines common import parameters
+struct ImportData {
 	ImportData()
 		:	ppFlags	(0)
 		,	showLog (false)
@@ -99,10 +98,8 @@ struct ImportData
 		,	log	    (false)
 	{}
 
-	/** Postprocessing flags
-	 */
+	/// Post-processing flags
 	unsigned int ppFlags;
-
 
 	// Log to std::err?
 	bool showLog;

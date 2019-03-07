@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -59,7 +59,6 @@ ASSIMP_API size_t aiGetExportFormatCount(void)
 {
     return Exporter().GetExportFormatCount();
 }
-
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t index)

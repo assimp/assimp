@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -85,34 +85,37 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-    : mFileName()
-	, mMeshIndexByID()
-	, mMaterialIndexByName()
-	, mMeshes()
-	, newMats()
-	, mCameras()
-	, mLights()
-	, mTextures()
-	, mAnims()
-	, noSkeletonMesh( false )
-    , ignoreUpDirection(false)
-    , mNodeNameCounter( 0 )
-{}
+: mFileName()
+, mMeshIndexByID()
+, mMaterialIndexByName()
+, mMeshes()
+, newMats()
+, mCameras()
+, mLights()
+, mTextures()
+, mAnims()
+, noSkeletonMesh( false )
+, ignoreUpDirection(false)
+, useColladaName( false )
+, mNodeNameCounter( 0 ) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ColladaLoader::~ColladaLoader()
-{}
+ColladaLoader::~ColladaLoader() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
+bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     // check file extension
     std::string extension = GetExtension(pFile);
 
-    if( extension == "dae")
+    if (extension == "dae") {
         return true;
+    }
 
     // XML - too generic, we need to open the file and search for typical keywords
     if( extension == "xml" || !extension.length() || checkSig)  {
@@ -120,10 +123,13 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
          *  support a specific file extension in general pIOHandler
          *  might be NULL and it's our duty to return true here.
          */
-        if (!pIOHandler)return true;
+        if (!pIOHandler) {
+            return true;
+        }
         const char* tokens[] = {"<collada"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
+
     return false;
 }
 
@@ -144,8 +150,7 @@ const aiImporterDesc* ColladaLoader::GetInfo () const
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
+void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
     mFileName = pFile;
 
     // clean all member arrays - just for safety, it should work even if we did not
@@ -181,7 +186,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
     // ... then fill the materials with the now adjusted settings
     FillMaterials(parser, pScene);
 
-    // Apply unitsize scale calculation
+    // Apply unit-size scale calculation
     pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0,  0,  0,
                                                         0,  parser.mUnitSize,  0,  0,
                                                         0,  0,  parser.mUnitSize,  0,
@@ -725,8 +730,11 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         std::vector<aiAnimMesh*> animMeshes;
         for (unsigned int i = 0; i < targetMeshes.size(); i++)
         {
-            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMeshes.at(i));
-            animMesh->mWeight = targetWeights[i];
+            aiMesh* targetMesh = targetMeshes.at(i);
+            aiAnimMesh *animMesh = aiCreateAnimMesh(targetMesh);
+            float weight = targetWeights[i];
+            animMesh->mWeight = weight == 0 ? 1.0f : weight;
+            animMesh->mName = targetMesh->mName;
             animMeshes.push_back(animMesh);
         }
         dstMesh->mMethod = (method == Collada::Relative)
@@ -1918,21 +1926,28 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
     // If explicitly requested, just use the collada name.
-    if (useColladaName) {
-        return pNode->mName;
-    }
-
-    // Now setup the name of the assimp node. The collada name might not be
-    // unique, so we use the collada ID.
-    if (!pNode->mID.empty())
-        return pNode->mID;
-    else if (!pNode->mSID.empty())
-    return pNode->mSID;
-  else
+    if (useColladaName)
     {
-        // No need to worry. Unnamed nodes are no problem at all, except
-        // if cameras or lights need to be assigned to them.
-    return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
+        if (!pNode->mName.empty()) {
+            return pNode->mName;
+        } else {
+            return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
+        }
+    }
+    else
+    {
+        // Now setup the name of the assimp node. The collada name might not be
+        // unique, so we use the collada ID.
+        if (!pNode->mID.empty())
+            return pNode->mID;
+        else if (!pNode->mSID.empty())
+            return pNode->mSID;
+        else
+        {
+            // No need to worry. Unnamed nodes are no problem at all, except
+            // if cameras or lights need to be assigned to them.
+            return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
+        }
     }
 }
 

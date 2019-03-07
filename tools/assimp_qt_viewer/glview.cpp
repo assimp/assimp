@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "contrib/stb_image/stb_image.h"
 
 CGLView::SHelper_Mesh::SHelper_Mesh(const size_t pQuantity_Point, const size_t pQuantity_Line, const size_t pQuantity_Triangle, const SBBox& pBBox)
 : Quantity_Point(pQuantity_Point)
@@ -237,7 +237,7 @@ void CGLView::ImportTextures(const QString& scenePath) {
 		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// We will use linear interpolation for magnification filter.
 		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// We will use linear interpolation for minifying filter.
             glTexImage2D(GL_TEXTURE_2D, 0, n, x, y, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, data );// Texture specification.
-
+            stbi_image_free(data);
             // Cleanup
 	    }
 	    else

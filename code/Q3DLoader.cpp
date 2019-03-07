@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -302,13 +302,14 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
         case 't':
 
             pScene->mNumTextures = numTextures;
-            if (!numTextures)break;
-            pScene->mTextures    = new aiTexture*[pScene->mNumTextures];
+            if (!numTextures) {
+                break;
+            }
+            pScene->mTextures = new aiTexture*[pScene->mNumTextures];
             // to make sure we won't crash if we leave through an exception
             ::memset(pScene->mTextures,0,sizeof(void*)*pScene->mNumTextures);
-            for (unsigned int i = 0; i < pScene->mNumTextures; ++i)
-            {
-                aiTexture* tex = pScene->mTextures[i] = new aiTexture();
+            for (unsigned int i = 0; i < pScene->mNumTextures; ++i) {
+                aiTexture* tex = pScene->mTextures[i] = new aiTexture;
 
                 // skip the texture name
                 while (stream.GetI1());
@@ -317,15 +318,16 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
                 tex->mWidth  = (unsigned int)stream.GetI4();
                 tex->mHeight = (unsigned int)stream.GetI4();
 
-                if (!tex->mWidth || !tex->mHeight)
+                if (!tex->mWidth || !tex->mHeight) {
                     throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
+                }
 
                 unsigned int mul = tex->mWidth * tex->mHeight;
                 aiTexel* begin = tex->pcData = new aiTexel[mul];
-                aiTexel* const end = & begin [mul];
+                aiTexel* const end = & begin[mul-1] +1;
 
-                for (;begin != end; ++begin)
-                {
+
+                for (;begin != end; ++begin) {
                     begin->r = stream.GetI1();
                     begin->g = stream.GetI1();
                     begin->b = stream.GetI1();

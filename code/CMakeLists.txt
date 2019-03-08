@@ -145,6 +145,10 @@ SET( Core_SRCS
   Assimp.cpp
 )
 
+IF(MSVC)
+  list(APPEND Core_SRCS "res/assimp.rc")
+ENDIF(MSVC)
+
 SET( Logging_SRCS
   ${HEADER_PATH}/DefaultLogger.hpp
   ${HEADER_PATH}/LogStream.hpp

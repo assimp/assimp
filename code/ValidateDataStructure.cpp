@@ -330,6 +330,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             {
             case 0:
                 ReportError("aiMesh::mFaces[%i].mNumIndices is 0",i);
+                break;
             case 1:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT))
                 {
@@ -811,9 +812,9 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
 {
     Validate(&pNodeAnim->mNodeName);
 
-    if (!pNodeAnim->mNumPositionKeys && !pNodeAnim->mScalingKeys && !pNodeAnim->mNumRotationKeys)
+    if (!pNodeAnim->mNumPositionKeys && !pNodeAnim->mScalingKeys && !pNodeAnim->mNumRotationKeys) {
         ReportError("Empty node animation channel");
-
+    }
     // otherwise check whether one of the keys exceeds the total duration of the animation
     if (pNodeAnim->mNumPositionKeys)
     {
@@ -916,8 +917,9 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
     }
     // Validate node name string first so that it's safe to use in below expressions
     this->Validate(&pNode->mName);
+    const char* nodeName = (&pNode->mName)->C_Str();
     if (pNode != mScene->mRootNode && !pNode->mParent){
-        ReportError("Non-root node %s lacks a valid parent (aiNode::mParent is NULL) ",pNode->mName);
+        ReportError("Non-root node %s lacks a valid parent (aiNode::mParent is NULL) ", nodeName);
     }
 
     // validate all meshes
@@ -926,7 +928,7 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
         if (!pNode->mMeshes)
         {
             ReportError("aiNode::mMeshes is NULL for node %s (aiNode::mNumMeshes is %i)",
-            		 pNode->mNumMeshes, pNode->mName);
+            		 pNode->mNumMeshes, nodeName);
         }
         std::vector<bool> abHadMesh;
         abHadMesh.resize(mScene->mNumMeshes,false);
@@ -935,12 +937,12 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
             if (pNode->mMeshes[i] >= mScene->mNumMeshes)
             {
                 ReportError("aiNode::mMeshes[%i] is out of range for node %s (maximum is %i)",
-                    pNode->mMeshes[i], pNode->mName, mScene->mNumMeshes-1);
+                    pNode->mMeshes[i], nodeName, mScene->mNumMeshes-1);
             }
             if (abHadMesh[pNode->mMeshes[i]])
             {
                 ReportError("aiNode::mMeshes[%i] is already referenced by this node %s (value: %i)",
-                    i, pNode->mName, pNode->mMeshes[i]);
+                    i, nodeName, pNode->mMeshes[i]);
             }
             abHadMesh[pNode->mMeshes[i]] = true;
         }
@@ -949,7 +951,7 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
     {
         if (!pNode->mChildren)  {
             ReportError("aiNode::mChildren is NULL for node %s (aiNode::mNumChildren is %i)",
-            		 pNode->mName, pNode->mNumChildren);
+            		nodeName, pNode->mNumChildren);
         }
         for (unsigned int i = 0; i < pNode->mNumChildren;++i)   {
             Validate(pNode->mChildren[i]);

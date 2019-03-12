@@ -160,7 +160,7 @@ inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
         {
             if (!parray[i])
             {
-                ReportError("aiScene::%s[%i] is NULL (aiScene::%s is %i)",
+                ReportError("aiScene::%s[%y] is NULL (aiScene::%s is %u)",
                     firstName,i,secondName,size);
             }
             Validate(parray[i]);
@@ -170,8 +170,8 @@ inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
             {
                 if (parray[i]->mName == parray[a]->mName)
                 {
-                	ReportError("aiScene::%s[%i] has the same name as "
-                        "aiScene::%s[%i]",firstName, i,secondName, a);
+                	ReportError("aiScene::%s[%u] has the same name as "
+                        "aiScene::%s[%u]",firstName, i,secondName, a);
                 }
             }
         }
@@ -964,7 +964,7 @@ void ValidateDSProcess::Validate( const aiString* pString)
 {
     if (pString->length > MAXLEN)
     {
-        ReportError("aiString::length is too large (%i, maximum is %lu)",
+        ReportError("aiString::length is too large (%lu, maximum is %lu)",
             pString->length,MAXLEN);
     }
     const char* sz = pString->data;

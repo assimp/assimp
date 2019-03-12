@@ -928,7 +928,7 @@ void ValidateDSProcess::Validate( const aiNode* pNode)
         if (!pNode->mMeshes)
         {
             ReportError("aiNode::mMeshes is NULL for node %s (aiNode::mNumMeshes is %i)",
-            		 pNode->mNumMeshes, nodeName);
+            		  nodeName, pNode->mNumMeshes);
         }
         std::vector<bool> abHadMesh;
         abHadMesh.resize(mScene->mNumMeshes,false);

@@ -160,7 +160,7 @@ inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
         {
             if (!parray[i])
             {
-                ReportError("aiScene::%s[%y] is NULL (aiScene::%s is %u)",
+                ReportError("aiScene::%s[%u] is NULL (aiScene::%s is %u)",
                     firstName,i,secondName,size);
             }
             Validate(parray[i]);

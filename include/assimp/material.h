@@ -912,6 +912,13 @@ extern "C" {
 #define AI_MATKEY_COLOR_TRANSPARENT "$clr.transparent",0,0
 #define AI_MATKEY_COLOR_REFLECTIVE "$clr.reflective",0,0
 #define AI_MATKEY_GLOBAL_BACKGROUND_IMAGE "?bg.global",0,0
+#define AI_MATKEY_GLOBAL_SHADERLANG "?sh.lang",0,0
+#define AI_MATKEY_SHADER_VERTEX "?sh.vs",0,0
+#define AI_MATKEY_SHADER_FRAGMENT "?sh.fs",0,0
+#define AI_MATKEY_SHADER_GEO "?sh.gs",0,0
+#define AI_MATKEY_SHADER_TESSELATION "?sh.ts",0,0
+#define AI_MATKEY_SHADER_PRIMITIVE "?sh.ps",0,0
+#define AI_MATKEY_SHADER_COMPUTE "?sh.cs",0,0
 
 // ---------------------------------------------------------------------------
 // Pure key names for all texture-related properties
@@ -1454,8 +1461,6 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
     aiGetMaterialIntegerArray(pMat, type, index, pKey, pOut, NULL)
 
 #endif //!__cplusplus
-
-
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a color value from the material property table

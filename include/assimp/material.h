@@ -198,8 +198,6 @@ enum aiTextureType
      */
     aiTextureType_NONE = 0x0,
 
-
-
     /** The texture is combined with the result of the diffuse
      *  lighting equation.
      */
@@ -278,7 +276,7 @@ enum aiTextureType
      *
      *  A texture reference that does not match any of the definitions
      *  above is considered to be 'unknown'. It is still imported,
-     *  but is excluded from any further postprocessing.
+     *  but is excluded from any further post-processing.
     */
     aiTextureType_UNKNOWN = 0xC,
 
@@ -375,7 +373,7 @@ enum aiShadingMode
 */
 enum aiTextureFlags
 {
-    /** The texture's color values have to be inverted (componentwise 1-n)
+    /** The texture's color values have to be inverted (component-wise 1-n)
      */
     aiTextureFlags_Invert = 0x1,
 

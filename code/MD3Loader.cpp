@@ -258,10 +258,10 @@ bool Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
             continue;
 
         fill.textures.push_back(SkinData::TextureEntry());
-        SkinData::TextureEntry& s = fill.textures.back();
+        SkinData::TextureEntry &entry = fill.textures.back();
 
-        s.first  = ss;
-        s.second = GetNextToken(buff);
+        entry.first  = ss;
+        entry.second = GetNextToken(buff);
     }
     return true;
 }
@@ -730,11 +730,13 @@ void MD3Importer::InternReadFile( const std::string& pFile,
     std::string::size_type s = mFile.find_last_of("/\\");
     if (s == std::string::npos) {
         s = 0;
+    } else {
+        ++s;
     }
-    else ++s;
-    filename = mFile.substr(s), path = mFile.substr(0,s);
-    for( std::string::iterator it = filename .begin(); it != filename.end(); ++it)
-        *it = tolower( *it);
+    filename = mFile.substr(s), path = mFile.substr(0, s);
+    for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
+        *it = static_cast<char>( tolower(*it) );
+    }
 
     // Load multi-part model file, if necessary
     if (configHandleMP) {
@@ -905,15 +907,15 @@ void MD3Importer::InternReadFile( const std::string& pFile,
         // Now search the current shader for a record with this name (
         // excluding texture file extension)
         if (!shaders.blocks.empty()) {
-
-            std::string::size_type s = convertedPath.find_last_of('.');
-            if (s == std::string::npos)
-                s = convertedPath.length();
+            std::string::size_type sh = convertedPath.find_last_of('.');
+            if (sh == std::string::npos) {
+                sh = convertedPath.length();
+            }
 
             const std::string without_ext = convertedPath.substr(0,s);
             std::list< Q3Shader::ShaderDataBlock >::const_iterator dit = std::find(shaders.blocks.begin(),shaders.blocks.end(),without_ext);
             if (dit != shaders.blocks.end()) {
-                // Hurra, wir haben einen. Tolle Sache.
+                // We made it!
                 shader = &*dit;
                 ASSIMP_LOG_INFO("Found shader record for " +without_ext );
             } else {

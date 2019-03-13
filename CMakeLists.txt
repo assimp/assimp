@@ -157,7 +157,7 @@ SET (PROJECT_VERSION "${ASSIMP_VERSION}")
 
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 
-# Enable C++1 globally
+# Enable C++11 support globally
 set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
 
 IF(NOT IGNORE_GIT_HASH)

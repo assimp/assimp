@@ -964,7 +964,7 @@ namespace Assimp {
             {
                 if (indices[i] < 0) epcount++;
             }
-            unsigned int pcount = indices.size();
+            unsigned int pcount = static_cast<unsigned int>( indices.size() );
             unsigned int scount = out_mesh->mNumFaces = pcount - epcount;
 
             aiFace* fac = out_mesh->mFaces = new aiFace[scount]();

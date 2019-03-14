@@ -276,9 +276,12 @@ inline uint32_t WriteBounds(const T* in, unsigned int size)
 void ChangeInteger(uint32_t ofs,uint32_t n)
 {
 	const uint32_t cur = ftell(out);
-	fseek(out,ofs,SEEK_SET);
-	fwrite(&n,4,1,out);
-	fseek(out,cur,SEEK_SET);
+    int retCode;
+    retCode = fseek(out, ofs, SEEK_SET);
+    ai_assert(0 == retCode);
+	fwrite(&n, 4, 1, out);
+    retCode = fseek(out, cur, SEEK_SET);
+    ai_assert(0 == retCode);
 }
 
 // -----------------------------------------------------------------------------------
@@ -1333,10 +1336,6 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 {
 	const char* fail = "assimp dump: Invalid number of arguments. "
 			"See \'assimp dump --help\'\r\n";
-	if (num < 1) {
-		printf("%s", fail);
-		return 1;
-	}
 
 	// --help
 	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {

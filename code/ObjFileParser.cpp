@@ -151,7 +151,8 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
                 } else if (*m_DataIt == 't') {
                     // read in texture coordinate ( 2D or 3D )
                     ++m_DataIt;
-                    getVector( m_pModel->m_TextureCoord );
+                    size_t dim = getVector(m_pModel->m_TextureCoord);
+                    m_pModel->m_TextureCoordDim = std::max(m_pModel->m_TextureCoordDim, (unsigned int)dim);
                 } else if (*m_DataIt == 'n') {
                     // Read in normal vector definition
                     ++m_DataIt;
@@ -296,7 +297,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
     return numComponents;
 }
 
-void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+size_t ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
     if( 2 == numComponents ) {
@@ -320,6 +321,7 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     }
     point3d_array.push_back( aiVector3D( x, y, z ) );
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+    return numComponents;
 }
 
 void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {

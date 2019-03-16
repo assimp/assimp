@@ -778,8 +778,11 @@ ADD_ASSIMP_EXPORTER( GLTF
 )
 
 ADD_ASSIMP_IMPORTER( 3MF
-    D3MFExporter.h
-    D3MFExporter.cpp
+	D3MFImporter.h
+    D3MFImporter.cpp
+	D3MFOpcPackage.h
+    D3MFOpcPackage.cpp
+    3MFXmlTags.h
 )
 
 ADD_ASSIMP_EXPORTER( 3MF

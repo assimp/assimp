@@ -223,7 +223,8 @@ namespace glTF2
         ComponentType_FLOAT = 5126
     };
 
-    inline unsigned int ComponentTypeSize(ComponentType t)
+    inline
+    unsigned int ComponentTypeSize(ComponentType t)
     {
         switch (t) {
             case ComponentType_SHORT:
@@ -250,7 +251,7 @@ namespace glTF2
     };
 
     //! Values for the Sampler::magFilter field
-    enum class SamplerMagFilter: unsigned int
+    enum class SamplerMagFilter : unsigned int
     {
         UNSET = 0,
         SamplerMagFilter_Nearest = 9728,
@@ -258,7 +259,7 @@ namespace glTF2
     };
 
     //! Values for the Sampler::minFilter field
-    enum class SamplerMinFilter: unsigned int
+    enum class SamplerMinFilter : unsigned int
     {
         UNSET = 0,
         SamplerMinFilter_Nearest = 9728,

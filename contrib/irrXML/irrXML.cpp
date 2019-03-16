@@ -18,7 +18,7 @@ namespace io
 {
 
 //! Implementation of the file read callback for ordinary files
-class CFileReadCallBack : public IFileReadCallBack
+class IRRXML_API CFileReadCallBack : public IFileReadCallBack
 {
 public:
 

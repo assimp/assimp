@@ -11,7 +11,7 @@
 #    define IRRXML_API __declspec(dllexport)
 #else
 #    define IRRXML_API
-#endif _WIN32
+#endif // _WIN32
 
 /** \mainpage irrXML 1.2 API documentation
  <div align="center"><img src="logobig.png" ></div>

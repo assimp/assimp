@@ -90,7 +90,7 @@ void SceneAnimator::SetAnimIndex( size_t pAnimIndex) {
     delete mAnimEvaluator;  mAnimEvaluator = nullptr;
     mNodesByName.clear();
 
-    mCurrentAnimIndex = pAnimIndex;
+    mCurrentAnimIndex = static_cast<int>( pAnimIndex );
 
     // create the internal node tree. Do this even in case of invalid animation index
     // so that the transformation matrices are properly set up to mimic the current scene

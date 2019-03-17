@@ -152,10 +152,10 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
 
     auto pMesh = scene.mMeshes[0];
 
-    long numValidPoints = points.size();
+    size_t numValidPoints = points.size();
 
     pMesh->mVertices = new aiVector3D[numValidPoints];
-    pMesh->mNumVertices = numValidPoints;
+    pMesh->mNumVertices = static_cast<unsigned int>( numValidPoints );
 
     int i = 0;
     for (XYZ &p : points) {

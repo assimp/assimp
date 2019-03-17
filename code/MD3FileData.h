@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Compiler/pushpack1.h>
 
-namespace Assimp    {
+namespace Assimp {
 namespace MD3   {
 
 // to make it easier for us, we test the magic word against both "endianesses"
@@ -303,12 +303,12 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
         b = int(57.2957795f * ( std::acos( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
         b &= 0xff;
 
-        ((unsigned char*)&p_iOut)[0] = b;   // longitude
-        ((unsigned char*)&p_iOut)[1] = a;   // latitude
+        ((unsigned char*)&p_iOut)[0] = (unsigned char) b;   // longitude
+        ((unsigned char*)&p_iOut)[1] = (unsigned char) a;   // latitude
     }
 }
 
-}
-}
+} // Namespace MD3
+} // Namespace Assimp
 
 #endif // !! AI_MD3FILEHELPER_H_INC

@@ -52,8 +52,8 @@ use_ifc_template = False
 	
 input_step_template_h   = 'StepReaderGen.h.template'
 input_step_template_cpp = 'StepReaderGen.cpp.template'
-input_ifc_template_h        = 'IFCReaderGen.h.template'
-input_ifc_template_cpp      = 'IFCReaderGen.cpp.template'
+input_ifc_template_h    = 'IFCReaderGen.h.template'
+input_ifc_template_cpp  = 'IFCReaderGen.cpp.template'
 
 cpp_keywords = "class"
 
@@ -87,7 +87,7 @@ template_type = r"""
 
 template_stub_decl = '\tDECL_CONV_STUB({type});\n'
 template_schema = '\t\tSchemaEntry("{normalized_name}",&STEP::ObjectHelper<{type},{argcnt}>::Construct )\n'
-template_schema_type = '\t\tSchemaEntry("{normalized_name}",NULL )\n'
+template_schema_type = '\t\tSchemaEntry("{normalized_name}",nullptr )\n'
 template_converter = r"""
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<{type}>(const DB& db, const LIST& params, {type}* in)
@@ -99,7 +99,7 @@ template_converter_prologue_a = '\tsize_t base = GenericFill(db,params,static_ca
 template_converter_prologue_b = '\tsize_t base = 0;\n'
 template_converter_check_argcnt = '\tif (params.GetSize() < {max_arg}) {{ throw STEP::TypeError("expected {max_arg} arguments to {name}"); }}'
 template_converter_code_per_field = r"""    do {{ // convert the '{fieldname}' argument
-        boost::shared_ptr<const DataType> arg = params[base++];{handle_unset}{convert}
+        std::shared_ptr<const DataType> arg = params[base++];{handle_unset}{convert}
     }} while(0);
 """
 template_allow_optional = r"""

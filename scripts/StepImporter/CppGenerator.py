@@ -151,10 +151,7 @@ def handle_unset_args(field,entity,schema,argnum):
     return n+template_allow_optional.format()
 
 def get_single_conversion(field,schema,argnum=0,classname='?'):
-    typen = field.type
     name = field.name
-    if field.collection:
-        typen = 'LIST'
     return template_convert_single.format(name=name,argnum=argnum,classname=classname,full_type=field.fullspec)
 
 def count_args_up(entity,schema):

@@ -300,5 +300,8 @@ def work(filename):
         with open(output_file_cpp,'wt') as outp:
             outp.write(inp.read().replace('{schema-static-table}',schema_table).replace('{converter-impl}',converters))
 
+    # Finished without error, so return 0
+    return 0
+
 if __name__ == "__main__":
     sys.exit(work(sys.argv[1] if len(sys.argv)>1 else 'schema.exp'))

@@ -20,6 +20,7 @@ try: import numpy
 except: numpy = None
 
 import logging
+import ctypes
 logger = logging.getLogger("pyassimp")
 # attach default null handler to logger so it doesn't complain
 # even if you don't attach another handler to logger
@@ -343,8 +344,7 @@ def export(scene,
 
     '''
 
-    from ctypes import pointer
-    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode(sys.getfilesystemencoding()), processing)
+    exportStatus = _assimp_lib.export(ctypes.pointer(scene), file_type.encode("ascii"), filename.encode(sys.getfilesystemencoding()), processing)
 
     if exportStatus != 0:
         raise AssimpError('Could not export scene!')

@@ -218,7 +218,7 @@ def get_derived(e,schema):
     return res
 
 def get_hierarchy(e,schema):
-    return get_derived(e.schema)+[e.name]+get_base_classes(e,schema)
+    return get_derived(e, schema)+[e.name]+get_base_classes(e,schema)
 
 def sort_entity_list(schema):
     deps = []

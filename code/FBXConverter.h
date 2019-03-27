@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/texture.h>
 #include <assimp/camera.h>
 #include <assimp/StringComparison.h>
+#include <unordered_map>
 
 struct aiScene;
 struct aiNode;
@@ -73,8 +74,6 @@ namespace Assimp {
 namespace FBX {
 
 class Document;
-
-using NodeNameCache = std::set<std::string>;
 
 /** 
  *  Convert a FBX #Document to #aiScene
@@ -444,7 +443,10 @@ private:
     typedef std::map<std::string, unsigned int> NodeAnimBitMap;
     NodeAnimBitMap node_anim_chain_bits;
 
-    NodeNameCache mNodeNames;
+    // number of nodes with the same name
+    typedef std::unordered_map<std::string, unsigned int> NodeNameMap;
+    NodeNameMap mNodeNameInstances;
+
     double anim_fps;
 
     aiScene* const out;

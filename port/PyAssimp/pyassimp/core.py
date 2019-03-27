@@ -15,7 +15,7 @@ if sys.version_info >= (3,0):
 
 
 try: import numpy
-except: numpy = None
+except ImportError: numpy = None
 import logging
 import ctypes
 logger = logging.getLogger("pyassimp")
@@ -67,7 +67,7 @@ def make_tuple(ai_obj, type = None):
 def _convert_assimp_string(assimp_string):
     try:
         return unicode(assimp_string.data, errors='ignore')
-    except:
+    except UnicodeError:
         return str(assimp_string.data, errors='ignore')
 
 # It is faster and more correct to have an init function for each assimp class

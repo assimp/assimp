@@ -14,7 +14,7 @@ import re
 import sys
 
 try: import numpy
-except: numpy = None
+except ImportError: numpy = None
 
 import logging;logger = logging.getLogger("pyassimp")
 
@@ -276,5 +276,5 @@ def hasattr_silent(object, name):
 
     try:
         return hasattr(object, name)
-    except:
+    except AttributeError:
         return False

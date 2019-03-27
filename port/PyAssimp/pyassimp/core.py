@@ -65,10 +65,10 @@ def make_tuple(ai_obj, type = None):
 
 # Returns unicode object for Python 2, and str object for Python 3.
 def _convert_assimp_string(assimp_string):
-    try:
-        return unicode(assimp_string.data, errors='ignore')
-    except UnicodeError:
+    if sys.version_info >= (3, 0):
         return str(assimp_string.data, errors='ignore')
+    else:
+        return unicode(assimp_string.data, errors='ignore')
 
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
@@ -303,7 +303,7 @@ def load(filename,
         #                                      unsigned int pLength,
         #                                      unsigned int pFlags,
         #                                      const char* pHint)
-        if file_type == None:
+        if file_type is None:
             raise AssimpError('File type must be specified when passing file objects!')
         data  = filename.read()
         model = _assimp_lib.load_mem(data,

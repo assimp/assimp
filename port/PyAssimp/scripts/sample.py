@@ -5,7 +5,7 @@
 This module demonstrates the functionality of PyAssimp.
 """
 
-import os, sys
+import sys
 import logging
 logging.basicConfig(level=logging.INFO)
 

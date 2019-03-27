@@ -6,7 +6,7 @@ This is the main-module of PyAssimp.
 
 import sys
 if sys.version_info < (2,6):
-    raise 'pyassimp: need python 2.6 or newer'
+    raise RuntimeError('pyassimp: need python 2.6 or newer')
 
 # xrange was renamed range in Python 3 and the original range from Python 2 was removed.
 # To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.

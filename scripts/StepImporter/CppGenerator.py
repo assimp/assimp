@@ -155,7 +155,7 @@ def get_single_conversion(field,schema,argnum=0,classname='?'):
     name = field.name
     if field.collection:
         typen = 'LIST'
-    return template_convert_single.format(type=typen,name=name,argnum=argnum,classname=classname,full_type=field.fullspec)
+    return template_convert_single.format(name=name,argnum=argnum,classname=classname,full_type=field.fullspec)
 
 def count_args_up(entity,schema):
     return len(entity.members) + (count_args_up(schema.entities[entity.parent],schema) if entity.parent else 0)

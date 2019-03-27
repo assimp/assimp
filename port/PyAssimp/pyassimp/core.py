@@ -13,12 +13,9 @@ if sys.version_info < (2,6):
 if sys.version_info >= (3,0):
     xrange = range
 
-import ctypes
-import os
 
 try: import numpy
 except: numpy = None
-
 import logging
 import ctypes
 logger = logging.getLogger("pyassimp")

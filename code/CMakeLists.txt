@@ -865,6 +865,7 @@ SET( ziplib_SRCS
   ../contrib/zip/src/zip.c
   ../contrib/zip/src/zip.h
 )
+add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES 0)
 
 SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
 

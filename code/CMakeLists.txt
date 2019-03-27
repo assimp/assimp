@@ -869,9 +869,9 @@ SET( ziplib_SRCS
 # TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
 if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
 	add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-else
+else()
 	add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-endif
+endif()
 
 SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
 

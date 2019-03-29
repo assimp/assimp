@@ -192,9 +192,9 @@ def try_load_functions(library_path, dll):
 
     # library found!
     from .structs import Scene, ExportDataBlob
-    load.restype = ctypes.POINTER(Scene)
-    load_mem.restype = ctypes.POINTER(Scene)
-    export2blob.restype = ctypes.POINTER(ExportDataBlob)
+    load.restype = ctype.POINTER(Scene)
+    load_mem.restype = ctype.POINTER(Scene)
+    export2blob.restype = ctype.POINTER(ExportDataBlob)
     return (library_path, load, load_mem, export, export2blob, release, dll)
 
 def search_library():

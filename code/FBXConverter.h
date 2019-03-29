@@ -418,7 +418,6 @@ private:
     void TransferDataToScene();
 
 private:
-
     // 0: not assigned yet, others: index is value - 1
     unsigned int defaultMaterialIndex;
 
@@ -428,23 +427,22 @@ private:
     std::vector<aiLight*> lights;
     std::vector<aiCamera*> cameras;
     std::vector<aiTexture*> textures;
-    
 
-    typedef std::map<const Material*, unsigned int> MaterialMap;
+    using MaterialMap = std::map<const Material*, unsigned int>;
     MaterialMap materials_converted;
 
-    typedef std::map<const Video*, unsigned int> VideoMap;
+    using VideoMap = std::map<const Video*, unsigned int>;
     VideoMap textures_converted;
 
-    typedef std::map<const Geometry*, std::vector<unsigned int> > MeshMap;
+    using MeshMap = std::map<const Geometry*, std::vector<unsigned int> >;
     MeshMap meshes_converted;
 
     // fixed node name -> which trafo chain components have animations?
-    typedef std::map<std::string, unsigned int> NodeAnimBitMap;
+    using NodeAnimBitMap = std::map<std::string, unsigned int> ;
     NodeAnimBitMap node_anim_chain_bits;
 
     // number of nodes with the same name
-    typedef std::unordered_map<std::string, unsigned int> NodeNameMap;
+    using NodeNameMap = std::unordered_map<std::string, unsigned int> ;
     NodeNameMap mNodeNameInstances;
 
     double anim_fps;

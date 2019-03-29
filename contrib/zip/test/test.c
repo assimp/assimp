@@ -102,8 +102,7 @@ static void test_read(void) {
   assert(0 == zip_entry_close(zip));
   free(buf);
   buf = NULL;
-  bufsize = 0;
-
+  
   assert(0 == zip_entry_open(zip, "test/test-2.txt"));
   assert(strlen(TESTDATA2) == zip_entry_size(zip));
   assert(CRC32DATA2 == zip_entry_crc32(zip));
@@ -132,8 +131,7 @@ static void test_read(void) {
   assert(0 == zip_entry_close(zip));
   free(buf);
   buf = NULL;
-  bufsize = 0;
-
+  
   buftmp = strlen(TESTDATA1);
   buf = calloc(buftmp, sizeof(char));
   assert(0 == zip_entry_open(zip, "test/test-1.txt"));

@@ -71,7 +71,7 @@ int arg = 2;
 zip_extract("foo.zip", "/tmp", on_extract_entry, &arg);
 ```
 
-* Extract a zip entry into memory.
+*   Extract a zip entry into memory.
 ```c
 void *buf = NULL;
 size_t bufsize;
@@ -89,7 +89,7 @@ zip_close(zip);
 free(buf);
 ```
 
-* Extract a zip entry into memory (no internal allocation).
+*   Extract a zip entry into memory (no internal allocation).
 ```c
 unsigned char *buf;
 size_t bufsize;
@@ -110,7 +110,7 @@ zip_close(zip);
 free(buf);
 ```
 
-* Extract a zip entry into memory using callback.
+*   Extract a zip entry into memory using callback.
 ```c
 struct buffer_t {
     char *data;
@@ -144,7 +144,7 @@ free(buf.data);
 ```
 
 
-* Extract a zip entry into a file.
+*   Extract a zip entry into a file.
 ```c
 struct zip_t *zip = zip_open("foo.zip", 0, 'r');
 {
@@ -157,7 +157,7 @@ struct zip_t *zip = zip_open("foo.zip", 0, 'r');
 zip_close(zip);
 ```
 
-* List of all zip entries
+*   List of all zip entries
 ```c
 struct zip_t *zip = zip_open("foo.zip", 0, 'r');
 int i, n = zip_total_entries(zip);
@@ -174,7 +174,7 @@ for (i = 0; i < n; ++i) {
 zip_close(zip);
 ```
 
-# Bindings
+## Bindings
 Compile zip library as a dynamic library.
 ```shell
 $ mkdir build

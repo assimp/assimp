@@ -85,12 +85,14 @@ static int mkpath(const char *path) {
   int has_device = HAS_DEVICE(path);
 
   memset(npath, 0, MAX_PATH + 1);
-  if (has_device) {
-    // only on windows
-    npath[0] = path[0];
-    npath[1] = path[1];
-    len = 2;
-  }
+
+#ifdef _WIN32
+  // only on windows fix the path
+  npath[0] = path[0];
+  npath[1] = path[1];
+  len = 2;
+#endif // _WIN32
+    
   for (p = path + len; *p && len < MAX_PATH; p++) {
     if (ISSLASH(*p) && ((!has_device && len > 0) || (has_device && len > 2))) {
       if (MKDIR(npath) == -1)
@@ -668,7 +670,10 @@ ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf, size_t bufsize) {
 int zip_entry_fread(struct zip_t *zip, const char *filename) {
   mz_zip_archive *pzip = NULL;
   mz_uint idx;
+#if defined(_MSC_VER)
+#else
   mz_uint32 xattr = 0;
+#endif
   mz_zip_archive_file_stat info;
 
   if (!zip) {

@@ -442,7 +442,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
     // Allocate buffer for texture coordinates
     if ( !pModel->m_TextureCoord.empty() && pObjMesh->m_uiUVCoordinates[0] )
     {
-        pMesh->mNumUVComponents[ 0 ] = 2;
+        pMesh->mNumUVComponents[ 0 ] = pModel->m_TextureCoordDim;
         pMesh->mTextureCoords[ 0 ] = new aiVector3D[ pMesh->mNumVertices ];
     }
 

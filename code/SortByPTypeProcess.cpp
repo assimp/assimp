@@ -228,36 +228,37 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
 
             out->mNumVertices = (3 == real ? numPolyVerts : out->mNumFaces * (real+1));
 
-            aiVector3D *vert(NULL), *nor(NULL), *tan(NULL), *bit(NULL);
+            aiVector3D *vert(nullptr), *nor(nullptr), *tan(nullptr), *bit(nullptr);
             aiVector3D *uv   [AI_MAX_NUMBER_OF_TEXTURECOORDS];
             aiColor4D  *cols [AI_MAX_NUMBER_OF_COLOR_SETS];
 
-            if (mesh->mVertices)
+            if (mesh->mVertices) {
                 vert = out->mVertices = new aiVector3D[out->mNumVertices];
+            }
 
-            if (mesh->mNormals)
-                nor  = out->mNormals  = new aiVector3D[out->mNumVertices];
+            if (mesh->mNormals) {
+                nor = out->mNormals = new aiVector3D[out->mNumVertices];
+            }
 
-            if (mesh->mTangents)
-            {
+            if (mesh->mTangents) {
                 tan = out->mTangents   = new aiVector3D[out->mNumVertices];
                 bit = out->mBitangents = new aiVector3D[out->mNumVertices];
             }
 
-            for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-            {
-                if (mesh->mTextureCoords[i])
-                    uv[i] = out->mTextureCoords[i] = new aiVector3D[out->mNumVertices];
-                else uv[i] = NULL;
+            for (unsigned int j = 0; j < AI_MAX_NUMBER_OF_TEXTURECOORDS;++j) {
+                uv[j] = nullptr;
+                if (mesh->mTextureCoords[j]) {
+                    uv[j] = out->mTextureCoords[j] = new aiVector3D[out->mNumVertices];
+                }
 
-                out->mNumUVComponents[i] = mesh->mNumUVComponents[i];
+                out->mNumUVComponents[j] = mesh->mNumUVComponents[j];
             }
 
-            for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
-            {
-                if (mesh->mColors[i])
-                    cols[i] = out->mColors[i] = new aiColor4D[out->mNumVertices];
-                else cols[i] = NULL;
+            for (unsigned int j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS;++j) {
+                cols[j] = nullptr;
+                if (mesh->mColors[j]) {
+                    cols[j] = out->mColors[j] = new aiColor4D[out->mNumVertices];
+                }
             }
 
             typedef std::vector< aiVertexWeight > TempBoneInfo;
@@ -323,7 +324,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
                     in.mIndices[q] = outIdx++;
                 }
 
-                in.mIndices = NULL;
+                in.mIndices = nullptr;
                 ++outFaces;
             }
             ai_assert(outFaces == out->mFaces + out->mNumFaces);

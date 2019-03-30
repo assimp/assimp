@@ -476,8 +476,11 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
             mZipArchive->Close( fileStream );
 
         } else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
-
+            ASSIMP_LOG_WARN_F("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES",file);
+        } else {
+            ASSIMP_LOG_WARN_F("Ignored file of unknown type: ",file);
         }
+
     }
 }
 

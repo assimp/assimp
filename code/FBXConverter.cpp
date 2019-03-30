@@ -1712,22 +1712,22 @@ namespace Assimp {
                         if (!mesh)
                         {
                             for (const MeshMap::value_type& v : meshes_converted) {
-                                const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
-                                if (!mesh) {
+                                const MeshGeometry* const meshGeom = dynamic_cast<const MeshGeometry*> (v.first);
+                                if (!meshGeom) {
                                     continue;
                                 }
 
-                                const MatIndexArray& mats = mesh->GetMaterialIndices();
+                                const MatIndexArray& mats = meshGeom->GetMaterialIndices();
                                 if (std::find(mats.begin(), mats.end(), matIndex) == mats.end()) {
                                     continue;
                                 }
 
                                 int index = -1;
                                 for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-                                    if (mesh->GetTextureCoords(i).empty()) {
+                                    if (meshGeom->GetTextureCoords(i).empty()) {
                                         break;
                                     }
-                                    const std::string& name = mesh->GetTextureCoordChannelName(i);
+                                    const std::string& name = meshGeom->GetTextureCoordChannelName(i);
                                     if (name == uvSet) {
                                         index = static_cast<int>(i);
                                         break;
@@ -1835,22 +1835,22 @@ namespace Assimp {
                         if (!mesh)
                         {
                             for (const MeshMap::value_type& v : meshes_converted) {
-                                const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
-                                if (!mesh) {
+                                const MeshGeometry* const meshGeom = dynamic_cast<const MeshGeometry*> (v.first);
+                                if (!meshGeom) {
                                     continue;
                                 }
 
-                                const MatIndexArray& mats = mesh->GetMaterialIndices();
+                                const MatIndexArray& mats = meshGeom->GetMaterialIndices();
                                 if (std::find(mats.begin(), mats.end(), matIndex) == mats.end()) {
                                     continue;
                                 }
 
                                 int index = -1;
                                 for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-                                    if (mesh->GetTextureCoords(i).empty()) {
+                                    if (meshGeom->GetTextureCoords(i).empty()) {
                                         break;
                                     }
-                                    const std::string& name = mesh->GetTextureCoordChannelName(i);
+                                    const std::string& name = meshGeom->GetTextureCoordChannelName(i);
                                     if (name == uvSet) {
                                         index = static_cast<int>(i);
                                         break;
@@ -2191,22 +2191,22 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                     if (!mesh)
                     {
                         for (const MeshMap::value_type& v : meshes_converted) {
-                            const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(v.first);
-                            if (!mesh) {
+                            const MeshGeometry* const meshGeom = dynamic_cast<const MeshGeometry*>(v.first);
+                            if (!meshGeom) {
                                 continue;
                             }
 
-                            const MatIndexArray& mats = mesh->GetMaterialIndices();
+                            const MatIndexArray& mats = meshGeom->GetMaterialIndices();
                             if (std::find(mats.begin(), mats.end(), matIndex) == mats.end()) {
                                 continue;
                             }
 
                             int index = -1;
                             for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-                                if (mesh->GetTextureCoords(i).empty()) {
+                                if (meshGeom->GetTextureCoords(i).empty()) {
                                     break;
                                 }
-                                const std::string& name = mesh->GetTextureCoordChannelName(i);
+                                const std::string& name = meshGeom->GetTextureCoordChannelName(i);
                                 if (name == uvSet) {
                                     index = static_cast<int>(i);
                                     break;

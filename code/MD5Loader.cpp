@@ -443,10 +443,10 @@ void MD5Importer::LoadMD5MeshFile ()
         for (MD5::VertexList::const_iterator iter =  meshSrc.mVertices.begin();iter != meshSrc.mVertices.end();++iter,++pv) {
             for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights;++w)
             {
-                MD5::WeightDesc& desc = meshSrc.mWeights[w];
+                MD5::WeightDesc& weightDesc = meshSrc.mWeights[w];
                 /* FIX for some invalid exporters */
-                if (!(desc.mWeight < AI_MD5_WEIGHT_EPSILON && desc.mWeight >= -AI_MD5_WEIGHT_EPSILON ))
-                    ++piCount[desc.mBone];
+                if (!(weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON ))
+                    ++piCount[weightDesc.mBone];
             }
         }
 
@@ -493,20 +493,20 @@ void MD5Importer::LoadMD5MeshFile ()
                     if (w >= meshSrc.mWeights.size())
                         throw DeadlyImportError("MD5MESH: Invalid weight index");
 
-                    MD5::WeightDesc& desc = meshSrc.mWeights[w];
-                    if ( desc.mWeight < AI_MD5_WEIGHT_EPSILON && desc.mWeight >= -AI_MD5_WEIGHT_EPSILON) {
+                    MD5::WeightDesc& weightDesc = meshSrc.mWeights[w];
+                    if ( weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON) {
                         continue;
                     }
 
-                    const ai_real fNewWeight = desc.mWeight / fSum;
+                    const ai_real fNewWeight = weightDesc.mWeight / fSum;
 
                     // transform the local position into worldspace
-                    MD5::BoneDesc& boneSrc = meshParser.mJoints[desc.mBone];
-                    const aiVector3D v = boneSrc.mRotationQuatConverted.Rotate (desc.vOffsetPosition);
+                    MD5::BoneDesc& boneSrc = meshParser.mJoints[weightDesc.mBone];
+                    const aiVector3D v = boneSrc.mRotationQuatConverted.Rotate (weightDesc.vOffsetPosition);
 
                     // use the original weight to compute the vertex position
                     // (some MD5s seem to depend on the invalid weight values ...)
-                    *pv += ((boneSrc.mPositionXYZ+v)* (ai_real)desc.mWeight);
+                    *pv += ((boneSrc.mPositionXYZ+v)* (ai_real)weightDesc.mWeight);
 
                     aiBone* bone = mesh->mBones[boneSrc.mMap];
                     *bone->mWeights++ = aiVertexWeight((unsigned int)(pv-mesh->mVertices),fNewWeight);

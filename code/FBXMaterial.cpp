@@ -326,8 +326,11 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
                 content = new uint8_t[len];
                 ::memcpy(content, data + 5, len);
             }
-        } catch (runtime_error runtimeError) {
+        } catch (const runtime_error& runtimeError)
+        {
             //we don't need the content data for contents that has already been loaded
+            ASSIMP_LOG_DEBUG_F("Caught exception in FBXMaterial (likely because content was already loaded): ",
+                    runtimeError.what());
         }
     }
 

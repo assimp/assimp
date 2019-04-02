@@ -78,7 +78,11 @@ using namespace Assimp;
 using namespace Assimp::Formatter;
 
 namespace Assimp {
-    template<> const std::string LogFunctions<C4DImporter>::log_prefix = "C4D: ";
+    template<> const char* LogFunctions<C4DImporter>::Prefix()
+    {
+        static auto prefix = "C4D: ";
+        return prefix;
+    }
 }
 
 static const aiImporterDesc desc = {

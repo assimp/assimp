@@ -78,14 +78,8 @@ namespace Assimp    {
 class C4DImporter : public BaseImporter, public LogFunctions<C4DImporter>
 {
 public:
-
     C4DImporter();
     ~C4DImporter();
-
-
-public:
-
-    // --------------------
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
         bool checkSig) const;
 
@@ -119,5 +113,5 @@ private:
 }; // !class C4DImporter
 
 } // end of namespace Assimp
-#endif // INCLUDED_AI_CINEMA_4D_LOADER_H
 
+#endif // INCLUDED_AI_CINEMA_4D_LOADER_H

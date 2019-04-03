@@ -416,7 +416,7 @@ template <> struct Structure :: _defaultInitializer<ErrorPolicy_Fail> {
     void operator ()(T& /*out*/,const char* = "") {
         // obviously, it is crucial that _DefaultInitializer is used
         // only from within a catch clause.
-        throw;
+        throw DeadlyImportError("Constructing BlenderDNA Structure encountered an error");
     }
 };
 

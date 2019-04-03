@@ -144,7 +144,7 @@ void COBImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     // check header
     char head[32];
     stream->CopyAndAdvance(head,32);
-    if (strncmp(head,"Caligari ",9)) {
+    if (strncmp(head,"Caligari ",9) != 0) {
         ThrowException("Could not found magic id: `Caligari`");
     }
 
@@ -656,14 +656,14 @@ void COBImporter::ReadLght_Ascii(Scene& out, LineSplitter& splitter, const Chunk
     ReadFloat3Tuple_Ascii(msh.color ,&rgb);
 
     SkipSpaces(&rgb);
-    if (strncmp(rgb,"cone angle",10)) {
+    if (strncmp(rgb,"cone angle",10) != 0) {
         ASSIMP_LOG_WARN_F( "Expected `cone angle` entity in `color` line in `Lght` chunk ", nfo.id );
     }
     SkipSpaces(rgb+10,&rgb);
     msh.angle = fast_atof(&rgb);
 
     SkipSpaces(&rgb);
-    if (strncmp(rgb,"inner angle",11)) {
+    if (strncmp(rgb,"inner angle",11) != 0) {
         ASSIMP_LOG_WARN_F( "Expected `inner angle` entity in `color` line in `Lght` chunk ", nfo.id);
     }
     SkipSpaces(rgb+11,&rgb);
@@ -903,7 +903,7 @@ public:
         if(nfo.size != static_cast<unsigned int>(-1)) {
             try {
                 reader.IncPtr( static_cast< int >( nfo.size ) - reader.GetCurrentPos() + cur );
-            } catch ( DeadlyImportError e ) {
+            } catch (const DeadlyImportError& e ) {
                 // out of limit so correct the value
                 reader.IncPtr( reader.GetReadLimit() );
             }
@@ -1214,7 +1214,7 @@ void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
     const chunk_guard cn(nfo,reader);
 
-    out.nodes.push_back(std::shared_ptr<Group>(new Group()));
+    out.nodes.push_back(std::make_shared<Group>());
     Group& msh = (Group&)(*out.nodes.back().get());
     msh = nfo;
 

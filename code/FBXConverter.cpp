@@ -412,17 +412,21 @@ namespace Assimp {
         {
             uniqueName = name;
             int i = 0;
-            auto it = mNodeNameInstances.find(uniqueName);
+            auto it = mNodeNameInstances.find(name); // duplicate node name instance count
             if (it != mNodeNameInstances.end())
             {
-                i = it->second + 1;
-                std::stringstream ext;
-                ext << name << std::setfill('0') << std::setw(3) << i;
-                uniqueName = ext.str();
+                i = it->second;
+                while (mNodeNames.find(uniqueName) != mNodeNames.end())
+                {
+                    i++;
+                    std::stringstream ext;
+                    ext << name << std::setfill('0') << std::setw(3) << i;
+                    uniqueName = ext.str();
+                }
             }
             mNodeNameInstances[name] = i;
+            mNodeNames.insert(uniqueName);
         }
-
 
         const char* FBXConverter::NameTransformationComp(TransformationComp comp) {
             switch (comp) {

@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/camera.h>
 #include <assimp/StringComparison.h>
 #include <unordered_map>
+#include <unordered_set>
 
 struct aiScene;
 struct aiNode;
@@ -442,8 +443,11 @@ private:
     NodeAnimBitMap node_anim_chain_bits;
 
     // number of nodes with the same name
-    using NodeNameMap = std::unordered_map<std::string, unsigned int> ;
-    NodeNameMap mNodeNameInstances;
+    typedef std::unordered_map<std::string, unsigned int> NodeAnimNameMap;
+    NodeAnimNameMap mNodeNameInstances;
+
+    typedef std::unordered_set<std::string> NodeNameCache;
+    NodeNameCache mNodeNames;
 
     double anim_fps;
 

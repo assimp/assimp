@@ -2041,6 +2041,12 @@ namespace Assimp {
                 CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
             }
 
+            // try to get the transparency factor
+            const float TransparencyFactor = PropertyGet<float>(props, "TransparencyFactor", ok);
+            if (ok) {
+                out_mat->AddProperty(&TransparencyFactor, 1, AI_MATKEY_TRANSPARENCYFACTOR);
+            }
+
             // use of TransparencyFactor is inconsistent.
             // Maya always stores it as 1.0,
             // so we can't use it to set AI_MATKEY_OPACITY.

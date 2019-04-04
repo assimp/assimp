@@ -206,6 +206,20 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 
     props = GetPropertyTable(doc,"Texture.FbxFileTexture",element,sc);
 
+    // 3DS Max and FBX SDK use "Scaling" and "Translation" instead of "ModelUVScaling" and "ModelUVTranslation". Use these properties if available.
+    bool ok;
+    const aiVector3D& scaling = PropertyGet<aiVector3D>(*props, "Scaling", ok);
+    if (ok) {
+        uvScaling.x = scaling.x;
+        uvScaling.y = scaling.y;
+    }
+
+    const aiVector3D& trans = PropertyGet<aiVector3D>(*props, "Translation", ok);
+    if (ok) {
+        uvTrans.x = trans.x;
+        uvTrans.y = trans.y;
+    }
+
     // resolve video links
     if(doc.Settings().readTextures) {
         const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());

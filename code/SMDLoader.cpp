@@ -486,7 +486,7 @@ void SMDImporter::CreateOutputAnimations(const std::string &pFile, IOSystem* pIO
     if (bLoadAnimationList) {
         GetAnimationFileList(pFile, pIOHandler, animFileList);
     }
-    int animCount = static_cast<int>( animFileList.size() ) + 1;
+    int animCount = static_cast<int>( animFileList.size() + 1u );
     pScene->mNumAnimations = 1;
     pScene->mAnimations = new aiAnimation*[animCount];
     memset(pScene->mAnimations, 0, sizeof(aiAnimation*)*animCount);

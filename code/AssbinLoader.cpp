@@ -708,7 +708,7 @@ void AssbinImporter::InternReadFile( const std::string& pFile, aiScene* pScene, 
 
         unsigned char * uncompressedData = new unsigned char[ uncompressedSize ];
 
-        int res = uncompress( uncompressedData, &uncompressedSize, compressedData, len );
+        int res = uncompress( uncompressedData, &uncompressedSize, compressedData, (uLong) len );
         if(res != Z_OK)
         {
             delete [] uncompressedData;

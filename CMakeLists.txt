@@ -351,6 +351,15 @@ IF( NOT ZLIB_FOUND )
   INCLUDE(CheckIncludeFile)
   INCLUDE(CheckTypeSize)
   INCLUDE(CheckFunctionExists)
+
+  # Explicitly turn off ASM686 and AMD64 cmake options.
+  # The AMD64 option causes a build failure on MSVC and the ASM builds seem to have problems:
+  #		https://github.com/madler/zlib/issues/41#issuecomment-125848075
+  # Also prevents these options from "polluting" the cmake options if assimp is being
+  # included as a submodule.
+  set( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+  set( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+
   # compile from sources
   ADD_SUBDIRECTORY(contrib/zlib)
   SET(ZLIB_FOUND 1)

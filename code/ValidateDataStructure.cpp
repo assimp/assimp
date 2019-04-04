@@ -582,15 +582,16 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 
     int iNumIndices = 0;
     int iIndex = -1;
-    for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
-    {
-        aiMaterialProperty* prop = pMaterial->mProperties[i];
-        if (!::strcmp(prop->mKey.data,"$tex.file") && prop->mSemantic == type)  {
+    for (unsigned int i = 0; i < pMaterial->mNumProperties;++i) {
+        aiMaterialProperty* prop = pMaterial->mProperties[ i ];
+        ai_assert(nullptr != prop);
+        if ( !::strcmp(prop->mKey.data,"$tex.file") && prop->mSemantic == static_cast<unsigned int>(type))  {
             iIndex = std::max(iIndex, (int) prop->mIndex);
             ++iNumIndices;
 
-            if (aiPTI_String != prop->mType)
-                ReportError("Material property %s is expected to be a string",prop->mKey.data);
+            if (aiPTI_String != prop->mType) {
+                ReportError("Material property %s is expected to be a string", prop->mKey.data);
+            }
         }
     }
     if (iIndex +1 != iNumIndices)   {

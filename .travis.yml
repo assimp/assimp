@@ -70,6 +70,6 @@ addons:
     project:
       name: "assimp/assimp"
     notification_email: kim.kulling@googlemail.com
-    build_command_prepend: "cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES"
+    build_command_prepend: "cmake ./"
     build_command: "make -j4"
     branch_pattern: coverity_scan

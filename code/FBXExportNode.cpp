@@ -432,7 +432,7 @@ void FBX::Node::WritePropertyNodeAscii(
     char buffer[32];
     FBX::Node node(name);
     node.Begin(s, false, indent);
-    std::string vsize = std::to_string(v.size());
+    std::string vsize = to_string(v.size());
     // *<size> {
     s.PutChar('*'); s.PutString(vsize); s.PutString(" {\n");
     // indent + 1
@@ -468,7 +468,7 @@ void FBX::Node::WritePropertyNodeAscii(
     char buffer[32];
     FBX::Node node(name);
     node.Begin(s, false, indent);
-    std::string vsize = std::to_string(v.size());
+    std::string vsize = to_string(v.size());
     // *<size> {
     s.PutChar('*'); s.PutString(vsize); s.PutString(" {\n");
     // indent + 1

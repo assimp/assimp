@@ -6,20 +6,18 @@ This is the main-module of PyAssimp.
 
 import sys
 if sys.version_info < (2,6):
-    raise 'pyassimp: need python 2.6 or newer'
+    raise RuntimeError('pyassimp: need python 2.6 or newer')
 
 # xrange was renamed range in Python 3 and the original range from Python 2 was removed.
 # To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.
 if sys.version_info >= (3,0):
     xrange = range
 
-import ctypes
-import os
 
 try: import numpy
-except: numpy = None
-
+except ImportError: numpy = None
 import logging
+import ctypes
 logger = logging.getLogger("pyassimp")
 # attach default null handler to logger so it doesn't complain
 # even if you don't attach another handler to logger
@@ -67,10 +65,10 @@ def make_tuple(ai_obj, type = None):
 
 # Returns unicode object for Python 2, and str object for Python 3.
 def _convert_assimp_string(assimp_string):
-    try:
-        return unicode(assimp_string.data, errors='ignore')
-    except:
+    if sys.version_info >= (3, 0):
         return str(assimp_string.data, errors='ignore')
+    else:
+        return unicode(assimp_string.data, errors='ignore')
 
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
@@ -305,7 +303,7 @@ def load(filename,
         #                                      unsigned int pLength,
         #                                      unsigned int pFlags,
         #                                      const char* pHint)
-        if file_type == None:
+        if file_type is None:
             raise AssimpError('File type must be specified when passing file objects!')
         data  = filename.read()
         model = _assimp_lib.load_mem(data,
@@ -343,8 +341,7 @@ def export(scene,
 
     '''
 
-    from ctypes import pointer
-    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode(sys.getfilesystemencoding()), processing)
+    exportStatus = _assimp_lib.export(ctypes.pointer(scene), file_type.encode("ascii"), filename.encode(sys.getfilesystemencoding()), processing)
 
     if exportStatus != 0:
         raise AssimpError('Could not export scene!')
@@ -369,16 +366,14 @@ def export_blob(scene,
     ---------
     Pointer to structs.ExportDataBlob
     '''
-    from ctypes import pointer
-    exportBlobPtr = _assimp_lib.export_blob(pointer(scene), file_type.encode("ascii"), processing)
+    exportBlobPtr = _assimp_lib.export_blob(ctypes.pointer(scene), file_type.encode("ascii"), processing)
 
     if exportBlobPtr == 0:
         raise AssimpError('Could not export scene to blob!')
     return exportBlobPtr
 
 def release(scene):
-    from ctypes import pointer
-    _assimp_lib.release(pointer(scene))
+    _assimp_lib.release(ctypes.pointer(scene))
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)
@@ -442,24 +437,22 @@ def _finalize_mesh(mesh, target):
     setattr(target, 'faces', faces)
 
 def _init_metadata_entry(entry):
-    from ctypes import POINTER, c_bool, c_int32, c_uint64, c_float, c_double, cast
-
     entry.type = entry.mType
     if entry.type == structs.MetadataEntry.AI_BOOL:
-        entry.data = cast(entry.mData, POINTER(c_bool)).contents.value
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_bool)).contents.value
     elif entry.type == structs.MetadataEntry.AI_INT32:
-        entry.data = cast(entry.mData, POINTER(c_int32)).contents.value
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_int32)).contents.value
     elif entry.type == structs.MetadataEntry.AI_UINT64:
-        entry.data = cast(entry.mData, POINTER(c_uint64)).contents.value
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_uint64)).contents.value
     elif entry.type == structs.MetadataEntry.AI_FLOAT:
-        entry.data = cast(entry.mData, POINTER(c_float)).contents.value
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_float)).contents.value
     elif entry.type == structs.MetadataEntry.AI_DOUBLE:
-        entry.data = cast(entry.mData, POINTER(c_double)).contents.value
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_double)).contents.value
     elif entry.type == structs.MetadataEntry.AI_AISTRING:
-        assimp_string = cast(entry.mData, POINTER(structs.String)).contents
+        assimp_string = ctypes.cast(entry.mData, ctypes.POINTER(structs.String)).contents
         entry.data = _convert_assimp_string(assimp_string)
     elif entry.type == structs.MetadataEntry.AI_AIVECTOR3D:
-        assimp_vector = cast(entry.mData, POINTER(structs.Vector3D)).contents
+        assimp_vector = ctypes.cast(entry.mData, ctypes.POINTER(structs.Vector3D)).contents
         entry.data = make_tuple(assimp_vector)
 
     return entry
@@ -513,15 +506,18 @@ def _get_properties(properties, length):
         key = (key.split('.')[1], p.mSemantic)
 
         #the data
-        from ctypes import POINTER, cast, c_int, c_float, sizeof
         if p.mType == 1:
-            arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
+            arr = ctypes.cast(p.mData,
+                              ctypes.POINTER(ctypes.c_float * int(p.mDataLength/ctypes.sizeof(ctypes.c_float)))
+                              ).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            value = _convert_assimp_string(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents)
+            value = _convert_assimp_string(ctypes.cast(p.mData, ctypes.POINTER(structs.MaterialPropertyString)).contents)
 
         elif p.mType == 4:
-            arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents
+            arr = ctypes.cast(p.mData,
+                              ctypes.POINTER(ctypes.c_int * int(p.mDataLength/ctypes.sizeof(ctypes.c_int)))
+                              ).contents
             value = [x for x in arr]
         else:
             value = p.mData[:p.mDataLength]
@@ -541,7 +537,9 @@ def decompose_matrix(matrix):
     rotation = structs.Quaternion()
     position = structs.Vector3D()
 
-    from ctypes import byref, pointer
-    _assimp_lib.dll.aiDecomposeMatrix(pointer(matrix), byref(scaling), byref(rotation), byref(position))
+    _assimp_lib.dll.aiDecomposeMatrix(ctypes.pointer(matrix),
+                                      ctypes.byref(scaling),
+                                      ctypes.byref(rotation),
+                                      ctypes.byref(position))
     return scaling._init(), rotation._init(), position._init()
     

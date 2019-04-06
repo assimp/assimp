@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"
+#include <stdint.h>
 
 namespace Assimp {
 namespace FBX {

@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/TinyFormatter.h>
 #include <string>
+#include <cstring>
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -126,7 +127,7 @@ static const uint8_t base64DecodeTable[128] = {
 
 uint8_t DecodeBase64(char ch)
 {
-    return base64DecodeTable[ch];
+    return base64DecodeTable[size_t(ch)];
 }
 
 size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out)

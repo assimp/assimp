@@ -78,6 +78,16 @@ namespace Assimp {
 
         FBXConverter::FBXConverter(aiScene* out, const Document& doc)
             : defaultMaterialIndex()
+            , lights()
+            , cameras()
+            , textures()
+            , materials_converted()
+            , textures_converted()
+            , meshes_converted()
+            , node_anim_chain_bits()
+            , mNodeNameInstances()
+            , mNodeNames()
+            , anim_fps()
             , out(out)
             , doc(doc) {
             // animations need to be converted first since this will

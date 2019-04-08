@@ -207,6 +207,12 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
                 0,  0,  0,  1);
     }
 
+    // Store scene metadata
+    for (auto it = parser.mAssetMetaData.cbegin(); it != parser.mAssetMetaData.cend(); ++it)
+    {
+        pScene->mMetaData->Add((*it).first, (*it).second);
+    }
+
     // store all meshes
     StoreSceneMeshes( pScene);
 

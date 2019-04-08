@@ -343,6 +343,9 @@ namespace Assimp
         /** Which is the up vector */
         enum { UP_X, UP_Y, UP_Z } mUpDirection;
 
+        typedef std::map<std::string, aiString> AssetMetaData;
+        AssetMetaData mAssetMetaData;
+
         /** Collada file format version */
         Collada::FormatVersion mFormat;
     };

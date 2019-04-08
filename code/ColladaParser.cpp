@@ -264,9 +264,22 @@ void ColladaParser::ReadAssetInfo()
 
                 // check element end
                 TestClosing( "up_axis");
-            } else
+            }
+            else if(IsElement("contributor"))
             {
-                SkipElement();
+                // This has no data of its own, will get children next time through
+            }
+            else
+            {
+                const char* metadata_key = mReader->getNodeName();
+                const char* metadata_value = TestTextContent();
+                if (metadata_key != nullptr && metadata_value != nullptr)
+                {
+                    aiString aistr;
+                    aistr.Set(metadata_value);
+                    mAssetMetaData.emplace(metadata_key, aistr);
+                }
+                //SkipElement();
             }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)

@@ -114,3 +114,18 @@ TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
     scene->mMetaData->Get("UnitScaleFactor", factor);
     EXPECT_DOUBLE_EQ(500.0, factor);
 }
+
+TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {
+    // see https://github.com/assimp/assimp/issues/1957
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_ascii/box.FBX", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(1, scene->mNumMaterials);
+    aiMaterial *mat = scene->mMaterials[0];
+    ASSERT_NE(nullptr, mat);
+
+    aiString path;
+    aiTextureMapMode modes[2];
+    EXPECT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
+}

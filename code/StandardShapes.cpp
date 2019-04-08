@@ -127,35 +127,35 @@ aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
 
     // Determine which kinds of primitives the mesh consists of
     aiMesh* out = new aiMesh();
-    switch (numIndices)
-    {
-    case 1:
-        out->mPrimitiveTypes = aiPrimitiveType_POINT;
-        break;
-    case 2:
-        out->mPrimitiveTypes = aiPrimitiveType_LINE;
-        break;
-    case 3:
-        out->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
-        break;
-    default:
-        out->mPrimitiveTypes = aiPrimitiveType_POLYGON;
-        break;
+    switch (numIndices) {
+        case 1:
+            out->mPrimitiveTypes = aiPrimitiveType_POINT;
+            break;
+        case 2:
+            out->mPrimitiveTypes = aiPrimitiveType_LINE;
+            break;
+        case 3:
+            out->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+            break;
+        default:
+            out->mPrimitiveTypes = aiPrimitiveType_POLYGON;
+            break;
     };
 
     out->mNumFaces = (unsigned int)positions.size() / numIndices;
     out->mFaces = new aiFace[out->mNumFaces];
-    for (unsigned int i = 0, a = 0; i < out->mNumFaces;++i)
-    {
+    for (unsigned int i = 0, a = 0; i < out->mNumFaces;++i) {
         aiFace& f = out->mFaces[i];
         f.mNumIndices = numIndices;
         f.mIndices = new unsigned int[numIndices];
-        for (unsigned int i = 0; i < numIndices;++i,++a)
-            f.mIndices[i] = a;
+        for (unsigned int j = 0; i < numIndices; ++i, ++a) {
+            f.mIndices[j] = a;
+        }
     }
     out->mNumVertices = (unsigned int)positions.size();
     out->mVertices = new aiVector3D[out->mNumVertices];
     ::memcpy(out->mVertices,&positions[0],out->mNumVertices*sizeof(aiVector3D));
+
     return out;
 }
 
@@ -466,8 +466,8 @@ void StandardShapes::MakeCone(ai_real height,ai_real radius1,
 
     // Need to flip face order?
     if ( SIZE_MAX != old )  {
-        for (size_t s = old; s < positions.size();s += 3) {
-            std::swap(positions[s],positions[s+1]);
+        for (size_t p = old; p < positions.size();p += 3) {
+            std::swap(positions[p],positions[p+1]);
         }
     }
 }

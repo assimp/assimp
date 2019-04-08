@@ -294,17 +294,17 @@ namespace glTF {
 							// filling object "compressedData"
 							json_comp_data.SetObject();
 							json_comp_data.AddMember("buffer", ptr_ext_comp->Buffer, w.mAl);
-							json_comp_data.AddMember("byteOffset", ptr_ext_comp->Offset, w.mAl);
+							json_comp_data.AddMember("byteOffset", static_cast<uint64_t>(ptr_ext_comp->Offset), w.mAl);
 							json_comp_data.AddMember("componentType", 5121, w.mAl);
 							json_comp_data.AddMember("type", "SCALAR", w.mAl);
-							json_comp_data.AddMember("count", ptr_ext_comp->Count, w.mAl);
+							json_comp_data.AddMember("count", static_cast<uint64_t>(ptr_ext_comp->Count), w.mAl);
 							if(ptr_ext_comp->Binary)
 								json_comp_data.AddMember("mode", "binary", w.mAl);
 							else
 								json_comp_data.AddMember("mode", "ascii", w.mAl);
 
-							json_comp_data.AddMember("indicesCount", ptr_ext_comp->IndicesCount, w.mAl);
-							json_comp_data.AddMember("verticesCount", ptr_ext_comp->VerticesCount, w.mAl);
+							json_comp_data.AddMember("indicesCount", static_cast<uint64_t>(ptr_ext_comp->IndicesCount), w.mAl);
+							json_comp_data.AddMember("verticesCount", static_cast<uint64_t>(ptr_ext_comp->VerticesCount), w.mAl);
 							// filling object "Open3DGC-compression"
 							Value json_o3dgc;
 

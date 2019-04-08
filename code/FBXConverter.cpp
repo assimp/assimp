@@ -78,6 +78,16 @@ namespace Assimp {
 
         FBXConverter::FBXConverter(aiScene* out, const Document& doc)
             : defaultMaterialIndex()
+            , lights()
+            , cameras()
+            , textures()
+            , materials_converted()
+            , textures_converted()
+            , meshes_converted()
+            , node_anim_chain_bits()
+            , mNodeNameInstances()
+            , mNodeNames()
+            , anim_fps()
             , out(out)
             , doc(doc) {
             // animations need to be converted first since this will
@@ -410,18 +420,23 @@ namespace Assimp {
 
         void FBXConverter::GetUniqueName(const std::string &name, std::string &uniqueName)
         {
-            int i = 0;
             uniqueName = name;
-            while (mNodeNames.find(uniqueName) != mNodeNames.end())
+            int i = 0;
+            auto it = mNodeNameInstances.find(name); // duplicate node name instance count
+            if (it != mNodeNameInstances.end())
             {
-                ++i;
-                std::stringstream ext;
-                ext << name << std::setfill('0') << std::setw(3) << i;
-                uniqueName = ext.str();
+                i = it->second;
+                while (mNodeNames.find(uniqueName) != mNodeNames.end())
+                {
+                    i++;
+                    std::stringstream ext;
+                    ext << name << std::setfill('0') << std::setw(3) << i;
+                    uniqueName = ext.str();
+                }
             }
+            mNodeNameInstances[name] = i;
             mNodeNames.insert(uniqueName);
         }
-
 
         const char* FBXConverter::NameTransformationComp(TransformationComp comp) {
             switch (comp) {
@@ -964,7 +979,7 @@ namespace Assimp {
             {
                 if (indices[i] < 0) epcount++;
             }
-            unsigned int pcount = indices.size();
+            unsigned int pcount = static_cast<unsigned int>( indices.size() );
             unsigned int scount = out_mesh->mNumFaces = pcount - epcount;
 
             aiFace* fac = out_mesh->mFaces = new aiFace[scount]();
@@ -1712,22 +1727,22 @@ namespace Assimp {
                         if (!mesh)
                         {
                             for (const MeshMap::value_type& v : meshes_converted) {
-                                const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
-                                if (!mesh) {
+                                const MeshGeometry* const meshGeom = dynamic_cast<const MeshGeometry*> (v.first);
+                                if (!meshGeom) {
                                     continue;
                                 }
 
-                                const MatIndexArray& mats = mesh->GetMaterialIndices();
+                                const MatIndexArray& mats = meshGeom->GetMaterialIndices();
                                 if (std::find(mats.begin(), mats.end(), matIndex) == mats.end()) {
                                     continue;
                                 }
 
                                 int index = -1;
                                 for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-                                    if (mesh->GetTextureCoords(i).empty()) {
+                                    if (meshGeom->GetTextureCoords(i).empty()) {
                                         break;
                                     }
-                                    const std::string& name = mesh->GetTextureCoordChannelName(i);
+                                    const std::string& name = meshGeom->GetTextureCoordChannelName(i);
                                     if (name == uvSet) {
                                         index = static_cast<int>(i);
                                         break;
@@ -1835,22 +1850,22 @@ namespace Assimp {
                         if (!mesh)
                         {
                             for (const MeshMap::value_type& v : meshes_converted) {
-                                const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
-                                if (!mesh) {
+                                const MeshGeometry* const meshGeom = dynamic_cast<const MeshGeometry*> (v.first);
+                                if (!meshGeom) {
                                     continue;
                                 }
 
-                                const MatIndexArray& mats = mesh->GetMaterialIndices();
+                                const MatIndexArray& mats = meshGeom->GetMaterialIndices();
                                 if (std::find(mats.begin(), mats.end(), matIndex) == mats.end()) {
                                     continue;
                                 }
 
                                 int index = -1;
                                 for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-                                    if (mesh->GetTextureCoords(i).empty()) {
+                                    if (meshGeom->GetTextureCoords(i).empty()) {
                                         break;
                                     }
-                                    const std::string& name = mesh->GetTextureCoordChannelName(i);
+                                    const std::string& name = meshGeom->GetTextureCoordChannelName(i);
                                     if (name == uvSet) {
                                         index = static_cast<int>(i);
                                         break;
@@ -2041,6 +2056,12 @@ namespace Assimp {
                 CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
             }
 
+            // try to get the transparency factor
+            const float TransparencyFactor = PropertyGet<float>(props, "TransparencyFactor", ok);
+            if (ok) {
+                out_mat->AddProperty(&TransparencyFactor, 1, AI_MATKEY_TRANSPARENCYFACTOR);
+            }
+
             // use of TransparencyFactor is inconsistent.
             // Maya always stores it as 1.0,
             // so we can't use it to set AI_MATKEY_OPACITY.
@@ -2191,22 +2212,22 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                     if (!mesh)
                     {
                         for (const MeshMap::value_type& v : meshes_converted) {
-                            const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(v.first);
-                            if (!mesh) {
+                            const MeshGeometry* const meshGeom = dynamic_cast<const MeshGeometry*>(v.first);
+                            if (!meshGeom) {
                                 continue;
                             }
 
-                            const MatIndexArray& mats = mesh->GetMaterialIndices();
+                            const MatIndexArray& mats = meshGeom->GetMaterialIndices();
                             if (std::find(mats.begin(), mats.end(), matIndex) == mats.end()) {
                                 continue;
                             }
 
                             int index = -1;
                             for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-                                if (mesh->GetTextureCoords(i).empty()) {
+                                if (meshGeom->GetTextureCoords(i).empty()) {
                                     break;
                                 }
-                                const std::string& name = mesh->GetTextureCoordChannelName(i);
+                                const std::string& name = meshGeom->GetTextureCoordChannelName(i);
                                 if (name == uvSet) {
                                     index = static_cast<int>(i);
                                     break;

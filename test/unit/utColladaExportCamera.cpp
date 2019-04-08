@@ -58,7 +58,7 @@ public:
 
     }
 
-    void TearDown() {
+    void TearDown() override {
         delete ex;
         ex = nullptr;
         delete im;

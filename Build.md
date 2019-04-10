@@ -35,6 +35,9 @@ The option -j descripes the number of parallel processes for the build. In this 
 If you want to use a IDE for linux you can try QTCreator for instance. 
 
 # Build instructions for MinGW
+ Older versions of MinGW's compiler (e.g. 5.1.0) do not support the -mbig_obj flag 
+required to compile some of assimp's files, especially for debug builds.
+Version 7.3.0 of g++-mingw-w64 & gcc-mingw-w64 appears to work.
 
 Please see [CMake Cross Compiling](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling) for general information on CMake Toolchains.
 
@@ -43,7 +46,7 @@ Some users have had success building assimp using MinGW on Linux using the follo
 The following toolchain may or may not be helpful for building assimp using MinGW on Windows (untested):
  [mingw-cxx17.cmake](https://github.com/ruslo/polly/blob/master/mingw-cxx17.cmake)
 
-Besides the toolchain, compilation should be the same as for Linux / Unix
+Besides the toolchain, compilation should be the same as for Linux / Unix.
 
 # CMake build options
 The cmake-build-environment provides options to configure the build. The following options can be used:

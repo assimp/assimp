@@ -23,7 +23,7 @@ This will generate the project files for the visual studio. All dependencies use
 See https://stackoverflow.com/questions/40803170/cmake-uwp-using-cmake-to-build-universal-windows-app
 
 
-# Build instrcutions for Linux / Unix
+# Build instructions for Linux / Unix
 Open a terminal and got to your repository. You can generate the makefiles and build the library via:
 
 ```
@@ -33,6 +33,17 @@ make -j4
 The option -j descripes the number of parallel processes for the build. In this case make will try to use 4 cores for the build.
 
 If you want to use a IDE for linux you can try QTCreator for instance. 
+
+# Build instructions for MinGW
+
+Please see [CMake Cross Compiling](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling) for general information on CMake Toolchains.
+
+Some users have had success building assimp using MinGW on Linux using the following toolchain, which is not maintained by assimp. [linux-mingw-w64-gnuxx11.cmake](https://github.com/ruslo/polly/blob/master/linux-mingw-w64-gnuxx11.cmake)
+
+The following toolchain may or may not be helpful for building assimp using MinGW on Windows (untested):
+ [mingw-cxx17.cmake](https://github.com/ruslo/polly/blob/master/mingw-cxx17.cmake)
+
+Besides the toolchain, compilation should be the same as for Linux / Unix
 
 # CMake build options
 The cmake-build-environment provides options to configure the build. The following options can be used:

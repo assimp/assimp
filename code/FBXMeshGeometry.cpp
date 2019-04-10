@@ -630,10 +630,11 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
             materials_out.clear();
         }
 
-        m_materials.assign(m_vertices.size(),materials_out[0]);
+        materials_out.resize(m_vertices.size());
+        std::fill(materials_out.begin(), materials_out.end(), materials_out.at(0));
     }
     else if (MappingInformationType == "ByPolygon" && ReferenceInformationType == "IndexToDirect") {
-        m_materials.resize(face_count);
+        materials_out.resize(face_count);
 
         if(materials_out.size() != face_count) {
             FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ")

@@ -1,6 +1,6 @@
 ply
 format ascii 1.0
-comment Created by Open Asset Import Library - http://assimp.sf.net (v4.1.4208963464)
+comment Created by Open Asset Import Library - http://assimp.sf.net (v4.1.412856994)
 element vertex 8
 property float x
 property float y

@@ -77,19 +77,19 @@ namespace Assimp {
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
         FBXConverter::FBXConverter(aiScene* out, const Document& doc)
-            : defaultMaterialIndex()
-            , lights()
-            , cameras()
-            , textures()
-            , materials_converted()
-            , textures_converted()
-            , meshes_converted()
-            , node_anim_chain_bits()
-            , mNodeNameInstances()
-            , mNodeNames()
-            , anim_fps()
-            , out(out)
-            , doc(doc) {
+        : defaultMaterialIndex()
+        , lights()
+        , cameras()
+        , textures()
+        , materials_converted()
+        , textures_converted()
+        , meshes_converted()
+        , node_anim_chain_bits()
+        , mNodeNameInstances()
+        , mNodeNames()
+        , anim_fps()
+        , out(out)
+        , doc(doc) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.

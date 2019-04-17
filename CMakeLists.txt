@@ -304,7 +304,9 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
   "Path the tool executables are installed to." )
 
-IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+get_cmake_property(is_multi_config GENERATOR_IS_MULTI_CONFIG)
+
+IF (is_multi_config OR (CMAKE_BUILD_TYPE STREQUAL "Debug"))
   SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfix for lib, samples and tools")
 ELSE()
   SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Debug Postfix for lib, samples and tools")

@@ -332,13 +332,13 @@ size_t ObjFileParser::getTexCoordVector( std::vector<aiVector3D> &point3d_array 
     }
 
     // Coerce nan and inf to 0 as is the OBJ default value
-    if (!isfinite(x))
+    if (!std::isfinite(x))
         x = 0;
 
-    if (!isfinite(y))
+    if (!std::isfinite(y))
         y = 0;
 
-    if (!isfinite(z))
+    if (!std::isfinite(z))
         z = 0;
 
     point3d_array.push_back( aiVector3D( x, y, z ) );

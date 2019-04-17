@@ -151,7 +151,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
                 } else if (*m_DataIt == 't') {
                     // read in texture coordinate ( 2D or 3D )
                     ++m_DataIt;
-                    size_t dim = getVector(m_pModel->m_TextureCoord);
+                    size_t dim = getTexCoordVector(m_pModel->m_TextureCoord);
                     m_pModel->m_TextureCoordDim = std::max(m_pModel->m_TextureCoordDim, (unsigned int)dim);
                 } else if (*m_DataIt == 'n') {
                     // Read in normal vector definition
@@ -272,6 +272,17 @@ static bool isDataDefinitionEnd( const char *tmp ) {
     return false;
 }
 
+static bool isNanOrInf(const char * in) {
+    // Look for "nan" or "inf", case insensitive
+    if ((in[0] == 'N' || in[0] == 'n') && ASSIMP_strincmp(in, "nan", 3) == 0) {
+        return true;
+    }
+    else if ((in[0] == 'I' || in[0] == 'i') && ASSIMP_strincmp(in, "inf", 3) == 0) {
+        return true;
+    }
+    return false;
+}
+
 size_t ObjFileParser::getNumComponentsInDataDefinition() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
@@ -285,7 +296,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if ( !SkipSpaces( &tmp ) ) {
             break;
         }
-        const bool isNum( IsNumeric( *tmp ) );
+        const bool isNum( IsNumeric( *tmp ) || isNanOrInf(tmp));
         SkipToken( tmp );
         if ( isNum ) {
             ++numComponents;
@@ -297,7 +308,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
     return numComponents;
 }
 
-size_t ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+size_t ObjFileParser::getTexCoordVector( std::vector<aiVector3D> &point3d_array ) {
     size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
     if( 2 == numComponents ) {
@@ -319,6 +330,17 @@ size_t ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     } else {
         throw DeadlyImportError( "OBJ: Invalid number of components" );
     }
+
+    // Coerce nan and inf to 0 as is the OBJ default value
+    if (!isfinite(x))
+        x = 0;
+
+    if (!isfinite(y))
+        y = 0;
+
+    if (!isfinite(z))
+        z = 0;
+
     point3d_array.push_back( aiVector3D( x, y, z ) );
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
     return numComponents;

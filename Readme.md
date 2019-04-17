@@ -99,7 +99,7 @@ __Importers__:
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
-- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange)
+- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) IMporting geometry + node hierarchy are currently supported
 
 __Exporters__:
 

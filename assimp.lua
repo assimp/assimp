@@ -364,6 +364,10 @@ project "assimp"
     -- configuration { "winuwp" } == _TARGET_IS_WINUWP
     -- -------------------------------------------------------------
 
+    defines {
+      "_CRT_SECURE_NO_WARNINGS",
+    }
+
     -- common configuration settings
 
     dofile (_BUILD_DIR .. "/static_winuwp.lua")

@@ -789,13 +789,16 @@ static void BuildVertexWeightMapping(Mesh::Primitive& primitive, std::vector<std
     delete[] indices16;
 }
 
+static std::string GetNodeName(const Node& node)
+{
+    return node.name.empty() ? node.id : node.name;
+}
+
 aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& meshOffsets, glTF2::Ref<glTF2::Node>& ptr)
 {
     Node& node = *ptr;
 
-    std::string nameOrId = node.name.empty() ? node.id : node.name;
-
-    aiNode* ainode = new aiNode(nameOrId);
+    aiNode* ainode = new aiNode(GetNodeName(node));
 
     if (!node.children.empty()) {
         ainode->mNumChildren = unsigned(node.children.size());
@@ -921,7 +924,7 @@ struct AnimationSamplers {
 aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& samplers)
 {
     aiNodeAnim* anim = new aiNodeAnim();
-    anim->mNodeName = node.name;
+    anim->mNodeName = GetNodeName(node);
 
     static const float kMillisecondsFromSeconds = 1000.f;
 

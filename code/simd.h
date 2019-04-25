@@ -44,10 +44,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/defs.h>
 
+#include "nmmintrin.h" // for SSE4.2
+#include "immintrin.h" // for AVX
+
 namespace Assimp {
+
+struct float4 {
+    union {
+        __m128 a4;
+        float a[4];
+    };
+
+    void set(float a, float b, float c, float d ) {
+        _mm_set_ps(a, b, c, d);
+    }
+};
 
 /// @brief  Checks if the platform supports SSE2 optimization
 /// @return true, if SSE2 is supported. false if SSE2 is not supported.
 bool ASSIMP_API CPUSupportsSSE2();
+
+void ASSIMP_API simd_add_op(const float4& v1, const float4& v2, float4& res);
+
+void ASSIMP_API simd_normalise_vectors_op(float4* decoded, float4* result, unsigned int num_vectors);
 
 } // Namespace Assimp

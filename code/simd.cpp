@@ -75,5 +75,20 @@ bool CPUSupportsSSE2() {
 #endif
 }
 
+void simd_add_op(const float4& v1, const float4& v2, float4& res) {
+    res.a4 = _mm_add_ps(v1.a4, v2.a4);
+}
+
+void simd_normalise_vectors_op(float4* decoded, float4* result, unsigned int num_vectors) {
+    for (unsigned int i = 0; i < num_vectors; ++i) {
+        result[i].a4 = _mm_mul_ps(decoded[ i ].a4, decoded[ i ].a4);
+        result[i].a4.m128_f32[0] = result[i].a4.m128_f32[1] = result[i].a4.m128_f32[2] = result[i].a4.m128_f32[3] =
+            result[i].a4.m128_f32[0] + result[i].a4.m128_f32[1] + result[i].a4.m128_f32[2] + result[i].a4.m128_f32[3];
+        result[i].a4 = _mm_rsqrt_ps(result[i].a4);
+        result[i].a4 = _mm_mul_ps(decoded[i].a4, result[i].a4);
+    }
+}
+
+
 
 } // Namespace Assimp

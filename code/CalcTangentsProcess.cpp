@@ -79,7 +79,7 @@ bool CalcTangentsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void CalcTangentsProcess::SetupProperties(const Importer* pImp)
 {
-    ai_assert( NULL != pImp );
+    ai_assert( nullptr != pImp );
 
     // get the current value of the property
     configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE,45.f);
@@ -91,15 +91,16 @@ void CalcTangentsProcess::SetupProperties(const Importer* pImp)
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void CalcTangentsProcess::Execute( aiScene* pScene)
-{
-    ai_assert( NULL != pScene );
+void CalcTangentsProcess::Execute( aiScene* pScene) {
+    ai_assert( nullptr != pScene );
 
     ASSIMP_LOG_DEBUG("CalcTangentsProcess begin");
 
     bool bHas = false;
     for ( unsigned int a = 0; a < pScene->mNumMeshes; a++ ) {
-        if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
+        if (ProcessMesh(pScene->mMeshes[a], a)) {
+            bHas = true;
+        }
     }
 
     if ( bHas ) {
@@ -111,8 +112,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Calculates tangents and bi-tangents for the given mesh
-bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
-{
+bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     // we assume that the mesh is still in the verbose vertex format where each face has its own set
     // of vertices and no vertices are shared between faces. Sadly I don't know any quick test to
     // assert() it here.
@@ -131,13 +131,12 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     // what we can check, though, is if the mesh has normals and texture coordinates. That's a requirement
-    if( pMesh->mNormals == NULL)
-    {
+    if( pMesh->mNormals == nullptr) {
         ASSIMP_LOG_ERROR("Failed to compute tangents; need normals");
         return false;
     }
-    if( configSourceUV >= AI_MAX_NUMBER_OF_TEXTURECOORDS || !pMesh->mTextureCoords[configSourceUV] )
-    {
+
+    if( configSourceUV >= AI_MAX_NUMBER_OF_TEXTURECOORDS || !pMesh->mTextureCoords[configSourceUV] ) {
         ASSIMP_LOG_ERROR((Formatter::format("Failed to compute tangents; need UV data in channel"),configSourceUV));
         return false;
     }
@@ -236,22 +235,20 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
     // create a helper to quickly find locally close vertices among the vertex array
     // FIX: check whether we can reuse the SpatialSort of a previous step
-    SpatialSort* vertexFinder = NULL;
+    SpatialSort* vertexFinder = nullptr;
     SpatialSort  _vertexFinder;
     float posEpsilon;
-    if (shared)
-    {
+    if (shared) {
         std::vector<std::pair<SpatialSort,float> >* avf;
         shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);
-        if (avf)
-        {
+        if (avf) {
             std::pair<SpatialSort,float>& blubb = avf->operator [] (meshIndex);
             vertexFinder = &blubb.first;
             posEpsilon = blubb.second;;
         }
     }
-    if (!vertexFinder)
-    {
+
+    if (!vertexFinder) {
         _vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
         vertexFinder = &_vertexFinder;
         posEpsilon = ComputePositionEpsilon(pMesh);
@@ -263,10 +260,10 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
     // in the second pass we now smooth out all tangents and bitangents at the same local position
     // if they are not too far off.
-    for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
-    {
-        if( vertexDone[a])
+    for( unsigned int a = 0; a < pMesh->mNumVertices; ++a ) {
+        if ( vertexDone[ a ] ) {
             continue;
+        }
 
         const aiVector3D& origPos = pMesh->mVertices[a];
         const aiVector3D& origNorm = pMesh->mNormals[a];
@@ -281,13 +278,14 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         closeVertices.push_back( a);
 
         // look among them for other vertices sharing the same normal and a close-enough tangent/bitangent
-        for( unsigned int b = 0; b < verticesFound.size(); b++)
-        {
+        for( unsigned int b = 0; b < verticesFound.size(); ++b ) {
             unsigned int idx = verticesFound[b];
-            if( vertexDone[idx])
+            if (vertexDone[idx]) {
                 continue;
-            if( meshNorm[idx] * origNorm < angleEpsilon)
+            }
+            if (meshNorm[idx] * origNorm < angleEpsilon) {
                 continue;
+            }
             if(  meshTang[idx] * origTang < fLimit)
                 continue;
             if( meshBitang[idx] * origBitang < fLimit)
@@ -300,8 +298,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
         // smooth the tangents and bitangents of all vertices that were found to be close enough
         aiVector3D smoothTangent( 0, 0, 0), smoothBitangent( 0, 0, 0);
-        for( unsigned int b = 0; b < closeVertices.size(); ++b)
-        {
+        for( unsigned int b = 0; b < closeVertices.size(); ++b) {
             smoothTangent += meshTang[ closeVertices[b] ];
             smoothBitangent += meshBitang[ closeVertices[b] ];
         }
@@ -309,11 +306,11 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         smoothBitangent.Normalize();
 
         // and write it back into all affected tangents
-        for( unsigned int b = 0; b < closeVertices.size(); ++b)
-        {
-            meshTang[ closeVertices[b] ] = smoothTangent;
-            meshBitang[ closeVertices[b] ] = smoothBitangent;
+        for( unsigned int b = 0; b < closeVertices.size(); ++b) {
+            meshTang[ closeVertices[ b] ] = smoothTangent;
+            meshBitang[ closeVertices[ b ] ] = smoothBitangent;
         }
     }
+
     return true;
 }

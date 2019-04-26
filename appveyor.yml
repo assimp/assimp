@@ -15,7 +15,7 @@ matrix:
     
 image:
   - Visual Studio 2013
-  - Previous Visual Studio 2015
+  #- Previous Visual Studio 2015
   - Previous Visual Studio 2017
     
 platform:

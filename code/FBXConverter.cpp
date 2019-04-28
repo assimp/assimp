@@ -68,18 +68,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 
 
-
-
- // MY DEBUG STUFF:
-
-#include <iostream>
-using std::cout;
-
-// END MY DEBUG STUF
-
-
-
-
 namespace Assimp {
     namespace FBX {
 

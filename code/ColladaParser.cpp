@@ -1645,8 +1645,11 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
                     pSampler.mUVChannel = mReader->getAttributeValue( attrTex);
                 //SkipElement();
 
+                // The line below was disabled by jere9309 for backwards compatibility. Disabling this makes the default 
+                // color match assimp version 3.1.
+                //
                 // as we've read texture, the color needs to be 1,1,1,1
-                pColor = aiColor4D(1.f, 1.f, 1.f, 1.f);
+                //pColor = aiColor4D(1.f, 1.f, 1.f, 1.f);
             }
             else if( IsElement( "technique"))
             {

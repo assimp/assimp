@@ -60,6 +60,10 @@ project "assimp"
     -- configuration { "windows" }
     -- -------------------------------------------------------------
 
+    buildoptions {
+      "/bigobj", -- Allow large object files for unity builds and template heavy objects
+    }
+
     -- common configuration settings
 
     dofile (_BUILD_DIR .. "/3rdparty_static_win.lua")

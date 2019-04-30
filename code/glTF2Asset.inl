@@ -1344,18 +1344,15 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
 
     id += suffix;
 
-    Asset::IdMap::iterator it = mUsedIds.find(id);
+    auto it = mUsedIds.find(id);
     if (it == mUsedIds.end())
         return id;
 
     std::vector<char> buffer;
     buffer.resize(id.size() + 16);
-    int offset = ai_snprintf(buffer.data(), buffer.size(), "%s_", id.c_str());
-    for (int i = 0; it != mUsedIds.end(); ++i) {
-        ai_snprintf(buffer.data() + offset, buffer.size() - offset, "%d", i);
-        id = buffer.data();
-        it = mUsedIds.find(id);
-    }
+    ai_snprintf(buffer.data(), buffer.size(), "%s_%d", id.c_str(), it->second);
+    it->second++;
+    id = buffer.data();
 
     return id;
 }

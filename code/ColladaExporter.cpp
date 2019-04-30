@@ -183,7 +183,12 @@ namespace {
                         ++futureKey;
                     }
 
-                    previousKey = --nextKey;
+                    nextKey = futureKey;
+                    if (nextKey==this->keys.begin()) {
+                        previousKey = &nodeDefaultKey;
+                    } else {
+                        previousKey = nextKey-1;
+                    }
                 }
 
                 ai_real coef;

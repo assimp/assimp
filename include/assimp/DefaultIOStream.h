@@ -75,6 +75,11 @@ public:
     /** Destructor public to allow simple deletion to close the file. */
     ~DefaultIOStream ();
 
+    
+    // -------------------------------------------------------------------
+    /// Get file name from stream
+    std::string GetFilename();
+
     // -------------------------------------------------------------------
     /// Read from stream
     size_t Read(void* pvBuffer,

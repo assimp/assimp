@@ -83,6 +83,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOStream.h>
 #include <assimp/DefaultIOSystem.h>
+#include <boost/filesystem/operations.hpp>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #   include "ValidateDataStructure.h"
@@ -653,7 +654,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         uint32_t fileSize = 0;
         if (fileIO)
         {
-            fileSize = static_cast<uint32_t>(fileIO->FileSize());
+            fileSize = boost::filesystem::file_size(pFile);
             pimpl->mIOHandler->Close( fileIO );
         }
 

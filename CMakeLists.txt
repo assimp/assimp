@@ -106,7 +106,7 @@ OPTION ( BUILD_DOCS
   OFF
 )
 OPTION( INJECT_DEBUG_POSTFIX
-  "Inject debug postfix in .a/.so lib names"
+  "Inject debug postfix in .a/.so/.dll lib names"
   ON
 )
 
@@ -127,12 +127,15 @@ if (WIN32)
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 endif()
 
-
 IF(MSVC)
   OPTION( ASSIMP_INSTALL_PDB
     "Install MSVC debug files."
     ON
   )
+  IF(NOT (MSVC_VERSION LESS 1900))
+    # Multibyte character set is deprecated since at least MSVC2015 (possibly earlier)
+    ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
+  ENDIF()
 ENDIF(MSVC)
 
 IF (BUILD_FRAMEWORK)
@@ -301,7 +304,9 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
   "Path the tool executables are installed to." )
 
-IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+get_cmake_property(is_multi_config GENERATOR_IS_MULTI_CONFIG)
+
+IF (is_multi_config OR (CMAKE_BUILD_TYPE STREQUAL "Debug"))
   SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfix for lib, samples and tools")
 ELSE()
   SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Debug Postfix for lib, samples and tools")
@@ -543,18 +548,22 @@ if(WIN32)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
     SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin64/")
     SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib64/")
-  elseif()
+  else()
     SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin32/")
     SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib32/")
   ENDIF()
 
-  IF(MSVC12)
-    SET(ASSIMP_MSVC_VERSION "vc120")
-  ELSEIF(MSVC14)
-    SET(ASSIMP_MSVC_VERSION "vc140")
-  ELSEIF(MSVC15)
-    SET(ASSIMP_MSVC_VERSION "vc141")
-  ENDIF(MSVC12)
+  IF(MSVC_TOOLSET_VERSION)
+    set(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
+  ELSE()
+    IF(MSVC12)
+      SET(ASSIMP_MSVC_VERSION "vc120")
+    ELSEIF(MSVC14)
+      SET(ASSIMP_MSVC_VERSION "vc140")
+    ELSEIF(MSVC15)
+      SET(ASSIMP_MSVC_VERSION "vc141")
+    ENDIF(MSVC12)
+  ENDIF()
 
   IF(MSVC12 OR MSVC14 OR MSVC15 )
     ADD_CUSTOM_TARGET(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)

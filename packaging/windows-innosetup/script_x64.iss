@@ -56,7 +56,7 @@ Source: "C:\Windows\SysWOW64\D3DX9_42.dll";       DestDir: "{app}\bin\x64"; Dest
 Source: "..\..\bin\release\assimp.exe";           DestDir: "{app}\bin\x64"; Components: tools
 
 ; Import libraries
-Source: "..\..\lib\release\assimp-vc140-mt.lib"; DestDir: "{app}\lib\x64"
+Source: "..\..\lib\release\assimp-vc141-mt.lib"; DestDir: "{app}\lib\x64"
 
 ; Samples
 Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples

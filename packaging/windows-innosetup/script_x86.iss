@@ -57,7 +57,7 @@ Source: "..\..\bin\release\assimp.exe";           DestDir: "{app}\bin\x86"; Comp
 
 
 ; Import libraries
-Source: "..\..\lib\release\assimp.lib"; DestDir: "{app}\lib\x86"
+Source: "..\..\lib\release\assimp-vc141-mt.lib"; DestDir: "{app}\lib\x86"
 
 ; Samples
 Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples

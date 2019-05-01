@@ -145,6 +145,10 @@ SET( Core_SRCS
   Assimp.cpp
 )
 
+IF(MSVC)
+  list(APPEND Core_SRCS "res/assimp.rc")
+ENDIF(MSVC)
+
 SET( Logging_SRCS
   ${HEADER_PATH}/DefaultLogger.hpp
   ${HEADER_PATH}/LogStream.hpp
@@ -841,12 +845,11 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-
 SET( Clipper_SRCS
   ../contrib/clipper/clipper.hpp
   ../contrib/clipper/clipper.cpp
 )
-SOURCE_GROUP( Clipper FILES ${Clipper_SRCS})
+SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
 
 SET( Poly2Tri_SRCS
   ../contrib/poly2tri/poly2tri/common/shapes.cc
@@ -861,7 +864,7 @@ SET( Poly2Tri_SRCS
   ../contrib/poly2tri/poly2tri/sweep/sweep_context.cc
   ../contrib/poly2tri/poly2tri/sweep/sweep_context.h
 )
-SOURCE_GROUP( Poly2Tri FILES ${Poly2Tri_SRCS})
+SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
 
 SET( unzip_SRCS
   ../contrib/unzip/crypt.h
@@ -870,7 +873,7 @@ SET( unzip_SRCS
   ../contrib/unzip/unzip.c
   ../contrib/unzip/unzip.h
 )
-SOURCE_GROUP( unzip FILES ${unzip_SRCS})
+SOURCE_GROUP(Contrib\\unzip FILES ${unzip_SRCS})
 
 SET( ziplib_SRCS
   ../contrib/zip/src/miniz.h
@@ -902,7 +905,7 @@ SET ( openddl_parser_SRCS
   ../contrib/openddlparser/include/openddlparser/DDLNode.h
   ../contrib/openddlparser/include/openddlparser/Value.h
 )
-SOURCE_GROUP( openddl_parser FILES ${openddl_parser_SRCS})
+SOURCE_GROUP( Contrib\\openddl_parser FILES ${openddl_parser_SRCS})
 
 SET ( open3dgc_SRCS
   ../contrib/Open3DGC/o3dgcAdjacencyInfo.h
@@ -935,7 +938,7 @@ SET ( open3dgc_SRCS
   ../contrib/Open3DGC/o3dgcVector.h
   ../contrib/Open3DGC/o3dgcVector.inl
 )
-SOURCE_GROUP( open3dgc FILES ${open3dgc_SRCS})
+SOURCE_GROUP( Contrib\\open3dgc FILES ${open3dgc_SRCS})
 
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
@@ -1046,6 +1049,10 @@ ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
 if( MSVC )
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
+  # CMake 3.12 added a variable for this
+  if(MSVC_TOOLSET_VERSION)
+    set(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
+  else()
   if( MSVC70 OR MSVC71 )
     set(MSVC_PREFIX "vc70")
   elseif( MSVC80 )
@@ -1060,8 +1067,11 @@ if( MSVC )
     set(MSVC_PREFIX "vc120")
   elseif( MSVC14 )
     set(MSVC_PREFIX "vc140")
+  elseif( MSVC15 )
+    set(MSVC_PREFIX "vc141")
   else()
     set(MSVC_PREFIX "vc150")
+  endif()
   endif()
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()

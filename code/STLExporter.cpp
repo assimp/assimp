@@ -127,7 +127,7 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
         mOutput.write((char *)&meshnum, 4);
 
         if (exportPointClouds) {
-
+            throw DeadlyExportError("This functionality is not yet implemented for binary output.");
         }
 
         for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {

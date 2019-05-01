@@ -66,6 +66,9 @@ namespace Assimp
         friend class ColladaLoader;
 
     protected:
+        /** Map for generic metadata as aiString */
+        typedef std::map<std::string, aiString> StringMetaData;
+
         /** Constructor from XML file */
         ColladaParser( IOSystem* pIOHandler, const std::string& pFile);
 
@@ -80,6 +83,15 @@ namespace Assimp
 
         /** Reads asset information such as coordinate system information and legal blah */
         void ReadAssetInfo();
+
+        /** Reads contributor information such as author and legal blah */
+        void ReadContributorInfo();
+
+        /** Reads generic metadata into provided map */
+        void ReadMetaDataItem(StringMetaData &metadata);
+
+        /** Convert underscore_seperated to CamelCase "authoring_tool" becomes "AuthoringTool" */
+        static void ToCamelCase(std::string &text);
 
         /** Reads the animation library */
         void ReadAnimationLibrary();
@@ -342,6 +354,9 @@ namespace Assimp
 
         /** Which is the up vector */
         enum { UP_X, UP_Y, UP_Z } mUpDirection;
+
+        /** Asset metadata (global for scene) */
+        StringMetaData mAssetMetaData;
 
         /** Collada file format version */
         Collada::FormatVersion mFormat;

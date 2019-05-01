@@ -49,7 +49,7 @@ Source: "WEB"; DestDir: "{app}"
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-Source: "..\..\bin\release\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x86"
+Source: "..\..\bin\release\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x86"
 Source: "..\..\bin\release\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DCompiler_42.dll";     DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DX9_42.dll";           DestDir: "{app}\bin\x86"; Components: tools

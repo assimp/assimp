@@ -49,8 +49,8 @@ Source: "WEB"; DestDir: "{app}"
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-Source: "..\..\bin\release\x86\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x86"
-Source: "..\..\bin\release\x86\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
+Source: "..\..\bin\release\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x86"
+Source: "..\..\bin\release\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DCompiler_42.dll";     DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DX9_42.dll";           DestDir: "{app}\bin\x86"; Components: tools
 Source: "..\..\bin\release\x86\assimp.exe";           DestDir: "{app}\bin\x86"; Components: tools
@@ -66,7 +66,7 @@ Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Comp
 Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 
 [Icons]
-Name: "{group}\Assimp Manual"; Filename: "{app}\doc\AssimpDoc.chm" ; Components: help
-Name: "{group}\Assimp Command Line Manual"; Filename: "{app}\doc\AssimpCmdDoc.chm"; Components: help
-Name: "{group}\AssimpView"; Filename: "{app}\bin\x64\assimp_view.exe"; Components: tools; Check: IsWin64
-Name: "{group}\AssimpView"; Filename: "{app}\bin\x86\assimp_view.exe"; Components: tools; Check: not IsWin64
+; Name: "{group}\Assimp Manual"; Filename: "{app}\doc\AssimpDoc.chm" ; Components: help
+; Name: "{group}\Assimp Command Line Manual"; Filename: "{app}\doc\AssimpCmdDoc.chm"; Components: help
+; Name: "{group}\AssimpView"; Filename: "{app}\bin\x64\assimp_view.exe"; Components: tools; Check: IsWin64
+; Name: "{group}\AssimpView"; Filename: "{app}\bin\x86\assimp_view.exe"; Components: tools; Check: not IsWin64

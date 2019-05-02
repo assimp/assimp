@@ -251,8 +251,8 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 
     // we have to check if color is default 0 with only one token
     if( !IsLineEnd( *m_DataIt ) ) {
-        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
-        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
+        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, pColor->g );
+        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, pColor->b );
     } else {
         pColor->g = r;
         pColor->b = r;

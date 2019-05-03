@@ -238,7 +238,11 @@ void ColladaExporter::WriteHeader()
     mOutput << startstr << "<contributor>" << endstr;
     PushTag();
 
-    aiMetadata* meta = mScene->mRootNode->mMetaData;
+    // If no Scene metadata, use root node metadata
+    aiMetadata* meta = mScene->mMetaData;
+    if (!meta)
+        meta = mScene->mRootNode->mMetaData;
+
     aiString value;
     if (!meta || !meta->Get("Author", value))
         mOutput << startstr << "<author>" << "Assimp" << "</author>" << endstr;
@@ -250,13 +254,39 @@ void ColladaExporter::WriteHeader()
     else
         mOutput << startstr << "<authoring_tool>" << XMLEscape(value.C_Str()) << "</authoring_tool>" << endstr;
 
-    //mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
-    //mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
+    if (meta)
+    {
+        if (meta->Get("Comments", value))
+            mOutput << startstr << "<comments>" << XMLEscape(value.C_Str()) << "</comments>" << endstr;
+        if (meta->Get("Copyright", value))
+            mOutput << startstr << "<copyright>" << XMLEscape(value.C_Str()) << "</copyright>" << endstr;
+        if (meta->Get("SourceData", value))
+            mOutput << startstr << "<source_data>" << XMLEscape(value.C_Str()) << "</source_data>" << endstr;
+    }
 
     PopTag();
     mOutput << startstr << "</contributor>" << endstr;
-    mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
+
+    if (!meta || !meta->Get("Created", value))
+        mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
+    else
+        mOutput << startstr << "<created>" << XMLEscape(value.C_Str()) << "</created>" << endstr;
+
+    // Modified date is always the date saved
     mOutput << startstr << "<modified>" << date_str << "</modified>" << endstr;
+
+    if (meta)
+    {
+        if (meta->Get("Keywords", value))
+            mOutput << startstr << "<keywords>" << XMLEscape(value.C_Str()) << "</keywords>" << endstr;
+        if (meta->Get("Revision", value))
+            mOutput << startstr << "<revision>" << XMLEscape(value.C_Str()) << "</revision>" << endstr;
+        if (meta->Get("Subject", value))
+            mOutput << startstr << "<subject>" << XMLEscape(value.C_Str()) << "</subject>" << endstr;
+        if (meta->Get("Title", value))
+            mOutput << startstr << "<title>" << XMLEscape(value.C_Str()) << "</title>" << endstr;
+    }
+
     mOutput << startstr << "<unit name=\"meter\" meter=\"" << scale << "\" />" << endstr;
     mOutput << startstr << "<up_axis>" << up_axis << "</up_axis>" << endstr;
     PopTag();

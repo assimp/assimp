@@ -53,7 +53,13 @@ build:
   project: Assimp.sln
   
 after_build:
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" iscc packaging\windows-innosetup\script.iss
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (
+        if "%platform%"=="x64" (
+            iscc packaging\windows-innosetup\script_x64.iss
+        ) else (
+            iscc packaging\windows-innosetup\script_x86.iss
+        )
+    )
   - 7z a assimp.7z bin\%CONFIGURATION%\* lib\%CONFIGURATION%\*
 
 test_script:

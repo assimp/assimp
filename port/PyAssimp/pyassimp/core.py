@@ -93,7 +93,7 @@ def _is_init_type(obj):
         return False
     tname = obj.__class__.__name__
     return not (tname[:2] == 'c_' or tname == 'Structure' \
-            or tname == 'POINTER') and not isinstance(obj,int)
+            or tname == 'POINTER') and not isinstance(obj, (int, str, bytes))
 
 def _init(self, target = None, parent = None):
     """

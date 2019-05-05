@@ -391,6 +391,39 @@ TEST_F(utObjImportExport, invalid_normals_uvs) {
     EXPECT_NE(nullptr, scene);
 }
 
+TEST_F(utObjImportExport, no_vt_just_vns) {
+    static const char *ObjModel =
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 10 0 0\n"
+		"v 0 10 0\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"f 10/10 11/11 12/12\n";
+
+    Assimp::Importer myImporter;
+    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    EXPECT_NE(nullptr, scene);
+}
+
 TEST_F( utObjImportExport, mtllib_after_g ) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_mtllib_after_g.obj", aiProcess_ValidateDataStructure );

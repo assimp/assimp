@@ -140,6 +140,7 @@ void FBXImporter::SetupProperties(const Importer* pImp)
     settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
     settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
     settings.useLegacyEmbeddedTextureNaming = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING, false);
+    settings.removeEmptyBones = pImp->GetPropertyBool(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -184,7 +185,7 @@ void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         Document doc(parser,settings);
 
         // convert the FBX DOM to aiScene
-        ConvertToAssimpScene(pScene,doc);
+        ConvertToAssimpScene(pScene,doc, settings.removeEmptyBones);
 
         std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
     }

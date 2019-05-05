@@ -451,13 +451,6 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
             if (type == aiPrimitiveType_POINT) {
                 ASSIMP_LOG_ERROR("Obj: Separator unexpected in point statement");
             }
-            if (iPos == 0) {
-                //if there are no texture coordinates in the file, but normals
-                if (!vt && vn) {
-                    iPos = 1;
-                    iStep++;
-                }
-            }
             iPos++;
         } else if( IsSpaceOrNewLine( *m_DataIt ) ) {
             iPos = 0;
@@ -473,6 +466,9 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
             while ( ( tmp = tmp / 10 ) != 0 ) {
                 ++iStep;
             }
+
+            if (iPos == 1 && !vt && vn)
+                iPos = 2; // skip texture coords for normals if there are no tex coords
 
             if ( iVal > 0 ) {
                 // Store parsed index

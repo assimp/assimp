@@ -178,7 +178,8 @@ inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline
-void ValidateDSProcess::DoValidationWithNameCheck(T** array, unsigned int size, const char* firstName, const char* secondName) {
+void ValidateDSProcess::DoValidationWithNameCheck(T** array, unsigned int size, const char* firstName,
+        const char* secondName) {
     // validate all entries
     DoValidationEx(array,size,firstName,secondName);
 
@@ -198,9 +199,8 @@ void ValidateDSProcess::DoValidationWithNameCheck(T** array, unsigned int size, 
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void ValidateDSProcess::Execute( aiScene* pScene)
-{
-    this->mScene = pScene;
+void ValidateDSProcess::Execute( aiScene* pScene) {
+    mScene = pScene;
     ASSIMP_LOG_DEBUG("ValidateDataStructureProcess begin");
 
     // validate the node graph of the scene
@@ -517,8 +517,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh, const aiBone* pBone,float
     this->Validate(&pBone->mName);
 
     if (!pBone->mNumWeights)    {
-    //    ReportError("aiBone::mNumWeights is zero");
-
+        //ReportError("aiBone::mNumWeights is zero");
     }
 
     // check whether all vertices affected by this bone are valid

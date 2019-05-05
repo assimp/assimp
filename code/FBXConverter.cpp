@@ -388,6 +388,7 @@ namespace Assimp {
                 break;
             default:
                 ai_assert(false);
+                break;
             }
         }
 
@@ -978,7 +979,9 @@ namespace Assimp {
             unsigned int epcount = 0;
             for (unsigned i = 0; i < indices.size(); i++)
             {
-                if (indices[i] < 0) epcount++;
+                if (indices[i] < 0) {
+                    epcount++;
+                }
             }
             unsigned int pcount = static_cast<unsigned int>( indices.size() );
             unsigned int scount = out_mesh->mNumFaces = pcount - epcount;
@@ -1408,9 +1411,9 @@ namespace Assimp {
 
                     const WeightIndexArray& indices = cluster->GetIndices();
 
-                    /*if (indices.empty()) {
+                    if (indices.empty() && mRemoveEmptyBones ) {
                         continue;
-                    }*/
+                    }
 
                     const MatIndexArray& mats = geo.GetMaterialIndices();
 
@@ -1460,14 +1463,14 @@ namespace Assimp {
                             }
                         }
                     }
-
+                    
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    //if (ok) {
+                    if (ok && mRemoveEmptyBones) {
                         ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                             count_out_indices, node_global_transform);
-                    //}
+                    }
                 }
             }
             catch (std::exception&) {

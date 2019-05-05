@@ -112,7 +112,7 @@ public:
     };
 
 public:
-    FBXConverter(aiScene* out, const Document& doc);
+    FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones );
     ~FBXConverter();
 
 private:
@@ -453,6 +453,8 @@ private:
 
     aiScene* const out;
     const FBX::Document& doc;
+
+    bool mRemoveEmptyBones;
 };
 
 }

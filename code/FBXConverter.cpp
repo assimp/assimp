@@ -76,7 +76,7 @@ namespace Assimp {
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-        FBXConverter::FBXConverter(aiScene* out, const Document& doc)
+        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones)
         : defaultMaterialIndex()
         , lights()
         , cameras()
@@ -89,7 +89,8 @@ namespace Assimp {
         , mNodeNames()
         , anim_fps()
         , out(out)
-        , doc(doc) {
+        , doc(doc)
+        , mRemoveEmptyBones( removeEmptyBones ) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.
@@ -1407,9 +1408,9 @@ namespace Assimp {
 
                     const WeightIndexArray& indices = cluster->GetIndices();
 
-                    if (indices.empty()) {
+                    /*if (indices.empty()) {
                         continue;
-                    }
+                    }*/
 
                     const MatIndexArray& mats = geo.GetMaterialIndices();
 
@@ -1439,13 +1440,11 @@ namespace Assimp {
 
                                 if (index_out_indices.back() == no_index_sentinel) {
                                     index_out_indices.back() = out_indices.size();
-
                                 }
 
                                 if (no_mat_check) {
                                     out_indices.push_back(out_idx[i]);
-                                }
-                                else {
+                                } else {
                                     // this extra lookup is in O(logn), so the entire algorithm becomes O(nlogn)
                                     const std::vector<unsigned int>::iterator it = std::lower_bound(
                                         outputVertStartIndices->begin(),
@@ -1465,10 +1464,10 @@ namespace Assimp {
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    if (ok) {
+                    //if (ok) {
                         ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                             count_out_indices, node_global_transform);
-                    }
+                    //}
                 }
             }
             catch (std::exception&) {
@@ -3525,9 +3524,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         }
 
         // ------------------------------------------------------------------------------------------------
-        void ConvertToAssimpScene(aiScene* out, const Document& doc)
+        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones)
         {
-            FBXConverter converter(out, doc);
+            FBXConverter converter(out, doc, removeEmptyBones);
         }
 
     } // !FBX

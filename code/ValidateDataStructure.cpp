@@ -46,8 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    the data structure returned by Assimp.
  */
 
-
-
 // internal headers
 #include "ValidateDataStructure.h"
 #include <assimp/BaseImporter.h>
@@ -110,8 +108,8 @@ void ValidateDSProcess::ReportWarning(const char* msg,...)
 }
 
 // ------------------------------------------------------------------------------------------------
-inline int HasNameMatch(const aiString& in, aiNode* node)
-{
+inline
+int HasNameMatch(const aiString& in, aiNode* node) {
     int result = (node->mName == in ? 1 : 0 );
     for (unsigned int i = 0; i < node->mNumChildren;++i)    {
         result += HasNameMatch(in,node->mChildren[i]);
@@ -121,9 +119,8 @@ inline int HasNameMatch(const aiString& in, aiNode* node)
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline void ValidateDSProcess::DoValidation(T** parray, unsigned int size,
-    const char* firstName, const char* secondName)
-{
+inline
+void ValidateDSProcess::DoValidation(T** parray, unsigned int size, const char* firstName, const char* secondName) {
     // validate all entries
     if (size)
     {
@@ -516,13 +513,12 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ValidateDSProcess::Validate( const aiMesh* pMesh,
-    const aiBone* pBone,float* afSum)
-{
+void ValidateDSProcess::Validate( const aiMesh* pMesh, const aiBone* pBone,float* afSum) {
     this->Validate(&pBone->mName);
 
     if (!pBone->mNumWeights)    {
-        ReportError("aiBone::mNumWeights is zero");
+    //    ReportError("aiBone::mNumWeights is zero");
+
     }
 
     // check whether all vertices affected by this bone are valid
@@ -563,9 +559,6 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
     else {
     	ReportError("aiAnimation::mNumChannels is 0. At least one node animation channel must be there.");
     }
-
-    // Animation duration is allowed to be zero in cases where the anim contains only a single key frame.
-    // if (!pAnimation->mDuration)this->ReportError("aiAnimation::mDuration is zero");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -746,8 +739,9 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
                     "AI_MATKEY_SHININESS_STRENGTH key is 0.0");
             }
             break;
-        default: ;
-        };
+        default:
+            break;
+        }
     }
 
     if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp) && (!fTemp || fTemp > 1.01)) {

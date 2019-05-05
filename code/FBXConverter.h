@@ -79,9 +79,10 @@ class Document;
 /** 
  *  Convert a FBX #Document to #aiScene
  *  @param out Empty scene to be populated
- *  @param doc Parsed FBX document 
+ *  @param doc Parsed FBX document
+ *  @param removeEmptyBones Will remove bones, which do not have any references to vertices.
  */
-void ConvertToAssimpScene(aiScene* out, const Document& doc);
+void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones );
 
 /** Dummy class to encapsulate the conversion process */
 class FBXConverter {

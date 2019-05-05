@@ -804,6 +804,18 @@ ADD_ASSIMP_IMPORTER( MMD
   MMDVmdParser.h
 )
 
+# Workaround for issue #2406 - force problematic large file to be optimized to prevent string table overflow error
+# Used -Os instead of -O2 as previous issues had mentioned, since -Os is roughly speaking -O2, excluding any
+# optimizations that take up extra space. Given that the issue is a string table overflowing, -Os seemed appropriate
+# Also, I'm not positive if both link & compile flags are needed, but this hopefully ensures that the issue should not
+# recur for edge cases such as static builds.
+if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
+  message("-- Applying MinGW StepFileGen1.cpp Debug Workaround")
+  SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES COMPILE_FLAGS -Os )
+  SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES LINK_FLAGS -Os )
+  SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
+endif()
+
 ADD_ASSIMP_IMPORTER( STEP
     STEPFile.h
     Importer/StepFile/StepFileImporter.h

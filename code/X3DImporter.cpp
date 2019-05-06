@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -47,11 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 // Header files, Assimp.
 #include <assimp/DefaultIOSystem.h>
-#include "fast_atof.h"
+#include <assimp/fast_atof.h>
 #include "FIReader.hpp"
 
 // Header files, stdlib.
@@ -95,8 +96,8 @@ struct WordIterator: public std::iterator<std::input_iterator_tag, const char*> 
         end_ = other.end_;
         return *this;
     }
-    bool operator==(WordIterator &other) const { return start_ == other.start_; }
-    bool operator!=(WordIterator &other) const { return start_ != other.start_; }
+    bool operator==(const WordIterator &other) const { return start_ == other.start_; }
+    bool operator!=(const WordIterator &other) const { return start_ != other.start_; }
     WordIterator &operator++() {
         start_ += strcspn(start_, whitespace);
         start_ += strspn(start_, whitespace);
@@ -558,7 +559,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrF(const int pAttrIdx, std::vector
 
         WordIterator wordItBegin(val, val + strlen(val));
         WordIterator wordItEnd;
-        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atof(match); });
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return static_cast<float>(atof(match)); });
     }
 }
 

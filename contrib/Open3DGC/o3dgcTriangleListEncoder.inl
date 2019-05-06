@@ -125,7 +125,7 @@ namespace o3dgc
         }
         return true;
     }
-    inline bool IsCase6(long degree, long numIndices, const long * const ops, const long * const indices)
+    inline bool IsCase6(long degree, long numIndices, const long * const ops, const long * const /*indices*/)
     {
         // ops: 0000000 indices: 
         if (numIndices!= 0) 

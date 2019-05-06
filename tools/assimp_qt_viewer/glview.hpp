@@ -1,19 +1,67 @@
-﻿/// \file   glview.hpp
-/// \brief  OpenGL visualisation.
-/// \author smal.root@gmail.com
-/// \date   2016
+﻿/*
+---------------------------------------------------------------------------
+Open Asset Import Library (assimp)
+---------------------------------------------------------------------------
+
+Copyright (c) 2006-2018, assimp team
+
+
+
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
+conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
 
 #pragma once
 
 // Header files, Qt.
-#include <QtOpenGL>
+#include <QMap>
+#if ASSIMP_QT4_VIEWER
+#	include <QtOpenGL>
+#else
+#	include <QOpenGLWidget>
+#	include <QOpenGLFunctions>
+#endif // ASSIMP_QT4_VIEWER
 
 // Header files Assimp
 #include <assimp/scene.h>
 
 /// \class CGLView
 /// Class which hold and render scene.
+#if ASSIMP_QT4_VIEWER
 class CGLView : public QGLWidget
+#else
+class CGLView : public QOpenGLWidget, protected QOpenGLFunctions
+#endif // ASSIMP_QT4_VIEWER
 {
 	Q_OBJECT
 
@@ -139,11 +187,16 @@ public:
 
 private:
 
+#if !ASSIMP_QT4_VIEWER
+	// Qt5 widget has another behavior, so you must to know that you already made context are current. Yes, its a dirty hack. Better decision are welcome.
+	bool mGLContext_Current;///< Widget's GL-context made current.
+#endif // ASSIMP_QT4_VIEWER
 	// Scene
 	const aiScene* mScene = nullptr;///< Copy of pointer to scene (\ref aiScene).
 	SBBox mScene_BBox;///< Bounding box of scene.
 	aiVector3D mScene_Center;///< Coordinates of center of the scene.
 	bool mScene_DrawBBox = false;///< Flag which control drawing scene BBox.
+	bool mScene_AxesEnabled = true;///< Flag which control drawing axes of the coordinate system.
 	// Meshes
 	size_t mHelper_Mesh_Quantity = 0;///< Quantity of meshes in scene.
 	SHelper_Mesh** mHelper_Mesh = nullptr;///< Array of pointers to helper objects for drawing mesh. Sequence of meshes are equivalent to \ref aiScene::mMeshes.
@@ -155,7 +208,6 @@ private:
 	GLdouble mCamera_Viewport_AspectRatio;///< Specifies the aspect ratio that determines the field of view in the x direction. The aspect ratio is the ratio of x (width) to y (height).
 	// Lighting
 	bool mLightingEnabled = false;///< If true then OpenGL lighting is enabled (glEnable(GL_LIGHTING)), if false - disabled.
-	// Textures
 	///TODO: map is goooood, but not for case when one image can be used in different materials with difference in: texture transformation, targeting of the
 	/// texture (ambient or emission, or even height map), texture properties.
 	QMap<QString, GLuint> mTexture_IDMap;///< Map image filenames to textures ID's.
@@ -249,13 +301,17 @@ private:
 	void Draw_BBox(const SBBox& pBBox);
 
 	/********************************************************************/
-	/*********************** Overrided functions ************************/
+	/*********************** Override functions ************************/
 	/********************************************************************/
 
 protected:
+
+	/// \fn void drawCoordSystem()
+	/// Draw axes of the coordinate system.
     void drawCoordSystem();
+
 	/// \fn void initializeGL() override
-	/// Overrided function for initialise OpenGL.
+	/// Override function to initialise OpenGL.
 	void initializeGL() override;
 
 	/// \fn void resizeGL(int pWidth, int pHeight) override
@@ -264,7 +320,7 @@ protected:
 	void resizeGL(int pWidth, int pHeight) override;
 
 	/// \fn void paintGL() override
-	/// Overrided function for rendering.
+	/// Override function for rendering.
 	void paintGL() override;
 
 public:
@@ -306,6 +362,11 @@ public:
 	/// \param [in] pEnable - if true then enable textures, false - disable textures.
 	void Enable_Textures(const bool pEnable);
 
+	/// \fn void Enable_Axes(const bool pEnable)
+	/// Control axes drawing.
+	/// \param [in] pEnable - if true then enable axes, false - disable axes.
+	void Enable_Axes(const bool pEnable) { this->mScene_AxesEnabled = pEnable; }
+
 	/********************************************************************/
 	/******************** Lighting control functions ********************/
 	/********************************************************************/
@@ -343,19 +404,23 @@ public:
 	/// \param [in] pCamera_Index - index of the camera (\ref aiScene::mCameras).
 	void Camera_Set(const size_t pCameraNumber);
 
-	/// \fn void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+	/// \fn void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial)
 	/// Rotate scene around axisees.
 	/// \param [in] pAngle_X - specifies the angle of rotation around axis oX, in degrees.
 	/// \param [in] pAngle_Y - specifies the angle of rotation around axis oY, in degrees.
 	/// \param [in] pAngle_Z - specifies the angle of rotation around axis oZ, in degrees.
-	void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z);
+	/// \param [in] pMatrix_Rotation_Initial - matrix from which calculates new transformation matrix. If not set (equal to nullptr) then current transformation matrix
+	/// will be used.
+	void Camera_RotateScene(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial = nullptr);
 
-	/// \fn void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z)
+	/// \fn void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial = nullptr)
 	/// Rotate camera around axisees.
 	/// \param [in] pAngle_X - specifies the angle of rotation around axis oX, in degrees.
 	/// \param [in] pAngle_Y - specifies the angle of rotation around axis oY, in degrees.
 	/// \param [in] pAngle_Z - specifies the angle of rotation around axis oZ, in degrees.
-	void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z);
+	/// \param [in] pMatrix_Rotation_Initial - matrix from which calculates new transformation matrix. If not set (equal to nullptr) then current transformation matrix
+	/// will be used.
+	void Camera_Rotate(const GLfloat pAngle_X, const GLfloat pAngle_Y, const GLfloat pAngle_Z, const aiMatrix4x4* pMatrix_Rotation_Initial = nullptr);
 
 	/// \fn void Camera_Translate(const size_t pTranslate_X, const size_t pTranslate_Y, const size_t pTranslate_Z)
 	/// Translate camera along axises. In local coordinates.
@@ -363,6 +428,13 @@ public:
 	/// \param [in] pTranslate_Y - specifies the Y coordinate of translation vector.
 	/// \param [in] pTranslate_Z - specifies the Z coordinate of translation vector.
 	void Camera_Translate(const GLfloat pTranslate_X, const GLfloat pTranslate_Y, const GLfloat pTranslate_Z);
+
+	/// \fn void Camera_Matrix(aiMatrix4x4& pRotation_Camera, aiMatrix4x4& pRotation_Scene, aiVector3D& pTranslation_Camera)
+	/// Return data about camera position in world.
+	/// \param [out] pRotation_Camera - rotation matrix which set rotation angles of the scene around camera.
+	/// \param [out] pRotation_Scene - rotation matrix which set rotation angles of the scene around own center.
+	/// \param [out] pTranslation_Camera - translation vector from camera to the scene.
+	void Camera_Matrix(aiMatrix4x4& pRotation_Camera, aiMatrix4x4& pRotation_Scene, aiVector3D& pTranslation_Camera);
 
 signals:
 

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -41,6 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  AssxmlExporter.cpp
  *  ASSXML exporter main code
  */
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+#ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
+
 #include <stdarg.h>
 #include <assimp/version.h>
 #include "ProcessHelper.h"
@@ -56,9 +61,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <time.h>
 #include <stdio.h>
-
-#ifndef ASSIMP_BUILD_NO_EXPORT
-#ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
 
 using namespace Assimp;
 
@@ -182,8 +184,13 @@ static std::string encodeXML(const std::string& data) {
 static
 void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
     time_t tt = ::time( NULL );
-    tm* p     = ::gmtime( &tt );
-    ai_assert( nullptr != p );
+#if _WIN32
+    tm* p = gmtime(&tt);
+#else
+    struct tm now;
+    tm* p = gmtime_r(&tt, &now);
+#endif
+    ai_assert(nullptr != p);
 
     // write header
     std::string header(
@@ -548,8 +555,6 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
                             mesh->mNormals[n].z);
                     }
                 }
-                else {
-                }
                 ioprintf(io,"\t\t</Normals>\n");
             }
 
@@ -631,7 +636,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
 
 } // end of namespace AssxmlExport
 
-void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
     IOStream * out = pIOSystem->Open( pFile, "wt" );
     if (!out) return;

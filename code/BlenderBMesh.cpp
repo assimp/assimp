@@ -52,7 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp
 {
-    template< > const std::string LogFunctions< BlenderBMeshConverter >::log_prefix = "BLEND_BMESH: ";
+    template< > const char* LogFunctions< BlenderBMeshConverter >::Prefix()
+    {
+        static auto prefix = "BLEND_BMESH: ";
+        return prefix;
+    }
 }
 
 using namespace Assimp;

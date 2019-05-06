@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -49,8 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "Q3DLoader.h"
-#include "StreamReader.h"
-#include "fast_atof.h"
+#include <assimp/StreamReader.h>
+#include <assimp/fast_atof.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
@@ -124,7 +125,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
     }
 
     // Print the file format version
-    DefaultLogger::get()->info("Quick3D File format version: " +
+    ASSIMP_LOG_INFO_F("Quick3D File format version: ",
         std::string(&((const char*)stream.GetPtr())[8],2));
 
     // ... an store it
@@ -301,13 +302,14 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
         case 't':
 
             pScene->mNumTextures = numTextures;
-            if (!numTextures)break;
-            pScene->mTextures    = new aiTexture*[pScene->mNumTextures];
+            if (!numTextures) {
+                break;
+            }
+            pScene->mTextures = new aiTexture*[pScene->mNumTextures];
             // to make sure we won't crash if we leave through an exception
             ::memset(pScene->mTextures,0,sizeof(void*)*pScene->mNumTextures);
-            for (unsigned int i = 0; i < pScene->mNumTextures; ++i)
-            {
-                aiTexture* tex = pScene->mTextures[i] = new aiTexture();
+            for (unsigned int i = 0; i < pScene->mNumTextures; ++i) {
+                aiTexture* tex = pScene->mTextures[i] = new aiTexture;
 
                 // skip the texture name
                 while (stream.GetI1());
@@ -316,15 +318,16 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
                 tex->mWidth  = (unsigned int)stream.GetI4();
                 tex->mHeight = (unsigned int)stream.GetI4();
 
-                if (!tex->mWidth || !tex->mHeight)
+                if (!tex->mWidth || !tex->mHeight) {
                     throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
+                }
 
                 unsigned int mul = tex->mWidth * tex->mHeight;
                 aiTexel* begin = tex->pcData = new aiTexel[mul];
-                aiTexel* const end = & begin [mul];
+                aiTexel* const end = & begin[mul-1] +1;
 
-                for (;begin != end; ++begin)
-                {
+
+                for (;begin != end; ++begin) {
                     begin->r = stream.GetI1();
                     begin->g = stream.GetI1();
                     begin->b = stream.GetI1();
@@ -412,7 +415,7 @@ outer:
     // If we have no materials loaded - generate a default mat
     if (materials.empty())
     {
-        DefaultLogger::get()->info("Quick3D: No material found, generating one");
+        ASSIMP_LOG_INFO("Quick3D: No material found, generating one");
         materials.push_back(Material());
         materials.back().diffuse  = fgColor ;
     }
@@ -432,7 +435,7 @@ outer:
         {
             if ((*fit).mat >= materials.size())
             {
-                DefaultLogger::get()->warn("Quick3D: Material index overflow");
+                ASSIMP_LOG_WARN("Quick3D: Material index overflow");
                 (*fit).mat = 0;
             }
             if (fidx[(*fit).mat].empty())++pScene->mNumMeshes;
@@ -527,7 +530,7 @@ outer:
             {
                 if (face.indices[n] >= m.verts.size())
                 {
-                    DefaultLogger::get()->warn("Quick3D: Vertex index overflow");
+                    ASSIMP_LOG_WARN("Quick3D: Vertex index overflow");
                     face.indices[n] = 0;
                 }
 
@@ -560,7 +563,7 @@ outer:
                     {
                         if (face.uvindices[n] >= m.uv.size())
                         {
-                            DefaultLogger::get()->warn("Quick3D: Texture coordinate index overflow");
+                            ASSIMP_LOG_WARN("Quick3D: Texture coordinate index overflow");
                             face.uvindices[n] = 0;
                         }
                         *uv = m.uv[face.uvindices[n]];

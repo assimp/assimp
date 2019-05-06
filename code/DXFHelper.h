@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -46,35 +47,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_DXFHELPER_H
 #define INCLUDED_DXFHELPER_H
 
-#include "LineSplitter.h"
-#include "TinyFormatter.h"
-#include "StreamReader.h"
-#include "fast_atof.h"
+#include <assimp/LineSplitter.h>
+#include <assimp/TinyFormatter.h>
+#include <assimp/StreamReader.h>
+#include <assimp/fast_atof.h>
 #include <vector>
 #include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
-    namespace DXF {
-
+namespace DXF {
 
 // read pairs of lines, parse group code and value and provide utilities
 // to convert the data to the target data type.
-class LineReader
-{
-
+// do NOT skip empty lines. In DXF files, they count as valid data.
+class LineReader {
 public:
-
     LineReader(StreamReaderLE& reader)
-         // do NOT skip empty lines. In DXF files, they count as valid data.
-        : splitter(reader,false,true)
-        , groupcode( 0 )
-        , value()
-        , end()
-    {
+    : splitter(reader,false,true)
+    , groupcode( 0 )
+    , value()
+    , end() {
+        // empty
     }
-
-public:
-
 
     // -----------------------------------------
     bool Is(int gc, const char* what) const {
@@ -101,8 +95,6 @@ public:
         return !((bool)*this);
     }
 
-public:
-
     // -----------------------------------------
     unsigned int ValueAsUnsignedInt() const {
         return strtoul10(value.c_str());
@@ -117,8 +109,6 @@ public:
     float ValueAsFloat() const {
         return fast_atof(value.c_str());
     }
-
-public:
 
     // -----------------------------------------
     /** pseudo-iterator increment to advance to the next (groupcode/value) pair */
@@ -145,7 +135,7 @@ public:
                 for(;splitter->length() && splitter->at(0) != '}'; splitter++, cnt++);
 
                 splitter++;
-                DefaultLogger::get()->debug((Formatter::format("DXF: skipped over control group ("),cnt," lines)"));
+                ASSIMP_LOG_DEBUG((Formatter::format("DXF: skipped over control group ("),cnt," lines)"));
             }
         } catch(std::logic_error&) {
             ai_assert(!splitter);
@@ -168,21 +158,18 @@ public:
     }
 
 private:
-
     LineSplitter splitter;
     int groupcode;
     std::string value;
     int end;
 };
 
-
-
 // represents a POLYLINE or a LWPOLYLINE. or even a 3DFACE The data is converted as needed.
-struct PolyLine
-{
+struct PolyLine {
     PolyLine()
-        : flags()
-    {}
+    : flags() {
+        // empty
+    }
 
     std::vector<aiVector3D> positions;
     std::vector<aiColor4D>  colors;
@@ -194,14 +181,15 @@ struct PolyLine
     std::string desc;
 };
 
-
 // reference to a BLOCK. Specifies its own coordinate system.
-struct InsertBlock
-{
+struct InsertBlock {
     InsertBlock()
-        : scale(1.f,1.f,1.f)
-        , angle()
-    {}
+    : pos()
+    , scale(1.f,1.f,1.f)
+    , angle()
+    , name() {
+        // empty
+    }
 
     aiVector3D pos;
     aiVector3D scale;
@@ -228,9 +216,7 @@ struct FileData
     std::vector<Block> blocks;
 };
 
+}
+} // Namespace Assimp
 
-
-
-
-}}
 #endif

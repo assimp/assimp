@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -45,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace Assimp;
 
@@ -52,7 +54,7 @@ class ut3DSImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", aiProcess_ValidateDataStructure );
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
         return nullptr != scene;
 #else
@@ -64,3 +66,11 @@ public:
 TEST_F( ut3DSImportExport, import3DSFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+TEST_F( ut3DSImportExport, import3DSformatdetection) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/testFormatDetection", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+

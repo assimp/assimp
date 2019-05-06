@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -100,8 +101,11 @@ TEST_F(VTAdjacencyTest, smallDataSet)
 
     mesh.mFaces = new aiFace[3];
     mesh.mFaces[0].mIndices = new unsigned int[3];
+    mesh.mFaces[0].mNumIndices = 3;
     mesh.mFaces[1].mIndices = new unsigned int[3];
+    mesh.mFaces[1].mNumIndices = 3;
     mesh.mFaces[2].mIndices = new unsigned int[3];
+    mesh.mFaces[2].mNumIndices = 3;
 
     mesh.mFaces[0].mIndices[0] = 1;
     mesh.mFaces[0].mIndices[1] = 3;

@@ -70,17 +70,17 @@ public final class AiNodeAnim {
     /**
      * Size of one position key entry.
      */
-    private static final int POS_KEY_SIZE = Jassimp.NATIVE_AIVEKTORKEY_SIZE;
+    private final int POS_KEY_SIZE = Jassimp.NATIVE_AIVEKTORKEY_SIZE;
     
     /**
      * Size of one rotation key entry.
      */
-    private static final int ROT_KEY_SIZE = Jassimp.NATIVE_AIQUATKEY_SIZE;
+    private final int ROT_KEY_SIZE = Jassimp.NATIVE_AIQUATKEY_SIZE;
     
     /**
      * Size of one scaling key entry.
      */
-    private static final int SCALE_KEY_SIZE = Jassimp.NATIVE_AIVEKTORKEY_SIZE;
+    private final int SCALE_KEY_SIZE = Jassimp.NATIVE_AIVEKTORKEY_SIZE;
     
     
     /**

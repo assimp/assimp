@@ -9,7 +9,12 @@
 #include "irrString.h"
 #include "irrArray.h"
 
-using namespace Assimp;
+#include <cassert>
+#include <stdlib.h>    
+#include <cctype>
+#include <cstdint>
+//using namespace Assimp;
+
 
 #ifdef _DEBUG
 #define IRR_DEBUGPRINT(x) printf((x));
@@ -160,7 +165,8 @@ public:
 			return 0;
 
 		core::stringc c = attr->Value.c_str();
-		return fast_atof(c.c_str());
+        return static_cast<float>(atof(c.c_str()));
+        //return fast_atof(c.c_str());
 	}
 
 
@@ -172,7 +178,8 @@ public:
 			return 0;
 
 		core::stringc c = attrvalue;
-		return fast_atof(c.c_str());
+        return static_cast<float>(atof(c.c_str()));
+		//return fast_atof(c.c_str());
 	}
 
 
@@ -426,7 +433,7 @@ private:
 			++P;
 
     // remove trailing whitespace, if any
-    while( isspace( P[-1]))
+    while( std::isspace( P[-1]))
       --P;
 
 		NodeName = core::string<char_type>(pBeginClose, (int)(P - pBeginClose));
@@ -664,12 +671,9 @@ private:
 			TextData = new char_type[sizeWithoutHeader];
 
 			// MSVC debugger complains here about loss of data ...
-
-
-			// FIXME - gcc complains about 'shift width larger than width of type'
-			// for T == unsigned long. Avoid it by messing around volatile ..
-			volatile unsigned int c = 3;
-			const src_char_type cc = (src_char_type)((((uint64_t)1u << (sizeof( char_type)<<c)) - 1));
+			size_t numShift = sizeof( char_type) * 8;
+			assert(numShift < 64);
+			const src_char_type cc = (src_char_type)(((uint64_t(1u) << numShift) - 1));
 			for (int i=0; i<sizeWithoutHeader; ++i)
 				TextData[i] = char_type( source[i] & cc); 
 

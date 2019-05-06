@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -78,7 +79,7 @@ namespace Assimp
 		if(!mReader->isEmptyElement()) \
 			ParseNode_Metadata(pNE, pMetaName);/* in that case node element will be added to child elements list of current node. */ \
 		else \
-			NodeElement_Cur->Child.push_back(pNE);/* else - add element to child list manualy */ \
+			NodeElement_Cur->Child.push_back(pNE);/* else - add element to child list manually */ \
 	 \
 		NodeElement_List.push_back(pNE);/* add new element to elements list. */ \
 	}/* if(!pUSE_Var.empty()) else */ \
@@ -105,7 +106,7 @@ bool X3DImporter::ParseHelper_CheckRead_X3DMetadataObject()
 	return true;
 }
 
-void X3DImporter::ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& pNodeName)
+void X3DImporter::ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& /*pNodeName*/)
 {
 	ParseHelper_Node_Enter(pParentElement);
 	MACRO_NODECHECK_METADATA(mReader->getNodeName());

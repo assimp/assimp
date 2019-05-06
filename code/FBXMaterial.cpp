@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
-#include "ByteSwapper.h"
+#include <assimp/ByteSwapper.h>
+
+#include <algorithm> // std::transform
+#include "FBXUtil.h"
 
 namespace Assimp {
 namespace FBX {
@@ -81,11 +85,12 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     std::string templateName;
 
-    const char* const sh = shading.c_str();
-    if(!strcmp(sh,"phong")) {
+    // lower-case shading because Blender (for example) writes "Phong"
+    std::transform(shading.begin(), shading.end(), shading.begin(), ::tolower);
+    if(shading == "phong") {
         templateName = "Material.FbxSurfacePhong";
     }
-    else if(!strcmp(sh,"lambert")) {
+    else if(shading == "lambert") {
         templateName = "Material.FbxSurfaceLambert";
     }
     else {
@@ -202,6 +207,20 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 
     props = GetPropertyTable(doc,"Texture.FbxFileTexture",element,sc);
 
+    // 3DS Max and FBX SDK use "Scaling" and "Translation" instead of "ModelUVScaling" and "ModelUVTranslation". Use these properties if available.
+    bool ok;
+    const aiVector3D& scaling = PropertyGet<aiVector3D>(*props, "Scaling", ok);
+    if (ok) {
+        uvScaling.x = scaling.x;
+        uvScaling.y = scaling.y;
+    }
+
+    const aiVector3D& trans = PropertyGet<aiVector3D>(*props, "Translation", ok);
+    if (ok) {
+        uvTrans.x = trans.x;
+        uvTrans.y = trans.y;
+    }
+
     // resolve video links
     if(doc.Settings().readTextures) {
         const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
@@ -291,40 +310,58 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
 
     if(FileName) {
         fileName = ParseTokenAsString(GetRequiredToken(*FileName,0));
-	}
+    }
 
     if(RelativeFilename) {
         relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
     }
 
     if(Content) {
-		//this field is ommited when the embedded texture is already loaded, let's ignore if it´s not found
-		try {
-			const Token& token = GetRequiredToken(*Content, 0);
-			const char* data = token.begin();
-			if (!token.IsBinary()) {
-				DOMWarning("video content is not binary data, ignoring", &element);
-			}
-			else if (static_cast<size_t>(token.end() - data) < 5) {
-				DOMError("binary data array is too short, need five (5) bytes for type signature and element count", &element);
-			}
-			else if (*data != 'R') {
-				DOMWarning("video content is not raw binary data, ignoring", &element);
-			}
-			else {
-				// read number of elements
-				uint32_t len = 0;
-				::memcpy(&len, data + 1, sizeof(len));
-				AI_SWAP4(len);
+        //this field is omitted when the embedded texture is already loaded, let's ignore if it's not found
+        try {
+            const Token& token = GetRequiredToken(*Content, 0);
+            const char* data = token.begin();
+            if (!token.IsBinary()) {
+                if (*data != '"') {
+                    DOMError("embedded content is not surrounded by quotation marks", &element);
+                }
+                else {
+                    const char* encodedData = data + 1;
+                    size_t encodedDataLen = static_cast<size_t>(token.end() - token.begin());
+                    // search for last quotation mark
+                    while (encodedDataLen > 1 && encodedData[encodedDataLen] != '"')
+                        encodedDataLen--;
+                    if (encodedDataLen % 4 != 0) {
+                        DOMError("embedded content is invalid, needs to be in base64", &element);
+                    }
+                    else {
+                        contentLength = Util::DecodeBase64(encodedData, encodedDataLen, content);
+                    }
+                }
+            }
+            else if (static_cast<size_t>(token.end() - data) < 5) {
+                DOMError("binary data array is too short, need five (5) bytes for type signature and element count", &element);
+            }
+            else if (*data != 'R') {
+                DOMWarning("video content is not raw binary data, ignoring", &element);
+            }
+            else {
+                // read number of elements
+                uint32_t len = 0;
+                ::memcpy(&len, data + 1, sizeof(len));
+                AI_SWAP4(len);
 
-				contentLength = len;
+                contentLength = len;
 
-				content = new uint8_t[len];
-				::memcpy(content, data + 5, len);
-			}
-		} catch (runtime_error runtimeError) {
-			//we don´t need the content data for contents that has already been loaded
-		}
+                content = new uint8_t[len];
+                ::memcpy(content, data + 5, len);
+            }
+        } catch (const runtime_error& runtimeError)
+        {
+            //we don't need the content data for contents that has already been loaded
+            ASSIMP_LOG_DEBUG_F("Caught exception in FBXMaterial (likely because content was already loaded): ",
+                    runtimeError.what());
+        }
     }
 
     props = GetPropertyTable(doc,"Video.FbxVideo",element,sc);

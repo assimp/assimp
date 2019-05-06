@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_DOCUMENT_UTIL_H
 #define INCLUDED_AI_FBX_DOCUMENT_UTIL_H
 
-#include "../include/assimp/defs.h"
+#include <assimp/defs.h>
 #include <string>
 #include <memory>
 #include "FBXDocument.h"
@@ -55,7 +55,6 @@ struct Element;
 namespace Assimp {
 namespace FBX {
 namespace Util {
-
 
 /* DOM/Parse error reporting - does not return */
 AI_WONT_RETURN void DOMError(const std::string& message, const Token& token) AI_WONT_RETURN_SUFFIX;
@@ -73,28 +72,28 @@ std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
     const Scope& sc,
     bool no_warn = false);
 
-
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline const T* ProcessSimpleConnection(const Connection& con,
+inline
+const T* ProcessSimpleConnection(const Connection& con,
     bool is_object_property_conn,
     const char* name,
     const Element& element,
-    const char** propNameOut = NULL)
+    const char** propNameOut = nullptr)
 {
     if (is_object_property_conn && !con.PropertyName().length()) {
         DOMWarning("expected incoming " + std::string(name) +
             " link to be an object-object connection, ignoring",
             &element
             );
-        return NULL;
+        return nullptr;
     }
     else if (!is_object_property_conn && con.PropertyName().length()) {
         DOMWarning("expected incoming " + std::string(name) +
             " link to be an object-property connection, ignoring",
             &element
             );
-        return NULL;
+        return nullptr;
     }
 
     if(is_object_property_conn && propNameOut) {
@@ -105,15 +104,14 @@ inline const T* ProcessSimpleConnection(const Connection& con,
 
     const Object* const ob = con.SourceObject();
     if(!ob) {
-        DOMWarning("failed to read source object for incoming" + std::string(name) +
+        DOMWarning("failed to read source object for incoming " + std::string(name) +
             " link, ignoring",
             &element);
-        return NULL;
+        return nullptr;
     }
 
     return dynamic_cast<const T*>(ob);
 }
-
 
 } //!Util
 } //!FBX

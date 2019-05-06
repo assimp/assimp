@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -110,7 +111,7 @@ void RemoveVCProcessTest::SetUp()
     char check[sizeof(aiMaterial) == sizeof(aiMaterial) ? 10 : -1];
     check[0] = 0;
     // to remove compiler warning
-    EXPECT_TRUE( check );
+    EXPECT_EQ( 0, check[0] );
 }
 
 // ------------------------------------------------------------------------------------------------

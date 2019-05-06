@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -56,17 +57,26 @@ class BlenderIntermediateTest : public ::testing::Test {
 #define NAME_1 "name1"
 #define NAME_2 "name2"
 
+// Updated this test after fixing #1776:
+// A comparator in C++ is used for ordering and must implement strict weak ordering,
+// which means it must return false for equal values.
+// The C++ standard defines and expects this behavior: true if lhs < rhs, false otherwise.
 TEST_F( BlenderIntermediateTest,ConversionData_ObjectCompareTest ) {
     Object obj1, obj2;
     strncpy( obj1.id.name, NAME_1, sizeof(NAME_1) );
     strncpy( obj2.id.name, NAME_2, sizeof(NAME_2) );
-    Blender::ObjectCompare cmp_false;
-    bool res( cmp_false( &obj1, &obj2 ) );
+
+    Blender::ObjectCompare cmp_true_because_first_is_smaller_than_second;
+    bool res( cmp_true_because_first_is_smaller_than_second( &obj1, &obj2 ) );
+    EXPECT_TRUE( res );
+
+    Blender::ObjectCompare cmp_false_because_equal;
+    res = cmp_false_because_equal( &obj1, &obj1 );
     EXPECT_FALSE( res );
 
-    Blender::ObjectCompare cmp_true;
-    res = cmp_true( &obj1, &obj1 );
-    EXPECT_TRUE( res );
+    Blender::ObjectCompare cmp_false_because_first_is_greater_than_second;
+    res = cmp_false_because_first_is_greater_than_second( &obj2, &obj1 );
+    EXPECT_FALSE( res );
 }
 
 

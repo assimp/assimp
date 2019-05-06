@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -187,7 +188,7 @@ namespace glTF {
         obj.AddMember("target", int(bv.target), w.mAl);
     }
 
-    inline void Write(Value& obj, Camera& c, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)
     {
 
     }
@@ -293,17 +294,17 @@ namespace glTF {
 							// filling object "compressedData"
 							json_comp_data.SetObject();
 							json_comp_data.AddMember("buffer", ptr_ext_comp->Buffer, w.mAl);
-							json_comp_data.AddMember("byteOffset", ptr_ext_comp->Offset, w.mAl);
+							json_comp_data.AddMember("byteOffset", static_cast<uint64_t>(ptr_ext_comp->Offset), w.mAl);
 							json_comp_data.AddMember("componentType", 5121, w.mAl);
 							json_comp_data.AddMember("type", "SCALAR", w.mAl);
-							json_comp_data.AddMember("count", ptr_ext_comp->Count, w.mAl);
+							json_comp_data.AddMember("count", static_cast<uint64_t>(ptr_ext_comp->Count), w.mAl);
 							if(ptr_ext_comp->Binary)
 								json_comp_data.AddMember("mode", "binary", w.mAl);
 							else
 								json_comp_data.AddMember("mode", "ascii", w.mAl);
 
-							json_comp_data.AddMember("indicesCount", ptr_ext_comp->IndicesCount, w.mAl);
-							json_comp_data.AddMember("verticesCount", ptr_ext_comp->VerticesCount, w.mAl);
+							json_comp_data.AddMember("indicesCount", static_cast<uint64_t>(ptr_ext_comp->IndicesCount), w.mAl);
+							json_comp_data.AddMember("verticesCount", static_cast<uint64_t>(ptr_ext_comp->VerticesCount), w.mAl);
 							// filling object "Open3DGC-compression"
 							Value json_o3dgc;
 
@@ -398,7 +399,7 @@ namespace glTF {
         }
     }
 
-    inline void Write(Value& obj, Program& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Program& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -424,7 +425,7 @@ namespace glTF {
         AddRefsVector(scene, "nodes", s.nodes, w.mAl);
     }
 
-    inline void Write(Value& obj, Shader& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Shader& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -452,7 +453,7 @@ namespace glTF {
 
     }
 
-    inline void Write(Value& obj, Technique& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Technique& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -467,7 +468,7 @@ namespace glTF {
         }
     }
 
-    inline void Write(Value& obj, Light& b, AssetWriter& w)
+    inline void Write(Value& /*obj*/, Light& /*b*/, AssetWriter& /*w*/)
     {
 
     }
@@ -606,13 +607,8 @@ namespace glTF {
     {
         Value asset;
         asset.SetObject();
-        {
-            char versionChar[10];
-            ai_snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
-            asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
-
-            asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
-        }
+        asset.AddMember("version", Value(mAsset.asset.version, mAl).Move(), mAl);
+        asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
         mDoc.AddMember("asset", asset, mAl);
     }
 

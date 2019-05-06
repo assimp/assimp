@@ -43,6 +43,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <ostream>
@@ -370,6 +371,9 @@ inline bool PointsEqual( const IntPoint &pt1, const IntPoint &pt2)
 
 bool Orientation(OutRec *outRec, bool UseFullInt64Range)
 {
+  if (!outRec->pts)
+    return 0.0;
+
   //first make sure bottomPt is correctly assigned ...
   OutPt *opBottom = outRec->pts, *op = outRec->pts->next;
   while (op != outRec->pts)
@@ -433,6 +437,9 @@ double Area(const Polygon &poly)
 
 double Area(const OutRec &outRec, bool UseFullInt64Range)
 {
+  if (!outRec.pts)
+    return 0.0;
+
   OutPt *op = outRec.pts;
   if (UseFullInt64Range) {
     Int128 a(0);
@@ -2365,6 +2372,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
       //ok, so far it looks like we're still in range of the horizontal edge
       if ( e->xcurr == horzEdge->xtop && !eMaxPair )
       {
+        assert(horzEdge->nextInLML);
         if (SlopesEqual(*e, *horzEdge->nextInLML, m_UseFullRange))
         {
           //if output polygons share an edge, they'll need joining later ...
@@ -2429,6 +2437,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
     if ( horzEdge->outIdx >= 0 )
       IntersectEdges( horzEdge, eMaxPair,
       IntPoint(horzEdge->xtop, horzEdge->ycurr), ipBoth);
+    assert(eMaxPair);
     if (eMaxPair->outIdx >= 0) throw clipperException("ProcessHorizontal error");
     DeleteFromAEL(eMaxPair);
     DeleteFromAEL(horzEdge);
@@ -3082,9 +3091,9 @@ void Clipper::JoinCommonEdges(bool fixHoleLinkages)
       FixupOutPolygon(*outRec1);
       FixupOutPolygon(*outRec2);
 
-      if (Orientation(outRec1, m_UseFullRange) != (Area(*outRec1, m_UseFullRange) > 0))
+      if (outRec1->pts && (Orientation(outRec1, m_UseFullRange) != (Area(*outRec1, m_UseFullRange) > 0)))
           DisposeBottomPt(*outRec1);
-      if (Orientation(outRec2, m_UseFullRange) != (Area(*outRec2, m_UseFullRange) > 0))
+      if (outRec2->pts && (Orientation(outRec2, m_UseFullRange) != (Area(*outRec2, m_UseFullRange) > 0)))
           DisposeBottomPt(*outRec2);
 
     } else

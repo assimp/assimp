@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -54,8 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/ProgressHandler.hpp>
 #include <assimp/types.h>
-#include "BaseImporter.h"
-#include "irrXMLWrapper.h"
+#include <assimp/BaseImporter.h>
+#include <assimp/irrXMLWrapper.h>
 #include "FIReader.hpp"
 //#include <regex>
 
@@ -176,7 +177,7 @@ namespace Assimp {
 /// Ignored attributes: "creaseAngle", "convex", "solid".
 ///
 /// Texture coordinates generating: only for Sphere, Cone, Cylinder. In all other case used PLANE mapping.
-///		It's better that Assimp main code has powerfull texture coordinates generator. Then is not needed to
+///		It's better that Assimp main code has powerful texture coordinates generator. Then is not needed to
 ///		duplicate this code in every importer.
 ///
 /// Lighting limitations.
@@ -401,10 +402,10 @@ private:
 	/************** Functions: XML set *************/
 	/***********************************************/
 
-	/// Chek if current node is empty: <node />. If not then exception will throwed.
+	/// Check if current node is empty: <node />. If not then exception will throwed.
 	void XML_CheckNode_MustBeEmpty();
 
-	/// Chek if current node name is equal to pNodeName.
+	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
 	/// return true if current node name is equal to pNodeName, else - false.
 	bool XML_CheckNode_NameEqual(const std::string& pNodeName) { return mReader->getNodeName() == pNodeName; }
@@ -521,7 +522,7 @@ private:
 	/// \param [in] pStartAngle - angle in radians of start of the arc.
 	/// \param [in] pEndAngle - angle in radians of end of the arc.
 	/// \param [in] pRadius - radius of the arc.
-	/// \param [out] pNumSegments - number of segments in arc. In other words - tesselation factor.
+	/// \param [out] pNumSegments - number of segments in arc. In other words - tessellation factor.
 	/// \param [out] pVertices - generated vertices.
 	void GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments, std::list<aiVector3D>& pVertices);
 

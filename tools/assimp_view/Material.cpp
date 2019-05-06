@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
-#include <../code/StringComparison.h>
+#include <assimp/StringComparison.h>
 
 #include <vector>
 #include <algorithm>
@@ -135,7 +135,6 @@ extern float g_smoothAngle /*= 80.f*/;
 
 extern unsigned int ppsteps, ppstepsdefault;
 extern bool nopointslines;
-
 
 CMaterialManager CMaterialManager::s_cInstance;
 
@@ -275,7 +274,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                         for (unsigned int i = 0; i < iSizeFound;++i)
                             info.cFileName[i] = (CHAR)tolower(info.cFileName[i]);
 
-                        if (0 == memcmp(info.cFileName,szFile2, min(iSizeFound,iSize)))
+                        if (0 == memcmp(info.cFileName,szFile2, std::min(iSizeFound,iSize)))
                         {
                             // we have it. Build the full path ...
                             char* sz = strrchr(szTempB,'*');

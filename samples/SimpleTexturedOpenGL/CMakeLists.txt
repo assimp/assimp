@@ -4,25 +4,28 @@ FIND_PACKAGE(GLUT)
 IF ( NOT GLUT_FOUND )
   IF ( MSVC )
     SET ( GLUT_FOUND 1 )
-    SET ( GLUT_INCLUDE_DIR ${Assimp_SOURCE_DIR}/samples/glut/ )
-    SET ( GLUT_LIBRARIES ${Assimp_SOURCE_DIR}/samples/glut/glut32.lib )
+    SET ( GLUT_INCLUDE_DIR ${Assimp_SOURCE_DIR}/samples/freeglut/ )
+    SET ( GLUT_LIBRARIES ${Assimp_SOURCE_DIR}/samples/freeglut/lib/freeglut.lib )
   ELSE ( MSVC )
     MESSAGE( WARNING "Please install glut." )
   ENDIF ( MSVC )
 ENDIF ( NOT GLUT_FOUND )
+
+if ( MSVC )
+  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+endif ( MSVC )
 
 INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code
   ${OPENGL_INCLUDE_DIR}
   ${GLUT_INCLUDE_DIR}
-  ${Assimp_SOURCE_DIR}/samples/DevIL/include/
 )
 
 LINK_DIRECTORIES(
   ${Assimp_BINARY_DIR}
   ${Assimp_BINARY_DIR}/lib/
-  ${Assimp_SOURCE_DIR}/samples/DevIL/lib/
 )
 
 ADD_EXECUTABLE( assimp_simpletexturedogl WIN32

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -45,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 class BlendImportAreaLight : public ::testing::Test {
 public:
@@ -67,7 +69,7 @@ protected:
 // ------------------------------------------------------------------------------------------------
 TEST_F(BlendImportAreaLight, testImportLight)
 {
-    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/AreaLight_269.blend",0);
+    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/AreaLight_269.blend", aiProcess_ValidateDataStructure);
     ASSERT_TRUE(pTest != NULL);
     ASSERT_TRUE(pTest->HasLights());
 

@@ -2,7 +2,8 @@
  Open Asset Import Library (assimp)
  ----------------------------------------------------------------------
 
- Copyright (c) 2006-2017, assimp team
+ Copyright (c) 2006-2019, assimp team
+
 
  All rights reserved.
 
@@ -46,10 +47,10 @@
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 
-#include "irrXMLWrapper.h"
+#include <assimp/irrXMLWrapper.h>
 #include "ColladaHelper.h"
 #include <assimp/ai_assert.h>
-#include "TinyFormatter.h"
+#include <assimp/TinyFormatter.h>
 
 namespace Assimp
 {
@@ -65,6 +66,9 @@ namespace Assimp
         friend class ColladaLoader;
 
     protected:
+        /** Map for generic metadata as aiString */
+        typedef std::map<std::string, aiString> StringMetaData;
+
         /** Constructor from XML file */
         ColladaParser( IOSystem* pIOHandler, const std::string& pFile);
 
@@ -77,8 +81,17 @@ namespace Assimp
         /** Reads the structure of the file */
         void ReadStructure();
 
-        /** Reads asset informations such as coordinate system informations and legal blah */
+        /** Reads asset information such as coordinate system information and legal blah */
         void ReadAssetInfo();
+
+        /** Reads contributor information such as author and legal blah */
+        void ReadContributorInfo();
+
+        /** Reads generic metadata into provided map */
+        void ReadMetaDataItem(StringMetaData &metadata);
+
+        /** Convert underscore_seperated to CamelCase "authoring_tool" becomes "AuthoringTool" */
+        static void ToCamelCase(std::string &text);
 
         /** Reads the animation library */
         void ReadAnimationLibrary();
@@ -86,6 +99,9 @@ namespace Assimp
 		/** Reads the animation clip library */
 		void ReadAnimationClipLibrary();
 
+        /** Unwrap controllers dependency hierarchy */
+        void PostProcessControllers();
+    
 		/** Re-build animations from animation clip library, if present, otherwise combine single-channel animations */
 		void PostProcessRootAnimations();
 
@@ -338,6 +354,9 @@ namespace Assimp
 
         /** Which is the up vector */
         enum { UP_X, UP_Y, UP_Z } mUpDirection;
+
+        /** Asset metadata (global for scene) */
+        StringMetaData mAssetMetaData;
 
         /** Collada file format version */
         Collada::FormatVersion mFormat;

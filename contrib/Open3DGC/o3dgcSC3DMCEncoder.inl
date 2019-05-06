@@ -762,8 +762,8 @@ namespace o3dgc
         const Real * const originalNormals = ifs.GetNormal();
         Vec3<long> p1, p2, p3, n0, nt;
         Vec3<Real> n1;
-        long na0, nb0;
-        Real rna0, rnb0, na1, nb1, norm0, norm1;
+        long na0 = 0, nb0 = 0;
+        Real rna0, rnb0, na1 = 0, nb1 = 0, norm0, norm1;
         char ni0 = 0, ni1 = 0;
         long a, b, c, v;
         m_predictors.Clear();

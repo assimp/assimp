@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 #include "AnimEvaluator.h"
 #include "SceneAnimator.h"
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 
 #include <commdlg.h>
 
@@ -96,22 +96,22 @@ D3DXVECTOR4 g_aclNormalColors[14] =
 void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 {
     *piCnt = *piCnt+1;
-    for (unsigned int i = 0; i < pcNode->mNumChildren;++i)
-        GetNodeCount(pcNode->mChildren[i],piCnt);
+    for (unsigned int i = 0; i < pcNode->mNumChildren; ++i) {
+        GetNodeCount(pcNode->mChildren[i], piCnt);
+    }
 }
 
 //-------------------------------------------------------------------------------
-int CDisplay::EnableAnimTools(BOOL hm)
-{
+int CDisplay::EnableAnimTools(BOOL hm) {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
+    
     return 1;
 }
 
 //-------------------------------------------------------------------------------
 // Fill animation combo box
-int CDisplay::FillAnimList(void)
-{
+int CDisplay::FillAnimList(void) {
     if (0 != g_pcAsset->pcScene->mNumAnimations)
     {
         // now fill in all animation names
@@ -362,9 +362,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
             *tex = piTexture;
             m_pcCurrentTexture->piTexture = tex;
 
-            //if (!pcMesh->bSharedFX){
-                pcMesh->piEffect->SetTexture(tex_string,piTexture);
-            //}
+            pcMesh->piEffect->SetTexture(tex_string,piTexture);
         }
     }
 
@@ -562,7 +560,6 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
     tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
     tvi.lParam = (LPARAM)10;
-    //tvi.state = TVIS_EXPANDED | TVIS_EXPANDEDONCE ;
 
     sNew.itemex = tvi;
     sNew.hInsertAfter = TVI_LAST;
@@ -629,7 +626,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     return 1;
 }
 //-------------------------------------------------------------------------------
-// Expand all elements in the treeview
+// Expand all elements in the tree-view
 int CDisplay::ExpandTree()
 {
     // expand all materials
@@ -779,7 +776,7 @@ int CDisplay::OnRender()
     // Now render the log display in the upper right corner of the window
     CLogDisplay::Instance().OnRender();
 
-    // present the backbuffer
+    // present the back-buffer
     g_piDevice->EndScene();
     g_piDevice->Present(NULL,NULL,NULL,NULL);
 
@@ -1042,16 +1039,23 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         switch (pcNew->eOp)
         {
         case aiTextureOp_Add:
-            szOp = "add";break;
+            szOp = "add";
+            break;
         case aiTextureOp_Subtract:
-            szOp = "sub";break;
+            szOp = "sub";
+            break;
         case aiTextureOp_Divide:
-            szOp = "div";break;
+            szOp = "div";
+            break;
         case aiTextureOp_SignedAdd:
-            szOp = "addsign";break;
+            szOp = "addsign";
+            break;
         case aiTextureOp_SmoothAdd:
-            szOp = "addsmooth";break;
-        default: szOp = "mul";
+            szOp = "addsmooth";
+            break;
+        default: 
+            szOp = "mul";
+            break;
         };
         SetWindowText(GetDlgItem(g_hDlg,IDC_ELOAD),szOp);
 
@@ -1593,7 +1597,7 @@ int CDisplay::HandleInput()
     return 1;
 }
 //-------------------------------------------------------------------------------
-// Process input for an empty scen view to allow for skybox rotations
+// Process input for an empty scene view to allow for sky-box rotations
 int CDisplay::HandleInputEmptyScene()
 {
     if(CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
@@ -2035,7 +2039,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
             g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
 
             if (g_sOptions.bNoAlphaBlending) {
-                // manually disable alphablending
+                // manually disable alpha-blending
                 g_piDevice->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE);
             }
 
@@ -2199,9 +2203,6 @@ int CDisplay::RenderTextureView()
     // it might be that there is no texture ...
     if (!m_pcCurrentTexture->piTexture)
     {
-        // FIX: no such log message. it would be repeated to often
-        //CLogDisplay::Instance().AddEntry("Unable to display texture. Image is unreachable.",
-        //  D3DCOLOR_ARGB(0xFF,0xFF,0,0));
         return 0;
     }
 
@@ -2251,7 +2252,7 @@ int CDisplay::RenderTextureView()
         const float ny = (float)sRect.bottom;
         const float  x = (float)sDesc.Width;
         const float  y = (float)sDesc.Height;
-        float f = min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
+        float f = std::min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
 
         float fHalfX = (nx - (f * x)) / 2.0f;
         float fHalfY = (ny - (f * y)) / 2.0f;
@@ -2296,5 +2297,6 @@ int CDisplay::RenderTextureView()
     // do we need to draw UV coordinates?
     return 1;
 }
-};
+
+}
 

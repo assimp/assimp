@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -44,10 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 #include <assimp/vector2.h>
 #include <assimp/vector3.h>
 #include <assimp/mesh.h>
-#include "IOStreamBuffer.h"
+#include <assimp/IOStreamBuffer.h>
 
 namespace Assimp {
 
@@ -94,7 +96,7 @@ protected:
     /// Get the number of components in a line.
     size_t getNumComponentsInDataDefinition();
     /// Stores the vector
-    void getVector( std::vector<aiVector3D> &point3d_array );
+    size_t getTexCoordVector( std::vector<aiVector3D> &point3d_array );
     /// Stores the following 3d vector.
     void getVector3( std::vector<aiVector3D> &point3d_array );
     /// Stores the following homogeneous vector as a 3D vector
@@ -145,7 +147,7 @@ private:
     //! Iterator to end position of buffer
     DataArrayIt m_DataItEnd;
     //! Pointer to model instance
-    ObjFile::Model *m_pModel;
+    std::unique_ptr<ObjFile::Model> m_pModel;
     //! Current line (for debugging)
     unsigned int m_uiLine;
     //! Helper buffer

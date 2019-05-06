@@ -576,7 +576,7 @@ void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out,
     const std::string& ReferenceInformationType)
 {
     const char * str = source.Elements().count( "Tangents" ) > 0 ? "Tangents" : "Tangent";
-    const char * strIdx = source.Elements().count( "Tangents" ) > 0 ? TangentsIndexToken.c_str() : TangentIndexToken.c_str();
+    const char * strIdx = source.Elements().count( "Tangents" ) > 0 ? TangentsIndexToken : TangentIndexToken;
     ResolveVertexDataArray(tangents_out,source,MappingInformationType,ReferenceInformationType,
         str,
         strIdx,

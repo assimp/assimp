@@ -419,15 +419,13 @@ private:
         cm = 0,
         m,
         km,
-        inch,
-        foot,
-        mile,
-        yard,
         NumUnits,
 
         Undefined
     };
 
+    // ------------------------------------------------------------------------------------------------
+    //  Will perform the conversion from a given unit to the requested unit.
     void ConvertToUnitScale(FbxUnit unit);
 
     // ------------------------------------------------------------------------------------------------

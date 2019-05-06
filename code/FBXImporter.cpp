@@ -141,7 +141,7 @@ void FBXImporter::SetupProperties(const Importer* pImp)
     settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
     settings.useLegacyEmbeddedTextureNaming = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING, false);
     settings.removeEmptyBones = pImp->GetPropertyBool(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true);
-    settings.convertToMeters = pImpl->GetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, false);
+    settings.convertToMeters = pImp->GetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, false);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -90,7 +90,8 @@ namespace Assimp {
         , anim_fps()
         , out(out)
         , doc(doc)
-        , mRemoveEmptyBones( removeEmptyBones ) {
+        , mRemoveEmptyBones( removeEmptyBones )
+        , mCurrentUnit( FbxUnit::Undefined ) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.
@@ -3472,6 +3473,10 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             out->mMetaData->Set(12, "TimeSpanStart", doc.GlobalSettings().TimeSpanStart());
             out->mMetaData->Set(13, "TimeSpanStop", doc.GlobalSettings().TimeSpanStop());
             out->mMetaData->Set(14, "CustomFrameRate", doc.GlobalSettings().CustomFrameRate());
+        }
+
+        void FBXConverter::ConvertToUnitScale(FbxUnit unit) {
+
         }
 
         void FBXConverter::TransferDataToScene()

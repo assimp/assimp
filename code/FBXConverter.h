@@ -415,6 +415,21 @@ private:
 
     void ConvertGlobalSettings();
 
+    enum class FbxUnit {
+        cm = 0,
+        m,
+        km,
+        inch,
+        foot,
+        mile,
+        yard,
+        NumUnits,
+
+        Undefined
+    };
+
+    void ConvertToUnitScale(FbxUnit unit);
+
     // ------------------------------------------------------------------------------------------------
     // copy generated meshes, animations, lights, cameras and textures to the output scene
     void TransferDataToScene();
@@ -456,6 +471,8 @@ private:
     const FBX::Document& doc;
 
     bool mRemoveEmptyBones;
+
+    FbxUnit mCurrentUnit;
 };
 
 }

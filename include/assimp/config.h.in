@@ -662,7 +662,7 @@ enum aiComponent
 /** @brief  Set wether the FBX importer shall not remove empty bones.
  *  
  *  Empty bone are often used to define connections for other models.
- *
+ */
 #define AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES \
     "AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES"
 

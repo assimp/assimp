@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 
+
 namespace Assimp {
     namespace FBX {
 
@@ -1598,6 +1599,13 @@ namespace Assimp {
             if (name.length()) {
                 str.Set(name);
                 out_mat->AddProperty(&str, AI_MATKEY_NAME);
+            }
+
+            // Set the shading mode as best we can: The FBX specification only mentions Lambert and Phong, and only Phong is mentioned in Assimp's aiShadingMode enum.
+            if (material.GetShadingModel() == "phong")
+            {
+                aiShadingMode shadingMode = aiShadingMode_Phong;
+                out_mat->AddProperty<aiShadingMode>(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);               
             }
 
             // shading stuff and colors

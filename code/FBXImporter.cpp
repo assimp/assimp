@@ -185,8 +185,12 @@ void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         // take the raw parse-tree and convert it to a FBX DOM
         Document doc(parser,settings);
 
+        FbxUnit unit(FbxUnit::cm);
+        if (settings.convertToMeters) {
+            unit = FbxUnit::m;
+        }
         // convert the FBX DOM to aiScene
-        ConvertToAssimpScene(pScene,doc, settings.removeEmptyBones);
+        ConvertToAssimpScene(pScene,doc, settings.removeEmptyBones, unit);
 
         std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
     }

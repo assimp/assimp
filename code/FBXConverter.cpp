@@ -76,7 +76,7 @@ namespace Assimp {
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones)
+        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit )
         : defaultMaterialIndex()
         , lights()
         , cameras()
@@ -119,7 +119,7 @@ namespace Assimp {
 
             ConvertGlobalSettings();
             TransferDataToScene();
-            ConvertToUnitScale(doc.GlobalSettings().UnitScaleFactor());
+            ConvertToUnitScale(unit);
 
             // if we didn't read any meshes set the AI_SCENE_FLAGS_INCOMPLETE
             // to make sure the scene passes assimp's validation. FBX files
@@ -3570,9 +3570,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         }
 
         // ------------------------------------------------------------------------------------------------
-        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones)
+        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit)
         {
-            FBXConverter converter(out, doc, removeEmptyBones);
+            FBXConverter converter(out, doc, removeEmptyBones, unit);
         }
 
     } // !FBX

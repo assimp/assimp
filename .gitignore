@@ -83,3 +83,7 @@ lib64/assimp-vc120-mt.exp
 xcuserdata
 
 cmake-build-debug
+
+# MacOS
+.DS_Store
+

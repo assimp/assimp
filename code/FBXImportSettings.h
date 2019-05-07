@@ -65,7 +65,8 @@ struct ImportSettings
     , preservePivots(true)
     , optimizeEmptyAnimationCurves(true)
     , useLegacyEmbeddedTextureNaming(false)
-    , removeEmptyBones( true ) {
+    , removeEmptyBones( true )
+    , convertToMeters( false ) {
         // empty
     }
 
@@ -149,6 +150,10 @@ struct ImportSettings
     /** Empty bones shall be removed
     */
     bool removeEmptyBones;
+
+    /** Set to true to perform a conversion from cm to meter after the import
+    */
+    bool convertToMeters;
 };
 
 

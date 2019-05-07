@@ -76,13 +76,22 @@ namespace FBX {
 
 class Document;
 
+enum class FbxUnit {
+    cm = 0,
+    m,
+    km,
+    NumUnits,
+
+    Undefined
+};
+
 /** 
  *  Convert a FBX #Document to #aiScene
  *  @param out Empty scene to be populated
  *  @param doc Parsed FBX document
  *  @param removeEmptyBones Will remove bones, which do not have any references to vertices.
  */
-void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones );
+void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit);
 
 /** Dummy class to encapsulate the conversion process */
 class FBXConverter {
@@ -113,7 +122,7 @@ public:
     };
 
 public:
-    FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones );
+    FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit);
     ~FBXConverter();
 
 private:
@@ -416,6 +425,10 @@ private:
     void ConvertGlobalSettings();
 
     // ------------------------------------------------------------------------------------------------
+    //  Will perform the conversion from a given unit to the requested unit.
+    void ConvertToUnitScale(FbxUnit unit);
+
+    // ------------------------------------------------------------------------------------------------
     // copy generated meshes, animations, lights, cameras and textures to the output scene
     void TransferDataToScene();
 
@@ -456,6 +469,8 @@ private:
     const FBX::Document& doc;
 
     bool mRemoveEmptyBones;
+
+    FbxUnit mCurrentUnit;
 };
 
 }

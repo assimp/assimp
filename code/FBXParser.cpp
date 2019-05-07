@@ -117,7 +117,7 @@ namespace FBX {
 Element::Element(const Token& key_token, Parser& parser)
 : key_token(key_token)
 {
-    TokenPtr n = NULL;
+    TokenPtr n = nullptr;
     do {
         n = parser.AdvanceToNextToken();
         if(!n) {

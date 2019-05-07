@@ -77,7 +77,7 @@ namespace Assimp {
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones)
+        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit )
         : defaultMaterialIndex()
         , lights()
         , cameras()
@@ -91,7 +91,8 @@ namespace Assimp {
         , anim_fps()
         , out(out)
         , doc(doc)
-        , mRemoveEmptyBones( removeEmptyBones ) {
+        , mRemoveEmptyBones( removeEmptyBones )
+        , mCurrentUnit(FbxUnit::cm) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.
@@ -119,6 +120,7 @@ namespace Assimp {
 
             ConvertGlobalSettings();
             TransferDataToScene();
+            ConvertToUnitScale(unit);
 
             // if we didn't read any meshes set the AI_SCENE_FLAGS_INCOMPLETE
             // to make sure the scene passes assimp's validation. FBX files
@@ -3417,8 +3419,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
 
             na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
             na->mScalingKeys = new aiVectorKey[keys.size()];
-            if (keys.size() > 0)
+            if (keys.size() > 0) {
                 InterpolateKeys(na->mScalingKeys, keys, inputs, aiVector3D(1.0f, 1.0f, 1.0f), maxTime, minTime);
+            }
         }
 
         void FBXConverter::ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
@@ -3482,6 +3485,46 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             out->mMetaData->Set(14, "CustomFrameRate", doc.GlobalSettings().CustomFrameRate());
         }
 
+        void FBXConverter::ConvertToUnitScale( FbxUnit unit ) {
+            if (mCurrentUnit == unit) {
+                return;
+            }
+
+            ai_real scale = 1.0;
+            if (mCurrentUnit == FbxUnit::cm) {
+                if (unit == FbxUnit::m) {
+                    scale = (ai_real)0.01;
+                } else if (unit == FbxUnit::km) {
+                    scale = (ai_real)0.00001;
+                }
+            } else if (mCurrentUnit == FbxUnit::m) {
+                if (unit == FbxUnit::cm) {
+                    scale = (ai_real)100.0;
+                } else if (unit == FbxUnit::km) {
+                    scale = (ai_real)0.001;
+                }
+            } else if (mCurrentUnit == FbxUnit::km) {
+                if (unit == FbxUnit::cm) {
+                    scale = (ai_real)100000.0;
+                } else if (unit == FbxUnit::m) {
+                    scale = (ai_real)1000.0;
+                }
+            }
+            
+            for (auto mesh : meshes) {
+                if (nullptr == mesh) {
+                    continue;
+                }
+
+                if (mesh->HasPositions()) {
+                    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+                        aiVector3D &pos = mesh->mVertices[i];
+                        pos *= scale;
+                    }
+                }
+            }
+        }
+
         void FBXConverter::TransferDataToScene()
         {
             ai_assert(!out->mMeshes);
@@ -3535,9 +3578,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         }
 
         // ------------------------------------------------------------------------------------------------
-        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones)
+        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit)
         {
-            FBXConverter converter(out, doc, removeEmptyBones);
+            FBXConverter converter(out, doc, removeEmptyBones, unit);
         }
 
     } // !FBX

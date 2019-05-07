@@ -2,6 +2,6 @@
 #define ASSIMP_REVISION_H_INC
 
 #define GitVersion 0xfcb571d
-#define GitBranch "jere9309/version4_1"
+#define GitBranch "runtimecore"
 
 #endif // ASSIMP_REVISION_H_INC

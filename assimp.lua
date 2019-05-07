@@ -75,9 +75,6 @@ project "assimp"
     "contrib/rapidjson/include/**.h",
   }
 
-  excludes {
-  }
-
   includedirs {
     "include",
     "contrib/irrXML",
@@ -96,17 +93,17 @@ project "assimp"
     -- configuration { "windows" }
     -- -------------------------------------------------------------
 
-    buildoptions {
-      "/bigobj", -- Allow large object files for unity builds and template heavy objects
-    }
-
     -- common configuration settings
 
     dofile (_BUILD_DIR .. "/3rdparty_static_win.lua")
 
     -- project specific configuration settings
 
-    -- configuration { "windows" }
+    configuration { "windows" }
+
+      buildoptions {
+        "/bigobj", -- Allow large object files for unity builds and template heavy objects
+      }
 
     -- -------------------------------------------------------------
     -- configuration { "windows", "Debug", "x32" }
@@ -316,10 +313,6 @@ project "assimp"
 
     configuration { "android*" }
 
-      defines {
-        "ASSIMP_BUILD_NO_IFC_IMPORTER",
-      }
-
     -- -------------------------------------------------------------
     -- configuration { "android_armv7_debug" }
     -- -------------------------------------------------------------
@@ -400,17 +393,17 @@ project "assimp"
     -- configuration { "winuwp" } == _TARGET_IS_WINUWP
     -- -------------------------------------------------------------
 
-    defines {
-      "_CRT_SECURE_NO_WARNINGS",
-    }
-
     -- common configuration settings
 
     dofile (_BUILD_DIR .. "/static_winuwp.lua")
 
     -- project specific configuration settings
 
-    -- configuration { "windows" }
+    configuration { "windows" }
+
+      defines {
+        "_CRT_SECURE_NO_WARNINGS",
+      }
 
     -- -------------------------------------------------------------
     -- configuration { "winuwp_debug", "x32" }

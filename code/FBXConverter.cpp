@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 
+
 namespace Assimp {
     namespace FBX {
 
@@ -76,7 +77,7 @@ namespace Assimp {
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-        FBXConverter::FBXConverter(aiScene* out, const Document& doc)
+        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit )
         : defaultMaterialIndex()
         , lights()
         , cameras()
@@ -89,7 +90,9 @@ namespace Assimp {
         , mNodeNames()
         , anim_fps()
         , out(out)
-        , doc(doc) {
+        , doc(doc)
+        , mRemoveEmptyBones( removeEmptyBones )
+        , mCurrentUnit(FbxUnit::cm) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.
@@ -117,6 +120,7 @@ namespace Assimp {
 
             ConvertGlobalSettings();
             TransferDataToScene();
+            ConvertToUnitScale(unit);
 
             // if we didn't read any meshes set the AI_SCENE_FLAGS_INCOMPLETE
             // to make sure the scene passes assimp's validation. FBX files
@@ -387,6 +391,7 @@ namespace Assimp {
                 break;
             default:
                 ai_assert(false);
+                break;
             }
         }
 
@@ -977,7 +982,9 @@ namespace Assimp {
             unsigned int epcount = 0;
             for (unsigned i = 0; i < indices.size(); i++)
             {
-                if (indices[i] < 0) epcount++;
+                if (indices[i] < 0) {
+                    epcount++;
+                }
             }
             unsigned int pcount = static_cast<unsigned int>( indices.size() );
             unsigned int scount = out_mesh->mNumFaces = pcount - epcount;
@@ -1407,7 +1414,7 @@ namespace Assimp {
 
                     const WeightIndexArray& indices = cluster->GetIndices();
 
-                    if (indices.empty()) {
+                    if (indices.empty() && mRemoveEmptyBones ) {
                         continue;
                     }
 
@@ -1439,13 +1446,11 @@ namespace Assimp {
 
                                 if (index_out_indices.back() == no_index_sentinel) {
                                     index_out_indices.back() = out_indices.size();
-
                                 }
 
                                 if (no_mat_check) {
                                     out_indices.push_back(out_idx[i]);
-                                }
-                                else {
+                                } else {
                                     // this extra lookup is in O(logn), so the entire algorithm becomes O(nlogn)
                                     const std::vector<unsigned int>::iterator it = std::lower_bound(
                                         outputVertStartIndices->begin(),
@@ -1461,11 +1466,11 @@ namespace Assimp {
                             }
                         }
                     }
-
+                    
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    if (ok) {
+                    if (ok && mRemoveEmptyBones) {
                         ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                             count_out_indices, node_global_transform);
                     }
@@ -1594,6 +1599,13 @@ namespace Assimp {
             if (name.length()) {
                 str.Set(name);
                 out_mat->AddProperty(&str, AI_MATKEY_NAME);
+            }
+
+            // Set the shading mode as best we can: The FBX specification only mentions Lambert and Phong, and only Phong is mentioned in Assimp's aiShadingMode enum.
+            if (material.GetShadingModel() == "phong")
+            {
+                aiShadingMode shadingMode = aiShadingMode_Phong;
+                out_mat->AddProperty<aiShadingMode>(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);               
             }
 
             // shading stuff and colors
@@ -3407,8 +3419,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
 
             na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
             na->mScalingKeys = new aiVectorKey[keys.size()];
-            if (keys.size() > 0)
+            if (keys.size() > 0) {
                 InterpolateKeys(na->mScalingKeys, keys, inputs, aiVector3D(1.0f, 1.0f, 1.0f), maxTime, minTime);
+            }
         }
 
         void FBXConverter::ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
@@ -3472,6 +3485,46 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             out->mMetaData->Set(14, "CustomFrameRate", doc.GlobalSettings().CustomFrameRate());
         }
 
+        void FBXConverter::ConvertToUnitScale( FbxUnit unit ) {
+            if (mCurrentUnit == unit) {
+                return;
+            }
+
+            ai_real scale = 1.0;
+            if (mCurrentUnit == FbxUnit::cm) {
+                if (unit == FbxUnit::m) {
+                    scale = (ai_real)0.01;
+                } else if (unit == FbxUnit::km) {
+                    scale = (ai_real)0.00001;
+                }
+            } else if (mCurrentUnit == FbxUnit::m) {
+                if (unit == FbxUnit::cm) {
+                    scale = (ai_real)100.0;
+                } else if (unit == FbxUnit::km) {
+                    scale = (ai_real)0.001;
+                }
+            } else if (mCurrentUnit == FbxUnit::km) {
+                if (unit == FbxUnit::cm) {
+                    scale = (ai_real)100000.0;
+                } else if (unit == FbxUnit::m) {
+                    scale = (ai_real)1000.0;
+                }
+            }
+            
+            for (auto mesh : meshes) {
+                if (nullptr == mesh) {
+                    continue;
+                }
+
+                if (mesh->HasPositions()) {
+                    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+                        aiVector3D &pos = mesh->mVertices[i];
+                        pos *= scale;
+                    }
+                }
+            }
+        }
+
         void FBXConverter::TransferDataToScene()
         {
             ai_assert(!out->mMeshes);
@@ -3525,9 +3578,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         }
 
         // ------------------------------------------------------------------------------------------------
-        void ConvertToAssimpScene(aiScene* out, const Document& doc)
+        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit)
         {
-            FBXConverter converter(out, doc);
+            FBXConverter converter(out, doc, removeEmptyBones, unit);
         }
 
     } // !FBX

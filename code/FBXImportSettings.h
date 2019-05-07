@@ -53,19 +53,21 @@ namespace FBX {
 struct ImportSettings
 {
     ImportSettings()
-        : strictMode(true)
-        , readAllLayers(true)
-        , readAllMaterials(false)
-        , readMaterials(true)
-        , readTextures(true)
-        , readCameras(true)
-        , readLights(true)
-        , readAnimations(true)
-        , readWeights(true)
-        , preservePivots(true)
-        , optimizeEmptyAnimationCurves(true)
-        , useLegacyEmbeddedTextureNaming(false)
-    {}
+    : strictMode(true)
+    , readAllLayers(true)
+    , readAllMaterials(false)
+    , readMaterials(true)
+    , readTextures(true)
+    , readCameras(true)
+    , readLights(true)
+    , readAnimations(true)
+    , readWeights(true)
+    , preservePivots(true)
+    , optimizeEmptyAnimationCurves(true)
+    , useLegacyEmbeddedTextureNaming(false)
+    , removeEmptyBones( true ) {
+        // empty
+    }
 
 
     /** enable strict mode:
@@ -141,8 +143,12 @@ struct ImportSettings
     bool optimizeEmptyAnimationCurves;
 
     /** use legacy naming for embedded textures eg: (*0, *1, *2)
-    **/
+    */
     bool useLegacyEmbeddedTextureNaming;
+
+    /** Empty bones shall be removed
+    */
+    bool removeEmptyBones;
 };
 
 

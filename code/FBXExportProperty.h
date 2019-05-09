@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ostream>
 #include <type_traits> // is_void
 
+namespace Assimp {
 namespace FBX {
     class Property;
 }
@@ -123,7 +124,7 @@ private:
     char type;
     std::vector<uint8_t> data;
 };
-
+}
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 
 #endif // AI_FBXEXPORTPROPERTY_H_INC

@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXExportNode.h"
 #include "FBXExportProperty.h"
 #include "FBXCommon.h"
+#include "FBXUtil.h"
 
 #include <assimp/version.h> // aiGetVersion
 #include <assimp/IOSystem.hpp>
@@ -73,7 +74,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const ai_real DEG = ai_real( 57.29577951308232087679815481 ); // degrees per radian
 
+using namespace Assimp;
+using namespace Assimp::FBX;
+
 // some constants that we'll use for writing metadata
+namespace Assimp {
 namespace FBX {
     const std::string EXPORT_VERSION_STR = "7.4.0";
     const uint32_t EXPORT_VERSION_INT = 7400; // 7.4 == 2014/2015
@@ -91,11 +96,6 @@ namespace FBX {
     const std::string COMMENT_UNDERLINE =
         ";------------------------------------------------------------------";
 }
-
-using namespace Assimp;
-using namespace FBX;
-
-namespace Assimp {
 
     // ---------------------------------------------------------------------
     // Worker function for exporting a scene to binary FBX.
@@ -121,6 +121,7 @@ namespace Assimp {
         IOSystem* pIOSystem,
         const aiScene* pScene,
         const ExportProperties* pProperties
+
     ){
         // initialize the exporter
         FBXExporter exporter(pScene, pProperties);
@@ -1393,10 +1394,6 @@ void FBXExporter::WriteObjects ()
 
     // FbxVideo - stores images used by textures.
     for (const auto &it : uid_by_image) {
-        if (it.first.compare(0, 1, "*") == 0) {
-            // TODO: embedded textures
-            continue;
-        }
         FBX::Node n("Video");
         const int64_t& uid = it.second;
         const std::string name = ""; // TODO: ... name???
@@ -1406,7 +1403,38 @@ void FBXExporter::WriteObjects ()
         // TODO: get full path... relative path... etc... ugh...
         // for now just use the same path for everything,
         // and hopefully one of them will work out.
-        const std::string& path = it.first;
+        std::string path = it.first;
+        // try get embedded texture
+        const aiTexture* embedded_texture = mScene->GetEmbeddedTexture(it.first.c_str());
+        if (embedded_texture != nullptr)
+        {
+            // change the path (use original filename, if available. If name is ampty, concatenate texture index with file extension)
+            std::stringstream newPath;
+            if (embedded_texture->mFilename.length > 0)
+                newPath << embedded_texture->mFilename.C_Str();
+            else if (embedded_texture->achFormatHint[0])
+            {
+                int texture_index = std::stoi(path.substr(1, path.size() - 1));
+                newPath << texture_index << "." << embedded_texture->achFormatHint;
+            }
+            path = newPath.str();
+            // embed the texture
+            size_t texture_size = static_cast<size_t>(embedded_texture->mWidth * std::max(embedded_texture->mHeight, 1u));
+            if (binary)
+            {
+                // embed texture as binary data
+                std::vector<uint8_t> tex_data;
+                tex_data.resize(texture_size);
+                memcpy(&tex_data[0], (char*)embedded_texture->pcData, texture_size);
+                n.AddChild("Content", tex_data);
+            }
+            else
+            {
+                // embed texture in base64 encoding
+                std::string encoded_texture = FBX::Util::EncodeBase64((char*)embedded_texture->pcData, texture_size);
+                n.AddChild("Content", encoded_texture);
+            }
+        }
         p.AddP70("Path", "KString", "XRefUrl", "", path);
         n.AddChild(p);
         n.AddChild("UseMipMap", int32_t(0));

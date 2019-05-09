@@ -113,6 +113,15 @@ uint8_t DecodeBase64(char ch);
 *  @return size of the decoded data (number of bytes)*/
 size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
 
+char EncodeBase64(char byte);
+
+/** Encode bytes in base64-encoding
+*
+*  @param data Binary data to encode.
+*  @param inLength Number of bytes to encode.
+*  @return base64-encoded string*/
+std::string EncodeBase64(const char* data, size_t length);
+
 }
 }
 }

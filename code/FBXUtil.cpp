@@ -170,10 +170,10 @@ char EncodeBase64(char byte)
 *  @param string_pos Position in out_string.*/
 void EncodeByteBlock(const char* bytes, std::string& out_string, size_t string_pos)
 {
-    char b0 = (bytes[0] & 0b11111100) >> 2;
-    char b1 = (bytes[0] & 0b00000011) << 4 | ((bytes[1] & 0b11110000) >> 4);
-    char b2 = (bytes[1] & 0b00001111) << 2 | ((bytes[2] & 0b11000000) >> 6);
-    char b3 = (bytes[2] & 0b00111111);
+    char b0 = (bytes[0] & 0xFC) >> 2;
+    char b1 = (bytes[0] & 0x03) << 4 | ((bytes[1] & 0xF0) >> 4);
+    char b2 = (bytes[1] & 0x0F) << 2 | ((bytes[2] & 0xC0) >> 6);
+    char b3 = (bytes[2] & 0x3F);
 
     out_string[string_pos + 0] = EncodeBase64(b0);
     out_string[string_pos + 1] = EncodeBase64(b1);

@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+namespace Assimp {
 namespace FBX {
     class Node;
 }
@@ -264,7 +265,7 @@ private: // static helper functions
     );
 
 };
-
+}
 
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 

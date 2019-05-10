@@ -157,6 +157,66 @@ size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out)
     return outLength;
 }
 
+static const char to_base64_string[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+char EncodeBase64(char byte)
+{
+    return to_base64_string[(size_t)byte];
+}
+
+/** Encodes a block of 4 bytes to base64 encoding
+*
+*  @param bytes Bytes to encode.
+*  @param out_string String to write encoded values to.
+*  @param string_pos Position in out_string.*/
+void EncodeByteBlock(const char* bytes, std::string& out_string, size_t string_pos)
+{
+    char b0 = (bytes[0] & 0xFC) >> 2;
+    char b1 = (bytes[0] & 0x03) << 4 | ((bytes[1] & 0xF0) >> 4);
+    char b2 = (bytes[1] & 0x0F) << 2 | ((bytes[2] & 0xC0) >> 6);
+    char b3 = (bytes[2] & 0x3F);
+
+    out_string[string_pos + 0] = EncodeBase64(b0);
+    out_string[string_pos + 1] = EncodeBase64(b1);
+    out_string[string_pos + 2] = EncodeBase64(b2);
+    out_string[string_pos + 3] = EncodeBase64(b3);
+}
+
+std::string EncodeBase64(const char* data, size_t length)
+{
+    // calculate extra bytes needed to get a multiple of 3
+    size_t extraBytes = 3 - length % 3;
+
+    // number of base64 bytes
+    size_t encodedBytes = 4 * (length + extraBytes) / 3;
+
+    std::string encoded_string(encodedBytes, '=');
+
+    // read blocks of 3 bytes
+    for (size_t ib3 = 0; ib3 < length / 3; ib3++)
+    {
+        const size_t iByte = ib3 * 3;
+        const size_t iEncodedByte = ib3 * 4;
+        const char* currData = &data[iByte];
+
+        EncodeByteBlock(currData, encoded_string, iEncodedByte);
+    }
+
+    // if size of data is not a multiple of 3, also encode the final bytes (and add zeros where needed)
+    if (extraBytes > 0)
+    {
+        char finalBytes[4] = { 0,0,0,0 };
+        memcpy(&finalBytes[0], &data[length - length % 3], length % 3);
+
+        const size_t iEncodedByte = encodedBytes - 4;
+        EncodeByteBlock(&finalBytes[0], encoded_string, iEncodedByte);
+
+        // add '=' at the end
+        for (size_t i = 0; i < 4 * extraBytes / 3; i++)
+            encoded_string[encodedBytes - i - 1] = '=';
+    }
+    return encoded_string;
+}
+
 } // !Util
 } // !FBX
 } // !Assimp

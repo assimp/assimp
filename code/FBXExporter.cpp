@@ -1406,30 +1406,25 @@ void FBXExporter::WriteObjects ()
         std::string path = it.first;
         // try get embedded texture
         const aiTexture* embedded_texture = mScene->GetEmbeddedTexture(it.first.c_str());
-        if (embedded_texture != nullptr)
-        {
-            // change the path (use original filename, if available. If name is ampty, concatenate texture index with file extension)
+        if (embedded_texture != nullptr) {
+            // change the path (use original filename, if available. If name is empty, concatenate texture index with file extension)
             std::stringstream newPath;
-            if (embedded_texture->mFilename.length > 0)
+            if (embedded_texture->mFilename.length > 0) {
                 newPath << embedded_texture->mFilename.C_Str();
-            else if (embedded_texture->achFormatHint[0])
-            {
+            } else if (embedded_texture->achFormatHint[0]) {
                 int texture_index = std::stoi(path.substr(1, path.size() - 1));
                 newPath << texture_index << "." << embedded_texture->achFormatHint;
             }
             path = newPath.str();
             // embed the texture
             size_t texture_size = static_cast<size_t>(embedded_texture->mWidth * std::max(embedded_texture->mHeight, 1u));
-            if (binary)
-            {
+            if (binary) {
                 // embed texture as binary data
                 std::vector<uint8_t> tex_data;
                 tex_data.resize(texture_size);
                 memcpy(&tex_data[0], (char*)embedded_texture->pcData, texture_size);
                 n.AddChild("Content", tex_data);
-            }
-            else
-            {
+            } else {
                 // embed texture in base64 encoding
                 std::string encoded_texture = FBX::Util::EncodeBase64((char*)embedded_texture->pcData, texture_size);
                 n.AddChild("Content", encoded_texture);
@@ -1447,17 +1442,17 @@ void FBXExporter::WriteObjects ()
     // referenced by material_index/texture_type pairs.
     std::map<std::pair<size_t,size_t>,int64_t> texture_uids;
     const std::map<aiTextureType,std::string> prop_name_by_tt = {
-        {aiTextureType_DIFFUSE, "DiffuseColor"},
-        {aiTextureType_SPECULAR, "SpecularColor"},
-        {aiTextureType_AMBIENT, "AmbientColor"},
-        {aiTextureType_EMISSIVE, "EmissiveColor"},
-        {aiTextureType_HEIGHT, "Bump"},
-        {aiTextureType_NORMALS, "NormalMap"},
-        {aiTextureType_SHININESS, "ShininessExponent"},
-        {aiTextureType_OPACITY, "TransparentColor"},
+        {aiTextureType_DIFFUSE,      "DiffuseColor"},
+        {aiTextureType_SPECULAR,     "SpecularColor"},
+        {aiTextureType_AMBIENT,      "AmbientColor"},
+        {aiTextureType_EMISSIVE,     "EmissiveColor"},
+        {aiTextureType_HEIGHT,       "Bump"},
+        {aiTextureType_NORMALS,      "NormalMap"},
+        {aiTextureType_SHININESS,    "ShininessExponent"},
+        {aiTextureType_OPACITY,      "TransparentColor"},
         {aiTextureType_DISPLACEMENT, "DisplacementColor"},
         //{aiTextureType_LIGHTMAP, "???"},
-        {aiTextureType_REFLECTION, "ReflectionColor"}
+        {aiTextureType_REFLECTION,   "ReflectionColor"}
         //{aiTextureType_UNKNOWN, ""}
     };
     for (size_t i = 0; i < mScene->mNumMaterials; ++i) {

@@ -253,7 +253,8 @@ void FBX::Node::DumpChildren(
     } else {
         std::ostringstream ss;
         DumpChildrenAscii(ss, indent);
-        s.PutString(ss.str());
+        if (ss.tellp() > 0)
+            s.PutString(ss.str());
     }
 }
 
@@ -267,7 +268,8 @@ void FBX::Node::End(
     } else {
         std::ostringstream ss;
         EndAscii(ss, indent, has_children);
-        s.PutString(ss.str());
+        if (ss.tellp() > 0)
+            s.PutString(ss.str());
     }
 }
 

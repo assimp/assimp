@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <locale>
 #include <sstream> // ostringstream
 
-
+namespace Assimp {
 // constructors for single element properties
 
 FBX::Property::Property(bool v)
@@ -359,6 +359,6 @@ void FBX::Property::DumpAscii(std::ostream& s, int indent)
         throw runtime_error(err.str());
     }
 }
-
+}
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

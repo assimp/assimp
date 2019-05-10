@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream> // ostringstream
 #include <memory> // shared_ptr
 
+namespace Assimp {
 // AddP70<type> helpers... there's no usable pattern here,
 // so all are defined as separate functions.
 // Even "animatable" properties are often completely different
@@ -252,7 +253,8 @@ void FBX::Node::DumpChildren(
     } else {
         std::ostringstream ss;
         DumpChildrenAscii(ss, indent);
-        s.PutString(ss.str());
+        if (ss.tellp() > 0)
+            s.PutString(ss.str());
     }
 }
 
@@ -266,7 +268,8 @@ void FBX::Node::End(
     } else {
         std::ostringstream ss;
         EndAscii(ss, indent, has_children);
-        s.PutString(ss.str());
+        if (ss.tellp() > 0)
+            s.PutString(ss.str());
     }
 }
 
@@ -367,7 +370,7 @@ void FBX::Node::EndBinary(
     bool has_children
 ) {
     // if there were children, add a null record
-    if (has_children) { s.PutString(FBX::NULL_RECORD); }
+    if (has_children) { s.PutString(Assimp::FBX::NULL_RECORD); }
 
     // now go back and write initial pos
     this->end_pos = s.Tell();
@@ -563,6 +566,6 @@ void FBX::Node::WritePropertyNode(
         FBX::Node::WritePropertyNodeAscii(name, v, s, indent);
     }
 }
-
+}
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

@@ -1299,7 +1299,7 @@ void ASEImporter::BuildMaterialIndices()
         }
     }
 
-    // Dekete our temporary array
+    // Delete our temporary array
     delete[] pcIntMaterials;
 }
 

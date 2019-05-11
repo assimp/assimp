@@ -16,7 +16,7 @@ OutputBaseFileName=assimp-sdk-5.0.0-setup
 VersionInfoVersion=4.1.0.0
 VersionInfoTextVersion=4.1.0
 VersionInfoCompany=Assimp Development Team
-ArchitecturesInstallIn64BitMode=x86
+;ArchitecturesInstallIn64BitMode=x64
 
 [Types]
 Name: "full";    Description: "Full installation"

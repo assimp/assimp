@@ -65,6 +65,9 @@ Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Comp
 ; Include files
 Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 
+; CMake files
+Source: "..\..\cmake-modules\*"; DestDir: "{app}\cmake-modules"; Flags: recursesubdirs
+
 [Icons]
 ; Name: "{group}\Assimp Manual"; Filename: "{app}\doc\AssimpDoc.chm" ; Components: help
 ; Name: "{group}\Assimp Command Line Manual"; Filename: "{app}\doc\AssimpCmdDoc.chm"; Components: help

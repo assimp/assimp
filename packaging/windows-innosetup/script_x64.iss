@@ -32,7 +32,7 @@ Name: "test";        Description: "Test Models (BSD-licensed)"; Types: full
 Name: "test_nonbsd"; Description: "Test Models (other (free) licenses)"; Types: full
 
 [Run]
-Filename: "{app}\stub\vc_redist.x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2017 redistributable package (64 Bit)"; Check: IsWin64
+Filename: "{app}\stub\vc_redist.x64.exe"; Parameters: "/qb /passive /quiet"; StatusMsg: "Installing VS2017 redistributable package (64 Bit)"; Check: IsWin64
 
 [Files]
 Source: "readme_installer.txt"; DestDir: "{app}"; Flags: isreadme

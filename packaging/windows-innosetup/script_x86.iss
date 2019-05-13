@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v4.1.0)
+AppVerName=Open Asset Import Library - SDK (v5.0.0)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x86\assimp.exe
@@ -12,11 +12,11 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-4.1.0-setup
+OutputBaseFileName=assimp-sdk-5.0.0-setup
 VersionInfoVersion=4.1.0.0
 VersionInfoTextVersion=4.1.0
 VersionInfoCompany=Assimp Development Team
-ArchitecturesInstallIn64BitMode=x64
+;ArchitecturesInstallIn64BitMode=x64
 
 [Types]
 Name: "full";    Description: "Full installation"
@@ -32,7 +32,7 @@ Name: "test";        Description: "Test Models (BSD-licensed)"; Types: full
 Name: "test_nonbsd"; Description: "Test Models (other (free) licenses)"; Types: full
 
 [Run]
-Filename: "{app}\stub\vc_redist.x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2017 redistributable package (32 Bit)"; Check: not IsWin64
+Filename: "{app}\stub\vc_redist.x86.exe"; Parameters: "/qb /passive /quiet"; StatusMsg: "Installing VS2017 redistributable package (32 Bit)"; Check: not IsWin64
 
 [Files]
 Source: "readme_installer.txt"; DestDir: "{app}"; Flags: isreadme
@@ -64,6 +64,9 @@ Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Comp
 
 ; Include files
 Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
+
+; CMake files
+Source: "..\..\cmake-modules\*"; DestDir: "{app}\cmake-modules"; Flags: recursesubdirs
 
 [Icons]
 ; Name: "{group}\Assimp Manual"; Filename: "{app}\doc\AssimpDoc.chm" ; Components: help

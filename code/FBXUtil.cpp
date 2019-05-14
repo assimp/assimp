@@ -170,6 +170,7 @@ size_t DecodeBase64(const char* in, size_t inLength, uint8_t* out, size_t maxOut
         {
             out[dst_offset++] = static_cast<uint8_t>((val >> valb) & 0xFF);
             valb -= 8;
+            val &= 0xFFF;
         }
     }
     return dst_offset;

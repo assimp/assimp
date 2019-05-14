@@ -93,7 +93,7 @@ public:
     Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
 
     /** construct a binary token */
-    Token(const char* sbegin, const char* send, TokenType type, unsigned int offset);
+    Token(const char* sbegin, const char* send, TokenType type, size_t offset);
 
     ~Token();
 
@@ -118,14 +118,14 @@ public:
         return type;
     }
 
-    unsigned int Offset() const {
+    size_t Offset() const {
         ai_assert(IsBinary());
         return offset;
     }
 
     unsigned int Line() const {
         ai_assert(!IsBinary());
-        return line;
+        return static_cast<unsigned int>(line);
     }
 
     unsigned int Column() const {
@@ -147,8 +147,8 @@ private:
     const TokenType type;
 
     union {
-        const unsigned int line;
-        unsigned int offset;
+        size_t line;
+        size_t offset;
     };
     const unsigned int column;
 };
@@ -178,7 +178,7 @@ void Tokenize(TokenList& output_tokens, const char* input);
  * @param input_buffer Binary input buffer to be processed.
  * @param length Length of input buffer, in bytes. There is no 0-terminal.
  * @throw DeadlyImportError if something goes wrong */
-void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int length);
+void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length);
 
 
 } // ! FBX

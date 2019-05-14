@@ -86,7 +86,7 @@ const char* TokenTypeString(TokenType t)
 
 
 // ------------------------------------------------------------------------------------------------
-std::string AddOffset(const std::string& prefix, const std::string& text, unsigned int offset)
+std::string AddOffset(const std::string& prefix, const std::string& text, size_t offset)
 {
     return static_cast<std::string>( (Formatter::format() << prefix << " (offset 0x" << std::hex << offset << ") " << text) );
 }

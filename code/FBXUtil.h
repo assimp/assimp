@@ -78,7 +78,7 @@ const char* TokenTypeString(TokenType t);
  *  @param line Line index, 1-based
  *  @param column Column index, 1-based
  *  @return A string of the following format: {prefix} (offset 0x{offset}) {text}*/
-std::string AddOffset(const std::string& prefix, const std::string& text, unsigned int offset);
+std::string AddOffset(const std::string& prefix, const std::string& text, size_t offset);
 
 
 /** Format log/error messages using a given line location in the source file.

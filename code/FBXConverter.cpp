@@ -442,15 +442,17 @@ namespace Assimp {
         void FBXConverter::GetUniqueName(const std::string &name, std::string &uniqueName)
         {
             uniqueName = name;
-            int i = 0;
-            while (mNodeNames.find(uniqueName) != mNodeNames.end())
+            auto it_pair = mNodeNameInstances.insert({ name, 0 }); // duplicate node name instance count
+            unsigned int& i = it_pair.first->second;
+            auto uniqueIt_pair = mNodeNames.insert(uniqueName);
+            while (!uniqueIt_pair.second)
             {
                 i++;
                 std::stringstream ext;
                 ext << name << std::setfill('0') << std::setw(3) << i;
                 uniqueName = ext.str();
+                uniqueIt_pair = mNodeNames.insert(uniqueName);
             }
-            mNodeNames.insert(uniqueName);
         }
 
         const char* FBXConverter::NameTransformationComp(TransformationComp comp) {

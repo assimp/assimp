@@ -166,7 +166,7 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
     ASSERT_STREQ(child1->mName.C_Str(), "Cube3");
 
     auto parent = child1;
-    constexpr size_t chain_length = 8u;
+    const size_t chain_length = 8u;
     const char* chainStr[chain_length] = {
         "Cube1001_$AssimpFbx$_Translation",
         "Cube1001_$AssimpFbx$_RotationPivot",

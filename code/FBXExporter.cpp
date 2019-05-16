@@ -2271,8 +2271,8 @@ void FBXExporter::WriteModelNode(
 
     // not sure what these are for,
     // but they seem to be omnipresent
-    m.AddChild("Shading", Property(true));
-    m.AddChild("Culling", Property("CullingOff"));
+    m.AddChild("Shading", FBXExportProperty(true));
+    m.AddChild("Culling", FBXExportProperty("CullingOff"));
 
     m.Dump(outstream, binary, 1);
 }
@@ -2385,7 +2385,7 @@ void FBXExporter::WriteModelNodes(
         na.AddProperties(
             node_attribute_uid, FBX::SEPARATOR + "NodeAttribute", "LimbNode"
         );
-        na.AddChild("TypeFlags", Property("Skeleton"));
+        na.AddChild("TypeFlags", FBXExportProperty("Skeleton"));
         na.Dump(outstream, binary, 1);
         // and connect them
         connections.emplace_back("C", "OO", node_attribute_uid, node_uid);

@@ -54,16 +54,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+namespace Assimp {
 namespace FBX {
     class Node;
 }
 
-class FBX::Node
-{
-public: // public data members
+class FBX::Node {
+public: 
     // TODO: accessors
     std::string name; // node name
-    std::vector<FBX::Property> properties; // node properties
+    std::vector<FBX::FBXExportProperty> properties; // node properties
     std::vector<FBX::Node> children; // child nodes
 
     // some nodes always pretend they have children...
@@ -214,7 +214,7 @@ public: // static member functions
         Assimp::StreamWriterLE& s,
         bool binary, int indent
     ) {
-        FBX::Property p(value);
+        FBX::FBXExportProperty p(value);
         FBX::Node node(name, p);
         node.Dump(s, binary, indent);
     }
@@ -264,7 +264,7 @@ private: // static helper functions
     );
 
 };
-
+}
 
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 

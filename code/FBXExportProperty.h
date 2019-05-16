@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
 
-
 #include <assimp/types.h> // aiMatrix4x4
 #include <assimp/StreamWriter.h> // StreamWriterLE
 
@@ -56,11 +55,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ostream>
 #include <type_traits> // is_void
 
+namespace Assimp {
 namespace FBX {
-    class Property;
-}
 
-/** FBX::Property
+/** @brief FBX::Property
  *
  *  Holds a value of any of FBX's recognized types,
  *  each represented by a particular one-character code.
@@ -78,35 +76,34 @@ namespace FBX {
  *  S : string (array of 1-byte char)
  *  R : raw data (array of bytes)
  */
-class FBX::Property
-{
+class FBXExportProperty {
 public:
     // constructors for basic types.
     // all explicit to avoid accidental typecasting
-    explicit Property(bool v);
+    explicit FBXExportProperty(bool v);
     // TODO: determine if there is actually a byte type,
     // or if this always means <bool>. 'C' seems to imply <char>,
     // so possibly the above was intended to represent both.
-    explicit Property(int16_t v);
-    explicit Property(int32_t v);
-    explicit Property(float v);
-    explicit Property(double v);
-    explicit Property(int64_t v);
+    explicit FBXExportProperty(int16_t v);
+    explicit FBXExportProperty(int32_t v);
+    explicit FBXExportProperty(float v);
+    explicit FBXExportProperty(double v);
+    explicit FBXExportProperty(int64_t v);
     // strings can either be stored as 'R' (raw) or 'S' (string) type
-    explicit Property(const char* c, bool raw=false);
-    explicit Property(const std::string& s, bool raw=false);
-    explicit Property(const std::vector<uint8_t>& r);
-    explicit Property(const std::vector<int32_t>& va);
-    explicit Property(const std::vector<int64_t>& va);
-    explicit Property(const std::vector<double>& va);
-    explicit Property(const std::vector<float>& va);
-    explicit Property(const aiMatrix4x4& vm);
+    explicit FBXExportProperty(const char* c, bool raw = false);
+    explicit FBXExportProperty(const std::string& s, bool raw = false);
+    explicit FBXExportProperty(const std::vector<uint8_t>& r);
+    explicit FBXExportProperty(const std::vector<int32_t>& va);
+    explicit FBXExportProperty(const std::vector<int64_t>& va);
+    explicit FBXExportProperty(const std::vector<double>& va);
+    explicit FBXExportProperty(const std::vector<float>& va);
+    explicit FBXExportProperty(const aiMatrix4x4& vm);
 
     // this will catch any type not defined above,
     // so that we don't accidentally convert something we don't want.
     // for example (const char*) --> (bool)... seriously wtf C++
     template <class T>
-    explicit Property(T v) : type('X') {
+    explicit FBXExportProperty(T v) : type('X') {
         static_assert(std::is_void<T>::value, "TRIED TO CREATE FBX PROPERTY WITH UNSUPPORTED TYPE, CHECK YOUR PROPERTY INSTANTIATION");
     } // note: no line wrap so it appears verbatim on the compiler error
 
@@ -114,15 +111,18 @@ public:
     size_t size();
 
     // write this property node as binary data to the given stream
-    void DumpBinary(Assimp::StreamWriterLE &s);
-    void DumpAscii(Assimp::StreamWriterLE &s, int indent=0);
-    void DumpAscii(std::ostream &s, int indent=0);
+    void DumpBinary(Assimp::StreamWriterLE& s);
+    void DumpAscii(Assimp::StreamWriterLE& s, int indent = 0);
+    void DumpAscii(std::ostream& s, int indent = 0);
     // note: make sure the ostream is in classic "C" locale
 
 private:
     char type;
     std::vector<uint8_t> data;
 };
+
+} // Namespace FBX
+} // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 

@@ -568,15 +568,15 @@ void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, cons
 }
 
 // ------------------------------------------------------------------------------------------------
-static const std::string TangentIndexToken = "TangentIndex";
-static const std::string TangentsIndexToken = "TangentsIndex";
+static const char *TangentIndexToken = "TangentIndex";
+static const char *TangentsIndexToken = "TangentsIndex";
 
 void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source,
     const std::string& MappingInformationType,
     const std::string& ReferenceInformationType)
 {
     const char * str = source.Elements().count( "Tangents" ) > 0 ? "Tangents" : "Tangent";
-    const char * strIdx = source.Elements().count( "Tangents" ) > 0 ? TangentsIndexToken.c_str() : TangentIndexToken.c_str();
+    const char * strIdx = source.Elements().count( "Tangents" ) > 0 ? TangentsIndexToken : TangentIndexToken;
     ResolveVertexDataArray(tangents_out,source,MappingInformationType,ReferenceInformationType,
         str,
         strIdx,

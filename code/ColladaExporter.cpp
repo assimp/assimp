@@ -64,13 +64,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
-{
+void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
 
@@ -93,12 +91,12 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 
 } // end of namespace Assimp
 
-
-
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
-{
+ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) 
+: mIOSystem(pIOSystem)
+, mPath(path)
+, mFile(file) {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
     mOutput.precision(16);
@@ -115,17 +113,15 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-ColladaExporter::~ColladaExporter()
-{
-    if(mSceneOwned) {
+ColladaExporter::~ColladaExporter() {
+    if ( mSceneOwned ) {
         delete mScene;
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Starts writing the contents
-void ColladaExporter::WriteFile()
-{
+void ColladaExporter::WriteFile() {
     // write the DTD
     mOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << endstr;
     // COLLADA element start
@@ -158,8 +154,7 @@ void ColladaExporter::WriteFile()
 
 // ------------------------------------------------------------------------------------------------
 // Writes the asset header
-void ColladaExporter::WriteHeader()
-{
+void ColladaExporter::WriteHeader() {
     static const ai_real epsilon = ai_real( 0.00001 );
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
@@ -238,25 +233,64 @@ void ColladaExporter::WriteHeader()
     mOutput << startstr << "<contributor>" << endstr;
     PushTag();
 
-    aiMetadata* meta = mScene->mRootNode->mMetaData;
+    // If no Scene metadata, use root node metadata
+    aiMetadata* meta = mScene->mMetaData;
+    if (nullptr == meta) {
+        meta = mScene->mRootNode->mMetaData;
+    }
+
     aiString value;
-    if (!meta || !meta->Get("Author", value))
+    if (!meta || !meta->Get("Author", value)) {
         mOutput << startstr << "<author>" << "Assimp" << "</author>" << endstr;
-    else
+    } else {
         mOutput << startstr << "<author>" << XMLEscape(value.C_Str()) << "</author>" << endstr;
+    }
 
-    if (!meta || !meta->Get("AuthoringTool", value))
+    if (nullptr == meta || !meta->Get("AuthoringTool", value)) {
         mOutput << startstr << "<authoring_tool>" << "Assimp Exporter" << "</authoring_tool>" << endstr;
-    else
+    } else {
         mOutput << startstr << "<authoring_tool>" << XMLEscape(value.C_Str()) << "</authoring_tool>" << endstr;
+    }
 
-    //mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
-    //mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
+    if (meta) {
+        if (meta->Get("Comments", value)) {
+            mOutput << startstr << "<comments>" << XMLEscape(value.C_Str()) << "</comments>" << endstr;
+        }
+        if (meta->Get("Copyright", value)) {
+            mOutput << startstr << "<copyright>" << XMLEscape(value.C_Str()) << "</copyright>" << endstr;
+        }
+        if (meta->Get("SourceData", value)) {
+            mOutput << startstr << "<source_data>" << XMLEscape(value.C_Str()) << "</source_data>" << endstr;
+        }
+    }
 
     PopTag();
     mOutput << startstr << "</contributor>" << endstr;
-    mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
+
+    if (nullptr == meta || !meta->Get("Created", value)) {
+        mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
+    } else {
+        mOutput << startstr << "<created>" << XMLEscape(value.C_Str()) << "</created>" << endstr;
+    }
+
+    // Modified date is always the date saved
     mOutput << startstr << "<modified>" << date_str << "</modified>" << endstr;
+
+    if (meta) {
+        if (meta->Get("Keywords", value)) {
+            mOutput << startstr << "<keywords>" << XMLEscape(value.C_Str()) << "</keywords>" << endstr;
+        }
+        if (meta->Get("Revision", value)) {
+            mOutput << startstr << "<revision>" << XMLEscape(value.C_Str()) << "</revision>" << endstr;
+        }
+        if (meta->Get("Subject", value)) {
+            mOutput << startstr << "<subject>" << XMLEscape(value.C_Str()) << "</subject>" << endstr;
+        }
+        if (meta->Get("Title", value)) {
+            mOutput << startstr << "<title>" << XMLEscape(value.C_Str()) << "</title>" << endstr;
+        }
+    }
+
     mOutput << startstr << "<unit name=\"meter\" meter=\"" << scale << "\" />" << endstr;
     mOutput << startstr << "<up_axis>" << up_axis << "</up_axis>" << endstr;
     PopTag();
@@ -269,12 +303,15 @@ void ColladaExporter::WriteTextures() {
     static const unsigned int buffer_size = 1024;
     char str[buffer_size];
 
-    if(mScene->HasTextures()) {
+    if (mScene->HasTextures()) {
         for(unsigned int i = 0; i < mScene->mNumTextures; i++) {
             // It would be great to be able to create a directory in portable standard C++, but it's not the case,
             // so we just write the textures in the current directory.
 
             aiTexture* texture = mScene->mTextures[i];
+            if ( nullptr == texture ) {
+                continue;
+            }
 
             ASSIMP_itoa10(str, buffer_size, i + 1);
 
@@ -428,6 +465,7 @@ void ColladaExporter::WritePointLight(const aiLight *const light){
     mOutput << startstr << "</point>" << endstr;
 
 }
+
 void ColladaExporter::WriteDirectionalLight(const aiLight *const light){
     const aiColor3D &color=  light->mColorDiffuse;
     mOutput << startstr << "<directional>" << endstr;
@@ -440,6 +478,7 @@ void ColladaExporter::WriteDirectionalLight(const aiLight *const light){
     mOutput << startstr << "</directional>" << endstr;
 
 }
+
 void ColladaExporter::WriteSpotLight(const aiLight *const light){
 
     const aiColor3D &color=  light->mColorDiffuse;
@@ -496,18 +535,16 @@ void ColladaExporter::WriteAmbienttLight(const aiLight *const light){
 
 // ------------------------------------------------------------------------------------------------
 // Reads a single surface entry from the given material keys
-void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex)
-{
-  if( pSrcMat->GetTextureCount( pTexture) > 0 )
-  {
+void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, 
+                                          aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex) {
+  if( pSrcMat->GetTextureCount( pTexture) > 0 ) {
     aiString texfile;
     unsigned int uvChannel = 0;
     pSrcMat->GetTexture( pTexture, 0, &texfile, NULL, &uvChannel);
 
     std::string index_str(texfile.C_Str());
 
-    if(index_str.size() != 0 && index_str[0] == '*')
-    {
+    if(index_str.size() != 0 && index_str[0] == '*') {
         unsigned int index;
 
         index_str = index_str.substr(1, std::string::npos);
@@ -525,15 +562,13 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
         } else {
             throw DeadlyExportError("could not find embedded texture at index " + index_str);
         }
-    } else
-    {
+    } else {
         poSurface.texture = texfile.C_Str();
     }
 
     poSurface.channel = uvChannel;
     poSurface.exist = true;
-  } else
-  {
+  } else {
     if( pKey )
       poSurface.exist = pSrcMat->Get( pKey, static_cast<unsigned int>(pType), static_cast<unsigned int>(pIndex), poSurface.color) == aiReturn_SUCCESS;
   }
@@ -541,15 +576,13 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
 
 // ------------------------------------------------------------------------------------------------
 // Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
-static bool isalnum_C(char c)
-{
+static bool isalnum_C(char c) {
   return ( nullptr != strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c) );
 }
 
 // ------------------------------------------------------------------------------------------------
 // Writes an image entry for the given surface
-void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd)
-{
+void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd) {
   if( !pSurface.texture.empty() )
   {
     mOutput << startstr << "<image id=\"" << XMLEscape(pNameAdd) << "\">" << endstr;
@@ -803,8 +836,9 @@ void ColladaExporter::WriteControllerLibrary()
     mOutput << startstr << "<library_controllers>" << endstr;
     PushTag();
     
-    for( size_t a = 0; a < mScene->mNumMeshes; ++a)
+    for( size_t a = 0; a < mScene->mNumMeshes; ++a) {
         WriteController( a);
+    }
 
     PopTag();
     mOutput << startstr << "</library_controllers>" << endstr;

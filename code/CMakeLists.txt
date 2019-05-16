@@ -1077,7 +1077,9 @@ if( MSVC )
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-    set(WindowsStore TRUE)
+    target_compile_definitions(assimp PUBLIC WindowsStore)
+    TARGET_LINK_LIBRARIES(assimp advapi32)
+    #set(WindowsStore TRUE)
 endif()
 SET_TARGET_PROPERTIES( assimp PROPERTIES
   VERSION ${ASSIMP_VERSION}

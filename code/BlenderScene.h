@@ -538,6 +538,10 @@ struct Lamp : ElemBase {
       float energy, dist, spotsize, spotblend;
       //float haint;
 
+      float constant_coefficient;
+      float linear_coefficient;
+      float quadratic_coefficient;
+
       float att1, att2;
       //struct CurveMapping *curfalloff;
       FalloffType falloff_type;

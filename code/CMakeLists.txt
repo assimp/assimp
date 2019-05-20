@@ -1077,7 +1077,9 @@ if( MSVC )
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-    set(WindowsStore TRUE)
+    target_compile_definitions(assimp PUBLIC WindowsStore)
+    TARGET_LINK_LIBRARIES(assimp advapi32)
+    #set(WindowsStore TRUE)
 endif()
 SET_TARGET_PROPERTIES( assimp PROPERTIES
   VERSION ${ASSIMP_VERSION}
@@ -1138,6 +1140,16 @@ if (ASSIMP_ANDROID_JNIIOSYSTEM)
 ENDIF(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
+  # When only the static library is built, these properties must
+  # be set to ensure the static lib .pdb is staged for installation.
+  IF(NOT BUILD_SHARED_LIBS)
+    SET_TARGET_PROPERTIES( assimp PROPERTIES
+      COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMPILE_PDB_NAME assimp${LIBRARY_SUFFIX}
+      COMPILE_PDB_NAME_DEBUG assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}
+    )
+  ENDIF()
+
   IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
     install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
       DESTINATION ${ASSIMP_LIB_INSTALL_DIR}

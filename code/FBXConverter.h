@@ -462,10 +462,7 @@ private:
     NodeAnimBitMap node_anim_chain_bits;
 
     // number of nodes with the same name
-    using NodeAnimNameMap = std::unordered_map<std::string, unsigned int>;
-    NodeAnimNameMap mNodeNameInstances;
-
-    using NodeNameCache = std::unordered_set<std::string>;
+    using NodeNameCache = std::unordered_map<std::string, unsigned int>;
     NodeNameCache mNodeNames;
 
     double anim_fps;

@@ -128,4 +128,28 @@ TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {
     aiString path;
     aiTextureMapMode modes[2];
     EXPECT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
+
+    ASSERT_EQ(1, scene->mNumTextures);
+    ASSERT_TRUE(scene->mTextures[0]->pcData);
+    ASSERT_EQ(439176u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
+}
+
+TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
+    // see https://github.com/assimp/assimp/issues/1957
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_ascii/box_embedded_texture_fragmented.fbx", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(1, scene->mNumMaterials);
+    aiMaterial *mat = scene->mMaterials[0];
+    ASSERT_NE(nullptr, mat);
+
+    aiString path;
+    aiTextureMapMode modes[2];
+    ASSERT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
+    ASSERT_STREQ(path.C_Str(), "paper.png");
+
+    ASSERT_EQ(1, scene->mNumTextures);
+    ASSERT_TRUE(scene->mTextures[0]->pcData);
+    ASSERT_EQ(968029u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
 }

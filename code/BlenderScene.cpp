@@ -211,9 +211,12 @@ template <> void Structure :: Convert<Lamp> (
     ReadField<ErrorPolicy_Warn>(dest.b,"b",db);
     ReadField<ErrorPolicy_Warn>(dest.k,"k",db);
     ReadField<ErrorPolicy_Igno>(dest.energy,"energy",db);
-    ReadField<ErrorPolicy_Igno>(dest.dist,"dist",db);
+    ReadField<ErrorPolicy_Warn>(dest.dist,"dist",db);
     ReadField<ErrorPolicy_Igno>(dest.spotsize,"spotsize",db);
     ReadField<ErrorPolicy_Igno>(dest.spotblend,"spotblend",db);
+    ReadField<ErrorPolicy_Warn>(dest.constant_coefficient, "coeff_const", db);
+    ReadField<ErrorPolicy_Warn>(dest.linear_coefficient, "coeff_lin", db);
+    ReadField<ErrorPolicy_Warn>(dest.quadratic_coefficient, "coeff_quad", db);
     ReadField<ErrorPolicy_Igno>(dest.att1,"att1",db);
     ReadField<ErrorPolicy_Igno>(dest.att2,"att2",db);
     ReadField<ErrorPolicy_Igno>(temp,"falloff_type",db);

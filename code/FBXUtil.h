@@ -105,13 +105,21 @@ std::string AddTokenText(const std::string& prefix, const std::string& text, con
 *  @return decoded byte value*/
 uint8_t DecodeBase64(char ch);
 
+/** Compute decoded size of a Base64-encoded string
+*
+*  @param in Characters to decode.
+*  @param inLength Number of characters to decode.
+*  @return size of the decoded data (number of bytes)*/
+size_t ComputeDecodedSizeBase64(const char* in, size_t inLength);
+
 /** Decode a Base64-encoded string
 *
 *  @param in Characters to decode.
 *  @param inLength Number of characters to decode.
-*  @param out Reference to pointer where we will store the decoded data.
+*  @param out Pointer where we will store the decoded data.
+*  @param maxOutLength Size of output buffer.
 *  @return size of the decoded data (number of bytes)*/
-size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
+size_t DecodeBase64(const char* in, size_t inLength, uint8_t* out, size_t maxOutLength);
 
 char EncodeBase64(char byte);
 

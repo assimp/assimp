@@ -316,7 +316,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
         relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
     }
 
-    if(Content) {
+    if(Content && !Content->Tokens().empty()) {
         //this field is omitted when the embedded texture is already loaded, let's ignore if it's not found
         try {
             const Token& token = GetRequiredToken(*Content, 0);
@@ -326,16 +326,40 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
                     DOMError("embedded content is not surrounded by quotation marks", &element);
                 }
                 else {
-                    const char* encodedData = data + 1;
-                    size_t encodedDataLen = static_cast<size_t>(token.end() - token.begin());
-                    // search for last quotation mark
-                    while (encodedDataLen > 1 && encodedData[encodedDataLen] != '"')
-                        encodedDataLen--;
-                    if (encodedDataLen % 4 != 0) {
-                        DOMError("embedded content is invalid, needs to be in base64", &element);
+                    size_t targetLength = 0;
+                    auto numTokens = Content->Tokens().size();
+                    // First time compute size (it could be large like 64Gb and it is good to allocate it once)
+                    for (uint32_t tokenIdx = 0; tokenIdx < numTokens; ++tokenIdx)
+                    {
+                        const Token& dataToken = GetRequiredToken(*Content, tokenIdx);
+                        size_t tokenLength = dataToken.end() - dataToken.begin() - 2; // ignore double quotes
+                        const char* base64data = dataToken.begin() + 1;
+                        const size_t outLength = Util::ComputeDecodedSizeBase64(base64data, tokenLength);
+                        if (outLength == 0)
+                        {
+                            DOMError("Corrupted embedded content found", &element);
+                        }
+                        targetLength += outLength;
                     }
-                    else {
-                        contentLength = Util::DecodeBase64(encodedData, encodedDataLen, content);
+                    if (targetLength == 0)
+                    {
+                        DOMError("Corrupted embedded content found", &element);
+                    }
+                    content = new uint8_t[targetLength];
+                    contentLength = static_cast<uint64_t>(targetLength);
+                    size_t dst_offset = 0;
+                    for (uint32_t tokenIdx = 0; tokenIdx < numTokens; ++tokenIdx)
+                    {
+                        const Token& dataToken = GetRequiredToken(*Content, tokenIdx);
+                        size_t tokenLength = dataToken.end() - dataToken.begin() - 2; // ignore double quotes
+                        const char* base64data = dataToken.begin() + 1;
+                        dst_offset += Util::DecodeBase64(base64data, tokenLength, content + dst_offset, targetLength - dst_offset);
+                    }
+                    if (targetLength != dst_offset)
+                    {
+                        delete[] content;
+                        contentLength = 0;
+                        DOMError("Corrupted embedded content found", &element);
                     }
                 }
             }

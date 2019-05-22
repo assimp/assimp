@@ -228,6 +228,7 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
                     if ( area < 1e-6 ) {
                         if ( mConfigRemoveDegenerates ) {
                             remove_me[ a ] = true;
+                            ++deg;
                             goto evil_jump_outside;
                         }
 

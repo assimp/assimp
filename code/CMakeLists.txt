@@ -292,6 +292,11 @@ ADD_ASSIMP_IMPORTER( AMF
   AMFImporter_Postprocess.cpp
 )
 
+ADD_ASSIMP_IMPORTER( JT
+  JTImporter.h
+  JTImporter.cpp
+)
+
 ADD_ASSIMP_IMPORTER( 3DS
   3DSConverter.cpp
   3DSHelper.h

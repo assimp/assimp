@@ -56,7 +56,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <algorithm>
 #include <cassert>
-#include <unzip.h>
+#ifdef ASSIMP_USE_HUNTER
+#  include <minizip/unzip.h>
+#else
+#  include <unzip.h>
+#endif
 #include "3MFXmlTags.h"
 
 namespace Assimp {

@@ -45,6 +45,10 @@ HunterGate(
     SHA1 "2e9ae973d028660b735ac4c6142725ca36a0048a"
 )
 
+IF(HUNTER_ENABLED)
+  add_definitions(-DASSIMP_USE_HUNTER)
+ENDIF(HUNTER_ENABLED)
+
 PROJECT( Assimp )
 
 # All supported options ###############################################

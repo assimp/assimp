@@ -36,6 +36,16 @@
 #----------------------------------------------------------------------
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
+
+# Toggles the use of the hunter package manager
+option(HUNTER_ENABLED "Enable Hunter package manager support" OFF)
+
+include("cmake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/ruslo/hunter/archive/v0.23.176.tar.gz"
+    SHA1 "2e9ae973d028660b735ac4c6142725ca36a0048a"
+)
+
 PROJECT( Assimp )
 
 # All supported options ###############################################

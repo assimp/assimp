@@ -318,12 +318,12 @@ Ref<T> LazyDict<T>::Create(const char* id)
     if (it != mAsset.mUsedIds.end()) {
         throw DeadlyImportError("GLTF: two objects with the same ID exist");
     }
-    T* inst = new T();
+    std::shared_ptr<T> inst = std::shared_ptr<T>( new T() );
     unsigned int idx = unsigned(mObjs.size());
     inst->id = id;
     inst->index = idx;
     inst->oIndex = idx;
-    return Add(inst);
+    return Add(inst.get());
 }
 
 

@@ -125,12 +125,12 @@ OPTION ( IGNORE_GIT_HASH
    OFF
 )
 
-IF (IOS)
+IF (IOS AND NOT HUNTER_ENABLED)
   IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Release")
   ENDIF (NOT CMAKE_BUILD_TYPE)
   ADD_DEFINITIONS(-DENABLE_BITCODE)
-ENDIF (IOS)
+ENDIF (IOS AND NOT HUNTER_ENABLED)
 
 # Use subset of Windows.h
 if (WIN32)
@@ -170,8 +170,10 @@ SET (PROJECT_VERSION "${ASSIMP_VERSION}")
 
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 
-# Enable C++11 support globally
-set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
+if(NOT HUNTER_ENABLED)
+  # Enable C++11 support globally
+  set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
+endif()
 
 IF(NOT IGNORE_GIT_HASH)
   # Get the current working branch
@@ -232,9 +234,13 @@ ENDIF( UNIX )
 
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
+  IF(NOT HUNTER_ENABLED)
+    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++0x ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+  ENDIF()
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -std=c++0x ${CMAKE_CXX_FLAGS}")
-  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
@@ -245,20 +251,28 @@ ELSEIF(MSVC)
     ADD_COMPILE_OPTIONS(/wd4351)
   ENDIF()
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fPIC -fno-strict-aliasing -Wall -Wno-long-long -std=c++11 ${CMAKE_CXX_FLAGS}" )
-  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS}")
+  IF(NOT HUNTER_ENABLED)
+    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++11 ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+  ENDIF()
+  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
   IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
     message(FATAL_ERROR "MinGW is too old to be supported. Please update MinGW and try again.")
   ELSEIF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.3)
     message(WARNING "MinGW is old, if you experience errors, update MinGW.")
   ENDIF()
-  SET( CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -std=c++11 -Wa,-mbig-obj ${CMAKE_CXX_FLAGS}" )
-  SET(CMAKE_C_FLAGS "-fPIC -fno-strict-aliasing ${CMAKE_C_FLAGS} ")
+  IF(NOT HUNTER_ENABLED)
+    SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+  ENDIF()
+  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
-IF ( IOS )
+IF ( IOS AND NOT HUNTER_ENABLED)
 
 IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -Og")
@@ -269,7 +283,7 @@ ELSE()
   # Experimental for pdb generation
 ENDIF()
 
-ENDIF( IOS )
+ENDIF( IOS AND NOT HUNTER_ENABLED)
 
 IF (ASSIMP_COVERALLS)
   MESSAGE(STATUS "Coveralls enabled")

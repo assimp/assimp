@@ -102,11 +102,11 @@ TEST_F( utglTF2ImportExport, importglTF2FromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
     EXPECT_TRUE( binaryImporterTest() );
 }
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F(utglTF2ImportExport, importglTF2AndExportToOBJ) {
     Assimp::Importer importer;
     Assimp::Exporter exporter;

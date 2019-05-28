@@ -155,6 +155,11 @@ private:
     const char* NameTransformationComp(TransformationComp comp);
 
     // ------------------------------------------------------------------------------------------------
+    // Returns an unique name for a node or traverses up a hierarchy until a non-empty name is found and
+    // then makes this name unique
+    std::string MakeUniqueNodeName(const Model* const model, const aiNode& parent);
+
+    // ------------------------------------------------------------------------------------------------
     // note: this returns the REAL fbx property names
     const char* NameTransformationCompProperty(TransformationComp comp);
 
@@ -177,7 +182,7 @@ private:
     /**
     *  note: memory for output_nodes will be managed by the caller
     */
-    void GenerateTransformationNodeChain(const Model& model, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes);
+    bool GenerateTransformationNodeChain(const Model& model, const std::string& name, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes);
 
     // ------------------------------------------------------------------------------------------------
     void SetupNodeMetadata(const Model& model, aiNode& nd);
@@ -457,10 +462,7 @@ private:
     NodeAnimBitMap node_anim_chain_bits;
 
     // number of nodes with the same name
-    using NodeAnimNameMap = std::unordered_map<std::string, unsigned int>;
-    NodeAnimNameMap mNodeNameInstances;
-
-    using NodeNameCache = std::unordered_set<std::string>;
+    using NodeNameCache = std::unordered_map<std::string, unsigned int>;
     NodeNameCache mNodeNames;
 
     double anim_fps;

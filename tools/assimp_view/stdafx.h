@@ -1,26 +1,26 @@
-// stdafx.h : Includedatei für Standardsystem-Includedateien
-// oder häufig verwendete projektspezifische Includedateien,
-// die nur in unregelmäßigen Abständen geändert werden.
+// stdafx.h : Includedatei fÃ¼r Standardsystem-Includedateien
+// oder hÃ¤ufig verwendete projektspezifische Includedateien,
+// die nur in unregelmÃ¤ÃŸigen AbstÃ¤nden geÃ¤ndert werden.
 //
 
 #pragma once
 
-// Ändern Sie folgende Definitionen für Plattformen, die älter als die unten angegebenen sind.
-// In MSDN finden Sie die neuesten Informationen über die entsprechenden Werte für die unterschiedlichen Plattformen.
-#ifndef WINVER              // Lassen Sie die Verwendung spezifischer Features von Windows XP oder später zu.
-#   define WINVER 0x0501        // Ändern Sie dies in den geeigneten Wert für andere Versionen von Windows.
+// Ã„ndern Sie folgende Definitionen fÃ¼r Plattformen, die Ã¤lter als die unten angegebenen sind.
+// In MSDN finden Sie die neuesten Informationen Ã¼ber die entsprechenden Werte fÃ¼r die unterschiedlichen Plattformen.
+#ifndef WINVER              // Lassen Sie die Verwendung spezifischer Features von Windows XP oder spÃ¤ter zu.
+#   define WINVER 0x0501        // Ã„ndern Sie dies in den geeigneten Wert fÃ¼r andere Versionen von Windows.
 #endif
 
-#ifndef _WIN32_WINNT        // Lassen Sie die Verwendung spezifischer Features von Windows XP oder später zu.
-#   define _WIN32_WINNT 0x0501  // Ändern Sie dies in den geeigneten Wert für andere Versionen von Windows.
+#ifndef _WIN32_WINNT        // Lassen Sie die Verwendung spezifischer Features von Windows XP oder spÃ¤ter zu.
+#   define _WIN32_WINNT 0x0501  // Ã„ndern Sie dies in den geeigneten Wert fÃ¼r andere Versionen von Windows.
 #endif
 
-#ifndef _WIN32_WINDOWS      // Lassen Sie die Verwendung spezifischer Features von Windows 98 oder später zu.
-#   define _WIN32_WINDOWS 0x0410 // Ändern Sie dies in den geeigneten Wert für Windows Me oder höher.
+#ifndef _WIN32_WINDOWS      // Lassen Sie die Verwendung spezifischer Features von Windows 98 oder spÃ¤ter zu.
+#   define _WIN32_WINDOWS 0x0410 // Ã„ndern Sie dies in den geeigneten Wert fÃ¼r Windows Me oder hÃ¶her.
 #endif
 
-#ifndef _WIN32_IE           // Lassen Sie die Verwendung spezifischer Features von IE 6.0 oder später zu.
-#define _WIN32_IE 0x0600    // Ändern Sie dies in den geeigneten Wert für andere Versionen von IE.
+#ifndef _WIN32_IE           // Lassen Sie die Verwendung spezifischer Features von IE 6.0 oder spÃ¤ter zu.
+#define _WIN32_IE 0x0600    // Ã„ndern Sie dies in den geeigneten Wert fÃ¼r andere Versionen von IE.
 #endif
 
 // Windows-Headerdateien:

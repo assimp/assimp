@@ -278,6 +278,7 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
             }
             std::string name( szMe, temp );
             node->mName.Set( name.c_str() );
+            pMesh->mName.Set( name.c_str() );
             //pScene->mRootNode->mName.length = temp;
             //memcpy(pScene->mRootNode->mName.data,szMe,temp);
             //pScene->mRootNode->mName.data[temp] = '\0';

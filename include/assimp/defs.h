@@ -293,7 +293,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MSC_VER
 #  define AI_NO_EXCEPT noexcept
 #else
-#  if (_MSC_VER == 1915 )
+#  if (_MSC_VER >= 1915 )
 #    define AI_NO_EXCEPT noexcept
 #  else
 #    define AI_NO_EXCEPT

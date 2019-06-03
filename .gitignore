@@ -7,6 +7,8 @@ build
 *.sln
 *.ncb
 *.vcproj
+*.vcxproj
+*.vcxproj.user
 
 # Output
 bin/
@@ -42,7 +44,6 @@ test/results
 # Python
 __pycache__
 *.log
-*.vcxproj
 *.filters
 *.tlog
 Assimp.sdf
@@ -59,7 +60,6 @@ test/gtest/src/gtest-stamp/Debug/gtest-build
 *.suo
 *.lib
 test/gtest/src/gtest-stamp/Debug/
-tools/assimp_view/assimp_viewer.vcxproj.user
 
 # Unix editor backups
 *~

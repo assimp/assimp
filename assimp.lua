@@ -19,7 +19,7 @@ project "assimp"
     "NoPCH",
   }
 
-  -- The only formats we want are 3DS, DAE, OBJ, GLTF, FBX
+  -- The formats we want are 3DS, DAE, OBJ, GLTF, FBX, DXF, X, STL, PLY, IFC, BLEND
   defines {
     "ASSIMP_BUILD_NO_OWN_ZLIB",
     "ASSIMP_BUILD_NO_EXPORT",
@@ -31,13 +31,10 @@ project "assimp"
     "ASSIMP_BUILD_NO_ASSBIN_IMPORTER",
     "ASSIMP_BUILD_NO_B3D_IMPORTER",
     "ASSIMP_BUILD_NO_BASE_IMPORTER",
-    "ASSIMP_BUILD_NO_BLEND_IMPORTER",
     "ASSIMP_BUILD_NO_BVH_IMPORTER",
     "ASSIMP_BUILD_NO_C4D_IMPORTER",
     "ASSIMP_BUILD_NO_CSM_IMPORTER",
-    "ASSIMP_BUILD_NO_DXF_IMPORTER",
     "ASSIMP_BUILD_NO_HMP_IMPORTER",
-    "ASSIMP_BUILD_NO_IFC_IMPORTER",
     "ASSIMP_BUILD_NO_IRRMESH_IMPORTER",
     "ASSIMP_BUILD_NO_IRR_IMPORTER",
     "ASSIMP_BUILD_NO_LWO_IMPORTER",
@@ -54,32 +51,34 @@ project "assimp"
     "ASSIMP_BUILD_NO_OFF_IMPORTER",
     "ASSIMP_BUILD_NO_OGRE_IMPORTER",
     "ASSIMP_BUILD_NO_OPENGEX_IMPORTER",
-    "ASSIMP_BUILD_NO_PLY_IMPORTER",
     "ASSIMP_BUILD_NO_Q3BSP_IMPORTER",
     "ASSIMP_BUILD_NO_Q3D_IMPORTER",
     "ASSIMP_BUILD_NO_RAW_IMPORTER",
     "ASSIMP_BUILD_NO_SIB_IMPORTER",
     "ASSIMP_BUILD_NO_SMD_IMPORTER",
-    "ASSIMP_BUILD_NO_STL_IMPORTER",
     "ASSIMP_BUILD_NO_TERRAGEN_IMPORTER",
-    "ASSIMP_BUILD_NO_X_IMPORTER",
     "ASSIMP_BUILD_NO_X3D_IMPORTER",
     "ASSIMP_BUILD_NO_XGL_IMPORTER",
+    "ZIP_DEFAULT_COMPRESSION_LEVEL=6",
   }
 
   files {
     "code/**.cpp",
     "code/**.h",
     "code/**.hpp",
-    "contrib/irrXML/irrXML.h", -- Required by Collada (DAE) reader
-    "contrib/irrXML/irrXML.cpp",
-    "contrib/rapidjson/include/**.h",
+    "contrib/clipper/**.cpp",
+    "contrib/clipper/**.hpp",
+    "contrib/irrXML/**.cpp",
+    "contrib/irrXML/**.h",
+    "contrib/poly2tri/poly2tri/**.cc",
+    "contrib/poly2tri/poly2tri/**.h",
   }
 
   includedirs {
     "include",
     "contrib/irrXML",
     "contrib/rapidjson/include",
+    "contrib/openddlparser/include",
     prjDir,
     prjDir .. "/../boost",
     prjDir .. "/../zlib",

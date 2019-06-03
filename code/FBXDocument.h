@@ -643,7 +643,7 @@ private:
     std::string fileName;
     std::shared_ptr<const PropertyTable> props;
 
-    uint32_t contentLength;
+    uint64_t contentLength;
     uint8_t* content;
 };
 

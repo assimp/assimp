@@ -137,6 +137,11 @@ void FindInstancesProcess::Execute( aiScene* pScene)
             aiMesh* inst = pScene->mMeshes[i];
             hashes[i] = GetMeshHash(inst);
 
+            // Find an appropriate epsilon 
+            // to compare position differences against
+            float epsilon = ComputePositionEpsilon(inst);
+            epsilon *= epsilon;
+
             for (int a = i-1; a >= 0; --a) {
                 if (hashes[i] == hashes[a])
                 {
@@ -154,12 +159,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
                         orig->mPrimitiveTypes != inst->mPrimitiveTypes)
                         continue;
 
-                    // up to now the meshes are equal. find an appropriate
-                    // epsilon to compare position differences against
-                    float epsilon = ComputePositionEpsilon(inst);
-                    epsilon *= epsilon;
-
-                    // now compare vertex positions, normals,
+                    // up to now the meshes are equal. Now compare vertex positions, normals,
                     // tangents and bitangents using this epsilon.
                     if (orig->HasPositions()) {
                         if(!CompareArrays(orig->mVertices,inst->mVertices,orig->mNumVertices,epsilon))

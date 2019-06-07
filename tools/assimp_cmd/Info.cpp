@@ -317,10 +317,15 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 		return 1;
 	}
 	
-	// do maximum post-processing unless -r was specified
+	// Parse post-processing flags unless -r was specified
 	ImportData import;
 	if (!raw) {
-		import.ppFlags = aiProcessPreset_TargetRealtime_MaxQuality;
+		// get import flags
+		ProcessStandardArguments(import, params + 1, num - 1);
+
+		//No custom post process flags defined, we set all the post process flags active
+		if(import.ppFlags == 0)
+			import.ppFlags |= aiProcessPreset_TargetRealtime_MaxQuality;
 	}
 
 	// import the main model

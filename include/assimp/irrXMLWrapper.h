@@ -91,14 +91,15 @@ public:
         stream->Read(&data[0],data.size(),1);
 
         // Remove null characters from the input sequence otherwise the parsing will utterly fail
-        unsigned int size = 0;
-        unsigned int size_max = static_cast<unsigned int>(data.size());
-        for(unsigned int i = 0; i < size_max; i++) {
-            if(data[i] != '\0') {
-                data[size++] = data[i];
-            }
+        // std::find is usually much faster than manually iterating
+        // It is very unlikely that there will be any null characters
+        auto null_char_iter = std::find(data.begin(), data.end(), '\0');
+
+        while (null_char_iter != data.end())
+        {
+            null_char_iter = data.erase(null_char_iter);
+            null_char_iter = std::find(null_char_iter, data.end(), '\0');
         }
-        data.resize(size);
 
         BaseImporter::ConvertToUTF8(data);
     }

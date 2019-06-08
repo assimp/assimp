@@ -117,7 +117,7 @@ namespace FBX {
 Element::Element(const Token& key_token, Parser& parser)
 : key_token(key_token)
 {
-    TokenPtr n = NULL;
+    TokenPtr n = nullptr;
     do {
         n = parser.AdvanceToNextToken();
         if(!n) {
@@ -643,9 +643,9 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, d += 3) {
-                out.push_back(aiVector3D(static_cast<float>(d[0]),
-                    static_cast<float>(d[1]),
-                    static_cast<float>(d[2])));
+                out.push_back(aiVector3D(static_cast<ai_real>(d[0]),
+                    static_cast<ai_real>(d[1]),
+                    static_cast<ai_real>(d[2])));
             }
             // for debugging
             /*for ( size_t i = 0; i < out.size(); i++ ) {

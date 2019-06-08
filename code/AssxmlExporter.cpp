@@ -555,8 +555,6 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
                             mesh->mNormals[n].z);
                     }
                 }
-                else {
-                }
                 ioprintf(io,"\t\t</Normals>\n");
             }
 

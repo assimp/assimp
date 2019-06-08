@@ -377,6 +377,53 @@ TEST_F(utObjImportExport, 0based_array_Test) {
     EXPECT_EQ(nullptr, scene);
 }
 
+TEST_F(utObjImportExport, invalid_normals_uvs) {
+    static const char *ObjModel =
+        "v -0.500000 0.000000 0.400000\n"
+        "v -0.500000 0.000000 -0.800000\n"
+        "v -0.500000 1.000000 -0.800000\n"
+		"vt 0 0\n"
+		"vn 0 1 0\n"
+        "f 1/1/1 1/1/1 2/2/2\nB";
+
+    Assimp::Importer myImporter;
+    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utObjImportExport, no_vt_just_vns) {
+    static const char *ObjModel =
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 10 0 0\n"
+		"v 0 10 0\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"f 10/10 11/11 12/12\n";
+
+    Assimp::Importer myImporter;
+    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    EXPECT_NE(nullptr, scene);
+}
+
 TEST_F( utObjImportExport, mtllib_after_g ) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_mtllib_after_g.obj", aiProcess_ValidateDataStructure );

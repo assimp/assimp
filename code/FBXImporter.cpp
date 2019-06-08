@@ -60,11 +60,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 
 namespace Assimp {
-    template<> const char* LogFunctions<FBXImporter>::Prefix()
-    {
-        static auto prefix = "FBX: ";
-        return prefix;
-    }
+
+template<>
+const char* LogFunctions<FBXImporter>::Prefix() {
+    static auto prefix = "FBX: ";
+    return prefix;
+}
+
 }
 
 using namespace Assimp;
@@ -72,6 +74,7 @@ using namespace Assimp::Formatter;
 using namespace Assimp::FBX;
 
 namespace {
+
 static const aiImporterDesc desc = {
     "Autodesk FBX Importer",
     "",
@@ -137,6 +140,8 @@ void FBXImporter::SetupProperties(const Importer* pImp)
     settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
     settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
     settings.useLegacyEmbeddedTextureNaming = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING, false);
+    settings.removeEmptyBones = pImp->GetPropertyBool(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true);
+    settings.convertToMeters = pImp->GetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, false);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -167,7 +172,7 @@ void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         bool is_binary = false;
         if (!strncmp(begin,"Kaydara FBX Binary",18)) {
             is_binary = true;
-            TokenizeBinary(tokens,begin,static_cast<unsigned int>(contents.size()));
+            TokenizeBinary(tokens,begin,contents.size());
         }
         else {
             Tokenize(tokens,begin);
@@ -180,8 +185,12 @@ void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         // take the raw parse-tree and convert it to a FBX DOM
         Document doc(parser,settings);
 
+        FbxUnit unit(FbxUnit::cm);
+        if (settings.convertToMeters) {
+            unit = FbxUnit::m;
+        }
         // convert the FBX DOM to aiScene
-        ConvertToAssimpScene(pScene,doc);
+        ConvertToAssimpScene(pScene,doc, settings.removeEmptyBones, unit);
 
         std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
     }

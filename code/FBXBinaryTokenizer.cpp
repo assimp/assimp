@@ -83,7 +83,7 @@ namespace FBX {
 //   e_unknown_21 = 1 << 21,
 //   e_unknown_22 = 1 << 22,
 //   e_unknown_23 = 1 << 23,
-//   e_flag_field_size_64_bit = 1 << 24, // Not sure what is 
+//   e_flag_field_size_64_bit = 1 << 24, // Not sure what is
 //   e_unknown_25 = 1 << 25,
 //   e_unknown_26 = 1 << 26,
 //   e_unknown_27 = 1 << 27,
@@ -98,7 +98,7 @@ namespace FBX {
 //	return (flags & to_check) != 0;
 //}
 // ------------------------------------------------------------------------------------------------
-Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int offset)
+Token::Token(const char* sbegin, const char* send, TokenType type, size_t offset)
     :
     #ifdef DEBUG
     contents(sbegin, static_cast<size_t>(send-sbegin)),
@@ -122,18 +122,18 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // signal tokenization error, this is always unrecoverable. Throws DeadlyImportError.
-AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int offset) AI_WONT_RETURN_SUFFIX;
-AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int offset)
+AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset) AI_WONT_RETURN_SUFFIX;
+AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset)
 {
     throw DeadlyImportError(Util::AddOffset("FBX-Tokenize",message,offset));
 }
 
 
 // ------------------------------------------------------------------------------------------------
-uint32_t Offset(const char* begin, const char* cursor) {
+size_t Offset(const char* begin, const char* cursor) {
     ai_assert(begin <= cursor);
 
-    return static_cast<unsigned int>(cursor - begin);
+    return cursor - begin;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -276,8 +276,8 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
     case 'f':
     case 'd':
     case 'l':
-    case 'i':   {
-
+    case 'i':
+    case 'c':   {
         const uint32_t length = ReadWord(input, cursor, end);
         const uint32_t encoding = ReadWord(input, cursor, end);
 
@@ -296,6 +296,10 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
             case 'd':
             case 'l':
                 stride = 8;
+                break;
+
+            case 'c':
+                stride = 1;
                 break;
 
             default:
@@ -420,7 +424,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 
 // ------------------------------------------------------------------------------------------------
 // TODO: Test FBX Binary files newer than the 7500 version to check if the 64 bits address behaviour is consistent
-void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int length)
+void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
 {
     ai_assert(input);
 

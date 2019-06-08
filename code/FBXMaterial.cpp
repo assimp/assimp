@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 
 #include <algorithm> // std::transform
+#include "FBXUtil.h"
 
 namespace Assimp {
 namespace FBX {
@@ -206,6 +207,20 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 
     props = GetPropertyTable(doc,"Texture.FbxFileTexture",element,sc);
 
+    // 3DS Max and FBX SDK use "Scaling" and "Translation" instead of "ModelUVScaling" and "ModelUVTranslation". Use these properties if available.
+    bool ok;
+    const aiVector3D& scaling = PropertyGet<aiVector3D>(*props, "Scaling", ok);
+    if (ok) {
+        uvScaling.x = scaling.x;
+        uvScaling.y = scaling.y;
+    }
+
+    const aiVector3D& trans = PropertyGet<aiVector3D>(*props, "Translation", ok);
+    if (ok) {
+        uvTrans.x = trans.x;
+        uvTrans.y = trans.y;
+    }
+
     // resolve video links
     if(doc.Settings().readTextures) {
         const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
@@ -301,13 +316,52 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
         relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
     }
 
-    if(Content) {
+    if(Content && !Content->Tokens().empty()) {
         //this field is omitted when the embedded texture is already loaded, let's ignore if it's not found
         try {
             const Token& token = GetRequiredToken(*Content, 0);
             const char* data = token.begin();
             if (!token.IsBinary()) {
-                DOMWarning("video content is not binary data, ignoring", &element);
+                if (*data != '"') {
+                    DOMError("embedded content is not surrounded by quotation marks", &element);
+                }
+                else {
+                    size_t targetLength = 0;
+                    auto numTokens = Content->Tokens().size();
+                    // First time compute size (it could be large like 64Gb and it is good to allocate it once)
+                    for (uint32_t tokenIdx = 0; tokenIdx < numTokens; ++tokenIdx)
+                    {
+                        const Token& dataToken = GetRequiredToken(*Content, tokenIdx);
+                        size_t tokenLength = dataToken.end() - dataToken.begin() - 2; // ignore double quotes
+                        const char* base64data = dataToken.begin() + 1;
+                        const size_t outLength = Util::ComputeDecodedSizeBase64(base64data, tokenLength);
+                        if (outLength == 0)
+                        {
+                            DOMError("Corrupted embedded content found", &element);
+                        }
+                        targetLength += outLength;
+                    }
+                    if (targetLength == 0)
+                    {
+                        DOMError("Corrupted embedded content found", &element);
+                    }
+                    content = new uint8_t[targetLength];
+                    contentLength = static_cast<uint64_t>(targetLength);
+                    size_t dst_offset = 0;
+                    for (uint32_t tokenIdx = 0; tokenIdx < numTokens; ++tokenIdx)
+                    {
+                        const Token& dataToken = GetRequiredToken(*Content, tokenIdx);
+                        size_t tokenLength = dataToken.end() - dataToken.begin() - 2; // ignore double quotes
+                        const char* base64data = dataToken.begin() + 1;
+                        dst_offset += Util::DecodeBase64(base64data, tokenLength, content + dst_offset, targetLength - dst_offset);
+                    }
+                    if (targetLength != dst_offset)
+                    {
+                        delete[] content;
+                        contentLength = 0;
+                        DOMError("Corrupted embedded content found", &element);
+                    }
+                }
             }
             else if (static_cast<size_t>(token.end() - data) < 5) {
                 DOMError("binary data array is too short, need five (5) bytes for type signature and element count", &element);
@@ -326,8 +380,11 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
                 content = new uint8_t[len];
                 ::memcpy(content, data + 5, len);
             }
-        } catch (runtime_error runtimeError) {
+        } catch (const runtime_error& runtimeError)
+        {
             //we don't need the content data for contents that has already been loaded
+            ASSIMP_LOG_DEBUG_F("Caught exception in FBXMaterial (likely because content was already loaded): ",
+                    runtimeError.what());
         }
     }
 

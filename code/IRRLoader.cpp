@@ -300,13 +300,10 @@ int ClampSpline(int idx, int size) {
 // ------------------------------------------------------------------------------------------------
 inline void FindSuitableMultiple(int& angle)
 {
-    if (angle < 3)angle = 3;
+    if (angle < 3) angle = 3;
     else if (angle < 10) angle = 10;
     else if (angle < 20) angle = 20;
     else if (angle < 30) angle = 30;
-    else
-    {
-    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -317,6 +314,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
     // XXX totally WIP - doesn't produce proper results, need to evaluate
     // whether there's any use for Irrlicht's proprietary scene format
     // outside Irrlicht ...
+    // This also applies to the above function of FindSuitableMultiple and ClampSpline which are
+    // solely used in this function
 
     if (root->animators.empty()) {
         return;
@@ -674,38 +673,38 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
             // Get the loaded mesh from the scene and add it to
             // the list of all scenes to be attached to the
             // graph we're currently building
-            aiScene* scene = batch.GetImport(root->id);
-            if (!scene) {
+            aiScene* localScene = batch.GetImport(root->id);
+            if (!localScene) {
                 ASSIMP_LOG_ERROR("IRR: Unable to load external file: " + root->meshPath);
                 break;
             }
-            attach.push_back(AttachmentInfo(scene,rootOut));
+            attach.push_back(AttachmentInfo(localScene,rootOut));
 
             // Now combine the material we've loaded for this mesh
             // with the real materials we got from the file. As we
             // don't execute any pp-steps on the file, the numbers
             // should be equal. If they are not, we can impossibly
             // do this  ...
-            if (root->materials.size() != (unsigned int)scene->mNumMaterials)   {
+            if (root->materials.size() != (unsigned int)localScene->mNumMaterials)   {
                 ASSIMP_LOG_WARN("IRR: Failed to match imported materials "
                     "with the materials found in the IRR scene file");
 
                 break;
             }
-            for (unsigned int i = 0; i < scene->mNumMaterials;++i)  {
+            for (unsigned int i = 0; i < localScene->mNumMaterials;++i)  {
                 // Delete the old material, we don't need it anymore
-                delete scene->mMaterials[i];
+                delete localScene->mMaterials[i];
 
                 std::pair<aiMaterial*, unsigned int>& src = root->materials[i];
-                scene->mMaterials[i] = src.first;
+                localScene->mMaterials[i] = src.first;
             }
 
             // NOTE: Each mesh should have exactly one material assigned,
             // but we do it in a separate loop if this behaviour changes
             // in future.
-            for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
+            for (unsigned int i = 0; i < localScene->mNumMeshes;++i) {
                 // Process material flags
-                aiMesh* mesh = scene->mMeshes[i];
+                aiMesh* mesh = localScene->mMeshes[i];
 
 
                 // If "trans_vertex_alpha" mode is enabled, search all vertex colors

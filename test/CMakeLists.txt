@@ -174,7 +174,7 @@ add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
-    ../code/Version.cpp
+    ../code/Common/Version.cpp
 	${COMMON}
 	${IMPORTERS}
 	${MATERIAL}

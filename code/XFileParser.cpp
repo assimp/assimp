@@ -595,7 +595,7 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
 
     // do not crah when no face definitions are there
     if (numFaces == 0) {
-        TestForSeparator();
+        //TestForSeparator();
         CheckForClosingBrace();
         return;
     }

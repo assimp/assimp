@@ -864,6 +864,8 @@ bool OgreBinarySerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *me
     }
 
     MemoryStreamReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
+    if (!reader)
+      return false;
 
     Skeleton *skeleton = new Skeleton();
     OgreBinarySerializer serializer(reader.get(), OgreBinarySerializer::AM_Skeleton);

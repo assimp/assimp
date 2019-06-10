@@ -47,13 +47,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PRETRANSFORMVERTICES_H_INC
 #define AI_PRETRANSFORMVERTICES_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/mesh.h>
+
 #include <list>
 #include <vector>
 
+// Forward declarations
 struct aiNode;
+
 class PretransformVerticesTest;
+
 namespace Assimp    {
 
 // ---------------------------------------------------------------------------
@@ -80,10 +85,10 @@ public:
 
     // -------------------------------------------------------------------
     /** @brief Toggle the 'keep hierarchy' option
-     *  @param d hm ... difficult to guess what this means, hu!?
+     *  @param keep    true for keep configuration.
      */
-    void KeepHierarchy(bool d) {
-        configKeepHierarchy = d;
+    void KeepHierarchy(bool keep) {
+        configKeepHierarchy = keep;
     }
 
     // -------------------------------------------------------------------
@@ -147,8 +152,6 @@ private:
     // -------------------------------------------------------------------
     // Build reference counters for all meshes
     void BuildMeshRefCountArray(aiNode* nd, unsigned int * refs);
-
-
 
     //! Configuration option: keep scene hierarchy as long as possible
     bool configKeepHierarchy;

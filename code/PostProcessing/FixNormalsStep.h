@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_FIXNORMALSPROCESS_H_INC
 #define AI_FIXNORMALSPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
 struct aiMesh;
 

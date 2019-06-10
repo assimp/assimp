@@ -43,9 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Subdivision.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/SpatialSort.h>
-#include "ProcessHelper.h"
 #include <assimp/Vertex.h>
 #include <assimp/ai_assert.h>
+
+#include "PostProcessing/ProcessHelper.h"
+
 #include <stdio.h>
 
 using namespace Assimp;
@@ -56,8 +58,7 @@ void mydummy() {}
  *  implementation is basing on recursive refinement. Directly evaluating the result is also
  *  possible and much quicker, but it depends on lengthy matrix lookup tables. */
 // ------------------------------------------------------------------------------------------------
-class CatmullClarkSubdivider : public Subdivider
-{
+class CatmullClarkSubdivider : public Subdivider {
 public:
     void Subdivide (aiMesh* mesh, aiMesh*& out, unsigned int num, bool discard_input);
     void Subdivide (aiMesh** smesh, size_t nmesh,

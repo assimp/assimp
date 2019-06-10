@@ -45,10 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SORTBYPTYPEPROCESS_H_INC
 #define AI_SORTBYPTYPEPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 #include <assimp/mesh.h>
 
 class SortByPTypeProcessTest;
+
 namespace Assimp    {
 
 
@@ -57,14 +58,11 @@ namespace Assimp    {
  *  A mesh with 5 lines, 3 points and 145 triangles would be split in 3
  * submeshes.
 */
-class ASSIMP_API SortByPTypeProcess : public BaseProcess
-{
+class ASSIMP_API SortByPTypeProcess : public BaseProcess {
 public:
-
     SortByPTypeProcess();
     ~SortByPTypeProcess();
 
-public:
     // -------------------------------------------------------------------
     bool IsActive( unsigned int pFlags) const;
 
@@ -75,8 +73,7 @@ public:
     void SetupProperties(const Importer* pImp);
 
 private:
-
-    int configRemoveMeshes;
+    int mConfigRemoveMeshes;
 };
 
 

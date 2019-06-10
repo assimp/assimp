@@ -47,15 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // internal headers
-#include "MD5Loader.h"
-#include "MaterialSystem.h"
+#include "MD5/MD5Loader.h"
+#include "Material/MaterialSystem.h"
+
 #include <assimp/fast_atof.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/StringComparison.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/mesh.h>
-
-
 
 using namespace Assimp;
 using namespace Assimp::MD5;

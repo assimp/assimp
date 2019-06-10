@@ -57,8 +57,8 @@ The chunks are taken from the official LightWave SDK headers.
 #include <assimp/mesh.h>
 
 // internal headers
-#include "IFF.h"
-#include "LWOAnimation.h"
+#include "Common/IFF.h"
+#include "LWO/LWOAnimation.h"
 
 namespace Assimp {
 namespace LWO {

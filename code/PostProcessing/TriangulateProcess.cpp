@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -60,9 +58,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *     a file
  */
 #ifndef ASSIMP_BUILD_NO_TRIANGULATE_PROCESS
-#include "TriangulateProcess.h"
-#include "ProcessHelper.h"
-#include "PolyTools.h"
+
+#include "PostProcessing/TriangulateProcess.h"
+#include "PostProcessing/ProcessHelper.h"
+#include "Common/PolyTools.h"
+
 #include <memory>
 
 //#define AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING

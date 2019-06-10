@@ -44,17 +44,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_DEBONEPROCESS_H_INC
 #define AI_DEBONEPROCESS_H_INC
 
-#include <vector>
-#include <utility>
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 
+#include <vector>
+#include <utility>
+
+#// Forward declarations
 class DeboneTest;
 
-namespace Assimp
-{
+namespace Assimp {
 
 #if (!defined AI_DEBONE_THRESHOLD)
 #   define AI_DEBONE_THRESHOLD  1.0f
@@ -66,14 +67,11 @@ namespace Assimp
 * the bone are split from the mesh. The split off (new) mesh is boneless. At any
 * point in time, bones without affect upon a given mesh are to be removed.
 */
-class DeboneProcess : public BaseProcess
-{
+class DeboneProcess : public BaseProcess {
 public:
-
     DeboneProcess();
     ~DeboneProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
     * @param pFlags The processing flags the importer was called with.
@@ -91,7 +89,6 @@ public:
     void SetupProperties(const Importer* pImp);
 
 protected:
-
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * At the moment a process is not supposed to fail.

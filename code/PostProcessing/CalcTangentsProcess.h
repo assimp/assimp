@@ -42,11 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 /** @file Defines a post processing step to calculate tangents and
-    bitangents on all imported meshes.*/
+    bi-tangents on all imported meshes.*/
 #ifndef AI_CALCTANGENTSPROCESS_H_INC
 #define AI_CALCTANGENTSPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
 struct aiMesh;
 

@@ -56,146 +56,146 @@ corresponding preprocessor flag to selectively disable formats.
 // (include_new_importers_here)
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
-#   include "XFileImporter.h"
+#   include "X/XFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
-#   include "AMFImporter.hpp"
+#   include "AMF/AMFImporter.hpp"
 #endif
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
-#   include "3DSLoader.h"
+#   include "3DS/3DSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
-#   include "MD3Loader.h"
+#   include "MD3/MD3Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
-#   include "MDLLoader.h"
+#   include "MDL/MDLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
-#   include "MD2Loader.h"
+#   include "MD2/MD2Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
-#   include "PlyLoader.h"
+#   include "Ply/PlyLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
-#   include "ASELoader.h"
+#   include "ASE/ASELoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
-#   include "ObjFileImporter.h"
+#   include "Obj/ObjFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
-#   include "HMPLoader.h"
+#   include "HMP/HMPLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
-#   include "SMDLoader.h"
+#   include "SMD/SMDLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
-#   include "MDCLoader.h"
+#   include "MDC/MDCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
-#   include "MD5Loader.h"
+#   include "MD5/MD5Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
-#   include "STLLoader.h"
+#   include "STL/STLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
-#   include "LWOLoader.h"
+#   include "LWO/LWOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
-#   include "DXFLoader.h"
+#   include "DXF/DXFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_NFF_IMPORTER
-#   include "NFFLoader.h"
+#   include "NFF/NFFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
-#   include "RawLoader.h"
+#   include "Raw/RawLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SIB_IMPORTER
-#   include "SIBImporter.h"
+#   include "SIB/SIBImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
-#   include "OFFLoader.h"
+#   include "OFF/OFFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
-#   include "ACLoader.h"
+#   include "AC/ACLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
-#   include "BVHLoader.h"
+#   include "BVH/BVHLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-#   include "IRRMeshLoader.h"
+#   include "IRR/IRRMeshLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
-#   include "IRRLoader.h"
+#   include "IRR/IRRLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
-#   include "Q3DLoader.h"
+#   include "Q3D/Q3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
-#   include "B3DImporter.h"
+#   include "B3D/B3DImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
-#   include "ColladaLoader.h"
+#   include "Collada/ColladaLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
-#   include "TerragenLoader.h"
+#   include "Terragen/TerragenLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
-#   include "CSMLoader.h"
+#   include "CSM/CSMLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_3D_IMPORTER
-#   include "UnrealLoader.h"
+#   include "Unreal/UnrealLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
-#   include "LWSLoader.h"
+#   include "LWS/LWSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
-#   include "OgreImporter.h"
+#   include "Ogre/OgreImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
-#   include "OpenGEXImporter.h"
+#   include "OpenGEX/OpenGEXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
-#   include "MS3DLoader.h"
+#   include "MS3D/MS3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
-#   include "COBLoader.h"
+#   include "COB/COBLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
-#   include "BlenderLoader.h"
+#   include "Blender/BlenderLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
-#   include "Q3BSPFileImporter.h"
+#   include "Q3BSP/Q3BSPFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
-#   include "NDOLoader.h"
+#   include "NDO/NDOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #   include "Importer/IFC/IFCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
-#   include "XGLLoader.h"
+#   include "XGL/XGLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
-#   include "FBXImporter.h"
+#   include "FBX/FBXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
-#   include "AssbinLoader.h"
+#   include "Assbin/AssbinLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
-#   include "glTFImporter.h"
-#   include "glTF2Importer.h"
+#   include "glTF/glTFImporter.h"
+#   include "glTF2/glTF2Importer.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
-#   include "C4DImporter.h"
+#   include "C4D/C4DImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
-#   include "D3MFImporter.h"
+#   include "3MF/D3MFImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
-#   include "X3DImporter.hpp"
+#   include "X3D/X3DImporter.hpp"
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
-#   include "MMDImporter.h"
+#   include "MMD/MMDImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
 #   include "Importer/StepFile/StepFileImporter.h"

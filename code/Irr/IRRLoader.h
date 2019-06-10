@@ -48,14 +48,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_IRRLOADER_H_INCLUDED
 #define AI_IRRLOADER_H_INCLUDED
 
-#include "IRRShared.h"
+#include "IRR/IRRShared.h"
+#include "Common/Importer.h"
+
 #include <assimp/SceneCombiner.h>
-#include "Importer.h"
 #include <assimp/StringUtils.h>
 #include <assimp/anim.h>
 
 namespace Assimp    {
-
 
 // ---------------------------------------------------------------------------
 /** Irr importer class.
@@ -64,14 +64,10 @@ namespace Assimp    {
  * irrEdit. As IrrEdit itself is capable of importing quite many file formats,
  * it might be a good file format for data exchange.
  */
-class IRRImporter : public BaseImporter, public IrrlichtBase
-{
+class IRRImporter : public BaseImporter, public IrrlichtBase {
 public:
     IRRImporter();
     ~IRRImporter();
-
-
-public:
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -81,32 +77,17 @@ public:
         bool checkSig) const;
 
 protected:
-
-    // -------------------------------------------------------------------
-    /**
-     */
     const aiImporterDesc* GetInfo () const;
-
-    // -------------------------------------------------------------------
-    /**
-     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
-
-    // -------------------------------------------------------------------
-    /**
-    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
     void SetupProperties(const Importer* pImp);
 
 private:
 
     /** Data structure for a scenegraph node animator
      */
-    struct Animator
-    {
+    struct Animator {
         // Type of the animator
-        enum AT
-        {
+        enum AT {
             UNKNOWN       = 0x0,
             ROTATION      = 0x1,
             FLY_CIRCLE    = 0x2,

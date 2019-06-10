@@ -42,10 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
-#include "glTF2Importer.h"
+#include "glTF2/glTF2Importer.h"
+#include "glTF2/glTF2Asset.h"
+#include "glTF2/glTF2AssetWriter.h"
+#include "PostProcessing/MakeVerboseFormat.h"
+
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
@@ -56,11 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <unordered_map>
 
-#include "MakeVerboseFormat.h"
-
-#include "glTF2Asset.h"
-// This is included here so WriteLazyDict<T>'s definition is found.
-#include "glTF2AssetWriter.h"
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 
@@ -68,7 +66,7 @@ using namespace Assimp;
 using namespace glTF2;
 
 namespace {
-    // generate bitangents from normals and tangents according to spec
+    // generate bi-tangents from normals and tangents according to spec
     struct Tangent {
         aiVector3D xyz;
         ai_real w;

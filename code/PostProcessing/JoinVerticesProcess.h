@@ -45,7 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_JOINVERTICESPROCESS_H_INC
 #define AI_JOINVERTICESPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/types.h>
 
 struct aiMesh;
@@ -61,13 +62,11 @@ namespace Assimp
  * erases all but one of the copies. This usually reduces the number of vertices
  * in a mesh by a serious amount and is the standard form to render a mesh.
  */
-class ASSIMP_API JoinVerticesProcess : public BaseProcess
-{
+class ASSIMP_API JoinVerticesProcess : public BaseProcess {
 public:
     JoinVerticesProcess();
     ~JoinVerticesProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
      * @param pFlags The processing flags the importer was called with. A bitwise
@@ -83,15 +82,12 @@ public:
     */
     void Execute( aiScene* pScene);
 
-public:
     // -------------------------------------------------------------------
     /** Unites identical vertices in the given mesh.
      * @param pMesh The mesh to process.
      * @param meshIndex Index of the mesh to process
      */
     int ProcessMesh( aiMesh* pMesh, unsigned int meshIndex);
-
-private:
 };
 
 } // end of namespace Assimp

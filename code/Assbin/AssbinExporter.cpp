@@ -46,12 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
 
-#include "assbin_chunks.h"
+#include "Common/assbin_chunks.h"
+#include "PostProcessing/ProcessHelper.h"
+
 #include <assimp/version.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
-#include "ProcessHelper.h"
 #include <assimp/Exceptional.h>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB

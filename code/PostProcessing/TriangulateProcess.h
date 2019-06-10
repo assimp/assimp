@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_TRIANGULATEPROCESS_H_INC
 #define AI_TRIANGULATEPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
 struct aiMesh;
 
@@ -59,14 +59,11 @@ namespace Assimp {
  * into triangles. You usually want this to happen because the graphics cards
  * need their data as triangles.
  */
-class ASSIMP_API TriangulateProcess : public BaseProcess
-{
+class ASSIMP_API TriangulateProcess : public BaseProcess {
 public:
-
     TriangulateProcess();
     ~TriangulateProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
      * @param pFlags The processing flags the importer was called with. A bitwise
@@ -82,7 +79,6 @@ public:
     */
     void Execute( aiScene* pScene);
 
-public:
     // -------------------------------------------------------------------
     /** Triangulates the given mesh.
      * @param pMesh The mesh to triangulate.

@@ -57,8 +57,8 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SortByPTypeProcess::SortByPTypeProcess()
-{
-    configRemoveMeshes = 0;
+: mConfigRemoveMeshes( 0 ) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ bool SortByPTypeProcess::IsActive( unsigned int pFlags) const
 // ------------------------------------------------------------------------------------------------
 void SortByPTypeProcess::SetupProperties(const Importer* pImp)
 {
-    configRemoveMeshes = pImp->GetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,0);
+    mConfigRemoveMeshes = pImp->GetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,0);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -172,7 +172,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
         }
 
         if (1 == num) {
-            if (!(configRemoveMeshes & mesh->mPrimitiveTypes)) {
+            if (!(mConfigRemoveMeshes & mesh->mPrimitiveTypes)) {
                 *meshIdx = static_cast<unsigned int>( outMeshes.size() );
                 outMeshes.push_back(mesh);
             } else {
@@ -206,7 +206,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
         VertexWeightTable* avw = ComputeVertexBoneWeightTable(mesh);
         for (unsigned int real = 0; real < 4; ++real,++meshIdx)
         {
-            if ( !aiNumPerPType[real] || configRemoveMeshes & (1u << real))
+            if ( !aiNumPerPType[real] || mConfigRemoveMeshes & (1u << real))
             {
                 continue;
             }
@@ -392,10 +392,10 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
     {
         char buffer[1024];
         ::ai_snprintf(buffer,1024,"Points: %u%s, Lines: %u%s, Triangles: %u%s, Polygons: %u%s (Meshes, X = removed)",
-            aiNumMeshesPerPType[0], ((configRemoveMeshes & aiPrimitiveType_POINT)     ? "X" : ""),
-            aiNumMeshesPerPType[1], ((configRemoveMeshes & aiPrimitiveType_LINE)      ? "X" : ""),
-            aiNumMeshesPerPType[2], ((configRemoveMeshes & aiPrimitiveType_TRIANGLE)  ? "X" : ""),
-            aiNumMeshesPerPType[3], ((configRemoveMeshes & aiPrimitiveType_POLYGON)   ? "X" : ""));
+            aiNumMeshesPerPType[0], ((mConfigRemoveMeshes & aiPrimitiveType_POINT)     ? "X" : ""),
+            aiNumMeshesPerPType[1], ((mConfigRemoveMeshes & aiPrimitiveType_LINE)      ? "X" : ""),
+            aiNumMeshesPerPType[2], ((mConfigRemoveMeshes & aiPrimitiveType_TRIANGLE)  ? "X" : ""),
+            aiNumMeshesPerPType[3], ((mConfigRemoveMeshes & aiPrimitiveType_POLYGON)   ? "X" : ""));
         ASSIMP_LOG_INFO(buffer);
         ASSIMP_LOG_DEBUG("SortByPTypeProcess finished");
     }

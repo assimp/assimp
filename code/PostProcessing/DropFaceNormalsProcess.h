@@ -44,23 +44,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_DROPFACENORMALPROCESS_H_INC
 #define AI_DROPFACENORMALPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/mesh.h>
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** The DropFaceNormalsProcess computes face normals for all faces of all meshes
 */
-class ASSIMP_API_WINONLY DropFaceNormalsProcess : public BaseProcess
-{
+class ASSIMP_API_WINONLY DropFaceNormalsProcess : public BaseProcess {
 public:
-
     DropFaceNormalsProcess();
     ~DropFaceNormalsProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
     * @param pFlags The processing flags the importer was called with. A bitwise

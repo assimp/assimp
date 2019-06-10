@@ -42,10 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
-#include "glTFImporter.h"
+#include "glTF/glTFImporter.h"
+#include "glTF/glTFAsset.h"
+#include "glTF/glTFAssetWriter.h"
+#include "PostProcessing/MakeVerboseFormat.h"
+
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
@@ -54,15 +57,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-#include "MakeVerboseFormat.h"
-
-#include "glTFAsset.h"
-// This is included here so WriteLazyDict<T>'s definition is found.
-#include "glTFAssetWriter.h"
-
 using namespace Assimp;
 using namespace glTF;
-
 
 //
 // glTFImporter

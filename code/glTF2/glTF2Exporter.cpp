@@ -42,14 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 
-#include "glTF2Exporter.h"
+#include "glTF2/glTF2Exporter.h"
+#include "glTF2/glTF2AssetWriter.h"
+#include "PostProcessing/SplitLargeMeshes.h"
 
 #include <assimp/Exceptional.h>
 #include <assimp/StringComparison.h>
 #include <assimp/ByteSwapper.h>
-
-#include "SplitLargeMeshes.h"
-
 #include <assimp/SceneCombiner.h>
 #include <assimp/version.h>
 #include <assimp/IOSystem.hpp>
@@ -60,8 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, standard library.
 #include <memory>
 #include <inttypes.h>
-
-#include "glTF2AssetWriter.h"
 
 using namespace rapidjson;
 

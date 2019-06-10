@@ -45,23 +45,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_STEP_EXPORTER
 
-#include "StepExporter.h"
-#include "ConvertToLHProcess.h"
+#include "Step/StepExporter.h"
+#include "PostProcessing/ConvertToLHProcess.h"
+
 #include <assimp/Bitmap.h>
 #include <assimp/BaseImporter.h>
 #include <assimp/fast_atof.h>
 #include <assimp/SceneCombiner.h>
+#include <assimp/Exceptional.h>
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/light.h>
+
 #include <iostream>
 #include <ctime>
 #include <set>
 #include <map>
 #include <list>
 #include <memory>
-#include <assimp/Exceptional.h>
-#include <assimp/DefaultIOSystem.h>
-#include <assimp/IOSystem.hpp>
-#include <assimp/scene.h>
-#include <assimp/light.h>
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)

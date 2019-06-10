@@ -45,7 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_IMPROVECACHELOCALITY_H_INC
 #define AI_IMPROVECACHELOCALITY_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/types.h>
 
 struct aiMesh;
@@ -87,12 +88,12 @@ protected:
      * @param pMesh The mesh to process.
      * @param meshNum Index of the mesh to process
      */
-    float ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
+    ai_real ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
 
 private:
     //! Configuration parameter: specifies the size of the cache to
     //! optimize the vertex data for.
-    unsigned int configCacheDepth;
+    unsigned int mConfigCacheDepth;
 };
 
 } // end of namespace Assimp

@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_SPLITLARGEMESHES_H_INC
 
 #include <vector>
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
 #include <assimp/mesh.h>
 #include <assimp/scene.h>

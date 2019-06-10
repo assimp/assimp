@@ -49,14 +49,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // internal headers
-#include "LWOLoader.h"
+#include "LWO/LWOLoader.h"
+#include "PostProcessing/ProcessHelper.h"
+#include "PostProcessing/ConvertToLHProcess.h"
+
 #include <assimp/StringComparison.h>
 #include <assimp/SGSpatialSort.h>
 #include <assimp/ByteSwapper.h>
-#include "ProcessHelper.h"
-#include "ConvertToLHProcess.h"
 #include <assimp/IOSystem.hpp>
 #include <assimp/importerdesc.h>
+
 #include <memory>
 #include <sstream>
 #include <iomanip>

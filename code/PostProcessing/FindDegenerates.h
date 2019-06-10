@@ -45,7 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_FINDDEGENERATESPROCESS_H_INC
 #define AI_FINDDEGENERATESPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/mesh.h>
 
 class FindDegeneratesProcessTest;

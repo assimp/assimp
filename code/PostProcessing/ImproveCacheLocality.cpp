@@ -45,14 +45,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * <br>
  * The algorithm is roughly basing on this paper:
  * http://www.cs.princeton.edu/gfx/pubs/Sander_2007_%3ETR/tipsy.pdf
- *   .. although overdraw rduction isn't implemented yet ...
+ *   .. although overdraw reduction isn't implemented yet ...
  */
 
-
-
 // internal headers
-#include "ImproveCacheLocality.h"
-#include "VertexTriangleAdjacency.h"
+#include "PostProcessing/ImproveCacheLocality.h"
+#include "Common/VertexTriangleAdjacency.h"
+
 #include <assimp/StringUtils.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -64,36 +63,33 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ImproveCacheLocalityProcess::ImproveCacheLocalityProcess() {
-    configCacheDepth = PP_ICL_PTCACHE_SIZE;
+ImproveCacheLocalityProcess::ImproveCacheLocalityProcess()
+: mConfigCacheDepth(PP_ICL_PTCACHE_SIZE) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ImproveCacheLocalityProcess::~ImproveCacheLocalityProcess()
-{
+ImproveCacheLocalityProcess::~ImproveCacheLocalityProcess() {
     // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool ImproveCacheLocalityProcess::IsActive( unsigned int pFlags) const
-{
+bool ImproveCacheLocalityProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_ImproveCacheLocality) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration
-void ImproveCacheLocalityProcess::SetupProperties(const Importer* pImp)
-{
+void ImproveCacheLocalityProcess::SetupProperties(const Importer* pImp) {
     // AI_CONFIG_PP_ICL_PTCACHE_SIZE controls the target cache size for the optimizer
-    configCacheDepth = pImp->GetPropertyInteger(AI_CONFIG_PP_ICL_PTCACHE_SIZE,PP_ICL_PTCACHE_SIZE);
+    mConfigCacheDepth = pImp->GetPropertyInteger(AI_CONFIG_PP_ICL_PTCACHE_SIZE,PP_ICL_PTCACHE_SIZE);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
-{
+void ImproveCacheLocalityProcess::Execute( aiScene* pScene) {
     if (!pScene->mNumMeshes) {
         ASSIMP_LOG_DEBUG("ImproveCacheLocalityProcess skipped; there are no meshes");
         return;
@@ -103,7 +99,7 @@ void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
 
     float out = 0.f;
     unsigned int numf = 0, numm = 0;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++){
+    for( unsigned int a = 0; a < pScene->mNumMeshes; ++a ){
         const float res = ProcessMesh( pScene->mMeshes[a],a);
         if (res) {
             numf += pScene->mMeshes[a]->mNumFaces;
@@ -121,44 +117,41 @@ void ImproveCacheLocalityProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Improves the cache coherency of a specific mesh
-float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshNum)
-{
+ai_real ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshNum) {
     // TODO: rewrite this to use std::vector or boost::shared_array
-    ai_assert(NULL != pMesh);
+    ai_assert(nullptr != pMesh);
 
     // Check whether the input data is valid
     // - there must be vertices and faces
     // - all faces must be triangulated or we can't operate on them
     if (!pMesh->HasFaces() || !pMesh->HasPositions())
-        return 0.f;
+        return static_cast<ai_real>(0.f);
 
     if (pMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) {
         ASSIMP_LOG_ERROR("This algorithm works on triangle meshes only");
-        return 0.f;
+        return static_cast<ai_real>(0.f);
     }
 
-    if(pMesh->mNumVertices <= configCacheDepth) {
-        return 0.f;
+    if(pMesh->mNumVertices <= mConfigCacheDepth) {
+        return static_cast<ai_real>(0.f);
     }
 
-    float fACMR = 3.f;
+    ai_real fACMR = 3.f;
     const aiFace* const pcEnd = pMesh->mFaces+pMesh->mNumFaces;
 
     // Input ACMR is for logging purposes only
     if (!DefaultLogger::isNullLogger())     {
 
-        unsigned int* piFIFOStack = new unsigned int[configCacheDepth];
-        memset(piFIFOStack,0xff,configCacheDepth*sizeof(unsigned int));
+        unsigned int* piFIFOStack = new unsigned int[mConfigCacheDepth];
+        memset(piFIFOStack,0xff,mConfigCacheDepth*sizeof(unsigned int));
         unsigned int* piCur = piFIFOStack;
-        const unsigned int* const piCurEnd = piFIFOStack + configCacheDepth;
+        const unsigned int* const piCurEnd = piFIFOStack + mConfigCacheDepth;
 
         // count the number of cache misses
         unsigned int iCacheMisses = 0;
         for (const aiFace* pcFace = pMesh->mFaces;pcFace != pcEnd;++pcFace) {
-
             for (unsigned int qq = 0; qq < 3;++qq) {
                 bool bInCache = false;
-
                 for (unsigned int* pp = piFIFOStack;pp < piCurEnd;++pp) {
                     if (*pp == pcFace->mIndices[qq])    {
                         // the vertex is in cache
@@ -176,7 +169,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             }
         }
         delete[] piFIFOStack;
-        fACMR = (float)iCacheMisses / pMesh->mNumFaces;
+        fACMR = (ai_real) iCacheMisses / pMesh->mNumFaces;
         if (3.0 == fACMR)   {
             char szBuff[128]; // should be sufficiently large in every case
 
@@ -185,7 +178,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             // smaller than 3.0 ...
             ai_snprintf(szBuff,128,"Mesh %u: Not suitable for vcache optimization",meshNum);
             ASSIMP_LOG_WARN(szBuff);
-            return 0.f;
+            return static_cast<ai_real>(0.f);
         }
     }
 
@@ -258,7 +251,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 
     int ivdx = 0;
     int ics = 1;
-    int iStampCnt = configCacheDepth+1;
+    int iStampCnt = mConfigCacheDepth+1;
     while (ivdx >= 0)   {
 
         unsigned int icnt = piNumTriPtrNoModify[ivdx];
@@ -294,7 +287,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
                     *piCSIter++ = dp;
 
                     // if the vertex is not yet in cache, set its cache count
-                    if (iStampCnt-piCachingStamps[dp] > configCacheDepth) {
+                    if (iStampCnt-piCachingStamps[dp] > mConfigCacheDepth) {
                         piCachingStamps[dp] = iStampCnt++;
                         ++iCacheMisses;
                     }
@@ -319,7 +312,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 
                 // will the vertex be in cache, even after fanning occurs?
                 unsigned int tmp;
-                if ((tmp = iStampCnt-piCachingStamps[dp]) + 2*piNumTriPtr[dp] <= configCacheDepth) {
+                if ((tmp = iStampCnt-piCachingStamps[dp]) + 2*piNumTriPtr[dp] <= mConfigCacheDepth) {
                     priority = tmp;
                 }
 
@@ -356,7 +349,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
             }
         }
     }
-    float fACMR2 = 0.0f;
+    ai_real fACMR2 = 0.0f;
     if (!DefaultLogger::isNullLogger()) {
         fACMR2 = (float)iCacheMisses / pMesh->mNumFaces;
 

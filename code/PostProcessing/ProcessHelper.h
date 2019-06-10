@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 
 #include <assimp/SpatialSort.h>
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 #include <assimp/ParsingUtils.h>
 
 #include <list>

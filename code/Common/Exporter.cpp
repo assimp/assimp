@@ -61,15 +61,16 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-
-#include "DefaultProgressHandler.h"
-#include "BaseProcess.h"
-#include "JoinVerticesProcess.h"
-#include "MakeVerboseFormat.h"
-#include "ConvertToLHProcess.h"
-#include "PretransformVertices.h"
 #include <assimp/Exceptional.h>
-#include "ScenePrivate.h"
+
+#include "Common/DefaultProgressHandler.h"
+#include "Common/BaseProcess.h"
+#include "Common/ScenePrivate.h"
+#include "PostProcessing/CalcTangentsProcess.h"
+#include "PostProcessing/MakeVerboseFormat.h"
+#include "PostProcessing/JoinVerticesProcess.h"
+#include "PostProcessing/ConvertToLHProcess.h"
+#include "PostProcessing/PretransformVertices.h"
 
 #include <memory>
 

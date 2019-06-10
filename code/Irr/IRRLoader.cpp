@@ -49,18 +49,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
-#include "IRRLoader.h"
+#include "IRR/IRRLoader.h"
+#include "Common/Importer.h"
+
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/GenericProperty.h>
-
 #include <assimp/SceneCombiner.h>
 #include <assimp/StandardShapes.h>
-#include "Importer.h"
-
-// We need MathFunctions.h to compute the lcm/gcd of a number
 #include <assimp/MathFunctions.h>
-#include <memory>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/mesh.h>
 #include <assimp/material.h>
@@ -68,6 +65,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/importerdesc.h>
+
+#include <memory>
 
 using namespace Assimp;
 using namespace irr;

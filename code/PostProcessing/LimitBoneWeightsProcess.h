@@ -44,14 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_LIMITBONEWEIGHTSPROCESS_H_INC
 #define AI_LIMITBONEWEIGHTSPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
+// Forward declarations
 struct aiMesh;
 
 class LimitBoneWeightsTest;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // NOTE: If you change these limits, don't forget to change the
 // corresponding values in all Assimp ports
@@ -72,14 +72,11 @@ namespace Assimp
 * The other weights on this bone are then renormalized to assure the sum weight
 * to be 1.
 */
-class ASSIMP_API LimitBoneWeightsProcess : public BaseProcess
-{
+class ASSIMP_API LimitBoneWeightsProcess : public BaseProcess {
 public:
-
     LimitBoneWeightsProcess();
     ~LimitBoneWeightsProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
     * @param pFlags The processing flags the importer was called with.
@@ -96,8 +93,6 @@ public:
     */
     void SetupProperties(const Importer* pImp);
 
-public:
-
     // -------------------------------------------------------------------
     /** Limits the bone weight count for all vertices in the given mesh.
     * @param pMesh The mesh to process.
@@ -111,34 +106,29 @@ public:
     */
     void Execute( aiScene* pScene);
 
-
-public:
-
     // -------------------------------------------------------------------
     /** Describes a bone weight on a vertex */
-    struct Weight
-    {
+    struct Weight {
         unsigned int mBone; ///< Index of the bone
         float mWeight;      ///< Weight of that bone on this vertex
         Weight() AI_NO_EXCEPT
         : mBone(0)
-        , mWeight(0.0f)
-        { }
+        , mWeight(0.0f) {
+            // empty
+        }
 
         Weight( unsigned int pBone, float pWeight)
-        {
-            mBone = pBone;
-            mWeight = pWeight;
+        : mBone(pBone)
+        , mWeight(pWeight) {
+            // empty
         }
 
         /** Comparison operator to sort bone weights by descending weight */
-        bool operator < (const Weight& pWeight) const
-        {
+        bool operator < (const Weight& pWeight) const {
             return mWeight > pWeight.mWeight;
         }
     };
 
-public:
     /** Maximum number of bones influencing any single vertex. */
     unsigned int mMaxWeights;
 };

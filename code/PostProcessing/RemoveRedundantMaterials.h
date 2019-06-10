@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_REMOVEREDUNDANTMATERIALS_H_INC
 #define AI_REMOVEREDUNDANTMATERIALS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 #include <assimp/mesh.h>
 
 class RemoveRedundantMatsTest;
@@ -57,8 +57,7 @@ namespace Assimp    {
 /** RemoveRedundantMatsProcess: Post-processing step to remove redundant
  *  materials from the imported scene.
  */
-class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
-{
+class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess {
 public:
     /// The default class constructor.
     RemoveRedundantMatsProcess();
@@ -66,7 +65,6 @@ public:
     /// The class destructor.
     ~RemoveRedundantMatsProcess();
 
-public:
     // -------------------------------------------------------------------
     // Check whether step is active
     bool IsActive( unsigned int pFlags) const;
@@ -79,27 +77,25 @@ public:
     // Setup import settings
     void SetupProperties(const Importer* pImp);
 
-
     // -------------------------------------------------------------------
-    /** @brief Set list of fixed (unmutable) materials
+    /** @brief Set list of fixed (inmutable) materials
      *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
      */
     void SetFixedMaterialsString(const std::string& fixed = "") {
-        configFixedMaterials = fixed;
+        mConfigFixedMaterials = fixed;
     }
 
     // -------------------------------------------------------------------
-    /** @brief Get list of fixed (unmutable) materials
+    /** @brief Get list of fixed (inmutable) materials
      *  @return See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
      */
     const std::string& GetFixedMaterialsString() const {
-        return configFixedMaterials;
+        return mConfigFixedMaterials;
     }
 
 private:
-
     //! Configuration option: list of all fixed materials
-    std::string configFixedMaterials;
+    std::string mConfigFixedMaterials;
 };
 
 } // end of namespace Assimp

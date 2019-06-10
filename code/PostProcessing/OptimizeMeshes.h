@@ -46,8 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OPTIMIZEMESHESPROCESS_H_INC
 #define AI_OPTIMIZEMESHESPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/types.h>
+
 #include <vector>
 
 struct aiMesh;
@@ -64,15 +66,13 @@ namespace Assimp    {
  *
  *  @note Instanced meshes are currently not processed.
  */
-class OptimizeMeshesProcess : public BaseProcess
-{
+class OptimizeMeshesProcess : public BaseProcess {
 public:
     /// @brief  The class constructor.
     OptimizeMeshesProcess();
 
-    /// @brief  The class destcructor,
+    /// @brief  The class destructor.
     ~OptimizeMeshesProcess();
-
 
     /** @brief Internal utility to store additional mesh info
      */

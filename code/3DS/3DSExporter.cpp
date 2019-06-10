@@ -43,15 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
 
-#include "3DSExporter.h"
-#include "3DSLoader.h"
-#include "3DSHelper.h"
+#include "3DS/3DSExporter.h"
+#include "3DS/3DSLoader.h"
+#include "3DS/3DSHelper.h"
+#include "PostProcessing/SplitLargeMeshes.h"
+
 #include <assimp/SceneCombiner.h>
-#include "SplitLargeMeshes.h"
 #include <assimp/StringComparison.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Exporter.hpp>
+
 #include <memory>
 
 using namespace Assimp;

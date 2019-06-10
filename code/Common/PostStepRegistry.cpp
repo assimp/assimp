@@ -48,88 +48,88 @@ directly (unless you are adding new steps), instead use the
 corresponding preprocessor flag to selectively disable steps.
 */
 
-#include "ProcessHelper.h"
+#include "PostProcessing/ProcessHelper.h"
 
 #ifndef ASSIMP_BUILD_NO_CALCTANGENTS_PROCESS
-#   include "CalcTangentsProcess.h"
+#   include "PostProcessing/CalcTangentsProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_JOINVERTICES_PROCESS
-#   include "JoinVerticesProcess.h"
+#   include "PostProcessing/JoinVerticesProcess.h"
 #endif
 #if !(defined ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS && defined ASSIMP_BUILD_NO_FLIPUVS_PROCESS && defined ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS)
-#   include "ConvertToLHProcess.h"
+#   include "PostProcessing/ConvertToLHProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_TRIANGULATE_PROCESS
-#   include "TriangulateProcess.h"
+#   include "PostProcessing/TriangulateProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_DROPFACENORMALS_PROCESS
-#   include "DropFaceNormalsProcess.h"
+#   include "PostProcessing/DropFaceNormalsProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS
-#   include "GenFaceNormalsProcess.h"
+#   include "PostProcessing/GenFaceNormalsProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_GENVERTEXNORMALS_PROCESS
-#   include "GenVertexNormalsProcess.h"
+#   include "PostProcessing/GenVertexNormalsProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_REMOVEVC_PROCESS
-#   include "RemoveVCProcess.h"
+#   include "PostProcessing/RemoveVCProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SPLITLARGEMESHES_PROCESS
-#   include "SplitLargeMeshes.h"
+#   include "PostProcessing/SplitLargeMeshes.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_PRETRANSFORMVERTICES_PROCESS
-#   include "PretransformVertices.h"
+#   include "PostProcessing/PretransformVertices.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LIMITBONEWEIGHTS_PROCESS
-#   include "LimitBoneWeightsProcess.h"
+#   include "PostProcessing/LimitBoneWeightsProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
-#   include "ValidateDataStructure.h"
+#   include "PostProcessing/ValidateDataStructure.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IMPROVECACHELOCALITY_PROCESS
-#   include "ImproveCacheLocality.h"
+#   include "PostProcessing/ImproveCacheLocality.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FIXINFACINGNORMALS_PROCESS
-#   include "FixNormalsStep.h"
+#   include "PostProcessing/FixNormalsStep.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS
-#   include "RemoveRedundantMaterials.h"
+#   include "PostProcessing/RemoveRedundantMaterials.h"
 #endif
 #if (!defined ASSIMP_BUILD_NO_EMBEDTEXTURES_PROCESS)
-#   include "EmbedTexturesProcess.h"
+#   include "PostProcessing/EmbedTexturesProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
-#   include "FindInvalidDataProcess.h"
+#   include "PostProcessing/FindInvalidDataProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FINDDEGENERATES_PROCESS
-#   include "FindDegenerates.h"
+#   include "PostProcessing/FindDegenerates.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SORTBYPTYPE_PROCESS
-#   include "SortByPTypeProcess.h"
+#   include "PostProcessing/SortByPTypeProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_GENUVCOORDS_PROCESS
-#   include "ComputeUVMappingProcess.h"
+#   include "PostProcessing/ComputeUVMappingProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_TRANSFORMTEXCOORDS_PROCESS
-#   include "TextureTransform.h"
+#   include "PostProcessing/TextureTransform.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FINDINSTANCES_PROCESS
-#   include "FindInstancesProcess.h"
+#   include "PostProcessing/FindInstancesProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OPTIMIZEMESHES_PROCESS
-#   include "OptimizeMeshes.h"
+#   include "PostProcessing/OptimizeMeshes.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OPTIMIZEGRAPH_PROCESS
-#   include "OptimizeGraph.h"
+#   include "PostProcessing/OptimizeGraph.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS
-#   include "SplitByBoneCountProcess.h"
+#   include "Common/SplitByBoneCountProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_DEBONE_PROCESS
-#   include "DeboneProcess.h"
+#   include "PostProcessing/DeboneProcess.h"
 #endif
 #if (!defined ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS)
-#   include "ScaleProcess.h"
+#   include "PostProcessing/ScaleProcess.h"
 #endif
 
 namespace Assimp {

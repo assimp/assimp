@@ -53,7 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASELoader.h"
 #include <assimp/StringComparison.h>
 #include <assimp/SkeletonMeshBuilder.h>
-#include "TargetAnimation.h"
+#include "Common/TargetAnimation.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
@@ -88,23 +89,25 @@ ASEImporter::ASEImporter()
 , mBuffer()
 , pcScene()
 , configRecomputeNormals()
-, noSkeletonMesh()
-{}
+, noSkeletonMesh() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ASEImporter::~ASEImporter()
-{}
+ASEImporter::~ASEImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
-{
+bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const {
     // check file extension
     const std::string extension = GetExtension(pFile);
 
-    if( extension == "ase" || extension == "ask")
+    if (extension == "ase" || extension == "ask") {
         return true;
+    }
 
     if ((!extension.length() || cs) && pIOHandler) {
         const char* tokens[] = {"*3dsmax_asciiexport"};
@@ -115,15 +118,13 @@ bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 
 // ------------------------------------------------------------------------------------------------
 // Loader meta information
-const aiImporterDesc* ASEImporter::GetInfo () const
-{
+const aiImporterDesc* ASEImporter::GetInfo () const {
     return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration options
-void ASEImporter::SetupProperties(const Importer* pImp)
-{
+void ASEImporter::SetupProperties(const Importer* pImp) {
     configRecomputeNormals = (pImp->GetPropertyInteger(
         AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS,1) ? true : false);
 
@@ -133,12 +134,11 @@ void ASEImporter::SetupProperties(const Importer* pImp)
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void ASEImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
-{
+    aiScene* pScene, IOSystem* pIOHandler) {
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
-    if( file.get() == NULL) {
+    if( file.get() == nullptr) {
         throw DeadlyImportError( "Failed to open ASE file " + pFile + ".");
     }
 

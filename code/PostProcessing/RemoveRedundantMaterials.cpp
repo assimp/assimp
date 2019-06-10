@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "RemoveRedundantMaterials.h"
 #include <assimp/ParsingUtils.h>
 #include "ProcessHelper.h"
-#include "MaterialSystem.h"
+#include "Material/MaterialSystem.h"
 #include <stdio.h>
 
 using namespace Assimp;
@@ -57,7 +57,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 RemoveRedundantMatsProcess::RemoveRedundantMatsProcess()
-: configFixedMaterials() {
+: mConfigFixedMaterials() {
     // nothing to do here
 }
 
@@ -80,7 +80,7 @@ bool RemoveRedundantMatsProcess::IsActive( unsigned int pFlags) const
 void RemoveRedundantMatsProcess::SetupProperties(const Importer* pImp)
 {
     // Get value of AI_CONFIG_PP_RRM_EXCLUDE_LIST
-    configFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
+    mConfigFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -100,10 +100,10 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
         // If a list of materials to be excluded was given, match the list with
         // our imported materials and 'salt' all positive matches to ensure that
         // we get unique hashes later.
-        if (configFixedMaterials.length()) {
+        if (mConfigFixedMaterials.length()) {
 
             std::list<std::string> strings;
-            ConvertListToStrings(configFixedMaterials,strings);
+            ConvertListToStrings(mConfigFixedMaterials,strings);
 
             for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
                 aiMaterial* mat = pScene->mMaterials[i];

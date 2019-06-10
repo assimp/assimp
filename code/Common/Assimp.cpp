@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exceptional.h>
 #include <assimp/BaseImporter.h>
 
-#include "CInterfaceIOWrapper.h"
+#include "CApi/CInterfaceIOWrapper.h"
 #include "Importer.h"
 #include "ScenePrivate.h"
 

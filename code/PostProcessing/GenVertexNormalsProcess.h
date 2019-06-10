@@ -45,24 +45,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_GENVERTEXNORMALPROCESS_H_INC
 #define AI_GENVERTEXNORMALPROCESS_H_INC
 
-#include "BaseProcess.h"
+#include "Common/assbin_chunks.h"
+#include "Common/BaseProcess.h"
+
 #include <assimp/mesh.h>
 
+// Forward declarations
 class GenNormalsTest;
 
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
-/** The GenFaceNormalsProcess computes vertex normals for all vertizes
+/** The GenFaceNormalsProcess computes vertex normals for all vertices
 */
-class ASSIMP_API GenVertexNormalsProcess : public BaseProcess
-{
+class ASSIMP_API GenVertexNormalsProcess : public BaseProcess {
 public:
-
     GenVertexNormalsProcess();
     ~GenVertexNormalsProcess();
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
     * @param pFlags The processing flags the importer was called with.
@@ -88,12 +88,9 @@ public:
 
 
     // setter for configMaxAngle
-    inline void SetMaxSmoothAngle(ai_real f)
-    {
+    inline void SetMaxSmoothAngle(ai_real f) {
         configMaxAngle =f;
     }
-
-public:
 
     // -------------------------------------------------------------------
     /** Computes normals for a specific mesh
@@ -104,7 +101,6 @@ public:
     bool GenMeshVertexNormals (aiMesh* pcMesh, unsigned int meshIndex);
 
 private:
-
     /** Configuration option: maximum smoothing angle, in radians*/
     ai_real configMaxAngle;
     mutable bool force_ = false;

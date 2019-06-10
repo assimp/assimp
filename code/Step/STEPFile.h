@@ -50,7 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <set>
 
-#include "FBXDocument.h" //ObjectMap::value_type
+#include "FBX/FBXDocument.h" //ObjectMap::value_type
+
 #include <assimp/DefaultLogger.hpp>
 
 //

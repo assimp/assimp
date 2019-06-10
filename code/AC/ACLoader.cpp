@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/Subdivision.h>
-#include "Importer.h"
+#include "Common/Importer.h"
 #include <assimp/BaseImporter.h>
 #include <assimp/Importer.hpp>
 #include <assimp/light.h>

@@ -46,13 +46,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OPTIMIZEGRAPHPROCESS_H_INC
 #define AI_OPTIMIZEGRAPHPROCESS_H_INC
 
-#include "BaseProcess.h"
-#include "ProcessHelper.h"
+#include "Common/BaseProcess.h"
+#include "PostProcessing/ProcessHelper.h"
+
 #include <assimp/types.h>
+
 #include <set>
 
+// Forward declarations
 struct aiMesh;
+
 class OptimizeGraphProcessTest;
+
 namespace Assimp    {
 
 // -----------------------------------------------------------------------------
@@ -64,14 +69,11 @@ namespace Assimp    {
  *  @see aiProcess_OptimizeGraph for a detailed description of the
  *  algorithm being applied.
  */
-class OptimizeGraphProcess : public BaseProcess
-{
+class OptimizeGraphProcess : public BaseProcess {
 public:
-
     OptimizeGraphProcess();
     ~OptimizeGraphProcess();
 
-public:
     // -------------------------------------------------------------------
     bool IsActive( unsigned int pFlags) const;
 
@@ -81,14 +83,12 @@ public:
     // -------------------------------------------------------------------
     void SetupProperties(const Importer* pImp);
 
-
     // -------------------------------------------------------------------
     /** @brief Add a list of node names to be locked and not modified.
      *  @param in List of nodes. See #AI_CONFIG_PP_OG_EXCLUDE_LIST for
      *    format explanations.
      */
-    inline void AddLockedNodeList(std::string& in)
-    {
+    inline void AddLockedNodeList(std::string& in) {
         ConvertListToStrings (in,locked_nodes);
     }
 
@@ -96,8 +96,7 @@ public:
     /** @brief Add another node to be locked and not modified.
      *  @param name Name to be locked
      */
-    inline void AddLockedNode(std::string& name)
-    {
+    inline void AddLockedNode(std::string& name) {
         locked_nodes.push_back(name);
     }
 
@@ -105,24 +104,20 @@ public:
     /** @brief Remove a node from the list of locked nodes.
      *  @param name Name to be unlocked
      */
-    inline void RemoveLockedNode(std::string& name)
-    {
+    inline void RemoveLockedNode(std::string& name) {
         locked_nodes.remove(name);
     }
 
 protected:
-
     void CollectNewChildren(aiNode* nd, std::list<aiNode*>& nodes);
     void FindInstancedMeshes (aiNode* pNode);
 
 private:
-
 #ifdef AI_OG_USE_HASHING
     typedef std::set<unsigned int> LockedSetType;
 #else
     typedef std::set<std::string> LockedSetType;
 #endif
-
 
     //! Scene we're working with
     aiScene* mScene;

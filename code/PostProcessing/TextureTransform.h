@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_TEXTURE_TRANSFORM_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
-#include "BaseProcess.h"
+#include "Common/BaseProcess.h"
 
 #include <assimp/material.h>
 #include <list>

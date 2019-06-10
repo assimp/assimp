@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/qnan.h>
 
 // ASE is quite similar to 3ds. We can reuse some structures
-#include "3DSLoader.h"
+#include "3DS/3DSLoader.h"
 
 namespace Assimp    {
 namespace ASE   {

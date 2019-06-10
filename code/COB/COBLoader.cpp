@@ -45,19 +45,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
-#include "COBLoader.h"
-#include "COBScene.h"
-#include "ConvertToLHProcess.h"
+#include "COB/COBLoader.h"
+#include "COB/COBScene.h"
+#include "PostProcessing/ConvertToLHProcess.h"
+
 #include <assimp/StreamReader.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/LineSplitter.h>
 #include <assimp/TinyFormatter.h>
-#include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
+
+#include <memory>
 
 using namespace Assimp;
 using namespace Assimp::COB;

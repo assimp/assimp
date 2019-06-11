@@ -1130,7 +1130,11 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset& r)
     }
 }
 
-void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
+void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
+{
+    // clean all member arrays
+    meshOffsets.clear();
+    embeddedTexIdxs.clear();
 
     this->mScene = pScene;
 

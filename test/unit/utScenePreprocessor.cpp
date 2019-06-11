@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
-#include <ScenePreprocessor.h>
+#include "Common/ScenePreprocessor.h"
 
 using namespace std;
 using namespace Assimp;

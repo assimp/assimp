@@ -990,6 +990,7 @@ MESSAGE(STATUS "Disabled exporter formats:${ASSIMP_EXPORTERS_DISABLED}")
 SET( assimp_src
   # Assimp Files
   ${Core_SRCS}
+  ${CApi_SRCS}
   ${Common_SRCS}
   ${Logging_SRCS}
   ${Exporter_SRCS}

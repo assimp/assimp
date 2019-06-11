@@ -122,10 +122,10 @@ corresponding preprocessor flag to selectively disable formats.
 #   include "BVH/BVHLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-#   include "IRR/IRRMeshLoader.h"
+#   include "Irr/IRRMeshLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
-#   include "IRR/IRRLoader.h"
+#   include "Irr/IRRLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
 #   include "Q3D/Q3DLoader.h"

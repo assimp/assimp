@@ -377,17 +377,17 @@ ADD_ASSIMP_IMPORTER( HMP
 )
 
 ADD_ASSIMP_IMPORTER( IRRMESH
-  IRR/IRRMeshLoader.cpp
-  IRR/IRRMeshLoader.h
-  IRR/IRRShared.cpp
-  IRR/IRRShared.h
+  Irr/IRRMeshLoader.cpp
+  Irr/IRRMeshLoader.h
+  Irr/IRRShared.cpp
+  Irr/IRRShared.h
 )
 
 ADD_ASSIMP_IMPORTER( IRR
-  IRR/IRRLoader.cpp
-  IRR/IRRLoader.h
-  IRR/IRRShared.cpp
-  IRR/IRRShared.h
+  Irr/IRRLoader.cpp
+  Irr/IRRLoader.h
+  Irr/IRRShared.cpp
+  Irr/IRRShared.h
 )
 
 ADD_ASSIMP_IMPORTER( LWO

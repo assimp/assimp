@@ -72,9 +72,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 
-
-#include "../../code/MaterialSystem.h"   // aiMaterial class
-#include <assimp/StringComparison.h> // ASSIMP_stricmp and ASSIMP_strincmp
+#include "Material/MaterialSystem.h"   // aiMaterial class
+#include <assimp/StringComparison.h>   // ASSIMP_stricmp and ASSIMP_strincmp
 
 #include <time.h>
 

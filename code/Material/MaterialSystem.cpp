@@ -96,12 +96,12 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
     ai_real* pOut,
     unsigned int* pMax)
 {
-    ai_assert( pOut != NULL );
-    ai_assert( pMat != NULL );
+    ai_assert( pOut != nullptr );
+    ai_assert( pMat != nullptr );
 
     const aiMaterialProperty* prop;
     aiGetMaterialProperty(pMat,pKey,type,index, (const aiMaterialProperty**) &prop);
-    if (!prop) {
+    if ( nullptr == prop) {
         return AI_FAILURE;
     }
 
@@ -112,9 +112,11 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
         if (pMax) {
             iWrite = std::min(*pMax,iWrite); ;
         }
-        for (unsigned int a = 0; a < iWrite;++a)    {
-            pOut[a] = static_cast<ai_real> ( reinterpret_cast<float*>(prop->mData)[a] );
+
+        for (unsigned int a = 0; a < iWrite; ++a) {
+            pOut[ a ] = static_cast<ai_real> ( reinterpret_cast<float*>(prop->mData)[a] );
         }
+
         if (pMax) {
             *pMax = iWrite;
         }

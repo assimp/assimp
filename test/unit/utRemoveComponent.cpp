@@ -43,22 +43,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <RemoveVCProcess.h>
-#include <MaterialSystem.h>
-
+#include "PostProcessing/RemoveVCProcess.h"
+#include "Material/MaterialSystem.h"
 
 using namespace std;
 using namespace Assimp;
 
-class RemoveVCProcessTest : public ::testing::Test
-{
+class RemoveVCProcessTest : public ::testing::Test {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     RemoveVCProcess* piProcess;
     aiScene* pScene;
 };

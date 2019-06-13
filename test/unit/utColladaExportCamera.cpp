@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -52,18 +52,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ColladaExportCamera : public ::testing::Test {
 public:
-
-    virtual void SetUp()
-    {
+    void SetUp() override{
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
 
     }
 
-    virtual void TearDown()
-    {
+    void TearDown() override {
         delete ex;
+        ex = nullptr;
         delete im;
+        im = nullptr;
     }
 
 protected:
@@ -71,16 +70,15 @@ protected:
     Assimp::Importer* im;
 };
 
-TEST_F(ColladaExportCamera, testExportCamera)
-{
+TEST_F(ColladaExportCamera, testExportCamera) {
     const char* file = "cameraExp.dae";
 
     const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cameras.dae", aiProcess_ValidateDataStructure);
-    ASSERT_TRUE(pTest!=NULL);
+    ASSERT_NE( nullptr, pTest );
     ASSERT_TRUE(pTest->HasCameras());
 
 
-    EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
+    EXPECT_EQ( AI_SUCCESS, ex->Export(pTest,"collada",file));
     const unsigned int origNumCams( pTest->mNumCameras );
     std::unique_ptr<float[]> origFOV( new float[ origNumCams ] );
     std::unique_ptr<float[]> orifClipPlaneNear( new float[ origNumCams ] );
@@ -89,7 +87,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
     std::unique_ptr<aiVector3D[]> pos( new aiVector3D[ origNumCams ] );
     for (size_t i = 0; i < origNumCams; i++) {
         const aiCamera *orig = pTest->mCameras[ i ];
-        ASSERT_TRUE( orig != nullptr );
+        ASSERT_NE(nullptr, orig );
 
         origFOV[ i ] = orig->mHorizontalFOV;
         orifClipPlaneNear[ i ] = orig->mClipPlaneNear;
@@ -99,7 +97,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
     }
     const aiScene* imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
 
-    ASSERT_TRUE(imported!=NULL);
+    ASSERT_NE(nullptr, imported );
 
     EXPECT_TRUE( imported->HasCameras() );
     EXPECT_EQ( origNumCams, imported->mNumCameras );
@@ -119,5 +117,3 @@ TEST_F(ColladaExportCamera, testExportCamera)
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT
-
-

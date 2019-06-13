@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -43,29 +43,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <ScenePreprocessor.h>
-#include <SortByPTypeProcess.h>
+#include "Common/ScenePreprocessor.h"
+#include "PostProcessing/SortByPTypeProcess.h"
 
 using namespace std;
 using namespace Assimp;
 
 
-class SortByPTypeProcessTest : public ::testing::Test
-{
+class SortByPTypeProcessTest : public ::testing::Test {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     SortByPTypeProcess* process1;
     aiScene* scene;
 };
 
 // ------------------------------------------------------------------------------------------------
-static unsigned int num[10][4] =
-    {
+static unsigned int num[10][4] = {
         {0,0,0,1000},
         {0,0,1000,0},
         {0,1000,0,0},

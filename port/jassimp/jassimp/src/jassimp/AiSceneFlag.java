@@ -48,11 +48,6 @@ import java.util.Set;
  */
 public enum AiSceneFlag {
     /**
-     * The mapped c/c++ integer enum value.
-     */
-    private final int m_rawValue;
-
-    /**
      * Specifies that the scene data structure that was imported is not 
      * complete.<p>
      * 
@@ -119,8 +114,12 @@ public enum AiSceneFlag {
      * you actually need to render it).
      */
     TERRAIN(0x10);
-    
-    
+
+    /**
+     * The mapped c/c++ integer enum value.
+     */
+    private final int m_rawValue;
+
     /**
      * Utility method for converting from c/c++ based integer enums to java 
      * enums.<p>

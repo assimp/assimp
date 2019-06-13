@@ -498,6 +498,13 @@ enum aiComponent
 #define AI_CONFIG_PP_FID_ANIM_ACCURACY              \
     "PP_FID_ANIM_ACCURACY"
 
+// ---------------------------------------------------------------------------
+/** @brief Input parameter to the #aiProcess_FindInvalidData step:
+ *  Set to true to ignore texture coordinates. This may be useful if you have
+ *  to assign different kind of textures like one for the summer or one for the winter.
+ */
+#define AI_CONFIG_PP_FID_IGNORE_TEXTURECOORDS        \
+    "PP_FID_IGNORE_TEXTURECOORDS"
 
 // TransformUVCoords evaluates UV scalings
 #define AI_UVTRAFO_SCALING 0x1
@@ -644,13 +651,28 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will use the legacy embedded texture naming.
-*
-* The default value is false (0)
-* Property type: bool
-*/
+ *
+ * The default value is false (0)
+ * Property type: bool
+ */
 #define AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING \
 	"AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
-	
+
+// ---------------------------------------------------------------------------
+/** @brief  Set wether the importer shall not remove empty bones.
+ *  
+ *  Empty bone are often used to define connections for other models.
+ */
+#define AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES \
+    "AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES"
+
+
+// ---------------------------------------------------------------------------
+/** @brief  Set wether the FBX importer shall convert the unit from cm to m.
+ */
+#define AI_CONFIG_FBX_CONVERT_TO_M \
+    "AI_CONFIG_FBX_CONVERT_TO_M"
+
 // ---------------------------------------------------------------------------
 /** @brief  Set the vertex animation keyframe to be imported
  *

@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2018, assimp team
+# Copyright (c) 2006-2019, assimp team
 
 
 # All rights reserved.
@@ -174,7 +174,7 @@ add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
-    ../code/Version.cpp
+    ../code/Common/Version.cpp
 	${COMMON}
 	${IMPORTERS}
 	${MATERIAL}

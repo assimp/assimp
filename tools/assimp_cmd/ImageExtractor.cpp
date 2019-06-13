@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -228,7 +228,8 @@ int DoExport(const aiTexture* tx, FILE* p, const std::string& extension,
 // Implementation of the assimp extract utility
 int Assimp_Extract (const char* const* params, unsigned int num)
 {
-    const char* const invalid = "assimp extract: Invalid number of arguments. See \'assimp extract --help\'\n"; 
+    const char* const invalid = "assimp extract: Invalid number of arguments. See \'assimp extract --help\'\n";
+    // assimp extract in out [options]
     if (num < 1) {
         printf(invalid);
         return 1;
@@ -240,11 +241,7 @@ int Assimp_Extract (const char* const* params, unsigned int num)
         return 0;
     }
 
-    // asssimp extract in out [options]
-    if (num < 1) {
-        printf(invalid);
-        return 1;
-    }
+
 
     std::string in  = std::string(params[0]);
     std::string out = (num > 1 ? std::string(params[1]) : "-");

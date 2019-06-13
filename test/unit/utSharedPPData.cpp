@@ -43,21 +43,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <BaseProcess.h>
 
+#include "Common/BaseProcess.h"
 
 using namespace std;
 using namespace Assimp;
 
-class SharedPPDataTest : public ::testing::Test
-{
+class SharedPPDataTest : public ::testing::Test {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     SharedPostProcessInfo* shared;
 };
 

@@ -43,7 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <TriangulateProcess.h>
+
+#include "PostProcessing/TriangulateProcess.h"
 
 
 using namespace std;

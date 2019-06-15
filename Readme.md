@@ -125,7 +125,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)
 * [Python](port/PyAssimp/README.md)
-* [.NET](port/AssimpNET/Readme.md)
+* [.NET](https://github.com/kebby/assimp-net)
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
 * [Unity 3d Plugin](https://www.assetstore.unity3d.com/en/#!/content/91777)
@@ -136,7 +136,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 [open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.
 
 #### Repository structure ####
-Open Asset Import Library is implemented in C++. The directory structure is:
+Open Asset Import Library is implemented in C++. The directory structure looks like:
 
 	/code		Source code
 	/contrib	Third-party libraries
@@ -149,6 +149,11 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 	/samples	A small number of samples to illustrate possible
                         use cases for Assimp
 
+The source code is organized in the following way:
+
+	code/Common		The base implementation for importers and the infrastructure
+	code/PostProcessing	The post-processing steps
+	code/<FormatName>	Implementation for import and export for the format
 
 ### Where to get help ###
 For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.

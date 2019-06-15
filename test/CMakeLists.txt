@@ -37,7 +37,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #----------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/contrib/gtest/include
@@ -174,7 +174,7 @@ add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
-    ../code/Version.cpp
+    ../code/Common/Version.cpp
 	${COMMON}
 	${IMPORTERS}
 	${MATERIAL}

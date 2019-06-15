@@ -59,8 +59,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 #include <assimp/StreamReader.h>
 #include <assimp/TinyFormatter.h>
-//#include "../contrib/ConvertUTF/ConvertUTF.h"
-#include "../contrib/utf8cpp/source/utf8.h"
+#ifdef ASSIMP_USE_HUNTER
+#  include <utf8/utf8.h>
+#else
+//#  include "../contrib/ConvertUTF/ConvertUTF.h"
+#  include "../contrib/utf8cpp/source/utf8.h"
+#endif
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>

@@ -123,6 +123,15 @@ int IOSystem2Unzip::testerror(voidpf /*opaque*/, voidpf /*stream*/) {
 zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
     zlib_filefunc_def mapping;
 
+#ifdef ASSIMP_USE_HUNTER
+    mapping.zopen_file = (open_file_func)open;
+    mapping.zread_file = (read_file_func)read;
+    mapping.zwrite_file = (write_file_func)write;
+    mapping.ztell_file = (tell_file_func)tell;
+    mapping.zseek_file = (seek_file_func)seek;
+    mapping.zclose_file = (close_file_func)close;
+    mapping.zerror_file = (error_file_func)testerror;
+#else
     mapping.zopen_file = open;
     mapping.zread_file = read;
     mapping.zwrite_file = write;
@@ -130,6 +139,7 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
     mapping.zseek_file = seek;
     mapping.zclose_file = close;
     mapping.zerror_file = testerror;
+#endif
     mapping.opaque = (voidpf) pIOHandler;
 
     return mapping;

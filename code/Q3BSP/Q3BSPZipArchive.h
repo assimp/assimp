@@ -42,7 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_Q3BSP_ZIPARCHIVE_H_INC
 #define AI_Q3BSP_ZIPARCHIVE_H_INC
 
-#include <unzip.h>
+#ifdef ASSIMP_USE_HUNTER
+#  include <minizip/unzip.h>
+#else
+#  include <unzip.h>
+#endif
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <vector>

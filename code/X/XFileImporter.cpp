@@ -332,7 +332,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 
                 // collect vertex data for indices of this face
                 for( unsigned int d = 0; d < df.mNumIndices; ++d ) {
-                    df.mIndices[d] = newIndex;
+                    df.mIndices[ d ] = newIndex;
                     const unsigned int newIdx( pf.mIndices[ d ] );
                     if ( newIdx > sourceMesh->mPositions.size() ) {
                         continue;
@@ -344,7 +344,10 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                     mesh->mVertices[newIndex] = sourceMesh->mPositions[pf.mIndices[d]];
                     // Normal, if present
                     if ( mesh->HasNormals() ) {
-                        mesh->mNormals[ newIndex ] = sourceMesh->mNormals[ sourceMesh->mNormFaces[ f ].mIndices[ d ] ];
+                        if ( sourceMesh->mNormFaces[ f ].mIndices.size() > d ) {
+                            const size_t idx( sourceMesh->mNormFaces[ f ].mIndices[ d ] );
+                            mesh->mNormals[ newIndex ] = sourceMesh->mNormals[ idx ];
+                        }
                     }
 
                     // texture coord sets

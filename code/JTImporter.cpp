@@ -27,7 +27,7 @@ namespace {
 }
 
 enum SegmentType {
-    SceneGraph = 1,
+    LogicalSceneGraph = 1,
     JT_B_Rep,
     PMI_Data,
     MetaData,
@@ -134,7 +134,7 @@ TokenEntry* JTImporter::FindTokenEntryByGuid(GUID& guid) {
 
 static bool SupportsZlibCompression(SegmentType type) {
     switch (type) {
-        case SceneGraph:
+        case LogicalSceneGraph:
         case JT_B_Rep:
         case PMI_Data:
         case MetaData:
@@ -179,6 +179,67 @@ void JTImporter::ReadDataSegmentHeader(BinReader& reader) {
     reader.readGUID(mCurrentDataSegment->m_DataSegmentHeader.guid);
     reader.readI32(mCurrentDataSegment->m_DataSegmentHeader.type);
     reader.readI32(mCurrentDataSegment->m_DataSegmentHeader.length);
+
+}
+
+void JTImporter::ReadLogicalElementHeaderZLib(BinReader& reader) {
+    i32 compressionFlag;
+    reader.readI32(compressionFlag);
+    i32 compressedLen;
+    reader.readI32(compressedLen);
+    u8 compressionAlgo;
+    reader.readUChar(compressionAlgo);
+}
+
+void JTImporter::ReadSegmentType(BinReader& reader) {
+    SegmentType type = static_cast<SegmentType>(mCurrentDataSegment->m_DataSegmentHeader.type);
+    switch (type) {
+        case LogicalSceneGraph:
+            ReadLSG(reader);
+            break;
+        case JT_B_Rep:
+            break;
+        case PMI_Data:
+            break;
+        case MetaData:
+            break;
+        case Shape:
+            break;
+        case Shape_LOD0:
+            break;
+        case Shape_LOD1:
+            break;
+        case Shape_LOD2:
+            break;
+        case Shape_LOD3:
+            break;
+        case Shape_LOD4:
+            break;
+        case Shape_LOD5:
+            break;
+        case Shape_LOD6:
+            break;
+        case Shape_LOD7:
+            break;
+        case Shape_LOD8:
+            break;
+        case Shape_LOD9:
+            break;
+        case XT_B_Rep:
+            break;
+        case Wireframe_Rep:
+            break;
+        case ULP:
+            break;
+        case LWPA:
+            break;
+        default:
+            break;
+    }
+}
+
+void JTImporter::ReadLSG(BinReader& reader) {
+    ReadLogicalElementHeaderZLib(reader);
 }
 
 } // end namespace Assimp

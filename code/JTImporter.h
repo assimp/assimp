@@ -192,6 +192,9 @@ protected:
     TokenEntry* FindTokenEntryByGuid(GUID& id);
     void ReadDataSegment(BinReader& reader);
     void ReadDataSegmentHeader(BinReader& reader);
+    void ReadLogicalElementHeaderZLib(BinReader& reader);
+    void ReadSegmentType(BinReader& reader);
+    void ReadLSG(BinReader& reader);
 
 private:
     JTModel mJTModel;

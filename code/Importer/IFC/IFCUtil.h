@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCReaderGen_2x3.h"
 #include "IFCLoader.h"
-#include "code/STEPFile.h"
+#include "code/Step/STEPFile.h"
 #include <assimp/mesh.h>
 #include <assimp/material.h>
 

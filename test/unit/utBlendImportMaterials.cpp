@@ -133,10 +133,10 @@ TEST_F(BlendImportMaterials, testImportMaterialwith2texturesAnd2TexCoordMappings
 
     // material has 2 diffuse textures
     ASSERT_TRUE(pTest->HasMaterials());
-    EXPECT_EQ(1, pTest->mNumMaterials);
+    EXPECT_EQ(1u, pTest->mNumMaterials);
     const aiMaterial *pMat = pTest->mMaterials[0];
     ASSERT_TRUE(nullptr != pMat);
-    ASSERT_EQ(2, pMat->GetTextureCount(aiTextureType_DIFFUSE));
+    ASSERT_EQ(2u, pMat->GetTextureCount(aiTextureType_DIFFUSE));
     aiString aPath;
     aiTextureMapping tm = aiTextureMapping::aiTextureMapping_OTHER;
     aiReturn result = pMat->GetTexture(aiTextureType_DIFFUSE, 0, &aPath, &tm);
@@ -146,7 +146,7 @@ TEST_F(BlendImportMaterials, testImportMaterialwith2texturesAnd2TexCoordMappings
 
     // mesh has 2 texturecoord sets
     ASSERT_TRUE(pTest->HasMeshes());
-    EXPECT_EQ(1, pTest->mNumMeshes);
+    EXPECT_EQ(1u, pTest->mNumMeshes);
     const aiMesh *pMesh = pTest->mMeshes[0];
     ASSERT_TRUE(nullptr != pMesh);
     ASSERT_TRUE(pMesh->HasTextureCoords(0));

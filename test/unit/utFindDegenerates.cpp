@@ -42,8 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include <FindDegenerates.h>
-
+#include "PostProcessing/FindDegenerates.h"
 
 using namespace std;
 using namespace Assimp;

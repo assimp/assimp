@@ -243,10 +243,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     typedef double ai_real;
     typedef signed long long int ai_int;
     typedef unsigned long long int ai_uint;
+#ifndef ASSIMP_AI_REAL_TEXT_PRECISION
+#define ASSIMP_AI_REAL_TEXT_PRECISION 16
+#endif // ASSIMP_AI_REAL_TEXT_PRECISION
 #else // ASSIMP_DOUBLE_PRECISION
     typedef float ai_real;
     typedef signed int ai_int;
     typedef unsigned int ai_uint;
+#ifndef ASSIMP_AI_REAL_TEXT_PRECISION
+#define ASSIMP_AI_REAL_TEXT_PRECISION 8
+#endif // ASSIMP_AI_REAL_TEXT_PRECISION
 #endif // ASSIMP_DOUBLE_PRECISION
 
     //////////////////////////////////////////////////////////////////////////

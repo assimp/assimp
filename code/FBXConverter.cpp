@@ -1385,6 +1385,50 @@ namespace Assimp {
                 ConvertWeights(out_mesh, model, mesh, node_global_transform, index, &reverseMapping);
             }
 
+            std::vector<aiAnimMesh*> animMeshes;
+            size_t bsIdx(0), bsChannelIdx(0);
+            for (const BlendShape* blendShape : mesh.GetBlendShapes()) {
+                for (const BlendShapeChannel* blendShapeChannel : blendShape->BlendShapeChannels()) {
+                    const std::vector<const ShapeGeometry*>& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+                    for (size_t i = 0; i < shapeGeometries.size(); i++) {
+                        aiAnimMesh* animMesh = aiCreateAnimMesh(out_mesh);
+                        const ShapeGeometry* shapeGeometry = shapeGeometries.at(i);
+                        const std::vector<aiVector3D>& vertices = shapeGeometry->GetVertices();
+                        const std::vector<aiVector3D>& normals = shapeGeometry->GetNormals();
+                        const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
+                        animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
+                        for (size_t j = 0; j < indices.size(); j++) {
+                            unsigned int index = indices.at(j);
+                            aiVector3D vertex = vertices.at(j);
+                            aiVector3D normal = normals.at(j);
+                            unsigned int count = 0;
+                            const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
+                            for (unsigned int k = 0; k < count; k++) {
+                                unsigned int index = outIndices[k];
+                                animMesh->mVertices[index] += vertex;
+                                if (animMesh->mNormals != nullptr) {
+                                    animMesh->mNormals[index] += normal;
+                                    animMesh->mNormals[index].NormalizeSafe();
+                                }
+                            }
+                        }
+                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
+                        animMeshes.push_back(animMesh);
+                    }
+                    bsChannelIdx++;
+                }
+                bsIdx++;
+            }
+
+            const size_t numAnimMeshes = animMeshes.size();
+            if (numAnimMeshes > 0) {
+                out_mesh->mNumAnimMeshes = static_cast<unsigned int>(numAnimMeshes);
+                out_mesh->mAnimMeshes = new aiAnimMesh * [numAnimMeshes];
+                for (size_t i = 0; i < numAnimMeshes; i++) {
+                    out_mesh->mAnimMeshes[i] = animMeshes.at(i);
+                }
+            }
+
             return static_cast<unsigned int>(meshes.size() - 1);
         }
 

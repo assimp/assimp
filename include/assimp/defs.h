@@ -122,7 +122,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * OPTIMIZEANIMS
  * OPTIMIZEGRAPH
  * GENENTITYMESHES
- * FIXTEXTUREPATHS */
+ * FIXTEXTUREPATHS
+ * GENBOUNDINGBOXES */
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
@@ -298,6 +299,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  else
 #    define AI_NO_EXCEPT
 #  endif
-#endif
+#endif // _MSC_VER
 
 #endif // !! AI_DEFINES_H_INC

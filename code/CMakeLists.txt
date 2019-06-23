@@ -60,6 +60,7 @@ SOURCE_GROUP( Compiler FILES ${COMPILER_HEADERS})
 
 SET( PUBLIC_HEADERS
   ${HEADER_PATH}/anim.h
+  ${HEADER_PATH}/aabb.h
   ${HEADER_PATH}/ai_assert.h
   ${HEADER_PATH}/camera.h
   ${HEADER_PATH}/color4.h

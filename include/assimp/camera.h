@@ -162,7 +162,6 @@ struct aiCamera
      */
     float mClipPlaneFar;
 
-
     /** Screen aspect ratio.
      *
      * This is the ration between the width and the height of the

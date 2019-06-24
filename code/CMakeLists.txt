@@ -669,6 +669,8 @@ SET( PostProcessing_SRCS
   PostProcessing/MakeVerboseFormat.h
   PostProcessing/ScaleProcess.cpp
   PostProcessing/ScaleProcess.h
+  PostProcessing/GenBoundingBoxesProcess.cpp
+  PostProcessing/GenBoundingBoxesProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 

@@ -89,7 +89,7 @@ void BaseProcess::ExecuteOnScene( Importer* pImp)
 
         // and kill the partially imported data
         delete pImp->Pimpl()->mScene;
-        pImp->Pimpl()->mScene = NULL;
+        pImp->Pimpl()->mScene = nullptr;
     }
 }
 

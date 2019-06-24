@@ -39,23 +39,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+/** @file Defines a post-processing step to generate Axis-aligned bounding
+ *        volumes for all meshes.
+ */
+
 #pragma once
 
 #ifndef AI_GENBOUNDINGBOXESPROCESS_H_INC
 #define AI_GENBOUNDINGBOXESPROCESS_H_INC
 
+#ifndef ASSIMP_BUILD_NO_GENBOUNDINGBOXES_PROCESS
+
 #include "Common/BaseProcess.h"
 
 namespace Assimp {
 
-class GenBoundingBoxesProcess : public BaseProcess {
+/** Post-processing process to find axis-aligned bounding volumes for amm meshes
+ *  used in a scene
+ */
+class ASSIMP_API GenBoundingBoxesProcess : public BaseProcess {
 public:
+    /// The class constructor.
     GenBoundingBoxesProcess();
+    /// The class destructor.
     ~GenBoundingBoxesProcess();
+    /// Will return true, if aiProcess_GenBoundingBoxes is defined.
     bool IsActive(unsigned int pFlags) const override;
+    /// The execution callback.
     void Execute(aiScene* pScene) override;
 };
 
 } // Namespace Assimp
+
+#endif // #ifndef ASSIMP_BUILD_NO_GENBOUNDINGBOXES_PROCESS
 
 #endif // AI_GENBOUNDINGBOXESPROCESS_H_INC

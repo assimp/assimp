@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to split large meshes into submeshes
+/** @file Defines a post processing step to split large meshes into sub-meshes
  */
 #ifndef AI_SPLITLARGEMESHES_H_INC
 #define AI_SPLITLARGEMESHES_H_INC
@@ -51,10 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 
+// Forward declarations
 class SplitLargeMeshesTest;
 
-namespace Assimp
-{
+namespace Assimp {
 
 class SplitLargeMeshesProcess_Triangle;
 class SplitLargeMeshesProcess_Vertex;

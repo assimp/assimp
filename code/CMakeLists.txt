@@ -60,6 +60,7 @@ SOURCE_GROUP( Compiler FILES ${COMPILER_HEADERS})
 
 SET( PUBLIC_HEADERS
   ${HEADER_PATH}/anim.h
+  ${HEADER_PATH}/aabb.h
   ${HEADER_PATH}/ai_assert.h
   ${HEADER_PATH}/camera.h
   ${HEADER_PATH}/color4.h
@@ -668,6 +669,8 @@ SET( PostProcessing_SRCS
   PostProcessing/MakeVerboseFormat.h
   PostProcessing/ScaleProcess.cpp
   PostProcessing/ScaleProcess.h
+  PostProcessing/GenBoundingBoxesProcess.cpp
+  PostProcessing/GenBoundingBoxesProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,67 +39,77 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of BaseProcess */
+#ifndef ASSIMP_BUILD_NO_GENBOUNDINGBOXES_PROCESS
 
-#include <assimp/BaseImporter.h>
-#include "BaseProcess.h"
-#include <assimp/DefaultLogger.hpp>
+#include "PostProcessing/GenBoundingBoxesProcess.h"
+
+#include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include "Importer.h"
 
-using namespace Assimp;
+namespace Assimp {
 
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-BaseProcess::BaseProcess() AI_NO_EXCEPT
-: shared()
-, progress()
-{
+GenBoundingBoxesProcess::GenBoundingBoxesProcess()
+: BaseProcess() {
+
 }
 
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseProcess::~BaseProcess()
-{
-    // nothing to do here
+GenBoundingBoxesProcess::~GenBoundingBoxesProcess() {
+    // empty
 }
 
-// ------------------------------------------------------------------------------------------------
-void BaseProcess::ExecuteOnScene( Importer* pImp)
-{
-    ai_assert(NULL != pImp && NULL != pImp->Pimpl()->mScene);
+bool GenBoundingBoxesProcess::IsActive(unsigned int pFlags) const {
+    return 0 != ( pFlags & aiProcess_GenBoundingBoxes );
+}
 
-    progress = pImp->GetProgressHandler();
-    ai_assert(progress);
+void checkMesh(aiMesh* mesh, aiVector3D& min, aiVector3D& max) {
+    ai_assert(nullptr != mesh);
 
-    SetupProperties( pImp );
+    if (0 == mesh->mNumVertices) {
+        return;
+    }
 
-    // catch exceptions thrown inside the PostProcess-Step
-    try
-    {
-        Execute(pImp->Pimpl()->mScene);
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+        const aiVector3D &pos = mesh->mVertices[i];
+        if (pos.x < min.x) {
+            min.x = pos.x;
+        }
+        if (pos.y < min.y) {
+            min.y = pos.y;
+        }
+        if (pos.z < min.z) {
+            min.z = pos.z;
+        }
 
-    } catch( const std::exception& err )    {
-
-        // extract error description
-        pImp->Pimpl()->mErrorString = err.what();
-        ASSIMP_LOG_ERROR(pImp->Pimpl()->mErrorString);
-
-        // and kill the partially imported data
-        delete pImp->Pimpl()->mScene;
-        pImp->Pimpl()->mScene = nullptr;
+        if (pos.x > max.x) {
+            max.x = pos.x;
+        }
+        if (pos.y > max.y) {
+            max.y = pos.y;
+        }
+        if (pos.z > max.z) {
+            max.z = pos.z;
+        }
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-void BaseProcess::SetupProperties(const Importer* /*pImp*/)
-{
-    // the default implementation does nothing
+void GenBoundingBoxesProcess::Execute(aiScene* pScene) {
+    if (nullptr == pScene) {
+        return;
+    }
+
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        aiMesh* mesh = pScene->mMeshes[i];
+        if (nullptr == mesh) {
+            continue;
+        }
+
+        aiVector3D min(999999, 999999, 999999), max(-999999, -999999, -999999);
+        checkMesh(mesh, min, max);
+        mesh->mAABB.mMin = min;
+        mesh->mAABB.mMax = max;
+    }
 }
 
-// ------------------------------------------------------------------------------------------------
-bool BaseProcess::RequireVerboseFormat() const
-{
-    return true;
-}
+} // Namespace Assimp
 
+#endif // ASSIMP_BUILD_NO_GENBOUNDINGBOXES_PROCESS

@@ -143,15 +143,15 @@ namespace {
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
 StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path,
-		const std::string& file, const ExportProperties* pProperties):
-				 mProperties(pProperties),mIOSystem(pIOSystem),mFile(file), mPath(path),
-				 mScene(pScene), endstr(";\n") {
-	CollectTrafos(pScene->mRootNode, trafos);
-	CollectMeshes(pScene->mRootNode, meshes);
+    const std::string& file, const ExportProperties* pProperties) :
+    mProperties(pProperties), mIOSystem(pIOSystem), mFile(file), mPath(path),
+    mScene(pScene), endstr(";\n") {
+    CollectTrafos(pScene->mRootNode, trafos);
+    CollectMeshes(pScene->mRootNode, meshes);
 
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
-    mOutput.imbue( std::locale("C") );
-    mOutput.precision(16);
+    mOutput.imbue(std::locale("C"));
+    mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
 
     // start writing
     WriteFile();
@@ -166,7 +166,7 @@ void StepExporter::WriteFile()
     mOutput.setf(std::ios::fixed);
     // precision for double
     // see http://stackoverflow.com/questions/554063/how-do-i-print-a-double-value-with-full-precision-using-cout
-    mOutput.precision(16);
+    mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
 
     // standard color
     aiColor4D fColor;

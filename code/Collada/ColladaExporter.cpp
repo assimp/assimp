@@ -99,7 +99,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 , mFile(file) {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
-    mOutput.precision(16);
+    mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
 
     mScene = pScene;
     mSceneOwned = false;

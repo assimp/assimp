@@ -87,6 +87,7 @@ namespace Assimp {
         , meshes_converted()
         , node_anim_chain_bits()
         , mNodeNameInstances()
+        , mNodeNameInstances()
         , mNodeNames()
         , anim_fps()
         , out(out)

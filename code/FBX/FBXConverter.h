@@ -155,6 +155,11 @@ private:
     // while these would be allowed, they are a potential trouble spot so better not use them).
     const char* NameTransformationComp(TransformationComp comp);
 
+    // ------------------------------------------------------------------------------------------------	
+    // Returns an unique name for a node or traverses up a hierarchy until a non-empty name is found and	
+    // then makes this name unique	
+    std::string MakeUniqueNodeName(const Model* const model, const aiNode& parent);	
+
     // ------------------------------------------------------------------------------------------------
     // note: this returns the REAL fbx property names
     const char* NameTransformationCompProperty(TransformationComp comp);

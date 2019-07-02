@@ -86,6 +86,7 @@ namespace Assimp {
         , textures_converted()
         , meshes_converted()
         , node_anim_chain_bits()
+        , mNodeNameInstances()
         , mNodeNames()
         , anim_fps()
         , out(out)
@@ -141,44 +142,10 @@ namespace Assimp {
 
         void FBXConverter::ConvertRootNode() {
             out->mRootNode = new aiNode();
-            std::string unique_name;
-            GetUniqueName("RootNode", unique_name);
-            out->mRootNode->mName.Set(unique_name);
+            out->mRootNode->mName.Set("RootNode");
 
             // root has ID 0
             ConvertNodes(0L, *out->mRootNode);
-        }
-
-        static std::string getAncestorBaseName(const aiNode* node)
-        {
-            const char* nodeName = nullptr;
-            size_t length = 0;
-            while (node && (!nodeName || length == 0))
-            {
-                nodeName = node->mName.C_Str();
-                length = node->mName.length;
-                node = node->mParent;
-            }
-
-            if (!nodeName || length == 0)
-            {
-                return {};
-            }
-            // could be std::string_view if c++17 available
-            return std::string(nodeName, length);
-        }
-
-        // Make unique name
-        std::string FBXConverter::MakeUniqueNodeName(const Model* const model, const aiNode& parent)
-        {
-            std::string original_name = FixNodeName(model->Name());
-            if (original_name.empty())
-            {
-                original_name = getAncestorBaseName(&parent);
-            }
-            std::string unique_name;
-            GetUniqueName(original_name, unique_name);
-            return unique_name;
         }
 
         void FBXConverter::ConvertNodes(uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform) {
@@ -212,18 +179,35 @@ namespace Assimp {
 
                         aiMatrix4x4 new_abs_transform = parent_transform;
 
-                        std::string unique_name = MakeUniqueNodeName(model, parent);
-
                         // even though there is only a single input node, the design of
                         // assimp (or rather: the complicated transformation chain that
                         // is employed by fbx) means that we may need multiple aiNode's
                         // to represent a fbx node's transformation.
-                        const bool need_additional_node = GenerateTransformationNodeChain(*model, unique_name, nodes_chain, post_nodes_chain);
+                        GenerateTransformationNodeChain(*model, nodes_chain, post_nodes_chain);
 
                         ai_assert(nodes_chain.size());
 
-                        if (need_additional_node) {
-                            nodes_chain.push_back(new aiNode(unique_name));
+                        std::string original_name = FixNodeName(model->Name());
+
+                        // check if any of the nodes in the chain has the name the fbx node
+                        // is supposed to have. If there is none, add another node to
+                        // preserve the name - people might have scripts etc. that rely
+                        // on specific node names.
+                        aiNode* name_carrier = NULL;
+                        for (aiNode* prenode : nodes_chain) {
+                            if (!strcmp(prenode->mName.C_Str(), original_name.c_str())) {
+                                name_carrier = prenode;
+                                break;
+                            }
+                        }
+
+                        if (!name_carrier) {
+                            std::string old_original_name = original_name;
+                            GetUniqueName(old_original_name, original_name);
+                            nodes_chain.push_back(new aiNode(original_name));
+                        }
+                        else {
+                            original_name = nodes_chain.back()->mName.C_Str();
                         }
 
                         //setup metadata on newest node
@@ -285,11 +269,11 @@ namespace Assimp {
                         ConvertNodes(model->ID(), *last_parent, new_abs_transform);
 
                         if (doc.Settings().readLights) {
-                            ConvertLights(*model, unique_name);
+                            ConvertLights(*model, original_name);
                         }
 
                         if (doc.Settings().readCameras) {
-                            ConvertCameras(*model, unique_name);
+                            ConvertCameras(*model, original_name);
                         }
 
                         nodes.push_back(nodes_chain.front());
@@ -442,16 +426,21 @@ namespace Assimp {
         void FBXConverter::GetUniqueName(const std::string &name, std::string &uniqueName)
         {
             uniqueName = name;
-            auto it_pair = mNodeNames.insert({ name, 0 }); // duplicate node name instance count
-            unsigned int& i = it_pair.first->second;
-            while (!it_pair.second)
+            int i = 0;
+            auto it = mNodeNameInstances.find(name); // duplicate node name instance count
+            if (it != mNodeNameInstances.end())
             {
-                i++;
-                std::ostringstream ext;
-                ext << name << std::setfill('0') << std::setw(3) << i;
-                uniqueName = ext.str();
-                it_pair = mNodeNames.insert({ uniqueName, 0 });
+                i = it->second;
+                while (mNodeNames.find(uniqueName) != mNodeNames.end())
+                {
+                    i++;
+                    std::stringstream ext;
+                    ext << name << std::setfill('0') << std::setw(3) << i;
+                    uniqueName = ext.str();
+                }
             }
+            mNodeNameInstances[name] = i;
+            mNodeNames.insert(uniqueName);
         }
 
         const char* FBXConverter::NameTransformationComp(TransformationComp comp) {
@@ -683,7 +672,7 @@ namespace Assimp {
             return name + std::string(MAGIC_NODE_TAG) + "_" + NameTransformationComp(comp);
         }
 
-        bool FBXConverter::GenerateTransformationNodeChain(const Model& model, const std::string& name, std::vector<aiNode*>& output_nodes,
+        void FBXConverter::GenerateTransformationNodeChain(const Model& model, std::vector<aiNode*>& output_nodes,
             std::vector<aiNode*>& post_output_nodes) {
             const PropertyTable& props = model.Props();
             const Model::RotOrder rot = model.RotationOrder();
@@ -798,6 +787,8 @@ namespace Assimp {
             // not be guaranteed.
             ai_assert(NeedsComplexTransformationChain(model) == is_complex);
 
+            std::string name = FixNodeName(model.Name());
+
             // now, if we have more than just Translation, Scaling and Rotation,
             // we need to generate a full node chain to accommodate for assimp's
             // lack to express pivots and offsets.
@@ -839,20 +830,20 @@ namespace Assimp {
                 }
 
                 ai_assert(output_nodes.size());
-                return true;
+                return;
             }
 
             // else, we can just multiply the matrices together
             aiNode* nd = new aiNode();
             output_nodes.push_back(nd);
+            std::string uniqueName;
+            GetUniqueName(name, uniqueName);
 
-            // name passed to the method is already unique
-            nd->mName.Set(name);
+            nd->mName.Set(uniqueName);
 
             for (const auto &transform : chain) {
                 nd->mTransformation = nd->mTransformation * transform;
             }
-            return false;
         }
 
         void FBXConverter::SetupNodeMetadata(const Model& model, aiNode& nd)
@@ -1255,7 +1246,7 @@ namespace Assimp {
 
             // mapping from output indices to DOM indexing, needed to resolve weights
             std::vector<unsigned int> reverseMapping;
-
+            std::map<unsigned int, unsigned int> translateIndexMap;
             if (process_weights) {
                 reverseMapping.resize(count_vertices);
             }
@@ -1291,9 +1282,8 @@ namespace Assimp {
                         }
 
                         binormals = &tempBinormals;
-                    }
-                    else {
-                        binormals = NULL;
+                    } else {
+                        binormals = nullptr;
                     }
                 }
 
@@ -1363,6 +1353,7 @@ namespace Assimp {
 
                     if (reverseMapping.size()) {
                         reverseMapping[cursor] = in_cursor;
+                        translateIndexMap[in_cursor] = cursor;
                     }
 
                     out_mesh->mVertices[cursor] = vertices[in_cursor];
@@ -1392,6 +1383,54 @@ namespace Assimp {
 
             if (process_weights) {
                 ConvertWeights(out_mesh, model, mesh, node_global_transform, index, &reverseMapping);
+            }
+
+            std::vector<aiAnimMesh*> animMeshes;
+            size_t bsIdx(0), bsChannelIdx(0);
+            for (const BlendShape* blendShape : mesh.GetBlendShapes()) {
+                for (const BlendShapeChannel* blendShapeChannel : blendShape->BlendShapeChannels()) {
+                    const std::vector<const ShapeGeometry*>& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+                    for (size_t i = 0; i < shapeGeometries.size(); i++) {
+                        aiAnimMesh* animMesh = aiCreateAnimMesh(out_mesh);
+                        const ShapeGeometry* shapeGeometry = shapeGeometries.at(i);
+                        const std::vector<aiVector3D>& vertices = shapeGeometry->GetVertices();
+                        const std::vector<aiVector3D>& normals = shapeGeometry->GetNormals();
+                        const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
+                        animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
+                        for (size_t j = 0; j < indices.size(); j++) {
+                            const unsigned int o_index = indices.at(j);
+                            //unsigned int index = translateIndexMap[indices.at(j)];
+                            unsigned int index = indices.at(j);
+                            aiVector3D vertex = vertices.at(j);
+                            aiVector3D normal = normals.at(j);
+                            unsigned int count = 0;
+                            const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
+                            for (unsigned int k = 0; k < count; k++) {
+                                //unsigned int index = outIndices[k];
+                                unsigned int index = translateIndexMap[outIndices[k]];
+
+                                animMesh->mVertices[index] += vertex;
+                                if (animMesh->mNormals != nullptr) {
+                                    animMesh->mNormals[index] += normal;
+                                    animMesh->mNormals[index].NormalizeSafe();
+                                }
+                            }
+                        }
+                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
+                        animMeshes.push_back(animMesh);
+                    }
+                    bsChannelIdx++;
+                }
+                bsIdx++;
+            }
+
+            const size_t numAnimMeshes = animMeshes.size();
+            if (numAnimMeshes > 0) {
+                out_mesh->mNumAnimMeshes = static_cast<unsigned int>(numAnimMeshes);
+                out_mesh->mAnimMeshes = new aiAnimMesh * [numAnimMeshes];
+                for (size_t i = 0; i < numAnimMeshes; i++) {
+                    out_mesh->mAnimMeshes[i] = animMeshes.at(i);
+                }
             }
 
             return static_cast<unsigned int>(meshes.size() - 1);
@@ -1642,7 +1681,7 @@ namespace Assimp {
             out_tex->pcData = reinterpret_cast<aiTexel*>(const_cast<Video&>(video).RelinquishContent());
 
             // try to extract a hint from the file extension
-            const std::string& filename = video.RelativeFilename().empty() ? video.FileName() : video.RelativeFilename();
+            const std::string& filename = video.FileName().empty() ? video.RelativeFilename() : video.FileName();
             std::string ext = BaseImporter::GetExtension(filename);
 
             if (ext == "jpeg") {
@@ -1653,7 +1692,7 @@ namespace Assimp {
                 memcpy(out_tex->achFormatHint, ext.c_str(), ext.size());
             }
 
-            out_tex->mFilename.Set(filename.c_str());
+            out_tex->mFilename.Set(video.FileName().c_str());
 
             return static_cast<unsigned int>(textures.size() - 1);
         }

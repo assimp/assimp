@@ -1246,7 +1246,7 @@ namespace Assimp {
 
             // mapping from output indices to DOM indexing, needed to resolve weights
             std::vector<unsigned int> reverseMapping;
-
+            std::map<unsigned int, unsigned int> translateIndexMap;
             if (process_weights) {
                 reverseMapping.resize(count_vertices);
             }
@@ -1282,9 +1282,8 @@ namespace Assimp {
                         }
 
                         binormals = &tempBinormals;
-                    }
-                    else {
-                        binormals = NULL;
+                    } else {
+                        binormals = nullptr;
                     }
                 }
 
@@ -1354,6 +1353,7 @@ namespace Assimp {
 
                     if (reverseMapping.size()) {
                         reverseMapping[cursor] = in_cursor;
+                        translateIndexMap[in_cursor] = cursor;
                     }
 
                     out_mesh->mVertices[cursor] = vertices[in_cursor];
@@ -1398,13 +1398,17 @@ namespace Assimp {
                         const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
                         animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                         for (size_t j = 0; j < indices.size(); j++) {
+                            const unsigned int o_index = indices.at(j);
+                            //unsigned int index = translateIndexMap[indices.at(j)];
                             unsigned int index = indices.at(j);
                             aiVector3D vertex = vertices.at(j);
                             aiVector3D normal = normals.at(j);
                             unsigned int count = 0;
                             const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
                             for (unsigned int k = 0; k < count; k++) {
-                                unsigned int index = outIndices[k];
+                                //unsigned int index = outIndices[k];
+                                unsigned int index = translateIndexMap[outIndices[k]];
+
                                 animMesh->mVertices[index] += vertex;
                                 if (animMesh->mNormals != nullptr) {
                                     animMesh->mNormals[index] += normal;

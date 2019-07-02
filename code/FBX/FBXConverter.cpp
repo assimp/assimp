@@ -148,6 +148,37 @@ namespace Assimp {
             ConvertNodes(0L, *out->mRootNode);
         }
 
+        static std::string getAncestorBaseName(const aiNode* node)	
+        {	
+            const char* nodeName = nullptr;	
+            size_t length = 0;	
+            while (node && (!nodeName || length == 0))	
+            {	
+                nodeName = node->mName.C_Str();	
+                length = node->mName.length;	
+                node = node->mParent;	
+            }	
+
+             if (!nodeName || length == 0)	
+            {	
+                return {};	
+            }	
+            // could be std::string_view if c++17 available	
+            return std::string(nodeName, length);	
+        }	
+
+         // Make unique name	
+        std::string FBXConverter::MakeUniqueNodeName(const Model* const model, const aiNode& parent)	
+        {	
+            std::string original_name = FixNodeName(model->Name());	
+            if (original_name.empty())	
+            {	
+                original_name = getAncestorBaseName(&parent);	
+            }	
+            std::string unique_name;	
+            GetUniqueName(original_name, unique_name);	
+            return unique_name;	
+        }
         void FBXConverter::ConvertNodes(uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform) {
             const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 

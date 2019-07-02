@@ -323,10 +323,8 @@ void ColladaParser::ReadMetaDataItem(StringMetaData &metadata)
             aiString aistr;
             aistr.Set(value_char);
             metadata.emplace(camel_key_str, aistr);
-            TestClosing(key_str.c_str());
         }
-        else
-            SkipElement();
+        TestClosing(key_str.c_str());
     }
     else
         SkipElement();

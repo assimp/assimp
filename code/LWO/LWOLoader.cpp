@@ -1328,6 +1328,7 @@ void LWOImporter::LoadLWO2File()
     bool skip = false;
 
     LE_NCONST uint8_t* const end = mFileBuffer + fileSize;
+    unsigned int iUnnamed = 0;
     while (true)
     {
         if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
@@ -1339,7 +1340,6 @@ void LWOImporter::LoadLWO2File()
             break;
         }
         uint8_t* const next = mFileBuffer+head.length;
-        unsigned int iUnnamed = 0;
 
         if(!head.length) {
             mFileBuffer = next;

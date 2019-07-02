@@ -1642,7 +1642,7 @@ namespace Assimp {
             out_tex->pcData = reinterpret_cast<aiTexel*>(const_cast<Video&>(video).RelinquishContent());
 
             // try to extract a hint from the file extension
-            const std::string& filename = video.FileName().empty() ? video.RelativeFilename() : video.FileName();
+            const std::string& filename = video.RelativeFilename().empty() ? video.FileName() : video.RelativeFilename();
             std::string ext = BaseImporter::GetExtension(filename);
 
             if (ext == "jpeg") {
@@ -1653,7 +1653,7 @@ namespace Assimp {
                 memcpy(out_tex->achFormatHint, ext.c_str(), ext.size());
             }
 
-            out_tex->mFilename.Set(video.FileName().c_str());
+            out_tex->mFilename.Set(filename.c_str());
 
             return static_cast<unsigned int>(textures.size() - 1);
         }

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,67 +39,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of BaseProcess */
+/** @file Defines a post-processing step to generate Axis-aligned bounding
+ *        volumes for all meshes.
+ */
 
-#include <assimp/BaseImporter.h>
-#include "BaseProcess.h"
-#include <assimp/DefaultLogger.hpp>
-#include <assimp/scene.h>
-#include "Importer.h"
+#pragma once
 
-using namespace Assimp;
+#ifndef AI_GENBOUNDINGBOXESPROCESS_H_INC
+#define AI_GENBOUNDINGBOXESPROCESS_H_INC
 
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-BaseProcess::BaseProcess() AI_NO_EXCEPT
-: shared()
-, progress()
-{
-}
+#ifndef ASSIMP_BUILD_NO_GENBOUNDINGBOXES_PROCESS
 
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseProcess::~BaseProcess()
-{
-    // nothing to do here
-}
+#include "Common/BaseProcess.h"
 
-// ------------------------------------------------------------------------------------------------
-void BaseProcess::ExecuteOnScene( Importer* pImp)
-{
-    ai_assert(NULL != pImp && NULL != pImp->Pimpl()->mScene);
+namespace Assimp {
 
-    progress = pImp->GetProgressHandler();
-    ai_assert(progress);
+/** Post-processing process to find axis-aligned bounding volumes for amm meshes
+ *  used in a scene
+ */
+class ASSIMP_API GenBoundingBoxesProcess : public BaseProcess {
+public:
+    /// The class constructor.
+    GenBoundingBoxesProcess();
+    /// The class destructor.
+    ~GenBoundingBoxesProcess();
+    /// Will return true, if aiProcess_GenBoundingBoxes is defined.
+    bool IsActive(unsigned int pFlags) const override;
+    /// The execution callback.
+    void Execute(aiScene* pScene) override;
+};
 
-    SetupProperties( pImp );
+} // Namespace Assimp
 
-    // catch exceptions thrown inside the PostProcess-Step
-    try
-    {
-        Execute(pImp->Pimpl()->mScene);
+#endif // #ifndef ASSIMP_BUILD_NO_GENBOUNDINGBOXES_PROCESS
 
-    } catch( const std::exception& err )    {
-
-        // extract error description
-        pImp->Pimpl()->mErrorString = err.what();
-        ASSIMP_LOG_ERROR(pImp->Pimpl()->mErrorString);
-
-        // and kill the partially imported data
-        delete pImp->Pimpl()->mScene;
-        pImp->Pimpl()->mScene = nullptr;
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-void BaseProcess::SetupProperties(const Importer* /*pImp*/)
-{
-    // the default implementation does nothing
-}
-
-// ------------------------------------------------------------------------------------------------
-bool BaseProcess::RequireVerboseFormat() const
-{
-    return true;
-}
-
+#endif // AI_GENBOUNDINGBOXESPROCESS_H_INC

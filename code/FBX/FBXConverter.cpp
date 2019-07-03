@@ -1407,15 +1407,12 @@ namespace Assimp {
                         const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
                         animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                         for (size_t j = 0; j < indices.size(); j++) {
-                            const unsigned int o_index = indices.at(j);
-                            //unsigned int index = translateIndexMap[indices.at(j)];
                             unsigned int index = indices.at(j);
                             aiVector3D vertex = vertices.at(j);
                             aiVector3D normal = normals.at(j);
                             unsigned int count = 0;
                             const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
                             for (unsigned int k = 0; k < count; k++) {
-                                //unsigned int index = outIndices[k];
                                 unsigned int index = translateIndexMap[outIndices[k]];
 
                                 animMesh->mVertices[index] += vertex;

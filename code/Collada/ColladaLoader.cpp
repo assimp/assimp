@@ -612,7 +612,8 @@ aiMesh *ColladaLoader::findMesh(std::string meshid)
 aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
     const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
 {
-    aiMesh* dstMesh = new aiMesh;
+    std::unique_ptr<aiMesh> dstMesh(new aiMesh);
+    //aiMesh* dstMesh = new aiMesh;
 
     dstMesh->mName = pSrcMesh->mName;
 
@@ -898,7 +899,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         }
     }
 
-    return dstMesh;
+    return dstMesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------

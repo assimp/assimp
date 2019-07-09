@@ -1255,7 +1255,7 @@ namespace Assimp {
 
             // mapping from output indices to DOM indexing, needed to resolve weights
             std::vector<unsigned int> reverseMapping;
-
+            std::map<unsigned int, unsigned int> translateIndexMap;
             if (process_weights) {
                 reverseMapping.resize(count_vertices);
             }
@@ -1363,6 +1363,7 @@ namespace Assimp {
 
                     if (reverseMapping.size()) {
                         reverseMapping[cursor] = in_cursor;
+                        translateIndexMap[in_cursor] = cursor;
                     }
 
                     out_mesh->mVertices[cursor] = vertices[in_cursor];
@@ -1392,6 +1393,39 @@ namespace Assimp {
 
             if (process_weights) {
                 ConvertWeights(out_mesh, model, mesh, node_global_transform, index, &reverseMapping);
+            }
+
+            std::vector<aiAnimMesh*> animMeshes;
+            for (const BlendShape* blendShape : mesh.GetBlendShapes()) {
+                for (const BlendShapeChannel* blendShapeChannel : blendShape->BlendShapeChannels()) {
+                    const std::vector<const ShapeGeometry*>& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+                    for (size_t i = 0; i < shapeGeometries.size(); i++) {
+                        aiAnimMesh* animMesh = aiCreateAnimMesh(out_mesh);
+                        const ShapeGeometry* shapeGeometry = shapeGeometries.at(i);
+                        const std::vector<aiVector3D>& vertices = shapeGeometry->GetVertices();
+                        const std::vector<aiVector3D>& normals = shapeGeometry->GetNormals();
+                        const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
+                        animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
+                        for (size_t j = 0; j < indices.size(); j++) {
+                            unsigned int index = indices.at(j);
+                            aiVector3D vertex = vertices.at(j);
+                            aiVector3D normal = normals.at(j);
+                            unsigned int count = 0;
+                            const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
+                            for (unsigned int k = 0; k < count; k++) {
+                                unsigned int index = translateIndexMap[outIndices[k]];
+
+                                animMesh->mVertices[index] += vertex;
+                                if (animMesh->mNormals != nullptr) {
+                                    animMesh->mNormals[index] += normal;
+                                    animMesh->mNormals[index].NormalizeSafe();
+                                }
+                            }
+                        }
+                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
+                        animMeshes.push_back(animMesh);
+                    }
+                }
             }
 
             return static_cast<unsigned int>(meshes.size() - 1);
@@ -1642,7 +1676,7 @@ namespace Assimp {
             out_tex->pcData = reinterpret_cast<aiTexel*>(const_cast<Video&>(video).RelinquishContent());
 
             // try to extract a hint from the file extension
-            const std::string& filename = video.FileName().empty() ? video.RelativeFilename() : video.FileName();
+            const std::string& filename = video.RelativeFilename().empty() ? video.FileName() : video.RelativeFilename();
             std::string ext = BaseImporter::GetExtension(filename);
 
             if (ext == "jpeg") {
@@ -1653,7 +1687,7 @@ namespace Assimp {
                 memcpy(out_tex->achFormatHint, ext.c_str(), ext.size());
             }
 
-            out_tex->mFilename.Set(video.FileName().c_str());
+            out_tex->mFilename.Set(filename.c_str());
 
             return static_cast<unsigned int>(textures.size() - 1);
         }

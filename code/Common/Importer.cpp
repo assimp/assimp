@@ -590,10 +590,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
         // Find an worker class which can handle the file
         BaseImporter* imp = NULL;
+        SetPropertyInteger("importerIndex", -1);
         for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
 
             if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, false)) {
                 imp = pimpl->mImporter[a];
+                SetPropertyInteger("importerIndex", a);
                 break;
             }
         }
@@ -606,6 +608,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
                 for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
                     if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
                         imp = pimpl->mImporter[a];
+                        SetPropertyInteger("importerIndex", a);
                         break;
                     }
                 }

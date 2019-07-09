@@ -113,7 +113,7 @@ XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const s
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
-    mOutput.precision(16);
+    mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
 
     // start writing
     WriteFile();
@@ -134,7 +134,7 @@ void XFileExporter::WriteFile()
 {
     // note, that all realnumber values must be comma separated in x files
     mOutput.setf(std::ios::fixed);
-    mOutput.precision(16); // precision for double
+    mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION); // precision for ai_real
 
     // entry of writing the file
     WriteHeader();

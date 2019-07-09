@@ -73,28 +73,14 @@ using namespace Assimp;
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const char* pFile) const
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WindowsStore)
     wchar_t fileName16[PATHLIMIT];
 
-#ifndef WindowsStore
-    bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL) != 0;
-    if (isUnicode) {
-
-        MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, pFile, -1, fileName16, PATHLIMIT);
-        struct __stat64 filestat;
-        if (0 != _wstat64(fileName16, &filestat)) {
-            return false;
-        }
-    } else {
-#endif
-        FILE* file = ::fopen(pFile, "rb");
-        if (!file)
-            return false;
-
-        ::fclose(file);
-#ifndef WindowsStore
+    MultiByteToWideChar(CP_UTF8, 0, pFile, -1, fileName16, PATHLIMIT);
+    struct __stat64 filestat;
+    if (0 != _wstat64(fileName16, &filestat)) {
+        return false;
     }
-#endif
 #else
     FILE* file = ::fopen( pFile, "rb");
     if( !file)
@@ -112,27 +98,19 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     ai_assert(NULL != strFile);
     ai_assert(NULL != strMode);
     FILE* file;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WindowsStore)
     wchar_t fileName16[PATHLIMIT];
-#ifndef WindowsStore
-    bool isUnicode = IsTextUnicode(strFile, static_cast<int>(strlen(strFile)), NULL) != 0;
-    if (isUnicode) {
-        MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, strFile, -1, fileName16, PATHLIMIT);
-        std::string mode8(strMode);
-        file = ::_wfopen(fileName16, std::wstring(mode8.begin(), mode8.end()).c_str());
-    } else {
-#endif
-        file = ::fopen(strFile, strMode);
-#ifndef WindowsStore
-    }
-#endif
+    MultiByteToWideChar(CP_UTF8, 0, strFile, -1, fileName16, PATHLIMIT);
+    std::string mode8(strMode);
+    std::wstring mode16(mode8.begin(), mode8.end());
+    file = ::_wfopen(fileName16, mode16.c_str());
 #else
     file = ::fopen(strFile, strMode);
 #endif
     if (nullptr == file)
         return nullptr;
 
-    return new DefaultIOStream(file, (std::string) strFile);
+    return new DefaultIOStream(file, strFile);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -167,44 +145,26 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
     ai_assert(in && _out);
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
 #ifndef WindowsStore
-    bool isUnicode = IsTextUnicode(in, static_cast<int>(strlen(in)), NULL) != 0;
-    if (isUnicode) {
-        wchar_t out16[PATHLIMIT];
-        wchar_t in16[PATHLIMIT];
-        MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, in, -1, out16, PATHLIMIT);
-        wchar_t* ret = ::_wfullpath(out16, in16, PATHLIMIT);
-        if (ret) {
-            WideCharToMultiByte(CP_UTF8, MB_PRECOMPOSED, out16, -1, _out, PATHLIMIT, nullptr, nullptr);
-        }
-        if (!ret) {
-            // preserve the input path, maybe someone else is able to fix
-            // the path before it is accessed (e.g. our file system filter)
-            ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
-            strcpy(_out, in);
-        }
-
-    } else {
-#endif
-        char* ret = :: _fullpath(_out, in, PATHLIMIT);
-        if (!ret) {
-            // preserve the input path, maybe someone else is able to fix
-            // the path before it is accessed (e.g. our file system filter)
-            ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
-            strcpy(_out, in);
-        }
-#ifndef WindowsStore
+    wchar_t in16[PATHLIMIT];
+    wchar_t out16[PATHLIMIT];
+    MultiByteToWideChar(CP_UTF8, 0, in, -1, in16, PATHLIMIT);
+    wchar_t* ret = ::_wfullpath(out16, in16, PATHLIMIT);
+    if (ret) {
+        WideCharToMultiByte(CP_UTF8, 0, out16, -1, _out, PATHLIMIT, nullptr, nullptr);
     }
+#else
+    char* ret = ::_fullpath(_out, in, PATHLIMIT);
 #endif
 #else
     // use realpath
     char* ret = realpath(in, _out);
+#endif
     if(!ret) {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
         ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
         strcpy(_out,in);
     }
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------

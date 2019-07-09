@@ -61,12 +61,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// maximum path length
-// XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
-#ifdef PATH_MAX
-#   define PATHLIMIT PATH_MAX
-#else
-#   define PATHLIMIT 4096
+#ifdef _WIN32
+static std::wstring Utf8ToWide(const char* in)
+{
+    int size = MultiByteToWideChar(CP_UTF8, 0, in, -1, nullptr, 0);
+    std::wstring out(size, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, in, -1, &out[0], size);
+    return out;
+}
+
+static std::string WideToUtf8(const wchar_t* in)
+{
+    int size = WideCharToMultiByte(CP_UTF8, 0, in, -1, nullptr, 0, nullptr, nullptr);
+    std::string out(size, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, in, -1, &out[0], size, nullptr, nullptr);
+    return out;
+}
 #endif
 
 // ------------------------------------------------------------------------------------------------
@@ -74,11 +84,8 @@ using namespace Assimp;
 bool DefaultIOSystem::Exists( const char* pFile) const
 {
 #if defined(_WIN32) && !defined(WindowsStore)
-    wchar_t fileName16[PATHLIMIT];
-
-    MultiByteToWideChar(CP_UTF8, 0, pFile, -1, fileName16, PATHLIMIT);
     struct __stat64 filestat;
-    if (0 != _wstat64(fileName16, &filestat)) {
+    if (0 != _wstat64(Utf8ToWide(pFile).c_str(), &filestat)) {
         return false;
     }
 #else
@@ -99,11 +106,7 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     ai_assert(NULL != strMode);
     FILE* file;
 #if defined(_WIN32) && !defined(WindowsStore)
-    wchar_t fileName16[PATHLIMIT];
-    MultiByteToWideChar(CP_UTF8, 0, strFile, -1, fileName16, PATHLIMIT);
-    std::string mode8(strMode);
-    std::wstring mode16(mode8.begin(), mode8.end());
-    file = ::_wfopen(fileName16, mode16.c_str());
+    file = ::_wfopen(Utf8ToWide(strFile).c_str(), Utf8ToWide(strMode).c_str());
 #else
     file = ::fopen(strFile, strMode);
 #endif
@@ -140,31 +143,39 @@ bool IOSystem::ComparePaths (const char* one, const char* second) const
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
-inline static void MakeAbsolutePath (const char* in, char* _out)
+inline static std::string MakeAbsolutePath (const char* in)
 {
-    ai_assert(in && _out);
-#if defined( _MSC_VER ) || defined( __MINGW32__ )
+    ai_assert(in);
+    std::string out;
+#ifdef _WIN32
 #ifndef WindowsStore
-    wchar_t in16[PATHLIMIT];
-    wchar_t out16[PATHLIMIT];
-    MultiByteToWideChar(CP_UTF8, 0, in, -1, in16, PATHLIMIT);
-    wchar_t* ret = ::_wfullpath(out16, in16, PATHLIMIT);
+    wchar_t* ret = ::_wfullpath(nullptr, Utf8ToWide(in).c_str(), 0);
     if (ret) {
-        WideCharToMultiByte(CP_UTF8, 0, out16, -1, _out, PATHLIMIT, nullptr, nullptr);
+        out = WideToUtf8(ret);
+        free(ret);
     }
 #else
-    char* ret = ::_fullpath(_out, in, PATHLIMIT);
+    char* ret = ::_fullpath(nullptr, in, 0);
+    if (ret) {
+        out = ret;
+        free(ret);
+    }
 #endif
 #else
     // use realpath
-    char* ret = realpath(in, _out);
+    char* ret = realpath(in, nullptr);
+    if (ret) {
+        out = ret;
+        free(ret);
+    }
 #endif
-    if(!ret) {
+    if (!ret) {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
         ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
-        strcpy(_out,in);
+        out = in;
     }
+    return out;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -176,11 +187,8 @@ bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
     if( !ASSIMP_stricmp(one,second) )
         return true;
 
-    char temp1[PATHLIMIT];
-    char temp2[PATHLIMIT];
-
-    MakeAbsolutePath (one, temp1);
-    MakeAbsolutePath (second, temp2);
+    std::string temp1 = MakeAbsolutePath(one);
+    std::string temp2 = MakeAbsolutePath(second);
 
     return !ASSIMP_stricmp(temp1,temp2);
 }
@@ -213,5 +221,3 @@ std::string DefaultIOSystem::absolutePath( const std::string &path )
 }
 
 // ------------------------------------------------------------------------------------------------
-
-#undef PATHLIMIT

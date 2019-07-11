@@ -6,6 +6,9 @@ Licensed under a 3-clause BSD license. See the LICENSE file for more information
 
 */
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+#ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
+
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/IOStream.hpp>
@@ -821,7 +824,7 @@ void Write(JSONWriter& out, const aiScene& ai)
 }
 
 
-void Assimp2Json(const char* file, Assimp::IOSystem* io, const aiScene* scene, const Assimp::ExportProperties*) 
+void ExportAssimp2Json(const char* file, Assimp::IOSystem* io, const aiScene* scene, const Assimp::ExportProperties*)
 {
 	std::unique_ptr<Assimp::IOStream> str(io->Open(file,"wt"));
 	if(!str) {
@@ -851,3 +854,6 @@ void Assimp2Json(const char* file, Assimp::IOSystem* io, const aiScene* scene, c
 }
 
 } // 
+
+#endif // ASSIMP_BUILD_NO_ASSJSON_EXPORTER
+#endif // ASSIMP_BUILD_NO_EXPORT

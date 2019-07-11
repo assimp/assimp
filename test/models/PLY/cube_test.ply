@@ -1,6 +1,10 @@
 ply
 format ascii 1.0
+<<<<<<< HEAD
 comment Created by Open Asset Import Library - http://assimp.sf.net (v4.1.732158294)
+=======
+comment Created by Open Asset Import Library - http://assimp.sf.net (v4.1.649942190)
+>>>>>>> master
 element vertex 8
 property float x
 property float y

@@ -41,11 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp_view.h"
 
-#include "GenFaceNormalsProcess.h"
-#include "GenVertexNormalsProcess.h"
-#include "JoinVerticesProcess.h"
-#include "CalcTangentsProcess.h"
-#include "MakeVerboseFormat.h"
+#include "PostProcessing/GenFaceNormalsProcess.h"
+#include "PostProcessing/GenVertexNormalsProcess.h"
+#include "PostProcessing/JoinVerticesProcess.h"
+#include "PostProcessing/CalcTangentsProcess.h"
+#include "PostProcessing/MakeVerboseFormat.h"
 
 namespace AssimpView {
 

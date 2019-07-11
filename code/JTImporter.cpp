@@ -131,7 +131,7 @@ TokenEntry* JTImporter::FindTokenEntryByGuid(GUID& guid) {
 
     return it->second;
 }
-
+/*
 static bool SupportsZlibCompression(SegmentType type) {
     switch (type) {
         case LogicalSceneGraph:
@@ -162,7 +162,7 @@ static bool SupportsZlibCompression(SegmentType type) {
     }
 
     return false;
-}
+}*/
 
 void JTImporter::ReadDataSegment(BinReader& reader) {
     mCurrentDataSegment = new DataSegment;

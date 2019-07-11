@@ -420,11 +420,6 @@ namespace Assimp {
 
             out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
-            //cameras are defined along positive x direction
-            /*out_camera->mPosition = cam.Position();
-            out_camera->mLookAt = (cam.InterestPosition() - out_camera->mPosition).Normalize();
-            out_camera->mUp = cam.UpVector();*/
-
             out_camera->mPosition = aiVector3D(0.0f);
             out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
             out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
@@ -667,8 +662,7 @@ namespace Assimp {
                     if ((v - all_ones).SquareLength() > zero_epsilon) {
                         return true;
                     }
-                }
-                else if (ok) {
+                } else if (ok) {
                     if (v.SquareLength() > zero_epsilon) {
                         return true;
                     }
@@ -1396,10 +1390,6 @@ namespace Assimp {
             }
 
             std::vector<aiAnimMesh*> animMeshes;
-<<<<<<< HEAD:code/FBXConverter.cpp
-            size_t bsIdx(0), bsChannelIdx(0);
-=======
->>>>>>> master:code/FBX/FBXConverter.cpp
             for (const BlendShape* blendShape : mesh.GetBlendShapes()) {
                 for (const BlendShapeChannel* blendShapeChannel : blendShape->BlendShapeChannels()) {
                     const std::vector<const ShapeGeometry*>& shapeGeometries = blendShapeChannel->GetShapeGeometries();
@@ -1417,12 +1407,7 @@ namespace Assimp {
                             unsigned int count = 0;
                             const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
                             for (unsigned int k = 0; k < count; k++) {
-<<<<<<< HEAD:code/FBXConverter.cpp
-                                unsigned int index = outIndices[k];
-=======
                                 unsigned int index = translateIndexMap[outIndices[k]];
-
->>>>>>> master:code/FBX/FBXConverter.cpp
                                 animMesh->mVertices[index] += vertex;
                                 if (animMesh->mNormals != nullptr) {
                                     animMesh->mNormals[index] += normal;
@@ -1433,20 +1418,6 @@ namespace Assimp {
                         animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
                         animMeshes.push_back(animMesh);
                     }
-<<<<<<< HEAD:code/FBXConverter.cpp
-                    bsChannelIdx++;
-                }
-                bsIdx++;
-            }
-
-            const size_t numAnimMeshes = animMeshes.size();
-            if (numAnimMeshes > 0) {
-                out_mesh->mNumAnimMeshes = static_cast<unsigned int>(numAnimMeshes);
-                out_mesh->mAnimMeshes = new aiAnimMesh * [numAnimMeshes];
-                for (size_t i = 0; i < numAnimMeshes; i++) {
-                    out_mesh->mAnimMeshes[i] = animMeshes.at(i);
-=======
->>>>>>> master:code/FBX/FBXConverter.cpp
                 }
             }
 
@@ -1755,9 +1726,8 @@ namespace Assimp {
         }
 
         void FBXConverter::TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures,
-            const std::string& propName,
-            aiTextureType target, const MeshGeometry* const mesh)
-        {
+                const std::string& propName,
+                aiTextureType target, const MeshGeometry* const mesh) {
             TextureMap::const_iterator it = textures.find(propName);
             if (it == textures.end()) {
                 return;

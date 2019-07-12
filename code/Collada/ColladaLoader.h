@@ -94,7 +94,7 @@ public:
 public:
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details. */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 protected:
     /** Return importer meta information.

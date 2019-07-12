@@ -54,6 +54,7 @@
 
 namespace Assimp
 {
+    class ZipArchiveIOSystem;
 
     // ------------------------------------------------------------------------------------------
     /** Parser helper class for the Collada loader.
@@ -74,6 +75,9 @@ namespace Assimp
 
         /** Destructor */
         ~ColladaParser();
+
+        /** Attempts to read the ZAE manifest and returns the DAE to open */
+        static std::string ReadZaeManifest(ZipArchiveIOSystem &zip_archive);
 
         /** Reads the contents of the file */
         void ReadContents();

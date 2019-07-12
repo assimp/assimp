@@ -120,13 +120,13 @@ SET( IMPORTERS
   unit/utB3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
+  unit/ImportExport/utAssjsonImportExport.cpp
   unit/ImportExport/utCOBImportExport.cpp
   unit/ImportExport/utOgreImportExport.cpp
   unit/ImportExport/utQ3BSPFileImportExport.cpp
   unit/ImportExport/utOFFImportExport.cpp
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
-#  unit/ImportExport/utJTImporter.cpp
 )
 
 SET( MATERIAL
@@ -166,11 +166,11 @@ SET( POST_PROCESSES
 )
 
 SOURCE_GROUP( UnitTests\\Compiler     FILES  unit/CCompilerTest.c )
-SOURCE_GROUP( UnitTests\\Common      FILES  ${COMMON} )
-SOURCE_GROUP( UnitTests\\Importers   FILES  ${IMPORTERS} )
-SOURCE_GROUP( UnitTests\\Material    FILES  ${MATERIAL} )
-SOURCE_GROUP( UnitTests\\Math        FILES  ${MATH} )
-SOURCE_GROUP( UnitTests\\PostProcess FILES  ${POST_PROCESSES})
+SOURCE_GROUP( UnitTests\\Common       FILES  ${COMMON} )
+SOURCE_GROUP( UnitTests\\ImportExport FILES  ${IMPORTERS} )
+SOURCE_GROUP( UnitTests\\Material     FILES  ${MATERIAL} )
+SOURCE_GROUP( UnitTests\\Math         FILES  ${MATH} )
+SOURCE_GROUP( UnitTests\\PostProcess  FILES  ${POST_PROCESSES})
 
 add_executable( unit
     ../contrib/gtest/src/gtest-all.cc

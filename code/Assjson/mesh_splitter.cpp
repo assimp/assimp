@@ -6,7 +6,6 @@ Licensed under a 3-clause BSD license. See the LICENSE file for more information
 
 */
 
-
 #include "mesh_splitter.h"
 
 #include <assimp/scene.h>
@@ -18,8 +17,7 @@ Licensed under a 3-clause BSD license. See the LICENSE file for more information
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void MeshSplitter :: Execute( aiScene* pScene)
-{
+void MeshSplitter::Execute( aiScene* pScene) {
 	std::vector<std::pair<aiMesh*, unsigned int> > source_mesh_map;
 
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++) {
@@ -27,8 +25,7 @@ void MeshSplitter :: Execute( aiScene* pScene)
 	}
 
 	const unsigned int size = static_cast<unsigned int>(source_mesh_map.size());
-	if (size != pScene->mNumMeshes)
-	{
+	if (size != pScene->mNumMeshes) {
 		// it seems something has been split. rebuild the mesh list
 		delete[] pScene->mMeshes;
 		pScene->mNumMeshes = size;
@@ -45,8 +42,7 @@ void MeshSplitter :: Execute( aiScene* pScene)
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshSplitter :: UpdateNode(aiNode* pcNode, const std::vector<std::pair<aiMesh*, unsigned int> >& source_mesh_map)
-{
+void MeshSplitter::UpdateNode(aiNode* pcNode, const std::vector<std::pair<aiMesh*, unsigned int> >& source_mesh_map) {
 	// TODO: should better use std::(multi)set for source_mesh_map.
 
 	// for every index in out list build a new entry
@@ -82,10 +78,9 @@ typedef std::pair <unsigned int,float> PerVertexWeight;
 typedef std::vector	<PerVertexWeight> VertexWeightTable;
 
 // ------------------------------------------------------------------------------------------------
-VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh)
-{
+VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh) {
 	if (!pMesh || !pMesh->mNumVertices || !pMesh->mNumBones) {
-		return NULL;
+		return nullptr;
 	}
 
 	VertexWeightTable* const avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
@@ -101,9 +96,7 @@ VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh,
-	std::vector<std::pair<aiMesh*, unsigned int> >& source_mesh_map)
-{
+void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std::pair<aiMesh*, unsigned int> >& source_mesh_map) {
 	// TODO: should better use std::(multi)set for source_mesh_map.
 
 	if (in_mesh->mNumVertices <= LIMIT)	{

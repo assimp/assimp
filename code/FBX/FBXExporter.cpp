@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <array>
 #include <unordered_set>
+#include <iostream>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -1825,9 +1826,9 @@ void FBXExporter::WriteObjects ()
             // this should be the same as the bone's mOffsetMatrix.
             // if it's not the same, the skeleton isn't in the bind pose.
             float epsilon = 1e-4f; // some error is to be expected
-#ifdef ASSIMP_CUSTOM_BINDPOSE_ERR
-            epsilon = ASSIMP_CUSTOM_BINDPOSE_ERR;
-#endif
+            float epsilon_custom = mProperties->GetPropertyFloat("BINDPOSE_EPSILON", -1);
+            if(epsilon_custom > 0)
+                epsilon = epsilon_custom;
             bool bone_xform_okay = true;
             if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
                 not_in_bind_pose.insert(b);

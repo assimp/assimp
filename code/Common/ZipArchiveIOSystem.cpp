@@ -199,20 +199,23 @@ namespace Assimp {
         explicit ZipFileInfo(unzFile zip_handle, size_t size);
 
         // Allocate and Extract data from the ZIP
-        ZipFile * Extract(unzFile zip_handle, const std::string & file) const;
+        ZipFile * Extract(unzFile zip_handle) const;
 
     private:
         size_t m_Size = 0;
-        unz_file_pos_s m_ZipFilePos = { 0,0 };
+        unz_file_pos_s m_ZipFilePos;
     };
 
     ZipFileInfo::ZipFileInfo(unzFile zip_handle, size_t size)
         : m_Size(size) {
         ai_assert(m_Size != 0);
+        // Workaround for MSVC 2013 - C2797
+        m_ZipFilePos.num_of_file = 0;
+        m_ZipFilePos.pos_in_zip_directory = 0;
         unzGetFilePos(zip_handle, &(m_ZipFilePos));
     }
 
-    ZipFile * ZipFileInfo::Extract(unzFile zip_handle, const std::string & file) const {
+    ZipFile * ZipFileInfo::Extract(unzFile zip_handle) const {
         // Find in the ZIP. This cannot fail
         unz_file_pos_s *filepos = const_cast<unz_file_pos_s*>(&(m_ZipFilePos));
         if (unzGoToFilePos(zip_handle, filepos) != UNZ_OK)
@@ -385,8 +388,6 @@ namespace Assimp {
         MapArchive();
 
         ZipFileMap::const_iterator it = m_ArchiveMap.find(filename);
-        bool exist(false);
-
         return (it != m_ArchiveMap.end());
     }
 
@@ -401,7 +402,7 @@ namespace Assimp {
             return nullptr;
 
         const ZipFileInfo &zip_file = (*zip_it).second;
-        return zip_file.Extract(m_ZipFileHandle, filename);
+        return zip_file.Extract(m_ZipFileHandle);
     }
 
     inline void ReplaceAll(std::string& data, const std::string& before, const std::string& after) {

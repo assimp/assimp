@@ -65,6 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "math.h"
 #include <algorithm>
 #include <numeric>
+#include <memory>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
@@ -126,7 +127,7 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
         if (!pIOHandler) {
             return true;
         }
-        const char* tokens[] = {"<collada"};
+        static const char* tokens[] = {"<collada"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
 
@@ -134,8 +135,7 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
 }
 
 // ------------------------------------------------------------------------------------------------
-void ColladaLoader::SetupProperties(const Importer* pImp)
-{
+void ColladaLoader::SetupProperties(const Importer* pImp) {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
     useColladaName = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES,0) != 0;
@@ -143,8 +143,7 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
 
 // ------------------------------------------------------------------------------------------------
 // Get file extension list
-const aiImporterDesc* ColladaLoader::GetInfo () const
-{
+const aiImporterDesc* ColladaLoader::GetInfo () const {
     return &desc;
 }
 
@@ -246,8 +245,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 // ------------------------------------------------------------------------------------------------
 // Recursively constructs a scene node for the given parser node and returns it.
-aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode)
-{
+aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode) {
     // create a node for it
     aiNode* node = new aiNode();
 
@@ -265,15 +263,13 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
     node->mNumChildren = static_cast<unsigned int>(pNode->mChildren.size()+instances.size());
     node->mChildren = new aiNode*[node->mNumChildren];
 
-    for( size_t a = 0; a < pNode->mChildren.size(); a++)
-    {
+    for( size_t a = 0; a < pNode->mChildren.size(); ++a) {
         node->mChildren[a] = BuildHierarchy( pParser, pNode->mChildren[a]);
         node->mChildren[a]->mParent = node;
     }
 
     // ... and finally the resolved node instances
-    for( size_t a = 0; a < instances.size(); a++)
-    {
+    for( size_t a = 0; a < instances.size(); ++a) {
         node->mChildren[pNode->mChildren.size() + a] = BuildHierarchy( pParser, instances[a]);
         node->mChildren[pNode->mChildren.size() + a]->mParent = node;
     }
@@ -286,20 +282,19 @@ aiNode* ColladaLoader::BuildHierarchy( const ColladaParser& pParser, const Colla
 
     // construct lights
     BuildLightsForNode(pParser, pNode, node);
+    
     return node;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Resolve node instances
 void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Collada::Node* pNode,
-    std::vector<const Collada::Node*>& resolved)
-{
+        std::vector<const Collada::Node*>& resolved) {
     // reserve enough storage
     resolved.reserve(pNode->mNodeInstances.size());
 
     // ... and iterate through all nodes to be instanced as children of pNode
-    for (const auto &nodeInst: pNode->mNodeInstances)
-    {
+    for (const auto &nodeInst: pNode->mNodeInstances) {
         // find the corresponding node in the library
         const ColladaParser::NodeLibrary::const_iterator itt = pParser.mNodeLibrary.find(nodeInst.mNode);
         const Collada::Node* nd = itt == pParser.mNodeLibrary.end() ? NULL : (*itt).second;
@@ -323,12 +318,12 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
 // ------------------------------------------------------------------------------------------------
 // Resolve UV channels
 void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler& sampler,
-     const Collada::SemanticMappingTable& table)
-{
+     const Collada::SemanticMappingTable& table) {
     std::map<std::string, Collada::InputSemanticMapEntry>::const_iterator it = table.mMap.find(sampler.mUVChannel);
     if (it != table.mMap.end()) {
-        if (it->second.mType != Collada::IT_Texcoord)
+        if (it->second.mType != Collada::IT_Texcoord) {
             ASSIMP_LOG_ERROR("Collada: Unexpected effect input mapping");
+        }
 
         sampler.mUVId = it->second.mSet;
     }
@@ -336,14 +331,11 @@ void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler& sampler
 
 // ------------------------------------------------------------------------------------------------
 // Builds lights for the given node and references them
-void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget)
-{
-    for( const Collada::LightInstance& lid : pNode->mLights)
-    {
+void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget) {
+    for( const Collada::LightInstance& lid : pNode->mLights) {
         // find the referred light
         ColladaParser::LightLibrary::const_iterator srcLightIt = pParser.mLightLibrary.find( lid.mLight);
-        if( srcLightIt == pParser.mLightLibrary.end())
-        {
+        if( srcLightIt == pParser.mLightLibrary.end()) {
             ASSIMP_LOG_WARN_F("Collada: Unable to find light for ID \"" , lid.mLight , "\". Skipping.");
             continue;
         }
@@ -365,8 +357,7 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
         if (out->mType == aiLightSource_AMBIENT) {
             out->mColorDiffuse = out->mColorSpecular = aiColor3D(0, 0, 0);
             out->mColorAmbient = srcLight->mColor*srcLight->mIntensity;
-        }
-        else {
+        } else {
             // collada doesn't differentiate between these color types
             out->mColorDiffuse = out->mColorSpecular = srcLight->mColor*srcLight->mIntensity;
             out->mColorAmbient = aiColor3D(0, 0, 0);
@@ -374,27 +365,24 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 
         // convert falloff angle and falloff exponent in our representation, if given
         if (out->mType == aiLightSource_SPOT) {
-
             out->mAngleInnerCone = AI_DEG_TO_RAD( srcLight->mFalloffAngle );
 
             // ... some extension magic.
-            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
-            {
+            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f)) {
                 // ... some deprecation magic.
-                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
-                {
+                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f)) {
                     // Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
                     // epsilon chosen to be 0.1
                     out->mAngleOuterCone = std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
                             out->mAngleInnerCone;
-                }
-                else {
+                } else {
                     out->mAngleOuterCone = out->mAngleInnerCone + AI_DEG_TO_RAD(  srcLight->mPenumbraAngle );
                     if (out->mAngleOuterCone < out->mAngleInnerCone)
                         std::swap(out->mAngleInnerCone,out->mAngleOuterCone);
                 }
+            } else {
+                out->mAngleOuterCone = AI_DEG_TO_RAD(  srcLight->mOuterAngle );
             }
-            else out->mAngleOuterCone = AI_DEG_TO_RAD(  srcLight->mOuterAngle );
         }
 
         // add to light list
@@ -404,14 +392,11 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 
 // ------------------------------------------------------------------------------------------------
 // Builds cameras for the given node and references them
-void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget)
-{
-    for( const Collada::CameraInstance& cid : pNode->mCameras)
-    {
+void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget) {
+    for( const Collada::CameraInstance& cid : pNode->mCameras) {
         // find the referred light
         ColladaParser::CameraLibrary::const_iterator srcCameraIt = pParser.mCameraLibrary.find( cid.mCamera);
-        if( srcCameraIt == pParser.mCameraLibrary.end())
-        {
+        if( srcCameraIt == pParser.mCameraLibrary.end()) {
             ASSIMP_LOG_WARN_F("Collada: Unable to find camera for ID \"" , cid.mCamera , "\". Skipping.");
             continue;
         }
@@ -435,8 +420,9 @@ void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Col
 
         // ... but for the rest some values are optional
         // and we need to compute the others in any combination.
-         if (srcCamera->mAspect != 10e10f)
+        if (srcCamera->mAspect != 10e10f) {
             out->mAspect = srcCamera->mAspect;
+        }
 
         if (srcCamera->mHorFov != 10e10f) {
             out->mHorizontalFOV = srcCamera->mHorFov;
@@ -461,77 +447,69 @@ void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Col
 
 // ------------------------------------------------------------------------------------------------
 // Builds meshes for the given node and references them
-void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget)
-{
+void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, aiNode* pTarget) {
     // accumulated mesh references by this node
     std::vector<size_t> newMeshRefs;
     newMeshRefs.reserve(pNode->mMeshes.size());
 
     // add a mesh for each subgroup in each collada mesh
-    for( const Collada::MeshInstance& mid : pNode->mMeshes)
-    {
-        const Collada::Mesh* srcMesh = NULL;
-        const Collada::Controller* srcController = NULL;
+    for( const Collada::MeshInstance& mid : pNode->mMeshes) {
+        const Collada::Mesh* srcMesh = nullptr;
+        const Collada::Controller* srcController = nullptr;
 
         // find the referred mesh
         ColladaParser::MeshLibrary::const_iterator srcMeshIt = pParser.mMeshLibrary.find( mid.mMeshOrController);
-        if( srcMeshIt == pParser.mMeshLibrary.end())
-        {
+        if( srcMeshIt == pParser.mMeshLibrary.end()) {
             // if not found in the mesh-library, it might also be a controller referring to a mesh
             ColladaParser::ControllerLibrary::const_iterator srcContrIt = pParser.mControllerLibrary.find( mid.mMeshOrController);
-            if( srcContrIt != pParser.mControllerLibrary.end())
-            {
+            if( srcContrIt != pParser.mControllerLibrary.end()) {
                 srcController = &srcContrIt->second;
                 srcMeshIt = pParser.mMeshLibrary.find( srcController->mMeshId);
-                if( srcMeshIt != pParser.mMeshLibrary.end())
+                if( srcMeshIt != pParser.mMeshLibrary.end()) {
                     srcMesh = srcMeshIt->second;
+                }
             }
 
-            if( !srcMesh)
-            {
+            if( !srcMesh) {
                 ASSIMP_LOG_WARN_F( "Collada: Unable to find geometry for ID \"", mid.mMeshOrController, "\". Skipping." );
                 continue;
             }
-        } else
-        {
+        } else {
             // ID found in the mesh library -> direct reference to an unskinned mesh
             srcMesh = srcMeshIt->second;
         }
 
         // build a mesh for each of its subgroups
         size_t vertexStart = 0, faceStart = 0;
-        for( size_t sm = 0; sm < srcMesh->mSubMeshes.size(); ++sm)
-        {
+        for( size_t sm = 0; sm < srcMesh->mSubMeshes.size(); ++sm) {
             const Collada::SubMesh& submesh = srcMesh->mSubMeshes[sm];
-            if( submesh.mNumFaces == 0)
+            if( submesh.mNumFaces == 0) {
                 continue;
+            }
 
             // find material assigned to this submesh
             std::string meshMaterial;
             std::map<std::string, Collada::SemanticMappingTable >::const_iterator meshMatIt = mid.mMaterials.find( submesh.mMaterial);
 
-            const Collada::SemanticMappingTable* table = NULL;
-            if( meshMatIt != mid.mMaterials.end())
-            {
+            const Collada::SemanticMappingTable* table = nullptr;
+            if( meshMatIt != mid.mMaterials.end()) {
                 table = &meshMatIt->second;
                 meshMaterial = table->mMatName;
-            }
-            else
-            {
+            } else {
                 ASSIMP_LOG_WARN_F( "Collada: No material specified for subgroup <", submesh.mMaterial, "> in geometry <",
                     mid.mMeshOrController, ">." );
-                if( !mid.mMaterials.empty() )
+                if( !mid.mMaterials.empty() ) {
                     meshMaterial = mid.mMaterials.begin()->second.mMatName;
+                }
             }
 
             // OK ... here the *real* fun starts ... we have the vertex-input-to-effect-semantic-table
             // given. The only mapping stuff which we do actually support is the UV channel.
             std::map<std::string, size_t>::const_iterator matIt = mMaterialIndexByName.find( meshMaterial);
-            unsigned int matIdx;
-            if( matIt != mMaterialIndexByName.end())
+            unsigned int matIdx = 0;
+            if( matIt != mMaterialIndexByName.end()) {
                 matIdx = static_cast<unsigned int>(matIt->second);
-            else
-                matIdx = 0;
+            }
 
             if (table && !table->mMap.empty() ) {
                 std::pair<Collada::Effect*, aiMaterial*>&  mat = newMats[matIdx];
@@ -553,9 +531,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
             std::map<ColladaMeshIndex, size_t>::const_iterator dstMeshIt = mMeshIndexByID.find( index);
             if( dstMeshIt != mMeshIndexByID.end())  {
                 newMeshRefs.push_back( dstMeshIt->second);
-            }
-            else
-            {
+            } else {
                 // else we have to add the mesh to the collection and store its newly assigned index at the node
                 aiMesh* dstMesh = CreateMesh( pParser, srcMesh, submesh, srcController, vertexStart, faceStart);
 
@@ -567,22 +543,18 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
                 // assign the material index
                 dstMesh->mMaterialIndex = matIdx;
-                if(dstMesh->mName.length == 0)
-                {
+                if(dstMesh->mName.length == 0) {
                     dstMesh->mName = mid.mMeshOrController;
                 }
-      }
+            }
         }
     }
 
     // now place all mesh references we gathered in the target node
     pTarget->mNumMeshes = static_cast<unsigned int>(newMeshRefs.size());
-    if( newMeshRefs.size())
-    {
-        struct UIntTypeConverter
-        {
-            unsigned int operator()(const size_t& v) const
-            {
+    if( newMeshRefs.size()) {
+        struct UIntTypeConverter {
+            unsigned int operator()(const size_t& v) const {
                 return static_cast<unsigned int>(v);
             }
         };
@@ -594,25 +566,27 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
 // ------------------------------------------------------------------------------------------------
 // Find mesh from either meshes or morph target meshes
-aiMesh *ColladaLoader::findMesh(std::string meshid)
-{
-    for (unsigned int i = 0; i < mMeshes.size(); i++)
-        if (std::string(mMeshes[i]->mName.data) == meshid)
+aiMesh *ColladaLoader::findMesh(std::string meshid) {
+    for (unsigned int i = 0; i < mMeshes.size(); ++i ) {
+        if (std::string(mMeshes[i]->mName.data) == meshid) {
             return mMeshes[i];
+        }
+    }
 
-    for (unsigned int i = 0; i < mTargetMeshes.size(); i++)
-        if (std::string(mTargetMeshes[i]->mName.data) == meshid)
+    for (unsigned int i = 0; i < mTargetMeshes.size(); ++i ) {
+        if (std::string(mTargetMeshes[i]->mName.data) == meshid) {
             return mTargetMeshes[i];
-
-    return NULL;
+        }
+    }
+    
+    return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh
 aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
-    const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
-{
-    aiMesh* dstMesh = new aiMesh;
+        const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace) {
+    std::unique_ptr<aiMesh> dstMesh(new aiMesh);
 
     dstMesh->mName = pSrcMesh->mName;
 
@@ -629,24 +603,21 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     // normals, if given. HACK: (thom) Due to the glorious Collada spec we never
     // know if we have the same number of normals as there are positions. So we
     // also ignore any vertex attribute if it has a different count
-    if( pSrcMesh->mNormals.size() >= pStartVertex + numVertices)
-    {
+    if( pSrcMesh->mNormals.size() >= pStartVertex + numVertices) {
         dstMesh->mNormals = new aiVector3D[numVertices];
         std::copy( pSrcMesh->mNormals.begin() + pStartVertex, pSrcMesh->mNormals.begin() +
             pStartVertex + numVertices, dstMesh->mNormals);
     }
 
     // tangents, if given.
-    if( pSrcMesh->mTangents.size() >= pStartVertex + numVertices)
-    {
+    if( pSrcMesh->mTangents.size() >= pStartVertex + numVertices) {
         dstMesh->mTangents = new aiVector3D[numVertices];
         std::copy( pSrcMesh->mTangents.begin() + pStartVertex, pSrcMesh->mTangents.begin() +
             pStartVertex + numVertices, dstMesh->mTangents);
     }
 
     // bitangents, if given.
-    if( pSrcMesh->mBitangents.size() >= pStartVertex + numVertices)
-    {
+    if( pSrcMesh->mBitangents.size() >= pStartVertex + numVertices) {
         dstMesh->mBitangents = new aiVector3D[numVertices];
         std::copy( pSrcMesh->mBitangents.begin() + pStartVertex, pSrcMesh->mBitangents.begin() +
             pStartVertex + numVertices, dstMesh->mBitangents);
@@ -654,13 +625,12 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 
     // same for texturecoords, as many as we have
     // empty slots are not allowed, need to pack and adjust UV indexes accordingly
-    for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
-    {
-        if( pSrcMesh->mTexCoords[a].size() >= pStartVertex + numVertices)
-        {
+    for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a ) {
+        if( pSrcMesh->mTexCoords[a].size() >= pStartVertex + numVertices) {
             dstMesh->mTextureCoords[real] = new aiVector3D[numVertices];
-            for( size_t b = 0; b < numVertices; ++b)
+            for( size_t b = 0; b < numVertices; ++b) {
                 dstMesh->mTextureCoords[real][b] = pSrcMesh->mTexCoords[a][pStartVertex+b];
+            }
 
             dstMesh->mNumUVComponents[real] = pSrcMesh->mNumUVComponents[a];
             ++real;
@@ -668,10 +638,8 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     }
 
     // same for vertex colors, as many as we have. again the same packing to avoid empty slots
-    for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++)
-    {
-        if( pSrcMesh->mColors[a].size() >= pStartVertex + numVertices)
-        {
+    for( size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a ) {
+        if( pSrcMesh->mColors[a].size() >= pStartVertex + numVertices) {
             dstMesh->mColors[real] = new aiColor4D[numVertices];
             std::copy( pSrcMesh->mColors[a].begin() + pStartVertex, pSrcMesh->mColors[a].begin() + pStartVertex + numVertices,dstMesh->mColors[real]);
             ++real;
@@ -682,14 +650,14 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     size_t vertex = 0;
     dstMesh->mNumFaces = static_cast<unsigned int>(pSubMesh.mNumFaces);
     dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
-    for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
-    {
+    for( size_t a = 0; a < dstMesh->mNumFaces; ++a) {
         size_t s = pSrcMesh->mFaceSize[ pStartFace + a];
         aiFace& face = dstMesh->mFaces[a];
         face.mNumIndices = static_cast<unsigned int>(s);
         face.mIndices = new unsigned int[s];
-        for( size_t b = 0; b < s; ++b)
+        for( size_t b = 0; b < s; ++b) {
             face.mIndices[b] = static_cast<unsigned int>(vertex++);
+        }
     }
 
     // create morph target meshes if any
@@ -697,14 +665,12 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     std::vector<float> targetWeights;
     Collada::MorphMethod method = Collada::Normalized;
 
-    for(std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin();
-        it != pParser.mControllerLibrary.end(); it++)
-    {
+    for(std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin(); 
+            it != pParser.mControllerLibrary.end(); it++) {
         const Collada::Controller &c = it->second;
         const Collada::Mesh* baseMesh = pParser.ResolveLibraryReference( pParser.mMeshLibrary, c.mMeshId);
 
-        if (c.mType == Collada::Morph && baseMesh->mName == pSrcMesh->mName)
-        {
+        if (c.mType == Collada::Morph && baseMesh->mName == pSrcMesh->mName) {
             const Collada::Accessor& targetAccessor = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, c.mMorphTarget);
             const Collada::Accessor& weightAccessor = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, c.mMorphWeight);
             const Collada::Data& targetData = pParser.ResolveLibraryReference( pParser.mDataLibrary, targetAccessor.mSource);
@@ -713,34 +679,34 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
             // take method
             method = c.mMethod;
 
-            if (!targetData.mIsStringArray)
+            if (!targetData.mIsStringArray) {
                 throw DeadlyImportError( "target data must contain id. ");
-            if (weightData.mIsStringArray)
+            }
+            if (weightData.mIsStringArray) {
                 throw DeadlyImportError( "target weight data must not be textual ");
+            }
 
-            for (unsigned int i = 0; i < targetData.mStrings.size(); ++i)
-            {
+            for (unsigned int i = 0; i < targetData.mStrings.size(); ++i) {
                 const Collada::Mesh* targetMesh = pParser.ResolveLibraryReference(pParser.mMeshLibrary, targetData.mStrings.at(i));
 
                 aiMesh *aimesh = findMesh(targetMesh->mName);
-                if (!aimesh)
-                {
-                    if (targetMesh->mSubMeshes.size() > 1)
+                if (!aimesh) {
+                    if (targetMesh->mSubMeshes.size() > 1) {
                         throw DeadlyImportError( "Morhing target mesh must be a single");
+                    }
                     aimesh = CreateMesh(pParser, targetMesh, targetMesh->mSubMeshes.at(0), NULL, 0, 0);
                     mTargetMeshes.push_back(aimesh);
                 }
                 targetMeshes.push_back(aimesh);
             }
-            for (unsigned int i = 0; i < weightData.mValues.size(); ++i)
+            for (unsigned int i = 0; i < weightData.mValues.size(); ++i) {
                 targetWeights.push_back(weightData.mValues.at(i));
+            }
         }
     }
-    if (targetMeshes.size() > 0 && targetWeights.size() == targetMeshes.size())
-    {
+    if (targetMeshes.size() > 0 && targetWeights.size() == targetMeshes.size()) {
         std::vector<aiAnimMesh*> animMeshes;
-        for (unsigned int i = 0; i < targetMeshes.size(); i++)
-        {
+        for (unsigned int i = 0; i < targetMeshes.size(); ++i ) {
             aiMesh* targetMesh = targetMeshes.at(i);
             aiAnimMesh *animMesh = aiCreateAnimMesh(targetMesh);
             float weight = targetWeights[i];
@@ -753,13 +719,13 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
                                 : aiMorphingMethod_MORPH_NORMALIZED;
         dstMesh->mAnimMeshes = new aiAnimMesh*[animMeshes.size()];
         dstMesh->mNumAnimMeshes = static_cast<unsigned int>(animMeshes.size());
-        for (unsigned int i = 0; i < animMeshes.size(); i++)
+        for (unsigned int i = 0; i < animMeshes.size(); ++i ) {
             dstMesh->mAnimMeshes[i] = animMeshes.at(i);
+        }
     }
 
     // create bones if given
-    if( pSrcController && pSrcController->mType == Collada::Skin)
-    {
+    if( pSrcController && pSrcController->mType == Collada::Skin) {
         // resolve references - joint names
         const Collada::Accessor& jointNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mJointNameSource);
         const Collada::Data& jointNames = pParser.ResolveLibraryReference( pParser.mDataLibrary, jointNamesAcc.mSource);
@@ -790,15 +756,13 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         weightStartPerVertex.resize(pSrcController->mWeightCounts.size(),pSrcController->mWeights.end());
 
         IndexPairVector::const_iterator pit = pSrcController->mWeights.begin();
-        for( size_t a = 0; a < pSrcController->mWeightCounts.size(); ++a)
-        {
+        for( size_t a = 0; a < pSrcController->mWeightCounts.size(); ++a) {
             weightStartPerVertex[a] = pit;
             pit += pSrcController->mWeightCounts[a];
         }
 
         // now for each vertex put the corresponding vertex weights into each bone's weight collection
-        for( size_t a = pStartVertex; a < pStartVertex + numVertices; ++a)
-        {
+        for( size_t a = pStartVertex; a < pStartVertex + numVertices; ++a) {
             // which position index was responsible for this vertex? that's also the index by which
             // the controller assigns the vertex weights
             size_t orgIndex = pSrcMesh->mFacePosIndices[a];
@@ -898,7 +862,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         }
     }
 
-    return dstMesh;
+    return dstMesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------

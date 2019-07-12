@@ -331,7 +331,7 @@ ADD_ASSIMP_EXPORTER( ASSBIN
   Assbin/AssbinExporter.cpp
 )
 
-ADD_ASSIMP_IMPORTER( ASSXML
+ADD_ASSIMP_EXPORTER( ASSXML
   Assxml/AssxmlExporter.h
   Assxml/AssxmlExporter.cpp
 )

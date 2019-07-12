@@ -104,6 +104,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/Exporter.hpp
   ${HEADER_PATH}/DefaultIOStream.h
   ${HEADER_PATH}/DefaultIOSystem.h
+  ${HEADER_PATH}/ZipArchiveIOSystem.h
   ${HEADER_PATH}/SceneCombiner.h
   ${HEADER_PATH}/fast_atof.h
   ${HEADER_PATH}/qnan.h
@@ -172,6 +173,7 @@ SET( Common_SRCS
   Common/DefaultProgressHandler.h
   Common/DefaultIOStream.cpp
   Common/DefaultIOSystem.cpp
+  Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h
   Common/Importer.cpp
   Common/IFF.h

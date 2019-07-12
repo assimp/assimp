@@ -420,11 +420,6 @@ namespace Assimp {
 
             out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
-            //cameras are defined along positive x direction
-            /*out_camera->mPosition = cam.Position();
-            out_camera->mLookAt = (cam.InterestPosition() - out_camera->mPosition).Normalize();
-            out_camera->mUp = cam.UpVector();*/
-
             out_camera->mPosition = aiVector3D(0.0f);
             out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
             out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
@@ -667,8 +662,7 @@ namespace Assimp {
                     if ((v - all_ones).SquareLength() > zero_epsilon) {
                         return true;
                     }
-                }
-                else if (ok) {
+                } else if (ok) {
                     if (v.SquareLength() > zero_epsilon) {
                         return true;
                     }
@@ -1414,7 +1408,6 @@ namespace Assimp {
                             const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
                             for (unsigned int k = 0; k < count; k++) {
                                 unsigned int index = translateIndexMap[outIndices[k]];
-
                                 animMesh->mVertices[index] += vertex;
                                 if (animMesh->mNormals != nullptr) {
                                     animMesh->mNormals[index] += normal;
@@ -1733,9 +1726,8 @@ namespace Assimp {
         }
 
         void FBXConverter::TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures,
-            const std::string& propName,
-            aiTextureType target, const MeshGeometry* const mesh)
-        {
+                const std::string& propName,
+                aiTextureType target, const MeshGeometry* const mesh) {
             TextureMap::const_iterator it = textures.find(propName);
             if (it == textures.end()) {
                 return;

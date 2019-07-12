@@ -102,6 +102,7 @@ void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperti
 void ExportSceneFBX(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
+void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::ExportProperties*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -179,7 +180,11 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
-    Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 )
+    Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 ),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
+    Exporter::ExportFormatEntry("json", "Plain JSON representation of the Assimp scene data structure", "json", &ExportAssimp2Json, 0)
 #endif
 };
 

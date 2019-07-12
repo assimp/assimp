@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 
 #include <unordered_map>
+#include <memory>
 
 #ifdef ASSIMP_USE_HUNTER
 #  include <minizip/unzip.h>

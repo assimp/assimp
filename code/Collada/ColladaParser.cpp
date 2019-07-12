@@ -132,7 +132,7 @@ ColladaParser::ColladaParser(IOSystem* pIOHandler, const std::string& pFile)
 
     // read embedded textures
     if (zip_archive && zip_archive->isOpen()) {
-        // TODO
+        ReadEmbeddedTextures(*zip_archive);
     }
 }
 
@@ -3052,6 +3052,26 @@ void ColladaParser::ReadMaterialVertexInputBinding(Collada::SemanticMappingTable
         else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
             if (strcmp(mReader->getNodeName(), "instance_material") == 0)
                 break;
+        }
+    }
+}
+
+void Assimp::ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem& zip_archive)
+{
+    // Attempt to load any undefined Collada::Image in ImageLibrary
+    for (ImageLibrary::iterator it = mImageLibrary.begin(); it != mImageLibrary.end(); ++it) {
+        Collada::Image &image = (*it).second;
+
+        if (image.mImageData.empty()) {
+            std::unique_ptr<IOStream> image_file(zip_archive.Open(image.mFileName.c_str()));
+            if (image_file) {
+                image.mImageData.resize(image_file->FileSize());
+                image_file->Read(image.mImageData.data(), image_file->FileSize(), 1);
+                image.mEmbeddedFormat = BaseImporter::GetExtension(image.mFileName);
+                if (image.mEmbeddedFormat == "jpeg") {
+                    image.mEmbeddedFormat = "jpg";
+                }
+            }
         }
     }
 }

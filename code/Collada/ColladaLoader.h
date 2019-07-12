@@ -100,14 +100,14 @@ protected:
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo () const override;
 
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
 
     /** Recursively constructs a scene node for the given parser node and returns it. */
     aiNode* BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode);

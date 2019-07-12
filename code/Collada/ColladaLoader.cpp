@@ -235,6 +235,9 @@ void ColladaLoader::InternReadFile(const std::string& pFile, aiScene* pScene, IO
     // store all materials
     StoreSceneMaterials(pScene);
 
+    // store all textures
+    StoreSceneTextures(pScene);
+
     // store all lights
     StoreSceneLights(pScene);
 
@@ -927,8 +930,7 @@ void ColladaLoader::StoreSceneLights(aiScene* pScene)
 void ColladaLoader::StoreSceneTextures(aiScene* pScene)
 {
     pScene->mNumTextures = static_cast<unsigned int>(mTextures.size());
-    if (mTextures.size() > 0)
-    {
+    if (mTextures.size() > 0) {
         pScene->mTextures = new aiTexture*[mTextures.size()];
         std::copy(mTextures.begin(), mTextures.end(), pScene->mTextures);
         mTextures.clear();
@@ -1728,7 +1730,7 @@ void ColladaLoader::BuildMaterials(ColladaParser& pParser, aiScene* /*pScene*/)
         mat->AddProperty(&colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
         const ai_real specExp = 5.0;
         mat->AddProperty(&specExp, 1, AI_MATKEY_SHININESS);
-    }
+}
 #endif
 }
 
@@ -1766,13 +1768,18 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParse
     }
 
     // if this is an embedded texture image setup an aiTexture for it
-    if (imIt->second.mFileName.empty())
+    if (!imIt->second.mImageData.empty())
     {
-        if (imIt->second.mImageData.empty()) {
-            throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");
-        }
-
         aiTexture* tex = new aiTexture();
+
+        // Store embedded texture name reference
+        tex->mFilename.Set(imIt->second.mFileName.c_str());
+        result.Set(imIt->second.mFileName);
+
+        // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
+//        result.data[0] = '*';
+//        result.length = 1 + ASSIMP_itoa10(result.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+
 
         // setup format hint
         if (imIt->second.mEmbeddedFormat.length() > 3) {
@@ -1786,20 +1793,15 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParse
         tex->pcData = (aiTexel*)new char[tex->mWidth];
         memcpy(tex->pcData, &imIt->second.mImageData[0], tex->mWidth);
 
-        // TODO: check the possibility of using the flag "AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
-        // In FBX files textures are now stored internally by Assimp with their filename included
-        // Now Assimp can lookup through the loaded textures after all data is processed
-        // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
-        // This may occur on this case too, it has to be studied
-        // setup texture reference string
-        result.data[0] = '*';
-        result.length = 1 + ASSIMP_itoa10(result.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
-
         // and add this texture to the list
         mTextures.push_back(tex);
     }
     else
     {
+        if (imIt->second.mFileName.empty()) {
+            throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");
+        }
+
         result.Set(imIt->second.mFileName);
         ConvertPath(result);
     }

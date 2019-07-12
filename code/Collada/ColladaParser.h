@@ -239,6 +239,9 @@ namespace Assimp
         // Processes bind_vertex_input and bind elements
         void ReadMaterialVertexInputBinding( Collada::SemanticMappingTable& tbl);
 
+        /** Reads embedded textures from a ZAE archive*/
+        void ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive);
+
     protected:
         /** Aborts the file reading with an exception */
         AI_WONT_RETURN void ThrowException( const std::string& pError) const AI_WONT_RETURN_SUFFIX;

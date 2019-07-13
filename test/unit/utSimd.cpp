@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 
-#include "simd.h"
+#include "Common/simd.h"
 
 using namespace ::Assimp;
 

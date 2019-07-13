@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "D3MFExporter.h"
+#include "3MF/D3MFExporter.h"
 
 class utD3MFImporterExporter : public AbstractImportExportBase {
 public:

@@ -7,6 +7,12 @@ build
 *.sln
 *.ncb
 *.vcproj
+*.vcxproj.user
+*.VC.db
+*.VC.db-shm
+*.VC.db-wal
+*.VC.opendb
+*.ipch
 
 # Output
 bin/
@@ -32,6 +38,7 @@ cmake_uninstall.cmake
 *.dir/
 assimp-config.cmake
 assimp-config-version.cmake
+assimpTargets*.cmake
 
 # MakeFile
 Makefile

@@ -1247,10 +1247,10 @@ namespace Assimp {
             ai_assert(count_faces);
             ai_assert(count_vertices);
 
-            // mapping from output indices to DOM indexing, needed to resolve weights
+            // mapping from output indices to DOM indexing, needed to resolve weights or blendshapes
             std::vector<unsigned int> reverseMapping;
             std::map<unsigned int, unsigned int> translateIndexMap;
-            if (process_weights) {
+            if (process_weights || mesh.GetBlendShapes().size() > 0) {
                 reverseMapping.resize(count_vertices);
             }
 
@@ -1407,7 +1407,10 @@ namespace Assimp {
                             unsigned int count = 0;
                             const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
                             for (unsigned int k = 0; k < count; k++) {
-                                unsigned int index = translateIndexMap[outIndices[k]];
+                                unsigned int outIndex = outIndices[k];
+                                if (translateIndexMap.find(outIndex) == translateIndexMap.end())
+                                    continue;
+                                unsigned int index = translateIndexMap[outIndex];
                                 animMesh->mVertices[index] += vertex;
                                 if (animMesh->mNormals != nullptr) {
                                     animMesh->mNormals[index] += normal;
@@ -1418,6 +1421,15 @@ namespace Assimp {
                         animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
                         animMeshes.push_back(animMesh);
                     }
+                }
+            }
+
+            const size_t numAnimMeshes = animMeshes.size();
+            if (numAnimMeshes > 0) {
+                out_mesh->mNumAnimMeshes = static_cast<unsigned int>(numAnimMeshes);
+                out_mesh->mAnimMeshes = new aiAnimMesh*[numAnimMeshes];
+                for (size_t i = 0; i < numAnimMeshes; i++) {
+                    out_mesh->mAnimMeshes[i] = animMeshes.at(i);
                 }
             }
 

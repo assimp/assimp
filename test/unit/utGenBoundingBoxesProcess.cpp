@@ -48,13 +48,21 @@ using namespace Assimp;
 
 class utGenBoundingBoxesProcess : public ::testing::Test {
 public:
+    utGenBoundingBoxesProcess()
+    : Test()
+    , mProcess(nullptr)
+    , mMesh(nullptr)
+    , mScene(nullptr) {
+        // empty
+    }
+
     void SetUp() override {
         mProcess = new GenBoundingBoxesProcess;
         mMesh = new aiMesh();
         mMesh->mNumVertices = 100;
         mMesh->mVertices = new aiVector3D[100];
         for (unsigned int i = 0; i < 100; ++i) {
-            mMesh->mVertices[i] = aiVector3D(i, i, i);
+            mMesh->mVertices[i] = aiVector3D((ai_real)i, (ai_real)i, (ai_real)i);
         }
         mScene = new aiScene();
         mScene->mNumMeshes = 1;

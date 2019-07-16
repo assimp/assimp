@@ -47,10 +47,6 @@ namespace Assimp    {
 aiAnimMesh *aiCreateAnimMesh(const aiMesh *mesh)
 {
     aiAnimMesh *animesh = new aiAnimMesh;
-    animesh->mVertices = NULL;
-    animesh->mNormals = NULL;
-    animesh->mTangents = NULL;
-    animesh->mBitangents = NULL;
     animesh->mNumVertices = mesh->mNumVertices;
     if (mesh->mVertices) {
         animesh->mVertices = new aiVector3D[animesh->mNumVertices];

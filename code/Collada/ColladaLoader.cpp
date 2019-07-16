@@ -772,10 +772,14 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 
             for( size_t b = 0; b < pairCount; ++b, ++iit)
             {
-                size_t jointIndex = iit->first;
-                size_t vertexIndex = iit->second;
 
-                ai_real weight = ReadFloat( weightsAcc, weights, vertexIndex, 0);
+                const size_t jointIndex = iit->first;
+                const size_t vertexIndex = iit->second;                
+                ai_real weight = 1.0f;
+                if (!weights.mValues.empty()) {
+                    weight = ReadFloat(weightsAcc, weights, vertexIndex, 0);
+                }
+                
 
                 // one day I gonna kill that XSI Collada exporter
                 if( weight > 0.0f)

@@ -39,38 +39,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-class utAssbinImportExport : public AbstractImportExportBase {
+class utAssjsonImportExport : public AbstractImportExportBase {
 public:
-    bool importerTest() override {
+    bool exporterTest() override {
         Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
 
         Exporter exporter;
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin" ) );
-        const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin", aiProcess_ValidateDataStructure );
-
-        return newScene != nullptr;
+        aiReturn res = exporter.Export(scene, "json", "./spider_test.json");
+        return aiReturn_SUCCESS == res;
     }
 };
 
-TEST_F( utAssbinImportExport, exportAssbin3DFromFileTest ) {
-    Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
+TEST_F(utAssjsonImportExport, exportTest) {
+    EXPECT_TRUE(exporterTest());
 }
 
-TEST_F( utAssbinImportExport, import3ExportAssbinDFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
-}
-
-#endif // #ifndef ASSIMP_BUILD_NO_EXPORT
+#endif // ASSIMP_BUILD_NO_EXPORT

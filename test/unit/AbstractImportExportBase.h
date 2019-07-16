@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -39,17 +39,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #pragma once
+#ifndef AI_ABSTRACTIMPORTEXPORTBASE_H_INC
+#define AI_ABSTRACTIMPORTEXPORTBASE_H_INC
 
 #include "UnitTestPCH.h"
 
+// ---------------------------------------------------------------------------
+/** Abstract base class to test import and export
+ */
+ // ---------------------------------------------------------------------------
 class AbstractImportExportBase : public ::testing::Test {
 public:
+    /// @brief  The class destructor.
     virtual ~AbstractImportExportBase();
-    virtual bool importerTest() = 0;
+
+    /// @brief  The importer-test, will return true for successful import.
+    /// @return true for success, false for failure.
+    virtual bool importerTest();
+
+    /// @brief  The exporter-test, will return true for successful import.
+    /// @return true for success, false for failure.
     virtual bool exporterTest();
 };
+
+inline
+bool AbstractImportExportBase::importerTest() {
+    return true;
+}
 
 inline 
 bool AbstractImportExportBase::exporterTest() {
     return true;
 }
+
+#endif // AI_ABSTRACTIMPORTEXPORTBASE_H_INC

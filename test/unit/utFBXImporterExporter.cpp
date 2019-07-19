@@ -235,7 +235,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_ascii/box.FBX", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(1, scene->mNumMaterials);
+    EXPECT_EQ(1u, scene->mNumMaterials);
     aiMaterial *mat = scene->mMaterials[0];
     ASSERT_NE(nullptr, mat);
 

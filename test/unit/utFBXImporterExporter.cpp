@@ -185,7 +185,7 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
         ASSERT_STREQ(node->mName.C_Str(), chainStr[i]);
         parent = node;
     }
-    ASSERT_EQ(0, parent->mNumChildren) << "Leaf node";
+    ASSERT_EQ(0u, parent->mNumChildren) << "Leaf node";
 }
 
 TEST_F( utFBXImporterExporter, importPhongMaterial ) {
@@ -244,7 +244,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {
     EXPECT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
     ASSERT_STREQ(path.C_Str(), "..\\..\\..\\Desktop\\uv_test.png");
 
-    ASSERT_EQ(1, scene->mNumTextures);
+    ASSERT_EQ(1u, scene->mNumTextures);
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(439176u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
 }
@@ -255,7 +255,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_ascii/box_embedded_texture_fragmented.fbx", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(1, scene->mNumMaterials);
+    EXPECT_EQ(1u, scene->mNumMaterials);
     aiMaterial *mat = scene->mMaterials[0];
     ASSERT_NE(nullptr, mat);
 
@@ -264,7 +264,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
     ASSERT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
     ASSERT_STREQ(path.C_Str(), "paper.png");
 
-    ASSERT_EQ(1, scene->mNumTextures);
+    ASSERT_EQ(1u, scene->mNumTextures);
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(968029u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
 }

@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXUtil.h"
 #include "FBXProperties.h"
 #include "FBXImporter.h"
+
 #include <assimp/anim.h>
 #include <assimp/material.h>
 #include <assimp/light.h>

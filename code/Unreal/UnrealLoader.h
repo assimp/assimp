@@ -127,7 +127,8 @@ inline void CompressVertex(const aiVector3D& v, uint32_t& out)
     n.X = (int32_t)v.x;
     n.Y = (int32_t)v.y;
     n.Z = (int32_t)v.z;
-    out = t;
+    ::memcpy( &out, &t, sizeof(int32_t));
+    //out = t;
 }
 
     // UNREAL vertex decompression

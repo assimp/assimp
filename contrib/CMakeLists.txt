@@ -2,3 +2,5 @@
 if( NOT SYSTEM_IRRXML )
     add_subdirectory(irrXML)
 endif( NOT SYSTEM_IRRXML )
+
+add_subdirectory( pugixml-1.9 )

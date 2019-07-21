@@ -1617,6 +1617,17 @@ void FBXExporter::WriteObjects ()
     // at the same time we can build a list of all the skeleton nodes,
     // which will be used later to mark them as type "limbNode".
     std::unordered_set<const aiNode*> limbnodes;
+    
+    //actual bone nodes in fbx, without parenting-up
+    std::unordered_set<std::string> setAllBoneNamesInScene;
+    for(unsigned int m = 0; m < mScene->mNumMeshes; ++ m)
+    {
+        aiMesh* pMesh = mScene->mMeshes[m];
+        for(unsigned int b = 0; b < pMesh->mNumBones; ++ b)
+            setAllBoneNamesInScene.insert(pMesh->mBones[b]->mName.data);
+    }
+    aiMatrix4x4 mxTransIdentity;
+    
     // and a map of nodes by bone name, as finding them is annoying.
     std::map<std::string,aiNode*> node_by_bone;
     for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
@@ -1659,6 +1670,11 @@ void FBXExporter::WriteObjects ()
                 const std::string node_name(parent->mName.C_Str());
                 if (node_name.find(MAGIC_NODE_TAG) != std::string::npos) {
                     continue;
+                }
+                //not a bone in scene && no effect in transform
+                if(setAllBoneNamesInScene.find(node_name)==setAllBoneNamesInScene.end()
+                   && parent->mTransformation == mxTransIdentity) {
+                        continue;
                 }
                 // otherwise check if this is the root of the skeleton
                 bool end = false;
@@ -1824,7 +1840,10 @@ void FBXExporter::WriteObjects ()
 
             // this should be the same as the bone's mOffsetMatrix.
             // if it's not the same, the skeleton isn't in the bind pose.
-            const float epsilon = 1e-4f; // some error is to be expected
+            float epsilon = 1e-4f; // some error is to be expected
+            float epsilon_custom = mProperties->GetPropertyFloat("BINDPOSE_EPSILON", -1);
+            if(epsilon_custom > 0)
+                epsilon = epsilon_custom;
             bool bone_xform_okay = true;
             if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
                 not_in_bind_pose.insert(b);

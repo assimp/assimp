@@ -54,7 +54,7 @@ public:
         mMesh->mNumVertices = 100;
         mMesh->mVertices = new aiVector3D[100];
         for (unsigned int i = 0; i < 100; ++i) {
-            mMesh->mVertices[i] = aiVector3D(i, i, i);
+            mMesh->mVertices[i] = aiVector3D(static_cast<ai_real>(i), static_cast<ai_real>(i), static_cast<ai_real>(i));
         }
         mScene = new aiScene();
         mScene->mNumMeshes = 1;

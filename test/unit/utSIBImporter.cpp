@@ -42,9 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include "SIBImporter.h"
+#include "SIB/SIBImporter.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+
 #include "AbstractImportExportBase.h"
 
 using namespace ::Assimp;

@@ -391,6 +391,39 @@ TEST_F(utObjImportExport, invalid_normals_uvs) {
     EXPECT_NE(nullptr, scene);
 }
 
+TEST_F(utObjImportExport, no_vt_just_vns) {
+    static const char *ObjModel =
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 0 0 0\n"
+		"v 10 0 0\n"
+		"v 0 10 0\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"vn 0 0 1\n"
+		"f 10/10 11/11 12/12\n";
+
+    Assimp::Importer myImporter;
+    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    EXPECT_NE(nullptr, scene);
+}
+
 TEST_F( utObjImportExport, mtllib_after_g ) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_mtllib_after_g.obj", aiProcess_ValidateDataStructure );
@@ -414,4 +447,38 @@ TEST_F(utObjImportExport, import_without_linend) {
     Assimp::Importer myImporter;
     const aiScene *scene = myImporter.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/box_without_lineending.obj", 0);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST_F(utObjImportExport, import_with_line_continuations) {
+    static const char *ObjModel =
+        "v -0.5 -0.5 0.5\n"
+        "v -0.5 \\\n"
+        "  -0.5 -0.5\n"
+        "v -0.5 \\\n"
+        "   0.5 \\\n"
+        "   -0.5\n"
+        "f 1 2 3\n";
+
+    Assimp::Importer myImporter;
+    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 3U);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 1U);
+
+    auto vertices = scene->mMeshes[0]->mVertices;
+    const float threshold = 0.0001f;
+
+    EXPECT_NEAR(vertices[0].x, -0.5f, threshold);
+    EXPECT_NEAR(vertices[0].y, -0.5f, threshold);
+    EXPECT_NEAR(vertices[0].z, 0.5f, threshold);
+
+    EXPECT_NEAR(vertices[1].x, -0.5f, threshold);
+    EXPECT_NEAR(vertices[1].y, -0.5f, threshold);
+    EXPECT_NEAR(vertices[1].z, -0.5f, threshold);
+
+    EXPECT_NEAR(vertices[2].x, -0.5f, threshold);
+    EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
+    EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
 }

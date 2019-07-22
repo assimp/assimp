@@ -82,7 +82,8 @@ def call_init(obj, caller = None):
         _init(obj,parent=caller)
 
 def _is_init_type(obj):
-    if helper.hasattr_silent(obj,'contents'): #pointer
+
+    if obj and helper.hasattr_silent(obj,'contents'): #pointer
         return _is_init_type(obj[0])
     # null-pointer case that arises when we reach a mesh attribute
     # like mBitangents which use mNumVertices rather than mNumBitangents
@@ -93,7 +94,7 @@ def _is_init_type(obj):
         return False
     tname = obj.__class__.__name__
     return not (tname[:2] == 'c_' or tname == 'Structure' \
-            or tname == 'POINTER') and not isinstance(obj,int)
+            or tname == 'POINTER') and not isinstance(obj, (int, str, bytes))
 
 def _init(self, target = None, parent = None):
     """

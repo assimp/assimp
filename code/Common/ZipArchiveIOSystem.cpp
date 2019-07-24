@@ -226,7 +226,7 @@ namespace Assimp {
 
         ZipFile *zip_file = new ZipFile(m_Size);
 
-        if (unzReadCurrentFile(zip_handle, zip_file->m_Buffer.get(), static_cast<unsigned int>(m_Size)) != m_Size)
+        if (unzReadCurrentFile(zip_handle, zip_file->m_Buffer.get(), static_cast<unsigned int>(m_Size)) != static_cast<int>(m_Size))
         {
             // Failed, release the memory
             delete zip_file;
@@ -281,6 +281,7 @@ namespace Assimp {
             m_SeekPtr = m_Size - pOffset;
             return aiReturn_SUCCESS;
         }
+        default:;
         }
 
         return aiReturn_FAILURE;
@@ -355,7 +356,7 @@ namespace Assimp {
                 if (fileInfo.uncompressed_size != 0) {
                     std::string filename_string(filename, fileInfo.size_filename);
                     SimplifyFilename(filename_string);
-                    std::pair<ZipFileMap::iterator, bool> result = m_ArchiveMap.insert(std::make_pair(filename_string, ZipFileInfo(m_ZipFileHandle, fileInfo.uncompressed_size)));
+                    m_ArchiveMap.emplace(filename_string, ZipFileInfo(m_ZipFileHandle, fileInfo.uncompressed_size));
                 }
             }
         } while (unzGoToNextFile(m_ZipFileHandle) != UNZ_END_OF_LIST_OF_FILE);

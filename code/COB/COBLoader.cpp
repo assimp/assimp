@@ -898,6 +898,7 @@ public:
     : nfo(nfo)
     , reader(reader)
     , cur(reader.GetCurrentPos()) {
+        // empty
     }
 
     ~chunk_guard() {
@@ -905,7 +906,7 @@ public:
         if(nfo.size != static_cast<unsigned int>(-1)) {
             try {
                 reader.IncPtr( static_cast< int >( nfo.size ) - reader.GetCurrentPos() + cur );
-            } catch (const DeadlyImportError& e ) {
+            } catch (const DeadlyImportError& ) {
                 // out of limit so correct the value
                 reader.IncPtr( reader.GetReadLimit() );
             }
@@ -913,15 +914,17 @@ public:
     }
 
 private:
-
     const COB::ChunkInfo& nfo;
     StreamReaderLE& reader;
     long cur;
 };
 
 // ------------------------------------------------------------------------------------------------
-void COBImporter::ReadBinaryFile(Scene& out, StreamReaderLE* reader)
-{
+void COBImporter::ReadBinaryFile(Scene& out, StreamReaderLE* reader) {
+    if (nullptr == reader) {
+        return;
+    }
+
     while(1) {
         std::string type;
          type += reader -> GetI1()

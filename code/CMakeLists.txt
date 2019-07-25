@@ -690,8 +690,6 @@ ADD_ASSIMP_IMPORTER( Q3BSP
   Q3BSP/Q3BSPFileParser.cpp
   Q3BSP/Q3BSPFileImporter.h
   Q3BSP/Q3BSPFileImporter.cpp
-  Q3BSP/Q3BSPZipArchive.h
-  Q3BSP/Q3BSPZipArchive.cpp
 )
 
 ADD_ASSIMP_IMPORTER( RAW

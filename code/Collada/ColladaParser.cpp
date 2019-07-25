@@ -165,7 +165,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
     }
 
     std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(manifestfile.get()));
-    irr::io::IrrXMLReader* manifest_reader = irr::io::createIrrXMLReader(mIOWrapper.get());
+    std::unique_ptr<irr::io::IrrXMLReader> manifest_reader(irr::io::createIrrXMLReader(mIOWrapper.get()));
 
     while (manifest_reader->read())
     {

@@ -149,13 +149,13 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
 
             ASSIMP_LOG_DEBUG(rootFile);
 
+            mZipArchive->Close(fileStream);
+
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert( mRootStream != nullptr );
             if ( nullptr == mRootStream ) {
                 throw DeadlyExportError( "Cannot open root-file in archive : " + rootFile );
             }
-
-            mZipArchive->Close( fileStream );
 
         } else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
             ASSIMP_LOG_WARN_F("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES",file);
@@ -167,7 +167,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
 }
 
 D3MFOpcPackage::~D3MFOpcPackage() {
-    // empty
+    mZipArchive->Close(mRootStream);
 }
 
 IOStream* D3MFOpcPackage::RootStream() const {

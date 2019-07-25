@@ -183,7 +183,7 @@ Exporter::ExportFormatEntry gExporters[] =
     Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 ),
 #endif
 
-#ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
+#ifndef ASSIMP_BUILD_NO_Assjson_EXPORTER
     Exporter::ExportFormatEntry("json", "Plain JSON representation of the Assimp scene data structure", "json", &ExportAssimp2Json, 0)
 #endif
 };

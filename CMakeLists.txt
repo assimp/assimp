@@ -341,8 +341,8 @@ SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
 
 get_cmake_property(is_multi_config GENERATOR_IS_MULTI_CONFIG)
 
-IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  SET(CMAKE_DEBUG_POSTFIX "totototot" CACHE STRING "Debug Postfix for lib, samples and tools")
+IF (INJECT_DEBUG_POSTFIX AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+  SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfix for lib, samples and tools")
 ELSE()
   SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Debug Postfix for lib, samples and tools")
 ENDIF()

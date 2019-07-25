@@ -40,6 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+/** @file  ZipArchiveIOSystem.cpp
+ *  @brief Zip File I/O implementation for #Importer
+ */
+
 #include <assimp/ZipArchiveIOSystem.h>
 #include <assimp/BaseImporter.h>
 

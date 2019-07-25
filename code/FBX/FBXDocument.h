@@ -627,7 +627,7 @@ public:
         return content;
     }
 
-    uint32_t ContentLength() const {
+    uint64_t ContentLength() const {
         return contentLength;
     }
 

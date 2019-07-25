@@ -963,7 +963,6 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // read an array of uints
 void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
@@ -1280,7 +1279,6 @@ float ParseTokenAsFloat(const Token& t)
     return i;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsInt() with ParseError handling
 int ParseTokenAsInt(const Token& t)
@@ -1292,8 +1290,6 @@ int ParseTokenAsInt(const Token& t)
     }
     return i;
 }
-
-
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsInt64() with ParseError handling

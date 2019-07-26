@@ -76,7 +76,7 @@ TEST_F(ExporterTest, ProgressHandlerTest) {
 TEST_F(ExporterTest, ExporterIdTest) {
     Exporter exporter;
     size_t exportFormatCount = exporter.GetExportFormatCount();
-    EXPECT_NE(0, exportFormatCount) << "No registered exporters";
+    EXPECT_NE(0u, exportFormatCount) << "No registered exporters";
     typedef std::map<std::string, const aiExportFormatDesc*> ExportIdMap;
     ExportIdMap exporterMap;
     for (size_t i = 0; i < exportFormatCount; ++i)

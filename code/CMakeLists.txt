@@ -331,7 +331,7 @@ ADD_ASSIMP_EXPORTER( ASSBIN
   Assbin/AssbinExporter.cpp
 )
 
-ADD_ASSIMP_IMPORTER( ASSXML
+ADD_ASSIMP_EXPORTER( ASSXML
   Assxml/AssxmlExporter.h
   Assxml/AssxmlExporter.cpp
 )
@@ -808,6 +808,14 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDPmxParser.h
   MMD/MMDPmxParser.cpp
   MMD/MMDVmdParser.h
+)
+
+ADD_ASSIMP_EXPORTER( Assjson
+  Assjson/cencode.c
+  Assjson/cencode.h
+  Assjson/json_exporter.cpp
+  Assjson/mesh_splitter.cpp
+  Assjson/mesh_splitter.h
 )
 
 # Workaround for issue #2406 - force problematic large file to be optimized to prevent string table overflow error

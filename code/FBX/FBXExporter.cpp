@@ -1219,6 +1219,16 @@ void FBXExporter::WriteObjects ()
         layer.AddChild(le);
         layer.Dump(outstream, binary, indent);
 
+        for(unsigned int lr = 1; lr < m->GetNumUVChannels(); ++ lr)
+        {
+            FBX::Node layerExtra("Layer", int32_t(1));
+            layerExtra.AddChild("Version", int32_t(100));
+            FBX::Node leExtra("LayerElement");
+            leExtra.AddChild("Type", "LayerElementUV");
+            leExtra.AddChild("TypedIndex", int32_t(lr));
+            layerExtra.AddChild(leExtra);
+            layerExtra.Dump(outstream, binary, indent);
+        }
         // finish the node record
         indent = 1;
         n.End(outstream, binary, indent, true);

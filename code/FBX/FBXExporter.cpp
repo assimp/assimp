@@ -1850,7 +1850,10 @@ void FBXExporter::WriteObjects ()
 
             // this should be the same as the bone's mOffsetMatrix.
             // if it's not the same, the skeleton isn't in the bind pose.
-            const float epsilon = 1e-4f; // some error is to be expected
+            float epsilon = 1e-4f; // some error is to be expected
+            float epsilon_custom = mProperties->GetPropertyFloat("BINDPOSE_EPSILON", -1);
+            if(epsilon_custom > 0)
+                epsilon = epsilon_custom;
             bool bone_xform_okay = true;
             if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
                 not_in_bind_pose.insert(b);

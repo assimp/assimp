@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -73,11 +71,6 @@ TEST_F(BlenderWorkTest,work_279) {
     ASSERT_TRUE(pTest->HasMaterials());
     ASSERT_TRUE(pTest->HasMeshes());
     ASSERT_TRUE(pTest->mMeshes[0]->mNumVertices > 0);
-    ASSERT_EQ(44, pTest->mMeshes[0]->mNumFaces);
-    EXPECT_EQ(1, pTest->mNumMaterials);
+    ASSERT_EQ(44u, pTest->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(1u, pTest->mNumMaterials);
 }
-
-
-
-
-

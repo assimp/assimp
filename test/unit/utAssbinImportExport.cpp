@@ -56,8 +56,8 @@ public:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
 
         Exporter exporter;
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin" ) );
-        const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin", aiProcess_ValidateDataStructure );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.assbin" ) );
+        const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.assbin", aiProcess_ValidateDataStructure );
 
         return newScene != nullptr;
     }

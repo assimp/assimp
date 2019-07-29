@@ -205,8 +205,8 @@ protected:
         ::Assimp::Exporter exporter;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
         EXPECT_NE( nullptr, scene );
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_test.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_out.obj" ) );
         
         return true;
     }
@@ -263,7 +263,7 @@ TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
     ::Assimp::Exporter exporter;
-    EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test.obj" ) );
+    EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test_out.obj" ) );
 #endif // ASSIMP_BUILD_NO_EXPORT
 }
 

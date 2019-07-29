@@ -810,7 +810,7 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDVmdParser.h
 )
 
-ADD_ASSIMP_EXPORTER( Assjson
+ADD_ASSIMP_EXPORTER( ASSJSON
   Assjson/cencode.c
   Assjson/cencode.h
   Assjson/json_exporter.cpp

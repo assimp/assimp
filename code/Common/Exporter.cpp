@@ -163,7 +163,7 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
-    Exporter::ExportFormatEntry( "assbin", "Assimp Binary", "assbin" , &ExportSceneAssbin, 0 ),
+    Exporter::ExportFormatEntry( "assbin", "Assimp Binary File", "assbin" , &ExportSceneAssbin, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER

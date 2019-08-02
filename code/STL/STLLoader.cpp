@@ -225,7 +225,7 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     }
     pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_DIFFUSE);
     pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_SPECULAR);
-    clrDiffuse = aiColor4D( ai_real(1.0), ai_real(1.0), ai_real(1.0), ai_real(1.0));
+    clrDiffuse = aiColor4D( ai_real(0.05), ai_real(0.05), ai_real(0.05), ai_real(1.0));
     pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_AMBIENT);
 
     pScene->mNumMaterials = 1;

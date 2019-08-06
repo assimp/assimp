@@ -71,3 +71,32 @@ TEST_F(ExporterTest, ProgressHandlerTest) {
     TestProgressHandler *ph(new TestProgressHandler);
     exporter.SetProgressHandler(ph);
 }
+
+// Make sure all the registered exporters have useful descriptions
+TEST_F(ExporterTest, ExporterIdTest) {
+    Exporter exporter;
+    size_t exportFormatCount = exporter.GetExportFormatCount();
+    EXPECT_NE(0u, exportFormatCount) << "No registered exporters";
+    typedef std::map<std::string, const aiExportFormatDesc*> ExportIdMap;
+    ExportIdMap exporterMap;
+    for (size_t i = 0; i < exportFormatCount; ++i)
+    {
+        // Check that the exporter description exists and makes sense
+        const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(i);
+        ASSERT_NE(nullptr, desc) << "Missing aiExportFormatDesc at index " << i;
+        EXPECT_NE(nullptr, desc->id) << "Null exporter ID at index " << i;
+        EXPECT_STRNE("", desc->id) << "Empty exporter ID at index " << i;
+        EXPECT_NE(nullptr, desc->description) << "Null exporter description at index " << i;
+        EXPECT_STRNE("", desc->description) << "Empty exporter description at index " << i;
+        EXPECT_NE(nullptr, desc->fileExtension) << "Null exporter file extension at index " << i;
+        EXPECT_STRNE("", desc->fileExtension) << "Empty exporter file extension at index " << i;
+
+        // Check the ID is unique
+        std::string key(desc->id);
+        std::pair<ExportIdMap::iterator, bool> result = exporterMap.emplace(key, desc);
+        EXPECT_TRUE(result.second) << "Duplicate exported id: '" << key << "' " << desc->description << " *." << desc->fileExtension << " at index " << i;
+    }
+
+    const aiExportFormatDesc* desc = exporter.GetExportFormatDescription(exportFormatCount);
+    EXPECT_EQ(nullptr, desc) << "More exporters than claimed";
+}

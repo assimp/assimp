@@ -1219,6 +1219,16 @@ void FBXExporter::WriteObjects ()
         layer.AddChild(le);
         layer.Dump(outstream, binary, indent);
 
+        for(unsigned int lr = 1; lr < m->GetNumUVChannels(); ++ lr)
+        {
+            FBX::Node layerExtra("Layer", int32_t(1));
+            layerExtra.AddChild("Version", int32_t(100));
+            FBX::Node leExtra("LayerElement");
+            leExtra.AddChild("Type", "LayerElementUV");
+            leExtra.AddChild("TypedIndex", int32_t(lr));
+            layerExtra.AddChild(leExtra);
+            layerExtra.Dump(outstream, binary, indent);
+        }
         // finish the node record
         indent = 1;
         n.End(outstream, binary, indent, true);
@@ -1842,8 +1852,10 @@ void FBXExporter::WriteObjects ()
             // if it's not the same, the skeleton isn't in the bind pose.
             float epsilon = 1e-4f; // some error is to be expected
             float epsilon_custom = mProperties->GetPropertyFloat("BINDPOSE_EPSILON", -1);
-            if(epsilon_custom > 0)
+            if(epsilon_custom > 0) {
                 epsilon = epsilon_custom;
+            }
+            
             bool bone_xform_okay = true;
             if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
                 not_in_bind_pose.insert(b);

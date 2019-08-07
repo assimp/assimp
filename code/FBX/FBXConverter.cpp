@@ -1450,7 +1450,9 @@ namespace Assimp {
             const Skin& sk = *geo.DeformerSkin();
 
             std::vector<aiBone*> bones;
-            bones.reserve(sk.Clusters().size());
+            size_t clusterSize = sk.Clusters().size();
+            printf("Cluster size: %zu\n", clusterSize);
+            bones.reserve(clusterSize);
 
             const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
             ai_assert(no_mat_check || outputVertStartIndices);
@@ -1462,13 +1464,13 @@ namespace Assimp {
 
                     const WeightIndexArray& indices = cluster->GetIndices();
 
-                    if (indices.empty() && mRemoveEmptyBones ) {
+                    // Disabled hack to prevent empty bones from existing
+                    /*if (indices.empty() && mRemoveEmptyBones ) {
+                        
                         continue;
-                    }
+                    }*/
 
                     const MatIndexArray& mats = geo.GetMaterialIndices();
-
-                    bool ok = false;
 
                     const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
 
@@ -1509,8 +1511,7 @@ namespace Assimp {
                                     out_indices.push_back(std::distance(outputVertStartIndices->begin(), it));
                                 }
 
-                                ++count_out_indices.back();
-                                ok = true;
+                                ++count_out_indices.back();                               
                             }
                         }
                     }
@@ -1518,10 +1519,10 @@ namespace Assimp {
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    if (ok && mRemoveEmptyBones) {
+                   // if (ok) {
                         ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                             count_out_indices, node_global_transform);
-                    }
+                    //}
                 }
             }
             catch (std::exception&) {
@@ -3580,6 +3581,10 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             // note: the trailing () ensures initialization with NULL - not
             // many C++ users seem to know this, so pointing it out to avoid
             // confusion why this code works.
+            printf("C++ meshes count: %ld\n", meshes.size());
+            //printf("number of meshes read from fbx: %d\n", meshes.si);
+
+            assert(out->mNumMeshes == 0);
 
             if (meshes.size()) {
                 out->mMeshes = new aiMesh*[meshes.size()]();

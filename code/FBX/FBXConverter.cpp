@@ -90,7 +90,6 @@ namespace Assimp {
         , anim_fps()
         , out(out)
         , doc(doc)
-        , mRemoveEmptyBones( removeEmptyBones )
         , mCurrentUnit(FbxUnit::cm) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
@@ -1462,13 +1461,7 @@ namespace Assimp {
 
                     const WeightIndexArray& indices = cluster->GetIndices();
 
-                    if (indices.empty() && mRemoveEmptyBones ) {
-                        continue;
-                    }
-
                     const MatIndexArray& mats = geo.GetMaterialIndices();
-
-                    bool ok = false;
 
                     const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
 
@@ -1509,8 +1502,7 @@ namespace Assimp {
                                     out_indices.push_back(std::distance(outputVertStartIndices->begin(), it));
                                 }
 
-                                ++count_out_indices.back();
-                                ok = true;
+                                ++count_out_indices.back();                               
                             }
                         }
                     }
@@ -1518,10 +1510,8 @@ namespace Assimp {
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    if (ok && mRemoveEmptyBones) {
-                        ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
+                    ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                             count_out_indices, node_global_transform);
-                    }
                 }
             }
             catch (std::exception&) {

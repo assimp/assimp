@@ -470,9 +470,6 @@ private:
 
     aiScene* const out;
     const FBX::Document& doc;
-
-    bool mRemoveEmptyBones;
-
     FbxUnit mCurrentUnit;
 };
 

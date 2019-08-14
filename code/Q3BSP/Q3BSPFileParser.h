@@ -48,13 +48,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp
 {
+    class ZipArchiveIOSystem;
+
 namespace Q3BSP
 {
-
-class Q3BSPZipArchive;
-struct Q3BSPModel;
-class ZipFile;
-
+    struct Q3BSPModel;
+    class ZipFile;
 }
 
 // -------------------------------------------------------------------
@@ -62,7 +61,7 @@ class ZipFile;
 class Q3BSPFileParser
 {
 public:
-    Q3BSPFileParser( const std::string &rMapName, Q3BSP::Q3BSPZipArchive *pZipArchive );
+    Q3BSPFileParser( const std::string &rMapName, ZipArchiveIOSystem *pZipArchive );
     ~Q3BSPFileParser();
     Q3BSP::Q3BSPModel *getModel() const;
 
@@ -83,7 +82,7 @@ private:
     size_t m_sOffset;
     std::vector<char> m_Data;
     Q3BSP::Q3BSPModel *m_pModel;
-    Q3BSP::Q3BSPZipArchive *m_pZipArchive;
+    ZipArchiveIOSystem *m_pZipArchive;
 };
 
 } // Namespace Assimp

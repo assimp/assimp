@@ -80,7 +80,13 @@ const aiImporterDesc X3DImporter::Description = {
 //const std::regex X3DImporter::pattern_nws(R"([^, \t\r\n]+)");
 //const std::regex X3DImporter::pattern_true(R"(^\s*(?:true|1)\s*$)", std::regex::icase);
 
-struct WordIterator: public std::iterator<std::input_iterator_tag, const char*> {
+struct WordIterator {
+    using iterator_category = std::input_iterator_tag;
+    using value_type = const char*;
+    using difference_type = ptrdiff_t;
+    using pointer = value_type*;
+    using reference = value_type&;
+
     static const char *whitespace;
     const char *start_, *end_;
     WordIterator(const char *start, const char *end): start_(start), end_(end) {

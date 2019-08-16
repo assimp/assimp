@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
+#include <assimp/ZipArchiveIOSystem.h>
 
 #include <string>
 #include <vector>
@@ -58,11 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include "D3MFOpcPackage.h"
-#ifdef ASSIMP_USE_HUNTER
-#  include <minizip/unzip.h>
-#else
-#  include <unzip.h>
-#endif
 #include <assimp/irrXMLWrapper.h>
 #include "3MFXmlTags.h"
 #include <assimp/fast_atof.h>
@@ -453,7 +449,7 @@ bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bo
         if ( nullptr == pIOHandler ) {
             return false;
         }
-        if ( !D3MF::D3MFOpcPackage::isZipArchive( pIOHandler, filename ) ) {
+        if ( !ZipArchiveIOSystem::isZipArchive( pIOHandler, filename ) ) {
             return false;
         }
         D3MF::D3MFOpcPackage opcPackage( pIOHandler, filename );

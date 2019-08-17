@@ -79,9 +79,13 @@ public:
 
     virtual bool binaryImporterTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine.glb",
-            aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+        Assimp::Exporter exporter;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine.glb", aiProcess_ValidateDataStructure);
+        EXPECT_NE( nullptr, scene );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine_out.glb" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine_out.gltf" ) );
+
+        return true;
     }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

@@ -173,7 +173,7 @@ SET (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VER
 SET (ASSIMP_SOVERSION 5)
 
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
-
+set(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2")
 if(NOT HUNTER_ENABLED)
   # Enable C++11 support globally
   set_property( GLOBAL PROPERTY CXX_STANDARD 11 )

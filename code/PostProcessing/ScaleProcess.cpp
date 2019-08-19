@@ -73,10 +73,13 @@ void ScaleProcess::SetupProperties( const Importer* pImp ) {
 }
 
 void ScaleProcess::Execute( aiScene* pScene ) {
-    if(mScale == 1.0f) return; // nothing to scale
+    if(mScale == 1.0f)  {
+        return; // nothing to scale
+    }
     
-    ai_assert(mScale != 0);
-    ai_assert(nullptr != pScene && nullptr != pScene->mRootNode);
+    ai_assert( mScale != 0 );
+    ai_assert( nullptr != pScene );
+    ai_assert( nullptr != pScene->mRootNode );
 
     if ( nullptr == pScene ) {
         return;

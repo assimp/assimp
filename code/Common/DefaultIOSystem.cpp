@@ -83,36 +83,36 @@ static std::string WideToUtf8(const wchar_t* in)
 
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
-bool DefaultIOSystem::Exists( const char* pFile) const
+bool DefaultIOSystem::Exists(const char* pFile) const
 {
 #if defined(_WIN32) && !defined(WindowsStore)
     struct __stat64 filestat;
-    if (0 != _wstat64(Utf8ToWide(pFile).c_str(), &filestat)) {
+    if (_wstat64(Utf8ToWide(pFile).c_str(), &filestat) != 0) {
         return false;
     }
 #else
-    FILE* file = ::fopen( pFile, "rb");
-    if( !file)
+    FILE* file = ::fopen(pFile, "rb");
+    if (!file)
         return false;
 
-    ::fclose( file);
+    ::fclose(file);
 #endif
     return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Open a new file with a given path.
-IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
+IOStream* DefaultIOSystem::Open(const char* strFile, const char* strMode)
 {
-    ai_assert(NULL != strFile);
-    ai_assert(NULL != strMode);
+    ai_assert(strFile != nullptr);
+    ai_assert(strMode != nullptr);
     FILE* file;
 #if defined(_WIN32) && !defined(WindowsStore)
     file = ::_wfopen(Utf8ToWide(strFile).c_str(), Utf8ToWide(strMode).c_str());
 #else
     file = ::fopen(strFile, strMode);
 #endif
-    if (nullptr == file)
+    if (!file)
         return nullptr;
 
     return new DefaultIOStream(file, strFile);
@@ -120,7 +120,7 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 
 // ------------------------------------------------------------------------------------------------
 // Closes the given file and releases all resources associated with it.
-void DefaultIOSystem::Close( IOStream* pFile)
+void DefaultIOSystem::Close(IOStream* pFile)
 {
     delete pFile;
 }
@@ -138,14 +138,14 @@ char DefaultIOSystem::getOsSeparator() const
 
 // ------------------------------------------------------------------------------------------------
 // IOSystem default implementation (ComparePaths isn't a pure virtual function)
-bool IOSystem::ComparePaths (const char* one, const char* second) const
+bool IOSystem::ComparePaths(const char* one, const char* second) const
 {
-    return !ASSIMP_stricmp(one,second);
+    return !ASSIMP_stricmp(one, second);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
-inline static std::string MakeAbsolutePath (const char* in)
+inline static std::string MakeAbsolutePath(const char* in)
 {
     ai_assert(in);
     std::string out;
@@ -182,21 +182,21 @@ inline static std::string MakeAbsolutePath (const char* in)
 
 // ------------------------------------------------------------------------------------------------
 // DefaultIOSystem's more specialized implementation
-bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
+bool DefaultIOSystem::ComparePaths(const char* one, const char* second) const
 {
     // chances are quite good both paths are formatted identically,
     // so we can hopefully return here already
-    if( !ASSIMP_stricmp(one,second) )
+    if (!ASSIMP_stricmp(one, second))
         return true;
 
     std::string temp1 = MakeAbsolutePath(one);
     std::string temp2 = MakeAbsolutePath(second);
 
-    return !ASSIMP_stricmp(temp1,temp2);
+    return !ASSIMP_stricmp(temp1, temp2);
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string DefaultIOSystem::fileName( const std::string &path )
+std::string DefaultIOSystem::fileName(const std::string& path)
 {
     std::string ret = path;
     std::size_t last = ret.find_last_of("\\/");
@@ -205,16 +205,16 @@ std::string DefaultIOSystem::fileName( const std::string &path )
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string DefaultIOSystem::completeBaseName( const std::string &path )
+std::string DefaultIOSystem::completeBaseName(const std::string& path)
 {
     std::string ret = fileName(path);
     std::size_t pos = ret.find_last_of('.');
-    if(pos != ret.npos) ret = ret.substr(0, pos);
+    if (pos != std::string::npos) ret = ret.substr(0, pos);
     return ret;
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string DefaultIOSystem::absolutePath( const std::string &path )
+std::string DefaultIOSystem::absolutePath(const std::string& path)
 {
     std::string ret = path;
     std::size_t last = ret.find_last_of("\\/");

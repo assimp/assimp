@@ -64,16 +64,18 @@ using namespace Assimp;
 #ifdef _WIN32
 static std::wstring Utf8ToWide(const char* in)
 {
-    int size = MultiByteToWideChar(CP_UTF8, 0, in, -1, nullptr, 0);
-    std::wstring out(size, L'\0');
+    size_t size = MultiByteToWideChar(CP_UTF8, 0, in, -1, nullptr, 0);
+    // size includes terminating null; std::wstring adds null automatically
+    std::wstring out(size - 1, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, in, -1, &out[0], size);
     return out;
 }
 
 static std::string WideToUtf8(const wchar_t* in)
 {
-    int size = WideCharToMultiByte(CP_UTF8, 0, in, -1, nullptr, 0, nullptr, nullptr);
-    std::string out(size, '\0');
+    size_t size = WideCharToMultiByte(CP_UTF8, 0, in, -1, nullptr, 0, nullptr, nullptr);
+    // size includes terminating null; std::string adds null automatically
+    std::string out(size - 1, '\0');
     WideCharToMultiByte(CP_UTF8, 0, in, -1, &out[0], size, nullptr, nullptr);
     return out;
 }

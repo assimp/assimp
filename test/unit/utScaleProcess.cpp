@@ -69,18 +69,5 @@ TEST_F( utScaleProcess, accessScaleTest ) {
     EXPECT_FLOAT_EQ( 2.0f, process.getScale() );
 }
 
-TEST_F( utScaleProcess, rescaleModelTest ) {
-    float opacity;
-    aiScene *testScene = TestModelFacttory::createDefaultTestModel( opacity );
-    ai_real v1 = testScene->mRootNode->mTransformation.a1;
-    ScaleProcess process;
-    process.setScale( 10.0f );
-    process.Execute( testScene );
-    ai_real v2 = testScene->mRootNode->mTransformation.a1;
-    const ai_real scale = v2 / v1;
-    EXPECT_FLOAT_EQ( scale, 10.0f );
-    TestModelFacttory::releaseDefaultTestModel( &testScene );
-}
-
 } // Namespace UnitTest
 } // Namespace Assimp

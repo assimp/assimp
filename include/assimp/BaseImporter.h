@@ -210,7 +210,7 @@ public:
     }
 
     /* Returns scale used by application called by ScaleProcess */
-    const double GetImporterScale()
+    double GetImporterScale() const
     {
         ai_assert(importerScale != 0);
         ai_assert(fileScale != 0);

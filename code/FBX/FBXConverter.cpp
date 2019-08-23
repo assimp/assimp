@@ -66,6 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <cstdint>
 
 
 namespace Assimp {
@@ -684,30 +685,37 @@ namespace Assimp {
             bool ok;
 
             aiMatrix4x4 chain[TransformationComp_MAXIMUM];
+
+            ai_assert(TransformationComp_MAXIMUM < 32);
+            std::uint32_t chainBits = 0;
+            // A node won't need a node chain if it only has these.
+            const std::uint32_t chainMaskSimple = (1 << TransformationComp_Translation) + (1 << TransformationComp_Scaling) + (1 << TransformationComp_Rotation);
+            // A node will need a node chain if it has any of these.
+            const std::uint32_t chainMaskComplex = ((1 << (TransformationComp_MAXIMUM)) - 1) - chainMaskSimple;
+
             std::fill_n(chain, static_cast<unsigned int>(TransformationComp_MAXIMUM), aiMatrix4x4());
 
             // generate transformation matrices for all the different transformation components
             const float zero_epsilon = 1e-6f;
             const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
-            bool is_complex = false;
 
             const aiVector3D& PreRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
             if (ok && PreRotation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_PreRotation);
 
                 GetRotationMatrix(Model::RotOrder::RotOrder_EulerXYZ, PreRotation, chain[TransformationComp_PreRotation]);
             }
 
             const aiVector3D& PostRotation = PropertyGet<aiVector3D>(props, "PostRotation", ok);
             if (ok && PostRotation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_PostRotation);
 
                 GetRotationMatrix(Model::RotOrder::RotOrder_EulerXYZ, PostRotation, chain[TransformationComp_PostRotation]);
             }
 
             const aiVector3D& RotationPivot = PropertyGet<aiVector3D>(props, "RotationPivot", ok);
             if (ok && RotationPivot.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_RotationPivot) | (1 << TransformationComp_RotationPivotInverse);
 
                 aiMatrix4x4::Translation(RotationPivot, chain[TransformationComp_RotationPivot]);
                 aiMatrix4x4::Translation(-RotationPivot, chain[TransformationComp_RotationPivotInverse]);
@@ -715,21 +723,21 @@ namespace Assimp {
 
             const aiVector3D& RotationOffset = PropertyGet<aiVector3D>(props, "RotationOffset", ok);
             if (ok && RotationOffset.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_RotationOffset);
 
                 aiMatrix4x4::Translation(RotationOffset, chain[TransformationComp_RotationOffset]);
             }
 
             const aiVector3D& ScalingOffset = PropertyGet<aiVector3D>(props, "ScalingOffset", ok);
             if (ok && ScalingOffset.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_ScalingOffset);
 
                 aiMatrix4x4::Translation(ScalingOffset, chain[TransformationComp_ScalingOffset]);
             }
 
             const aiVector3D& ScalingPivot = PropertyGet<aiVector3D>(props, "ScalingPivot", ok);
             if (ok && ScalingPivot.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_ScalingPivot) | (1 << TransformationComp_ScalingPivotInverse);
 
                 aiMatrix4x4::Translation(ScalingPivot, chain[TransformationComp_ScalingPivot]);
                 aiMatrix4x4::Translation(-ScalingPivot, chain[TransformationComp_ScalingPivotInverse]);
@@ -737,22 +745,28 @@ namespace Assimp {
 
             const aiVector3D& Translation = PropertyGet<aiVector3D>(props, "Lcl Translation", ok);
             if (ok && Translation.SquareLength() > zero_epsilon) {
+                chainBits = chainBits | (1 << TransformationComp_Translation);
+
                 aiMatrix4x4::Translation(Translation, chain[TransformationComp_Translation]);
             }
 
             const aiVector3D& Scaling = PropertyGet<aiVector3D>(props, "Lcl Scaling", ok);
             if (ok && (Scaling - all_ones).SquareLength() > zero_epsilon) {
+                chainBits = chainBits | (1 << TransformationComp_Scaling);
+
                 aiMatrix4x4::Scaling(Scaling, chain[TransformationComp_Scaling]);
             }
 
             const aiVector3D& Rotation = PropertyGet<aiVector3D>(props, "Lcl Rotation", ok);
             if (ok && Rotation.SquareLength() > zero_epsilon) {
+                chainBits = chainBits | (1 << TransformationComp_Rotation);
+
                 GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
             }
 
             const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>(props, "GeometricScaling", ok);
             if (ok && (GeometricScaling - all_ones).SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_GeometricScaling);
                 aiMatrix4x4::Scaling(GeometricScaling, chain[TransformationComp_GeometricScaling]);
                 aiVector3D GeometricScalingInverse = GeometricScaling;
                 bool canscale = true;
@@ -767,13 +781,14 @@ namespace Assimp {
                     }
                 }
                 if (canscale) {
+                    chainBits = chainBits | (1 << TransformationComp_GeometricScalingInverse);
                     aiMatrix4x4::Scaling(GeometricScalingInverse, chain[TransformationComp_GeometricScalingInverse]);
                 }
             }
 
             const aiVector3D& GeometricRotation = PropertyGet<aiVector3D>(props, "GeometricRotation", ok);
             if (ok && GeometricRotation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_GeometricRotation) | (1 << TransformationComp_GeometricRotationInverse);
                 GetRotationMatrix(rot, GeometricRotation, chain[TransformationComp_GeometricRotation]);
                 GetRotationMatrix(rot, GeometricRotation, chain[TransformationComp_GeometricRotationInverse]);
                 chain[TransformationComp_GeometricRotationInverse].Inverse();
@@ -781,7 +796,7 @@ namespace Assimp {
 
             const aiVector3D& GeometricTranslation = PropertyGet<aiVector3D>(props, "GeometricTranslation", ok);
             if (ok && GeometricTranslation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_GeometricTranslation) | (1 << TransformationComp_GeometricTranslationInverse);
                 aiMatrix4x4::Translation(GeometricTranslation, chain[TransformationComp_GeometricTranslation]);
                 aiMatrix4x4::Translation(-GeometricTranslation, chain[TransformationComp_GeometricTranslationInverse]);
             }
@@ -789,12 +804,12 @@ namespace Assimp {
             // is_complex needs to be consistent with NeedsComplexTransformationChain()
             // or the interplay between this code and the animation converter would
             // not be guaranteed.
-            ai_assert(NeedsComplexTransformationChain(model) == is_complex);
+            ai_assert(NeedsComplexTransformationChain(model) == ((chainBits & chainMaskComplex) != 0));
 
             // now, if we have more than just Translation, Scaling and Rotation,
             // we need to generate a full node chain to accommodate for assimp's
             // lack to express pivots and offsets.
-            if (is_complex && doc.Settings().preservePivots) {
+            if ((chainBits & chainMaskComplex) && doc.Settings().preservePivots) {
                 FBXImporter::LogInfo("generating full transformation chain for node: " + name);
 
                 // query the anim_chain_bits dictionary to find out which chain elements
@@ -807,7 +822,7 @@ namespace Assimp {
                 for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i, bit <<= 1) {
                     const TransformationComp comp = static_cast<TransformationComp>(i);
 
-                    if (chain[i].IsIdentity() && (anim_chain_bitmask & bit) == 0) {
+                    if ((chainBits & bit) == 0 && (anim_chain_bitmask & bit) == 0) {
                         continue;
                     }
 

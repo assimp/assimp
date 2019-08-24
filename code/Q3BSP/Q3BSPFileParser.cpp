@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Q3BSPFileParser.h"
 #include "Q3BSPFileData.h"
-#include "Q3BSPZipArchive.h"
 #include <vector>
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/ZipArchiveIOSystem.h>
 #include <assimp/ai_assert.h>
 
 namespace Assimp {
@@ -55,7 +55,7 @@ namespace Assimp {
 using namespace Q3BSP;
 
 // ------------------------------------------------------------------------------------------------
-Q3BSPFileParser::Q3BSPFileParser( const std::string &mapName, Q3BSPZipArchive *pZipArchive ) :
+Q3BSPFileParser::Q3BSPFileParser( const std::string &mapName, ZipArchiveIOSystem *pZipArchive ) :
     m_sOffset( 0 ),
     m_Data(),
     m_pModel(nullptr),
@@ -101,6 +101,7 @@ bool Q3BSPFileParser::readData( const std::string &rMapName ) {
     const size_t readSize = pMapFile->Read( &m_Data[0], sizeof( char ), size );
     if ( readSize != size ) {
         m_Data.clear();
+        m_pZipArchive->Close(pMapFile);
         return false;
     }
     m_pZipArchive->Close( pMapFile );

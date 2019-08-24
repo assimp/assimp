@@ -115,7 +115,6 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 
     if(tempVerts.empty()) {
         FBXImporter::LogWarn("encountered mesh with no vertices");
-        return;
     }
 
     std::vector<int> tempFaces;
@@ -123,7 +122,6 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 
     if(tempFaces.empty()) {
         FBXImporter::LogWarn("encountered mesh with no faces");
-        return;
     }
 
     m_vertices.reserve(tempFaces.size());

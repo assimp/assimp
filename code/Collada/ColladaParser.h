@@ -54,6 +54,7 @@
 
 namespace Assimp
 {
+    class ZipArchiveIOSystem;
 
     // ------------------------------------------------------------------------------------------
     /** Parser helper class for the Collada loader.
@@ -74,6 +75,9 @@ namespace Assimp
 
         /** Destructor */
         ~ColladaParser();
+
+        /** Attempts to read the ZAE manifest and returns the DAE to open */
+        static std::string ReadZaeManifest(ZipArchiveIOSystem &zip_archive);
 
         /** Reads the contents of the file */
         void ReadContents();
@@ -234,6 +238,9 @@ namespace Assimp
 
         // Processes bind_vertex_input and bind elements
         void ReadMaterialVertexInputBinding( Collada::SemanticMappingTable& tbl);
+
+        /** Reads embedded textures from a ZAE archive*/
+        void ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive);
 
     protected:
         /** Aborts the file reading with an exception */

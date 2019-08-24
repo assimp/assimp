@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/irrXMLWrapper.h>
 
 namespace Assimp {
+    class ZipArchiveIOSystem;
+
 namespace D3MF {
 
 using XmlReader = irr::io::IrrXMLReader ;
@@ -60,22 +62,19 @@ struct OpcPackageRelationship {
     std::string target;
 };
 
-class D3MFZipArchive;
-
 class D3MFOpcPackage {
 public:
     D3MFOpcPackage( IOSystem* pIOHandler, const std::string& rFile );
     ~D3MFOpcPackage();
     IOStream* RootStream() const;
     bool validate();
-    static bool isZipArchive( IOSystem* pIOHandler, const std::string& rFile );
 
 protected:
     std::string ReadPackageRootRelationship(IOStream* stream);
 
 private:
     IOStream* mRootStream;
-    std::unique_ptr<D3MFZipArchive> mZipArchive;
+    std::unique_ptr<ZipArchiveIOSystem> mZipArchive;
 };
 
 } // Namespace D3MF

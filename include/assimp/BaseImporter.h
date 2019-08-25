@@ -48,8 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <set>
+#include <map>
 #include <assimp/types.h>
 #include <assimp/ProgressHandler.hpp>
+#include <assimp/ai_assert.h>
 
 struct aiScene;
 struct aiImporterDesc;
@@ -161,14 +163,72 @@ public:
      *  some loader features. Importers must provide this information. */
     virtual const aiImporterDesc* GetInfo() const = 0;
 
+    /**
+     * Will be called only by scale process when scaling is requested.
+     */
+    virtual void SetFileScale(double scale)
+    {
+        fileScale = scale;
+    }
+
+    virtual double GetFileScale() const
+    {
+        return fileScale;
+    }
+
+    enum ImporterUnits {
+        M,
+        MM,
+        CM,
+        INCHES,
+        FEET
+    };
+
+    /**
+     * Assimp Importer
+     * unit conversions available 
+     * if you need another measurment unit add it below.
+     * it's currently defined in assimp that we prefer meters.
+     * */
+    std::map<ImporterUnits, double> importerUnits = {
+        {ImporterUnits::M, 1},
+        {ImporterUnits::CM, 0.01},
+        {ImporterUnits::MM, 0.001},
+        {ImporterUnits::INCHES, 0.0254},
+        {ImporterUnits::FEET, 0.3048}
+    };
+
+    virtual void SetApplicationUnits( const ImporterUnits& unit )
+    {
+        importerScale = importerUnits[unit];
+        applicationUnits = unit;
+    }
+
+    virtual const ImporterUnits& GetApplicationUnits()
+    {
+        return applicationUnits;
+    }
+
+    /* Returns scale used by application called by ScaleProcess */
+    double GetImporterScale() const
+    {
+        ai_assert(importerScale != 0);
+        ai_assert(fileScale != 0);
+        return importerScale * fileScale;
+    }
+
     // -------------------------------------------------------------------
     /** Called by #Importer::GetExtensionList for each loaded importer.
      *  Take the extension list contained in the structure returned by
      *  #GetInfo and insert all file extensions into the given set.
      *  @param extension set to collect file extensions in*/
     void GetExtensionList(std::set<std::string>& extensions);
+    
+protected:    
+    ImporterUnits applicationUnits = ImporterUnits::M;
+    double importerScale = 1.0;
+    double fileScale = 1.0;
 
-protected:
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure. The

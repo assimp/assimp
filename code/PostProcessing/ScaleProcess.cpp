@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+#include <assimp/BaseImporter.h>
 
 namespace Assimp {
 
@@ -69,7 +69,15 @@ bool ScaleProcess::IsActive( unsigned int pFlags ) const {
 }
 
 void ScaleProcess::SetupProperties( const Importer* pImp ) {
+    // User scaling
     mScale = pImp->GetPropertyFloat( AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, 1.0f );
+
+    // File scaling * Application Scaling
+    float importerScale = pImp->GetPropertyFloat( AI_CONFIG_APP_SCALE_KEY, 1.0f );
+
+    // apply scale to the scale 
+    // helps prevent bugs with backward compatibility for anyone using normal scaling.
+    mScale *= importerScale;
 }
 
 void ScaleProcess::Execute( aiScene* pScene ) {

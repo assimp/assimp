@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "metadata.h"
 
 #ifdef __cplusplus
+#  include <cstdlib>
 extern "C" {
 #endif
 

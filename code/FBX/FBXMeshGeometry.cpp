@@ -610,7 +610,7 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
     const std::string& ReferenceInformationType)
 {
     const size_t face_count = m_faces.size();
-    if(face_count <= 0)
+    if(face_count == 0)
     {
         return;
     }

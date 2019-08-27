@@ -610,8 +610,12 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
     const std::string& ReferenceInformationType)
 {
     const size_t face_count = m_faces.size();
-    ai_assert(face_count);
 
+    if(face_count == 0)
+    {
+        return;
+    }
+    
     // materials are handled separately. First of all, they are assigned per-face
     // and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
     // has a slightly different meaning for materials.

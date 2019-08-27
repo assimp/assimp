@@ -185,13 +185,8 @@ void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         // take the raw parse-tree and convert it to a FBX DOM
         Document doc(parser,settings);
 
-        FbxUnit unit(FbxUnit::cm);
-        if (settings.convertToMeters) {
-            unit = FbxUnit::m;
-        }
-
         // convert the FBX DOM to aiScene
-        ConvertToAssimpScene(pScene, doc, settings.removeEmptyBones, unit);
+        ConvertToAssimpScene(pScene, doc, settings.removeEmptyBones);
 
         // size relative to cm
         float size_relative_to_cm = doc.GlobalSettings().UnitScaleFactor();

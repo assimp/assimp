@@ -205,8 +205,8 @@ protected:
         ::Assimp::Exporter exporter;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
         EXPECT_NE( nullptr, scene );
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_test.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "objnomtl", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_nomtl_out.obj" ) );
         
         return true;
     }
@@ -263,7 +263,7 @@ TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
     ::Assimp::Exporter exporter;
-    EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test.obj" ) );
+    EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test_out.obj" ) );
 #endif // ASSIMP_BUILD_NO_EXPORT
 }
 
@@ -447,4 +447,38 @@ TEST_F(utObjImportExport, import_without_linend) {
     Assimp::Importer myImporter;
     const aiScene *scene = myImporter.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/box_without_lineending.obj", 0);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST_F(utObjImportExport, import_with_line_continuations) {
+    static const char *ObjModel =
+        "v -0.5 -0.5 0.5\n"
+        "v -0.5 \\\n"
+        "  -0.5 -0.5\n"
+        "v -0.5 \\\n"
+        "   0.5 \\\n"
+        "   -0.5\n"
+        "f 1 2 3\n";
+
+    Assimp::Importer myImporter;
+    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 3U);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 1U);
+
+    auto vertices = scene->mMeshes[0]->mVertices;
+    const float threshold = 0.0001f;
+
+    EXPECT_NEAR(vertices[0].x, -0.5f, threshold);
+    EXPECT_NEAR(vertices[0].y, -0.5f, threshold);
+    EXPECT_NEAR(vertices[0].z, 0.5f, threshold);
+
+    EXPECT_NEAR(vertices[1].x, -0.5f, threshold);
+    EXPECT_NEAR(vertices[1].y, -0.5f, threshold);
+    EXPECT_NEAR(vertices[1].z, -0.5f, threshold);
+
+    EXPECT_NEAR(vertices[2].x, -0.5f, threshold);
+    EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
+    EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
 }

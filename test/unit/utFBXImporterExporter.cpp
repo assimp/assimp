@@ -70,10 +70,10 @@ TEST_F( utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
-    EXPECT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mNumMeshes, 1u);
     aiMesh* mesh = scene->mMeshes[0];
-    EXPECT_EQ(mesh->mNumFaces, 12);
-    EXPECT_EQ(mesh->mNumVertices, 36);
+    EXPECT_EQ(mesh->mNumFaces, 12u);
+    EXPECT_EQ(mesh->mNumVertices, 36u);
 }
 
 TEST_F(utFBXImporterExporter, importCubesWithNoNames) {
@@ -85,13 +85,13 @@ TEST_F(utFBXImporterExporter, importCubesWithNoNames) {
     const auto root = scene->mRootNode;
     ASSERT_STREQ(root->mName.C_Str(), "RootNode");
     ASSERT_TRUE(root->mChildren);
-    ASSERT_EQ(root->mNumChildren, 2);
+    ASSERT_EQ(root->mNumChildren, 2u);
 
     const auto child0 = root->mChildren[0];
     ASSERT_TRUE(child0);
     ASSERT_STREQ(child0->mName.C_Str(), "RootNode001");
     ASSERT_TRUE(child0->mChildren);
-    ASSERT_EQ(child0->mNumChildren, 1);
+    ASSERT_EQ(child0->mNumChildren, 1u);
 
     const auto child00 = child0->mChildren[0];
     ASSERT_TRUE(child00);
@@ -101,7 +101,7 @@ TEST_F(utFBXImporterExporter, importCubesWithNoNames) {
     ASSERT_TRUE(child1);
     ASSERT_STREQ(child1->mName.C_Str(), "RootNode002");
     ASSERT_TRUE(child1->mChildren);
-    ASSERT_EQ(child1->mNumChildren, 1);
+    ASSERT_EQ(child1->mNumChildren, 1u);
 
     const auto child10 = child1->mChildren[0];
     ASSERT_TRUE(child10);
@@ -117,13 +117,13 @@ TEST_F(utFBXImporterExporter, importCubesWithUnicodeDuplicatedNames) {
     const auto root = scene->mRootNode;
     ASSERT_STREQ(root->mName.C_Str(), "RootNode");
     ASSERT_TRUE(root->mChildren);
-    ASSERT_EQ(root->mNumChildren, 2);
+    ASSERT_EQ(root->mNumChildren, 2u);
 
     const auto child0 = root->mChildren[0];
     ASSERT_TRUE(child0);
     ASSERT_STREQ(child0->mName.C_Str(), "Cube2");
     ASSERT_TRUE(child0->mChildren);
-    ASSERT_EQ(child0->mNumChildren, 1);
+    ASSERT_EQ(child0->mNumChildren, 1u);
 
     const auto child00 = child0->mChildren[0];
     ASSERT_TRUE(child00);
@@ -133,7 +133,7 @@ TEST_F(utFBXImporterExporter, importCubesWithUnicodeDuplicatedNames) {
     ASSERT_TRUE(child1);
     ASSERT_STREQ(child1->mName.C_Str(), "Cube3");
     ASSERT_TRUE(child1->mChildren);
-    ASSERT_EQ(child1->mNumChildren, 1);
+    ASSERT_EQ(child1->mNumChildren, 1u);
 
     const auto child10 = child1->mChildren[0];
     ASSERT_TRUE(child10);
@@ -149,13 +149,13 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
     const auto root = scene->mRootNode;
     ASSERT_STREQ(root->mName.C_Str(), "RootNode");
     ASSERT_TRUE(root->mChildren);
-    ASSERT_EQ(root->mNumChildren, 2);
+    ASSERT_EQ(root->mNumChildren, 2u);
 
     const auto child0 = root->mChildren[0];
     ASSERT_TRUE(child0);
     ASSERT_STREQ(child0->mName.C_Str(), "Cube2");
     ASSERT_TRUE(child0->mChildren);
-    ASSERT_EQ(child0->mNumChildren, 1);
+    ASSERT_EQ(child0->mNumChildren, 1u);
 
     const auto child00 = child0->mChildren[0];
     ASSERT_TRUE(child00);
@@ -177,35 +177,44 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
         "Cube1001_$AssimpFbx$_ScalingPivotInverse",
         "Cube1001"
     };
-    for (size_t i = 0; i < chain_length; ++i)
-    {
+    for (size_t i = 0; i < chain_length; ++i) {
         ASSERT_TRUE(parent->mChildren);
-        ASSERT_EQ(parent->mNumChildren, 1);
+        ASSERT_EQ(parent->mNumChildren, 1u);
         auto node = parent->mChildren[0];
         ASSERT_TRUE(node);
         ASSERT_STREQ(node->mName.C_Str(), chainStr[i]);
         parent = node;
     }
-    ASSERT_EQ(0, parent->mNumChildren) << "Leaf node";
+    ASSERT_EQ(0u, parent->mNumChildren) << "Leaf node";
+}
+
+TEST_F(utFBXImporterExporter, importCloseToIdentityTransforms) {
+    Assimp::Importer importer;
+    // This was asserting in FBXConverter.cpp because the transforms appeared to be the identity by one test, but not by another.
+    // This asset should now load successfully.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/close_to_identity_transforms.fbx", aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(scene);
 }
 
 TEST_F( utFBXImporterExporter, importPhongMaterial ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/phong_cube.fbx", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
-    EXPECT_EQ( (unsigned int)1, scene->mNumMaterials );
+    EXPECT_EQ( 1u, scene->mNumMaterials );
     const aiMaterial *mat = scene->mMaterials[0];
     EXPECT_NE( nullptr, mat );
-    float f; aiColor3D c;
+    float f;
+    aiColor3D c;
+
     // phong_cube.fbx has all properties defined
     EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_DIFFUSE, c), aiReturn_SUCCESS );
     EXPECT_EQ( c, aiColor3D(0.5, 0.25, 0.25) );
     EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_SPECULAR, c), aiReturn_SUCCESS );
     EXPECT_EQ( c, aiColor3D(0.25, 0.25, 0.5) );
     EXPECT_EQ( mat->Get(AI_MATKEY_SHININESS_STRENGTH, f), aiReturn_SUCCESS );
-    EXPECT_EQ( f, 0.5 );
+    EXPECT_EQ( f, 0.5f );
     EXPECT_EQ( mat->Get(AI_MATKEY_SHININESS, f), aiReturn_SUCCESS );
-    EXPECT_EQ( f, 10.0 );
+    EXPECT_EQ( f, 10.0f );
     EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_AMBIENT, c), aiReturn_SUCCESS );
     EXPECT_EQ( c, aiColor3D(0.125, 0.25, 0.25) );
     EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_EMISSIVE, c), aiReturn_SUCCESS );
@@ -213,7 +222,7 @@ TEST_F( utFBXImporterExporter, importPhongMaterial ) {
     EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_TRANSPARENT, c), aiReturn_SUCCESS );
     EXPECT_EQ( c, aiColor3D(0.75, 0.5, 0.25) );
     EXPECT_EQ( mat->Get(AI_MATKEY_OPACITY, f), aiReturn_SUCCESS );
-    EXPECT_EQ( f, 0.5 );
+    EXPECT_EQ( f, 0.5f );
 }
 
 TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
@@ -234,7 +243,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_ascii/box.FBX", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(1, scene->mNumMaterials);
+    EXPECT_EQ(1u, scene->mNumMaterials);
     aiMaterial *mat = scene->mMaterials[0];
     ASSERT_NE(nullptr, mat);
 
@@ -243,7 +252,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {
     EXPECT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
     ASSERT_STREQ(path.C_Str(), "..\\..\\..\\Desktop\\uv_test.png");
 
-    ASSERT_EQ(1, scene->mNumTextures);
+    ASSERT_EQ(1u, scene->mNumTextures);
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(439176u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
 }
@@ -254,7 +263,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_ascii/box_embedded_texture_fragmented.fbx", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
-    EXPECT_EQ(1, scene->mNumMaterials);
+    EXPECT_EQ(1u, scene->mNumMaterials);
     aiMaterial *mat = scene->mMaterials[0];
     ASSERT_NE(nullptr, mat);
 
@@ -263,7 +272,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
     ASSERT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
     ASSERT_STREQ(path.C_Str(), "paper.png");
 
-    ASSERT_EQ(1, scene->mNumTextures);
+    ASSERT_EQ(1u, scene->mNumTextures);
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(968029u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
 }

@@ -189,8 +189,12 @@ void FBXImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         if (settings.convertToMeters) {
             unit = FbxUnit::m;
         }
+
         // convert the FBX DOM to aiScene
-        ConvertToAssimpScene(pScene,doc, settings.removeEmptyBones, unit);
+        ConvertToAssimpScene(pScene, doc, settings.removeEmptyBones, unit);
+        
+        // units is relative to CM :) we need it in meters for assimp
+        SetFileScale( doc.GlobalSettings().UnitScaleFactor() * 0.01f);
 
         std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
     }

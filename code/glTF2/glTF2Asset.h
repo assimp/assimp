@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness full
  *   KHR_materials_unlit full
+ *   KHR_lights_punctual full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -668,6 +669,28 @@ namespace glTF2
         void Read(Value& obj, Asset& r);
     };
 
+    //! A light (from KHR_lights_punctual extension)
+    struct Light : public Object
+    {
+        enum Type
+        {
+            Directional,
+            Point,
+            Spot
+        };
+
+        Type type;
+
+        vec3 color;
+        float intensity;
+        Nullable<float> range;
+
+        float innerConeAngle;
+        float outerConeAngle;
+
+        Light() {}
+        void Read(Value& obj, Asset& r);
+    };
 
     //! Image data used to create a texture.
     struct Image : public Object
@@ -819,6 +842,7 @@ namespace glTF2
         Nullable<vec3> scale;
 
         Ref<Camera> camera;
+        Ref<Light>  light;
 
         std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
         Ref<Skin> skin;                           //!< The ID of the skin referenced by this node.
@@ -1050,6 +1074,7 @@ namespace glTF2
         {
             bool KHR_materials_pbrSpecularGlossiness;
             bool KHR_materials_unlit;
+            bool KHR_lights_punctual;
 
         } extensionsUsed;
 
@@ -1063,6 +1088,7 @@ namespace glTF2
         LazyDict<Buffer>      buffers;
         LazyDict<BufferView>  bufferViews;
         LazyDict<Camera>      cameras;
+        LazyDict<Light>       lights;
         LazyDict<Image>       images;
         LazyDict<Material>    materials;
         LazyDict<Mesh>        meshes;
@@ -1083,6 +1109,7 @@ namespace glTF2
             , buffers       (*this, "buffers")
             , bufferViews   (*this, "bufferViews")
             , cameras       (*this, "cameras")
+            , lights        (*this, "lights", "KHR_lights_punctual")
             , images        (*this, "images")
             , materials     (*this, "materials")
             , meshes        (*this, "meshes")

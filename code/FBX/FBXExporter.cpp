@@ -1219,6 +1219,16 @@ void FBXExporter::WriteObjects ()
         layer.AddChild(le);
         layer.Dump(outstream, binary, indent);
 
+        for(unsigned int lr = 1; lr < m->GetNumUVChannels(); ++ lr)
+        {
+            FBX::Node layerExtra("Layer", int32_t(1));
+            layerExtra.AddChild("Version", int32_t(100));
+            FBX::Node leExtra("LayerElement");
+            leExtra.AddChild("Type", "LayerElementUV");
+            leExtra.AddChild("TypedIndex", int32_t(lr));
+            layerExtra.AddChild(leExtra);
+            layerExtra.Dump(outstream, binary, indent);
+        }
         // finish the node record
         indent = 1;
         n.End(outstream, binary, indent, true);
@@ -1617,6 +1627,17 @@ void FBXExporter::WriteObjects ()
     // at the same time we can build a list of all the skeleton nodes,
     // which will be used later to mark them as type "limbNode".
     std::unordered_set<const aiNode*> limbnodes;
+    
+    //actual bone nodes in fbx, without parenting-up
+    std::unordered_set<std::string> setAllBoneNamesInScene;
+    for(unsigned int m = 0; m < mScene->mNumMeshes; ++ m)
+    {
+        aiMesh* pMesh = mScene->mMeshes[m];
+        for(unsigned int b = 0; b < pMesh->mNumBones; ++ b)
+            setAllBoneNamesInScene.insert(pMesh->mBones[b]->mName.data);
+    }
+    aiMatrix4x4 mxTransIdentity;
+    
     // and a map of nodes by bone name, as finding them is annoying.
     std::map<std::string,aiNode*> node_by_bone;
     for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
@@ -1660,6 +1681,11 @@ void FBXExporter::WriteObjects ()
                 if (node_name.find(MAGIC_NODE_TAG) != std::string::npos) {
                     continue;
                 }
+                //not a bone in scene && no effect in transform
+                if(setAllBoneNamesInScene.find(node_name)==setAllBoneNamesInScene.end()
+                   && parent->mTransformation == mxTransIdentity) {
+                        continue;
+                }
                 // otherwise check if this is the root of the skeleton
                 bool end = false;
                 // is the mesh part of this node?
@@ -1680,8 +1706,7 @@ void FBXExporter::WriteObjects ()
                     }
                     if (end) { break; }
                 }
-                limbnodes.insert(parent);
-                skeleton.insert(parent);
+                
                 // if it was the skeleton root we can finish here
                 if (end) { break; }
             }
@@ -1822,41 +1847,10 @@ void FBXExporter::WriteObjects ()
             inverse_bone_xform.Inverse();
             aiMatrix4x4 tr = inverse_bone_xform * mesh_xform;
 
-            // this should be the same as the bone's mOffsetMatrix.
-            // if it's not the same, the skeleton isn't in the bind pose.
-            const float epsilon = 1e-4f; // some error is to be expected
-            bool bone_xform_okay = true;
-            if (b && ! tr.Equal(b->mOffsetMatrix, epsilon)) {
-                not_in_bind_pose.insert(b);
-                bone_xform_okay = false;
-            }
+            sdnode.AddChild("Transform", tr);
 
-            // if we have a bone we should use the mOffsetMatrix,
-            // otherwise try to just use the calculated transform.
-            if (b) {
-                sdnode.AddChild("Transform", b->mOffsetMatrix);
-            } else {
-                sdnode.AddChild("Transform", tr);
-            }
-            // note: it doesn't matter if we mix these,
-            // because if they disagree we'll throw an exception later.
-            // it could be that the skeleton is not in the bone pose
-            // but all bones are still defined,
-            // in which case this would use the mOffsetMatrix for everything
-            // and a correct skeleton would still be output.
 
-            // transformlink should be the position of the bone in world space.
-            // if the bone is in the bind pose (or nonexistent),
-            // we can just use the matrix we already calculated
-            if (bone_xform_okay) {
-                sdnode.AddChild("TransformLink", bone_xform);
-            // otherwise we can only work it out using the mesh position.
-            } else {
-                aiMatrix4x4 trl = b->mOffsetMatrix;
-                trl.Inverse();
-                trl *= mesh_xform;
-                sdnode.AddChild("TransformLink", trl);
-            }
+            sdnode.AddChild("TransformLink", bone_xform);
             // note: this means we ALWAYS rely on the mesh node transform
             // being unchanged from the time the skeleton was bound.
             // there's not really any way around this at the moment.

@@ -202,6 +202,11 @@ namespace glTF2 {
 
     }
 
+    inline void Write(Value& /*obj*/, Light& /*c*/, AssetWriter& /*w*/)
+    {
+
+    }
+
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
         if (img.bufferView) {

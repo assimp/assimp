@@ -104,6 +104,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/Exporter.hpp
   ${HEADER_PATH}/DefaultIOStream.h
   ${HEADER_PATH}/DefaultIOSystem.h
+  ${HEADER_PATH}/ZipArchiveIOSystem.h
   ${HEADER_PATH}/SceneCombiner.h
   ${HEADER_PATH}/fast_atof.h
   ${HEADER_PATH}/qnan.h
@@ -172,6 +173,7 @@ SET( Common_SRCS
   Common/DefaultProgressHandler.h
   Common/DefaultIOStream.cpp
   Common/DefaultIOSystem.cpp
+  Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h
   Common/Importer.cpp
   Common/IFF.h
@@ -688,8 +690,6 @@ ADD_ASSIMP_IMPORTER( Q3BSP
   Q3BSP/Q3BSPFileParser.cpp
   Q3BSP/Q3BSPFileImporter.h
   Q3BSP/Q3BSPFileImporter.cpp
-  Q3BSP/Q3BSPZipArchive.h
-  Q3BSP/Q3BSPZipArchive.cpp
 )
 
 ADD_ASSIMP_IMPORTER( RAW
@@ -810,7 +810,7 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDVmdParser.h
 )
 
-ADD_ASSIMP_EXPORTER( Assjson
+ADD_ASSIMP_EXPORTER( ASSJSON
   Assjson/cencode.c
   Assjson/cencode.h
   Assjson/json_exporter.cpp

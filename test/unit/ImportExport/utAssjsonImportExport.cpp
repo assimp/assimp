@@ -57,7 +57,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
 
         Exporter exporter;
-        aiReturn res = exporter.Export(scene, "json", "./spider_test.json");
+        aiReturn res = exporter.Export(scene, "assjson", "./spider_test.json");
         return aiReturn_SUCCESS == res;
     }
 };

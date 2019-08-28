@@ -1067,6 +1067,39 @@ inline void Camera::Read(Value& obj, Asset& /*r*/)
     }
 }
 
+inline void Light::Read(Value& obj, Asset& /*r*/)
+{
+#ifndef M_PI
+    const float M_PI = 3.14159265358979323846f;
+#endif
+
+    std::string type_string;
+    ReadMember(obj, "type", type_string);
+    if (type_string == "directional")
+        type = Light::Directional;
+    else if (type_string == "point")
+        type = Light::Point;
+    else
+        type = Light::Spot;
+
+    name = MemberOrDefault(obj, "name", "");
+
+    SetVector(color, vec3{ 1.0f, 1.0f, 1.0f });
+    ReadMember(obj, "color", color);
+
+    intensity = MemberOrDefault(obj, "intensity", 1.0f);
+
+    ReadMember(obj, "range", range);
+
+    if (type == Light::Spot)
+    {
+        Value* spot = FindObject(obj, "spot");
+        if (!spot) throw DeadlyImportError("GLTF: Light missing its spot parameters");
+        innerConeAngle = MemberOrDefault(*spot, "innerConeAngle", 0.0f);
+        outerConeAngle = MemberOrDefault(*spot, "outerConeAngle", M_PI / 4.0f);
+    }
+}
+
 inline void Node::Read(Value& obj, Asset& r)
 {
 
@@ -1109,6 +1142,19 @@ inline void Node::Read(Value& obj, Asset& r)
         this->camera = r.cameras.Retrieve(camera->GetUint());
         if (this->camera)
             this->camera->id = this->id;
+    }
+
+    if (Value* extensions = FindObject(obj, "extensions")) {
+        if (r.extensionsUsed.KHR_lights_punctual) {
+
+            if (Value* ext = FindObject(*extensions, "KHR_lights_punctual")) {
+                if (Value* light = FindUInt(*ext, "light")) {
+                    this->light = r.lights.Retrieve(light->GetUint());
+                    if (this->light)
+                        this->light->id = this->id;
+                }
+            }
+        }
     }
 }
 
@@ -1421,6 +1467,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
 
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
     CHECK_EXT(KHR_materials_unlit);
+    CHECK_EXT(KHR_lights_punctual);
 
     #undef CHECK_EXT
 }

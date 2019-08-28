@@ -580,15 +580,11 @@ struct Image
 {
     std::string mFileName;
 
-    /** If image file name is zero, embedded image data
-     */
+    /** Embedded image data */
     std::vector<uint8_t> mImageData;
 
-    /** If image file name is zero, file format of
-     *  embedded image data.
-     */
+    /** File format hint ofembedded image data */
     std::string mEmbeddedFormat;
-
 };
 
 /** An animation channel. */

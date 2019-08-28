@@ -1041,7 +1041,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.rotation.isPresent) {
         anim->mNumRotationKeys = 1;
-        anim->mRotationKeys = new aiQuatKey();
+        anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
         anim->mRotationKeys->mTime = 0.f;
         anim->mRotationKeys->mValue.x = node.rotation.value[0];
         anim->mRotationKeys->mValue.y = node.rotation.value[1];

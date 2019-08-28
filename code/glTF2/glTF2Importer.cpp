@@ -1064,7 +1064,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.scale.isPresent) {
         anim->mNumScalingKeys = 1;
-        anim->mScalingKeys = new aiVectorKey();
+        anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
         anim->mScalingKeys->mTime = 0.f;
         anim->mScalingKeys->mValue.x = node.scale.value[0];
         anim->mScalingKeys->mValue.y = node.scale.value[1];

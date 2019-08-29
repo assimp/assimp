@@ -500,7 +500,7 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D()
 		if(!def.empty()) ne->ID = def;
 
 		// convert vec2 to vec3
-		for(std::list<aiVector2D>::iterator it2 = vertices.begin(); it2 != vertices.end(); it2++)
+		for(std::list<aiVector2D>::iterator it2 = vertices.begin(); it2 != vertices.end(); ++it2)
 		{
 			((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices.push_back(aiVector3D(it2->x, it2->y, 0));
 		}

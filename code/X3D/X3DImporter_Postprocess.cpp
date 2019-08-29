@@ -686,7 +686,7 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 		for(size_t i = 0; i < pSceneNode.mNumChildren; i++) pSceneNode.mChildren[i] = *it++;
 	}
 
-	if(SceneNode_Mesh.size() > 0)
+	if(!SceneNode_Mesh.empty())
 	{
 		std::list<unsigned int>::const_iterator it = SceneNode_Mesh.begin();
 

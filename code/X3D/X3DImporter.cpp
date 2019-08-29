@@ -182,7 +182,7 @@ bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode,
 	}// if((pStartNode->Type() == pType) && (pStartNode->ID() == pID))
 
 	// Check childs of pStartNode.
-	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Child.begin(); ch_it != pStartNode->Child.end(); ch_it++)
+	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Child.begin(); ch_it != pStartNode->Child.end(); ++ch_it)
 	{
 		found = FindNodeElement_FromNode(*ch_it, pID, pType, pElement);
         if ( found )
@@ -687,7 +687,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec2f(const int pAttrIdx, std::ve
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-        for ( std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        for ( std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
         {
             pValue.push_back( *it );
         }
@@ -823,7 +823,7 @@ void X3DImporter::GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>&
     std::list<aiVector3D>::const_iterator pit = pPoint.begin();
     std::list<aiVector3D>::const_iterator pit_last = pPoint.end();
 
-	pit_last--;
+	--pit_last;
 
     if ( pPoint.size() < 2 )
     {
@@ -1031,7 +1031,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 
 	// copy list to array because we are need indexed access to colors.
 	col_arr_copy.reserve(pColors.size());
-    for ( std::list<aiColor4D>::const_iterator it = pColors.begin(); it != pColors.end(); it++ )
+    for ( std::list<aiColor4D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it )
     {
         col_arr_copy.push_back( *it );
     }
@@ -1291,7 +1291,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVect
 
 	// copy list to array because we are need convert aiVector2D to aiVector3D and also get indexed access as a bonus.
 	tc_arr_copy.reserve(pTexCoords.size());
-    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); it++ )
+    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it )
     {
         tc_arr_copy.push_back( aiVector3D( ( *it ).x, ( *it ).y, 0 ) );
     }

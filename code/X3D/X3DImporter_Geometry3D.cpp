@@ -157,7 +157,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		}
 
 		// copy data from temp array
-		for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); it++) ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it);
+		for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it) ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it);
 
 		((CX3DImporter_NodeElement_Geometry3D*)ne)->Solid = solid;
 		((CX3DImporter_NodeElement_Geometry3D*)ne)->NumIndices = 3;
@@ -336,7 +336,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 					aiVector3D tvec(xSpacing * xi, *he_it, zSpacing * zi);
 
 					grid_alias.Vertices.push_back(tvec);
-					he_it++;
+					++he_it;
 				}
 			}
 		}// END: create grid vertices list
@@ -977,7 +977,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 
 		StandardShapes::MakeSphere(tess, tlist);
 		// copy data from temp array and apply scale
-		for(std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); it++)
+		for(std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it)
 		{
 			((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it * radius);
 		}

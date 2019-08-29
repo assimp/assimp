@@ -66,7 +66,7 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
     aiColor4D tcol;
 
 	// Check if stored data are supported.
-	if(Composition.size() != 0)
+	if(!Composition.empty())
 	{
 		throw DeadlyImportError("IME. GetColor for composition");
 	}

@@ -340,7 +340,7 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
 			}
 			else
 			{
-				it++;
+				++it;
 			}
 		}
 

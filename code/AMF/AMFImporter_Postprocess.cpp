@@ -346,7 +346,7 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
 
 		if(face_list_cur.size() > 0) pOutputList_Separated.push_back(face_list_cur);
 
-	} while(pInputList.size() > 0);
+	} while(!pInputList.empty());
 }
 
 void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeElement_Metadata*>& metadataList, aiNode& sceneNode) const
@@ -907,7 +907,7 @@ nl_clean_loop:
 	//
 	//
 	// Nodes
-	if(node_list.size() > 0)
+	if(!node_list.empty())
 	{
 		std::list<aiNode*>::const_iterator nl_it = node_list.begin();
 

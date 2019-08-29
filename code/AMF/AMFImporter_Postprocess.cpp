@@ -344,7 +344,7 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
 			}
 		}
 
-		if(face_list_cur.size() > 0) pOutputList_Separated.push_back(face_list_cur);
+		if(!face_list_cur.empty()) pOutputList_Separated.push_back(face_list_cur);
 
 	} while(!pInputList.empty());
 }
@@ -787,7 +787,7 @@ std::list<aiNode*> ch_node;
 	}// for(const CAMFImporter_NodeElement* ne: pConstellation.Child)
 
 	// copy found aiNode's as children
-	if(ch_node.size() == 0) throw DeadlyImportError("<constellation> must have at least one <instance>.");
+	if(ch_node.empty()) throw DeadlyImportError("<constellation> must have at least one <instance>.");
 
 	size_t ch_idx = 0;
 

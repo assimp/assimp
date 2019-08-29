@@ -688,7 +688,7 @@ aiMesh* ColladaLoader::CreateMesh(const ColladaParser& pParser, const Collada::M
     Collada::MorphMethod method = Collada::Normalized;
 
     for (std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin();
-        it != pParser.mControllerLibrary.end(); it++) {
+        it != pParser.mControllerLibrary.end(); ++it) {
         const Collada::Controller &c = it->second;
         const Collada::Mesh* baseMesh = pParser.ResolveLibraryReference(pParser.mMeshLibrary, c.mMeshId);
 

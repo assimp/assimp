@@ -321,7 +321,7 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
     };
 
 	pOutputList_Separated.clear();
-	if(pInputList.size() == 0) return;
+	if(pInputList.empty()) return;
 
 	do
 	{
@@ -712,7 +712,7 @@ std::list<unsigned int> mesh_idx;
 	}// for(const CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
 
 	// if meshes was created then assign new indices with current aiNode
-	if(mesh_idx.size() > 0)
+	if(!mesh_idx.empty())
 	{
 		std::list<unsigned int>::const_iterator mit = mesh_idx.begin();
 
@@ -924,7 +924,7 @@ nl_clean_loop:
 
 	//
 	// Meshes
-	if(mesh_list.size() > 0)
+	if(!mesh_list.empty())
 	{
 		std::list<aiMesh*>::const_iterator ml_it = mesh_list.begin();
 

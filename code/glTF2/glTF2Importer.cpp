@@ -1130,6 +1130,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
 
         // Use the latest keyframe for the duration of the animation
         double maxDuration = 0;
+        unsigned int maxNumberOfKeys = 0;
         for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
             auto chan = ai_anim->mChannels[j];
             if (chan->mNumPositionKeys) {
@@ -1137,21 +1138,25 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
                 if (lastPosKey.mTime > maxDuration) {
                     maxDuration = lastPosKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumPositionKeys);
             }
             if (chan->mNumRotationKeys) {
                 auto lastRotKey = chan->mRotationKeys[chan->mNumRotationKeys - 1];
                 if (lastRotKey.mTime > maxDuration) {
                     maxDuration = lastRotKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumRotationKeys);
             }
             if (chan->mNumScalingKeys) {
                 auto lastScaleKey = chan->mScalingKeys[chan->mNumScalingKeys - 1];
                 if (lastScaleKey.mTime > maxDuration) {
                     maxDuration = lastScaleKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumScalingKeys);
             }
         }
         ai_anim->mDuration = maxDuration;
+        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? (maxNumberOfKeys / (maxDuration/1000)) : 30;
 
         mScene->mAnimations[i] = ai_anim;
     }

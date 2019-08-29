@@ -273,7 +273,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		std::vector<aiVector3D> tarr;
 
 		tarr.reserve(tnemesh.Vertices.size());
-		for(std::list<aiVector3D>::iterator it = tnemesh.Vertices.begin(); it != tnemesh.Vertices.end(); it++) tarr.push_back(*it);
+		for(std::list<aiVector3D>::iterator it = tnemesh.Vertices.begin(); it != tnemesh.Vertices.end(); ++it) tarr.push_back(*it);
 
 		*pMesh = StandardShapes::MakeMesh(tarr, static_cast<unsigned int>(tnemesh.NumIndices));// create mesh from vertices using Assimp help.
 
@@ -642,13 +642,13 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to chosen node.
 
 				chit_end = chit_begin;
-				chit_end++;// point end iterator to next element after chosen node.
+				++chit_end;// point end iterator to next element after chosen node.
 			}
 		}// if(tne_group.UseChoice)
 	}// if(pNodeElement.Type == CX3DImporter_NodeElement::ENET_Group)
 
 	// Reserve memory for fast access and check children.
-	for(std::list<CX3DImporter_NodeElement*>::const_iterator it = chit_begin; it != chit_end; it++)
+	for(std::list<CX3DImporter_NodeElement*>::const_iterator it = chit_begin; it != chit_end; ++it)
 	{// in this loop we do not read metadata because it's already read at begin.
 		if((*it)->Type == CX3DImporter_NodeElement::ENET_Group)
 		{
@@ -706,7 +706,7 @@ void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& p
     CX3DImporter_NodeElement::EType mesh_type = CX3DImporter_NodeElement::ENET_Invalid;
     unsigned int mat_ind = 0;
 
-	for(std::list<CX3DImporter_NodeElement*>::const_iterator it = pShapeNodeElement.Child.begin(); it != pShapeNodeElement.Child.end(); it++)
+	for(std::list<CX3DImporter_NodeElement*>::const_iterator it = pShapeNodeElement.Child.begin(); it != pShapeNodeElement.Child.end(); ++it)
 	{
 		if(PostprocessHelper_ElementIsMesh((*it)->Type))
 		{

@@ -855,7 +855,7 @@ void X3DImporter::GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int
 		{
 			std::list<int32_t>::const_iterator plit_next;
 
-			plit_next = ++plit, plit_next;
+			plit_next = plit, ++plit_next;
 			pLineCoordIdx.push_back(*plit);// second point of previous line.
 			pLineCoordIdx.push_back(-1);// delimiter
 			if((*plit_next == (-1)) || (plit_next == pPolylineCoordIdx.end())) break;// current polyline is finished

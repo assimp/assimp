@@ -650,7 +650,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol4f(const int pAttrIdx, std::ve
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-        for ( std::list<aiColor4D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        for ( std::list<aiColor4D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
         {
             pValue.push_back( *it );
         }
@@ -855,7 +855,7 @@ void X3DImporter::GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int
 		{
 			std::list<int32_t>::const_iterator plit_next;
 
-			plit_next = plit, plit_next++;
+			plit_next = ++plit, plit_next;
 			pLineCoordIdx.push_back(*plit);// second point of previous line.
 			pLineCoordIdx.push_back(-1);// delimiter
 			if((*plit_next == (-1)) || (plit_next == pPolylineCoordIdx.end())) break;// current polyline is finished
@@ -1048,7 +1048,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
-			for(std::vector<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); colidx_it++, coordidx_it++)
+			for(std::vector<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); ++colidx_it, ++coordidx_it)
 			{
                 if ( *colidx_it == ( -1 ) )
                 {
@@ -1134,7 +1134,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_
 
 	// copy list to array because we are need indexed access to normals.
 	norm_arr_copy.reserve(pNormals.size());
-    for ( std::list<aiVector3D>::const_iterator it = pNormals.begin(); it != pNormals.end(); it++ )
+    for ( std::list<aiVector3D>::const_iterator it = pNormals.begin(); it != pNormals.end(); ++it )
     {
         norm_arr_copy.push_back( *it );
     }
@@ -1147,7 +1147,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_
 			if(pNormalIdx.size() != pCoordIdx.size()) throw DeadlyImportError("Normals and Coords inidces count must be equal.");
 
 			tind.reserve(pNormalIdx.size());
-			for(std::vector<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); it++)
+			for(std::vector<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); ++it)
 			{
 				if(*it != (-1)) tind.push_back(*it);
 			}

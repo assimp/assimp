@@ -153,7 +153,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		{
 			StandardShapes::MakeCircle(bottomRadius, tess, tvec);
 			height = -(height / 2);
-			for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); it++) it->y = height;// y - because circle made in oXZ.
+			for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it) it->y = height;// y - because circle made in oXZ.
 		}
 
 		// copy data from temp array

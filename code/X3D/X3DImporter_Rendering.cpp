@@ -956,7 +956,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 
 		ne_alias.CoordIndex.clear();
 		coord_num_sb = 0;
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
 		{
 			if(*vc_it < 3) throw DeadlyImportError("TriangleStripSet. stripCount shall be greater than or equal to three.");
 

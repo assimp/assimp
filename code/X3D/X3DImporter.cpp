@@ -722,7 +722,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec3f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListVec3f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
         for ( std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
@@ -1699,7 +1699,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		// create nodes tree
 		Postprocess_BuildNode(*NodeElement_Cur, *pScene->mRootNode, mesh_list, mat_list, light_list);
 		// copy needed data to scene
-		if(mesh_list.size() > 0)
+		if(!mesh_list.empty())
 		{
 			std::list<aiMesh*>::const_iterator it = mesh_list.begin();
 

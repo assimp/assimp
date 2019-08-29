@@ -81,7 +81,7 @@ aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const
 	}
 
 	// multiplicate all matrices in reverse order
-	for(std::list<aiMatrix4x4>::reverse_iterator rit = matr.rbegin(); rit != matr.rend(); rit++) out_matr = out_matr * (*rit);
+	for(std::list<aiMatrix4x4>::reverse_iterator rit = matr.rbegin(); rit != matr.rend(); ++rit) out_matr = out_matr * (*rit);
 
 	return out_matr;
 }

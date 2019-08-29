@@ -136,7 +136,7 @@ X3DImporter::~X3DImporter() {
 void X3DImporter::Clear() {
 	NodeElement_Cur = nullptr;
 	// Delete all elements
-	if(NodeElement_List.size()) {
+	if(!NodeElement_List.empty()) {
         for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++ ) {
             delete *it;
         }

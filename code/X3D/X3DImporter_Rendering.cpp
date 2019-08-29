@@ -519,7 +519,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
 		{
 			idx[2] = *idx_it;
 			if (idx[2] < 0)

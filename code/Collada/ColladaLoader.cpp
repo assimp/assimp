@@ -588,7 +588,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser& pParser, const Colla
 
 // ------------------------------------------------------------------------------------------------
 // Find mesh from either meshes or morph target meshes
-aiMesh *ColladaLoader::findMesh(std::string meshid) {
+aiMesh *ColladaLoader::findMesh(const std::string& meshid) {
     for (unsigned int i = 0; i < mMeshes.size(); ++i) {
         if (std::string(mMeshes[i]->mName.data) == meshid) {
             return mMeshes[i];

@@ -883,7 +883,7 @@ nl_clean_loop:
 	if(node_list.size() > 1)
 	{
 		// walk through all nodes
-		for(std::list<aiNode*>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); nl_it++)
+		for(std::list<aiNode*>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); ++nl_it)
 		{
 			// and try to find them in another top nodes.
 			std::list<aiNode*>::const_iterator next_it = nl_it;

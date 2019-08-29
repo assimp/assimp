@@ -1708,7 +1708,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 			for(size_t i = 0; i < pScene->mNumMeshes; i++) pScene->mMeshes[i] = *it++;
 		}
 
-		if(mat_list.size() > 0)
+		if(!mat_list.empty())
 		{
 			std::list<aiMaterial*>::const_iterator it = mat_list.begin();
 
@@ -1717,7 +1717,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 			for(size_t i = 0; i < pScene->mNumMaterials; i++) pScene->mMaterials[i] = *it++;
 		}
 
-		if(light_list.size() > 0)
+		if(!light_list.empty())
 		{
 			std::list<aiLight*>::const_iterator it = light_list.begin();
 

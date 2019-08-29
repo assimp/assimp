@@ -226,7 +226,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		// copy data from temp arrays
 		std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices;// just short alias.
 
-		for(std::vector<aiVector3D>::iterator it = tside.begin(); it != tside.end(); it++) vlist.push_back(*it);
+		for(std::vector<aiVector3D>::iterator it = tside.begin(); it != tside.end(); ++it) vlist.push_back(*it);
 
 		if(top)
 		{

@@ -677,7 +677,7 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 	}// for(std::list<CX3DImporter_NodeElement*>::const_iterator it = chit_begin; it != chit_end; it++)
 
 	// copy data about children and meshes to aiNode.
-	if(SceneNode_Child.size() > 0)
+	if(!SceneNode_Child.empty())
 	{
 		std::list<aiNode*>::const_iterator it = SceneNode_Child.begin();
 

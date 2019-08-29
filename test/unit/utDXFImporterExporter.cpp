@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -69,3 +69,8 @@ TEST_F( utDXFImporterExporter, importerWithoutExtensionTest ) {
     EXPECT_NE( nullptr, scene );
 }
 
+TEST_F(utDXFImporterExporter, issue2229) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/DXF/issue_2229.dxf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}

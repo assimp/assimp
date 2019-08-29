@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -80,6 +80,12 @@ TEST_F(utSTLImporterExporter, test_multiple) {
     EXPECT_NE(nullptr, scene2);
 }
 
+TEST_F(utSTLImporterExporter, importSTLformatdetection) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/formatDetection", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
 
 TEST_F( utSTLImporterExporter, test_with_two_solids ) {
     Assimp::Importer importer;
@@ -146,10 +152,10 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
 
     auto pMesh = scene.mMeshes[0];
 
-    long numValidPoints = points.size();
+    size_t numValidPoints = points.size();
 
     pMesh->mVertices = new aiVector3D[numValidPoints];
-    pMesh->mNumVertices = numValidPoints;
+    pMesh->mNumVertices = static_cast<unsigned int>( numValidPoints );
 
     int i = 0;
     for (XYZ &p : points) {

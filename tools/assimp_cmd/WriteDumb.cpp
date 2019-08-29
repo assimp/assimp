@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "Main.h"
-#include "../code/ProcessHelper.h"
+#include "PostProcessing/ProcessHelper.h"
 
 const char* AICMD_MSG_DUMP_HELP = 
 "assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
@@ -59,7 +59,7 @@ const char* AICMD_MSG_DUMP_HELP =
 "\t -cfull    Fires almost all post processing steps \n"
 ;
 
-#include "../../code/assbin_chunks.h"
+#include "Common/assbin_chunks.h"
 
 FILE* out = NULL;
 bool shortened = false;
@@ -82,15 +82,18 @@ void CompressBinaryDump(const char* file, unsigned int head_size)
 	uint8_t* data = new uint8_t[size];
 	fread(data,1,size,p);
 
-	uLongf out_size = (uLongf)((size-head_size) * 1.001 + 12.);
+	uint32_t uncompressed_size = size-head_size;
+	uLongf out_size = (uLongf)compressBound(uncompressed_size);
 	uint8_t* out = new uint8_t[out_size];
 
-	compress2(out,&out_size,data+head_size,size-head_size,9);
+	int res = compress2(out,&out_size,data+head_size,uncompressed_size,9);
+	if(res != Z_OK)
+		fprintf(stderr, "compress2: error\n");
 	fclose(p);
 	p = fopen(file,"w");
 
 	fwrite(data,head_size,1,p);
-	fwrite(&out_size,4,1,p); // write size of uncompressed data
+	fwrite(&uncompressed_size,4,1,p); // write size of uncompressed data
 	fwrite(out,out_size,1,p);
 
 	fclose(p);
@@ -273,9 +276,12 @@ inline uint32_t WriteBounds(const T* in, unsigned int size)
 void ChangeInteger(uint32_t ofs,uint32_t n)
 {
 	const uint32_t cur = ftell(out);
-	fseek(out,ofs,SEEK_SET);
-	fwrite(&n,4,1,out);
-	fseek(out,cur,SEEK_SET);
+    int retCode;
+    retCode = fseek(out, ofs, SEEK_SET);
+    ai_assert(0 == retCode);
+	fwrite(&n, 4, 1, out);
+    retCode = fseek(out, cur, SEEK_SET);
+    ai_assert(0 == retCode);
 }
 
 // -----------------------------------------------------------------------------------
@@ -676,7 +682,13 @@ void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const ch
 	shortened = _shortened;
 
 	time_t tt = time(NULL);
-	tm* p     = gmtime(&tt);
+#if _WIN32
+    tm* p = gmtime(&tt);
+#else
+    struct tm now;
+    tm* p = gmtime_r(&tt, &now);
+#endif
+    ai_assert(nullptr != p);
 
 	// header
 	fprintf(out,"ASSIMP.binary-dump.%s",asctime(p));
@@ -858,7 +870,13 @@ static std::string encodeXML(const std::string& data) {
 void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd, bool shortened)
 {
 	time_t tt = ::time(NULL);
-	tm* p     = ::gmtime(&tt);
+#if _WIN32
+    tm* p = gmtime(&tt);
+#else
+    struct tm now;
+    tm* p = gmtime_r(&tt, &now);
+#endif
+    ai_assert(nullptr != p);
 
 	std::string c = cmd;
 	std::string::size_type s; 
@@ -1318,10 +1336,6 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 {
 	const char* fail = "assimp dump: Invalid number of arguments. "
 			"See \'assimp dump --help\'\r\n";
-	if (num < 1) {
-		printf("%s", fail);
-		return 1;
-	}
 
 	// --help
 	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {

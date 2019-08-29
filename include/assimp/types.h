@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -161,7 +161,14 @@ struct aiColor3D
     explicit aiColor3D (ai_real _r) : r(_r), g(_r), b(_r) {}
     aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
 
-    /** Component-wise comparison */
+	aiColor3D &operator=(const aiColor3D &o) {
+		r = o.r;
+		g = o.g;
+		b = o.b;
+		return *this;
+	}
+
+	/** Component-wise comparison */
     // TODO: add epsilon?
     bool operator == (const aiColor3D& other) const
         {return r == other.r && g == other.g && b == other.b;}

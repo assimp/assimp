@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -384,6 +384,7 @@ int ProcessStandardArguments(
 	// -om     --optimize-meshes
 	// -db     --debone
 	// -sbc    --split-by-bone-count
+	// -gs	   --global-scale
 	//
 	// -c<file> --config-file=<file>
 
@@ -471,6 +472,9 @@ int ProcessStandardArguments(
 		}
 		else if (!strcmp(param, "-embtex") || ! strcmp(param, "--embed-textures")) {
 			fill.ppFlags |= aiProcess_EmbedTextures;
+		}
+		else if (!strcmp(param, "-gs") || ! strcmp(param, "--global-scale")) {
+			fill.ppFlags |= aiProcess_GlobalScale;
 		}
 		else if (! strncmp( param, "-c",2) || ! strncmp( param, "--config=",9)) {
 			const unsigned int ofs = (params[i][1] == '-' ? 9 : 2);

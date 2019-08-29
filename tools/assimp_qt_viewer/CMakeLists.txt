@@ -1,7 +1,8 @@
 set(PROJECT_VERSION "")
 project(assimp_qt_viewer)
 
-cmake_minimum_required(VERSION 2.6)
+# Qt5 requires cmake 3.1 or newer
+cmake_minimum_required(VERSION 3.1)
 
 FIND_PACKAGE(OpenGL QUIET)
 
@@ -33,7 +34,6 @@ IF(VIEWER_BUILD)
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_SOURCE_DIR}
 		${OPENGL_INCLUDE_DIR}
-		${IL_INCLUDE_DIR}
 	)
 
 	LINK_DIRECTORIES(${Assimp_BINARY_DIR})
@@ -55,7 +55,7 @@ IF(VIEWER_BUILD)
 	qt5_wrap_cpp(MOCrcs mainwindow.hpp glview.hpp)
 
 	add_executable(${PROJECT_NAME} ${assimp_qt_viewer_SRCS} ${UISrcs} ${MOCrcs})
-	target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Widgets Qt5::OpenGL ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
+	target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Widgets Qt5::OpenGL ${OPENGL_LIBRARIES} assimp)
 
 	IF(WIN32) # Check if we are on Windows
 		IF(MSVC) # Check if we are using the Visual Studio compiler

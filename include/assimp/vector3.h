@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -69,7 +69,7 @@ public:
     aiVector3t() AI_NO_EXCEPT : x(), y(), z() {}
     aiVector3t(TReal _x, TReal _y, TReal _z) : x(_x), y(_y), z(_z) {}
     explicit aiVector3t (TReal _xyz ) : x(_xyz), y(_xyz), z(_xyz) {}
-    aiVector3t( const aiVector3t& o ) : x(o.x), y(o.y), z(o.z) {}
+    aiVector3t( const aiVector3t& o ) = default;
 
 public:
 

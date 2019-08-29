@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -49,8 +49,7 @@ namespace AssimpView {
 CMeshRenderer CMeshRenderer::s_cInstance;
 
 //-------------------------------------------------------------------------------
-int CMeshRenderer::DrawUnsorted(unsigned int iIndex)
-{
+int CMeshRenderer::DrawUnsorted(unsigned int iIndex) {
     ai_assert(iIndex < g_pcAsset->pcScene->mNumMeshes);
 
     // set vertex and index buffer
@@ -77,8 +76,7 @@ int CMeshRenderer::DrawUnsorted(unsigned int iIndex)
     return 1;
 }
 //-------------------------------------------------------------------------------
-int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
-{
+int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
     ai_assert(iIndex < g_pcAsset->pcScene->mNumMeshes);
 
     AssetHelper::MeshHelper* pcHelper = g_pcAsset->apcMeshes[iIndex];

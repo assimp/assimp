@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -42,19 +42,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include "assimp/types.h"
-#include "assimp/mesh.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
 
-#include <VertexTriangleAdjacency.h>
-
+#include "Common/VertexTriangleAdjacency.h"
 
 using namespace std;
 using namespace Assimp;
 
-class VTAdjacencyTest : public ::testing::Test
-{
+class VTAdjacencyTest : public ::testing::Test {
 protected:
-
     void checkMesh(const aiMesh& mesh);
 };
 

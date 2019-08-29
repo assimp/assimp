@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -57,6 +57,7 @@ namespace Assimp {
     
 class ExporterPimpl;
 class IOSystem;
+class ProgressHandler;
 
 // ----------------------------------------------------------------------------------
 /** CPP-API: The Exporter class forms an C++ interface to the export functionality
@@ -84,8 +85,7 @@ public:
     typedef void (*fpExportFunc)(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
     /** Internal description of an Assimp export format option */
-    struct ExportFormatEntry
-    {
+    struct ExportFormatEntry {
         /// Public description structure to be returned by aiGetExportFormatDescription()
         aiExportFormatDesc mDescription;
 
@@ -159,6 +159,19 @@ public:
     bool IsDefaultIOHandler() const;
 
     // -------------------------------------------------------------------
+    /** Supplies a custom progress handler to the exporter. This
+     *  interface exposes an #Update() callback, which is called
+     *  more or less periodically (please don't sue us if it
+     *  isn't as periodically as you'd like it to have ...).
+     *  This can be used to implement progress bars and loading
+     *  timeouts.
+     *  @param pHandler Progress callback interface. Pass nullptr to
+     *    disable progress reporting.
+     *  @note Progress handlers can be used to abort the loading
+     *    at almost any time.*/
+    void SetProgressHandler(ProgressHandler* pHandler);
+
+    // -------------------------------------------------------------------
     /** Exports the given scene to a chosen file format. Returns the exported
     * data as a binary blob which you can write into a file or something.
     * When you're done with the data, simply let the #Exporter instance go
@@ -177,7 +190,7 @@ public:
     * @note Use aiCopyScene() to get a modifiable copy of a previously
     *   imported scene. */
     const aiExportDataBlob* ExportToBlob(const aiScene* pScene, const char* pFormatId,
-        unsigned int pPreprocessing = 0u, const ExportProperties* = nullptr);
+        unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
     const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,
         unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -135,7 +135,6 @@ extern float g_smoothAngle /*= 80.f*/;
 
 extern unsigned int ppsteps, ppstepsdefault;
 extern bool nopointslines;
-
 
 CMaterialManager CMaterialManager::s_cInstance;
 

@@ -239,7 +239,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 
 		if(bottom)
 		{
-			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); it++)
+			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it)
 			{
 				(*it).y = -height;// y - because circle made in oXZ.
 				vlist.push_back(*it);

@@ -888,8 +888,8 @@ nl_clean_loop:
 			// and try to find them in another top nodes.
 			std::list<aiNode*>::const_iterator next_it = nl_it;
 
-			next_it++;
-			for(; next_it != node_list.end(); next_it++)
+			++next_it;
+			for(; next_it != node_list.end(); ++next_it)
 			{
 				if((*next_it)->FindNode((*nl_it)->mName) != nullptr)
 				{

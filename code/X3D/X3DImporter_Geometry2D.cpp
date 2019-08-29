@@ -356,7 +356,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 		std::list<aiVector3D> tlist;
 
 		// convert vec2 to vec3
-		for(std::list<aiVector2D>::iterator it2 = lineSegments.begin(); it2 != lineSegments.end(); it2++) tlist.push_back(aiVector3D(it2->x, it2->y, 0));
+		for(std::list<aiVector2D>::iterator it2 = lineSegments.begin(); it2 != lineSegments.end(); ++it2) tlist.push_back(aiVector3D(it2->x, it2->y, 0));
 
 		// convert point set to line set
 		GeometryHelper_Extend_PointToLine(tlist, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);

@@ -137,7 +137,7 @@ void X3DImporter::Clear() {
 	NodeElement_Cur = nullptr;
 	// Delete all elements
 	if(!NodeElement_List.empty()) {
-        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++ ) {
+        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it ) {
             delete *it;
         }
 		NodeElement_List.clear();
@@ -151,7 +151,7 @@ void X3DImporter::Clear() {
 
 bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
 {
-	for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++)
+	for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it)
 	{
 		if(((*it)->Type == pType) && ((*it)->ID == pID))
 		{
@@ -617,7 +617,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol3f(const int pAttrIdx, std::ve
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-		for(std::list<aiColor3D>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
+		for(std::list<aiColor3D>::iterator it = tlist.begin(); it != tlist.end(); ++it) pValue.push_back(*it);
 	}
 }
 
@@ -725,7 +725,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec3f(const int pAttrIdx, std::ve
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-        for ( std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        for ( std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
         {
             pValue.push_back( *it );
         }
@@ -910,7 +910,7 @@ void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::vector<int32_t>
 	pFaces.reserve(f_data.size() / 3);
 	inds.reserve(4);
     //PrintVectorSet("build. ci", pCoordIdx);
-	for(std::vector<int32_t>::iterator it = f_data.begin(); it != f_data.end(); it++)
+	for(std::vector<int32_t>::iterator it = f_data.begin(); it != f_data.end(); ++it)
 	{
 		// when face is got count how many indices in it.
 		if(*it == (-1))
@@ -957,7 +957,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor3D
 std::list<aiColor4D> tcol;
 
 	// create RGBA array from RGB.
-	for(std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); it++) tcol.push_back(aiColor4D((*it).r, (*it).g, (*it).b, 1));
+	for(std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it) tcol.push_back(aiColor4D((*it).r, (*it).g, (*it).b, 1));
 
 	// call existing function for adding RGBA colors
 	MeshGeometry_AddColor(pMesh, tcol, pColorPerVertex);
@@ -997,7 +997,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
                 pMesh.mColors[ 0 ][ pMesh.mFaces[ fi ].mIndices[ vi ] ] = *col_it;
             }
 
-			col_it++;
+			++col_it;
 		}
 	}// if(pColorPerVertex) else
 }
@@ -1008,7 +1008,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
     std::list<aiColor4D> tcol;
 
 	// create RGBA array from RGB.
-    for ( std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); it++ )
+    for ( std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it )
     {
         tcol.push_back( aiColor4D( ( *it ).r, ( *it ).g, ( *it ).b, 1 ) );
     }

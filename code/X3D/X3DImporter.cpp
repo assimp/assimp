@@ -837,7 +837,7 @@ void X3DImporter::GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>&
 	{
 		pLine.push_back(*pit);// second point of previous line
 		pLine.push_back(*pit);// first point of next line
-		pit++;
+		++pit;
 	}
 	// add last point of last line
 	pLine.push_back(*pit);
@@ -1121,7 +1121,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 	}// if(pColorPerVertex) else
 
 	// copy array to list for calling function that add colors.
-	for(std::vector<aiColor4D>::const_iterator it = col_tgt_arr.begin(); it != col_tgt_arr.end(); it++) col_tgt_list.push_back(*it);
+	for(std::vector<aiColor4D>::const_iterator it = col_tgt_arr.begin(); it != col_tgt_arr.end(); ++it) col_tgt_list.push_back(*it);
 	// add prepared colors list to mesh.
 	MeshGeometry_AddColor(pMesh, col_tgt_list, pColorPerVertex);
 }
@@ -1227,7 +1227,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<aiVector
 			// apply color to all vertices of face
 			for(size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) pMesh.mNormals[pMesh.mFaces[fi].mIndices[vi]] = *norm_it;
 
-			norm_it++;
+			++norm_it;
 		}
 	}// if(pNormalPerVertex) else
 }

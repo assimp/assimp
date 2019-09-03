@@ -1241,7 +1241,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int3
 
 	// copy list to array because we are need indexed access to normals.
 	texcoord_arr_copy.reserve(pTexCoords.size());
-	for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); it++)
+	for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it)
 	{
 		texcoord_arr_copy.push_back(aiVector3D((*it).x, (*it).y, 0));
 	}

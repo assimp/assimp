@@ -684,7 +684,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec2f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListVec2f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
         for ( std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); ++it )

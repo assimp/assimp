@@ -49,8 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
 
-#include "../contrib/poly2tri/poly2tri/poly2tri.h"
-#include "../contrib/clipper/clipper.hpp"
+#ifdef ASSIMP_USE_HUNTER
+#  include <poly2tri/poly2tri.h>
+#  include <polyclipping/clipper.hpp>
+#else
+#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+#  include "../contrib/clipper/clipper.hpp"
+#endif
 
 #include <iterator>
 

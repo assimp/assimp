@@ -102,6 +102,7 @@ void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperti
 void ExportSceneFBX(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
+void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::ExportProperties*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -162,11 +163,11 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
-    Exporter::ExportFormatEntry( "assbin", "Assimp Binary", "assbin" , &ExportSceneAssbin, 0 ),
+    Exporter::ExportFormatEntry( "assbin", "Assimp Binary File", "assbin" , &ExportSceneAssbin, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
-    Exporter::ExportFormatEntry( "assxml", "Assxml Document", "assxml" , &ExportSceneAssxml, 0 ),
+    Exporter::ExportFormatEntry( "assxml", "Assimp XML Document", "assxml" , &ExportSceneAssxml, 0 ),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
@@ -179,7 +180,11 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
-    Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 )
+    Exporter::ExportFormatEntry( "3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0 ),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
+    Exporter::ExportFormatEntry( "assjson", "Assimp JSON Document", "json", &ExportAssimp2Json, 0)
 #endif
 };
 
@@ -311,34 +316,6 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
 }
 
 // ------------------------------------------------------------------------------------------------
-bool IsVerboseFormat(const aiMesh* mesh) {
-    // avoid slow vector<bool> specialization
-    std::vector<unsigned int> seen(mesh->mNumVertices,0);
-    for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-        const aiFace& f = mesh->mFaces[i];
-        for(unsigned int j = 0; j < f.mNumIndices; ++j) {
-            if(++seen[f.mIndices[j]] == 2) {
-                // found a duplicate index
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-// ------------------------------------------------------------------------------------------------
-bool IsVerboseFormat(const aiScene* pScene) {
-    for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-        if(!IsVerboseFormat(pScene->mMeshes[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// ------------------------------------------------------------------------------------------------
 aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const char* pPath,
         unsigned int pPreprocessing, const ExportProperties* pProperties) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
@@ -347,7 +324,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
     // format. They will likely not be aware that there is a flag in the scene to indicate
     // this, however. To avoid surprises and bug reports, we check for duplicates in
     // meshes upfront.
-    const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || IsVerboseFormat(pScene);
+    const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || MakeVerboseFormatProcess::IsVerboseFormat(pScene);
 
     pimpl->mProgressHandler->UpdateFileWrite(0, 4);
 

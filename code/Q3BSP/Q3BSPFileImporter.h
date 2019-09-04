@@ -54,9 +54,9 @@ struct aiMaterial;
 struct aiTexture;
 
 namespace Assimp {
+    class ZipArchiveIOSystem;
 
 namespace Q3BSP {
-    class Q3BSPZipArchive;
     struct Q3BSPModel;
     struct sQ3BSPFace;
 }
@@ -85,24 +85,24 @@ protected:
     const aiImporterDesc* GetInfo () const;
     void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
     void separateMapName( const std::string &rImportName, std::string &rArchiveName, std::string &rMapName );
-    bool findFirstMapInArchive( Q3BSP::Q3BSPZipArchive &rArchive, std::string &rMapName );
-    void CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, Q3BSP::Q3BSPZipArchive *pArchive );
+    bool findFirstMapInArchive(ZipArchiveIOSystem &rArchive, std::string &rMapName );
+    void CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, ZipArchiveIOSystem *pArchive );
     void CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, aiNode *pParent );
     aiNode *CreateTopology( const Q3BSP::Q3BSPModel *pModel, unsigned int materialIdx,
         std::vector<Q3BSP::sQ3BSPFace*> &rArray, aiMesh  **pMesh );
     void createTriangleTopology( const Q3BSP::Q3BSPModel *pModel, Q3BSP::sQ3BSPFace *pQ3BSPFace, aiMesh* pMesh, unsigned int &rFaceIdx,
         unsigned int &rVertIdx  );
-    void createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, Q3BSP::Q3BSPZipArchive *pArchive );
+    void createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, ZipArchiveIOSystem *pArchive );
     size_t countData( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
     size_t countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
     size_t countTriangles( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const;
     void createMaterialMap( const Q3BSP::Q3BSPModel *pModel);
     aiFace *getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx );
-    bool importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel, Q3BSP::Q3BSPZipArchive *pArchive, aiScene* pScene,
+    bool importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel, ZipArchiveIOSystem *pArchive, aiScene* pScene,
         aiMaterial *pMatHelper, int textureId );
     bool importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, aiMaterial *pMatHelper, int lightmapId );
     bool importEntities( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene );
-    bool expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std::string &rFilename, const std::vector<std::string> &rExtList,
+    bool expandFile(ZipArchiveIOSystem *pArchive, const std::string &rFilename, const std::vector<std::string> &rExtList,
         std::string &rFile, std::string &rExt );
 
 private:

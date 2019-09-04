@@ -55,7 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3MFXmlTags.h"
 #include "D3MFOpcPackage.h"
 
-#include <contrib/zip/src/zip.h>
+#ifdef ASSIMP_USE_HUNTER
+#  include <zip/zip.h>
+#else
+#  include <contrib/zip/src/zip.h>
+#endif
 
 namespace Assimp {
 

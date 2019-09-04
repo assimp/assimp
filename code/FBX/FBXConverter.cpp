@@ -66,6 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <cstdint>
 
 
 namespace Assimp {
@@ -77,7 +78,7 @@ namespace Assimp {
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit )
+        FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones )
         : defaultMaterialIndex()
         , lights()
         , cameras()
@@ -89,9 +90,7 @@ namespace Assimp {
         , mNodeNames()
         , anim_fps()
         , out(out)
-        , doc(doc)
-        , mRemoveEmptyBones( removeEmptyBones )
-        , mCurrentUnit(FbxUnit::cm) {
+        , doc(doc) {
             // animations need to be converted first since this will
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.
@@ -119,7 +118,6 @@ namespace Assimp {
 
             ConvertGlobalSettings();
             TransferDataToScene();
-            ConvertToUnitScale(unit);
 
             // if we didn't read any meshes set the AI_SCENE_FLAGS_INCOMPLETE
             // to make sure the scene passes assimp's validation. FBX files
@@ -420,11 +418,6 @@ namespace Assimp {
 
             out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
-            //cameras are defined along positive x direction
-            /*out_camera->mPosition = cam.Position();
-            out_camera->mLookAt = (cam.InterestPosition() - out_camera->mPosition).Normalize();
-            out_camera->mUp = cam.UpVector();*/
-
             out_camera->mPosition = aiVector3D(0.0f);
             out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
             out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
@@ -667,8 +660,7 @@ namespace Assimp {
                     if ((v - all_ones).SquareLength() > zero_epsilon) {
                         return true;
                     }
-                }
-                else if (ok) {
+                } else if (ok) {
                     if (v.SquareLength() > zero_epsilon) {
                         return true;
                     }
@@ -691,30 +683,37 @@ namespace Assimp {
             bool ok;
 
             aiMatrix4x4 chain[TransformationComp_MAXIMUM];
+
+            ai_assert(TransformationComp_MAXIMUM < 32);
+            std::uint32_t chainBits = 0;
+            // A node won't need a node chain if it only has these.
+            const std::uint32_t chainMaskSimple = (1 << TransformationComp_Translation) + (1 << TransformationComp_Scaling) + (1 << TransformationComp_Rotation);
+            // A node will need a node chain if it has any of these.
+            const std::uint32_t chainMaskComplex = ((1 << (TransformationComp_MAXIMUM)) - 1) - chainMaskSimple;
+
             std::fill_n(chain, static_cast<unsigned int>(TransformationComp_MAXIMUM), aiMatrix4x4());
 
             // generate transformation matrices for all the different transformation components
             const float zero_epsilon = 1e-6f;
             const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
-            bool is_complex = false;
 
             const aiVector3D& PreRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
             if (ok && PreRotation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_PreRotation);
 
                 GetRotationMatrix(Model::RotOrder::RotOrder_EulerXYZ, PreRotation, chain[TransformationComp_PreRotation]);
             }
 
             const aiVector3D& PostRotation = PropertyGet<aiVector3D>(props, "PostRotation", ok);
             if (ok && PostRotation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_PostRotation);
 
                 GetRotationMatrix(Model::RotOrder::RotOrder_EulerXYZ, PostRotation, chain[TransformationComp_PostRotation]);
             }
 
             const aiVector3D& RotationPivot = PropertyGet<aiVector3D>(props, "RotationPivot", ok);
             if (ok && RotationPivot.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_RotationPivot) | (1 << TransformationComp_RotationPivotInverse);
 
                 aiMatrix4x4::Translation(RotationPivot, chain[TransformationComp_RotationPivot]);
                 aiMatrix4x4::Translation(-RotationPivot, chain[TransformationComp_RotationPivotInverse]);
@@ -722,21 +721,21 @@ namespace Assimp {
 
             const aiVector3D& RotationOffset = PropertyGet<aiVector3D>(props, "RotationOffset", ok);
             if (ok && RotationOffset.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_RotationOffset);
 
                 aiMatrix4x4::Translation(RotationOffset, chain[TransformationComp_RotationOffset]);
             }
 
             const aiVector3D& ScalingOffset = PropertyGet<aiVector3D>(props, "ScalingOffset", ok);
             if (ok && ScalingOffset.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_ScalingOffset);
 
                 aiMatrix4x4::Translation(ScalingOffset, chain[TransformationComp_ScalingOffset]);
             }
 
             const aiVector3D& ScalingPivot = PropertyGet<aiVector3D>(props, "ScalingPivot", ok);
             if (ok && ScalingPivot.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_ScalingPivot) | (1 << TransformationComp_ScalingPivotInverse);
 
                 aiMatrix4x4::Translation(ScalingPivot, chain[TransformationComp_ScalingPivot]);
                 aiMatrix4x4::Translation(-ScalingPivot, chain[TransformationComp_ScalingPivotInverse]);
@@ -744,22 +743,28 @@ namespace Assimp {
 
             const aiVector3D& Translation = PropertyGet<aiVector3D>(props, "Lcl Translation", ok);
             if (ok && Translation.SquareLength() > zero_epsilon) {
+                chainBits = chainBits | (1 << TransformationComp_Translation);
+
                 aiMatrix4x4::Translation(Translation, chain[TransformationComp_Translation]);
             }
 
             const aiVector3D& Scaling = PropertyGet<aiVector3D>(props, "Lcl Scaling", ok);
             if (ok && (Scaling - all_ones).SquareLength() > zero_epsilon) {
+                chainBits = chainBits | (1 << TransformationComp_Scaling);
+
                 aiMatrix4x4::Scaling(Scaling, chain[TransformationComp_Scaling]);
             }
 
             const aiVector3D& Rotation = PropertyGet<aiVector3D>(props, "Lcl Rotation", ok);
             if (ok && Rotation.SquareLength() > zero_epsilon) {
+                chainBits = chainBits | (1 << TransformationComp_Rotation);
+
                 GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
             }
 
             const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>(props, "GeometricScaling", ok);
             if (ok && (GeometricScaling - all_ones).SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_GeometricScaling);
                 aiMatrix4x4::Scaling(GeometricScaling, chain[TransformationComp_GeometricScaling]);
                 aiVector3D GeometricScalingInverse = GeometricScaling;
                 bool canscale = true;
@@ -774,13 +779,14 @@ namespace Assimp {
                     }
                 }
                 if (canscale) {
+                    chainBits = chainBits | (1 << TransformationComp_GeometricScalingInverse);
                     aiMatrix4x4::Scaling(GeometricScalingInverse, chain[TransformationComp_GeometricScalingInverse]);
                 }
             }
 
             const aiVector3D& GeometricRotation = PropertyGet<aiVector3D>(props, "GeometricRotation", ok);
             if (ok && GeometricRotation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_GeometricRotation) | (1 << TransformationComp_GeometricRotationInverse);
                 GetRotationMatrix(rot, GeometricRotation, chain[TransformationComp_GeometricRotation]);
                 GetRotationMatrix(rot, GeometricRotation, chain[TransformationComp_GeometricRotationInverse]);
                 chain[TransformationComp_GeometricRotationInverse].Inverse();
@@ -788,7 +794,7 @@ namespace Assimp {
 
             const aiVector3D& GeometricTranslation = PropertyGet<aiVector3D>(props, "GeometricTranslation", ok);
             if (ok && GeometricTranslation.SquareLength() > zero_epsilon) {
-                is_complex = true;
+                chainBits = chainBits | (1 << TransformationComp_GeometricTranslation) | (1 << TransformationComp_GeometricTranslationInverse);
                 aiMatrix4x4::Translation(GeometricTranslation, chain[TransformationComp_GeometricTranslation]);
                 aiMatrix4x4::Translation(-GeometricTranslation, chain[TransformationComp_GeometricTranslationInverse]);
             }
@@ -796,12 +802,12 @@ namespace Assimp {
             // is_complex needs to be consistent with NeedsComplexTransformationChain()
             // or the interplay between this code and the animation converter would
             // not be guaranteed.
-            ai_assert(NeedsComplexTransformationChain(model) == is_complex);
+            ai_assert(NeedsComplexTransformationChain(model) == ((chainBits & chainMaskComplex) != 0));
 
             // now, if we have more than just Translation, Scaling and Rotation,
             // we need to generate a full node chain to accommodate for assimp's
             // lack to express pivots and offsets.
-            if (is_complex && doc.Settings().preservePivots) {
+            if ((chainBits & chainMaskComplex) && doc.Settings().preservePivots) {
                 FBXImporter::LogInfo("generating full transformation chain for node: " + name);
 
                 // query the anim_chain_bits dictionary to find out which chain elements
@@ -814,7 +820,7 @@ namespace Assimp {
                 for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i, bit <<= 1) {
                     const TransformationComp comp = static_cast<TransformationComp>(i);
 
-                    if (chain[i].IsIdentity() && (anim_chain_bitmask & bit) == 0) {
+                    if ((chainBits & bit) == 0 && (anim_chain_bitmask & bit) == 0) {
                         continue;
                     }
 
@@ -1253,10 +1259,10 @@ namespace Assimp {
             ai_assert(count_faces);
             ai_assert(count_vertices);
 
-            // mapping from output indices to DOM indexing, needed to resolve weights
+            // mapping from output indices to DOM indexing, needed to resolve weights or blendshapes
             std::vector<unsigned int> reverseMapping;
-
-            if (process_weights) {
+            std::map<unsigned int, unsigned int> translateIndexMap;
+            if (process_weights || mesh.GetBlendShapes().size() > 0) {
                 reverseMapping.resize(count_vertices);
             }
 
@@ -1363,6 +1369,7 @@ namespace Assimp {
 
                     if (reverseMapping.size()) {
                         reverseMapping[cursor] = in_cursor;
+                        translateIndexMap[in_cursor] = cursor;
                     }
 
                     out_mesh->mVertices[cursor] = vertices[in_cursor];
@@ -1394,6 +1401,50 @@ namespace Assimp {
                 ConvertWeights(out_mesh, model, mesh, node_global_transform, index, &reverseMapping);
             }
 
+            std::vector<aiAnimMesh*> animMeshes;
+            for (const BlendShape* blendShape : mesh.GetBlendShapes()) {
+                for (const BlendShapeChannel* blendShapeChannel : blendShape->BlendShapeChannels()) {
+                    const std::vector<const ShapeGeometry*>& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+                    for (size_t i = 0; i < shapeGeometries.size(); i++) {
+                        aiAnimMesh* animMesh = aiCreateAnimMesh(out_mesh);
+                        const ShapeGeometry* shapeGeometry = shapeGeometries.at(i);
+                        const std::vector<aiVector3D>& vertices = shapeGeometry->GetVertices();
+                        const std::vector<aiVector3D>& normals = shapeGeometry->GetNormals();
+                        const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
+                        animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
+                        for (size_t j = 0; j < indices.size(); j++) {
+                            unsigned int index = indices.at(j);
+                            aiVector3D vertex = vertices.at(j);
+                            aiVector3D normal = normals.at(j);
+                            unsigned int count = 0;
+                            const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
+                            for (unsigned int k = 0; k < count; k++) {
+                                unsigned int outIndex = outIndices[k];
+                                if (translateIndexMap.find(outIndex) == translateIndexMap.end())
+                                    continue;
+                                unsigned int index = translateIndexMap[outIndex];
+                                animMesh->mVertices[index] += vertex;
+                                if (animMesh->mNormals != nullptr) {
+                                    animMesh->mNormals[index] += normal;
+                                    animMesh->mNormals[index].NormalizeSafe();
+                                }
+                            }
+                        }
+                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
+                        animMeshes.push_back(animMesh);
+                    }
+                }
+            }
+
+            const size_t numAnimMeshes = animMeshes.size();
+            if (numAnimMeshes > 0) {
+                out_mesh->mNumAnimMeshes = static_cast<unsigned int>(numAnimMeshes);
+                out_mesh->mAnimMeshes = new aiAnimMesh*[numAnimMeshes];
+                for (size_t i = 0; i < numAnimMeshes; i++) {
+                    out_mesh->mAnimMeshes[i] = animMeshes.at(i);
+                }
+            }
+
             return static_cast<unsigned int>(meshes.size() - 1);
         }
 
@@ -1423,13 +1474,7 @@ namespace Assimp {
 
                     const WeightIndexArray& indices = cluster->GetIndices();
 
-                    if (indices.empty() && mRemoveEmptyBones ) {
-                        continue;
-                    }
-
                     const MatIndexArray& mats = geo.GetMaterialIndices();
-
-                    bool ok = false;
 
                     const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
 
@@ -1470,8 +1515,7 @@ namespace Assimp {
                                     out_indices.push_back(std::distance(outputVertStartIndices->begin(), it));
                                 }
 
-                                ++count_out_indices.back();
-                                ok = true;
+                                ++count_out_indices.back();                               
                             }
                         }
                     }
@@ -1479,10 +1523,8 @@ namespace Assimp {
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    if (ok && mRemoveEmptyBones) {
-                        ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
+                    ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                             count_out_indices, node_global_transform);
-                    }
                 }
             }
             catch (std::exception&) {
@@ -1642,7 +1684,7 @@ namespace Assimp {
             out_tex->pcData = reinterpret_cast<aiTexel*>(const_cast<Video&>(video).RelinquishContent());
 
             // try to extract a hint from the file extension
-            const std::string& filename = video.FileName().empty() ? video.RelativeFilename() : video.FileName();
+            const std::string& filename = video.RelativeFilename().empty() ? video.FileName() : video.RelativeFilename();
             std::string ext = BaseImporter::GetExtension(filename);
 
             if (ext == "jpeg") {
@@ -1653,7 +1695,7 @@ namespace Assimp {
                 memcpy(out_tex->achFormatHint, ext.c_str(), ext.size());
             }
 
-            out_tex->mFilename.Set(video.FileName().c_str());
+            out_tex->mFilename.Set(filename.c_str());
 
             return static_cast<unsigned int>(textures.size() - 1);
         }
@@ -1699,9 +1741,8 @@ namespace Assimp {
         }
 
         void FBXConverter::TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures,
-            const std::string& propName,
-            aiTextureType target, const MeshGeometry* const mesh)
-        {
+                const std::string& propName,
+                aiTextureType target, const MeshGeometry* const mesh) {
             TextureMap::const_iterator it = textures.find(propName);
             if (it == textures.end()) {
                 return;
@@ -3494,46 +3535,6 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             out->mMetaData->Set(14, "CustomFrameRate", doc.GlobalSettings().CustomFrameRate());
         }
 
-        void FBXConverter::ConvertToUnitScale( FbxUnit unit ) {
-            if (mCurrentUnit == unit) {
-                return;
-            }
-
-            ai_real scale = 1.0;
-            if (mCurrentUnit == FbxUnit::cm) {
-                if (unit == FbxUnit::m) {
-                    scale = (ai_real)0.01;
-                } else if (unit == FbxUnit::km) {
-                    scale = (ai_real)0.00001;
-                }
-            } else if (mCurrentUnit == FbxUnit::m) {
-                if (unit == FbxUnit::cm) {
-                    scale = (ai_real)100.0;
-                } else if (unit == FbxUnit::km) {
-                    scale = (ai_real)0.001;
-                }
-            } else if (mCurrentUnit == FbxUnit::km) {
-                if (unit == FbxUnit::cm) {
-                    scale = (ai_real)100000.0;
-                } else if (unit == FbxUnit::m) {
-                    scale = (ai_real)1000.0;
-                }
-            }
-            
-            for (auto mesh : meshes) {
-                if (nullptr == mesh) {
-                    continue;
-                }
-
-                if (mesh->HasPositions()) {
-                    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                        aiVector3D &pos = mesh->mVertices[i];
-                        pos *= scale;
-                    }
-                }
-            }
-        }
-
         void FBXConverter::TransferDataToScene()
         {
             ai_assert(!out->mMeshes);
@@ -3587,9 +3588,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         }
 
         // ------------------------------------------------------------------------------------------------
-        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones, FbxUnit unit)
+        void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones)
         {
-            FBXConverter converter(out, doc, removeEmptyBones, unit);
+            FBXConverter converter(out, doc, removeEmptyBones);
         }
 
     } // !FBX

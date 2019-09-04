@@ -140,10 +140,10 @@ static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode)
     }
 }
 
-//static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
-//{
-//    out.r = v[0]; out.g = v[1]; out.b = v[2];
-//}
+static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
+{
+    out.r = v[0]; out.g = v[1]; out.b = v[2];
+}
 
 static void CopyValue(const glTF2::vec4& v, aiColor4D& out)
 {
@@ -710,6 +710,69 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
     }
 }
 
+void glTF2Importer::ImportLights(glTF2::Asset& r)
+{
+    if (!r.lights.Size())
+        return;
+
+    mScene->mNumLights = r.lights.Size();
+    mScene->mLights = new aiLight*[r.lights.Size()];
+
+    for (size_t i = 0; i < r.lights.Size(); ++i) {
+        Light& light = r.lights[i];
+
+        aiLight* ail = mScene->mLights[i] = new aiLight();
+
+        switch (light.type)
+        {
+        case Light::Directional:
+            ail->mType = aiLightSource_DIRECTIONAL; break;
+        case Light::Point:
+            ail->mType = aiLightSource_POINT; break;
+        case Light::Spot:
+            ail->mType = aiLightSource_SPOT; break;
+        }
+
+        if (ail->mType != aiLightSource_POINT)
+        {
+            ail->mDirection = aiVector3D(0.0f, 0.0f, -1.0f);
+            ail->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
+        }
+
+        vec3 colorWithIntensity = { light.color[0] * light.intensity, light.color[1] * light.intensity, light.color[2] * light.intensity };
+        CopyValue(colorWithIntensity, ail->mColorAmbient);
+        CopyValue(colorWithIntensity, ail->mColorDiffuse);
+        CopyValue(colorWithIntensity, ail->mColorSpecular);
+
+        if (ail->mType == aiLightSource_DIRECTIONAL)
+        {
+            ail->mAttenuationConstant = 1.0;
+            ail->mAttenuationLinear = 0.0;
+            ail->mAttenuationQuadratic = 0.0;
+        }
+        else
+        {
+            //in PBR attenuation is calculated using inverse square law which can be expressed
+            //using assimps equation: 1/(att0 + att1 * d + att2 * d*d) with the following parameters
+            //this is correct equation for the case when range (see
+            //https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual)
+            //is not present. When range is not present it is assumed that it is infinite and so numerator is 1.
+            //When range is present then numerator might be any value in range [0,1] and then assimps equation
+            //will not suffice. In this case range is added into metadata in ImportNode function
+            //and its up to implementation to read it when it wants to
+            ail->mAttenuationConstant = 0.0;
+            ail->mAttenuationLinear = 0.0;
+            ail->mAttenuationQuadratic = 1.0;
+        }
+
+        if (ail->mType == aiLightSource_SPOT)
+        {
+            ail->mAngleInnerCone = light.innerConeAngle;
+            ail->mAngleOuterCone = light.outerConeAngle;
+        }
+    }
+}
+
 static void GetNodeTransform(aiMatrix4x4& matrix, const glTF2::Node& node) {
     if (node.matrix.isPresent) {
         CopyValue(node.matrix.value, matrix);
@@ -879,6 +942,18 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
 
     if (node.camera) {
         pScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
+    }
+
+    if (node.light) {
+        pScene->mLights[node.light.GetIndex()]->mName = ainode->mName;
+
+        //range is optional - see https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
+        //it is added to meta data of parent node, because there is no other place to put it
+        if (node.light->range.isPresent)
+        {
+            ainode->mMetaData = aiMetadata::Alloc(1);
+            ainode->mMetaData->Set(0, "PBR_LightRange", node.light->range.value);
+        }
     }
 
     return ainode;
@@ -1150,6 +1225,7 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
     ImportMeshes(asset);
 
     ImportCameras(asset);
+    ImportLights(asset);
 
     ImportNodes(asset);
 

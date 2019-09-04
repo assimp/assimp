@@ -58,13 +58,13 @@ struct aiNode;
 namespace Assimp    {
 
 namespace XFile {
-struct Scene;
-struct Node;
+    struct Scene;
+    struct Node;
 }
 
 // ---------------------------------------------------------------------------
 /** The XFileImporter is a worker class capable of importing a scene from a
- * DirectX file .x
+ *   DirectX file .x
  */
 class XFileImporter : public BaseImporter {
 public:

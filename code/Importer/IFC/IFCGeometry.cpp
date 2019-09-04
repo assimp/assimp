@@ -49,8 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
 
-#include "../contrib/poly2tri/poly2tri/poly2tri.h"
-#include "../contrib/clipper/clipper.hpp"
+#ifdef ASSIMP_USE_HUNTER
+#  include <poly2tri/poly2tri.h>
+#  include <polyclipping/clipper.hpp>
+#else
+#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
+#  include "../contrib/clipper/clipper.hpp"
+#endif
 
 #include <memory>
 #include <iterator>
@@ -123,7 +128,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
         outer_polygon_it = begin + master_bounds;
     }
     else {
-        for(iit = begin; iit != end; iit++) {
+        for(iit = begin; iit != end; ++iit) {
             // find the polygon with the largest area and take it as the outer bound.
             IfcVector3& n = normals[std::distance(begin,iit)];
             const IfcFloat area = n.SquareLength();

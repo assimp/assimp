@@ -85,7 +85,7 @@ static std::string WideToUtf8(const wchar_t* in)
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists(const char* pFile) const
 {
-#if defined(_WIN32) && !defined(WindowsStore)
+#ifdef _WIN32
     struct __stat64 filestat;
     if (_wstat64(Utf8ToWide(pFile).c_str(), &filestat) != 0) {
         return false;
@@ -107,7 +107,7 @@ IOStream* DefaultIOSystem::Open(const char* strFile, const char* strMode)
     ai_assert(strFile != nullptr);
     ai_assert(strMode != nullptr);
     FILE* file;
-#if defined(_WIN32) && !defined(WindowsStore)
+#ifdef _WIN32
     file = ::_wfopen(Utf8ToWide(strFile).c_str(), Utf8ToWide(strMode).c_str());
 #else
     file = ::fopen(strFile, strMode);
@@ -150,21 +150,12 @@ inline static std::string MakeAbsolutePath(const char* in)
     ai_assert(in);
     std::string out;
 #ifdef _WIN32
-#ifndef WindowsStore
     wchar_t* ret = ::_wfullpath(nullptr, Utf8ToWide(in).c_str(), 0);
     if (ret) {
         out = WideToUtf8(ret);
         free(ret);
     }
 #else
-    char* ret = ::_fullpath(nullptr, in, 0);
-    if (ret) {
-        out = ret;
-        free(ret);
-    }
-#endif
-#else
-    // use realpath
     char* ret = realpath(in, nullptr);
     if (ret) {
         out = ret;

@@ -203,7 +203,7 @@ void CGLView::Matrix_NodeToRoot(const aiNode* pNode, aiMatrix4x4& pOutMatrix)
 	}
 
 	// multiply all matrices in reverse order
-    for ( std::list<aiMatrix4x4>::reverse_iterator rit = mat_list.rbegin(); rit != mat_list.rend(); rit++)
+    for ( std::list<aiMatrix4x4>::reverse_iterator rit = mat_list.rbegin(); rit != mat_list.rend(); ++rit)
     {
         pOutMatrix = pOutMatrix * (*rit);
     }
@@ -729,7 +729,7 @@ void CGLView::FreeScene() {
 		GLuint* id_tex = new GLuint[id_tex_size];
 		QMap<QString, GLuint>::iterator it = mTexture_IDMap.begin();
 
-		for(int idx = 0; idx < id_tex_size; idx++, it++)
+		for(int idx = 0; idx < id_tex_size; idx++, ++it)
 		{
 			id_tex[idx] = it.value();
 		}

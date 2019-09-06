@@ -295,7 +295,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
 		{
 			idx[2] = *idx_it;
 			if (idx[2] < 0)
@@ -617,7 +617,7 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 		size_t coord_num = 0;
 
 		ne_alias.CoordIndex.clear();
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
 		{
 			if(*vc_it < 2) throw DeadlyImportError("LineSet. vertexCount shall be greater than or equal to two.");
 

@@ -2001,6 +2001,12 @@ namespace Assimp {
             TrySetTextureProperties(out_mat, textures, "Maya|SpecularTexture", aiTextureType_SPECULAR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|FalloffTexture", aiTextureType_OPACITY, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
+            // Maya PBR
+            TrySetTextureProperties(out_mat, textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
         }
 
         void FBXConverter::SetTextureProperties(aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh)

@@ -334,7 +334,7 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
 			{
 				auto it_old = it;
 
-				it++;
+				++it;
 				face_list_cur.push_back(*it_old);
 				pInputList.erase(it_old);
 			}

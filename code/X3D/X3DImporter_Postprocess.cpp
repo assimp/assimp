@@ -89,7 +89,7 @@ aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const
 void X3DImporter::PostprocessHelper_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, std::list<CX3DImporter_NodeElement*>& pList) const
 {
 	// walk through childs and find for metadata.
-	for(std::list<CX3DImporter_NodeElement*>::const_iterator el_it = pNodeElement.Child.begin(); el_it != pNodeElement.Child.end(); el_it++)
+	for(std::list<CX3DImporter_NodeElement*>::const_iterator el_it = pNodeElement.Child.begin(); el_it != pNodeElement.Child.end(); ++el_it)
 	{
 		if(((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaBoolean) || ((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaDouble) ||
 			((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaFloat) || ((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaInteger) ||
@@ -255,7 +255,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		std::vector<aiVector3D> tarr;
 
 		tarr.reserve(tnemesh.Vertices.size());
-		for(std::list<aiVector3D>::iterator it = tnemesh.Vertices.begin(); it != tnemesh.Vertices.end(); it++) tarr.push_back(*it);
+		for(std::list<aiVector3D>::iterator it = tnemesh.Vertices.begin(); it != tnemesh.Vertices.end(); ++it) tarr.push_back(*it);
 		*pMesh = StandardShapes::MakeMesh(tarr, static_cast<unsigned int>(tnemesh.NumIndices));// create mesh from vertices using Assimp help.
 
 		return;// mesh is build, nothing to do anymore.
@@ -438,7 +438,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 
 				vec_copy.reserve(((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.size());
 				for(std::list<aiVector3D>::const_iterator it = ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.begin();
-					it != ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.end(); it++)
+					it != ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.end(); ++it)
 				{
 					vec_copy.push_back(*it);
 				}
@@ -580,7 +580,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		CX3DImporter_NodeElement_Set& tnemesh = *((CX3DImporter_NodeElement_Set*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
-		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
+		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ++ch_it)
 		{
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Coordinate)
 			{

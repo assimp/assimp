@@ -196,7 +196,7 @@ TEST(IteratorTest, ParamIteratorConformsToForwardIteratorConcept) {
                            << "element same as its source points to";
 
   // Verifies that iterator assignment works as expected.
-  it++;
+  ++it;
   EXPECT_FALSE(*it == *it2);
   it2 = it;
   EXPECT_TRUE(*it == *it2) << "Assigned iterators must point to the "

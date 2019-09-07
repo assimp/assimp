@@ -89,7 +89,7 @@ public:
         scene->mMeshes[ 0 ]->mFaces[ 0 ].mIndices[ 1 ] = 1;
         scene->mMeshes[ 0 ]->mFaces[ 0 ].mIndices[ 2 ] = 2;
 
-        scene->mRootNode = new aiNode;
+        scene->mRootNode = new aiNode();
         scene->mRootNode->mNumMeshes = 1;
         scene->mRootNode->mMeshes = new unsigned int[1]{ 0 };
 

@@ -83,7 +83,7 @@ void AMFImporter::Clear()
 	mMaterial_Converted.clear();
 	mTexture_Converted.clear();
 	// Delete all elements
-	if(mNodeElement_List.size())
+	if(!mNodeElement_List.empty())
 	{
 		for(CAMFImporter_NodeElement* ne: mNodeElement_List) { delete ne; }
 

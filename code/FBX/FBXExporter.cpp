@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <array>
 #include <unordered_set>
+#include <numeric>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -1005,6 +1006,9 @@ void FBXExporter::WriteObjects ()
     object_node.EndProperties(outstream, binary, indent);
     object_node.BeginChildren(outstream, binary, indent);
 
+    bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
+    std::vector<std::vector<int32_t>> vVertexIndice;//save vertex_indices as it is needed later
+
     // geometry (aiMesh)
     mesh_uids.clear();
     indent = 1;
@@ -1031,21 +1035,35 @@ void FBXExporter::WriteObjects ()
         std::vector<int32_t> vertex_indices;
         // map of vertex value to its index in the data vector
         std::map<aiVector3D,size_t> index_by_vertex_value;
-        int32_t index = 0;
-        for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
-            aiVector3D vtx = m->mVertices[vi];
-            auto elem = index_by_vertex_value.find(vtx);
-            if (elem == index_by_vertex_value.end()) {
-                vertex_indices.push_back(index);
-                index_by_vertex_value[vtx] = index;
-                flattened_vertices.push_back(vtx[0]);
-                flattened_vertices.push_back(vtx[1]);
-                flattened_vertices.push_back(vtx[2]);
-                ++index;
-            } else {
-                vertex_indices.push_back(int32_t(elem->second));
+        if(bJoinIdenticalVertices){
+            int32_t index = 0;
+            for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
+                aiVector3D vtx = m->mVertices[vi];
+                auto elem = index_by_vertex_value.find(vtx);
+                if (elem == index_by_vertex_value.end()) {
+                    vertex_indices.push_back(index);
+                    index_by_vertex_value[vtx] = index;
+                    flattened_vertices.push_back(vtx[0]);
+                    flattened_vertices.push_back(vtx[1]);
+                    flattened_vertices.push_back(vtx[2]);
+                    ++index;
+                } else {
+                    vertex_indices.push_back(int32_t(elem->second));
+                }
             }
         }
+        else { // do not join vertex, respect the export flag
+            vertex_indices.resize(m->mNumVertices);
+            std::iota(vertex_indices.begin(), vertex_indices.end(), 0);
+            for(unsigned int v = 0; v < m->mNumVertices; ++ v) {
+                aiVector3D vtx = m->mVertices[v];
+                flattened_vertices.push_back(vtx.x);
+                flattened_vertices.push_back(vtx.y);
+                flattened_vertices.push_back(vtx.z);
+            }
+        }
+        vVertexIndice.push_back(vertex_indices);
+
         FBX::Node::WritePropertyNode(
             "Vertices", flattened_vertices, outstream, binary, indent
         );
@@ -1798,28 +1816,8 @@ void FBXExporter::WriteObjects ()
         // connect it
         connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mi]);
 
-        // we will be indexing by vertex...
-        // but there might be a different number of "vertices"
-        // between assimp and our output FBX.
-        // this code is cut-and-pasted from the geometry section above...
-        // ideally this should not be so.
-        // ---
-        // index of original vertex in vertex data vector
-        std::vector<int32_t> vertex_indices;
-        // map of vertex value to its index in the data vector
-        std::map<aiVector3D,size_t> index_by_vertex_value;
-        int32_t index = 0;
-        for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
-            aiVector3D vtx = m->mVertices[vi];
-            auto elem = index_by_vertex_value.find(vtx);
-            if (elem == index_by_vertex_value.end()) {
-                vertex_indices.push_back(index);
-                index_by_vertex_value[vtx] = index;
-                ++index;
-            } else {
-                vertex_indices.push_back(int32_t(elem->second));
-            }
-        }
+        //computed before
+        std::vector<int32_t>& vertex_indices = vVertexIndice[mi];
 
         // TODO, FIXME: this won't work if anything is not in the bind pose.
         // for now if such a situation is detected, we throw an exception.

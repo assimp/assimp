@@ -380,4 +380,13 @@ TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );
 }
 
+TEST_F( utglTF2ImportExport, crash_in_anim_mesh_destructor ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube.gltf",
+        aiProcess_ValidateDataStructure);
+    ASSERT_NE( nullptr, scene );
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube_out.glTF"));
+}
+
 #endif // ASSIMP_BUILD_NO_EXPORT

@@ -472,7 +472,10 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                 }
 
                 ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
-                exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProperties ? pProperties : &emptyProperties);
+                ExportProperties* pProp = pProperties ? (ExportProperties*)pProperties : &emptyProperties;
+                                pProp->SetPropertyBool("bJoinIdenticalVertices", must_join_again);
+                                exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProp);
+                exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProp);
 
                 pimpl->mProgressHandler->UpdateFileWrite(4, 4);
             } catch (DeadlyExportError& err) {

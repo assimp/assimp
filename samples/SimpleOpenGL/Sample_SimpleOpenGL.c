@@ -26,9 +26,9 @@
 #include <assimp/postprocess.h>
 
 /* the global Assimp scene object */
-const struct aiScene* scene = NULL;
+const aiScene* scene = NULL;
 GLuint scene_list = 0;
-struct aiVector3D scene_min, scene_max, scene_center;
+aiVector3D scene_min, scene_max, scene_center;
 
 /* current rotation angle */
 static float angle = 0.f;
@@ -49,22 +49,22 @@ void reshape(int width, int height)
 }
 
 /* ---------------------------------------------------------------------------- */
-void get_bounding_box_for_node (const struct aiNode* nd,
-	struct aiVector3D* min,
-	struct aiVector3D* max,
-	struct aiMatrix4x4* trafo
+void get_bounding_box_for_node (const aiNode* nd,
+	aiVector3D* min,
+	aiVector3D* max,
+	aiMatrix4x4* trafo
 ){
-	struct aiMatrix4x4 prev;
+	aiMatrix4x4 prev;
 	unsigned int n = 0, t;
 
 	prev = *trafo;
 	aiMultiplyMatrix4(trafo,&nd->mTransformation);
 
 	for (; n < nd->mNumMeshes; ++n) {
-		const struct aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
+		const aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 		for (t = 0; t < mesh->mNumVertices; ++t) {
 
-			struct aiVector3D tmp = mesh->mVertices[t];
+			aiVector3D tmp = mesh->mVertices[t];
 			aiTransformVecByMatrix4(&tmp,trafo);
 
 			min->x = aisgl_min(min->x,tmp.x);
@@ -84,9 +84,9 @@ void get_bounding_box_for_node (const struct aiNode* nd,
 }
 
 /* ---------------------------------------------------------------------------- */
-void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
+void get_bounding_box (aiVector3D* min, aiVector3D* max)
 {
-	struct aiMatrix4x4 trafo;
+	aiMatrix4x4 trafo;
 	aiIdentityMatrix4(&trafo);
 
 	min->x = min->y = min->z =  1e10f;
@@ -95,7 +95,7 @@ void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
 }
 
 /* ---------------------------------------------------------------------------- */
-void color4_to_float4(const struct aiColor4D *c, float f[4])
+void color4_to_float4(const aiColor4D *c, float f[4])
 {
 	f[0] = c->r;
 	f[1] = c->g;
@@ -113,16 +113,16 @@ void set_float4(float f[4], float a, float b, float c, float d)
 }
 
 /* ---------------------------------------------------------------------------- */
-void apply_material(const struct aiMaterial *mtl)
+void apply_material(const aiMaterial *mtl)
 {
 	float c[4];
 
 	GLenum fill_mode;
 	int ret1, ret2;
-	struct aiColor4D diffuse;
-	struct aiColor4D specular;
-	struct aiColor4D ambient;
-	struct aiColor4D emission;
+	aiColor4D diffuse;
+	aiColor4D specular;
+	aiColor4D ambient;
+	aiColor4D emission;
 	ai_real shininess, strength;
 	int two_sided;
 	int wireframe;
@@ -179,11 +179,11 @@ void apply_material(const struct aiMaterial *mtl)
 }
 
 /* ---------------------------------------------------------------------------- */
-void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
+void recursive_render (const aiScene *sc, const aiNode* nd)
 {
 	unsigned int i;
 	unsigned int n = 0, t;
-	struct aiMatrix4x4 m = nd->mTransformation;
+	aiMatrix4x4 m = nd->mTransformation;
 
 	/* update transform */
 	aiTransposeMatrix4(&m);
@@ -192,7 +192,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 
 	/* draw all meshes assigned to this node */
 	for (; n < nd->mNumMeshes; ++n) {
-		const struct aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
+		const aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 
@@ -203,7 +203,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 		}
 
 		for (t = 0; t < mesh->mNumFaces; ++t) {
-			const struct aiFace* face = &mesh->mFaces[t];
+			const aiFace* face = &mesh->mFaces[t];
 			GLenum face_mode;
 
 			switch(face->mNumIndices) {
@@ -324,7 +324,7 @@ int loadasset (const char* path)
 /* ---------------------------------------------------------------------------- */
 int main(int argc, char **argv)
 {
-	struct aiLogStream stream;
+	aiLogStream stream;
 
 	glutInitWindowSize(900,600);
 	glutInitWindowPosition(100,100);

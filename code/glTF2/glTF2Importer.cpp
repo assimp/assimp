@@ -1041,7 +1041,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.rotation.isPresent) {
         anim->mNumRotationKeys = 1;
-        anim->mRotationKeys = new aiQuatKey();
+        anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
         anim->mRotationKeys->mTime = 0.f;
         anim->mRotationKeys->mValue.x = node.rotation.value[0];
         anim->mRotationKeys->mValue.y = node.rotation.value[1];
@@ -1064,7 +1064,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.scale.isPresent) {
         anim->mNumScalingKeys = 1;
-        anim->mScalingKeys = new aiVectorKey();
+        anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
         anim->mScalingKeys->mTime = 0.f;
         anim->mScalingKeys->mValue.x = node.scale.value[0];
         anim->mScalingKeys->mValue.y = node.scale.value[1];
@@ -1130,6 +1130,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
 
         // Use the latest keyframe for the duration of the animation
         double maxDuration = 0;
+        unsigned int maxNumberOfKeys = 0;
         for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
             auto chan = ai_anim->mChannels[j];
             if (chan->mNumPositionKeys) {
@@ -1137,21 +1138,25 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
                 if (lastPosKey.mTime > maxDuration) {
                     maxDuration = lastPosKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumPositionKeys);
             }
             if (chan->mNumRotationKeys) {
                 auto lastRotKey = chan->mRotationKeys[chan->mNumRotationKeys - 1];
                 if (lastRotKey.mTime > maxDuration) {
                     maxDuration = lastRotKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumRotationKeys);
             }
             if (chan->mNumScalingKeys) {
                 auto lastScaleKey = chan->mScalingKeys[chan->mNumScalingKeys - 1];
                 if (lastScaleKey.mTime > maxDuration) {
                     maxDuration = lastScaleKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumScalingKeys);
             }
         }
         ai_anim->mDuration = maxDuration;
+        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? (maxNumberOfKeys / (maxDuration/1000)) : 30;
 
         mScene->mAnimations[i] = ai_anim;
     }

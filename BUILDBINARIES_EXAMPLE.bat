@@ -5,6 +5,9 @@
 
 :: NOTE
 :: The build process will generate a config.h file that is placed in BINARIES_DIR\include
+:: This file must be merged with SOURCE_DIR\include
+:: You should write yourself a script that copies the files where you want them.
+:: Also see: https://github.com/assimp/assimp/pull/2646
 
 SET SOURCE_DIR=.
 

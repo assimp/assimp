@@ -244,8 +244,8 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     size_t index = 0;
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
     if ( *m_DataIt == '\\' ) {
-        m_DataIt++;
-        m_DataIt++;
+        ++m_DataIt;
+        ++m_DataIt;
         m_DataIt = getNextWord<DataArrayIt>( m_DataIt, m_DataItEnd );
     }
     while( m_DataIt != m_DataItEnd && !IsSpaceOrNewLine( *m_DataIt ) ) {

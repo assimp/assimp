@@ -89,7 +89,7 @@ void X3DImporter::ParseNode_Texturing_ImageTexture()
 		((CX3DImporter_NodeElement_ImageTexture*)ne)->RepeatS = repeatS;
 		((CX3DImporter_NodeElement_ImageTexture*)ne)->RepeatT = repeatT;
 		// Attribute "url" can contain list of strings. But we need only one - first.
-		if(url.size() > 0)
+		if(!url.empty())
 			((CX3DImporter_NodeElement_ImageTexture*)ne)->URL = url.front();
 		else
 			((CX3DImporter_NodeElement_ImageTexture*)ne)->URL = "";

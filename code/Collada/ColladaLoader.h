@@ -120,7 +120,7 @@ protected:
     void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode,
         aiNode* pTarget);
 		
-    aiMesh *findMesh(std::string meshid);
+    aiMesh *findMesh(const std::string& meshid);
 
     /** Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh */
     aiMesh* CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,

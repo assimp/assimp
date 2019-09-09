@@ -66,7 +66,7 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
     aiColor4D tcol;
 
 	// Check if stored data are supported.
-	if(Composition.size() != 0)
+	if(!Composition.empty())
 	{
 		throw DeadlyImportError("IME. GetColor for composition");
 	}
@@ -321,7 +321,7 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
     };
 
 	pOutputList_Separated.clear();
-	if(pInputList.size() == 0) return;
+	if(pInputList.empty()) return;
 
 	do
 	{
@@ -334,19 +334,19 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
 			{
 				auto it_old = it;
 
-				it++;
+				++it;
 				face_list_cur.push_back(*it_old);
 				pInputList.erase(it_old);
 			}
 			else
 			{
-				it++;
+				++it;
 			}
 		}
 
-		if(face_list_cur.size() > 0) pOutputList_Separated.push_back(face_list_cur);
+		if(!face_list_cur.empty()) pOutputList_Separated.push_back(face_list_cur);
 
-	} while(pInputList.size() > 0);
+	} while(!pInputList.empty());
 }
 
 void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeElement_Metadata*>& metadataList, aiNode& sceneNode) const
@@ -712,7 +712,7 @@ std::list<unsigned int> mesh_idx;
 	}// for(const CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
 
 	// if meshes was created then assign new indices with current aiNode
-	if(mesh_idx.size() > 0)
+	if(!mesh_idx.empty())
 	{
 		std::list<unsigned int>::const_iterator mit = mesh_idx.begin();
 
@@ -787,7 +787,7 @@ std::list<aiNode*> ch_node;
 	}// for(const CAMFImporter_NodeElement* ne: pConstellation.Child)
 
 	// copy found aiNode's as children
-	if(ch_node.size() == 0) throw DeadlyImportError("<constellation> must have at least one <instance>.");
+	if(ch_node.empty()) throw DeadlyImportError("<constellation> must have at least one <instance>.");
 
 	size_t ch_idx = 0;
 
@@ -883,13 +883,13 @@ nl_clean_loop:
 	if(node_list.size() > 1)
 	{
 		// walk through all nodes
-		for(std::list<aiNode*>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); nl_it++)
+		for(std::list<aiNode*>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); ++nl_it)
 		{
 			// and try to find them in another top nodes.
 			std::list<aiNode*>::const_iterator next_it = nl_it;
 
-			next_it++;
-			for(; next_it != node_list.end(); next_it++)
+			++next_it;
+			for(; next_it != node_list.end(); ++next_it)
 			{
 				if((*next_it)->FindNode((*nl_it)->mName) != nullptr)
 				{
@@ -907,7 +907,7 @@ nl_clean_loop:
 	//
 	//
 	// Nodes
-	if(node_list.size() > 0)
+	if(!node_list.empty())
 	{
 		std::list<aiNode*>::const_iterator nl_it = node_list.begin();
 
@@ -924,7 +924,7 @@ nl_clean_loop:
 
 	//
 	// Meshes
-	if(mesh_list.size() > 0)
+	if(!mesh_list.empty())
 	{
 		std::list<aiMesh*>::const_iterator ml_it = mesh_list.begin();
 

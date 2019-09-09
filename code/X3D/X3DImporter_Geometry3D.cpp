@@ -153,11 +153,11 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		{
 			StandardShapes::MakeCircle(bottomRadius, tess, tvec);
 			height = -(height / 2);
-			for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); it++) it->y = height;// y - because circle made in oXZ.
+			for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it) it->y = height;// y - because circle made in oXZ.
 		}
 
 		// copy data from temp array
-		for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); it++) ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it);
+		for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it) ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it);
 
 		((CX3DImporter_NodeElement_Geometry3D*)ne)->Solid = solid;
 		((CX3DImporter_NodeElement_Geometry3D*)ne)->NumIndices = 3;
@@ -226,11 +226,11 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		// copy data from temp arrays
 		std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices;// just short alias.
 
-		for(std::vector<aiVector3D>::iterator it = tside.begin(); it != tside.end(); it++) vlist.push_back(*it);
+		for(std::vector<aiVector3D>::iterator it = tside.begin(); it != tside.end(); ++it) vlist.push_back(*it);
 
 		if(top)
 		{
-			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); it++)
+			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it)
 			{
 				(*it).y = height;// y - because circle made in oXZ.
 				vlist.push_back(*it);
@@ -239,7 +239,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 
 		if(bottom)
 		{
-			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); it++)
+			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it)
 			{
 				(*it).y = -height;// y - because circle made in oXZ.
 				vlist.push_back(*it);
@@ -336,7 +336,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 					aiVector3D tvec(xSpacing * xi, *he_it, zSpacing * zi);
 
 					grid_alias.Vertices.push_back(tvec);
-					he_it++;
+					++he_it;
 				}
 			}
 		}// END: create grid vertices list
@@ -977,7 +977,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 
 		StandardShapes::MakeSphere(tess, tlist);
 		// copy data from temp array and apply scale
-		for(std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); it++)
+		for(std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it)
 		{
 			((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it * radius);
 		}

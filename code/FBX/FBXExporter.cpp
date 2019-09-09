@@ -1134,6 +1134,51 @@ void FBXExporter::WriteObjects ()
             normals.End(outstream, binary, indent, true);
         }
 
+        // colors, if any
+        // TODO only one color channel currently
+        const int32_t colorChannelIndex = 0;
+        if (m->HasVertexColors(colorChannelIndex)) {
+            FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
+            vertexcolors.Begin(outstream, binary, indent);
+            vertexcolors.DumpProperties(outstream, binary, indent);
+            vertexcolors.EndProperties(outstream, binary, indent);
+            vertexcolors.BeginChildren(outstream, binary, indent);
+            indent = 3;
+            FBX::Node::WritePropertyNode(
+                "Version", int32_t(101), outstream, binary, indent
+            );
+            char layerName[8];
+            sprintf(layerName, "COLOR_%d", colorChannelIndex);
+            FBX::Node::WritePropertyNode(
+                "Name", (const char*)layerName, outstream, binary, indent
+            );
+            FBX::Node::WritePropertyNode(
+                "MappingInformationType", "ByPolygonVertex",
+                outstream, binary, indent
+            );
+            FBX::Node::WritePropertyNode(
+                "ReferenceInformationType", "Direct",
+                outstream, binary, indent
+            );
+            std::vector<double> color_data;
+            color_data.reserve(4 * polygon_data.size());
+            for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
+                const aiFace &f = m->mFaces[fi];
+                for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
+                    const aiColor4D &c = m->mColors[colorChannelIndex][f.mIndices[pvi]];
+                    color_data.push_back(c.r);
+                    color_data.push_back(c.g);
+                    color_data.push_back(c.b);
+                    color_data.push_back(c.a);
+                }
+            }
+            FBX::Node::WritePropertyNode(
+                "Colors", color_data, outstream, binary, indent
+            );
+            indent = 2;
+            vertexcolors.End(outstream, binary, indent, true);
+        }
+        
         // uvs, if any
         for (size_t uvi = 0; uvi < m->GetNumUVChannels(); ++uvi) {
             if (m->mNumUVComponents[uvi] > 2) {
@@ -1225,6 +1270,11 @@ void FBXExporter::WriteObjects ()
         layer.AddChild("Version", int32_t(100));
         FBX::Node le("LayerElement");
         le.AddChild("Type", "LayerElementNormal");
+        le.AddChild("TypedIndex", int32_t(0));
+        layer.AddChild(le);
+        // TODO only 1 color channel currently
+        le = FBX::Node("LayerElement");
+        le.AddChild("Type", "LayerElementColor");
         le.AddChild("TypedIndex", int32_t(0));
         layer.AddChild(le);
         le = FBX::Node("LayerElement");
@@ -2433,7 +2483,7 @@ void FBXExporter::WriteModelNodes(
 void FBXExporter::WriteAnimationCurveNode(
     StreamWriterLE& outstream,
     int64_t uid,
-    std::string name, // "T", "R", or "S"
+    const std::string& name, // "T", "R", or "S"
     aiVector3D default_value,
     std::string property_name, // "Lcl Translation" etc
     int64_t layer_uid,

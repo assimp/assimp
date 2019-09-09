@@ -3,6 +3,9 @@
 
 :: Compiled binaries will be placed in BINARIES_DIR\code\CONFIG
 
+:: NOTE
+:: The build process will generate a config.h file that is placed in BINARIES_DIR\include
+
 SET SOURCE_DIR=.
 
 :: For generators see "cmake --help"

@@ -215,7 +215,7 @@ TEST(IteratorTest, ParamIteratorConformsToForwardIteratorConcept) {
   // Verifies that prefix and postfix operator++() advance an iterator
   // all the same.
   it2 = it;
-  it++;
+  ++it;
   ++it2;
   EXPECT_TRUE(*it == *it2);
 }

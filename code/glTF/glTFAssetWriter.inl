@@ -55,7 +55,8 @@ namespace glTF {
     namespace {
 
         template<size_t N>
-        inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
+        inline 
+        Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
             for (decltype(N) i = 0; i < N; ++i) {
@@ -64,7 +65,8 @@ namespace glTF {
             return val;
         }
 
-        inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
+        inline 
+        Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
             for (unsigned int i = 0; i < r.size(); ++i) {

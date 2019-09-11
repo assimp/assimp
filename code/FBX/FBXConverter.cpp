@@ -2735,7 +2735,6 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             NodeMap::const_iterator chain[TransformationComp_MAXIMUM];
 
             bool has_any = false;
-            bool has_complex = false;
 
             for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
                 const TransformationComp comp = static_cast<TransformationComp>(i);
@@ -2759,11 +2758,6 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                     }
 
                     has_any = true;
-
-                    if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation)
-                    {
-                        has_complex = true;
-                    }
                 }
             }
 
@@ -2772,159 +2766,23 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 return;
             }
 
-            // this needs to play nicely with GenerateTransformationNodeChain() which will
-            // be invoked _later_ (animations come first). If this node has only rotation,
-            // scaling and translation _and_ there are no animated other components either,
-            // we can use a single node and also a single node animation channel.
-            if (!has_complex && !NeedsComplexTransformationChain(target)) {
+            aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain,
+                node_property_map.end(),
+                layer_map,
+                start, stop,
+                max_time,
+                min_time,
+                true // input is TRS order, assimp is SRT
+            );
 
-                aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain,
-                    node_property_map.end(),
-                    layer_map,
-                    start, stop,
-                    max_time,
-                    min_time,
-                    true // input is TRS order, assimp is SRT
-                );
-
-                ai_assert(nd);
-                if (nd->mNumPositionKeys == 0 && nd->mNumRotationKeys == 0 && nd->mNumScalingKeys == 0) {
-                    delete nd;
-                }
-                else {
-                    node_anims.push_back(nd);
-                }
-                return;
+            ai_assert(nd);
+            if (nd->mNumPositionKeys == 0 && nd->mNumRotationKeys == 0 && nd->mNumScalingKeys == 0) {
+                delete nd;
             }
-
-            // otherwise, things get gruesome and we need separate animation channels
-            // for each part of the transformation chain. Remember which channels
-            // we generated and pass this information to the node conversion
-            // code to avoid nodes that have identity transform, but non-identity
-            // animations, being dropped.
-            unsigned int flags = 0, bit = 0x1;
-            for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i, bit <<= 1) {
-                const TransformationComp comp = static_cast<TransformationComp>(i);
-
-                if (chain[i] != node_property_map.end()) {
-                    flags |= bit;
-
-                    ai_assert(comp != TransformationComp_RotationPivotInverse);
-                    ai_assert(comp != TransformationComp_ScalingPivotInverse);
-
-                    const std::string& chain_name = NameTransformationChainNode(fixed_name, comp);
-
-                    aiNodeAnim* na = nullptr;
-                    switch (comp)
-                    {
-                    case TransformationComp_Rotation:
-                    case TransformationComp_PreRotation:
-                    case TransformationComp_PostRotation:
-                    case TransformationComp_GeometricRotation:
-                        na = GenerateRotationNodeAnim(chain_name,
-                            target,
-                            (*chain[i]).second,
-                            layer_map,
-                            start, stop,
-                            max_time,
-                            min_time);
-
-                        break;
-
-                    case TransformationComp_RotationOffset:
-                    case TransformationComp_RotationPivot:
-                    case TransformationComp_ScalingOffset:
-                    case TransformationComp_ScalingPivot:
-                    case TransformationComp_Translation:
-                    case TransformationComp_GeometricTranslation:
-                        na = GenerateTranslationNodeAnim(chain_name,
-                            target,
-                            (*chain[i]).second,
-                            layer_map,
-                            start, stop,
-                            max_time,
-                            min_time);
-
-                        // pivoting requires us to generate an implicit inverse channel to undo the pivot translation
-                        if (comp == TransformationComp_RotationPivot) {
-                            const std::string& invName = NameTransformationChainNode(fixed_name,
-                                TransformationComp_RotationPivotInverse);
-
-                            aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName,
-                                target,
-                                (*chain[i]).second,
-                                layer_map,
-                                start, stop,
-                                max_time,
-                                min_time,
-                                true);
-
-                            ai_assert(inv);
-                            if (inv->mNumPositionKeys == 0 && inv->mNumRotationKeys == 0 && inv->mNumScalingKeys == 0) {
-                                delete inv;
-                            }
-                            else {
-                                node_anims.push_back(inv);
-                            }
-
-                            ai_assert(TransformationComp_RotationPivotInverse > i);
-                            flags |= bit << (TransformationComp_RotationPivotInverse - i);
-                        }
-                        else if (comp == TransformationComp_ScalingPivot) {
-                            const std::string& invName = NameTransformationChainNode(fixed_name,
-                                TransformationComp_ScalingPivotInverse);
-
-                            aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName,
-                                target,
-                                (*chain[i]).second,
-                                layer_map,
-                                start, stop,
-                                max_time,
-                                min_time,
-                                true);
-
-                            ai_assert(inv);
-                            if (inv->mNumPositionKeys == 0 && inv->mNumRotationKeys == 0 && inv->mNumScalingKeys == 0) {
-                                delete inv;
-                            }
-                            else {
-                                node_anims.push_back(inv);
-                            }
-
-                            ai_assert(TransformationComp_RotationPivotInverse > i);
-                            flags |= bit << (TransformationComp_RotationPivotInverse - i);
-                        }
-
-                        break;
-
-                    case TransformationComp_Scaling:
-                    case TransformationComp_GeometricScaling:
-                        na = GenerateScalingNodeAnim(chain_name,
-                            target,
-                            (*chain[i]).second,
-                            layer_map,
-                            start, stop,
-                            max_time,
-                            min_time);
-
-                        break;
-
-                    default:
-                        ai_assert(false);
-                    }
-
-                    ai_assert(na);
-                    if (na->mNumPositionKeys == 0 && na->mNumRotationKeys == 0 && na->mNumScalingKeys == 0) {
-                        delete na;
-                    }
-                    else {
-                        node_anims.push_back(na);
-                    }
-                    continue;
-                }
+            else {
+                node_anims.push_back(nd);
             }
-
-            node_anim_chain_bits[fixed_name] = flags;
+            
         }
 
 

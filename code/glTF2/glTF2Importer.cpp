@@ -705,9 +705,11 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
             aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * aicam->mAspect;
             aicam->mClipPlaneFar  = cam.cameraProperties.perspective.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.perspective.znear;
-        }
-        else {
-            // assimp does not support orthographic cameras
+        } else {
+            aicam->mClipPlaneFar = cam.ortographic.zfar;
+            aicam->mClipPlaneNear = cam.ortographic.znear;
+            aicam->mHorizontalFOV = 0.0;
+            aicam->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
         }
     }
 }

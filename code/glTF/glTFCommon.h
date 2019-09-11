@@ -128,46 +128,53 @@ namespace glTFCommon {
     typedef float(vec4)[4];
     typedef float(mat4)[16];
 
-    static void CopyValue(const glTFCommon::vec3& v, aiColor4D& out) {
+    inline
+    void CopyValue(const glTFCommon::vec3& v, aiColor4D& out) {
         out.r = v[0];
         out.g = v[1];
         out.b = v[2];
         out.a = 1.0;
     }
 
-    static void CopyValue(const glTFCommon::vec4& v, aiColor4D& out) {
+    inline
+    void CopyValue(const glTFCommon::vec4& v, aiColor4D& out) {
         out.r = v[0];
         out.g = v[1];
         out.b = v[2];
         out.a = v[3];
     }
 
-    static void CopyValue(const glTFCommon::vec4& v, aiColor3D& out) {
+    inline
+    void CopyValue(const glTFCommon::vec4& v, aiColor3D& out) {
         out.r = v[0];
         out.g = v[1];
         out.b = v[2];
     }
 
-    static void CopyValue(const glTFCommon::vec3& v, aiColor3D& out) {
+    inline
+    void CopyValue(const glTFCommon::vec3& v, aiColor3D& out) {
         out.r = v[0];
         out.g = v[1];
         out.b = v[2];
     }
 
-    static void CopyValue(const glTFCommon::vec3& v, aiVector3D& out) {
+    inline
+    void CopyValue(const glTFCommon::vec3& v, aiVector3D& out) {
         out.x = v[0];
         out.y = v[1];
         out.z = v[2];
     }
 
-    static void CopyValue(const glTFCommon::vec4& v, aiQuaternion& out) {
+    inline
+    void CopyValue(const glTFCommon::vec4& v, aiQuaternion& out) {
         out.x = v[0];
         out.y = v[1];
         out.z = v[2];
         out.w = v[3];
     }
 
-    static void CopyValue(const glTFCommon::mat4& v, aiMatrix4x4& o) {
+    inline
+    void CopyValue(const glTFCommon::mat4& v, aiMatrix4x4& o) {
         o.a1 = v[0]; o.b1 = v[1]; o.c1 = v[2]; o.d1 = v[3];
         o.a2 = v[4]; o.b2 = v[5]; o.c2 = v[6]; o.d2 = v[7];
         o.a3 = v[8]; o.b3 = v[9]; o.c3 = v[10]; o.d3 = v[11];

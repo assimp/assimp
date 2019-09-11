@@ -102,3 +102,8 @@ tools/assimp_qt_viewer/moc_glview.cpp_parameters
 tools/assimp_qt_viewer/moc_mainwindow.cpp
 tools/assimp_qt_viewer/moc_mainwindow.cpp_parameters
 tools/assimp_qt_viewer/ui_mainwindow.h
+
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja

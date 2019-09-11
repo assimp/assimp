@@ -115,39 +115,6 @@ bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
     return false;
 }
 
-static void CopyValue(const glTF::vec4& v, aiColor4D& out) {
-    out.r = v[0];
-    out.g = v[1];
-    out.b = v[2];
-    out.a = v[3];
-}
-
-static void CopyValue(const glTF::vec4& v, aiColor3D& out) {
-    out.r = v[0];
-    out.g = v[1];
-    out.b = v[2];
-}
-
-static void CopyValue(const glTF::vec3& v, aiVector3D& out) {
-    out.x = v[0];
-    out.y = v[1];
-    out.z = v[2];
-}
-
-static void CopyValue(const glTF::vec4& v, aiQuaternion& out) {
-    out.x = v[0];
-    out.y = v[1];
-    out.z = v[2];
-    out.w = v[3];
-}
-
-static void CopyValue(const glTF::mat4& v, aiMatrix4x4& o) {
-    o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
-    o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
-    o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
-    o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}
-
 inline
 void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /*r*/, glTF::TexProperty prop, aiMaterial* mat,
         aiTextureType texType, const char* pKey, unsigned int type, unsigned int idx) {

@@ -706,10 +706,10 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
             aicam->mClipPlaneFar  = cam.cameraProperties.perspective.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.perspective.znear;
         } else {
-            aicam->mClipPlaneFar = cam.ortographic.zfar;
-            aicam->mClipPlaneNear = cam.ortographic.znear;
+            aicam->mClipPlaneFar = cam.cameraProperties.ortographic.zfar;
+            aicam->mClipPlaneNear = cam.cameraProperties.ortographic.znear;
             aicam->mHorizontalFOV = 0.0;
-            aicam->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
+            aicam->mAspect = cam.cameraProperties.ortographic.xmag / cam.cameraProperties.ortographic.ymag;
         }
     }
 }

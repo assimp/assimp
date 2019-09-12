@@ -274,8 +274,8 @@ def hasattr_silent(object, name):
     """
 
     try:
-	    if not object:
-		    return False
+        if not object:
+            return False
         return hasattr(object, name)
     except AttributeError:
         return False

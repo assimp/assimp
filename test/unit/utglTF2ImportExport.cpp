@@ -375,6 +375,13 @@ TEST_F( utglTF2ImportExport, bug_import_simple_skin ) {
     EXPECT_NE( nullptr, scene );
 }
 
+TEST_F(utglTF2ImportExport, import_cameras) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/cameras/Cameras.gltf",
+        aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );

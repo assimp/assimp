@@ -218,7 +218,7 @@ namespace glTF2 {
             if (img.HasData()) {
                 uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
                 uri += ";base64,";
-                Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+                glTFCommon::Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
             }
             else {
                 uri = img.uri;

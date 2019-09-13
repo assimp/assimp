@@ -49,7 +49,7 @@ void reshape(int width, int height)
 }
 
 /* ---------------------------------------------------------------------------- */
-void get_bounding_box_for_node (const a<C_STRUCT iNode* nd,
+void get_bounding_box_for_node (const C_STRUCT aiNode* nd,
 	C_STRUCT aiVector3D* min,
 	C_STRUCT aiVector3D* max,
 	C_STRUCT aiMatrix4x4* trafo
@@ -86,7 +86,7 @@ void get_bounding_box_for_node (const a<C_STRUCT iNode* nd,
 /* ---------------------------------------------------------------------------- */
 void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max)
 {
-	aiMatrix4x4 trafo;
+	C_STRUCT aiMatrix4x4 trafo;
 	aiIdentityMatrix4(&trafo);
 
 	min->x = min->y = min->z =  1e10f;

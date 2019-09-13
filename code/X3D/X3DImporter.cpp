@@ -614,7 +614,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol3f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListCol3f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
 		for(std::list<aiColor3D>::iterator it = tlist.begin(); it != tlist.end(); ++it) pValue.push_back(*it);

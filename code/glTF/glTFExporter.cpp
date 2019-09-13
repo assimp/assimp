@@ -242,7 +242,10 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
 
 namespace {
     void GetMatScalar(const aiMaterial* mat, float& val, const char* propName, int type, int idx) {
-        ai_assert(mat->Get(propName, type, idx, val) == AI_SUCCESS);
+        ai_assert( nullptr != mat );
+        if ( nullptr != mat ) {
+            mat->Get(propName, type, idx, val);
+        }
     }
 }
 

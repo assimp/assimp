@@ -276,3 +276,13 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(968029u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
 }
+
+TEST_F(utFBXImporterExporter, fbxTokenizeTestTest) {
+    Assimp::Importer importer1;
+    const aiScene* scene1 = importer1.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/transparentTest.fbx", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene1);
+
+    Assimp::Importer importer2;
+    const aiScene* scene2 = importer2.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/transparentTest2.fbx", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene2);
+}

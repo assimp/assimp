@@ -475,14 +475,17 @@ void glTFImporter::ImportCameras(glTF::Asset& r) {
 
         if (cam.type == Camera::Perspective) {
             aicam->mAspect        = cam.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.perspective.yfov * aicam->mAspect;
+            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar  = cam.perspective.zfar;
             aicam->mClipPlaneNear = cam.perspective.znear;
         } else {
             aicam->mClipPlaneFar = cam.ortographic.zfar;
             aicam->mClipPlaneNear = cam.ortographic.znear;
             aicam->mHorizontalFOV = 0.0;
-            aicam->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
+            aicam->mAspect = 1.0f;
+            if (0.f != cam.cameraProperties.ortographic.ymag) {
+                aicam->mAspect = cam.cameraProperties.ortographic.xmag / cam.cameraProperties.ortographic.ymag;
+            }
         }
     }
 }

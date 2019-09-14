@@ -1180,8 +1180,12 @@ inline void Light::SetDefaults()
     falloffExponent = 0.f;
 }
 
-inline void Node::Read(Value& obj, Asset& r)
-{
+inline 
+void Node::Read(Value& obj, Asset& r) {
+    if (name.empty()) {
+        name = id;
+    }
+
     if (Value* children = FindArray(obj, "children")) {
         this->children.reserve(children->Size());
         for (unsigned int i = 0; i < children->Size(); ++i) {

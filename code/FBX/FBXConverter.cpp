@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 
 #include <assimp/StringComparison.h>
+#include <assimp/MathFunctions.h>
 
 #include <assimp/scene.h>
 
@@ -553,7 +554,7 @@ namespace Assimp {
                 return;
             }
 
-            const float angle_epsilon = 1e-6f;
+            const float angle_epsilon = Math::getEpsilon<float>();
 
             out = aiMatrix4x4();
 

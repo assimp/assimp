@@ -2,7 +2,7 @@
 build
 .project
 *.kdev4*
-
+*.o
 # Visual Studio
 *.sln
 *.ncb

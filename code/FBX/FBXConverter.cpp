@@ -695,7 +695,7 @@ namespace Assimp {
             std::fill_n(chain, static_cast<unsigned int>(TransformationComp_MAXIMUM), aiMatrix4x4());
 
             // generate transformation matrices for all the different transformation components
-            const float zero_epsilon = 1e-6f;
+            const float zero_epsilon = Math::getEpsilon<float>();
             const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
 
             const aiVector3D& PreRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
@@ -2968,7 +2968,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 TransformationCompDefaultValue(comp)
                 );
 
-            const float epsilon = 1e-6f;
+            const float epsilon = Math::getEpsilon<float>();
             return (dyn_val - static_val).SquareLength() < epsilon;
         }
 

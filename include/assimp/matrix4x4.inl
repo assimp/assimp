@@ -441,7 +441,7 @@ void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TRea
 	*/
 
 	// Use a small epsilon to solve floating-point inaccuracies
-    const TReal epsilon = Math::getEpsilon<TReal>();
+    const TReal epsilon = Assimp::Math::getEpsilon<TReal>();
 
 	pRotation.y  = std::asin(-vCols[0].z);// D. Angle around oY.
 

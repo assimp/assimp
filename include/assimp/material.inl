@@ -49,8 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MATERIAL_INL_INC
 #define AI_MATERIAL_INL_INC
 
-#include <assimp/MathFunctions.h>
-
 // ---------------------------------------------------------------------------
 inline aiPropertyTypeInfo ai_real_to_property_type_info(float)
 {

@@ -702,14 +702,17 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
         if (cam.type == Camera::Perspective) {
 
             aicam->mAspect        = cam.cameraProperties.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * aicam->mAspect;
+            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar  = cam.cameraProperties.perspective.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.perspective.znear;
         } else {
             aicam->mClipPlaneFar = cam.cameraProperties.ortographic.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.ortographic.znear;
             aicam->mHorizontalFOV = 0.0;
-            aicam->mAspect = cam.cameraProperties.ortographic.xmag / cam.cameraProperties.ortographic.ymag;
+            aicam->mAspect = 1.0f;
+            if (0.f != cam.cameraProperties.ortographic.ymag ) {
+                aicam->mAspect = cam.cameraProperties.ortographic.xmag / cam.cameraProperties.ortographic.ymag;
+            }
         }
     }
 }
@@ -905,6 +908,9 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                 std::vector<std::vector<aiVertexWeight>> weighting(mesh->mNumBones);
                 BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
 
+                mat4* pbindMatrices = nullptr;
+                node.skin->inverseBindMatrices->ExtractData(pbindMatrices);
+
                 for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
                     aiBone* bone = new aiBone();
 
@@ -920,6 +926,8 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                     }
                     GetNodeTransform(bone->mOffsetMatrix, *joint);
 
+                    CopyValue(pbindMatrices[i], bone->mOffsetMatrix);
+
                     std::vector<aiVertexWeight>& weights = weighting[i];
 
                     bone->mNumWeights = static_cast<uint32_t>(weights.size());
@@ -934,6 +942,10 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                       bone->mWeights->mWeight = 0.f;
                     }
                     mesh->mBones[i] = bone;
+                }
+
+                if (pbindMatrices) {
+                    delete[] pbindMatrices;
                 }
             }
         }

@@ -1098,8 +1098,11 @@ inline void Light::Read(Value& obj, Asset& /*r*/)
     }
 }
 
-inline void Node::Read(Value& obj, Asset& r)
-{
+inline 
+void Node::Read(Value& obj, Asset& r) {
+    if (name.empty()) {
+        name = id;
+    }
 
     if (Value* children = FindArray(obj, "children")) {
         this->children.reserve(children->Size());

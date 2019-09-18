@@ -122,7 +122,8 @@ public:
         Translation,
         Rotation,
         Scale,
-        Maximum
+        UNKNOWN,
+        Maximum        
     };
 
 
@@ -321,7 +322,6 @@ private:
         const std::string& fixed_name,
         const std::vector<const AnimationCurveNode*>& curves,
         const LayerMap& layer_map,
-        int64_t start, int64_t stop,
         double& max_time,
         double& min_time);
 

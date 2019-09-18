@@ -691,21 +691,8 @@ public:
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
     virtual ~AnimationCurve();
 
-    /** get list of keyframe positions (time).
-     *  Invariant: |GetKeys()| > 0 */
-    /* Get Keys for this animation curve */
-    
-    // const KeyTimeList& GetKeys() const {
-    //     return NULL;
-    // }
-
-    // /** get list of keyframe values.
-    //   * Invariant: |GetKeys()| == |GetValues()| && |GetKeys()| > 0*/
-    // const KeyValueList& GetValues() const {
-    //     return NULL;
-    // }
-
-    const std::map<int64_t, float>& get_keyframes()
+    /* Return dictionary of the keyframe data */
+    const std::map<int64_t, float>& GetKeyframeData() const
     {
         return time_values;
     }

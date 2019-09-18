@@ -95,38 +95,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/StringUtils.h>
 
+#include "glTF/glTFCommon.h"
+
 namespace glTF2
 {
-#ifdef ASSIMP_API
-    using Assimp::IOStream;
-    using Assimp::IOSystem;
-    using std::shared_ptr;
-#else
-    using std::shared_ptr;
-
-    typedef std::runtime_error DeadlyImportError;
-    typedef std::runtime_error DeadlyExportError;
-
-    enum aiOrigin { aiOrigin_SET = 0, aiOrigin_CUR = 1, aiOrigin_END = 2 };
-    class IOSystem;
-    class IOStream
-    {
-        FILE* f;
-    public:
-        IOStream(FILE* file) : f(file) {}
-        ~IOStream() { fclose(f); f = 0; }
-
-        size_t Read(void* b, size_t sz, size_t n) { return fread(b, sz, n, f); }
-        size_t Write(const void* b, size_t sz, size_t n) { return fwrite(b, sz, n, f); }
-        int    Seek(size_t off, aiOrigin orig) { return fseek(f, off, int(orig)); }
-        size_t Tell() const { return ftell(f); }
-
-        size_t FileSize() {
-            long p = Tell(), len = (Seek(0, aiOrigin_END), Tell());
-            return size_t((Seek(p, aiOrigin_SET), len));
-        }
-    };
-#endif
+    using glTFCommon::shared_ptr;
+    using glTFCommon::IOSystem;
+    using glTFCommon::IOStream;
 
     using rapidjson::Value;
     using rapidjson::Document;
@@ -138,35 +113,9 @@ namespace glTF2
     struct Texture;
     struct Skin;
 
-    // Vec/matrix types, as raw float arrays
-    typedef float (vec3)[3];
-    typedef float (vec4)[4];
-    typedef float (mat4)[16];
-
-    namespace Util
-    {
-        void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out);
-
-        size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
-
-        inline size_t DecodeBase64(const char* in, uint8_t*& out)
-        {
-            return DecodeBase64(in, strlen(in), out);
-        }
-
-        struct DataURI
-        {
-            const char* mediaType;
-            const char* charset;
-            bool base64;
-            const char* data;
-            size_t dataLength;
-        };
-
-        //! Check if a uri is a data URI
-        inline bool ParseDataURI(const char* uri, size_t uriLen, DataURI& out);
-    }
-
+    using glTFCommon::vec3;
+    using glTFCommon::vec4;
+    using glTFCommon::mat4;
 
     //! Magic number for GLB files
 	#define AI_GLB_MAGIC_NUMBER "glTF"
@@ -552,7 +501,7 @@ namespace glTF2
 		/// but in real life you'll get:
 		/// "accessor_0" : { byteOffset: 0, byteLength: 4}, "accessor_1" : { byteOffset: 2, byteLength: 4}
 		/// Yes, accessor of next mesh has offset and length which mean: current mesh data is decoded, all other data is encoded.
-		/// And when before you start to read data of current mesh (with encoded data ofcourse) you must decode region of "bufferView", after read finished
+		/// And when before you start to read data of current mesh (with encoded data of course) you must decode region of "bufferView", after read finished
 		/// delete encoding mark. And after that you can repeat process: decode data of mesh, read, delete decoded data.
 		///
 		/// Remark. Encoding all data at once is good in world with computers which do not has RAM limitation. So, you must use step by step encoding in

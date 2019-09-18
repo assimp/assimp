@@ -79,7 +79,10 @@ using namespace std;
 ObjFileImporter::ObjFileImporter()
 : m_Buffer()
 , m_pRootObject( nullptr )
-, m_strAbsPath( DefaultIOSystem().getOsSeparator() ) {}
+, m_strAbsPath( "" ) {
+    DefaultIOSystem io;
+    m_strAbsPath = io.getOsSeparator();
+}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.

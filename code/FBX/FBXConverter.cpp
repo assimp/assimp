@@ -2647,29 +2647,31 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                                         else {
                                             animData = animIt->second;
                                         }
-                                        // todo: unfuck this
-                                        // can be so much simpler now we have a dictionary :)
-                                        // for (std::pair<std::string, const AnimationCurve*> curvesIt : node->Curves()) {
-                                        //     if (curvesIt.first == "d|DeformPercent") {
-                                        //         const AnimationCurve* animationCurve = curvesIt.second;
-                                        //         const KeyTimeList& keys = animationCurv
-                                        //         unsigned int k = 0;
-                                        //         for (auto key : keys) {
-                                        //             morphKeyData* keyData;
-                                        //             auto keyIt = animData->find(key);
-                                        //             if (keyIt == animData->end()) {
-                                        //                 keyData = new morphKeyData();
-                                        //                 animData->insert(std::make_pair(key, keyData));
-                                        //             }
-                                        //             else {
-                                        //                 keyData = keyIt->second;
-                                        //             }
-                                        //             keyData->values.push_back(channelIndex);
-                                        //             keyData->weights.push_back(values.at(k) / 100.0f);
-                                        //             k++;
-                                        //         }
-                                        //     }
-                                        // }
+                                        
+                                        for (std::pair<std::string, const AnimationCurve*> curvesIt : node->Curves()) {
+                                            if (curvesIt.first == "d|DeformPercent") {
+                                                const AnimationCurve* animationCurve = curvesIt.second;
+                                                
+                                                unsigned int k = 0;
+                                                for (auto key_value_pair : animationCurve->GetKeyframeData()) {
+                                                    
+                                                    morphKeyData* keyData;
+
+                                                    // does our anim key already exist? if not create it!
+                                                    auto keyIt = animData->find(key_value_pair.first);
+                                                    if (keyIt == animData->end()) {
+                                                        keyData = new morphKeyData();
+                                                        animData->insert(std::make_pair(key_value_pair.first, keyData));
+                                                    }
+                                                    else {
+                                                        keyData = keyIt->second;
+                                                    }
+                                                    keyData->values.push_back(channelIndex);
+                                                    keyData->weights.push_back(key_value_pair.second / 100.0f);
+                                                    k++;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

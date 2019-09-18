@@ -278,7 +278,7 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
 }
 
 TEST_F(utFBXImporterExporter, fbxTokenizeTestTest) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/transparentTest2.fbx", aiProcess_ValidateDataStructure);
+    //Assimp::Importer importer;
+    //const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/transparentTest2.fbx", aiProcess_ValidateDataStructure);
     //EXPECT_NE(nullptr, scene);
 }

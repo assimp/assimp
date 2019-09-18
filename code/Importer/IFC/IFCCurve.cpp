@@ -311,10 +311,9 @@ class TrimmedCurve : public BoundedCurve {
 public:
     // --------------------------------------------------
     TrimmedCurve(const Schema_2x3::IfcTrimmedCurve& entity, ConversionData& conv)
-        : BoundedCurve(entity,conv)
+        : BoundedCurve(entity,conv),
+          base(std::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv)))
     {
-        base = std::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
-
         typedef std::shared_ptr<const STEP::EXPRESS::DataType> Entry;
 
         // for some reason, trimmed curves can either specify a parametric value

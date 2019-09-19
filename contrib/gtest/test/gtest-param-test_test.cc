@@ -141,7 +141,7 @@ void VerifyGenerator(const ParamGenerator<T>& generator,
         << ", expected_values[i] is " << PrintValue(expected_values[i])
         << ", *it is " << PrintValue(*it)
         << ", and 'it' is an iterator created with the copy constructor.\n";
-    it++;
+    ++it;
   }
   EXPECT_TRUE(it == generator.end())
         << "At the presumed end of sequence when accessing via an iterator "
@@ -161,7 +161,7 @@ void VerifyGenerator(const ParamGenerator<T>& generator,
         << ", expected_values[i] is " << PrintValue(expected_values[i])
         << ", *it is " << PrintValue(*it)
         << ", and 'it' is an iterator created with the copy constructor.\n";
-    it++;
+    ++it;
   }
   EXPECT_TRUE(it == generator.end())
         << "At the presumed end of sequence when accessing via an iterator "

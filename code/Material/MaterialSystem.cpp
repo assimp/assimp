@@ -551,7 +551,8 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
     // ought to change aiString::mLength to uint32_t one day.
     if (sizeof(size_t) == 8) {
         aiString copy = *pInput;
-        uint8_t* s = reinterpret_cast<uint8_t*>(&copy.length);
+        copy.length = 0;
+        uint8_t *s = (uint8_t*)(&copy.length);
         memcpy(&s[4], &pInput->length, 4);
 
         return AddBinaryProperty(s+1,

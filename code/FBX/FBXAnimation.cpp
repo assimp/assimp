@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
+#include <iterator> 
+#include <algorithm>
 
 namespace Assimp {
 namespace FBX {
@@ -65,6 +67,10 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
     const Element& KeyTime = GetRequiredElement(sc,"KeyTime");
     const Element& KeyValueFloat = GetRequiredElement(sc,"KeyValueFloat");
 
+    std::vector<int64_t> keys;
+    std::vector<float> values;
+
+    // parse as arrays first
     ParseVectorDataArray(keys, KeyTime);
     ParseVectorDataArray(values, KeyValueFloat);
 
@@ -72,10 +78,13 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
         DOMError("the number of key times does not match the number of keyframe values",&KeyTime);
     }
 
-    // check if the key times are well-ordered
-    if(!std::equal(keys.begin(), keys.end() - 1, keys.begin() + 1, std::less<KeyTimeList::value_type>())) {
-        DOMError("the keyframes are not in ascending order",&KeyTime);
-    }
+    // convert keyframes into simple keyframe dictionary map.
+    // this reduces considerable boilerplate code.
+    std::transform(
+        keys.begin(), 
+        keys.end(), 
+        values.begin(), 
+        std::inserter(time_values, time_values.end()), std::make_pair<int64_t&, float&>);
 
     const Element* KeyAttrDataFloat = sc["KeyAttrDataFloat"];
     if(KeyAttrDataFloat) {

@@ -684,26 +684,19 @@ private:
     LayeredTextureMap layeredTextures;
 };
 
-typedef std::vector<int64_t> KeyTimeList;
-typedef std::vector<float> KeyValueList;
-
+typedef std::map<int64_t, float> KeyFrameValueMap;
 /** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefor) */
 class AnimationCurve : public Object {
 public:
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
     virtual ~AnimationCurve();
 
-    /** get list of keyframe positions (time).
-     *  Invariant: |GetKeys()| > 0 */
-    const KeyTimeList& GetKeys() const {
-        return keys;
+    /* Return dictionary of the keyframe data */
+    const std::map<int64_t, float>& GetKeyframeData() const
+    {
+        return time_values;
     }
 
-    /** get list of keyframe values.
-      * Invariant: |GetKeys()| == |GetValues()| && |GetKeys()| > 0*/
-    const KeyValueList& GetValues() const {
-        return values;
-    }
 
     const std::vector<float>& GetAttributes() const {
         return attributes;
@@ -714,8 +707,7 @@ public:
     }
 
 private:
-    KeyTimeList keys;
-    KeyValueList values;
+    std::map<int64_t, float> time_values;
     std::vector<float> attributes;
     std::vector<unsigned int> flags;
 };

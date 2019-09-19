@@ -68,6 +68,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 #include <cstdint>
+#include <iostream>
+#include <string>
+#include <float.h>
+
+#define FBX_ONE_SECOND 46186158000L
 
 
 namespace Assimp {
@@ -75,10 +80,10 @@ namespace Assimp {
 
         using namespace Util;
 
-#define MAGIC_NODE_TAG "_$AssimpFbx$"
+        #define MAGIC_NODE_TAG "_$AssimpFbx$"
 
-#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
-
+        #define CONVERT_FBX_TIME_TO_SECONDS(time) static_cast<double>(time) / 46186158000L
+        #define CONVERT_FBX_TIME_TO_FRAMES(time, frames_per_second) CONVERT_FBX_TIME_TO_SECONDS(time) * frames_per_second
         FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones )
         : defaultMaterialIndex()
         , lights()
@@ -758,6 +763,7 @@ namespace Assimp {
                 aiMatrix4x4::Scaling(Scaling, chain[TransformationComp_Scaling]);
             }
 
+            // use me rotation code
             const aiVector3D& Rotation = PropertyGet<aiVector3D>(props, "Lcl Rotation", ok);
             if (ok && Rotation.SquareLength() > zero_epsilon) {
                 chainBits = chainBits | (1 << TransformationComp_Rotation);
@@ -2530,18 +2536,15 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             // generate node animations
             std::vector<aiNodeAnim*> node_anims;
 
-            double min_time = 1e10;
-            double max_time = -1e10;
-
             int64_t start_time = st.LocalStart();
             int64_t stop_time = st.LocalStop();
             bool has_local_startstop = start_time != 0 || stop_time != 0;
-            if (!has_local_startstop) {
-                // no time range given, so accept every keyframe and use the actual min/max time
-                // the numbers are INT64_MIN/MAX, the 20000 is for safety because GenerateNodeAnimations uses an epsilon of 10000
-                start_time = -9223372036854775807ll + 20000;
-                stop_time = 9223372036854775807ll - 20000;
-            }
+
+            ASSIMP_LOG_DEBUG_F("Has local start stop? %s\n", has_local_startstop ? "yes" : "no" );
+
+            // Goal we need the number of frames passed
+            double start_time_frame_number = has_local_startstop ? (CONVERT_FBX_TIME_TO_SECONDS(start_time) * anim_fps) : 0;
+            double stop_time_frame_number = has_local_startstop ? (CONVERT_FBX_TIME_TO_SECONDS(stop_time) * anim_fps): DBL_MAX;
 
             try {
                 for (const NodeMap::value_type& kv : node_map) {
@@ -2549,9 +2552,8 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                         kv.first,
                         kv.second,
                         layer_map,
-                        start_time, stop_time,
-                        max_time,
-                        min_time);
+                        start_time_frame_number,
+                        stop_time_frame_number);
                 }
             }
             catch (std::exception&) {
@@ -2584,7 +2586,8 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                             meshMorphAnim->mKeys[j].mNumValuesAndWeights = numValuesAndWeights;
                             meshMorphAnim->mKeys[j].mValues = new unsigned int[numValuesAndWeights];
                             meshMorphAnim->mKeys[j].mWeights = new double[numValuesAndWeights];
-                            meshMorphAnim->mKeys[j].mTime = CONVERT_FBX_TIME(animIt.first) * anim_fps;
+
+                            meshMorphAnim->mKeys[j].mTime = CONVERT_FBX_TIME_TO_FRAMES(animIt.first, anim_fps);
                             for (unsigned int k = 0; k < numValuesAndWeights; k++) {
                                 meshMorphAnim->mKeys[j].mValues[k] = keyData->values.at(k);
                                 meshMorphAnim->mKeys[j].mWeights[k] = keyData->weights.at(k);
@@ -2603,32 +2606,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 return;
             }
 
-            double start_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(start_time) * anim_fps) : min_time;
-            double stop_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(stop_time) * anim_fps) : max_time;
-
-            // adjust relative timing for animation
-            for (unsigned int c = 0; c < anim->mNumChannels; c++) {
-                aiNodeAnim* channel = anim->mChannels[c];
-                for (uint32_t i = 0; i < channel->mNumPositionKeys; i++) {
-                    channel->mPositionKeys[i].mTime -= start_time_fps;
-                }
-                for (uint32_t i = 0; i < channel->mNumRotationKeys; i++) {
-                    channel->mRotationKeys[i].mTime -= start_time_fps;
-                }
-                for (uint32_t i = 0; i < channel->mNumScalingKeys; i++) {
-                    channel->mScalingKeys[i].mTime -= start_time_fps;
-                }
-            }
-            for (unsigned int c = 0; c < anim->mNumMorphMeshChannels; c++) {
-                aiMeshMorphAnim* channel = anim->mMorphMeshChannels[c];
-                for (uint32_t i = 0; i < channel->mNumKeys; i++) {
-                    channel->mKeys[i].mTime -= start_time_fps;
-                }
-            }
-
-            // for some mysterious reason, mDuration is simply the maximum key -- the
-            // validator always assumes animations to start at zero.
-            anim->mDuration = stop_time_fps - start_time_fps;
+            anim->mDuration = stop_time_frame_number;
             anim->mTicksPerSecond = anim_fps;
         }
 
@@ -2662,24 +2640,27 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                                         else {
                                             animData = animIt->second;
                                         }
+                                        
                                         for (std::pair<std::string, const AnimationCurve*> curvesIt : node->Curves()) {
                                             if (curvesIt.first == "d|DeformPercent") {
                                                 const AnimationCurve* animationCurve = curvesIt.second;
-                                                const KeyTimeList& keys = animationCurve->GetKeys();
-                                                const KeyValueList& values = animationCurve->GetValues();
+                                                
                                                 unsigned int k = 0;
-                                                for (auto key : keys) {
+                                                for (auto key_value_pair : animationCurve->GetKeyframeData()) {
+                                                    
                                                     morphKeyData* keyData;
-                                                    auto keyIt = animData->find(key);
+
+                                                    // does our anim key already exist? if not create it!
+                                                    auto keyIt = animData->find(key_value_pair.first);
                                                     if (keyIt == animData->end()) {
                                                         keyData = new morphKeyData();
-                                                        animData->insert(std::make_pair(key, keyData));
+                                                        animData->insert(std::make_pair(key_value_pair.first, keyData));
                                                     }
                                                     else {
                                                         keyData = keyIt->second;
                                                     }
                                                     keyData->values.push_back(channelIndex);
-                                                    keyData->weights.push_back(values.at(k) / 100.0f);
+                                                    keyData->weights.push_back(key_value_pair.second / 100.0f);
                                                     k++;
                                                 }
                                             }
@@ -2701,644 +2682,319 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             bool strictMode) {
             const Object* target(NULL);
             for (const AnimationCurveNode* node : curves) {
+                if( node->Curves().size() == 0 || node->Target() == nullptr) continue; // prevents dumb data becoming part of the equation
                 if (!target) {
                     target = node->Target();
                 }
                 if (node->Target() != target) {
                     FBXImporter::LogWarn("Node target is nullptr type.");
-                }
+                }                
+
                 if (strictMode) {
-                    ai_assert(node->Target() == target);
+                    if(target == nullptr) continue;
                 }
             }
         }
 #endif // ASSIMP_BUILD_DEBUG
+
+
+
+    // can be expanded for other use cases
+    FBXConverter::FBX_PROPERTY_TYPE GetFBXPropertyType( const std::string& property_name )
+    {
+        try
+        {
+            if(property_name.compare("d|X") == 0)
+            {
+                return FBXConverter::X_AXIS;                           
+            }
+            else if(property_name.compare("d|Y") == 0)
+            {
+                return FBXConverter::Y_AXIS;
+            }
+            else if(property_name.compare("d|Z") == 0)
+            {
+                return FBXConverter::Z_AXIS;          
+            }
+            else if(property_name.compare("Lcl Translation") == 0)
+            {
+                return FBXConverter::Translation;
+            }
+            else if(property_name.compare("Lcl Rotation") == 0)
+            {
+               return FBXConverter::Rotation;
+            }
+            else if(property_name.compare("Lcl Scaling") == 0)
+            {
+                return FBXConverter::Scale;
+            }
+            
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        return FBXConverter::UNKNOWN;
+    }
+
+        
 
         // ------------------------------------------------------------------------------------------------
         void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim*>& node_anims,
             const std::string& fixed_name,
             const std::vector<const AnimationCurveNode*>& curves,
             const LayerMap& layer_map,
-            int64_t start, int64_t stop,
-            double& max_time,
-            double& min_time)
+            double& start_time,
+            double& end_time)
         {
 
             NodeMap node_property_map;
             ai_assert(curves.size());
 
 #ifdef ASSIMP_BUILD_DEBUG
-            validateAnimCurveNodes(curves, doc.Settings().strictMode);
+            validateAnimCurveNodes(curves, true);
 #endif
-            const AnimationCurveNode* curve_node = NULL;
-            for (const AnimationCurveNode* node : curves) {
-                ai_assert(node);
 
-                if (node->TargetProperty().empty()) {
-                    FBXImporter::LogWarn("target property for animation curve not set: " + node->Name());
-                    continue;
-                }
+            // make new animation to hold this animations keyframes
+            aiNodeAnim * nodeAnim = new aiNodeAnim();
+            nodeAnim->mNumPositionKeys = 0;
+            nodeAnim->mNumRotationKeys = 0;
+            nodeAnim->mNumScalingKeys = 0;
 
-                curve_node = node;
-                if (node->Curves().empty()) {
-                    FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode: " + node->Name());
-                    continue;
-                }
+            // simple position, scale and rotation keys
+            // each will have a target, and if they have any duplicate target they will write to the value of the key.
+            std::map<const int64_t, aiVectorKey*> position_keys;
+            std::map<const int64_t, aiVectorKey*> rotation_keys;
+            std::map<const int64_t, aiVectorKey*> scale_keys;
 
-                node_property_map[node->TargetProperty()].push_back(node);
-            }
+            for( const AnimationCurveNode* curve : curves)
+            {
+                ASSIMP_LOG_DEBUG_F("[Header] Curve from fbx: ID %d Name: %s\n", curve->ID(), curve->Name().c_str());
+                
+                const Object *target = curve->Target();
+                std::string property_type = curve->TargetProperty();
 
-            ai_assert(curve_node);
-            ai_assert(curve_node->TargetAsModel());
-
-            const Model& target = *curve_node->TargetAsModel();
-
-            // check for all possible transformation components
-            NodeMap::const_iterator chain[TransformationComp_MAXIMUM];
-
-            bool has_any = false;
-
-            for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
-                const TransformationComp comp = static_cast<TransformationComp>(i);
-
-                // inverse pivots don't exist in the input, we just generate them
-                if (comp == TransformationComp_RotationPivotInverse || comp == TransformationComp_ScalingPivotInverse) {
-                    chain[i] = node_property_map.end();
-                    continue;
-                }
-
-                chain[i] = node_property_map.find(NameTransformationCompProperty(comp));
-                if (chain[i] != node_property_map.end()) {
-
-                    // check if this curves contains redundant information by looking
-                    // up the corresponding node's transformation chain.
-                    if (doc.Settings().optimizeEmptyAnimationCurves &&
-                        IsRedundantAnimationData(target, comp, (*chain[i]).second)) {
-
-                        FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
-                        continue;
-                    }
-
-                    has_any = true;
-                }
-            }
-
-            if (!has_any) {
-                FBXImporter::LogWarn("ignoring node animation, did not find any transformation key frames");
-                return;
-            }
-
-            aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain,
-                node_property_map.end(),
-                layer_map,
-                start, stop,
-                max_time,
-                min_time,
-                true // input is TRS order, assimp is SRT
-            );
-
-            ai_assert(nd);
-            if (nd->mNumPositionKeys == 0 && nd->mNumRotationKeys == 0 && nd->mNumScalingKeys == 0) {
-                delete nd;
-            }
-            else {
-                node_anims.push_back(nd);
-            }
-            
-        }
-
-
-        bool FBXConverter::IsRedundantAnimationData(const Model& target,
-            TransformationComp comp,
-            const std::vector<const AnimationCurveNode*>& curves) {
-            ai_assert(curves.size());
-
-            // look for animation nodes with
-            //  * sub channels for all relevant components set
-            //  * one key/value pair per component
-            //  * combined values match up the corresponding value in the bind pose node transformation
-            // only such nodes are 'redundant' for this function.
-
-            if (curves.size() > 1) {
-                return false;
-            }
-
-            const AnimationCurveNode& nd = *curves.front();
-            const AnimationCurveMap& sub_curves = nd.Curves();
-
-            const AnimationCurveMap::const_iterator dx = sub_curves.find("d|X");
-            const AnimationCurveMap::const_iterator dy = sub_curves.find("d|Y");
-            const AnimationCurveMap::const_iterator dz = sub_curves.find("d|Z");
-
-            if (dx == sub_curves.end() || dy == sub_curves.end() || dz == sub_curves.end()) {
-                return false;
-            }
-
-            const KeyValueList& vx = (*dx).second->GetValues();
-            const KeyValueList& vy = (*dy).second->GetValues();
-            const KeyValueList& vz = (*dz).second->GetValues();
-
-            if (vx.size() != 1 || vy.size() != 1 || vz.size() != 1) {
-                return false;
-            }
-
-            const aiVector3D dyn_val = aiVector3D(vx[0], vy[0], vz[0]);
-            const aiVector3D& static_val = PropertyGet<aiVector3D>(target.Props(),
-                NameTransformationCompProperty(comp),
-                TransformationCompDefaultValue(comp)
-                );
-
-            const float epsilon = Math::getEpsilon<float>();
-            return (dyn_val - static_val).SquareLength() < epsilon;
-        }
-
-
-        aiNodeAnim* FBXConverter::GenerateRotationNodeAnim(const std::string& name,
-            const Model& target,
-            const std::vector<const AnimationCurveNode*>& curves,
-            const LayerMap& layer_map,
-            int64_t start, int64_t stop,
-            double& max_time,
-            double& min_time)
-        {
-            std::unique_ptr<aiNodeAnim> na(new aiNodeAnim());
-            na->mNodeName.Set(name);
-
-            ConvertRotationKeys(na.get(), curves, layer_map, start, stop, max_time, min_time, target.RotationOrder());
-
-            // dummy scaling key
-            na->mScalingKeys = new aiVectorKey[1];
-            na->mNumScalingKeys = 1;
-
-            na->mScalingKeys[0].mTime = 0.;
-            na->mScalingKeys[0].mValue = aiVector3D(1.0f, 1.0f, 1.0f);
-
-            // dummy position key
-            na->mPositionKeys = new aiVectorKey[1];
-            na->mNumPositionKeys = 1;
-
-            na->mPositionKeys[0].mTime = 0.;
-            na->mPositionKeys[0].mValue = aiVector3D();
-
-            return na.release();
-        }
-
-        aiNodeAnim* FBXConverter::GenerateScalingNodeAnim(const std::string& name,
-            const Model& /*target*/,
-            const std::vector<const AnimationCurveNode*>& curves,
-            const LayerMap& layer_map,
-            int64_t start, int64_t stop,
-            double& max_time,
-            double& min_time)
-        {
-            std::unique_ptr<aiNodeAnim> na(new aiNodeAnim());
-            na->mNodeName.Set(name);
-
-            ConvertScaleKeys(na.get(), curves, layer_map, start, stop, max_time, min_time);
-
-            // dummy rotation key
-            na->mRotationKeys = new aiQuatKey[1];
-            na->mNumRotationKeys = 1;
-
-            na->mRotationKeys[0].mTime = 0.;
-            na->mRotationKeys[0].mValue = aiQuaternion();
-
-            // dummy position key
-            na->mPositionKeys = new aiVectorKey[1];
-            na->mNumPositionKeys = 1;
-
-            na->mPositionKeys[0].mTime = 0.;
-            na->mPositionKeys[0].mValue = aiVector3D();
-
-            return na.release();
-        }
-
-        aiNodeAnim* FBXConverter::GenerateTranslationNodeAnim(const std::string& name,
-            const Model& /*target*/,
-            const std::vector<const AnimationCurveNode*>& curves,
-            const LayerMap& layer_map,
-            int64_t start, int64_t stop,
-            double& max_time,
-            double& min_time,
-            bool inverse) {
-            std::unique_ptr<aiNodeAnim> na(new aiNodeAnim());
-            na->mNodeName.Set(name);
-
-            ConvertTranslationKeys(na.get(), curves, layer_map, start, stop, max_time, min_time);
-
-            if (inverse) {
-                for (unsigned int i = 0; i < na->mNumPositionKeys; ++i) {
-                    na->mPositionKeys[i].mValue *= -1.0f;
-                }
-            }
-
-            // dummy scaling key
-            na->mScalingKeys = new aiVectorKey[1];
-            na->mNumScalingKeys = 1;
-
-            na->mScalingKeys[0].mTime = 0.;
-            na->mScalingKeys[0].mValue = aiVector3D(1.0f, 1.0f, 1.0f);
-
-            // dummy rotation key
-            na->mRotationKeys = new aiQuatKey[1];
-            na->mNumRotationKeys = 1;
-
-            na->mRotationKeys[0].mTime = 0.;
-            na->mRotationKeys[0].mValue = aiQuaternion();
-
-            return na.release();
-        }
-
-        aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
-            const Model& target,
-            NodeMap::const_iterator chain[TransformationComp_MAXIMUM],
-            NodeMap::const_iterator iter_end,
-            const LayerMap& layer_map,
-            int64_t start, int64_t stop,
-            double& max_time,
-            double& min_time,
-            bool reverse_order)
-
-        {
-            std::unique_ptr<aiNodeAnim> na(new aiNodeAnim());
-            na->mNodeName.Set(name);
-
-            const PropertyTable& props = target.Props();
-
-            // need to convert from TRS order to SRT?
-            if (reverse_order) {
-
-                aiVector3D def_scale = PropertyGet(props, "Lcl Scaling", aiVector3D(1.f, 1.f, 1.f));
-                aiVector3D def_translate = PropertyGet(props, "Lcl Translation", aiVector3D(0.f, 0.f, 0.f));
-                aiVector3D def_rot = PropertyGet(props, "Lcl Rotation", aiVector3D(0.f, 0.f, 0.f));
-
-                KeyFrameListList scaling;
-                KeyFrameListList translation;
-                KeyFrameListList rotation;
-
-                if (chain[TransformationComp_Scaling] != iter_end) {
-                    scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second, start, stop);
-                }
-
-                if (chain[TransformationComp_Translation] != iter_end) {
-                    translation = GetKeyframeList((*chain[TransformationComp_Translation]).second, start, stop);
-                }
-
-                if (chain[TransformationComp_Rotation] != iter_end) {
-                    rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second, start, stop);
-                }
-
-                KeyFrameListList joined;
-                joined.insert(joined.end(), scaling.begin(), scaling.end());
-                joined.insert(joined.end(), translation.begin(), translation.end());
-                joined.insert(joined.end(), rotation.begin(), rotation.end());
-
-                const KeyTimeList& times = GetKeyTimeList(joined);
-
-                aiQuatKey* out_quat = new aiQuatKey[times.size()];
-                aiVectorKey* out_scale = new aiVectorKey[times.size()];
-                aiVectorKey* out_translation = new aiVectorKey[times.size()];
-
-                if (times.size())
+                ASSIMP_LOG_DEBUG_F("-- Target property: %s\n", curve->TargetProperty().c_str());
+                
+                // I believe that an invalid target could 
+                // still be of use in certain cases so we 
+                // must keep this data for now.
+                if(target == nullptr)
                 {
-                    ConvertTransformOrder_TRStoSRT(out_quat, out_scale, out_translation,
-                        scaling,
-                        translation,
-                        rotation,
-                        times,
-                        max_time,
-                        min_time,
-                        target.RotationOrder(),
-                        def_scale,
-                        def_translate,
-                        def_rot);
+                    ASSIMP_LOG_DEBUG_F("-- [WARNING-Serious] Invalid node target: %d\n", curve->ID());
+                    continue; // skip this to make sure we handle this case.
+                }
+                else
+                {
+                    ASSIMP_LOG_DEBUG_F("-- Valid node target: %d\n", curve->ID());
                 }
 
-                // XXX remove duplicates / redundant keys which this operation did
-                // likely produce if not all three channels were equally dense.
 
-                na->mNumScalingKeys = static_cast<unsigned int>(times.size());
-                na->mNumRotationKeys = na->mNumScalingKeys;
-                na->mNumPositionKeys = na->mNumScalingKeys;
+                // std::map<std::string, const AnimationCurve*>
+                // please note this is an std::map
+                AnimationCurveMap map = curve->Curves();
+                AnimationCurveMap::iterator itr;
 
-                na->mScalingKeys = out_scale;
-                na->mRotationKeys = out_quat;
-                na->mPositionKeys = out_translation;
-            }
-            else {
 
-                // if a particular transformation is not given, grab it from
-                // the corresponding node to meet the semantics of aiNodeAnim,
-                // which requires all of rotation, scaling and translation
-                // to be set.
-                if (chain[TransformationComp_Scaling] != iter_end) {
-                    ConvertScaleKeys(na.get(), (*chain[TransformationComp_Scaling]).second,
-                        layer_map,
-                        start, stop,
-                        max_time,
-                        min_time);
-                }
-                else {
-                    na->mScalingKeys = new aiVectorKey[1];
-                    na->mNumScalingKeys = 1;
+                for( itr = map.begin(); itr != map.end(); ++itr)
+                {
+                    std::string subPropertyName = itr->first;
+                    const AnimationCurve* subCurve = itr->second;
+                    ASSIMP_LOG_DEBUG_F("-- SubCurve %s vs sub curve name %s\n", subPropertyName.c_str(), subCurve->Name().c_str());
+                    
+                    // todo make into dict
+                    const std::map<int64_t, float>& keyframes = subCurve->GetKeyframeData();
+                    ASSIMP_LOG_DEBUG_F("keyframe count: %ld\n", keyframes.size());
+                    // subCurve->GetKeys()
+                    // filter node
 
-                    na->mScalingKeys[0].mTime = 0.;
-                    na->mScalingKeys[0].mValue = PropertyGet(props, "Lcl Scaling",
-                        aiVector3D(1.f, 1.f, 1.f));
-                }
-
-                if (chain[TransformationComp_Rotation] != iter_end) {
-                    ConvertRotationKeys(na.get(), (*chain[TransformationComp_Rotation]).second,
-                        layer_map,
-                        start, stop,
-                        max_time,
-                        min_time,
-                        target.RotationOrder());
-                }
-                else {
-                    na->mRotationKeys = new aiQuatKey[1];
-                    na->mNumRotationKeys = 1;
-
-                    na->mRotationKeys[0].mTime = 0.;
-                    na->mRotationKeys[0].mValue = EulerToQuaternion(
-                        PropertyGet(props, "Lcl Rotation", aiVector3D(0.f, 0.f, 0.f)),
-                        target.RotationOrder());
-                }
-
-                if (chain[TransformationComp_Translation] != iter_end) {
-                    ConvertTranslationKeys(na.get(), (*chain[TransformationComp_Translation]).second,
-                        layer_map,
-                        start, stop,
-                        max_time,
-                        min_time);
-                }
-                else {
-                    na->mPositionKeys = new aiVectorKey[1];
-                    na->mNumPositionKeys = 1;
-
-                    na->mPositionKeys[0].mTime = 0.;
-                    na->mPositionKeys[0].mValue = PropertyGet(props, "Lcl Translation",
-                        aiVector3D(0.f, 0.f, 0.f));
-                }
-
-            }
-            return na.release();
-        }
-
-        FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop)
-        {
-            KeyFrameListList inputs;
-            inputs.reserve(nodes.size() * 3);
-
-            //give some breathing room for rounding errors
-            int64_t adj_start = start - 10000;
-            int64_t adj_stop = stop + 10000;
-
-            for (const AnimationCurveNode* node : nodes) {
-                ai_assert(node);
-
-                const AnimationCurveMap& curves = node->Curves();
-                for (const AnimationCurveMap::value_type& kv : curves) {
-
-                    unsigned int mapto;
-                    if (kv.first == "d|X") {
-                        mapto = 0;
-                    }
-                    else if (kv.first == "d|Y") {
-                        mapto = 1;
-                    }
-                    else if (kv.first == "d|Z") {
-                        mapto = 2;
-                    }
-                    else {
-                        FBXImporter::LogWarn("ignoring scale animation curve, did not recognize target component");
-                        continue;
-                    }
-
-                    const AnimationCurve* const curve = kv.second;
-                    ai_assert(curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size());
-
-                    //get values within the start/stop time window
-                    std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
-                    std::shared_ptr<KeyValueList> Values(new KeyValueList());
-                    const size_t count = curve->GetKeys().size();
-                    Keys->reserve(count);
-                    Values->reserve(count);
-                    for (size_t n = 0; n < count; n++)
+                    // note target match is wrong.
+                    switch (GetFBXPropertyType(property_type))
                     {
-                        int64_t k = curve->GetKeys().at(n);
-                        if (k >= adj_start && k <= adj_stop)
-                        {
-                            Keys->push_back(k);
-                            Values->push_back(curve->GetValues().at(n));
-                        }
+                        case Translation:                        
+                            for( std::pair<const int64_t, float> keyframe_data : keyframes )
+                            {
+                                aiVectorKey *key;
+                                if( position_keys.count( keyframe_data.first ) )
+                                {
+                                    key = position_keys[keyframe_data.first];
+                                    ASSIMP_LOG_DEBUG_F("Found pre-existing pos key for sub curve %ld\n", keyframe_data.first);
+                                }
+                                else
+                                {
+                                    key = new aiVectorKey();
+                                    position_keys.insert( std::pair<const int64_t, aiVectorKey*>(keyframe_data.first, key) );
+                                    ASSIMP_LOG_DEBUG_F("Created pos key for sub curve %ld\n", keyframe_data.first);
+                                }                         
+                               
+                                key->mTime = CONVERT_FBX_TIME_TO_FRAMES(keyframe_data.first, anim_fps);
+
+                                switch ( GetFBXPropertyType( subPropertyName ) )
+                                {
+                                    case X_AXIS:
+                                        key->mValue.x = keyframe_data.second;
+                                    break;
+                                    case Y_AXIS:
+                                        key->mValue.y = keyframe_data.second;
+                                    break;                                    
+                                    case Z_AXIS:
+                                        key->mValue.z = keyframe_data.second;
+                                    break;
+                                }
+                            }
+                        break;
+                        case Rotation:
+                        for( std::pair<const int64_t, float> keyframe_data : keyframes )
+                            {
+                                aiVectorKey *key;
+                                if( rotation_keys.count( keyframe_data.first ) )
+                                {
+                                    key = rotation_keys[keyframe_data.first];
+                                    ASSIMP_LOG_DEBUG_F("Found pre-existing rot key for sub curve %ld\n", keyframe_data.first);
+                                }
+                                else
+                                {
+
+                                    key = new aiVectorKey();
+                                    rotation_keys.insert( std::pair<const int64_t, aiVectorKey*>(keyframe_data.first, key) );
+                                    ASSIMP_LOG_DEBUG_F("Created rot key for sub curve %ld\n", keyframe_data.first);
+                                }
+
+                                // set key frame time
+                                key->mTime = CONVERT_FBX_TIME_TO_FRAMES(keyframe_data.first, anim_fps);
+
+                                switch ( GetFBXPropertyType( subPropertyName ) )
+                                {
+                                    case X_AXIS:
+                                        key->mValue.x = keyframe_data.second;
+                                    break;
+                                    case Y_AXIS:
+                                        key->mValue.y = keyframe_data.second;
+                                    break;                                    
+                                    case Z_AXIS:
+                                        key->mValue.z = keyframe_data.second;
+                                    break;
+                                }
+                            }
+                        break;
+                        case Scale:
+                            for( std::pair<const int64_t, float> keyframe_data : keyframes )
+                            {
+                                aiVectorKey *key;
+                                if( scale_keys.count( keyframe_data.first ) )
+                                {
+                                    key = scale_keys[keyframe_data.first];
+                                    ASSIMP_LOG_DEBUG_F("Found pre-existing scale key for sub curve %ld\n", keyframe_data.first);
+                                }
+                                else
+                                {
+                                    key = new aiVectorKey();
+                                    scale_keys.insert( std::pair<const int64_t, aiVectorKey*>(keyframe_data.first, key) );
+                                    ASSIMP_LOG_DEBUG_F("Created scale key for sub curve %ld\n", keyframe_data.first);
+                                }                                
+
+
+                                key->mTime = CONVERT_FBX_TIME_TO_FRAMES(keyframe_data.first, anim_fps);
+
+                                switch ( GetFBXPropertyType( subPropertyName ) )
+                                {
+                                    case X_AXIS:
+                                        key->mValue.x = keyframe_data.second;
+                                    break;
+                                    case Y_AXIS:
+                                        key->mValue.y = keyframe_data.second;
+                                    break;                                    
+                                    case Z_AXIS:
+                                        key->mValue.z = keyframe_data.second;
+                                    break;
+                                }
+                            }
+                        break;
+                        default:
+                        break;
                     }
-
-                    inputs.push_back(std::make_tuple(Keys, Values, mapto));
-                }
-            }
-            return inputs; // pray for NRVO :-)
-        }
-
-
-        KeyTimeList FBXConverter::GetKeyTimeList(const KeyFrameListList& inputs) {
-            ai_assert(!inputs.empty());
-
-            // reserve some space upfront - it is likely that the key-frame lists
-            // have matching time values, so max(of all key-frame lists) should
-            // be a good estimate.
-            KeyTimeList keys;
-
-            size_t estimate = 0;
-            for (const KeyFrameList& kfl : inputs) {
-                estimate = std::max(estimate, std::get<0>(kfl)->size());
-            }
-
-            keys.reserve(estimate);
-
-            std::vector<unsigned int> next_pos;
-            next_pos.resize(inputs.size(), 0);
-
-            const size_t count = inputs.size();
-            while (true) {
-
-                int64_t min_tick = std::numeric_limits<int64_t>::max();
-                for (size_t i = 0; i < count; ++i) {
-                    const KeyFrameList& kfl = inputs[i];
-
-                    if (std::get<0>(kfl)->size() > next_pos[i] && std::get<0>(kfl)->at(next_pos[i]) < min_tick) {
-                        min_tick = std::get<0>(kfl)->at(next_pos[i]);
-                    }
                 }
 
-                if (min_tick == std::numeric_limits<int64_t>::max()) {
-                    break;
+                std::cout << std::endl;               
+
+                // todo: container which can contain arbitrary keyframe data?
+                // goal: convert FBX data to assimp aiAnimation.
+                // goal: only include what is needed for the animation
+            }
+
+            std::map<const int64_t, aiQuatKey*> real_rotation_keys;
+            // goal convert rotation keys into quaternion keys from euler (which is in FBX)
+            for( std::pair<const int64_t, aiVectorKey*> rot_key : rotation_keys)
+            {
+                auto quat_key = new aiQuatKey();
+                quat_key->mValue = EulerToQuaternion(rot_key.second->mValue, Model::RotOrder::RotOrder_EulerXYZ);
+                quat_key->mTime = rot_key.second->mTime;
+                real_rotation_keys.insert( std::pair<const int64_t, aiQuatKey*> (rot_key.first, quat_key ));  
+                delete rot_key.second; // clear allocation          
+            }
+
+            // this list is no longer required free it.
+            rotation_keys.clear();
+
+            ai_assert(nodeAnim); // if new fails then we need to report this asap and crash?
+            nodeAnim->mNodeName = fixed_name;
+            nodeAnim->mNumPositionKeys = position_keys.size();
+            nodeAnim->mNumRotationKeys = real_rotation_keys.size();
+            nodeAnim->mNumScalingKeys = scale_keys.size();
+
+            /*
+            /* Finalization stage
+             */
+
+            nodeAnim->mPositionKeys = new aiVectorKey[nodeAnim->mNumPositionKeys];
+            int ordered_insert = 0;
+            for (std::pair<const int64_t, aiVectorKey*> pos_key : position_keys)
+            {   
+                // why does this happen? 
+                // we need to remove keys the artist purposefully didn't include in the track :)
+                // 120 frame number
+                // 119.001 duration
+                if(pos_key.second->mTime <= end_time )
+                {                
+                    nodeAnim->mPositionKeys[ordered_insert] = *pos_key.second;
+                    ++ordered_insert;
                 }
-                keys.push_back(min_tick);
+                delete pos_key.second;
+            }
 
-                for (size_t i = 0; i < count; ++i) {
-                    const KeyFrameList& kfl = inputs[i];
-
-
-                    while (std::get<0>(kfl)->size() > next_pos[i] && std::get<0>(kfl)->at(next_pos[i]) == min_tick) {
-                        ++next_pos[i];
-                    }
+            nodeAnim->mScalingKeys = new aiVectorKey[nodeAnim->mNumScalingKeys];
+            ordered_insert = 0;
+            for (std::pair<const int64_t, aiVectorKey*> scale_key : scale_keys)
+            {
+                if( scale_key.second->mTime <= end_time )
+                { 
+                    nodeAnim->mScalingKeys[ordered_insert] = *scale_key.second;
+                    ++ordered_insert;
                 }
+                delete scale_key.second;
             }
 
-            return keys;
-        }
-
-        void FBXConverter::InterpolateKeys(aiVectorKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
-            const aiVector3D& def_value,
-            double& max_time,
-            double& min_time) {
-            ai_assert(!keys.empty());
-            ai_assert(nullptr != valOut);
-
-            std::vector<unsigned int> next_pos;
-            const size_t count(inputs.size());
-
-            next_pos.resize(inputs.size(), 0);
-
-            for (KeyTimeList::value_type time : keys) {
-                ai_real result[3] = { def_value.x, def_value.y, def_value.z };
-
-                for (size_t i = 0; i < count; ++i) {
-                    const KeyFrameList& kfl = inputs[i];
-
-                    const size_t ksize = std::get<0>(kfl)->size();
-                    if (ksize == 0) {
-                        continue;
-                    }
-                    if (ksize > next_pos[i] && std::get<0>(kfl)->at(next_pos[i]) == time) {
-                        ++next_pos[i];
-                    }
-
-                    const size_t id0 = next_pos[i] > 0 ? next_pos[i] - 1 : 0;
-                    const size_t id1 = next_pos[i] == ksize ? ksize - 1 : next_pos[i];
-
-                    // use lerp for interpolation
-                    const KeyValueList::value_type valueA = std::get<1>(kfl)->at(id0);
-                    const KeyValueList::value_type valueB = std::get<1>(kfl)->at(id1);
-
-                    const KeyTimeList::value_type timeA = std::get<0>(kfl)->at(id0);
-                    const KeyTimeList::value_type timeB = std::get<0>(kfl)->at(id1);
-
-                    const ai_real factor = timeB == timeA ? ai_real(0.) : static_cast<ai_real>((time - timeA)) / (timeB - timeA);
-                    const ai_real interpValue = static_cast<ai_real>(valueA + (valueB - valueA) * factor);
-
-                    result[std::get<2>(kfl)] = interpValue;
+            nodeAnim->mRotationKeys = new aiQuatKey[nodeAnim->mNumRotationKeys];
+            ordered_insert = 0;
+            for (std::pair<const int64_t, aiQuatKey*> rot_key : real_rotation_keys)
+            {
+                if(rot_key.second->mTime <= end_time)
+                { 
+                    nodeAnim->mRotationKeys[ordered_insert] = *rot_key.second;
+                    ++ordered_insert;
                 }
-
-                // magic value to convert fbx times to seconds
-                valOut->mTime = CONVERT_FBX_TIME(time) * anim_fps;
-
-                min_time = std::min(min_time, valOut->mTime);
-                max_time = std::max(max_time, valOut->mTime);
-
-                valOut->mValue.x = result[0];
-                valOut->mValue.y = result[1];
-                valOut->mValue.z = result[2];
-
-                ++valOut;
-            }
-        }
-
-        void FBXConverter::InterpolateKeys(aiQuatKey* valOut, const KeyTimeList& keys, const KeyFrameListList& inputs,
-            const aiVector3D& def_value,
-            double& maxTime,
-            double& minTime,
-            Model::RotOrder order)
-        {
-            ai_assert(!keys.empty());
-            ai_assert(nullptr != valOut);
-
-            std::unique_ptr<aiVectorKey[]> temp(new aiVectorKey[keys.size()]);
-            InterpolateKeys(temp.get(), keys, inputs, def_value, maxTime, minTime);
-
-            aiMatrix4x4 m;
-
-            aiQuaternion lastq;
-
-            for (size_t i = 0, c = keys.size(); i < c; ++i) {
-
-                valOut[i].mTime = temp[i].mTime;
-
-                GetRotationMatrix(order, temp[i].mValue, m);
-                aiQuaternion quat = aiQuaternion(aiMatrix3x3(m));
-
-                // take shortest path by checking the inner product
-                // http://www.3dkingdoms.com/weekly/weekly.php?a=36
-                if (quat.x * lastq.x + quat.y * lastq.y + quat.z * lastq.z + quat.w * lastq.w < 0)
-                {
-                    quat.x = -quat.x;
-                    quat.y = -quat.y;
-                    quat.z = -quat.z;
-                    quat.w = -quat.w;
-                }
-                lastq = quat;
-
-                valOut[i].mValue = quat;
-            }
-        }
-
-        void FBXConverter::ConvertTransformOrder_TRStoSRT(aiQuatKey* out_quat, aiVectorKey* out_scale,
-            aiVectorKey* out_translation,
-            const KeyFrameListList& scaling,
-            const KeyFrameListList& translation,
-            const KeyFrameListList& rotation,
-            const KeyTimeList& times,
-            double& maxTime,
-            double& minTime,
-            Model::RotOrder order,
-            const aiVector3D& def_scale,
-            const aiVector3D& def_translate,
-            const aiVector3D& def_rotation)
-        {
-            if (rotation.size()) {
-                InterpolateKeys(out_quat, times, rotation, def_rotation, maxTime, minTime, order);
-            }
-            else {
-                for (size_t i = 0; i < times.size(); ++i) {
-                    out_quat[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-                    out_quat[i].mValue = EulerToQuaternion(def_rotation, order);
-                }
+                delete rot_key.second;
             }
 
-            if (scaling.size()) {
-                InterpolateKeys(out_scale, times, scaling, def_scale, maxTime, minTime);
+            if(real_rotation_keys.size() > 0 || position_keys.size() > 0 || scale_keys.size() > 0)
+            {
+                node_anims.push_back( nodeAnim );
             }
-            else {
-                for (size_t i = 0; i < times.size(); ++i) {
-                    out_scale[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-                    out_scale[i].mValue = def_scale;
-                }
-            }
-
-            if (translation.size()) {
-                InterpolateKeys(out_translation, times, translation, def_translate, maxTime, minTime);
-            }
-            else {
-                for (size_t i = 0; i < times.size(); ++i) {
-                    out_translation[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-                    out_translation[i].mValue = def_translate;
-                }
-            }
-
-            const size_t count = times.size();
-            for (size_t i = 0; i < count; ++i) {
-                aiQuaternion& r = out_quat[i].mValue;
-                aiVector3D& s = out_scale[i].mValue;
-                aiVector3D& t = out_translation[i].mValue;
-
-                aiMatrix4x4 mat, temp;
-                aiMatrix4x4::Translation(t, mat);
-                mat *= aiMatrix4x4(r.GetMatrix());
-                mat *= aiMatrix4x4::Scaling(s, temp);
-
-                mat.Decompose(s, r, t);
-            }
+            else
+            {
+                delete nodeAnim;
+            }            
         }
 
         aiQuaternion FBXConverter::EulerToQuaternion(const aiVector3D& rot, Model::RotOrder order)
@@ -3347,65 +3003,6 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             GetRotationMatrix(order, rot, m);
 
             return aiQuaternion(aiMatrix3x3(m));
-        }
-
-        void FBXConverter::ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
-            int64_t start, int64_t stop,
-            double& maxTime,
-            double& minTime)
-        {
-            ai_assert(nodes.size());
-
-            // XXX for now, assume scale should be blended geometrically (i.e. two
-            // layers should be multiplied with each other). There is a FBX
-            // property in the layer to specify the behaviour, though.
-
-            const KeyFrameListList& inputs = GetKeyframeList(nodes, start, stop);
-            const KeyTimeList& keys = GetKeyTimeList(inputs);
-
-            na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
-            na->mScalingKeys = new aiVectorKey[keys.size()];
-            if (keys.size() > 0) {
-                InterpolateKeys(na->mScalingKeys, keys, inputs, aiVector3D(1.0f, 1.0f, 1.0f), maxTime, minTime);
-            }
-        }
-
-        void FBXConverter::ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
-            const LayerMap& /*layers*/,
-            int64_t start, int64_t stop,
-            double& maxTime,
-            double& minTime)
-        {
-            ai_assert(nodes.size());
-
-            // XXX see notes in ConvertScaleKeys()
-            const KeyFrameListList& inputs = GetKeyframeList(nodes, start, stop);
-            const KeyTimeList& keys = GetKeyTimeList(inputs);
-
-            na->mNumPositionKeys = static_cast<unsigned int>(keys.size());
-            na->mPositionKeys = new aiVectorKey[keys.size()];
-            if (keys.size() > 0)
-                InterpolateKeys(na->mPositionKeys, keys, inputs, aiVector3D(0.0f, 0.0f, 0.0f), maxTime, minTime);
-        }
-
-        void FBXConverter::ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes,
-            const LayerMap& /*layers*/,
-            int64_t start, int64_t stop,
-            double& maxTime,
-            double& minTime,
-            Model::RotOrder order)
-        {
-            ai_assert(nodes.size());
-
-            // XXX see notes in ConvertScaleKeys()
-            const std::vector< KeyFrameList >& inputs = GetKeyframeList(nodes, start, stop);
-            const KeyTimeList& keys = GetKeyTimeList(inputs);
-
-            na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
-            na->mRotationKeys = new aiQuatKey[keys.size()];
-            if (!keys.empty()) {
-                InterpolateKeys(na->mRotationKeys, keys, inputs, aiVector3D(0.0f, 0.0f, 0.0f), maxTime, minTime, order);
-            }
         }
 
         void FBXConverter::ConvertGlobalSettings() {

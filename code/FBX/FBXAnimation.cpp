@@ -68,7 +68,7 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
     std::vector<int64_t> keys;
     std::vector<float> values;
 
-    // todo: make this into a dictionary somewhere. !important
+    // parse as arrays first
     ParseVectorDataArray(keys, KeyTime);
     ParseVectorDataArray(values, KeyValueFloat);
 
@@ -76,17 +76,13 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
         DOMError("the number of key times does not match the number of keyframe values",&KeyTime);
     }
 
+    // convert keyframes into simple keyframe dictionary map.
+    // this reduces considerable boilerplate code.
     std::transform(
         keys.begin(), 
         keys.end(), 
         values.begin(), 
         std::inserter(time_values, time_values.end()), std::make_pair<int64_t&, float&>);
-
-
-    // // check if the key times are well-ordered
-    // if(!std::equal(keys.begin(), keys.end() - 1, keys.begin() + 1, std::less<KeyTimeList::value_type>())) {
-    //     DOMError("the keyframes are not in ascending order",&KeyTime);
-    // }
 
     const Element* KeyAttrDataFloat = sc["KeyAttrDataFloat"];
     if(KeyAttrDataFloat) {

@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ColladaExporter.h"
 #include <assimp/Bitmap.h>
+#include <assimp/MathFunctions.h>
 #include <assimp/fast_atof.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
@@ -155,7 +156,7 @@ void ColladaExporter::WriteFile() {
 // ------------------------------------------------------------------------------------------------
 // Writes the asset header
 void ColladaExporter::WriteHeader() {
-    static const ai_real epsilon = ai_real( 0.00001 );
+    static const ai_real epsilon = Math::getEpsilon<ai_real>();
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
         1,  0,  0,
@@ -317,7 +318,7 @@ void ColladaExporter::WriteTextures() {
 
             std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char*) texture->achFormatHint);
 
-            std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
+            std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath + mIOSystem->getOsSeparator() + name, "wb"));
             if(outfile == NULL) {
                 throw DeadlyExportError("could not open output texture file: " + mPath + name);
             }

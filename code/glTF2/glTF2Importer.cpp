@@ -64,6 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 using namespace glTF2;
+using namespace glTFCommon;
 
 namespace {
     // generate bi-tangents from normals and tangents according to spec
@@ -140,22 +141,23 @@ static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode)
     }
 }
 
-static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
+/*static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2];
 }
 
+
 static void CopyValue(const glTF2::vec4& v, aiColor4D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
-}
+}*/
 
 /*static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2];
 }*/
 
-static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
+/*static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = 1.0;
 }
@@ -168,15 +170,15 @@ static void CopyValue(const glTF2::vec3& v, aiVector3D& out)
 static void CopyValue(const glTF2::vec4& v, aiQuaternion& out)
 {
     out.x = v[0]; out.y = v[1]; out.z = v[2]; out.w = v[3];
-}
+}*/
 
-static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
+/*static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
 {
     o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
     o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
     o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
     o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}
+}*/
 
 inline void SetMaterialColorProperty(Asset& /*r*/, vec4& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
 {
@@ -188,7 +190,7 @@ inline void SetMaterialColorProperty(Asset& /*r*/, vec4& prop, aiMaterial* mat, 
 inline void SetMaterialColorProperty(Asset& /*r*/, vec3& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
 {
     aiColor4D col;
-    CopyValue(prop, col);
+    glTFCommon::CopyValue(prop, col);
     mat->AddProperty(&col, 1, pKey, type, idx);
 }
 
@@ -700,12 +702,17 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
         if (cam.type == Camera::Perspective) {
 
             aicam->mAspect        = cam.cameraProperties.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * aicam->mAspect;
+            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar  = cam.cameraProperties.perspective.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.perspective.znear;
-        }
-        else {
-            // assimp does not support orthographic cameras
+        } else {
+            aicam->mClipPlaneFar = cam.cameraProperties.ortographic.zfar;
+            aicam->mClipPlaneNear = cam.cameraProperties.ortographic.znear;
+            aicam->mHorizontalFOV = 0.0;
+            aicam->mAspect = 1.0f;
+            if (0.f != cam.cameraProperties.ortographic.ymag ) {
+                aicam->mAspect = cam.cameraProperties.ortographic.xmag / cam.cameraProperties.ortographic.ymag;
+            }
         }
     }
 }
@@ -901,6 +908,9 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                 std::vector<std::vector<aiVertexWeight>> weighting(mesh->mNumBones);
                 BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
 
+                mat4* pbindMatrices = nullptr;
+                node.skin->inverseBindMatrices->ExtractData(pbindMatrices);
+
                 for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
                     aiBone* bone = new aiBone();
 
@@ -916,6 +926,8 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                     }
                     GetNodeTransform(bone->mOffsetMatrix, *joint);
 
+                    CopyValue(pbindMatrices[i], bone->mOffsetMatrix);
+
                     std::vector<aiVertexWeight>& weights = weighting[i];
 
                     bone->mNumWeights = static_cast<uint32_t>(weights.size());
@@ -930,6 +942,10 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                       bone->mWeights->mWeight = 0.f;
                     }
                     mesh->mBones[i] = bone;
+                }
+
+                if (pbindMatrices) {
+                    delete[] pbindMatrices;
                 }
             }
         }
@@ -987,7 +1003,12 @@ void glTF2Importer::ImportNodes(glTF2::Asset& r)
 }
 
 struct AnimationSamplers {
-    AnimationSamplers() : translation(nullptr), rotation(nullptr), scale(nullptr) {}
+    AnimationSamplers()
+    : translation(nullptr)
+    , rotation(nullptr)
+    , scale(nullptr) {
+        // empty
+    }
 
     Animation::Sampler* translation;
     Animation::Sampler* rotation;

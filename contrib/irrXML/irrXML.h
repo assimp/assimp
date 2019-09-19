@@ -215,7 +215,7 @@ namespace io
 	two methods to read your data and give a pointer to an instance of
 	your implementation when calling createIrrXMLReader(), 
 	createIrrXMLReaderUTF16() or createIrrXMLReaderUTF32() */
-	class IFileReadCallBack
+	class IRRXML_API IFileReadCallBack
 	{
 	public:
 

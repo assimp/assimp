@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 
 #include <assimp/StringComparison.h>
+#include <assimp/MathFunctions.h>
 
 #include <assimp/scene.h>
 
@@ -553,7 +554,7 @@ namespace Assimp {
                 return;
             }
 
-            const float angle_epsilon = 1e-6f;
+            const float angle_epsilon = Math::getEpsilon<float>();
 
             out = aiMatrix4x4();
 
@@ -694,7 +695,7 @@ namespace Assimp {
             std::fill_n(chain, static_cast<unsigned int>(TransformationComp_MAXIMUM), aiMatrix4x4());
 
             // generate transformation matrices for all the different transformation components
-            const float zero_epsilon = 1e-6f;
+            const float zero_epsilon = Math::getEpsilon<float>();
             const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
 
             const aiVector3D& PreRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
@@ -2001,6 +2002,21 @@ namespace Assimp {
             TrySetTextureProperties(out_mat, textures, "Maya|SpecularTexture", aiTextureType_SPECULAR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|FalloffTexture", aiTextureType_OPACITY, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
+            
+            // Maya PBR
+            TrySetTextureProperties(out_mat, textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+            
+            // Maya stingray
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_color_map|file", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_normal_map|file", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);            
         }
 
         void FBXConverter::SetTextureProperties(aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh)
@@ -2952,7 +2968,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 TransformationCompDefaultValue(comp)
                 );
 
-            const float epsilon = 1e-6f;
+            const float epsilon = Math::getEpsilon<float>();
             return (dyn_val - static_val).SquareLength() < epsilon;
         }
 

@@ -2518,7 +2518,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             int64_t stop_time = st.LocalStop();
             bool has_local_startstop = start_time != 0 || stop_time != 0;
 
-            printf("Has local start stop? %s\n", has_local_startstop ? "yes" : "no" );
+            ASSIMP_LOG_DEBUG_F("Has local start stop? %s\n", has_local_startstop ? "yes" : "no" );
 
             // Goal we need the number of frames passed
             double start_time_frame_number = has_local_startstop ? (CONVERT_FBX_TIME_TO_SECONDS(start_time) * anim_fps) : 0;
@@ -2777,24 +2777,24 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
 
             for( const AnimationCurveNode* curve : curves)
             {
-                printf("[Header] Curve from fbx: ID %d Name: %s\n", curve->ID(), curve->Name().c_str());
+                ASSIMP_LOG_DEBUG_F("[Header] Curve from fbx: ID %d Name: %s\n", curve->ID(), curve->Name().c_str());
                 
                 const Object *target = curve->Target();
                 std::string property_type = curve->TargetProperty();
 
-                printf("-- Target property: %s\n", curve->TargetProperty().c_str());
+                ASSIMP_LOG_DEBUG_F("-- Target property: %s\n", curve->TargetProperty().c_str());
                 
                 // I believe that an invalid target could 
                 // still be of use in certain cases so we 
                 // must keep this data for now.
                 if(target == nullptr)
                 {
-                    printf("-- [WARNING-Serious] Invalid node target: %d\n", curve->ID());
+                    ASSIMP_LOG_DEBUG_F("-- [WARNING-Serious] Invalid node target: %d\n", curve->ID());
                     continue; // skip this to make sure we handle this case.
                 }
                 else
                 {
-                    printf("-- Valid node target: %d\n", curve->ID());
+                    ASSIMP_LOG_DEBUG_F("-- Valid node target: %d\n", curve->ID());
                 }
 
 
@@ -2808,11 +2808,11 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 {
                     std::string subPropertyName = itr->first;
                     const AnimationCurve* subCurve = itr->second;
-                    printf("-- SubCurve %s vs sub curve name %s\n", subPropertyName.c_str(), subCurve->Name().c_str());
+                    ASSIMP_LOG_DEBUG_F("-- SubCurve %s vs sub curve name %s\n", subPropertyName.c_str(), subCurve->Name().c_str());
                     
                     // todo make into dict
                     const std::map<int64_t, float>& keyframes = subCurve->GetKeyframeData();
-                    printf("keyframe count: %ld\n", keyframes.size());
+                    ASSIMP_LOG_DEBUG_F("keyframe count: %ld\n", keyframes.size());
                     // subCurve->GetKeys()
                     // filter node
 
@@ -2826,13 +2826,13 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                                 if( position_keys.count( keyframe_data.first ) )
                                 {
                                     key = position_keys[keyframe_data.first];
-                                    printf("Found pre-existing pos key for sub curve %ld\n", keyframe_data.first);
+                                    ASSIMP_LOG_DEBUG_F("Found pre-existing pos key for sub curve %ld\n", keyframe_data.first);
                                 }
                                 else
                                 {
                                     key = new aiVectorKey();
                                     position_keys.insert( std::pair<const int64_t, aiVectorKey*>(keyframe_data.first, key) );
-                                    printf("Created pos key for sub curve %ld\n", keyframe_data.first);
+                                    ASSIMP_LOG_DEBUG_F("Created pos key for sub curve %ld\n", keyframe_data.first);
                                 }                         
                                
                                 key->mTime = CONVERT_FBX_TIME_TO_FRAMES(keyframe_data.first, anim_fps);
@@ -2858,14 +2858,14 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                                 if( rotation_keys.count( keyframe_data.first ) )
                                 {
                                     key = rotation_keys[keyframe_data.first];
-                                    printf("Found pre-existing rot key for sub curve %ld\n", keyframe_data.first);
+                                    ASSIMP_LOG_DEBUG_F("Found pre-existing rot key for sub curve %ld\n", keyframe_data.first);
                                 }
                                 else
                                 {
 
                                     key = new aiVectorKey();
                                     rotation_keys.insert( std::pair<const int64_t, aiVectorKey*>(keyframe_data.first, key) );
-                                    printf("Created rot key for sub curve %ld\n", keyframe_data.first);
+                                    ASSIMP_LOG_DEBUG_F("Created rot key for sub curve %ld\n", keyframe_data.first);
                                 }
 
                                 // set key frame time
@@ -2892,13 +2892,13 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                                 if( scale_keys.count( keyframe_data.first ) )
                                 {
                                     key = scale_keys[keyframe_data.first];
-                                    printf("Found pre-existing scale key for sub curve %ld\n", keyframe_data.first);
+                                    ASSIMP_LOG_DEBUG_F("Found pre-existing scale key for sub curve %ld\n", keyframe_data.first);
                                 }
                                 else
                                 {
                                     key = new aiVectorKey();
                                     scale_keys.insert( std::pair<const int64_t, aiVectorKey*>(keyframe_data.first, key) );
-                                    printf("Created scale key for sub curve %ld\n", keyframe_data.first);
+                                    ASSIMP_LOG_DEBUG_F("Created scale key for sub curve %ld\n", keyframe_data.first);
                                 }                                
 
 
@@ -2944,7 +2944,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             // this list is no longer required free it.
             rotation_keys.clear();
 
-            assert(nodeAnim); // if new fails then we need to report this asap and crash?
+            ai_assert(nodeAnim); // if new fails then we need to report this asap and crash?
             nodeAnim->mNodeName = fixed_name;
             nodeAnim->mNumPositionKeys = position_keys.size();
             nodeAnim->mNumRotationKeys = real_rotation_keys.size();

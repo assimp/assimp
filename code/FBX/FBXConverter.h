@@ -325,11 +325,6 @@ private:
         double& max_time,
         double& min_time);
 
-    // // ------------------------------------------------------------------------------------------------
-    // bool IsRedundantAnimationData(const Model& target,
-    //     TransformationComp comp,
-    //     const std::vector<const AnimationCurveNode*>& curves);
-
     // ------------------------------------------------------------------------------------------------
     // generate node anim, extracting only Rotation, Scaling and Translation from the given chain
     aiNodeAnim* GenerateSimpleNodeAnim(const std::string& name,

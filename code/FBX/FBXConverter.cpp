@@ -2584,35 +2584,6 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 return;
             }
 
-
-            // // adjust relative timing for animation
-            // for (unsigned int c = 0; c < anim->mNumChannels; c++) {
-            //     aiNodeAnim* channel = anim->mChannels[c];
-            //     for (uint32_t i = 0; i < channel->mNumPositionKeys; i++) {
-            //         channel->mPositionKeys[i].mTime -= start_time_fps;
-            //     }
-            //     for (uint32_t i = 0; i < channel->mNumRotationKeys; i++) {
-            //         channel->mRotationKeys[i].mTime -= start_time_fps;
-            //     }
-            //     for (uint32_t i = 0; i < channel->mNumScalingKeys; i++) {
-            //         channel->mScalingKeys[i].mTime -= start_time_fps;
-            //     }
-            // }
-            // for (unsigned int c = 0; c < anim->mNumMorphMeshChannels; c++) {
-            //     aiMeshMorphAnim* channel = anim->mMorphMeshChannels[c];
-            //     for (uint32_t i = 0; i < channel->mNumKeys; i++) {
-            //         channel->mKeys[i].mTime -= start_time_fps;
-            //     }
-            // }
-
-            // for some mysterious reason, mDuration is simply the maximum key -- the
-            // validator always assumes animations to start at zero.
-            // todo: this is broken
-
-            // Basis use FBX method
-            // anim->mDuration = stop_time - start_time;
-            // anim->mTicksPerSecond = FBX_ONE_SECOND;
-
             anim->mDuration = stop_time_frame_number;
             anim->mTicksPerSecond = anim_fps;
         }

@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "ObjTools.h"
-#include "ObjFileParser.h"
+#include "Obj/ObjTools.h"
+#include "Obj/ObjFileParser.h"
 
 using namespace ::Assimp;
 

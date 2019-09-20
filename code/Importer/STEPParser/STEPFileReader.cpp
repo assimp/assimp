@@ -278,10 +278,10 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
         std::transform( type.begin(), type.end(), type.begin(), &Assimp::ToLower<char>  );
         const char* sz = scheme.GetStaticStringForToken(type);
         if(sz) {
-            const std::string::size_type len = n2-n1+1;
-            char* const copysz = new char[len+1];
+            const std::string::size_type szLen = n2-n1+1;
+            char* const copysz = new char[szLen+1];
             std::copy(s.c_str()+n1,s.c_str()+n2+1,copysz);
-            copysz[len] = '\0';
+            copysz[szLen] = '\0';
             db.InternInsert(new LazyObject(db,id,line,sz,copysz));
         }
         if(!has_next) {

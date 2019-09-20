@@ -1,7 +1,8 @@
 set(PROJECT_VERSION "")
 project(assimp_qt_viewer)
 
-cmake_minimum_required(VERSION 3.0)
+# Qt5 requires cmake 3.1 or newer
+cmake_minimum_required(VERSION 3.1)
 
 FIND_PACKAGE(OpenGL QUIET)
 

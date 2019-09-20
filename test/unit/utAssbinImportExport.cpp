@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,20 +51,20 @@ using namespace Assimp;
 
 class utAssbinImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
+    bool importerTest() override {
+        Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
 
         Exporter exporter;
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin" ) );
-        const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.assbin", aiProcess_ValidateDataStructure );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "assbin", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.assbin" ) );
+        const aiScene *newScene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.assbin", aiProcess_ValidateDataStructure );
 
         return newScene != nullptr;
     }
 };
 
 TEST_F( utAssbinImportExport, exportAssbin3DFromFileTest ) {
-    Assimp::Importer importer;
+    Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure );
     EXPECT_NE( nullptr, scene );
 }

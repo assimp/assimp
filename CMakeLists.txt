@@ -277,16 +277,14 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
 ENDIF()
 
 IF ( IOS AND NOT HUNTER_ENABLED)
-
-IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -Og")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -Og")
-ELSE()
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -O3")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -O3")
-  # Experimental for pdb generation
-ENDIF()
-
+  IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -Og")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -Og")
+  ELSE()
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -O3")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -O3")
+    # Experimental for pdb generation
+  ENDIF()
 ENDIF( IOS AND NOT HUNTER_ENABLED)
 
 IF (ASSIMP_COVERALLS)
@@ -559,17 +557,15 @@ ENDIF(NOT HUNTER_ENABLED)
 
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
+  # The viewer for windows only
   IF ( WIN32 AND DirectX_D3DX9_LIBRARY )
     OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${DirectX_FOUND} )
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ( ASSIMP_BUILD_ASSIMP_VIEW )
   ENDIF ( WIN32 AND DirectX_D3DX9_LIBRARY )
-
+  # Te command line tool
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
-IF (NOT IOS)
-  ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
-ENDIF (NOT IOS)
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
 IF ( ASSIMP_BUILD_SAMPLES)

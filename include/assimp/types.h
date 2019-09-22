@@ -305,7 +305,7 @@ struct aiString
     /** Copy a const char* to the aiString */
     void Set( const char* sz) {
         const ai_int32 len = (ai_uint32) ::strlen(sz);
-        if( len > MAXLEN - 1) {
+        if( len > (ai_int32)MAXLEN - 1) {
             return;
         }
         length = len;

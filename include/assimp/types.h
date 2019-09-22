@@ -274,8 +274,8 @@ struct aiString
     }
 
     /** Copy constructor */
-    aiString(const aiString& rOther) :
-        length(rOther.length)
+    aiString(const aiString& rOther)
+    : length(rOther.length)
     {
         // Crop the string to the maximum length
         length = length>=MAXLEN?MAXLEN-1:length;
@@ -285,7 +285,7 @@ struct aiString
 
     /** Constructor from std::string */
     explicit aiString(const std::string& pString) :
-        length(pString.length())
+        length( (ai_uint32) pString.length())
     {
         length = length>=MAXLEN?MAXLEN-1:length;
         memcpy( data, pString.c_str(), length);
@@ -297,14 +297,14 @@ struct aiString
         if( pString.length() > MAXLEN - 1) {
             return;
         }
-        length = pString.length();
+        length = (ai_uint32)pString.length();
         memcpy( data, pString.c_str(), length);
         data[length] = 0;
     }
 
     /** Copy a const char* to the aiString */
     void Set( const char* sz) {
-        const size_t len = ::strlen(sz);
+        const ai_int32 len = (ai_uint32) ::strlen(sz);
         if( len > MAXLEN - 1) {
             return;
         }
@@ -351,7 +351,7 @@ struct aiString
 
     /** Append a string to the string */
     void Append (const char* app)   {
-        const size_t len = ::strlen(app);
+        const ai_uint32 len = (ai_uint32) ::strlen(app);
         if (!len) {
             return;
         }

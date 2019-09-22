@@ -413,8 +413,6 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
         case Value::ddl_ref:
             data->m_size = 0;
             break;
-        case Value::ddl_none:
-        case Value::ddl_types_max:
         default:
             break;
     }

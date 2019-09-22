@@ -1037,7 +1037,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.translation.isPresent) {
         anim->mNumPositionKeys = 1;
-        anim->mPositionKeys = new aiVectorKey();
+        anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
         anim->mPositionKeys->mTime = 0.f;
         anim->mPositionKeys->mValue.x = node.translation.value[0];
         anim->mPositionKeys->mValue.y = node.translation.value[1];

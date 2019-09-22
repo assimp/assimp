@@ -958,7 +958,7 @@ void ValidateDSProcess::Validate( const aiString* pString)
 {
     if (pString->length > MAXLEN)
     {
-        ReportError("aiString::length is too large (%lu, maximum is %lu)",
+        ReportError("aiString::length is too large (%u, maximum is %lu)",
             pString->length,MAXLEN);
     }
     const char* sz = pString->data;

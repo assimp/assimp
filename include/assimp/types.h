@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h>
 #include <string.h>
 #include <limits.h>
+#include <stdint.h>
 
 // Our compile configuration
 #include "defs.h"
@@ -65,10 +66,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "matrix4x4.h"
 #include "quaternion.h"
 
+typedef int32_t ai_int32;
+typedef uint32_t ai_uint32 ;
+
 #ifdef __cplusplus
 #include <cstring>
 #include <new>      // for std::nothrow_t
 #include <string>   // for aiString::Set(const std::string&)
+
 
 namespace Assimp    {
     //! @cond never
@@ -379,7 +384,7 @@ struct aiString
     /** Binary length of the string excluding the terminal 0. This is NOT the
      *  logical length of strings containing UTF-8 multi-byte sequences! It's
      *  the number of bytes from the beginning of the string to its end.*/
-    size_t length;
+    ai_uint32 length;
 
     /** String buffer. Size limit is MAXLEN */
     char data[MAXLEN];

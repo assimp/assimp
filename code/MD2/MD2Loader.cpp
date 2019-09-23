@@ -344,7 +344,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         if (pcSkins->name[0])
         {
             aiString szString;
-            const size_t iLen = ::strlen(pcSkins->name);
+            const ai_uint32 iLen = (ai_uint32) ::strlen(pcSkins->name);
             ::memcpy(szString.data,pcSkins->name,iLen);
             szString.data[iLen] = '\0';
             szString.length = iLen;

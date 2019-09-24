@@ -266,7 +266,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {
-                size_t& len = aim->mName.length;
+                ai_uint32& len = aim->mName.length;
                 aim->mName.data[len] = '-';
                 len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
             }

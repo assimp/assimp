@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -431,7 +429,7 @@ void Parser::ParseLV1SoftSkinBlock()
                         std::string bone;
                         for (unsigned int w = 0; w < numWeights;++w) {
                             bone.clear();
-                            ParseString(bone,"*MESH_SOFTSKINVERTS.Bone");
+                            ParseString(bone, "*MESH_SOFTSKINVERTS.Bone");
 
                             // Find the bone in the mesh's list
                             std::pair<int,ai_real> me;
@@ -826,7 +824,6 @@ bool Parser::ParseString(std::string& out,const char* szName)
     char szBuffer[1024];
     if (!SkipSpaces(&filePtr))
     {
-
         ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Unexpected EOL",szName);
         LogWarning(szBuffer);
         return false;
@@ -834,7 +831,6 @@ bool Parser::ParseString(std::string& out,const char* szName)
     // there must be '"'
     if ('\"' != *filePtr)
     {
-
         ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected "
             "to be enclosed in double quotation marks",szName);
         LogWarning(szBuffer);
@@ -842,9 +838,9 @@ bool Parser::ParseString(std::string& out,const char* szName)
     }
     ++filePtr;
     const char* sz = filePtr;
-    while (true)
-    {
-        if ('\"' == *sz)break;
+    while (true) {
+        if ('\"' == *sz)
+            break;
         else if ('\0' == *sz)
         {
             ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected to "

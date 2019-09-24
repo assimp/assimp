@@ -50,7 +50,7 @@ using namespace Assimp;
 
 class utASEImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen.ASE", aiProcess_ValidateDataStructure );
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER

@@ -444,7 +444,6 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         "\" does not match the vertex count");
                     continue;
                 }
-                aim->mColors[c] = new aiColor4D[attr.color[c]->count];
                 attr.color[c]->ExtractData(aim->mColors[c]);
             }
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {

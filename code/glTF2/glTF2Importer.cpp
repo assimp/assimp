@@ -64,6 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 using namespace glTF2;
+using namespace glTFCommon;
 
 namespace {
     // generate bi-tangents from normals and tangents according to spec
@@ -140,22 +141,23 @@ static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode)
     }
 }
 
-static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
+/*static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2];
 }
 
+
 static void CopyValue(const glTF2::vec4& v, aiColor4D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
-}
+}*/
 
 /*static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2];
 }*/
 
-static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
+/*static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = 1.0;
 }
@@ -168,15 +170,15 @@ static void CopyValue(const glTF2::vec3& v, aiVector3D& out)
 static void CopyValue(const glTF2::vec4& v, aiQuaternion& out)
 {
     out.x = v[0]; out.y = v[1]; out.z = v[2]; out.w = v[3];
-}
+}*/
 
-static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
+/*static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
 {
     o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
     o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
     o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
     o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}
+}*/
 
 inline void SetMaterialColorProperty(Asset& /*r*/, vec4& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
 {
@@ -188,7 +190,7 @@ inline void SetMaterialColorProperty(Asset& /*r*/, vec4& prop, aiMaterial* mat, 
 inline void SetMaterialColorProperty(Asset& /*r*/, vec3& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
 {
     aiColor4D col;
-    CopyValue(prop, col);
+    glTFCommon::CopyValue(prop, col);
     mat->AddProperty(&col, 1, pKey, type, idx);
 }
 
@@ -383,7 +385,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
             aim->mName = mesh.name.empty() ? mesh.id : mesh.name;
 
             if (mesh.primitives.size() > 1) {
-                size_t& len = aim->mName.length;
+                ai_uint32& len = aim->mName.length;
                 aim->mName.data[len] = '-';
                 len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
             }
@@ -442,7 +444,6 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                         "\" does not match the vertex count");
                     continue;
                 }
-                aim->mColors[c] = new aiColor4D[attr.color[c]->count];
                 attr.color[c]->ExtractData(aim->mColors[c]);
             }
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
@@ -700,12 +701,17 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
         if (cam.type == Camera::Perspective) {
 
             aicam->mAspect        = cam.cameraProperties.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * aicam->mAspect;
+            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar  = cam.cameraProperties.perspective.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.perspective.znear;
-        }
-        else {
-            // assimp does not support orthographic cameras
+        } else {
+            aicam->mClipPlaneFar = cam.cameraProperties.ortographic.zfar;
+            aicam->mClipPlaneNear = cam.cameraProperties.ortographic.znear;
+            aicam->mHorizontalFOV = 0.0;
+            aicam->mAspect = 1.0f;
+            if (0.f != cam.cameraProperties.ortographic.ymag ) {
+                aicam->mAspect = cam.cameraProperties.ortographic.xmag / cam.cameraProperties.ortographic.ymag;
+            }
         }
     }
 }
@@ -901,6 +907,9 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                 std::vector<std::vector<aiVertexWeight>> weighting(mesh->mNumBones);
                 BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
 
+                mat4* pbindMatrices = nullptr;
+                node.skin->inverseBindMatrices->ExtractData(pbindMatrices);
+
                 for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
                     aiBone* bone = new aiBone();
 
@@ -916,6 +925,8 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                     }
                     GetNodeTransform(bone->mOffsetMatrix, *joint);
 
+                    CopyValue(pbindMatrices[i], bone->mOffsetMatrix);
+
                     std::vector<aiVertexWeight>& weights = weighting[i];
 
                     bone->mNumWeights = static_cast<uint32_t>(weights.size());
@@ -930,6 +941,10 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
                       bone->mWeights->mWeight = 0.f;
                     }
                     mesh->mBones[i] = bone;
+                }
+
+                if (pbindMatrices) {
+                    delete[] pbindMatrices;
                 }
             }
         }
@@ -987,7 +1002,12 @@ void glTF2Importer::ImportNodes(glTF2::Asset& r)
 }
 
 struct AnimationSamplers {
-    AnimationSamplers() : translation(nullptr), rotation(nullptr), scale(nullptr) {}
+    AnimationSamplers()
+    : translation(nullptr)
+    , rotation(nullptr)
+    , scale(nullptr) {
+        // empty
+    }
 
     Animation::Sampler* translation;
     Animation::Sampler* rotation;
@@ -1016,7 +1036,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.translation.isPresent) {
         anim->mNumPositionKeys = 1;
-        anim->mPositionKeys = new aiVectorKey();
+        anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
         anim->mPositionKeys->mTime = 0.f;
         anim->mPositionKeys->mValue.x = node.translation.value[0];
         anim->mPositionKeys->mValue.y = node.translation.value[1];
@@ -1041,7 +1061,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.rotation.isPresent) {
         anim->mNumRotationKeys = 1;
-        anim->mRotationKeys = new aiQuatKey();
+        anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
         anim->mRotationKeys->mTime = 0.f;
         anim->mRotationKeys->mValue.x = node.rotation.value[0];
         anim->mRotationKeys->mValue.y = node.rotation.value[1];
@@ -1064,7 +1084,7 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
         delete[] values;
     } else if (node.scale.isPresent) {
         anim->mNumScalingKeys = 1;
-        anim->mScalingKeys = new aiVectorKey();
+        anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
         anim->mScalingKeys->mTime = 0.f;
         anim->mScalingKeys->mValue.x = node.scale.value[0];
         anim->mScalingKeys->mValue.y = node.scale.value[1];
@@ -1130,6 +1150,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
 
         // Use the latest keyframe for the duration of the animation
         double maxDuration = 0;
+        unsigned int maxNumberOfKeys = 0;
         for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
             auto chan = ai_anim->mChannels[j];
             if (chan->mNumPositionKeys) {
@@ -1137,21 +1158,25 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
                 if (lastPosKey.mTime > maxDuration) {
                     maxDuration = lastPosKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumPositionKeys);
             }
             if (chan->mNumRotationKeys) {
                 auto lastRotKey = chan->mRotationKeys[chan->mNumRotationKeys - 1];
                 if (lastRotKey.mTime > maxDuration) {
                     maxDuration = lastRotKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumRotationKeys);
             }
             if (chan->mNumScalingKeys) {
                 auto lastScaleKey = chan->mScalingKeys[chan->mNumScalingKeys - 1];
                 if (lastScaleKey.mTime > maxDuration) {
                     maxDuration = lastScaleKey.mTime;
                 }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumScalingKeys);
             }
         }
         ai_anim->mDuration = maxDuration;
+        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? (maxNumberOfKeys / (maxDuration/1000)) : 30;
 
         mScene->mAnimations[i] = ai_anim;
     }

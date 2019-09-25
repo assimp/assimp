@@ -596,11 +596,11 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
     // do not crah when no face definitions are there
     if (numFaces > 0) {
         // normal face creation
-        pMesh->mNormFaces.resize( pMesh->mNormFaces.size() + numFaces );
+        pMesh->mNormFaces.resize( numFaces );
         for( unsigned int a = 0; a < numFaces; ++a ) {
             unsigned int numIndices = ReadInt();
-            pMesh->mNormFaces.push_back( Face() );
-            Face& face = pMesh->mNormFaces.back();
+            pMesh->mNormFaces[a] = Face();
+            Face& face = pMesh->mNormFaces[a];
             for( unsigned int b = 0; b < numIndices; ++b ) {
                 face.mIndices.push_back( ReadInt());
             }

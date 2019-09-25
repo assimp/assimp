@@ -188,6 +188,14 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
     ASSERT_EQ(0u, parent->mNumChildren) << "Leaf node";
 }
 
+TEST_F(utFBXImporterExporter, importCloseToIdentityTransforms) {
+    Assimp::Importer importer;
+    // This was asserting in FBXConverter.cpp because the transforms appeared to be the identity by one test, but not by another.
+    // This asset should now load successfully.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/close_to_identity_transforms.fbx", aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(scene);
+}
+
 TEST_F( utFBXImporterExporter, importPhongMaterial ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/phong_cube.fbx", aiProcess_ValidateDataStructure );
@@ -267,4 +275,10 @@ TEST_F(utFBXImporterExporter, importEmbeddedFragmentedAsciiTest) {
     ASSERT_EQ(1u, scene->mNumTextures);
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(968029u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression splits data by 512Kb, it should be two parts for this texture";
+}
+
+TEST_F(utFBXImporterExporter, fbxTokenizeTestTest) {
+    //Assimp::Importer importer;
+    //const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/transparentTest2.fbx", aiProcess_ValidateDataStructure);
+    //EXPECT_NE(nullptr, scene);
 }

@@ -82,7 +82,7 @@ glTFImporter::glTFImporter()
 : BaseImporter()
 , meshOffsets()
 , embeddedTexIdxs()
-, mScene( NULL ) {
+, mScene( nullptr ) {
     // empty
 }
 
@@ -90,17 +90,16 @@ glTFImporter::~glTFImporter() {
     // empty
 }
 
-const aiImporterDesc* glTFImporter::GetInfo() const
-{
+const aiImporterDesc* glTFImporter::GetInfo() const {
     return &desc;
 }
 
-bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool /* checkSig */) const
-{
+bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool /* checkSig */) const {
     const std::string &extension = GetExtension(pFile);
 
-    if (extension != "gltf" && extension != "glb")
+    if (extension != "gltf" && extension != "glb") {
         return false;
+    }
 
     if (pIOHandler) {
         glTF::Asset asset(pIOHandler);
@@ -116,44 +115,9 @@ bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
     return false;
 }
 
-
-
-//static void CopyValue(const glTF::vec3& v, aiColor3D& out)
-//{
-//    out.r = v[0]; out.g = v[1]; out.b = v[2];
-//}
-
-static void CopyValue(const glTF::vec4& v, aiColor4D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
-}
-
-static void CopyValue(const glTF::vec4& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}
-
-static void CopyValue(const glTF::vec3& v, aiVector3D& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2];
-}
-
-static void CopyValue(const glTF::vec4& v, aiQuaternion& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2]; out.w = v[3];
-}
-
-static void CopyValue(const glTF::mat4& v, aiMatrix4x4& o)
-{
-    o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
-    o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
-    o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
-    o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}
-
-inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /*r*/, glTF::TexProperty prop, aiMaterial* mat,
-    aiTextureType texType, const char* pKey, unsigned int type, unsigned int idx)
-{
+inline
+void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /*r*/, glTF::TexProperty prop, aiMaterial* mat,
+        aiTextureType texType, const char* pKey, unsigned int type, unsigned int idx) {
     if (prop.texture) {
         if (prop.texture->source) {
             aiString uri(prop.texture->source->uri);
@@ -167,16 +131,14 @@ inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /
 
             mat->AddProperty(&uri, _AI_MATKEY_TEXTURE_BASE, texType, 0);
         }
-    }
-    else {
+    } else {
         aiColor4D col;
         CopyValue(prop.color, col);
         mat->AddProperty(&col, 1, pKey, type, idx);
     }
 }
 
-void glTFImporter::ImportMaterials(glTF::Asset& r)
-{
+void glTFImporter::ImportMaterials(glTF::Asset& r) {
     mScene->mNumMaterials = unsigned(r.materials.Size());
     mScene->mMaterials = new aiMaterial*[mScene->mNumMaterials];
 
@@ -304,7 +266,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {
-                size_t& len = aim->mName.length;
+                ai_uint32& len = aim->mName.length;
                 aim->mName.data[len] = '-';
                 len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
             }
@@ -499,27 +461,31 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
     CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
-void glTFImporter::ImportCameras(glTF::Asset& r)
-{
-    if (!r.cameras.Size()) return;
+void glTFImporter::ImportCameras(glTF::Asset& r) {
+    if (!r.cameras.Size()) {
+        return;
+    }
 
     mScene->mNumCameras = r.cameras.Size();
     mScene->mCameras = new aiCamera*[r.cameras.Size()];
-
     for (size_t i = 0; i < r.cameras.Size(); ++i) {
         Camera& cam = r.cameras[i];
 
         aiCamera* aicam = mScene->mCameras[i] = new aiCamera();
 
         if (cam.type == Camera::Perspective) {
-
             aicam->mAspect        = cam.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.perspective.yfov * aicam->mAspect;
+            aicam->mHorizontalFOV = cam.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar  = cam.perspective.zfar;
             aicam->mClipPlaneNear = cam.perspective.znear;
-        }
-        else {
-            // assimp does not support orthographic cameras
+        } else {
+            aicam->mClipPlaneFar = cam.ortographic.zfar;
+            aicam->mClipPlaneNear = cam.ortographic.znear;
+            aicam->mHorizontalFOV = 0.0;
+            aicam->mAspect = 1.0f;
+            if (0.f != cam.ortographic.ymag) {
+                aicam->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
+            }
         }
     }
 }

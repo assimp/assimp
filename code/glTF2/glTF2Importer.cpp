@@ -1005,13 +1005,15 @@ struct AnimationSamplers {
     AnimationSamplers()
     : translation(nullptr)
     , rotation(nullptr)
-    , scale(nullptr) {
+    , scale(nullptr)
+    , weight(nullptr) {
         // empty
     }
 
     Animation::Sampler* translation;
     Animation::Sampler* rotation;
     Animation::Sampler* scale;
+    Animation::Sampler* weight;
 };
 
 aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& samplers)
@@ -1094,6 +1096,43 @@ aiNodeAnim* CreateNodeAnim(glTF2::Asset& r, Node& node, AnimationSamplers& sampl
     return anim;
 }
 
+aiMeshMorphAnim* CreateMeshMorphAnim(glTF2::Asset& r, Node& node, AnimationSamplers& samplers)
+{
+    aiMeshMorphAnim* anim = new aiMeshMorphAnim();
+    anim->mName = GetNodeName(node);
+
+    static const float kMillisecondsFromSeconds = 1000.f;
+
+    if (nullptr != samplers.weight) {
+        float* times = nullptr;
+        samplers.weight->input->ExtractData(times);
+        float* values = nullptr;
+        samplers.weight->output->ExtractData(values);
+        anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
+
+        const unsigned int numMorphs = samplers.weight->output->count / anim->mNumKeys;
+
+        anim->mKeys = new aiMeshMorphKey[anim->mNumKeys];
+        unsigned int k = 0u;
+        for (unsigned int i = 0u; i < anim->mNumKeys; ++i) {
+            anim->mKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+            anim->mKeys[i].mNumValuesAndWeights = numMorphs;
+            anim->mKeys[i].mValues = new unsigned int[numMorphs];
+            anim->mKeys[i].mWeights = new double[numMorphs];
+
+            for (unsigned int j = 0u; j < numMorphs; ++j, ++k) {
+                anim->mKeys[i].mValues[j] = j;
+                anim->mKeys[i].mWeights[j] = ( 0.f > values[k] ) ? 0.f : values[k];
+            }
+        }
+
+        delete[] times;
+        delete[] values;
+    }
+
+    return anim;
+}
+
 std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation& anim)
 {
     std::unordered_map<unsigned int, AnimationSamplers> samplers;
@@ -1112,6 +1151,8 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation& an
             sampler.rotation = &anim.samplers[channel.sampler];
         } else if (channel.target.path == AnimationPath_SCALE) {
             sampler.scale = &anim.samplers[channel.sampler];
+        } else if (channel.target.path == AnimationPath_WEIGHTS) {
+            sampler.weight = &anim.samplers[channel.sampler];
         }
     }
 
@@ -1138,13 +1179,39 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
 
         std::unordered_map<unsigned int, AnimationSamplers> samplers = GatherSamplers(anim);
 
-        ai_anim->mNumChannels = static_cast<uint32_t>(samplers.size());
+        uint32_t numChannels = 0u;
+        uint32_t numMorphMeshChannels = 0u;
+
+        for (auto& iter : samplers) {
+            if ((nullptr != iter.second.rotation) || (nullptr != iter.second.scale) || (nullptr != iter.second.translation)) {
+                ++numChannels;
+            }
+            if (nullptr != iter.second.weight) {
+                ++numMorphMeshChannels;
+            }
+        }
+
+        ai_anim->mNumChannels = numChannels;
         if (ai_anim->mNumChannels > 0) {
             ai_anim->mChannels = new aiNodeAnim*[ai_anim->mNumChannels];
             int j = 0;
             for (auto& iter : samplers) {
-                ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
-                ++j;
+                if ((nullptr != iter.second.rotation) || (nullptr != iter.second.scale) || (nullptr != iter.second.translation)) {
+                    ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
+                    ++j;
+                }
+            }
+        }
+
+        ai_anim->mNumMorphMeshChannels = numMorphMeshChannels;
+        if (ai_anim->mNumMorphMeshChannels > 0) {
+            ai_anim->mMorphMeshChannels = new aiMeshMorphAnim*[ai_anim->mNumMorphMeshChannels];
+            int j = 0;
+            for (auto& iter : samplers) {
+                if (nullptr != iter.second.weight) {
+                  ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, r.nodes[iter.first], iter.second);
+                  ++j;
+                }
             }
         }
 
@@ -1175,8 +1242,58 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
                 maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumScalingKeys);
             }
         }
-        ai_anim->mDuration = maxDuration;
-        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? (maxNumberOfKeys / (maxDuration/1000)) : 30;
+
+        for (unsigned int j = 0; j < ai_anim->mNumMorphMeshChannels; ++j) {
+            const auto* const chan = ai_anim->mMorphMeshChannels[j];
+
+            if (0u != chan->mNumKeys) {
+                const auto& lastKey = chan->mKeys[chan->mNumKeys - 1u];
+                if (lastKey.mTime > maxDuration) {
+                    maxDuration = lastKey.mTime;
+                }
+                maxNumberOfKeys = std::max(maxNumberOfKeys, chan->mNumKeys);
+            }
+        }
+
+        ai_anim->mDuration = static_cast<double>(maxNumberOfKeys - 1u); /// According the documentation in anim.h the mDuration units are ticks.
+        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? ((maxNumberOfKeys-1u) / (maxDuration / 1000.0)) : 30.0;
+
+        // Set all the times of the keys in ticks.
+
+        const float kMsToTicks = ai_anim->mTicksPerSecond / 1000.f;
+
+        for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
+            auto chan = ai_anim->mChannels[j];
+            if (0u != chan->mNumPositionKeys) {
+                for (unsigned int k = 0u; k < chan->mNumPositionKeys; ++k)
+                {
+                    chan->mPositionKeys[k].mTime *= kMsToTicks;
+                }
+            }
+            if (0u != chan->mNumRotationKeys) {
+                for (unsigned int k = 0u; k < chan->mNumRotationKeys; ++k)
+                {
+                    chan->mRotationKeys[k].mTime *= kMsToTicks;
+                }
+            }
+            if (0u != chan->mNumScalingKeys) {
+                for (unsigned int k = 0u; k < chan->mNumScalingKeys; ++k)
+                {
+                    chan->mScalingKeys[k].mTime *= kMsToTicks;
+                }
+            }
+        }
+
+        for (unsigned int j = 0; j < ai_anim->mNumMorphMeshChannels; ++j) {
+            const auto* const chan = ai_anim->mMorphMeshChannels[j];
+
+            if (0u != chan->mNumKeys) {
+                for (unsigned int k = 0u; k < chan->mNumKeys; ++k)
+                {
+                    chan->mKeys[k].mTime = static_cast<double>(k);
+                }
+            }
+        }
 
         mScene->mAnimations[i] = ai_anim;
     }

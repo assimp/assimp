@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace {
-    
+
 static const aiImporterDesc desc = {
     "Stereolithography (STL) Importer",
     "",
@@ -376,13 +376,13 @@ void STLImporter::LoadASCIIFile( aiNode *root ) {
             pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
             pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
             pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-            memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            memcpy((void*)pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
             positionBuffer.clear();
         }
         // also only process normalBuffer when filled, else exception when accessing with index operator
         if (!normalBuffer.empty()) {
             pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-            memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            memcpy((void*)pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
             normalBuffer.clear();
         }
 
@@ -460,14 +460,14 @@ bool STLImporter::LoadBinaryFile()
 
     pMesh->mNumVertices = pMesh->mNumFaces*3;
 
-    
+
     aiVector3D *vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
     aiVector3D *vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
     typedef aiVector3t<float> aiVector3F;
     aiVector3F* theVec;
     aiVector3F theVec3F;
-    
+
     for ( unsigned int i = 0; i < pMesh->mNumFaces; ++i ) {
         // NOTE: Blender sometimes writes empty normals ... this is not
         // our fault ... the RemoveInvalidData helper step should fix that
@@ -499,7 +499,7 @@ bool STLImporter::LoadBinaryFile()
         vp->x = theVec3F.x; vp->y = theVec3F.y; vp->z = theVec3F.z;
         ++theVec;
         ++vp;
-        
+
         sz = (const unsigned char*) theVec;
 
         uint16_t color = *((uint16_t*)sz);

@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // possible as new fields are added to assimp structures.
 
 // ----------------------------------------------------------------------------
-/** 
+/**
   * @file Implements Assimp::SceneCombiner. This is a smart utility
   *       class that combines multiple scenes, meshes, ... into one. Currently
   *       these utilities are used by the IRR and LWS loaders and the
@@ -978,7 +978,7 @@ void GetArrayCopy(Type*& dest, ai_uint num ) {
     Type* old = dest;
 
     dest = new Type[num];
-    ::memcpy(dest, old, sizeof(Type) * num);
+    ::memcpy((void*)dest, old, sizeof(Type) * num);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -995,7 +995,7 @@ void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src) {
         *_dest = new aiScene();
     }
 
-    ::memcpy(*_dest,src,sizeof(aiScene));
+    ::memcpy((void*)*_dest,src,sizeof(aiScene));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1066,7 +1066,7 @@ void SceneCombiner::Copy( aiMesh** _dest, const aiMesh* src ) {
     aiMesh* dest = *_dest = new aiMesh();
 
     // get a flat copy
-    ::memcpy(dest,src,sizeof(aiMesh));
+    ::memcpy((void*)dest,src,sizeof(aiMesh));
 
     // and reallocate all arrays
     GetArrayCopy( dest->mVertices,   dest->mNumVertices );
@@ -1105,7 +1105,7 @@ void SceneCombiner::Copy(aiAnimMesh** _dest, const aiAnimMesh* src) {
     aiAnimMesh* dest = *_dest = new aiAnimMesh();
 
     // get a flat copy
-    ::memcpy(dest, src, sizeof(aiAnimMesh));
+    ::memcpy((void*)dest, src, sizeof(aiAnimMesh));
 
     // and reallocate all arrays
     GetArrayCopy(dest->mVertices, dest->mNumVertices);
@@ -1162,7 +1162,7 @@ void SceneCombiner::Copy(aiTexture** _dest, const aiTexture* src) {
     aiTexture* dest = *_dest = new aiTexture();
 
     // get a flat copy
-    ::memcpy(dest,src,sizeof(aiTexture));
+    ::memcpy((void*)dest,src,sizeof(aiTexture));
 
     // and reallocate all arrays. We must do it manually here
     const char* old = (const char*)dest->pcData;
@@ -1192,7 +1192,7 @@ void SceneCombiner::Copy( aiAnimation** _dest, const aiAnimation* src ) {
     aiAnimation* dest = *_dest = new aiAnimation();
 
     // get a flat copy
-    ::memcpy(dest,src,sizeof(aiAnimation));
+    ::memcpy((void*)dest,src,sizeof(aiAnimation));
 
     // and reallocate all arrays
     CopyPtrArray( dest->mChannels, src->mChannels, dest->mNumChannels );
@@ -1207,7 +1207,7 @@ void SceneCombiner::Copy(aiNodeAnim** _dest, const aiNodeAnim* src) {
     aiNodeAnim* dest = *_dest = new aiNodeAnim();
 
     // get a flat copy
-    ::memcpy(dest,src,sizeof(aiNodeAnim));
+    ::memcpy((void*)dest,src,sizeof(aiNodeAnim));
 
     // and reallocate all arrays
     GetArrayCopy( dest->mPositionKeys, dest->mNumPositionKeys );
@@ -1224,7 +1224,7 @@ void SceneCombiner::Copy( aiCamera** _dest,const  aiCamera* src) {
     aiCamera* dest = *_dest = new aiCamera();
 
     // get a flat copy, that's already OK
-    ::memcpy(dest,src,sizeof(aiCamera));
+    ::memcpy((void*)dest,src,sizeof(aiCamera));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1236,7 +1236,7 @@ void SceneCombiner::Copy(aiLight** _dest, const aiLight* src) {
     aiLight* dest = *_dest = new aiLight();
 
     // get a flat copy, that's already OK
-    ::memcpy(dest,src,sizeof(aiLight));
+    ::memcpy((void*)dest,src,sizeof(aiLight));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1248,7 +1248,7 @@ void SceneCombiner::Copy(aiBone** _dest, const aiBone* src) {
     aiBone* dest = *_dest = new aiBone();
 
     // get a flat copy
-    ::memcpy(dest,src,sizeof(aiBone));
+    ::memcpy((void*)dest,src,sizeof(aiBone));
 
     // and reallocate all arrays
     GetArrayCopy( dest->mWeights, dest->mNumWeights );
@@ -1262,7 +1262,7 @@ void SceneCombiner::Copy     (aiNode** _dest, const aiNode* src)
     aiNode* dest = *_dest = new aiNode();
 
     // get a flat copy
-    ::memcpy(dest,src,sizeof(aiNode));
+    ::memcpy((void*)dest,src,sizeof(aiNode));
 
     if (src->mMetaData) {
         Copy(&dest->mMetaData, src->mMetaData);

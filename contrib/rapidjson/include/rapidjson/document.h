@@ -1999,7 +1999,7 @@ private:
         if (count) {
             GenericValue* e = static_cast<GenericValue*>(allocator.Malloc(count * sizeof(GenericValue)));
             SetElementsPointer(e);
-            std::memcpy(e, values, count * sizeof(GenericValue));
+            std::memcpy((void*)e, values, count * sizeof(GenericValue));
         }
         else
             SetElementsPointer(0);
@@ -2012,7 +2012,7 @@ private:
         if (count) {
             Member* m = static_cast<Member*>(allocator.Malloc(count * sizeof(Member)));
             SetMembersPointer(m);
-            std::memcpy(m, members, count * sizeof(Member));
+            std::memcpy((void*)m, members, count * sizeof(Member));
         }
         else
             SetMembersPointer(0);

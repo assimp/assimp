@@ -63,8 +63,8 @@ class BlenderIntermediateTest : public ::testing::Test {
 // The C++ standard defines and expects this behavior: true if lhs < rhs, false otherwise.
 TEST_F( BlenderIntermediateTest,ConversionData_ObjectCompareTest ) {
     Object obj1, obj2;
-    strncpy( obj1.id.name, NAME_1, sizeof(NAME_1) );
-    strncpy( obj2.id.name, NAME_2, sizeof(NAME_2) );
+    strcpy( obj1.id.name, NAME_1 );
+    strcpy( obj2.id.name, NAME_2 );
 
     Blender::ObjectCompare cmp_true_because_first_is_smaller_than_second;
     bool res( cmp_true_because_first_is_smaller_than_second( &obj1, &obj2 ) );

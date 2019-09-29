@@ -219,18 +219,22 @@ namespace {
         //  representation we must convert negative values to.
         // See http://en.wikipedia.org/wiki/Signed_number_representations.
 
-        // Two's complement?
-        if( (-42 == (~42 + 1)) && (binValue & 0x80000000))
+        if(binValue & 0x80000000)
+        {
+// Two's complement?
+#if (-42 == (~42 + 1))
             return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
-        // One's complement?
-        else if ( (-42 == ~42) && (binValue & 0x80000000))
+// One's complement?
+#elif (-42 == ~42)
             return BinFloat(-0) - binValue;
-        // Sign-magnitude?
-        else if( (-42 == (42 | (-0))) && (binValue & 0x80000000)) // -0 = 1000... binary
-            return binValue;
-        else
-            return binValue;
-    }
+// Sign-magnitude?
+#elif (-42 == (42 | (-0))) // -0 = 1000... binary
+            // return binValue; return is below
+#endif
+        }
+
+        return binValue;
+    }// BinFloat ToBinary( const ai_real & pValue)
 
 } // namespace
 

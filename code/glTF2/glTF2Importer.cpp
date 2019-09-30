@@ -1176,7 +1176,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
             }
         }
         ai_anim->mDuration = maxDuration;
-        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? (maxNumberOfKeys / (maxDuration/1000)) : 30;
+        ai_anim->mTicksPerSecond = 1000.0;
 
         mScene->mAnimations[i] = ai_anim;
     }

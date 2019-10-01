@@ -1255,45 +1255,8 @@ void glTF2Importer::ImportAnimations(glTF2::Asset& r)
             }
         }
 
-        ai_anim->mDuration = static_cast<double>(maxNumberOfKeys - 1u); /// According the documentation in anim.h the mDuration units are ticks.
-        ai_anim->mTicksPerSecond = (maxNumberOfKeys > 0 && maxDuration > 0) ? ((maxNumberOfKeys-1u) / (maxDuration / 1000.0)) : 30.0;
-
-        // Set all the times of the keys in ticks.
-
-        const float kMsToTicks = ai_anim->mTicksPerSecond / 1000.f;
-
-        for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
-            auto chan = ai_anim->mChannels[j];
-            if (0u != chan->mNumPositionKeys) {
-                for (unsigned int k = 0u; k < chan->mNumPositionKeys; ++k)
-                {
-                    chan->mPositionKeys[k].mTime *= kMsToTicks;
-                }
-            }
-            if (0u != chan->mNumRotationKeys) {
-                for (unsigned int k = 0u; k < chan->mNumRotationKeys; ++k)
-                {
-                    chan->mRotationKeys[k].mTime *= kMsToTicks;
-                }
-            }
-            if (0u != chan->mNumScalingKeys) {
-                for (unsigned int k = 0u; k < chan->mNumScalingKeys; ++k)
-                {
-                    chan->mScalingKeys[k].mTime *= kMsToTicks;
-                }
-            }
-        }
-
-        for (unsigned int j = 0; j < ai_anim->mNumMorphMeshChannels; ++j) {
-            const auto* const chan = ai_anim->mMorphMeshChannels[j];
-
-            if (0u != chan->mNumKeys) {
-                for (unsigned int k = 0u; k < chan->mNumKeys; ++k)
-                {
-                    chan->mKeys[k].mTime = static_cast<double>(k);
-                }
-            }
-        }
+        ai_anim->mDuration = maxDuration;
+        ai_anim->mTicksPerSecond = 1000.0;
 
         mScene->mAnimations[i] = ai_anim;
     }

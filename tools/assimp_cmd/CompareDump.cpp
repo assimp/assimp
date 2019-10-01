@@ -451,25 +451,20 @@ template<> aiVertexWeight comparer_context :: cmp<aiVertexWeight >(const std::st
 /// Not a *real* iterator, doesn't fully conform to the isocpp iterator spec
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class sliced_chunk_iterator {
-
     friend class sliced_chunk_reader;
+
     sliced_chunk_iterator(comparer_context& ctx, long end)
-        : ctx(ctx)
-        , endit(false)
-        , next(std::numeric_limits<long>::max())
-        , end(end)
-    {
+    : ctx(ctx)
+    , endit(false)
+    , next(std::numeric_limits<long>::max())
+    , end(end) {
         load_next();
     }
 
 public:
-
     ~sliced_chunk_iterator() {
-        fseek(ctx.get_actual(),end,SEEK_SET);
-        fseek(ctx.get_expect(),end,SEEK_SET);
+        cleanup();
     }
-
-public:
 
     /* get current chunk head */
     typedef std::pair<uint32_t,uint32_t> Chunk;
@@ -490,14 +485,18 @@ public:
     }
 
 private:
-
     /* get to the end of *this* chunk */
     void cleanup() {
+        int retValue(-1);
         if(next != std::numeric_limits<long>::max()) {
-            fseek(ctx.get_actual(),next,SEEK_SET);
-            fseek(ctx.get_expect(),next,SEEK_SET);
-
+            if (0 == ::fseek(ctx.get_actual(), next, SEEK_SET) ) {
+                retValue = ::fseek(ctx.get_expect(), next, SEEK_SET);
+            }
             ctx.pop_length();
+        }
+
+        if (0 != retValue) {
+            printf("Error while cleanup.");
         }
     }
 
@@ -562,25 +561,24 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class sliced_chunk_reader  {
 public:
-
-    //
+    /// The class constructor.
     sliced_chunk_reader(comparer_context& ctx)
-        : ctx(ctx)
-    {}
-
-    //
-    ~sliced_chunk_reader() {
+    : ctx(ctx) {
+        // empty
     }
 
-public:
+    /// The class destructor.
+    ~sliced_chunk_reader() {
+        // empty
+    }
 
+    /// Return the begin of a chunk
     sliced_chunk_iterator begin() const {
         return sliced_chunk_iterator(ctx,ctx.get_latest_chunk_length()+
             ctx.get_latest_chunk_start());
     }
 
 private:
-
     comparer_context& ctx;
 };
 

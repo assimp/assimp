@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
@@ -49,15 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/ProcessHelper.h"
 
 const char* AICMD_MSG_DUMP_HELP = 
-"assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
-"\t -b Binary output \n"
-"\t -s Shortened  \n"
-"\t -z Compressed  \n"
-"\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
-"\t -cfast    Fast post processing preset, runs just a few important steps \n"
-"\t -cdefault Default post processing: runs all recommended steps\n"
-"\t -cfull    Fires almost all post processing steps \n"
-;
+    "assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
+    "\t -b Binary output \n"
+    "\t -s Shortened  \n"
+    "\t -z Compressed  \n"
+    "\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
+    "\t -cfast    Fast post processing preset, runs just a few important steps \n"
+    "\t -cdefault Default post processing: runs all recommended steps\n"
+    "\t -cfull    Fires almost all post processing steps \n";
 
 #include "Common/assbin_chunks.h"
 
@@ -66,21 +63,29 @@ bool shortened = false;
 
 // -----------------------------------------------------------------------------------
 // Compress a binary dump file (beginning at offset head_size)
-void CompressBinaryDump(const char* file, unsigned int head_size)
-{
+void CompressBinaryDump(const char* file, unsigned int head_size) {
 	// for simplicity ... copy the file into memory again and compress it there
 	FILE* p = fopen(file,"r");
-	fseek(p,0,SEEK_END);
+    if (nullptr == p) {
+        printf("Cannot open file.\n");
+        return;
+    }
+
+    fseek(p,0,SEEK_END);
 	const uint32_t size = ftell(p);
 	fseek(p,0,SEEK_SET);
 
 	if (size<head_size) {
-		fclose(p);
+		::fclose(p);
 		return;
 	}
 
 	uint8_t* data = new uint8_t[size];
-	fread(data,1,size,p);
+    size_t len = fread(data,1,size,p);
+    if (0 == len) {
+        printf("Error reading file.\n");
+        return;
+    }
 
 	uint32_t uncompressed_size = size-head_size;
 	uLongf out_size = (uLongf)compressBound(uncompressed_size);

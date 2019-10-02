@@ -93,6 +93,7 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 } // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
+// Encodes a string into a valid XML ID using the xsd:ID schema qualifications.
 const std::string XMLIDEncode(const std::string& name)
 {
     const char XML_ID_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-.";
@@ -875,7 +876,7 @@ void ColladaExporter::WriteControllerLibrary()
 void ColladaExporter::WriteController( size_t pIndex)
 {
     const aiMesh* mesh = mScene->mMeshes[pIndex];
-    const std::string idstr = GetMeshId( pIndex);
+    const std::string idstr = mesh->mName.length == 0 ? GetMeshId(pIndex) : mesh->mName.C_Str();
     const std::string idstrEscaped = XMLIDEncode(idstr);
 
     if ( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
@@ -1046,7 +1047,7 @@ void ColladaExporter::WriteGeometryLibrary()
 void ColladaExporter::WriteGeometry( size_t pIndex)
 {
     const aiMesh* mesh = mScene->mMeshes[pIndex];
-    const std::string idstr = GetMeshId( pIndex);
+    const std::string idstr = mesh->mName.length == 0 ? GetMeshId(pIndex) : mesh->mName.C_Str();
     const std::string geometryName = XMLEscape(idstr);
     const std::string geometryId = XMLIDEncode(idstr);
 
@@ -1641,15 +1642,17 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
         if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
             continue;
 
+        const std::string meshName = mesh->mName.length == 0 ? GetMeshId(pNode->mMeshes[a]) : mesh->mName.C_Str();
+
         if( mesh->mNumBones == 0 )
         {
-            mOutput << startstr << "<instance_geometry url=\"#" << XMLIDEncode(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
+            mOutput << startstr << "<instance_geometry url=\"#" << XMLIDEncode(meshName) << "\">" << endstr;
             PushTag();
         }
         else
         {
             mOutput << startstr
-                    << "<instance_controller url=\"#" << XMLIDEncode(GetMeshId( pNode->mMeshes[a])) << "-skin\">"
+                    << "<instance_controller url=\"#" << XMLIDEncode(meshName) << "-skin\">"
                     << endstr;
             PushTag();
 

@@ -7,7 +7,8 @@
 #
 function generate() {
     OPTIONS="-DASSIMP_WERROR=ON"
-
+    OPTIONS="$OPTIONS -DASSIMP_NO_EXPORT=NO"
+    
     if [ "$DISABLE_EXPORTERS" = "YES" ] ; then
         OPTIONS="$OPTIONS -DASSIMP_NO_EXPORT=YES"
     else

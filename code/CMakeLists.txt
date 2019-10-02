@@ -766,6 +766,8 @@ ADD_ASSIMP_EXPORTER( X3D
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
+  glTF/glTFCommon.h
+  glTF/glTFCommon.cpp
   glTF/glTFAsset.h
   glTF/glTFAsset.inl
   glTF/glTFAssetWriter.h

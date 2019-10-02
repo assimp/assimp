@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -94,23 +92,24 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MDLImporter::MDLImporter()
-    : configFrameID(),
-    mBuffer(),
-    iGSFileVersion(),
-    pIOHandler(),
-    pScene(),
-    iFileSize()
-{}
+: configFrameID()
+, mBuffer()
+, iGSFileVersion()
+, pIOHandler()
+, pScene()
+, iFileSize() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MDLImporter::~MDLImporter()
-{}
+MDLImporter::~MDLImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
+bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(pFile);
 
     // if check for extension is not enough, check for the magic tokens
@@ -404,23 +403,15 @@ void MDLImporter::InternReadFile_Quake1() {
 
     // now get a pointer to the first frame in the file
     BE_NCONST MDL::Frame* pcFrames = (BE_NCONST MDL::Frame*)szCurrent;
-    BE_NCONST MDL::SimpleFrame* pcFirstFrame;
+    MDL::SimpleFrame* pcFirstFrame;
 
     if (0 == pcFrames->type) {
         // get address of single frame
-        pcFirstFrame = &pcFrames->frame;
+        pcFirstFrame =( MDL::SimpleFrame*) &pcFrames->frame;
     } else {
         // get the first frame in the group
-
-#if 1
-        // FIXME: the cast is wrong and cause a warning on clang 5.0
-        // disable this code for now, fix it later
-        ai_assert(false && "Bad pointer cast");
-        pcFirstFrame = nullptr; // Workaround: msvc++ C4703 error
-#else
-        BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
-        pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
-#endif
+        BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*) pcFrames;
+        pcFirstFrame = &(pcFrames2->frames[0]);
     }
     BE_NCONST MDL::Vertex* pcVertices = (BE_NCONST MDL::Vertex*) ((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));

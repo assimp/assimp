@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code
   ${OPENGL_INCLUDE_DIR}
+  ${GLUT_INCLUDE_DIR}
   ${Assimp_SOURCE_DIR}/samples/freeglut/include
 )
 

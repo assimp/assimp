@@ -145,7 +145,7 @@ namespace Assimp {
             out->mRootNode->mName.Set(unique_name);
 
             // root has ID 0
-            ConvertNodes(0L, *out->mRootNode);
+            ConvertNodes(0L, out->mRootNode, out->mRootNode);
         }
 
         static std::string getAncestorBaseName(const aiNode* node)
@@ -179,8 +179,11 @@ namespace Assimp {
             GetUniqueName(original_name, unique_name);
             return unique_name;
         }
-
-        void FBXConverter::ConvertNodes(uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform) {
+        /// todo: pre-build node hierarchy
+        /// todo: get bone from stack
+        /// todo: make map of aiBone* to aiNode*
+        /// then update convert clusters to the new format
+        void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) {
             const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 
             std::vector<aiNode*> nodes;
@@ -209,10 +212,9 @@ namespace Assimp {
                         nodes_chain.clear();
                         post_nodes_chain.clear();
 
-                        aiMatrix4x4 new_abs_transform = parent_transform;
+                        aiMatrix4x4 new_abs_transform = parent->mTransformation;
 
-                        std::string unique_name = MakeUniqueNodeName(model, parent);
-
+                        std::string unique_name = FixNodeName(model->Name());
                         // even though there is only a single input node, the design of
                         // assimp (or rather: the complicated transformation chain that
                         // is employed by fbx) means that we may need multiple aiNode's
@@ -229,11 +231,11 @@ namespace Assimp {
                         SetupNodeMetadata(*model, *nodes_chain.back());
 
                         // link all nodes in a row
-                        aiNode* last_parent = &parent;
+                        aiNode* last_parent = parent;
                         for (aiNode* prenode : nodes_chain) {
                             ai_assert(prenode);
 
-                            if (last_parent != &parent) {
+                            if (last_parent != parent) {
                                 last_parent->mNumChildren = 1;
                                 last_parent->mChildren = new aiNode*[1];
                                 last_parent->mChildren[0] = prenode;
@@ -246,7 +248,7 @@ namespace Assimp {
                         }
 
                         // attach geometry
-                        ConvertModel(*model, *nodes_chain.back(), new_abs_transform);
+                        ConvertModel(*model, nodes_chain.back(), root_node);
 
                         // check if there will be any child nodes
                         const std::vector<const Connection*>& child_conns
@@ -258,7 +260,7 @@ namespace Assimp {
                             for (aiNode* postnode : post_nodes_chain) {
                                 ai_assert(postnode);
 
-                                if (last_parent != &parent) {
+                                if (last_parent != parent) {
                                     last_parent->mNumChildren = 1;
                                     last_parent->mChildren = new aiNode*[1];
                                     last_parent->mChildren[0] = postnode;
@@ -281,7 +283,7 @@ namespace Assimp {
                         }
 
                         // attach sub-nodes (if any)
-                        ConvertNodes(model->ID(), *last_parent, new_abs_transform);
+                        ConvertNodes(model->ID(), last_parent, root_node);
 
                         if (doc.Settings().readLights) {
                             ConvertLights(*model, unique_name);
@@ -297,10 +299,10 @@ namespace Assimp {
                 }
 
                 if (nodes.size()) {
-                    parent.mChildren = new aiNode*[nodes.size()]();
-                    parent.mNumChildren = static_cast<unsigned int>(nodes.size());
+                    parent->mChildren = new aiNode*[nodes.size()]();
+                    parent->mNumChildren = static_cast<unsigned int>(nodes.size());
 
-                    std::swap_ranges(nodes.begin(), nodes.end(), parent.mChildren);
+                    std::swap_ranges(nodes.begin(), nodes.end(), parent->mChildren);
                 }
             }
             catch (std::exception&) {
@@ -905,7 +907,7 @@ namespace Assimp {
             }
         }
 
-        void FBXConverter::ConvertModel(const Model& model, aiNode& nd, const aiMatrix4x4& node_global_transform)
+        void FBXConverter::ConvertModel(const Model& model, aiNode *parent, aiNode *root_node)
         {
             const std::vector<const Geometry*>& geos = model.GetGeometry();
 
@@ -917,11 +919,11 @@ namespace Assimp {
                 const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
                 const LineGeometry* const line = dynamic_cast<const LineGeometry*>(geo);
                 if (mesh) {
-                    const std::vector<unsigned int>& indices = ConvertMesh(*mesh, model, node_global_transform, nd);
+                    const std::vector<unsigned int>& indices = ConvertMesh(*mesh, model, parent, root_node);
                     std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
                 }
                 else if (line) {
-                    const std::vector<unsigned int>& indices = ConvertLine(*line, model, node_global_transform, nd);
+                    const std::vector<unsigned int>& indices = ConvertLine(*line, model, parent, root_node);
                     std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
                 }
                 else {
@@ -930,15 +932,15 @@ namespace Assimp {
             }
 
             if (meshes.size()) {
-                nd.mMeshes = new unsigned int[meshes.size()]();
-                nd.mNumMeshes = static_cast<unsigned int>(meshes.size());
+                parent->mMeshes = new unsigned int[meshes.size()]();
+                parent->mNumMeshes = static_cast<unsigned int>(meshes.size());
 
-                std::swap_ranges(meshes.begin(), meshes.end(), nd.mMeshes);
+                std::swap_ranges(meshes.begin(), meshes.end(), parent->mMeshes);
             }
         }
 
         std::vector<unsigned int> FBXConverter::ConvertMesh(const MeshGeometry& mesh, const Model& model,
-            const aiMatrix4x4& node_global_transform, aiNode& nd)
+                                                            aiNode *parent, aiNode *root_node)
         {
             std::vector<unsigned int> temp;
 
@@ -962,18 +964,18 @@ namespace Assimp {
                 const MatIndexArray::value_type base = mindices[0];
                 for (MatIndexArray::value_type index : mindices) {
                     if (index != base) {
-                        return ConvertMeshMultiMaterial(mesh, model, node_global_transform, nd);
+                        return ConvertMeshMultiMaterial(mesh, model, parent, root_node);
                     }
                 }
             }
 
             // faster code-path, just copy the data
-            temp.push_back(ConvertMeshSingleMaterial(mesh, model, node_global_transform, nd));
+            temp.push_back(ConvertMeshSingleMaterial(mesh, model, parent, root_node));
             return temp;
         }
 
         std::vector<unsigned int> FBXConverter::ConvertLine(const LineGeometry& line, const Model& model,
-            const aiMatrix4x4& node_global_transform, aiNode& nd)
+                                                            aiNode *parent, aiNode *root_node)
         {
             std::vector<unsigned int> temp;
 
@@ -984,7 +986,7 @@ namespace Assimp {
                 return temp;
             }
 
-            aiMesh* const out_mesh = SetupEmptyMesh(line, nd);
+            aiMesh* const out_mesh = SetupEmptyMesh(line, root_node);
             out_mesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
 
             // copy vertices
@@ -1019,7 +1021,7 @@ namespace Assimp {
             return temp;
         }
 
-        aiMesh* FBXConverter::SetupEmptyMesh(const Geometry& mesh, aiNode& nd)
+        aiMesh* FBXConverter::SetupEmptyMesh(const Geometry& mesh, aiNode *parent)
         {
             aiMesh* const out_mesh = new aiMesh();
             meshes.push_back(out_mesh);
@@ -1036,17 +1038,17 @@ namespace Assimp {
             }
             else
             {
-                out_mesh->mName = nd.mName;
+                out_mesh->mName = parent->mName;
             }
 
             return out_mesh;
         }
 
         unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model,
-            const aiMatrix4x4& node_global_transform, aiNode& nd)
+                                                             aiNode *parent, aiNode *root_node)
         {
             const MatIndexArray& mindices = mesh.GetMaterialIndices();
-            aiMesh* const out_mesh = SetupEmptyMesh(mesh, nd);
+            aiMesh* const out_mesh = SetupEmptyMesh(mesh, parent);
 
             const std::vector<aiVector3D>& vertices = mesh.GetVertices();
             const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
@@ -1164,7 +1166,7 @@ namespace Assimp {
             }
 
             if (doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
-                ConvertWeights(out_mesh, model, mesh, node_global_transform, NO_MATERIAL_SEPARATION);
+                ConvertWeights(out_mesh, model, mesh, parent, root_node, NO_MATERIAL_SEPARATION);
             }
 
             std::vector<aiAnimMesh*> animMeshes;
@@ -1210,7 +1212,7 @@ namespace Assimp {
         }
 
         std::vector<unsigned int> FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model,
-            const aiMatrix4x4& node_global_transform, aiNode& nd)
+                                                                         aiNode *parent, aiNode *root_node)
         {
             const MatIndexArray& mindices = mesh.GetMaterialIndices();
             ai_assert(mindices.size());
@@ -1221,7 +1223,7 @@ namespace Assimp {
             for (MatIndexArray::value_type index : mindices) {
                 if (had.find(index) == had.end()) {
 
-                    indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, node_global_transform, nd));
+                    indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, parent, root_node));
                     had.insert(index);
                 }
             }
@@ -1230,11 +1232,11 @@ namespace Assimp {
         }
 
         unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model,
-            MatIndexArray::value_type index,
-            const aiMatrix4x4& node_global_transform,
-            aiNode& nd)
+                                                            MatIndexArray::value_type index,
+                                                            aiNode *parent,
+                                                            aiNode *root_node)
         {
-            aiMesh* const out_mesh = SetupEmptyMesh(mesh, nd);
+            aiMesh* const out_mesh = SetupEmptyMesh(mesh, parent);
 
             const MatIndexArray& mindices = mesh.GetMaterialIndices();
             const std::vector<aiVector3D>& vertices = mesh.GetVertices();
@@ -1399,7 +1401,7 @@ namespace Assimp {
             ConvertMaterialForMesh(out_mesh, model, mesh, index);
 
             if (process_weights) {
-                ConvertWeights(out_mesh, model, mesh, node_global_transform, index, &reverseMapping);
+                ConvertWeights(out_mesh, model, mesh, parent, root_node, index, &reverseMapping);
             }
 
             std::vector<aiAnimMesh*> animMeshes;
@@ -1450,9 +1452,10 @@ namespace Assimp {
         }
 
         void FBXConverter::ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo,
-            const aiMatrix4x4& node_global_transform,
-            unsigned int materialIndex,
-            std::vector<unsigned int>* outputVertStartIndices)
+                                          aiNode* parent,
+                                          aiNode* root_node,
+                                          unsigned int materialIndex,
+                                          std::vector<unsigned int>* outputVertStartIndices)
         {
             ai_assert(geo.DeformerSkin());
 
@@ -1469,7 +1472,7 @@ namespace Assimp {
             ai_assert(no_mat_check || outputVertStartIndices);
 
             try {
-
+                // iterate over the sub deformers
                 for (const Cluster* cluster : sk.Clusters()) {
                     ai_assert(cluster);
 
@@ -1525,7 +1528,7 @@ namespace Assimp {
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
                     ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
-                            count_out_indices, node_global_transform);
+                                   count_out_indices, parent, root_node);
                 }
             }
             catch (std::exception&) {
@@ -1543,22 +1546,41 @@ namespace Assimp {
             std::swap_ranges(bones.begin(), bones.end(), out->mBones);
         }
 
-        void FBXConverter::ConvertCluster(std::vector<aiBone*>& bones, const Model& /*model*/, const Cluster& cl,
-            std::vector<size_t>& out_indices,
-            std::vector<size_t>& index_out_indices,
-            std::vector<size_t>& count_out_indices,
-            const aiMatrix4x4& node_global_transform)
+        const aiNode* FBXConverter::GetNodeByName( const aiString& name, aiNode *current_node )
+        {
+            aiNode * iter = current_node;
+            printf("Child count: %d", iter->mNumChildren);
+            return iter;
+        }
+
+        void FBXConverter::ConvertCluster(std::vector<aiBone *> &bones, const Model &, const Cluster &cl,
+                                          std::vector<size_t> &out_indices,
+                                          std::vector<size_t> &index_out_indices,
+                                          std::vector<size_t> &count_out_indices, aiNode *parent,
+                                          aiNode *root_node)
         {
 
             aiBone* const bone = new aiBone();
             bones.push_back(bone);
+            aiString bone_name = aiString( FixNodeName(cl.TargetNode()->Name()));
+            printf("root node: %s parent node: %s\n", root_node->mName.C_Str(), parent->mName.C_Str());
+            printf("target bone name: %s\n", bone_name.C_Str());
+            bone->mName = bone_name;
 
-            bone->mName = FixNodeName(cl.TargetNode()->Name());
+            // todo: bone stack information
+            const aiNode * bone_node = FBXConverter::GetNodeByName(bone_name, root_node);
 
+            if(bone_node)
+            {
+                printf("Found bone: %s\n", bone_name.C_Str());
+            }
+
+            aiMatrix4x4t<float> transform = cl.Transform();
             bone->mOffsetMatrix = cl.TransformLink();
-            bone->mOffsetMatrix.Inverse();
+            bone->mOffsetMatrix = transform.Inverse();
 
-            bone->mOffsetMatrix = bone->mOffsetMatrix * node_global_transform;
+            // this is more correct but this assumes skeletons are always on root - bad assumption but lets test
+            bone->mOffsetMatrix = bone->mOffsetMatrix * root_node->mTransformation;
 
             bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
             aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];

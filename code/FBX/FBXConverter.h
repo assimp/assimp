@@ -457,8 +457,13 @@ private:
     aiScene* const out;
     const FBX::Document& doc;
 
-    static void BuildBoneMap(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
-                             std::map<aiBone *, aiNode *> &bone_map);
+    static void BuildBoneList(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
+                             std::vector<aiBone*>& bones);
+
+    void
+    BuildBoneStack(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
+                   const std::vector<aiBone *> &bones,
+                   std::map<aiBone *, aiNode *> &bone_stack);
 };
 
 }

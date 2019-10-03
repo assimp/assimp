@@ -122,23 +122,24 @@ namespace Assimp {
             TransferDataToScene();
 
             // Now convert all bone positions to the correct mOffsetMatrix
-            std::map<aiBone*, aiNode*> bone_map;
-            BuildBoneMap(out->mRootNode, out->mRootNode, out, bone_map);
-
-            for( std::pair<aiBone*, aiNode*> kvp : bone_map )
+            std::vector<aiBone*> bones;
+            std::map<aiBone*, aiNode*> bone_stack;
+            BuildBoneList(out->mRootNode, out->mRootNode, out, bones);
+            BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack);
+            for( std::pair<aiBone*, aiNode*> kvp : bone_stack )
             {
                 aiBone *bone = kvp.first;
                 aiNode *bone_node = kvp.second;
 
                 // lcl transform grab - done in generate_nodes :)
-                aiMatrix4x4 bone_xform = bone->mOffsetMatrix;
+                aiMatrix4x4 bone_xform = bone_node->mTransformation * bone->mOffsetMatrix;
 
                 // apply full hierarchy to transform for basic offset
-                while( bone_node->mParent )
+                while( bone_node )
                 {
-                    bone_node = bone_node->mParent;
-                    bone_xform = bone_node->mTransformation * bone_xform;
                     std::cout << "recursing to root node: " << bone_node->mName.C_Str() << std::endl;
+                    bone_xform = bone_node->mTransformation * bone_xform;
+                    bone_node = bone_node->mParent;
                 }
 
                 // apply inverse and lcl scaling :)
@@ -169,7 +170,7 @@ namespace Assimp {
         /* Before this would use mesh transforms which is wrong for bone transforms */
         /* Before this would work for simple character skeletons but not complex meshes with multiple origins */
         /* Source: sketch fab log cutter fbx */
-        void FBXConverter::BuildBoneMap(aiNode *current_node, const aiNode * root_node, const aiScene *scene, std::map<aiBone*, aiNode*>& bone_map )
+        void FBXConverter::BuildBoneList(aiNode *current_node, const aiNode * root_node, const aiScene *scene, std::vector<aiBone*> &bones )
         {
             assert(scene);
             for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
@@ -183,6 +184,7 @@ namespace Assimp {
                     assert(child->mMeshes);
                     unsigned int mesh_index = child->mMeshes[meshId];
                     aiMesh *mesh = scene->mMeshes[ mesh_index ];
+                    assert(mesh);
 
                     for( unsigned int boneId = 0; boneId < mesh->mNumBones; ++boneId)
                     {
@@ -191,10 +193,10 @@ namespace Assimp {
 
                         // duplicate meshes exist with the same bones sometimes :)
                         // so this must be detected
-                        if(bone_map.count(bone) == 0)
+                        if( std::find(bones.begin(), bones.end(), bone) == bones.end() )
                         {
-                            std::cout << "Added bone: " << std::string(bone->mName.C_Str()) << "based on node " << std::string(child->mName.C_Str()) << std::endl;
-                            bone_map.insert(std::pair<aiBone*, aiNode*>(bone, child));
+                            // add the element once
+                            bones.push_back(bone);
                         }
                     }
 
@@ -202,8 +204,62 @@ namespace Assimp {
                     // then do recursive lookup for bones in root node hierarchy
                 }
 
-                BuildBoneMap(child, root_node, scene, bone_map);
+                BuildBoneMap(child, root_node, scene, bones);
             }
+        }
+
+        /* A bone stack allows us to have multiple armatures, with the same bone names
+         * A bone stack allows us also to retrieve bones true transform even with duplicate names :)
+         */
+        void FBXConverter::BuildBoneStack(aiNode *current_node, const aiNode * root_node, const aiScene *scene, const std::vector<aiBone*>& bones, std::map<aiBone*, aiNode*> &bone_stack )
+        {
+            ai_assert(scene);
+            ai_assert(root_node);
+
+            for( aiBone * bone : bones)
+            {
+                // get_bone_from_stack() // stack of armatures
+
+                // example stack algorithm
+                // get armatures then
+                // get node by name from stack
+                // remove node from stack
+                // get node by name from stack
+                // remove node from stack
+            }
+//            for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
+//            {
+//                aiNode *child = current_node->mChildren[nodeId];
+//                assert(child);
+//
+//                // check for bones
+//                for( unsigned int meshId = 0; meshId < child->mNumMeshes; ++meshId)
+//                {
+//                    assert(child->mMeshes);
+//                    unsigned int mesh_index = child->mMeshes[meshId];
+//                    aiMesh *mesh = scene->mMeshes[ mesh_index ];
+//                    assert(mesh);
+//
+//                    for( unsigned int boneId = 0; boneId < mesh->mNumBones; ++boneId)
+//                    {
+//                        aiBone *bone = mesh->mBones[boneId];
+//                        ai_assert(bone);
+//
+//                        // duplicate meshes exist with the same bones sometimes :)
+//                        // so this must be detected
+//                        if( std::find(bones.begin(), bones.end(), bone) == bones.end() )
+//                        {
+//                            // add the element once
+//                            bones.push_back(bone);
+//                        }
+//                    }
+//
+//                    // find mesh and get bones
+//                    // then do recursive lookup for bones in root node hierarchy
+//                }
+//
+//                BuildBoneMap(child, root_node, scene, bones);
+//            }
         }
 
         void FBXConverter::ConvertRootNode() {

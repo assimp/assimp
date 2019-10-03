@@ -68,6 +68,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 #include <cstdint>
+#include <iostream>
 
 
 namespace Assimp {
@@ -120,6 +121,32 @@ namespace Assimp {
             ConvertGlobalSettings();
             TransferDataToScene();
 
+            // Now convert all bone positions to the correct mOffsetMatrix
+            std::map<aiBone*, aiNode*> bone_map;
+            BuildBoneMap(out->mRootNode, out->mRootNode, out, bone_map);
+
+            for( std::pair<aiBone*, aiNode*> kvp : bone_map )
+            {
+                aiBone *bone = kvp.first;
+                aiNode *bone_node = kvp.second;
+
+                // lcl transform grab - done in generate_nodes :)
+                aiMatrix4x4 bone_xform = bone->mOffsetMatrix;
+
+                // apply full heirarchy to transform for basic offset
+                while( bone_node->mParent )
+                {
+                    bone_node = bone_node->mParent;
+                    bone_xform = bone_node->mTransformation * bone_xform;
+                    std::cout << "recursing to root node: " << bone_node->mName.C_Str() << std::endl;
+                }
+
+                // apply inverse and lcl scaling :)
+                bone->mOffsetMatrix = bone_xform.Inverse();
+                std::cout << bone->mName.C_Str() << ": mOffsetMatrix calculated" << std::endl;
+            }
+
+
             // if we didn't read any meshes set the AI_SCENE_FLAGS_INCOMPLETE
             // to make sure the scene passes assimp's validation. FBX files
             // need not contain geometry (i.e. camera animations, raw armatures).
@@ -138,6 +165,47 @@ namespace Assimp {
             std::for_each(textures.begin(), textures.end(), Util::delete_fun<aiTexture>());
         }
 
+        /* Reprocess all nodes to calculate bone transforms properly based on the REAL mOffsetMatrix not the local. */
+        /* Before this would use mesh transforms which is wrong for bone transforms */
+        /* Before this would work for simple character skeletons but not complex meshes with multiple origins */
+        /* Source: sketch fab log cutter fbx */
+        void FBXConverter::BuildBoneMap(aiNode *current_node, const aiNode * root_node, const aiScene *scene, std::map<aiBone*, aiNode*>& bone_map )
+        {
+            assert(scene);
+            for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
+            {
+                aiNode *child = current_node->mChildren[nodeId];
+                assert(child);
+
+                // check for bones
+                for( unsigned int meshId = 0; meshId < child->mNumMeshes; ++meshId)
+                {
+                    assert(child->mMeshes);
+                    unsigned int mesh_index = child->mMeshes[meshId];
+                    aiMesh *mesh = scene->mMeshes[ mesh_index ];
+
+                    for( unsigned int boneId = 0; boneId < mesh->mNumBones; ++boneId)
+                    {
+                        aiBone *bone = mesh->mBones[boneId];
+                        ai_assert(bone);
+
+                        // duplicate meshes exist with the same bones sometimes :)
+                        // so this must be detected
+                        if(bone_map.count(bone) == 0)
+                        {
+                            std::cout << "Added bone: " << std::string(bone->mName.C_Str()) << "based on node " << std::string(child->mName.C_Str()) << std::endl;
+                            bone_map.insert(std::pair<aiBone*, aiNode*>(bone, child));
+                        }
+                    }
+
+                    // find mesh and get bones
+                    // then do recursive lookup for bones in root node hierarchy
+                }
+
+                BuildBoneMap(child, root_node, scene, bone_map);
+            }
+        }
+
         void FBXConverter::ConvertRootNode() {
             out->mRootNode = new aiNode();
             std::string unique_name;
@@ -147,6 +215,9 @@ namespace Assimp {
             // root has ID 0
             ConvertNodes(0L, out->mRootNode, out->mRootNode);
         }
+
+
+
 
         static std::string getAncestorBaseName(const aiNode* node)
         {
@@ -194,18 +265,22 @@ namespace Assimp {
 
             try {
                 for (const Connection* con : conns) {
-
                     // ignore object-property links
                     if (con->PropertyName().length()) {
-                        continue;
+                        // really important we document why this is ignored.
+                        FBXImporter::LogInfo("ignoring property link - no docs on why this is ignored");
+                        continue; //?
                     }
 
+                    // convert connection source object into Object base class
                     const Object* const object = con->SourceObject();
                     if (nullptr == object) {
-                        FBXImporter::LogWarn("failed to convert source object for Model link");
+                        FBXImporter::LogError("failed to convert source object for Model link");
                         continue;
                     }
 
+                    // FBX Model::Cube, Model::Bone001, etc elements
+                    // This detects if we can cast the object into this model structure.
                     const Model* const model = dynamic_cast<const Model*>(object);
 
                     if (nullptr != model) {
@@ -213,18 +288,22 @@ namespace Assimp {
                         post_nodes_chain.clear();
 
                         aiMatrix4x4 new_abs_transform = parent->mTransformation;
-
-                        std::string unique_name = FixNodeName(model->Name());
+                        std::string node_name = FixNodeName(model->Name());
                         // even though there is only a single input node, the design of
                         // assimp (or rather: the complicated transformation chain that
                         // is employed by fbx) means that we may need multiple aiNode's
                         // to represent a fbx node's transformation.
-                        const bool need_additional_node = GenerateTransformationNodeChain(*model, unique_name, nodes_chain, post_nodes_chain);
 
+
+                        // generate node transforms - this includes pivot data
+                        // if need_additional_node is true then you t
+                        const bool need_additional_node = GenerateTransformationNodeChain(*model, node_name, nodes_chain, post_nodes_chain);
+
+                        // assert that for the current node we must have at least a single transform
                         ai_assert(nodes_chain.size());
 
                         if (need_additional_node) {
-                            nodes_chain.push_back(new aiNode(unique_name));
+                            nodes_chain.push_back(new aiNode(node_name));
                         }
 
                         //setup metadata on newest node
@@ -232,19 +311,19 @@ namespace Assimp {
 
                         // link all nodes in a row
                         aiNode* last_parent = parent;
-                        for (aiNode* prenode : nodes_chain) {
-                            ai_assert(prenode);
+                        for (aiNode* child : nodes_chain) {
+                            ai_assert(child);
 
                             if (last_parent != parent) {
                                 last_parent->mNumChildren = 1;
                                 last_parent->mChildren = new aiNode*[1];
-                                last_parent->mChildren[0] = prenode;
+                                last_parent->mChildren[0] = child;
                             }
 
-                            prenode->mParent = last_parent;
-                            last_parent = prenode;
+                            child->mParent = last_parent;
+                            last_parent = child;
 
-                            new_abs_transform *= prenode->mTransformation;
+                            new_abs_transform *= child->mTransformation;
                         }
 
                         // attach geometry
@@ -282,15 +361,15 @@ namespace Assimp {
                             );
                         }
 
-                        // attach sub-nodes (if any)
+                        // recursion call - child nodes
                         ConvertNodes(model->ID(), last_parent, root_node);
 
                         if (doc.Settings().readLights) {
-                            ConvertLights(*model, unique_name);
+                            ConvertLights(*model, node_name);
                         }
 
                         if (doc.Settings().readCameras) {
-                            ConvertCameras(*model, unique_name);
+                            ConvertCameras(*model, node_name);
                         }
 
                         nodes.push_back(nodes_chain.front());
@@ -1576,11 +1655,14 @@ namespace Assimp {
             }
 
             aiMatrix4x4t<float> transform = cl.Transform();
+
+            // store local transform link for post processing
             bone->mOffsetMatrix = cl.TransformLink();
-            bone->mOffsetMatrix = transform.Inverse();
+
+            //bone->mOffsetMatrix = transform.Inverse();
 
             // this is more correct but this assumes skeletons are always on root - bad assumption but lets test
-            bone->mOffsetMatrix = bone->mOffsetMatrix * root_node->mTransformation;
+           // bone->mOffsetMatrix = bone->mOffsetMatrix * root_node->mTransformation;
 
             bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
             aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];

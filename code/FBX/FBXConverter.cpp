@@ -133,7 +133,7 @@ namespace Assimp {
                 // lcl transform grab - done in generate_nodes :)
                 aiMatrix4x4 bone_xform = bone->mOffsetMatrix;
 
-                // apply full heirarchy to transform for basic offset
+                // apply full hierarchy to transform for basic offset
                 while( bone_node->mParent )
                 {
                     bone_node = bone_node->mParent;
@@ -1654,12 +1654,12 @@ namespace Assimp {
                 printf("Found bone: %s\n", bone_name.C_Str());
             }
 
-            aiMatrix4x4t<float> transform = cl.Transform();
+           // aiMatrix4x4t<float> transform = cl.Transform();
 
             // store local transform link for post processing
-            bone->mOffsetMatrix = cl.TransformLink();
-
-            //bone->mOffsetMatrix = transform.Inverse();
+            bone->mOffsetMatrix = cl.Transform();
+            bone->mOffsetMatrix.Inverse();
+            //bone->mOffsetMatrix.Inverse();
 
             // this is more correct but this assumes skeletons are always on root - bad assumption but lets test
            // bone->mOffsetMatrix = bone->mOffsetMatrix * root_node->mTransformation;

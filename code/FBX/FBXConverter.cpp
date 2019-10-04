@@ -136,14 +136,14 @@ namespace Assimp {
                 aiNode *bone_node = kvp.second;
                 std::cout << "active node lookup: " << bone->mName.C_Str() << std::endl;
                 // lcl transform grab - done in generate_nodes :)
-                aiMatrix4x4 bone_xform = bone->mOffsetMatrix;
+                aiMatrix4x4 bone_xform = bone_node->mTransformation;
 
                 // apply full hierarchy to transform for basic offset
-                while( bone_node )
+                while( bone_node->mParent )
                 {
-                    std::cout << "recursing to root node: " << bone_node->mName.C_Str() << std::endl;
-                    bone_xform = bone_node->mTransformation * bone_xform;
                     bone_node = bone_node->mParent;
+                    bone_xform = bone_node->mTransformation * bone_xform;
+                    std::cout << "recursing to root node: " << bone_node->mName.C_Str() << std::endl;
                 }
 
                 // apply inverse and lcl scaling :)

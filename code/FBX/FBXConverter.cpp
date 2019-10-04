@@ -123,16 +123,20 @@ namespace Assimp {
 
             // Now convert all bone positions to the correct mOffsetMatrix
             std::vector<aiBone*> bones;
+            std::vector<aiNode*> nodes;
             std::map<aiBone*, aiNode*> bone_stack;
             BuildBoneList(out->mRootNode, out->mRootNode, out, bones);
-            BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack);
+            BuildNodeList(out->mRootNode, nodes );
+
+
+            BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack, nodes);
             for( std::pair<aiBone*, aiNode*> kvp : bone_stack )
             {
                 aiBone *bone = kvp.first;
                 aiNode *bone_node = kvp.second;
-
+                std::cout << "active node lookup: " << bone->mName.C_Str() << std::endl;
                 // lcl transform grab - done in generate_nodes :)
-                aiMatrix4x4 bone_xform = bone_node->mTransformation * bone->mOffsetMatrix;
+                aiMatrix4x4 bone_xform = bone->mOffsetMatrix;
 
                 // apply full hierarchy to transform for basic offset
                 while( bone_node )
@@ -164,6 +168,50 @@ namespace Assimp {
             std::for_each(lights.begin(), lights.end(), Util::delete_fun<aiLight>());
             std::for_each(cameras.begin(), cameras.end(), Util::delete_fun<aiCamera>());
             std::for_each(textures.begin(), textures.end(), Util::delete_fun<aiTexture>());
+        }
+
+        /* Pop this node by name from the stack if found */
+        /* Used in multiple armature situations with duplicate node / bone names */
+        /* Known flaw: cannot have nodes with bone names, will be fixed in later release */
+        aiNode* FBXConverter::GetNodeFromStack(const aiString &node_name, std::vector<aiNode*> &nodes)
+        {
+            std::vector<aiNode*>::iterator iter;
+            aiNode *found = NULL;
+            for( iter = nodes.begin(); iter < nodes.end(); ++iter )
+            {
+                aiNode *element = *iter;
+                ai_assert(element);
+                // node valid and node name matches
+                if(element->mName == node_name)
+                {
+                    found = element;
+                    break;
+                }
+            }
+
+            if(iter != nodes.end()) {
+                // now pop the element from the node list
+                nodes.erase(iter);
+
+                return found;
+            }
+            return NULL;
+        }
+
+        /* Prepare flat node list which can be used for non recursive lookups later */
+        void FBXConverter::BuildNodeList(aiNode *current_node, std::vector<aiNode *> &nodes)
+        {
+            assert(current_node);
+
+            for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
+            {
+                aiNode *child = current_node->mChildren[nodeId];
+                assert(child);
+
+                nodes.push_back(child);
+
+                BuildNodeList(child, nodes);
+            }
         }
 
         /* Reprocess all nodes to calculate bone transforms properly based on the REAL mOffsetMatrix not the local. */
@@ -204,29 +252,31 @@ namespace Assimp {
                     // then do recursive lookup for bones in root node hierarchy
                 }
 
-                BuildBoneMap(child, root_node, scene, bones);
+                BuildBoneList(child, root_node, scene, bones);
             }
         }
 
         /* A bone stack allows us to have multiple armatures, with the same bone names
          * A bone stack allows us also to retrieve bones true transform even with duplicate names :)
          */
-        void FBXConverter::BuildBoneStack(aiNode *current_node, const aiNode * root_node, const aiScene *scene, const std::vector<aiBone*>& bones, std::map<aiBone*, aiNode*> &bone_stack )
+        void FBXConverter::BuildBoneStack(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
+                                          const std::vector<aiBone *> &bones,
+                                          std::map<aiBone *, aiNode *> &bone_stack,
+                                          std::vector<aiNode*> &node_stack )
         {
             ai_assert(scene);
             ai_assert(root_node);
 
             for( aiBone * bone : bones)
             {
-                // get_bone_from_stack() // stack of armatures
-
-                // example stack algorithm
-                // get armatures then
-                // get node by name from stack
-                // remove node from stack
-                // get node by name from stack
-                // remove node from stack
+                ai_assert(bone);
+                aiNode* node = GetNodeFromStack(bone->mName, node_stack);
+                ai_assert(node);
+                bone_stack.insert(std::pair<aiBone*, aiNode*>(bone, node));
             }
+
+
+
 //            for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
 //            {
 //                aiNode *child = current_node->mChildren[nodeId];

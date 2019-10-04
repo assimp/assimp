@@ -463,7 +463,12 @@ private:
     void
     BuildBoneStack(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
                    const std::vector<aiBone *> &bones,
-                   std::map<aiBone *, aiNode *> &bone_stack);
+                   std::map<aiBone *, aiNode *> &bone_stack,
+                   std::vector<aiNode*> &node_stack );
+
+    static void BuildNodeList(aiNode *current_node, std::vector<aiNode *> &nodes);
+
+    static aiNode *GetNodeFromStack(const aiString &node_name, std::vector<aiNode *> &nodes);
 };
 
 }

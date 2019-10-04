@@ -171,9 +171,11 @@ namespace Assimp {
             std::for_each(textures.begin(), textures.end(), Util::delete_fun<aiTexture>());
         }
 
-        /* Pop this node by name from the stack if found */
-        /* Used in multiple armature situations with duplicate node / bone names */
-        /* Known flaw: cannot have nodes with bone names, will be fixed in later release */
+        /* Returns the armature root node */
+        /* This is required to be detected for a bone initially, it will recurse up until it cannot find another
+         * bone and return the node
+         * No known failure points. (yet)
+         */
         aiNode * FBXConverter::GetArmatureRoot(aiNode *bone_node, std::vector<aiBone*> &bone_list)
         {
             while(bone_node->mParent)
@@ -190,6 +192,7 @@ namespace Assimp {
             return NULL;
         }
 
+        /* Simple IsBoneNode check if this could be a bone */
         bool FBXConverter::IsBoneNode(const aiString &bone_name, std::vector<aiBone*>& bones )
         {
             for( aiBone *bone : bones)
@@ -207,6 +210,7 @@ namespace Assimp {
         /* Pop this node by name from the stack if found */
         /* Used in multiple armature situations with duplicate node / bone names */
         /* Known flaw: cannot have nodes with bone names, will be fixed in later release */
+        /* (serious to be fixed) Known flaw: nodes which have more than one bone could be prematurely dropped from stack */
         aiNode* FBXConverter::GetNodeFromStack(const aiString &node_name, std::vector<aiNode*> &nodes)
         {
             std::vector<aiNode*>::iterator iter;
@@ -314,42 +318,6 @@ namespace Assimp {
 
                 bone_stack.insert(std::pair<aiBone*, aiNode*>(bone, node));
             }
-
-
-
-//            for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
-//            {
-//                aiNode *child = current_node->mChildren[nodeId];
-//                assert(child);
-//
-//                // check for bones
-//                for( unsigned int meshId = 0; meshId < child->mNumMeshes; ++meshId)
-//                {
-//                    assert(child->mMeshes);
-//                    unsigned int mesh_index = child->mMeshes[meshId];
-//                    aiMesh *mesh = scene->mMeshes[ mesh_index ];
-//                    assert(mesh);
-//
-//                    for( unsigned int boneId = 0; boneId < mesh->mNumBones; ++boneId)
-//                    {
-//                        aiBone *bone = mesh->mBones[boneId];
-//                        ai_assert(bone);
-//
-//                        // duplicate meshes exist with the same bones sometimes :)
-//                        // so this must be detected
-//                        if( std::find(bones.begin(), bones.end(), bone) == bones.end() )
-//                        {
-//                            // add the element once
-//                            bones.push_back(bone);
-//                        }
-//                    }
-//
-//                    // find mesh and get bones
-//                    // then do recursive lookup for bones in root node hierarchy
-//                }
-//
-//                BuildBoneMap(child, root_node, scene, bones);
-//            }
         }
 
         void FBXConverter::ConvertRootNode() {
@@ -361,9 +329,6 @@ namespace Assimp {
             // root has ID 0
             ConvertNodes(0L, out->mRootNode, out->mRootNode);
         }
-
-
-
 
         static std::string getAncestorBaseName(const aiNode* node)
         {

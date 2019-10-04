@@ -460,8 +460,7 @@ private:
     static void BuildBoneList(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
                              std::vector<aiBone*>& bones);
 
-    void
-    BuildBoneStack(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
+    void BuildBoneStack(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
                    const std::vector<aiBone *> &bones,
                    std::map<aiBone *, aiNode *> &bone_stack,
                    std::vector<aiNode*> &node_stack );
@@ -469,6 +468,10 @@ private:
     static void BuildNodeList(aiNode *current_node, std::vector<aiNode *> &nodes);
 
     static aiNode *GetNodeFromStack(const aiString &node_name, std::vector<aiNode *> &nodes);
+
+    static aiNode *GetArmatureRoot(aiNode *bone_node, std::vector<aiBone*> &bone_list);
+
+    static bool IsBoneNode(const aiString &bone_name, std::vector<aiBone *> &bones);
 };
 
 }

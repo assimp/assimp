@@ -137,9 +137,10 @@ namespace Assimp {
                 std::cout << "active node lookup: " << bone->mName.C_Str() << std::endl;
                 // lcl transform grab - done in generate_nodes :)
                 aiMatrix4x4 bone_xform = bone_node->mTransformation;
-
+                aiNode * armature = GetArmatureRoot(bone_node, bones);
+                ai_assert(armature);
                 // apply full hierarchy to transform for basic offset
-                while( bone_node->mParent )
+                while( bone_node->mParent && bone_node->mParent != armature )
                 {
                     bone_node = bone_node->mParent;
                     bone_xform = bone_node->mTransformation * bone_xform;
@@ -173,6 +174,39 @@ namespace Assimp {
         /* Pop this node by name from the stack if found */
         /* Used in multiple armature situations with duplicate node / bone names */
         /* Known flaw: cannot have nodes with bone names, will be fixed in later release */
+        aiNode * FBXConverter::GetArmatureRoot(aiNode *bone_node, std::vector<aiBone*> &bone_list)
+        {
+            while(bone_node->mParent)
+            {
+                bone_node = bone_node->mParent;
+                if(!IsBoneNode(bone_node->mName, bone_list))
+                {
+                    std::cout << "Found valid armature: " << bone_node->mName.C_Str() << std::endl;
+                    return bone_node;
+                }
+
+            }
+
+            return NULL;
+        }
+
+        bool FBXConverter::IsBoneNode(const aiString &bone_name, std::vector<aiBone*>& bones )
+        {
+            for( aiBone *bone : bones)
+            {
+                if(bone->mName == bone_name)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        /* Pop this node by name from the stack if found */
+        /* Used in multiple armature situations with duplicate node / bone names */
+        /* Known flaw: cannot have nodes with bone names, will be fixed in later release */
         aiNode* FBXConverter::GetNodeFromStack(const aiString &node_name, std::vector<aiNode*> &nodes)
         {
             std::vector<aiNode*>::iterator iter;
@@ -189,7 +223,7 @@ namespace Assimp {
                 }
             }
 
-            if(iter != nodes.end()) {
+            if(found != NULL) {
                 // now pop the element from the node list
                 nodes.erase(iter);
 
@@ -266,12 +300,18 @@ namespace Assimp {
         {
             ai_assert(scene);
             ai_assert(root_node);
+            ai_assert(!node_stack.empty());
 
             for( aiBone * bone : bones)
             {
                 ai_assert(bone);
                 aiNode* node = GetNodeFromStack(bone->mName, node_stack);
-                ai_assert(node);
+
+                if(node == NULL)
+                {
+                    continue;
+                }
+
                 bone_stack.insert(std::pair<aiBone*, aiNode*>(bone, node));
             }
 

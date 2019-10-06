@@ -68,6 +68,7 @@ struct aiMesh;
 struct aiAnimMesh;
 struct aiAnimation;
 struct aiNodeAnim;
+struct aiMeshMorphAnim;
 
 namespace Assimp    {
 
@@ -372,6 +373,7 @@ public:
     static void Copy  (aiBone** dest, const aiBone* src);
     static void Copy  (aiLight** dest, const aiLight* src);
     static void Copy  (aiNodeAnim** dest, const aiNodeAnim* src);
+    static void Copy  (aiMeshMorphAnim** dest, const aiMeshMorphAnim* src);
     static void Copy  (aiMetadata** dest, const aiMetadata* src);
 
     // recursive, of course

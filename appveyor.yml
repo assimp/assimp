@@ -16,6 +16,7 @@ matrix:
 image:
   - Visual Studio 2015
   - Visual Studio 2017
+  - Visual Studio 2019
   - MinGW  
     
 platform:
@@ -30,8 +31,8 @@ install:
   - if [%COMPILER%]==[MinGW] set PATH=C:\MinGW\bin;%PATH%
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" set CMAKE_GENERATOR_NAME=Visual Studio 14 2015
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" set CMAKE_GENERATOR_NAME=Visual Studio 15 2017
-  - if "%platform%"=="x64" set CMAKE_GENERATOR_NAME=%CMAKE_GENERATOR_NAME% Win64
-  - cmake %CMAKE_DEFINES% -G "%CMAKE_GENERATOR_NAME%" .
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set CMAKE_GENERATOR_NAME=Visual Studio 16 2019
+  - cmake %CMAKE_DEFINES% -G "%CMAKE_GENERATOR_NAME%" -A %platform% .
   # Rename sh.exe as sh.exe in PATH interferes with MinGW
   - rename "C:\Program Files\Git\usr\bin\sh.exe" "sh2.exe"
   - set PATH=%PATH%;"C:\\Program Files (x86)\\Inno Setup 5"

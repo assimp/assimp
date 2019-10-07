@@ -139,7 +139,12 @@ namespace Assimp {
 
                 aiMatrix4x4 bone_xform = bone_node->mTransformation;
                 aiNode * armature = GetArmatureRoot(bone_node, bones);
+
                 ai_assert(armature);
+
+                // set up bone armature id
+                bone->mArmatureID = armature;
+
                 // apply full hierarchy to transform for basic offset
                 while( bone_node->mParent && bone_node->mParent != armature )
                 {
@@ -314,6 +319,8 @@ namespace Assimp {
 
                 if(node == NULL)
                 {
+                    std::cout << "Element has null armature in this case we are using root: " << bone->mName.C_Str() << std::endl;
+                    //node = (aiNode*)root_node;
                     continue;
                 }
 

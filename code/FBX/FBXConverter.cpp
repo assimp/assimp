@@ -1751,23 +1751,22 @@ namespace Assimp {
                                           std::vector<size_t> &out_indices,
                                           std::vector<size_t> &index_out_indices,
                                           std::vector<size_t> &count_out_indices, aiNode *parent,
-                                          aiNode *root_node)
-        {
+                                          aiNode *root_node) {
             std::string deformer_name = cl.TargetNode()->Name();
             aiString bone_name = aiString(FixNodeName(deformer_name));
 
-            aiBone * bone = NULL;
+            aiBone *bone = NULL;
+            bool pre_existed = false;
 
-            if(bone_map.count(deformer_name))
-            {
-                std::cout << "retrieved bone from lookup " << bone_name.C_Str() << ". Deformer: " << deformer_name <<  std::endl;
+            if (bone_map.count(deformer_name)) {
+                std::cout << "retrieved bone from lookup " << bone_name.C_Str() << ". Deformer: " << deformer_name
+                          << std::endl;
                 bone = bone_map[deformer_name];
-            }
-            else
-            {
-                std::cout << "created new bone " << bone_name.C_Str() << ". Deformer: " << deformer_name <<  std::endl;
+                pre_existed = true;
+            } else {
+                std::cout << "created new bone " << bone_name.C_Str() << ". Deformer: " << deformer_name << std::endl;
                 bone = new aiBone();
-                bone_map.insert(std::pair<const std::string, aiBone*>(deformer_name, bone));
+                bone_map.insert(std::pair<const std::string, aiBone *>(deformer_name, bone));
             }
 
             // lookup must be populated in case something goes wrong
@@ -1781,8 +1780,20 @@ namespace Assimp {
             bone->mOffsetMatrix = cl.Transform();
             bone->mOffsetMatrix.Inverse();
 
-            bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
-            aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
+
+            // todo make this append size if found already
+            aiVertexWeight *cursor = nullptr;
+            if (!pre_existed)
+            {
+                bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
+                cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
+            } else
+            {
+                bone->mNumWeights = bone->mNumWeights + static_cast<unsigned int>(out_indices.size());
+                // todo re-alloc bone->mWeights
+                // todo figure out cursor
+                // todo: !take break :D
+            }
 
             const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
             const WeightArray& weights = cl.GetWeights();

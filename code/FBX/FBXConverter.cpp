@@ -69,7 +69,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <cstdint>
 #include <iostream>
-
+#include <stdlib.h>
 
 namespace Assimp {
     namespace FBX {
@@ -1715,20 +1715,21 @@ namespace Assimp {
                         }
                     }
 
-
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
+                    ConvertCluster(bones, cluster, out_indices, index_out_indices,
                                    count_out_indices, parent, root_node);
                 }
+
+                bone_map.clear();
             }
             catch (std::exception&e) {
                 std::for_each(bones.begin(), bones.end(), Util::delete_fun<aiBone>());
                 throw;
             }
 
-            if (bone_map.empty()) {
+            if (bones.empty()) {
                 out->mBones = nullptr;
                 out->mNumBones = 0;
                 return;
@@ -1747,73 +1748,68 @@ namespace Assimp {
             return iter;
         }
 
-        void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Model &, const Cluster &cl,
-                                          std::vector<size_t> &out_indices,
-                                          std::vector<size_t> &index_out_indices,
-                                          std::vector<size_t> &count_out_indices, aiNode *parent,
-                                          aiNode *root_node) {
-            std::string deformer_name = cl.TargetNode()->Name();
+        void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
+                                          std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
+                                          std::vector<size_t> &count_out_indices, aiNode *parent, aiNode *root_node) {
+            assert(cl); // make sure cluster valid
+            std::string deformer_name = cl->TargetNode()->Name();
             aiString bone_name = aiString(FixNodeName(deformer_name));
 
             aiBone *bone = NULL;
-            bool pre_existed = false;
 
             if (bone_map.count(deformer_name)) {
                 std::cout << "retrieved bone from lookup " << bone_name.C_Str() << ". Deformer: " << deformer_name
                           << std::endl;
                 bone = bone_map[deformer_name];
-                pre_existed = true;
             } else {
                 std::cout << "created new bone " << bone_name.C_Str() << ". Deformer: " << deformer_name << std::endl;
                 bone = new aiBone();
+                bone->mName = bone_name;
+
+                // store local transform link for post processing
+                bone->mOffsetMatrix = cl->Transform();
+                bone->mOffsetMatrix.Inverse();
+
+
+                //
+                // Now calculate the aiVertexWeights
+                //
+
+                aiVertexWeight *cursor = nullptr;
+
+                bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
+                cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
+
+                const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
+                const WeightArray& weights = cl->GetWeights();
+
+                const size_t c = index_out_indices.size();
+                for (size_t i = 0; i < c; ++i) {
+                    const size_t index_index = index_out_indices[i];
+
+                    if (index_index == no_index_sentinel) {
+                        continue;
+                    }
+
+                    const size_t cc = count_out_indices[i];
+                    for (size_t j = 0; j < cc; ++j) {
+                        // cursor runs from first element relative to the start
+                        // or relative to the start of the next indexes.
+                        aiVertexWeight& out_weight = *cursor++;
+
+                        out_weight.mVertexId = static_cast<unsigned int>(out_indices[index_index + j]);
+                        out_weight.mWeight = weights[i];
+                    }
+                }
+
                 bone_map.insert(std::pair<const std::string, aiBone *>(deformer_name, bone));
             }
+
+            std::cout << "bone research: Indicies size: " << out_indices.size() << std::endl;
 
             // lookup must be populated in case something goes wrong
             // this also allocates bones to mesh instance outside
             local_mesh_bones.push_back(bone);
-            //printf("root node: %s parent node: %s\n", root_node->mName.C_Str(), parent->mName.C_Str());
-            //printf("target bone name: %s\n", bone_name.C_Str());
-            bone->mName = bone_name;
-
-            // store local transform link for post processing
-            bone->mOffsetMatrix = cl.Transform();
-            bone->mOffsetMatrix.Inverse();
-
-
-            // todo make this append size if found already
-            aiVertexWeight *cursor = nullptr;
-            if (!pre_existed)
-            {
-                bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
-                cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
-            } else
-            {
-                bone->mNumWeights = bone->mNumWeights + static_cast<unsigned int>(out_indices.size());
-                // todo re-alloc bone->mWeights
-                // todo figure out cursor
-                // todo: !take break :D
-            }
-
-            const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
-            const WeightArray& weights = cl.GetWeights();
-
-            const size_t c = index_out_indices.size();
-            for (size_t i = 0; i < c; ++i) {
-                const size_t index_index = index_out_indices[i];
-
-                if (index_index == no_index_sentinel) {
-                    continue;
-                }
-
-                const size_t cc = count_out_indices[i];
-                for (size_t j = 0; j < cc; ++j) {
-                    aiVertexWeight& out_weight = *cursor++;
-
-                    out_weight.mVertexId = static_cast<unsigned int>(out_indices[index_index + j]);
-                    out_weight.mWeight = weights[i];
-                }
-            }
         }
 
         void FBXConverter::ConvertMaterialForMesh(aiMesh* out, const Model& model, const MeshGeometry& geo,

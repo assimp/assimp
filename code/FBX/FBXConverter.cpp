@@ -1760,12 +1760,12 @@ namespace Assimp {
 
             if(bone_map.count(deformer_name))
             {
-                std::cout << "retrieved bone from lookup" << bone_name.C_Str() << "deformer: " << deformer_name <<  std::endl;
+                std::cout << "retrieved bone from lookup " << bone_name.C_Str() << ". Deformer: " << deformer_name <<  std::endl;
                 bone = bone_map[deformer_name];
             }
             else
             {
-                std::cout << "created new bone " << bone_name.C_Str() << std::endl;
+                std::cout << "created new bone " << bone_name.C_Str() << ". Deformer: " << deformer_name <<  std::endl;
                 bone = new aiBone();
                 bone_map.insert(std::pair<const std::string, aiBone*>(deformer_name, bone));
             }

@@ -62,6 +62,8 @@ else(WIN32)
 	  assimp_LIBRARIES
 	  NAMES assimp
 	  PATHS /usr/local/lib/
+	  PATHS /usr/lib64/
+	  PATHS /usr/lib/
 	)
 
 	if (assimp_INCLUDE_DIRS AND assimp_LIBRARIES)

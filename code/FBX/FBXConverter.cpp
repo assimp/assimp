@@ -1656,9 +1656,7 @@ namespace Assimp {
 
             const Skin& sk = *geo.DeformerSkin();
 
-            // Deformer name is not the same as a bone name
-            // Deformer names in FBX are always unique in an FBX file.
-            std::map<const std::string, aiBone *> bone_map;
+            std::vector<aiBone*> bones;
 
             const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
             ai_assert(no_mat_check || outputVertStartIndices);
@@ -1678,7 +1676,6 @@ namespace Assimp {
                     index_out_indices.clear();
                     out_indices.clear();
 
-                    std::cout << "Cluster name: " << cluster->Name() << std::endl;
 
                     // now check if *any* of these weights is contained in the output mesh,
                     // taking notes so we don't need to do it twice.
@@ -1722,19 +1719,12 @@ namespace Assimp {
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    ConvertCluster(bone_map, model, *cluster, out_indices, index_out_indices,
+                    ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
                                    count_out_indices, parent, root_node);
                 }
-
             }
             catch (std::exception&e) {
-                std::cout << "Failed to import bone deform! serious error: " << e.what() << std::endl;
-                // Since we now use std::pair not aiBone* for deformer deletions we use this simple foreach.
-                for(std::pair<const std::string, aiBone*> &bone : bone_map)
-                {
-                    delete bone.second;
-                }
-                bone_map.clear(); // clear bone list explicitly
+                std::for_each(bones.begin(), bones.end(), Util::delete_fun<aiBone>());
                 throw;
             }
 
@@ -1743,14 +1733,6 @@ namespace Assimp {
                 out->mNumBones = 0;
                 return;
             } else {
-                std::vector<aiBone*> bones;
-
-                // make bone list quick
-                for( auto bone : bone_map )
-                {
-                    bones.push_back(bone.second);
-                }
-
                 out->mBones = new aiBone *[bones.size()]();
                 out->mNumBones = static_cast<unsigned int>(bones.size());
 
@@ -1765,7 +1747,7 @@ namespace Assimp {
             return iter;
         }
 
-        void FBXConverter::ConvertCluster(std::map<const std::string, aiBone *> &bones, const Model &, const Cluster &cl,
+        void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Model &, const Cluster &cl,
                                           std::vector<size_t> &out_indices,
                                           std::vector<size_t> &index_out_indices,
                                           std::vector<size_t> &count_out_indices, aiNode *parent,
@@ -1775,19 +1757,22 @@ namespace Assimp {
             aiString bone_name = aiString(FixNodeName(deformer_name));
 
             aiBone * bone = NULL;
-            
-            if(bones.count(deformer_name))
+
+            if(bone_map.count(deformer_name))
             {
-                bone = bones[deformer_name];
+                std::cout << "retrieved bone from lookup" << bone_name.C_Str() << "deformer: " << deformer_name <<  std::endl;
+                bone = bone_map[deformer_name];
             }
             else
             {
+                std::cout << "created new bone " << bone_name.C_Str() << std::endl;
                 bone = new aiBone();
+                bone_map.insert(std::pair<const std::string, aiBone*>(deformer_name, bone));
             }
 
-            bones.insert(std::pair<const std::string, aiBone*>(deformer_name, bone));
-
-            printf("Created bone: %s\n", bone_name.C_Str());
+            // lookup must be populated in case something goes wrong
+            // this also allocates bones to mesh instance outside
+            local_mesh_bones.push_back(bone);
             //printf("root node: %s parent node: %s\n", root_node->mName.C_Str(), parent->mName.C_Str());
             //printf("target bone name: %s\n", bone_name.C_Str());
             bone->mName = bone_name;

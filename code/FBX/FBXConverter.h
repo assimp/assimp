@@ -225,7 +225,7 @@ private:
     // lookup
     static const aiNode* GetNodeByName( const aiString& name, aiNode *current_node );
     // ------------------------------------------------------------------------------------------------
-    void ConvertCluster(std::map<const std::string, aiBone *> &bones, const Model &, const Cluster &cl, std::vector<size_t> &out_indices,
+    void ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Model &, const Cluster &cl, std::vector<size_t> &out_indices,
                         std::vector<size_t> &index_out_indices, std::vector<size_t> &count_out_indices, aiNode *parent,
                         aiNode *root_node);
 
@@ -451,6 +451,10 @@ private:
     // number of nodes with the same name
     using NodeNameCache = std::unordered_map<std::string, unsigned int>;
     NodeNameCache mNodeNames;
+
+    // Deformer name is not the same as a bone name - it does contain the bone name though :)
+    // Deformer names in FBX are always unique in an FBX file.
+    std::map<const std::string, aiBone *> bone_map;
 
     double anim_fps;
 

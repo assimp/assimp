@@ -54,8 +54,10 @@ else(WIN32)
 
 	find_path(
 	  assimp_INCLUDE_DIRS
-	  NAMES postprocess.h scene.h version.h config.h cimport.h
-	  PATHS /usr/local/include/
+	  NAMES assimp/postprocess.h assimp/scene.h assimp/version.h assimp/config.h assimp/cimport.h
+	  PATHS /usr/local/include
+	  PATHS /usr/include/
+
 	)
 
 	find_library(

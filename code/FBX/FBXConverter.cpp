@@ -136,6 +136,7 @@ namespace Assimp {
                 aiNode *bone_node = kvp.second;
                 std::cout << "active node lookup: " << bone->mName.C_Str() << std::endl;
                 // lcl transform grab - done in generate_nodes :)
+
                 aiMatrix4x4 bone_xform = bone_node->mTransformation;
                 aiNode * armature = GetArmatureRoot(bone_node, bones);
                 ai_assert(armature);
@@ -1655,8 +1656,9 @@ namespace Assimp {
 
             const Skin& sk = *geo.DeformerSkin();
 
-            std::vector<aiBone*> bones;
-            bones.reserve(sk.Clusters().size());
+            // Deformer name is not the same as a bone name
+            // Deformer names in FBX are always unique in an FBX file.
+            std::map<const std::string, aiBone *> bone_map;
 
             const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
             ai_assert(no_mat_check || outputVertStartIndices);
@@ -1675,6 +1677,8 @@ namespace Assimp {
                     count_out_indices.clear();
                     index_out_indices.clear();
                     out_indices.clear();
+
+                    std::cout << "Cluster name: " << cluster->Name() << std::endl;
 
                     // now check if *any* of these weights is contained in the output mesh,
                     // taking notes so we don't need to do it twice.
@@ -1713,67 +1717,84 @@ namespace Assimp {
                             }
                         }
                     }
-                    
+
+
                     // if we found at least one, generate the output bones
                     // XXX this could be heavily simplified by collecting the bone
                     // data in a single step.
-                    ConvertCluster(bones, model, *cluster, out_indices, index_out_indices,
+                    ConvertCluster(bone_map, model, *cluster, out_indices, index_out_indices,
                                    count_out_indices, parent, root_node);
                 }
+
             }
-            catch (std::exception&) {
-                std::for_each(bones.begin(), bones.end(), Util::delete_fun<aiBone>());
+            catch (std::exception&e) {
+                std::cout << "Failed to import bone deform! serious error: " << e.what() << std::endl;
+                // Since we now use std::pair not aiBone* for deformer deletions we use this simple foreach.
+                for(std::pair<const std::string, aiBone*> &bone : bone_map)
+                {
+                    delete bone.second;
+                }
+                bone_map.clear(); // clear bone list explicitly
                 throw;
             }
 
-            if (bones.empty()) {
+            if (bone_map.empty()) {
+                out->mBones = nullptr;
+                out->mNumBones = 0;
                 return;
+            } else {
+                std::vector<aiBone*> bones;
+
+                // make bone list quick
+                for( auto bone : bone_map )
+                {
+                    bones.push_back(bone.second);
+                }
+
+                out->mBones = new aiBone *[bones.size()]();
+                out->mNumBones = static_cast<unsigned int>(bones.size());
+
+                std::swap_ranges(bones.begin(), bones.end(), out->mBones);
             }
-
-            out->mBones = new aiBone*[bones.size()]();
-            out->mNumBones = static_cast<unsigned int>(bones.size());
-
-            std::swap_ranges(bones.begin(), bones.end(), out->mBones);
         }
 
         const aiNode* FBXConverter::GetNodeByName( const aiString& name, aiNode *current_node )
         {
             aiNode * iter = current_node;
-            printf("Child count: %d", iter->mNumChildren);
+            //printf("Child count: %d", iter->mNumChildren);
             return iter;
         }
 
-        void FBXConverter::ConvertCluster(std::vector<aiBone *> &bones, const Model &, const Cluster &cl,
+        void FBXConverter::ConvertCluster(std::map<const std::string, aiBone *> &bones, const Model &, const Cluster &cl,
                                           std::vector<size_t> &out_indices,
                                           std::vector<size_t> &index_out_indices,
                                           std::vector<size_t> &count_out_indices, aiNode *parent,
                                           aiNode *root_node)
         {
+            std::string deformer_name = cl.TargetNode()->Name();
+            aiString bone_name = aiString(FixNodeName(deformer_name));
 
-            aiBone* const bone = new aiBone();
-            bones.push_back(bone);
-            aiString bone_name = aiString( FixNodeName(cl.TargetNode()->Name()));
-            printf("root node: %s parent node: %s\n", root_node->mName.C_Str(), parent->mName.C_Str());
-            printf("target bone name: %s\n", bone_name.C_Str());
-            bone->mName = bone_name;
-
-            // todo: bone stack information
-            const aiNode * bone_node = FBXConverter::GetNodeByName(bone_name, root_node);
-
-            if(bone_node)
+            aiBone * bone = NULL;
+            
+            if(bones.count(deformer_name))
             {
-                printf("Found bone: %s\n", bone_name.C_Str());
+                bone = bones[deformer_name];
+            }
+            else
+            {
+                bone = new aiBone();
             }
 
-           // aiMatrix4x4t<float> transform = cl.Transform();
+            bones.insert(std::pair<const std::string, aiBone*>(deformer_name, bone));
+
+            printf("Created bone: %s\n", bone_name.C_Str());
+            //printf("root node: %s parent node: %s\n", root_node->mName.C_Str(), parent->mName.C_Str());
+            //printf("target bone name: %s\n", bone_name.C_Str());
+            bone->mName = bone_name;
 
             // store local transform link for post processing
             bone->mOffsetMatrix = cl.Transform();
             bone->mOffsetMatrix.Inverse();
-            //bone->mOffsetMatrix.Inverse();
-
-            // this is more correct but this assumes skeletons are always on root - bad assumption but lets test
-           // bone->mOffsetMatrix = bone->mOffsetMatrix * root_node->mTransformation;
 
             bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
             aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];

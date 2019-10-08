@@ -332,10 +332,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                     case PrimitiveMode_LINES: {
                         nFaces = count / 2;
-                        if (nFaces * 2 != count) {
-                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
-                            count = nFaces * 2;
-                        }
                         faces = new aiFace[nFaces];
                         for (unsigned int i = 0; i < count; i += 2) {
                             SetFace(faces[i / 2], data.GetUInt(i), data.GetUInt(i + 1));
@@ -359,10 +355,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                     case PrimitiveMode_TRIANGLES: {
                         nFaces = count / 3;
-                        if (nFaces * 3 != count) {
-                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
-                            count = nFaces * 3;
-                        }
                         faces = new aiFace[nFaces];
                         for (unsigned int i = 0; i < count; i += 3) {
                             SetFace(faces[i / 3], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
@@ -405,10 +397,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                 case PrimitiveMode_LINES: {
                     nFaces = count / 2;
-                    if (nFaces * 2 != count) {
-                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
-                        count = nFaces * 2;
-                    }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 2) {
                         SetFace(faces[i / 2], i, i + 1);
@@ -432,10 +420,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                 case PrimitiveMode_TRIANGLES: {
                     nFaces = count / 3;
-                    if (nFaces * 3 != count) {
-                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
-                        count = nFaces * 3;
-                    }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 3) {
                         SetFace(faces[i / 3], i, i + 1, i + 2);

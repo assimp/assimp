@@ -116,7 +116,7 @@
          "buffer" : 0,
          "byteLength" : 576,
          "byteOffset" : 936,
-         "target" : 349626
+         "target" : 34962
       },
       {
          "buffer" : 0,
@@ -195,11 +195,13 @@
       },
       {
          "mesh" : 1,
-         "name" : "CubeInside"
+         "name" : "CubeInside",
+         "translation": [ 2.0, 0.0, 0.0 ]
       },
 	  {
 		"mesh" : 2,
-		"name" : "Lines"
+      "name" : "Lines",
+      "translation": [ -2.0, 0.0, 0.0 ]
 	  }
    ],
    "samplers" : [

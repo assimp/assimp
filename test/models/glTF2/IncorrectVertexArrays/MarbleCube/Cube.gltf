@@ -1,0 +1,226 @@
+{
+   "accessors" : [
+      {
+         "bufferView" : 0,
+         "byteOffset" : 0,
+         "componentType" : 5123,
+         "count" : 36,
+         "max" : [
+            35
+         ],
+         "min" : [
+            0
+         ],
+         "type" : "SCALAR"
+      },
+      {
+         "bufferView" : 1,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            1.000000,
+            1.000001
+         ],
+         "min" : [
+            -1.000000,
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC3"
+      },
+      {
+         "bufferView" : 2,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            1.000000,
+            1.000000
+         ],
+         "min" : [
+            -1.000000,
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC3"
+      },
+      {
+         "bufferView" : 3,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            -0.000000,
+            -0.000000,
+            1.000000
+         ],
+         "min" : [
+            0.000000,
+            -0.000000,
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC4"
+      },
+      {
+         "bufferView" : 4,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            1.000000
+         ],
+         "min" : [
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC2"
+      },
+      {
+         "bufferView" : 1,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 5,
+         "type" : "VEC3"
+       }
+   ],
+   "asset" : {
+      "generator" : "VKTS glTF 2.0 exporter",
+      "version" : "2.0"
+   },
+   "bufferViews" : [
+      {
+         "buffer" : 0,
+         "byteLength" : 72,
+         "byteOffset" : 0,
+         "target" : 34963
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 432,
+         "byteOffset" : 72,
+         "target" : 34962
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 432,
+         "byteOffset" : 504,
+         "target" : 34962
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 576,
+         "byteOffset" : 936,
+         "target" : 349626
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 288,
+         "byteOffset" : 1512,
+         "target" : 34962
+      }
+   ],
+   "buffers" : [
+      {
+         "byteLength" : 1848,
+         "uri" : "Cube.bin"
+      }
+   ],
+   "images" : [
+      {
+         "uri" : "Cube_BaseColor.png"
+      },
+      {
+         "uri" : "Cube_MetallicRoughness.png"
+      }
+   ],
+   "materials" : [
+      {
+         "name" : "Cube",
+         "pbrMetallicRoughness" : {
+            "baseColorTexture" : {
+               "index" : 0
+            },
+            "metallicRoughnessTexture" : {
+               "index" : 1
+            }
+         }
+      }
+   ],
+   "meshes" : [
+      {
+         "name" : "Cube",
+         "primitives" : [
+            {
+               "attributes" : {
+                  "NORMAL" : 2,
+                  "POSITION" : 1,
+                  "TANGENT" : 3,
+                  "TEXCOORD_0" : 4
+               },
+               "indices" : 0,
+               "material" : 0,
+               "mode" : 4
+            }
+         ]
+      },
+      {
+         "name" : "CubeInside",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 5
+           },
+		   "mode" : 4
+         } ]
+       },
+	   {
+         "name" : "Lines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 5
+           },
+		   "mode" : 1
+         } ]
+       }
+   ],
+   "nodes" : [
+      {
+         "mesh" : 0,
+         "name" : "Cube"
+      },
+      {
+         "mesh" : 1,
+         "name" : "CubeInside"
+      },
+	  {
+		"mesh" : 2,
+		"name" : "Lines"
+	  }
+   ],
+   "samplers" : [
+      {}
+   ],
+   "scene" : 0,
+   "scenes" : [
+      {
+         "nodes" : [
+            0, 1, 2
+         ]
+      }
+   ],
+   "textures" : [
+      {
+         "sampler" : 0,
+         "source" : 0
+      },
+      {
+         "sampler" : 0,
+         "source" : 1
+      }
+   ]
+}

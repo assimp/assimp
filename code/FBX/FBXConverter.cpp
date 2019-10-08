@@ -130,6 +130,9 @@ namespace Assimp {
 
 
             BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack, nodes);
+
+            std::cout << "Bone stack size: " << bone_stack.size() << std::endl;
+
             for( std::pair<aiBone*, aiNode*> kvp : bone_stack )
             {
                 aiBone *bone = kvp.first;
@@ -143,7 +146,11 @@ namespace Assimp {
                 ai_assert(armature);
 
                 // set up bone armature id
-                bone->mArmatureID = armature;
+                bone->mArmature = armature;
+
+                // set this bone node to be referenced properly
+                ai_assert(bone_node);
+                bone->mNode = bone_node;
 
                 // apply full hierarchy to transform for basic offset
                 while( bone_node->mParent && bone_node->mParent != armature )
@@ -184,16 +191,18 @@ namespace Assimp {
          */
         aiNode * FBXConverter::GetArmatureRoot(aiNode *bone_node, std::vector<aiBone*> &bone_list)
         {
-            while(bone_node->mParent)
+            while(bone_node)
             {
-                bone_node = bone_node->mParent;
                 if(!IsBoneNode(bone_node->mName, bone_list))
                 {
                     std::cout << "Found valid armature: " << bone_node->mName.C_Str() << std::endl;
                     return bone_node;
                 }
 
+                bone_node = bone_node->mParent;
             }
+
+            std::cout << "can't find armature! node: " << bone_node << std::endl;
 
             return NULL;
         }
@@ -316,13 +325,21 @@ namespace Assimp {
             {
                 ai_assert(bone);
                 aiNode* node = GetNodeFromStack(bone->mName, node_stack);
-
                 if(node == NULL)
                 {
-                    std::cout << "Element has null armature in this case we are using root: " << bone->mName.C_Str() << std::endl;
-                    //node = (aiNode*)root_node;
-                    continue;
+                    node_stack.clear();
+                    BuildNodeList(out->mRootNode, node_stack );
+                    std::cout << "Resetting bone stack: null element " << bone->mName.C_Str() << std::endl;
+
+                    node = GetNodeFromStack(bone->mName, node_stack);
+
+                    if(!node) {
+                        std::cout << "serious import issue armature failed to be detected?" << std::endl;
+                        continue;
+                    }
                 }
+
+                std::cout << "Successfully added bone to stack and have valid armature: " << bone->mName.C_Str() << std::endl;
 
                 bone_stack.insert(std::pair<aiBone*, aiNode*>(bone, node));
             }
@@ -1003,7 +1020,7 @@ namespace Assimp {
             // is_complex needs to be consistent with NeedsComplexTransformationChain()
             // or the interplay between this code and the animation converter would
             // not be guaranteed.
-            ai_assert(NeedsComplexTransformationChain(model) == ((chainBits & chainMaskComplex) != 0));
+            //ai_assert(NeedsComplexTransformationChain(model) == ((chainBits & chainMaskComplex) != 0));
 
             // now, if we have more than just Translation, Scaling and Rotation,
             // we need to generate a full node chain to accommodate for assimp's

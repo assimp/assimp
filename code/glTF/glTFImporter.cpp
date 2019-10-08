@@ -170,6 +170,8 @@ void glTFImporter::ImportMaterials(glTF::Asset& r) {
 
     if (mScene->mNumMaterials == 0) {
         mScene->mNumMaterials = 1;
+        // Delete the array of length zero created above.
+        delete[] mScene->mMaterials;
         mScene->mMaterials = new aiMaterial*[1];
         mScene->mMaterials[0] = new aiMaterial();
     }

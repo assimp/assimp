@@ -85,9 +85,29 @@
          "bufferView" : 1,
          "byteOffset" : 0,
          "componentType" : 5126,
-         "count" : 5,
+         "count" : 36,
          "type" : "VEC3"
-       }
+       },
+       {
+         "bufferView" : 1,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 35,
+         "type" : "VEC3"
+       },
+       {
+         "bufferView" : 0,
+         "byteOffset" : 0,
+         "componentType" : 5123,
+         "count" : 35,
+         "max" : [
+            35
+         ],
+         "min" : [
+            0
+         ],
+         "type" : "SCALAR"
+      }
    ],
    "asset" : {
       "generator" : "VKTS glTF 2.0 exporter",
@@ -158,22 +178,17 @@
          "primitives" : [
             {
                "attributes" : {
-                  "NORMAL" : 2,
-                  "POSITION" : 1,
-                  "TANGENT" : 3,
-                  "TEXCOORD_0" : 4
+                  "POSITION" : 1
                },
-               "indices" : 0,
-               "material" : 0,
                "mode" : 4
             }
          ]
       },
       {
-         "name" : "CubeInside",
+         "name" : "TruncatedCube",
          "primitives" : [ {
            "attributes" : {
-             "POSITION" : 5
+             "POSITION" : 6
            },
 		   "mode" : 4
          } ]
@@ -186,6 +201,55 @@
            },
 		   "mode" : 1
          } ]
+       },
+       {
+         "name" : "TruncatedLines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 6
+           },
+		   "mode" : 1
+         } ]
+       },
+       {
+          "name" : "IndexedCube",
+          "primitives" : [ {
+             "attributes" : {
+                "POSITION" : 1
+             },
+             "mode" : 4,
+             "indices" : 0
+          } ]
+       },
+       {
+          "name" : "TruncatedIndexedCube",
+          "primitives" : [ {
+             "attributes" : {
+                "POSITION" : 1
+             },
+             "mode" : 4,
+             "indices" : 7
+          } ]
+       },
+       {
+         "name" : "IndexedLines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 5
+           },
+		   "mode" : 1,
+         "indices" : 0
+         } ]
+       },
+       {
+         "name" : "TruncatedIndexedLines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 6
+           },
+		   "mode" : 1,
+         "indices" : 7
+         } ]
        }
    ],
    "nodes" : [
@@ -195,13 +259,38 @@
       },
       {
          "mesh" : 1,
-         "name" : "CubeInside",
-         "translation": [ 2.0, 0.0, 0.0 ]
+         "name" : "TruncatedCube",
+         "translation": [ 2.5, 0.0, 2.5 ]
       },
 	  {
 		"mesh" : 2,
       "name" : "Lines",
-      "translation": [ -2.0, 0.0, 0.0 ]
+      "translation": [ 2.5, 0.0, 0.0 ]
+	  },	  
+     {
+		"mesh" : 3,
+      "name" : "TruncatedLines",
+      "translation": [ 2.5, 0.0, -2.5 ]
+	  },
+     {
+       "mesh" : 4,
+       "name" : "IndexedCube",
+       "translation": [ -2.5, 0.0, 2.5 ]
+     },
+     {
+       "mesh" : 5,
+       "name" : "TruncatedIndexedCube",
+       "translation": [ -2.5, 0.0, 0.0 ]
+     },
+     	{
+		"mesh" : 6,
+      "name" : "IndexedLines",
+      "translation": [ -2.5, 0.0, -2.5 ]
+	  },
+     {
+		"mesh" : 7,
+      "name" : "TruncatedIndexedLines",
+      "translation": [ 0.0, 0.0, -2.5 ]
 	  }
    ],
    "samplers" : [
@@ -211,7 +300,7 @@
    "scenes" : [
       {
          "nodes" : [
-            0, 1, 2
+            0, 1, 2, 3, 4, 5, 6, 7
          ]
       }
    ],

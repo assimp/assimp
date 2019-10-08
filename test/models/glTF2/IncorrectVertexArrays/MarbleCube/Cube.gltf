@@ -147,29 +147,8 @@
    ],
    "buffers" : [
       {
-         "byteLength" : 1848,
+         "byteLength" : 514,
          "uri" : "Cube.bin"
-      }
-   ],
-   "images" : [
-      {
-         "uri" : "Cube_BaseColor.png"
-      },
-      {
-         "uri" : "Cube_MetallicRoughness.png"
-      }
-   ],
-   "materials" : [
-      {
-         "name" : "Cube",
-         "pbrMetallicRoughness" : {
-            "baseColorTexture" : {
-               "index" : 0
-            },
-            "metallicRoughnessTexture" : {
-               "index" : 1
-            }
-         }
       }
    ],
    "meshes" : [

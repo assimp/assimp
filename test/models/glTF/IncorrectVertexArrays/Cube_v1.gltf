@@ -204,7 +204,7 @@
           "name" : "TruncatedIndexedCube",
           "primitives" : [ {
              "attributes" : {
-                "POSITION" : "accessor_1"
+                "POSITION" : "accessor_6"
              },
              "mode" : 4,
              "indices" : "accessor_7"
@@ -279,15 +279,5 @@
             "node_0", "node_1", "node_2", "node_3", "node_4", "node_5", "node_6", "node_7"
          ]
       }
-   },
-   "textures" : [
-      {
-         "sampler" : 0,
-         "source" : 0
-      },
-      {
-         "sampler" : 0,
-         "source" : 1
-      }
-   ]
+   }
 }

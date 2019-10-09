@@ -403,6 +403,7 @@ project "assimp"
 
       defines {
         "_CRT_SECURE_NO_WARNINGS",
+        "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING",
       }
 
     -- -------------------------------------------------------------

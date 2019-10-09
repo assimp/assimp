@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include "ScenePrivate.h"
 
-static const unsigned int MajorVersion = 4;
-static const unsigned int MinorVersion = 1;
+static const unsigned int MajorVersion = 5;
+static const unsigned int MinorVersion = 0;
 
 // --------------------------------------------------------------------------------
 // Legal information string - don't remove this.

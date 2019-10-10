@@ -393,6 +393,11 @@ ADD_ASSIMP_IMPORTER( IRR
   Irr/IRRShared.h
 )
 
+ADD_ASSIMP_IMPORTER( JT
+  JT/JTImporter.h
+  JT/JTImporter.cpp
+)
+
 ADD_ASSIMP_IMPORTER( LWO
   LWO/LWOAnimation.cpp
   LWO/LWOAnimation.h

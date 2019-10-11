@@ -137,7 +137,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/irrXMLWrapper.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
-  ${HEADER_PATH}/Macros.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
 )

@@ -1058,6 +1058,8 @@ MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
 MESSAGE(STATUS "Enabled exporter formats:${ASSIMP_EXPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled exporter formats:${ASSIMP_EXPORTERS_DISABLED}")
 
+SOURCE_GROUP( include\\assimp    FILES ${PUBLIC_HEADERS} )
+
 SET( assimp_src
   # Assimp Files
   ${Core_SRCS}

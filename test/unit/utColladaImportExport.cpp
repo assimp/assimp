@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 using namespace Assimp;
@@ -53,7 +54,18 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure );
-        return nullptr != scene;
+        if (scene == nullptr)
+            return false;
+
+        // Expected number of items
+        EXPECT_EQ(scene->mNumMeshes, 1);
+        EXPECT_EQ(scene->mNumMaterials, 1);
+        EXPECT_EQ(scene->mNumAnimations, 0);
+        EXPECT_EQ(scene->mNumTextures, 0);
+        EXPECT_EQ(scene->mNumLights, 1);
+        EXPECT_EQ(scene->mNumCameras, 1);
+
+        return true;
     }
 };
 
@@ -66,7 +78,18 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+        if (scene == nullptr)
+            return false;
+
+        // Expected number of items
+        EXPECT_EQ(scene->mNumMeshes, 1);
+        EXPECT_EQ(scene->mNumMaterials, 1);
+        EXPECT_EQ(scene->mNumAnimations, 0);
+        EXPECT_EQ(scene->mNumTextures, 1);
+        EXPECT_EQ(scene->mNumLights, 1);
+        EXPECT_EQ(scene->mNumCameras, 1);
+
+        return true;
     }
 };
 

@@ -183,11 +183,64 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
                 if (filepath == nullptr)
                     return std::string();
 
-                return std::string(filepath);
+                aiString ai_str(filepath);
+                ConvertPath(ai_str);
+
+                return std::string(ai_str.C_Str());
             }
         }
     }
     return std::string();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Convert a path read from a collada file to the usual representation
+void ColladaParser::ConvertPath(aiString& ss)
+{
+    // TODO: collada spec, p 22. Handle URI correctly.
+    // For the moment we're just stripping the file:// away to make it work.
+    // Windows doesn't seem to be able to find stuff like
+    // 'file://..\LWO\LWO2\MappingModes\earthSpherical.jpg'
+    if (0 == strncmp(ss.data, "file://", 7))
+    {
+        ss.length -= 7;
+        memmove(ss.data, ss.data + 7, ss.length);
+        ss.data[ss.length] = '\0';
+    }
+
+    // Maxon Cinema Collada Export writes "file:///C:\andsoon" with three slashes...
+    // I need to filter it without destroying linux paths starting with "/somewhere"
+#if defined( _MSC_VER )
+    if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
+#else
+    if (ss.data[0] == '/' && isalpha(ss.data[1]) && ss.data[2] == ':') {
+#endif
+        --ss.length;
+        ::memmove(ss.data, ss.data + 1, ss.length);
+        ss.data[ss.length] = 0;
+    }
+
+    // find and convert all %xy special chars
+    char* out = ss.data;
+    for (const char* it = ss.data; it != ss.data + ss.length; /**/)
+    {
+        if (*it == '%' && (it + 3) < ss.data + ss.length)
+        {
+            // separate the number to avoid dragging in chars from behind into the parsing
+            char mychar[3] = { it[1], it[2], 0 };
+            size_t nbr = strtoul16(mychar);
+            it += 3;
+            *out++ = (char)(nbr & 0xFF);
+        }
+        else
+        {
+            *out++ = *it++;
+        }
+    }
+
+    // adjust length and terminator of the shortened string
+    *out = 0;
+    ss.length = (ptrdiff_t)(out - ss.data);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1120,7 +1173,12 @@ void ColladaParser::ReadImage(Collada::Image& pImage)
                     if (!mReader->isEmptyElement()) {
                         // element content is filename - hopefully
                         const char* sz = TestTextContent();
-                        if (sz)pImage.mFileName = sz;
+                        if (sz)
+                        {
+                            aiString filepath(sz);
+                            ConvertPath(filepath);
+                            pImage.mFileName = filepath.C_Str();
+                        }
                         TestClosing("init_from");
                     }
                     if (!pImage.mFileName.length()) {
@@ -1153,7 +1211,12 @@ void ColladaParser::ReadImage(Collada::Image& pImage)
                 {
                     // element content is filename - hopefully
                     const char* sz = TestTextContent();
-                    if (sz)pImage.mFileName = sz;
+                    if (sz)
+                    {
+                        aiString filepath(sz);
+                        ConvertPath(filepath);
+                        pImage.mFileName = filepath.C_Str();
+                    }
                     TestClosing("ref");
                 }
                 else if (IsElement("hex") && !pImage.mFileName.length())

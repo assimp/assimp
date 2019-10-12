@@ -66,8 +66,10 @@ else()
     if(WIN32)
       # Handle MinGW compiler.
       set(sharedLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@@CMAKE_STATIC_LIBRARY_SUFFIX@")
+    elseif(APPLE)
+      set(sharedLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}.@ASSIMP_VERSION_MAJOR@@CMAKE_SHARED_LIBRARY_SUFFIX@")
     else()
-      set(sharedLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@.@ASSIMP_VERSION_MAJOR@")
+      set(sharedLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_SHARED_LIBRARY_SUFFIX@.@ASSIMP_VERSION_MAJOR@")
     endif()
     set_target_properties(assimp::assimp PROPERTIES
       IMPORTED_SONAME_RELEASE "${sharedLibraryName}"

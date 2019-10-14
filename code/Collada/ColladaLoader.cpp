@@ -1763,7 +1763,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParse
 
         //set default texture file name
         result.Set(name + ".jpg");
-        ColladaParser::ConvertPath(result);
+        ColladaParser::UriDecodePath(result);
         return result;
     }
 

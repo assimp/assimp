@@ -184,7 +184,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
                     return std::string();
 
                 aiString ai_str(filepath);
-                ConvertPath(ai_str);
+                UriDecodePath(ai_str);
 
                 return std::string(ai_str.C_Str());
             }
@@ -195,7 +195,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
 
 // ------------------------------------------------------------------------------------------------
 // Convert a path read from a collada file to the usual representation
-void ColladaParser::ConvertPath(aiString& ss)
+void ColladaParser::UriDecodePath(aiString& ss)
 {
     // TODO: collada spec, p 22. Handle URI correctly.
     // For the moment we're just stripping the file:// away to make it work.
@@ -1176,7 +1176,7 @@ void ColladaParser::ReadImage(Collada::Image& pImage)
                         if (sz)
                         {
                             aiString filepath(sz);
-                            ConvertPath(filepath);
+                            UriDecodePath(filepath);
                             pImage.mFileName = filepath.C_Str();
                         }
                         TestClosing("init_from");
@@ -1214,7 +1214,7 @@ void ColladaParser::ReadImage(Collada::Image& pImage)
                     if (sz)
                     {
                         aiString filepath(sz);
-                        ConvertPath(filepath);
+                        UriDecodePath(filepath);
                         pImage.mFileName = filepath.C_Str();
                     }
                     TestClosing("ref");

@@ -67,7 +67,7 @@ namespace Assimp
         friend class ColladaLoader;
 
         /** Converts a path read from a collada file to the usual representation */
-        static void ConvertPath(aiString& ss);
+        static void UriDecodePath(aiString& ss);
 
     protected:
         /** Map for generic metadata as aiString */

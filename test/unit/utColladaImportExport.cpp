@@ -58,12 +58,12 @@ public:
             return false;
 
         // Expected number of items
-        EXPECT_EQ(scene->mNumMeshes, 1);
-        EXPECT_EQ(scene->mNumMaterials, 1);
-        EXPECT_EQ(scene->mNumAnimations, 0);
-        EXPECT_EQ(scene->mNumTextures, 0);
-        EXPECT_EQ(scene->mNumLights, 1);
-        EXPECT_EQ(scene->mNumCameras, 1);
+        EXPECT_EQ(scene->mNumMeshes, 1u);
+        EXPECT_EQ(scene->mNumMaterials, 1u);
+        EXPECT_EQ(scene->mNumAnimations, 0u);
+        EXPECT_EQ(scene->mNumTextures, 0u);
+        EXPECT_EQ(scene->mNumLights, 1u);
+        EXPECT_EQ(scene->mNumCameras, 1u);
 
         return true;
     }
@@ -83,12 +83,12 @@ public:
                 return false;
 
             // Expected number of items
-            EXPECT_EQ(scene->mNumMeshes, 1);
-            EXPECT_EQ(scene->mNumMaterials, 1);
-            EXPECT_EQ(scene->mNumAnimations, 0);
-            EXPECT_EQ(scene->mNumTextures, 1);
-            EXPECT_EQ(scene->mNumLights, 1);
-            EXPECT_EQ(scene->mNumCameras, 1);
+            EXPECT_EQ(scene->mNumMeshes, 1u);
+            EXPECT_EQ(scene->mNumMaterials, 1u);
+            EXPECT_EQ(scene->mNumAnimations, 0u);
+            EXPECT_EQ(scene->mNumTextures, 1u);
+            EXPECT_EQ(scene->mNumLights, 1u);
+            EXPECT_EQ(scene->mNumCameras, 1u);
         }
 
         {
@@ -98,12 +98,12 @@ public:
                 return false;
 
             // Expected number of items
-            EXPECT_EQ(scene->mNumMeshes, 1);
-            EXPECT_EQ(scene->mNumMaterials, 1);
-            EXPECT_EQ(scene->mNumAnimations, 0);
-            EXPECT_EQ(scene->mNumTextures, 1);
-            EXPECT_EQ(scene->mNumLights, 1);
-            EXPECT_EQ(scene->mNumCameras, 1);
+            EXPECT_EQ(scene->mNumMeshes, 1u);
+            EXPECT_EQ(scene->mNumMaterials, 1u);
+            EXPECT_EQ(scene->mNumAnimations, 0u);
+            EXPECT_EQ(scene->mNumTextures, 1u);
+            EXPECT_EQ(scene->mNumLights, 1u);
+            EXPECT_EQ(scene->mNumCameras, 1u);
         }
 
         return true;

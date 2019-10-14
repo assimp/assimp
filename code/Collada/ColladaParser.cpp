@@ -240,7 +240,8 @@ void ColladaParser::UriDecodePath(aiString& ss)
 
     // adjust length and terminator of the shortened string
     *out = 0;
-    ss.length = (ptrdiff_t)(out - ss.data);
+    ai_assert(out > ss.data);
+    ss.length = static_cast<ai_uint32>(out - ss.data);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3119,7 +3120,7 @@ void ColladaParser::ReadMaterialVertexInputBinding(Collada::SemanticMappingTable
     }
 }
 
-void Assimp::ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem& zip_archive)
+void ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem& zip_archive)
 {
     // Attempt to load any undefined Collada::Image in ImageLibrary
     for (ImageLibrary::iterator it = mImageLibrary.begin(); it != mImageLibrary.end(); ++it) {

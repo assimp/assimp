@@ -140,7 +140,7 @@ namespace Assimp {
                 std::cout << "active node lookup: " << bone->mName.C_Str() << std::endl;
                 // lcl transform grab - done in generate_nodes :)
 
-                bone->mOffsetMatrix = bone_node->mTransformation;
+                //bone->mOffsetMatrix = bone_node->mTransformation;
                 aiNode * armature = GetArmatureRoot(bone_node, bones);
 
                 ai_assert(armature);
@@ -153,14 +153,11 @@ namespace Assimp {
                 bone->mNode = bone_node;
 
                 // apply full hierarchy to transform for basic offset
-                while( bone_node->mParent && bone_node->mParent != armature)
+                while( bone_node->mParent )
                 {
+                    bone->mRestMatrix = bone_node->mTransformation * bone->mRestMatrix;
                     bone_node = bone_node->mParent;
-                    bone->mOffsetMatrix = bone_node->mTransformation * bone->mOffsetMatrix;
                 }
-
-                // apply inverse and lcl scaling :)
-                bone->mOffsetMatrix = bone->mOffsetMatrix.Inverse();
             }
 
 
@@ -1789,8 +1786,10 @@ namespace Assimp {
                 bone->mName = bone_name;
 
                 // store local transform link for post processing
-                //bone->mOffsetMatrix = cl->TransformLink();
-//                bone->mOffsetMatrix.Inverse();
+                bone->mOffsetMatrix = cl->TransformLink();
+                bone->mOffsetMatrix.Inverse();
+
+                bone->mOffsetMatrix = bone->mOffsetMatrix *
 
 
                 //

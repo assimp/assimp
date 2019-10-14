@@ -53,7 +53,7 @@ class utColladaImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
         if (scene == nullptr)
             return false;
 
@@ -76,18 +76,35 @@ TEST_F(utColladaImportExport, importBlenFromFileTest) {
 class utColladaZaeImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
-        if (scene == nullptr)
-            return false;
+        {
+            Assimp::Importer importer;
+            const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
+            if (scene == nullptr)
+                return false;
 
-        // Expected number of items
-        EXPECT_EQ(scene->mNumMeshes, 1);
-        EXPECT_EQ(scene->mNumMaterials, 1);
-        EXPECT_EQ(scene->mNumAnimations, 0);
-        EXPECT_EQ(scene->mNumTextures, 1);
-        EXPECT_EQ(scene->mNumLights, 1);
-        EXPECT_EQ(scene->mNumCameras, 1);
+            // Expected number of items
+            EXPECT_EQ(scene->mNumMeshes, 1);
+            EXPECT_EQ(scene->mNumMaterials, 1);
+            EXPECT_EQ(scene->mNumAnimations, 0);
+            EXPECT_EQ(scene->mNumTextures, 1);
+            EXPECT_EQ(scene->mNumLights, 1);
+            EXPECT_EQ(scene->mNumCameras, 1);
+        }
+
+        {
+            Assimp::Importer importer;
+            const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck_nomanifest.zae", aiProcess_ValidateDataStructure);
+            if (scene == nullptr)
+                return false;
+
+            // Expected number of items
+            EXPECT_EQ(scene->mNumMeshes, 1);
+            EXPECT_EQ(scene->mNumMaterials, 1);
+            EXPECT_EQ(scene->mNumAnimations, 0);
+            EXPECT_EQ(scene->mNumTextures, 1);
+            EXPECT_EQ(scene->mNumLights, 1);
+            EXPECT_EQ(scene->mNumCameras, 1);
+        }
 
         return true;
     }

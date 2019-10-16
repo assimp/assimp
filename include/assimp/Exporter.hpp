@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -47,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #ifndef AI_EXPORT_HPP_INC
 #define AI_EXPORT_HPP_INC
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
@@ -190,7 +194,7 @@ public:
     * @note Use aiCopyScene() to get a modifiable copy of a previously
     *   imported scene. */
     const aiExportDataBlob* ExportToBlob(const aiScene* pScene, const char* pFormatId,
-        unsigned int pPreprocessing = 0u, const ExportProperties* = nullptr);
+        unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
     const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,
         unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -123,7 +123,7 @@ void SceneDiffer::showReport() {
         return;
     }
 
-    for ( std::vector<std::string>::iterator it = m_diffs.begin(); it != m_diffs.end(); it++ ) {
+    for ( std::vector<std::string>::iterator it = m_diffs.begin(); it != m_diffs.end(); ++it ) {
         std::cout << *it << "\n";
     }
 

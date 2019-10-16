@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -48,16 +48,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SCENE_H_INC
 #define AI_SCENE_H_INC
 
-#include "types.h"
-#include "texture.h"
-#include "mesh.h"
-#include "light.h"
-#include "camera.h"
-#include "material.h"
-#include "anim.h"
-#include "metadata.h"
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
+#include <assimp/types.h>
+#include <assimp/texture.h>
+#include <assimp/mesh.h>
+#include <assimp/light.h>
+#include <assimp/camera.h>
+#include <assimp/material.h>
+#include <assimp/anim.h>
+#include <assimp/metadata.h>
 
 #ifdef __cplusplus
+#  include <cstdlib>
 extern "C" {
 #endif
 
@@ -389,6 +394,14 @@ struct aiScene
 
     //! Returns an embedded texture
     const aiTexture* GetEmbeddedTexture(const char* filename) const {
+        // lookup using texture ID (if referenced like: "*1", "*2", etc.)
+        if ('*' == *filename) {
+            int index = std::atoi(filename + 1);
+            if (0 > index || mNumTextures <= static_cast<unsigned>(index))
+                return nullptr;
+            return mTextures[index];
+        }
+        // lookup using filename
         const char* shortFilename = GetShortFilename(filename);
         for (unsigned int i = 0; i < mNumTextures; i++) {
             const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());

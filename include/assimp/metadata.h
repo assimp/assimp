@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -47,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #ifndef AI_METADATA_H_INC
 #define AI_METADATA_H_INC
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1500)
 #  include "Compiler/pstdint.h"

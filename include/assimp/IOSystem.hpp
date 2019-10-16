@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -49,6 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #ifndef AI_IOSYSTEM_H_INC
 #define AI_IOSYSTEM_H_INC
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #ifndef __cplusplus
 #   error This header requires C++ to be used. aiFileIO.h is the \

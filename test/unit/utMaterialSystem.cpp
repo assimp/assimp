@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -43,13 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <MaterialSystem.h>
+#include "Material/MaterialSystem.h"
 
 using namespace ::std;
 using namespace ::Assimp;
 
-class MaterialSystemTest : public ::testing::Test
-{
+class MaterialSystemTest : public ::testing::Test {
 public:
     virtual void SetUp() { this->pcMat = new aiMaterial(); }
     virtual void TearDown() { delete this->pcMat; }

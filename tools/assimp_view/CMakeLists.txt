@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 # 
-# Copyright (c) 2006-2018, assimp team
+# Copyright (c) 2006-2019, assimp team
 
 
 # All rights reserved.
@@ -88,6 +88,8 @@ SET_PROPERTY(TARGET assimp_viewer PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 IF ( MSVC )
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+  # assimp_viewer is ANSI (MBCS) throughout
+  REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
 ENDIF ( MSVC )
 
 

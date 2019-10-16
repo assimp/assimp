@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2018, assimp team
+# Copyright (c) 2006-2019, assimp team
 
 
 # All rights reserved.
@@ -37,7 +37,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #----------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/contrib/gtest/include
@@ -81,6 +81,7 @@ SET( COMMON
 
 SET( IMPORTERS
   unit/utLWSImportExport.cpp
+  unit/utLWOImportExport.cpp
   unit/utSMDImportExport.cpp
   unit/utglTFImportExport.cpp
   unit/utglTF2ImportExport.cpp
@@ -119,10 +120,13 @@ SET( IMPORTERS
   unit/utB3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
+  unit/ImportExport/utAssjsonImportExport.cpp
   unit/ImportExport/utCOBImportExport.cpp
   unit/ImportExport/utOgreImportExport.cpp
   unit/ImportExport/utQ3BSPFileImportExport.cpp
   unit/ImportExport/utOFFImportExport.cpp
+  unit/ImportExport/utNFFImportExport.cpp
+  unit/ImportExport/utXGLImportExport.cpp
 )
 
 SET( MATERIAL
@@ -158,20 +162,21 @@ SET( POST_PROCESSES
   unit/utTargetAnimation.cpp
   unit/utSortByPType.cpp
   unit/utSceneCombiner.cpp
+  unit/utGenBoundingBoxesProcess.cpp
 )
 
 SOURCE_GROUP( UnitTests\\Compiler     FILES  unit/CCompilerTest.c )
-SOURCE_GROUP( UnitTests\\Common      FILES  ${COMMON} )
-SOURCE_GROUP( UnitTests\\Importers   FILES  ${IMPORTERS} )
-SOURCE_GROUP( UnitTests\\Material    FILES  ${MATERIAL} )
-SOURCE_GROUP( UnitTests\\Math        FILES  ${MATH} )
-SOURCE_GROUP( UnitTests\\PostProcess FILES  ${POST_PROCESSES})
+SOURCE_GROUP( UnitTests\\Common       FILES  ${COMMON} )
+SOURCE_GROUP( UnitTests\\ImportExport FILES  ${IMPORTERS} )
+SOURCE_GROUP( UnitTests\\Material     FILES  ${MATERIAL} )
+SOURCE_GROUP( UnitTests\\Math         FILES  ${MATH} )
+SOURCE_GROUP( UnitTests\\PostProcess  FILES  ${POST_PROCESSES})
 
 add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
-    ../code/Version.cpp
+    ../code/Common/Version.cpp
 	${COMMON}
 	${IMPORTERS}
 	${MATERIAL}

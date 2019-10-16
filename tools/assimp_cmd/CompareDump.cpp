@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -53,7 +53,7 @@ const char* AICMD_MSG_CMPDUMP_HELP =
 "\tCompare two short dumps produced with \'assimp dump <..> -s\' for equality.\n"
 ;
 
-#include "../../code/assbin_chunks.h"
+#include "Common/assbin_chunks.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "generic_inserter.hpp"
@@ -62,7 +62,7 @@ const char* AICMD_MSG_CMPDUMP_HELP =
 #include <stack>
 #include <sstream>
 #include <iostream>
-#include "../../include/assimp/ai_assert.h"
+#include <assimp/ai_assert.h>
 
 // get << for aiString
 template <typename char_t, typename traits_t>

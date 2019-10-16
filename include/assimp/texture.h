@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
-
-
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -53,12 +51,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_TEXTURE_H_INC
 #define AI_TEXTURE_H_INC
 
-#include "types.h"
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
+#include <assimp/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 // --------------------------------------------------------------------------------
 
@@ -79,7 +80,6 @@ extern "C" {
 #   define AI_MAKE_EMBEDDED_TEXNAME(_n_) AI_EMBEDDED_TEXNAME_PREFIX # _n_
 #endif
 
-
 #include "./Compiler/pushpack1.h"
 
 // --------------------------------------------------------------------------------
@@ -87,8 +87,7 @@ extern "C" {
 *
 *  Used by aiTexture.
 */
-struct aiTexel
-{
+struct aiTexel {
     unsigned char b,g,r,a;
 
 #ifdef __cplusplus
@@ -116,6 +115,8 @@ struct aiTexel
 } PACK_STRUCT;
 
 #include "./Compiler/poppack1.h"
+
+#define HINTMAXTEXTURELEN 9
 
 // --------------------------------------------------------------------------------
 /** Helper structure to describe an embedded texture
@@ -166,7 +167,7 @@ struct aiTexture {
      * E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
      * The fourth character will always be '\\0'.
      */
-    char achFormatHint[9];// 8 for string + 1 for terminator.
+    char achFormatHint[ HINTMAXTEXTURELEN ];// 8 for string + 1 for terminator.
 
     /** Data of the texture.
      *

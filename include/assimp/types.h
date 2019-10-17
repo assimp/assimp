@@ -48,6 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_TYPES_H_INC
 #define AI_TYPES_H_INC
 
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
 // Some runtime headers
 #include <sys/types.h>
 #include <stddef.h>
@@ -56,15 +60,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 
 // Our compile configuration
-#include "defs.h"
+#include <assimp/defs.h>
 
 // Some types moved to separate header due to size of operators
-#include "vector3.h"
-#include "vector2.h"
-#include "color4.h"
-#include "matrix3x3.h"
-#include "matrix4x4.h"
-#include "quaternion.h"
+#include <assimp/vector3.h>
+#include <assimp/vector2.h>
+#include <assimp/color4.h>
+#include <assimp/matrix3x3.h>
+#include <assimp/matrix4x4.h>
+#include <assimp/quaternion.h>
 
 typedef int32_t ai_int32;
 typedef uint32_t ai_uint32 ;
@@ -74,9 +78,8 @@ typedef uint32_t ai_uint32 ;
 #include <new>      // for std::nothrow_t
 #include <string>   // for aiString::Set(const std::string&)
 
-
 namespace Assimp    {
-    //! @cond never
+//! @cond never
 namespace Intern        {
     // --------------------------------------------------------------------
     /** @brief Internal helper class to utilize our internal new/delete

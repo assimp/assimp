@@ -72,17 +72,22 @@ void CompressBinaryDump(const char* file, unsigned int head_size) {
     }
 
     fseek(p,0,SEEK_END);
-	const uint32_t size = ftell(p);
-	fseek(p,0,SEEK_SET);
+	const long int size = ftell(p);
+    if (-1 == size) {
+        ::fclose(p);
+        return;
+    }
 
-	if (size<head_size) {
+	fseek(p,0,SEEK_SET);
+	if (static_cast<size_t>(size)<head_size) {
 		::fclose(p);
 		return;
 	}
 
-	uint8_t* data = new uint8_t[size];
+	uint8_t* data = new uint8_t[static_cast<size_t>(size)];
     size_t len = fread(data,1,size,p);
     if (0 == len) {
+        ::fclose(p);
         printf("Error reading file.\n");
         return;
     }
@@ -92,8 +97,10 @@ void CompressBinaryDump(const char* file, unsigned int head_size) {
 	uint8_t* out = new uint8_t[out_size];
 
 	int res = compress2(out,&out_size,data+head_size,uncompressed_size,9);
-	if(res != Z_OK)
-		fprintf(stderr, "compress2: error\n");
+    if (res != Z_OK) {
+        fprintf(stderr, "compress2: error\n");
+    }
+
 	fclose(p);
 	p = fopen(file,"w");
 
@@ -278,20 +285,24 @@ inline uint32_t WriteBounds(const T* in, unsigned int size)
 
 
 // -----------------------------------------------------------------------------------
-void ChangeInteger(uint32_t ofs,uint32_t n)
-{
+void ChangeInteger(uint32_t ofs,uint32_t n) {
 	const uint32_t cur = ftell(out);
     int retCode;
     retCode = fseek(out, ofs, SEEK_SET);
     ai_assert(0 == retCode);
+    if (-1 == retCode) {
+        return;
+    }
 	fwrite(&n, 4, 1, out);
     retCode = fseek(out, cur, SEEK_SET);
     ai_assert(0 == retCode);
+    if (-1 == retCode) {
+        return;
+    }
 }
 
 // -----------------------------------------------------------------------------------
-uint32_t WriteBinaryNode(const aiNode* node)
-{
+uint32_t WriteBinaryNode(const aiNode* node) {
 	uint32_t len = 0, old = WriteMagic(ASSBIN_CHUNK_AINODE);
 	len += Write<aiString>(node->mName);
 	len += Write<aiMatrix4x4>(node->mTransformation);
@@ -311,8 +322,7 @@ uint32_t WriteBinaryNode(const aiNode* node)
 }
 
 // -----------------------------------------------------------------------------------
-uint32_t WriteBinaryTexture(const aiTexture* tex)
-{
+uint32_t WriteBinaryTexture(const aiTexture* tex) {
 	uint32_t len = 0, old = WriteMagic(ASSBIN_CHUNK_AITEXTURE);
 
 	len += Write<unsigned int>(tex->mWidth);

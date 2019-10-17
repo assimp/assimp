@@ -248,10 +248,8 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 
 // ------------------------------------------------------------------------------------------------
 // Check whether we're still inside the valid file range
-void MDLImporter::SizeCheck(const void* szPos)
-{
-    if (!szPos || (const unsigned char*)szPos > this->mBuffer + this->iFileSize)
-    {
+void MDLImporter::SizeCheck(const void* szPos) {
+    if (!szPos || (const unsigned char*)szPos > this->mBuffer + this->iFileSize) {
         throw DeadlyImportError("Invalid MDL file. The file is too small "
             "or contains invalid data.");
     }
@@ -259,11 +257,10 @@ void MDLImporter::SizeCheck(const void* szPos)
 
 // ------------------------------------------------------------------------------------------------
 // Just for debugging purposes
-void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int iLine)
-{
-    ai_assert(NULL != szFile);
-    if (!szPos || (const unsigned char*)szPos > mBuffer + iFileSize)
-    {
+void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int iLine) {
+    ai_assert(nullptr != szFile);
+
+    if (nullptr == szFile || !szPos || (const unsigned char*)szPos > mBuffer + iFileSize) {
         // remove a directory if there is one
         const char* szFilePtr = ::strrchr(szFile,'\\');
         if (!szFilePtr) {
@@ -285,14 +282,17 @@ void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int 
 void MDLImporter::ValidateHeader_Quake1(const MDL::Header* pcHeader)
 {
     // some values may not be NULL
-    if (!pcHeader->num_frames)
-        throw DeadlyImportError( "[Quake 1 MDL] There are no frames in the file");
+    if (!pcHeader->num_frames) {
+        throw DeadlyImportError("[Quake 1 MDL] There are no frames in the file");
+    }
+     
+    if (!pcHeader->num_verts) {
+        throw DeadlyImportError("[Quake 1 MDL] There are no vertices in the file");
+    }
 
-    if (!pcHeader->num_verts)
-        throw DeadlyImportError( "[Quake 1 MDL] There are no vertices in the file");
-
-    if (!pcHeader->num_tris)
-        throw DeadlyImportError( "[Quake 1 MDL] There are no triangles in the file");
+    if (!pcHeader->num_tris) {
+        throw DeadlyImportError("[Quake 1 MDL] There are no triangles in the file");
+    }
 
     // check whether the maxima are exceeded ...however, this applies for Quake 1 MDLs only
     if (!this->iGSFileVersion)

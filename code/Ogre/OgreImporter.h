@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#pragma once
 #ifndef AI_OGREIMPORTER_H_INC
 #define AI_OGREIMPORTER_H_INC
 
@@ -64,6 +65,12 @@ namespace Ogre
 class OgreImporter : public BaseImporter
 {
 public:
+    //  The class construtr.
+    OgreImporter();
+
+    // The class destructor.
+    ~OgreImporter();
+
     /// BaseImporter override.
     virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
 
@@ -95,6 +102,7 @@ private:
 
     std::map<aiTextureType, unsigned int> m_textures;
 };
+
 } // Ogre
 } // Assimp
 

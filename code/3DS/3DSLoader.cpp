@@ -709,10 +709,11 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
             mLastNodeIndex++;
         }
         else if(hierarchy >= mLastNodeIndex)    {
-
-            // place it at the current position in the hierarchy
-            mCurrentNode->push_back(pcNode);
-            mLastNodeIndex = hierarchy;
+            if (nullptr != mCurrentNode) {
+                // place it at the current position in the hierarchy
+                mCurrentNode->push_back(pcNode);
+                mLastNodeIndex = hierarchy;
+            }
         }
         else    {
             // need to go back to the specified position in the hierarchy.
@@ -1378,6 +1379,7 @@ void Discreet3DSImporter::ParseColorChunk( aiColor3D* out, bool acceptPercent )
     {
     case Discreet3DS::CHUNK_LINRGBF:
         bGamma = true;
+        break;
 
     case Discreet3DS::CHUNK_RGBF:
         if (sizeof(float) * 3 > diff)   {
@@ -1391,6 +1393,7 @@ void Discreet3DSImporter::ParseColorChunk( aiColor3D* out, bool acceptPercent )
 
     case Discreet3DS::CHUNK_LINRGBB:
         bGamma = true;
+        break;
     case Discreet3DS::CHUNK_RGBB:
         {
             if ( sizeof( char ) * 3 > diff ) {

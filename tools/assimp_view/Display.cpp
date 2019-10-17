@@ -267,15 +267,16 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
 
 //-------------------------------------------------------------------------------
 // Replace the currently selected texture by another one
-int CDisplay::ReplaceCurrentTexture(const char* szPath)
-{
-    ai_assert(NULL != szPath);
+int CDisplay::ReplaceCurrentTexture(const char* szPath) {
+    if (nullptr == szPath) {
+        return -1;
+    }
 
     // well ... try to load it
-    IDirect3DTexture9* piTexture = NULL;
+    IDirect3DTexture9* piTexture = nullptr;
     aiString szString;
     strcpy(szString.data,szPath);
-    szString.length = strlen(szPath);
+    szString.length = (ai_uint32) strlen(szPath);
     CMaterialManager::Instance().LoadTexture(&piTexture,&szString);
 
     if (!piTexture) {

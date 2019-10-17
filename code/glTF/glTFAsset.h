@@ -888,7 +888,17 @@ namespace glTF
         float falloffAngle;
         float falloffExponent;
 
-        Light() {}
+        Light()
+        : type( Type_undefined )
+        , color()
+        , distance(0.f)
+        , constantAttenuation(0.f)
+        , linearAttenuation(0.f)
+        , quadraticAttenuation(0.f)
+        , falloffAngle(0.f)
+        , falloffExponent(0.f) {
+            // empty
+        }
         void Read(Value& obj, Asset& r);
 
         void SetDefaults();

@@ -318,14 +318,21 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* specialization for aiString (it needs separate handling because its on-disk representation
  * differs from its binary representation in memory and can't be treated as an array of n T's.*/
-template <> void comparer_context :: read<aiString>(aiString& filla,aiString& fille) {
-    uint32_t lena,lene;
-    read(lena,lene);
+template <> 
+inline
+void comparer_context::read<aiString>(aiString& filla,aiString& fille) {
+    uint32_t lena(0),lene(0);
+    read(lena, lene);
 
-    if(lena && 1 != fread(&filla.data,lena,1,actual)) {
+    if (0 == lena || lena > 1) {
+        return;
+    }
+
+    if(1 != fread(&filla.data, lena, 1, actual)) {
         EOFActual();
     }
-    if(lene && 1 != fread(&fille.data,lene,1,expect)) {
+
+    if(lene && 1 != fread(&fille.data, lene, 1, expect)) {
         EOFExpect();
     }
 

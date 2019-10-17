@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -61,7 +60,7 @@ namespace Assimp{
 
 class B3DImporter : public BaseImporter{
 public:
-    B3DImporter() = default;
+    B3DImporter();
     virtual ~B3DImporter();
 
     virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
@@ -72,7 +71,6 @@ protected:
     virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 
 private:
-
     int ReadByte();
     int ReadInt();
     float ReadFloat();
@@ -113,7 +111,6 @@ private:
     void ReadBB3D( aiScene *scene );
 
     unsigned _pos;
-//  unsigned _size;
     std::vector<unsigned char> _buf;
     std::vector<unsigned> _stack;
 

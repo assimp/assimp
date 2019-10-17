@@ -457,11 +457,15 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
 
     // read vertex count
     unsigned int numVertices = ReadInt();
+    if (0 == numVertices) {
+        return;
+    }
     pMesh->mPositions.resize( numVertices);
 
     // read vertices
-    for( unsigned int a = 0; a < numVertices; a++)
+    for (unsigned int a = 0; a < numVertices; ++a ) {
         pMesh->mPositions[a] = ReadVector3();
+    }
 
     // read position faces
     unsigned int numPosFaces = ReadInt();
@@ -534,18 +538,23 @@ void XFileParser::ParseDataObjectSkinWeights( Mesh *pMesh) {
 
     // read vertex weights
     unsigned int numWeights = ReadInt();
+    if ( 0 == numWeights ) {
+        CheckForSemicolon();
+        CheckForClosingBrace();
+        return;
+    }
     bone.mWeights.reserve( numWeights);
 
-    for( unsigned int a = 0; a < numWeights; a++)
-    {
+    for( unsigned int a = 0; a < numWeights; ++a ) {
         BoneWeight weight;
         weight.mVertex = ReadInt();
         bone.mWeights.push_back( weight);
     }
 
     // read vertex weights
-    for( unsigned int a = 0; a < numWeights; a++)
+    for (unsigned int a = 0; a < numWeights; ++a ) {
         bone.mWeights[a].mWeight = ReadFloat();
+    }
 
     // read matrix offset
     bone.mOffsetMatrix.a1 = ReadFloat(); bone.mOffsetMatrix.b1 = ReadFloat();
@@ -562,8 +571,7 @@ void XFileParser::ParseDataObjectSkinWeights( Mesh *pMesh) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void XFileParser::ParseDataObjectSkinMeshHeader( Mesh* /*pMesh*/ )
-{
+void XFileParser::ParseDataObjectSkinMeshHeader( Mesh* /*pMesh*/ ) {
     readHeadOfDataObject();
 
     /*unsigned int maxSkinWeightsPerVertex =*/ ReadInt();
@@ -580,11 +588,13 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
 
     // read count
     unsigned int numNormals = ReadInt();
-    pMesh->mNormals.resize( numNormals);
+    if (numNormals > 0) {
+        pMesh->mNormals.resize(numNormals);
 
-    // read normal vectors
-    for( unsigned int a = 0; a < numNormals; ++a) {
-        pMesh->mNormals[a] = ReadVector3();
+        // read normal vectors
+        for (unsigned int a = 0; a < numNormals; ++a) {
+            pMesh->mNormals[a] = ReadVector3();
+        }
     }
 
     // read normal indices
@@ -593,7 +603,7 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
         ThrowException( "Normal face count does not match vertex face count.");
     }
 
-    // do not crah when no face definitions are there
+    // do not crash when no face definitions are there
     if (numFaces > 0) {
         // normal face creation
         pMesh->mNormFaces.resize( numFaces );
@@ -866,10 +876,13 @@ void XFileParser::ParseDataObjectAnimationKey( AnimBone* pAnimBone)
     unsigned int keyType = ReadInt();
 
     // read number of keys
-    unsigned int numKeys = ReadInt();
+    unsigned int numKeys = ReadInt(); 
+    if (0 == numKeys) {
+        CheckForClosingBrace();
+        return;
+    }
 
-    for( unsigned int a = 0; a < numKeys; a++)
-    {
+    for( unsigned int a = 0; a < numKeys; ++a ) {
         // read time
         unsigned int time = ReadInt();
 
@@ -879,8 +892,9 @@ void XFileParser::ParseDataObjectAnimationKey( AnimBone* pAnimBone)
             case 0: // rotation quaternion
             {
                 // read count
-                if( ReadInt() != 4)
-                    ThrowException( "Invalid number of arguments for quaternion key in animation");
+                if (ReadInt() != 4) {
+                    ThrowException("Invalid number of arguments for quaternion key in animation");
+                }
 
                 aiQuatKey key;
                 key.mTime = double( time);

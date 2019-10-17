@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include <stdlib.h>
@@ -56,33 +53,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp    {
 
 // Material specific token (case insensitive compare)
-static const std::string DiffuseTexture       = "map_Kd";
-static const std::string AmbientTexture       = "map_Ka";
-static const std::string SpecularTexture      = "map_Ks";
-static const std::string OpacityTexture       = "map_d";
-static const std::string EmissiveTexture1     = "map_emissive";
-static const std::string EmissiveTexture2     = "map_Ke";
-static const std::string BumpTexture1         = "map_bump";
-static const std::string BumpTexture2         = "bump";
-static const std::string NormalTexture        = "map_Kn";
-static const std::string ReflectionTexture    = "refl";
-static const std::string DisplacementTexture1 = "map_disp";
-static const std::string DisplacementTexture2 = "disp";
-static const std::string SpecularityTexture   = "map_ns";
+static const char *DiffuseTexture       = "map_Kd";
+static const char *AmbientTexture       = "map_Ka";
+static const char *SpecularTexture      = "map_Ks";
+static const char *OpacityTexture       = "map_d";
+static const char *EmissiveTexture1     = "map_emissive";
+static const char *EmissiveTexture2     = "map_Ke";
+static const char *BumpTexture1         = "map_bump";
+static const char *BumpTexture2         = "bump";
+static const char *NormalTexture        = "map_Kn";
+static const char *ReflectionTexture    = "refl";
+static const char *DisplacementTexture1 = "map_disp";
+static const char *DisplacementTexture2 = "disp";
+static const char *SpecularityTexture   = "map_ns";
 
 // texture option specific token
-static const std::string BlendUOption       = "-blendu";
-static const std::string BlendVOption       = "-blendv";
-static const std::string BoostOption        = "-boost";
-static const std::string ModifyMapOption    = "-mm";
-static const std::string OffsetOption       = "-o";
-static const std::string ScaleOption        = "-s";
-static const std::string TurbulenceOption   = "-t";
-static const std::string ResolutionOption   = "-texres";
-static const std::string ClampOption        = "-clamp";
-static const std::string BumpOption         = "-bm";
-static const std::string ChannelOption      = "-imfchan";
-static const std::string TypeOption         = "-type";
+static const char *BlendUOption       = "-blendu";
+static const char *BlendVOption       = "-blendv";
+static const char *BoostOption        = "-boost";
+static const char *ModifyMapOption    = "-mm";
+static const char *OffsetOption       = "-o";
+static const char *ScaleOption        = "-s";
+static const char *TurbulenceOption   = "-t";
+static const char *ResolutionOption   = "-texres";
+static const char *ClampOption        = "-clamp";
+static const char *BumpOption         = "-bm";
+static const char *ChannelOption      = "-imfchan";
+static const char *TypeOption         = "-type";
 
 // -------------------------------------------------------------------
 //  Constructor
@@ -108,20 +105,6 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 ObjFileMtlImporter::~ObjFileMtlImporter()
 {
     // empty
-}
-
-// -------------------------------------------------------------------
-//  Private copy constructor
-ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter & )
-{
-    // empty
-}
-
-// -------------------------------------------------------------------
-//  Private copy constructor
-ObjFileMtlImporter &ObjFileMtlImporter::operator = ( const ObjFileMtlImporter & )
-{
-    return *this;
 }
 
 // -------------------------------------------------------------------
@@ -320,46 +303,46 @@ void ObjFileMtlImporter::getTexture() {
     int clampIndex = -1;
 
     const char *pPtr( &(*m_DataIt) );
-    if ( !ASSIMP_strincmp( pPtr, DiffuseTexture.c_str(), static_cast<unsigned int>(DiffuseTexture.size()) ) ) {
+    if ( !ASSIMP_strincmp( pPtr, DiffuseTexture, strlen( DiffuseTexture ) ) ) {
         // Diffuse texture
         out = & m_pModel->m_pCurrentMaterial->texture;
         clampIndex = ObjFile::Material::TextureDiffuseType;
-    } else if ( !ASSIMP_strincmp( pPtr,AmbientTexture.c_str(), static_cast<unsigned int>(AmbientTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr,AmbientTexture, strlen( AmbientTexture ) ) ) {
         // Ambient texture
         out = & m_pModel->m_pCurrentMaterial->textureAmbient;
         clampIndex = ObjFile::Material::TextureAmbientType;
-    } else if ( !ASSIMP_strincmp( pPtr, SpecularTexture.c_str(), static_cast<unsigned int>(SpecularTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, SpecularTexture, strlen(SpecularTexture ) ) ) {
         // Specular texture
         out = & m_pModel->m_pCurrentMaterial->textureSpecular;
         clampIndex = ObjFile::Material::TextureSpecularType;
-    } else if ( !ASSIMP_strincmp( pPtr, DisplacementTexture1.c_str(), static_cast<unsigned int>(DisplacementTexture1.size()) ) ||
-                !ASSIMP_strincmp( pPtr, DisplacementTexture2.c_str(), static_cast<unsigned int>(DisplacementTexture2.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, DisplacementTexture1, strlen( DisplacementTexture1 ) ) ||
+                !ASSIMP_strincmp( pPtr, DisplacementTexture2, strlen( DisplacementTexture2 ) ) ) {
         // Displacement texture
         out = &m_pModel->m_pCurrentMaterial->textureDisp;
         clampIndex = ObjFile::Material::TextureDispType;
-    } else if ( !ASSIMP_strincmp( pPtr, OpacityTexture.c_str(), static_cast<unsigned int>(OpacityTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, OpacityTexture, strlen(OpacityTexture ) ) ) {
         // Opacity texture
         out = & m_pModel->m_pCurrentMaterial->textureOpacity;
         clampIndex = ObjFile::Material::TextureOpacityType;
-    } else if ( !ASSIMP_strincmp( pPtr, EmissiveTexture1.c_str(), static_cast<unsigned int>(EmissiveTexture1.size()) ) ||
-                !ASSIMP_strincmp( pPtr, EmissiveTexture2.c_str(), static_cast<unsigned int>(EmissiveTexture2.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, EmissiveTexture1, strlen( EmissiveTexture1 ) ) ||
+                !ASSIMP_strincmp( pPtr, EmissiveTexture2, strlen( EmissiveTexture2 ) ) ) {
         // Emissive texture
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
-    } else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), static_cast<unsigned int>(BumpTexture1.size()) ) ||
-                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), static_cast<unsigned int>(BumpTexture2.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, BumpTexture1, strlen(BumpTexture1 ) ) ||
+                !ASSIMP_strincmp( pPtr, BumpTexture2, strlen(BumpTexture2 ) ) ) {
         // Bump texture
         out = & m_pModel->m_pCurrentMaterial->textureBump;
         clampIndex = ObjFile::Material::TextureBumpType;
-    } else if ( !ASSIMP_strincmp( pPtr,NormalTexture.c_str(), static_cast<unsigned int>(NormalTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr,NormalTexture, strlen( NormalTexture ) ) ) {
         // Normal map
         out = & m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;
-    } else if( !ASSIMP_strincmp( pPtr, ReflectionTexture.c_str(), static_cast<unsigned int>(ReflectionTexture.size()) ) ) {
+    } else if( !ASSIMP_strincmp( pPtr, ReflectionTexture, strlen(ReflectionTexture ) ) ) {
         // Reflection texture(s)
         //Do nothing here
         return;
-    } else if ( !ASSIMP_strincmp( pPtr, SpecularityTexture.c_str(), static_cast<unsigned int>(SpecularityTexture.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, SpecularityTexture, strlen( SpecularityTexture ) ) ) {
         // Specularity scaling (glossiness)
         out = & m_pModel->m_pCurrentMaterial->textureSpecularity;
         clampIndex = ObjFile::Material::TextureSpecularityType;
@@ -374,7 +357,7 @@ void ObjFileMtlImporter::getTexture() {
 
     std::string texture;
     m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, texture );
-    if ( NULL!=out ) {
+    if ( nullptr != out ) {
         out->Set( texture );
     }
 }
@@ -398,90 +381,65 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 
     // If there is any more texture option
-    while (!isEndOfBuffer(m_DataIt, m_DataItEnd) && *m_DataIt == '-')
-    {
+    while (!isEndOfBuffer(m_DataIt, m_DataItEnd) && *m_DataIt == '-') {
         const char *pPtr( &(*m_DataIt) );
         //skip option key and value
         int skipToken = 1;
 
-        if (!ASSIMP_strincmp(pPtr, ClampOption.c_str(), static_cast<unsigned int>(ClampOption.size())))
-        {
+        if (!ASSIMP_strincmp(pPtr, ClampOption, strlen( ClampOption ))) {
             DataArrayIt it = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
             char value[3];
             CopyNextWord(it, m_DataItEnd, value, sizeof(value) / sizeof(*value));
-            if (!ASSIMP_strincmp(value, "on", 2))
-            {
+            if (!ASSIMP_strincmp(value, "on", 2)) {
                 clamp = true;
             }
 
             skipToken = 2;
-        }
-        else if( !ASSIMP_strincmp( pPtr, TypeOption.c_str(), static_cast<unsigned int>(TypeOption.size()) ) )
-        {
+        } else if( !ASSIMP_strincmp( pPtr, TypeOption, strlen( TypeOption ) ) ) {
             DataArrayIt it = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
             char value[ 12 ];
             CopyNextWord( it, m_DataItEnd, value, sizeof( value ) / sizeof( *value ) );
-            if( !ASSIMP_strincmp( value, "cube_top", 8 ) )
-            {
+            if( !ASSIMP_strincmp( value, "cube_top", 8 ) ) {
                 clampIndex = ObjFile::Material::TextureReflectionCubeTopType;
-                out = &m_pModel->m_pCurrentMaterial->textureReflection[0];
-            }
-            else if( !ASSIMP_strincmp( value, "cube_bottom", 11 ) )
-            {
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[ 0];
+            } else if( !ASSIMP_strincmp( value, "cube_bottom", 11 ) ) { 
                 clampIndex = ObjFile::Material::TextureReflectionCubeBottomType;
-                out = &m_pModel->m_pCurrentMaterial->textureReflection[1];
-            }
-            else if( !ASSIMP_strincmp( value, "cube_front", 10 ) )
-            {
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[ 1 ];
+            } else if( !ASSIMP_strincmp( value, "cube_front", 10 ) ) {
                 clampIndex = ObjFile::Material::TextureReflectionCubeFrontType;
                 out = &m_pModel->m_pCurrentMaterial->textureReflection[2];
-            }
-            else if( !ASSIMP_strincmp( value, "cube_back", 9 ) )
-            {
+            } else if( !ASSIMP_strincmp( value, "cube_back", 9 ) ) {
                 clampIndex = ObjFile::Material::TextureReflectionCubeBackType;
                 out = &m_pModel->m_pCurrentMaterial->textureReflection[3];
-            }
-            else if( !ASSIMP_strincmp( value, "cube_left", 9 ) )
-            {
+            } else if( !ASSIMP_strincmp( value, "cube_left", 9 ) ) {
                 clampIndex = ObjFile::Material::TextureReflectionCubeLeftType;
                 out = &m_pModel->m_pCurrentMaterial->textureReflection[4];
-            }
-            else if( !ASSIMP_strincmp( value, "cube_right", 10 ) )
-            {
+            } else if( !ASSIMP_strincmp( value, "cube_right", 10 ) ) {
                 clampIndex = ObjFile::Material::TextureReflectionCubeRightType;
                 out = &m_pModel->m_pCurrentMaterial->textureReflection[5];
-            }
-            else if( !ASSIMP_strincmp( value, "sphere", 6 ) )
-            {
+            } else if( !ASSIMP_strincmp( value, "sphere", 6 ) ) {
                 clampIndex = ObjFile::Material::TextureReflectionSphereType;
                 out = &m_pModel->m_pCurrentMaterial->textureReflection[0];
             }
 
             skipToken = 2;
-        }
-        else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size()))
-                || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size()))
-                || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size()))
-                || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size()))
-                || !ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size()))
-                || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size())))
-        {
+        } else if (!ASSIMP_strincmp(pPtr, BlendUOption, strlen(BlendUOption))
+                || !ASSIMP_strincmp(pPtr, BlendVOption, strlen(BlendVOption))
+                || !ASSIMP_strincmp(pPtr, BoostOption, strlen(BoostOption))
+                || !ASSIMP_strincmp(pPtr, ResolutionOption, strlen(ResolutionOption))
+                || !ASSIMP_strincmp(pPtr, BumpOption, strlen(BumpOption))
+                || !ASSIMP_strincmp(pPtr, ChannelOption, strlen(ChannelOption))) {
             skipToken = 2;
-        }
-        else if (!ASSIMP_strincmp(pPtr, ModifyMapOption.c_str(), static_cast<unsigned int>(ModifyMapOption.size())))
-        {
+        } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption, strlen(ModifyMapOption))) {
             skipToken = 3;
-        }
-        else if (  !ASSIMP_strincmp(pPtr, OffsetOption.c_str(), static_cast<unsigned int>(OffsetOption.size()))
-                || !ASSIMP_strincmp(pPtr, ScaleOption.c_str(), static_cast<unsigned int>(ScaleOption.size()))
-                || !ASSIMP_strincmp(pPtr, TurbulenceOption.c_str(), static_cast<unsigned int>(TurbulenceOption.size()))
-                )
-        {
+        } else if (  !ASSIMP_strincmp(pPtr, OffsetOption, strlen(OffsetOption ))
+                || !ASSIMP_strincmp(pPtr, ScaleOption, strlen( ScaleOption ))
+                || !ASSIMP_strincmp(pPtr, TurbulenceOption, strlen(TurbulenceOption))
+                ) {
             skipToken = 4;
         }
 
-        for (int i = 0; i < skipToken; ++i)
-        {
+        for (int i = 0; i < skipToken; ++i) {
             m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
         }
     }

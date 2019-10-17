@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -79,6 +77,19 @@ static const aiImporterDesc desc = {
     0,
     "assbin"
 };
+
+// -----------------------------------------------------------------------------------
+AssbinImporter::AssbinImporter()
+: BaseImporter()
+, shortened(false)
+, compressed(false) {
+    // empty
+}
+
+// -----------------------------------------------------------------------------------
+AssbinImporter::~AssbinImporter() {
+    // empty
+}
 
 // -----------------------------------------------------------------------------------
 const aiImporterDesc* AssbinImporter::GetInfo() const {

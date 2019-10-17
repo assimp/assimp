@@ -6,7 +6,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#pragma once
 #ifndef AI_COLLADAHELPER_H_INC
 #define AI_COLLADAHELPER_H_INC
 
@@ -58,8 +58,7 @@ namespace Assimp    {
 namespace Collada       {
 
 /** Collada file versions which evolved during the years ... */
-enum FormatVersion
-{
+enum FormatVersion {
     FV_1_5_n,
     FV_1_4_n,
     FV_1_3_n
@@ -128,7 +127,7 @@ struct Camera
     // Name of camera
     std::string mName;
 
-    // True if it is an orthografic camera
+    // True if it is an orthographic camera
     bool mOrtho;
 
     //! Horizontal field of view in degrees

@@ -62,10 +62,20 @@ static const aiImporterDesc desc = {
     "mesh mesh.xml"
 };
 
-namespace Assimp
-{
-namespace Ogre
-{
+namespace Assimp {
+namespace Ogre {
+
+OgreImporter::OgreImporter()
+: BaseImporter()
+, m_userDefinedMaterialLibFile()
+, m_detectTextureTypeFromFilename(true)
+, m_textures() {
+    // empty
+}
+
+OgreImporter::~OgreImporter() {
+    // empty
+}
 
 const aiImporterDesc* OgreImporter::GetInfo() const
 {

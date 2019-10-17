@@ -761,7 +761,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
     }
     else if (iMasked || !iType)
     {
-        if (iMasked || !iType || (iType && iWidth && iHeight))
+        if (iType && iWidth && iHeight)
         {
             // ParseTextureColorData(..., aiTexture::pcData == bad_texel) will simply
             // return the size of the color data in bytes in iSkip

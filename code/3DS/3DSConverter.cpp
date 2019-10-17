@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -61,8 +59,7 @@ static const unsigned int NotSet = 0xcdcdcdcd;
 
 // ------------------------------------------------------------------------------------------------
 // Setup final material indices, generae a default material if necessary
-void Discreet3DSImporter::ReplaceDefaultMaterial()
-{
+void Discreet3DSImporter::ReplaceDefaultMaterial() {
     // Try to find an existing material that matches the
     // typical default material setting:
     // - no textures
@@ -276,18 +273,17 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
     mat.AddProperty<ai_real>( &oldMat.mBumpHeight,1,AI_MATKEY_BUMPSCALING);
 
     // Two sided rendering?
-    if (oldMat.mTwoSided)
-    {
+    if (oldMat.mTwoSided) {
         int i = 1;
         mat.AddProperty<int>(&i,1,AI_MATKEY_TWOSIDED);
     }
 
     // Shading mode
     aiShadingMode eShading = aiShadingMode_NoShading;
-    switch (oldMat.mShading)
-    {
+    switch (oldMat.mShading) {
         case D3DS::Discreet3DS::Flat:
-            eShading = aiShadingMode_Flat; break;
+            eShading = aiShadingMode_Flat;
+            break;
 
         // I don't know what "Wire" shading should be,
         // assume it is simple lambertian diffuse shading
@@ -297,22 +293,30 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
                 unsigned int iWire = 1;
                 mat.AddProperty<int>( (int*)&iWire,1,AI_MATKEY_ENABLE_WIREFRAME);
             }
+            break;
 
         case D3DS::Discreet3DS::Gouraud:
-            eShading = aiShadingMode_Gouraud; break;
+            eShading = aiShadingMode_Gouraud;
+            break;
 
         // assume cook-torrance shading for metals.
         case D3DS::Discreet3DS::Phong :
-            eShading = aiShadingMode_Phong; break;
+            eShading = aiShadingMode_Phong;
+            break;
 
         case D3DS::Discreet3DS::Metal :
-            eShading = aiShadingMode_CookTorrance; break;
+            eShading = aiShadingMode_CookTorrance;
+            break;
 
             // FIX to workaround a warning with GCC 4 who complained
             // about a missing case Blinn: here - Blinn isn't a valid
             // value in the 3DS Loader, it is just needed for ASE
         case D3DS::Discreet3DS::Blinn :
-            eShading = aiShadingMode_Blinn; break;
+            eShading = aiShadingMode_Blinn;
+            break;
+
+        default:
+            break;
     }
     int eShading_ = static_cast<int>(eShading);
     mat.AddProperty<int>(&eShading_, 1, AI_MATKEY_SHADING_MODEL);

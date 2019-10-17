@@ -140,6 +140,8 @@ namespace o3dgc
                             Vec3(T x, T y, T z);
                             Vec3(const Vec3 & rhs);
                             ~Vec3(void);
+                            Vec3(Vec3&&);
+        Vec3& operator= (Vec3&&);
 
     private:
         T                    m_data[3];
@@ -174,6 +176,8 @@ namespace o3dgc
                             Vec2(T x, T y);
                             Vec2(const Vec2 & rhs);
                             ~Vec2(void);
+        Vec2(Vec2&&) = delete;
+        Vec2& operator= (Vec2&&) = delete;
 
     private:
         T                   m_data[2];

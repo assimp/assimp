@@ -181,6 +181,23 @@ namespace o3dgc
     inline Vec3<T>::Vec3() {}
     
     template <typename T>
+    inline Vec3<T>::Vec3(Vec3 &&rhs)
+    {
+        m_data[0] = std::move(rhs.m_data[0]);
+        m_data[1] = std::move(rhs.m_data[1]);
+        m_data[2] = std::move(rhs.m_data[2]);
+    } 
+
+    template <typename T>
+    inline Vec3<T>& Vec3<T>::operator= (Vec3<T>&& rhs)
+    {
+        m_data[0] = std::move(rhs.m_data[0]);
+        m_data[1] = std::move(rhs.m_data[1]);
+        m_data[2] = std::move(rhs.m_data[2]);
+        return *this;
+    }
+
+    template <typename T>
     inline Vec2<T> operator*(T lhs, const Vec2<T> & rhs)
     {
         return Vec2<T>(lhs * rhs.X(), lhs * rhs.Y());

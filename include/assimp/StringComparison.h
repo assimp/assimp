@@ -182,9 +182,9 @@ int ASSIMP_stricmp(const std::string& a, const std::string& b) {
  *  @return 0 if the given strings are identical
  */
 AI_FORCE_INLINE
-int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n) {
-    ai_assert( NULL != s1 );
-    ai_assert( NULL != s2 );
+int ASSIMP_strincmp(const char *s1, const char *s2, size_t n) {
+    ai_assert( nullptr != s1 );
+    ai_assert( nullptr != s2 );
     if ( !n ) {
         return 0;
     }
@@ -200,18 +200,17 @@ int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n) {
 #else
     char c1, c2;
     unsigned int p = 0;
-    do
-    {
-        if (p++ >= n)return 0;
+    do {
+        if (p++ >= n) {
+            return 0;
+        }
         c1 = tolower(*s1++);
         c2 = tolower(*s2++);
-    }
-    while ( c1 && (c1 == c2) );
+    } while ( c1 && (c1 == c2) );
 
     return c1 - c2;
 #endif
 }
-
 
 // -------------------------------------------------------------------------------
 /** @brief Evaluates an integer power

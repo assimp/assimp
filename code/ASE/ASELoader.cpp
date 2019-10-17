@@ -883,11 +883,14 @@ void ASEImporter::ConvertMaterial(ASE::Material& mat)
     switch (mat.mShading)
     {
         case D3DS::Discreet3DS::Flat:
-            eShading = aiShadingMode_Flat; break;
+            eShading = aiShadingMode_Flat;
+            break;
         case D3DS::Discreet3DS::Phong :
-            eShading = aiShadingMode_Phong; break;
+            eShading = aiShadingMode_Phong;
+            break;
         case D3DS::Discreet3DS::Blinn :
-            eShading = aiShadingMode_Blinn; break;
+            eShading = aiShadingMode_Blinn;
+            break;
 
             // I don't know what "Wire" shading should be,
             // assume it is simple lambertian diffuse (L dot N) shading
@@ -897,10 +900,13 @@ void ASEImporter::ConvertMaterial(ASE::Material& mat)
                 unsigned int iWire = 1;
                 mat.pcInstance->AddProperty<int>( (int*)&iWire,1,AI_MATKEY_ENABLE_WIREFRAME);
             }
+            break;
         case D3DS::Discreet3DS::Gouraud:
-            eShading = aiShadingMode_Gouraud; break;
+            eShading = aiShadingMode_Gouraud;
+            break;
         case D3DS::Discreet3DS::Metal :
-            eShading = aiShadingMode_CookTorrance; break;
+            eShading = aiShadingMode_CookTorrance;
+            break;
     }
     mat.pcInstance->AddProperty<int>( (int*)&eShading,1,AI_MATKEY_SHADING_MODEL);
 

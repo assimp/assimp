@@ -5,7 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -67,13 +66,10 @@ namespace Assimp    {
 // ---------------------------------------------------------------------------------
 /** Importer class for 3D Studio r3 and r4 3DS files
  */
-class AssbinImporter : public BaseImporter
-{
-private:
-    bool shortened;
-    bool compressed;
-
+class AssbinImporter : public BaseImporter {
 public:
+    AssbinImporter();
+    ~AssbinImporter();
     virtual bool CanRead(
         const std::string& pFile,
         IOSystem* pIOHandler,
@@ -97,6 +93,10 @@ public:
     void ReadBinaryTexture(IOStream * stream, aiTexture* tex);
     void ReadBinaryLight( IOStream * stream, aiLight* l );
     void ReadBinaryCamera( IOStream * stream, aiCamera* cam );
+
+private:
+    bool shortened;
+    bool compressed;
 };
 
 } // end of namespace Assimp

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  B3DImporter.cpp
  *  @brief Implementation of the b3d importer class
  */
-
 
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
 
@@ -94,26 +91,48 @@ void DeleteAllBarePointers(std::vector<T>& x)
     }
 }
 
-B3DImporter::~B3DImporter()
-{
+// ------------------------------------------------------------------------------------------------
+B3DImporter::B3DImporter()
+: BaseImporter()
+, _pos(0)
+, _buf()
+, _stack()
+, _textures()
+, _materials()
+, _vflags(-1)
+, _tcsets(-1)
+, _tcsize(-1)
+, _vertices()
+, _nodes()
+, _meshes()
+, _nodeAnims()
+, _animations() {
+    // empty
+}
+
+// ------------------------------------------------------------------------------------------------
+B3DImporter::~B3DImporter() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const{
-
     size_t pos=pFile.find_last_of( '.' );
-    if( pos==string::npos ) return false;
+    if (pos == string::npos) {
+        return false;
+    }
 
     string ext=pFile.substr( pos+1 );
-    if( ext.size()!=3 ) return false;
+    if (ext.size() != 3) {
+        return false;
+    }
 
     return (ext[0]=='b' || ext[0]=='B') && (ext[1]=='3') && (ext[2]=='d' || ext[2]=='D');
 }
 
 // ------------------------------------------------------------------------------------------------
 // Loader meta information
-const aiImporterDesc* B3DImporter::GetInfo () const
-{
+const aiImporterDesc* B3DImporter::GetInfo () const {
     return &desc;
 }
 

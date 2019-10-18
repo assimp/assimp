@@ -136,8 +136,8 @@ X3DImporter::~X3DImporter() {
 void X3DImporter::Clear() {
 	NodeElement_Cur = nullptr;
 	// Delete all elements
-	if(NodeElement_List.size()) {
-        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++ ) {
+	if(!NodeElement_List.empty()) {
+        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it ) {
             delete *it;
         }
 		NodeElement_List.clear();
@@ -151,7 +151,7 @@ void X3DImporter::Clear() {
 
 bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
 {
-	for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++)
+	for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it)
 	{
 		if(((*it)->Type == pType) && ((*it)->ID == pID))
 		{
@@ -182,7 +182,7 @@ bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode,
 	}// if((pStartNode->Type() == pType) && (pStartNode->ID() == pID))
 
 	// Check childs of pStartNode.
-	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Child.begin(); ch_it != pStartNode->Child.end(); ch_it++)
+	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Child.begin(); ch_it != pStartNode->Child.end(); ++ch_it)
 	{
 		found = FindNodeElement_FromNode(*ch_it, pID, pType, pElement);
         if ( found )
@@ -614,10 +614,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol3f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListCol3f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
-		for(std::list<aiColor3D>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
+		for(std::list<aiColor3D>::iterator it = tlist.begin(); it != tlist.end(); ++it) pValue.push_back(*it);
 	}
 }
 
@@ -647,10 +647,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol4f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListCol4f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
-        for ( std::list<aiColor4D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        for ( std::list<aiColor4D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
         {
             pValue.push_back( *it );
         }
@@ -684,10 +684,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec2f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListVec2f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
-        for ( std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        for ( std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
         {
             pValue.push_back( *it );
         }
@@ -722,10 +722,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec3f(const int pAttrIdx, std::ve
 
 	XML_ReadNode_GetAttrVal_AsListVec3f(pAttrIdx, tlist);// read as list
 	// and copy to array
-	if(tlist.size() > 0)
+	if(!tlist.empty())
 	{
 		pValue.reserve(tlist.size());
-        for ( std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        for ( std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it )
         {
             pValue.push_back( *it );
         }
@@ -823,7 +823,7 @@ void X3DImporter::GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>&
     std::list<aiVector3D>::const_iterator pit = pPoint.begin();
     std::list<aiVector3D>::const_iterator pit_last = pPoint.end();
 
-	pit_last--;
+	--pit_last;
 
     if ( pPoint.size() < 2 )
     {
@@ -837,7 +837,7 @@ void X3DImporter::GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>&
 	{
 		pLine.push_back(*pit);// second point of previous line
 		pLine.push_back(*pit);// first point of next line
-		pit++;
+		++pit;
 	}
 	// add last point of last line
 	pLine.push_back(*pit);
@@ -855,7 +855,7 @@ void X3DImporter::GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int
 		{
 			std::list<int32_t>::const_iterator plit_next;
 
-			plit_next = plit, plit_next++;
+			plit_next = plit, ++plit_next;
 			pLineCoordIdx.push_back(*plit);// second point of previous line.
 			pLineCoordIdx.push_back(-1);// delimiter
 			if((*plit_next == (-1)) || (plit_next == pPolylineCoordIdx.end())) break;// current polyline is finished
@@ -910,7 +910,7 @@ void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::vector<int32_t>
 	pFaces.reserve(f_data.size() / 3);
 	inds.reserve(4);
     //PrintVectorSet("build. ci", pCoordIdx);
-	for(std::vector<int32_t>::iterator it = f_data.begin(); it != f_data.end(); it++)
+	for(std::vector<int32_t>::iterator it = f_data.begin(); it != f_data.end(); ++it)
 	{
 		// when face is got count how many indices in it.
 		if(*it == (-1))
@@ -957,7 +957,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor3D
 std::list<aiColor4D> tcol;
 
 	// create RGBA array from RGB.
-	for(std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); it++) tcol.push_back(aiColor4D((*it).r, (*it).g, (*it).b, 1));
+	for(std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it) tcol.push_back(aiColor4D((*it).r, (*it).g, (*it).b, 1));
 
 	// call existing function for adding RGBA colors
 	MeshGeometry_AddColor(pMesh, tcol, pColorPerVertex);
@@ -997,7 +997,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
                 pMesh.mColors[ 0 ][ pMesh.mFaces[ fi ].mIndices[ vi ] ] = *col_it;
             }
 
-			col_it++;
+			++col_it;
 		}
 	}// if(pColorPerVertex) else
 }
@@ -1008,7 +1008,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
     std::list<aiColor4D> tcol;
 
 	// create RGBA array from RGB.
-    for ( std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); it++ )
+    for ( std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it )
     {
         tcol.push_back( aiColor4D( ( *it ).r, ( *it ).g, ( *it ).b, 1 ) );
     }
@@ -1031,7 +1031,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 
 	// copy list to array because we are need indexed access to colors.
 	col_arr_copy.reserve(pColors.size());
-    for ( std::list<aiColor4D>::const_iterator it = pColors.begin(); it != pColors.end(); it++ )
+    for ( std::list<aiColor4D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it )
     {
         col_arr_copy.push_back( *it );
     }
@@ -1048,7 +1048,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
-			for(std::vector<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); colidx_it++, coordidx_it++)
+			for(std::vector<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); ++colidx_it, ++coordidx_it)
 			{
                 if ( *colidx_it == ( -1 ) )
                 {
@@ -1121,7 +1121,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 	}// if(pColorPerVertex) else
 
 	// copy array to list for calling function that add colors.
-	for(std::vector<aiColor4D>::const_iterator it = col_tgt_arr.begin(); it != col_tgt_arr.end(); it++) col_tgt_list.push_back(*it);
+	for(std::vector<aiColor4D>::const_iterator it = col_tgt_arr.begin(); it != col_tgt_arr.end(); ++it) col_tgt_list.push_back(*it);
 	// add prepared colors list to mesh.
 	MeshGeometry_AddColor(pMesh, col_tgt_list, pColorPerVertex);
 }
@@ -1134,7 +1134,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_
 
 	// copy list to array because we are need indexed access to normals.
 	norm_arr_copy.reserve(pNormals.size());
-    for ( std::list<aiVector3D>::const_iterator it = pNormals.begin(); it != pNormals.end(); it++ )
+    for ( std::list<aiVector3D>::const_iterator it = pNormals.begin(); it != pNormals.end(); ++it )
     {
         norm_arr_copy.push_back( *it );
     }
@@ -1147,7 +1147,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_
 			if(pNormalIdx.size() != pCoordIdx.size()) throw DeadlyImportError("Normals and Coords inidces count must be equal.");
 
 			tind.reserve(pNormalIdx.size());
-			for(std::vector<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); it++)
+			for(std::vector<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); ++it)
 			{
 				if(*it != (-1)) tind.push_back(*it);
 			}
@@ -1227,7 +1227,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<aiVector
 			// apply color to all vertices of face
 			for(size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) pMesh.mNormals[pMesh.mFaces[fi].mIndices[vi]] = *norm_it;
 
-			norm_it++;
+			++norm_it;
 		}
 	}// if(pNormalPerVertex) else
 }
@@ -1241,7 +1241,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int3
 
 	// copy list to array because we are need indexed access to normals.
 	texcoord_arr_copy.reserve(pTexCoords.size());
-	for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); it++)
+	for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it)
 	{
 		texcoord_arr_copy.push_back(aiVector3D((*it).x, (*it).y, 0));
 	}
@@ -1291,7 +1291,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVect
 
 	// copy list to array because we are need convert aiVector2D to aiVector3D and also get indexed access as a bonus.
 	tc_arr_copy.reserve(pTexCoords.size());
-    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); it++ )
+    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it )
     {
         tc_arr_copy.push_back( aiVector3D( ( *it ).x, ( *it ).y, 0 ) );
     }
@@ -1699,7 +1699,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		// create nodes tree
 		Postprocess_BuildNode(*NodeElement_Cur, *pScene->mRootNode, mesh_list, mat_list, light_list);
 		// copy needed data to scene
-		if(mesh_list.size() > 0)
+		if(!mesh_list.empty())
 		{
 			std::list<aiMesh*>::const_iterator it = mesh_list.begin();
 
@@ -1708,7 +1708,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 			for(size_t i = 0; i < pScene->mNumMeshes; i++) pScene->mMeshes[i] = *it++;
 		}
 
-		if(mat_list.size() > 0)
+		if(!mat_list.empty())
 		{
 			std::list<aiMaterial*>::const_iterator it = mat_list.begin();
 
@@ -1717,7 +1717,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 			for(size_t i = 0; i < pScene->mNumMaterials; i++) pScene->mMaterials[i] = *it++;
 		}
 
-		if(light_list.size() > 0)
+		if(!light_list.empty())
 		{
 			std::list<aiLight*>::const_iterator it = light_list.begin();
 

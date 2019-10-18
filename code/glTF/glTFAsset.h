@@ -92,38 +92,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #endif
 
+#include "glTF/glTFCommon.h"
+
 namespace glTF
 {
-#ifdef ASSIMP_API
-    using Assimp::IOStream;
-    using Assimp::IOSystem;
-    using std::shared_ptr;
-#else
-    using std::shared_ptr;
-
-    typedef std::runtime_error DeadlyImportError;
-    typedef std::runtime_error DeadlyExportError;
-
-    enum aiOrigin { aiOrigin_SET = 0, aiOrigin_CUR = 1, aiOrigin_END = 2 };
-    class IOSystem;
-    class IOStream
-    {
-        FILE* f;
-    public:
-        IOStream(FILE* file) : f(file) {}
-        ~IOStream() { fclose(f); f = 0; }
-
-        size_t Read(void* b, size_t sz, size_t n) { return fread(b, sz, n, f); }
-        size_t Write(const void* b, size_t sz, size_t n) { return fwrite(b, sz, n, f); }
-        int    Seek(size_t off, aiOrigin orig) { return fseek(f, off, int(orig)); }
-        size_t Tell() const { return ftell(f); }
-
-        size_t FileSize() {
-            long p = Tell(), len = (Seek(0, aiOrigin_END), Tell());
-            return size_t((Seek(p, aiOrigin_SET), len));
-        }
-    };
-#endif
+    using glTFCommon::shared_ptr;
+    using glTFCommon::IOSystem;
+    using glTFCommon::IOStream;
 
     using rapidjson::Value;
     using rapidjson::Document;
@@ -136,37 +111,9 @@ namespace glTF
     struct Light;
     struct Skin;
 
-
-    // Vec/matrix types, as raw float arrays
-    typedef float (vec3)[3];
-    typedef float (vec4)[4];
-    typedef float (mat4)[16];
-
-
-    namespace Util
-    {
-        void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out);
-
-        size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
-
-        inline size_t DecodeBase64(const char* in, uint8_t*& out)
-        {
-            return DecodeBase64(in, strlen(in), out);
-        }
-
-        struct DataURI
-        {
-            const char* mediaType;
-            const char* charset;
-            bool base64;
-            const char* data;
-            size_t dataLength;
-        };
-
-        //! Check if a uri is a data URI
-        inline bool ParseDataURI(const char* uri, size_t uriLen, DataURI& out);
-    }
-
+    using glTFCommon::vec3;
+    using glTFCommon::vec4;
+    using glTFCommon::mat4;
 
     //! Magic number for GLB files
     #define AI_GLB_MAGIC_NUMBER "glTF"

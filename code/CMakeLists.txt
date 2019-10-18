@@ -137,7 +137,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/irrXMLWrapper.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
-  ${HEADER_PATH}/Macros.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
 )
@@ -766,6 +765,8 @@ ADD_ASSIMP_EXPORTER( X3D
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
+  glTF/glTFCommon.h
+  glTF/glTFCommon.cpp
   glTF/glTFAsset.h
   glTF/glTFAsset.inl
   glTF/glTFAssetWriter.h
@@ -1056,6 +1057,8 @@ MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
 
 MESSAGE(STATUS "Enabled exporter formats:${ASSIMP_EXPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled exporter formats:${ASSIMP_EXPORTERS_DISABLED}")
+
+SOURCE_GROUP( include\\assimp    FILES ${PUBLIC_HEADERS} )
 
 SET( assimp_src
   # Assimp Files

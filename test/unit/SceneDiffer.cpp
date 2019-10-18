@@ -123,7 +123,7 @@ void SceneDiffer::showReport() {
         return;
     }
 
-    for ( std::vector<std::string>::iterator it = m_diffs.begin(); it != m_diffs.end(); it++ ) {
+    for ( std::vector<std::string>::iterator it = m_diffs.begin(); it != m_diffs.end(); ++it ) {
         std::cout << *it << "\n";
     }
 

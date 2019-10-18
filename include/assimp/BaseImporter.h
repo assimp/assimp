@@ -41,8 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Definition of the base class for all importer worker classes. */
+#pragma once
 #ifndef INCLUDED_AI_BASEIMPORTER_H
 #define INCLUDED_AI_BASEIMPORTER_H
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #include "Exceptional.h"
 
@@ -81,6 +86,10 @@ class IOStream;
  */
 class ASSIMP_API BaseImporter {
     friend class Importer;
+
+private:
+    /* Pushes state into importer for the importer scale */
+    virtual void UpdateImporterScale( Importer* pImp );
 
 public:
 
@@ -134,7 +143,7 @@ public:
      *  a suitable response to the caller.
      */
     aiScene* ReadFile(
-        const Importer* pImp,
+        Importer* pImp,
         const std::string& pFile,
         IOSystem* pIOHandler
         );
@@ -209,14 +218,6 @@ public:
         return applicationUnits;
     }
 
-    /* Returns scale used by application called by ScaleProcess */
-    double GetImporterScale() const
-    {
-        ai_assert(importerScale != 0);
-        ai_assert(fileScale != 0);
-        return importerScale * fileScale;
-    }
-
     // -------------------------------------------------------------------
     /** Called by #Importer::GetExtensionList for each loaded importer.
      *  Take the extension list contained in the structure returned by
@@ -228,6 +229,7 @@ protected:
     ImporterUnits applicationUnits = ImporterUnits::M;
     double importerScale = 1.0;
     double fileScale = 1.0;
+
 
 
     // -------------------------------------------------------------------

@@ -282,9 +282,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
 template<class T>
 Ref<T> LazyDict<T>::Get(unsigned int i)
 {
-
     return Ref<T>(mObjs, i);
-
 }
 
 template<class T>
@@ -361,11 +359,11 @@ inline void Buffer::Read(Value& obj, Asset& r)
 
     const char* uri = it->GetString();
 
-    Util::DataURI dataURI;
+    glTFCommon::Util::DataURI dataURI;
     if (ParseDataURI(uri, it->GetStringLength(), dataURI)) {
         if (dataURI.base64) {
             uint8_t* data = 0;
-            this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
+            this->byteLength = glTFCommon::Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
@@ -717,12 +715,12 @@ inline void Image::Read(Value& obj, Asset& r)
         if (Value* uri = FindString(obj, "uri")) {
             const char* uristr = uri->GetString();
 
-            Util::DataURI dataURI;
+            glTFCommon::Util::DataURI dataURI;
             if (ParseDataURI(uristr, uri->GetStringLength(), dataURI)) {
                 mimeType = dataURI.mediaType;
                 if (dataURI.base64) {
                     uint8_t *ptr = nullptr;
-                    mDataLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
+                    mDataLength = glTFCommon::Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
                     mData.reset(ptr);
                 }
             }
@@ -1100,8 +1098,11 @@ inline void Light::Read(Value& obj, Asset& /*r*/)
     }
 }
 
-inline void Node::Read(Value& obj, Asset& r)
-{
+inline 
+void Node::Read(Value& obj, Asset& r) {
+    if (name.empty()) {
+        name = id;
+    }
 
     if (Value* children = FindArray(obj, "children")) {
         this->children.reserve(children->Size());
@@ -1513,192 +1514,6 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
     }
 
     return id;
-}
-
-namespace Util {
-
-    inline
-    bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
-        if ( NULL == const_uri ) {
-            return false;
-        }
-
-        if (const_uri[0] != 0x10) { // we already parsed this uri?
-            if (strncmp(const_uri, "data:", 5) != 0) // not a data uri?
-                return false;
-        }
-
-        // set defaults
-        out.mediaType = "text/plain";
-        out.charset = "US-ASCII";
-        out.base64 = false;
-
-        char* uri = const_cast<char*>(const_uri);
-        if (uri[0] != 0x10) {
-            uri[0] = 0x10;
-            uri[1] = uri[2] = uri[3] = uri[4] = 0;
-
-            size_t i = 5, j;
-            if (uri[i] != ';' && uri[i] != ',') { // has media type?
-                uri[1] = char(i);
-                for (; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
-                    // nothing to do!
-                }
-            }
-            while (uri[i] == ';' && i < uriLen) {
-                uri[i++] = '\0';
-                for (j = i; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
-                    // nothing to do!
-                }
-
-                if ( strncmp( uri + j, "charset=", 8 ) == 0 ) {
-                    uri[2] = char(j + 8);
-                } else if ( strncmp( uri + j, "base64", 6 ) == 0 ) {
-                    uri[3] = char(j);
-                }
-            }
-            if (i < uriLen) {
-                uri[i++] = '\0';
-                uri[4] = char(i);
-            } else {
-                uri[1] = uri[2] = uri[3] = 0;
-                uri[4] = 5;
-            }
-        }
-
-        if ( uri[ 1 ] != 0 ) {
-            out.mediaType = uri + uri[ 1 ];
-        }
-        if ( uri[ 2 ] != 0 ) {
-            out.charset = uri + uri[ 2 ];
-        }
-        if ( uri[ 3 ] != 0 ) {
-            out.base64 = true;
-        }
-        out.data = uri + uri[4];
-        out.dataLength = (uri + uriLen) - out.data;
-
-        return true;
-    }
-
-    template<bool B>
-    struct DATA
-    {
-        static const uint8_t tableDecodeBase64[128];
-    };
-
-    template<bool B>
-    const uint8_t DATA<B>::tableDecodeBase64[128] = {
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 62,  0,  0,  0, 63,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61,  0,  0,  0, 64,  0,  0,
-         0,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,  0,  0,  0,  0,  0,
-         0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-        41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,  0,  0,  0,  0,  0
-    };
-
-    inline char EncodeCharBase64(uint8_t b)
-    {
-        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="[size_t(b)];
-    }
-
-    inline uint8_t DecodeCharBase64(char c)
-    {
-        return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
-        /*if (c >= 'A' && c <= 'Z') return c - 'A';
-        if (c >= 'a' && c <= 'z') return c - 'a' + 26;
-        if (c >= '0' && c <= '9') return c - '0' + 52;
-        if (c == '+') return 62;
-        if (c == '/') return 63;
-        return 64; // '-' */
-    }
-
-    inline size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out)
-    {
-        ai_assert(inLength % 4 == 0);
-
-        if (inLength < 4) {
-            out = 0;
-            return 0;
-        }
-
-        int nEquals = int(in[inLength - 1] == '=') +
-                      int(in[inLength - 2] == '=');
-
-        size_t outLength = (inLength * 3) / 4 - nEquals;
-        out = new uint8_t[outLength];
-        memset(out, 0, outLength);
-
-        size_t i, j = 0;
-
-        for (i = 0; i + 4 < inLength; i += 4) {
-            uint8_t b0 = DecodeCharBase64(in[i]);
-            uint8_t b1 = DecodeCharBase64(in[i + 1]);
-            uint8_t b2 = DecodeCharBase64(in[i + 2]);
-            uint8_t b3 = DecodeCharBase64(in[i + 3]);
-
-            out[j++] = (uint8_t)((b0 << 2) | (b1 >> 4));
-            out[j++] = (uint8_t)((b1 << 4) | (b2 >> 2));
-            out[j++] = (uint8_t)((b2 << 6) | b3);
-        }
-
-        {
-            uint8_t b0 = DecodeCharBase64(in[i]);
-            uint8_t b1 = DecodeCharBase64(in[i + 1]);
-            uint8_t b2 = DecodeCharBase64(in[i + 2]);
-            uint8_t b3 = DecodeCharBase64(in[i + 3]);
-
-            out[j++] = (uint8_t)((b0 << 2) | (b1 >> 4));
-            if (b2 < 64) out[j++] = (uint8_t)((b1 << 4) | (b2 >> 2));
-            if (b3 < 64) out[j++] = (uint8_t)((b2 << 6) | b3);
-        }
-
-        return outLength;
-    }
-
-
-
-    inline void EncodeBase64(
-        const uint8_t* in, size_t inLength,
-        std::string& out)
-    {
-        size_t outLength = ((inLength + 2) / 3) * 4;
-
-        size_t j = out.size();
-        out.resize(j + outLength);
-
-        for (size_t i = 0; i <  inLength; i += 3) {
-            uint8_t b = (in[i] & 0xFC) >> 2;
-            out[j++] = EncodeCharBase64(b);
-
-            b = (in[i] & 0x03) << 4;
-            if (i + 1 < inLength) {
-                b |= (in[i + 1] & 0xF0) >> 4;
-                out[j++] = EncodeCharBase64(b);
-
-                b = (in[i + 1] & 0x0F) << 2;
-                if (i + 2 < inLength) {
-                    b |= (in[i + 2] & 0xC0) >> 6;
-                    out[j++] = EncodeCharBase64(b);
-
-                    b = in[i + 2] & 0x3F;
-                    out[j++] = EncodeCharBase64(b);
-                }
-                else {
-                    out[j++] = EncodeCharBase64(b);
-                    out[j++] = '=';
-                }
-            }
-            else {
-                out[j++] = EncodeCharBase64(b);
-                out[j++] = '=';
-                out[j++] = '=';
-            }
-        }
-    }
-
 }
 
 } // ns glTF

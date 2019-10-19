@@ -94,28 +94,29 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 
 // ------------------------------------------------------------------------------------------------
 // Encodes a string into a valid XML ID using the xsd:ID schema qualifications.
-const std::string XMLIDEncode(const std::string& name)
-{
+static const std::string XMLIDEncode(const std::string& name) {
     const char XML_ID_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-.";
     const unsigned int XML_ID_CHARS_COUNT = sizeof(XML_ID_CHARS) / sizeof(char);
 
-    if (name.length() == 0)
+    if (name.length() == 0) {
         return name;
+    }
 
     std::stringstream idEncoded;
 
     // xsd:ID must start with letter or underscore
-    if (!((name[0] >= 'A' && name[0] <= 'z') || name[0] == '_'))
+    if (!((name[0] >= 'A' && name[0] <= 'z') || name[0] == '_')) {
         idEncoded << '_';
+    }
 
-    for (std::string::const_iterator it = name.begin(); it != name.end(); ++it)
-    {
+    for (std::string::const_iterator it = name.begin(); it != name.end(); ++it) {
         // xsd:ID can only contain letters, digits, underscores, hyphens and periods
-        if (strchr(XML_ID_CHARS, *it) != nullptr)
+        if (strchr(XML_ID_CHARS, *it) != nullptr) {
             idEncoded << *it;
-        else
-        // Select placeholder character based on invalid character to prevent name collisions 
+        } else {
+            // Select placeholder character based on invalid character to prevent name collisions 
             idEncoded << XML_ID_CHARS[(*it) % XML_ID_CHARS_COUNT];
+        }
     }
 
     return idEncoded.str();

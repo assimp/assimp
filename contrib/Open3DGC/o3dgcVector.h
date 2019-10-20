@@ -26,6 +26,8 @@ THE SOFTWARE.
 
 #include "o3dgcCommon.h"
 
+#include  <utility>
+
 namespace o3dgc
 {
     const unsigned long O3DGC_DEFAULT_VECTOR_SIZE = 32;

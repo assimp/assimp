@@ -3236,6 +3236,10 @@ void ColladaParser::TestOpening(const char* pName)
 // Tests for the closing tag of the given element, throws an exception if not found
 void ColladaParser::TestClosing(const char* pName)
 {
+    // check if we have an empty (self-closing) element
+    if (mReader->isEmptyElement())
+        return;
+
     // check if we're already on the closing tag and return right away
     if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp(mReader->getNodeName(), pName) == 0)
         return;

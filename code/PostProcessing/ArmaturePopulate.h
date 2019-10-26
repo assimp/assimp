@@ -39,19 +39,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef SCALE_PROCESS_H_
-#define SCALE_PROCESS_H_
+#ifndef ARMATURE_POPULATE_H_
+#define ARMATURE_POPULATE_H_
 
 #include "Common/BaseProcess.h"
+#include <assimp/BaseImporter.h>
 #include <vector>
 #include <map>
 
+
 struct aiNode;
 struct aiBone;
-
-#if (!defined AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT)
-#   define AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT  1.0f
-#endif // !! AI_DEBONE_THRESHOLD
 
 namespace Assimp {
 
@@ -66,12 +64,10 @@ namespace Assimp {
 class ASSIMP_API ArmaturePopulate : public BaseProcess {
 public:
     /// The default class constructor.
-    ArmaturePopulate() : BaseProcess()
-    {}
+    ArmaturePopulate();
 
     /// The class destructor.
-    virtual ~ArmaturePopulate() 
-    {}
+    virtual ~ArmaturePopulate();
 
     /// Overwritten, @see BaseProcess
     virtual bool IsActive( unsigned int pFlags ) const;

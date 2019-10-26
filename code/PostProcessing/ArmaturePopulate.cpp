@@ -48,6 +48,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+/// The default class constructor.
+ArmaturePopulate::ArmaturePopulate() : BaseProcess()
+{}
+
+/// The class destructor.
+ArmaturePopulate::~ArmaturePopulate() 
+{}
+
 bool ArmaturePopulate::IsActive(unsigned int pFlags) const {
   return (pFlags & aiProcess_PopulateArmatureData) != 0;
 }
@@ -104,9 +112,9 @@ aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
 
     bone_node = bone_node->mParent;
   }
-
-  ASSIMP_LOG_WARN_F("can't find armature! node: %s\n", bone_node->mName.C_Str());
-
+  
+  ASSIMP_LOG_WARN("GetArmatureRoot() can't find armature!");
+  
   return NULL;
 }
 

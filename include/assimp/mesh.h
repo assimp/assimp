@@ -271,12 +271,16 @@ struct aiBone {
     //! The maximum value for this member is #AI_MAX_BONE_WEIGHTS.
     unsigned int mNumWeights;
 
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
     // The bone armature node - used for skeleton conversion
+    // you must enable aiProcess_PopulateArmatureData to populate this
     C_STRUCT aiNode* mArmature;
 
     // The bone node in the scene - used for skeleton conversion
+    // you must enable aiProcess_PopulateArmatureData to populate this
     C_STRUCT aiNode* mNode;
 
+#endif
     //! The influence weights of this bone, by vertex index.
     C_STRUCT aiVertexWeight* mWeights;
 

@@ -151,13 +151,6 @@ namespace Assimp {
                 // set this bone node to be referenced properly
                 ai_assert(bone_node);
                 bone->mNode = bone_node;
-
-                // apply full hierarchy to transform for basic offset
-                while( bone_node->mParent )
-                {
-                    bone->mRestMatrix = bone_node->mTransformation * bone->mRestMatrix;
-                    bone_node = bone_node->mParent;
-                }
             }
 
 
@@ -249,12 +242,12 @@ namespace Assimp {
         /* Prepare flat node list which can be used for non recursive lookups later */
         void FBXConverter::BuildNodeList(aiNode *current_node, std::vector<aiNode *> &nodes)
         {
-            assert(current_node);
+            ai_assert(current_node);
 
             for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
             {
                 aiNode *child = current_node->mChildren[nodeId];
-                assert(child);
+                ai_assert(child);
 
                 nodes.push_back(child);
 
@@ -268,19 +261,19 @@ namespace Assimp {
         /* Source: sketch fab log cutter fbx */
         void FBXConverter::BuildBoneList(aiNode *current_node, const aiNode * root_node, const aiScene *scene, std::vector<aiBone*> &bones )
         {
-            assert(scene);
+            ai_assert(scene);
             for( unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId)
             {
                 aiNode *child = current_node->mChildren[nodeId];
-                assert(child);
+                ai_assert(child);
 
                 // check for bones
                 for( unsigned int meshId = 0; meshId < child->mNumMeshes; ++meshId)
                 {
-                    assert(child->mMeshes);
+                    ai_assert(child->mMeshes);
                     unsigned int mesh_index = child->mMeshes[meshId];
                     aiMesh *mesh = scene->mMeshes[ mesh_index ];
-                    assert(mesh);
+                    ai_assert(mesh);
 
                     for( unsigned int boneId = 0; boneId < mesh->mNumBones; ++boneId)
                     {
@@ -1777,7 +1770,7 @@ namespace Assimp {
                                           std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
                                           std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform,
                                           aiNode *parent, aiNode *root_node) {
-            assert(cl); // make sure cluster valid
+            ai_assert(cl); // make sure cluster valid
             std::string deformer_name = cl->TargetNode()->Name();
             aiString bone_name = aiString(FixNodeName(deformer_name));
 

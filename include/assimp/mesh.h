@@ -293,11 +293,6 @@ struct aiBone {
      */
     C_STRUCT aiMatrix4x4 mOffsetMatrix;
 
-    /** Matrix used for the global rest transform
-     * This tells you directly the rest without extending as required in most game engine implementations
-     * */
-    C_STRUCT aiMatrix4x4 mRestMatrix;
-
 #ifdef __cplusplus
 
     //! Default constructor

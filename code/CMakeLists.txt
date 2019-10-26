@@ -670,6 +670,8 @@ SET( PostProcessing_SRCS
   PostProcessing/MakeVerboseFormat.h
   PostProcessing/ScaleProcess.cpp
   PostProcessing/ScaleProcess.h
+  PostProcessing/ArmaturePopulate.cpp
+  PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
 )

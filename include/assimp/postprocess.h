@@ -537,6 +537,18 @@ enum aiPostProcessSteps
     */
     aiProcess_Debone  = 0x4000000,
 
+
+    // -------------------------------------------------------------------------
+    /** 
+     * This step generically populates aiBone->mArmature and aiBone->mNode generically
+     * The point of these is it saves you later having to calculate these elements
+     * This is useful when handling rest information or skin information
+     * If you have multiple armatures on your models we strongly recommend enabling this 
+     * Instead of writing your own multi-root, multi-armature lookups we have done the 
+     * hard work for you :)
+   */
+    aiProcess_PopulateArmatureData = 0x5000000,
+
     // -------------------------------------------------------------------------
     /** <hr>This step will perform a global scale of the model.
     *

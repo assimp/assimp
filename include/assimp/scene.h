@@ -48,14 +48,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SCENE_H_INC
 #define AI_SCENE_H_INC
 
-#include "types.h"
-#include "texture.h"
-#include "mesh.h"
-#include "light.h"
-#include "camera.h"
-#include "material.h"
-#include "anim.h"
-#include "metadata.h"
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
+#include <assimp/types.h>
+#include <assimp/texture.h>
+#include <assimp/mesh.h>
+#include <assimp/light.h>
+#include <assimp/camera.h>
+#include <assimp/material.h>
+#include <assimp/anim.h>
+#include <assimp/metadata.h>
 
 #ifdef __cplusplus
 #  include <cstdlib>

@@ -68,7 +68,7 @@ aiNode::aiNode(const std::string& name)
 aiNode::~aiNode() {
     // delete all children recursively
     // to make sure we won't crash if the data is invalid ...
-    if (mChildren && mNumChildren)
+    if (mNumChildren && mChildren)
     {
         for (unsigned int a = 0; a < mNumChildren; a++)
             delete mChildren[a];

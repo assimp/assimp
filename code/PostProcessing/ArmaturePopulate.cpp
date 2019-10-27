@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <iostream>
 
 namespace Assimp {
 
@@ -76,7 +77,7 @@ void ArmaturePopulate::Execute(aiScene *out) {
   BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack, nodes);
 
   ASSIMP_LOG_DEBUG_F("Bone stack size: %ld\n", bone_stack.size());
-
+  std::cout << "post process for armature population has run!" << std::endl;
   for (std::pair<aiBone *, aiNode *> kvp : bone_stack) {
     aiBone *bone = kvp.first;
     aiNode *bone_node = kvp.second;

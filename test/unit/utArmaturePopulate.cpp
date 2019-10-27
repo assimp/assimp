@@ -64,7 +64,7 @@ class utArmaturePopulate : public ::testing::Test {
 
 TEST_F( utArmaturePopulate, importCheckForArmatureTest) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/huesitos.fbx", aiProcess_ValidateDataStructure | aiProcess_PopulateArmatureData);
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/huesitos.fbx", aiProcess_PopulateArmatureData);
     EXPECT_NE( nullptr, scene );
     EXPECT_EQ(scene->mNumMeshes, 1u);
     aiMesh* mesh = scene->mMeshes[0];

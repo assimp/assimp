@@ -313,6 +313,12 @@ namespace Assimp {
 
                     std::swap_ranges(nodes.begin(), nodes.end(), parent->mChildren);
                 }
+                else
+                {
+                    parent->mNumChildren = 0;
+                    parent->mChildren = nullptr;
+                }
+                
             }
             catch (std::exception&) {
                 Util::delete_fun<aiNode> deleter;

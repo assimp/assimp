@@ -76,12 +76,12 @@ void ArmaturePopulate::Execute(aiScene *out) {
 
   BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack, nodes);
 
-  ASSIMP_LOG_DEBUG_F("Bone stack size: %ld\n", bone_stack.size());
-  std::cout << "post process for armature population has run!" << std::endl;
+  ASSIMP_LOG_DEBUG_F("Bone stack size: ", bone_stack.size());
+
   for (std::pair<aiBone *, aiNode *> kvp : bone_stack) {
     aiBone *bone = kvp.first;
     aiNode *bone_node = kvp.second;
-    ASSIMP_LOG_DEBUG_F("active node lookup: %s\n", bone->mName.C_Str());
+    ASSIMP_LOG_DEBUG_F("active node lookup: ", bone->mName.C_Str());
     // lcl transform grab - done in generate_nodes :)
 
     // bone->mOffsetMatrix = bone_node->mTransformation;
@@ -98,82 +98,6 @@ void ArmaturePopulate::Execute(aiScene *out) {
   }
 }
 
-/* Returns the armature root node */
-/* This is required to be detected for a bone initially, it will recurse up
- * until it cannot find another bone and return the node No known failure
- * points. (yet)
- */
-aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
-                                          std::vector<aiBone *> &bone_list) {
-  while (bone_node) {
-    if (!IsBoneNode(bone_node->mName, bone_list)) {
-      ASSIMP_LOG_DEBUG_F("Found valid armature: %s\n", bone_node->mName.C_Str());
-      return bone_node;
-    }
-
-    bone_node = bone_node->mParent;
-  }
-  
-  ASSIMP_LOG_WARN("GetArmatureRoot() can't find armature!");
-  
-  return nullptr;
-}
-
-/* Simple IsBoneNode check if this could be a bone */
-bool ArmaturePopulate::IsBoneNode(const aiString &bone_name,
-                                  std::vector<aiBone *> &bones) {
-  for (aiBone *bone : bones) {
-    if (bone->mName == bone_name) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/* Pop this node by name from the stack if found */
-/* Used in multiple armature situations with duplicate node / bone names */
-/* Known flaw: cannot have nodes with bone names, will be fixed in later release
- */
-/* (serious to be fixed) Known flaw: nodes which have more than one bone could
- * be prematurely dropped from stack */
-aiNode *ArmaturePopulate::GetNodeFromStack(const aiString &node_name,
-                                           std::vector<aiNode *> &nodes) {
-  std::vector<aiNode *>::iterator iter;
-  aiNode *found = nullptr;
-  for (iter = nodes.begin(); iter < nodes.end(); ++iter) {
-    aiNode *element = *iter;
-    ai_assert(element);
-    // node valid and node name matches
-    if (element->mName == node_name) {
-      found = element;
-      break;
-    }
-  }
-
-  if (found != nullptr) {
-    // now pop the element from the node list
-    nodes.erase(iter);
-
-    return found;
-  }
-  return nullptr;
-}
-
-/* Prepare flat node list which can be used for non recursive lookups later */
-void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
-                                     std::vector<aiNode *> &nodes) {
-  ai_assert(current_node);
-
-  for (unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId) {
-    aiNode *child = current_node->mChildren[nodeId];
-    ai_assert(child);
-
-    nodes.push_back(child);
-
-    BuildNodeList(child, nodes);
-  }
-}
 
 /* Reprocess all nodes to calculate bone transforms properly based on the REAL
  * mOffsetMatrix not the local. */
@@ -217,6 +141,21 @@ void ArmaturePopulate::BuildBoneList(aiNode *current_node,
   }
 }
 
+/* Prepare flat node list which can be used for non recursive lookups later */
+void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
+                                     std::vector<aiNode *> &nodes) {
+  ai_assert(current_node);
+
+  for (unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId) {
+    aiNode *child = current_node->mChildren[nodeId];
+    ai_assert(child);
+
+    nodes.push_back(child);
+
+    BuildNodeList(child, nodes);
+  }
+}
+
 /* A bone stack allows us to have multiple armatures, with the same bone names
  * A bone stack allows us also to retrieve bones true transform even with
  * duplicate names :)
@@ -237,20 +176,93 @@ void ArmaturePopulate::BuildBoneStack(aiNode *current_node,
     if (node == nullptr) {
       node_stack.clear();
       BuildNodeList(root_node, node_stack);
-      ASSIMP_LOG_DEBUG_F("Resetting bone stack: nullptr element %s\n", bone->mName.C_Str());
+      ASSIMP_LOG_DEBUG_F("Resetting bone stack: nullptr element ", bone->mName.C_Str());
 
       node = GetNodeFromStack(bone->mName, node_stack);
 
       if (!node) {
-        ASSIMP_LOG_ERROR("serious import issue armature failed to be detected");
+        ASSIMP_LOG_ERROR("serious import issue node for bone was not detected");
         continue;
       }
     }
 
-    ASSIMP_LOG_DEBUG_F("Successfully added bone to stack and have valid armature: %s\n", bone->mName.C_Str());
+    ASSIMP_LOG_DEBUG_F("Successfully added bone[", bone->mName.C_Str(), "] to stack and bone node is: ", node->mName.C_Str());
 
     bone_stack.insert(std::pair<aiBone *, aiNode *>(bone, node));
   }
 }
+
+
+/* Returns the armature root node */
+/* This is required to be detected for a bone initially, it will recurse up
+ * until it cannot find another bone and return the node No known failure
+ * points. (yet)
+ */
+aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
+                                          std::vector<aiBone *> &bone_list) {
+  while (bone_node) {
+    if (!IsBoneNode(bone_node->mName, bone_list)) {
+      ASSIMP_LOG_DEBUG_F("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());
+      return bone_node;
+    }
+
+    bone_node = bone_node->mParent;
+  }
+  
+  ASSIMP_LOG_ERROR("GetArmatureRoot() can't find armature!");
+  
+  return nullptr;
+}
+
+
+
+/* Simple IsBoneNode check if this could be a bone */
+bool ArmaturePopulate::IsBoneNode(const aiString &bone_name,
+                                  std::vector<aiBone *> &bones) {
+  for (aiBone *bone : bones) {
+    if (bone->mName == bone_name) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/* Pop this node by name from the stack if found */
+/* Used in multiple armature situations with duplicate node / bone names */
+/* Known flaw: cannot have nodes with bone names, will be fixed in later release
+ */
+/* (serious to be fixed) Known flaw: nodes which have more than one bone could
+ * be prematurely dropped from stack */
+aiNode *ArmaturePopulate::GetNodeFromStack(const aiString &node_name,
+                                           std::vector<aiNode *> &nodes) {
+  std::vector<aiNode *>::iterator iter;
+  aiNode *found = nullptr;
+  for (iter = nodes.begin(); iter < nodes.end(); ++iter) {
+    aiNode *element = *iter;
+    ai_assert(element);
+    // node valid and node name matches
+    if (element->mName == node_name) {
+      found = element;
+      break;
+    }
+  }
+
+  if (found != nullptr) {
+    ASSIMP_LOG_INFO_F("Removed node from stack: ", found->mName.C_Str());
+    // now pop the element from the node list
+    nodes.erase(iter);
+
+    return found;
+  }
+
+  // unique names can cause this problem
+  ASSIMP_LOG_ERROR("[Serious] GetNodeFromStack() can't find node from stack!");
+
+  return nullptr;
+}
+
+
+
 
 } // Namespace Assimp

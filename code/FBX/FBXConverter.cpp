@@ -77,7 +77,7 @@ namespace Assimp {
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
 
-#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
+#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000LL
 
         FBXConverter::FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones )
         : defaultMaterialIndex()

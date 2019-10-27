@@ -110,13 +110,13 @@ struct ASSIMP_API aiNode
     /** The transformation relative to the node's parent. */
     C_STRUCT aiMatrix4x4 mTransformation;
 
-    /** Parent node. NULL if this node is the root node. */
+    /** Parent node. nullptr if this node is the root node. */
     C_STRUCT aiNode* mParent;
 
     /** The number of child nodes of this node. */
     unsigned int mNumChildren;
 
-    /** The child nodes of this node. NULL if mNumChildren is 0. */
+    /** The child nodes of this node. nullptr if mNumChildren is 0. */
     C_STRUCT aiNode** mChildren;
 
     /** The number of meshes of this node. */
@@ -127,7 +127,7 @@ struct ASSIMP_API aiNode
       */
     unsigned int* mMeshes;
 
-    /** Metadata associated with this node or NULL if there is no metadata.
+    /** Metadata associated with this node or nullptr if there is no metadata.
       *  Whether any metadata is generated depends on the source file format. See the
       * @link importer_notes @endlink page for more information on every source file
       * format. Importers that don't document any metadata don't write any.
@@ -149,7 +149,7 @@ struct ASSIMP_API aiNode
      *  of the scene.
      *
      *  @param name Name to search for
-     *  @return NULL or a valid Node if the search was successful.
+     *  @return nullptr or a valid Node if the search was successful.
      */
     inline 
     const aiNode* FindNode(const aiString& name) const {
@@ -344,7 +344,7 @@ struct aiScene
 
 #ifdef __cplusplus
 
-    //! Default constructor - set everything to 0/NULL
+    //! Default constructor - set everything to 0/nullptr
     ASSIMP_API aiScene();
 
     //! Destructor
@@ -353,33 +353,33 @@ struct aiScene
     //! Check whether the scene contains meshes
     //! Unless no special scene flags are set this will always be true.
     inline bool HasMeshes() const { 
-        return mMeshes != NULL && mNumMeshes > 0; 
+        return mMeshes != nullptr && mNumMeshes > 0; 
     }
 
     //! Check whether the scene contains materials
     //! Unless no special scene flags are set this will always be true.
     inline bool HasMaterials() const { 
-        return mMaterials != NULL && mNumMaterials > 0; 
+        return mMaterials != nullptr && mNumMaterials > 0; 
     }
 
     //! Check whether the scene contains lights
     inline bool HasLights() const { 
-        return mLights != NULL && mNumLights > 0; 
+        return mLights != nullptr && mNumLights > 0; 
     }
 
     //! Check whether the scene contains textures
     inline bool HasTextures() const {
-        return mTextures != NULL && mNumTextures > 0; 
+        return mTextures != nullptr && mNumTextures > 0; 
     }
 
     //! Check whether the scene contains cameras
     inline bool HasCameras() const {
-        return mCameras != NULL && mNumCameras > 0; 
+        return mCameras != nullptr && mNumCameras > 0; 
     }
 
     //! Check whether the scene contains animations
     inline bool HasAnimations() const { 
-        return mAnimations != NULL && mNumAnimations > 0; 
+        return mAnimations != nullptr && mNumAnimations > 0; 
     }
 
     //! Returns a short filename from a full path

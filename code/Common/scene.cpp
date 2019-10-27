@@ -44,23 +44,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 aiNode::aiNode()
 : mName("")
-, mParent(NULL)
+, mParent(nullptr)
 , mNumChildren(0)
-, mChildren(NULL)
+, mChildren(nullptr)
 , mNumMeshes(0)
-, mMeshes(NULL)
-, mMetaData(NULL) {
+, mMeshes(nullptr)
+, mMetaData(nullptr) {
     // empty
 }
 
 aiNode::aiNode(const std::string& name)
 : mName(name)
-, mParent(NULL)
+, mParent(nullptr)
 , mNumChildren(0)
-, mChildren(NULL)
+, mChildren(nullptr)
 , mNumMeshes(0)
-, mMeshes(NULL)
-, mMetaData(NULL) {
+, mMeshes(nullptr)
+, mMetaData(nullptr) {
     // empty
 }
 

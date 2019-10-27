@@ -115,7 +115,7 @@ aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
   
   ASSIMP_LOG_WARN("GetArmatureRoot() can't find armature!");
   
-  return NULL;
+  return nullptr;
 }
 
 /* Simple IsBoneNode check if this could be a bone */
@@ -139,7 +139,7 @@ bool ArmaturePopulate::IsBoneNode(const aiString &bone_name,
 aiNode *ArmaturePopulate::GetNodeFromStack(const aiString &node_name,
                                            std::vector<aiNode *> &nodes) {
   std::vector<aiNode *>::iterator iter;
-  aiNode *found = NULL;
+  aiNode *found = nullptr;
   for (iter = nodes.begin(); iter < nodes.end(); ++iter) {
     aiNode *element = *iter;
     ai_assert(element);
@@ -150,13 +150,13 @@ aiNode *ArmaturePopulate::GetNodeFromStack(const aiString &node_name,
     }
   }
 
-  if (found != NULL) {
+  if (found != nullptr) {
     // now pop the element from the node list
     nodes.erase(iter);
 
     return found;
   }
-  return NULL;
+  return nullptr;
 }
 
 /* Prepare flat node list which can be used for non recursive lookups later */
@@ -233,10 +233,10 @@ void ArmaturePopulate::BuildBoneStack(aiNode *current_node,
   for (aiBone *bone : bones) {
     ai_assert(bone);
     aiNode *node = GetNodeFromStack(bone->mName, node_stack);
-    if (node == NULL) {
+    if (node == nullptr) {
       node_stack.clear();
       BuildNodeList(root_node, node_stack);
-      ASSIMP_LOG_DEBUG_F("Resetting bone stack: null element %s\n", bone->mName.C_Str());
+      ASSIMP_LOG_DEBUG_F("Resetting bone stack: nullptr element %s\n", bone->mName.C_Str());
 
       node = GetNodeFromStack(bone->mName, node_stack);
 

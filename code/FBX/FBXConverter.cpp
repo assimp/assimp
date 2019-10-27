@@ -1134,7 +1134,7 @@ namespace Assimp {
                         binormals = &tempBinormals;
                     }
                     else {
-                        binormals = NULL;
+                        binormals = nullptr;
                     }
                 }
 
@@ -1184,7 +1184,7 @@ namespace Assimp {
                 ConvertMaterialForMesh(out_mesh, model, mesh, mindices[0]);
             }
 
-            if (doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
+            if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr) {
                 ConvertWeights(out_mesh, model, mesh, absolute_transform, parent, root_node, NO_MATERIAL_SEPARATION,
                                nullptr);
             }
@@ -1264,7 +1264,7 @@ namespace Assimp {
             const std::vector<aiVector3D>& vertices = mesh.GetVertices();
             const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 
-            const bool process_weights = doc.Settings().readWeights && mesh.DeformerSkin() != NULL;
+            const bool process_weights = doc.Settings().readWeights && mesh.DeformerSkin() != nullptr;
 
             unsigned int count_faces = 0;
             unsigned int count_vertices = 0;
@@ -1324,7 +1324,7 @@ namespace Assimp {
                         binormals = &tempBinormals;
                     }
                     else {
-                        binormals = NULL;
+                        binormals = nullptr;
                     }
                 }
 
@@ -1513,9 +1513,9 @@ namespace Assimp {
 
                         unsigned int count = 0;
                         const unsigned int* const out_idx = geo.ToOutputVertexIndex(index, count);
-                        // ToOutputVertexIndex only returns NULL if index is out of bounds
+                        // ToOutputVertexIndex only returns nullptr if index is out of bounds
                         // which should never happen
-                        ai_assert(out_idx != NULL);
+                        ai_assert(out_idx != nullptr);
 
                         index_out_indices.push_back(no_index_sentinel);
                         count_out_indices.push_back(0);
@@ -1586,7 +1586,7 @@ namespace Assimp {
             std::string deformer_name = cl->TargetNode()->Name();
             aiString bone_name = aiString(FixNodeName(deformer_name));
 
-            aiBone *bone = NULL;
+            aiBone *bone = nullptr;
 
             if (bone_map.count(deformer_name)) {
                 std::cout << "retrieved bone from lookup " << bone_name.C_Str() << ". Deformer: " << deformer_name
@@ -2740,7 +2740,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         // sanity check whether the input is ok
         static void validateAnimCurveNodes(const std::vector<const AnimationCurveNode*>& curves,
             bool strictMode) {
-            const Object* target(NULL);
+            const Object* target(nullptr);
             for (const AnimationCurveNode* node : curves) {
                 if (!target) {
                     target = node->Target();
@@ -2771,7 +2771,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
 #ifdef ASSIMP_BUILD_DEBUG
             validateAnimCurveNodes(curves, doc.Settings().strictMode);
 #endif
-            const AnimationCurveNode* curve_node = NULL;
+            const AnimationCurveNode* curve_node = nullptr;
             for (const AnimationCurveNode* node : curves) {
                 ai_assert(node);
 
@@ -3619,7 +3619,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             ai_assert(!out->mMeshes);
             ai_assert(!out->mNumMeshes);
 
-            // note: the trailing () ensures initialization with NULL - not
+            // note: the trailing () ensures initialization with nullptr - not
             // many C++ users seem to know this, so pointing it out to avoid
             // confusion why this code works.
 

@@ -435,11 +435,11 @@ struct aiAnimMesh
     /**Anim Mesh name */
     C_STRUCT aiString mName;
 
-    /** Replacement for aiMesh::mVertices. If this array is non-NULL,
+    /** Replacement for aiMesh::mVertices. If this array is non-nullptr,
      *  it *must* contain mNumVertices entries. The corresponding
-     *  array in the host mesh must be non-NULL as well - animation
+     *  array in the host mesh must be non-nullptr as well - animation
      *  meshes may neither add or nor remove vertex components (if
-     *  a replacement array is NULL and the corresponding source
+     *  a replacement array is nullptr and the corresponding source
      *  array is not, the source data is taken instead)*/
     C_STRUCT aiVector3D* mVertices;
 
@@ -613,7 +613,7 @@ struct aiMesh
     C_STRUCT aiVector3D* mVertices;
 
     /** Vertex normals.
-    * The array contains normalized vectors, NULL if not present.
+    * The array contains normalized vectors, nullptr if not present.
     * The array is mNumVertices in size. Normals are undefined for
     * point and line primitives. A mesh consisting of points and
     * lines only may not have normal vectors. Meshes with mixed
@@ -636,7 +636,7 @@ struct aiMesh
 
     /** Vertex tangents.
     * The tangent of a vertex points in the direction of the positive
-    * X texture axis. The array contains normalized vectors, NULL if
+    * X texture axis. The array contains normalized vectors, nullptr if
     * not present. The array is mNumVertices in size. A mesh consisting
     * of points and lines only may not have normal vectors. Meshes with
     * mixed primitive types (i.e. lines and triangles) may have
@@ -650,7 +650,7 @@ struct aiMesh
 
     /** Vertex bitangents.
     * The bitangent of a vertex points in the direction of the positive
-    * Y texture axis. The array contains normalized vectors, NULL if not
+    * Y texture axis. The array contains normalized vectors, nullptr if not
     * present. The array is mNumVertices in size.
     * @note If the mesh contains tangents, it automatically also contains
     * bitangents.
@@ -659,14 +659,14 @@ struct aiMesh
 
     /** Vertex color sets.
     * A mesh may contain 0 to #AI_MAX_NUMBER_OF_COLOR_SETS vertex
-    * colors per vertex. NULL if not present. Each array is
+    * colors per vertex. nullptr if not present. Each array is
     * mNumVertices in size if present.
     */
     C_STRUCT aiColor4D* mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
 
     /** Vertex texture coords, also known as UV channels.
     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
-    * vertex. NULL if not present. The array is mNumVertices in size.
+    * vertex. nullptr if not present. The array is mNumVertices in size.
     */
     C_STRUCT aiVector3D* mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
@@ -688,7 +688,7 @@ struct aiMesh
     C_STRUCT aiFace* mFaces;
 
     /** The number of bones this mesh contains.
-    * Can be 0, in which case the mBones array is NULL.
+    * Can be 0, in which case the mBones array is nullptr.
     */
     unsigned int mNumBones;
 

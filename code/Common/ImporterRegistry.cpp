@@ -200,6 +200,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
 #   include "Importer/StepFile/StepFileImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_JT_IMPORTER
+#   include "JT/JTImporter.h"
+#endif
 
 namespace Assimp {
 
@@ -357,6 +360,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
     out.push_back(new StepFile::StepFileImporter());
+#endif
+#ifndef ASSIMP_BUILD_NO_JT_IMPORTER
+    out.push_back(new JTImporter);
 #endif
 }
 

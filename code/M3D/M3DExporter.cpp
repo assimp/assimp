@@ -174,15 +174,14 @@ void M3DExporter::doExport (
 // recursive node walker
 void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
 {
-    unsigned int i, j, k, l, n, mi, idx;
+    unsigned int i, j, k, l, n, idx;
     aiMatrix4x4 nm = m * pNode->mTransformation;
     m3dv_t vertex;
     m3dti_t ti;
 
     for(i = 0; i < pNode->mNumMeshes; i++) {
         const aiMesh *mesh = mScene->mMeshes[pNode->mMeshes[i]];
-
-        mi = (M3D_INDEX)-1U;
+        unsigned int mi = (M3D_INDEX)-1U;
         if(mScene->mMaterials) {
             // get the material for this mesh
             mi = addMaterial(mScene->mMaterials[mesh->mMaterialIndex]);
@@ -263,7 +262,7 @@ uint32_t M3DExporter::mkColor(aiColor4D* c)
 // add a material to the output
 M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
 {
-    unsigned int i, j, k, mi = -1U;
+    unsigned int i, j, mi = -1U;
     aiColor4D c;
     aiString name;
     ai_real f;
@@ -290,7 +289,7 @@ M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
             m3d->material[mi].numprop = 0;
             m3d->material[mi].prop = NULL;
             // iterate through the material property table and see what we got
-            for(k = 0;
+            for(unsigned int k = 0;
                 k < sizeof(m3d_propertytypes)/sizeof(m3d_propertytypes[0]);
                 k++) {
                 if(m3d_propertytypes[k].format == m3dpf_map)

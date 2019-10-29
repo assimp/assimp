@@ -486,7 +486,7 @@ void M3DImporter::importBones(unsigned int parentid, aiNode *pParent)
 // bone, so we have to convert between the two conceptually different representation forms
 void M3DImporter::importAnimations()
 {
-    unsigned int i, j, k, l, n, pos, ori;
+    unsigned int i, j, k, l, pos, ori;
     double t;
     m3da_t *a;
 
@@ -511,6 +511,7 @@ void M3DImporter::importAnimations()
         pAnim->mNumChannels = m3d->numbone;
         pAnim->mChannels = new aiNodeAnim*[pAnim->mNumChannels];
         for(l = 0; l < m3d->numbone; l++) {
+            unsigned int n;
             pAnim->mChannels[l] = new aiNodeAnim;
             pAnim->mChannels[l]->mNodeName = aiString(std::string(m3d->bone[l].name));
             // now n is the size of positions / orientations arrays
@@ -628,8 +629,7 @@ void M3DImporter::calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m)
 void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *vertices,
     std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
     std::vector<unsigned int> *vertexids) {
-    unsigned int i, j, k, s;
-    aiNode *pNode;
+    unsigned int i, j, k;
 
     ai_assert(pMesh != nullptr);
     ai_assert(faces != nullptr);
@@ -670,6 +670,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
         if(pMesh->mNumBones) {
             pMesh->mBones = new aiBone*[pMesh->mNumBones];
             for(i = 0; i < m3d->numbone; i++) {
+                aiNode *pNode;
                 pMesh->mBones[i] = new aiBone;
                 pMesh->mBones[i]->mName = aiString(std::string(m3d->bone[i].name));
                 pMesh->mBones[i]->mNumWeights = 0;
@@ -683,7 +684,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
             if(vertexids->size()) {
                 // first count how many vertices we have per bone
                 for(i = 0; i < vertexids->size(); i++) {
-                    s = m3d->vertex[vertexids->at(i)].skinid;
+                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
                     if(s != -1U && s!= -2U) {
                         for(k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
                                 aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
@@ -706,7 +707,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
                 }
                 // fill up with data
                 for(i = 0; i < vertexids->size(); i++) {
-                    s = m3d->vertex[vertexids->at(i)].skinid;
+                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
                     if(s != -1U && s!= -2U) {
                         for(k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
                                 aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));

@@ -358,7 +358,7 @@ namespace glTF2 {
             WriteVec(pbrSpecularGlossiness, pbrSG.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
 
             if (pbrSG.glossinessFactor != 1) {
-                WriteFloat(obj, pbrSG.glossinessFactor, "glossinessFactor", w.mAl);
+                WriteFloat(pbrSpecularGlossiness, pbrSG.glossinessFactor, "glossinessFactor", w.mAl);
             }
 
             WriteTex(pbrSpecularGlossiness, pbrSG.diffuseTexture, "diffuseTexture", w.mAl);

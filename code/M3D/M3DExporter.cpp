@@ -142,11 +142,10 @@ void M3DExporter::doExport (
     }
 
     // use malloc() here because m3d_free() will call free()
-    m3d = (m3d_t*)malloc(sizeof(m3d_t));
+    m3d = (m3d_t*)calloc(1, sizeof(m3d_t));
     if(!m3d) {
         throw DeadlyExportError( "memory allocation error" );
     }
-    memset(m3d, 0, sizeof(m3d_t));
     m3d->name = _m3d_safestr((char*)&mScene->mRootNode->mName.data, 2);
 
     // Create a model from assimp structures
@@ -201,7 +200,9 @@ void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
                 throw DeadlyExportError( "memory allocation error" );
             }
             /* set all index to -1 by default */
-            memset(&m3d->face[n], 255, sizeof(m3df_t));
+            m3d->face[n].vertex[0] = m3d->face[n].vertex[1] = m3d->face[n].vertex[2] =
+            m3d->face[n].normal[0] = m3d->face[n].normal[1] = m3d->face[n].normal[2] =
+            m3d->face[n].texcoord[0] = m3d->face[n].texcoord[1] = m3d->face[n].texcoord[2] = -1U;
             m3d->face[n].materialid = mi;
             for(k = 0; k < face->mNumIndices; k++) {
                 // get the vertex's index
@@ -209,11 +210,12 @@ void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
                 // multiply the position vector by the transformation matrix
                 aiVector3D v = mesh->mVertices[l];
                 v *= nm;
-                memset(&vertex, 0, sizeof(m3dv_t));
                 vertex.x = v.x;
                 vertex.y = v.y;
                 vertex.z = v.z;
                 vertex.w = 1.0;
+                vertex.color = 0;
+                vertex.skinid = -1U;
                 // add color if defined
                 if(mesh->HasVertexColors(0))
                     vertex.color = mkColor(&mesh->mColors[0][l]);
@@ -262,7 +264,7 @@ uint32_t M3DExporter::mkColor(aiColor4D* c)
 // add a material to the output
 M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
 {
-    unsigned int i, j, mi = -1U;
+    unsigned int i, mi = -1U;
     aiColor4D c;
     aiString name;
     ai_real f;
@@ -292,6 +294,7 @@ M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
             for(unsigned int k = 0;
                 k < sizeof(m3d_propertytypes)/sizeof(m3d_propertytypes[0]);
                 k++) {
+                unsigned int j;
                 if(m3d_propertytypes[k].format == m3dpf_map)
                     continue;
                 if(aiProps[k].pKey) {

@@ -74,6 +74,15 @@ typedef uint16_t M3D_INDEX;
 #ifndef M3D_BONEMAXLEVEL
 #define M3D_BONEMAXLEVEL 8
 #endif
+#ifndef _MSC_VER
+#define _inline __inline__
+#define _pack __attribute__((packed))
+#define _unused __attribute__((unused))
+#else
+#define _inline
+#define _pack
+#define _unused
+#endif
 
 /*** File format structures ***/
 
@@ -104,12 +113,12 @@ typedef struct {
     uint32_t length;
     float scale; /* deliberately not M3D_FLOAT */
     uint32_t types;
-} __attribute__((packed)) m3dhdr_t;
+} _pack m3dhdr_t;
 
 typedef struct {
     char magic[4];
     uint32_t length;
-} __attribute__((packed)) m3dchunk_t;
+} _pack m3dchunk_t;
 
 /*** in-memory model structure ***/
 
@@ -125,7 +134,7 @@ typedef struct {
     uint32_t *d;                /* pixels data */
     uint16_t w;                 /* width */
     uint16_t h;                 /* height */
-} __attribute__((packed)) m3dtx_t;
+} _pack m3dtx_t;
 
 typedef struct {
     M3D_INDEX vertexid;
@@ -179,7 +188,7 @@ typedef struct {
 #endif
 } m3dpd_t;
 
-/* material properties */
+/* material property types */
 /* You shouldn't change the first 8 display and first 4 physical property. Assign the rest as you like. */
 enum {
     m3dp_Kd = 0,                /* scalar display properties */
@@ -216,6 +225,7 @@ enum {                          /* aliases */
     m3dp_bump = m3dp_map_Km,
     m3dp_refl = m3dp_map_Pm
 };
+extern m3dpd_t m3d_propertytypes[];
 
 /* material property */
 typedef struct {
@@ -243,7 +253,7 @@ typedef struct {
     M3D_INDEX texcoord[3];      /* UV coordinates */
 } m3df_t;
 
-/* frame transformations entry */
+/* frame transformations / working copy skeleton entry */
 typedef struct {
     M3D_INDEX boneid;           /* selects a node in bone hierarchy */
     M3D_INDEX pos;              /* vertex index new position */
@@ -270,7 +280,7 @@ typedef struct {
     char *name;                 /* asset name (same pointer as in texture[].name) */
     uint8_t *data;              /* compressed asset data */
     uint32_t length;            /* compressed data length */
-} __attribute__((packed)) m3di_t;
+} m3di_t;
 
 /*** in-memory model structure ***/
 #define M3D_FLG_FREERAW     (1<<0)
@@ -374,8 +384,8 @@ char *_m3d_safestr(char *in, int morelines);
 /*** C implementation ***/
 #ifdef M3D_IMPLEMENTATION
 #if !defined(M3D_NOIMPORTER) || defined(M3D_EXPORTER)
-/* property definitions */
-static m3dpd_t m3d_propertytypes[] = {
+/* material property definitions */
+m3dpd_t m3d_propertytypes[] = {
     M3D_PROPERTYDEF(m3dpf_color, m3dp_Kd, "Kd"),    /* diffuse color */
     M3D_PROPERTYDEF(m3dpf_color, m3dp_Ka, "Ka"),    /* ambient color */
     M3D_PROPERTYDEF(m3dpf_color, m3dp_Ks, "Ks"),    /* specular color */
@@ -462,14 +472,14 @@ typedef struct
 #define STBI_FREE(p)              M3D_FREE(p)
 #define STBI_REALLOC_SIZED(p,oldsz,newsz) STBI_REALLOC(p,newsz)
 
-__inline__ static stbi_uc stbi__get8(stbi__context *s)
+_inline static stbi_uc stbi__get8(stbi__context *s)
 {
    if (s->img_buffer < s->img_buffer_end)
       return *s->img_buffer++;
    return 0;
 }
 
-__inline__ static int stbi__at_eof(stbi__context *s)
+_inline static int stbi__at_eof(stbi__context *s)
 {
    return s->img_buffer >= s->img_buffer_end;
 }
@@ -512,7 +522,7 @@ static int stbi__errstr(const char *str)
    return 0;
 }
 
-__inline__ static void *stbi__malloc(size_t size)
+_inline static void *stbi__malloc(size_t size)
 {
     return STBI_MALLOC(size);
 }
@@ -662,7 +672,7 @@ typedef struct
    stbi__uint16 value[288];
 } stbi__zhuffman;
 
-__inline__ static int stbi__bitreverse16(int n)
+_inline static int stbi__bitreverse16(int n)
 {
   n = ((n & 0xAAAA) >>  1) | ((n & 0x5555) << 1);
   n = ((n & 0xCCCC) >>  2) | ((n & 0x3333) << 2);
@@ -671,7 +681,7 @@ __inline__ static int stbi__bitreverse16(int n)
   return n;
 }
 
-__inline__ static int stbi__bit_reverse(int v, int bits)
+_inline static int stbi__bit_reverse(int v, int bits)
 {
    STBI_ASSERT(bits <= 16);
    return stbi__bitreverse16(v) >> (16-bits);
@@ -737,7 +747,7 @@ typedef struct
    stbi__zhuffman z_length, z_distance;
 } stbi__zbuf;
 
-__inline__ static stbi_uc stbi__zget8(stbi__zbuf *z)
+_inline static stbi_uc stbi__zget8(stbi__zbuf *z)
 {
    if (z->zbuffer >= z->zbuffer_end) return 0;
    return *z->zbuffer++;
@@ -752,7 +762,7 @@ static void stbi__fill_bits(stbi__zbuf *z)
    } while (z->num_bits <= 24);
 }
 
-__inline__ static unsigned int stbi__zreceive(stbi__zbuf *z, int n)
+_inline static unsigned int stbi__zreceive(stbi__zbuf *z, int n)
 {
    unsigned int k;
    if (z->num_bits < n) stbi__fill_bits(z);
@@ -777,7 +787,7 @@ static int stbi__zhuffman_decode_slowpath(stbi__zbuf *a, stbi__zhuffman *z)
    return z->value[b];
 }
 
-__inline__ static int stbi__zhuffman_decode(stbi__zbuf *a, stbi__zhuffman *z)
+_inline static int stbi__zhuffman_decode(stbi__zbuf *a, stbi__zhuffman *z)
 {
    int b,s;
    if (a->num_bits < 16) stbi__fill_bits(a);
@@ -915,7 +925,7 @@ static int stbi__compute_huffman_codes(stbi__zbuf *a)
    return 1;
 }
 
-__inline__ static int stbi__parse_uncompressed_block(stbi__zbuf *a)
+_inline static int stbi__parse_uncompressed_block(stbi__zbuf *a)
 {
    stbi_uc header[4];
    int len,nlen,k;
@@ -1034,7 +1044,7 @@ static stbi__pngchunk stbi__get_chunk_header(stbi__context *s)
    return c;
 }
 
-__inline__ static int stbi__check_png_header(stbi__context *s)
+_inline static int stbi__check_png_header(stbi__context *s)
 {
    static stbi_uc png_sig[8] = { 137,80,78,71,13,10,26,10 };
    int i;
@@ -2008,8 +2018,11 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
         s.read_from_callbacks = 0;
         s.img_buffer = s.img_buffer_original = (stbi_uc *) buff;
         s.img_buffer_end = s.img_buffer_original_end = (stbi_uc *) buff+len;
+        /* don't use model->texture[i].w directly, it's a uint16_t */
         w = h = 0;
         model->texture[i].d = (uint32_t*)stbi__png_load(&s, (int*)&w, (int*)&h, (int*)&len, STBI_rgb_alpha, &ri);
+        model->texture[i].w = w;
+        model->texture[i].h = h;
     } else {
 #ifdef M3D_TX_INTERP
         if((model->errcode = M3D_TX_INTERP(fn, buff, len, &model->texture[i])) != M3D_SUCCESS) {
@@ -2022,21 +2035,18 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
 #endif
     }
     if(freecb) (*freecb)(buff);
-    if(!model->texture[i].d || !w || !h) {
-        if(model->texture[i].d) M3D_FREE(model->texture[i].d);
+    if(!model->texture[i].d) {
+        M3D_FREE(model->texture[i].d);
         model->errcode = M3D_ERR_UNKIMG;
         model->numtexture--;
         return -1U;
     }
-    model->texture[i].w = w;
-    model->texture[i].h = h;
     model->texture[i].name = fn;
     return i;
 }
 
 /* helper function to load and generate a procedural surface */
-void _m3d_getpr(m3d_t *model, __attribute__((unused)) m3dread_t readfilecb, __attribute__((unused))  m3dfree_t freecb,
-    __attribute__((unused))  char *fn)
+void _m3d_getpr(m3d_t *model, _unused m3dread_t readfilecb, _unused  m3dfree_t freecb, _unused char *fn)
 {
 #ifdef M3D_PR_INTERP
     unsigned int i, len = 0;
@@ -2065,7 +2075,7 @@ void _m3d_getpr(m3d_t *model, __attribute__((unused)) m3dread_t readfilecb, __at
 }
 /* helpers to read indices from data stream */
 #define M3D_GETSTR(x) do{offs=0;data=_m3d_getidx(data,model->si_s,&offs);x=offs?((char*)model->raw+16+offs):NULL;}while(0)
-__inline__ static unsigned char *_m3d_getidx(unsigned char *data, char type, M3D_INDEX *idx)
+_inline static unsigned char *_m3d_getidx(unsigned char *data, char type, M3D_INDEX *idx)
 {
     switch(type) {
         case 1: *idx = data[0] > 253 ? (int8_t)data[0] : data[0]; data++; break;
@@ -2606,8 +2616,8 @@ asciiend:
         M3D_LOG("Double precision coordinates not supported, truncating to float...");
         model->errcode = M3D_ERR_TRUNC;
     }
-    if(sizeof(M3D_INDEX) == 2 && (model->vi_s > 2 || model->si_s == 4 || model->ci_s == 4 || model->ti_s == 4 ||
-        model->bi_s == 4 || model->sk_s == 4 || model->fi_s == 4)) {
+    if(sizeof(M3D_INDEX) == 2 && (model->vi_s > 2 || model->si_s > 2 || model->ci_s > 2 || model->ti_s > 2 ||
+        model->bi_s > 2 || model->sk_s > 2 || model->fi_s > 2)) {
         M3D_LOG("32 bit indices not supported, unable to load model");
         M3D_FREE(model);
         return NULL;
@@ -2667,15 +2677,16 @@ memerr:         M3D_LOG("Out of memory");
         /* color map */
         if(M3D_CHUNKMAGIC(data, 'C','M','A','P')) {
             M3D_LOG("Color map");
-            if(model->cmap) { M3D_LOG("More color map chunks, should be unique"); model->errcode = M3D_ERR_CMAP; break; }
-            if(model->ci_s >= 4) { M3D_LOG("Color map chunk, shouldn't be any"); model->errcode = M3D_ERR_CMAP; break; }
+            if(model->cmap) { M3D_LOG("More color map chunks, should be unique"); model->errcode = M3D_ERR_CMAP; continue; }
+            if(!model->ci_s) { M3D_LOG("Color map chunk, shouldn't be any"); model->errcode = M3D_ERR_CMAP; continue; }
             model->numcmap = len / sizeof(uint32_t);
             model->cmap = (uint32_t*)(data + sizeof(m3dchunk_t));
         } else
         /* texture map */
         if(M3D_CHUNKMAGIC(data, 'T','M','A','P')) {
             M3D_LOG("Texture map");
-            if(model->tmap) { M3D_LOG("More texture map chunks, should be unique"); model->errcode = M3D_ERR_TMAP; break; }
+            if(model->tmap) { M3D_LOG("More texture map chunks, should be unique"); model->errcode = M3D_ERR_TMAP; continue; }
+            if(!model->ti_s) { M3D_LOG("Texture map chunk, shouldn't be any"); model->errcode = M3D_ERR_TMAP; continue; }
             reclen = model->vc_s + model->vc_s;
             model->numtmap = len / reclen;
             model->tmap = (m3dti_t*)M3D_MALLOC(model->numtmap * sizeof(m3dti_t));
@@ -2705,7 +2716,7 @@ memerr:         M3D_LOG("Out of memory");
         /* vertex list */
         if(M3D_CHUNKMAGIC(data, 'V','R','T','S')) {
             M3D_LOG("Vertex list");
-            if(model->vertex) { M3D_LOG("More vertex chunks, should be unique"); model->errcode = M3D_ERR_VRTS; break; }
+            if(model->vertex) { M3D_LOG("More vertex chunks, should be unique"); model->errcode = M3D_ERR_VRTS; continue; }
             if(model->ci_s && model->ci_s < 4 && !model->cmap) model->errcode = M3D_ERR_CMAP;
             reclen = model->ci_s + model->sk_s + 4 * model->vc_s;
             model->numvertex = len / reclen;
@@ -2756,8 +2767,8 @@ memerr:         M3D_LOG("Out of memory");
         /* skeleton: bone hierarchy and skin */
         if(M3D_CHUNKMAGIC(data, 'B','O','N','E')) {
             M3D_LOG("Skeleton");
-            if(model->bone) { M3D_LOG("More bone chunks, should be unique"); model->errcode = M3D_ERR_BONE; break; }
-            if(model->bi_s > 4) { M3D_LOG("Bone chunk, shouldn't be any"); model->errcode=M3D_ERR_BONE; break; }
+            if(model->bone) { M3D_LOG("More bone chunks, should be unique"); model->errcode = M3D_ERR_BONE; continue; }
+            if(!model->bi_s) { M3D_LOG("Bone chunk, shouldn't be any"); model->errcode=M3D_ERR_BONE; continue; }
             if(!model->vertex) { M3D_LOG("No vertex chunk before bones"); model->errcode = M3D_ERR_VRTS; break; }
             data += sizeof(m3dchunk_t);
             model->numbone = 0;
@@ -3353,7 +3364,7 @@ static uint32_t _m3d_stridx(m3dstr_t *str, uint32_t numstr, char *s)
 }
 
 /* compare two colors by HSV value */
-__inline__ static int _m3d_cmapcmp(const void *a, const void *b)
+_inline static int _m3d_cmapcmp(const void *a, const void *b)
 {
     uint8_t *A = (uint8_t*)a,  *B = (uint8_t*)b;
     register int m, vA, vB;
@@ -4348,16 +4359,16 @@ namespace M3D {
             Model() {
                 this->model = (m3d_t*)malloc(sizeof(m3d_t)); memset(this->model, 0, sizeof(m3d_t));
             }
-            Model(__attribute__((unused)) const std::string &data, __attribute__((unused)) m3dread_t ReadFileCB,
-                __attribute__((unused)) m3dfree_t FreeCB, __attribute__((unused)) M3D::Model mtllib) {
+            Model(_unused const std::string &data, _unused m3dread_t ReadFileCB,
+                _unused m3dfree_t FreeCB, _unused M3D::Model mtllib) {
 #ifndef M3D_NOIMPORTER
                 this->model = m3d_load((unsigned char *)data.data(), ReadFileCB, FreeCB, mtllib.model);
 #else
                 Model();
 #endif
             }
-            Model(__attribute__((unused)) const std::vector<unsigned char> data, __attribute__((unused)) m3dread_t ReadFileCB,
-                __attribute__((unused)) m3dfree_t FreeCB, __attribute__((unused)) M3D::Model mtllib) {
+            Model(_unused const std::vector<unsigned char> data, _unused m3dread_t ReadFileCB,
+                _unused m3dfree_t FreeCB, _unused M3D::Model mtllib) {
 #ifndef M3D_NOIMPORTER
                 this->model = m3d_load((unsigned char *)&data[0], ReadFileCB, FreeCB, mtllib.model);
 #else
@@ -4459,7 +4470,7 @@ namespace M3D {
             std::vector<std::unique_ptr<m3dchunk_t>> getUnknowns() { return this->model->unknown ?
                 std::vector<std::unique_ptr<m3dchunk_t>>(this->model->unknown,
                 this->model->unknown + this->model->numunknown) : std::vector<std::unique_ptr<m3dchunk_t>>(); }
-            std::vector<unsigned char> Save(__attribute__((unused)) int quality, __attribute__((unused)) int flags) {
+            std::vector<unsigned char> Save(_unused int quality, _unused int flags) {
 #ifdef M3D_EXPORTER
                 unsigned int size;
                 unsigned char *ptr = m3d_save(this->model, quality, flags, &size);

@@ -629,7 +629,7 @@ void M3DImporter::calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m)
 void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *vertices,
     std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
     std::vector<unsigned int> *vertexids) {
-    unsigned int i, j, k;
+    unsigned int i, j;
 
     ai_assert(pMesh != nullptr);
     ai_assert(faces != nullptr);
@@ -684,7 +684,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
             if(vertexids->size()) {
                 // first count how many vertices we have per bone
                 for(i = 0; i < vertexids->size(); i++) {
-                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
+                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid, k;
                     if(s != -1U && s!= -2U) {
                         for(k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
                                 aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
@@ -707,7 +707,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
                 }
                 // fill up with data
                 for(i = 0; i < vertexids->size(); i++) {
-                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
+                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid, k;
                     if(s != -1U && s!= -2U) {
                         for(k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
                                 aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));

@@ -54,12 +54,17 @@ struct aiBone;
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
-/** ScaleProcess: Class to rescale the whole model.
- * Now rescales animations, bones, and blend shapes properly.
- * Please note this will not write to 'scale' transform it will rewrite mesh 
- * and matrixes so that your scale values 
- * from your model package are preserved, so this is completely intentional
- * bugs should be reported as soon as they are found.
+/** Armature Populate: This is a post process designed
+ * To save you time when importing models into your game engines
+ * This was originally designed only for fbx but will work with other formats
+ * it is intended to auto populate aiBone data with armature and the aiNode
+ * This is very useful when dealing with skinned meshes
+ * or when dealing with many different skeletons
+ * It's off by default but recommend that you try it and use it
+ * It should reduce down any glue code you have in your
+ * importers
+ * You can contact RevoluPowered <gordon@gordonite.tech>
+ * For more info about this
 */
 class ASSIMP_API ArmaturePopulate : public BaseProcess {
 public:

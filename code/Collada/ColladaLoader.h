@@ -94,7 +94,7 @@ public:
 public:
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details. */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
+    bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 protected:
     /** Return importer meta information.
@@ -183,9 +183,6 @@ protected:
     /** Resolves the texture name for the given effect texture entry */
     aiString FindFilenameForEffectTexture( const ColladaParser& pParser,
         const Collada::Effect& pEffect, const std::string& pName);
-
-    /** Converts a path read from a collada file to the usual representation */
-    void ConvertPath( aiString& ss);
 
     /** Reads a float value from an accessor and its data array.
      * @param pAccessor The accessor to use for reading

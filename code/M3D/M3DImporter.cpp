@@ -629,7 +629,6 @@ void M3DImporter::calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m)
 void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *vertices,
     std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
     std::vector<unsigned int> *vertexids) {
-    unsigned int i, j;
 
     ai_assert(pMesh != nullptr);
     ai_assert(faces != nullptr);
@@ -644,6 +643,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
         " numnormals ", normals->size(), " numtexcoord ", texcoords->size(), " numbones ", m3d->numbone);
 
     if(vertices->size() && faces->size()) {
+        unsigned int i;
         pMesh->mNumFaces = faces->size();
         pMesh->mFaces = new aiFace[pMesh->mNumFaces];
         std::copy(faces->begin(), faces->end(), pMesh->mFaces);
@@ -682,11 +682,12 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
                     pMesh->mBones[i]->mOffsetMatrix = aiMatrix4x4();
             }
             if(vertexids->size()) {
+                unsigned int j;
                 // first count how many vertices we have per bone
                 for(i = 0; i < vertexids->size(); i++) {
-                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid, k;
+                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
                     if(s != -1U && s!= -2U) {
-                        for(k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
+                        for(unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
                                 aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
                                 for(j = 0; j < pMesh->mNumBones; j++) {
                                     if(pMesh->mBones[j]->mName == name) {
@@ -707,9 +708,9 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
                 }
                 // fill up with data
                 for(i = 0; i < vertexids->size(); i++) {
-                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid, k;
+                    unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
                     if(s != -1U && s!= -2U) {
-                        for(k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
+                        for(unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
                                 aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
                                 for(j = 0; j < pMesh->mNumBones; j++) {
                                     if(pMesh->mBones[j]->mName == name) {

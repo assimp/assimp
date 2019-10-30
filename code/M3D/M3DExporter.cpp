@@ -264,7 +264,7 @@ uint32_t M3DExporter::mkColor(aiColor4D* c)
 // add a material to the output
 M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
 {
-    unsigned int i, mi = -1U;
+    unsigned int mi = -1U;
     aiColor4D c;
     aiString name;
     ai_real f;
@@ -274,13 +274,14 @@ M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
         strcmp((char*)&name.data, AI_DEFAULT_MATERIAL_NAME)) {
         // check if we have saved a material by this name. This has to be done
         // because only the referenced materials should be added to the output
-        for(i = 0; i < m3d->nummaterial; i++)
+        for(unsigned int i = 0; i < m3d->nummaterial; i++)
             if(!strcmp((char*)&name.data, m3d->material[i].name)) {
                 mi = i;
                 break;
             }
         // if not found, add the material to the output
         if(mi == -1U) {
+            unsigned int k;
             mi = m3d->nummaterial++;
             m3d->material = (m3dm_t*)M3D_REALLOC(m3d->material, m3d->nummaterial
                 * sizeof(m3dm_t));
@@ -291,9 +292,7 @@ M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
             m3d->material[mi].numprop = 0;
             m3d->material[mi].prop = NULL;
             // iterate through the material property table and see what we got
-            for(unsigned int k = 0;
-                k < sizeof(m3d_propertytypes)/sizeof(m3d_propertytypes[0]);
-                k++) {
+            for(k = 0; k < 15; k++) {
                 unsigned int j;
                 if(m3d_propertytypes[k].format == m3dpf_map)
                     continue;
@@ -341,6 +340,7 @@ M3D_INDEX M3DExporter::addMaterial(const aiMaterial *mat)
                     mat->GetTexture((aiTextureType)aiTxProps[k].type,
                         aiTxProps[k].index, &name, NULL, NULL, NULL,
                         NULL, NULL) == AI_SUCCESS) {
+                        unsigned int i;
                         for(j = name.length-1; j > 0 && name.data[j]!='.'; j++);
                         if(j && name.data[j]=='.' &&
                             (name.data[j+1]=='p' || name.data[j+1]=='P') &&

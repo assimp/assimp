@@ -643,7 +643,6 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
         " numnormals ", normals->size(), " numtexcoord ", texcoords->size(), " numbones ", m3d->numbone);
 
     if(vertices->size() && faces->size()) {
-        unsigned int i;
         pMesh->mNumFaces = faces->size();
         pMesh->mFaces = new aiFace[pMesh->mNumFaces];
         std::copy(faces->begin(), faces->end(), pMesh->mFaces);
@@ -669,7 +668,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
         /* we need aiBone with mOffsetMatrix for bones without weights as well */
         if(pMesh->mNumBones) {
             pMesh->mBones = new aiBone*[pMesh->mNumBones];
-            for(i = 0; i < m3d->numbone; i++) {
+            for(unsigned int i = 0; i < m3d->numbone; i++) {
                 aiNode *pNode;
                 pMesh->mBones[i] = new aiBone;
                 pMesh->mBones[i]->mName = aiString(std::string(m3d->bone[i].name));
@@ -682,7 +681,7 @@ void M3DImporter::populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::v
                     pMesh->mBones[i]->mOffsetMatrix = aiMatrix4x4();
             }
             if(vertexids->size()) {
-                unsigned int j;
+                unsigned int i, j;
                 // first count how many vertices we have per bone
                 for(i = 0; i < vertexids->size(); i++) {
                     unsigned int s = m3d->vertex[vertexids->at(i)].skinid;

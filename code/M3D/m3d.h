@@ -85,6 +85,7 @@ typedef uint16_t M3D_INDEX;
 #endif
 #ifndef  __cplusplus
 #define _register register
+#else
 #define _register
 #endif
 

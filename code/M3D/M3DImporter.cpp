@@ -96,13 +96,14 @@ static const aiImporterDesc desc = {
 
 // workaround: the SDK expects a C callback, but we want to use Assimp::IOSystem to implement that
 extern "C" {
-    struct Assimp::IOSystem* m3dimporter_pIOHandler;
+    void* m3dimporter_pIOHandler;
 
     unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
         ai_assert( nullptr != fn );
         ai_assert( nullptr != size );
         std::string file(fn);
-        std::unique_ptr<Assimp::IOStream> pStream( m3dimporter_pIOHandler->Open( file, "rb"));
+        std::unique_ptr<Assimp::IOStream> pStream(
+            (reinterpret_cast<Assimp::IOSystem*>(m3dimporter_pIOHandler))->Open( file, "rb"));
         size_t fileSize = pStream->FileSize();
         // should be allocated with malloc(), because the library will call free() to deallocate
         unsigned char *data = (unsigned char*)malloc(fileSize);
@@ -179,7 +180,8 @@ void M3DImporter::InternReadFile( const std::string &file, aiScene* pScene, IOSy
     if( fileSize < 8 ) {
         throw DeadlyImportError( "M3D-file " + file + " is too small." );
     }
-    unsigned char data[fileSize];
+    std::unique_ptr<unsigned char[]> _buffer (new unsigned char[fileSize]);
+    unsigned char *data( _buffer.get() );
     if(fileSize != pStream->Read(data,1,fileSize)) {
         throw DeadlyImportError( "Failed to read the file " + file + "." );
     }

@@ -1987,7 +1987,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
         i = strlen(fn);
         if(i < 5 || fn[i - 4] != '.') {
             fn2 = (char*)M3D_MALLOC(i + 5);
-            if(!fn2) { model->errcode = M3D_ERR_ALLOC; return -1U; }
+            if(!fn2) { model->errcode = M3D_ERR_ALLOC; return (M3D_INDEX)-1U; }
             memcpy(fn2, fn, i);
             memcpy(fn2+i, ".png", 5);
             buff = (*readfilecb)(fn2, &len);
@@ -2005,12 +2005,12 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
                 break;
             }
     }
-    if(!buff) return -1U;
+    if(!buff) return (M3D_INDEX)-1U;
     i = model->numtexture++;
     model->texture = (m3dtx_t*)M3D_REALLOC(model->texture, model->numtexture * sizeof(m3dtx_t));
     if(!model->texture) {
         if(freecb) (*freecb)(buff);
-        model->errcode = M3D_ERR_ALLOC; return -1U;
+        model->errcode = M3D_ERR_ALLOC; return (M3D_INDEX)-1U;
     }
     model->texture[i].w = model->texture[i].h = 0; model->texture[i].d = NULL;
     if(buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
@@ -2038,7 +2038,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
         M3D_FREE(model->texture[i].d);
         model->errcode = M3D_ERR_UNKIMG;
         model->numtexture--;
-        return -1U;
+        return (M3D_INDEX)-1U;
     }
     model->texture[i].name = fn;
     return i;
@@ -3198,7 +3198,7 @@ m3db_t *m3d_pose(m3d_t *model, M3D_INDEX actionid, uint32_t msec)
                     p = &model->vertex[ret[i].ori];
                     f = &model->vertex[tmp[i].ori];
                     v = &model->vertex[j];
-                    d = (p->w * f->w + p->x * f->x + p->y * f->y + p->z * f->z < 0) ? -1 : 1;
+                    d = (p->w * f->w + p->x * f->x + p->y * f->y + p->z * f->z < 0) ? (M3D_FLOAT)-1.0 : (M3D_FLOAT)1.0;
                     v->x = p->x + t * (d*f->x - p->x);
                     v->y = p->y + t * (d*f->y - p->y);
                     v->z = p->z + t * (d*f->z - p->z);
@@ -4419,7 +4419,7 @@ namespace M3D {
                         !this->model->material[idx].prop) return -1.0f;
                     for (int i = 0; i < this->model->material[idx].numprop; i++) {
                         if (this->model->material[idx].prop[i].type == type)
-                            return this->model->material[idx].prop[i].value.num;
+                            return this->model->material[idx].prop[i].value.fnum;
                     }
                     return -1.0f;
                 }

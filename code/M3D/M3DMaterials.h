@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * only once. D.R.Y. and K.I.S.S.
  */
 typedef struct {
-    char *pKey;
+    const char *pKey;
     unsigned int type;
     unsigned int index;
 } aiMatProp;

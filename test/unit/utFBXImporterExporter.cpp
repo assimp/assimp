@@ -76,6 +76,7 @@ TEST_F( utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords ) {
     EXPECT_EQ(mesh->mNumVertices, 36u);
 }
 
+
 TEST_F(utFBXImporterExporter, importCubesWithNoNames) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/cubes_nonames.fbx", aiProcess_ValidateDataStructure);
@@ -86,26 +87,6 @@ TEST_F(utFBXImporterExporter, importCubesWithNoNames) {
     ASSERT_STREQ(root->mName.C_Str(), "RootNode");
     ASSERT_TRUE(root->mChildren);
     ASSERT_EQ(root->mNumChildren, 2u);
-
-    const auto child0 = root->mChildren[0];
-    ASSERT_TRUE(child0);
-    ASSERT_STREQ(child0->mName.C_Str(), "RootNode001");
-    ASSERT_TRUE(child0->mChildren);
-    ASSERT_EQ(child0->mNumChildren, 1u);
-
-    const auto child00 = child0->mChildren[0];
-    ASSERT_TRUE(child00);
-    ASSERT_STREQ(child00->mName.C_Str(), "RootNode001001");
-
-    const auto child1 = root->mChildren[1];
-    ASSERT_TRUE(child1);
-    ASSERT_STREQ(child1->mName.C_Str(), "RootNode002");
-    ASSERT_TRUE(child1->mChildren);
-    ASSERT_EQ(child1->mNumChildren, 1u);
-
-    const auto child10 = child1->mChildren[0];
-    ASSERT_TRUE(child10);
-    ASSERT_STREQ(child10->mName.C_Str(), "RootNode002001");
 }
 
 TEST_F(utFBXImporterExporter, importCubesWithUnicodeDuplicatedNames) {
@@ -137,7 +118,7 @@ TEST_F(utFBXImporterExporter, importCubesWithUnicodeDuplicatedNames) {
 
     const auto child10 = child1->mChildren[0];
     ASSERT_TRUE(child10);
-    ASSERT_STREQ(child10->mName.C_Str(), "\xd0\x9a\xd1\x83\xd0\xb1\x31""001");
+    ASSERT_STREQ(child10->mName.C_Str(), "\xd0\x9a\xd1\x83\xd0\xb1\x31");
 }
 
 TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
@@ -168,14 +149,14 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
     auto parent = child1;
     const size_t chain_length = 8u;
     const char* chainStr[chain_length] = {
-        "Cube1001_$AssimpFbx$_Translation",
-        "Cube1001_$AssimpFbx$_RotationPivot",
-        "Cube1001_$AssimpFbx$_RotationPivotInverse",
-        "Cube1001_$AssimpFbx$_ScalingOffset",
-        "Cube1001_$AssimpFbx$_ScalingPivot",
-        "Cube1001_$AssimpFbx$_Scaling",
-        "Cube1001_$AssimpFbx$_ScalingPivotInverse",
-        "Cube1001"
+        "Cube1_$AssimpFbx$_Translation",
+        "Cube1_$AssimpFbx$_RotationPivot",
+        "Cube1_$AssimpFbx$_RotationPivotInverse",
+        "Cube1_$AssimpFbx$_ScalingOffset",
+        "Cube1_$AssimpFbx$_ScalingPivot",
+        "Cube1_$AssimpFbx$_Scaling",
+        "Cube1_$AssimpFbx$_ScalingPivotInverse",
+        "Cube1"
     };
     for (size_t i = 0; i < chain_length; ++i) {
         ASSERT_TRUE(parent->mChildren);

@@ -83,6 +83,10 @@ typedef uint16_t M3D_INDEX;
 #define _pack
 #define _unused
 #endif
+#ifndef  __cplusplus
+#define _register register
+#define _register
+#endif
 
 /*** File format structures ***/
 
@@ -3366,7 +3370,7 @@ static uint32_t _m3d_stridx(m3dstr_t *str, uint32_t numstr, char *s)
 _inline static int _m3d_cmapcmp(const void *a, const void *b)
 {
     uint8_t *A = (uint8_t*)a,  *B = (uint8_t*)b;
-    register int m, vA, vB;
+    _register int m, vA, vB;
     /* get HSV value for A */
     m = A[2] < A[1]? A[2] : A[1]; if(A[0] < m) m = A[0];
     vA = A[2] > A[1]? A[2] : A[1]; if(A[0] > vA) vA = A[0];
@@ -3464,7 +3468,7 @@ static unsigned char *_m3d_addidx(unsigned char *out, char type, uint32_t idx) {
 /* round a vertex position */
 static void _m3d_round(int quality, m3dv_t *src, m3dv_t *dst)
 {
-    register int t;
+    _register int t;
     /* copy additional attributes */
     if(src != dst) memcpy(dst, src, sizeof(m3dv_t));
     /* round according to quality */
@@ -3518,7 +3522,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     char *sn = NULL, *sl = NULL, *sa = NULL, *sd = NULL;
     unsigned char *out = NULL, *z = NULL, weights[M3D_NUMBONE];
     unsigned int i, j, k, l, len, chunklen, *length;
-    register float scale = 0.0f, min_x, max_x, min_y, max_y, min_z, max_z;
+    float scale = 0.0f, min_x, max_x, min_y, max_y, min_z, max_z;
     uint32_t idx, numcmap = 0, *cmap = NULL, numvrtx = 0, numtmap = 0, numbone = 0;
     uint32_t numskin = 0, numactn = 0, *actn = NULL, numstr = 0, nummtrl = 0, maxt = 0;
     m3dstr_t *str = NULL;

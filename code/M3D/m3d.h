@@ -225,7 +225,6 @@ enum {                          /* aliases */
     m3dp_bump = m3dp_map_Km,
     m3dp_refl = m3dp_map_Pm
 };
-extern m3dpd_t m3d_propertytypes[];
 
 /* material property */
 typedef struct {
@@ -385,7 +384,7 @@ char *_m3d_safestr(char *in, int morelines);
 #ifdef M3D_IMPLEMENTATION
 #if !defined(M3D_NOIMPORTER) || defined(M3D_EXPORTER)
 /* material property definitions */
-m3dpd_t m3d_propertytypes[] = {
+static m3dpd_t m3d_propertytypes[] = {
     M3D_PROPERTYDEF(m3dpf_color, m3dp_Kd, "Kd"),    /* diffuse color */
     M3D_PROPERTYDEF(m3dpf_color, m3dp_Ka, "Ka"),    /* ambient color */
     M3D_PROPERTYDEF(m3dpf_color, m3dp_Ks, "Ks"),    /* specular color */

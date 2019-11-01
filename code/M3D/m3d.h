@@ -1899,26 +1899,7 @@ static char *_m3d_getfloat(char *s, M3D_FLOAT *ret)
     return _m3d_findarg(e);
 }
 #endif
-#if !defined(M3D_NODUP) && (defined(M3D_ASCII) || defined(M3D_EXPORTER))
-m3ds_t *_m3d_addskin(m3ds_t *skin, uint32_t *numskin, m3ds_t *s, uint32_t *idx)
-{
-    uint32_t i;
-    M3D_FLOAT w = (M3D_FLOAT)0.0;
-    for(i = 0; i < M3D_NUMBONE && s->weight[i] > (M3D_FLOAT)0.0; i++)
-        w += s->weight[i];
-    if(w != (M3D_FLOAT)1.0 && w != (M3D_FLOAT)0.0)
-        for(i = 0; i < M3D_NUMBONE && s->weight[i] > (M3D_FLOAT)0.0; i++)
-            s->weight[i] /= w;
-    if(skin) {
-        for(i = 0; i < *numskin; i++)
-            if(!memcmp(&skin[i], s, sizeof(m3ds_t))) { *idx = i; return skin; }
-    }
-    skin = (m3ds_t*)M3D_REALLOC(skin, ((*numskin) + 1) * sizeof(m3ds_t));
-    memcpy(&skin[*numskin], s, sizeof(m3ds_t));
-    *idx = *numskin;
-    (*numskin)++;
-    return skin;
-}
+#if !defined(M3D_NODUP) && (!defined(M3D_NONORMALS) || defined(M3D_EXPORTER))
 /* add vertex to list, only compare x,y,z */
 m3dv_t *_m3d_addnorm(m3dv_t *vrtx, uint32_t *numvrtx, m3dv_t *v, uint32_t *idx)
 {
@@ -1938,6 +1919,27 @@ m3dv_t *_m3d_addnorm(m3dv_t *vrtx, uint32_t *numvrtx, m3dv_t *v, uint32_t *idx)
     *idx = *numvrtx;
     (*numvrtx)++;
     return vrtx;
+}
+#endif
+#if !defined(M3D_NODUP) && (defined(M3D_ASCII) || defined(M3D_EXPORTER))
+m3ds_t *_m3d_addskin(m3ds_t *skin, uint32_t *numskin, m3ds_t *s, uint32_t *idx)
+{
+    uint32_t i;
+    M3D_FLOAT w = (M3D_FLOAT)0.0;
+    for(i = 0; i < M3D_NUMBONE && s->weight[i] > (M3D_FLOAT)0.0; i++)
+        w += s->weight[i];
+    if(w != (M3D_FLOAT)1.0 && w != (M3D_FLOAT)0.0)
+        for(i = 0; i < M3D_NUMBONE && s->weight[i] > (M3D_FLOAT)0.0; i++)
+            s->weight[i] /= w;
+    if(skin) {
+        for(i = 0; i < *numskin; i++)
+            if(!memcmp(&skin[i], s, sizeof(m3ds_t))) { *idx = i; return skin; }
+    }
+    skin = (m3ds_t*)M3D_REALLOC(skin, ((*numskin) + 1) * sizeof(m3ds_t));
+    memcpy(&skin[*numskin], s, sizeof(m3ds_t));
+    *idx = *numskin;
+    (*numskin)++;
+    return skin;
 }
 /* helper function to create safe strings */
 char *_m3d_safestr(char *in, int morelines)
@@ -2089,19 +2091,6 @@ _inline static unsigned char *_m3d_getidx(unsigned char *data, char type, M3D_IN
     return data;
 }
 
-/* fast inverse square root calculation. returns 1/sqrt(x) */
-static M3D_FLOAT _m3d_rsq(M3D_FLOAT x)
-{
-#ifdef M3D_DOUBLE
-    return ((M3D_FLOAT)15.0/(M3D_FLOAT)8.0) + ((M3D_FLOAT)-5.0/(M3D_FLOAT)4.0)*x + ((M3D_FLOAT)3.0/(M3D_FLOAT)8.0)*x*x;
-#else
-    /* John Carmack's */
-    float x2 = x * 0.5f;
-    *((uint32_t*)&x) = (0x5f3759df - (*((uint32_t*)&x) >> 1));
-    return x * (1.5f - (x2 * x * x));
-#endif
-}
-
 #ifndef M3D_NOANIMATION
 /* multiply 4 x 4 matrices. Do not use float *r[16] as argument, because some compilers misinterpret that as
  * 16 pointers each pointing to a float, but we need a single pointer to 16 floats. */
@@ -2176,6 +2165,20 @@ void _m3d_mat(M3D_FLOAT *r, m3dv_t *p, m3dv_t *q)
     r[12] = 0; r[13] = 0; r[14] = 0; r[15] = 1;
 }
 #endif
+#if !defined(M3D_NOANIMATION) || !defined(M3D_NONORMALS)
+/* fast inverse square root calculation. returns 1/sqrt(x) */
+static M3D_FLOAT _m3d_rsq(M3D_FLOAT x)
+{
+#ifdef M3D_DOUBLE
+    return ((M3D_FLOAT)15.0/(M3D_FLOAT)8.0) + ((M3D_FLOAT)-5.0/(M3D_FLOAT)4.0)*x + ((M3D_FLOAT)3.0/(M3D_FLOAT)8.0)*x*x;
+#else
+    /* John Carmack's */
+    float x2 = x * 0.5f;
+    *((uint32_t*)&x) = (0x5f3759df - (*((uint32_t*)&x) >> 1));
+    return x * (1.5f - (x2 * x * x));
+#endif
+}
+#endif
 
 /**
  * Function to decode a Model 3D into in-memory format
@@ -2183,12 +2186,19 @@ void _m3d_mat(M3D_FLOAT *r, m3dv_t *p, m3dv_t *q)
 m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d_t *mtllib)
 {
     unsigned char *end, *chunk, *buff, weights[8];
-    unsigned int i, j, k, n, am, len = 0, reclen, offs, numnorm = 0;
+    unsigned int i, j, k, n, am, len = 0, reclen, offs;
     char *material;
+#ifndef M3D_NONORMALS
+    unsigned int numnorm = 0;
     m3dv_t *norm = NULL, *v0, *v1, *v2, va, vb, vn;
+    M3D_INDEX *ni = NULL, *vi = NULL;
+#endif
     m3d_t *model;
-    M3D_INDEX mi, *ni = NULL, *vi = NULL;
-    M3D_FLOAT w, r[16];
+    M3D_INDEX mi;
+    M3D_FLOAT w;
+#ifndef M3D_NOANIMATION
+    M3D_FLOAT r[16];
+#endif
     m3dtx_t *tx;
     m3dm_t *m;
     m3da_t *a;
@@ -3000,8 +3010,11 @@ memerr:         M3D_LOG("Out of memory");
         }
     }
     /* calculate normals, normalize skin weights, create bone/vertex cross-references and calculate transform matrices */
+#ifdef M3D_ASCII
 postprocess:
+#endif
     if(model) {
+#ifndef M3D_NONORMALS
         if(model->numface && model->face) {
             memset(&vn, 0, sizeof(m3dv_t));
             /* if they are missing, calculate triangle normals into a temporary buffer */
@@ -3049,7 +3062,9 @@ postprocess:
                 M3D_FREE(vi);
             }
         }
+#endif
         if(model->numbone && model->bone && model->numskin && model->skin && model->numvertex && model->vertex) {
+#ifndef M3D_NOWEIGHTS
             for(i = 0; i < model->numvertex; i++) {
                 if(model->vertex[i].skinid < M3D_INDEXMAX) {
                     sk = &model->skin[model->vertex[i].skinid];
@@ -3067,6 +3082,7 @@ postprocess:
                     }
                 }
             }
+#endif
 #ifndef M3D_NOANIMATION
             for(i = 0; i < model->numbone; i++) {
                 b = &model->bone[i];
@@ -4317,7 +4333,7 @@ memerr: if(face) M3D_FREE(face);
         /* zlib compress */
         if(!(flags & M3D_EXP_NOZLIB)) {
             z = stbi_zlib_compress((unsigned char *)h, len, (int*)&l, 9);
-            if(z && l > 0) { len = l; M3D_FREE(h); h = (m3dhdr_t*)z; }
+            if(z && l > 0 && l < len) { len = l; M3D_FREE(h); h = (m3dhdr_t*)z; }
         }
         /* add file header at the begining */
         len += 8;
@@ -4346,7 +4362,7 @@ memerr: if(face) M3D_FREE(face);
 
 #ifdef  __cplusplus
 }
-
+#ifdef M3D_CPPWRAPPER
 #include <vector>
 #include <string>
 #include <memory>
@@ -4538,6 +4554,7 @@ namespace M3D {
 
 #endif /* impl */
 }
+#endif
 
 #endif /* __cplusplus */
 

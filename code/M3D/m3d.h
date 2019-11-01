@@ -2144,6 +2144,10 @@ void _m3d_inv(M3D_FLOAT *m)
     memcpy(m, &r, sizeof(r));
 }
 /* compose a coloumn major 4 x 4 matrix from vec3 position and vec4 orientation/rotation quaternion */
+#ifndef M3D_EPSILON
+/* carefully choosen for IEEE 754 don't change */
+#define M3D_EPSILON ((M3D_FLOAT)1e-7)
+#endif
 void _m3d_mat(M3D_FLOAT *r, m3dv_t *p, m3dv_t *q)
 {
     if(q->x == (M3D_FLOAT)0.0 && q->y == (M3D_FLOAT)0.0 && q->z >=(M3D_FLOAT) 0.7071065 && q->z <= (M3D_FLOAT)0.7071075 &&
@@ -2151,15 +2155,15 @@ void _m3d_mat(M3D_FLOAT *r, m3dv_t *p, m3dv_t *q)
         r[ 1] = r[ 2] = r[ 4] = r[ 6] = r[ 8] = r[ 9] = (M3D_FLOAT)0.0;
         r[ 0] = r[ 5] = r[10] = (M3D_FLOAT)-1.0;
     } else {
-        r[ 0] = 1 - 2 * (q->y * q->y + q->z * q->z); if(r[ 0]>(M3D_FLOAT)-1e-7 && r[ 0]<(M3D_FLOAT)1e-7) r[ 0]=(M3D_FLOAT)0.0;
-        r[ 1] = 2 * (q->x * q->y - q->z * q->w);     if(r[ 1]>(M3D_FLOAT)-1e-7 && r[ 1]<(M3D_FLOAT)1e-7) r[ 1]=(M3D_FLOAT)0.0;
-        r[ 2] = 2 * (q->x * q->z + q->y * q->w);     if(r[ 2]>(M3D_FLOAT)-1e-7 && r[ 2]<(M3D_FLOAT)1e-7) r[ 2]=(M3D_FLOAT)0.0;
-        r[ 4] = 2 * (q->x * q->y + q->z * q->w);     if(r[ 4]>(M3D_FLOAT)-1e-7 && r[ 4]<(M3D_FLOAT)1e-7) r[ 4]=(M3D_FLOAT)0.0;
-        r[ 5] = 1 - 2 * (q->x * q->x + q->z * q->z); if(r[ 5]>(M3D_FLOAT)-1e-7 && r[ 5]<(M3D_FLOAT)1e-7) r[ 5]=(M3D_FLOAT)0.0;
-        r[ 6] = 2 * (q->y * q->z - q->x * q->w);     if(r[ 6]>(M3D_FLOAT)-1e-7 && r[ 6]<(M3D_FLOAT)1e-7) r[ 6]=(M3D_FLOAT)0.0;
-        r[ 8] = 2 * (q->x * q->z - q->y * q->w);     if(r[ 8]>(M3D_FLOAT)-1e-7 && r[ 8]<(M3D_FLOAT)1e-7) r[ 8]=(M3D_FLOAT)0.0;
-        r[ 9] = 2 * (q->y * q->z + q->x * q->w);     if(r[ 9]>(M3D_FLOAT)-1e-7 && r[ 9]<(M3D_FLOAT)1e-7) r[ 9]=(M3D_FLOAT)0.0;
-        r[10] = 1 - 2 * (q->x * q->x + q->y * q->y); if(r[10]>(M3D_FLOAT)-1e-7 && r[10]<(M3D_FLOAT)1e-7) r[10]=(M3D_FLOAT)0.0;
+        r[ 0] = 1 - 2 * (q->y * q->y + q->z * q->z); if(r[ 0]>-M3D_EPSILON && r[ 0]<M3D_EPSILON) r[ 0]=(M3D_FLOAT)0.0;
+        r[ 1] = 2 * (q->x * q->y - q->z * q->w);     if(r[ 1]>-M3D_EPSILON && r[ 1]<M3D_EPSILON) r[ 1]=(M3D_FLOAT)0.0;
+        r[ 2] = 2 * (q->x * q->z + q->y * q->w);     if(r[ 2]>-M3D_EPSILON && r[ 2]<M3D_EPSILON) r[ 2]=(M3D_FLOAT)0.0;
+        r[ 4] = 2 * (q->x * q->y + q->z * q->w);     if(r[ 4]>-M3D_EPSILON && r[ 4]<M3D_EPSILON) r[ 4]=(M3D_FLOAT)0.0;
+        r[ 5] = 1 - 2 * (q->x * q->x + q->z * q->z); if(r[ 5]>-M3D_EPSILON && r[ 5]<M3D_EPSILON) r[ 5]=(M3D_FLOAT)0.0;
+        r[ 6] = 2 * (q->y * q->z - q->x * q->w);     if(r[ 6]>-M3D_EPSILON && r[ 6]<M3D_EPSILON) r[ 6]=(M3D_FLOAT)0.0;
+        r[ 8] = 2 * (q->x * q->z - q->y * q->w);     if(r[ 8]>-M3D_EPSILON && r[ 8]<M3D_EPSILON) r[ 8]=(M3D_FLOAT)0.0;
+        r[ 9] = 2 * (q->y * q->z + q->x * q->w);     if(r[ 9]>-M3D_EPSILON && r[ 9]<M3D_EPSILON) r[ 9]=(M3D_FLOAT)0.0;
+        r[10] = 1 - 2 * (q->x * q->x + q->y * q->y); if(r[10]>-M3D_EPSILON && r[10]<M3D_EPSILON) r[10]=(M3D_FLOAT)0.0;
     }
     r[ 3] = p->x; r[ 7] = p->y; r[11] = p->z;
     r[12] = 0; r[13] = 0; r[14] = 0; r[15] = 1;

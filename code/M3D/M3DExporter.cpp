@@ -173,12 +173,9 @@ void M3DExporter::doExport (
 // recursive node walker
 void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
 {
-    unsigned int i, j, k, l, n, idx;
     aiMatrix4x4 nm = m * pNode->mTransformation;
-    m3dv_t vertex;
-    m3dti_t ti;
 
-    for(i = 0; i < pNode->mNumMeshes; i++) {
+    for(unsigned int i = 0; i < pNode->mNumMeshes; i++) {
         const aiMesh *mesh = mScene->mMeshes[pNode->mMeshes[i]];
         unsigned int mi = (M3D_INDEX)-1U;
         if(mScene->mMaterials) {
@@ -186,7 +183,8 @@ void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
             mi = addMaterial(mScene->mMaterials[mesh->mMaterialIndex]);
         }
         // iterate through the mesh faces
-        for(j = 0; j < mesh->mNumFaces; j++) {
+        for(unsigned int j = 0; j < mesh->mNumFaces; j++) {
+            unsigned int n;
             const aiFace* face = &(mesh->mFaces[j]);
             // only triangle meshes supported for now
             if(face->mNumIndices != 3) {
@@ -204,9 +202,12 @@ void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
             m3d->face[n].normal[0] = m3d->face[n].normal[1] = m3d->face[n].normal[2] =
             m3d->face[n].texcoord[0] = m3d->face[n].texcoord[1] = m3d->face[n].texcoord[2] = -1U;
             m3d->face[n].materialid = mi;
-            for(k = 0; k < face->mNumIndices; k++) {
+            for(unsigned int k = 0; k < face->mNumIndices; k++) {
                 // get the vertex's index
-                l = face->mIndices[k];
+                unsigned int l = face->mIndices[k];
+                unsigned int idx;
+                m3dv_t vertex;
+                m3dti_t ti;
                 // multiply the position vector by the transformation matrix
                 aiVector3D v = mesh->mVertices[l];
                 v *= nm;
@@ -245,7 +246,7 @@ void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
         }
     }
     // repeat for the children nodes
-    for (i = 0; i < pNode->mNumChildren; i++) {
+    for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
         NodeWalk(pNode->mChildren[i], nm);
     }
 }

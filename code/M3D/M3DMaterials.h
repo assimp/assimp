@@ -60,7 +60,7 @@ typedef struct {
 } aiMatProp;
 
 /* --- Scalar Properties ---        !!!!! must match m3d_propertytypes !!!!! */
-static aiMatProp aiProps[] = {
+static const aiMatProp aiProps[] = {
     { AI_MATKEY_COLOR_DIFFUSE },                                /* m3dp_Kd */
     { AI_MATKEY_COLOR_AMBIENT },                                /* m3dp_Ka */
     { AI_MATKEY_COLOR_SPECULAR },                               /* m3dp_Ks */
@@ -82,7 +82,7 @@ static aiMatProp aiProps[] = {
 };
 
 /* --- Texture Map Properties ---   !!!!! must match m3d_propertytypes !!!!! */
-static aiMatProp aiTxProps[] = {
+static const aiMatProp aiTxProps[] = {
     { AI_MATKEY_TEXTURE_DIFFUSE(0) },                        /* m3dp_map_Kd */
     { AI_MATKEY_TEXTURE_AMBIENT(0) },                        /* m3dp_map_Ka */
     { AI_MATKEY_TEXTURE_SPECULAR(0) },                       /* m3dp_map_Ks */

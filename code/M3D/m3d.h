@@ -2085,8 +2085,8 @@ _inline static unsigned char *_m3d_getidx(unsigned char *data, char type, M3D_IN
 {
     switch(type) {
         case 1: *idx = data[0] > 253 ? (int8_t)data[0] : data[0]; data++; break;
-        case 2: *idx = *((uint16_t*)data) > 65533 ? *((int16_t*)data) : *((uint16_t*)data); data += 2; break;
-        case 4: *idx = *((int32_t*)data); data += 4; break;
+        case 2: *idx = (uint16_t)((data[1]<<8)|data[0]) > 65533 ? (int16_t)((data[1]<<8)|data[0]) : (uint16_t)((data[1]<<8)|data[0]); data += 2; break;
+        case 4: *idx = (int32_t)((data[3]<<24)|(data[2]<<16)|(data[1]<<8)|data[0]); data += 4; break;
     }
     return data;
 }
@@ -2751,10 +2751,10 @@ memerr:         M3D_LOG("Out of memory");
                         data += 4;
                     break;
                     case 2:
-                        model->vertex[i].x = (M3D_FLOAT)(*((int16_t*)(data+0))) / 32767;
-                        model->vertex[i].y = (M3D_FLOAT)(*((int16_t*)(data+2))) / 32767;
-                        model->vertex[i].z = (M3D_FLOAT)(*((int16_t*)(data+4))) / 32767;
-                        model->vertex[i].w = (M3D_FLOAT)(*((int16_t*)(data+6))) / 32767;
+                        model->vertex[i].x = (M3D_FLOAT)((int16_t)((data[1]<<8)|data[0])) / 32767;
+                        model->vertex[i].y = (M3D_FLOAT)((int16_t)((data[3]<<8)|data[2])) / 32767;
+                        model->vertex[i].z = (M3D_FLOAT)((int16_t)((data[5]<<8)|data[4])) / 32767;
+                        model->vertex[i].w = (M3D_FLOAT)((int16_t)((data[7]<<8)|data[6])) / 32767;
                         data += 8;
                     break;
                     case 4:

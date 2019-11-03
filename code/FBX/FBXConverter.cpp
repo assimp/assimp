@@ -97,6 +97,14 @@ namespace Assimp {
             // populate the node_anim_chain_bits map, which is needed
             // to determine which nodes need to be generated.
             ConvertAnimations();
+            // Embedded textures in FBX could be connected to nothing but to itself,
+            // for instance Texture -> Video connection only but not to the main graph,
+            // The idea here is to traverse all objects to find these Textures and convert them,
+            // so later during material conversion it will find converted texture in the textures_converted array.
+            if (doc.Settings().readTextures)
+            {
+                ConvertOrphantEmbeddedTextures();
+            }
             ConvertRootNode();
 
             if (doc.Settings().readAllMaterials) {
@@ -1774,7 +1782,7 @@ namespace Assimp {
                 bool textureReady = false; //tells if our texture is ready (if it was loaded or if it was found)
                 unsigned int index;
 
-                VideoMap::const_iterator it = textures_converted.find(media);
+                VideoMap::const_iterator it = textures_converted.find(*media);
                 if (it != textures_converted.end()) {
                     index = (*it).second;
                     textureReady = true;
@@ -1782,7 +1790,7 @@ namespace Assimp {
                 else {
                     if (media->ContentLength() > 0) {
                         index = ConvertVideo(*media);
-                        textures_converted[media] = index;
+                        textures_converted[*media] = index;
                         textureReady = true;
                     }
                 }
@@ -2306,13 +2314,13 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             if (media != nullptr && media->ContentLength() > 0) {
                 unsigned int index;
 
-                VideoMap::const_iterator it = textures_converted.find(media);
+                VideoMap::const_iterator it = textures_converted.find(*media);
                 if (it != textures_converted.end()) {
                     index = (*it).second;
                 }
                 else {
                     index = ConvertVideo(*media);
-                    textures_converted[media] = index;
+                    textures_converted[*media] = index;
                 }
 
                 // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
@@ -3663,6 +3671,47 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 out->mNumTextures = static_cast<unsigned int>(textures.size());
 
                 std::swap_ranges(textures.begin(), textures.end(), out->mTextures);
+            }
+        }
+
+        void FBXConverter::ConvertOrphantEmbeddedTextures()
+        {
+            // in C++14 it could be:
+            // for (auto&& [id, object] : objects)
+            for (auto&& id_and_object : doc.Objects())
+            {
+                auto&& id = std::get<0>(id_and_object);
+                auto&& object = std::get<1>(id_and_object);
+                // If an object doesn't have parent
+                if (doc.ConnectionsBySource().count(id) == 0)
+                {
+                    const Texture* realTexture = nullptr;
+                    try
+                    {
+                        const auto& element = object->GetElement();
+                        const Token& key = element.KeyToken();
+                        const char* obtype = key.begin();
+                        const size_t length = static_cast<size_t>(key.end() - key.begin());
+                        if (strncmp(obtype, "Texture", length) == 0)
+                        {
+                            const Texture* texture = static_cast<const Texture*>(object->Get());
+                            if (texture->Media() && texture->Media()->ContentLength() > 0)
+                            {
+                                realTexture = texture;
+                            }
+                        }
+                    }
+                    catch (...)
+                    {
+                        // do nothing
+                    }
+                    if (realTexture)
+                    {
+                        const Video* media = realTexture->Media();
+                        unsigned int index = ConvertVideo(*media);
+                        textures_converted[*media] = index;
+                    }
+                }
             }
         }
 

@@ -263,3 +263,23 @@ TEST_F(utFBXImporterExporter, fbxTokenizeTestTest) {
     //const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/transparentTest2.fbx", aiProcess_ValidateDataStructure);
     //EXPECT_NE(nullptr, scene);
 }
+
+TEST_F(utFBXImporterExporter, importOrphantEmbeddedTextureTest) {
+    // see https://github.com/assimp/assimp/issues/1957
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/box_orphant_embedded_texture.fbx", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(1u, scene->mNumMaterials);
+    aiMaterial *mat = scene->mMaterials[0];
+    ASSERT_NE(nullptr, mat);
+
+    aiString path;
+    aiTextureMapMode modes[2];
+    ASSERT_EQ(aiReturn_SUCCESS, mat->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr, nullptr, nullptr, modes));
+    ASSERT_STREQ(path.C_Str(), "..\\Primitives\\GridGrey.tga");
+
+    ASSERT_EQ(1u, scene->mNumTextures);
+    ASSERT_TRUE(scene->mTextures[0]->pcData);
+    ASSERT_EQ(9026u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression used for a texture.";
+}

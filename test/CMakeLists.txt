@@ -148,6 +148,7 @@ SET( POST_PROCESSES
   unit/utRemoveRedundantMaterials.cpp
   unit/utRemoveVCProcess.cpp
   unit/utScaleProcess.cpp
+  unit/utArmaturePopulate.cpp
   unit/utJoinVertices.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp

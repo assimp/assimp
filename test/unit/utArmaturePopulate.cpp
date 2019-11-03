@@ -1,8 +1,11 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2019, assimp team
+
+
 
 All rights reserved.
 
@@ -35,41 +38,46 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
+---------------------------------------------------------------------------
+*/
 #include "UnitTestPCH.h"
-#include <assimp/version.h>
+#include "TestModelFactory.h"
 
-class utVersion : public ::testing::Test {
+
+#include "SceneDiffer.h"
+#include "AbstractImportExportBase.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/types.h>
+
+#include "PostProcessing/ArmaturePopulate.h"
+
+namespace Assimp {
+namespace UnitTest {
+
+class utArmaturePopulate : public ::testing::Test {
     // empty
 };
 
-TEST_F( utVersion, aiGetLegalStringTest ) {
-    const char *lv( aiGetLegalString() );
-    EXPECT_NE( lv, nullptr );
-    std::string text( lv );
+TEST_F( utArmaturePopulate, importCheckForArmatureTest) {
+    Assimp::Importer importer;
+    unsigned int mask = aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/huesitos.fbx", mask);
+    EXPECT_NE( nullptr, scene );
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    aiMesh* mesh = scene->mMeshes[0];
+    EXPECT_EQ(mesh->mNumFaces, 68u);
+    EXPECT_EQ(mesh->mNumVertices, 256u);
+    EXPECT_GT(mesh->mNumBones, 0u);
 
-    size_t pos( text.find( std::string( "2019" ) ) );
-    EXPECT_NE( pos, std::string::npos );
+    aiBone* exampleBone = mesh->mBones[0];
+    EXPECT_NE(exampleBone, nullptr);
+    EXPECT_NE(exampleBone->mArmature, nullptr);
+    EXPECT_NE(exampleBone->mNode, nullptr);
 }
 
-TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ( aiGetVersionMinor(), 0U );
-}
-    
-TEST_F( utVersion, aiGetVersionMajorTest ) {
-    EXPECT_EQ( aiGetVersionMajor(), 5U );
-}
-
-TEST_F( utVersion, aiGetCompileFlagsTest ) {
-    EXPECT_NE( aiGetCompileFlags(), 0U );
-}
-
-TEST_F( utVersion, aiGetVersionRevisionTest ) {
-    EXPECT_NE( aiGetVersionRevision(), 0U );
-}
-
-TEST_F( utVersion, aiGetBranchNameTest ) {
-    EXPECT_NE( nullptr, aiGetBranchName() );
-}
-
-
+} // Namespace UnitTest
+} // Namespace Assimp

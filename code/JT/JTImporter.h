@@ -143,6 +143,7 @@ namespace JT {
     };
 
     struct JTModel;
+    struct JTTOCEntry;
 }
 
 
@@ -159,6 +160,7 @@ protected:
     void InternReadFile(const std::string& pFile,aiScene* pScene,IOSystem* pIOHandler) override;
     void readHeader(DataBuffer& buffer, size_t &offset);
     void readTOCSegment(size_t toc_offset, DataBuffer& buffer, size_t& offset);
+    void readDataSegment( JT::JTTOCEntry *entry, DataBuffer &buffer, size_t &offset );
 
 private:
     JT::JTModel* mModel;

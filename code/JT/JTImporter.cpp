@@ -51,6 +51,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace JT {
 
+enum class SegmentType {
+    LogicalScenegraph = 1,
+    JT_BRep,
+    PMIData,
+    MetaData,
+    Shape,
+    ShapeLOD0,
+    ShapeLOD1,
+    ShapeLOD2,
+    ShapeLOD3,
+    ShapeLOD4,
+    ShapeLOD5,
+    ShapeLOD6,
+    ShapeLOD7,
+    ShapeLOD8,
+    ShapeLOD9,
+    XT_BRep,
+    WireframeRepresentation,
+    ULP,
+    LWPA
+};
+
+static const char ZLibCompressionEnabled[] = {
+    1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1
+};
+
+bool isZLibCompressionEnabled( SegmentType type ) {
+    const size_t index = ( size_t )type - 1;
+    return 1 == ZLibCompressionEnabled[ index ];
+}
+
+#pragma pack(1)
 struct JTHeader {
     uchar version[80];
     uchar byte_order;
@@ -80,7 +112,6 @@ struct JTTOCSegment {
     i32 num_entries;
     JTTOCEntry* entries;
 
-
     JTTOCSegment()
     : num_entries(0)
     , entries(nullptr) {
@@ -103,6 +134,21 @@ struct JTTOCSegment {
 
         return &entries[index];
     }
+};
+
+struct SegmentHeader {
+    Guid SegmentID;
+    i32 SegmentType;
+    i32 SegmentLength;
+};
+
+struct LogicalElementHeader {
+    i32 length;
+};
+
+struct ElementHeader {
+    Guid ObjectTypeID;
+    uchar ObjectBaseType;
 };
 
 struct JTModel {
@@ -180,15 +226,15 @@ void JTImporter::InternReadFile(const std::string& file, aiScene* scene, IOSyste
     size_t offset(0);
     readHeader(buffer, offset);
     readTOCSegment(mModel->header.toc_offset, buffer, offset);
+
+    for (size_t i = 0; i < mModel->toc_segment.num_entries; ++i) {
+
+    }
 }
 
 void JTImporter::readHeader( DataBuffer& buffer, size_t& offset ) {
     ::memcpy(&mModel->header, &buffer[offset], sizeof(JTHeader));
     offset += sizeof(JTHeader);
-
-    if (0 == mModel->header.byte_order) {
-        AI_SWAP4(mModel->header.toc_offset);
-    }
 }
 
 void JTImporter::readTOCSegment(size_t toc_offset, DataBuffer& buffer, size_t& offset ) {
@@ -202,9 +248,61 @@ void JTImporter::readTOCSegment(size_t toc_offset, DataBuffer& buffer, size_t& o
             continue;
         }
 
-
+        ::memcpy( entry, &buffer[ offset ], sizeof( JTTOCEntry ) );
     }
 }
+
+void JTImporter::readDataSegment( JTTOCEntry *entry, DataBuffer &buffer, size_t &offset ) {
+    if (nullptr == entry) {
+        return;
+    }
+    SegmentHeader header;
+    ::memcpy( &header, &buffer[ entry->segment_offset ], entry->segment_lenght );
+
+    switch (header.SegmentType) {
+        case SegmentType::LogicalScenegraph:
+            break;
+        case SegmentType::JT_BRep:
+            break;
+        case SegmentType::PMIData:
+            break;
+        case SegmentType::MetaData:
+            break;
+        case SegmentType::Shape:
+            break;
+        case SegmentType::ShapeLOD0:
+            break;
+        case SegmentType::ShapeLOD1:
+            break;
+        case SegmentType::ShapeLOD2:
+            break;
+        case SegmentType::ShapeLOD3:
+            break;
+        case SegmentType::ShapeLOD4:
+            break;
+        case SegmentType::ShapeLOD5:
+            break;
+        case SegmentType::ShapeLOD6:
+            break;
+        case SegmentType::ShapeLOD7:
+            break;
+        case SegmentType::ShapeLOD8:
+            break;
+        case SegmentType::ShapeLOD9:
+            break;
+        case SegmentType::XT_BRep:
+            break;
+        case SegmentType::WireframeRepresentation:
+            break;
+        case SegmentType::ULP:
+            break;
+        case SegmentType::LWPA:
+            break;
+        default:
+            break;
+    }
+}
+
 
 } //! namespace Assimp
 

@@ -152,7 +152,33 @@ static void IdentityMatrix4(mat4& o) {
     o[12] = 0; o[13] = 0; o[14] = 0; o[15] = 1;
 }
 
-inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+template<typename CompType>
+void computeMinMax(Ref<Accessor>& accInOut, void* data, size_t count, size_t numCompsIn, size_t numCompsOut)
+{
+    // Allocate and initialize with large values.
+    ai_assert(accInOut->min.empty());
+    ai_assert(accInOut->max.empty());
+    accInOut->min.resize(numCompsOut, std::numeric_limits<float>::max());
+    accInOut->max.resize(numCompsOut, std::numeric_limits<float>::min());
+
+    // Search and set extreme values.
+    CompType* valueTmpPtr = static_cast<CompType*>(data);
+    for (unsigned int i = 0; i < count; i++)
+    {
+        for (unsigned int j = 0; j < numCompsOut; j++)
+        {
+            float valueTmp = valueTmpPtr[i * numCompsIn + j];
+            if (valueTmp < accInOut->min[j]) {
+                accInOut->min[j] = valueTmp;
+            }
+            if (valueTmp > accInOut->max[j]) {
+                accInOut->max[j] = valueTmp;
+            }
+        }
+    }
+}
+
+inline Ref<Accessor> ExportDataInternal(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
     size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
     if (!count || !data) {
@@ -162,6 +188,9 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
     unsigned int numCompsOut = AttribType::GetNumComponents(typeOut);
     unsigned int bytesPerComp = ComponentTypeSize(compType);
+
+    // There is no support for resizing of the data yet
+    ai_assert(numCompsIn >= numCompsOut);
 
     size_t offset = buffer->byteLength;
     // make sure offset is correctly byte-aligned, as required by spec
@@ -187,32 +216,28 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     acc->type = typeOut;
 
     // calculate min and max values
+    switch (compType)
     {
-        // Allocate and initialize with large values.
-        float float_MAX = 10000000000000.0f;
-        for (unsigned int i = 0 ; i < numCompsOut ; i++) {
-            acc->min.push_back( float_MAX);
-            acc->max.push_back(-float_MAX);
-        }
-
-        // Search and set extreme values.
-        float valueTmp;
-        for (unsigned int i = 0 ; i < count       ; i++) {
-            for (unsigned int j = 0 ; j < numCompsOut ; j++) {
-                if (numCompsOut == 1) {
-                  valueTmp = static_cast<unsigned short*>(data)[i];
-                } else {
-                  valueTmp = static_cast<aiVector3D*>(data)[i][j];
-                }
-
-                if (valueTmp < acc->min[j]) {
-                    acc->min[j] = valueTmp;
-                }
-                if (valueTmp > acc->max[j]) {
-                    acc->max[j] = valueTmp;
-                }
-            }
-        }
+    case glTF2::ComponentType_BYTE:
+        computeMinMax<int8_t>(acc, data, count, numCompsIn, numCompsOut);
+        break;
+    case glTF2::ComponentType_UNSIGNED_BYTE:
+        computeMinMax<uint8_t>(acc, data, count, numCompsIn, numCompsOut);
+        break;
+    case glTF2::ComponentType_SHORT:
+        computeMinMax<int16_t>(acc, data, count, numCompsIn, numCompsOut);
+        break;
+    case glTF2::ComponentType_UNSIGNED_SHORT:
+        computeMinMax<uint16_t>(acc, data, count, numCompsIn, numCompsOut);
+        break;
+    case glTF2::ComponentType_UNSIGNED_INT:
+        computeMinMax<uint32_t>(acc, data, count, numCompsIn, numCompsOut);
+        break;
+    case glTF2::ComponentType_FLOAT:
+        computeMinMax<float>(acc, data, count, numCompsIn, numCompsOut);
+        break;
+    default:
+        throw DeadlyExportError("Unknown component type");
     }
 
     // copy the data
@@ -220,6 +245,87 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
 
     return acc;
 }
+
+template<typename DataType>
+Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+    size_t count, DataType* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
+{
+    return ExportDataInternal(a, meshName, buffer, count, data, typeIn, typeOut, compType, isIndices);
+}
+
+#ifdef ASSIMP_DOUBLE_PRECISION
+#include <cmath>
+template<size_t numComponents>
+std::vector<float> convertBufferDoubleToFloat(const double* src, size_t count)
+{
+    std::vector<float> buf(count * numComponents);
+    float* dst = buf.data();
+    for (size_t i = 0; i < buf.size(); i += numComponents)
+    {
+        for (size_t comp = 0; comp < numComponents; ++comp)
+        {
+            dst[i + comp] = static_cast<float>(src[i + comp]);
+            if (!std::isfinite(dst[i + comp]))
+            {
+                dst[i + comp] = 0.f;
+            }
+        }
+    }
+    return buf;
+}
+template<>
+Ref<Accessor> ExportData<double>(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+    size_t count, double* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices)
+{
+    if (!count || !data)
+    {
+        return Ref<Accessor>();
+    }
+    ai_assert(compType == ComponentType_FLOAT);
+    std::vector<float> buf = convertBufferDoubleToFloat<1>(data, count);
+    return ExportDataInternal(a, meshName, buffer, count, buf.data(), typeIn, typeOut, compType, isIndices);
+}
+
+template<>
+Ref<Accessor> ExportData<aiVector2D>(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+    size_t count, aiVector2D* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices)
+{
+    if (!count || !data)
+    {
+        return Ref<Accessor>();
+    }
+    ai_assert(compType == ComponentType_FLOAT);
+    std::vector<float> buf = convertBufferDoubleToFloat<2>(reinterpret_cast<double*>(data), count);
+    return ExportDataInternal(a, meshName, buffer, count, buf.data(), typeIn, typeOut, compType, isIndices);
+}
+
+template<>
+Ref<Accessor> ExportData<aiVector3D>(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+    size_t count, aiVector3D* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices)
+{
+    if (!count || !data)
+    {
+        return Ref<Accessor>();
+    }
+    ai_assert(compType == ComponentType_FLOAT);
+    std::vector<float> buf = convertBufferDoubleToFloat<3>(reinterpret_cast<double*>(data), count);
+    return ExportDataInternal(a, meshName, buffer, count, buf.data(), typeIn, typeOut, compType, isIndices);
+}
+
+template<>
+Ref<Accessor> ExportData<aiColor4D>(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+    size_t count, aiColor4D* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices)
+{
+    if (!count || !data)
+    {
+        return Ref<Accessor>();
+    }
+    ai_assert(compType == ComponentType_FLOAT);
+    std::vector<float> buf = convertBufferDoubleToFloat<4>(reinterpret_cast<double*>(data), count);
+    return ExportDataInternal(a, meshName, buffer, count, buf.data(), typeIn, typeOut, compType, isIndices);
+}
+
+#endif
 
 inline void SetSamplerWrap(SamplerWrap& wrap, aiTextureMapMode map)
 {

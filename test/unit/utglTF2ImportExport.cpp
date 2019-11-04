@@ -416,7 +416,53 @@ TEST_F( utglTF2ImportExport, crash_in_anim_mesh_destructor ) {
         aiProcess_ValidateDataStructure);
     ASSERT_NE( nullptr, scene );
     Assimp::Exporter exporter;
-    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube_out.glTF"));
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube_out.glb"));
 }
 
+TEST_F(utglTF2ImportExport, corrupted_double_to_float_export) {
+    // Expected triangle data
+    // One day everything will support `constexpr`
+    const size_t numExpectedVertices = 3;
+    const aiVector3D expectedVertex[numExpectedVertices] = {
+        aiVector3D(0.0, 0.0, 0.0),
+        aiVector3D(1.0, 0.0, 0.0),
+        aiVector3D(0.0, 1.0, 0.0)
+    };
+    const ai_real epsilon = 1e-6;
+    // First step: load glTF (aiScene will hold a double precision) and save it (should convert doubles to float)
+    {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/Triangle/Triangle.gltf",
+            aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(scene->mNumMeshes, 1u);
+        ASSERT_EQ(scene->mMeshes[0]->mNumVertices, numExpectedVertices);
+        aiVector3D* vertex = scene->mMeshes[0]->mVertices;
+
+        for (size_t i = 0; i < numExpectedVertices; ++i)
+        {
+            ASSERT_NEAR(expectedVertex[i].x, vertex[i].x, epsilon);
+            ASSERT_NEAR(expectedVertex[i].y, vertex[i].y, epsilon);
+            ASSERT_NEAR(expectedVertex[i].z, vertex[i].z, epsilon);
+        }
+        Assimp::Exporter exporter;
+        ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/Triangle/Triangle_out.glb"));
+    }
+    // Should be able to load saved file
+    {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/Triangle/Triangle_out.glb",
+            aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(scene->mNumMeshes, 1u);
+        ASSERT_EQ(scene->mMeshes[0]->mNumVertices, numExpectedVertices);
+        aiVector3D* vertex = scene->mMeshes[0]->mVertices;
+        for (size_t i = 0; i < numExpectedVertices; ++i)
+        {
+            ASSERT_NEAR(expectedVertex[i].x, vertex[i].x, epsilon);
+            ASSERT_NEAR(expectedVertex[i].y, vertex[i].y, epsilon);
+            ASSERT_NEAR(expectedVertex[i].z, vertex[i].z, epsilon);
+        }
+    }
+}
 #endif // ASSIMP_BUILD_NO_EXPORT

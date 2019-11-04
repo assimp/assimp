@@ -635,6 +635,83 @@ namespace {
     }
 }
 
+namespace
+{
+	template<typename T>
+	void copyElementData(T*& outData, const uint8_t* data, const size_t stride, const size_t elemSize, const size_t count, const size_t targetElemSize, ComponentType componentType)
+	{
+		const size_t totalSize = elemSize * count;
+		if (stride == elemSize && targetElemSize == elemSize) {
+			memcpy(outData, data, totalSize);
+		}
+		else {
+			for (size_t i = 0; i < count; ++i) {
+				memcpy(outData + i, data + i * stride, elemSize);
+			}
+		}
+	}
+#ifdef ASSIMP_DOUBLE_PRECISION
+	template<typename TypeIn>
+	void copyElementDataDouble(double* outData, const TypeIn* data, const size_t numComponents, const size_t count)
+	{
+		for (size_t i = 0; i < count * numComponents; ++i)
+		{
+			outData[i] = data[i];
+		}
+	}
+	void selectAndCopyElementDataDouble(double* outData, const uint8_t* data, const size_t numComponents, const size_t count, ComponentType componentType)
+	{
+		switch (componentType)
+		{
+		case glTF2::ComponentType_BYTE:
+			copyElementDataDouble(outData, reinterpret_cast<const int8_t*>(data), numComponents, count);
+			break;
+		case glTF2::ComponentType_UNSIGNED_BYTE:
+			copyElementDataDouble(outData, reinterpret_cast<const uint8_t*>(data), numComponents, count);
+			break;
+		case glTF2::ComponentType_SHORT:
+			copyElementDataDouble(outData, reinterpret_cast<const int16_t*>(data), numComponents, count);
+			break;
+		case glTF2::ComponentType_UNSIGNED_SHORT:
+			copyElementDataDouble(outData, reinterpret_cast<const uint16_t*>(data), numComponents, count);
+			break;
+		case glTF2::ComponentType_UNSIGNED_INT:
+			copyElementDataDouble(outData, reinterpret_cast<const uint32_t*>(data), numComponents, count);
+			break;
+		case glTF2::ComponentType_FLOAT:
+			copyElementDataDouble(outData, reinterpret_cast<const float*>(data), numComponents, count);
+			break;
+		default:
+			throw DeadlyImportError("Unknown component type");
+		}
+	}
+
+	template<>
+	void copyElementData<double>(double*& outData, const uint8_t* data, const size_t stride, const size_t elemSize, const size_t count, const size_t targetElemSize, ComponentType componentType)
+	{
+		selectAndCopyElementDataDouble(outData, data, 1u, count, componentType);
+	}
+
+	template<>
+	void copyElementData<aiVector2D>(aiVector2D*& outData, const uint8_t* data, const size_t stride, const size_t elemSize, const size_t count, const size_t targetElemSize, ComponentType componentType)
+	{
+		selectAndCopyElementDataDouble(reinterpret_cast<double*>(outData), data, 2u, count, componentType);
+	}
+
+	template<>
+	void copyElementData<aiVector3D>(aiVector3D*& outData, const uint8_t* data, const size_t stride, const size_t elemSize, const size_t count, const size_t targetElemSize, ComponentType componentType)
+	{
+		selectAndCopyElementDataDouble(reinterpret_cast<double*>(outData), data, 3u, count, componentType);
+	}
+
+	template<>
+	void copyElementData<aiColor4D>(aiColor4D*& outData, const uint8_t* data, const size_t stride, const size_t elemSize, const size_t count, const size_t targetElemSize, ComponentType componentType)
+	{
+		selectAndCopyElementDataDouble(reinterpret_cast<double*>(outData), data, 4u, count, componentType);
+	}
+#endif
+}
+
 template<class T>
 bool Accessor::ExtractData(T*& outData)
 {
@@ -642,8 +719,6 @@ bool Accessor::ExtractData(T*& outData)
     if (!data) return false;
 
     const size_t elemSize = GetElementSize();
-    const size_t totalSize = elemSize * count;
-
     const size_t stride = bufferView && bufferView->byteStride ? bufferView->byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
@@ -652,14 +727,7 @@ bool Accessor::ExtractData(T*& outData)
     ai_assert(count*stride <= bufferView->byteLength);
 
     outData = new T[count];
-    if (stride == elemSize && targetElemSize == elemSize) {
-        memcpy(outData, data, totalSize);
-    }
-    else {
-        for (size_t i = 0; i < count; ++i) {
-            memcpy(outData + i, data + i*stride, elemSize);
-        }
-    }
+	copyElementData(outData, data, stride, elemSize, count, targetElemSize, componentType);
 
     return true;
 }

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 using namespace Assimp;
@@ -52,8 +53,19 @@ class utColladaImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure );
-        return nullptr != scene;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
+        if (scene == nullptr)
+            return false;
+
+        // Expected number of items
+        EXPECT_EQ(scene->mNumMeshes, 1u);
+        EXPECT_EQ(scene->mNumMaterials, 1u);
+        EXPECT_EQ(scene->mNumAnimations, 0u);
+        EXPECT_EQ(scene->mNumTextures, 0u);
+        EXPECT_EQ(scene->mNumLights, 1u);
+        EXPECT_EQ(scene->mNumCameras, 1u);
+
+        return true;
     }
 };
 
@@ -64,9 +76,37 @@ TEST_F(utColladaImportExport, importBlenFromFileTest) {
 class utColladaZaeImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+        {
+            Assimp::Importer importer;
+            const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
+            if (scene == nullptr)
+                return false;
+
+            // Expected number of items
+            EXPECT_EQ(scene->mNumMeshes, 1u);
+            EXPECT_EQ(scene->mNumMaterials, 1u);
+            EXPECT_EQ(scene->mNumAnimations, 0u);
+            EXPECT_EQ(scene->mNumTextures, 1u);
+            EXPECT_EQ(scene->mNumLights, 1u);
+            EXPECT_EQ(scene->mNumCameras, 1u);
+        }
+
+        {
+            Assimp::Importer importer;
+            const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck_nomanifest.zae", aiProcess_ValidateDataStructure);
+            if (scene == nullptr)
+                return false;
+
+            // Expected number of items
+            EXPECT_EQ(scene->mNumMeshes, 1u);
+            EXPECT_EQ(scene->mNumMaterials, 1u);
+            EXPECT_EQ(scene->mNumAnimations, 0u);
+            EXPECT_EQ(scene->mNumTextures, 1u);
+            EXPECT_EQ(scene->mNumLights, 1u);
+            EXPECT_EQ(scene->mNumCameras, 1u);
+        }
+
+        return true;
     }
 };
 

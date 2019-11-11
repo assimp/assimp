@@ -1,8 +1,11 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2019, assimp team
+
+
 
 All rights reserved.
 
@@ -35,41 +38,31 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include "UnitTestPCH.h"
-#include <assimp/version.h>
+---------------------------------------------------------------------------
+*/
 
-class utVersion : public ::testing::Test {
-    // empty
+#include "UnitTestPCH.h"
+#include "SceneDiffer.h"
+#include "AbstractImportExportBase.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+using namespace Assimp;
+
+class utM3DImportExport : public AbstractImportExportBase {
+public:
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/M3D/WusonBlitz0.m3d", aiProcess_ValidateDataStructure );
+#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
+        return nullptr != scene;
+#else
+        return nullptr == scene;
+#endif // ASSIMP_BUILD_NO_M3D_IMPORTER
+    }
 };
 
-TEST_F( utVersion, aiGetLegalStringTest ) {
-    const char *lv( aiGetLegalString() );
-    EXPECT_NE( lv, nullptr );
-    std::string text( lv );
-
-    size_t pos( text.find( std::string( "2019" ) ) );
-    EXPECT_NE( pos, std::string::npos );
+TEST_F( utM3DImportExport, importM3DFromFileTest ) {
+    EXPECT_TRUE( importerTest() );
 }
-
-TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ( aiGetVersionMinor(), 0U );
-}
-    
-TEST_F( utVersion, aiGetVersionMajorTest ) {
-    EXPECT_EQ( aiGetVersionMajor(), 5U );
-}
-
-TEST_F( utVersion, aiGetCompileFlagsTest ) {
-    EXPECT_NE( aiGetCompileFlags(), 0U );
-}
-
-TEST_F( utVersion, aiGetVersionRevisionTest ) {
-    EXPECT_NE( aiGetVersionRevision(), 0U );
-}
-
-TEST_F( utVersion, aiGetBranchNameTest ) {
-    EXPECT_NE( nullptr, aiGetBranchName() );
-}
-
-

@@ -67,6 +67,7 @@ __Importers__:
 - [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
 - LWS
 - LXO
+- [M3D](https://gitlab.com/bztsrc/model3d)
 - MD2
 - MD3
 - MD5

@@ -44,12 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IRRXML_WRAPPER
 
 // some long includes ....
-#ifdef ASSIMP_USE_HUNTER
-#  include <irrXML/irrXML.h>
-#else
-#  include <irrXML.h>
-#endif
-#include "IOStream.hpp"
+#include <irrXML.h>
+#include <boost/filesystem/operations.hpp>
+#include "./../include/assimp/IOStream.hpp"
 #include "BaseImporter.h"
 #include <vector>
 
@@ -91,8 +88,21 @@ public:
         // gets the buffer. Sadly, this forces us to map the whole file into
         // memory.
 
-        data.resize(stream->FileSize());
-        stream->Read(&data[0],data.size(),1);
+        auto default_stream = dynamic_cast<Assimp::DefaultIOStream*>(stream);
+        size_t data_size = 0;
+
+        if (default_stream != nullptr) 
+        {
+                std::string file_name = default_stream->GetFilename();	
+                data_size = boost::filesystem::file_size(file_name);
+        }
+        else
+        {
+                data_size = stream->FileSize();
+        }
+
+        data.resize(data_size);
+        stream->Read(&data[0], data.size(), 1);
 
         // Remove null characters from the input sequence otherwise the parsing will utterly fail
         // std::find is usually much faster than manually iterating

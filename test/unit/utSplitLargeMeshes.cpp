@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -42,16 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <SplitLargeMeshes.h>
-
+#include "PostProcessing/SplitLargeMeshes.h"
 
 using namespace std;
 using namespace Assimp;
 
-class SplitLargeMeshesTest : public ::testing::Test
-{
+class SplitLargeMeshesTest : public ::testing::Test {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 

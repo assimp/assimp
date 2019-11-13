@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -60,4 +61,25 @@ public:
 
 TEST_F( utIFCImportExport, importIFCFromFileTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+TEST_F( utIFCImportExport, importComplextypeAsColor ) {
+    std::string asset =
+        "ISO-10303-21;\n"
+        "HEADER;\n"
+        "FILE_DESCRIPTION( ( 'ViewDefinition [CoordinationView, SpaceBoundary2ndLevelAddOnView]', 'Option [Filter: ]' ), '2;1' );\n"
+        "FILE_NAME( 'S:\\[IFC]\\[COMPLETE-BUILDINGS]\\FZK-MODELS\\FZK-Haus\\ArchiCAD-14\\AC14-FZK-Haus.ifc', '2010-10-07T13:40:52', ( 'Architect' ), ( 'Building Designer Office' ), 'PreProc - EDM 5.0', 'ArchiCAD 14.00 Release 1. Windows Build Number of the Ifc 2x3 interface: 3427', 'The authorising person' );\n"
+        "FILE_SCHEMA( ( 'IFC2X3' ) );\n"
+        "ENDSEC;\n"
+        "\n"
+        "DATA;\n"
+        "#1 = IFCORGANIZATION( 'GS', 'Graphisoft', 'Graphisoft', $, $ );\n"
+        "#2 = IFCPROPERTYSINGLEVALUE( 'Red', $, IFCINTEGER( 255 ), $ );\n"
+        "#3 = IFCPROPERTYSINGLEVALUE( 'Green', $, IFCINTEGER( 255 ), $ );\n"
+        "#4 = IFCPROPERTYSINGLEVALUE( 'Blue', $, IFCINTEGER( 255 ), $ );\n"
+        "#5 = IFCCOMPLEXPROPERTY( 'Color', $, 'Color', ( #19, #20, #21 ) );\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory( asset.c_str(), asset.size(), 0 );
+    EXPECT_EQ( nullptr, scene );
+
 }

@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
-
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -41,97 +40,106 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include <FindInvalidDataProcess.h>
-#include "../../include/assimp/mesh.h"
-
+#include "PostProcessing/FindInvalidDataProcess.h"
+#include <assimp/mesh.h>
 
 using namespace std;
 using namespace Assimp;
 
-class FindInvalidDataProcessTest : public ::testing::Test
-{
+class utFindInvalidDataProcess : public ::testing::Test {
 public:
+    utFindInvalidDataProcess()
+    : Test()
+    , mMesh(nullptr)
+    , mProcess(nullptr) {
+        // empty
+    }
+
+protected:
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-    aiMesh* pcMesh;
-    FindInvalidDataProcess* piProcess;
+    aiMesh* mMesh;
+    FindInvalidDataProcess* mProcess;
 };
 
 // ------------------------------------------------------------------------------------------------
-void FindInvalidDataProcessTest::SetUp()
-{
+void utFindInvalidDataProcess::SetUp() {
     ASSERT_TRUE( AI_MAX_NUMBER_OF_TEXTURECOORDS >= 3);
 
-    piProcess = new FindInvalidDataProcess();
-    pcMesh = new aiMesh();
+    mProcess = new FindInvalidDataProcess();
+    mMesh = new aiMesh();
 
-    pcMesh->mNumVertices = 1000;
-    pcMesh->mVertices = new aiVector3D[1000];
-    for (unsigned int i = 0; i < 1000;++i)
-        pcMesh->mVertices[i] = aiVector3D((float)i);
+    mMesh->mNumVertices = 1000;
+    mMesh->mVertices = new aiVector3D[1000];
+    for (unsigned int i = 0; i < 1000; ++i) {
+        mMesh->mVertices[i] = aiVector3D((float)i);
+    }
 
-    pcMesh->mNormals = new aiVector3D[1000];
-    for (unsigned int i = 0; i < 1000;++i)
-        pcMesh->mNormals[i] = aiVector3D((float)i+1);
+    mMesh->mNormals = new aiVector3D[1000];
+    for (unsigned int i = 0; i < 1000; ++i) {
+        mMesh->mNormals[i] = aiVector3D((float)i + 1);
+    }
 
-    pcMesh->mTangents = new aiVector3D[1000];
-    for (unsigned int i = 0; i < 1000;++i)
-        pcMesh->mTangents[i] = aiVector3D((float)i);
+    mMesh->mTangents = new aiVector3D[1000];
+    for (unsigned int i = 0; i < 1000; ++i) {
+        mMesh->mTangents[i] = aiVector3D((float)i);
+    }
 
-    pcMesh->mBitangents = new aiVector3D[1000];
-    for (unsigned int i = 0; i < 1000;++i)
-        pcMesh->mBitangents[i] = aiVector3D((float)i);
+    mMesh->mBitangents = new aiVector3D[1000];
+    for (unsigned int i = 0; i < 1000; ++i) {
+        mMesh->mBitangents[i] = aiVector3D((float)i);
+    }
 
-    for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)
-    {
-        pcMesh->mTextureCoords[a] = new aiVector3D[1000];
-        for (unsigned int i = 0; i < 1000;++i)
-            pcMesh->mTextureCoords[a][i] = aiVector3D((float)i);
+    for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a) {
+        mMesh->mTextureCoords[a] = new aiVector3D[1000];
+        for (unsigned int i = 0; i < 1000; ++i) {
+            mMesh->mTextureCoords[a][i] = aiVector3D((float)i);
+        }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void FindInvalidDataProcessTest::TearDown()
-{
-    delete piProcess;
-    delete pcMesh;
+void utFindInvalidDataProcess::TearDown() {
+    delete mProcess;
+    delete mMesh;
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(FindInvalidDataProcessTest, testStepNegativeResult)
-{
-    ::memset(pcMesh->mNormals,0,pcMesh->mNumVertices*sizeof(aiVector3D));
-    ::memset(pcMesh->mBitangents,0,pcMesh->mNumVertices*sizeof(aiVector3D));
+TEST_F(utFindInvalidDataProcess, testStepNegativeResult) {
+    ::memset(mMesh->mNormals, 0, mMesh->mNumVertices*sizeof(aiVector3D) );
+    ::memset(mMesh->mBitangents, 0, mMesh->mNumVertices*sizeof(aiVector3D) );
 
-    pcMesh->mTextureCoords[2][455] = aiVector3D( std::numeric_limits<float>::quiet_NaN() );
+    mMesh->mTextureCoords[2][455] = aiVector3D( std::numeric_limits<float>::quiet_NaN() );
 
-    piProcess->ProcessMesh(pcMesh);
+    mProcess->ProcessMesh(mMesh);
 
-    EXPECT_TRUE(NULL != pcMesh->mVertices);
-    EXPECT_TRUE(NULL == pcMesh->mNormals);
-    EXPECT_TRUE(NULL == pcMesh->mTangents);
-    EXPECT_TRUE(NULL == pcMesh->mBitangents);
+    EXPECT_TRUE(NULL != mMesh->mVertices);
+    EXPECT_EQ(NULL, mMesh->mNormals);
+    EXPECT_EQ(NULL, mMesh->mTangents);
+    EXPECT_EQ(NULL, mMesh->mBitangents);
 
-    for (unsigned int i = 0; i < 2;++i)
-        EXPECT_TRUE(NULL != pcMesh->mTextureCoords[i]);
+    for (unsigned int i = 0; i < 2; ++i) {
+        EXPECT_TRUE(NULL != mMesh->mTextureCoords[i]);
+    }
 
-    for (unsigned int i = 2; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-        EXPECT_TRUE(NULL == pcMesh->mTextureCoords[i]);
+    for (unsigned int i = 2; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+        EXPECT_EQ(NULL, mMesh->mTextureCoords[i]);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(FindInvalidDataProcessTest, testStepPositiveResult)
-{
-    piProcess->ProcessMesh(pcMesh);
+TEST_F(utFindInvalidDataProcess, testStepPositiveResult) {
+    mProcess->ProcessMesh(mMesh);
 
-    EXPECT_TRUE(NULL != pcMesh->mVertices);
+    EXPECT_NE(nullptr, mMesh->mVertices);
 
-    EXPECT_TRUE(NULL != pcMesh->mNormals);
-    EXPECT_TRUE(NULL != pcMesh->mTangents);
-    EXPECT_TRUE(NULL != pcMesh->mBitangents);
+    EXPECT_NE(nullptr, mMesh->mNormals);
+    EXPECT_NE(nullptr, mMesh->mTangents);
+    EXPECT_NE(nullptr, mMesh->mBitangents);
 
-    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-        EXPECT_TRUE(NULL != pcMesh->mTextureCoords[i]);
+    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+        EXPECT_NE(nullptr, mMesh->mTextureCoords[i]);
+    }
 }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -42,9 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "assimp_view.h"
-#include <timeapi.h>
-#include "StringUtils.h"
+#include <assimp/StringUtils.h>
 #include <map>
+
+#ifdef __MINGW32__
+#   include <mmsystem.h>
+#else
+#   include <timeapi.h>
+#endif
 
 using namespace std;
 
@@ -142,7 +148,7 @@ float g_fLoadTime = 0.0f;
 
 //-------------------------------------------------------------------------------
 // Entry point for the loader thread
-// The laoder thread loads the asset while the progress dialog displays the
+// The loader thread loads the asset while the progress dialog displays the
 // smart progress bar
 //-------------------------------------------------------------------------------
 DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
@@ -177,7 +183,6 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     // get the end time of zje operation, calculate delta t
     double fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
-//	char szTemp[128];
     g_bLoadingFinished = true;
 
     // check whether the loading process has failed ...
@@ -199,9 +204,9 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 // load the current asset
 // THe path to the asset is specified in the global path variable
 //-------------------------------------------------------------------------------
-int LoadAsset(void)
+int LoadAsset()
 {
-    // set the world and world rotation matrices to the identuty
+    // set the world and world rotation matrices to the identity
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 
@@ -305,9 +310,10 @@ int LoadAsset(void)
 // Delete the loaded asset
 // The function does nothing is no asset is loaded
 //-------------------------------------------------------------------------------
-int DeleteAsset(void)
-{
-    if (!g_pcAsset)return 0;
+int DeleteAsset(void) {
+    if (!g_pcAsset) {
+        return 0;
+    }
 
     // don't anymore know why this was necessary ...
     CDisplay::Instance().OnRender();
@@ -344,9 +350,7 @@ int DeleteAsset(void)
 // p_avOut Receives the min/max boundaries. Must point to 2 vec3s
 // piMatrix Transformation matrix of the graph at this position
 //-------------------------------------------------------------------------------
-int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut, 
-    const aiMatrix4x4& piMatrix)
-{
+int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut, const aiMatrix4x4& piMatrix) {
     ai_assert(NULL != piNode);
     ai_assert(NULL != p_avOut);
 
@@ -504,19 +508,28 @@ int CreateAssetData()
         unsigned int nidx;
         switch (mesh->mPrimitiveTypes) {
             case aiPrimitiveType_POINT:
-                nidx = 1;break;
+                nidx = 1;
+                break;
             case aiPrimitiveType_LINE:
-                nidx = 2;break;
+                nidx = 2;
+                break;
             case aiPrimitiveType_TRIANGLE:
-                nidx = 3;break;
-            default: ai_assert(false);
+                nidx = 3;
+                break;
+            default: 
+                ai_assert(false);
+                break;
         };
 
+        unsigned int numIndices = mesh->mNumFaces * 3;
+        if (0 == numIndices && nidx == 1) {
+            numIndices = mesh->mNumVertices;
+        }
         // check whether we can use 16 bit indices
-        if (mesh->mNumFaces * 3 >= 65536)	{
+        if (numIndices >= 65536)	{
             // create 32 bit index buffer
             if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
-                mesh->mNumFaces * nidx,
+                numIndices,
                 D3DUSAGE_WRITEONLY | dwUsage,
                 D3DFMT_INDEX32,
                 D3DPOOL_DEFAULT, 
@@ -542,7 +555,7 @@ int CreateAssetData()
         else	{
             // create 16 bit index buffer
             if(FAILED( g_piDevice->CreateIndexBuffer( 2 *
-                mesh->mNumFaces * nidx,
+                numIndices,
                 D3DUSAGE_WRITEONLY | dwUsage,
                 D3DFMT_INDEX16,
                 D3DPOOL_DEFAULT,
@@ -734,7 +747,7 @@ int DeleteAssetData(bool bNoMaterials)
 
 
 //-------------------------------------------------------------------------------
-// Switch beetween zoom/rotate view and the standatd FPS view
+// Switch between zoom/rotate view and the standard FPS view
 // g_bFPSView specifies the view mode to setup
 //-------------------------------------------------------------------------------
 int SetupFPSView()
@@ -787,9 +800,17 @@ int ShutdownD3D(void)
     return 1;
 }
 
+template<class TComPtr>
+inline 
+void SafeRelease(TComPtr *ptr) {
+    if (nullptr != g_piPassThroughEffect) {
+        g_piPassThroughEffect->Release();
+        g_piPassThroughEffect = nullptr;
+    }
+}
 
 //-------------------------------------------------------------------------------
-// Shutdown the D3D devie object and all resources associated with it
+// Shutdown the D3D device object and all resources associated with it
 // NOTE: Assumes that the asset has already been deleted
 //-------------------------------------------------------------------------------
 int ShutdownDevice(void)
@@ -798,49 +819,20 @@ int ShutdownDevice(void)
     CBackgroundPainter::Instance().ReleaseNativeResource();
     CLogDisplay::Instance().ReleaseNativeResource();
 
-    // release global shaders that have been allocazed
-    if (NULL != g_piDefaultEffect)
-    {
-        g_piDefaultEffect->Release();
-        g_piDefaultEffect = NULL;
-    }
-    if (NULL != g_piNormalsEffect)
-    {
-        g_piNormalsEffect->Release();
-        g_piNormalsEffect = NULL;
-    }
-    if (NULL != g_piPassThroughEffect)
-    {
-        g_piPassThroughEffect->Release();
-        g_piPassThroughEffect = NULL;
-    }
-    if (NULL != g_piPatternEffect)
-    {
-        g_piPatternEffect->Release();
-        g_piPatternEffect = NULL;
-    }
-    if (NULL != g_pcTexture)
-    {
-        g_pcTexture->Release();
-        g_pcTexture = NULL;
-    }
-
-    if( NULL != gDefaultVertexDecl)
-    {
-        gDefaultVertexDecl->Release();
-        gDefaultVertexDecl = NULL;
-    }
+    // release global shaders that have been allocated
+    SafeRelease(g_piDefaultEffect);
+    SafeRelease(g_piNormalsEffect);
+    SafeRelease(g_piPassThroughEffect);
+    SafeRelease(g_piPatternEffect);
+    SafeRelease(g_pcTexture);
+    SafeRelease(gDefaultVertexDecl);
 
     // delete the main D3D device object
-    if (NULL != g_piDevice)
-    {
-        g_piDevice->Release();
-        g_piDevice = NULL;
-    }
+    SafeRelease(g_piDevice);
 
     // deleted the one channel image allocated to hold the HUD mask
     delete[] g_szImageMask;
-    g_szImageMask = NULL;
+    g_szImageMask = nullptr;
 
     return 1;
 }
@@ -998,7 +990,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
         sParams.MultiSampleType = sMSOut;
     }
 
-    // preget the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
+    // get the device capabilities. If the hardware vertex shader is too old, we prefer software vertex processing
     g_piD3D->GetDeviceCaps( 0, D3DDEVTYPE_HAL, &g_sCaps);
     DWORD creationFlags = D3DCREATE_MULTITHREADED;
     if( g_sCaps.VertexShaderVersion >= D3DVS_VERSION( 2, 0))
@@ -1115,17 +1107,13 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     return 1;
 }
 
-
 //-------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------
-int CreateDevice (void)
+int CreateDevice()
 {
     return CreateDevice(g_sOptions.bMultiSample,
         g_sOptions.bSuperSample);
 }
 
-
-//-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 int GetProjectionMatrix (aiMatrix4x4& p_mOut)
 {
@@ -1150,8 +1138,6 @@ int GetProjectionMatrix (aiMatrix4x4& p_mOut)
     return 1;
 }
 
-
-//-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut)
 {

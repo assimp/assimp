@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -42,29 +43,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <ScenePreprocessor.h>
-#include <SortByPTypeProcess.h>
+#include "Common/ScenePreprocessor.h"
+#include "PostProcessing/SortByPTypeProcess.h"
 
 using namespace std;
 using namespace Assimp;
 
 
-class SortByPTypeProcessTest : public ::testing::Test
-{
+class SortByPTypeProcessTest : public ::testing::Test {
 public:
+    SortByPTypeProcessTest()
+    : Test()
+    , mProcess1(nullptr)
+    , mScene(nullptr) {
+        // empty
+    }
 
+protected:
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
-    SortByPTypeProcess* process1;
-    aiScene* scene;
+    SortByPTypeProcess* mProcess1;
+    aiScene* mScene;
 };
 
 // ------------------------------------------------------------------------------------------------
-static unsigned int num[10][4] =
-    {
+static unsigned int num[10][4] = {
         {0,0,0,1000},
         {0,0,1000,0},
         {0,1000,0,0},
@@ -78,8 +83,7 @@ static unsigned int num[10][4] =
     };
 
 // ------------------------------------------------------------------------------------------------
-static unsigned int result[10] =
-{
+static unsigned int result[10] = {
     aiPrimitiveType_POLYGON,
     aiPrimitiveType_TRIANGLE,
     aiPrimitiveType_LINE,
@@ -93,19 +97,16 @@ static unsigned int result[10] =
 };
 
 // ------------------------------------------------------------------------------------------------
-void SortByPTypeProcessTest::SetUp()
-{
-//  process0 = new DeterminePTypeHelperProcess();
-    process1 = new SortByPTypeProcess();
-    scene = new aiScene();
+void SortByPTypeProcessTest::SetUp() {
+    mProcess1 = new SortByPTypeProcess();
+    mScene = new aiScene();
 
-    scene->mNumMeshes = 10;
-    scene->mMeshes = new aiMesh*[10];
+    mScene->mNumMeshes = 10;
+    mScene->mMeshes = new aiMesh*[10];
 
     bool five = false;
-    for (unsigned int i = 0; i < 10; ++i)
-    {
-        aiMesh* mesh = scene->mMeshes[i] = new aiMesh();
+    for (unsigned int i = 0; i < 10; ++i) {
+        aiMesh* mesh = mScene->mMeshes[i] = new aiMesh();
         mesh->mNumFaces = 1000;
         aiFace* faces =  mesh->mFaces = new aiFace[1000];
         aiVector3D* pv = mesh->mVertices = new aiVector3D[mesh->mNumFaces*5];
@@ -118,27 +119,24 @@ void SortByPTypeProcessTest::SetUp()
 
         unsigned int remaining[4] = {num[i][0],num[i][1],num[i][2],num[i][3]};
         unsigned int n = 0;
-        for (unsigned int m = 0; m < 1000; ++m)
-        {
+        for (unsigned int m = 0; m < 1000; ++m) {
             unsigned int idx = m % 4;
-            while (true)
-            {
-                if (!remaining[idx])
-                {
-                    if (4 == ++idx)idx = 0;
+            while (true) {
+                if (!remaining[idx]) {
+                    if (4 == ++idx) {
+                        idx = 0;
+                    }
                     continue;
                 }
                 break;
             }
             faces->mNumIndices = idx+1;
-            if (4 == faces->mNumIndices)
-            {
+            if (4 == faces->mNumIndices) {
                 if(five)++faces->mNumIndices;
                 five = !five;
             }
             faces->mIndices = new unsigned int[faces->mNumIndices];
-            for (unsigned int q = 0; q <faces->mNumIndices;++q,++n)
-            {
+            for (unsigned int q = 0; q <faces->mNumIndices;++q,++n) {
                 faces->mIndices[q] = n;
                 float f = (float)remaining[idx];
 
@@ -155,12 +153,11 @@ void SortByPTypeProcessTest::SetUp()
         mesh->mNumVertices = n;
     }
 
-    scene->mRootNode = new aiNode();
-    scene->mRootNode->mNumChildren = 5;
-    scene->mRootNode->mChildren = new aiNode*[5];
-    for (unsigned int i = 0; i< 5;++i )
-    {
-        aiNode* node = scene->mRootNode->mChildren[i] = new aiNode();
+    mScene->mRootNode = new aiNode();
+    mScene->mRootNode->mNumChildren = 5;
+    mScene->mRootNode->mChildren = new aiNode*[5];
+    for (unsigned int i = 0; i< 5;++i ) {
+        aiNode* node = mScene->mRootNode->mChildren[i] = new aiNode();
         node->mNumMeshes = 2;
         node->mMeshes = new unsigned int[2];
         node->mMeshes[0] = (i<<1u);
@@ -169,48 +166,27 @@ void SortByPTypeProcessTest::SetUp()
 }
 
 // ------------------------------------------------------------------------------------------------
-void SortByPTypeProcessTest::TearDown()
-{
-    //delete process0;
-    delete process1;
-    delete scene;
+void SortByPTypeProcessTest::TearDown() {
+    delete mProcess1;
+    delete mScene;
 }
 
 // ------------------------------------------------------------------------------------------------
-//TEST_F(SortByPTypeProcessTest, DeterminePTypeStep()
-//{
-//  process0->Execute(scene);
-//
-//  for (unsigned int i = 0; i < 10; ++i)
-//  {
-//      aiMesh* mesh = scene->mMeshes[i];
-//      EXPECT_TRUE(mesh->mPrimitiveTypes == result[i]);
-//  }
-//}
-
-// ------------------------------------------------------------------------------------------------
-TEST_F(SortByPTypeProcessTest, SortByPTypeStep)
-{
-    // process0->Execute(scene);
-
-    // and another small test for ScenePreprocessor
-    ScenePreprocessor s(scene);
+TEST_F(SortByPTypeProcessTest, SortByPTypeStep) {
+    ScenePreprocessor s(mScene);
     s.ProcessScene();
     for (unsigned int m = 0; m< 10;++m)
-        EXPECT_EQ(result[m], scene->mMeshes[m]->mPrimitiveTypes);
+        EXPECT_EQ(result[m], mScene->mMeshes[m]->mPrimitiveTypes);
 
-    process1->Execute(scene);
+    mProcess1->Execute(mScene);
 
     unsigned int idx = 0;
-    for (unsigned int m = 0,real = 0; m< 10;++m)
-    {
-        for (unsigned int n = 0; n < 4;++n)
-        {
-            if ((idx = num[m][n]))
-            {
-                EXPECT_TRUE(real < scene->mNumMeshes);
+    for (unsigned int m = 0,real = 0; m< 10;++m) {
+        for (unsigned int n = 0; n < 4;++n) {
+            if ((idx = num[m][n])) {
+                EXPECT_TRUE(real < mScene->mNumMeshes);
 
-                aiMesh* mesh = scene->mMeshes[real];
+                aiMesh* mesh = mScene->mMeshes[real];
 
                 EXPECT_TRUE(NULL != mesh);
                 EXPECT_EQ(AI_PRIMITIVE_TYPE_FOR_N_INDICES(n+1), mesh->mPrimitiveTypes);
@@ -221,8 +197,7 @@ TEST_F(SortByPTypeProcessTest, SortByPTypeStep)
                 EXPECT_TRUE(NULL != mesh->mTextureCoords[0]);
 
                 EXPECT_TRUE(mesh->mNumFaces == idx);
-                for (unsigned int f = 0; f < mesh->mNumFaces;++f)
-                {
+                for (unsigned int f = 0; f < mesh->mNumFaces;++f) {
                     aiFace& face = mesh->mFaces[f];
                     EXPECT_TRUE(face.mNumIndices == (n+1) || (3 == n && face.mNumIndices > 3));
                 }
@@ -231,4 +206,3 @@ TEST_F(SortByPTypeProcessTest, SortByPTypeStep)
         }
     }
 }
-

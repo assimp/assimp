@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -42,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <PretransformVertices.h>
+#include "PostProcessing/PretransformVertices.h"
 
 
 using namespace std;
@@ -50,18 +51,24 @@ using namespace Assimp;
 
 class PretransformVerticesTest : public ::testing::Test {
 public:
+    PretransformVerticesTest()
+    : Test()
+    , mScene(nullptr)
+    , mProcess(nullptr) {
+        // empty
+    }
+
+protected:
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
-    aiScene* scene;
-    PretransformVertices* process;
+    aiScene *mScene;
+    PretransformVertices *mProcess;
 };
 
 // ------------------------------------------------------------------------------------------------
-void AddNodes(unsigned int num, aiNode* father, unsigned int depth)
-{
+void AddNodes(unsigned int num, aiNode* father, unsigned int depth) {
     father->mChildren = new aiNode*[father->mNumChildren = 5];
     for (unsigned int i = 0; i < 5; ++i) {
         aiNode* nd = father->mChildren[i] = new aiNode();
@@ -78,26 +85,26 @@ void AddNodes(unsigned int num, aiNode* father, unsigned int depth)
     }
 
     if (depth > 1) {
-        for (unsigned int i = 0; i < 5; ++i)
-            AddNodes(i, father->mChildren[i],depth-1);
+        for (unsigned int i = 0; i < 5; ++i) {
+            AddNodes(i, father->mChildren[i], depth - 1);
+        }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void PretransformVerticesTest::SetUp()
-{
-    scene = new aiScene();
+void PretransformVerticesTest::SetUp() {
+    mScene = new aiScene();
 
     // add 5 empty materials
-    scene->mMaterials = new aiMaterial*[scene->mNumMaterials = 5];
+    mScene->mMaterials = new aiMaterial*[mScene->mNumMaterials = 5];
     for (unsigned int i = 0; i < 5;++i) {
-        scene->mMaterials[i] = new aiMaterial();
+        mScene->mMaterials[i] = new aiMaterial();
     }
 
     // add 25 test meshes
-    scene->mMeshes = new aiMesh*[scene->mNumMeshes = 25];
-    for ( unsigned int i = 0; i < 25; ++i) {
-        aiMesh* mesh = scene->mMeshes[ i ] = new aiMesh();
+    mScene->mMeshes = new aiMesh*[mScene->mNumMeshes = 25];
+    for ( unsigned int i = 0; i < 25; ++i) { 
+        aiMesh* mesh = mScene->mMeshes[ i ] = new aiMesh();
 
         mesh->mPrimitiveTypes = aiPrimitiveType_POINT;
         mesh->mFaces = new aiFace[ mesh->mNumFaces = 10+i ];
@@ -123,36 +130,33 @@ void PretransformVerticesTest::SetUp()
     }
 
     // construct some nodes (1+25)
-    scene->mRootNode = new aiNode();
-    scene->mRootNode->mName.Set("Root");
-    AddNodes(0,scene->mRootNode,2);
+    mScene->mRootNode = new aiNode();
+    mScene->mRootNode->mName.Set("Root");
+    AddNodes(0, mScene->mRootNode, 2);
 
-    process = new PretransformVertices();
+    mProcess = new PretransformVertices();
 }
 
 // ------------------------------------------------------------------------------------------------
-void PretransformVerticesTest::TearDown()
-{
-    delete scene;
-    delete process;
+void PretransformVerticesTest::TearDown() {
+    delete mScene;
+    delete mProcess;
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(PretransformVerticesTest, testProcessCollapseHierarchy)
-{
-    process->KeepHierarchy(false);
-    process->Execute(scene);
+TEST_F(PretransformVerticesTest, testProcessCollapseHierarchy) {
+    mProcess->KeepHierarchy(false);
+    mProcess->Execute(mScene);
 
-    EXPECT_EQ(5U, scene->mNumMaterials);
-    EXPECT_EQ(10U, scene->mNumMeshes); // every second mesh has normals
+    EXPECT_EQ(5U, mScene->mNumMaterials);
+    EXPECT_EQ(10U, mScene->mNumMeshes); // every second mesh has normals
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(PretransformVerticesTest, testProcessKeepHierarchy)
-{
-    process->KeepHierarchy(true);
-    process->Execute(scene);
+TEST_F(PretransformVerticesTest, testProcessKeepHierarchy) {
+    mProcess->KeepHierarchy(true);
+    mProcess->Execute(mScene);
 
-    EXPECT_EQ(5U, scene->mNumMaterials);
-    EXPECT_EQ(49U, scene->mNumMeshes); // see note on mesh 12 above
+    EXPECT_EQ(5U, mScene->mNumMaterials);
+    EXPECT_EQ(49U, mScene->mNumMeshes); // see note on mesh 12 above
 }

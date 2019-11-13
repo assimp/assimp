@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -88,7 +89,7 @@ public:
         scene->mMeshes[ 0 ]->mFaces[ 0 ].mIndices[ 1 ] = 1;
         scene->mMeshes[ 0 ]->mFaces[ 0 ].mIndices[ 2 ] = 2;
 
-        scene->mRootNode = new aiNode;
+        scene->mRootNode = new aiNode();
         scene->mRootNode->mNumMeshes = 1;
         scene->mRootNode->mMeshes = new unsigned int[1]{ 0 };
 

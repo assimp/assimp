@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -73,7 +74,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     if ( newScene->mNumMaterials > 0 ) {
         std::cout << "Desc = " << desc->description << "\n";
         EXPECT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
-        EXPECT_EQ( opacity, newOpacity );
+        EXPECT_FLOAT_EQ( opacity, newOpacity );
     }
     delete scene;
 }

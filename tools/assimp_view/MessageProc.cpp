@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -45,7 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <windowsx.h>
 #include <commdlg.h>
-#include <timeapi.h>
+
+#ifdef __MINGW32__
+#   include <mmsystem.h>
+#else
+#   include <timeapi.h>
+#endif
 
 namespace AssimpView {
 
@@ -80,46 +85,42 @@ void SaveHistory();
 // File associations are registered in HKCU\Software\Classes. They might
 // be overwritten by global file associations.
 //-------------------------------------------------------------------------------
-void MakeFileAssociations()
-    {
+void MakeFileAssociations() {
     char szTemp2[MAX_PATH];
     char szTemp[MAX_PATH + 10];
 
     GetModuleFileName(NULL,szTemp2,MAX_PATH);
     sprintf(szTemp,"%s %%1",szTemp2);
 
-    HKEY g_hRegistry;
+    HKEY hRegistry = NULL;
 
     aiString list, tmp;
     aiGetExtensionList(&list);
     tmp = list;
 
     const char* sz = strtok(list.data,";");
-    do
-    {
+    do {
         char buf[256];
         ai_assert(sz[0] == '*');
         sprintf(buf,"Software\\Classes\\%s",sz+1);
 
-        RegCreateKeyEx(HKEY_CURRENT_USER,buf,0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-        RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
-        RegCloseKey(g_hRegistry);
-    }
-    while ((sz = strtok(NULL,";")));
+        RegCreateKeyEx(HKEY_CURRENT_USER,buf,0,NULL,0,KEY_ALL_ACCESS, NULL, &hRegistry,NULL);
+        RegSetValueEx(hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
+        RegCloseKey(hRegistry);
+    } while ((sz = strtok(NULL,";")));
 
-    RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-    RegCloseKey(g_hRegistry);
+    RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",0,NULL,0,KEY_ALL_ACCESS, NULL, &hRegistry,NULL);
+    RegCloseKey(hRegistry);
 
-    RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS\\shell\\open\\command",0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-    RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
-    RegCloseKey(g_hRegistry);
+    RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS\\shell\\open\\command",0,NULL,0,KEY_ALL_ACCESS, NULL, &hRegistry,NULL);
+    RegSetValueEx(hRegistry,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
+    RegCloseKey(hRegistry);
 
     CLogDisplay::Instance().AddEntry("[OK] File assocations have been registered",
         D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 
     CLogDisplay::Instance().AddEntry(tmp.data,D3DCOLOR_ARGB(0xFF,0,0xFF,0));
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Handle command line parameters
@@ -127,18 +128,18 @@ void MakeFileAssociations()
 // The function loads an asset specified on the command line as first argument
 // Other command line parameters are not handled
 //-------------------------------------------------------------------------------
-void HandleCommandLine(char* p_szCommand)
-    {
+void HandleCommandLine(char* p_szCommand) {
     char* sz = p_szCommand;
     //bool bQuak = false;
 
-    if (strlen(sz) < 2)return;
+    if (strlen(sz) < 2) {
+        return;
+    }
 
-    if (*sz == '\"')
-  {
+    if (*sz == '\"') {
         char* sz2 = strrchr(sz,'\"');
         if (sz2)*sz2 = 0;
-    sz++; // skip the starting quote
+        sz++; // skip the starting quote
     }
 
     strcpy( g_szFileName, sz );
@@ -149,41 +150,31 @@ void HandleCommandLine(char* p_szCommand)
 
     // Save the list of previous files to the registry
     SaveHistory();
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Load the light colors from the registry
 //-------------------------------------------------------------------------------
-void LoadLightColors()
-{
+void LoadLightColors() {
     DWORD dwTemp = 4;
-    RegQueryValueEx(g_hRegistry,"LightColor0",NULL,NULL,
-        (BYTE*)&g_avLightColors[0],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor1",NULL,NULL,
-        (BYTE*)&g_avLightColors[1],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor2",NULL,NULL,
-        (BYTE*)&g_avLightColors[2],&dwTemp);
-    return;
+    RegQueryValueEx(g_hRegistry,"LightColor0",NULL,NULL, (BYTE*)&g_avLightColors[0],&dwTemp);
+    RegQueryValueEx(g_hRegistry,"LightColor1",NULL,NULL, (BYTE*)&g_avLightColors[1],&dwTemp);
+    RegQueryValueEx(g_hRegistry,"LightColor2",NULL,NULL, (BYTE*)&g_avLightColors[2],&dwTemp);
 }
-
 
 //-------------------------------------------------------------------------------
 // Save the light colors to the registry
 //-------------------------------------------------------------------------------
-void SaveLightColors()
-{
+void SaveLightColors() {
     RegSetValueExA(g_hRegistry,"LightColor0",0,REG_DWORD,(const BYTE*)&g_avLightColors[0],4);
     RegSetValueExA(g_hRegistry,"LightColor1",0,REG_DWORD,(const BYTE*)&g_avLightColors[1],4);
     RegSetValueExA(g_hRegistry,"LightColor2",0,REG_DWORD,(const BYTE*)&g_avLightColors[2],4);
 }
 
-
 //-------------------------------------------------------------------------------
 // Save the checker pattern colors to the registry
 //-------------------------------------------------------------------------------
-void SaveCheckerPatternColors()
-{
+void SaveCheckerPatternColors() {
     // we have it as float4. save it as binary value --.
     RegSetValueExA(g_hRegistry,"CheckerPattern0",0,REG_BINARY,
         (const BYTE*)CDisplay::Instance().GetFirstCheckerColor(),
@@ -197,8 +188,7 @@ void SaveCheckerPatternColors()
 //-------------------------------------------------------------------------------
 // Load the checker pattern colors from the registry
 //-------------------------------------------------------------------------------
-void LoadCheckerPatternColors()
-{
+void LoadCheckerPatternColors() {
     DWORD dwTemp = sizeof(D3DXVECTOR3);
     RegQueryValueEx(g_hRegistry,"CheckerPattern0",NULL,NULL,
         (BYTE*) /* jep, this is evil */ CDisplay::Instance().GetFirstCheckerColor(),&dwTemp);
@@ -210,8 +200,7 @@ void LoadCheckerPatternColors()
 //-------------------------------------------------------------------------------
 // Changed pp setup
 //-------------------------------------------------------------------------------
-void UpdatePPSettings()
-{
+void UpdatePPSettings() {
     DWORD dwValue = ppsteps;
     RegSetValueExA(g_hRegistry,"PostProcessing",0,REG_DWORD,(const BYTE*)&dwValue,4);
     UpdateWindow(g_hDlg);
@@ -220,8 +209,7 @@ void UpdatePPSettings()
 //-------------------------------------------------------------------------------
 // Toggle the "Display Normals" state
 //-------------------------------------------------------------------------------
-void ToggleNormals()
-{
+void ToggleNormals() {
     g_sOptions.bRenderNormals = !g_sOptions.bRenderNormals;
 
     // store this in the registry, too
@@ -230,97 +218,72 @@ void ToggleNormals()
     RegSetValueExA(g_hRegistry,"RenderNormals",0,REG_DWORD,(const BYTE*)&dwValue,4);
 }
 
+static void storeRegKey(bool option, LPCSTR name) {
+    // store this in the registry, too
+    DWORD dwValue = 0;
+    if (option) {
+        dwValue = 1;
+    }
+    RegSetValueExA(g_hRegistry, name, 0, REG_DWORD, (const BYTE*)&dwValue, 4);
+
+}
 //-------------------------------------------------------------------------------
 // Toggle the "AutoRotate" state
 //-------------------------------------------------------------------------------
-void ToggleAutoRotate()
-{
+void ToggleAutoRotate() {
     g_sOptions.bRotate = !g_sOptions.bRotate;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bRotate)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"AutoRotate",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bRotate, "AutoRotate");
     UpdateWindow(g_hDlg);
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "FPS" state
 //-------------------------------------------------------------------------------
-void ToggleFPSView()
-{
+void ToggleFPSView() {
     g_bFPSView = !g_bFPSView;
     SetupFPSView();
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_bFPSView)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"FPSView",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_bFPSView, "FPSView");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "2 Light sources" state
 //-------------------------------------------------------------------------------
-void ToggleMultipleLights()
-{
+void ToggleMultipleLights() {
     g_sOptions.b3Lights = !g_sOptions.b3Lights;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.b3Lights)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"MultipleLights",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.b3Lights, "MultipleLights");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "LightRotate" state
 //-------------------------------------------------------------------------------
-void ToggleLightRotate()
-{
+void ToggleLightRotate() {
     g_sOptions.bLightRotate = !g_sOptions.bLightRotate;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bLightRotate)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"LightRotate",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bLightRotate, "LightRotate");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "NoTransparency" state
 //-------------------------------------------------------------------------------
-void ToggleTransparency()
-{
+void ToggleTransparency() {
     g_sOptions.bNoAlphaBlending = !g_sOptions.bNoAlphaBlending;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bNoAlphaBlending)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"NoTransparency",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bNoAlphaBlending, "NoTransparency");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "LowQuality" state
 //-------------------------------------------------------------------------------
-void ToggleLowQuality()
-{
+void ToggleLowQuality() {
     g_sOptions.bLowQuality = !g_sOptions.bLowQuality;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bLowQuality)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"LowQuality",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bLowQuality, "LowQuality");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "Specular" state
 //-------------------------------------------------------------------------------
-void ToggleSpecular()
-{
+void ToggleSpecular() {
     g_sOptions.bNoSpecular = !g_sOptions.bNoSpecular;
 
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bNoSpecular)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"NoSpecular",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bNoSpecular, "NoSpecular");
 
     // update all specular materials
     CMaterialManager::Instance().UpdateSpecularMaterials();
@@ -329,14 +292,10 @@ void ToggleSpecular()
 //-------------------------------------------------------------------------------
 // Toggle the "RenderMats" state
 //-------------------------------------------------------------------------------
-void ToggleMats()
-{
+void ToggleMats() {
     g_sOptions.bRenderMats = !g_sOptions.bRenderMats;
 
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bRenderMats)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"RenderMats",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bRenderMats, "RenderMats");
 
     // update all specular materials
     CMaterialManager::Instance().UpdateSpecularMaterials();
@@ -345,55 +304,40 @@ void ToggleMats()
 //-------------------------------------------------------------------------------
 // Toggle the "Culling" state
 //-------------------------------------------------------------------------------
-void ToggleCulling()
-{
+void ToggleCulling() {
     g_sOptions.bCulling = !g_sOptions.bCulling;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bCulling)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"Culling",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bCulling, "Culling");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "Skeleton" state
 //-------------------------------------------------------------------------------
-void ToggleSkeleton()
-{
+void ToggleSkeleton() {
     g_sOptions.bSkeleton = !g_sOptions.bSkeleton;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bCulling)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"Skeleton",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bSkeleton, "Skeleton");
 }
 
 //-------------------------------------------------------------------------------
 // Toggle the "WireFrame" state
 //-------------------------------------------------------------------------------
-void ToggleWireFrame()
-{
-    if (g_sOptions.eDrawMode == RenderOptions::WIREFRAME)
+void ToggleWireFrame() {
+    if (g_sOptions.eDrawMode == RenderOptions::WIREFRAME) {
         g_sOptions.eDrawMode = RenderOptions::NORMAL;
-    else g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
+    } else {
+        g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
+    }
 
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (RenderOptions::WIREFRAME == g_sOptions.eDrawMode)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"Wireframe",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(RenderOptions::WIREFRAME == g_sOptions.eDrawMode, "Wireframe");
 }
-
 
 //-------------------------------------------------------------------------------
 // Toggle the "MultiSample" state
 //-------------------------------------------------------------------------------
-void ToggleMS()
-{
+void ToggleMS() {
     g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
     DeleteAssetData();
     ShutdownDevice();
-    if (0 == CreateDevice())
-    {
+    if (0 == CreateDevice()) {
         CLogDisplay::Instance().AddEntry(
             "[ERROR] Failed to toggle MultiSampling mode");
         g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
@@ -401,28 +345,21 @@ void ToggleMS()
     }
     CreateAssetData();
 
-    if (g_sOptions.bMultiSample)
-    {
+    if (g_sOptions.bMultiSample) {
         CLogDisplay::Instance().AddEntry(
             "[OK] Changed MultiSampling mode to the maximum value for this device");
-    }
-    else
-    {
+    } else {
         CLogDisplay::Instance().AddEntry(
             "[OK] MultiSampling has been disabled");
     }
 
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bMultiSample)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"MultiSampling",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bMultiSample, "MultiSampling");
 }
 
 //-------------------------------------------------------------------------------
 // Expand or collapse the UI
 //-------------------------------------------------------------------------------
-void ToggleUIState()
-{
+void ToggleUIState() {
     // adjust the size
     RECT sRect;
     GetWindowRect(g_hDlg,&sRect);
@@ -434,46 +371,33 @@ void ToggleUIState()
     sRect2.left -= sRect.left;
     sRect2.top -= sRect.top;
 
-    DWORD dwValue;
-    if (BST_UNCHECKED == IsDlgButtonChecked(g_hDlg,IDC_BLUBB))
-    {
+    if (BST_UNCHECKED == IsDlgButtonChecked(g_hDlg,IDC_BLUBB)) {
         SetWindowPos(g_hDlg,NULL,0,0,sRect.right-214,sRect.bottom,
             SWP_NOMOVE | SWP_NOZORDER);
 
-        dwValue = 0;
         SetWindowText(GetDlgItem(g_hDlg,IDC_BLUBB),">>");
-        RegSetValueExA(g_hRegistry,"LastUIState",0,REG_DWORD,(const BYTE*)&dwValue,4);
-    }
-    else
-    {
+        storeRegKey(false, "MultiSampling");
+    } else {
         SetWindowPos(g_hDlg,NULL,0,0,sRect.right+214,sRect.bottom,
             SWP_NOMOVE | SWP_NOZORDER);
 
-        dwValue = 1;
+        storeRegKey(true, "LastUIState");
         SetWindowText(GetDlgItem(g_hDlg,IDC_BLUBB),"<<");
-        RegSetValueExA(g_hRegistry,"LastUIState",0,REG_DWORD,(const BYTE*)&dwValue,4);
     }
     UpdateWindow(g_hDlg);
-    return;
 }
 
-
 //-------------------------------------------------------------------------------
-// Load the background texture for the cviewer
+// Load the background texture for the viewer
 //-------------------------------------------------------------------------------
-void LoadBGTexture()
-{
+void LoadBGTexture() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"TextureSrc",NULL,NULL,
-        (BYTE*)szFileName,&dwTemp))
-    {
+    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"TextureSrc",NULL,NULL, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
         strcpy(szFileName,"");
-    }
-    else
-    {
+    } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
         if (!sz)
@@ -499,14 +423,12 @@ void LoadBGTexture()
     RegSetValueExA(g_hRegistry,"LastSkyBoxSrc",0,REG_SZ,(const BYTE*)"",MAX_PATH);
 
     CBackgroundPainter::Instance().SetTextureBG(szFileName);
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Reset the background color to a smart and nice grey
 //-------------------------------------------------------------------------------
-void ClearBG()
-{
+void ClearBG() {
     D3DCOLOR clrColor = D3DCOLOR_ARGB(0xFF,100,100,100);
     CBackgroundPainter::Instance().SetColor(clrColor);
 
@@ -514,14 +436,12 @@ void ClearBG()
     RegSetValueExA(g_hRegistry,"LastTextureSrc",0,REG_SZ,(const BYTE*)"",MAX_PATH);
 
     RegSetValueExA(g_hRegistry,"Color",0,REG_DWORD,(const BYTE*)&clrColor,4);
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Let the user choose a color in a windows standard color dialog
 //-------------------------------------------------------------------------------
-void DisplayColorDialog(D3DCOLOR* pclrResult)
-{
+void DisplayColorDialog(D3DCOLOR* pclrResult) {
     CHOOSECOLOR clr;
     clr.lStructSize = sizeof(CHOOSECOLOR);
     clr.hwndOwner = g_hDlg;
@@ -538,15 +458,12 @@ void DisplayColorDialog(D3DCOLOR* pclrResult)
         GetRValue(clr.rgbResult),
         GetGValue(clr.rgbResult),
         GetBValue(clr.rgbResult));
-    return;
 }
-
 
 //-------------------------------------------------------------------------------
 // Let the user choose a color in a windows standard color dialog
 //-------------------------------------------------------------------------------
-void DisplayColorDialog(D3DXVECTOR4* pclrResult)
-{
+void DisplayColorDialog(D3DXVECTOR4* pclrResult) {
     CHOOSECOLOR clr;
     clr.lStructSize = sizeof(CHOOSECOLOR);
     clr.hwndOwner = g_hDlg;
@@ -564,14 +481,12 @@ void DisplayColorDialog(D3DXVECTOR4* pclrResult)
     pclrResult->x = GetRValue(clr.rgbResult) / 255.0f;
     pclrResult->y = GetGValue(clr.rgbResult) / 255.0f;
     pclrResult->z = GetBValue(clr.rgbResult) / 255.0f;
-    return;
 }
 
 //-------------------------------------------------------------------------------
-// Let the user choose the baclground color for the viewer
+// Let the user choose the background color for the viewer
 //-------------------------------------------------------------------------------
-void ChooseBGColor()
-{
+void ChooseBGColor() {
     RegSetValueExA(g_hRegistry,"LastSkyBoxSrc",0,REG_SZ,(const BYTE*)"",MAX_PATH);
     RegSetValueExA(g_hRegistry,"LastTextureSrc",0,REG_SZ,(const BYTE*)"",MAX_PATH);
 
@@ -580,14 +495,12 @@ void ChooseBGColor()
     CBackgroundPainter::Instance().SetColor(clrColor);
 
     RegSetValueExA(g_hRegistry,"Color",0,REG_DWORD,(const BYTE*)&clrColor,4);
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Display the OpenFile dialog and let the user choose a new slybox as bg
 //-------------------------------------------------------------------------------
-void LoadSkybox()
-{
+void LoadSkybox() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
@@ -626,23 +539,26 @@ void LoadSkybox()
     return;
 }
 
+template<class T>
+inline
+void SaveRelease(T **iface ) {
+    if (nullptr != iface) {
+        (*iface)->Release();
+        *iface = nullptr;
+    }
+}
 
 //-------------------------------------------------------------------------------
-// Sace a screenshot to an user-defined file
+// Save a screenshot to an user-defined file
 //-------------------------------------------------------------------------------
-void SaveScreenshot()
-{
+void SaveScreenshot() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"ScreenShot",NULL,NULL,
-        (BYTE*)szFileName,&dwTemp))
-    {
+    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"ScreenShot",NULL,NULL, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
         strcpy(szFileName,"");
-    }
-    else
-    {
+    } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
         if (!sz)
@@ -666,49 +582,42 @@ void SaveScreenshot()
 
     IDirect3DSurface9* pi = NULL;
     g_piDevice->GetRenderTarget(0,&pi);
-    if(!pi || FAILED(D3DXSaveSurfaceToFile(szFileName,D3DXIFF_PNG,pi,NULL,NULL)))
-    {
+    if(!pi || FAILED(D3DXSaveSurfaceToFile(szFileName,D3DXIFF_PNG,pi,NULL,NULL))) {
         CLogDisplay::Instance().AddEntry("[ERROR] Unable to save screenshot",
             D3DCOLOR_ARGB(0xFF,0xFF,0,0));
-    }
-    else
-    {
+    } else {
         CLogDisplay::Instance().AddEntry("[INFO] The screenshot has been saved",
             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
     }
-    if(pi)pi->Release();
-    return;
+    SaveRelease(&pi);
 }
 
 //-------------------------------------------------------------------------------
 // Get the amount of memory required for textures
 //-------------------------------------------------------------------------------
-void AddTextureMem(IDirect3DTexture9* pcTex, unsigned int& out)
-{
-    if (!pcTex)return;
+void AddTextureMem(IDirect3DTexture9* pcTex, unsigned int& out) {
+    if (!pcTex) {
+        return;
+    }
 
     D3DSURFACE_DESC sDesc;
     pcTex->GetLevelDesc(0,&sDesc);
 
     out += (sDesc.Width * sDesc.Height) << 2;
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Display memory statistics
 //-------------------------------------------------------------------------------
-void DisplayMemoryConsumption()
-{
+void DisplayMemoryConsumption() {
     // first get the memory consumption for the aiScene
-    if (! g_pcAsset ||!g_pcAsset->pcScene)
-    {
+    if (! g_pcAsset ||!g_pcAsset->pcScene) {
         MessageBox(g_hDlg,"No asset is loaded. Can you guess how much memory I need to store nothing?",
             "Memory consumption",MB_OK);
         return;
     }
     unsigned int iScene = sizeof(aiScene);
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-    {
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i) {
         iScene += sizeof(aiMesh);
         if (g_pcAsset->pcScene->mMeshes[i]->HasPositions())
             iScene += sizeof(aiVector3D) * g_pcAsset->pcScene->mMeshes[i]->mNumVertices;
@@ -719,22 +628,20 @@ void DisplayMemoryConsumption()
         if (g_pcAsset->pcScene->mMeshes[i]->HasTangentsAndBitangents())
             iScene += sizeof(aiVector3D) * g_pcAsset->pcScene->mMeshes[i]->mNumVertices * 2;
 
-        for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a)
-        {
-            if (g_pcAsset->pcScene->mMeshes[i]->HasVertexColors(a))
+        for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS;++a) {
+            if (g_pcAsset->pcScene->mMeshes[i]->HasVertexColors(a)) {
                 iScene += sizeof(aiColor4D) * g_pcAsset->pcScene->mMeshes[i]->mNumVertices;
-            else break;
+            } else {
+                break;
+            }
         }
-        for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)
-        {
+        for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a) {
             if (g_pcAsset->pcScene->mMeshes[i]->HasTextureCoords(a))
                 iScene += sizeof(aiVector3D) * g_pcAsset->pcScene->mMeshes[i]->mNumVertices;
             else break;
         }
-        if (g_pcAsset->pcScene->mMeshes[i]->HasBones())
-        {
-            for (unsigned int p = 0; p < g_pcAsset->pcScene->mMeshes[i]->mNumBones;++p)
-            {
+        if (g_pcAsset->pcScene->mMeshes[i]->HasBones()) {
+            for (unsigned int p = 0; p < g_pcAsset->pcScene->mMeshes[i]->mNumBones;++p) {
                 iScene += sizeof(aiBone);
                 iScene += g_pcAsset->pcScene->mMeshes[i]->mBones[p]->mNumWeights * sizeof(aiVertexWeight);
             }
@@ -742,22 +649,20 @@ void DisplayMemoryConsumption()
         iScene += (sizeof(aiFace) + 3 * sizeof(unsigned int))*g_pcAsset->pcScene->mMeshes[i]->mNumFaces;
     }
     // add all embedded textures
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumTextures;++i)
-    {
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumTextures;++i) {
         const aiTexture* pc = g_pcAsset->pcScene->mTextures[i];
-        if (0 != pc->mHeight)
-        {
+        if (0 != pc->mHeight) {
             iScene += 4 * pc->mHeight * pc->mWidth;
+        } else {
+            iScene += pc->mWidth;
         }
-        else iScene += pc->mWidth;
     }
     // add 30k for each material ... a string has 4k for example
     iScene += g_pcAsset->pcScene->mNumMaterials * 30 * 1024;
 
     // now get the memory consumption required by D3D, first all textures
     unsigned int iTexture = 0;
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-    {
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i) {
         AssetHelper::MeshHelper* pc = g_pcAsset->apcMeshes[i];
 
         AddTextureMem(pc->piDiffuseTexture,iTexture);
@@ -771,15 +676,13 @@ void DisplayMemoryConsumption()
     unsigned int iVRAM = iTexture;
 
     // now get the memory consumption of all vertex/index buffers
-    unsigned int iVB = 0;
-    unsigned int iIB = 0;
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-    {
+    unsigned int iVB( 0 ), iIB(0);
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i) {
         AssetHelper:: MeshHelper* pc = g_pcAsset->apcMeshes[i];
 
         union{
-        D3DVERTEXBUFFER_DESC sDesc;
-        D3DINDEXBUFFER_DESC sDesc2;
+            D3DVERTEXBUFFER_DESC sDesc;
+            D3DINDEXBUFFER_DESC sDesc2;
         };
 
         if (pc->piVB)
@@ -818,36 +721,30 @@ void DisplayMemoryConsumption()
         iScene / 1024,iTexture / 1024,iVB / 1024,iIB / 1024,iVRAM / 1024,
         (iScene + iTexture + iVB + iIB + iVRAM) / 1024);
     MessageBox(g_hDlg,szOut,"Memory consumption",MB_OK);
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Save the list of recent files to the registry
 //-------------------------------------------------------------------------------
-void SaveHistory()
-{
-    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
-    {
+void SaveHistory() {
+    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i) {
         char szName[66];
         sprintf(szName,"Recent%i",i+1);
 
         RegSetValueEx(g_hRegistry,szName,0,REG_SZ,
             (const BYTE*)g_aPreviousFiles[i].c_str(),(DWORD)g_aPreviousFiles[i].length());
     }
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Recover the file history
 //-------------------------------------------------------------------------------
-void LoadHistory()
-{
+void LoadHistory() {
     g_aPreviousFiles.resize(AI_VIEW_NUM_RECENT_FILES);
 
     char szFileName[MAX_PATH];
 
-    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
-    {
+    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i) {
         char szName[66];
         sprintf(szName,"Recent%i",i+1);
 
@@ -855,20 +752,17 @@ void LoadHistory()
 
         szFileName[0] ='\0';
         if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,szName,NULL,NULL,
-            (BYTE*)szFileName,&dwTemp))
-        {
+                (BYTE*)szFileName,&dwTemp)) {
             g_aPreviousFiles[i] = std::string(szFileName);
         }
     }
 
     // add sub items for all recent files
     g_hHistoryMenu = CreateMenu();
-    for (int i = AI_VIEW_NUM_RECENT_FILES-1; i >= 0;--i)
-    {
+    for (int i = AI_VIEW_NUM_RECENT_FILES-1; i >= 0;--i) {
         const char* szText = g_aPreviousFiles[i].c_str();
         UINT iFlags = 0;
-        if ('\0' == *szText)
-        {
+        if ('\0' == *szText) {
             szText = "<empty>";
             iFlags = MF_GRAYED | MF_DISABLED;
         }
@@ -877,19 +771,17 @@ void LoadHistory()
 
     ModifyMenu(GetMenu(g_hDlg),ID_VIEWER_RECENTFILES,MF_BYCOMMAND | MF_POPUP,
         (UINT_PTR)g_hHistoryMenu,"Recent files");
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Clear the file history
 //-------------------------------------------------------------------------------
-void ClearHistory()
-{
-    for(unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
+void ClearHistory() {
+    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES; ++i) {
         g_aPreviousFiles[i] = std::string("");
+    }
 
-    for (int i = AI_VIEW_NUM_RECENT_FILES-1; i >= 0;--i)
-    {
+    for (int i = AI_VIEW_NUM_RECENT_FILES-1; i >= 0;--i) {
         ModifyMenu(g_hHistoryMenu,AI_VIEW_RECENT_FILE_ID(i),
             MF_STRING | MF_BYCOMMAND | MF_GRAYED | MF_DISABLED,AI_VIEW_RECENT_FILE_ID(i),"<empty>");
     }
@@ -900,50 +792,44 @@ void ClearHistory()
 //-------------------------------------------------------------------------------
 // Update the file history
 //-------------------------------------------------------------------------------
-void UpdateHistory()
-{
-    if(!g_hHistoryMenu)return;
+void UpdateHistory() {
+    if (!g_hHistoryMenu) {
+        return;
+    }
 
     std::string sz = std::string(g_szFileName);
-    if (g_aPreviousFiles[AI_VIEW_NUM_RECENT_FILES-1] == sz)return;
+    if (g_aPreviousFiles[AI_VIEW_NUM_RECENT_FILES - 1] == sz) {
+        return;
+    }
 
     // add the new asset to the list of recent files
-    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES-1;++i)
-    {
+    for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES-1;++i) {
         g_aPreviousFiles[i] = g_aPreviousFiles[i+1];
     }
     g_aPreviousFiles[AI_VIEW_NUM_RECENT_FILES-1] = sz;
-    for (int i = AI_VIEW_NUM_RECENT_FILES-1; i >= 0;--i)
-    {
+    for (int i = AI_VIEW_NUM_RECENT_FILES-1; i >= 0;--i) {
         const char* szText = g_aPreviousFiles[i].c_str();
         UINT iFlags = 0;
-        if ('\0' == *szText)
-        {
+        if ('\0' == *szText) {
             szText = "<empty>";
             iFlags = MF_GRAYED | MF_DISABLED;
         }
         ModifyMenu(g_hHistoryMenu,AI_VIEW_RECENT_FILE_ID(i),
             MF_STRING | MF_BYCOMMAND | iFlags,AI_VIEW_RECENT_FILE_ID(i),szText);
     }
-    return;
 }
 
 //-------------------------------------------------------------------------------
 // Open a new asset
 //-------------------------------------------------------------------------------
-void OpenAsset()
-{
+void OpenAsset() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"CurrentApp",NULL,NULL,
-        (BYTE*)szFileName,&dwTemp))
-    {
+    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"CurrentApp",NULL,NULL, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
         strcpy(szFileName,"");
-    }
-    else
-    {
+    } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
         if (!sz)
@@ -966,21 +852,28 @@ void OpenAsset()
     strcpy(szCur,"*.*");
     szCur[4] = 0;
 
-    OPENFILENAME sFilename1 = {
-        sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), szList, NULL, 0, 1,
-        szFileName, MAX_PATH, NULL, 0, NULL,
-        "Import Asset into ASSIMP",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
-        0, 1, ".x", 0, NULL, NULL
-    };
-    if(GetOpenFileName(&sFilename1) == 0) return;
+    OPENFILENAME sFilename1;
+    ZeroMemory(&sFilename1, sizeof(sFilename1));
+    sFilename1.lStructSize = sizeof(sFilename1);
+    sFilename1.hwndOwner = g_hDlg;
+    sFilename1.hInstance = GetModuleHandle(NULL);
+    sFilename1.lpstrFile = szFileName;
+    sFilename1.lpstrFile[0] = '\0';
+    sFilename1.nMaxFile = sizeof(szList);
+    sFilename1.lpstrFilter = szList;
+    sFilename1.nFilterIndex = 1;
+    sFilename1.lpstrFileTitle = NULL;
+    sFilename1.nMaxFileTitle = 0;
+    sFilename1.lpstrInitialDir = NULL;
+    sFilename1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
+    if (GetOpenFileName(&sFilename1) == 0) {
+        return;
+    }
 
     // Now store the file in the registry
     RegSetValueExA(g_hRegistry,"CurrentApp",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
 
-    if (0 != strcmp(g_szFileName,szFileName))
-    {
+    if (0 != strcmp(g_szFileName,szFileName)) {
         strcpy(g_szFileName, szFileName);
         DeleteAssetData();
         DeleteAsset();
@@ -992,13 +885,10 @@ void OpenAsset()
         // Save the list of previous files to the registry
         SaveHistory();
     }
-    return;
 }
 
 //-------------------------------------------------------------------------------
-void SetupPPUIState()
-{
-
+void SetupPPUIState() {
     // that's ugly. anyone willing to rewrite me from scratch?
     HMENU hMenu = GetMenu(g_hDlg);
     CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
@@ -1022,13 +912,11 @@ void SetupPPUIState()
 //-------------------------------------------------------------------------------
 // Fill the 'export' top level menu with a list of all supported export formats
 //-------------------------------------------------------------------------------
-void PopulateExportMenu()
-{
+void PopulateExportMenu() {
     // add sub items for all recent files
     Exporter exp;
     HMENU hm = ::CreateMenu();
-    for(size_t i = 0; i < exp.GetExportFormatCount(); ++i)
-    {
+    for(size_t i = 0; i < exp.GetExportFormatCount(); ++i) {
         const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
         char tmp[256];
         sprintf(tmp,"%s (%s)",e->description,e->id);
@@ -1041,9 +929,9 @@ void PopulateExportMenu()
 }
 
 //-------------------------------------------------------------------------------
+// Export function
 //-------------------------------------------------------------------------------
-void DoExport(size_t formatId)
-{
+void DoExport(size_t formatId) {
     if (!g_szFileName[0]) {
         MessageBox(g_hDlg, "No model loaded", "Export", MB_ICONERROR);
         return;
@@ -1058,9 +946,9 @@ void DoExport(size_t formatId)
         ai_assert(strlen(szFileName) <= MAX_PATH);
 
         // invent a nice default file name
-        char* sz = max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
+        char* sz = std::max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
         if (sz) {
-            strncpy(sz,max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
+            strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
         }
     }
     else {
@@ -1126,8 +1014,7 @@ void DoExport(size_t formatId)
 //-------------------------------------------------------------------------------
 // Initialize the user interface
 //-------------------------------------------------------------------------------
-void InitUI()
-{
+void InitUI() {
     SetDlgItemText(g_hDlg,IDC_EVERT,"0");
     SetDlgItemText(g_hDlg,IDC_EFACE,"0");
     SetDlgItemText(g_hDlg,IDC_EMAT,"0");
@@ -1151,13 +1038,10 @@ void InitUI()
     RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\ASSIMP\\Viewer",
         0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LastUIState",NULL,NULL,
-        (BYTE*)&dwValue,&dwTemp))
-    {
+    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LastUIState",NULL,NULL, (BYTE*)&dwValue,&dwTemp)) {
         dwValue = 1;
     }
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         // collapse the viewer
         // adjust the size
         RECT sRect;
@@ -1173,22 +1057,17 @@ void InitUI()
         SetWindowPos(g_hDlg,NULL,0,0,sRect.right-214,sRect.bottom,
             SWP_NOMOVE | SWP_NOZORDER);
         SetWindowText(GetDlgItem(g_hDlg,IDC_BLUBB),">>");
-    }
-    else
-    {
+    } else {
         CheckDlgButton(g_hDlg,IDC_BLUBB,BST_CHECKED);
     }
 
     // AutoRotate
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"AutoRotate",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.bRotate = false;
         CheckDlgButton(g_hDlg,IDC_AUTOROTATE,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bRotate = true;
         CheckDlgButton(g_hDlg,IDC_AUTOROTATE,BST_CHECKED);
     }
@@ -1196,13 +1075,10 @@ void InitUI()
     // MultipleLights
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"MultipleLights",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.b3Lights = false;
         CheckDlgButton(g_hDlg,IDC_3LIGHTS,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.b3Lights = true;
         CheckDlgButton(g_hDlg,IDC_3LIGHTS,BST_CHECKED);
     }
@@ -1210,27 +1086,22 @@ void InitUI()
     // Light rotate
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LightRotate",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.bLightRotate = false;
         CheckDlgButton(g_hDlg,IDC_LIGHTROTATE,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bLightRotate = true;
         CheckDlgButton(g_hDlg,IDC_LIGHTROTATE,BST_CHECKED);
     }
 
     // NoSpecular
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"NoSpecular",NULL,NULL,
-        (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry, "NoSpecular", NULL, NULL, (BYTE*)&dwValue, &dwTemp)) {
+        dwValue = 0;
+    }
+    if (0 == dwValue) {
         g_sOptions.bNoSpecular = false;
         CheckDlgButton(g_hDlg,IDC_NOSPECULAR,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bNoSpecular = true;
         CheckDlgButton(g_hDlg,IDC_NOSPECULAR,BST_CHECKED);
     }
@@ -1238,13 +1109,10 @@ void InitUI()
     // LowQuality
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LowQuality",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.bLowQuality = false;
         CheckDlgButton(g_hDlg,IDC_LOWQUALITY,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bLowQuality = true;
         CheckDlgButton(g_hDlg,IDC_LOWQUALITY,BST_CHECKED);
     }
@@ -1252,13 +1120,10 @@ void InitUI()
     // LowQuality
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"NoTransparency",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.bNoAlphaBlending = false;
         CheckDlgButton(g_hDlg,IDC_NOAB,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bNoAlphaBlending = true;
         CheckDlgButton(g_hDlg,IDC_NOAB,BST_CHECKED);
     }
@@ -1266,27 +1131,23 @@ void InitUI()
     // DisplayNormals
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"RenderNormals",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.bRenderNormals = false;
         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bRenderNormals = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,BST_CHECKED);
     }
 
     // NoMaterials
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"RenderMats",NULL,NULL,
-        (BYTE*)&dwValue,&dwTemp))dwValue = 1;
-    if (0 == dwValue)
-    {
+    if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry, "RenderMats", NULL, NULL,
+        (BYTE*)&dwValue, &dwTemp)) {
+        dwValue = 1;
+    }
+    if (0 == dwValue) {
         g_sOptions.bRenderMats = false;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMAT,BST_CHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bRenderMats = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMAT,BST_UNCHECKED);
     }
@@ -1298,9 +1159,7 @@ void InitUI()
     {
         g_sOptions.bMultiSample = false;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMS,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.bMultiSample = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMS,BST_CHECKED);
     }
@@ -1308,13 +1167,10 @@ void InitUI()
     // FPS Mode
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"FPSView",NULL,NULL,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_bFPSView = false;
         CheckDlgButton(g_hDlg,IDC_ZOOM,BST_CHECKED);
-    }
-    else
-    {
+    } else {
         g_bFPSView = true;
         CheckDlgButton(g_hDlg,IDC_ZOOM,BST_UNCHECKED);
     }
@@ -1342,22 +1198,20 @@ void InitUI()
 
     SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMIN,TRUE,0);
     SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMAX,TRUE,10000);
-    return;
 }
 
 //-------------------------------------------------------------------------------
-// Message prcoedure for the smooth normals dialog
+// Message procedure for the smooth normals dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg,
-                               WPARAM wParam,LPARAM lParam)
-{
+INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
-    switch (uMsg)
-    {
+    switch (uMsg) {
     case WM_INITDIALOG:
-        char s[30];
-        ::sprintf(s,"%.2f",g_smoothAngle);
-        SetDlgItemText(hwndDlg,IDC_EDITSM,s);
+        {
+            char s[30];
+            ::sprintf(s, "%.2f", g_smoothAngle);
+            SetDlgItemText(hwndDlg, IDC_EDITSM, s);
+        }
         return TRUE;
 
     case WM_CLOSE:
@@ -1365,16 +1219,16 @@ INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg,
         return TRUE;
 
     case WM_COMMAND:
+        {
+            if (IDOK == LOWORD(wParam)) {
+                char s[30];
+                GetDlgItemText(hwndDlg, IDC_EDITSM, s, 30);
+                g_smoothAngle = (float)atof(s);
 
-        if (IDOK == LOWORD(wParam)) {
-            char s[30];
-            GetDlgItemText(hwndDlg,IDC_EDITSM,s,30);
-            g_smoothAngle = (float)atof(s);
-
-            EndDialog(hwndDlg,0);
-        }
-        else if (IDCANCEL == LOWORD(wParam)) {
-            EndDialog(hwndDlg,1);
+                EndDialog(hwndDlg, 0);
+            } else if (IDCANCEL == LOWORD(wParam)) {
+                EndDialog(hwndDlg, 1);
+            }
         }
         return TRUE;
     }
@@ -1389,9 +1243,7 @@ INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg,
 // NOTE: Due to the impossibility to process WM_CHAR messages in dialogs
 // properly the code for all hotkeys has been moved to the WndMain
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
-    WPARAM wParam,LPARAM lParam)
-    {
+INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
     UNREFERENCED_PARAMETER(wParam);
 
@@ -1407,7 +1259,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
             g_hDlg = hwndDlg;
 
-            // load the state of the usr interface
+            // load the state of the user interface
             InitUI();
 
             // load the file history
@@ -1651,11 +1503,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
             xPos = xPos2 = sPoint.x;
             yPos = yPos2 = sPoint.y;
 
-        /*  xPos -= 10;
-            yPos -= 10;
-            xPos2 = xPos-3;
-            yPos2 = yPos-5;*/
-
             RECT sRect;
             GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
             sRect.right -= sRect.left;
@@ -1756,21 +1603,17 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
         case WM_DROPFILES:
             {
                 HDROP hDrop = (HDROP)wParam;
-
                 char szFile[MAX_PATH];
                 DragQueryFile(hDrop,0,szFile,sizeof(szFile));
-
                 const char* sz = strrchr(szFile,'.');
-                if (!sz)
+                if (!sz) {
                     sz = szFile;
+                }
 
-                if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode())
-                {
+                if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode()) {
                     // replace the selected texture with the new one ...
                     CDisplay::Instance().ReplaceCurrentTexture(szFile);
-                }
-                else
-                {
+                } else {
                     // check whether it is a typical texture file format ...
                     ++sz;
                     if (0 == ASSIMP_stricmp(sz,"png") ||
@@ -1812,19 +1655,17 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                         fseek(pFile,112,SEEK_SET);
                         fread(&dwCaps,4,1,pFile);
 
-                        if (dwCaps & 0x00000400L /* DDSCAPS2_CUBEMAP_POSITIVEX */)
-                        {
+                        if (dwCaps & 0x00000400L /* DDSCAPS2_CUBEMAP_POSITIVEX */) {
                             CLogDisplay::Instance().AddEntry(
                                 "[INFO] Assuming this dds file is a skybox ...",
                                 D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
 
                             CBackgroundPainter::Instance().SetCubeMapBG(szFile);
+                        } else {
+                            CBackgroundPainter::Instance().SetTextureBG(szFile);
                         }
-                        else CBackgroundPainter::Instance().SetTextureBG(szFile);
                         fclose(pFile);
-                    }
-                    else
-                    {
+                    } else {
                         strcpy(g_szFileName,szFile);
 
                         DeleteAsset();
@@ -1838,15 +1679,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
             return TRUE;
 
         case WM_COMMAND:
-
             HMENU hMenu = GetMenu(g_hDlg);
-            if (ID_VIEWER_QUIT == LOWORD(wParam))
-                {
+            if (ID_VIEWER_QUIT == LOWORD(wParam)) {
                 PostQuitMessage(0);
                 DestroyWindow(hwndDlg);
-                }
-            else if (IDC_COMBO1 == LOWORD(wParam))
-            {
+            } else if (IDC_COMBO1 == LOWORD(wParam)) {
                 if(HIWORD(wParam) == CBN_SELCHANGE) {
                     const size_t sel = static_cast<size_t>(ComboBox_GetCurSel(GetDlgItem(hwndDlg,IDC_COMBO1)));
                     if(g_pcAsset) {
@@ -1854,9 +1691,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                         SendDlgItemMessage(hwndDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,0);
                     }
                 }
-            }
-            else if (ID_VIEWER_RESETVIEW == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_RESETVIEW == LOWORD(wParam)) {
                 g_sCamera.vPos = aiVector3D(0.0f,0.0f,-10.0f);
                 g_sCamera.vLookAt = aiVector3D(0.0f,0.0f,1.0f);
                 g_sCamera.vUp = aiVector3D(0.0f,1.0f,0.0f);
@@ -1866,102 +1701,61 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
                 // don't forget to reset the st
                 CBackgroundPainter::Instance().ResetSB();
-                }
-            else if (ID__HELP == LOWORD(wParam))
-                {
+            } else if (ID__HELP == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_AVHELP),
                     hwndDlg,&HelpDialogProc);
-                }
-            else if (ID__ABOUT == LOWORD(wParam))
-                {
+            } else if (ID__ABOUT == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_ABOUTBOX),
                     hwndDlg,&AboutMessageProc);
-                }
-            else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam))
-                {
-                    CLogWindow::Instance().Show();
-                }
-            else if (ID__WEBSITE == LOWORD(wParam))
-                {
-                    ShellExecute(NULL,"open","http://assimp.sourceforge.net","","",SW_SHOW);
-                }
-            else if (ID__WEBSITESF == LOWORD(wParam))
-                {
-                    ShellExecute(NULL,"open","https://sourceforge.net/projects/assimp","","",SW_SHOW);
-                }
-            else if (ID_REPORTBUG == LOWORD(wParam))
-                {
-                    ShellExecute(NULL,"open","https://sourceforge.net/tracker/?func=add&group_id=226462&atid=1067632","","",SW_SHOW);
-                }
-            else if (ID_FR == LOWORD(wParam))
-                {
-                    ShellExecute(NULL,"open","https://sourceforge.net/forum/forum.php?forum_id=817653","","",SW_SHOW);
-                }
-            else if (ID_TOOLS_CLEARLOG == LOWORD(wParam))
-                {
-                    CLogWindow::Instance().Clear();
-                }
-            else if (ID_TOOLS_SAVELOGTOFILE == LOWORD(wParam))
-                {
-                    CLogWindow::Instance().Save();
-                }
-            else if (ID_VIEWER_MEMORYCONSUMATION == LOWORD(wParam))
-                {
-                    DisplayMemoryConsumption();
-                }
-            else if (ID_VIEWER_H == LOWORD(wParam))
-                {
+            } else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam)) {
+                CLogWindow::Instance().Show();
+            } else if (ID__WEBSITE == LOWORD(wParam)) {
+                ShellExecute(NULL,"open","http://assimp.sourceforge.net","","",SW_SHOW);
+            } else if (ID__WEBSITESF == LOWORD(wParam)) {
+                ShellExecute(NULL,"open","https://sourceforge.net/projects/assimp","","",SW_SHOW);
+            }  else if (ID_REPORTBUG == LOWORD(wParam)) {
+                ShellExecute(NULL,"open","https://sourceforge.net/tracker/?func=add&group_id=226462&atid=1067632","","",SW_SHOW);
+            } else if (ID_FR == LOWORD(wParam)) {
+                ShellExecute(NULL,"open","https://sourceforge.net/forum/forum.php?forum_id=817653","","",SW_SHOW);
+            } else if (ID_TOOLS_CLEARLOG == LOWORD(wParam)) {
+                CLogWindow::Instance().Clear();
+            } else if (ID_TOOLS_SAVELOGTOFILE == LOWORD(wParam)) {
+                CLogWindow::Instance().Save();
+            } else if (ID_VIEWER_MEMORYCONSUMATION == LOWORD(wParam)) {
+                DisplayMemoryConsumption();
+            } else if (ID_VIEWER_H == LOWORD(wParam)) {
                 MakeFileAssociations();
-                }
-            else if (ID_BACKGROUND_CLEAR == LOWORD(wParam))
-                {
+            } else if (ID_BACKGROUND_CLEAR == LOWORD(wParam)) {
                 ClearBG();
-                }
-            else if (ID_BACKGROUND_SETCOLOR == LOWORD(wParam))
-                {
+            } else if (ID_BACKGROUND_SETCOLOR == LOWORD(wParam)) {
                 ChooseBGColor();
-                }
-            else if (ID_BACKGROUND_LOADTEXTURE == LOWORD(wParam))
-                {
+            } else if (ID_BACKGROUND_LOADTEXTURE == LOWORD(wParam)) {
                 LoadBGTexture();
-                }
-            else if (ID_BACKGROUND_LOADSKYBOX == LOWORD(wParam))
-                {
+            } else if (ID_BACKGROUND_LOADSKYBOX == LOWORD(wParam)) {
                 LoadSkybox();
-                }
-            else if (ID_VIEWER_SAVESCREENSHOTTOFILE == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_SAVESCREENSHOTTOFILE == LOWORD(wParam)) {
                 SaveScreenshot();
-                }
-            else if (ID_VIEWER_OPEN == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_OPEN == LOWORD(wParam)) {
                 OpenAsset();
-                }
-            else if (ID_TOOLS_FLIPNORMALS == LOWORD(wParam))
-                {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_FLIPNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->FlipNormals();
-                    }
                 }
-
+            }
             // this is ugly. anyone willing to rewrite it from scratch using wxwidgets or similar?
             else if (ID_VIEWER_PP_JIV == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_JoinIdenticalVertices;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_CTS == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_CTS == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_CalcTangentSpace;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FD == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_FD == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_FindDegenerates;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FID == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_FID == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_FindInvalidData;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
@@ -2081,34 +1875,25 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                 {
                     g_sOptions.bStereoView =! g_sOptions.bStereoView;
 
-                    HMENU hMenu = GetMenu(g_hDlg);
-                    if (g_sOptions.bStereoView)
-                    {
-                        ModifyMenu(hMenu,ID_TOOLS_STEREOVIEW,
+                    HMENU menu = ::GetMenu(g_hDlg);
+                    if (g_sOptions.bStereoView) {
+                        ::ModifyMenu(menu,ID_TOOLS_STEREOVIEW,
                             MF_BYCOMMAND | MF_CHECKED | MF_STRING,ID_TOOLS_STEREOVIEW,"Stereo view");
 
                         CLogDisplay::Instance().AddEntry("[INFO] Switched to stereo mode",
                             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
-                    }
-                    else
-                    {
-                        ModifyMenu(hMenu,ID_TOOLS_STEREOVIEW,
+                    } else {
+                        ModifyMenu(menu,ID_TOOLS_STEREOVIEW,
                             MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_STEREOVIEW,"Stereo view");
 
                         CLogDisplay::Instance().AddEntry("[INFO] Switched to mono mode",
                             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
                     }
-                }
-            else if (ID_TOOLS_SETANGLELIMIT == LOWORD(wParam))
-                {
+            } else if (ID_TOOLS_SETANGLELIMIT == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_DIALOGSMOOTH),g_hDlg,&SMMessageProc);
-                }
-            else if (ID_VIEWER_CLEARHISTORY == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_CLEARHISTORY == LOWORD(wParam)) {
                 ClearHistory();
-                }
-            else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam))
-                {
+            } else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) {
                 DeleteAssetData();
                 DeleteAsset();
                 }
@@ -2369,7 +2154,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR    lpCmdLine,
                        int       nCmdShow)
-    {
+{
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -2379,14 +2164,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     // load windows common controls library to get XP style
     InitCommonControls();
 
-    // intiailize the IDirect3D9 interface
+    // initialize the IDirect3D9 interface
     g_hInstance = hInstance;
-    if (0 == InitD3D())
-        {
+    if (0 == InitD3D()) {
         MessageBox(NULL,"Failed to initialize Direct3D 9",
             "ASSIMP ModelViewer",MB_OK);
         return -6;
-        }
+    }
 
     // create the main dialog
     HWND hDlg = CreateDialog(hInstance,MAKEINTRESOURCE(IDD_DIALOGMAIN),
@@ -2403,12 +2187,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         Assimp::DefaultLogger::Debugging | Assimp::DefaultLogger::Info |
         Assimp::DefaultLogger::Err | Assimp::DefaultLogger::Warn);
 
-    if (NULL == hDlg)
-        {
+    if (NULL == hDlg) {
         MessageBox(NULL,"Failed to create dialog from resource",
             "ASSIMP ModelViewer",MB_OK);
         return -5;
-        }
+    }
 
     // display the window
     g_hDlg = hDlg;
@@ -2418,12 +2201,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     UpdateWindow( hDlg );
 
     // create the D3D device object
-    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true))
-        {
+    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true)) {
         MessageBox(NULL,"Failed to initialize Direct3D 9 (2)",
             "ASSIMP ModelViewer",MB_OK);
         return -4;
-        }
+    }
+    
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
     // create the log window
@@ -2432,35 +2215,33 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     SetFocus(g_hDlg);
 
     // recover background skyboxes/textures from the last session
-    HKEY g_hRegistry;
-    union
-        {
+    HKEY hRegistry;
+    union {
         char szFileName[MAX_PATH];
         D3DCOLOR clrColor;
-        };
+    };
     DWORD dwTemp = MAX_PATH;
     RegCreateKeyEx(HKEY_CURRENT_USER,
-        "Software\\ASSIMP\\Viewer",0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
-    if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"LastSkyBoxSrc",NULL,NULL,
+        "Software\\ASSIMP\\Viewer",0,NULL,0,KEY_ALL_ACCESS, NULL, &hRegistry,NULL);
+    if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastSkyBoxSrc",NULL,NULL,
         (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
         {
         CBackgroundPainter::Instance().SetCubeMapBG(szFileName);
         }
-    else if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"LastTextureSrc",NULL,NULL,
+    else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastTextureSrc",NULL,NULL,
         (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
         {
         CBackgroundPainter::Instance().SetTextureBG(szFileName);
         }
-    else if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"Color",NULL,NULL,
+    else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"Color",NULL,NULL,
         (BYTE*)&clrColor,&dwTemp))
         {
         CBackgroundPainter::Instance().SetColor(clrColor);
         }
-    RegCloseKey(g_hRegistry);
+    RegCloseKey(hRegistry);
 
     // now handle command line arguments
     HandleCommandLine(lpCmdLine);
-
 
     double adLast[30];
     for (int i = 0; i < 30;++i)adLast[i] = 0.0f;
@@ -2620,7 +2401,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         // render the scene
         CDisplay::Instance().OnRender();
 
-
         // measure FPS, average it out
         g_dCurTime     = timeGetTime();
         g_fElpasedTime = (float)((g_dCurTime - g_dLastTime) * 0.001);
@@ -2629,26 +2409,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         adLast[iCurrent++] = 1.0f / g_fElpasedTime;
 
         double dFPS = 0.0;
-        for (int i = 0;i < 30;++i)
-            dFPS += adLast[i];
+        for (int i = 0; i < 30; ++i) {
+            dFPS += adLast[ i ];
+        }
         dFPS /= 30.0;
 
-        if (30 == iCurrent)
-            {
+        if (30 == iCurrent) {
             iCurrent = 0;
-            if (dFPS != g_fFPS)
-                {
+            if (dFPS != g_fFPS) {
                 g_fFPS = dFPS;
                 char szOut[256];
 
                 sprintf(szOut,"%i",(int)floorf((float)dFPS+0.5f));
                 SetDlgItemText(g_hDlg,IDC_EFPS,szOut);
-                }
             }
         }
+    }
     DeleteAsset();
     Assimp::DefaultLogger::kill();
     ShutdownDevice();
     ShutdownD3D();
+
     return 0;
-    }
+}

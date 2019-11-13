@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -57,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "metadata.h"
 
 #ifdef __cplusplus
+#  include <cstdlib>
 extern "C" {
 #endif
 
@@ -326,6 +328,16 @@ struct aiScene
     */
     C_STRUCT aiCamera** mCameras;
 
+    /**
+     *  @brief  The global metadata assigned to the scene itself.
+     *
+     *  This data contains global metadata which belongs to the scene like 
+     *  unit-conversions, versions, vendors or other model-specific data. This 
+     *  can be used to store format-specific metadata as well.
+     */
+    C_STRUCT aiMetadata* mMetaData;
+
+
 #ifdef __cplusplus
 
     //! Default constructor - set everything to 0/NULL
@@ -366,6 +378,35 @@ struct aiScene
         return mAnimations != NULL && mNumAnimations > 0; 
     }
 
+    //! Returns a short filename from a full path
+    static const char* GetShortFilename(const char* filename) {
+        const char* lastSlash = strrchr(filename, '/');
+        if (lastSlash == nullptr) {
+            lastSlash = strrchr(filename, '\\');
+        }
+        const char* shortFilename = lastSlash != nullptr ? lastSlash + 1 : filename;
+        return shortFilename;
+    }
+
+    //! Returns an embedded texture
+    const aiTexture* GetEmbeddedTexture(const char* filename) const {
+        // lookup using texture ID (if referenced like: "*1", "*2", etc.)
+        if ('*' == *filename) {
+            int index = std::atoi(filename + 1);
+            if (0 > index || mNumTextures <= static_cast<unsigned>(index))
+                return nullptr;
+            return mTextures[index];
+        }
+        // lookup using filename
+        const char* shortFilename = GetShortFilename(filename);
+        for (unsigned int i = 0; i < mNumTextures; i++) {
+            const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());
+            if (strcmp(shortTextureFilename, shortFilename) == 0) {
+                return mTextures[i];
+            }
+        }
+        return nullptr;
+    }
 #endif // __cplusplus
 
     /**  Internal data, do not touch */

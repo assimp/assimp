@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -60,4 +61,9 @@ public:
 
 TEST_F( utXImporterExporter, importXFromFileTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+TEST_F( utXImporterExporter, heap_overflow_in_tokenizer ) {
+    Assimp::Importer importer;
+    EXPECT_NO_THROW( importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/X/OV_GetNextToken", 0 ) );
 }

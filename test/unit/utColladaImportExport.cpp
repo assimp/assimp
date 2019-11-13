@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -56,6 +57,19 @@ public:
     }
 };
 
-TEST_F( utColladaImportExport, importBlenFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utColladaImportExport, importBlenFromFileTest) {
+    EXPECT_TRUE(importerTest());
+}
+
+class utColladaZaeImportExport : public AbstractImportExportBase {
+public:
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
+        return nullptr != scene;
+    }
+};
+
+TEST_F(utColladaZaeImportExport, importBlenFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }

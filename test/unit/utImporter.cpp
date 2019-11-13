@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -44,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../include/assimp/postprocess.h"
 #include "../../include/assimp/scene.h"
 #include <assimp/Importer.hpp>
-#include <BaseImporter.h>
+#include <assimp/BaseImporter.h>
 #include "TestIOSystem.h"
 #include <assimp/DefaultIOSystem.h>
 

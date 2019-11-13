@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -180,3 +181,74 @@ TEST_F( utMetadata, get_set_aiVector3D_Test ) {
     EXPECT_TRUE( success );
 }
 
+TEST_F( utMetadata, copy_test ) {
+    m_data = aiMetadata::Alloc( AI_META_MAX );
+    bool bv = true;
+    m_data->Set( 0, "bool", bv );
+    int32_t i32v = -10;
+    m_data->Set( 1, "int32", i32v );
+    uint64_t ui64v = static_cast<uint64_t>( 10 );
+    m_data->Set( 2, "uint64", ui64v );
+    float fv = 1.0f;
+    m_data->Set( 3, "float", fv );
+    double dv = 2.0;
+    m_data->Set( 4, "double", dv );
+    const aiString strVal( std::string( "test" ) );
+    m_data->Set( 5, "aiString", strVal );
+    aiVector3D vecVal( 1, 2, 3 );
+    m_data->Set( 6, "aiVector3D", vecVal );
+
+    aiMetadata copy( *m_data );
+    EXPECT_EQ( 7u, copy.mNumProperties );
+
+    // bool test
+    {
+        bool v;
+        EXPECT_TRUE( copy.Get( "bool", v ) );
+        EXPECT_EQ( bv, v );
+    }
+
+    // int32_t test
+    {
+		int32_t v = 0;
+        bool ok = copy.Get( "int32", v );
+        EXPECT_TRUE( ok );
+        EXPECT_EQ( i32v, v );
+    }
+
+    // uint64_t test
+    {
+        uint64_t v;
+        bool ok = copy.Get( "uint64", v );
+        EXPECT_TRUE( ok );
+        EXPECT_EQ( ui64v, v );
+    }
+
+    // float test
+    {
+        float v;
+        EXPECT_TRUE( copy.Get( "float", v ) );
+        EXPECT_EQ( fv, v );
+    }
+
+    // double test
+    {
+        double v;
+        EXPECT_TRUE( copy.Get( "double", v ) );
+        EXPECT_EQ( dv, v );
+    }
+
+    // bool test
+    {
+        aiString v;
+        EXPECT_TRUE( copy.Get( "aiString", v ) );
+        EXPECT_EQ( strVal, v );
+    }
+
+    // bool test
+    {
+        aiVector3D v;
+        EXPECT_TRUE( copy.Get( "aiVector3D", v ) );
+        EXPECT_EQ( vecVal, v );
+    }
+}

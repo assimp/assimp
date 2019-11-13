@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 All rights reserved.
 
@@ -44,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include "AbstractImportExportBase.h"
+#include <assimp/postprocess.h>
 
 using namespace ::Assimp;
 
@@ -51,9 +53,12 @@ class utPLYImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
         EXPECT_EQ( 1u, scene->mNumMeshes );
         EXPECT_NE( nullptr, scene->mMeshes[0] );
+        if (nullptr == scene->mMeshes[0]) {
+            return false;
+        }
         EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
         EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
         
@@ -64,9 +69,9 @@ public:
     virtual bool exporterTest() {
         Importer importer;
         Exporter exporter;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
-        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "ply", ASSIMP_TEST_MODELS_DIR "/PLY/cube_test.ply"));
+        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "ply", ASSIMP_TEST_MODELS_DIR "/PLY/cube_out.ply"));
 
         return true;
     }
@@ -85,8 +90,94 @@ TEST_F(utPLYImportExport, exportTest_Success ) {
 
 #endif // ASSIMP_BUILD_NO_EXPORT
 
+//Test issue 1623, crash when loading two PLY files in a row
+TEST_F(utPLYImportExport, importerMultipleTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+
+    scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
+}
+
+TEST_F(utPLYImportExport, importPLYwithUV) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_uv.ply", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    //This test model is using n-gons, so 6 faces instead of 12 tris
+    EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(aiPrimitiveType_POLYGON, scene->mMeshes[0]->mPrimitiveTypes);
+    EXPECT_EQ(true, scene->mMeshes[0]->HasTextureCoords(0));
+}
+
+TEST_F(utPLYImportExport, importBinaryPLY) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    //This test model is double sided, so 12 faces instead of 6
+    EXPECT_EQ(12u, scene->mMeshes[0]->mNumFaces);
+}
+
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", 0 );
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", aiProcess_ValidateDataStructure);
+    EXPECT_NE( nullptr, scene );
+    EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(aiPrimitiveType_TRIANGLE, scene->mMeshes[0]->mPrimitiveTypes);
+    EXPECT_EQ(true, scene->mMeshes[0]->HasVertexColors(0));
+
+    auto first_face = scene->mMeshes[0]->mFaces[0];
+    EXPECT_EQ(3u, first_face.mNumIndices);
+    EXPECT_EQ(0u, first_face.mIndices[0]);
+    EXPECT_EQ(1u, first_face.mIndices[1]);
+    EXPECT_EQ(2u, first_face.mIndices[2]);
+}
+
+// Test issue #623, PLY importer should not automatically create faces
+TEST_F(utPLYImportExport, pointcloudTest) {
+    Assimp::Importer importer;
+
+    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(1u, scene->mNumMeshes);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
+    EXPECT_EQ(aiPrimitiveType::aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
+    EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+}
+
+static const char *test_file =
+    "ply\n"
+    "format ascii 1.0\n"
+    "element vertex 4\n"
+    "property float x\n"
+    "property float y\n"
+    "property float z\n"
+    "property uchar red\n"
+    "property uchar green\n"
+    "property uchar blue\n"
+    "property float nx\n"
+    "property float ny\n"
+    "property float nz\n"
+    "end_header\n"
+    "0.0 0.0 0.0 255 255 255 0.0 1.0 0.0\n"
+    "0.0 0.0 1.0 255 0 255 0.0 0.0 1.0\n"
+    "0.0 1.0 0.0 255 255 0 1.0 0.0 0.0\n"
+    "0.0 1.0 1.0 0 255 255 1.0 1.0 0.0\n";
+
+TEST_F( utPLYImportExport, parseErrorTest ) {
+    Assimp::Importer importer;
+    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), 0);
     EXPECT_NE( nullptr, scene );
 }

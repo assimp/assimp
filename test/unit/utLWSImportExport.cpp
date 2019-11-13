@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -41,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include <assimp/postprocess.h>
 
 #include <assimp/Importer.hpp>
 
@@ -51,13 +53,90 @@ class utLWSImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/LWS/move_x.lws", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/LWS/move_x.lws", aiProcess_ValidateDataStructure);
         return nullptr != scene;
-
-        return true;
     }
 };
 
 TEST_F( utLWSImportExport, importLWSFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+TEST_F(utLWSImportExport, importLWSmove_x_post_linear) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_post_linear.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_xz_bezier) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_bezier.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_xz_stepped) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_stepped.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_x_oldformat_56) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_oldformat_56.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_x_post_offset_repeat) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_post_offset_repeat.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_xz_hermite) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_hermite.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_y_pre_ofrep_post_osc) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_y_pre_ofrep_post_osc.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_x_oldformat_6) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_oldformat_6.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_x_post_repeat) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_post_repeat.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_xz_linear) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_linear.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_x_post_constant) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_post_constant.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_x_post_reset) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x_post_reset.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importLWSmove_xz_spline) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_spline.lws", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+

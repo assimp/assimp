@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -51,26 +52,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/config.h>
 
-    //////////////////////////////////////////////////////////////////////////
-    /* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
-     * file format loader. The loader is be excluded from the
-     * build in this case. 'XX' stands for the most common file
-     * extension of the file format. E.g.:
-     * ASSIMP_BUILD_NO_X_IMPORTER disables the X loader.
-     *
-     * If you're unsure about that, take a look at the implementation of the
-     * import plugin you wish to disable. You'll find the right define in the
-     * first lines of the corresponding unit.
-     *
-     * Other (mixed) configuration switches are listed here:
-     *    ASSIMP_BUILD_NO_COMPRESSED_X
-     *      - Disable support for compressed X files (zip)
-     *    ASSIMP_BUILD_NO_COMPRESSED_BLEND
-     *      - Disable support for compressed Blender files (zip)
-     *    ASSIMP_BUILD_NO_COMPRESSED_IFC
-     *      - Disable support for IFCZIP files (unzip)
-     */
-    //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+/* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
+ * file format loader. The loader is be excluded from the
+ * build in this case. 'XX' stands for the most common file
+ * extension of the file format. E.g.:
+ * ASSIMP_BUILD_NO_X_IMPORTER disables the X loader.
+ *
+ * If you're unsure about that, take a look at the implementation of the
+ * import plugin you wish to disable. You'll find the right define in the
+ * first lines of the corresponding unit.
+ *
+ * Other (mixed) configuration switches are listed here:
+ *    ASSIMP_BUILD_NO_COMPRESSED_X
+ *      - Disable support for compressed X files (zip)
+ *    ASSIMP_BUILD_NO_COMPRESSED_BLEND
+ *      - Disable support for compressed Blender files (zip)
+ *    ASSIMP_BUILD_NO_COMPRESSED_IFC
+ *      - Disable support for IFCZIP files (unzip)
+ */
+//////////////////////////////////////////////////////////////////////////
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
 #   define ASSIMP_BUILD_NEED_Z_INFLATE
@@ -90,37 +91,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   define ASSIMP_BUILD_NEED_UNZIP
 #endif
 
-    //////////////////////////////////////////////////////////////////////////
-    /* Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific
-     * post processing step. This is the current list of process names ('XX'):
-     * CALCTANGENTS
-     * JOINVERTICES
-     * TRIANGULATE
-     * GENFACENORMALS
-     * GENVERTEXNORMALS
-     * REMOVEVC
-     * SPLITLARGEMESHES
-     * PRETRANSFORMVERTICES
-     * LIMITBONEWEIGHTS
-     * VALIDATEDS
-     * IMPROVECACHELOCALITY
-     * FIXINFACINGNORMALS
-     * REMOVE_REDUNDANTMATERIALS
-     * OPTIMIZEGRAPH
-     * SORTBYPTYPE
-     * FINDINVALIDDATA
-     * TRANSFORMTEXCOORDS
-     * GENUVCOORDS
-     * ENTITYMESHBUILDER
-     * MAKELEFTHANDED
-     * FLIPUVS
-     * FLIPWINDINGORDER
-     * OPTIMIZEMESHES
-     * OPTIMIZEANIMS
-     * OPTIMIZEGRAPH
-     * GENENTITYMESHES
-     * FIXTEXTUREPATHS */
-    //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+/* Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific
+ * post processing step. This is the current list of process names ('XX'):
+ * CALCTANGENTS
+ * JOINVERTICES
+ * TRIANGULATE
+ * DROPFACENORMALS
+ * GENFACENORMALS
+ * GENVERTEXNORMALS
+ * REMOVEVC
+ * SPLITLARGEMESHES
+ * PRETRANSFORMVERTICES
+ * LIMITBONEWEIGHTS
+ * VALIDATEDS
+ * IMPROVECACHELOCALITY
+ * FIXINFACINGNORMALS
+ * REMOVE_REDUNDANTMATERIALS
+ * OPTIMIZEGRAPH
+ * SORTBYPTYPE
+ * FINDINVALIDDATA
+ * TRANSFORMTEXCOORDS
+ * GENUVCOORDS
+ * ENTITYMESHBUILDER
+ * EMBEDTEXTURES
+ * MAKELEFTHANDED
+ * FLIPUVS
+ * FLIPWINDINGORDER
+ * OPTIMIZEMESHES
+ * OPTIMIZEANIMS
+ * OPTIMIZEGRAPH
+ * GENENTITYMESHES
+ * FIXTEXTUREPATHS
+ * GENBOUNDINGBOXES */
+//////////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
 #   undef ASSIMP_API
@@ -211,10 +215,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
-#error Currently, Borland is unsupported. Feel free to port Assimp.
-
-// "W8059 Packgröße der Struktur geändert"
-
+#   error Currently, Borland is unsupported. Feel free to port Assimp.
 #endif
 
 
@@ -240,10 +241,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     typedef double ai_real;
     typedef signed long long int ai_int;
     typedef unsigned long long int ai_uint;
+#ifndef ASSIMP_AI_REAL_TEXT_PRECISION
+#define ASSIMP_AI_REAL_TEXT_PRECISION 16
+#endif // ASSIMP_AI_REAL_TEXT_PRECISION
 #else // ASSIMP_DOUBLE_PRECISION
     typedef float ai_real;
     typedef signed int ai_int;
     typedef unsigned int ai_uint;
+#ifndef ASSIMP_AI_REAL_TEXT_PRECISION
+#define ASSIMP_AI_REAL_TEXT_PRECISION 8
+#endif // ASSIMP_AI_REAL_TEXT_PRECISION
 #endif // ASSIMP_DOUBLE_PRECISION
 
     //////////////////////////////////////////////////////////////////////////
@@ -263,6 +270,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Tiny macro to convert from radians to degrees and back */
 #define AI_DEG_TO_RAD(x) ((x)*(ai_real)0.0174532925)
 #define AI_RAD_TO_DEG(x) ((x)*(ai_real)57.2957795)
+
+/* Numerical limits */
+static const ai_real ai_epsilon = (ai_real) 0.00001;
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)
@@ -286,5 +296,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * It's NOT a total limit, just a limit for individual allocations
  */
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
+
+#ifndef _MSC_VER
+#  define AI_NO_EXCEPT noexcept
+#else
+#  if (_MSC_VER >= 1915 )
+#    define AI_NO_EXCEPT noexcept
+#  else
+#    define AI_NO_EXCEPT
+#  endif
+#endif // _MSC_VER
 
 #endif // !! AI_DEFINES_H_INC

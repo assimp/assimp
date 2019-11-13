@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -116,6 +117,8 @@ struct aiTexel
 
 #include "./Compiler/poppack1.h"
 
+#define HINTMAXTEXTURELEN 9
+
 // --------------------------------------------------------------------------------
 /** Helper structure to describe an embedded texture
  *
@@ -130,8 +133,7 @@ struct aiTexel
  * as the texture paths (a single asterisk character followed by the
  * zero-based index of the texture in the aiScene::mTextures array).
  */
-struct aiTexture
-{
+struct aiTexture {
     /** Width of the texture, in pixels
      *
      * If mHeight is zero the texture is compressed in a format
@@ -166,7 +168,7 @@ struct aiTexture
      * E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
      * The fourth character will always be '\\0'.
      */
-    char achFormatHint[9];// 8 for string + 1 for terminator.
+    char achFormatHint[ HINTMAXTEXTURELEN ];// 8 for string + 1 for terminator.
 
     /** Data of the texture.
      *
@@ -179,6 +181,12 @@ struct aiTexture
      */
     C_STRUCT aiTexel* pcData;
 
+    /** Texture original filename
+    *
+    * Used to get the texture reference
+    */
+    C_STRUCT aiString mFilename;
+
 #ifdef __cplusplus
 
     //! For compressed textures (mHeight == 0): compare the
@@ -186,24 +194,26 @@ struct aiTexture
     //! @param s Input string. 3 characters are maximally processed.
     //!        Example values: "jpg", "png"
     //! @return true if the given string matches the format hint
-    bool CheckFormat(const char* s) const
-    {
+    bool CheckFormat(const char* s) const {
+        if (nullptr == s) {
+            return false;
+        }
+
 		return (0 == ::strncmp(achFormatHint, s, sizeof(achFormatHint)));
     }
 
     // Construction
-    aiTexture ()
-        : mWidth  (0)
-        , mHeight (0)
-        , pcData  (NULL)
-    {
+    aiTexture() AI_NO_EXCEPT
+    : mWidth(0)
+    , mHeight(0)
+    , pcData(nullptr)
+    , mFilename() {
         achFormatHint[0] = achFormatHint[1] = 0;
         achFormatHint[2] = achFormatHint[3] = 0;
     }
 
     // Destruction
-    ~aiTexture ()
-    {
+    ~aiTexture () {
         delete[] pcData;
     }
 #endif

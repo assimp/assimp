@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -40,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "ScaleProcess.h"
+#include "PostProcessing/ScaleProcess.h"
 #include "TestModelFactory.h"
 
 namespace Assimp {
@@ -66,19 +67,6 @@ TEST_F( utScaleProcess, accessScaleTest ) {
 
     process.setScale( 2.0f );
     EXPECT_FLOAT_EQ( 2.0f, process.getScale() );
-}
-
-TEST_F( utScaleProcess, rescaleModelTest ) {
-    float opacity;
-    aiScene *testScene = TestModelFacttory::createDefaultTestModel( opacity );
-    ai_real v1 = testScene->mRootNode->mTransformation.a1;
-    ScaleProcess process;
-    process.setScale( 10.0f );
-    process.Execute( testScene );
-    ai_real v2 = testScene->mRootNode->mTransformation.a1;
-    const ai_real scale = v2 / v1;
-    EXPECT_FLOAT_EQ( scale, 10.0f );
-    TestModelFacttory::releaseDefaultTestModel( &testScene );
 }
 
 } // Namespace UnitTest

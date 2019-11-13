@@ -1,7 +1,8 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 # 
-# Copyright (c) 2006-2017, assimp team
+# Copyright (c) 2006-2019, assimp team
+
 
 # All rights reserved.
 #
@@ -41,6 +42,7 @@ cmake_minimum_required( VERSION 2.6 )
 INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code
+  ${Assimp_BINARY_DIR}/tools/assimp_cmd
 )
 
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${Assimp_BINARY_DIR}/lib )

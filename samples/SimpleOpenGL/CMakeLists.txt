@@ -9,8 +9,8 @@ ENDIF ( MSVC )
 IF ( NOT GLUT_FOUND )
   IF ( MSVC )
     SET ( GLUT_FOUND 1 )
-    SET ( GLUT_INCLUDE_DIR ${Assimp_SOURCE_DIR}/samples/glut/ )
-    SET ( GLUT_LIBRARIES ${Assimp_SOURCE_DIR}/samples/glut/glut32.lib )
+    SET ( GLUT_INCLUDE_DIR ${Assimp_SOURCE_DIR}/samples/freeglut/ )
+    SET ( GLUT_LIBRARIES ${Assimp_SOURCE_DIR}/samples/freeglut/lib/freeglut.lib )
   ELSE ( MSVC )
     MESSAGE( WARNING "Please install glut." )
   ENDIF ( MSVC )
@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/code
   ${OPENGL_INCLUDE_DIR}
   ${GLUT_INCLUDE_DIR}
+  ${Assimp_SOURCE_DIR}/samples/freeglut/include
 )
 
 LINK_DIRECTORIES(

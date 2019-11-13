@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2019, assimp team
+
 
 
 All rights reserved.
@@ -72,7 +73,7 @@ TEST_F( utSceneCombiner, MergeMeshes_ValidNames_Test ) {
     EXPECT_EQ( "mesh_1.mesh_2.mesh_3", outName );
 }
 
-TEST_F( utSceneCombiner, CopySceneWithNullptr_NoException ) {
+TEST_F( utSceneCombiner, CopySceneWithNullptr_AI_NO_EXCEPTion ) {
     EXPECT_NO_THROW( SceneCombiner::CopyScene( nullptr, nullptr ) );
     EXPECT_NO_THROW( SceneCombiner::CopySceneFlat( nullptr, nullptr ) );
 }

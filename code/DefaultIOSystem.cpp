@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultIOStream.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/ai_assert.h>
-#include <boost/nowide/cstdio.hpp>
 #include <stdlib.h>
 
 #ifdef __unix__
@@ -75,7 +74,7 @@ DefaultIOSystem::~DefaultIOSystem()
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const char* pFile) const
 {
-    FILE* file = boost::nowide::fopen( pFile, "rb");
+    FILE* file = ::fopen( pFile, "rb");
     if( !file)
         return false;
 
@@ -90,7 +89,7 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     ai_assert(NULL != strFile);
     ai_assert(NULL != strMode);
 
-    FILE* file = boost::nowide::fopen( strFile, strMode);
+    FILE* file = ::fopen( strFile, strMode);
     if( NULL == file)
         return NULL;
 

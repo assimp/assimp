@@ -8,9 +8,9 @@
 #include <stdio.h>
 
 #ifdef _WIN32
-#   define IRRXML_API __declspec(dllexport)
+#   define IRRXML_API
 #else
-#   define IRRXML_API __attribute__ ((visibility("default")))
+#   define IRRXML_API
 #endif // _WIN32
 
 /** \mainpage irrXML 1.2 API documentation

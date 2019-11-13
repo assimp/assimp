@@ -35,6 +35,7 @@ project "assimp"
     "ASSIMP_BUILD_NO_C4D_IMPORTER",
     "ASSIMP_BUILD_NO_CSM_IMPORTER",
     "ASSIMP_BUILD_NO_HMP_IMPORTER",
+    "ASSIMP_BUILD_NO_IFC_IMPORTER",
     "ASSIMP_BUILD_NO_IRRMESH_IMPORTER",
     "ASSIMP_BUILD_NO_IRR_IMPORTER",
     "ASSIMP_BUILD_NO_LWO_IMPORTER",
@@ -76,6 +77,7 @@ project "assimp"
 
   includedirs {
     "include",
+    "code",
     "contrib/irrXML",
     "contrib/rapidjson/include",
     "contrib/openddlparser/include",
@@ -403,7 +405,6 @@ project "assimp"
 
       defines {
         "_CRT_SECURE_NO_WARNINGS",
-        "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING",
       }
 
     -- -------------------------------------------------------------

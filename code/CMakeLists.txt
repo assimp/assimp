@@ -137,7 +137,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/irrXMLWrapper.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
-  ${HEADER_PATH}/Macros.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
 )
@@ -408,6 +407,18 @@ ADD_ASSIMP_IMPORTER( LWS
   LWS/LWSLoader.h
 )
 
+ADD_ASSIMP_IMPORTER( M3D
+  M3D/M3DMaterials.h
+  M3D/M3DImporter.h
+  M3D/M3DImporter.cpp
+  M3D/m3d.h
+)
+
+ADD_ASSIMP_EXPORTER( M3D
+  M3D/M3DExporter.h
+  M3D/M3DExporter.cpp
+)
+
 ADD_ASSIMP_IMPORTER( MD2
   MD2/MD2FileData.h
   MD2/MD2Loader.cpp
@@ -671,6 +682,8 @@ SET( PostProcessing_SRCS
   PostProcessing/MakeVerboseFormat.h
   PostProcessing/ScaleProcess.cpp
   PostProcessing/ScaleProcess.h
+  PostProcessing/ArmaturePopulate.cpp
+  PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
 )
@@ -1058,6 +1071,8 @@ MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
 
 MESSAGE(STATUS "Enabled exporter formats:${ASSIMP_EXPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled exporter formats:${ASSIMP_EXPORTERS_DISABLED}")
+
+SOURCE_GROUP( include\\assimp    FILES ${PUBLIC_HEADERS} )
 
 SET( assimp_src
   # Assimp Files

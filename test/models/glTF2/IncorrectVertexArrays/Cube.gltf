@@ -1,0 +1,286 @@
+{
+   "accessors" : [
+      {
+         "bufferView" : 0,
+         "byteOffset" : 0,
+         "componentType" : 5123,
+         "count" : 36,
+         "max" : [
+            35
+         ],
+         "min" : [
+            0
+         ],
+         "type" : "SCALAR"
+      },
+      {
+         "bufferView" : 1,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            1.000000,
+            1.000001
+         ],
+         "min" : [
+            -1.000000,
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC3"
+      },
+      {
+         "bufferView" : 2,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            1.000000,
+            1.000000
+         ],
+         "min" : [
+            -1.000000,
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC3"
+      },
+      {
+         "bufferView" : 3,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            -0.000000,
+            -0.000000,
+            1.000000
+         ],
+         "min" : [
+            0.000000,
+            -0.000000,
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC4"
+      },
+      {
+         "bufferView" : 4,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "max" : [
+            1.000000,
+            1.000000
+         ],
+         "min" : [
+            -1.000000,
+            -1.000000
+         ],
+         "type" : "VEC2"
+      },
+      {
+         "bufferView" : 1,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 36,
+         "type" : "VEC3"
+       },
+       {
+         "bufferView" : 1,
+         "byteOffset" : 0,
+         "componentType" : 5126,
+         "count" : 35,
+         "type" : "VEC3"
+       },
+       {
+         "bufferView" : 0,
+         "byteOffset" : 0,
+         "componentType" : 5123,
+         "count" : 35,
+         "max" : [
+            35
+         ],
+         "min" : [
+            0
+         ],
+         "type" : "SCALAR"
+      }
+   ],
+   "asset" : {
+      "generator" : "VKTS glTF 2.0 exporter",
+      "version" : "2.0"
+   },
+   "bufferViews" : [
+      {
+         "buffer" : 0,
+         "byteLength" : 72,
+         "byteOffset" : 0,
+         "target" : 34963
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 432,
+         "byteOffset" : 72,
+         "target" : 34962
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 432,
+         "byteOffset" : 504,
+         "target" : 34962
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 576,
+         "byteOffset" : 936,
+         "target" : 34962
+      },
+      {
+         "buffer" : 0,
+         "byteLength" : 288,
+         "byteOffset" : 1512,
+         "target" : 34962
+      }
+   ],
+   "buffers" : [
+      {
+         "byteLength" : 514,
+         "uri" : "Cube.bin"
+      }
+   ],
+   "meshes" : [
+      {
+         "name" : "Cube",
+         "primitives" : [
+            {
+               "attributes" : {
+                  "POSITION" : 1
+               },
+               "mode" : 4
+            }
+         ]
+      },
+      {
+         "name" : "TruncatedCube",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 6
+           },
+		   "mode" : 4
+         } ]
+       },
+	   {
+         "name" : "Lines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 5
+           },
+		   "mode" : 1
+         } ]
+       },
+       {
+         "name" : "TruncatedLines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 6
+           },
+		   "mode" : 1
+         } ]
+       },
+       {
+          "name" : "IndexedCube",
+          "primitives" : [ {
+             "attributes" : {
+                "POSITION" : 1
+             },
+             "mode" : 4,
+             "indices" : 0
+          } ]
+       },
+       {
+          "name" : "TruncatedIndexedCube",
+          "primitives" : [ {
+             "attributes" : {
+                "POSITION" : 6
+             },
+             "mode" : 4,
+             "indices" : 7
+          } ]
+       },
+       {
+         "name" : "IndexedLines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 5
+           },
+		   "mode" : 1,
+         "indices" : 0
+         } ]
+       },
+       {
+         "name" : "TruncatedIndexedLines",
+         "primitives" : [ {
+           "attributes" : {
+             "POSITION" : 6
+           },
+		   "mode" : 1,
+         "indices" : 7
+         } ]
+       }
+   ],
+   "nodes" : [
+      {
+         "mesh" : 0,
+         "name" : "Cube"
+      },
+      {
+         "mesh" : 1,
+         "name" : "TruncatedCube",
+         "translation": [ 2.5, 0.0, 2.5 ]
+      },
+	  {
+		"mesh" : 2,
+      "name" : "Lines",
+      "translation": [ 2.5, 0.0, 0.0 ]
+	  },	  
+     {
+		"mesh" : 3,
+      "name" : "TruncatedLines",
+      "translation": [ 2.5, 0.0, -2.5 ]
+	  },
+     {
+       "mesh" : 4,
+       "name" : "IndexedCube",
+       "translation": [ -2.5, 0.0, 2.5 ]
+     },
+     {
+       "mesh" : 5,
+       "name" : "TruncatedIndexedCube",
+       "translation": [ -2.5, 0.0, 0.0 ]
+     },
+     	{
+		"mesh" : 6,
+      "name" : "IndexedLines",
+      "translation": [ -2.5, 0.0, -2.5 ]
+	  },
+     {
+		"mesh" : 7,
+      "name" : "TruncatedIndexedLines",
+      "translation": [ 0.0, 0.0, -2.5 ]
+	  }
+   ],
+   "samplers" : [
+      {}
+   ],
+   "scene" : 0,
+   "scenes" : [
+      {
+         "nodes" : [
+            0, 1, 2, 3, 4, 5, 6, 7
+         ]
+      }
+   ]
+}

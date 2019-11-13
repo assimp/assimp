@@ -67,6 +67,7 @@ __Importers__:
 - [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
 - LWS
 - LXO
+- [M3D](https://gitlab.com/bztsrc/model3d)
 - MD2
 - MD3
 - MD5
@@ -120,7 +121,7 @@ __Exporters__:
 - FBX ( experimental )
 
 ### Building ###
-Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
+Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
 
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)

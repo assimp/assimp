@@ -50,6 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined _WIN32 && !defined __GNUC__
+#include <io.h> // needed for _filelengthi64
+#endif // defined _WIN32 && !defined __GNUC__
+
 using namespace Assimp;
 
 // ----------------------------------------------------------------------------------
@@ -129,12 +133,14 @@ size_t DefaultIOStream::FileSize() const
         // See here for details:
         // https://www.securecoding.cert.org/confluence/display/seccode/FIO19-C.+Do+not+use+fseek()+and+ftell()+to+compute+the+size+of+a+regular+file
 #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
-        struct __stat64 fileStat;
-        //using fileno + fstat avoids having to handle the filename
-        int err = _fstat64(  _fileno(mFile), &fileStat );
-        if (0 != err)
-            return 0;
-        mCachedSize = (size_t) (fileStat.st_size);
+        // _stat64 does not accept utf8 strings on windows so instead use _filelengthi64 as suggesteed by the reference above
+        auto file_length = _filelengthi64(_fileno(mFile));
+        if (file_length <= 0)
+        {
+          return 0;
+        }
+
+        mCachedSize = (size_t) (file_length);
 #elif defined __GNUC__ || defined __APPLE__ || defined __MACH__ || defined __FreeBSD__
         struct stat fileStat;
         int err = stat(mFilename.c_str(), &fileStat );

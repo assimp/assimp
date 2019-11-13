@@ -91,7 +91,6 @@ bool DefaultIOSystem::Exists(const char* pFile) const
         return false;
 
     ::fclose(file);
-#endif
     return true;
 }
 

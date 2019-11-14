@@ -685,6 +685,10 @@ namespace glTF2
         Ref<Texture> texture;
         unsigned int index;
         unsigned int texCoord = 0;
+        
+        float offset[2];
+		float rotation;
+		float scale[2];
     };
 
     struct NormalTextureInfo : TextureInfo
@@ -1024,7 +1028,7 @@ namespace glTF2
             bool KHR_materials_pbrSpecularGlossiness;
             bool KHR_materials_unlit;
             bool KHR_lights_punctual;
-
+			bool KHR_texture_transform;
         } extensionsUsed;
 
         AssetMetadata asset;

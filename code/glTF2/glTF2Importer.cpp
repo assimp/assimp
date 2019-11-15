@@ -622,7 +622,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     nFaces = count / 2;
                     if (nFaces * 2 != count) {
                         ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
-                        count = nFaces * 2;
+                        count = (unsigned int) nFaces * 2;
                     }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 2) {
@@ -649,7 +649,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                     nFaces = count / 3;
                     if (nFaces * 3 != count) {
                         ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
-                        count = nFaces * 3;
+                        count = (unsigned int) nFaces * 3;
                     }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 3) {
@@ -1134,7 +1134,7 @@ aiMeshMorphAnim* CreateMeshMorphAnim(glTF2::Asset& r, Node& node, AnimationSampl
         samplers.weight->output->ExtractData(values);
         anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
 
-        const unsigned int numMorphs = samplers.weight->output->count / anim->mNumKeys;
+        const unsigned int numMorphs = (unsigned int)samplers.weight->output->count / anim->mNumKeys;
 
         anim->mKeys = new aiMeshMorphKey[anim->mNumKeys];
         unsigned int k = 0u;

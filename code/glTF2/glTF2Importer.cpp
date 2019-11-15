@@ -206,6 +206,14 @@ inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset&
             uri.length = 1 + ASSIMP_itoa10(uri.data + 1, MAXLEN - 1, texIdx);
         }
 
+        aiUVTransform transform;
+		transform.mTranslation.x = prop.offset[0];
+		transform.mTranslation.y = prop.offset[0];
+		transform.mRotation = prop.rotation;
+		transform.mScaling.x = prop.scale[0];
+		transform.mScaling.y = prop.scale[1];
+		mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
+
         mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
         mat->AddProperty(&prop.texCoord, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, texType, texSlot);
 

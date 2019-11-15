@@ -2,8 +2,6 @@ FIND_PACKAGE(DirectX)
 
 IF ( MSVC )
   SET(M_LIB)
-ELSE ( MSVC )
-  find_library(M_LIB m)
 ENDIF ( MSVC )
 
 if ( MSVC )

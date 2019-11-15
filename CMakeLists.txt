@@ -90,7 +90,7 @@ OPTION( ASSIMP_BUILD_ASSIMP_TOOLS
 )
 OPTION ( ASSIMP_BUILD_SAMPLES
   "If the official samples are built as well (needs Glut)."
-  OFF
+  ON
 )
 OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."

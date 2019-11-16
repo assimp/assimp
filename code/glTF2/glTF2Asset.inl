@@ -803,25 +803,26 @@ namespace {
     inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out) {
 	    if (r.extensionsUsed.KHR_texture_transform) {
             if (Value *extensions = FindObject(*prop, "extensions")) {
-				if (Value *pKHR_texture_transform = FindObject(*extensions, "KHR_texture_transform")) {
+				out.textureTransformSupported = true;
+                if (Value *pKHR_texture_transform = FindObject(*extensions, "KHR_texture_transform")) {
 					if (Value *array = FindArray(*pKHR_texture_transform, "offset")) {
-						out.offset[0] = (*array)[0].GetFloat();
-						out.offset[1] = (*array)[1].GetFloat();
+						out.TextureTransformExt_t.offset[0] = (*array)[0].GetFloat();
+						out.TextureTransformExt_t.offset[1] = (*array)[1].GetFloat();
 					} else {
-						out.offset[0] = 0;
-						out.offset[1] = 0;
+						out.TextureTransformExt_t.offset[0] = 0;
+						out.TextureTransformExt_t.offset[1] = 0;
 					}      
 					
-                    if (!ReadMember(*pKHR_texture_transform, "rotation", out.rotation)) {
-						out.rotation = 0;					
+                    if (!ReadMember(*pKHR_texture_transform, "rotation", out.TextureTransformExt_t.rotation)) {
+						out.TextureTransformExt_t.rotation = 0;					
                     }
 					
                     if (Value *array = FindArray(*pKHR_texture_transform, "scale")) {
-						out.scale[0] = (*array)[0].GetFloat();
-						out.scale[1] = (*array)[1].GetFloat();
+						out.TextureTransformExt_t.scale[0] = (*array)[0].GetFloat();
+						out.TextureTransformExt_t.scale[1] = (*array)[1].GetFloat();
 					} else {
-						out.scale[0] = 1;
-						out.scale[1] = 1;
+						out.TextureTransformExt_t.scale[0] = 1;
+						out.TextureTransformExt_t.scale[1] = 1;
                     }
 				}
 			}

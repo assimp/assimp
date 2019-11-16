@@ -685,10 +685,13 @@ namespace glTF2
         Ref<Texture> texture;
         unsigned int index;
         unsigned int texCoord = 0;
-        
-        float offset[2];
-		float rotation;
-		float scale[2];
+
+        bool textureTransformSupported = false;
+        struct TextureTransformExt {
+			float offset[2];
+			float rotation;
+			float scale[2];
+		} TextureTransformExt_t;
     };
 
     struct NormalTextureInfo : TextureInfo

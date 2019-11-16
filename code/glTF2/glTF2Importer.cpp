@@ -201,7 +201,6 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 		}
 
         mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
-		mat->AddProperty(&prop.texCoord, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, texType, texSlot);
 
 		if (prop.textureTransformSupported) {
 			aiUVTransform transform;

@@ -200,6 +200,9 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 			uri.length = 1 + ASSIMP_itoa10(uri.data + 1, MAXLEN - 1, texIdx);
 		}
 
+        mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
+		mat->AddProperty(&prop.texCoord, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, texType, texSlot);
+
 		if (prop.textureTransformSupported) {
 			aiUVTransform transform;
 			transform.mTranslation.x = prop.TextureTransformExt_t.offset[0];
@@ -209,9 +212,6 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 			transform.mScaling.y = prop.TextureTransformExt_t.scale[1];
 			mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
 		}
-
-		mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
-		mat->AddProperty(&prop.texCoord, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, texType, texSlot);
 
 		if (prop.texture->sampler) {
 			Ref<Sampler> sampler = prop.texture->sampler;

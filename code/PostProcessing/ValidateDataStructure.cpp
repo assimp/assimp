@@ -603,15 +603,18 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
         ReportError("%s #%i is set, but there are only %i %s textures",
             szType,iIndex,iNumIndices,szType);
     }
-    if (!iNumIndices)return;
+	if (!iNumIndices) {
+		return;
+	}
     std::vector<aiTextureMapping> mappings(iNumIndices);
 
     // Now check whether all UV indices are valid ...
     bool bNoSpecified = true;
-    for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
-    {
+    for (unsigned int i = 0; i < pMaterial->mNumProperties;++i) {
         aiMaterialProperty* prop = pMaterial->mProperties[i];
-        if (prop->mSemantic != type)continue;
+		if (prop->mSemantic != type) {
+			continue;
+		}
 
         if ((int)prop->mIndex >= iNumIndices)
         {

@@ -405,6 +405,13 @@ TEST_F(utglTF2ImportExport, incorrect_vertex_arrays) {
     EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
 }
 
+TEST_F( utglTF2ImportExport, texture_transform_test ) {
+	Assimp::Importer importer;
+	const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/textureTransform/TextureTransformTest.gltf",
+			aiProcess_ValidateDataStructure);
+	EXPECT_NE(nullptr, scene);
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );

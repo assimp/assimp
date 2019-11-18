@@ -396,9 +396,14 @@ void M3DImporter::importMeshes()
         // we must switch mesh if material changes
         if(lastMat != m3d->face[i].materialid) {
             lastMat = m3d->face[i].materialid;
-            if(pMesh && vertices->size() && faces->size()) {
+            if(pMesh && vertices && vertices->size() && faces && faces->size()) {
                 populateMesh(pMesh, faces, vertices, normals, texcoords, colors, vertexids);
                 meshes->push_back(pMesh);
+                delete faces;
+                delete vertices;
+                delete normals;
+                delete texcoords;
+                delete colors;
                 delete vertexids;   // this is not stored in pMesh, just to collect bone vertices
             }
             pMesh = new aiMesh;

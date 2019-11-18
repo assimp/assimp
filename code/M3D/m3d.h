@@ -616,7 +616,7 @@ static m3dcd_t m3d_commandtypes[] = {
 
    stb_image - v2.23 - public domain image loader - http://nothings.org/stb_image.h
 */
-static const char *stbi__g_failure_reason;
+static const char *_m3dstbi__g_failure_reason;
 
 enum
 {
@@ -635,57 +635,56 @@ enum
    STBI__SCAN_header
 };
 
-typedef unsigned char stbi_uc;
-typedef unsigned short stbi_us;
+typedef unsigned short _m3dstbi_us;
 
-typedef uint16_t stbi__uint16;
-typedef int16_t  stbi__int16;
-typedef uint32_t stbi__uint32;
-typedef int32_t  stbi__int32;
+typedef uint16_t _m3dstbi__uint16;
+typedef int16_t  _m3dstbi__int16;
+typedef uint32_t _m3dstbi__uint32;
+typedef int32_t  _m3dstbi__int32;
 
 typedef struct
 {
-   stbi__uint32 img_x, img_y;
+   _m3dstbi__uint32 img_x, img_y;
    int img_n, img_out_n;
 
    void *io_user_data;
 
    int read_from_callbacks;
    int buflen;
-   stbi_uc buffer_start[128];
+   unsigned char buffer_start[128];
 
-   stbi_uc *img_buffer, *img_buffer_end;
-   stbi_uc *img_buffer_original, *img_buffer_original_end;
-} stbi__context;
+   unsigned char *img_buffer, *img_buffer_end;
+   unsigned char *img_buffer_original, *img_buffer_original_end;
+} _m3dstbi__context;
 
 typedef struct
 {
    int bits_per_channel;
    int num_channels;
    int channel_order;
-} stbi__result_info;
+} _m3dstbi__result_info;
 
 #define STBI_ASSERT(v)
 #define STBI_NOTUSED(v)  (void)sizeof(v)
-#define STBI__BYTECAST(x)  ((stbi_uc) ((x) & 255))
+#define STBI__BYTECAST(x)  ((unsigned char) ((x) & 255))
 #define STBI_MALLOC(sz)           M3D_MALLOC(sz)
 #define STBI_REALLOC(p,newsz)     M3D_REALLOC(p,newsz)
 #define STBI_FREE(p)              M3D_FREE(p)
 #define STBI_REALLOC_SIZED(p,oldsz,newsz) STBI_REALLOC(p,newsz)
 
-_inline static stbi_uc stbi__get8(stbi__context *s)
+_inline static unsigned char _m3dstbi__get8(_m3dstbi__context *s)
 {
    if (s->img_buffer < s->img_buffer_end)
       return *s->img_buffer++;
    return 0;
 }
 
-_inline static int stbi__at_eof(stbi__context *s)
+_inline static int _m3dstbi__at_eof(_m3dstbi__context *s)
 {
    return s->img_buffer >= s->img_buffer_end;
 }
 
-static void stbi__skip(stbi__context *s, int n)
+static void _m3dstbi__skip(_m3dstbi__context *s, int n)
 {
    if (n < 0) {
       s->img_buffer = s->img_buffer_end;
@@ -694,7 +693,7 @@ static void stbi__skip(stbi__context *s, int n)
    s->img_buffer += n;
 }
 
-static int stbi__getn(stbi__context *s, stbi_uc *buffer, int n)
+static int _m3dstbi__getn(_m3dstbi__context *s, unsigned char *buffer, int n)
 {
    if (s->img_buffer+n <= s->img_buffer_end) {
       memcpy(buffer, s->img_buffer, n);
@@ -704,72 +703,72 @@ static int stbi__getn(stbi__context *s, stbi_uc *buffer, int n)
       return 0;
 }
 
-static int stbi__get16be(stbi__context *s)
+static int _m3dstbi__get16be(_m3dstbi__context *s)
 {
-   int z = stbi__get8(s);
-   return (z << 8) + stbi__get8(s);
+   int z = _m3dstbi__get8(s);
+   return (z << 8) + _m3dstbi__get8(s);
 }
 
-static stbi__uint32 stbi__get32be(stbi__context *s)
+static _m3dstbi__uint32 _m3dstbi__get32be(_m3dstbi__context *s)
 {
-   stbi__uint32 z = stbi__get16be(s);
-   return (z << 16) + stbi__get16be(s);
+   _m3dstbi__uint32 z = _m3dstbi__get16be(s);
+   return (z << 16) + _m3dstbi__get16be(s);
 }
 
-#define stbi__err(x,y)  stbi__errstr(y)
-static int stbi__errstr(const char *str)
+#define _m3dstbi__err(x,y)  _m3dstbi__errstr(y)
+static int _m3dstbi__errstr(const char *str)
 {
-   stbi__g_failure_reason = str;
+   _m3dstbi__g_failure_reason = str;
    return 0;
 }
 
-_inline static void *stbi__malloc(size_t size)
+_inline static void *_m3dstbi__malloc(size_t size)
 {
     return STBI_MALLOC(size);
 }
 
-static int stbi__addsizes_valid(int a, int b)
+static int _m3dstbi__addsizes_valid(int a, int b)
 {
    if (b < 0) return 0;
    return a <= 2147483647 - b;
 }
 
-static int stbi__mul2sizes_valid(int a, int b)
+static int _m3dstbi__mul2sizes_valid(int a, int b)
 {
    if (a < 0 || b < 0) return 0;
    if (b == 0) return 1;
    return a <= 2147483647/b;
 }
 
-static int stbi__mad2sizes_valid(int a, int b, int add)
+static int _m3dstbi__mad2sizes_valid(int a, int b, int add)
 {
-   return stbi__mul2sizes_valid(a, b) && stbi__addsizes_valid(a*b, add);
+   return _m3dstbi__mul2sizes_valid(a, b) && _m3dstbi__addsizes_valid(a*b, add);
 }
 
-static int stbi__mad3sizes_valid(int a, int b, int c, int add)
+static int _m3dstbi__mad3sizes_valid(int a, int b, int c, int add)
 {
-   return stbi__mul2sizes_valid(a, b) && stbi__mul2sizes_valid(a*b, c) &&
-      stbi__addsizes_valid(a*b*c, add);
+   return _m3dstbi__mul2sizes_valid(a, b) && _m3dstbi__mul2sizes_valid(a*b, c) &&
+      _m3dstbi__addsizes_valid(a*b*c, add);
 }
 
-static void *stbi__malloc_mad2(int a, int b, int add)
+static void *_m3dstbi__malloc_mad2(int a, int b, int add)
 {
-   if (!stbi__mad2sizes_valid(a, b, add)) return NULL;
-   return stbi__malloc(a*b + add);
+   if (!_m3dstbi__mad2sizes_valid(a, b, add)) return NULL;
+   return _m3dstbi__malloc(a*b + add);
 }
 
-static void *stbi__malloc_mad3(int a, int b, int c, int add)
+static void *_m3dstbi__malloc_mad3(int a, int b, int c, int add)
 {
-   if (!stbi__mad3sizes_valid(a, b, c, add)) return NULL;
-   return stbi__malloc(a*b*c + add);
+   if (!_m3dstbi__mad3sizes_valid(a, b, c, add)) return NULL;
+   return _m3dstbi__malloc(a*b*c + add);
 }
 
-static stbi_uc stbi__compute_y(int r, int g, int b)
+static unsigned char _m3dstbi__compute_y(int r, int g, int b)
 {
-   return (stbi_uc) (((r*77) + (g*150) +  (29*b)) >> 8);
+   return (unsigned char) (((r*77) + (g*150) +  (29*b)) >> 8);
 }
 
-static unsigned char *stbi__convert_format(unsigned char *data, int img_n, int req_comp, unsigned int x, unsigned int y)
+static unsigned char *_m3dstbi__convert_format(unsigned char *data, int img_n, int req_comp, unsigned int x, unsigned int y)
 {
    int i,j;
    unsigned char *good;
@@ -777,10 +776,10 @@ static unsigned char *stbi__convert_format(unsigned char *data, int img_n, int r
    if (req_comp == img_n) return data;
    STBI_ASSERT(req_comp >= 1 && req_comp <= 4);
 
-   good = (unsigned char *) stbi__malloc_mad3(req_comp, x, y, 0);
+   good = (unsigned char *) _m3dstbi__malloc_mad3(req_comp, x, y, 0);
    if (good == NULL) {
       STBI_FREE(data);
-      stbi__err("outofmem", "Out of memory");
+      _m3dstbi__err("outofmem", "Out of memory");
       return NULL;
    }
 
@@ -798,10 +797,10 @@ static unsigned char *stbi__convert_format(unsigned char *data, int img_n, int r
          STBI__CASE(2,3) { dest[0]=dest[1]=dest[2]=src[0];                                  } break;
          STBI__CASE(2,4) { dest[0]=dest[1]=dest[2]=src[0], dest[3]=src[1];                  } break;
          STBI__CASE(3,4) { dest[0]=src[0],dest[1]=src[1],dest[2]=src[2],dest[3]=255;        } break;
-         STBI__CASE(3,1) { dest[0]=stbi__compute_y(src[0],src[1],src[2]);                   } break;
-         STBI__CASE(3,2) { dest[0]=stbi__compute_y(src[0],src[1],src[2]), dest[1] = 255;    } break;
-         STBI__CASE(4,1) { dest[0]=stbi__compute_y(src[0],src[1],src[2]);                   } break;
-         STBI__CASE(4,2) { dest[0]=stbi__compute_y(src[0],src[1],src[2]), dest[1] = src[3]; } break;
+         STBI__CASE(3,1) { dest[0]=_m3dstbi__compute_y(src[0],src[1],src[2]);                   } break;
+         STBI__CASE(3,2) { dest[0]=_m3dstbi__compute_y(src[0],src[1],src[2]), dest[1] = 255;    } break;
+         STBI__CASE(4,1) { dest[0]=_m3dstbi__compute_y(src[0],src[1],src[2]);                   } break;
+         STBI__CASE(4,2) { dest[0]=_m3dstbi__compute_y(src[0],src[1],src[2]), dest[1] = src[3]; } break;
          STBI__CASE(4,3) { dest[0]=src[0],dest[1]=src[1],dest[2]=src[2];                    } break;
          default: STBI_ASSERT(0);
       }
@@ -812,29 +811,29 @@ static unsigned char *stbi__convert_format(unsigned char *data, int img_n, int r
    return good;
 }
 
-static stbi__uint16 stbi__compute_y_16(int r, int g, int b)
+static _m3dstbi__uint16 _m3dstbi__compute_y_16(int r, int g, int b)
 {
-   return (stbi__uint16) (((r*77) + (g*150) +  (29*b)) >> 8);
+   return (_m3dstbi__uint16) (((r*77) + (g*150) +  (29*b)) >> 8);
 }
 
-static stbi__uint16 *stbi__convert_format16(stbi__uint16 *data, int img_n, int req_comp, unsigned int x, unsigned int y)
+static _m3dstbi__uint16 *_m3dstbi__convert_format16(_m3dstbi__uint16 *data, int img_n, int req_comp, unsigned int x, unsigned int y)
 {
    int i,j;
-   stbi__uint16 *good;
+   _m3dstbi__uint16 *good;
 
    if (req_comp == img_n) return data;
    STBI_ASSERT(req_comp >= 1 && req_comp <= 4);
 
-   good = (stbi__uint16 *) stbi__malloc(req_comp * x * y * 2);
+   good = (_m3dstbi__uint16 *) _m3dstbi__malloc(req_comp * x * y * 2);
    if (good == NULL) {
       STBI_FREE(data);
-      stbi__err("outofmem", "Out of memory");
+      _m3dstbi__err("outofmem", "Out of memory");
       return NULL;
    }
 
    for (j=0; j < (int) y; ++j) {
-      stbi__uint16 *src  = data + j * x * img_n   ;
-      stbi__uint16 *dest = good + j * x * req_comp;
+      _m3dstbi__uint16 *src  = data + j * x * img_n   ;
+      _m3dstbi__uint16 *dest = good + j * x * req_comp;
 
       #define STBI__COMBO(a,b)  ((a)*8+(b))
       #define STBI__CASE(a,b)   case STBI__COMBO(a,b): for(i=x-1; i >= 0; --i, src += a, dest += b)
@@ -846,10 +845,10 @@ static stbi__uint16 *stbi__convert_format16(stbi__uint16 *data, int img_n, int r
          STBI__CASE(2,3) { dest[0]=dest[1]=dest[2]=src[0];                                     } break;
          STBI__CASE(2,4) { dest[0]=dest[1]=dest[2]=src[0], dest[3]=src[1];                     } break;
          STBI__CASE(3,4) { dest[0]=src[0],dest[1]=src[1],dest[2]=src[2],dest[3]=0xffff;        } break;
-         STBI__CASE(3,1) { dest[0]=stbi__compute_y_16(src[0],src[1],src[2]);                   } break;
-         STBI__CASE(3,2) { dest[0]=stbi__compute_y_16(src[0],src[1],src[2]), dest[1] = 0xffff; } break;
-         STBI__CASE(4,1) { dest[0]=stbi__compute_y_16(src[0],src[1],src[2]);                   } break;
-         STBI__CASE(4,2) { dest[0]=stbi__compute_y_16(src[0],src[1],src[2]), dest[1] = src[3]; } break;
+         STBI__CASE(3,1) { dest[0]=_m3dstbi__compute_y_16(src[0],src[1],src[2]);                   } break;
+         STBI__CASE(3,2) { dest[0]=_m3dstbi__compute_y_16(src[0],src[1],src[2]), dest[1] = 0xffff; } break;
+         STBI__CASE(4,1) { dest[0]=_m3dstbi__compute_y_16(src[0],src[1],src[2]);                   } break;
+         STBI__CASE(4,2) { dest[0]=_m3dstbi__compute_y_16(src[0],src[1],src[2]), dest[1] = src[3]; } break;
          STBI__CASE(4,3) { dest[0]=src[0],dest[1]=src[1],dest[2]=src[2];                       } break;
          default: STBI_ASSERT(0);
       }
@@ -865,15 +864,15 @@ static stbi__uint16 *stbi__convert_format16(stbi__uint16 *data, int img_n, int r
 
 typedef struct
 {
-   stbi__uint16 fast[1 << STBI__ZFAST_BITS];
-   stbi__uint16 firstcode[16];
+   _m3dstbi__uint16 fast[1 << STBI__ZFAST_BITS];
+   _m3dstbi__uint16 firstcode[16];
    int maxcode[17];
-   stbi__uint16 firstsymbol[16];
-   stbi_uc  size[288];
-   stbi__uint16 value[288];
-} stbi__zhuffman;
+   _m3dstbi__uint16 firstsymbol[16];
+   unsigned char  size[288];
+   _m3dstbi__uint16 value[288];
+} _m3dstbi__zhuffman;
 
-_inline static int stbi__bitreverse16(int n)
+_inline static int _m3dstbi__bitreverse16(int n)
 {
   n = ((n & 0xAAAA) >>  1) | ((n & 0x5555) << 1);
   n = ((n & 0xCCCC) >>  2) | ((n & 0x3333) << 2);
@@ -882,13 +881,13 @@ _inline static int stbi__bitreverse16(int n)
   return n;
 }
 
-_inline static int stbi__bit_reverse(int v, int bits)
+_inline static int _m3dstbi__bit_reverse(int v, int bits)
 {
    STBI_ASSERT(bits <= 16);
-   return stbi__bitreverse16(v) >> (16-bits);
+   return _m3dstbi__bitreverse16(v) >> (16-bits);
 }
 
-static int stbi__zbuild_huffman(stbi__zhuffman *z, stbi_uc *sizelist, int num)
+static int _m3dstbi__zbuild_huffman(_m3dstbi__zhuffman *z, unsigned char *sizelist, int num)
 {
    int i,k=0;
    int code, next_code[16], sizes[17];
@@ -900,15 +899,15 @@ static int stbi__zbuild_huffman(stbi__zhuffman *z, stbi_uc *sizelist, int num)
    sizes[0] = 0;
    for (i=1; i < 16; ++i)
       if (sizes[i] > (1 << i))
-         return stbi__err("bad sizes", "Corrupt PNG");
+         return _m3dstbi__err("bad sizes", "Corrupt PNG");
    code = 0;
    for (i=1; i < 16; ++i) {
       next_code[i] = code;
-      z->firstcode[i] = (stbi__uint16) code;
-      z->firstsymbol[i] = (stbi__uint16) k;
+      z->firstcode[i] = (_m3dstbi__uint16) code;
+      z->firstsymbol[i] = (_m3dstbi__uint16) k;
       code = (code + sizes[i]);
       if (sizes[i])
-         if (code-1 >= (1 << i)) return stbi__err("bad codelengths","Corrupt PNG");
+         if (code-1 >= (1 << i)) return _m3dstbi__err("bad codelengths","Corrupt PNG");
       z->maxcode[i] = code << (16-i);
       code <<= 1;
       k += sizes[i];
@@ -918,11 +917,11 @@ static int stbi__zbuild_huffman(stbi__zhuffman *z, stbi_uc *sizelist, int num)
       int s = sizelist[i];
       if (s) {
          int c = next_code[s] - z->firstcode[s] + z->firstsymbol[s];
-         stbi__uint16 fastv = (stbi__uint16) ((s << 9) | i);
-         z->size [c] = (stbi_uc     ) s;
-         z->value[c] = (stbi__uint16) i;
+         _m3dstbi__uint16 fastv = (_m3dstbi__uint16) ((s << 9) | i);
+         z->size [c] = (unsigned char     ) s;
+         z->value[c] = (_m3dstbi__uint16) i;
          if (s <= STBI__ZFAST_BITS) {
-            int j = stbi__bit_reverse(next_code[s],s);
+            int j = _m3dstbi__bit_reverse(next_code[s],s);
             while (j < (1 << STBI__ZFAST_BITS)) {
                z->fast[j] = fastv;
                j += (1 << s);
@@ -936,47 +935,47 @@ static int stbi__zbuild_huffman(stbi__zhuffman *z, stbi_uc *sizelist, int num)
 
 typedef struct
 {
-   stbi_uc *zbuffer, *zbuffer_end;
+   unsigned char *zbuffer, *zbuffer_end;
    int num_bits;
-   stbi__uint32 code_buffer;
+   _m3dstbi__uint32 code_buffer;
 
    char *zout;
    char *zout_start;
    char *zout_end;
    int   z_expandable;
 
-   stbi__zhuffman z_length, z_distance;
-} stbi__zbuf;
+   _m3dstbi__zhuffman z_length, z_distance;
+} _m3dstbi__zbuf;
 
-_inline static stbi_uc stbi__zget8(stbi__zbuf *z)
+_inline static unsigned char _m3dstbi__zget8(_m3dstbi__zbuf *z)
 {
    if (z->zbuffer >= z->zbuffer_end) return 0;
    return *z->zbuffer++;
 }
 
-static void stbi__fill_bits(stbi__zbuf *z)
+static void _m3dstbi__fill_bits(_m3dstbi__zbuf *z)
 {
    do {
       STBI_ASSERT(z->code_buffer < (1U << z->num_bits));
-      z->code_buffer |= (unsigned int) stbi__zget8(z) << z->num_bits;
+      z->code_buffer |= (unsigned int) _m3dstbi__zget8(z) << z->num_bits;
       z->num_bits += 8;
    } while (z->num_bits <= 24);
 }
 
-_inline static unsigned int stbi__zreceive(stbi__zbuf *z, int n)
+_inline static unsigned int _m3dstbi__zreceive(_m3dstbi__zbuf *z, int n)
 {
    unsigned int k;
-   if (z->num_bits < n) stbi__fill_bits(z);
+   if (z->num_bits < n) _m3dstbi__fill_bits(z);
    k = z->code_buffer & ((1 << n) - 1);
    z->code_buffer >>= n;
    z->num_bits -= n;
    return k;
 }
 
-static int stbi__zhuffman_decode_slowpath(stbi__zbuf *a, stbi__zhuffman *z)
+static int _m3dstbi__zhuffman_decode_slowpath(_m3dstbi__zbuf *a, _m3dstbi__zhuffman *z)
 {
    int b,s,k;
-   k = stbi__bit_reverse(a->code_buffer, 16);
+   k = _m3dstbi__bit_reverse(a->code_buffer, 16);
    for (s=STBI__ZFAST_BITS+1; ; ++s)
       if (k < z->maxcode[s])
          break;
@@ -988,10 +987,10 @@ static int stbi__zhuffman_decode_slowpath(stbi__zbuf *a, stbi__zhuffman *z)
    return z->value[b];
 }
 
-_inline static int stbi__zhuffman_decode(stbi__zbuf *a, stbi__zhuffman *z)
+_inline static int _m3dstbi__zhuffman_decode(_m3dstbi__zbuf *a, _m3dstbi__zhuffman *z)
 {
    int b,s;
-   if (a->num_bits < 16) stbi__fill_bits(a);
+   if (a->num_bits < 16) _m3dstbi__fill_bits(a);
    b = z->fast[a->code_buffer & STBI__ZFAST_MASK];
    if (b) {
       s = b >> 9;
@@ -999,76 +998,76 @@ _inline static int stbi__zhuffman_decode(stbi__zbuf *a, stbi__zhuffman *z)
       a->num_bits -= s;
       return b & 511;
    }
-   return stbi__zhuffman_decode_slowpath(a, z);
+   return _m3dstbi__zhuffman_decode_slowpath(a, z);
 }
 
-static int stbi__zexpand(stbi__zbuf *z, char *zout, int n)
+static int _m3dstbi__zexpand(_m3dstbi__zbuf *z, char *zout, int n)
 {
    char *q;
    int cur, limit, old_limit;
    z->zout = zout;
-   if (!z->z_expandable) return stbi__err("output buffer limit","Corrupt PNG");
+   if (!z->z_expandable) return _m3dstbi__err("output buffer limit","Corrupt PNG");
    cur   = (int) (z->zout     - z->zout_start);
    limit = old_limit = (int) (z->zout_end - z->zout_start);
    while (cur + n > limit)
       limit *= 2;
    q = (char *) STBI_REALLOC_SIZED(z->zout_start, old_limit, limit);
    STBI_NOTUSED(old_limit);
-   if (q == NULL) return stbi__err("outofmem", "Out of memory");
+   if (q == NULL) return _m3dstbi__err("outofmem", "Out of memory");
    z->zout_start = q;
    z->zout       = q + cur;
    z->zout_end   = q + limit;
    return 1;
 }
 
-static int stbi__zlength_base[31] = {
+static int _m3dstbi__zlength_base[31] = {
    3,4,5,6,7,8,9,10,11,13,
    15,17,19,23,27,31,35,43,51,59,
    67,83,99,115,131,163,195,227,258,0,0 };
 
-static int stbi__zlength_extra[31]=
+static int _m3dstbi__zlength_extra[31]=
 { 0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0 };
 
-static int stbi__zdist_base[32] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,
+static int _m3dstbi__zdist_base[32] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,
 257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0};
 
-static int stbi__zdist_extra[32] =
+static int _m3dstbi__zdist_extra[32] =
 { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13};
 
-static int stbi__parse_huffman_block(stbi__zbuf *a)
+static int _m3dstbi__parse_huffman_block(_m3dstbi__zbuf *a)
 {
    char *zout = a->zout;
    for(;;) {
-      int z = stbi__zhuffman_decode(a, &a->z_length);
+      int z = _m3dstbi__zhuffman_decode(a, &a->z_length);
       if (z < 256) {
-         if (z < 0) return stbi__err("bad huffman code","Corrupt PNG");
+         if (z < 0) return _m3dstbi__err("bad huffman code","Corrupt PNG");
          if (zout >= a->zout_end) {
-            if (!stbi__zexpand(a, zout, 1)) return 0;
+            if (!_m3dstbi__zexpand(a, zout, 1)) return 0;
             zout = a->zout;
          }
          *zout++ = (char) z;
       } else {
-         stbi_uc *p;
+         unsigned char *p;
          int len,dist;
          if (z == 256) {
             a->zout = zout;
             return 1;
          }
          z -= 257;
-         len = stbi__zlength_base[z];
-         if (stbi__zlength_extra[z]) len += stbi__zreceive(a, stbi__zlength_extra[z]);
-         z = stbi__zhuffman_decode(a, &a->z_distance);
-         if (z < 0) return stbi__err("bad huffman code","Corrupt PNG");
-         dist = stbi__zdist_base[z];
-         if (stbi__zdist_extra[z]) dist += stbi__zreceive(a, stbi__zdist_extra[z]);
-         if (zout - a->zout_start < dist) return stbi__err("bad dist","Corrupt PNG");
+         len = _m3dstbi__zlength_base[z];
+         if (_m3dstbi__zlength_extra[z]) len += _m3dstbi__zreceive(a, _m3dstbi__zlength_extra[z]);
+         z = _m3dstbi__zhuffman_decode(a, &a->z_distance);
+         if (z < 0) return _m3dstbi__err("bad huffman code","Corrupt PNG");
+         dist = _m3dstbi__zdist_base[z];
+         if (_m3dstbi__zdist_extra[z]) dist += _m3dstbi__zreceive(a, _m3dstbi__zdist_extra[z]);
+         if (zout - a->zout_start < dist) return _m3dstbi__err("bad dist","Corrupt PNG");
          if (zout + len > a->zout_end) {
-            if (!stbi__zexpand(a, zout, len)) return 0;
+            if (!_m3dstbi__zexpand(a, zout, len)) return 0;
             zout = a->zout;
          }
-         p = (stbi_uc *) (zout - dist);
+         p = (unsigned char *) (zout - dist);
          if (dist == 1) {
-            stbi_uc v = *p;
+            unsigned char v = *p;
             if (len) { do *zout++ = v; while (--len); }
          } else {
             if (len) { do *zout++ = *p++; while (--len); }
@@ -1077,152 +1076,152 @@ static int stbi__parse_huffman_block(stbi__zbuf *a)
    }
 }
 
-static int stbi__compute_huffman_codes(stbi__zbuf *a)
+static int _m3dstbi__compute_huffman_codes(_m3dstbi__zbuf *a)
 {
-   static stbi_uc length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
-   stbi__zhuffman z_codelength;
-   stbi_uc lencodes[286+32+137];
-   stbi_uc codelength_sizes[19];
+   static unsigned char length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
+   _m3dstbi__zhuffman z_codelength;
+   unsigned char lencodes[286+32+137];
+   unsigned char codelength_sizes[19];
    int i,n;
 
-   int hlit  = stbi__zreceive(a,5) + 257;
-   int hdist = stbi__zreceive(a,5) + 1;
-   int hclen = stbi__zreceive(a,4) + 4;
+   int hlit  = _m3dstbi__zreceive(a,5) + 257;
+   int hdist = _m3dstbi__zreceive(a,5) + 1;
+   int hclen = _m3dstbi__zreceive(a,4) + 4;
    int ntot  = hlit + hdist;
 
    memset(codelength_sizes, 0, sizeof(codelength_sizes));
    for (i=0; i < hclen; ++i) {
-      int s = stbi__zreceive(a,3);
-      codelength_sizes[length_dezigzag[i]] = (stbi_uc) s;
+      int s = _m3dstbi__zreceive(a,3);
+      codelength_sizes[length_dezigzag[i]] = (unsigned char) s;
    }
-   if (!stbi__zbuild_huffman(&z_codelength, codelength_sizes, 19)) return 0;
+   if (!_m3dstbi__zbuild_huffman(&z_codelength, codelength_sizes, 19)) return 0;
 
    n = 0;
    while (n < ntot) {
-      int c = stbi__zhuffman_decode(a, &z_codelength);
-      if (c < 0 || c >= 19) return stbi__err("bad codelengths", "Corrupt PNG");
+      int c = _m3dstbi__zhuffman_decode(a, &z_codelength);
+      if (c < 0 || c >= 19) return _m3dstbi__err("bad codelengths", "Corrupt PNG");
       if (c < 16)
-         lencodes[n++] = (stbi_uc) c;
+         lencodes[n++] = (unsigned char) c;
       else {
-         stbi_uc fill = 0;
+         unsigned char fill = 0;
          if (c == 16) {
-            c = stbi__zreceive(a,2)+3;
-            if (n == 0) return stbi__err("bad codelengths", "Corrupt PNG");
+            c = _m3dstbi__zreceive(a,2)+3;
+            if (n == 0) return _m3dstbi__err("bad codelengths", "Corrupt PNG");
             fill = lencodes[n-1];
          } else if (c == 17)
-            c = stbi__zreceive(a,3)+3;
+            c = _m3dstbi__zreceive(a,3)+3;
          else {
             STBI_ASSERT(c == 18);
-            c = stbi__zreceive(a,7)+11;
+            c = _m3dstbi__zreceive(a,7)+11;
          }
-         if (ntot - n < c) return stbi__err("bad codelengths", "Corrupt PNG");
+         if (ntot - n < c) return _m3dstbi__err("bad codelengths", "Corrupt PNG");
          memset(lencodes+n, fill, c);
          n += c;
       }
    }
-   if (n != ntot) return stbi__err("bad codelengths","Corrupt PNG");
-   if (!stbi__zbuild_huffman(&a->z_length, lencodes, hlit)) return 0;
-   if (!stbi__zbuild_huffman(&a->z_distance, lencodes+hlit, hdist)) return 0;
+   if (n != ntot) return _m3dstbi__err("bad codelengths","Corrupt PNG");
+   if (!_m3dstbi__zbuild_huffman(&a->z_length, lencodes, hlit)) return 0;
+   if (!_m3dstbi__zbuild_huffman(&a->z_distance, lencodes+hlit, hdist)) return 0;
    return 1;
 }
 
-_inline static int stbi__parse_uncompressed_block(stbi__zbuf *a)
+_inline static int _m3dstbi__parse_uncompressed_block(_m3dstbi__zbuf *a)
 {
-   stbi_uc header[4];
+   unsigned char header[4];
    int len,nlen,k;
    if (a->num_bits & 7)
-      stbi__zreceive(a, a->num_bits & 7);
+      _m3dstbi__zreceive(a, a->num_bits & 7);
    k = 0;
    while (a->num_bits > 0) {
-      header[k++] = (stbi_uc) (a->code_buffer & 255);
+      header[k++] = (unsigned char) (a->code_buffer & 255);
       a->code_buffer >>= 8;
       a->num_bits -= 8;
    }
    STBI_ASSERT(a->num_bits == 0);
    while (k < 4)
-      header[k++] = stbi__zget8(a);
+      header[k++] = _m3dstbi__zget8(a);
    len  = header[1] * 256 + header[0];
    nlen = header[3] * 256 + header[2];
-   if (nlen != (len ^ 0xffff)) return stbi__err("zlib corrupt","Corrupt PNG");
-   if (a->zbuffer + len > a->zbuffer_end) return stbi__err("read past buffer","Corrupt PNG");
+   if (nlen != (len ^ 0xffff)) return _m3dstbi__err("zlib corrupt","Corrupt PNG");
+   if (a->zbuffer + len > a->zbuffer_end) return _m3dstbi__err("read past buffer","Corrupt PNG");
    if (a->zout + len > a->zout_end)
-      if (!stbi__zexpand(a, a->zout, len)) return 0;
+      if (!_m3dstbi__zexpand(a, a->zout, len)) return 0;
    memcpy(a->zout, a->zbuffer, len);
    a->zbuffer += len;
    a->zout += len;
    return 1;
 }
 
-static int stbi__parse_zlib_header(stbi__zbuf *a)
+static int _m3dstbi__parse_zlib_header(_m3dstbi__zbuf *a)
 {
-   int cmf   = stbi__zget8(a);
+   int cmf   = _m3dstbi__zget8(a);
    int cm    = cmf & 15;
    /* int cinfo = cmf >> 4; */
-   int flg   = stbi__zget8(a);
-   if ((cmf*256+flg) % 31 != 0) return stbi__err("bad zlib header","Corrupt PNG");
-   if (flg & 32) return stbi__err("no preset dict","Corrupt PNG");
-   if (cm != 8) return stbi__err("bad compression","Corrupt PNG");
+   int flg   = _m3dstbi__zget8(a);
+   if ((cmf*256+flg) % 31 != 0) return _m3dstbi__err("bad zlib header","Corrupt PNG");
+   if (flg & 32) return _m3dstbi__err("no preset dict","Corrupt PNG");
+   if (cm != 8) return _m3dstbi__err("bad compression","Corrupt PNG");
    return 1;
 }
 
-static stbi_uc stbi__zdefault_length[288], stbi__zdefault_distance[32];
-static void stbi__init_zdefaults(void)
+static unsigned char _m3dstbi__zdefault_length[288], _m3dstbi__zdefault_distance[32];
+static void _m3dstbi__init_zdefaults(void)
 {
    int i;
-   for (i=0; i <= 143; ++i)     stbi__zdefault_length[i]   = 8;
-   for (   ; i <= 255; ++i)     stbi__zdefault_length[i]   = 9;
-   for (   ; i <= 279; ++i)     stbi__zdefault_length[i]   = 7;
-   for (   ; i <= 287; ++i)     stbi__zdefault_length[i]   = 8;
+   for (i=0; i <= 143; ++i)     _m3dstbi__zdefault_length[i]   = 8;
+   for (   ; i <= 255; ++i)     _m3dstbi__zdefault_length[i]   = 9;
+   for (   ; i <= 279; ++i)     _m3dstbi__zdefault_length[i]   = 7;
+   for (   ; i <= 287; ++i)     _m3dstbi__zdefault_length[i]   = 8;
 
-   for (i=0; i <=  31; ++i)     stbi__zdefault_distance[i] = 5;
+   for (i=0; i <=  31; ++i)     _m3dstbi__zdefault_distance[i] = 5;
 }
 
-static int stbi__parse_zlib(stbi__zbuf *a, int parse_header)
+static int _m3dstbi__parse_zlib(_m3dstbi__zbuf *a, int parse_header)
 {
    int final, type;
    if (parse_header)
-      if (!stbi__parse_zlib_header(a)) return 0;
+      if (!_m3dstbi__parse_zlib_header(a)) return 0;
    a->num_bits = 0;
    a->code_buffer = 0;
    do {
-      final = stbi__zreceive(a,1);
-      type = stbi__zreceive(a,2);
+      final = _m3dstbi__zreceive(a,1);
+      type = _m3dstbi__zreceive(a,2);
       if (type == 0) {
-         if (!stbi__parse_uncompressed_block(a)) return 0;
+         if (!_m3dstbi__parse_uncompressed_block(a)) return 0;
       } else if (type == 3) {
          return 0;
       } else {
          if (type == 1) {
-            if (!stbi__zdefault_distance[31]) stbi__init_zdefaults();
-            if (!stbi__zbuild_huffman(&a->z_length  , stbi__zdefault_length  , 288)) return 0;
-            if (!stbi__zbuild_huffman(&a->z_distance, stbi__zdefault_distance,  32)) return 0;
+            _m3dstbi__init_zdefaults();
+            if (!_m3dstbi__zbuild_huffman(&a->z_length  , _m3dstbi__zdefault_length  , 288)) return 0;
+            if (!_m3dstbi__zbuild_huffman(&a->z_distance, _m3dstbi__zdefault_distance,  32)) return 0;
          } else {
-            if (!stbi__compute_huffman_codes(a)) return 0;
+            if (!_m3dstbi__compute_huffman_codes(a)) return 0;
          }
-         if (!stbi__parse_huffman_block(a)) return 0;
+         if (!_m3dstbi__parse_huffman_block(a)) return 0;
       }
    } while (!final);
    return 1;
 }
 
-static int stbi__do_zlib(stbi__zbuf *a, char *obuf, int olen, int exp, int parse_header)
+static int _m3dstbi__do_zlib(_m3dstbi__zbuf *a, char *obuf, int olen, int exp, int parse_header)
 {
    a->zout_start = obuf;
    a->zout       = obuf;
    a->zout_end   = obuf + olen;
    a->z_expandable = exp;
 
-   return stbi__parse_zlib(a, parse_header);
+   return _m3dstbi__parse_zlib(a, parse_header);
 }
 
-char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, int initial_size, int *outlen, int parse_header)
+char *_m3dstbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, int initial_size, int *outlen, int parse_header)
 {
-   stbi__zbuf a;
-   char *p = (char *) stbi__malloc(initial_size);
+   _m3dstbi__zbuf a;
+   char *p = (char *) _m3dstbi__malloc(initial_size);
    if (p == NULL) return NULL;
-   a.zbuffer = (stbi_uc *) buffer;
-   a.zbuffer_end = (stbi_uc *) buffer + len;
-   if (stbi__do_zlib(&a, p, initial_size, 1, parse_header)) {
+   a.zbuffer = (unsigned char *) buffer;
+   a.zbuffer_end = (unsigned char *) buffer + len;
+   if (_m3dstbi__do_zlib(&a, p, initial_size, 1, parse_header)) {
       if (outlen) *outlen = (int) (a.zout - a.zout_start);
       return a.zout_start;
    } else {
@@ -1233,33 +1232,33 @@ char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, 
 
 typedef struct
 {
-   stbi__uint32 length;
-   stbi__uint32 type;
-} stbi__pngchunk;
+   _m3dstbi__uint32 length;
+   _m3dstbi__uint32 type;
+} _m3dstbi__pngchunk;
 
-static stbi__pngchunk stbi__get_chunk_header(stbi__context *s)
+static _m3dstbi__pngchunk _m3dstbi__get_chunk_header(_m3dstbi__context *s)
 {
-   stbi__pngchunk c;
-   c.length = stbi__get32be(s);
-   c.type   = stbi__get32be(s);
+   _m3dstbi__pngchunk c;
+   c.length = _m3dstbi__get32be(s);
+   c.type   = _m3dstbi__get32be(s);
    return c;
 }
 
-_inline static int stbi__check_png_header(stbi__context *s)
+_inline static int _m3dstbi__check_png_header(_m3dstbi__context *s)
 {
-   static stbi_uc png_sig[8] = { 137,80,78,71,13,10,26,10 };
+   static unsigned char png_sig[8] = { 137,80,78,71,13,10,26,10 };
    int i;
    for (i=0; i < 8; ++i)
-      if (stbi__get8(s) != png_sig[i]) return stbi__err("bad png sig","Not a PNG");
+      if (_m3dstbi__get8(s) != png_sig[i]) return _m3dstbi__err("bad png sig","Not a PNG");
    return 1;
 }
 
 typedef struct
 {
-   stbi__context *s;
-   stbi_uc *idata, *expanded, *out;
+   _m3dstbi__context *s;
+   unsigned char *idata, *expanded, *out;
    int depth;
-} stbi__png;
+} _m3dstbi__png;
 
 
 enum {
@@ -1272,7 +1271,7 @@ enum {
    STBI__F_paeth_first
 };
 
-static stbi_uc first_row_filter[5] =
+static unsigned char first_row_filter[5] =
 {
    STBI__F_none,
    STBI__F_sub,
@@ -1281,7 +1280,7 @@ static stbi_uc first_row_filter[5] =
    STBI__F_paeth_first
 };
 
-static int stbi__paeth(int a, int b, int c)
+static int _m3dstbi__paeth(int a, int b, int c)
 {
    int p = a + b - c;
    int pa = abs(p-a);
@@ -1292,14 +1291,14 @@ static int stbi__paeth(int a, int b, int c)
    return c;
 }
 
-static stbi_uc stbi__depth_scale_table[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
+static unsigned char _m3dstbi__depth_scale_table[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
 
-static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 raw_len, int out_n, stbi__uint32 x, stbi__uint32 y, int depth, int color)
+static int _m3dstbi__create_png_image_raw(_m3dstbi__png *a, unsigned char *raw, _m3dstbi__uint32 raw_len, int out_n, _m3dstbi__uint32 x, _m3dstbi__uint32 y, int depth, int color)
 {
    int bytes = (depth == 16? 2 : 1);
-   stbi__context *s = a->s;
-   stbi__uint32 i,j,stride = x*out_n*bytes;
-   stbi__uint32 img_len, img_width_bytes;
+   _m3dstbi__context *s = a->s;
+   _m3dstbi__uint32 i,j,stride = x*out_n*bytes;
+   _m3dstbi__uint32 img_len, img_width_bytes;
    int k;
    int img_n = s->img_n;
 
@@ -1308,24 +1307,25 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
    int width = x;
 
    STBI_ASSERT(out_n == s->img_n || out_n == s->img_n+1);
-   a->out = (stbi_uc *) stbi__malloc_mad3(x, y, output_bytes, 0);
-   if (!a->out) return stbi__err("outofmem", "Out of memory");
+   a->out = (unsigned char *) _m3dstbi__malloc_mad3(x, y, output_bytes, 0);
+   if (!a->out) return _m3dstbi__err("outofmem", "Out of memory");
 
+   if (!_m3dstbi__mad3sizes_valid(img_n, x, depth, 7)) return _m3dstbi__err("too large", "Corrupt PNG");
    img_width_bytes = (((img_n * x * depth) + 7) >> 3);
    img_len = (img_width_bytes + 1) * y;
    if (s->img_x == x && s->img_y == y) {
-      if (raw_len != img_len) return stbi__err("not enough pixels","Corrupt PNG");
+      if (raw_len != img_len) return _m3dstbi__err("not enough pixels","Corrupt PNG");
    } else {
-      if (raw_len < img_len) return stbi__err("not enough pixels","Corrupt PNG");
+      if (raw_len < img_len) return _m3dstbi__err("not enough pixels","Corrupt PNG");
    }
 
    for (j=0; j < y; ++j) {
-      stbi_uc *cur = a->out + stride*j;
-      stbi_uc *prior = cur - stride;
+      unsigned char *cur = a->out + stride*j;
+      unsigned char *prior = cur - stride;
       int filter = *raw++;
 
       if (filter > 4)
-         return stbi__err("invalid filter","Corrupt PNG");
+         return _m3dstbi__err("invalid filter","Corrupt PNG");
 
       if (depth < 8) {
          STBI_ASSERT(img_width_bytes <= x);
@@ -1333,6 +1333,7 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
          filter_bytes = 1;
          width = img_width_bytes;
       }
+      prior = cur - stride;
 
       if (j == 0) filter = first_row_filter[filter];
 
@@ -1342,7 +1343,7 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
             case STBI__F_sub        : cur[k] = raw[k]; break;
             case STBI__F_up         : cur[k] = STBI__BYTECAST(raw[k] + prior[k]); break;
             case STBI__F_avg        : cur[k] = STBI__BYTECAST(raw[k] + (prior[k]>>1)); break;
-            case STBI__F_paeth      : cur[k] = STBI__BYTECAST(raw[k] + stbi__paeth(0,prior[k],0)); break;
+            case STBI__F_paeth      : cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(0,prior[k],0)); break;
             case STBI__F_avg_first  : cur[k] = raw[k]; break;
             case STBI__F_paeth_first: cur[k] = raw[k]; break;
          }
@@ -1378,9 +1379,9 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
             STBI__CASE(STBI__F_sub)          { cur[k] = STBI__BYTECAST(raw[k] + cur[k-filter_bytes]); } break;
             STBI__CASE(STBI__F_up)           { cur[k] = STBI__BYTECAST(raw[k] + prior[k]); } break;
             STBI__CASE(STBI__F_avg)          { cur[k] = STBI__BYTECAST(raw[k] + ((prior[k] + cur[k-filter_bytes])>>1)); } break;
-            STBI__CASE(STBI__F_paeth)        { cur[k] = STBI__BYTECAST(raw[k] + stbi__paeth(cur[k-filter_bytes],prior[k],prior[k-filter_bytes])); } break;
+            STBI__CASE(STBI__F_paeth)        { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k-filter_bytes],prior[k],prior[k-filter_bytes])); } break;
             STBI__CASE(STBI__F_avg_first)    { cur[k] = STBI__BYTECAST(raw[k] + (cur[k-filter_bytes] >> 1)); } break;
-            STBI__CASE(STBI__F_paeth_first)  { cur[k] = STBI__BYTECAST(raw[k] + stbi__paeth(cur[k-filter_bytes],0,0)); } break;
+            STBI__CASE(STBI__F_paeth_first)  { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k-filter_bytes],0,0)); } break;
          }
          #undef STBI__CASE
          raw += nk;
@@ -1395,9 +1396,9 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
             STBI__CASE(STBI__F_sub)          { cur[k] = STBI__BYTECAST(raw[k] + cur[k- output_bytes]); } break;
             STBI__CASE(STBI__F_up)           { cur[k] = STBI__BYTECAST(raw[k] + prior[k]); } break;
             STBI__CASE(STBI__F_avg)          { cur[k] = STBI__BYTECAST(raw[k] + ((prior[k] + cur[k- output_bytes])>>1)); } break;
-            STBI__CASE(STBI__F_paeth)        { cur[k] = STBI__BYTECAST(raw[k] + stbi__paeth(cur[k- output_bytes],prior[k],prior[k- output_bytes])); } break;
+            STBI__CASE(STBI__F_paeth)        { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k- output_bytes],prior[k],prior[k- output_bytes])); } break;
             STBI__CASE(STBI__F_avg_first)    { cur[k] = STBI__BYTECAST(raw[k] + (cur[k- output_bytes] >> 1)); } break;
-            STBI__CASE(STBI__F_paeth_first)  { cur[k] = STBI__BYTECAST(raw[k] + stbi__paeth(cur[k- output_bytes],0,0)); } break;
+            STBI__CASE(STBI__F_paeth_first)  { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k- output_bytes],0,0)); } break;
          }
          #undef STBI__CASE
 
@@ -1412,9 +1413,9 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
 
    if (depth < 8) {
       for (j=0; j < y; ++j) {
-         stbi_uc *cur = a->out + stride*j;
-         stbi_uc *in  = a->out + stride*j + x*out_n - img_width_bytes;
-         stbi_uc scale = (color == 0) ? stbi__depth_scale_table[depth] : 1;
+         unsigned char *cur = a->out + stride*j;
+         unsigned char *in  = a->out + stride*j + x*out_n - img_width_bytes;
+         unsigned char scale = (color == 0) ? _m3dstbi__depth_scale_table[depth] : 1;
 
          if (depth == 4) {
             for (k=x*img_n; k >= 2; k-=2, ++in) {
@@ -1471,8 +1472,8 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
          }
       }
    } else if (depth == 16) {
-      stbi_uc *cur = a->out;
-      stbi__uint16 *cur16 = (stbi__uint16*)cur;
+      unsigned char *cur = a->out;
+      _m3dstbi__uint16 *cur16 = (_m3dstbi__uint16*)cur;
 
       for(i=0; i < x*y*out_n; ++i,cur16++,cur+=2) {
          *cur16 = (cur[0] << 8) | cur[1];
@@ -1482,16 +1483,16 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
    return 1;
 }
 
-static int stbi__create_png_image(stbi__png *a, stbi_uc *image_data, stbi__uint32 image_data_len, int out_n, int depth, int color, int interlaced)
+static int _m3dstbi__create_png_image(_m3dstbi__png *a, unsigned char *image_data, _m3dstbi__uint32 image_data_len, int out_n, int depth, int color, int interlaced)
 {
    int bytes = (depth == 16 ? 2 : 1);
    int out_bytes = out_n * bytes;
-   stbi_uc *final;
+   unsigned char *final;
    int p;
    if (!interlaced)
-      return stbi__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->img_x, a->s->img_y, depth, color);
+      return _m3dstbi__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->img_x, a->s->img_y, depth, color);
 
-   final = (stbi_uc *) stbi__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
+   final = (unsigned char *) _m3dstbi__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
    for (p=0; p < 7; ++p) {
       int xorig[] = { 0,4,0,2,0,1,0 };
       int yorig[] = { 0,0,4,0,2,0,1 };
@@ -1501,8 +1502,8 @@ static int stbi__create_png_image(stbi__png *a, stbi_uc *image_data, stbi__uint3
       x = (a->s->img_x - xorig[p] + xspc[p]-1) / xspc[p];
       y = (a->s->img_y - yorig[p] + yspc[p]-1) / yspc[p];
       if (x && y) {
-         stbi__uint32 img_len = ((((a->s->img_n * x * depth) + 7) >> 3) + 1) * y;
-         if (!stbi__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color)) {
+         _m3dstbi__uint32 img_len = ((((a->s->img_n * x * depth) + 7) >> 3) + 1) * y;
+         if (!_m3dstbi__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color)) {
             STBI_FREE(final);
             return 0;
          }
@@ -1524,11 +1525,11 @@ static int stbi__create_png_image(stbi__png *a, stbi_uc *image_data, stbi__uint3
    return 1;
 }
 
-static int stbi__compute_transparency(stbi__png *z, stbi_uc tc[3], int out_n)
+static int _m3dstbi__compute_transparency(_m3dstbi__png *z, unsigned char tc[3], int out_n)
 {
-   stbi__context *s = z->s;
-   stbi__uint32 i, pixel_count = s->img_x * s->img_y;
-   stbi_uc *p = z->out;
+   _m3dstbi__context *s = z->s;
+   _m3dstbi__uint32 i, pixel_count = s->img_x * s->img_y;
+   unsigned char *p = z->out;
 
    STBI_ASSERT(out_n == 2 || out_n == 4);
 
@@ -1547,11 +1548,11 @@ static int stbi__compute_transparency(stbi__png *z, stbi_uc tc[3], int out_n)
    return 1;
 }
 
-static int stbi__compute_transparency16(stbi__png *z, stbi__uint16 tc[3], int out_n)
+static int _m3dstbi__compute_transparency16(_m3dstbi__png *z, _m3dstbi__uint16 tc[3], int out_n)
 {
-   stbi__context *s = z->s;
-   stbi__uint32 i, pixel_count = s->img_x * s->img_y;
-   stbi__uint16 *p = (stbi__uint16*) z->out;
+   _m3dstbi__context *s = z->s;
+   _m3dstbi__uint32 i, pixel_count = s->img_x * s->img_y;
+   _m3dstbi__uint16 *p = (_m3dstbi__uint16*) z->out;
 
    STBI_ASSERT(out_n == 2 || out_n == 4);
 
@@ -1570,13 +1571,13 @@ static int stbi__compute_transparency16(stbi__png *z, stbi__uint16 tc[3], int ou
    return 1;
 }
 
-static int stbi__expand_png_palette(stbi__png *a, stbi_uc *palette, int len, int pal_img_n)
+static int _m3dstbi__expand_png_palette(_m3dstbi__png *a, unsigned char *palette, int len, int pal_img_n)
 {
-   stbi__uint32 i, pixel_count = a->s->img_x * a->s->img_y;
-   stbi_uc *p, *temp_out, *orig = a->out;
+   _m3dstbi__uint32 i, pixel_count = a->s->img_x * a->s->img_y;
+   unsigned char *p, *temp_out, *orig = a->out;
 
-   p = (stbi_uc *) stbi__malloc_mad2(pixel_count, pal_img_n, 0);
-   if (p == NULL) return stbi__err("outofmem", "Out of memory");
+   p = (unsigned char *) _m3dstbi__malloc_mad2(pixel_count, pal_img_n, 0);
+   if (p == NULL) return _m3dstbi__err("outofmem", "Out of memory");
 
    temp_out = p;
 
@@ -1606,228 +1607,177 @@ static int stbi__expand_png_palette(stbi__png *a, stbi_uc *palette, int len, int
    return 1;
 }
 
-static int stbi__unpremultiply_on_load = 0;
-static int stbi__de_iphone_flag = 0;
+#define STBI__PNG_TYPE(a,b,c,d)  (((unsigned) (a) << 24) + ((unsigned) (b) << 16) + ((unsigned) (c) << 8) + (unsigned) (d))
 
-void stbi_set_unpremultiply_on_load(int flag_true_if_should_unpremultiply)
+static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp)
 {
-   stbi__unpremultiply_on_load = flag_true_if_should_unpremultiply;
-}
-
-void stbi_convert_iphone_png_to_rgb(int flag_true_if_should_convert)
-{
-   stbi__de_iphone_flag = flag_true_if_should_convert;
-}
-
-static void stbi__de_iphone(stbi__png *z)
-{
-   stbi__context *s = z->s;
-   stbi__uint32 i, pixel_count = s->img_x * s->img_y;
-   stbi_uc *p = z->out;
-
-   if (s->img_out_n == 3) {
-      for (i=0; i < pixel_count; ++i) {
-         stbi_uc t = p[0];
-         p[0] = p[2];
-         p[2] = t;
-         p += 3;
-      }
-   } else {
-      STBI_ASSERT(s->img_out_n == 4);
-      if (stbi__unpremultiply_on_load) {
-         for (i=0; i < pixel_count; ++i) {
-            stbi_uc a = p[3];
-            stbi_uc t = p[0];
-            if (a) {
-               p[0] = p[2] * 255 / a;
-               p[1] = p[1] * 255 / a;
-               p[2] =  t   * 255 / a;
-            } else {
-               p[0] = p[2];
-               p[2] = t;
-            }
-            p += 4;
-         }
-      } else {
-         for (i=0; i < pixel_count; ++i) {
-            stbi_uc t = p[0];
-            p[0] = p[2];
-            p[2] = t;
-            p += 4;
-         }
-      }
-   }
-}
-
-#define STBI__PNG_TYPE(a,b,c,d)  (((a) << 24) + ((b) << 16) + ((c) << 8) + (d))
-
-static int stbi__parse_png_file(stbi__png *z, int scan, int req_comp)
-{
-   stbi_uc palette[1024], pal_img_n=0;
-   stbi_uc has_trans=0, tc[3];
-   stbi__uint16 tc16[3];
-   stbi__uint32 ioff=0, idata_limit=0, i, pal_len=0;
-   int first=1,k,interlace=0, color=0, is_iphone=0;
-   stbi__context *s = z->s;
+   unsigned char palette[1024], pal_img_n=0;
+   unsigned char has_trans=0, tc[3];
+   _m3dstbi__uint16 tc16[3];
+   _m3dstbi__uint32 ioff=0, idata_limit=0, i, pal_len=0;
+   int first=1,k,interlace=0, color=0;
+   _m3dstbi__context *s = z->s;
 
    z->expanded = NULL;
    z->idata = NULL;
    z->out = NULL;
 
-   if (!stbi__check_png_header(s)) return 0;
+   if (!_m3dstbi__check_png_header(s)) return 0;
 
    if (scan == STBI__SCAN_type) return 1;
 
    for (;;) {
-      stbi__pngchunk c = stbi__get_chunk_header(s);
+      _m3dstbi__pngchunk c = _m3dstbi__get_chunk_header(s);
       switch (c.type) {
          case STBI__PNG_TYPE('C','g','B','I'):
-            is_iphone = 1;
-            stbi__skip(s, c.length);
+            _m3dstbi__skip(s, c.length);
             break;
          case STBI__PNG_TYPE('I','H','D','R'): {
             int comp,filter;
-            if (!first) return stbi__err("multiple IHDR","Corrupt PNG");
+            if (!first) return _m3dstbi__err("multiple IHDR","Corrupt PNG");
             first = 0;
-            if (c.length != 13) return stbi__err("bad IHDR len","Corrupt PNG");
-            s->img_x = stbi__get32be(s); if (s->img_x > (1 << 24)) return stbi__err("too large","Very large image (corrupt?)");
-            s->img_y = stbi__get32be(s); if (s->img_y > (1 << 24)) return stbi__err("too large","Very large image (corrupt?)");
-            z->depth = stbi__get8(s);  if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16)  return stbi__err("1/2/4/8/16-bit only","PNG not supported: 1/2/4/8/16-bit only");
-            color = stbi__get8(s);  if (color > 6)         return stbi__err("bad ctype","Corrupt PNG");
-            if (color == 3 && z->depth == 16)                  return stbi__err("bad ctype","Corrupt PNG");
-            if (color == 3) pal_img_n = 3; else if (color & 1) return stbi__err("bad ctype","Corrupt PNG");
-            comp  = stbi__get8(s);  if (comp) return stbi__err("bad comp method","Corrupt PNG");
-            filter= stbi__get8(s);  if (filter) return stbi__err("bad filter method","Corrupt PNG");
-            interlace = stbi__get8(s); if (interlace>1) return stbi__err("bad interlace method","Corrupt PNG");
-            if (!s->img_x || !s->img_y) return stbi__err("0-pixel image","Corrupt PNG");
+            if (c.length != 13) return _m3dstbi__err("bad IHDR len","Corrupt PNG");
+            s->img_x = _m3dstbi__get32be(s); if (s->img_x > (1 << 24)) return _m3dstbi__err("too large","Very large image (corrupt?)");
+            s->img_y = _m3dstbi__get32be(s); if (s->img_y > (1 << 24)) return _m3dstbi__err("too large","Very large image (corrupt?)");
+            z->depth = _m3dstbi__get8(s);  if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16)  return _m3dstbi__err("1/2/4/8/16-bit only","PNG not supported: 1/2/4/8/16-bit only");
+            color = _m3dstbi__get8(s);  if (color > 6)         return _m3dstbi__err("bad ctype","Corrupt PNG");
+            if (color == 3 && z->depth == 16)                  return _m3dstbi__err("bad ctype","Corrupt PNG");
+            if (color == 3) pal_img_n = 3; else if (color & 1) return _m3dstbi__err("bad ctype","Corrupt PNG");
+            comp  = _m3dstbi__get8(s);  if (comp) return _m3dstbi__err("bad comp method","Corrupt PNG");
+            filter= _m3dstbi__get8(s);  if (filter) return _m3dstbi__err("bad filter method","Corrupt PNG");
+            interlace = _m3dstbi__get8(s); if (interlace>1) return _m3dstbi__err("bad interlace method","Corrupt PNG");
+            if (!s->img_x || !s->img_y) return _m3dstbi__err("0-pixel image","Corrupt PNG");
             if (!pal_img_n) {
                s->img_n = (color & 2 ? 3 : 1) + (color & 4 ? 1 : 0);
-               if ((1 << 30) / s->img_x / s->img_n < s->img_y) return stbi__err("too large", "Image too large to decode");
+               if ((1 << 30) / s->img_x / s->img_n < s->img_y) return _m3dstbi__err("too large", "Image too large to decode");
                if (scan == STBI__SCAN_header) return 1;
             } else {
                s->img_n = 1;
-               if ((1 << 30) / s->img_x / 4 < s->img_y) return stbi__err("too large","Corrupt PNG");
+               if ((1 << 30) / s->img_x / 4 < s->img_y) return _m3dstbi__err("too large","Corrupt PNG");
             }
             break;
          }
 
          case STBI__PNG_TYPE('P','L','T','E'):  {
-            if (first) return stbi__err("first not IHDR", "Corrupt PNG");
-            if (c.length > 256*3) return stbi__err("invalid PLTE","Corrupt PNG");
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (c.length > 256*3) return _m3dstbi__err("invalid PLTE","Corrupt PNG");
             pal_len = c.length / 3;
-            if (pal_len * 3 != c.length) return stbi__err("invalid PLTE","Corrupt PNG");
+            if (pal_len * 3 != c.length) return _m3dstbi__err("invalid PLTE","Corrupt PNG");
             for (i=0; i < pal_len; ++i) {
-               palette[i*4+0] = stbi__get8(s);
-               palette[i*4+1] = stbi__get8(s);
-               palette[i*4+2] = stbi__get8(s);
+               palette[i*4+0] = _m3dstbi__get8(s);
+               palette[i*4+1] = _m3dstbi__get8(s);
+               palette[i*4+2] = _m3dstbi__get8(s);
                palette[i*4+3] = 255;
             }
             break;
          }
 
          case STBI__PNG_TYPE('t','R','N','S'): {
-            if (first) return stbi__err("first not IHDR", "Corrupt PNG");
-            if (z->idata) return stbi__err("tRNS after IDAT","Corrupt PNG");
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (z->idata) return _m3dstbi__err("tRNS after IDAT","Corrupt PNG");
             if (pal_img_n) {
                if (scan == STBI__SCAN_header) { s->img_n = 4; return 1; }
-               if (pal_len == 0) return stbi__err("tRNS before PLTE","Corrupt PNG");
-               if (c.length > pal_len) return stbi__err("bad tRNS len","Corrupt PNG");
+               if (pal_len == 0) return _m3dstbi__err("tRNS before PLTE","Corrupt PNG");
+               if (c.length > pal_len) return _m3dstbi__err("bad tRNS len","Corrupt PNG");
                pal_img_n = 4;
                for (i=0; i < c.length; ++i)
-                  palette[i*4+3] = stbi__get8(s);
+                  palette[i*4+3] = _m3dstbi__get8(s);
             } else {
-               if (!(s->img_n & 1)) return stbi__err("tRNS with alpha","Corrupt PNG");
-               if (c.length != (stbi__uint32) s->img_n*2) return stbi__err("bad tRNS len","Corrupt PNG");
+               if (!(s->img_n & 1)) return _m3dstbi__err("tRNS with alpha","Corrupt PNG");
+               if (c.length != (_m3dstbi__uint32) s->img_n*2) return _m3dstbi__err("bad tRNS len","Corrupt PNG");
                has_trans = 1;
                if (z->depth == 16) {
-                  for (k = 0; k < s->img_n; ++k) tc16[k] = (stbi__uint16)stbi__get16be(s);
+                  for (k = 0; k < s->img_n; ++k) tc16[k] = (_m3dstbi__uint16)_m3dstbi__get16be(s);
                } else {
-                  for (k = 0; k < s->img_n; ++k) tc[k] = (stbi_uc)(stbi__get16be(s) & 255) * stbi__depth_scale_table[z->depth];
+                  for (k = 0; k < s->img_n; ++k) tc[k] = (unsigned char)(_m3dstbi__get16be(s) & 255) * _m3dstbi__depth_scale_table[z->depth];
                }
             }
             break;
          }
 
          case STBI__PNG_TYPE('I','D','A','T'): {
-            if (first) return stbi__err("first not IHDR", "Corrupt PNG");
-            if (pal_img_n && !pal_len) return stbi__err("no PLTE","Corrupt PNG");
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (pal_img_n && !pal_len) return _m3dstbi__err("no PLTE","Corrupt PNG");
             if (scan == STBI__SCAN_header) { s->img_n = pal_img_n; return 1; }
             if ((int)(ioff + c.length) < (int)ioff) return 0;
             if (ioff + c.length > idata_limit) {
-               stbi__uint32 idata_limit_old = idata_limit;
-               stbi_uc *p;
+               _m3dstbi__uint32 idata_limit_old = idata_limit;
+               unsigned char *p;
                if (idata_limit == 0) idata_limit = c.length > 4096 ? c.length : 4096;
                while (ioff + c.length > idata_limit)
                   idata_limit *= 2;
                STBI_NOTUSED(idata_limit_old);
-               p = (stbi_uc *) STBI_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit); if (p == NULL) return stbi__err("outofmem", "Out of memory");
+               p = (unsigned char *) STBI_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit); if (p == NULL) return _m3dstbi__err("outofmem", "Out of memory");
                z->idata = p;
             }
-            if (!stbi__getn(s, z->idata+ioff,c.length)) return stbi__err("outofdata","Corrupt PNG");
+            if (!_m3dstbi__getn(s, z->idata+ioff,c.length)) return _m3dstbi__err("outofdata","Corrupt PNG");
             ioff += c.length;
             break;
          }
 
          case STBI__PNG_TYPE('I','E','N','D'): {
-            stbi__uint32 raw_len, bpl;
-            if (first) return stbi__err("first not IHDR", "Corrupt PNG");
+            _m3dstbi__uint32 raw_len, bpl;
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
             if (scan != STBI__SCAN_load) return 1;
-            if (z->idata == NULL) return stbi__err("no IDAT","Corrupt PNG");
+            if (z->idata == NULL) return _m3dstbi__err("no IDAT","Corrupt PNG");
             bpl = (s->img_x * z->depth + 7) / 8;
             raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
-            z->expanded = (stbi_uc *) stbi_zlib_decode_malloc_guesssize_headerflag((char *) z->idata, ioff, raw_len, (int *) &raw_len, !is_iphone);
+            z->expanded = (unsigned char *) _m3dstbi_zlib_decode_malloc_guesssize_headerflag((char *) z->idata, ioff, raw_len, (int *) &raw_len, 1);
             if (z->expanded == NULL) return 0;
             STBI_FREE(z->idata); z->idata = NULL;
             if ((req_comp == s->img_n+1 && req_comp != 3 && !pal_img_n) || has_trans)
                s->img_out_n = s->img_n+1;
             else
                s->img_out_n = s->img_n;
-            if (!stbi__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, color, interlace)) return 0;
+            if (!_m3dstbi__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, color, interlace)) return 0;
             if (has_trans) {
                if (z->depth == 16) {
-                  if (!stbi__compute_transparency16(z, tc16, s->img_out_n)) return 0;
+                  if (!_m3dstbi__compute_transparency16(z, tc16, s->img_out_n)) return 0;
                } else {
-                  if (!stbi__compute_transparency(z, tc, s->img_out_n)) return 0;
+                  if (!_m3dstbi__compute_transparency(z, tc, s->img_out_n)) return 0;
                }
             }
-            if (is_iphone && stbi__de_iphone_flag && s->img_out_n > 2)
-               stbi__de_iphone(z);
             if (pal_img_n) {
                s->img_n = pal_img_n;
                s->img_out_n = pal_img_n;
                if (req_comp >= 3) s->img_out_n = req_comp;
-               if (!stbi__expand_png_palette(z, palette, pal_len, s->img_out_n))
+               if (!_m3dstbi__expand_png_palette(z, palette, pal_len, s->img_out_n))
                   return 0;
+            } else if (has_trans) {
+               ++s->img_n;
             }
             STBI_FREE(z->expanded); z->expanded = NULL;
             return 1;
          }
 
          default:
-            if (first) return stbi__err("first not IHDR", "Corrupt PNG");
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
             if ((c.type & (1 << 29)) == 0) {
-               return stbi__err("invalid_chunk", "PNG not supported: unknown PNG chunk type");
+               return _m3dstbi__err("invalid_chunk", "PNG not supported: unknown PNG chunk type");
             }
-            stbi__skip(s, c.length);
+            _m3dstbi__skip(s, c.length);
             break;
       }
-      stbi__get32be(s);
+      _m3dstbi__get32be(s);
    }
 }
 
-static void *stbi__do_png(stbi__png *p, int *x, int *y, int *n, int req_comp, stbi__result_info *ri)
+static void *_m3dstbi__do_png(_m3dstbi__png *p, int *x, int *y, int *n, int req_comp, _m3dstbi__result_info *ri)
 {
    void *result=NULL;
-   if (req_comp < 0 || req_comp > 4) { stbi__err("bad req_comp", "Internal error"); return NULL; }
-   if (stbi__parse_png_file(p, STBI__SCAN_load, req_comp)) {
-      ri->bits_per_channel = p->depth;
+   if (req_comp < 0 || req_comp > 4) { _m3dstbi__err("bad req_comp", "Internal error"); return NULL; }
+   if (_m3dstbi__parse_png_file(p, STBI__SCAN_load, req_comp)) {
+      if (p->depth < 8)
+         ri->bits_per_channel = 8;
+      else
+         ri->bits_per_channel = p->depth;
       result = p->out;
       p->out = NULL;
       if (req_comp && req_comp != p->s->img_out_n) {
          if (ri->bits_per_channel == 8)
-            result = stbi__convert_format((unsigned char *) result, p->s->img_out_n, req_comp, p->s->img_x, p->s->img_y);
+            result = _m3dstbi__convert_format((unsigned char *) result, p->s->img_out_n, req_comp, p->s->img_x, p->s->img_y);
          else
-            result = stbi__convert_format16((stbi__uint16 *) result, p->s->img_out_n, req_comp, p->s->img_x, p->s->img_y);
+            result = _m3dstbi__convert_format16((_m3dstbi__uint16 *) result, p->s->img_out_n, req_comp, p->s->img_x, p->s->img_y);
          p->s->img_out_n = req_comp;
          if (result == NULL) return result;
       }
@@ -1842,12 +1792,16 @@ static void *stbi__do_png(stbi__png *p, int *x, int *y, int *n, int req_comp, st
    return result;
 }
 
-static void *stbi__png_load(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri)
+static void *_m3dstbi__png_load(_m3dstbi__context *s, int *x, int *y, int *comp, int req_comp, _m3dstbi__result_info *ri)
 {
-   stbi__png p;
+   _m3dstbi__png p;
    p.s = s;
-   return stbi__do_png(&p, x,y,comp,req_comp, ri);
+   return _m3dstbi__do_png(&p, x,y,comp,req_comp, ri);
 }
+#define stbi__context _m3dstbi__context
+#define stbi__result_info _m3dstbi__result_info
+#define stbi__png_load _m3dstbi__png_load
+#define stbi_zlib_decode_malloc_guesssize_headerflag _m3dstbi_zlib_decode_malloc_guesssize_headerflag
 #endif
 
 #if defined(M3D_EXPORTER) && !defined(INCLUDE_STB_IMAGE_WRITE_H)
@@ -1855,13 +1809,13 @@ static void *stbi__png_load(stbi__context *s, int *x, int *y, int *comp, int req
 
    stb_image_write - v1.13 - public domain - http://nothings.org/stb/stb_image_write.h
 */
-typedef unsigned char stbiw_uc;
-typedef unsigned short stbiw_us;
+typedef unsigned char _m3dstbiw__uc;
+typedef unsigned short _m3dstbiw__us;
 
-typedef uint16_t stbiw_uint16;
-typedef int16_t  stbiw_int16;
-typedef uint32_t stbiw_uint32;
-typedef int32_t  stbiw_int32;
+typedef uint16_t _m3dstbiw__uint16;
+typedef int16_t  _m3dstbiw__int16;
+typedef uint32_t _m3dstbiw__uint32;
+typedef int32_t  _m3dstbiw__int32;
 
 #define STBIW_MALLOC(s)     M3D_MALLOC(s)
 #define STBIW_REALLOC(p,ns) M3D_REALLOC(p,ns)
@@ -1870,42 +1824,42 @@ typedef int32_t  stbiw_int32;
 #define STBIW_MEMMOVE       memmove
 #define STBIW_UCHAR         (uint8_t)
 #define STBIW_ASSERT(x)
-#define stbiw__sbraw(a)     ((int *) (a) - 2)
-#define stbiw__sbm(a)       stbiw__sbraw(a)[0]
-#define stbiw__sbn(a)       stbiw__sbraw(a)[1]
+#define _m3dstbiw___sbraw(a)     ((int *) (a) - 2)
+#define _m3dstbiw___sbm(a)       _m3dstbiw___sbraw(a)[0]
+#define _m3dstbiw___sbn(a)       _m3dstbiw___sbraw(a)[1]
 
-#define stbiw__sbneedgrow(a,n)  ((a)==0 || stbiw__sbn(a)+n >= stbiw__sbm(a))
-#define stbiw__sbmaybegrow(a,n) (stbiw__sbneedgrow(a,(n)) ? stbiw__sbgrow(a,n) : 0)
-#define stbiw__sbgrow(a,n)  stbiw__sbgrowf((void **) &(a), (n), sizeof(*(a)))
+#define _m3dstbiw___sbneedgrow(a,n)  ((a)==0 || _m3dstbiw___sbn(a)+n >= _m3dstbiw___sbm(a))
+#define _m3dstbiw___sbmaybegrow(a,n) (_m3dstbiw___sbneedgrow(a,(n)) ? _m3dstbiw___sbgrow(a,n) : 0)
+#define _m3dstbiw___sbgrow(a,n)  _m3dstbiw___sbgrowf((void **) &(a), (n), sizeof(*(a)))
 
-#define stbiw__sbpush(a, v)      (stbiw__sbmaybegrow(a,1), (a)[stbiw__sbn(a)++] = (v))
-#define stbiw__sbcount(a)        ((a) ? stbiw__sbn(a) : 0)
-#define stbiw__sbfree(a)         ((a) ? STBIW_FREE(stbiw__sbraw(a)),0 : 0)
+#define _m3dstbiw___sbpush(a, v)      (_m3dstbiw___sbmaybegrow(a,1), (a)[_m3dstbiw___sbn(a)++] = (v))
+#define _m3dstbiw___sbcount(a)        ((a) ? _m3dstbiw___sbn(a) : 0)
+#define _m3dstbiw___sbfree(a)         ((a) ? STBIW_FREE(_m3dstbiw___sbraw(a)),0 : 0)
 
-static void *stbiw__sbgrowf(void **arr, int increment, int itemsize)
+static void *_m3dstbiw___sbgrowf(void **arr, int increment, int itemsize)
 {
-   int m = *arr ? 2*stbiw__sbm(*arr)+increment : increment+1;
-   void *p = STBIW_REALLOC_SIZED(*arr ? stbiw__sbraw(*arr) : 0, *arr ? (stbiw__sbm(*arr)*itemsize + sizeof(int)*2) : 0, itemsize * m + sizeof(int)*2);
+   int m = *arr ? 2*_m3dstbiw___sbm(*arr)+increment : increment+1;
+   void *p = STBIW_REALLOC_SIZED(*arr ? _m3dstbiw___sbraw(*arr) : 0, *arr ? (_m3dstbiw___sbm(*arr)*itemsize + sizeof(int)*2) : 0, itemsize * m + sizeof(int)*2);
    STBIW_ASSERT(p);
    if (p) {
       if (!*arr) ((int *) p)[1] = 0;
       *arr = (void *) ((int *) p + 2);
-      stbiw__sbm(*arr) = m;
+      _m3dstbiw___sbm(*arr) = m;
    }
    return *arr;
 }
 
-static unsigned char *stbiw__zlib_flushf(unsigned char *data, unsigned int *bitbuffer, int *bitcount)
+static unsigned char *_m3dstbiw___zlib_flushf(unsigned char *data, unsigned int *bitbuffer, int *bitcount)
 {
    while (*bitcount >= 8) {
-      stbiw__sbpush(data, STBIW_UCHAR(*bitbuffer));
+      _m3dstbiw___sbpush(data, STBIW_UCHAR(*bitbuffer));
       *bitbuffer >>= 8;
       *bitcount -= 8;
    }
    return data;
 }
 
-static int stbiw__zlib_bitrev(int code, int codebits)
+static int _m3dstbiw___zlib_bitrev(int code, int codebits)
 {
    int res=0;
    while (codebits--) {
@@ -1915,7 +1869,7 @@ static int stbiw__zlib_bitrev(int code, int codebits)
    return res;
 }
 
-static unsigned int stbiw__zlib_countm(unsigned char *a, unsigned char *b, int limit)
+static unsigned int _m3dstbiw___zlib_countm(unsigned char *a, unsigned char *b, int limit)
 {
    int i;
    for (i=0; i < limit && i < 258; ++i)
@@ -1923,9 +1877,9 @@ static unsigned int stbiw__zlib_countm(unsigned char *a, unsigned char *b, int l
    return i;
 }
 
-static unsigned int stbiw__zhash(unsigned char *data)
+static unsigned int _m3dstbiw___zhash(unsigned char *data)
 {
-   stbiw_uint32 hash = data[0] + (data[1] << 8) + (data[2] << 16);
+   _m3dstbiw__uint32 hash = data[0] + (data[1] << 8) + (data[2] << 16);
    hash ^= hash << 3;
    hash += hash >> 5;
    hash ^= hash << 4;
@@ -1935,20 +1889,20 @@ static unsigned int stbiw__zhash(unsigned char *data)
    return hash;
 }
 
-#define stbiw__zlib_flush() (out = stbiw__zlib_flushf(out, &bitbuf, &bitcount))
-#define stbiw__zlib_add(code,codebits) \
-      (bitbuf |= (code) << bitcount, bitcount += (codebits), stbiw__zlib_flush())
-#define stbiw__zlib_huffa(b,c)  stbiw__zlib_add(stbiw__zlib_bitrev(b,c),c)
-#define stbiw__zlib_huff1(n)  stbiw__zlib_huffa(0x30 + (n), 8)
-#define stbiw__zlib_huff2(n)  stbiw__zlib_huffa(0x190 + (n)-144, 9)
-#define stbiw__zlib_huff3(n)  stbiw__zlib_huffa(0 + (n)-256,7)
-#define stbiw__zlib_huff4(n)  stbiw__zlib_huffa(0xc0 + (n)-280,8)
-#define stbiw__zlib_huff(n)  ((n) <= 143 ? stbiw__zlib_huff1(n) : (n) <= 255 ? stbiw__zlib_huff2(n) : (n) <= 279 ? stbiw__zlib_huff3(n) : stbiw__zlib_huff4(n))
-#define stbiw__zlib_huffb(n) ((n) <= 143 ? stbiw__zlib_huff1(n) : stbiw__zlib_huff2(n))
+#define _m3dstbiw___zlib_flush() (out = _m3dstbiw___zlib_flushf(out, &bitbuf, &bitcount))
+#define _m3dstbiw___zlib_add(code,codebits) \
+      (bitbuf |= (code) << bitcount, bitcount += (codebits), _m3dstbiw___zlib_flush())
+#define _m3dstbiw___zlib_huffa(b,c)  _m3dstbiw___zlib_add(_m3dstbiw___zlib_bitrev(b,c),c)
+#define _m3dstbiw___zlib_huff1(n)  _m3dstbiw___zlib_huffa(0x30 + (n), 8)
+#define _m3dstbiw___zlib_huff2(n)  _m3dstbiw___zlib_huffa(0x190 + (n)-144, 9)
+#define _m3dstbiw___zlib_huff3(n)  _m3dstbiw___zlib_huffa(0 + (n)-256,7)
+#define _m3dstbiw___zlib_huff4(n)  _m3dstbiw___zlib_huffa(0xc0 + (n)-280,8)
+#define _m3dstbiw___zlib_huff(n)  ((n) <= 143 ? _m3dstbiw___zlib_huff1(n) : (n) <= 255 ? _m3dstbiw___zlib_huff2(n) : (n) <= 279 ? _m3dstbiw___zlib_huff3(n) : _m3dstbiw___zlib_huff4(n))
+#define _m3dstbiw___zlib_huffb(n) ((n) <= 143 ? _m3dstbiw___zlib_huff1(n) : _m3dstbiw___zlib_huff2(n))
 
-#define stbiw__ZHASH   16384
+#define _m3dstbiw___ZHASH   16384
 
-unsigned char * stbi_zlib_compress(unsigned char *data, int data_len, int *out_len, int quality)
+unsigned char * _m3dstbi_zlib_compress(unsigned char *data, int data_len, int *out_len, int quality)
 {
    static unsigned short lengthc[] = { 3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258, 259 };
    static unsigned char  lengtheb[]= { 0,0,0,0,0,0,0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
@@ -1957,42 +1911,44 @@ unsigned char * stbi_zlib_compress(unsigned char *data, int data_len, int *out_l
    unsigned int bitbuf=0;
    int i,j, bitcount=0;
    unsigned char *out = NULL;
-   unsigned char ***hash_table = (unsigned char***) STBIW_MALLOC(stbiw__ZHASH * sizeof(char**));
+   unsigned char ***hash_table = (unsigned char***) STBIW_MALLOC(_m3dstbiw___ZHASH * sizeof(char**));
+   if (hash_table == NULL)
+      return NULL;
    if (quality < 5) quality = 5;
 
-   stbiw__sbpush(out, 0x78);
-   stbiw__sbpush(out, 0x5e);
-   stbiw__zlib_add(1,1);
-   stbiw__zlib_add(1,2);
+   _m3dstbiw___sbpush(out, 0x78);
+   _m3dstbiw___sbpush(out, 0x5e);
+   _m3dstbiw___zlib_add(1,1);
+   _m3dstbiw___zlib_add(1,2);
 
-   for (i=0; i < stbiw__ZHASH; ++i)
+   for (i=0; i < _m3dstbiw___ZHASH; ++i)
       hash_table[i] = NULL;
 
    i=0;
    while (i < data_len-3) {
-      int h = stbiw__zhash(data+i)&(stbiw__ZHASH-1), best=3;
+      int h = _m3dstbiw___zhash(data+i)&(_m3dstbiw___ZHASH-1), best=3;
       unsigned char *bestloc = 0;
       unsigned char **hlist = hash_table[h];
-      int n = stbiw__sbcount(hlist);
+      int n = _m3dstbiw___sbcount(hlist);
       for (j=0; j < n; ++j) {
          if (hlist[j]-data > i-32768) {
-            int d = stbiw__zlib_countm(hlist[j], data+i, data_len-i);
+            int d = _m3dstbiw___zlib_countm(hlist[j], data+i, data_len-i);
             if (d >= best) best=d,bestloc=hlist[j];
          }
       }
-      if (hash_table[h] && stbiw__sbn(hash_table[h]) == 2*quality) {
+      if (hash_table[h] && _m3dstbiw___sbn(hash_table[h]) == 2*quality) {
          STBIW_MEMMOVE(hash_table[h], hash_table[h]+quality, sizeof(hash_table[h][0])*quality);
-         stbiw__sbn(hash_table[h]) = quality;
+         _m3dstbiw___sbn(hash_table[h]) = quality;
       }
-      stbiw__sbpush(hash_table[h],data+i);
+      _m3dstbiw___sbpush(hash_table[h],data+i);
 
       if (bestloc) {
-         h = stbiw__zhash(data+i+1)&(stbiw__ZHASH-1);
+         h = _m3dstbiw___zhash(data+i+1)&(_m3dstbiw___ZHASH-1);
          hlist = hash_table[h];
-         n = stbiw__sbcount(hlist);
+         n = _m3dstbiw___sbcount(hlist);
          for (j=0; j < n; ++j) {
             if (hlist[j]-data > i-32767) {
-               int e = stbiw__zlib_countm(hlist[j], data+i+1, data_len-i-1);
+               int e = _m3dstbiw___zlib_countm(hlist[j], data+i+1, data_len-i-1);
                if (e > best) {
                   bestloc = NULL;
                   break;
@@ -2005,25 +1961,25 @@ unsigned char * stbi_zlib_compress(unsigned char *data, int data_len, int *out_l
          int d = (int) (data+i - bestloc);
          STBIW_ASSERT(d <= 32767 && best <= 258);
          for (j=0; best > lengthc[j+1]-1; ++j);
-         stbiw__zlib_huff(j+257);
-         if (lengtheb[j]) stbiw__zlib_add(best - lengthc[j], lengtheb[j]);
+         _m3dstbiw___zlib_huff(j+257);
+         if (lengtheb[j]) _m3dstbiw___zlib_add(best - lengthc[j], lengtheb[j]);
          for (j=0; d > distc[j+1]-1; ++j);
-         stbiw__zlib_add(stbiw__zlib_bitrev(j,5),5);
-         if (disteb[j]) stbiw__zlib_add(d - distc[j], disteb[j]);
+         _m3dstbiw___zlib_add(_m3dstbiw___zlib_bitrev(j,5),5);
+         if (disteb[j]) _m3dstbiw___zlib_add(d - distc[j], disteb[j]);
          i += best;
       } else {
-         stbiw__zlib_huffb(data[i]);
+         _m3dstbiw___zlib_huffb(data[i]);
          ++i;
       }
    }
    for (;i < data_len; ++i)
-      stbiw__zlib_huffb(data[i]);
-   stbiw__zlib_huff(256);
+      _m3dstbiw___zlib_huffb(data[i]);
+   _m3dstbiw___zlib_huff(256);
    while (bitcount)
-      stbiw__zlib_add(0,1);
+      _m3dstbiw___zlib_add(0,1);
 
-   for (i=0; i < stbiw__ZHASH; ++i)
-      (void) stbiw__sbfree(hash_table[i]);
+   for (i=0; i < _m3dstbiw___ZHASH; ++i)
+      (void) _m3dstbiw___sbfree(hash_table[i]);
    STBIW_FREE(hash_table);
 
    {
@@ -2036,15 +1992,18 @@ unsigned char * stbi_zlib_compress(unsigned char *data, int data_len, int *out_l
          j += blocklen;
          blocklen = 5552;
       }
-      stbiw__sbpush(out, STBIW_UCHAR(s2 >> 8));
-      stbiw__sbpush(out, STBIW_UCHAR(s2));
-      stbiw__sbpush(out, STBIW_UCHAR(s1 >> 8));
-      stbiw__sbpush(out, STBIW_UCHAR(s1));
+      _m3dstbiw___sbpush(out, STBIW_UCHAR(s2 >> 8));
+      _m3dstbiw___sbpush(out, STBIW_UCHAR(s2));
+      _m3dstbiw___sbpush(out, STBIW_UCHAR(s1 >> 8));
+      _m3dstbiw___sbpush(out, STBIW_UCHAR(s1));
    }
-   *out_len = stbiw__sbn(out);
-   STBIW_MEMMOVE(stbiw__sbraw(out), out, *out_len);
-   return (unsigned char *) stbiw__sbraw(out);
+   *out_len = _m3dstbiw___sbn(out);
+   STBIW_MEMMOVE(_m3dstbiw___sbraw(out), out, *out_len);
+   return (unsigned char *) _m3dstbiw___sbraw(out);
 }
+#define stbi_zlib_compress _m3dstbi_zlib_compress
+#else
+unsigned char * _m3dstbi_zlib_compress(unsigned char *data, int data_len, int *out_len, int quality);
 #endif
 
 #define M3D_CHUNKMAGIC(m, a,b,c,d) ((m)[0]==(a) && (m)[1]==(b) && (m)[2]==(c) && (m)[3]==(d))
@@ -2138,10 +2097,11 @@ char *_m3d_safestr(char *in, int morelines)
 /* helper function to load and decode/generate a texture */
 M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char *fn)
 {
-    unsigned int i, len = 0, w, h;
+    unsigned int i, len = 0;
     unsigned char *buff = NULL;
     char *fn2;
 #ifdef STBI__PNG_TYPE
+    unsigned int w, h;
     stbi__context s;
     stbi__result_info ri;
 #endif
@@ -2187,8 +2147,8 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     if(buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
 #ifdef STBI__PNG_TYPE
         s.read_from_callbacks = 0;
-        s.img_buffer = s.img_buffer_original = (stbi_uc *) buff;
-        s.img_buffer_end = s.img_buffer_original_end = (stbi_uc *) buff+len;
+        s.img_buffer = s.img_buffer_original = (unsigned char *) buff;
+        s.img_buffer_end = s.img_buffer_original_end = (unsigned char *) buff+len;
         /* don't use model->texture[i].w directly, it's a uint16_t */
         w = h = len = 0;
         ri.bits_per_channel = 8;
@@ -2935,11 +2895,9 @@ asciiend:
     /* Binary variant */
 #endif
     if(!M3D_CHUNKMAGIC(data + 8, 'H','E','A','D')) {
-        stbi__g_failure_reason = "Corrupt file";
         buff = (unsigned char *)stbi_zlib_decode_malloc_guesssize_headerflag((const char*)data+8, ((m3dchunk_t*)data)->length-8,
             4096, (int*)&len, 1);
         if(!buff || !len || !M3D_CHUNKMAGIC(buff, 'H','E','A','D')) {
-            M3D_LOG(stbi__g_failure_reason);
             if(buff) M3D_FREE(buff);
             M3D_FREE(model);
             return NULL;
@@ -3969,7 +3927,7 @@ static int _m3d_vrtxcmp(const void *a, const void *b) {
     return memcmp(a, b, sizeof(m3dv_t));
 }
 /* compare labels */
-_inline int _m3d_strcmp(char *a, char *b)
+static _inline int _m3d_strcmp(char *a, char *b)
 {
     if(a == NULL && b != NULL) return -1;
     if(a != NULL && b == NULL) return 1;

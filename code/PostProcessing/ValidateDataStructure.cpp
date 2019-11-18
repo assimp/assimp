@@ -637,7 +637,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
                 ReportError("Material property %s%i is expected to be 5 floats large (size is %i)",
                     prop->mKey.data,prop->mIndex, prop->mDataLength);
             }
-            mappings[prop->mIndex] = *((aiTextureMapping*)prop->mData);
+			//mappings[prop->mIndex] = ((aiUVTransform*)prop->mData);
         }
         else if (!::strcmp(prop->mKey.data,"$tex.uvwsrc")) {
             if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)

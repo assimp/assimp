@@ -419,4 +419,13 @@ TEST_F( utglTF2ImportExport, crash_in_anim_mesh_destructor ) {
     ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube_out.glTF"));
 }
 
+TEST_F(utglTF2ImportExport, error_string_preserved) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/MissingBin/BoxTextured.gltf",
+        aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+    std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("BoxTextured0.bin"), std::string::npos) << "Error string should contain an error about missing .bin file";
+}
+
 #endif // ASSIMP_BUILD_NO_EXPORT

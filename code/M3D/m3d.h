@@ -339,6 +339,7 @@ enum {
     m3dc_cylinder,
     m3dc_shpere,
     m3dc_torus,
+    m3dc_cone,
     m3dc_cube
 };
 
@@ -602,6 +603,7 @@ static m3dcd_t m3d_commandtypes[] = {
     M3D_CMDDEF(m3dc_cylinder,"cylinder",6, m3dcp_vi_t, m3dcp_qi_t, m3dcp_vc_t, m3dcp_vi_t, m3dcp_qi_t, m3dcp_vc_t, 0, 0),
     M3D_CMDDEF(m3dc_shpere,  "shpere",  2, m3dcp_vi_t, m3dcp_vc_t, 0, 0, 0, 0, 0, 0),
     M3D_CMDDEF(m3dc_torus,   "torus",   4, m3dcp_vi_t, m3dcp_qi_t, m3dcp_vc_t, m3dcp_vc_t, 0, 0, 0, 0),
+    M3D_CMDDEF(m3dc_cone,    "cone",    3, m3dcp_vi_t, m3dcp_vi_t, m3dcp_vi_t, 0, 0, 0, 0, 0),
     M3D_CMDDEF(m3dc_cube,    "cube",    3, m3dcp_vi_t, m3dcp_vi_t, m3dcp_vi_t, 0, 0, 0, 0, 0)
 };
 #endif

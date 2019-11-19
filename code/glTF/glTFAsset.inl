@@ -1427,9 +1427,6 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
         }
     }
 
-    #define CHECK_EXT(EXT) \
-        if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
-
     CHECK_EXT(KHR_binary_glTF);
     CHECK_EXT(KHR_materials_common);
 

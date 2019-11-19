@@ -74,6 +74,7 @@ namespace glTF2
     struct Texture;
 
     // Vec/matrix types, as raw float arrays
+	typedef float (vec2)[2];
     typedef float (vec3)[3];
     typedef float (vec4)[4];
 }

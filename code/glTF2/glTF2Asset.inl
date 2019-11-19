@@ -270,13 +270,14 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
         throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" is not a JSON object");
     }
 
-    T* inst = new T();
+    // Unique ptr prevents memory leak in case of Read throws an exception
+    auto inst = std::unique_ptr<T>();
     inst->id = std::string(mDictId) + "_" + to_string(i);
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
 
-    return Add(inst);
+    return Add(inst.release());
 }
 
 template<class T>

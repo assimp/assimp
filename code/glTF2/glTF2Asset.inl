@@ -271,7 +271,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
     }
 
     // Unique ptr prevents memory leak in case of Read throws an exception
-    auto inst = std::unique_ptr<T>();
+    auto inst = std::unique_ptr<T>(new T());
     inst->id = std::string(mDictId) + "_" + to_string(i);
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);

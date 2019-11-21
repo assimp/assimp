@@ -54,7 +54,7 @@ class utM3DImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/M3D/WusonBlitz0.m3d", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure );
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
         return nullptr != scene;
 #else

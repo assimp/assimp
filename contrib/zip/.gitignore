@@ -1,6 +1,7 @@
 /build/
 /test/build/
 /xcodeproj/
+.vscode/
 
 # Object files
 *.o
@@ -54,3 +55,4 @@ zip.dir/
 test/test.exe.vcxproj.filters
 test/test.exe.vcxproj
 test/test.exe.dir/
+

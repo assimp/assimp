@@ -169,6 +169,33 @@ void M3DExporter::doExport (
     outfile.reset();
 }
 
+
+// ------------------------------------------------------------------------------------------------
+// helper to add a vertex (private to NodeWalk)
+m3dv_t *M3DExporter::AddVrtx(m3dv_t *vrtx, uint32_t *numvrtx, m3dv_t *v, uint32_t *idx)
+{
+    if(v->x == (M3D_FLOAT)-0.0) v->x = (M3D_FLOAT)0.0;
+    if(v->y == (M3D_FLOAT)-0.0) v->y = (M3D_FLOAT)0.0;
+    if(v->z == (M3D_FLOAT)-0.0) v->z = (M3D_FLOAT)0.0;
+    if(v->w == (M3D_FLOAT)-0.0) v->w = (M3D_FLOAT)0.0;
+    vrtx = (m3dv_t*)M3D_REALLOC(vrtx, ((*numvrtx) + 1) * sizeof(m3dv_t));
+    memcpy(&vrtx[*numvrtx], v, sizeof(m3dv_t));
+    *idx = *numvrtx;
+    (*numvrtx)++;
+    return vrtx;
+}
+
+// ------------------------------------------------------------------------------------------------
+// helper to add a tmap (private to NodeWalk)
+m3dti_t *M3DExporter::AddTmap(m3dti_t *tmap, uint32_t *numtmap, m3dti_t *ti, uint32_t *idx)
+{
+    tmap = (m3dti_t*)M3D_REALLOC(tmap, ((*numtmap) + 1) * sizeof(m3dti_t));
+    memcpy(&tmap[*numtmap], ti, sizeof(m3dti_t));
+    *idx = *numtmap;
+    (*numtmap)++;
+    return tmap;
+}
+
 // ------------------------------------------------------------------------------------------------
 // recursive node walker
 void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
@@ -221,25 +248,23 @@ void M3DExporter::NodeWalk(const aiNode* pNode, aiMatrix4x4 m)
                 if(mesh->HasVertexColors(0))
                     vertex.color = mkColor(&mesh->mColors[0][l]);
                 // save the vertex to the output
-                m3d->vertex = _m3d_addvrtx(m3d->vertex, &m3d->numvertex,
+                m3d->vertex = AddVrtx(m3d->vertex, &m3d->numvertex,
                     &vertex, &idx);
                 m3d->face[n].vertex[k] = (M3D_INDEX)idx;
                 // do we have texture coordinates?
                 if(mesh->HasTextureCoords(0)) {
                     ti.u = mesh->mTextureCoords[0][l].x;
                     ti.v = mesh->mTextureCoords[0][l].y;
-                    m3d->tmap = _m3d_addtmap(m3d->tmap, &m3d->numtmap, &ti,
-                        &idx);
+                    m3d->tmap = AddTmap(m3d->tmap, &m3d->numtmap, &ti, &idx);
                     m3d->face[n].texcoord[k] = (M3D_INDEX)idx;
                 }
                 // do we have normal vectors?
                 if(mesh->HasNormals()) {
-                    vertex.color = 0;
                     vertex.x = mesh->mNormals[l].x;
                     vertex.y = mesh->mNormals[l].y;
                     vertex.z = mesh->mNormals[l].z;
-                    m3d->vertex = _m3d_addnorm(m3d->vertex, &m3d->numvertex,
-                        &vertex, &idx);
+                    vertex.color = 0;
+                    m3d->vertex = AddVrtx(m3d->vertex, &m3d->numvertex, &vertex, &idx);
                     m3d->face[n].normal[k] = (M3D_INDEX)idx;
                 }
             }

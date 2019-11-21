@@ -247,8 +247,8 @@ namespace o3dgc
 
         if (predMode == O3DGC_SC3DMC_SURF_NORMALS_PREDICTION)
         {
-            const Real minFloatArray[2] = {(Real)(-2.0),(Real)(-2.0)};
-            const Real maxFloatArray[2] = {(Real)(2.0),(Real)(2.0)};
+            const Real minArray[2] = {(Real)(-2.0),(Real)(-2.0)};
+            const Real maxArray[2] = {(Real)(2.0),(Real)(2.0)};
             if (m_streamType == O3DGC_STREAM_TYPE_ASCII)
             {
                 for(unsigned long i = 0; i < numFloatArray; ++i)
@@ -264,7 +264,7 @@ namespace o3dgc
                     ace.encode(IntToUInt(m_predictors[i]), dModel);
                 }
             }
-            QuantizeFloatArray(floatArray, numFloatArray, dimFloatArray, stride, minFloatArray, maxFloatArray, nQBits+1);
+            QuantizeFloatArray(floatArray, numFloatArray, dimFloatArray, stride, minArray, maxArray, nQBits+1);
         }
         else
         {

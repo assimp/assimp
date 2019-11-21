@@ -326,7 +326,7 @@ namespace Assimp {
                     parent->mNumChildren = 0;
                     parent->mChildren = nullptr;
                 }
-                
+
             }
             catch (std::exception&) {
                 Util::delete_fun<aiNode> deleter;
@@ -1037,7 +1037,7 @@ namespace Assimp {
             for (unsigned int i = 0; i < pcount; ++i) {
                 if (indices[i] < 0) continue;
                 aiFace& f = *fac++;
-                f.mNumIndices = 2; //2 == aiPrimitiveType_LINE 
+                f.mNumIndices = 2; //2 == aiPrimitiveType_LINE
                 f.mIndices = new unsigned int[2];
                 f.mIndices[0] = indices[i];
                 int segid = indices[(i + 1 == pcount ? 0 : i + 1)];   //If we have reached he last point, wrap around
@@ -1446,20 +1446,20 @@ namespace Assimp {
                         const std::vector<unsigned int>& indices = shapeGeometry->GetIndices();
                         animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                         for (size_t j = 0; j < indices.size(); j++) {
-                            unsigned int index = indices.at(j);
+                            unsigned int ind = indices.at(j);
                             aiVector3D vertex = vertices.at(j);
                             aiVector3D normal = normals.at(j);
                             unsigned int count = 0;
-                            const unsigned int* outIndices = mesh.ToOutputVertexIndex(index, count);
+                            const unsigned int* outIndices = mesh.ToOutputVertexIndex(ind, count);
                             for (unsigned int k = 0; k < count; k++) {
                                 unsigned int outIndex = outIndices[k];
                                 if (translateIndexMap.find(outIndex) == translateIndexMap.end())
                                     continue;
-                                unsigned int index = translateIndexMap[outIndex];
-                                animMesh->mVertices[index] += vertex;
+                                unsigned int ind = translateIndexMap[outIndex];
+                                animMesh->mVertices[ind] += vertex;
                                 if (animMesh->mNormals != nullptr) {
-                                    animMesh->mNormals[index] += normal;
-                                    animMesh->mNormals[index].NormalizeSafe();
+                                    animMesh->mNormals[ind] += normal;
+                                    animMesh->mNormals[ind].NormalizeSafe();
                                 }
                             }
                         }
@@ -1548,7 +1548,7 @@ namespace Assimp {
                                     out_indices.push_back(std::distance(outputVertStartIndices->begin(), it));
                                 }
 
-                                ++count_out_indices.back();                               
+                                ++count_out_indices.back();
                             }
                         }
                     }
@@ -1728,7 +1728,7 @@ namespace Assimp {
             if (material.GetShadingModel() == "phong")
             {
                 aiShadingMode shadingMode = aiShadingMode_Phong;
-                out_mat->AddProperty<aiShadingMode>(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);               
+                out_mat->AddProperty<aiShadingMode>(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);
             }
 
             // shading stuff and colors
@@ -2073,21 +2073,21 @@ namespace Assimp {
             TrySetTextureProperties(out_mat, textures, "Maya|SpecularTexture", aiTextureType_SPECULAR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|FalloffTexture", aiTextureType_OPACITY, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
-            
+
             // Maya PBR
             TrySetTextureProperties(out_mat, textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-            
+
             // Maya stingray
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_color_map|file", aiTextureType_BASE_COLOR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_normal_map|file", aiTextureType_NORMAL_CAMERA, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-            TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);            
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);
         }
 
         void FBXConverter::SetTextureProperties(aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh)
@@ -2335,7 +2335,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             uvTrafo.mScaling = tex->UVScaling();
             uvTrafo.mTranslation = tex->UVTranslation();
             out_mat->AddProperty(&uvTrafo, 1, (name + "|uvtrafo").c_str(), aiTextureType_UNKNOWN, 0);
- 
+
             int uvIndex = 0;
 
             bool uvFound = false;

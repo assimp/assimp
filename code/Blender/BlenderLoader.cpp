@@ -420,7 +420,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const MTex* tex, const Image* img, ConversionData& conv_data)
 {
-    (void)mat; (void)tex; (void)conv_data;
+    (void)mat;
     aiString name;
 
     // check if the file contents are bundled with the BLEND file
@@ -429,7 +429,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         name.length = 1+ ASSIMP_itoa10(name.data+1,static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
-        aiTexture* tex = conv_data.textures->back();
+        aiTexture* texture = conv_data.textures->back();
 
         // usually 'img->name' will be the original file name of the embedded textures,
         // so we can extract the file extension from it.
@@ -439,19 +439,19 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
             --s;
         }
 
-        tex->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
-        tex->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
-        tex->achFormatHint[2] = s+3>e ? '\0' : ::tolower( s[3] );
-        tex->achFormatHint[3] = '\0';
+        texture->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
+        texture->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
+        texture->achFormatHint[2] = s+3>e ? '\0' : ::tolower( s[3] );
+        texture->achFormatHint[3] = '\0';
 
-        // tex->mHeight = 0;
-        tex->mWidth = img->packedfile->size;
-        uint8_t* ch = new uint8_t[tex->mWidth];
+        // texture->mHeight = 0;
+        texture->mWidth = img->packedfile->size;
+        uint8_t *ch = new uint8_t[texture->mWidth];
 
         conv_data.db.reader->SetCurrentPos(static_cast<size_t>( img->packedfile->data->val));
-        conv_data.db.reader->CopyAndAdvance(ch,tex->mWidth);
+        conv_data.db.reader->CopyAndAdvance(ch, texture->mWidth);
 
-        tex->pcData = reinterpret_cast<aiTexel*>(ch);
+        texture->pcData = reinterpret_cast<aiTexel *>(ch);
 
         LogInfo("Reading embedded texture, original file was "+std::string(img->name));
     } else {

@@ -54,14 +54,14 @@ ArmaturePopulate::ArmaturePopulate() : BaseProcess()
 {}
 
 /// The class destructor.
-ArmaturePopulate::~ArmaturePopulate() 
+ArmaturePopulate::~ArmaturePopulate()
 {}
 
 bool ArmaturePopulate::IsActive(unsigned int pFlags) const {
   return (pFlags & aiProcess_PopulateArmatureData) != 0;
 }
 
-void ArmaturePopulate::SetupProperties(const Importer */*pImp*/) {
+void ArmaturePopulate::SetupProperties(const Importer * /*pImp*/) {
   // do nothing
 }
 
@@ -160,7 +160,7 @@ void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
  * A bone stack allows us also to retrieve bones true transform even with
  * duplicate names :)
  */
-void ArmaturePopulate::BuildBoneStack(aiNode *current_node,
+void ArmaturePopulate::BuildBoneStack(aiNode * /*current_node*/,
                                       const aiNode *root_node,
                                       const aiScene *scene,
                                       const std::vector<aiBone *> &bones,
@@ -208,9 +208,9 @@ aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
 
     bone_node = bone_node->mParent;
   }
-  
+
   ASSIMP_LOG_ERROR("GetArmatureRoot() can't find armature!");
-  
+
   return nullptr;
 }
 

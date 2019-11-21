@@ -100,6 +100,10 @@ OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
 )
+OPTION ( ASSIMP_ERROR_MAX
+  "Enable all warnings."
+  OFF
+)
 OPTION ( ASSIMP_WERROR
   "Treat warnings as errors."
   OFF
@@ -292,6 +296,16 @@ IF (ASSIMP_COVERALLS)
   INCLUDE(Coveralls)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+ENDIF()
+
+IF (ASSIMP_ERROR_MAX)
+  MESSAGE(STATUS "Turning on all warnings")
+  IF (MSVC)
+    ADD_COMPILE_OPTIONS(/W4) # NB: there is a /Wall option, pedantic mode
+  ELSE()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+  ENDIF()
 ENDIF()
 
 IF (ASSIMP_WERROR)

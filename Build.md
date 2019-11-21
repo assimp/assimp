@@ -77,6 +77,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **ASSIMP_BUILD_SAMPLES ( default OFF )**: If the official samples are built as well (needs Glut).
 - **ASSIMP_BUILD_TESTS ( default ON )**: If the test suite for Assimp is built in addition to the library.
 - **ASSIMP_COVERALLS ( default OFF )**: Enable this to measure test coverage.
+- **ASSIMP_ERROR_MAX( default OFF)**: Enable all warnings.
 - **ASSIMP_WERROR( default OFF )**: Treat warnings as errors.
 - **ASSIMP_ASAN ( default OFF )**: Enable AddressSanitizer.
 - **ASSIMP_UBSAN ( default OFF )**: Enable Undefined Behavior sanitizer.

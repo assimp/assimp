@@ -61,7 +61,7 @@ bool ArmaturePopulate::IsActive(unsigned int pFlags) const {
   return (pFlags & aiProcess_PopulateArmatureData) != 0;
 }
 
-void ArmaturePopulate::SetupProperties(const Importer *pImp) {
+void ArmaturePopulate::SetupProperties(const Importer */*pImp*/) {
   // do nothing
 }
 

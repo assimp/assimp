@@ -75,7 +75,7 @@ static const aiMatProp aiProps[] = {
     { AI_MATKEY_REFLECTIVITY },                                 /* m3dp_Pm */
     { NULL, 0, 0 },                                             /* m3dp_Ps */
     { AI_MATKEY_REFRACTI },                                     /* m3dp_Ni */
-    { NULL, 0, 0 },
+    { NULL, 0, 0 },                                             /* m3dp_Nt */
     { NULL, 0, 0 },
     { NULL, 0, 0 },
     { NULL, 0, 0 }
@@ -97,7 +97,7 @@ static const aiMatProp aiTxProps[] = {
     { AI_MATKEY_TEXTURE(aiTextureType_METALNESS,0) },        /* m3dp_map_Pm */
     { NULL, 0, 0 },                                          /* m3dp_map_Ps */
     { AI_MATKEY_TEXTURE(aiTextureType_AMBIENT_OCCLUSION,0) },/* m3dp_map_Ni */
-    { NULL, 0, 0 },
+    { NULL, 0, 0 },                                          /* m3dp_map_Nt */
     { NULL, 0, 0 },
     { NULL, 0, 0 },
     { NULL, 0, 0 }

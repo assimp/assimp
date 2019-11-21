@@ -1734,6 +1734,7 @@ void ColladaLoader::BuildMaterials(ColladaParser& pParser, aiScene* /*pScene*/)
 
 // ------------------------------------------------------------------------------------------------
 // Resolves the texture name for the given effect texture entry
+// and loads the texture data 
 aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParser,
     const Collada::Effect& pEffect, const std::string& pName)
 {
@@ -1761,7 +1762,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParse
 
         //set default texture file name
         result.Set(name + ".jpg");
-        ConvertPath(result);
+        ColladaParser::UriDecodePath(result);
         return result;
     }
 
@@ -1780,7 +1781,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParse
 
 
         // setup format hint
-        if (imIt->second.mEmbeddedFormat.length() > 3) {
+        if (imIt->second.mEmbeddedFormat.length() >= HINTMAXTEXTURELEN) {
             ASSIMP_LOG_WARN("Collada: texture format hint is too long, truncating to 3 characters");
         }
         strncpy(tex->achFormatHint, imIt->second.mEmbeddedFormat.c_str(), 3);
@@ -1801,7 +1802,6 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser& pParse
         }
 
         result.Set(imIt->second.mFileName);
-        ConvertPath(result);
     }
     return result;
 }

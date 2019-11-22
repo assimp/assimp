@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, standard library.
 #include <memory>
+#include <limits>
 #include <inttypes.h>
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
@@ -181,8 +182,8 @@ void SetAccessorRange(Ref<Accessor> acc, void* data, unsigned int count,
 
 	// Allocate and initialize with large values.
 	for (unsigned int i = 0 ; i < numCompsOut ; i++) {
-		acc->min.push_back(DBL_MAX);
-		acc->max.push_back(DBL_MIN);
+		acc->min.push_back( std::numeric_limits<double>::max());
+		acc->max.push_back(-std::numeric_limits<double>::max());
 	}
 
 	size_t totalComps = count * numCompsIn;

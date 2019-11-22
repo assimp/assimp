@@ -87,6 +87,8 @@ namespace Assimp
 
         // helper to do the recursive walking
         void NodeWalk(const aiNode* pNode, aiMatrix4x4 m);
+        m3dv_t *AddVrtx(m3dv_t *vrtx, uint32_t *numvrtx, m3dv_t *v, uint32_t *idx);
+        m3dti_t *AddTmap(m3dti_t *tmap, uint32_t *numtmap, m3dti_t *ti, uint32_t *idx);
         uint32_t mkColor(aiColor4D* c);
         M3D_INDEX addMaterial(const aiMaterial *mat);
         void addProp(m3dm_t *m, uint8_t type, uint32_t value);

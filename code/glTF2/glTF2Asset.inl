@@ -800,8 +800,34 @@ inline void Texture::Read(Value& obj, Asset& r)
 }
 
 namespace {
-    inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out)
-    {
+    inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out) {
+	    if (r.extensionsUsed.KHR_texture_transform) {
+            if (Value *extensions = FindObject(*prop, "extensions")) {
+				out.textureTransformSupported = true;
+                if (Value *pKHR_texture_transform = FindObject(*extensions, "KHR_texture_transform")) {
+					if (Value *array = FindArray(*pKHR_texture_transform, "offset")) {
+						out.TextureTransformExt_t.offset[0] = (*array)[0].GetFloat();
+						out.TextureTransformExt_t.offset[1] = (*array)[1].GetFloat();
+					} else {
+						out.TextureTransformExt_t.offset[0] = 0;
+						out.TextureTransformExt_t.offset[1] = 0;
+					}      
+					
+                    if (!ReadMember(*pKHR_texture_transform, "rotation", out.TextureTransformExt_t.rotation)) {
+						out.TextureTransformExt_t.rotation = 0;					
+                    }
+					
+                    if (Value *array = FindArray(*pKHR_texture_transform, "scale")) {
+						out.TextureTransformExt_t.scale[0] = (*array)[0].GetFloat();
+						out.TextureTransformExt_t.scale[1] = (*array)[1].GetFloat();
+					} else {
+						out.TextureTransformExt_t.scale[0] = 1;
+						out.TextureTransformExt_t.scale[1] = 1;
+                    }
+				}
+			}
+        }
+
         if (Value* index = FindUInt(*prop, "index")) {
             out.texture = r.textures.Retrieve(index->GetUint());
         }
@@ -876,6 +902,9 @@ inline void Material::Read(Value& material, Asset& r)
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
+
+        if (r.extensionsUsed.KHR_texture_transform) {
+		}
 
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
@@ -1463,12 +1492,10 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
         }
     }
 
-    #define CHECK_EXT(EXT) \
-        if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
-
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
     CHECK_EXT(KHR_materials_unlit);
     CHECK_EXT(KHR_lights_punctual);
+	CHECK_EXT(KHR_texture_transform);
 
     #undef CHECK_EXT
 }

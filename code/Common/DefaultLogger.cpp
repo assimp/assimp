@@ -107,7 +107,7 @@ LogStream* LogStream::createDefaultStream(aiDefaultLogStream    streams,
         return nullptr;
 #endif
 
-        // Platform-independent default streams
+    // Platform-independent default streams
     case aiDefaultLogStream_STDERR:
         return new StdOStreamLogStream(std::cerr);
     case aiDefaultLogStream_STDOUT:
@@ -121,7 +121,7 @@ LogStream* LogStream::createDefaultStream(aiDefaultLogStream    streams,
     };
 
     // For compilers without dead code path detection
-    return NULL;
+    return nullptr;
 }
 
 // ----------------------------------------------------------------------------------

@@ -81,8 +81,8 @@ using namespace Assimp::FBX;
 // some constants that we'll use for writing metadata
 namespace Assimp {
 namespace FBX {
-    const std::string EXPORT_VERSION_STR = "7.4.0";
-    const uint32_t EXPORT_VERSION_INT = 7400; // 7.4 == 2014/2015
+    const std::string EXPORT_VERSION_STR = "7.5.0";
+    const uint32_t EXPORT_VERSION_INT = 7500; // 7.5 == 2016+
     // FBX files have some hashed values that depend on the creation time field,
     // but for now we don't actually know how to generate these.
     // what we can do is set them to a known-working version.
@@ -1289,7 +1289,7 @@ void FBXExporter::WriteObjects ()
 
         for(unsigned int lr = 1; lr < m->GetNumUVChannels(); ++ lr)
         {
-            FBX::Node layerExtra("Layer", int32_t(1));
+            FBX::Node layerExtra("Layer", int32_t(lr));
             layerExtra.AddChild("Version", int32_t(100));
             FBX::Node leExtra("LayerElement");
             leExtra.AddChild("Type", "LayerElementUV");

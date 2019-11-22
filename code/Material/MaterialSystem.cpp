@@ -51,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/Macros.h>
 
 using namespace Assimp;
 
@@ -472,12 +471,12 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     aiPropertyTypeInfo pType
     )
 {
-    ai_assert( pInput != NULL );
-    ai_assert( pKey != NULL );
+    ai_assert( pInput != nullptr );
+	ai_assert(pKey != nullptr );
     ai_assert( 0 != pSizeInBytes );
 
     if ( 0 == pSizeInBytes ) {
-
+		return AI_FAILURE;
     }
 
     // first search the list whether there is already an entry with this key

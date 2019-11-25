@@ -388,7 +388,7 @@ typedef struct {
 
 /* label entry */
 typedef struct {
-    char *name;                 /* name of the annotation group or NULL */
+    char *name;                 /* name of the annotation layer or NULL */
     char *lang;                 /* language code or NULL */
     char *text;                 /* the label text */
     uint32_t color;             /* color */
@@ -438,7 +438,7 @@ typedef struct {
 typedef struct {
     m3dhdr_t *raw;              /* pointer to raw data */
     char flags;                 /* internal flags */
-    char errcode;               /* returned error code */
+    signed char errcode;        /* returned error code */
     char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s,fi_s;  /* decoded sizes for types */
     char *name;                 /* name of the model, like "Utah teapot" */
     char *license;              /* usage condition or license, like "MIT", "LGPL" or "BSD-3clause" */
@@ -1192,7 +1192,6 @@ static int _m3dstbi__parse_zlib(_m3dstbi__zbuf *a, int parse_header)
          return 0;
       } else {
          if (type == 1) {
-            _m3dstbi__init_zdefaults();
             if (!_m3dstbi__zbuild_huffman(&a->z_length  , _m3dstbi__zdefault_length  , 288)) return 0;
             if (!_m3dstbi__zbuild_huffman(&a->z_distance, _m3dstbi__zdefault_distance,  32)) return 0;
          } else {
@@ -1210,7 +1209,7 @@ static int _m3dstbi__do_zlib(_m3dstbi__zbuf *a, char *obuf, int olen, int exp, i
    a->zout       = obuf;
    a->zout_end   = obuf + olen;
    a->z_expandable = exp;
-
+   _m3dstbi__init_zdefaults();
    return _m3dstbi__parse_zlib(a, parse_header);
 }
 
@@ -2012,6 +2011,9 @@ unsigned char * _m3dstbi_zlib_compress(unsigned char *data, int data_len, int *o
 #include <stdio.h>          /* get sprintf */
 #include <locale.h>         /* sprintf and strtod cares about number locale */
 #endif
+#ifdef M3D_PROFILING
+#include <sys/time.h>
+#endif
 
 #if !defined(M3D_NOIMPORTER) && defined(M3D_ASCII)
 /* helper functions for the ASCII parser */
@@ -2088,7 +2090,7 @@ char *_m3d_safestr(char *in, int morelines)
         }
         for(; o > out && (*(o-1) == ' ' || *(o-1) == '\t' || *(o-1) == '\r' || *(o-1) == '\n'); o--);
         *o = 0;
-        out = (char*)M3D_REALLOC(out, (uint64_t)o - (uint64_t)out + 1);
+        out = (char*)M3D_REALLOC(out, (uintptr_t)o - (uintptr_t)out + 1);
     }
     return out;
 }
@@ -2322,6 +2324,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
     m3da_t *a;
     m3di_t *t;
 #ifndef M3D_NONORMALS
+    char neednorm = 0;
     m3dv_t *norm = NULL, *v0, *v1, *v2, va, vb;
 #endif
 #ifndef M3D_NOANIMATION
@@ -2338,6 +2341,10 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
     M3D_INDEX bi[M3D_BONEMAXLEVEL+1], level;
     const char *ol;
     char *ptr, *pe, *fn;
+#endif
+#ifdef M3D_PROFILING
+    struct timeval tv0, tv1, tvd;
+    gettimeofday(&tv0, NULL);
 #endif
 
     if(!data || (!M3D_CHUNKMAGIC(data, '3','D','M','O')
@@ -2647,6 +2654,9 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                                     if(!*ptr) goto asciiend;
                                 }
                             }
+#ifndef M3D_NONORMALS
+                            if(model->face[i].normal[j] == (M3D_INDEX)-1U) neednorm = 1;
+#endif
                             ptr = _m3d_findarg(ptr);
                         }
                     }
@@ -2870,7 +2880,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 pe = _m3d_findarg(pe);
                 if(!*pe || *pe == '\r' || *pe == '\n') goto asciiend;
                 buff = (unsigned char*)_m3d_findnl(ptr);
-                k = ((uint32_t)((uint64_t)buff - (uint64_t)ptr) / 3) + 1;
+                k = ((uint32_t)((uintptr_t)buff - (uintptr_t)ptr) / 3) + 1;
                 i = model->numextra++;
                 model->extra = (m3dchunk_t**)M3D_REALLOC(model->extra, model->numextra * sizeof(m3dchunk_t*));
                 if(!model->extra) goto memerr;
@@ -2892,8 +2902,8 @@ asciiend:
         setlocale(LC_NUMERIC, ol);
         goto postprocess;
     }
-    /* Binary variant */
 #endif
+    /* Binary variant */
     if(!M3D_CHUNKMAGIC(data + 8, 'H','E','A','D')) {
         buff = (unsigned char *)stbi_zlib_decode_malloc_guesssize_headerflag((const char*)data+8, ((m3dchunk_t*)data)->length-8,
             4096, (int*)&len, 1);
@@ -2905,6 +2915,14 @@ asciiend:
         buff = (unsigned char*)M3D_REALLOC(buff, len);
         model->flags |= M3D_FLG_FREERAW; /* mark that we have to free the raw buffer */
         data = buff;
+#ifdef M3D_PROFILING
+        gettimeofday(&tv1, NULL);
+        tvd.tv_sec = tv1.tv_sec - tv0.tv_sec;
+        tvd.tv_usec = tv1.tv_usec - tv0.tv_usec;
+        if(tvd.tv_usec < 0) { tvd.tv_sec--; tvd.tv_usec += 1000000L; }
+        printf("  Deflate model   %ld.%06ld sec\n", tvd.tv_sec, tvd.tv_usec);
+        memcpy(&tv0, &tv1, sizeof(struct timeval));
+#endif
     } else {
         len = ((m3dhdr_t*)data)->length;
         data += 8;
@@ -2961,7 +2979,7 @@ asciiend:
         return NULL;
     }
     if(model->nb_s > M3D_NUMBONE) {
-        M3D_LOG("Model has more bones per vertex than what importer configured to support");
+        M3D_LOG("Model has more bones per vertex than what importer was configured to support");
         model->errcode = M3D_ERR_TRUNC;
     }
 
@@ -3295,6 +3313,9 @@ memerr:         M3D_LOG("Out of memory");
                     /* normal */
                     if(k & 2)
                         data = _m3d_getidx(data, model->vi_s, &model->face[i].normal[j]);
+#ifndef M3D_NONORMALS
+                    if(model->face[i].normal[j] == (M3D_INDEX)-1U) neednorm = 1;
+#endif
                 }
             }
             model->face = (m3df_t*)M3D_REALLOC(model->face, model->numface * sizeof(m3df_t));
@@ -3454,9 +3475,18 @@ postprocess:
 #endif
     if(model) {
         M3D_LOG("Post-process");
+#ifdef M3D_PROFILING
+        gettimeofday(&tv1, NULL);
+        tvd.tv_sec = tv1.tv_sec - tv0.tv_sec;
+        tvd.tv_usec = tv1.tv_usec - tv0.tv_usec;
+        if(tvd.tv_usec < 0) { tvd.tv_sec--; tvd.tv_usec += 1000000L; }
+        printf("  Parsing chunks  %ld.%06ld sec\n", tvd.tv_sec, tvd.tv_usec);
+#endif
 #ifndef M3D_NONORMALS
-        if(model->numface && model->face) {
+        if(model->numface && model->face && neednorm) {
             /* if they are missing, calculate triangle normals into a temporary buffer */
+            norm = (m3dv_t*)M3D_MALLOC(model->numface * sizeof(m3dv_t));
+            if(!norm) goto memerr;
             for(i = 0, n = model->numvertex; i < model->numface; i++)
                 if(model->face[i].normal[0] == -1U) {
                     v0 = &model->vertex[model->face[i].vertex[0]];
@@ -3464,10 +3494,6 @@ postprocess:
                     v2 = &model->vertex[model->face[i].vertex[2]];
                     va.x = v1->x - v0->x; va.y = v1->y - v0->y; va.z = v1->z - v0->z;
                     vb.x = v2->x - v0->x; vb.y = v2->y - v0->y; vb.z = v2->z - v0->z;
-                    if(!norm) {
-                        norm = (m3dv_t*)M3D_MALLOC(model->numface * sizeof(m3dv_t));
-                        if(!norm) goto memerr;
-                    }
                     v0 = &norm[i];
                     v0->x = (va.y * vb.z) - (va.z * vb.y);
                     v0->y = (va.z * vb.x) - (va.x * vb.z);
@@ -3479,28 +3505,26 @@ postprocess:
                     model->face[i].normal[2] = model->face[i].vertex[2] + n;
                 }
             /* this is the fast way, we don't care if a normal is repeated in model->vertex */
-            if(norm) {
-                M3D_LOG("Generating normals");
-                model->flags |= M3D_FLG_GENNORM;
-                model->numvertex <<= 1;
-                model->vertex = (m3dv_t*)M3D_REALLOC(model->vertex, model->numvertex * sizeof(m3dv_t));
-                if(!model->vertex) goto memerr;
-                memset(&model->vertex[n], 0, n * sizeof(m3dv_t));
-                for(i = 0; i < model->numface; i++)
-                    for(j = 0; j < 3; j++) {
-                        v0 = &model->vertex[model->face[i].vertex[j] + n];
-                        v0->x += norm[i].x;
-                        v0->y += norm[i].y;
-                        v0->z += norm[i].z;
-                    }
-                /* for each vertex, take the average of the temporary normals and use that */
-                for(i = 0, v0 = &model->vertex[n]; i < n; i++, v0++) {
-                    w = _m3d_rsq((v0->x * v0->x) + (v0->y * v0->y) + (v0->z * v0->z));
-                    v0->x *= w; v0->y *= w; v0->z *= w;
-                    v0->skinid = -1U;
+            M3D_LOG("Generating normals");
+            model->flags |= M3D_FLG_GENNORM;
+            model->numvertex <<= 1;
+            model->vertex = (m3dv_t*)M3D_REALLOC(model->vertex, model->numvertex * sizeof(m3dv_t));
+            if(!model->vertex) goto memerr;
+            memset(&model->vertex[n], 0, n * sizeof(m3dv_t));
+            for(i = 0; i < model->numface; i++)
+                for(j = 0; j < 3; j++) {
+                    v0 = &model->vertex[model->face[i].vertex[j] + n];
+                    v0->x += norm[i].x;
+                    v0->y += norm[i].y;
+                    v0->z += norm[i].z;
                 }
-                M3D_FREE(norm);
+            /* for each vertex, take the average of the temporary normals and use that */
+            for(i = 0, v0 = &model->vertex[n]; i < n; i++, v0++) {
+                w = _m3d_rsq((v0->x * v0->x) + (v0->y * v0->y) + (v0->z * v0->z));
+                v0->x *= w; v0->y *= w; v0->z *= w;
+                v0->skinid = -1U;
             }
+            M3D_FREE(norm);
         }
 #endif
         if(model->numbone && model->bone && model->numskin && model->skin && model->numvertex && model->vertex) {
@@ -3539,6 +3563,13 @@ postprocess:
                 _m3d_inv((M3D_FLOAT*)&model->bone[i].mat4);
 #endif
         }
+#ifdef M3D_PROFILING
+        gettimeofday(&tv0, NULL);
+        tvd.tv_sec = tv0.tv_sec - tv1.tv_sec;
+        tvd.tv_usec = tv0.tv_usec - tv1.tv_usec;
+        if(tvd.tv_usec < 0) { tvd.tv_sec--; tvd.tv_usec += 1000000L; }
+        printf("  Post-process    %ld.%06ld sec\n", tvd.tv_sec, tvd.tv_usec);
+#endif
     }
     return model;
 }
@@ -4509,8 +4540,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
         if(model->preview.data && model->preview.length) {
             sl = _m3d_safestr(sn, 0);
             if(sl) {
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + 20;
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + 20;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Preview\r\n%s.png\r\n\r\n", sl);
                 M3D_FREE(sl); sl = NULL;
@@ -4519,8 +4550,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
         M3D_FREE(sn);  sn = NULL;
         /* texture map */
         if(numtmap && tmap && !(flags & M3D_EXP_NOTXTCRD) && !(flags & M3D_EXP_NOFACE)) {
-            ptr -= (uint64_t)out; len = (uint64_t)ptr + maxtmap * 32 + 12;
-            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+            ptr -= (uintptr_t)out; len = (uintptr_t)ptr + maxtmap * 32 + 12;
+            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
             if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
             ptr += sprintf(ptr, "Textmap\r\n");
             last = (M3D_INDEX)-1U;
@@ -4533,8 +4564,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
         }
         /* vertex chunk */
         if(numvrtx && vrtx && !(flags & M3D_EXP_NOFACE)) {
-            ptr -= (uint64_t)out; len = (uint64_t)ptr + maxvrtx * 128 + 10;
-            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+            ptr -= (uintptr_t)out; len = (uintptr_t)ptr + maxvrtx * 128 + 10;
+            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
             if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
             ptr += sprintf(ptr, "Vertex\r\n");
             last = (M3D_INDEX)-1U;
@@ -4559,11 +4590,11 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
         }
         /* bones chunk */
         if(model->numbone && model->bone && !(flags & M3D_EXP_NOBONE)) {
-            ptr -= (uint64_t)out; len = (uint64_t)ptr + 9;
+            ptr -= (uintptr_t)out; len = (uintptr_t)ptr + 9;
             for(i = 0; i < model->numbone; i++) {
                 len += strlen(model->bone[i].name) + 128;
             }
-            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
             if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
             ptr += sprintf(ptr, "Bones\r\n");
             ptr = _m3d_prtbone(ptr, model->bone, model->numbone, (M3D_INDEX)-1U, 0, vrtxidx);
@@ -4576,14 +4607,14 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 m = &model->material[j];
                 sn = _m3d_safestr(m->name, 0);
                 if(!sn) { setlocale(LC_NUMERIC, ol); goto memerr; }
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + strlen(sn) + 12;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + strlen(sn) + 12;
                 for(i = 0; i < m->numprop; i++) {
                     if(m->prop[i].type < 128)
                         len += 32;
                     else if(m->prop[i].value.textureid < model->numtexture && model->texture[m->prop[i].value.textureid].name)
                         len += strlen(model->texture[m->prop[i].value.textureid].name) + 16;
                 }
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Material %s\r\n", sn);
                 M3D_FREE(sn); sn = NULL;
@@ -4645,8 +4676,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 if(k) continue;
                 sn = _m3d_safestr(model->inlined[j].name, 0);
                 if(!sn) { setlocale(LC_NUMERIC, ol); goto memerr; }
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + strlen(sn) + 18;
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + strlen(sn) + 18;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Procedural\r\n%s\r\n\r\n", sn);
                 M3D_FREE(sn); sn = NULL;
@@ -4654,7 +4685,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
         }
         /* mesh face */
         if(model->numface && face && !(flags & M3D_EXP_NOFACE)) {
-            ptr -= (uint64_t)out; len = (uint64_t)ptr + model->numface * 128 + 6;
+            ptr -= (uintptr_t)out; len = (uintptr_t)ptr + model->numface * 128 + 6;
             last = (M3D_INDEX)-1U;
             if(!(flags & M3D_EXP_NOMATERIAL))
                 for(i = 0; i < model->numface; i++) {
@@ -4666,7 +4697,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                         len += 6;
                     }
                 }
-            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
             if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
             ptr += sprintf(ptr, "Mesh\r\n");
             last = (M3D_INDEX)-1U;
@@ -4703,8 +4734,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
             for(j = 0; j < model->numshape; j++) {
                 sn = _m3d_safestr(model->shape[j].name, 0);
                 if(!sn) { setlocale(LC_NUMERIC, ol); goto memerr; }
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + strlen(sn) + 33;
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + strlen(sn) + 33;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Shape %s\r\n", sn);
                 M3D_FREE(sn); sn = NULL;
@@ -4715,14 +4746,14 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                     if(cmd->type >= (unsigned int)(sizeof(m3d_commandtypes)/sizeof(m3d_commandtypes[0])) || !cmd->arg)
                         continue;
                     cd = &m3d_commandtypes[cmd->type];
-                    ptr -= (uint64_t)out; len = (uint64_t)ptr + strlen(cd->key) + 3;
+                    ptr -= (uintptr_t)out; len = (uintptr_t)ptr + strlen(cd->key) + 3;
                     for(k = 0; k < cd->p; k++)
                         switch(cd->a[k]) {
                             case m3dcp_mi_t: if(cmd->arg[k] != -1U) { len += strlen(model->material[cmd->arg[k]].name) + 1; } break;
                             case m3dcp_va_t: len += cmd->arg[k] * (cd->p - k - 1) * 16; k = cd->p; break;
                             default: len += 16; break;
                         }
-                    out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                    out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                     if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                     ptr += sprintf(ptr, "%s", cd->key);
                     for(k = n = 0, l = cd->p; k < l; k++) {
@@ -4755,8 +4786,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 if(model->label[i].text) j += strlen(model->label[i].text);
                 j += 40;
             }
-            ptr -= (uint64_t)out; len = (uint64_t)ptr + j;
-            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+            ptr -= (uintptr_t)out; len = (uintptr_t)ptr + j;
+            out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
             if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
             for(i = 0; i < model->numlabel; i++) {
                 if(!i || _m3d_strcmp(sl, model->label[i].lang) || _m3d_strcmp(sn, model->label[i].name)) {
@@ -4790,10 +4821,10 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 a = &model->action[j];
                 sn = _m3d_safestr(a->name, 0);
                 if(!sn) { setlocale(LC_NUMERIC, ol); goto memerr; }
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + strlen(sn) + 48;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + strlen(sn) + 48;
                 for(i = 0; i < a->numframe; i++)
                     len += a->frame[i].numtransform * 128 + 8;
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Action %d %s\r\n", a->durationmsec, sn);
                 M3D_FREE(sn); sn = NULL;
@@ -4813,8 +4844,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 if(model->inlined[i].name)
                     j += strlen(model->inlined[i].name) + 6;
             if(j > 0) {
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + j + 16;
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + j + 16;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Assets\r\n");
                 for(i = 0; i < model->numinlined; i++)
@@ -4827,8 +4858,8 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
         if(model->numextra && (flags & M3D_EXP_EXTRA)) {
             for(i = 0; i < model->numextra; i++) {
                 if(model->extra[i]->length < 9) continue;
-                ptr -= (uint64_t)out; len = (uint64_t)ptr + 17 + model->extra[i]->length * 3;
-                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uint64_t)out;
+                ptr -= (uintptr_t)out; len = (uintptr_t)ptr + 17 + model->extra[i]->length * 3;
+                out = (unsigned char*)M3D_REALLOC(out, len); ptr += (uintptr_t)out;
                 if(!out) { setlocale(LC_NUMERIC, ol); goto memerr; }
                 ptr += sprintf(ptr, "Extra %c%c%c%c\r\n",
                     model->extra[i]->magic[0] > ' ' ? model->extra[i]->magic[0] : '_',
@@ -4842,7 +4873,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
             }
         }
         setlocale(LC_NUMERIC, ol);
-        len = (uint64_t)ptr - (uint64_t)out;
+        len = (uintptr_t)ptr - (uintptr_t)out;
         out = (unsigned char*)M3D_REALLOC(out, len + 1);
         if(!out) goto memerr;
         out[len] = 0;
@@ -4943,7 +4974,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                     case 8: *((double*)out) = tmap[i].data.u; out += 8; *((double*)out) = tmap[i].data.v; out += 8; break;
                 }
             }
-            *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+            *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
             out = NULL;
             len += *length;
         }
@@ -4993,7 +5024,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 }
                 out = _m3d_addidx(out, sk_s, vrtx[i].data.skinid);
             }
-            *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+            *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
             out = NULL;
             len += *length;
         }
@@ -5035,7 +5066,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                     }
                 }
             }
-            *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+            *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
             out = NULL;
             len += *length;
         }
@@ -5084,7 +5115,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                         break;
                     }
                 }
-                *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+                *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
                 len += *length;
                 out = NULL;
             }
@@ -5144,7 +5175,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                         out = _m3d_addidx(out, vi_s, vrtxidx[face[i].data.normal[j]]);
                 }
             }
-            *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+            *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
             len += *length;
             out = NULL;
         }
@@ -5195,7 +5226,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                         }
                     }
                 }
-                *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+                *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
                 len += *length;
                 out = NULL;
             }
@@ -5207,7 +5238,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                     sl = model->label[i].lang;
                     sn = model->label[i].name;
                     if(length) {
-                        *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+                        *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
                         len += *length;
                     }
                     chunklen = 8 + 2 * si_s + ci_s + model->numlabel * (vi_s + si_s);
@@ -5229,7 +5260,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                 out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->label[l].text));
             }
             if(length) {
-                *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+                *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
                 len += *length;
             }
             out = NULL;
@@ -5257,7 +5288,7 @@ memerr: if(vrtxidx) M3D_FREE(vrtxidx);
                         out = _m3d_addidx(out, vi_s, vrtxidx[a->frame[i].transform[k].ori]);
                     }
                 }
-                *length = (uint64_t)out - (uint64_t)((uint8_t*)h + len);
+                *length = (uintptr_t)out - (uintptr_t)((uint8_t*)h + len);
                 len += *length;
                 out = NULL;
             }

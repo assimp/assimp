@@ -128,16 +128,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * GENBOUNDINGBOXES */
 //////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #   undef ASSIMP_API
-
     //////////////////////////////////////////////////////////////////////////
     /* Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library */
     //////////////////////////////////////////////////////////////////////////
 #   ifdef ASSIMP_BUILD_DLL_EXPORT
 #       define ASSIMP_API __declspec(dllexport)
 #       define ASSIMP_API_WINONLY __declspec(dllexport)
-#       pragma warning (disable : 4251)
 
     //////////////////////////////////////////////////////////////////////////
     /* Define 'ASSIMP_DLL' before including Assimp to link to ASSIMP in
@@ -150,7 +148,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #       define ASSIMP_API
 #       define ASSIMP_API_WINONLY
 #   endif
+#elif defined(SWIG)
 
+    /* Do nothing, the relevant defines are all in AssimpSwigPort.i */
+
+#else
+#   define ASSIMP_API __attribute__ ((visibility("default")))
+#   define ASSIMP_API_WINONLY
+#endif
+
+#ifdef _MSC_VER
+#   ifdef ASSIMP_BUILD_DLL_EXPORT
+#       pragma warning (disable : 4251)
+#   endif
     /* Force the compiler to inline a function, if possible
      */
 #   define AI_FORCE_INLINE __forceinline
@@ -158,17 +168,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     /* Tells the compiler that a function never returns. Used in code analysis
      * to skip dead paths (e.g. after an assertion evaluated to false). */
 #   define AI_WONT_RETURN __declspec(noreturn)
-
 #elif defined(SWIG)
 
     /* Do nothing, the relevant defines are all in AssimpSwigPort.i */
 
 #else
-
 #   define AI_WONT_RETURN
-
-#   define ASSIMP_API __attribute__ ((visibility("default")))
-#   define ASSIMP_API_WINONLY
 #   define AI_FORCE_INLINE inline
 #endif // (defined _MSC_VER)
 
@@ -301,7 +306,11 @@ static const ai_real ai_epsilon = (ai_real) 0.00001;
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
 
 #ifndef _MSC_VER
-#  define AI_NO_EXCEPT noexcept
+#  if __cplusplus >= 201103L // C++11
+#    define AI_NO_EXCEPT noexcept
+#  else
+#    define AI_NO_EXCEPT
+#  endif
 #else
 #  if (_MSC_VER >= 1915 )
 #    define AI_NO_EXCEPT noexcept

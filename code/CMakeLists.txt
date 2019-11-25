@@ -407,6 +407,18 @@ ADD_ASSIMP_IMPORTER( LWS
   LWS/LWSLoader.h
 )
 
+ADD_ASSIMP_IMPORTER( M3D
+  M3D/M3DMaterials.h
+  M3D/M3DImporter.h
+  M3D/M3DImporter.cpp
+  M3D/m3d.h
+)
+
+ADD_ASSIMP_EXPORTER( M3D
+  M3D/M3DExporter.h
+  M3D/M3DExporter.cpp
+)
+
 ADD_ASSIMP_IMPORTER( MD2
   MD2/MD2FileData.h
   MD2/MD2Loader.cpp
@@ -670,6 +682,8 @@ SET( PostProcessing_SRCS
   PostProcessing/MakeVerboseFormat.h
   PostProcessing/ScaleProcess.cpp
   PostProcessing/ScaleProcess.h
+  PostProcessing/ArmaturePopulate.cpp
+  PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
 )

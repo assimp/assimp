@@ -180,6 +180,8 @@ string ModelLoader::determineTextureType(const aiScene * scene, aiMaterial * mat
 	{
 		return "textures are on disk";
 	}
+
+    return ".";
 }
 
 int ModelLoader::getTextureIndex(aiString * str)

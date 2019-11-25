@@ -63,6 +63,13 @@ extern "C" {
 ASSIMP_API const char*  aiGetLegalString  (void);
 
 // ---------------------------------------------------------------------------
+/** @brief Returns the current patch version number of Assimp.
+ *  @return Patch version of the Assimp runtime the application was
+ *    linked/built against
+ */
+ASSIMP_API unsigned int aiGetVersionPatch(void);
+
+// ---------------------------------------------------------------------------
 /** @brief Returns the current minor version number of Assimp.
  *  @return Minor version of the Assimp runtime the application was
  *    linked/built against

@@ -202,6 +202,11 @@ namespace glTF2 {
 
     }
 
+    inline void Write(Value& /*obj*/, Light& /*c*/, AssetWriter& /*w*/)
+    {
+
+    }
+
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
         if (img.bufferView) {
@@ -213,7 +218,7 @@ namespace glTF2 {
             if (img.HasData()) {
                 uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
                 uri += ";base64,";
-                Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+                glTFCommon::Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
             }
             else {
                 uri = img.uri;
@@ -353,7 +358,7 @@ namespace glTF2 {
             WriteVec(pbrSpecularGlossiness, pbrSG.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
 
             if (pbrSG.glossinessFactor != 1) {
-                WriteFloat(obj, pbrSG.glossinessFactor, "glossinessFactor", w.mAl);
+                WriteFloat(pbrSpecularGlossiness, pbrSG.glossinessFactor, "glossinessFactor", w.mAl);
             }
 
             WriteTex(pbrSpecularGlossiness, pbrSG.diffuseTexture, "diffuseTexture", w.mAl);

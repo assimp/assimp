@@ -93,7 +93,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 		// at this place new group mode created and made current, so we can name it.
 		if(!def.empty()) NodeElement_Cur->ID = def;
 
-		if(load && (url.size() > 0))
+		if(load && !url.empty())
 		{
 			std::string full_path = mpIOHandler->CurrentDirectory() + url.front();
 

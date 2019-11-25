@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MD5Loader.h"
 #include <assimp/StringComparison.h>
 #include <assimp/fast_atof.h>
+#include <assimp/MathFunctions.h>
 #include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -64,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // Minimum weight value. Weights inside [-n ... n] are ignored
-#define AI_MD5_WEIGHT_EPSILON 1e-5f
+#define AI_MD5_WEIGHT_EPSILON Math::getEpsilon<float>()
 
 
 static const aiImporterDesc desc = {

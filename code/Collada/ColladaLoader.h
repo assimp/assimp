@@ -94,20 +94,20 @@ public:
 public:
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details. */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
+    bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 protected:
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo () const override;
 
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
 
     /** Recursively constructs a scene node for the given parser node and returns it. */
     aiNode* BuildHierarchy( const ColladaParser& pParser, const Collada::Node* pNode);
@@ -120,7 +120,7 @@ protected:
     void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode,
         aiNode* pTarget);
 		
-    aiMesh *findMesh(std::string meshid);
+    aiMesh *findMesh(const std::string& meshid);
 
     /** Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh */
     aiMesh* CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
@@ -183,9 +183,6 @@ protected:
     /** Resolves the texture name for the given effect texture entry */
     aiString FindFilenameForEffectTexture( const ColladaParser& pParser,
         const Collada::Effect& pEffect, const std::string& pName);
-
-    /** Converts a path read from a collada file to the usual representation */
-    void ConvertPath( aiString& ss);
 
     /** Reads a float value from an accessor and its data array.
      * @param pAccessor The accessor to use for reading

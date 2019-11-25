@@ -118,7 +118,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     size_t lastFilePos( 0 );
 
     std::vector<char> buffer;
-    while ( streamBuffer.getNextDataLine( buffer, '\0' ) ) {
+    while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 
@@ -244,8 +244,8 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     size_t index = 0;
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
     if ( *m_DataIt == '\\' ) {
-        m_DataIt++;
-        m_DataIt++;
+        ++m_DataIt;
+        ++m_DataIt;
         m_DataIt = getNextWord<DataArrayIt>( m_DataIt, m_DataItEnd );
     }
     while( m_DataIt != m_DataItEnd && !IsSpaceOrNewLine( *m_DataIt ) ) {

@@ -34,15 +34,6 @@ namespace Assimp {
 
 void ExportAssimp2Json(const char*, Assimp::IOSystem*, const aiScene*, const Assimp::ExportProperties*);
 
-Exporter::ExportFormatEntry Assimp2Json_desc = Assimp::Exporter::ExportFormatEntry(
-    "json",
-    "Plain JSON representation of the Assimp scene data structure",
-    "json",
-    &ExportAssimp2Json,
-    0u
-);
-
-
 // small utility class to simplify serializing the aiScene to Json
 class JSONWriter {
 public:

@@ -104,6 +104,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/Exporter.hpp
   ${HEADER_PATH}/DefaultIOStream.h
   ${HEADER_PATH}/DefaultIOSystem.h
+  ${HEADER_PATH}/ZipArchiveIOSystem.h
   ${HEADER_PATH}/SceneCombiner.h
   ${HEADER_PATH}/fast_atof.h
   ${HEADER_PATH}/qnan.h
@@ -136,7 +137,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/irrXMLWrapper.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
-  ${HEADER_PATH}/Macros.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
 )
@@ -172,6 +172,7 @@ SET( Common_SRCS
   Common/DefaultProgressHandler.h
   Common/DefaultIOStream.cpp
   Common/DefaultIOSystem.cpp
+  Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h
   Common/Importer.cpp
   Common/IFF.h
@@ -404,6 +405,18 @@ ADD_ASSIMP_IMPORTER( LWO
 ADD_ASSIMP_IMPORTER( LWS
   LWS/LWSLoader.cpp
   LWS/LWSLoader.h
+)
+
+ADD_ASSIMP_IMPORTER( M3D
+  M3D/M3DMaterials.h
+  M3D/M3DImporter.h
+  M3D/M3DImporter.cpp
+  M3D/m3d.h
+)
+
+ADD_ASSIMP_EXPORTER( M3D
+  M3D/M3DExporter.h
+  M3D/M3DExporter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( MD2
@@ -669,6 +682,8 @@ SET( PostProcessing_SRCS
   PostProcessing/MakeVerboseFormat.h
   PostProcessing/ScaleProcess.cpp
   PostProcessing/ScaleProcess.h
+  PostProcessing/ArmaturePopulate.cpp
+  PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
 )
@@ -688,8 +703,6 @@ ADD_ASSIMP_IMPORTER( Q3BSP
   Q3BSP/Q3BSPFileParser.cpp
   Q3BSP/Q3BSPFileImporter.h
   Q3BSP/Q3BSPFileImporter.cpp
-  Q3BSP/Q3BSPZipArchive.h
-  Q3BSP/Q3BSPZipArchive.cpp
 )
 
 ADD_ASSIMP_IMPORTER( RAW
@@ -766,6 +779,8 @@ ADD_ASSIMP_EXPORTER( X3D
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
+  glTF/glTFCommon.h
+  glTF/glTFCommon.cpp
   glTF/glTFAsset.h
   glTF/glTFAsset.inl
   glTF/glTFAssetWriter.h
@@ -810,7 +825,7 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDVmdParser.h
 )
 
-ADD_ASSIMP_EXPORTER( Assjson
+ADD_ASSIMP_EXPORTER( ASSJSON
   Assjson/cencode.c
   Assjson/cencode.h
   Assjson/json_exporter.cpp
@@ -1056,6 +1071,8 @@ MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
 
 MESSAGE(STATUS "Enabled exporter formats:${ASSIMP_EXPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled exporter formats:${ASSIMP_EXPORTERS_DISABLED}")
+
+SOURCE_GROUP( include\\assimp    FILES ${PUBLIC_HEADERS} )
 
 SET( assimp_src
   # Assimp Files

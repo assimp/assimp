@@ -118,6 +118,7 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
@@ -148,6 +149,7 @@ SET( POST_PROCESSES
   unit/utRemoveRedundantMaterials.cpp
   unit/utRemoveVCProcess.cpp
   unit/utScaleProcess.cpp
+  unit/utArmaturePopulate.cpp
   unit/utJoinVertices.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp

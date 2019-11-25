@@ -188,7 +188,7 @@ namespace glTFCommon {
         size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
 
         inline
-            size_t DecodeBase64(const char* in, uint8_t*& out) {
+        size_t DecodeBase64(const char* in, uint8_t*& out) {
             return DecodeBase64(in, strlen(in), out);
         }
 
@@ -221,25 +221,22 @@ namespace glTFCommon {
         };
 
         inline
-            char EncodeCharBase64(uint8_t b) {
+        char EncodeCharBase64(uint8_t b) {
             return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="[size_t(b)];
         }
 
         inline
-            uint8_t DecodeCharBase64(char c) {
+        uint8_t DecodeCharBase64(char c) {
             return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
-            /*if (c >= 'A' && c <= 'Z') return c - 'A';
-            if (c >= 'a' && c <= 'z') return c - 'a' + 26;
-            if (c >= '0' && c <= '9') return c - '0' + 52;
-            if (c == '+') return 62;
-            if (c == '/') return 63;
-            return 64; // '-' */
         }
 
         size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
 
         void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out);
-    }
+    } // namespace Util
+
+#define CHECK_EXT(EXT) \
+	if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
 }
 

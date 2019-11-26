@@ -205,7 +205,7 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 		if (prop.textureTransformSupported) {
 			aiUVTransform transform;
 			transform.mTranslation.x = prop.TextureTransformExt_t.offset[0];
-			transform.mTranslation.y = prop.TextureTransformExt_t.offset[0];
+			transform.mTranslation.y = prop.TextureTransformExt_t.offset[1];
 			transform.mRotation = prop.TextureTransformExt_t.rotation;
 			transform.mScaling.x = prop.TextureTransformExt_t.scale[0];
 			transform.mScaling.y = prop.TextureTransformExt_t.scale[1];

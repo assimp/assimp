@@ -214,8 +214,8 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 			// texture origin. All three can be corrected for solely by a change of the translation since
 			// the transformations available are shape preserving. Note the importer already flips the V
 			// coordinate of the actual meshes during import.
-			ai_real rcos(cos(-transform.mRotation));
-			ai_real rsin(sin(-transform.mRotation));
+			const ai_real rcos(cos(-transform.mRotation));
+			const ai_real rsin(sin(-transform.mRotation));
 			transform.mTranslation.x = (0.5 * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
 			transform.mTranslation.y = ((0.5 * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
 

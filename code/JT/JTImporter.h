@@ -144,8 +144,9 @@ namespace JT {
 
     struct JTModel;
     struct JTTOCEntry;
-}
-
+	struct LogicalElementHeaderZLib;
+	struct SegmentHeader;
+} // namespace JT
 
 class JTImporter : public BaseImporter {
 public:
@@ -161,6 +162,8 @@ protected:
     void readHeader(DataBuffer& buffer, size_t &offset);
     void readTOCSegment(size_t toc_offset, DataBuffer& buffer, size_t& offset);
     void readDataSegment( JT::JTTOCEntry *entry, DataBuffer &buffer, size_t &offset );
+	void readLogicalElementHeaderZLib(JT::LogicalElementHeaderZLib &headerZLib, DataBuffer &buffer, size_t &offset);
+	void readLSGSegment(JT::SegmentHeader header, bool isCompressed, DataBuffer &buffer, size_t &offset);
 
 private:
     JT::JTModel* mModel;

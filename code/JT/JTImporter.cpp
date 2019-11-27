@@ -43,267 +43,308 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "JTImporter.h"
 
-#include <assimp/DefaultIOSystem.h>
 #include <assimp/ByteSwapper.h>
+#include <assimp/DefaultIOSystem.h>
 
 #include <memory>
 
 namespace Assimp {
 namespace JT {
 
-enum class SegmentType {
-    LogicalScenegraph = 1,
-    JT_BRep,
-    PMIData,
-    MetaData,
-    Shape,
-    ShapeLOD0,
-    ShapeLOD1,
-    ShapeLOD2,
-    ShapeLOD3,
-    ShapeLOD4,
-    ShapeLOD5,
-    ShapeLOD6,
-    ShapeLOD7,
-    ShapeLOD8,
-    ShapeLOD9,
-    XT_BRep,
-    WireframeRepresentation,
-    ULP,
-    LWPA
+enum class SegmentTypeEnum {
+	LogicalScenegraph = 1,
+	JT_BRep,
+	PMIData,
+	MetaData,
+	Shape,
+	ShapeLOD0,
+	ShapeLOD1,
+	ShapeLOD2,
+	ShapeLOD3,
+	ShapeLOD4,
+	ShapeLOD5,
+	ShapeLOD6,
+	ShapeLOD7,
+	ShapeLOD8,
+	ShapeLOD9,
+	XT_BRep,
+	WireframeRepresentation,
+	ULP,
+	LWPA
 };
 
 static const char ZLibCompressionEnabled[] = {
-    1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1
+	1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
 };
 
-bool isZLibCompressionEnabled( SegmentType type ) {
-    const size_t index = ( size_t )type - 1;
-    return 1 == ZLibCompressionEnabled[ index ];
+bool isZLibCompressionEnabled(SegmentTypeEnum type) {
+	const size_t index = (size_t)type - 1;
+	return 1 == ZLibCompressionEnabled[index];
 }
 
 #pragma pack(1)
 struct JTHeader {
-    uchar version[80];
-    uchar byte_order;
-    i32   reserved;
-    i32   toc_offset;
-    union {
-        Guid LSG_segment_id;
-        Guid reserved_field;
-    };
+	uchar version[80];
+	uchar byte_order;
+	i32 reserved;
+	i32 toc_offset;
+	union {
+		Guid LSG_segment_id;
+		Guid reserved_field;
+	};
 
-    JTHeader()
-    : byte_order( 0 )
-    , reserved( 0 )
-    , toc_offset( 0 ) {
-        ::memset(version, ' ', sizeof(uchar) * 80);
-    }
+	JTHeader() :
+			byte_order(0),
+			reserved(0),
+			toc_offset(0) {
+		::memset(version, ' ', sizeof(uchar) * 80);
+	}
 };
 
 struct JTTOCEntry {
-    Guid segment_id;
-    i32 segment_offset;
-    i32 segment_lenght;
-    u32 segment_attributes;
+	Guid segment_id;
+	i32 segment_offset;
+	i32 segment_lenght;
+	u32 segment_attributes;
 };
 
 struct JTTOCSegment {
-    i32 num_entries;
-    JTTOCEntry* entries;
+	i32 num_entries;
+	JTTOCEntry *entries;
 
-    JTTOCSegment()
-    : num_entries(0)
-    , entries(nullptr) {
-        // empty
-    }
+	JTTOCSegment() :
+			num_entries(0),
+			entries(nullptr) {
+		// empty
+	}
 
-    ~JTTOCSegment() {
-        delete [] entries;
-    }
+	~JTTOCSegment() {
+		delete[] entries;
+	}
 
-    void allocEntries(i32 numEntries) {
-        num_entries = num_entries;
-        entries = new JTTOCEntry[num_entries];
-    }
+	void allocEntries(i32 numEntries) {
+		num_entries = num_entries;
+		entries = new JTTOCEntry[num_entries];
+	}
 
-    JTTOCEntry* getEntryAt(size_t index) {
-        if (index > num_entries) {
-            return nullptr;
-        }
+	JTTOCEntry *getEntryAt(size_t index) {
+		if (index > num_entries) {
+			return nullptr;
+		}
 
-        return &entries[index];
-    }
+		return &entries[index];
+	}
 };
 
 struct SegmentHeader {
-    Guid SegmentID;
-    i32 SegmentType;
-    i32 SegmentLength;
+	Guid SegmentID;
+	i32 SegmentType;
+	i32 SegmentLength;
 };
 
 struct LogicalElementHeader {
-    i32 length;
+	i32 length;
+};
+
+struct LogicalElementHeaderZLib {
+	i32 CompressionFlag;
+	i32 CompressionDataLength;
+	u8 CompressionAlgo;
 };
 
 struct ElementHeader {
-    Guid ObjectTypeID;
-    uchar ObjectBaseType;
+	Guid ObjectTypeID;
+	uchar ObjectBaseType;
+};
+
+struct BaseNodeData {
+	i16 Version;
+	u32 NodeFlags;
+	i32 AttributeCount;
+	i32 *AttributeObjectIds;
 };
 
 struct JTModel {
-    JTHeader     header;
-    JTTOCSegment toc_segment;
-    JTModel() {
-        // empty
-    }
+	JTHeader header;
+	JTTOCSegment toc_segment;
+
+	JTModel() {
+		// empty
+	}
 };
 
-} //! namespace JT
+} // namespace JT
 
 static const aiImporterDesc desc = {
-    "JT File Format from Siemens",
-    "",
-    "",
-    "",
-    aiImporterFlags_SupportTextFlavour,
-    0,
-    0,
-    0,
-    0,
-    "jt"
+	"JT File Format from Siemens",
+	"",
+	"",
+	"",
+	aiImporterFlags_SupportTextFlavour,
+	0,
+	0,
+	0,
+	0,
+	"jt"
 };
 
 using namespace ::Assimp::JT;
 
-JTImporter::JTImporter()
-: BaseImporter()
-, mModel( nullptr ) {
-    // empty
+JTImporter::JTImporter() :
+		BaseImporter(),
+		mModel(nullptr) {
+	// empty
 }
 
 JTImporter::~JTImporter() {
-    delete mModel;
-    mModel = nullptr;
+	delete mModel;
+	mModel = nullptr;
 }
 
-bool JTImporter::CanRead(const std::string& file, IOSystem* pIOHandler, bool checkSig) const {
-    if (!checkSig) {
-        //Check File Extension
-        return SimpleExtensionCheck(file, "jt");
-    }
+bool JTImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool checkSig) const {
+	if (!checkSig) {
+		//Check File Extension
+		return SimpleExtensionCheck(file, "jt");
+	}
 
-    // Check file Header
+	// Check file Header
 
-    return false;
+	return false;
 }
 
-const aiImporterDesc* JTImporter::GetInfo() const {
-    return &desc;
+const aiImporterDesc *JTImporter::GetInfo() const {
+	return &desc;
 }
 
-void JTImporter::InternReadFile(const std::string& file, aiScene* scene, IOSystem* ioHandler) {
-    ai_assert(nullptr != scene);
-    ai_assert(nullptr != ioHandler);
+void JTImporter::InternReadFile(const std::string &file, aiScene *scene, IOSystem *ioHandler) {
+	ai_assert(nullptr != scene);
+	ai_assert(nullptr != ioHandler);
 
-    static const std::string mode = "rb";
-    std::unique_ptr<IOStream> fileStream(ioHandler->Open(file, mode));
-    if (!fileStream.get()) {
-        throw DeadlyImportError("Failed to open file " + file + ".");
-    }
+	static const std::string mode = "rb";
+	std::unique_ptr<IOStream> fileStream(ioHandler->Open(file, mode));
+	if (!fileStream.get()) {
+		throw DeadlyImportError("Failed to open file " + file + ".");
+	}
 
-    // Get the file-size and validate it, throwing an exception when fails
-    size_t fileSize = fileStream->FileSize();
-    if (fileSize < sizeof(JTHeader)) {
-        throw DeadlyImportError("JT-file is too small.");
-    }
+	// Get the file-size and validate it, throwing an exception when fails
+	size_t fileSize = fileStream->FileSize();
+	if (fileSize < sizeof(JT::JTHeader)) {
+		throw DeadlyImportError("JT-file is too small.");
+	}
 
-    mModel = new JTModel;
-    DataBuffer buffer;
-    buffer.resize(fileSize);
-    fileStream->Read(&buffer[0], sizeof(char), fileSize);
+	mModel = new JTModel;
+	DataBuffer buffer;
+	buffer.resize(fileSize);
+	fileStream->Read(&buffer[0], sizeof(char), fileSize);
 
-    size_t offset(0);
-    readHeader(buffer, offset);
-    readTOCSegment(mModel->header.toc_offset, buffer, offset);
+	size_t offset(0);
+	readHeader(buffer, offset);
+	readTOCSegment(mModel->header.toc_offset, buffer, offset);
 
-    for (size_t i = 0; i < mModel->toc_segment.num_entries; ++i) {
-
-    }
+	for (size_t i = 0; i < mModel->toc_segment.num_entries; ++i) {
+	}
 }
 
-void JTImporter::readHeader( DataBuffer& buffer, size_t& offset ) {
-    ::memcpy(&mModel->header, &buffer[offset], sizeof(JTHeader));
-    offset += sizeof(JTHeader);
+void JTImporter::readHeader(DataBuffer &buffer, size_t &offset) {
+	::memcpy(&mModel->header, &buffer[offset], sizeof(JTHeader));
+	offset += sizeof(JTHeader);
 }
 
-void JTImporter::readTOCSegment(size_t toc_offset, DataBuffer& buffer, size_t& offset ) {
-    i32 num_entries(0);
-    ::memcpy(&num_entries, &buffer[toc_offset], sizeof(i32));
-    offset = toc_offset + sizeof(i32);
-    mModel->toc_segment.allocEntries(num_entries);
-    for (i32 i = 0; i < num_entries; ++i) {
-        JTTOCEntry* entry = mModel->toc_segment.getEntryAt(i);
-        if (nullptr == entry) {
-            continue;
-        }
+void JTImporter::readTOCSegment(size_t toc_offset, DataBuffer &buffer, size_t &offset) {
+	i32 num_entries(0);
+	::memcpy(&num_entries, &buffer[toc_offset], sizeof(i32));
+	offset = toc_offset + sizeof(i32);
+	mModel->toc_segment.allocEntries(num_entries);
+	for (i32 i = 0; i < num_entries; ++i) {
+		JTTOCEntry *entry = mModel->toc_segment.getEntryAt(i);
+		if (nullptr == entry) {
+			continue;
+		}
 
-        ::memcpy( entry, &buffer[ offset ], sizeof( JTTOCEntry ) );
-    }
+		::memcpy(entry, &buffer[offset], sizeof(JTTOCEntry));
+	}
 }
 
-void JTImporter::readDataSegment( JTTOCEntry *entry, DataBuffer &buffer, size_t &offset ) {
-    if (nullptr == entry) {
-        return;
-    }
-    SegmentHeader header;
-    ::memcpy( &header, &buffer[ entry->segment_offset ], entry->segment_lenght );
+void JTImporter::readDataSegment(JTTOCEntry *entry, DataBuffer &buffer, size_t &offset) {
+	if (nullptr == entry) {
+		return;
+	}
 
-    switch (header.SegmentType) {
-        case SegmentType::LogicalScenegraph:
-            break;
-        case SegmentType::JT_BRep:
-            break;
-        case SegmentType::PMIData:
-            break;
-        case SegmentType::MetaData:
-            break;
-        case SegmentType::Shape:
-            break;
-        case SegmentType::ShapeLOD0:
-            break;
-        case SegmentType::ShapeLOD1:
-            break;
-        case SegmentType::ShapeLOD2:
-            break;
-        case SegmentType::ShapeLOD3:
-            break;
-        case SegmentType::ShapeLOD4:
-            break;
-        case SegmentType::ShapeLOD5:
-            break;
-        case SegmentType::ShapeLOD6:
-            break;
-        case SegmentType::ShapeLOD7:
-            break;
-        case SegmentType::ShapeLOD8:
-            break;
-        case SegmentType::ShapeLOD9:
-            break;
-        case SegmentType::XT_BRep:
-            break;
-        case SegmentType::WireframeRepresentation:
-            break;
-        case SegmentType::ULP:
-            break;
-        case SegmentType::LWPA:
-            break;
-        default:
-            break;
-    }
+	SegmentHeader header;
+	::memcpy(&header, &buffer[entry->segment_offset], entry->segment_lenght);
+	header.SegmentID;
+	const bool compressed = isZLibCompressionEnabled((SegmentTypeEnum)header.SegmentType);
+	switch ((SegmentTypeEnum)header.SegmentType) {
+		case SegmentTypeEnum::LogicalScenegraph:
+			readLSGSegment(header, compressed, buffer, offset);
+			break;
+
+		case SegmentTypeEnum::JT_BRep:
+			break;
+		case SegmentTypeEnum::PMIData:
+			break;
+		case SegmentTypeEnum::MetaData:
+			break;
+		case SegmentTypeEnum::Shape:
+			break;
+		case SegmentTypeEnum::ShapeLOD0:
+			break;
+		case SegmentTypeEnum::ShapeLOD1:
+			break;
+		case SegmentTypeEnum::ShapeLOD2:
+			break;
+		case SegmentTypeEnum::ShapeLOD3:
+			break;
+		case SegmentTypeEnum::ShapeLOD4:
+			break;
+		case SegmentTypeEnum::ShapeLOD5:
+			break;
+		case SegmentTypeEnum::ShapeLOD6:
+			break;
+		case SegmentTypeEnum::ShapeLOD7:
+			break;
+		case SegmentTypeEnum::ShapeLOD8:
+			break;
+		case SegmentTypeEnum::ShapeLOD9:
+			break;
+		case SegmentTypeEnum::XT_BRep:
+			break;
+		case SegmentTypeEnum::WireframeRepresentation:
+			break;
+		case SegmentTypeEnum::ULP:
+			break;
+		case SegmentTypeEnum::LWPA:
+			break;
+		default:
+			break;
+	}
 }
 
+void JTImporter::readLogicalElementHeaderZLib(LogicalElementHeaderZLib &headerZLib, DataBuffer &buffer, size_t &offset) {
+	::memcpy(&headerZLib, &buffer[offset], sizeof(LogicalElementHeaderZLib));
+}
 
-} //! namespace Assimp
+void readBaseNodeData(BaseNodeData &baseNodeData, JTImporter::DataBuffer &buffer, size_t &offset) {
+	::memcpy(&baseNodeData.Version, &buffer[offset], sizeof(i16));
+	offset += sizeof(i16);
+	::memcpy(&baseNodeData.NodeFlags, &buffer[offset], sizeof(u32));
+	offset += sizeof(u32);
+	::memcpy(&baseNodeData.AttributeCount, &buffer[offset], sizeof(i32));
+	offset += sizeof(i32);
+	if (baseNodeData.AttributeCount > 0) {
+		baseNodeData.AttributeObjectIds = new i32[baseNodeData.AttributeCount];
+		::memcpy(baseNodeData.AttributeObjectIds, &buffer[offset], sizeof(i32) * baseNodeData.AttributeCount);
+	}
+}
+
+void JTImporter::readLSGSegment(SegmentHeader header, bool isCompressed, DataBuffer &buffer, size_t &offset) {
+	if (isCompressed) {
+		LogicalElementHeaderZLib header;
+		readLogicalElementHeaderZLib(header, buffer, offset);
+	}
+
+}
+
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_JT_IMPORTER

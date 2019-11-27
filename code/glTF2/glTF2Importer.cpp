@@ -204,11 +204,21 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 
 		if (prop.textureTransformSupported) {
 			aiUVTransform transform;
-			transform.mTranslation.x = prop.TextureTransformExt_t.offset[0];
-			transform.mTranslation.y = prop.TextureTransformExt_t.offset[1];
-			transform.mRotation = prop.TextureTransformExt_t.rotation;
 			transform.mScaling.x = prop.TextureTransformExt_t.scale[0];
 			transform.mScaling.y = prop.TextureTransformExt_t.scale[1];
+			transform.mRotation = -prop.TextureTransformExt_t.rotation; // must be negated
+
+			// A change of coordinates is required to map glTF UV transformations into the space used by
+			// Assimp. In glTF all UV origins are at 0,1 (top left of texture) in Assimp space. In Assimp
+			// rotation occurs around the image center (0.5,0.5) where as in glTF rotation is around the
+			// texture origin. All three can be corrected for solely by a change of the translation since
+			// the transformations available are shape preserving. Note the importer already flips the V
+			// coordinate of the actual meshes during import.
+			ai_real rcos(cos(-transform.mRotation));
+			ai_real rsin(sin(-transform.mRotation));
+			transform.mTranslation.x = (0.5 * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
+			transform.mTranslation.y = ((0.5 * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
+
 			mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
 		}
 

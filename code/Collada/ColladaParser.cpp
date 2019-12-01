@@ -3234,13 +3234,12 @@ void ColladaParser::ReadScene()
 
 // ------------------------------------------------------------------------------------------------
 // Aborts the file reading with an exception
-AI_WONT_RETURN void ColladaParser::ThrowException(const std::string& pError) const
-{
+AI_WONT_RETURN void ColladaParser::ThrowException(const std::string& pError) const {
     throw DeadlyImportError(format() << "Collada: " << mFileName << " - " << pError);
 }
-void ColladaParser::ReportWarning(const char* msg, ...)
-{
-    ai_assert(NULL != msg);
+
+void ColladaParser::ReportWarning(const char* msg, ...) {
+    ai_assert(nullptr != msg);
 
     va_list args;
     va_start(args, msg);
@@ -3255,11 +3254,11 @@ void ColladaParser::ReportWarning(const char* msg, ...)
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the current element
-void ColladaParser::SkipElement()
-{
+void ColladaParser::SkipElement() {
     // nothing to skip if it's an <element />
-    if (mReader->isEmptyElement())
+    if (mReader->isEmptyElement()) {
         return;
+    }
 
     // reroute
     SkipElement(mReader->getNodeName());
@@ -3267,63 +3266,75 @@ void ColladaParser::SkipElement()
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the given element
-void ColladaParser::SkipElement(const char* pElement)
-{
+void ColladaParser::SkipElement(const char* pElement) {
     // copy the current node's name because it'a pointer to the reader's internal buffer,
     // which is going to change with the upcoming parsing
     std::string element = pElement;
-    while (mReader->read())
-    {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
-            if (mReader->getNodeName() == element)
+    while (mReader->read()) {
+        if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+            if (mReader->getNodeName() == element) {
                 break;
+            }
+        }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Tests for an opening element of the given name, throws an exception if not found
-void ColladaParser::TestOpening(const char* pName)
-{
+void ColladaParser::TestOpening(const char* pName) {
     // read element start
-    if (!mReader->read())
+    if (!mReader->read()) {
         ThrowException(format() << "Unexpected end of file while beginning of <" << pName << "> element.");
+    }
     // whitespace in front is ok, just read again if found
-    if (mReader->getNodeType() == irr::io::EXN_TEXT)
-        if (!mReader->read())
+    if (mReader->getNodeType() == irr::io::EXN_TEXT) {
+        if (!mReader->read()) {
             ThrowException(format() << "Unexpected end of file while reading beginning of <" << pName << "> element.");
+        }
+    }
 
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp(mReader->getNodeName(), pName) != 0)
+    if (mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp(mReader->getNodeName(), pName) != 0) {
         ThrowException(format() << "Expected start of <" << pName << "> element.");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Tests for the closing tag of the given element, throws an exception if not found
-void ColladaParser::TestClosing(const char* pName)
-{
-    // check if we're already on the closing tag and return right away
-    if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp(mReader->getNodeName(), pName) == 0)
+void ColladaParser::TestClosing(const char* pName) {
+    // check if we have an empty (self-closing) element
+    if (mReader->isEmptyElement()) {
         return;
+    }
+
+    // check if we're already on the closing tag and return right away
+    if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp(mReader->getNodeName(), pName) == 0) {
+        return;
+    }
 
     // if not, read some more
-    if (!mReader->read())
+    if (!mReader->read()) {
         ThrowException(format() << "Unexpected end of file while reading end of <" << pName << "> element.");
+    }
     // whitespace in front is ok, just read again if found
-    if (mReader->getNodeType() == irr::io::EXN_TEXT)
-        if (!mReader->read())
+    if (mReader->getNodeType() == irr::io::EXN_TEXT) {
+        if (!mReader->read()) {
             ThrowException(format() << "Unexpected end of file while reading end of <" << pName << "> element.");
+        }
+    }
 
     // but this has the be the closing tag, or we're lost
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp(mReader->getNodeName(), pName) != 0)
+    if (mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp(mReader->getNodeName(), pName) != 0) {
         ThrowException(format() << "Expected end of <" << pName << "> element.");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns the index of the named attribute or -1 if not found. Does not throw, therefore useful for optional attributes
-int ColladaParser::GetAttribute(const char* pAttr) const
-{
+int ColladaParser::GetAttribute(const char* pAttr) const {
     int index = TestAttribute(pAttr);
-    if (index != -1)
+    if (index != -1) {
         return index;
+    }
 
     // attribute not found -> throw an exception
     ThrowException(format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.");

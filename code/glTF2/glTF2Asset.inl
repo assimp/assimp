@@ -1492,10 +1492,11 @@ inline void Asset::SetAsBinary()
 inline void Asset::ReadExtensionsRequired(Document& doc)
 {
     Value* extsRequired = FindArray(doc, "extensionsRequired");
-    if (!extsRequired) return;
+    if (nullptr == extsRequired) {
+	return;
+    }
 
     std::gltf_unordered_map<std::string, bool> exts;
-
     for (unsigned int i = 0; i < extsRequired->Size(); ++i) {
         if ((*extsRequired)[i].IsString()) {
             exts[(*extsRequired)[i].GetString()] = true;

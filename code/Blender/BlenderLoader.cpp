@@ -444,7 +444,6 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         texture->achFormatHint[2] = s+3>e ? '\0' : ::tolower( s[3] );
         texture->achFormatHint[3] = '\0';
 
-        // texture->mHeight = 0;
         texture->mWidth = img->packedfile->size;
         uint8_t *ch = new uint8_t[texture->mWidth];
 

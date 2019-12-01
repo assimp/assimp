@@ -29,6 +29,8 @@
 #define XFILE "7.txt\0"
 #define XMODE 0100777
 
+#define UNIXMODE 0100644
+
 #define UNUSED(x) (void)x
 
 static int total_entries = 0;
@@ -102,7 +104,8 @@ static void test_read(void) {
   assert(0 == zip_entry_close(zip));
   free(buf);
   buf = NULL;
-  
+  bufsize = 0;
+
   assert(0 == zip_entry_open(zip, "test/test-2.txt"));
   assert(strlen(TESTDATA2) == zip_entry_size(zip));
   assert(CRC32DATA2 == zip_entry_crc32(zip));
@@ -131,7 +134,8 @@ static void test_read(void) {
   assert(0 == zip_entry_close(zip));
   free(buf);
   buf = NULL;
-  
+  bufsize = 0;
+
   buftmp = strlen(TESTDATA1);
   buf = calloc(buftmp, sizeof(char));
   assert(0 == zip_entry_open(zip, "test/test-1.txt"));
@@ -433,6 +437,35 @@ static void test_mtime(void) {
   remove(ZIPNAME);
 }
 
+static void test_unix_permissions(void) {
+#if defined(_WIN64) || defined(_WIN32) || defined(__WIN32__)
+#else
+  // UNIX or APPLE
+  struct MZ_FILE_STAT_STRUCT file_stats;
+
+  remove(ZIPNAME);
+
+  struct zip_t *zip = zip_open(ZIPNAME, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+  assert(zip != NULL);
+
+  assert(0 == zip_entry_open(zip, RFILE));
+  assert(0 == zip_entry_write(zip, TESTDATA1, strlen(TESTDATA1)));
+  assert(0 == zip_entry_close(zip));
+
+  zip_close(zip);
+
+  remove(RFILE);
+
+  assert(0 == zip_extract(ZIPNAME, ".", NULL, NULL));
+
+  assert(0 == MZ_FILE_STAT(RFILE, &file_stats));
+  assert(UNIXMODE == file_stats.st_mode);
+
+  remove(RFILE);
+  remove(ZIPNAME);
+#endif
+}
+
 int main(int argc, char *argv[]) {
   UNUSED(argc);
   UNUSED(argv);
@@ -453,6 +486,7 @@ int main(int argc, char *argv[]) {
   test_write_permissions();
   test_exe_permissions();
   test_mtime();
+  test_unix_permissions();
 
   remove(ZIPNAME);
   return 0;

@@ -2,6 +2,7 @@
 build
 .project
 *.kdev4*
+.DS_Store
 
 # build artefacts
 *.o

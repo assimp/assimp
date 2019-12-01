@@ -34,6 +34,8 @@ if(MSVC)
     endif()
   endif()
   set(ASSIMP_LIBRARY_SUFFIX "@ASSIMP_LIBRARY_SUFFIX@-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" )
+  	
+  file(TO_NATIVE_PATH ${_IMPORT_PREFIX} _IMPORT_PREFIX)
 
   if(ASSIMP_BUILD_SHARED_LIBS)
     set(sharedLibraryName "assimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_SHARED_LIBRARY_SUFFIX@")
@@ -73,6 +75,7 @@ else()
     endif()
     set_target_properties(assimp::assimp PROPERTIES
       IMPORTED_SONAME_RELEASE "${sharedLibraryName}"
+
       IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/${sharedLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )

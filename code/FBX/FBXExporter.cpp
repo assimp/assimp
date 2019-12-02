@@ -1860,6 +1860,7 @@ void FBXExporter::WriteObjects ()
             sdnode.AddChild("Version", int32_t(100));
             sdnode.AddChild("UserData", "", "");
 
+            std::set<int32_t> setWeightedVertex;
             // add indices and weights, if any
             if (b) {
                 std::vector<int32_t> subdef_indices;
@@ -1867,7 +1868,8 @@ void FBXExporter::WriteObjects ()
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
                     int32_t vi = vertex_indices[b->mWeights[wi].mVertexId];
-                    if (vi == last_index) {
+                    bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
+                    if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx
                         // TODO, FIXME: this assumes identically-located vertices
                         // will always deform in the same way.
@@ -1877,6 +1879,7 @@ void FBXExporter::WriteObjects ()
                         // identical vertex.
                         continue;
                     }
+                    setWeightedVertex.insert(vi);
                     subdef_indices.push_back(vi);
                     subdef_weights.push_back(b->mWeights[wi].mWeight);
                     last_index = vi;

@@ -685,6 +685,13 @@ namespace glTF2
         Ref<Texture> texture;
         unsigned int index;
         unsigned int texCoord = 0;
+
+        bool textureTransformSupported = false;
+        struct TextureTransformExt {
+			float offset[2];
+			float rotation;
+			float scale[2];
+		} TextureTransformExt_t;
     };
 
     struct NormalTextureInfo : TextureInfo
@@ -1024,8 +1031,14 @@ namespace glTF2
             bool KHR_materials_pbrSpecularGlossiness;
             bool KHR_materials_unlit;
             bool KHR_lights_punctual;
-
+			bool KHR_texture_transform;
         } extensionsUsed;
+
+        //! Keeps info about the required extensions
+        struct RequiredExtensions
+        {
+            bool KHR_draco_mesh_compression;
+        } extensionsRequired;
 
         AssetMetadata asset;
 
@@ -1069,6 +1082,7 @@ namespace glTF2
             , textures      (*this, "textures")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
+            memset(&extensionsRequired, 0, sizeof(extensionsRequired));
         }
 
         //! Main function
@@ -1087,6 +1101,7 @@ namespace glTF2
         void ReadBinaryHeader(IOStream& stream, std::vector<char>& sceneData);
 
         void ReadExtensionsUsed(Document& doc);
+        void ReadExtensionsRequired(Document& doc);
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };

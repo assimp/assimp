@@ -67,6 +67,12 @@ ASSIMP_API const char*  aiGetLegalString  ()    {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get Assimp patch version
+ASSIMP_API unsigned int aiGetVersionPatch() {
+	return VER_PATCH;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get Assimp minor version
 ASSIMP_API unsigned int aiGetVersionMinor ()    {
     return VER_MINOR;

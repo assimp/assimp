@@ -23,16 +23,39 @@ int main(int argc, char *argv[]) {
   uint step = 0;
   int cmp_status;
   uLong src_len = (uLong)strlen(s_pStr);
-  uLong cmp_len = compressBound(src_len);
   uLong uncomp_len = src_len;
+  uLong cmp_len;
   uint8 *pCmp, *pUncomp;
+  size_t sz;
   uint total_succeeded = 0;
   (void)argc, (void)argv;
 
   printf("miniz.c version: %s\n", MZ_VERSION);
 
   do {
+    pCmp = (uint8 *)tdefl_compress_mem_to_heap(s_pStr, src_len, &cmp_len, 0);
+    if (!pCmp) {
+      printf("tdefl_compress_mem_to_heap failed\n");
+      return EXIT_FAILURE;
+    }
+    if (src_len <= cmp_len) {
+      printf("tdefl_compress_mem_to_heap failed: from %u to %u bytes\n",
+             (mz_uint32)uncomp_len, (mz_uint32)cmp_len);
+      free(pCmp);
+      return EXIT_FAILURE;
+    }
+
+    sz = tdefl_compress_mem_to_mem(pCmp, cmp_len, s_pStr, src_len, 0);
+    if (sz != cmp_len) {
+      printf("tdefl_compress_mem_to_mem failed: expected %u, got %u\n",
+             (mz_uint32)cmp_len, (mz_uint32)sz);
+      free(pCmp);
+      return EXIT_FAILURE;
+    }
+
     // Allocate buffers to hold compressed and uncompressed data.
+    free(pCmp);
+    cmp_len = compressBound(src_len);
     pCmp = (mz_uint8 *)malloc((size_t)cmp_len);
     pUncomp = (mz_uint8 *)malloc((size_t)src_len);
     if ((!pCmp) || (!pUncomp)) {

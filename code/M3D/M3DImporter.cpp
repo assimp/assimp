@@ -44,6 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define M3D_IMPLEMENTATION
 #define M3D_ASCII
+#define M3D_NONORMALS       /* leave the post-processing to Assimp */
+#define M3D_NOWEIGHTS
+#define M3D_NOANIMATION
 
 #include <assimp/IOStreamBuffer.h>
 #include <memory>
@@ -104,16 +107,21 @@ extern "C" {
         std::string file(fn);
         std::unique_ptr<Assimp::IOStream> pStream(
             (reinterpret_cast<Assimp::IOSystem*>(m3dimporter_pIOHandler))->Open( file, "rb"));
-        size_t fileSize = pStream->FileSize();
-        // should be allocated with malloc(), because the library will call free() to deallocate
-        unsigned char *data = (unsigned char*)malloc(fileSize);
-        if( !data || !pStream.get() || !fileSize || fileSize != pStream->Read(data,1,fileSize)) {
+        size_t fileSize = 0;
+        unsigned char *data = NULL;
+        // sometimes pStream is nullptr for some reason (should be an empty object returning nothing I guess)
+        if(pStream) {
+            fileSize = pStream->FileSize();
+            // should be allocated with malloc(), because the library will call free() to deallocate
+            data = (unsigned char*)malloc(fileSize);
+            if( !data || !pStream.get() || !fileSize || fileSize != pStream->Read(data,1,fileSize)) {
+                pStream.reset();
+                *size = 0;
+                // don't throw a deadly exception, it's not fatal if we can't read an external asset
+                return nullptr;
+            }
             pStream.reset();
-            *size = 0;
-            // don't throw a deadly exception, it's not fatal if we can't read an external asset
-            return nullptr;
         }
-        pStream.reset();
         *size = (int)fileSize;
         return data;
     }
@@ -307,7 +315,7 @@ void M3DImporter::importMaterials()
                 m->prop[j].value.textureid < m3d->numtexture &&
                 m3d->texture[m->prop[j].value.textureid].name) {
                     name.Set(std::string(std::string(m3d->texture[m->prop[j].value.textureid].name) + ".png"));
-                    mat->AddProperty(&name, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
+                    mat->AddProperty(&name, aiTxProps[k].pKey, aiTxProps[k].type, aiTxProps[k].index);
                     n = 0;
                     mat->AddProperty(&n, 1, _AI_MATKEY_UVWSRC_BASE, aiProps[k].type, aiProps[k].index);
             }
@@ -321,6 +329,7 @@ void M3DImporter::importMaterials()
 void M3DImporter::importTextures()
 {
     unsigned int i;
+    const char *formatHint[] = { "rgba0800", "rgba0808", "rgba8880", "rgba8888" };
     m3dtx_t *t;
 
     ai_assert(mScene != nullptr);
@@ -334,14 +343,29 @@ void M3DImporter::importTextures()
 
     mScene->mTextures = new aiTexture*[m3d->numtexture];
     for(i = 0; i < m3d->numtexture; i++) {
+        unsigned int j, k;
         t = &m3d->texture[i];
+        if(!t->w || !t->h || !t->f || !t->d) continue;
         aiTexture *tx = new aiTexture;
-        strcpy(tx->achFormatHint, "rgba8888");
+        strcpy(tx->achFormatHint, formatHint[t->f - 1]);
         tx->mFilename = aiString(std::string(t->name) + ".png");
         tx->mWidth = t->w;
         tx->mHeight = t->h;
         tx->pcData = new aiTexel[ tx->mWidth*tx->mHeight ];
-        memcpy(tx->pcData, t->d, tx->mWidth*tx->mHeight*4);
+        for(j = k = 0; j < tx->mWidth*tx->mHeight; j++) {
+            switch(t->f) {
+                case 1: tx->pcData[j].g = t->d[k++]; break;
+                case 2: tx->pcData[j].g = t->d[k++]; tx->pcData[j].a = t->d[k++]; break;
+                case 3:
+                    tx->pcData[j].r = t->d[k++]; tx->pcData[j].g = t->d[k++];
+                    tx->pcData[j].b = t->d[k++]; tx->pcData[j].a = 255;
+                break;
+                case 4:
+                    tx->pcData[j].r = t->d[k++]; tx->pcData[j].g = t->d[k++];
+                    tx->pcData[j].b = t->d[k++]; tx->pcData[j].a = t->d[k++];
+                break;
+            }
+        }
         mScene->mTextures[i] = tx;
     }
 }
@@ -372,9 +396,14 @@ void M3DImporter::importMeshes()
         // we must switch mesh if material changes
         if(lastMat != m3d->face[i].materialid) {
             lastMat = m3d->face[i].materialid;
-            if(pMesh && vertices->size() && faces->size()) {
+            if(pMesh && vertices && vertices->size() && faces && faces->size()) {
                 populateMesh(pMesh, faces, vertices, normals, texcoords, colors, vertexids);
                 meshes->push_back(pMesh);
+                delete faces;
+                delete vertices;
+                delete normals;
+                delete texcoords;
+                delete colors;
                 delete vertexids;   // this is not stored in pMesh, just to collect bone vertices
             }
             pMesh = new aiMesh;
@@ -574,15 +603,15 @@ void M3DImporter::convertPose(aiMatrix4x4 *m, unsigned int posid, unsigned int o
         m->a2 = m->a3 = m->b1 = m->b3 = m->c1 = m->c2 = 0.0;
         m->a1 = m->b2 = m->c3 = -1.0;
     } else {
-        m->a1 = 1 - 2 * (q->y * q->y + q->z * q->z); if(m->a1 > -1e-7 && m->a1 < 1e-7) m->a1 = 0.0;
-        m->a2 = 2 * (q->x * q->y - q->z * q->w);     if(m->a2 > -1e-7 && m->a2 < 1e-7) m->a2 = 0.0;
-        m->a3 = 2 * (q->x * q->z + q->y * q->w);     if(m->a3 > -1e-7 && m->a3 < 1e-7) m->a3 = 0.0;
-        m->b1 = 2 * (q->x * q->y + q->z * q->w);     if(m->b1 > -1e-7 && m->b1 < 1e-7) m->b1 = 0.0;
-        m->b2 = 1 - 2 * (q->x * q->x + q->z * q->z); if(m->b2 > -1e-7 && m->b2 < 1e-7) m->b2 = 0.0;
-        m->b3 = 2 * (q->y * q->z - q->x * q->w);     if(m->b3 > -1e-7 && m->b3 < 1e-7) m->b3 = 0.0;
-        m->c1 = 2 * (q->x * q->z - q->y * q->w);     if(m->c1 > -1e-7 && m->c1 < 1e-7) m->c1 = 0.0;
-        m->c2 = 2 * (q->y * q->z + q->x * q->w);     if(m->c2 > -1e-7 && m->c2 < 1e-7) m->c2 = 0.0;
-        m->c3 = 1 - 2 * (q->x * q->x + q->y * q->y); if(m->c3 > -1e-7 && m->c3 < 1e-7) m->c3 = 0.0;
+        m->a1 = 1 - 2 * (q->y * q->y + q->z * q->z); if(m->a1 > -M3D_EPSILON && m->a1 < M3D_EPSILON) m->a1 = 0.0;
+        m->a2 = 2 * (q->x * q->y - q->z * q->w);     if(m->a2 > -M3D_EPSILON && m->a2 < M3D_EPSILON) m->a2 = 0.0;
+        m->a3 = 2 * (q->x * q->z + q->y * q->w);     if(m->a3 > -M3D_EPSILON && m->a3 < M3D_EPSILON) m->a3 = 0.0;
+        m->b1 = 2 * (q->x * q->y + q->z * q->w);     if(m->b1 > -M3D_EPSILON && m->b1 < M3D_EPSILON) m->b1 = 0.0;
+        m->b2 = 1 - 2 * (q->x * q->x + q->z * q->z); if(m->b2 > -M3D_EPSILON && m->b2 < M3D_EPSILON) m->b2 = 0.0;
+        m->b3 = 2 * (q->y * q->z - q->x * q->w);     if(m->b3 > -M3D_EPSILON && m->b3 < M3D_EPSILON) m->b3 = 0.0;
+        m->c1 = 2 * (q->x * q->z - q->y * q->w);     if(m->c1 > -M3D_EPSILON && m->c1 < M3D_EPSILON) m->c1 = 0.0;
+        m->c2 = 2 * (q->y * q->z + q->x * q->w);     if(m->c2 > -M3D_EPSILON && m->c2 < M3D_EPSILON) m->c2 = 0.0;
+        m->c3 = 1 - 2 * (q->x * q->x + q->y * q->y); if(m->c3 > -M3D_EPSILON && m->c3 < M3D_EPSILON) m->c3 = 0.0;
     }
 
     /* set translation */

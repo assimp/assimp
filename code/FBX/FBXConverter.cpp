@@ -1597,11 +1597,11 @@ namespace Assimp {
             aiBone *bone = nullptr;
 
             if (bone_map.count(deformer_name)) {
-                ASSIMP_LOG_DEBUG_F("retrieved bone from lookup %s. Deformer:%s", bone_name.C_Str(), deformer_name.c_str());
-                bone = bone_map[deformer_name];
-            } else {
-                ASSIMP_LOG_DEBUG_F("created new bone %s. Deformer: %s", bone_name.C_Str(), deformer_name.c_str());
-                bone = new aiBone();
+				ASSIMP_LOG_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
+				bone = bone_map[deformer_name];
+			} else {
+				ASSIMP_LOG_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
+				bone = new aiBone();
                 bone->mName = bone_name;
 
                 // store local transform link for post processing
@@ -1647,7 +1647,7 @@ namespace Assimp {
                 bone_map.insert(std::pair<const std::string, aiBone *>(deformer_name, bone));
             }
 
-            ASSIMP_LOG_DEBUG_F("bone research: Indicies size: %zu", out_indices.size());
+            ASSIMP_LOG_DEBUG_F("bone research: Indicies size: ", out_indices.size());
 
             // lookup must be populated in case something goes wrong
             // this also allocates bones to mesh instance outside

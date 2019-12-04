@@ -493,7 +493,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
     ReadFile(fbuff,pFlags);
     SetIOHandler(io);
 
-    ASSIMP_END_EXCEPTION_REGION(const aiScene*);
+    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString);
     return pimpl->mScene;
 }
 
@@ -710,7 +710,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
     // either successful or failure - the pointer expresses it anyways
-    ASSIMP_END_EXCEPTION_REGION(const aiScene*);
+    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString);
     return pimpl->mScene;
 }
 

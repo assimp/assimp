@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, standard library.
 #include <memory>
+#include <limits>
 #include <inttypes.h>
 
 using namespace rapidjson;
@@ -152,6 +153,62 @@ static void IdentityMatrix4(mat4& o) {
     o[12] = 0; o[13] = 0; o[14] = 0; o[15] = 1;
 }
 
+template<typename T>
+void SetAccessorRange(Ref<Accessor> acc, void* data, size_t count,
+	unsigned int numCompsIn, unsigned int numCompsOut)
+{
+	ai_assert(numCompsOut <= numCompsIn);
+
+	// Allocate and initialize with large values.
+	for (unsigned int i = 0 ; i < numCompsOut ; i++) {
+		acc->min.push_back( std::numeric_limits<double>::max());
+		acc->max.push_back(-std::numeric_limits<double>::max());
+	}
+
+	size_t totalComps = count * numCompsIn;
+	T* buffer_ptr = static_cast<T*>(data);
+	T* buffer_end = buffer_ptr + totalComps;
+
+	// Search and set extreme values.
+	for (; buffer_ptr < buffer_end ; buffer_ptr += numCompsIn) {
+		for (unsigned int j = 0 ; j < numCompsOut ; j++) {
+			double valueTmp = buffer_ptr[j];
+
+			if (valueTmp < acc->min[j]) {
+				acc->min[j] = valueTmp;
+			}
+			if (valueTmp > acc->max[j]) {
+				acc->max[j] = valueTmp;
+			}
+		}
+	}
+}
+
+inline void SetAccessorRange(ComponentType compType, Ref<Accessor> acc, void* data,
+		size_t count, unsigned int numCompsIn, unsigned int numCompsOut)
+{
+	switch (compType) {
+		case ComponentType_SHORT:
+			SetAccessorRange<short>(acc, data, count, numCompsIn, numCompsOut);
+			return;
+		case ComponentType_UNSIGNED_SHORT:
+			SetAccessorRange<unsigned short>(acc, data, count, numCompsIn, numCompsOut);
+			return;
+		case ComponentType_UNSIGNED_INT:
+			SetAccessorRange<unsigned int>(acc, data, count, numCompsIn, numCompsOut);
+			return;
+		case ComponentType_FLOAT:
+			SetAccessorRange<float>(acc, data, count, numCompsIn, numCompsOut);
+			return;
+		case ComponentType_BYTE:
+			SetAccessorRange<int8_t>(acc, data, count, numCompsIn, numCompsOut);
+			return;
+		case ComponentType_UNSIGNED_BYTE:
+			SetAccessorRange<uint8_t>(acc, data, count, numCompsIn, numCompsOut);
+			return;
+	}
+}
+
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
     size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
@@ -187,33 +244,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     acc->type = typeOut;
 
     // calculate min and max values
-    {
-        // Allocate and initialize with large values.
-        float float_MAX = 10000000000000.0f;
-        for (unsigned int i = 0 ; i < numCompsOut ; i++) {
-            acc->min.push_back( float_MAX);
-            acc->max.push_back(-float_MAX);
-        }
-
-        // Search and set extreme values.
-        float valueTmp;
-        for (unsigned int i = 0 ; i < count       ; i++) {
-            for (unsigned int j = 0 ; j < numCompsOut ; j++) {
-                if (numCompsOut == 1) {
-                  valueTmp = static_cast<unsigned short*>(data)[i];
-                } else {
-                  valueTmp = static_cast<aiVector3D*>(data)[i][j];
-                }
-
-                if (valueTmp < acc->min[j]) {
-                    acc->min[j] = valueTmp;
-                }
-                if (valueTmp > acc->max[j]) {
-                    acc->max[j] = valueTmp;
-                }
-            }
-        }
-    }
+	SetAccessorRange(compType, acc, data, count, numCompsIn, numCompsOut);
 
     // copy the data
     acc->WriteData(count, data, numCompsIn*bytesPerComp);

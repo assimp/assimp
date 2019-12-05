@@ -422,7 +422,7 @@ private:
         Model::RotOrder order);
 
     // ------------------------------------------------------------------------------------------------
-    // Copy information about the source of the document into scene metadata.
+    // Copy global geometric data and some information about the source asset into scene metadata.
     void ConvertGlobalSettings();
 
     // ------------------------------------------------------------------------------------------------

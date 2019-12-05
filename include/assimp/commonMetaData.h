@@ -53,9 +53,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_METADATA_SOURCE_FORMAT "SourceAsset_Format"
 
 /// Scene metadata holding the version of the source asset as a string, if available.
+/// Not all formats add this metadata.
 #define AI_METADATA_SOURCE_FORMAT_VERSION "SourceAsset_FormatVersion"
 
 /// Scene metadata holding the name of the software which generated the source asset, if available.
+/// Not all formats add this metadata.
 #define AI_METADATA_SOURCE_GENERATOR "SourceAsset_Generator"
 
 #endif

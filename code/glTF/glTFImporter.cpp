@@ -743,7 +743,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportLights(asset);
 
     ImportNodes(asset);
-
+    ImportCommonMetadata(asset);
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/postprocess.h>
 
 #include <assimp/scene.h>
+#include <assimp/commonMetaData.h>
 
 using namespace Assimp;
 
@@ -61,6 +62,31 @@ public:
 
 TEST_F( utglTFImportExport, importglTFFromFileTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+TEST_F(utglTFImportExport, sceneMetadata) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(scene);
+    ASSERT_TRUE(scene->mMetaData);
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT));
+        aiString format;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, format));
+        ASSERT_EQ(strcmp(format.C_Str(), "glTF Importer"), 0);
+    }
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT_VERSION));
+        aiString version;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT_VERSION, version));
+        ASSERT_EQ(strcmp(version.C_Str(), "1.0"), 0);
+    }
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_GENERATOR));
+        aiString generator;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator));
+        ASSERT_EQ(strncmp(generator.C_Str(), "collada2gltf", 12), 0);
+    }
 }
 
 TEST_F(utglTFImportExport, incorrect_vertex_arrays) {

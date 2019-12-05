@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 
@@ -695,6 +696,14 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
             }
         }
     }
+}
+
+void glTFImporter::ImportCommonMetadata(glTF::Asset& a)
+{
+    ai_assert(mScene->mMetaData == nullptr);
+    mScene->mMetaData = aiMetadata::Alloc(2);
+    mScene->mMetaData->Set(0, AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+    mScene->mMetaData->Set(1, AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
 }
 
 void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)

@@ -421,6 +421,8 @@ private:
         double& minTime,
         Model::RotOrder order);
 
+    // ------------------------------------------------------------------------------------------------
+    // Copy information about the source of the document into scene metadata.
     void ConvertGlobalSettings();
 
     // ------------------------------------------------------------------------------------------------

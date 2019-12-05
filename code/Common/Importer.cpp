@@ -78,6 +78,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/TinyFormatter.h>
 #include <assimp/Exceptional.h>
 #include <assimp/Profiler.h>
+#include <assimp/commonMetaData.h>
 #include <set>
 #include <memory>
 #include <cctype>
@@ -654,6 +655,10 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
         // If successful, apply all active post processing steps to the imported data
         if( pimpl->mScene)  {
+            if (!pimpl->mScene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT))
+            {
+                pimpl->mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT, aiString(ext));
+            }
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
             // The ValidateDS process is an exception. It is executed first, even before ScenePreprocessor is called.

@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 #include <unordered_map>
@@ -1301,6 +1302,13 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 	}
 }
 
+void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
+    ai_assert(mScene->mMetaData == nullptr);
+    mScene->mMetaData = aiMetadata::Alloc(2);
+    mScene->mMetaData->Set(0, AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+    mScene->mMetaData->Set(1, AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+}
+
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
 	// clean all member arrays
 	meshOffsets.clear();
@@ -1327,6 +1335,8 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 	ImportNodes(asset);
 
 	ImportAnimations(asset);
+
+    ImportCommonMetadata(asset);
 
 	if (pScene->mNumMeshes == 0) {
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

@@ -64,6 +64,29 @@ TEST_F( utglTFImportExport, importglTFFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
 
+TEST_F(utglTFImportExport, incorrect_vertex_arrays) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/IncorrectVertexArrays/Cube_v1.gltf",
+        aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);
+    EXPECT_EQ(scene->mMeshes[1]->mNumVertices, 35u);
+    EXPECT_EQ(scene->mMeshes[1]->mNumFaces, 11u);
+    EXPECT_EQ(scene->mMeshes[2]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[2]->mNumFaces, 18u);
+    EXPECT_EQ(scene->mMeshes[3]->mNumVertices, 35u);
+    EXPECT_EQ(scene->mMeshes[3]->mNumFaces, 17u);
+    EXPECT_EQ(scene->mMeshes[4]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[4]->mNumFaces, 12u);
+    EXPECT_EQ(scene->mMeshes[5]->mNumVertices, 35u);
+    EXPECT_EQ(scene->mMeshes[5]->mNumFaces, 11u);
+    EXPECT_EQ(scene->mMeshes[6]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[6]->mNumFaces, 18u);
+    EXPECT_EQ(scene->mMeshes[7]->mNumVertices, 35u);
+    EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
+}
+
 TEST_F(utglTFImportExport, sceneMetadata) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", aiProcess_ValidateDataStructure);
@@ -87,27 +110,4 @@ TEST_F(utglTFImportExport, sceneMetadata) {
         ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator));
         ASSERT_EQ(strncmp(generator.C_Str(), "collada2gltf", 12), 0);
     }
-}
-
-TEST_F(utglTFImportExport, incorrect_vertex_arrays) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/IncorrectVertexArrays/Cube_v1.gltf",
-        aiProcess_ValidateDataStructure);
-    EXPECT_NE(nullptr, scene);
-    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
-    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);
-    EXPECT_EQ(scene->mMeshes[1]->mNumVertices, 35u);
-    EXPECT_EQ(scene->mMeshes[1]->mNumFaces, 11u);
-    EXPECT_EQ(scene->mMeshes[2]->mNumVertices, 36u);
-    EXPECT_EQ(scene->mMeshes[2]->mNumFaces, 18u);
-    EXPECT_EQ(scene->mMeshes[3]->mNumVertices, 35u);
-    EXPECT_EQ(scene->mMeshes[3]->mNumFaces, 17u);
-    EXPECT_EQ(scene->mMeshes[4]->mNumVertices, 36u);
-    EXPECT_EQ(scene->mMeshes[4]->mNumFaces, 12u);
-    EXPECT_EQ(scene->mMeshes[5]->mNumVertices, 35u);
-    EXPECT_EQ(scene->mMeshes[5]->mNumFaces, 11u);
-    EXPECT_EQ(scene->mMeshes[6]->mNumVertices, 36u);
-    EXPECT_EQ(scene->mMeshes[6]->mNumFaces, 18u);
-    EXPECT_EQ(scene->mMeshes[7]->mNumVertices, 35u);
-    EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
 }

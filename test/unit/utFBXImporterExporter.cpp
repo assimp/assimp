@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
+#include <assimp/commonMetaData.h>
 
 using namespace Assimp;
 
@@ -282,4 +283,30 @@ TEST_F(utFBXImporterExporter, importOrphantEmbeddedTextureTest) {
     ASSERT_EQ(1u, scene->mNumTextures);
     ASSERT_TRUE(scene->mTextures[0]->pcData);
     ASSERT_EQ(9026u, scene->mTextures[0]->mWidth) << "FBX ASCII base64 compression used for a texture.";
+}
+
+TEST_F(utFBXImporterExporter, sceneMetadata) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/global_settings.fbx",
+        aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mMetaData, nullptr);
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT));
+        aiString format;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, format));
+        ASSERT_EQ(strcmp(format.C_Str(), "Autodesk FBX Importer"), 0);
+    }
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT_VERSION));
+        aiString version;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT_VERSION, version));
+        ASSERT_EQ(strcmp(version.C_Str(), "7400"), 0);
+    }
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_GENERATOR));
+        aiString generator;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator));
+        ASSERT_EQ(strncmp(generator.C_Str(), "Blender", 7), 0);
+    }
 }

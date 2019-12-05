@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/CreateAnimMesh.h>
 #include <assimp/commonMetaData.h>
+#include <assimp/StringUtils.h>
 
 #include <tuple>
 #include <memory>
@@ -3605,7 +3606,9 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                 return;
             }
 
-            out->mMetaData = aiMetadata::Alloc(17);
+            const bool hasGenerator = !doc.Creator().empty();
+
+            out->mMetaData = aiMetadata::Alloc(16 + (hasGenerator ? 1 : 0));
             out->mMetaData->Set(0, "UpAxis", doc.GlobalSettings().UpAxis());
             out->mMetaData->Set(1, "UpAxisSign", doc.GlobalSettings().UpAxisSign());
             out->mMetaData->Set(2, "FrontAxis", doc.GlobalSettings().FrontAxis());
@@ -3621,8 +3624,11 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             out->mMetaData->Set(12, "TimeSpanStart", doc.GlobalSettings().TimeSpanStart());
             out->mMetaData->Set(13, "TimeSpanStop", doc.GlobalSettings().TimeSpanStop());
             out->mMetaData->Set(14, "CustomFrameRate", doc.GlobalSettings().CustomFrameRate());
-            out->mMetaData->Set(15, AI_METADATA_SOURCE_FORMAT_VERSION, aiString(std::to_string(doc.FBXVersion())));
-            out->mMetaData->Set(16, AI_METADATA_SOURCE_GENERATOR, aiString(doc.Creator()));
+            out->mMetaData->Set(15, AI_METADATA_SOURCE_FORMAT_VERSION, aiString(to_string(doc.FBXVersion())));
+            if (hasGenerator)
+            {
+                out->mMetaData->Set(16, AI_METADATA_SOURCE_GENERATOR, aiString(doc.Creator()));
+            }
         }
 
         void FBXConverter::TransferDataToScene()

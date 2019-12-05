@@ -655,8 +655,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
         // If successful, apply all active post processing steps to the imported data
         if( pimpl->mScene)  {
-            if (!pimpl->mScene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT))
+            if (!pimpl->mScene->mMetaData || !pimpl->mScene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT))
             {
+                if (!pimpl->mScene->mMetaData)
+                {
+                    pimpl->mScene->mMetaData = new aiMetadata;
+                }
                 pimpl->mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT, aiString(ext));
             }
 

@@ -286,8 +286,8 @@ struct aiMetadata {
 			new_values[i] = mValues[i];
 		}
 
-		delete mKeys;
-		delete mValues;
+		delete[] mKeys;
+		delete[] mValues;
 
 		mKeys = new_keys;
 		mValues = new_values;

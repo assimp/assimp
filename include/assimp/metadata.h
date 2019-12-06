@@ -380,11 +380,14 @@ struct aiMetadata {
     /// Check whether there is a metadata entry for the given key.
     /// \param [in] Key - the key value value to check for.
     inline
-    bool HasKey(const char* key)
-    {
+    bool HasKey(const char* key) {
+        if ( nullptr == key ) {
+            return false;
+        }
+        
         // Search for the given key
         for (unsigned int i = 0; i < mNumProperties; ++i) {
-            if (strcmp(mKeys[i].C_Str(), key) == 0) {
+            if ( 0 == strncmp(mKeys[i].C_Str(), key, mKeys[i].length ) ) {
                 return true;
             }
         }

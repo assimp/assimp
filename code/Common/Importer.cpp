@@ -1080,7 +1080,7 @@ const std::string Importer::GetPropertyString(const char* szName, const std::str
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
 const aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const {
-    ai_assert(nullptr != pImp);
+    ai_assert(nullptr != pimpl);
     
     return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
 }

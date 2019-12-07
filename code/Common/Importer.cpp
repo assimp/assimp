@@ -365,8 +365,6 @@ bool Importer::IsDefaultProgressHandler() const {
 // ------------------------------------------------------------------------------------------------
 // Validate post process step flags
 bool _ValidateFlags(unsigned int pFlags) {
-    ai_assert(nullptr != pimpl);
-    
     if (pFlags & aiProcess_GenSmoothNormals && pFlags & aiProcess_GenNormals)   {
         ASSIMP_LOG_ERROR("#aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible");
         return false;
@@ -510,7 +508,6 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 
 // ------------------------------------------------------------------------------------------------
 void WriteLogOpening(const std::string& file) {
-    ai_assert(nullptr != pimpl);
     
     ASSIMP_LOG_INFO_F("Load ", file);
 
@@ -1023,7 +1020,7 @@ bool Importer::SetPropertyInteger(const char* szName, int iValue) {
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
 bool Importer::SetPropertyFloat(const char* szName, ai_real iValue) {
-    ai_assert(nullptr != pImp);
+    ai_assert(nullptr != pimpl);
     
     bool existing;
     ASSIMP_BEGIN_EXCEPTION_REGION();

@@ -76,7 +76,7 @@ class String(Structure):
             # Binary length of the string excluding the terminal 0. This is NOT the
             #  logical length of strings containing UTF-8 multibyte sequences! It's
             #  the number of bytes from the beginning of the string to its end.
-            ("length", c_size_t),
+            ("length", c_uint32),
 
             # String buffer. Size limit is MAXLEN
             ("data", c_char*MAXLEN),

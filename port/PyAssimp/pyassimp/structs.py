@@ -752,7 +752,7 @@ class Mesh(Structure):
             # Attachment meshes carry replacement data for some of the
             # mesh'es vertex components (usually positions, normals).
             # Note! Currently only works with Collada loader.
-            ("mAnimMesh", POINTER(POINTER(AnimMesh))),
+            ("mAnimMeshes", POINTER(POINTER(AnimMesh))),
 
             # Method of morphing when animeshes are specified.
             ("mMethod", c_uint),

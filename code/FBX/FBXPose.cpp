@@ -46,40 +46,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-#include "FBXParser.h"
 #include "FBXDocument.h"
-#include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
+#include "FBXImporter.h"
+#include "FBXParser.h"
 #include <iostream>
 
 namespace Assimp {
-    namespace FBX {
+namespace FBX {
 
-        using namespace Util;
-
-// ------------------------------------------------------------------------------------------------
-        FbxPose::FbxPose(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-                : Object(id,element,name)
-        {
-            const Scope& sc = GetRequiredScope(element);
-            std::cout << "pose name: " << name << std::endl;
-            for( auto element : sc.Elements())
-            {
-                std::cout << "pose element: " << element.first << std::endl;
-            }
-            const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
-
-        }
-
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-        FbxPose::~FbxPose()
-        {
-            // empty
-        }
-
-
-    }
+FbxPose::FbxPose(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+		Object(id, element, name) {
+	const Scope &sc = GetRequiredScope(element);
+	std::cout << "pose name: " << name << std::endl;
+	for (auto element : sc.Elements()) {
+		std::cout << "pose element: " << element.first << std::endl;
+	}
+	const std::string &classname = ParseTokenAsString(GetRequiredToken(element, 2));
 }
+
+// ------------------------------------------------------------------------------------------------
+FbxPose::~FbxPose() {
+	// empty
+}
+
+} // namespace FBX
+} // namespace Assimp
 
 #endif

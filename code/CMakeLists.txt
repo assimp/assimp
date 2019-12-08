@@ -603,6 +603,7 @@ ADD_ASSIMP_IMPORTER( FBX
   FBX/FBXUtil.h
   FBX/FBXUtil.cpp
   FBX/FBXDocument.h
+  FBX/FBXPose.cpp
   FBX/FBXDocument.cpp
   FBX/FBXProperties.h
   FBX/FBXProperties.cpp

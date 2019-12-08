@@ -122,54 +122,6 @@ TEST_F(utFBXImporterExporter, importCubesWithUnicodeDuplicatedNames) {
     ASSERT_STREQ(child10->mName.C_Str(), "\xd0\x9a\xd1\x83\xd0\xb1\x31");
 }
 
-TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/cubes_with_mirroring_and_pivot.fbx", aiProcess_ValidateDataStructure);
-    ASSERT_TRUE(scene);
-
-    ASSERT_TRUE(scene->mRootNode);
-    const auto root = scene->mRootNode;
-    ASSERT_STREQ(root->mName.C_Str(), "RootNode");
-    ASSERT_TRUE(root->mChildren);
-    ASSERT_EQ(root->mNumChildren, 2u);
-
-    const auto child0 = root->mChildren[0];
-    ASSERT_TRUE(child0);
-    ASSERT_STREQ(child0->mName.C_Str(), "Cube2");
-    ASSERT_TRUE(child0->mChildren);
-    ASSERT_EQ(child0->mNumChildren, 1u);
-
-    const auto child00 = child0->mChildren[0];
-    ASSERT_TRUE(child00);
-    ASSERT_STREQ(child00->mName.C_Str(), "Cube1");
-
-    const auto child1 = root->mChildren[1];
-    ASSERT_TRUE(child1);
-    ASSERT_STREQ(child1->mName.C_Str(), "Cube3");
-
-    auto parent = child1;
-    const size_t chain_length = 8u;
-    const char* chainStr[chain_length] = {
-        "Cube1_$AssimpFbx$_Translation",
-        "Cube1_$AssimpFbx$_RotationPivot",
-        "Cube1_$AssimpFbx$_RotationPivotInverse",
-        "Cube1_$AssimpFbx$_ScalingOffset",
-        "Cube1_$AssimpFbx$_ScalingPivot",
-        "Cube1_$AssimpFbx$_Scaling",
-        "Cube1_$AssimpFbx$_ScalingPivotInverse",
-        "Cube1"
-    };
-    for (size_t i = 0; i < chain_length; ++i) {
-        ASSERT_TRUE(parent->mChildren);
-        ASSERT_EQ(parent->mNumChildren, 1u);
-        auto node = parent->mChildren[0];
-        ASSERT_TRUE(node);
-        ASSERT_STREQ(node->mName.C_Str(), chainStr[i]);
-        parent = node;
-    }
-    ASSERT_EQ(0u, parent->mNumChildren) << "Leaf node";
-}
-
 TEST_F(utFBXImporterExporter, importCloseToIdentityTransforms) {
     Assimp::Importer importer;
     // This was asserting in FBXConverter.cpp because the transforms appeared to be the identity by one test, but not by another.

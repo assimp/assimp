@@ -1,3 +1,4 @@
+#pragma once
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
@@ -40,55 +41,57 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file M3DExporter.h
-*   @brief Declares the exporter class to write a scene to a Model 3D file
+/** @file M3DWrapper.h
+*   @brief Declares a class to wrap the C m3d SDK
 */
-#ifndef AI_M3DEXPORTER_H_INC
-#define AI_M3DEXPORTER_H_INC
+#ifndef AI_M3DWRAPPER_H_INC
+#define AI_M3DWRAPPER_H_INC
+#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER
 
-#ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
+#include <memory>
+#include <vector>
+#include <string>
 
-#include <assimp/types.h>
-//#include <assimp/material.h>
-#include <assimp/StreamWriter.h> // StreamWriterLE
-#include <assimp/Exceptional.h> // DeadlyExportError
+#include "m3d.h"
 
-#include <memory> // shared_ptr
+namespace Assimp {
+class IOSystem;
 
-struct aiScene;
-struct aiNode;
-struct aiMaterial;
-struct aiFace;
+class M3DWrapper {
+	m3d_t *m3d_ = nullptr;
+	unsigned char *saved_output_ = nullptr;
 
-namespace Assimp
-{
-    class IOSystem;
-    class IOStream;
-    class ExportProperties;
+public:
+	// Construct an empty M3D model
+	explicit M3DWrapper();
 
-    class M3DWrapper;
+	// Construct an M3D model from provided buffer
+	// NOTE: The m3d.h SDK function does not mark the data as const. Have assumed it does not write.
+	// BUG: SECURITY: The m3d.h SDK cannot be informed of the buffer size. BUFFER OVERFLOW IS CERTAIN
+	explicit M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer);
 
-    // ---------------------------------------------------------------------
-    /** Helper class to export a given scene to an M3D file. */
-    // ---------------------------------------------------------------------
-    class M3DExporter
-    {
-    public:
-        /// Constructor for a specific scene to export
-        M3DExporter(const aiScene* pScene, const ExportProperties* pProperties);
-        // call this to do the actual export
-        void doExport(const char* pFile, IOSystem* pIOSystem, bool toAscii);
+	~M3DWrapper();
 
-    private:
-        const aiScene* mScene; // the scene to export
-        const ExportProperties* mProperties; // currently unused
-        std::shared_ptr<IOStream> outfile; // file to write to
+	void reset();
 
-        // helper to do the recursive walking
-        void NodeWalk(const M3DWrapper &m3d, const aiNode* pNode, aiMatrix4x4 m);
-    };
-}
+	// Name
+	inline std::string Name() const {
+		if (m3d_) return std::string(m3d_->name);
+		return std::string();
+	}
 
-#endif // ASSIMP_BUILD_NO_M3D_EXPORTER
+	// Execute a save
+	unsigned char *Save(int quality, int flags, unsigned int &size);
+	void ClearSave();
 
-#endif // AI_M3DEXPORTER_H_INC
+	inline explicit operator bool() const { return m3d_ != nullptr; }
+
+	// Allow direct access to M3D API
+	inline m3d_t *operator->() const { return m3d_; }
+	inline m3d_t *M3D() const { return m3d_; }
+};
+} // namespace Assimp
+
+#endif
+
+#endif // AI_M3DWRAPPER_H_INC

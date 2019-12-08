@@ -411,6 +411,8 @@ ADD_ASSIMP_IMPORTER( M3D
   M3D/M3DMaterials.h
   M3D/M3DImporter.h
   M3D/M3DImporter.cpp
+  M3D/M3DWrapper.h
+  M3D/M3DWrapper.cpp
   M3D/m3d.h
 )
 

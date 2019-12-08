@@ -583,7 +583,7 @@ struct Image
     /** Embedded image data */
     std::vector<uint8_t> mImageData;
 
-    /** File format hint ofembedded image data */
+    /** File format hint of embedded image data */
     std::string mEmbeddedFormat;
 };
 

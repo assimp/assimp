@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_VERSION_H_INC
 #define AI_VERSION_H_INC
 
-#include "defs.h"
+#include <assimp/defs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,6 +61,13 @@ extern "C" {
  *  @return Pointer to static string.
  */
 ASSIMP_API const char*  aiGetLegalString  (void);
+
+// ---------------------------------------------------------------------------
+/** @brief Returns the current patch version number of Assimp.
+ *  @return Patch version of the Assimp runtime the application was
+ *    linked/built against
+ */
+ASSIMP_API unsigned int aiGetVersionPatch(void);
 
 // ---------------------------------------------------------------------------
 /** @brief Returns the current minor version number of Assimp.

@@ -538,12 +538,16 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 {
     Validate(&pAnimation->mName);
 
-    // validate all materials
-    if (pAnimation->mNumChannels)
+    // validate all animations
+    if (pAnimation->mNumChannels || pAnimation->mNumMorphMeshChannels)
     {
-        if (!pAnimation->mChannels) {
+        if (!pAnimation->mChannels && pAnimation->mNumChannels) {
             ReportError("aiAnimation::mChannels is NULL (aiAnimation::mNumChannels is %i)",
                 pAnimation->mNumChannels);
+        }
+        if (!pAnimation->mMorphMeshChannels && pAnimation->mNumMorphMeshChannels) {
+            ReportError("aiAnimation::mMorphMeshChannels is NULL (aiAnimation::mNumMorphMeshChannels is %i)",
+                pAnimation->mNumMorphMeshChannels);
         }
         for (unsigned int i = 0; i < pAnimation->mNumChannels;++i)
         {
@@ -553,6 +557,15 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
                     i, pAnimation->mNumChannels);
             }
             Validate(pAnimation, pAnimation->mChannels[i]);
+        }
+        for (unsigned int i = 0; i < pAnimation->mNumMorphMeshChannels;++i)
+        {
+            if (!pAnimation->mMorphMeshChannels[i])
+            {
+                ReportError("aiAnimation::mMorphMeshChannels[%i] is NULL (aiAnimation::mNumMorphMeshChannels is %i)",
+                    i, pAnimation->mNumMorphMeshChannels);
+            }
+            Validate(pAnimation, pAnimation->mMorphMeshChannels[i]);
         }
     }
     else {
@@ -590,15 +603,18 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
         ReportError("%s #%i is set, but there are only %i %s textures",
             szType,iIndex,iNumIndices,szType);
     }
-    if (!iNumIndices)return;
+	if (!iNumIndices) {
+		return;
+	}
     std::vector<aiTextureMapping> mappings(iNumIndices);
 
     // Now check whether all UV indices are valid ...
     bool bNoSpecified = true;
-    for (unsigned int i = 0; i < pMaterial->mNumProperties;++i)
-    {
+    for (unsigned int i = 0; i < pMaterial->mNumProperties;++i) {
         aiMaterialProperty* prop = pMaterial->mProperties[i];
-        if (prop->mSemantic != type)continue;
+		if (prop->mSemantic != type) {
+			continue;
+		}
 
         if ((int)prop->mIndex >= iNumIndices)
         {
@@ -621,7 +637,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
                 ReportError("Material property %s%i is expected to be 5 floats large (size is %i)",
                     prop->mKey.data,prop->mIndex, prop->mDataLength);
             }
-            mappings[prop->mIndex] = *((aiTextureMapping*)prop->mData);
+			//mappings[prop->mIndex] = ((aiUVTransform*)prop->mData);
         }
         else if (!::strcmp(prop->mKey.data,"$tex.uvwsrc")) {
             if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)
@@ -900,6 +916,48 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
         !pNodeAnim->mNumPositionKeys)
     {
         ReportError("A node animation channel must have at least one subtrack");
+    }
+}
+
+void ValidateDSProcess::Validate( const aiAnimation* pAnimation,
+     const aiMeshMorphAnim* pMeshMorphAnim)
+{
+    Validate(&pMeshMorphAnim->mName);
+
+    if (!pMeshMorphAnim->mNumKeys) {
+        ReportError("Empty mesh morph animation channel");
+    }
+
+    // otherwise check whether one of the keys exceeds the total duration of the animation
+    if (pMeshMorphAnim->mNumKeys)
+    {
+        if (!pMeshMorphAnim->mKeys)
+        {
+            ReportError("aiMeshMorphAnim::mKeys is NULL (aiMeshMorphAnim::mNumKeys is %i)",
+                pMeshMorphAnim->mNumKeys);
+        }
+        double dLast = -10e10;
+        for (unsigned int i = 0; i < pMeshMorphAnim->mNumKeys;++i)
+        {
+            // ScenePreprocessor will compute the duration if still the default value
+            // (Aramis) Add small epsilon, comparison tended to fail if max_time == duration,
+            //  seems to be due the compilers register usage/width.
+            if (pAnimation->mDuration > 0. && pMeshMorphAnim->mKeys[i].mTime > pAnimation->mDuration+0.001)
+            {
+                ReportError("aiMeshMorphAnim::mKeys[%i].mTime (%.5f) is larger "
+                    "than aiAnimation::mDuration (which is %.5f)",i,
+                    (float)pMeshMorphAnim->mKeys[i].mTime,
+                    (float)pAnimation->mDuration);
+            }
+            if (i && pMeshMorphAnim->mKeys[i].mTime <= dLast)
+            {
+                ReportWarning("aiMeshMorphAnim::mKeys[%i].mTime (%.5f) is smaller "
+                    "than aiMeshMorphAnim::mKeys[%i] (which is %.5f)",i,
+                    (float)pMeshMorphAnim->mKeys[i].mTime,
+                    i-1, (float)dLast);
+            }
+            dLast = pMeshMorphAnim->mKeys[i].mTime;
+        }
     }
 }
 

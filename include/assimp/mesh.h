@@ -255,6 +255,9 @@ struct aiVertexWeight {
 // Forward declare aiNode (pointer use only)
 struct aiNode;
 
+
+
+
 // ---------------------------------------------------------------------------
 /** @brief A single bone of a mesh.
  *
@@ -270,6 +273,7 @@ struct aiBone {
     //! The number of vertices affected by this bone.
     //! The maximum value for this member is #AI_MAX_BONE_WEIGHTS.
     unsigned int mNumWeights;
+    bool finalized;
 
 #ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
     // The bone armature node - used for skeleton conversion
@@ -304,7 +308,7 @@ struct aiBone {
     : mName()
     , mNumWeights( 0 )
     , mWeights( nullptr )
-    , mOffsetMatrix() {
+    , mOffsetMatrix(), finalized(false){
         // empty
     }
 
@@ -361,6 +365,21 @@ struct aiBone {
     ~aiBone() {
         delete [] mWeights;
     }
+#endif // __cplusplus
+};
+
+struct aiSkin {
+    // name of the skin
+    C_STRUCT aiString mName;
+
+    unsigned int mNumBones;
+    C_STRUCT aiBone* mBones;
+#ifdef __cplusplus
+    aiSkin() AI_NO_EXCEPT
+            : mName(),
+              mNumBones(0),
+              mBones(nullptr)
+    {}
 #endif // __cplusplus
 };
 

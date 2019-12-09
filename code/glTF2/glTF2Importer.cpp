@@ -1306,7 +1306,8 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
     ai_assert(mScene->mMetaData == nullptr);
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
-    if (hasVersion || hasGenerator)
+    const bool hasCopyright = !a.asset.copyright.empty();
+    if (hasVersion || hasGenerator || hasCopyright)
     {
         mScene->mMetaData = new aiMetadata;
         if (hasVersion)
@@ -1316,6 +1317,10 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
         if (hasGenerator)
         {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+        if (hasCopyright)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
         }
     }
 }

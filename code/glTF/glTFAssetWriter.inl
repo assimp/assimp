@@ -627,6 +627,9 @@ namespace glTF {
         asset.SetObject();
         asset.AddMember("version", Value(mAsset.asset.version, mAl).Move(), mAl);
         asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
+        if (!mAsset.asset.copyright.empty())
+            asset.AddMember("copyright", Value(mAsset.asset.copyright, mAl).Move(), mAl);
+
         mDoc.AddMember("asset", asset, mAl);
     }
 

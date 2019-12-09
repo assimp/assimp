@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdarg.h>
 #include "ColladaParser.h"
+#include <assimp/commonMetaData.h>
 #include <assimp/fast_atof.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/StringUtils.h>
@@ -276,6 +277,9 @@ void ColladaParser::ReadContents()
                 if (attrib != -1) {
                     const char* version = mReader->getAttributeValue(attrib);
 
+                    // Store declared format version string
+                    mAssetMetaData.emplace(AI_METADATA_SOURCE_FORMAT_VERSION, version);
+
                     if (!::strncmp(version, "1.5", 3)) {
                         mFormat = FV_1_5_n;
                         ASSIMP_LOG_DEBUG("Collada schema version is 1.5.n");
@@ -399,7 +403,7 @@ void ColladaParser::ReadAssetInfo()
             }
             else
             {
-                ReadMetaDataItem(mAssetMetaData);
+                ReadMetaDataItem(mAssetMetaData, GetColladaAssimpMetaKeys());
             }
         }
         else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
@@ -423,7 +427,7 @@ void ColladaParser::ReadContributorInfo()
     {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT)
         {
-            ReadMetaDataItem(mAssetMetaData);
+            ReadMetaDataItem(mAssetMetaData, GetColladaAssimpMetaKeys());
         }
         else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
         {
@@ -434,23 +438,36 @@ void ColladaParser::ReadContributorInfo()
     }
 }
 
+bool FindCommonKey(const char *collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
+    for (size_t i = 0; i < key_renaming.size(); ++i) {
+		if (strcmp(key_renaming[i].first, collada_key) == 0) {
+            found_index = i;
+            return true;
+		}
+	}
+    return false;
+}
+
 // ------------------------------------------------------------------------------------------------
 // Reads a single string metadata item
-void ColladaParser::ReadMetaDataItem(StringMetaData &metadata)
-{
-    // Metadata such as created, keywords, subject etc
-    const char* key_char = mReader->getNodeName();
-    if (key_char != nullptr)
-    {
+void ColladaParser::ReadMetaDataItem(StringMetaData &metadata, const MetaKeyPairVector &key_renaming) {
+	// Metadata such as created, keywords, subject etc
+	const char *key_char = mReader->getNodeName();
+	if (key_char != nullptr) {
         const std::string key_str(key_char);
-        const char* value_char = TestTextContent();
-        if (value_char != nullptr)
-        {
-            std::string camel_key_str = key_str;
-            ToCamelCase(camel_key_str);
+		const char *value_char = TestTextContent();
+		if (value_char != nullptr) {
             aiString aistr;
-            aistr.Set(value_char);
-            metadata.emplace(camel_key_str, aistr);
+			aistr.Set(value_char);
+
+			size_t found_index;
+			if (FindCommonKey(key_str.c_str(), key_renaming, found_index)) {
+                metadata.emplace(key_renaming[found_index].second, aistr);
+            } else {
+				std::string camel_key_str(key_str);
+				ToCamelCase(camel_key_str);
+				metadata.emplace(camel_key_str, aistr);
+			}
         }
         TestClosing(key_str.c_str());
     }

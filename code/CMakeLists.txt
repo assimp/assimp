@@ -66,6 +66,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.h
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
+  ${HEADER_PATH}/commonMetaData.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
@@ -348,6 +349,7 @@ ADD_ASSIMP_IMPORTER( BVH
 )
 
 ADD_ASSIMP_IMPORTER( COLLADA
+  Collada/ColladaHelper.cpp
   Collada/ColladaHelper.h
   Collada/ColladaLoader.cpp
   Collada/ColladaLoader.h

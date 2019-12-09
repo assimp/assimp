@@ -104,6 +104,11 @@ enum MorphMethod
     Relative
 };
 
+/** Common metadata keys as <Collada, Assimp> */
+typedef std::pair<const char*, const char*> MetaKeyPair;
+typedef std::vector<MetaKeyPair> MetaKeyPairVector;
+
+const MetaKeyPairVector &GetColladaAssimpMetaKeys();
 
 /** Contains all data for one of the different transformation types */
 struct Transform

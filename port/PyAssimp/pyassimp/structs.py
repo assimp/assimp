@@ -573,6 +573,9 @@ class AnimMesh(Structure):
     AI_MAX_NUMBER_OF_COLOR_SETS = 0x8
 
     _fields_ = [
+            #  Anim Mesh name
+            ("mName", String),
+
             # Replacement for aiMesh::mVertices. If this array is non-NULL,
             # it *must* contain mNumVertices entries. The corresponding
             # array in the host mesh must be non-NULL as well - animation

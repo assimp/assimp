@@ -176,7 +176,7 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 	// let the C SDK do the hard work for us
 	M3DWrapper m3d(pIOHandler, buffer);
 
-	
+
 	if (!m3d) {
 		throw DeadlyImportError("Unable to parse " + file + " as M3D.");
 	}
@@ -193,7 +193,7 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 	// now we just have to fill up the Assimp structures in pScene
 	importMaterials(m3d);
     importTextures(m3d);
-	importBones(m3d, -1U, pScene->mRootNode);
+	importBones(m3d, M3D_NOTDEFINED, pScene->mRootNode);
 	importMeshes(m3d);
 	importAnimations(m3d);
 
@@ -343,7 +343,7 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 // individually. In assimp there're per mesh vertex and UV lists, and they must be
 // indexed simultaneously.
 void M3DImporter::importMeshes(const M3DWrapper &m3d) {
-	unsigned int i, j, k, l, numpoly = 3, lastMat = -2U;
+	unsigned int i, j, k, l, numpoly = 3, lastMat = M3D_INDEXMAX;
 	std::vector<aiMesh *> *meshes = new std::vector<aiMesh *>();
 	std::vector<aiFace> *faces = nullptr;
 	std::vector<aiVector3D> *vertices = nullptr;
@@ -398,20 +398,20 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 			vertices->push_back(pos);
 			colors->push_back(mkColor(m3d->vertex[l].color));
 			// add a bone to temporary vector
-			if (m3d->vertex[l].skinid != -1U && m3d->vertex[l].skinid != -2U && m3d->skin && m3d->bone) {
+			if (m3d->vertex[l].skinid != M3D_UNDEF && m3d->vertex[l].skinid != M3D_INDEXMAX && m3d->skin && m3d->bone) {
 				// this is complicated, because M3D stores a list of bone id / weight pairs per
 				// vertex but assimp uses lists of local vertex id/weight pairs per local bone list
 				vertexids->push_back(l);
 			}
 			l = m3d->face[i].texcoord[j];
-			if (l != -1U) {
+			if (l != M3D_UNDEF) {
 				uv.x = m3d->tmap[l].u;
 				uv.y = m3d->tmap[l].v;
 				uv.z = 0.0;
 				texcoords->push_back(uv);
 			}
 			l = m3d->face[i].normal[j];
-			if (l != -1U) {
+			if (l != M3D_UNDEF) {
 				norm.x = m3d->vertex[l].x;
 				norm.y = m3d->vertex[l].y;
 				norm.z = m3d->vertex[l].z;
@@ -557,8 +557,8 @@ aiColor4D M3DImporter::mkColor(uint32_t c) {
 void M3DImporter::convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned int posid, unsigned int orientid) {
 	ai_assert(m != nullptr);
 	ai_assert(m3d);
-	ai_assert(posid != -1U && posid < m3d->numvertex);
-	ai_assert(orientid != -1U && orientid < m3d->numvertex);
+	ai_assert(posid != M3D_UNDEF && posid < m3d->numvertex);
+	ai_assert(orientid != M3D_UNDEF && orientid < m3d->numvertex);
 	m3dv_t *p = &m3d->vertex[posid];
 	m3dv_t *q = &m3d->vertex[orientid];
 
@@ -692,7 +692,7 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 				// first count how many vertices we have per bone
 				for (i = 0; i < vertexids->size(); i++) {
 					unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
-					if (s != -1U && s != -2U) {
+					if (s != M3D_UNDEF && s != M3D_INDEXMAX) {
 						for (unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
 							aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
 							for (j = 0; j < pMesh->mNumBones; j++) {
@@ -715,7 +715,7 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 				// fill up with data
 				for (i = 0; i < vertexids->size(); i++) {
 					unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
-					if (s != -1U && s != -2U) {
+					if (s != M3D_UNDEF && s != M3D_INDEXMAX) {
 						for (unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
 							aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
 							for (j = 0; j < pMesh->mNumBones; j++) {

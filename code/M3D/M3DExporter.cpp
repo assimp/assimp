@@ -134,7 +134,7 @@ void addProp(m3dm_t *m, uint8_t type, uint32_t value) {
 // ------------------------------------------------------------------------------------------------
 // add a material to the output
 M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
-	unsigned int mi = -1U;
+	unsigned int mi = M3D_NOTDEFINED;
 	aiColor4D c;
 	aiString name;
 	ai_real f;
@@ -150,7 +150,7 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 				break;
 			}
 		// if not found, add the material to the output
-		if (mi == -1U) {
+		if (mi == M3D_NOTDEFINED) {
 			unsigned int k;
 			mi = m3d->nummaterial++;
 			m3d->material = (m3dm_t *)M3D_REALLOC(m3d->material, m3d->nummaterial * sizeof(m3dm_t));
@@ -219,13 +219,13 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 						name.data[j] = 0;
 					// do we have this texture saved already?
 					fn = _m3d_safestr((char *)&name.data, 0);
-					for (j = 0, i = -1U; j < m3d->numtexture; j++)
+					for (j = 0, i = M3D_NOTDEFINED; j < m3d->numtexture; j++)
 						if (!strcmp(fn, m3d->texture[j].name)) {
 							i = j;
 							free(fn);
 							break;
 						}
-					if (i == -1U) {
+					if (i == M3D_NOTDEFINED) {
 						i = m3d->numtexture++;
 						m3d->texture = (m3dtx_t *)M3D_REALLOC(
 								m3d->texture,
@@ -335,7 +335,7 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
 
 	for (unsigned int i = 0; i < pNode->mNumMeshes; i++) {
 		const aiMesh *mesh = mScene->mMeshes[pNode->mMeshes[i]];
-		unsigned int mi = (M3D_INDEX)-1U;
+		unsigned int mi = M3D_NOTDEFINED;
 		if (mScene->mMaterials) {
 			// get the material for this mesh
 			mi = addMaterial(m3d, mScene->mMaterials[mesh->mMaterialIndex]);
@@ -358,7 +358,7 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
 			/* set all index to -1 by default */
 			m3d->face[n].vertex[0] = m3d->face[n].vertex[1] = m3d->face[n].vertex[2] =
 					m3d->face[n].normal[0] = m3d->face[n].normal[1] = m3d->face[n].normal[2] =
-							m3d->face[n].texcoord[0] = m3d->face[n].texcoord[1] = m3d->face[n].texcoord[2] = -1U;
+							m3d->face[n].texcoord[0] = m3d->face[n].texcoord[1] = m3d->face[n].texcoord[2] = M3D_UNDEF;
 			m3d->face[n].materialid = mi;
 			for (unsigned int k = 0; k < face->mNumIndices; k++) {
 				// get the vertex's index
@@ -374,7 +374,7 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
 				vertex.z = v.z;
 				vertex.w = 1.0;
 				vertex.color = 0;
-				vertex.skinid = -1U;
+				vertex.skinid = M3D_UNDEF;
 				// add color if defined
 				if (mesh->HasVertexColors(0))
 					vertex.color = mkColor(&mesh->mColors[0][l]);

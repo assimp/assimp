@@ -159,6 +159,10 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 	if (fileSize != pStream->Read(buffer.data(), 1, fileSize)) {
 		throw DeadlyImportError("Failed to read the file " + file + ".");
 	}
+	// extra check for binary format's first 8 bytes. Not done for the ASCII variant
+	if(!memcmp(buffer.data(), "3DMO", 4) && memcmp(buffer.data() + 4, &fileSize, 4)) {
+		throw DeadlyImportError("Bad binary header in file " + file + ".");
+	}
 
 	// Get the path for external assets
 	std::string folderName("./");

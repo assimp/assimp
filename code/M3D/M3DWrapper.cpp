@@ -75,7 +75,8 @@ unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
 			(reinterpret_cast<Assimp::IOSystem *>(m3dimporter_pIOHandler))->Open(file, "rb"));
 	size_t fileSize = 0;
 	unsigned char *data = NULL;
-	// sometimes pStream is nullptr for some reason (should be an empty object returning nothing I guess)
+	// sometimes pStream is nullptr in a single-threaded scenario too for some reason
+	// (should be an empty object returning nothing I guess)
 	if (pStream) {
 		fileSize = pStream->FileSize();
 		// should be allocated with malloc(), because the library will call free() to deallocate
@@ -101,7 +102,7 @@ M3DWrapper::M3DWrapper() {
 
 M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer) {
 #if AI_M3D_USE_STDMUTEX
-	// M3D is NOT thread-safe, so lock the global mutex
+	// M3D is thread-safe, but pIOHandler is NOT, so lock the global mutex
 	const std::lock_guard<std::mutex> lock(file_mutex);
 #endif
 	// pass this IOHandler to the C callback

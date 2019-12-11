@@ -91,7 +91,7 @@ typedef uint16_t M3D_INDEX;
 #else
 #define _inline
 #define _pack
-#define _unused
+#define _unused __pragma(warning(suppress:4100))
 #endif
 #ifndef  __cplusplus
 #define _register register
@@ -2202,6 +2202,9 @@ void _m3d_getpr(m3d_t *model, _unused m3dread_t readfilecb, _unused  m3dfree_t f
     }
     if(freecb && buff) (*freecb)(buff);
 #else
+    (void)readfilecb;
+    (void)freecb;
+    (void)fn;
     M3D_LOG("Unimplemented interpreter");
     M3D_LOG(fn);
     model->errcode = M3D_ERR_UNIMPL;
@@ -2294,7 +2297,7 @@ void _m3d_mat(M3D_FLOAT *r, m3dv_t *p, m3dv_t *q)
 }
 #endif
 #if !defined(M3D_NOANIMATION) || !defined(M3D_NONORMALS)
-/* fast inverse square root calculation. returns 1/sqrt(x) */
+/* portable fast inverse square root calculation. returns 1/sqrt(x) */
 static M3D_FLOAT _m3d_rsq(M3D_FLOAT x)
 {
 #ifdef M3D_DOUBLE
@@ -3053,12 +3056,12 @@ memerr:         M3D_LOG("Out of memory");
             for(i = 0, data += sizeof(m3dchunk_t); data < chunk; i++) {
                 switch(model->vc_s) {
                     case 1:
-                        model->tmap[i].u = (M3D_FLOAT)(data[0]) / 255;
-                        model->tmap[i].v = (M3D_FLOAT)(data[1]) / 255;
+                        model->tmap[i].u = (M3D_FLOAT)(data[0]) / (M3D_FLOAT)255.0;
+                        model->tmap[i].v = (M3D_FLOAT)(data[1]) / (M3D_FLOAT)255.0;
                     break;
                     case 2:
-                        model->tmap[i].u = (M3D_FLOAT)(*((int16_t*)(data+0))) / 65535;
-                        model->tmap[i].v = (M3D_FLOAT)(*((int16_t*)(data+2))) / 65535;
+                        model->tmap[i].u = (M3D_FLOAT)(*((int16_t*)(data+0))) / (M3D_FLOAT)65535.0;
+                        model->tmap[i].v = (M3D_FLOAT)(*((int16_t*)(data+2))) / (M3D_FLOAT)65535.0;
                     break;
                     case 4:
                         model->tmap[i].u = (M3D_FLOAT)(*((float*)(data+0)));
@@ -3085,17 +3088,17 @@ memerr:         M3D_LOG("Out of memory");
             for(i = 0, data += sizeof(m3dchunk_t); data < chunk && i < model->numvertex; i++) {
                 switch(model->vc_s) {
                     case 1:
-                        model->vertex[i].x = (M3D_FLOAT)((int8_t)data[0]) / 127;
-                        model->vertex[i].y = (M3D_FLOAT)((int8_t)data[1]) / 127;
-                        model->vertex[i].z = (M3D_FLOAT)((int8_t)data[2]) / 127;
-                        model->vertex[i].w = (M3D_FLOAT)((int8_t)data[3]) / 127;
+                        model->vertex[i].x = (M3D_FLOAT)((int8_t)data[0]) / (M3D_FLOAT)127.0;
+                        model->vertex[i].y = (M3D_FLOAT)((int8_t)data[1]) / (M3D_FLOAT)127.0;
+                        model->vertex[i].z = (M3D_FLOAT)((int8_t)data[2]) / (M3D_FLOAT)127.0;
+                        model->vertex[i].w = (M3D_FLOAT)((int8_t)data[3]) / (M3D_FLOAT)127.0;
                         data += 4;
                     break;
                     case 2:
-                        model->vertex[i].x = (M3D_FLOAT)(*((int16_t*)(data+0))) / 32767;
-                        model->vertex[i].y = (M3D_FLOAT)(*((int16_t*)(data+2))) / 32767;
-                        model->vertex[i].z = (M3D_FLOAT)(*((int16_t*)(data+4))) / 32767;
-                        model->vertex[i].w = (M3D_FLOAT)(*((int16_t*)(data+6))) / 32767;
+                        model->vertex[i].x = (M3D_FLOAT)(*((int16_t*)(data+0))) / (M3D_FLOAT)32767.0;
+                        model->vertex[i].y = (M3D_FLOAT)(*((int16_t*)(data+2))) / (M3D_FLOAT)32767.0;
+                        model->vertex[i].z = (M3D_FLOAT)(*((int16_t*)(data+4))) / (M3D_FLOAT)32767.0;
+                        model->vertex[i].w = (M3D_FLOAT)(*((int16_t*)(data+6))) / (M3D_FLOAT)32767.0;
                         data += 8;
                     break;
                     case 4:
@@ -3167,7 +3170,7 @@ memerr:         M3D_LOG("Out of memory");
                             if(j >= M3D_NUMBONE)
                                 data += model->bi_s;
                             else {
-                                model->skin[i].weight[j] = (M3D_FLOAT)(weights[j]) / 255;
+                                model->skin[i].weight[j] = (M3D_FLOAT)(weights[j]) / (M3D_FLOAT)255.0;
                                 w += model->skin[i].weight[j];
                                 data = _m3d_getidx(data, model->bi_s, &model->skin[i].boneid[j]);
                             }
@@ -4036,16 +4039,16 @@ static void _m3d_round(int quality, m3dv_t *src, m3dv_t *dst)
     /* round according to quality */
     switch(quality) {
         case M3D_EXP_INT8:
-            t = src->x * 127 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->x = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            t = src->y * 127 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->y = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            t = src->z * 127 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->z = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            t = src->w * 127 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->w = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+            t = (int)(src->x * 127 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->x = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+            t = (int)(src->y * 127 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->y = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+            t = (int)(src->z * 127 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->z = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+            t = (int)(src->w * 127 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->w = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
         break;
         case M3D_EXP_INT16:
-            t = src->x * 32767 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->x = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            t = src->y * 32767 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->y = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            t = src->z * 32767 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->z = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            t = src->w * 32767 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5); dst->w = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+            t = (int)(src->x * 32767 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->x = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+            t = (int)(src->y * 32767 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->y = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+            t = (int)(src->z * 32767 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->z = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+            t = (int)(src->w * 32767 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5)); dst->w = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
         break;
     }
     if(dst->x == (M3D_FLOAT)-0.0) dst->x = (M3D_FLOAT)0.0;
@@ -4351,12 +4354,12 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             if(tmapidx[i] == M3D_UNDEF) continue;
             switch(quality) {
                 case M3D_EXP_INT8:
-                    l = model->tmap[i].u * 255; tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
-                    l = model->tmap[i].v * 255; tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
+                    l = (unsigned int)(model->tmap[i].u * 255); tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
+                    l = (unsigned int)(model->tmap[i].v * 255); tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
                 break;
                 case M3D_EXP_INT16:
-                    l = model->tmap[i].u * 65535; tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
-                    l = model->tmap[i].v * 65535; tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
+                    l = (unsigned int)(model->tmap[i].u * 65535); tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
+                    l = (unsigned int)(model->tmap[i].v * 65535); tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
                 break;
                 default:
                     tcoord.data.u = model->tmap[i].u;

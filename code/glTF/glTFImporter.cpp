@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 
@@ -697,6 +698,25 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
     }
 }
 
+void glTFImporter::ImportCommonMetadata(glTF::Asset& a)
+{
+    ai_assert(mScene->mMetaData == nullptr);
+    const bool hasVersion = !a.asset.version.empty();
+    const bool hasGenerator = !a.asset.generator.empty();
+    if (hasVersion || hasGenerator)
+    {
+        mScene->mMetaData = new aiMetadata;
+        if (hasVersion)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+        }
+        if (hasGenerator)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+    }
+}
+
 void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // clean all member arrays
@@ -723,7 +743,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportLights(asset);
 
     ImportNodes(asset);
-
+    ImportCommonMetadata(asset);
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

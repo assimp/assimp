@@ -1,9 +1,10 @@
+#pragma once
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2019, assimp team
-
+Copyright (c) 2019 bzt
 
 All rights reserved.
 
@@ -39,54 +40,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTFIMPORTER_H_INC
-#define AI_GLTFIMPORTER_H_INC
 
-#include <assimp/BaseImporter.h>
-#include <assimp/DefaultIOSystem.h>
+/** @file M3DWrapper.h
+*   @brief Declares a class to wrap the C m3d SDK
+*/
+#ifndef AI_M3DWRAPPER_H_INC
+#define AI_M3DWRAPPER_H_INC
+#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER
 
-struct aiNode;
+#include <memory>
+#include <vector>
+#include <string>
 
-
-namespace glTF
-{
-    class Asset;
-}
+#include "m3d.h"
 
 namespace Assimp {
+class IOSystem;
 
-/**
- * Load the glTF format.
- * https://github.com/KhronosGroup/glTF/tree/master/specification
- */
-class glTFImporter : public BaseImporter{
+class M3DWrapper {
+	m3d_t *m3d_ = nullptr;
+	unsigned char *saved_output_ = nullptr;
+
 public:
-    glTFImporter();
-    virtual ~glTFImporter();
-    virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
+	// Construct an empty M3D model
+	explicit M3DWrapper();
 
-protected:
-    virtual const aiImporterDesc* GetInfo() const;
-    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+	// Construct an M3D model from provided buffer
+	// NOTE: The m3d.h SDK function does not mark the data as const. Have assumed it does not write.
+	// BUG: SECURITY: The m3d.h SDK cannot be informed of the buffer size. BUFFER OVERFLOW IS CERTAIN
+	explicit M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer);
 
-private:
+	~M3DWrapper();
 
-    std::vector<unsigned int> meshOffsets;
+	void reset();
 
-    std::vector<int> embeddedTexIdxs;
+	// Name
+	inline std::string Name() const {
+		if (m3d_) return std::string(m3d_->name);
+		return std::string();
+	}
 
-    aiScene* mScene;
+	// Execute a save
+	unsigned char *Save(int quality, int flags, unsigned int &size);
+	void ClearSave();
 
-    void ImportEmbeddedTextures(glTF::Asset& a);
-    void ImportMaterials(glTF::Asset& a);
-    void ImportMeshes(glTF::Asset& a);
-    void ImportCameras(glTF::Asset& a);
-    void ImportLights(glTF::Asset& a);
-    void ImportNodes(glTF::Asset& a);
-    void ImportCommonMetadata(glTF::Asset& a);
+	inline explicit operator bool() const { return m3d_ != nullptr; }
+
+	// Allow direct access to M3D API
+	inline m3d_t *operator->() const { return m3d_; }
+	inline m3d_t *M3D() const { return m3d_; }
 };
+} // namespace Assimp
 
-} // Namespace assimp
+#endif
 
-#endif // AI_GLTFIMPORTER_H_INC
-
+#endif // AI_M3DWRAPPER_H_INC

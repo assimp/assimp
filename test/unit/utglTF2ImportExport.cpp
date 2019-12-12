@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <array>
 
+#include <assimp/pbrmaterial.h>
+
 using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
@@ -436,3 +438,30 @@ TEST_F(utglTF2ImportExport, error_string_preserved) {
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utglTF2ImportExport, texcoords) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf",
+        aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+
+    ASSERT_TRUE(scene->HasMaterials());
+    const aiMaterial *material = scene->mMaterials[0];
+
+    aiString path;
+    aiTextureMapMode modes[2];
+    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr,
+        nullptr, nullptr, modes));
+    EXPECT_STREQ(path.C_Str(), "texture.png");
+
+    int uvIndex = -1;
+    EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_DIFFUSE, 0), &uvIndex), aiReturn_SUCCESS);
+    EXPECT_EQ(uvIndex, 0);
+
+    // Using manual macro expansion of AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE here.
+    // The following works with some but not all compilers:
+    // #define APPLY(X, Y) X(Y)
+    // ..., APPLY(AI_MATKEY_GLTF_TEXTURE_TEXCOORD, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE), ...
+    EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_UNKNOWN, 0), &uvIndex), aiReturn_SUCCESS);
+    EXPECT_EQ(uvIndex, 1);
+}

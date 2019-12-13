@@ -250,6 +250,9 @@ void ColladaParser::UriDecodePath(aiString& ss)
 bool ColladaParser::ReadBoolFromTextContent()
 {
     const char* cur = GetTextContent();
+    if ( nullptr == cur) {
+        return false;
+    }
     return (!ASSIMP_strincmp(cur, "true", 4) || '0' != *cur);
 }
 
@@ -258,6 +261,9 @@ bool ColladaParser::ReadBoolFromTextContent()
 ai_real ColladaParser::ReadFloatFromTextContent()
 {
     const char* cur = GetTextContent();
+    if ( nullptr == cur ) {
+        return 0.0;
+    }
     return fast_atof(cur);
 }
 
@@ -278,7 +284,9 @@ void ColladaParser::ReadContents()
                     const char* version = mReader->getAttributeValue(attrib);
 
                     // Store declared format version string
-                    mAssetMetaData.emplace(AI_METADATA_SOURCE_FORMAT_VERSION, version);
+                    aiString v;
+                    v.Set(version);
+                    mAssetMetaData.emplace(AI_METADATA_SOURCE_FORMAT_VERSION, v );
 
                     if (!::strncmp(version, "1.5", 3)) {
                         mFormat = FV_1_5_n;

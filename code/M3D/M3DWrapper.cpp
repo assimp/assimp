@@ -48,24 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStreamBuffer.h>
 #include <assimp/ai_assert.h>
 
-#ifndef AI_M3D_USE_STDMUTEX
-#if (__cplusplus >= 201103L) || (_MSC_VER >= 1900) // C++11 and MSVC 2015 onwards
-#define AI_M3D_USE_STDMUTEX 1
-#else
-#define AI_M3D_USE_STDMUTEX 0
-#endif
-#endif
-
-#if AI_M3D_USE_STDMUTEX
-#include <mutex>
-std::mutex file_mutex;
-#endif
-
 // workaround: the M3D SDK expects a C callback, but we want to use Assimp::IOSystem to implement that
-// This makes it non-rentrant so lock a mutex (requires C++11)
 
 extern "C" {
-void *m3dimporter_pIOHandler;
+thread_local void *m3dimporter_pIOHandler;
 
 unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
 	ai_assert(nullptr != fn);
@@ -101,11 +87,7 @@ M3DWrapper::M3DWrapper() {
 }
 
 M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer) {
-#if AI_M3D_USE_STDMUTEX
-	// M3D is thread-safe, but pIOHandler is NOT, so lock the global mutex
-	const std::lock_guard<std::mutex> lock(file_mutex);
-#endif
-	// pass this IOHandler to the C callback
+	// pass this IOHandler to the C callback in a thread-local pointer
 	m3dimporter_pIOHandler = pIOHandler;
 	m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), m3dimporter_readfile, free, nullptr);
 	// Clear the C callback

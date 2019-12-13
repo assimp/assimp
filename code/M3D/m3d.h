@@ -2994,11 +2994,11 @@ asciiend:
     while(buff < end && !M3D_CHUNKMAGIC(buff, 'O','M','D','3')) {
         data = buff;
         len = ((m3dchunk_t*)data)->length;
-        if(len < sizeof(m3dchunk_t)) {
+        buff += len;
+        if(len < sizeof(m3dchunk_t) || buff >= end) {
             M3D_LOG("Invalid chunk size");
             break;
         }
-        buff += len;
         len -= sizeof(m3dchunk_t) + model->si_s;
 
         /* inlined assets */
@@ -3024,11 +3024,11 @@ memerr:         M3D_LOG("Out of memory");
     while(chunk < end && !M3D_CHUNKMAGIC(chunk, 'O','M','D','3')) {
         data = chunk;
         len = ((m3dchunk_t*)chunk)->length;
-        if(len < sizeof(m3dchunk_t)) {
+        chunk += len;
+        if(len < sizeof(m3dchunk_t) || chunk >= end) {
             M3D_LOG("Invalid chunk size");
             break;
         }
-        chunk += len;
         len -= sizeof(m3dchunk_t);
 
         /* preview chunk */

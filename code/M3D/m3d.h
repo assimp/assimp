@@ -95,7 +95,11 @@ typedef uint16_t M3D_INDEX;
 #else
 #define _inline
 #define _pack
-#define _unused __pragma(warning(suppress:4100))
+#  ifdef __cplusplus // only for c++ code
+#    define _unused __pragma(warning(suppress:4100))
+#  else // or c code just use void
+#    define _unused (void)
+#  endif // ___cplusplus
 #endif
 #ifndef  __cplusplus
 #define _register register

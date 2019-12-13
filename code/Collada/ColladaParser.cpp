@@ -438,13 +438,19 @@ void ColladaParser::ReadContributorInfo()
     }
 }
 
-bool FindCommonKey(const char *collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
+static bool FindCommonKey(const char *collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
+    found_index = 9999999u;
+    if ( nullptr == collada_key ) {
+        return false;
+    }
+    
     for (size_t i = 0; i < key_renaming.size(); ++i) {
-		if (strcmp(key_renaming[i].first, collada_key) == 0) {
+		if (strncmp(key_renaming[i].first, collada_key, strlen(collada_key)) == 0) {
             found_index = i;
             return true;
 		}
 	}
+    
     return false;
 }
 

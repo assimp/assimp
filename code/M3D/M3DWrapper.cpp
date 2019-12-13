@@ -48,10 +48,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStreamBuffer.h>
 #include <assimp/ai_assert.h>
 
-// workaround: the M3D SDK expects a C callback, but we want to use Assimp::IOSystem to implement that
+#if (__cplusplus >= 201103L) || !defined(_MSC_VER) || (_MSC_VER >= 1900) // C++11 and MSVC 2015 onwards
+# define threadlocal thread_local
+#else
+# if defined(_MSC_VER) && (_MSC_VER >= 1800) // there's an alternative for MSVC 2013
+#  define threadlocal __declspec(thread)
+# else
+#  define threadlocal
+# endif
+#endif
 
 extern "C" {
-thread_local void *m3dimporter_pIOHandler;
+
+// workaround: the M3D SDK expects a C callback, but we want to use Assimp::IOSystem to implement that
+threadlocal void *m3dimporter_pIOHandler;
 
 unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
 	ai_assert(nullptr != fn);

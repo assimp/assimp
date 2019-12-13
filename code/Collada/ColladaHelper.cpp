@@ -6,7 +6,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,15 +49,15 @@ namespace Assimp {
 namespace Collada {
 
 const MetaKeyPairVector MakeColladaAssimpMetaKeys() {
-	MetaKeyPairVector result;
-	result.emplace_back("authoring_tool", AI_METADATA_SOURCE_GENERATOR);
+    MetaKeyPairVector result;
+    result.emplace_back("authoring_tool", AI_METADATA_SOURCE_GENERATOR);
     result.emplace_back("copyright", AI_METADATA_SOURCE_COPYRIGHT);
-	return result;
+    return result;
 };
 
 const MetaKeyPairVector &GetColladaAssimpMetaKeys() {
-	static const MetaKeyPairVector result = MakeColladaAssimpMetaKeys();
-	return result;
+    static const MetaKeyPairVector result = MakeColladaAssimpMetaKeys();
+    return result;
 }
 
 } // namespace Collada

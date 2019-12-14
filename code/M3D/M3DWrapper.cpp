@@ -48,15 +48,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStreamBuffer.h>
 #include <assimp/ai_assert.h>
 
-#if (__cplusplus >= 201103L) || !defined(_MSC_VER) || (_MSC_VER >= 1900) // C++11 and MSVC 2015 onwards
-# define threadlocal thread_local
-#else
-# if defined(_MSC_VER) && (_MSC_VER >= 1800) // there's an alternative for MSVC 2013
-#  define threadlocal __declspec(thread)
+#ifdef ASSIMP_USE_M3D_READFILECB
+
+# if (__cplusplus >= 201103L) || !defined(_MSC_VER) || (_MSC_VER >= 1900) // C++11 and MSVC 2015 onwards
+#  define threadlocal thread_local
 # else
-#  define threadlocal
+#  if defined(_MSC_VER) && (_MSC_VER >= 1800) // there's an alternative for MSVC 2013
+#   define threadlocal __declspec(thread)
+#  else
+#   define threadlocal
+#  endif
 # endif
-#endif
 
 extern "C" {
 
@@ -89,6 +91,7 @@ unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
 	return data;
 }
 }
+#endif
 
 namespace Assimp {
 M3DWrapper::M3DWrapper() {
@@ -97,11 +100,15 @@ M3DWrapper::M3DWrapper() {
 }
 
 M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer) {
+#ifdef ASSIMP_USE_M3D_READFILECB
 	// pass this IOHandler to the C callback in a thread-local pointer
 	m3dimporter_pIOHandler = pIOHandler;
 	m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), m3dimporter_readfile, free, nullptr);
 	// Clear the C callback
 	m3dimporter_pIOHandler = nullptr;
+#else
+	m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), nullptr, nullptr, nullptr);
+#endif
 }
 
 M3DWrapper::~M3DWrapper() {

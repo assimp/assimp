@@ -45,7 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define M3D_IMPLEMENTATION
 #define M3D_NOIMPORTER
 #define M3D_EXPORTER
-#define M3D_ASCII
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 #define M3D_NODUP
 #endif
@@ -65,9 +64,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include "M3DWrapper.h"
 #include "M3DExporter.h"
 #include "M3DMaterials.h"
-#include "M3DWrapper.h"
 
 // RESOURCES:
 // https://gitlab.com/bztsrc/model3d/blob/master/docs/m3d_format.md
@@ -132,6 +131,28 @@ void addProp(m3dm_t *m, uint8_t type, uint32_t value) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// convert aiString to identifier safe C string. This is a duplication of _m3d_safestr
+char *SafeStr(aiString str, bool isStrict)
+{
+	char *s = (char *)&str.data;
+	char *d, *ret;
+	int i, len;
+
+	for(len = str.length + 1; *s && (*s == ' ' || *s == '\t'); s++, len--);
+	if(len > 255) len = 255;
+	ret = (char *)M3D_MALLOC(len + 1);
+	if (!ret) {
+		throw DeadlyExportError("memory allocation error");
+	}
+	for(i = 0, d = ret; i < len && *s && *s != '\r' && *s != '\n'; s++, d++, i++) {
+		*d = isStrict && (*s == ' ' || *s == '\t' || *s == '/' || *s == '\\') ? '_' : (*s == '\t' ? ' ' : *s);
+	}
+	for(; d > ret && (*(d-1) == ' ' || *(d-1) == '\t'); d--);
+	*d = 0;
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
 // add a material to the output
 M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 	unsigned int mi = M3D_NOTDEFINED;
@@ -157,7 +178,7 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 			if (!m3d->material) {
 				throw DeadlyExportError("memory allocation error");
 			}
-			m3d->material[mi].name = _m3d_safestr((char *)&name.data, 0);
+			m3d->material[mi].name = SafeStr(name, true);
 			m3d->material[mi].numprop = 0;
 			m3d->material[mi].prop = NULL;
 			// iterate through the material property table and see what we got
@@ -218,7 +239,7 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 							(name.data[j + 1] == 'g' || name.data[j + 1] == 'G'))
 						name.data[j] = 0;
 					// do we have this texture saved already?
-					fn = _m3d_safestr((char *)&name.data, 0);
+					fn = SafeStr(name, true);
 					for (j = 0, i = M3D_NOTDEFINED; j < m3d->numtexture; j++)
 						if (!strcmp(fn, m3d->texture[j].name)) {
 							i = j;
@@ -275,11 +296,15 @@ void ExportSceneA3D(
 		const ExportProperties *pProperties
 
 ) {
+#ifdef M3D_ASCII
 	// initialize the exporter
 	M3DExporter exporter(pScene, pProperties);
 
 	// perform ascii export
 	exporter.doExport(pFile, pIOSystem, true);
+#else
+	throw DeadlyExportError("Assimp configured without M3D_ASCII support");
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -306,7 +331,7 @@ void M3DExporter::doExport(
 	if (!m3d) {
 		throw DeadlyExportError("memory allocation error");
 	}
-	m3d->name = _m3d_safestr((char *)&mScene->mRootNode->mName.data, 2);
+	m3d->name = SafeStr(mScene->mRootNode->mName, false);
 
 	// Create a model from assimp structures
 	aiMatrix4x4 m;

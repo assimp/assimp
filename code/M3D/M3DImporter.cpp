@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 
 #define M3D_IMPLEMENTATION
-#define M3D_ASCII
 #define M3D_NONORMALS /* leave the post-processing to Assimp */
 #define M3D_NOWEIGHTS
 #define M3D_NOANIMATION
@@ -57,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <memory>
 
+#include "M3DWrapper.h"
 #include "M3DImporter.h"
 #include "M3DMaterials.h"
-#include "M3DWrapper.h"
 
 // RESOURCES:
 // https://gitlab.com/bztsrc/model3d/blob/master/docs/m3d_format.md
@@ -96,7 +95,11 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
+#ifdef M3D_ASCII
 	"m3d a3d"
+#else
+	"m3d"
+#endif
 };
 
 namespace Assimp {
@@ -113,7 +116,11 @@ M3DImporter::M3DImporter() :
 bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
 	const std::string extension = GetExtension(pFile);
 
-	if (extension == "m3d" || extension == "a3d")
+	if (extension == "m3d"
+#ifdef M3D_ASCII
+		|| extension == "a3d"
+#endif
+		)
 		return true;
 	else if (!extension.length() || checkSig) {
 		if (!pIOHandler) {
@@ -131,7 +138,11 @@ bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 		if (4 != pStream->Read(data, 1, 4)) {
 			return false;
 		}
-		return !memcmp(data, "3DMO", 4) /* bin */ || !memcmp(data, "3dmo", 4) /* ASCII */;
+		return !memcmp(data, "3DMO", 4) /* bin */
+#ifdef M3D_ASCII
+			|| !memcmp(data, "3dmo", 4) /* ASCII */
+#endif
+		;
 	}
 	return false;
 }
@@ -163,6 +174,12 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 	if(!memcmp(buffer.data(), "3DMO", 4) && memcmp(buffer.data() + 4, &fileSize, 4)) {
 		throw DeadlyImportError("Bad binary header in file " + file + ".");
 	}
+#ifdef M3D_ASCII
+	// make sure there's a terminator zero character, as input must be ASCIIZ
+	if(!memcmp(buffer.data(), "3dmo", 4)) {
+		buffer.push_back(0);
+	}
+#endif
 
 	// Get the path for external assets
 	std::string folderName("./");
@@ -179,7 +196,6 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
 	// let the C SDK do the hard work for us
 	M3DWrapper m3d(pIOHandler, buffer);
-
 
 	if (!m3d) {
 		throw DeadlyImportError("Unable to parse " + file + " as M3D.");
@@ -310,32 +326,40 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 	for (i = 0; i < m3d->numtexture; i++) {
 		unsigned int j, k;
 		t = &m3d->texture[i];
-		if (!t->w || !t->h || !t->f || !t->d) continue;
 		aiTexture *tx = new aiTexture;
-		strcpy(tx->achFormatHint, formatHint[t->f - 1]);
 		tx->mFilename = aiString(std::string(t->name) + ".png");
-		tx->mWidth = t->w;
-		tx->mHeight = t->h;
-		tx->pcData = new aiTexel[tx->mWidth * tx->mHeight];
-		for (j = k = 0; j < tx->mWidth * tx->mHeight; j++) {
-			switch (t->f) {
-				case 1: tx->pcData[j].g = t->d[k++]; break;
-				case 2:
-					tx->pcData[j].g = t->d[k++];
-					tx->pcData[j].a = t->d[k++];
-					break;
-				case 3:
-					tx->pcData[j].r = t->d[k++];
-					tx->pcData[j].g = t->d[k++];
-					tx->pcData[j].b = t->d[k++];
-					tx->pcData[j].a = 255;
-					break;
-				case 4:
-					tx->pcData[j].r = t->d[k++];
-					tx->pcData[j].g = t->d[k++];
-					tx->pcData[j].b = t->d[k++];
-					tx->pcData[j].a = t->d[k++];
-					break;
+		if (!t->w || !t->h || !t->f || !t->d) {
+			/* without ASSIMP_USE_M3D_READFILECB, we only have the filename, but no texture data ever */
+			tx->mWidth = 0;
+			tx->mHeight = 0;
+			memcpy(tx->achFormatHint, "png\000", 4);
+			tx->pcData = nullptr;
+		} else {
+			/* if we have the texture loaded, set format hint and pcData too */
+			tx->mWidth = t->w;
+			tx->mHeight = t->h;
+			strcpy(tx->achFormatHint, formatHint[t->f - 1]);
+			tx->pcData = new aiTexel[tx->mWidth * tx->mHeight];
+			for (j = k = 0; j < tx->mWidth * tx->mHeight; j++) {
+				switch (t->f) {
+					case 1: tx->pcData[j].g = t->d[k++]; break;
+					case 2:
+						tx->pcData[j].g = t->d[k++];
+						tx->pcData[j].a = t->d[k++];
+						break;
+					case 3:
+						tx->pcData[j].r = t->d[k++];
+						tx->pcData[j].g = t->d[k++];
+						tx->pcData[j].b = t->d[k++];
+						tx->pcData[j].a = 255;
+						break;
+					case 4:
+						tx->pcData[j].r = t->d[k++];
+						tx->pcData[j].g = t->d[k++];
+						tx->pcData[j].b = t->d[k++];
+						tx->pcData[j].a = t->d[k++];
+						break;
+				}
 			}
 		}
 		mScene->mTextures[i] = tx;

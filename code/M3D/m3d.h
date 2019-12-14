@@ -91,11 +91,7 @@ typedef uint16_t M3D_INDEX;
 #else
 #define _inline
 #define _pack
-#  ifdef __cplusplus /* only for c++ code */
-#    define _unused __pragma(warning(suppress:4100))
-#  else
-#    define _unused (void)
-#  endif
+#define _unused __pragma(warning(suppress:4100))
 #endif
 #ifndef  __cplusplus
 #define _register register
@@ -2064,7 +2060,7 @@ static char *_m3d_getfloat(char *s, M3D_FLOAT *ret)
     return _m3d_findarg(e);
 }
 #endif
-#if !defined(M3D_NODUP) && (defined(M3D_ASCII) || defined(M3D_EXPORTER))
+#if !defined(M3D_NODUP) && (!defined(M3D_NOIMPORTER) || defined(M3D_ASCII) || defined(M3D_EXPORTER))
 /* helper function to create safe strings */
 char *_m3d_safestr(char *in, int morelines)
 {
@@ -2139,45 +2135,48 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
             buff = (*readfilecb)(fn2, &len);
             M3D_FREE(fn2);
         }
-        if(!buff)
+        if(!buff) {
             buff = (*readfilecb)(fn, &len);
+            if(!buff) return M3D_UNDEF;
+        }
     }
-    if(!buff) return M3D_UNDEF;
     /* add to textures array */
     i = model->numtexture++;
     model->texture = (m3dtx_t*)M3D_REALLOC(model->texture, model->numtexture * sizeof(m3dtx_t));
     if(!model->texture) {
-        if(freecb) (*freecb)(buff);
+        if(buff && freecb) (*freecb)(buff);
         model->errcode = M3D_ERR_ALLOC;
         return M3D_UNDEF;
     }
     model->texture[i].name = fn;
     model->texture[i].w = model->texture[i].h = 0; model->texture[i].d = NULL;
-    if(buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
+    if(buff) {
+        if(buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
 #ifdef STBI__PNG_TYPE
-        s.read_from_callbacks = 0;
-        s.img_buffer = s.img_buffer_original = (unsigned char *) buff;
-        s.img_buffer_end = s.img_buffer_original_end = (unsigned char *) buff+len;
-        /* don't use model->texture[i].w directly, it's a uint16_t */
-        w = h = len = 0;
-        ri.bits_per_channel = 8;
-        model->texture[i].d = (uint8_t*)stbi__png_load(&s, (int*)&w, (int*)&h, (int*)&len, 0, &ri);
-        model->texture[i].w = w;
-        model->texture[i].h = h;
-        model->texture[i].f = (uint8_t)len;
+            s.read_from_callbacks = 0;
+            s.img_buffer = s.img_buffer_original = (unsigned char *) buff;
+            s.img_buffer_end = s.img_buffer_original_end = (unsigned char *) buff+len;
+            /* don't use model->texture[i].w directly, it's a uint16_t */
+            w = h = len = 0;
+            ri.bits_per_channel = 8;
+            model->texture[i].d = (uint8_t*)stbi__png_load(&s, (int*)&w, (int*)&h, (int*)&len, 0, &ri);
+            model->texture[i].w = w;
+            model->texture[i].h = h;
+            model->texture[i].f = (uint8_t)len;
 #endif
-    } else {
+        } else {
 #ifdef M3D_TX_INTERP
-        if((model->errcode = M3D_TX_INTERP(fn, buff, len, &model->texture[i])) != M3D_SUCCESS) {
-            M3D_LOG("Unable to generate texture");
-            M3D_LOG(fn);
-        }
+            if((model->errcode = M3D_TX_INTERP(fn, buff, len, &model->texture[i])) != M3D_SUCCESS) {
+                M3D_LOG("Unable to generate texture");
+                M3D_LOG(fn);
+            }
 #else
-        M3D_LOG("Unimplemented interpreter");
-        M3D_LOG(fn);
+            M3D_LOG("Unimplemented interpreter");
+            M3D_LOG(fn);
 #endif
+        }
+        if(freecb) (*freecb)(buff);
     }
-    if(freecb) (*freecb)(buff);
     if(!model->texture[i].d)
         model->errcode = M3D_ERR_UNKIMG;
     return i;
@@ -2589,6 +2588,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                                 if(!pe || !*pe) goto asciiend;
                                 m->prop[j].value.textureid = _m3d_gettx(model, readfilecb, freecb, pe);
                                 if(model->errcode == M3D_ERR_ALLOC) { M3D_FREE(pe); goto memerr; }
+                                /* this error code only returned if readfilecb was specified */
                                 if(m->prop[j].value.textureid == M3D_UNDEF) {
                                     M3D_LOG("Texture not found");
                                     M3D_LOG(pe);
@@ -3254,6 +3254,7 @@ memerr:         M3D_LOG("Out of memory");
                             M3D_GETSTR(name);
                             m->prop[i].value.textureid = _m3d_gettx(model, readfilecb, freecb, name);
                             if(model->errcode == M3D_ERR_ALLOC) goto memerr;
+                            /* this error code only returned if readfilecb was specified */
                             if(m->prop[i].value.textureid == M3D_UNDEF) {
                                 M3D_LOG("Texture not found");
                                 M3D_LOG(m->name);

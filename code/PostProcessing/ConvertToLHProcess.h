@@ -137,8 +137,9 @@ public:
     // -------------------------------------------------------------------
     void Execute( aiScene* pScene);
 
-protected:
-    void ProcessMesh( aiMesh* pMesh);
+public:
+    /** Some other types of post-processing require winding order flips */
+    static void ProcessMesh( aiMesh* pMesh);
 };
 
 // ---------------------------------------------------------------------------

@@ -256,7 +256,7 @@ enum {
     m3dp_map_Tf,
     m3dp_map_Km, /* bump map */
     m3dp_map_D,
-    m3dp_map_il, /* reflection map */
+    m3dp_map_N,  /* normal map */
 
     m3dp_map_Pr = 192,          /* textured physical map properties */
     m3dp_map_Pm,
@@ -266,6 +266,7 @@ enum {
 };
 enum {                          /* aliases */
     m3dp_bump = m3dp_map_Km,
+    m3dp_map_il = m3dp_map_N,
     m3dp_refl = m3dp_map_Pm
 };
 
@@ -560,6 +561,7 @@ static m3dpd_t m3d_propertytypes[] = {
 
     /* aliases, note that "map_*" aliases are handled automatically */
     M3D_PROPERTYDEF(m3dpf_map, m3dp_map_Km, "bump"),
+    M3D_PROPERTYDEF(m3dpf_map, m3dp_map_N, "map_N"),/* as normal map has no scalar version, it's counterpart is 'il' */
     M3D_PROPERTYDEF(m3dpf_map, m3dp_map_Pm, "refl")
 };
 /* shape command definitions. if more commands start with the same string, the longer must come first */

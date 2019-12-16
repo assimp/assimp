@@ -128,6 +128,11 @@ SET( IMPORTERS
   unit/ImportExport/utOFFImportExport.cpp
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
+  unit/ImportExport/utMDLImporter.cpp
+  unit/ImportExport/MDL/MDLHL1TestFiles.h
+  unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
+  unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
+  unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
 )
 
 SET( MATERIAL

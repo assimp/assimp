@@ -456,6 +456,16 @@ ADD_ASSIMP_IMPORTER( MDL
   MDL/MDLLoader.cpp
   MDL/MDLLoader.h
   MDL/MDLMaterialLoader.cpp
+  MDL/HalfLife/HalfLifeMDLBaseHeader.h
+  MDL/HalfLife/HL1FileData.h
+  MDL/HalfLife/HL1MDLLoader.cpp
+  MDL/HalfLife/HL1MDLLoader.h
+  MDL/HalfLife/HL1ImportDefinitions.h
+  MDL/HalfLife/HL1ImportSettings.h
+  MDL/HalfLife/HL1MeshTrivert.h
+  MDL/HalfLife/LogFunctions.h
+  MDL/HalfLife/UniqueNameGenerator.cpp
+  MDL/HalfLife/UniqueNameGenerator.h
 )
 
 SET( MaterialSystem_SRCS

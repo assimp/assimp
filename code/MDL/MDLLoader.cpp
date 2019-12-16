@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDL/MDLLoader.h"
 #include "MDL/MDLDefaultColorMap.h"
 #include "MD2/MD2FileData.h"
+#include "MDL/HalfLife/HL1MDLLoader.h"
 
 #include <assimp/qnan.h>
 #include <assimp/StringUtils.h>
@@ -142,6 +143,18 @@ void MDLImporter::SetupProperties(const Importer* pImp)
 
     // AI_CONFIG_IMPORT_MDL_COLORMAP - palette file
     configPalette =  pImp->GetPropertyString(AI_CONFIG_IMPORT_MDL_COLORMAP,"colormap.lmp");
+
+    // Read configuration specific to MDL (Half-Life 1).
+    mHL1ImportSettings.read_animations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS, true);
+    if (mHL1ImportSettings.read_animations) {
+        mHL1ImportSettings.read_animation_events = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS, true);
+        mHL1ImportSettings.read_blend_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BLEND_CONTROLLERS, true);
+        mHL1ImportSettings.read_sequence_transitions = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_SEQUENCE_TRANSITIONS, true);
+    }
+    mHL1ImportSettings.read_attachments = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ATTACHMENTS, true);
+    mHL1ImportSettings.read_bone_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS, true);
+    mHL1ImportSettings.read_hitboxes = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES, true);
+    mHL1ImportSettings.read_misc_global_info = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -224,9 +237,19 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
         AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
     {
-        ASSIMP_LOG_DEBUG("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
         iGSFileVersion = 0;
-        InternReadFile_HL2();
+
+        HalfLife::HalfLifeMDLBaseHeader *pHeader = (HalfLife::HalfLifeMDLBaseHeader *)mBuffer;
+        if (pHeader->version == AI_MDL_HL1_VERSION)
+        {
+            ASSIMP_LOG_DEBUG("MDL subtype: Half-Life 1/Goldsrc Engine, magic word is IDST/IDSQ");
+            InternReadFile_HL1(pFile, iMagicWord);
+        }
+        else
+        {
+            ASSIMP_LOG_DEBUG("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
+            InternReadFile_HL2();
+        }
     }
     else    {
         // print the magic word to the log file
@@ -1953,6 +1976,23 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
         pcMatOut->AddProperty<int>(&iVal,1,AI_MATKEY_UVWSRC_DIFFUSE(1));
         pcMatOut->AddProperty(&sString,AI_MATKEY_TEXTURE_DIFFUSE(1));
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Read a Half-life 1 MDL
+void MDLImporter::InternReadFile_HL1(const std::string& pFile, const uint32_t iMagicWord)
+{
+    // We can't correctly load an MDL from a MDL "sequence" file.
+    if (iMagicWord == AI_MDL_MAGIC_NUMBER_BE_HL2b || iMagicWord == AI_MDL_MAGIC_NUMBER_LE_HL2b)
+        throw DeadlyImportError("Impossible to properly load a model from an MDL sequence file.");
+
+    // Read the MDL file.
+    HalfLife::HL1MDLLoader loader(
+        pScene,
+        pIOHandler,
+        mBuffer,
+        pFile,
+        mHL1ImportSettings);
 }
 
 // ------------------------------------------------------------------------------------------------

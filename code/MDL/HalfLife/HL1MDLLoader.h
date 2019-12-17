@@ -50,9 +50,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "HL1ImportSettings.h"
 #include "UniqueNameGenerator.h"
 
+#include <memory>
+#include <string>
+
+#include <assimp/types.h>
 #include <assimp/scene.h>
 #include <assimp/texture.h>
 #include <assimp/IOSystem.hpp>
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/Exceptional.h>
 
 namespace Assimp {
 namespace MDL {

@@ -348,6 +348,7 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->mWidth = outwidth;
     pResult->mHeight = outheight;
     strncpy(pResult->achFormatHint, "bgra8888", 8);
+    pResult->achFormatHint[8] = '\0';
 
     aiTexel *out = pResult->pcData = new aiTexel[outwidth * outheight];
 

@@ -665,7 +665,7 @@ void HL1MDLLoader::read_meshes() {
      */
     auto AddTrivertToBone = [&](int bone, short trivert_index) {
         if (bone_triverts.count(bone) == 0)
-            bone_triverts.insert_or_assign(bone, std::set<short>{ trivert_index });
+            bone_triverts.insert({ bone, std::set<short>{ trivert_index }});
         else
             bone_triverts[bone].insert(trivert_index);
     };
@@ -681,7 +681,7 @@ void HL1MDLLoader::read_meshes() {
         short new_trivert_index = static_cast<short>(triverts.size());
 
         if (triverts_similars.count(trivert.vertindex) == 0)
-            triverts_similars.insert_or_assign(trivert.vertindex, std::set<short>{ new_trivert_index });
+            triverts_similars.insert({ trivert.vertindex, std::set<short>{ new_trivert_index }});
         else
             triverts_similars[trivert.vertindex].insert(new_trivert_index);
 

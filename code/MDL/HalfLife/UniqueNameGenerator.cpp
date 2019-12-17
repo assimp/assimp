@@ -146,7 +146,7 @@ void UniqueNameGenerator::make_unique(std::vector<std::string> &names) {
 
         // Map each unique name to it's duplicate.
         if (names_to_duplicates.count(names[i]) == 0)
-            names_to_duplicates.insert_or_assign(names[i], DuplicateInfo());
+            names_to_duplicates.insert({ names[i], DuplicateInfo()});
         else
             names_to_duplicates[names[i]].indices.push_back(i);
     }

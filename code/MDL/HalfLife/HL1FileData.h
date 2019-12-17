@@ -233,7 +233,7 @@ union AnimValue_HL1 {
         uint8_t total;
     } num PACK_STRUCT;
     short value;
-} PACK_STRUCT;
+};
 
 // body part index
 struct Bodypart_HL1 {

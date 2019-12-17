@@ -268,7 +268,7 @@ void ExportSceneM3D(
 // ---------------------------------------------------------------------
 // Worker function for exporting a scene to ASCII A3D.
 // Prototyped and registered in Exporter.cpp
-void ExportSceneA3D(
+void ExportSceneM3DA(
 		const char *pFile,
 		IOSystem *pIOSystem,
 		const aiScene *pScene,

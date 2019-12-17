@@ -347,7 +347,14 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->mFilename = ptexture->name;
     pResult->mWidth = outwidth;
     pResult->mHeight = outheight;
-    strncpy(pResult->achFormatHint, "bgra8888", 8);
+    pResult->achFormatHint[0] = 'b';
+    pResult->achFormatHint[1] = 'g';
+    pResult->achFormatHint[2] = 'r';
+    pResult->achFormatHint[3] = 'a';
+    pResult->achFormatHint[4] = '8';
+    pResult->achFormatHint[5] = '8';
+    pResult->achFormatHint[6] = '8';
+    pResult->achFormatHint[7] = '8';
     pResult->achFormatHint[8] = '\0';
 
     aiTexel *out = pResult->pcData = new aiTexel[outwidth * outheight];

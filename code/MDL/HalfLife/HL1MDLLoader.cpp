@@ -49,18 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UniqueNameGenerator.h"
 
 #include <assimp/BaseImporter.h>
-#include <assimp/DefaultIOSystem.h>
-#include <assimp/Exceptional.h>
 #include <assimp/StringUtils.h>
 #include <assimp/ai_assert.h>
 #include <assimp/qnan.h>
-#include <assimp/scene.h>
-#include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 
 #include <iomanip>
-#include <memory>
 #include <sstream>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER

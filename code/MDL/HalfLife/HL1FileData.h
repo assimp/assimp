@@ -231,9 +231,9 @@ union AnimValue_HL1 {
     struct {
         uint8_t valid;
         uint8_t total;
-    } num PACK_STRUCT;
+    } num;
     short value;
-};
+} PACK_STRUCT;
 
 // body part index
 struct Bodypart_HL1 {

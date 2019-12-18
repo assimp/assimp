@@ -764,7 +764,7 @@ void HL1MDLLoader::read_meshes() {
                 bone_triverts.clear();
 
                 int l;
-                while (l = *(ptricmds++)) {
+                while ((l = *(ptricmds++))) {
                     bool is_triangle_fan = false;
 
                     if (l < 0) {

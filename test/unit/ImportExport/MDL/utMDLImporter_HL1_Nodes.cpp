@@ -409,7 +409,6 @@ private:
     }
 
     void expect_named_children(const aiScene *scene, const char *node_name, const std::vector<std::string> &expected_names) {
-        const aiNode *node = scene->mRootNode->FindNode(node_name);
         expect_named_children(scene->mRootNode->FindNode(node_name), expected_names);
     }
 

@@ -211,7 +211,7 @@ public:
 
         const aiNode *bodyparts_node = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BODYPARTS);
         EXPECT_NE(nullptr, bodyparts_node);
-        EXPECT_EQ(3, bodyparts_node->mNumChildren);
+        EXPECT_EQ(3u, bodyparts_node->mNumChildren);
         for (unsigned int i = 0; i < bodyparts_node->mNumChildren; ++i) {
             expect_named_children(bodyparts_node->mChildren[i],
                     expected_bodypart_sub_models_names[i]);

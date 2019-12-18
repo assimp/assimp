@@ -71,7 +71,7 @@ public:
             AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS,
             false, // Set config value to false.
             [&](const aiScene *scene) {
-                EXPECT_EQ(0, scene->mNumAnimations);
+                EXPECT_EQ(0u, scene->mNumAnimations);
                 EXPECT_EQ(nullptr, scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_INFOS));
                 EXPECT_EQ(nullptr, scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_GROUPS));
                 EXPECT_EQ(nullptr, scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_TRANSITION_GRAPH));
@@ -89,7 +89,7 @@ public:
             AI_CONFIG_IMPORT_MDL_HL1_READ_BLEND_CONTROLLERS,
             false, // Set config value to false.
             [&](const aiScene *scene) {
-                EXPECT_NE(0, scene->mNumAnimations);
+                EXPECT_NE(0u, scene->mNumAnimations);
 
                 const aiNode *sequence_infos = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_INFOS);
                 EXPECT_NE(nullptr, sequence_infos);
@@ -107,7 +107,7 @@ public:
             AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS,
             false, // Set config value to false.
             [&](const aiScene *scene) {
-                EXPECT_NE(0, scene->mNumAnimations);
+                EXPECT_NE(0u, scene->mNumAnimations);
 
                 const aiNode *sequence_infos = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_INFOS);
                 EXPECT_NE(nullptr, sequence_infos);

@@ -2088,7 +2088,14 @@ namespace Assimp {
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
             TrySetTextureProperties(out_mat, textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-            TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);            
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);
+
+            // 3DSMax PBR
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|base_color_map", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|bump_map", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|emission_map", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|metalness_map", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
         }
 
         void FBXConverter::SetTextureProperties(aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh)

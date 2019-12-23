@@ -45,7 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define M3D_IMPLEMENTATION
 #define M3D_NOIMPORTER
 #define M3D_EXPORTER
-#define M3D_ASCII
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 #define M3D_NODUP
 #endif
@@ -65,9 +64,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include "M3DWrapper.h"
 #include "M3DExporter.h"
 #include "M3DMaterials.h"
-#include "M3DWrapper.h"
 
 // RESOURCES:
 // https://gitlab.com/bztsrc/model3d/blob/master/docs/m3d_format.md
@@ -132,9 +131,31 @@ void addProp(m3dm_t *m, uint8_t type, uint32_t value) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// convert aiString to identifier safe C string. This is a duplication of _m3d_safestr
+char *SafeStr(aiString str, bool isStrict)
+{
+	char *s = (char *)&str.data;
+	char *d, *ret;
+	int i, len;
+
+	for(len = str.length + 1; *s && (*s == ' ' || *s == '\t'); s++, len--);
+	if(len > 255) len = 255;
+	ret = (char *)M3D_MALLOC(len + 1);
+	if (!ret) {
+		throw DeadlyExportError("memory allocation error");
+	}
+	for(i = 0, d = ret; i < len && *s && *s != '\r' && *s != '\n'; s++, d++, i++) {
+		*d = isStrict && (*s == ' ' || *s == '\t' || *s == '/' || *s == '\\') ? '_' : (*s == '\t' ? ' ' : *s);
+	}
+	for(; d > ret && (*(d-1) == ' ' || *(d-1) == '\t'); d--);
+	*d = 0;
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
 // add a material to the output
 M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
-	unsigned int mi = -1U;
+	unsigned int mi = M3D_NOTDEFINED;
 	aiColor4D c;
 	aiString name;
 	ai_real f;
@@ -150,14 +171,14 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 				break;
 			}
 		// if not found, add the material to the output
-		if (mi == -1U) {
+		if (mi == M3D_NOTDEFINED) {
 			unsigned int k;
 			mi = m3d->nummaterial++;
 			m3d->material = (m3dm_t *)M3D_REALLOC(m3d->material, m3d->nummaterial * sizeof(m3dm_t));
 			if (!m3d->material) {
 				throw DeadlyExportError("memory allocation error");
 			}
-			m3d->material[mi].name = _m3d_safestr((char *)&name.data, 0);
+			m3d->material[mi].name = SafeStr(name, true);
 			m3d->material[mi].numprop = 0;
 			m3d->material[mi].prop = NULL;
 			// iterate through the material property table and see what we got
@@ -218,14 +239,14 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
 							(name.data[j + 1] == 'g' || name.data[j + 1] == 'G'))
 						name.data[j] = 0;
 					// do we have this texture saved already?
-					fn = _m3d_safestr((char *)&name.data, 0);
-					for (j = 0, i = -1U; j < m3d->numtexture; j++)
+					fn = SafeStr(name, true);
+					for (j = 0, i = M3D_NOTDEFINED; j < m3d->numtexture; j++)
 						if (!strcmp(fn, m3d->texture[j].name)) {
 							i = j;
 							free(fn);
 							break;
 						}
-					if (i == -1U) {
+					if (i == M3D_NOTDEFINED) {
 						i = m3d->numtexture++;
 						m3d->texture = (m3dtx_t *)M3D_REALLOC(
 								m3d->texture,
@@ -275,11 +296,15 @@ void ExportSceneM3DA(
 		const ExportProperties *pProperties
 
 ) {
+#ifdef M3D_ASCII
 	// initialize the exporter
 	M3DExporter exporter(pScene, pProperties);
 
 	// perform ascii export
 	exporter.doExport(pFile, pIOSystem, true);
+#else
+	throw DeadlyExportError("Assimp configured without M3D_ASCII support");
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -306,7 +331,7 @@ void M3DExporter::doExport(
 	if (!m3d) {
 		throw DeadlyExportError("memory allocation error");
 	}
-	m3d->name = _m3d_safestr((char *)&mScene->mRootNode->mName.data, 2);
+	m3d->name = SafeStr(mScene->mRootNode->mName, false);
 
 	// Create a model from assimp structures
 	aiMatrix4x4 m;
@@ -335,7 +360,7 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
 
 	for (unsigned int i = 0; i < pNode->mNumMeshes; i++) {
 		const aiMesh *mesh = mScene->mMeshes[pNode->mMeshes[i]];
-		unsigned int mi = (M3D_INDEX)-1U;
+		unsigned int mi = M3D_NOTDEFINED;
 		if (mScene->mMaterials) {
 			// get the material for this mesh
 			mi = addMaterial(m3d, mScene->mMaterials[mesh->mMaterialIndex]);
@@ -358,7 +383,7 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
 			/* set all index to -1 by default */
 			m3d->face[n].vertex[0] = m3d->face[n].vertex[1] = m3d->face[n].vertex[2] =
 					m3d->face[n].normal[0] = m3d->face[n].normal[1] = m3d->face[n].normal[2] =
-							m3d->face[n].texcoord[0] = m3d->face[n].texcoord[1] = m3d->face[n].texcoord[2] = -1U;
+							m3d->face[n].texcoord[0] = m3d->face[n].texcoord[1] = m3d->face[n].texcoord[2] = M3D_UNDEF;
 			m3d->face[n].materialid = mi;
 			for (unsigned int k = 0; k < face->mNumIndices; k++) {
 				// get the vertex's index
@@ -374,7 +399,7 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
 				vertex.z = v.z;
 				vertex.w = 1.0;
 				vertex.color = 0;
-				vertex.skinid = -1U;
+				vertex.skinid = M3D_UNDEF;
 				// add color if defined
 				if (mesh->HasVertexColors(0))
 					vertex.color = mkColor(&mesh->mColors[0][l]);

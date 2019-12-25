@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogStream.hpp>
 
 #include "CApi/CInterfaceIOWrapper.h"
+#include "CApi/CProgressHandlerWrapper.h"
 #include "Importer.h"
 #include "ScenePrivate.h"
 

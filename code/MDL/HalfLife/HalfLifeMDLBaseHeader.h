@@ -53,7 +53,10 @@ namespace HalfLife {
 /** Used to interface different Valve MDL formats. */
 struct HalfLifeMDLBaseHeader
 {
+    //! Magic number: "IDST"/"IDSQ"
     char ident[4];
+
+    //! The file format version.
     int32_t version;
 };
 

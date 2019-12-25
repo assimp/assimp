@@ -1,4 +1,3 @@
-#pragma once
 #include <map>
 #include <string>
 #include <assimp/DefaultIOSystem.h>

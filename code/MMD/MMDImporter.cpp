@@ -242,11 +242,11 @@ void MMDImporter::CreateDataFromImportPmd(const pmd::PmdModel *pModel,
 
     // create node hierarchy for bone position
     std::unique_ptr<aiNode *[]> ppNode(new aiNode *[pModel->bones.size()]);
-    for (auto i = 0; i < pModel->bones.size(); i++) {
+    for (unsigned int i = 0; i < pModel->bones.size(); i++) {
         ppNode[i] = new aiNode(pModel->bones[i].name);
     }
 
-    for (auto i = 0; i < pModel->bones.size(); i++) {
+    for (unsigned int i = 0; i < pModel->bones.size(); i++) {
         const pmd::PmdBone &bone = pModel->bones[i];
 
         if (bone.parent_bone_index >= 65535) {

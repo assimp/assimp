@@ -1,4 +1,3 @@
-#pragma once
 #include "PmdStringHelper.h"
 #include <assimp/IOStream.hpp>
 #include <map>

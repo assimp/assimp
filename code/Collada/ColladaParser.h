@@ -66,12 +66,15 @@ namespace Assimp
     {
         friend class ColladaLoader;
 
+        /** Converts a path read from a collada file to the usual representation */
+        static void UriDecodePath(aiString& ss);
+
     protected:
         /** Map for generic metadata as aiString */
         typedef std::map<std::string, aiString> StringMetaData;
 
         /** Constructor from XML file */
-        ColladaParser( IOSystem* pIOHandler, const std::string& pFile);
+        ColladaParser(IOSystem* pIOHandler, const std::string& pFile);
 
         /** Destructor */
         ~ColladaParser();

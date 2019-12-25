@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <array>
 #include <unordered_set>
+#include <numeric>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -80,8 +81,8 @@ using namespace Assimp::FBX;
 // some constants that we'll use for writing metadata
 namespace Assimp {
 namespace FBX {
-    const std::string EXPORT_VERSION_STR = "7.4.0";
-    const uint32_t EXPORT_VERSION_INT = 7400; // 7.4 == 2014/2015
+    const std::string EXPORT_VERSION_STR = "7.5.0";
+    const uint32_t EXPORT_VERSION_INT = 7500; // 7.5 == 2016+
     // FBX files have some hashed values that depend on the creation time field,
     // but for now we don't actually know how to generate these.
     // what we can do is set them to a known-working version.
@@ -1005,6 +1006,9 @@ void FBXExporter::WriteObjects ()
     object_node.EndProperties(outstream, binary, indent);
     object_node.BeginChildren(outstream, binary, indent);
 
+    bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
+    std::vector<std::vector<int32_t>> vVertexIndice;//save vertex_indices as it is needed later
+
     // geometry (aiMesh)
     mesh_uids.clear();
     indent = 1;
@@ -1031,21 +1035,35 @@ void FBXExporter::WriteObjects ()
         std::vector<int32_t> vertex_indices;
         // map of vertex value to its index in the data vector
         std::map<aiVector3D,size_t> index_by_vertex_value;
-        int32_t index = 0;
-        for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
-            aiVector3D vtx = m->mVertices[vi];
-            auto elem = index_by_vertex_value.find(vtx);
-            if (elem == index_by_vertex_value.end()) {
-                vertex_indices.push_back(index);
-                index_by_vertex_value[vtx] = index;
-                flattened_vertices.push_back(vtx[0]);
-                flattened_vertices.push_back(vtx[1]);
-                flattened_vertices.push_back(vtx[2]);
-                ++index;
-            } else {
-                vertex_indices.push_back(int32_t(elem->second));
+        if(bJoinIdenticalVertices){
+            int32_t index = 0;
+            for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
+                aiVector3D vtx = m->mVertices[vi];
+                auto elem = index_by_vertex_value.find(vtx);
+                if (elem == index_by_vertex_value.end()) {
+                    vertex_indices.push_back(index);
+                    index_by_vertex_value[vtx] = index;
+                    flattened_vertices.push_back(vtx[0]);
+                    flattened_vertices.push_back(vtx[1]);
+                    flattened_vertices.push_back(vtx[2]);
+                    ++index;
+                } else {
+                    vertex_indices.push_back(int32_t(elem->second));
+                }
             }
         }
+        else { // do not join vertex, respect the export flag
+            vertex_indices.resize(m->mNumVertices);
+            std::iota(vertex_indices.begin(), vertex_indices.end(), 0);
+            for(unsigned int v = 0; v < m->mNumVertices; ++ v) {
+                aiVector3D vtx = m->mVertices[v];
+                flattened_vertices.push_back(vtx.x);
+                flattened_vertices.push_back(vtx.y);
+                flattened_vertices.push_back(vtx.z);
+            }
+        }
+        vVertexIndice.push_back(vertex_indices);
+
         FBX::Node::WritePropertyNode(
             "Vertices", flattened_vertices, outstream, binary, indent
         );
@@ -1116,6 +1134,51 @@ void FBXExporter::WriteObjects ()
             normals.End(outstream, binary, indent, true);
         }
 
+        // colors, if any
+        // TODO only one color channel currently
+        const int32_t colorChannelIndex = 0;
+        if (m->HasVertexColors(colorChannelIndex)) {
+            FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
+            vertexcolors.Begin(outstream, binary, indent);
+            vertexcolors.DumpProperties(outstream, binary, indent);
+            vertexcolors.EndProperties(outstream, binary, indent);
+            vertexcolors.BeginChildren(outstream, binary, indent);
+            indent = 3;
+            FBX::Node::WritePropertyNode(
+                "Version", int32_t(101), outstream, binary, indent
+            );
+            char layerName[8];
+            sprintf(layerName, "COLOR_%d", colorChannelIndex);
+            FBX::Node::WritePropertyNode(
+                "Name", (const char*)layerName, outstream, binary, indent
+            );
+            FBX::Node::WritePropertyNode(
+                "MappingInformationType", "ByPolygonVertex",
+                outstream, binary, indent
+            );
+            FBX::Node::WritePropertyNode(
+                "ReferenceInformationType", "Direct",
+                outstream, binary, indent
+            );
+            std::vector<double> color_data;
+            color_data.reserve(4 * polygon_data.size());
+            for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
+                const aiFace &f = m->mFaces[fi];
+                for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
+                    const aiColor4D &c = m->mColors[colorChannelIndex][f.mIndices[pvi]];
+                    color_data.push_back(c.r);
+                    color_data.push_back(c.g);
+                    color_data.push_back(c.b);
+                    color_data.push_back(c.a);
+                }
+            }
+            FBX::Node::WritePropertyNode(
+                "Colors", color_data, outstream, binary, indent
+            );
+            indent = 2;
+            vertexcolors.End(outstream, binary, indent, true);
+        }
+        
         // uvs, if any
         for (size_t uvi = 0; uvi < m->GetNumUVChannels(); ++uvi) {
             if (m->mNumUVComponents[uvi] > 2) {
@@ -1209,6 +1272,11 @@ void FBXExporter::WriteObjects ()
         le.AddChild("Type", "LayerElementNormal");
         le.AddChild("TypedIndex", int32_t(0));
         layer.AddChild(le);
+        // TODO only 1 color channel currently
+        le = FBX::Node("LayerElement");
+        le.AddChild("Type", "LayerElementColor");
+        le.AddChild("TypedIndex", int32_t(0));
+        layer.AddChild(le);
         le = FBX::Node("LayerElement");
         le.AddChild("Type", "LayerElementMaterial");
         le.AddChild("TypedIndex", int32_t(0));
@@ -1221,7 +1289,7 @@ void FBXExporter::WriteObjects ()
 
         for(unsigned int lr = 1; lr < m->GetNumUVChannels(); ++ lr)
         {
-            FBX::Node layerExtra("Layer", int32_t(1));
+            FBX::Node layerExtra("Layer", int32_t(lr));
             layerExtra.AddChild("Version", int32_t(100));
             FBX::Node leExtra("LayerElement");
             leExtra.AddChild("Type", "LayerElementUV");
@@ -1748,28 +1816,8 @@ void FBXExporter::WriteObjects ()
         // connect it
         connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mi]);
 
-        // we will be indexing by vertex...
-        // but there might be a different number of "vertices"
-        // between assimp and our output FBX.
-        // this code is cut-and-pasted from the geometry section above...
-        // ideally this should not be so.
-        // ---
-        // index of original vertex in vertex data vector
-        std::vector<int32_t> vertex_indices;
-        // map of vertex value to its index in the data vector
-        std::map<aiVector3D,size_t> index_by_vertex_value;
-        int32_t index = 0;
-        for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
-            aiVector3D vtx = m->mVertices[vi];
-            auto elem = index_by_vertex_value.find(vtx);
-            if (elem == index_by_vertex_value.end()) {
-                vertex_indices.push_back(index);
-                index_by_vertex_value[vtx] = index;
-                ++index;
-            } else {
-                vertex_indices.push_back(int32_t(elem->second));
-            }
-        }
+        //computed before
+        std::vector<int32_t>& vertex_indices = vVertexIndice[mi];
 
         // TODO, FIXME: this won't work if anything is not in the bind pose.
         // for now if such a situation is detected, we throw an exception.
@@ -1812,6 +1860,7 @@ void FBXExporter::WriteObjects ()
             sdnode.AddChild("Version", int32_t(100));
             sdnode.AddChild("UserData", "", "");
 
+            std::set<int32_t> setWeightedVertex;
             // add indices and weights, if any
             if (b) {
                 std::vector<int32_t> subdef_indices;
@@ -1819,7 +1868,8 @@ void FBXExporter::WriteObjects ()
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
                     int32_t vi = vertex_indices[b->mWeights[wi].mVertexId];
-                    if (vi == last_index) {
+                    bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
+                    if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx
                         // TODO, FIXME: this assumes identically-located vertices
                         // will always deform in the same way.
@@ -1829,6 +1879,7 @@ void FBXExporter::WriteObjects ()
                         // identical vertex.
                         continue;
                     }
+                    setWeightedVertex.insert(vi);
                     subdef_indices.push_back(vi);
                     subdef_weights.push_back(b->mWeights[wi].mWeight);
                     last_index = vi;

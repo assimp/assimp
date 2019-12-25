@@ -60,13 +60,19 @@ __Importers__:
 - ENFF
 - [FBX](https://en.wikipedia.org/wiki/FBX)
 - [glTF 1.0](https://en.wikipedia.org/wiki/GlTF#glTF_1.0) + GLB
-- [glTF 2.0](https://en.wikipedia.org/wiki/GlTF#glTF_2.0)
+- [glTF 2.0](https://en.wikipedia.org/wiki/GlTF#glTF_2.0):
+  At the moment for glTF2.0 the following extensions are supported:
+  + KHR_lights_punctual ( 5.0 )
+  + KHR_materials_pbrSpecularGlossiness ( 5.0 )
+  + KHR_materials_unlit ( 5.0 )
+  + KHR_texture_transform ( 5.1 under test )
 - HMB
 - IFC-STEP
 - IRR / IRRMESH
 - [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
 - LWS
 - LXO
+- [M3D](https://bztsrc.gitlab.io/model3d)
 - MD2
 - MD3
 - MD5
@@ -120,7 +126,7 @@ __Exporters__:
 - FBX ( experimental )
 
 ### Building ###
-Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
+Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
 
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)

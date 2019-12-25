@@ -87,4 +87,3 @@ The cmake-build-environment provides options to configure the build. The followi
 - **IGNORE_GIT_HASH ( default OFF )**: Don't call git to get the hash.
 - **ASSIMP_INSTALL_PDB ( default ON )**: Install MSVC debug files.
 - **SKIP_MSVC_UPDATE  ( default OFF )**: Disables MSVC libraries prefix.
-

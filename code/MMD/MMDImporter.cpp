@@ -169,11 +169,11 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
 
   // create node hierarchy for bone position
   std::unique_ptr<aiNode *[]> ppNode(new aiNode *[pModel->bone_count]);
-  for (auto i = 0; i < pModel->bone_count; i++) {
+  for (unsigned int i = 0; i < pModel->bone_count; i++) {
     ppNode[i] = new aiNode(pModel->bones[i].bone_name);
   }
 
-  for (auto i = 0; i < pModel->bone_count; i++) {
+  for (unsigned int i = 0; i < pModel->bone_count; i++) {
     const pmx::PmxBone &bone = pModel->bones[i];
 
     if (bone.parent_index < 0) {
@@ -389,7 +389,7 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
   auto bone_ptr_ptr = new aiBone *[pModel->bone_count];
   pMesh->mNumBones = pModel->bone_count;
   pMesh->mBones = bone_ptr_ptr;
-  for (auto ii = 0; ii < pModel->bone_count; ++ii) {
+  for (unsigned int ii = 0; ii < pModel->bone_count; ++ii) {
     auto pBone = new aiBone;
     const auto &pmxBone = pModel->bones[ii];
     pBone->mName = pmxBone.bone_name;
@@ -457,7 +457,7 @@ aiMesh *MMDImporter::CreateMeshPmd(const pmd::PmdModel *pModel,
     auto bone_ptr_ptr = new aiBone *[pModel->bones.size()];
     pMesh->mNumBones = pModel->bones.size();
     pMesh->mBones = bone_ptr_ptr;
-    for (auto ii = 0; ii < pModel->bones.size(); ++ii) {
+    for (unsigned int ii = 0; ii < pModel->bones.size(); ++ii) {
         auto pBone = new aiBone;
         const auto &pmxBone = pModel->bones[ii];
         pBone->mName = pmxBone.name;

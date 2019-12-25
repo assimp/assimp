@@ -59,7 +59,7 @@ const char* AICMD_MSG_DUMP_HELP =
 "\t -cfull    Fires almost all post processing steps \n"
 ;
 
-#include "Common/assbin_chunks.h"
+#include "Assbin/assbin_chunks.h"
 
 FILE* out = NULL;
 bool shortened = false;

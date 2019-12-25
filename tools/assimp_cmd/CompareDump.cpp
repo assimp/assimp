@@ -53,7 +53,7 @@ const char* AICMD_MSG_CMPDUMP_HELP =
 "\tCompare two short dumps produced with \'assimp dump <..> -s\' for equality.\n"
 ;
 
-#include "Common/assbin_chunks.h"
+#include "Assbin/assbin_chunks.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "generic_inserter.hpp"

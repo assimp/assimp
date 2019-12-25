@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "Assbin/AssbinLoader.h"
-#include "Common/assbin_chunks.h"
+#include "Assbin/assbin_chunks.h"
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/mesh.h>
 #include <assimp/anim.h>

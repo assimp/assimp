@@ -1225,7 +1225,7 @@ namespace Assimp {
                                 }
                             }
                         }
-                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
+                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() : 1.0f;
                         animMeshes.push_back(animMesh);
                     }
                 }
@@ -1465,7 +1465,7 @@ namespace Assimp {
                                 }
                             }
                         }
-                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() / 100.0f : 1.0f;
+                        animMesh->mWeight = shapeGeometries.size() > 1 ? blendShapeChannel->DeformPercent() : 1.0f;
                         animMeshes.push_back(animMesh);
                     }
                 }
@@ -2171,7 +2171,9 @@ namespace Assimp {
             // and as we only support recent versions of FBX anyway, we can do the same.
             bool ok;
 
-            const aiColor3D& Diffuse = GetColorPropertyFromMaterial(props, "Diffuse", ok);
+			//rickomax- adding the disableDiffuseFactor option as some models will have a dark diffuse color if multiplied with a zero diffuse factor
+            const aiColor3D& Diffuse = doc.Settings().disableDiffuseFactor ? GetColorProperty(props, "DiffuseColor", ok, true) : GetColorPropertyFromMaterial(props, "Diffuse", ok);
+
             if (ok) {
                 out_mat->AddProperty(&Diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
             }
@@ -2195,29 +2197,33 @@ namespace Assimp {
             // and also try to get SHININESS_STRENGTH
             const float SpecularFactor = PropertyGet<float>(props, "SpecularFactor", ok, true);
             if (ok) {
-                out_mat->AddProperty(&SpecularFactor, 1, AI_MATKEY_SHININESS_STRENGTH);
+				out_mat->AddProperty(&SpecularFactor, 1, AI_MATKEY_SHININESS_STRENGTH);
             }
 
+            // rickomax- shinniness exponent is not specular factor, commenting!
             // and the specular exponent
-            const float ShininessExponent = PropertyGet<float>(props, "ShininessExponent", ok);
-            if (ok) {
-                out_mat->AddProperty(&ShininessExponent, 1, AI_MATKEY_SHININESS);
-            }
+            //const float ShininessExponent = PropertyGet<float>(props, "ShininessExponent", ok);
+            //if (ok) {
+			//	out_mat->AddProperty(&ShininessExponent, 1, AI_MATKEY_SHININESS_STRENGTH);
+            //}
 
+			//rickomax- as per various tests I've made in FBX files, we aren't evaluating these properties correctly
+			// and neither they seems to be default FBX properties, so I'll comment as this is breaking compatibility with some models
+            
             // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:
-            const aiColor3D& Transparent = GetColorPropertyFactored(props, "TransparentColor", "TransparencyFactor", ok);
-            float CalculatedOpacity = 1.0f;
-            if (ok) {
-                out_mat->AddProperty(&Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
-                // as calculated by FBX SDK 2017:
-                CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
-            }
+            //const aiColor3D& Transparent = GetColorPropertyFactored(props, "TransparentColor", "TransparencyFactor", ok);
+            //float CalculatedOpacity = 1.0f;
+            //if (ok) {
+            //    out_mat->AddProperty(&Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
+            //    // as calculated by FBX SDK 2017:
+            //    CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
+            //}
 
             // try to get the transparency factor
-            const float TransparencyFactor = PropertyGet<float>(props, "TransparencyFactor", ok);
-            if (ok) {
-                out_mat->AddProperty(&TransparencyFactor, 1, AI_MATKEY_TRANSPARENCYFACTOR);
-            }
+            //const float TransparencyFactor = PropertyGet<float>(props, "TransparencyFactor", ok);
+            //if (ok) {
+            //    out_mat->AddProperty(&TransparencyFactor, 1, AI_MATKEY_TRANSPARENCYFACTOR);
+            //}
 
             // use of TransparencyFactor is inconsistent.
             // Maya always stores it as 1.0,
@@ -2233,13 +2239,16 @@ namespace Assimp {
             //
             // There's no consistent way to interpret this opacity value,
             // so it's up to clients to do the correct thing.
-            const float Opacity = PropertyGet<float>(props, "Opacity", ok);
-            if (ok) {
-                out_mat->AddProperty(&Opacity, 1, AI_MATKEY_OPACITY);
-            }
-            else if (CalculatedOpacity != 1.0) {
-                out_mat->AddProperty(&CalculatedOpacity, 1, AI_MATKEY_OPACITY);
-            }
+			//rickomax- commented by the reason above
+            //else if (CalculatedOpacity != 1.0) {
+            //    out_mat->AddProperty(&CalculatedOpacity, 1, AI_MATKEY_OPACITY);
+            //}
+
+            //rickomax- right way to get opacity value
+			const float Opacity = PropertyGet<float>(props, "Opacity", ok);
+			if (ok) {
+				out_mat->AddProperty(&Opacity, 1, AI_MATKEY_OPACITY);
+			}
 
             // reflection color and factor are stored separately
             const aiColor3D& Reflection = GetColorProperty(props, "ReflectionColor", ok, true);
@@ -2260,7 +2269,7 @@ namespace Assimp {
             const float DispFactor = PropertyGet<float>(props, "DisplacementFactor", ok);
             if (ok) {
                 out_mat->AddProperty(&DispFactor, 1, "$mat.displacementscaling", 0, 0);
-    }
+            }
 }
 
 
@@ -2315,27 +2324,8 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         const Texture* const tex = (*it).second;
         if (tex != nullptr)
         {
-            aiString path;
-            path.Set(tex->RelativeFilename());
-
-            const Video* media = tex->Media();
-            if (media != nullptr && media->ContentLength() > 0) {
-                unsigned int index;
-
-                VideoMap::const_iterator it = textures_converted.find(*media);
-                if (it != textures_converted.end()) {
-                    index = (*it).second;
-                }
-                else {
-                    index = ConvertVideo(*media);
-                    textures_converted[*media] = index;
-                }
-
-                // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
-                path.data[0] = '*';
-                path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
-            }
-
+            //rickomax- Replaced with GetTexturePath
+        	aiString path = GetTexturePath(tex);
             out_mat->AddProperty(&path, (name + "|file").c_str(), aiTextureType_UNKNOWN, 0);
 
             aiUVTransform uvTrafo;
@@ -2736,7 +2726,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                                                         keyData = keyIt->second;
                                                     }
                                                     keyData->values.push_back(channelIndex);
-                                                    keyData->weights.push_back(values.at(k) / 100.0f);
+                                                    keyData->weights.push_back(values.at(k));
                                                     k++;
                                                 }
                                             }

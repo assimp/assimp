@@ -41,56 +41,64 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file aiFileIO -> IOSystem wrapper*/
+/** @file cprogresshandler.h
+ *  @brief Defines generic C routines to handle writing/reading progress.
+ */
+#pragma once
+#ifndef AI_CPROGRESSHANDLER_H_INC
+#define AI_CPROGRESSHANDLER_H_INC
 
-#ifndef AI_CIOSYSTEM_H_INCLUDED
-#define AI_CIOSYSTEM_H_INCLUDED
-
-#include <assimp/cfileio.h>
-#include <assimp/IOStream.hpp>
-#include <assimp/IOSystem.hpp>
-
-namespace Assimp {
-
-class CIOSystemWrapper;
-
-// ------------------------------------------------------------------------------------------------
-// Custom IOStream implementation for the C-API
-class CIOStreamWrapper : public IOStream {
-public:
-	explicit CIOStreamWrapper(aiFile *pFile, CIOSystemWrapper *io) :
-			mFile(pFile),
-			mIO(io) {}
-	~CIOStreamWrapper(void);
-
-	size_t Read(void *pvBuffer, size_t pSize, size_t pCount);
-	size_t Write(const void *pvBuffer, size_t pSize, size_t pCount);
-	aiReturn Seek(size_t pOffset, aiOrigin pOrigin);
-	size_t Tell(void) const;
-	size_t FileSize() const;
-	void Flush();
-
-private:
-	aiFile *mFile;
-	CIOSystemWrapper *mIO;
-};
-
-class CIOSystemWrapper : public IOSystem {
-	friend class CIOStreamWrapper;
-
-public:
-	explicit CIOSystemWrapper(aiFileIO *pFile) :
-			mFileSystem(pFile) {}
-
-	bool Exists(const char *pFile) const;
-	char getOsSeparator() const;
-	IOStream *Open(const char *pFile, const char *pMode = "rb");
-	void Close(IOStream *pFile);
-
-private:
-	aiFileIO *mFileSystem;
-};
-
-} // namespace Assimp
-
+#ifdef __GNUC__
+#pragma GCC system_header
 #endif
+
+#include <assimp/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct aiProgressHandler;
+
+// aiProgressHandler callbacks
+typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdateProc)(C_STRUCT aiProgressHandler*, float);
+typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdateFileReadProc)(C_STRUCT aiProgressHandler*, int, int);
+typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdatePostProcessProc)(C_STRUCT aiProgressHandler*, int, int);
+typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdateFileWriteProc)(C_STRUCT aiProgressHandler*, int, int);
+
+typedef char *aiProgressUserData;
+
+// ----------------------------------------------------------------------------------
+/** @brief C-API: Progress handler callbacks
+ *
+ *  Provided are functions to handle writing/reading progress. */
+
+struct aiProgressHandler {
+	/*
+        @brief Progress callback.
+     */
+	aiProgressHandlerUpdateProc UpdateProc;
+
+	/*
+        @brief Progress callback for file loading steps
+     */
+	aiProgressHandlerUpdateFileReadProc UpdateFileReadProc;
+
+    /*
+        @brief Progress callback for post-processing steps
+     */
+    aiProgressHandlerUpdatePostProcessProc UpdatePostProcessProc;
+
+    /*
+        @brief Progress callback for export steps.
+    */
+    aiProgressHandlerUpdateFileWriteProc UpdateFileWriteProc;
+
+	/** User-defined, opaque data */
+	aiProgressUserData UserData;
+};
+
+#ifdef __cplusplus
+}
+#endif
+#endif // AI_CPROGRESSHANDLER_H_INC

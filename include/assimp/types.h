@@ -71,7 +71,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/quaternion.h>
 
 typedef int32_t ai_int32;
-typedef uint32_t ai_uint32 ;
+typedef uint32_t ai_uint32;
 
 #ifdef __cplusplus
 #include <cstring>

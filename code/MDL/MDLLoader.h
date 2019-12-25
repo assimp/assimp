@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/BaseImporter.h>
 #include "MDLFileData.h"
-#include "HMP/HalfLifeFileData.h"
+#include "HalfLifeFileData.h"
 
 struct aiNode;
 struct aiTexture;

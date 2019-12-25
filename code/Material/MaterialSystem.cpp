@@ -56,7 +56,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Get a specific property from a material
-aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialProperty(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -88,7 +88,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get an array of floating-point values from the material.
-aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialFloatArray(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -176,7 +176,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get an array if integers from the material
-aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialIntegerArray(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -255,7 +255,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a color (3 or 4 floats) from the material
-aiReturn aiGetMaterialColor(const aiMaterial* pMat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialColor(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -274,7 +274,7 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a aiUVTransform (5 floats) from the material
-aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialUVTransform(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -286,7 +286,7 @@ aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a string from the material
-aiReturn aiGetMaterialString(const aiMaterial* pMat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialString(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -321,7 +321,7 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get the number of textures on a particular texture stack
-unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
+unsigned int ASSIMP_CALLCONV aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
     C_ENUM aiTextureType type)
 {
     ai_assert (pMat != NULL);
@@ -342,7 +342,7 @@ unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
-aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
+aiReturn ASSIMP_CALLCONV aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     aiTextureType type,
     unsigned int  index,
     C_STRUCT aiString* path,

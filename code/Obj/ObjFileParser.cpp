@@ -118,7 +118,10 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     size_t lastFilePos( 0 );
 
     std::vector<char> buffer;
-    while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
+    while ( streamBuffer.getNextDataLine( buffer, '\0' ) ) {
+    //todo: this will introduce the old behaviour where reference to files with the '\' character will cause errors in the parse
+	//reverting, studying a new solution for that
+	//while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 

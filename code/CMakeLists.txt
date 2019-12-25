@@ -68,7 +68,8 @@ SET( PUBLIC_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
-  ${HEADER_PATH}/cfileio.h
+  ${HEADER_PATH}/cfileio.h  
+  ${HEADER_PATH}/cprogresshandler.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h
   ${HEADER_PATH}/material.inl
@@ -84,7 +85,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/scene.h
   ${HEADER_PATH}/metadata.h
   ${HEADER_PATH}/texture.h
-  ${HEADER_PATH}/types.h
+  ${HEADER_PATH}/types.h  
   ${HEADER_PATH}/vector2.h
   ${HEADER_PATH}/vector2.inl
   ${HEADER_PATH}/vector3.h
@@ -184,8 +185,6 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
-  Common/SplitByBoneCountProcess.cpp
-  Common/SplitByBoneCountProcess.h
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -203,6 +202,8 @@ SOURCE_GROUP(Common FILES ${Common_SRCS})
 SET( CApi_SRCS
   CApi/CInterfaceIOWrapper.cpp
   CApi/CInterfaceIOWrapper.h
+  CApi/CProgressHandlerWrapper.h
+  CApi/CProgressHandlerWrapper.cpp
 )
 SOURCE_GROUP(CApi FILES ${CApi_SRCS})
 
@@ -375,7 +376,6 @@ ADD_ASSIMP_IMPORTER( HMP
   HMP/HMPFileData.h
   HMP/HMPLoader.cpp
   HMP/HMPLoader.h
-  HMP/HalfLifeFileData.h
 )
 
 ADD_ASSIMP_IMPORTER( IRRMESH
@@ -449,6 +449,7 @@ ADD_ASSIMP_IMPORTER( MDC
 )
 
 ADD_ASSIMP_IMPORTER( MDL
+  MDL/HalfLifeFileData.h
   MDL/MDLDefaultColorMap.h
   MDL/MDLFileData.h
   MDL/MDLLoader.cpp
@@ -688,6 +689,8 @@ SET( PostProcessing_SRCS
   PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
+  PostProcessing/SplitByBoneCountProcess.cpp
+  PostProcessing/SplitByBoneCountProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
@@ -825,6 +828,10 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDPmxParser.h
   MMD/MMDPmxParser.cpp
   MMD/MMDVmdParser.h
+  MMD/PmdHelper.h
+  MMD/PmdHelper.cpp
+  MMD/PmdStringHelper.h
+  MMD/PmdStringHelper.cpp  
 )
 
 ADD_ASSIMP_EXPORTER( ASSJSON
@@ -1157,7 +1164,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
-if( MSVC )
+if( MSVC AND NOT SKIP_MSVC_UPDATE)
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
   # CMake 3.12 added a variable for this
   if(MSVC_TOOLSET_VERSION)

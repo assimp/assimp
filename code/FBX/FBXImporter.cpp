@@ -135,8 +135,9 @@ void FBXImporter::SetupProperties(const Importer *pImp) {
 	settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
 	settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
 	settings.useLegacyEmbeddedTextureNaming = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING, false);
-	settings.removeEmptyBones = pImp->GetPropertyBool(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true);
+	settings.removeEmptyBones = pImp->GetPropertyBool(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, false);
 	settings.convertToMeters = pImp->GetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, false);
+	settings.disableDiffuseFactor = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_DISABLE_DIFFUSE_FACTOR, false);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -181,12 +182,14 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		// convert the FBX DOM to aiScene
 		ConvertToAssimpScene(pScene, doc, settings.removeEmptyBones);
 
+		if (settings.convertToMeters) {
 		// size relative to cm
-		float size_relative_to_cm = doc.GlobalSettings().UnitScaleFactor();
+			float size_relative_to_cm = doc.GlobalSettings().UnitScaleFactor();
 
-		// Set FBX file scale is relative to CM must be converted to M for
-		// assimp universal format (M)
-		SetFileScale(size_relative_to_cm * 0.01f);
+			// Set FBX file scale is relative to CM must be converted to M for
+			// assimp universal format (M)
+			SetFileScale(size_relative_to_cm * 0.01f);
+		}
 
 		std::for_each(tokens.begin(), tokens.end(), Util::delete_fun<Token>());
 	} catch (std::exception &) {

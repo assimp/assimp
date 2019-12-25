@@ -47,6 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <memory>
 #include "MMDCpp14.h"
+#include <assimp/DefaultIOSystem.h>
+
+using namespace::Assimp;
 
 namespace pmx
 {
@@ -72,7 +75,7 @@ namespace pmx
 		uint8_t bone_index_size;
 		uint8_t morph_index_size;
 		uint8_t rigidbody_index_size;
-		void Read(std::istream *stream);
+		void Read(IOStream *stream);
 	};
 
 	enum class PmxVertexSkinningType : uint8_t
@@ -87,7 +90,7 @@ namespace pmx
 	class PmxVertexSkinning
 	{
 	public:
-		virtual void Read(std::istream *stream, PmxSetting *setting) = 0;
+		virtual void Read(IOStream *stream, PmxSetting *setting) = 0;
 		virtual ~PmxVertexSkinning() {}
 	};
 
@@ -99,7 +102,7 @@ namespace pmx
 		{}
 
 		int bone_index;
-		void Read(std::istream *stresam, PmxSetting *setting);
+		void Read(IOStream *stresam, PmxSetting *setting);
 	};
 
 	class PmxVertexSkinningBDEF2 : public PmxVertexSkinning
@@ -114,7 +117,7 @@ namespace pmx
 		int bone_index1;
 		int bone_index2;
 		float bone_weight;
-		void Read(std::istream *stresam, PmxSetting *setting);
+		void Read(IOStream *stresam, PmxSetting *setting);
 	};
 
 	class PmxVertexSkinningBDEF4 : public PmxVertexSkinning
@@ -139,7 +142,7 @@ namespace pmx
 		float bone_weight2;
 		float bone_weight3;
 		float bone_weight4;
-		void Read(std::istream *stresam, PmxSetting *setting);
+		void Read(IOStream *stresam, PmxSetting *setting);
 	};
 
 	class PmxVertexSkinningSDEF : public PmxVertexSkinning
@@ -163,7 +166,7 @@ namespace pmx
 		float sdef_c[3];
 		float sdef_r0[3];
 		float sdef_r1[3];
-		void Read(std::istream *stresam, PmxSetting *setting);
+		void Read(IOStream *stresam, PmxSetting *setting);
 	};
 
 	class PmxVertexSkinningQDEF : public PmxVertexSkinning
@@ -188,7 +191,7 @@ namespace pmx
 		float bone_weight2;
 		float bone_weight3;
 		float bone_weight4;
-		void Read(std::istream *stresam, PmxSetting *setting);
+		void Read(IOStream *stresam, PmxSetting *setting);
 	};
 
 	class PmxVertex
@@ -216,7 +219,7 @@ namespace pmx
 		PmxVertexSkinningType skinning_type;
 		std::unique_ptr<PmxVertexSkinning> skinning;
 		float edge;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxMaterial
@@ -259,7 +262,7 @@ namespace pmx
 		int toon_texture_index;
 		std::string memo;
 		int index_count;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxIkLink
@@ -279,7 +282,7 @@ namespace pmx
 		uint8_t angle_lock;
 		float max_radian[3];
 		float min_radian[3];
-		void Read(std::istream *stream, PmxSetting *settingn);
+		void Read(IOStream *stream, PmxSetting *settingn);
 	};
 
 	class PmxBone
@@ -326,7 +329,7 @@ namespace pmx
 		float ik_loop_angle_limit;
 		int ik_link_count;
 		std::unique_ptr<PmxIkLink []> ik_links;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	enum class MorphType : uint8_t
@@ -356,7 +359,7 @@ namespace pmx
 	class PmxMorphOffset
 	{
 	public:
-		void virtual Read(std::istream *stream, PmxSetting *setting) = 0;
+		void virtual Read(IOStream *stream, PmxSetting *setting) = 0;
 	};
 
 	class PmxMorphVertexOffset : public PmxMorphOffset
@@ -371,7 +374,7 @@ namespace pmx
 		}
 		int vertex_index;
 		float position_offset[3];
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphUVOffset : public PmxMorphOffset
@@ -386,7 +389,7 @@ namespace pmx
 		}
 		int vertex_index;
 		float uv_offset[4];
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphBoneOffset : public PmxMorphOffset
@@ -405,7 +408,7 @@ namespace pmx
 		int bone_index;
 		float translation[3];
 		float rotation[4];
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphMaterialOffset : public PmxMorphOffset
@@ -438,7 +441,7 @@ namespace pmx
 		float texture_argb[4];
 		float sphere_texture_argb[4];
 		float toon_texture_argb[4];
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphGroupOffset : public PmxMorphOffset
@@ -450,7 +453,7 @@ namespace pmx
 		{}
 		int morph_index;
 		float morph_weight;
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphFlipOffset : public PmxMorphOffset
@@ -462,7 +465,7 @@ namespace pmx
 		{}
 		int morph_index;
 		float morph_value;
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphImplusOffset : public PmxMorphOffset
@@ -481,7 +484,7 @@ namespace pmx
 		uint8_t is_local;
 		float velocity[3];
 		float angular_torque[3];
-		void Read(std::istream *stream, PmxSetting *setting); //override;
+		void Read(IOStream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorph
@@ -503,7 +506,7 @@ namespace pmx
 		std::unique_ptr<PmxMorphGroupOffset []> group_offsets;
 		std::unique_ptr<PmxMorphFlipOffset []> flip_offsets;
 		std::unique_ptr<PmxMorphImplusOffset []> implus_offsets;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxFrameElement
@@ -516,7 +519,7 @@ namespace pmx
 		}
 		uint8_t element_target;
 		int index;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxFrame
@@ -532,7 +535,7 @@ namespace pmx
 		uint8_t frame_flag;
 		int element_count;
 		std::unique_ptr<PmxFrameElement []> elements;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxRigidBody
@@ -571,7 +574,7 @@ namespace pmx
 		float repulsion;
 		float friction;
 		uint8_t physics_calc_type;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	enum class PmxJointType : uint8_t
@@ -612,7 +615,7 @@ namespace pmx
 		float rotation_limitation_max[3];
 		float spring_move_coefficient[3];
 		float spring_rotation_coefficient[3];
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxJoint
@@ -622,7 +625,7 @@ namespace pmx
 		std::string joint_english_name;
 		PmxJointType joint_type;
 		PmxJointParam param;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	enum PmxSoftBodyFlag : uint8_t
@@ -643,7 +646,7 @@ namespace pmx
 		int related_rigid_body;
 		int related_vertex;
 		bool is_near;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxSoftBody
@@ -728,7 +731,7 @@ namespace pmx
 		std::unique_ptr<PmxAncherRigidBody []> anchers;
 		int pin_vertex_count;
 		std::unique_ptr<int []> pin_vertices;
-		void Read(std::istream *stream, PmxSetting *setting);
+		void Read(IOStream *stream, PmxSetting *setting);
 	};
 
 	class PmxModel
@@ -775,8 +778,8 @@ namespace pmx
 		int soft_body_count;
 		std::unique_ptr<PmxSoftBody []> soft_bodies;
 		void Init();
-		void Read(std::istream *stream);
+		void Read(IOStream *stream);
 		//static std::unique_ptr<PmxModel> ReadFromFile(const char *filename);
-		//static std::unique_ptr<PmxModel> ReadFromStream(std::istream *stream);
+		//static std::unique_ptr<PmxModel> ReadFromStream(IOStream *stream);
 	};
 }

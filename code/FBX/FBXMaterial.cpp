@@ -317,89 +317,125 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
     }
 
     if(Content && !Content->Tokens().empty()) {
-        //this field is omitted when the embedded texture is already loaded, let's ignore if it's not found
-        try {
-            const Token& token = GetRequiredToken(*Content, 0);
-            const char* data = token.begin();
-            if (!token.IsBinary()) {
-                if (*data != '"') {
-                    DOMError("embedded content is not surrounded by quotation marks", &element);
-                }
-                else {
-                    size_t targetLength = 0;
-                    auto numTokens = Content->Tokens().size();
-                    // First time compute size (it could be large like 64Gb and it is good to allocate it once)
-                    for (uint32_t tokenIdx = 0; tokenIdx < numTokens; ++tokenIdx)
-                    {
-                        const Token& dataToken = GetRequiredToken(*Content, tokenIdx);
-                        size_t tokenLength = dataToken.end() - dataToken.begin() - 2; // ignore double quotes
-                        const char* base64data = dataToken.begin() + 1;
-                        const size_t outLength = Util::ComputeDecodedSizeBase64(base64data, tokenLength);
-                        if (outLength == 0)
-                        {
-                            DOMError("Corrupted embedded content found", &element);
+                std::vector<uint8_t> composedData;
+                TokenList tokens = Content->Tokens();
+                size_t tokenCount = tokens.size();
+                for (size_t i = 0; i < tokenCount; i++) {
+                    const Token& token = *tokens.at(i);
+                    const char* data = token.begin();
+                    size_t size = static_cast<size_t>(token.end() - data);
+                    if (size < 2) {
+                        DOMWarning("base64 data array is too short, need two (2) bytes for parsing", &element);
+                    }
+                    else if (data[0] == '"' && data[size - 1] == '"') { //base64 data
+                        uint8_t* decoded;
+                        size_t decodedSize = Base64Decode(data + 1, size - 2, decoded);
+                        if (decodedSize > 0) {
+                            std::copy(decoded, decoded + decodedSize, std::back_inserter(composedData));
                         }
-                        targetLength += outLength;
+                        else {
+                            DOMWarning("invalid base64 video content", &element);
+                        }
                     }
-                    if (targetLength == 0)
-                    {
-                        DOMError("Corrupted embedded content found", &element);
+                    else if (size < 5) {
+                        DOMWarning("binary data array is too short, need five (5) bytes for type signature and element count", &element);
                     }
-                    content = new uint8_t[targetLength];
-                    contentLength = static_cast<uint64_t>(targetLength);
-                    size_t dst_offset = 0;
-                    for (uint32_t tokenIdx = 0; tokenIdx < numTokens; ++tokenIdx)
-                    {
-                        const Token& dataToken = GetRequiredToken(*Content, tokenIdx);
-                        size_t tokenLength = dataToken.end() - dataToken.begin() - 2; // ignore double quotes
-                        const char* base64data = dataToken.begin() + 1;
-                        dst_offset += Util::DecodeBase64(base64data, tokenLength, content + dst_offset, targetLength - dst_offset);
+                    else if (!token.IsBinary()) {
+                        DOMWarning("video content is not binary data, ignoring", &element);
                     }
-                    if (targetLength != dst_offset)
-                    {
-                        delete[] content;
-                        contentLength = 0;
-                        DOMError("Corrupted embedded content found", &element);
+                    else if (data[0] != 'R') {
+                        DOMWarning("video content is not raw binary data, ignoring", &element);
+                    }
+                    else {
+                        // read number of elements
+                        uint32_t len = 0;
+                        std::memcpy(&len, data + 1, sizeof(len));
+                        AI_SWAP4(len);
+                        const char* start = data + 5;
+                        std::copy(start, start + len, std::back_inserter(composedData));
                     }
                 }
+                contentLength = composedData.size();
+                if (contentLength > 0) {
+                    content = new uint8_t[contentLength];
+                    std::copy(composedData.begin(), composedData.end(), content);
+                }
             }
-            else if (static_cast<size_t>(token.end() - data) < 5) {
-                DOMError("binary data array is too short, need five (5) bytes for type signature and element count", &element);
-            }
-            else if (*data != 'R') {
-                DOMWarning("video content is not raw binary data, ignoring", &element);
-            }
-            else {
-                // read number of elements
-                uint32_t len = 0;
-                ::memcpy(&len, data + 1, sizeof(len));
-                AI_SWAP4(len);
 
-                contentLength = len;
-
-                content = new uint8_t[len];
-                ::memcpy(content, data + 5, len);
-            }
-        } catch (const runtime_error& runtimeError)
-        {
-            //we don't need the content data for contents that has already been loaded
-            ASSIMP_LOG_DEBUG_F("Caught exception in FBXMaterial (likely because content was already loaded): ",
-                    runtimeError.what());
+            props = GetPropertyTable(doc, "Video.FbxVideo", element, sc);
         }
-    }
 
-    props = GetPropertyTable(doc,"Video.FbxVideo",element,sc);
-}
+        template<bool B>
+        struct DATA
+        {
+            static const uint8_t tableDecodeBase64[128];
+        };
 
+        template<bool B>
+        const uint8_t DATA<B>::tableDecodeBase64[128] = {
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 62,  0,  0,  0, 63,
+            52, 53, 54, 55, 56, 57, 58, 59, 60, 61,  0,  0,  0, 64,  0,  0,
+            0,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+            15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,  0,  0,  0,  0,  0,
+            0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+            41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,  0,  0,  0,  0,  0
+        };
 
-Video::~Video()
-{
-    if(content) {
-        delete[] content;
-    }
-}
+        inline uint8_t DecodeCharBase64(char c)
+        {
+            return DATA<true>::tableDecodeBase64[size_t(c)];
+        }
 
-} //!FBX
+        size_t Video::Base64Decode(const char *pInputBase64, size_t len, uint8_t*& pOutputData) {
+            ai_assert(len % 4 == 0);
+
+            if (len < 4) {
+                pOutputData = 0;
+                return 0;
+            }
+
+            int nEquals = int(pInputBase64[len - 1] == '=') + int(pInputBase64[len - 2] == '=');
+
+            size_t outLength = (len * 3) / 4 - nEquals;
+            pOutputData = new uint8_t[outLength];
+            memset(pOutputData, 0, outLength);
+
+            size_t i, j = 0;
+
+            for (i = 0; i + 4 < len; i += 4) {
+                uint8_t b0 = DecodeCharBase64(pInputBase64[i]);
+                uint8_t b1 = DecodeCharBase64(pInputBase64[i + 1]);
+                uint8_t b2 = DecodeCharBase64(pInputBase64[i + 2]);
+                uint8_t b3 = DecodeCharBase64(pInputBase64[i + 3]);
+
+                pOutputData[j++] = (uint8_t)((b0 << 2) | (b1 >> 4));
+                pOutputData[j++] = (uint8_t)((b1 << 4) | (b2 >> 2));
+                pOutputData[j++] = (uint8_t)((b2 << 6) | b3);
+            }
+
+            {
+                uint8_t b0 = DecodeCharBase64(pInputBase64[i]);
+                uint8_t b1 = DecodeCharBase64(pInputBase64[i + 1]);
+                uint8_t b2 = DecodeCharBase64(pInputBase64[i + 2]);
+                uint8_t b3 = DecodeCharBase64(pInputBase64[i + 3]);
+
+                pOutputData[j++] = (uint8_t)((b0 << 2) | (b1 >> 4));
+                if (b2 < 64) pOutputData[j++] = (uint8_t)((b1 << 4) | (b2 >> 2));
+                if (b3 < 64) pOutputData[j++] = (uint8_t)((b2 << 6) | b3);
+            }
+            return outLength;
+        }
+
+        Video::~Video()
+        {
+            if (content) {
+                delete[] content;
+            }
+        }
+
+    } //!FBX
 } //!Assimp
 
 #endif

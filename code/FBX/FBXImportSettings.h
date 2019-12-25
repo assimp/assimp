@@ -65,9 +65,10 @@ struct ImportSettings
     , preservePivots(true)
     , optimizeEmptyAnimationCurves(true)
     , useLegacyEmbeddedTextureNaming(false)
-	, disableDiffuseFactor(false)
-    , removeEmptyBones( true )
-    , convertToMeters( false ) {
+	, removeEmptyBones(true)
+	, convertToMeters(false)
+	, disableDiffuseFactor(true)
+	{
         // empty
     }
 

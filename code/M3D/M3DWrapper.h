@@ -52,6 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 
+// Assimp specific M3D configuration. Comment out these defines to remove functionality
+//#define ASSIMP_USE_M3D_READFILECB
+//#define M3D_ASCII
+
 #include "m3d.h"
 
 namespace Assimp {

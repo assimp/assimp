@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file  HL1FileData.h
  *  @brief Definition of in-memory structures for the
- *        Half-Life 1 MDL file format.
+ *         Half-Life 1 MDL file format.
  */
 
 #ifndef AI_HL1FILEDATA_INCLUDED
@@ -58,175 +58,357 @@ namespace HalfLife {
 
 using vec3_t = float[3];
 
+/** \struct Header_HL1
+ *  \brief Data structure for the HL1 MDL file header.
+ */
 struct Header_HL1 : HalfLifeMDLBaseHeader {
+    //! The model name.
     char name[64];
+
+    //! The total file size in bytes.
     int32_t length;
 
-    vec3_t eyeposition; // ideal eye position
-    vec3_t min; // ideal movement hull size
+    //! Ideal eye position.
+    vec3_t eyeposition;
+
+    //! Ideal movement hull size.
+    vec3_t min;
     vec3_t max;
 
-    vec3_t bbmin; // clipping bounding box
+    //! Clipping bounding box.
+    vec3_t bbmin;
     vec3_t bbmax;
 
-    int32_t unused; // was flags
+    //! Was "flags".
+    int32_t unused;
 
-    int32_t numbones; // bones
+    //! The number of bones.
+    int32_t numbones;
+
+    //! Offset to the first bone chunk.
     int32_t boneindex;
 
-    int32_t numbonecontrollers; // bone controllers
+    //! The number of bone controllers.
+    int32_t numbonecontrollers;
+
+    //! Offset to the first bone controller chunk.
     int32_t bonecontrollerindex;
 
-    int32_t numhitboxes; // complex bounding boxes
+    //! The number of hitboxes.
+    int32_t numhitboxes;
+
+    //! Offset to the first hitbox chunk.
     int32_t hitboxindex;
 
-    int32_t numseq; // animation sequences
+    //! The number of sequences.
+    int32_t numseq;
+
+    //! Offset to the first sequence description chunk.
     int32_t seqindex;
 
-    int32_t numseqgroups; // demand loaded sequences
+    //! The number of sequence groups.
+    int32_t numseqgroups;
+
+    //! Offset to the first sequence group chunk.
     int32_t seqgroupindex;
 
-    int32_t numtextures; // raw textures
+    //! The number of textures.
+    int32_t numtextures;
+
+    //! Offset to the first texture chunk.
     int32_t textureindex;
+
+    //! Offset to the first texture's image data.
     int32_t texturedataindex;
 
-    int32_t numskinref; // replaceable textures
+    //! The number of replaceable textures.
+    int32_t numskinref;
+
+    //! The number of skin families.
     int32_t numskinfamilies;
+
+    //! Offset to the first replaceable texture.
     int32_t skinindex;
 
+    //! The number of bodyparts.
     int32_t numbodyparts;
+
+    //! Offset the the first bodypart.
     int32_t bodypartindex;
 
-    int32_t numattachments; // queryable attachable points
+    //! The number of attachments.
+    int32_t numattachments;
+
+    //! Offset the the first attachment chunk.
     int32_t attachmentindex;
 
-    int32_t unused2; // was "soundtable"
-    int32_t unused3; // was "soundindex"
-    int32_t unused4; // was "soundgroups"
-    int32_t unused5; // was "soundgroupindex"
+    //! Was "soundtable".
+    int32_t unused2;
 
-    int32_t numtransitions; // animation node to animation node transition graph
+    //! Was "soundindex".
+    int32_t unused3;
+
+    //! Was "soundgroups".
+    int32_t unused4;
+
+    //! Was "soundgroupindex".
+    int32_t unused5;
+
+    //! The number of nodes in the sequence transition graph.
+    int32_t numtransitions;
+
+    //! Offset the the first sequence transition.
     int32_t transitionindex;
 } PACK_STRUCT;
 
-// header for demand loaded sequence group data
+/** \struct SequenceHeader_HL1
+ *  \brief Data structure for the file header of a demand loaded
+ *         HL1 MDL sequence group file.
+ */
 struct SequenceHeader_HL1 : HalfLifeMDLBaseHeader {
+    //! The sequence group file name.
     char name[64];
+
+    //! The total file size in bytes.
     int32_t length;
 } PACK_STRUCT;
 
-// bones
+/** \struct Bone_HL1
+ *  \brief Data structure for a bone in HL1 MDL files.
+ */
 struct Bone_HL1 {
-    char name[32]; // bone name for symbolic links
-    int32_t parent; // parent bone
-    int32_t unused; // was "flags" -- ??
-    int32_t bonecontroller[6]; // bone controller index, -1 == none
-    float value[6]; // default DoF values
-    float scale[6]; // scale for delta DoF values
+    //! The bone name.
+    char name[32];
+
+    //! The parent bone index. (-1) If it has no parent.
+    int32_t parent;
+
+    //! Was "flags".
+    int32_t unused;
+
+    //! Available bone controller per motion type.
+    //! (-1) if no controller is available.
+    int32_t bonecontroller[6];
+
+    /*! Default position and rotation values where
+     * scale[0] = position.X
+     * scale[1] = position.Y
+     * scale[2] = position.Z
+     * scale[3] = rotation.X
+     * scale[4] = rotation.Y
+     * scale[5] = rotation.Z
+     */
+    float value[6];
+
+    /*! Compressed scale values where
+     * scale[0] = position.X scale
+     * scale[1] = position.Y scale
+     * scale[2] = position.Z scale
+     * scale[3] = rotation.X scale
+     * scale[4] = rotation.Y scale
+     * scale[5] = rotation.Z scale
+     */
+    float scale[6];
 } PACK_STRUCT;
 
-// bone controllers
+/** \struct BoneController_HL1
+ *  \brief Data structure for a bone controller in HL1 MDL files.
+ */
 struct BoneController_HL1 {
-    int32_t bone; // -1 == 0
-    int32_t type; // X, Y, Z, XR, YR, ZR, M
+    //! Bone affected by this controller.
+    int32_t bone;
+
+    //! The motion type.
+    int32_t type;
+
+    //! The minimum and maximum values.
     float start;
     float end;
-    int32_t unused; // was "rest" - byte index value at rest
-    int32_t index; // 0-3 user set controller, 4 mouth
+
+    // Was "rest".
+    int32_t unused;
+
+    // The bone controller channel.
+    int32_t index;
 } PACK_STRUCT;
 
-// intersection boxes
+/** \struct Hitbox_HL1
+ *  \brief Data structure for a hitbox in HL1 MDL files.
+ */
 struct Hitbox_HL1 {
+    //! The bone this hitbox follows.
     int32_t bone;
-    int32_t group; // intersection group
-    vec3_t bbmin; // bounding box
+
+    //! The hit group.
+    int32_t group;
+
+    //! The hitbox minimum and maximum extents.
+    vec3_t bbmin;
     vec3_t bbmax;
 } PACK_STRUCT;
 
-//
-// demand loaded sequence groups
-//
+/** \struct SequenceGroup_HL1
+ *  \brief Data structure for a sequence group in HL1 MDL files.
+ */
 struct SequenceGroup_HL1 {
-    char label[32]; // textual name
-    char name[64]; // file name
-    int32_t unused; // was "cache"  - index pointer
-    int32_t unused2; // was "data" -  hack for group 0
+    //! A textual name for this sequence group.
+    char label[32];
+
+    //! The file name.
+    char name[64];
+
+    //! Was "cache".
+    int32_t unused;
+
+    //! Was "data".
+    int32_t unused2;
 } PACK_STRUCT;
 
-// The type of blending for a sequence.
+//! The type of blending for a sequence.
 enum SequenceBlendMode_HL1 {
     NoBlend = 1,
     TwoWayBlending = 2,
     FourWayBlending = 4,
 };
 
-// sequence descriptions
+/** \struct SequenceDesc_HL1
+ *  \brief Data structure for a sequence description in HL1 MDL files.
+ */
 struct SequenceDesc_HL1 {
-    char label[32]; // sequence label
+    //! The sequence name.
+    char label[32];
 
-    float fps; // frames per second
-    int32_t flags; // looping/non-looping flags
+    //! Frames per second.
+    float fps;
 
+    //! looping/non-looping flags.
+    int32_t flags;
+
+    //! The sequence activity.
     int32_t activity;
+
+    //! The sequence activity weight.
     int32_t actweight;
 
+    //! The number of animation events.
     int32_t numevents;
+
+    //! Offset the the first animation event chunk.
     int32_t eventindex;
 
-    int32_t numframes; // number of frames per sequence
+    //! The number of frames in the sequence.
+    int32_t numframes;
 
-    int32_t unused; // was "numpivots" - number of foot pivots
-    int32_t unused2; // was "pivotindex"
+    //! Was "numpivots".
+    int32_t unused;
 
+    //! Was "pivotindex".
+    int32_t unused2;
+
+    //! Linear motion type.
     int32_t motiontype;
-    int32_t motionbone;
-    vec3_t linearmovement;
-    int32_t unused3; // was "automoveposindex"
-    int32_t unused4; // was "automoveangleindex"
 
-    vec3_t bbmin; // per sequence bounding box
+    //! Linear motion bone.
+    int32_t motionbone;
+
+    //! Linear motion.
+    vec3_t linearmovement;
+
+    //! Was "automoveposindex".
+    int32_t unused3;
+
+    //! Was "automoveangleindex".
+    int32_t unused4;
+
+    //! The sequence minimum and maximum extents.
+    vec3_t bbmin;
     vec3_t bbmax;
 
+    //! The number of blend animations.
     int32_t numblends;
-    int32_t animindex; // mstudioanim_t pointer relative to start of sequence group data
-                   // [blend][bone][X, Y, Z, XR, YR, ZR]
 
-    int32_t blendtype[2]; // X, Y, Z, XR, YR, ZR
-    float blendstart[2]; // starting value
-    float blendend[2]; // ending value
-    int32_t unused5; // was "blendparent"
+    //! Offset to first the AnimValueOffset_HL1 chunk.
+    //! This offset is relative to the SequenceHeader_HL1 of the file
+    //! that contains the animation data.
+    int32_t animindex;
 
-    int32_t seqgroup; // sequence group for demand loading
+    //! The motion type of each blend controller.
+    int32_t blendtype[2];
 
-    int32_t entrynode; // transition node at entry
-    int32_t exitnode; // transition node at exit
-    int32_t nodeflags; // transition rules
+    //! The starting value of each blend controller.
+    float blendstart[2];
 
-    int32_t unused6; // was "nextseq" - auto advancing sequences
+    //! The ending value of each blend controller.
+    float blendend[2];
+
+    //! Was "blendparent".
+    int32_t unused5;
+
+    //! The sequence group.
+    int32_t seqgroup;
+
+    //! The node at entry in the sequence transition graph.
+    int32_t entrynode;
+
+    //! The node at exit in the sequence transition graph.
+    int32_t exitnode;
+
+    //! Transition rules.
+    int32_t nodeflags;
+
+    //! Was "nextseq"
+    int32_t unused6;
 } PACK_STRUCT;
 
-// events
+/** \struct AnimEvent_HL1
+ *  \brief Data structure for an animation event in HL1 MDL files.
+ */
 struct AnimEvent_HL1 {
+    //! The frame at which this animation event occurs.
     int32_t frame;
+
+    //! The script event type.
     int32_t event;
-    int32_t unused; // was "type"
+
+    //! was "type"
+    int32_t unused;
+
+    //! Options. Could be path to sound WAVE files.
     char options[64];
 } PACK_STRUCT;
 
-// attachment
+/** \struct Attachment_HL1
+ *  \brief Data structure for an attachment in HL1 MDL files.
+ */
 struct Attachment_HL1 {
-    char unused[32]; // was "name"
-    int32_t unused2; // was "type"
+    //! Was "name".
+    char unused[32];
+
+    //! Was "type".
+    int32_t unused2;
+
+    //! The bone this attachment follows.
     int32_t bone;
-    vec3_t org; // attachment point
-    vec3_t unused3[3]; // was "vectors"
+
+    //! The attachment origin.
+    vec3_t org;
+
+    //! Was "vectors"
+    vec3_t unused3[3];
 } PACK_STRUCT;
 
+/** \struct AnimValueOffset_HL1
+ *  \brief Data structure to hold offsets (one per motion type)
+ *         to the first animation frame value for a single bone
+ *         in HL1 MDL files.
+ */
 struct AnimValueOffset_HL1 {
     unsigned short offset[6];
 } PACK_STRUCT;
 
-// animation frames
+/** \struct AnimValue_HL1
+ *  \brief Data structure for an animation frame in HL1 MDL files.
+ */
 union AnimValue_HL1 {
     struct {
         uint8_t valid;
@@ -235,58 +417,121 @@ union AnimValue_HL1 {
     short value;
 } PACK_STRUCT;
 
-// body part index
+/** \struct Bodypart_HL1
+ *  \brief Data structure for a bodypart in HL1 MDL files.
+ */
 struct Bodypart_HL1 {
+    //! The bodypart name.
     char name[64];
+
+    //! The number of available models for this bodypart.
     int32_t nummodels;
+
+    //! Used to convert from a global model index
+    //! to a local bodypart model index.
     int32_t base;
-    int32_t modelindex; // index into models array
+
+    //! The offset to the first model chunk.
+    int32_t modelindex;
 } PACK_STRUCT;
 
-// skin info
+/** \struct Texture_HL1
+ *  \brief Data structure for a texture in HL1 MDL files.
+ */
 struct Texture_HL1 {
+    //! Texture file name.
     char name[64];
+
+    //! Texture flags.
     int32_t flags;
+
+    //! Texture width in pixels.
     int32_t width;
+
+    //! Texture height in pixels.
     int32_t height;
+
+    //! Offset to the image data.
+    //! This offset is relative to the texture file header.
     int32_t index;
 } PACK_STRUCT;
 
-// studio models
+/** \struct Model_HL1
+ *  \brief Data structure for a model in HL1 MDL files.
+ */
 struct Model_HL1 {
+    //! Model name.
     char name[64];
 
-    int32_t unused; // was "type"
+    //! Was "type".
+    int32_t unused;
 
-    float unused2; // was "boundingradius"
+    //! Was "boundingradius".
+    float unused2;
 
+    //! The number of meshes in the model.
     int32_t nummesh;
+
+    //! Offset to the first mesh chunk.
     int32_t meshindex;
 
-    int32_t numverts; // number of unique vertices
-    int32_t vertinfoindex; // vertex bone info
-    int32_t vertindex; // vertex vec3_t
-    int32_t numnorms; // number of unique surface normals
-    int32_t norminfoindex; // normal bone info
-    int32_t normindex; // normal vec3_t
+    //! The number of unique vertices.
+    int32_t numverts;
 
-    int32_t unused3; // was "numgroups" - deformation groups
-    int32_t unused4; // was "groupindex"
+    //! Offset to the vertex bone array.
+    int32_t vertinfoindex;
+
+    //! Offset to the vertex array.
+    int32_t vertindex;
+
+    //! The number of unique normals.
+    int32_t numnorms;
+
+    //! Offset to the normal bone array.
+    int32_t norminfoindex;
+
+    //! Offset to the normal array.
+    int32_t normindex;
+
+    //! Was "numgroups".
+    int32_t unused3;
+
+    //! Was "groupindex".
+    int32_t unused4;
 } PACK_STRUCT;
 
-// meshes
+/** \struct Mesh_HL1
+ *  \brief Data structure for a mesh in HL1 MDL files.
+ */
 struct Mesh_HL1 {
+    //! Can be interpreted as the number of triangles in the mesh.
     int32_t numtris;
+
+    //! Offset to the start of the tris sequence.
     int32_t triindex;
+
+    //! The skin index.
     int32_t skinref;
-    int32_t numnorms; // per mesh normals
-    int32_t unused; // was "normindex" - normal vec3_t
+
+    //! The number of normals in the mesh.
+    int32_t numnorms;
+
+    //! Was "normindex".
+    int32_t unused;
 } PACK_STRUCT;
 
+/** \struct Trivert
+ *  \brief Data structure for a trivert in HL1 MDL files.
+ */
 struct Trivert {
-    short vertindex; // index into vertex array
-    short normindex; // index into normal array
-    short s, t; // s,t position on skin
+    //! Index into Model_HL1 vertex array.
+    short vertindex;
+
+    //! Index into Model_HL1 normal array.
+    short normindex;
+
+    //! Texture coordinates in absolute space (unnormalized).
+    short s, t;
 } PACK_STRUCT;
 
 #include <assimp/Compiler/poppack1.h>

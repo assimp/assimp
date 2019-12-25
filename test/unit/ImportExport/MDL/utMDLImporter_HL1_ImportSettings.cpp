@@ -198,18 +198,6 @@ private:
         func(scene);
     }
 
-    void load_with_import_setting_string(
-        const char *file_path,
-        const char *setting_key,
-        const char *setting_value,
-        std::function<void(const aiScene *)> &&func) {
-        Assimp::Importer importer;
-        importer.SetPropertyString(setting_key, setting_value);
-        const aiScene *scene = importer.ReadFile(file_path, aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
-        func(scene);
-    }
-
     inline static aiNode *get_global_info(const aiScene *scene) {
         return scene->mRootNode->FindNode(AI_MDL_HL1_NODE_GLOBAL_INFO);
     }

@@ -86,4 +86,4 @@ The cmake-build-environment provides options to configure the build. The followi
 - **INJECT_DEBUG_POSTFIX( default ON )**: Inject debug postfix in .a/.so lib names
 - **IGNORE_GIT_HASH ( default OFF )**: Don't call git to get the hash.
 - **ASSIMP_INSTALL_PDB ( default ON )**: Install MSVC debug files.
-- **SKIP_MSVC_UPDATE  ( default OFF )**: Disables MSVC libraries prefix.
+- **SKIP_MSVC_UPDATE ( default OFF )**: Disables MSVC libraries prefix.

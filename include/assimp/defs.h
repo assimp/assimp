@@ -127,10 +127,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * FIXTEXTUREPATHS
  * GENBOUNDINGBOXES */
 //////////////////////////////////////////////////////////////////////////
-#   define ASSIMP_CALLCONV  //rickomax: no callconv to use in C# interop calls under other platforms
 #ifdef _WIN32
 #   undef ASSIMP_API
-#   undef ASSIMP_CALLCONV
 #   define ASSIMP_CALLCONV __stdcall //rickomax: stdcall to use in C# interop calls under windows
     //////////////////////////////////////////////////////////////////////////
     /* Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library */
@@ -155,6 +153,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     /* Do nothing, the relevant defines are all in AssimpSwigPort.i */
 
 #else
+#   define ASSIMP_CALLCONV  //rickomax: no callconv to use in C# interop calls under other platforms
 #   define ASSIMP_API __attribute__ ((visibility("default")))
 #   define ASSIMP_API_WINONLY
 #endif

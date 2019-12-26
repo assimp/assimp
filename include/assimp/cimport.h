@@ -62,7 +62,7 @@ extern "C" {
 
 struct aiScene; // aiScene.h
 struct aiFileIO; // aiFileIO.h
-typedef void (*aiLogStreamCallback)(const char * /* message */, char * /* user */);
+typedef void (ASSIMP_CALLCONV *aiLogStreamCallback)(const char * /* message */, char * /* user */);
 
 // --------------------------------------------------------------------------------
 /** C-API: Represents a log stream. A log stream receives all log messages and

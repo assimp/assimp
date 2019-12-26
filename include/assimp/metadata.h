@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -47,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #ifndef AI_METADATA_H_INC
 #define AI_METADATA_H_INC
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1500)
 #  include "Compiler/pstdint.h"
@@ -129,7 +133,7 @@ struct aiMetadata {
     /** 
      *  @brief  The default constructor, set all members to zero by default.
      */
-    aiMetadata()
+    aiMetadata() AI_NO_EXCEPT
     : mNumProperties(0)
     , mKeys(nullptr)
     , mValues(nullptr) {
@@ -141,15 +145,16 @@ struct aiMetadata {
     , mKeys( nullptr )
     , mValues( nullptr ) {
         mKeys = new aiString[ mNumProperties ];
-        for ( unsigned int i = 0; i < mNumProperties; ++i ) {
+        for ( size_t i = 0; i < static_cast<size_t>( mNumProperties ); ++i ) {
             mKeys[ i ] = rhs.mKeys[ i ];
         }
         mValues = new aiMetadataEntry[ mNumProperties ];
-        for ( unsigned int i = 0; i < mNumProperties; ++i ) {
+        for ( size_t i = 0; i < static_cast<size_t>(mNumProperties); ++i ) {
             mValues[ i ].mType = rhs.mValues[ i ].mType;
             switch ( rhs.mValues[ i ].mType ) {
             case AI_BOOL:
-                mValues[ i ].mData = new bool( rhs.mValues[i].mData );
+                mValues[ i ].mData = new bool;
+                ::memcpy( mValues[ i ].mData, rhs.mValues[ i ].mData, sizeof(bool) );
                 break;
             case AI_INT32: {
                 int32_t v;
@@ -281,8 +286,8 @@ struct aiMetadata {
 			new_values[i] = mValues[i];
 		}
 
-		delete mKeys;
-		delete mValues;
+		delete[] mKeys;
+		delete[] mValues;
 
 		mKeys = new_keys;
 		mValues = new_values;
@@ -371,6 +376,23 @@ struct aiMetadata {
 
 		return true;
 	}
+
+    /// Check whether there is a metadata entry for the given key.
+    /// \param [in] Key - the key value value to check for.
+    inline
+    bool HasKey(const char* key) {
+        if ( nullptr == key ) {
+            return false;
+        }
+        
+        // Search for the given key
+        for (unsigned int i = 0; i < mNumProperties; ++i) {
+            if ( 0 == strncmp(mKeys[i].C_Str(), key, mKeys[i].length ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 #endif // __cplusplus
 

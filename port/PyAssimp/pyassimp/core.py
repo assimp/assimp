@@ -6,20 +6,18 @@ This is the main-module of PyAssimp.
 
 import sys
 if sys.version_info < (2,6):
-    raise 'pyassimp: need python 2.6 or newer'
+    raise RuntimeError('pyassimp: need python 2.6 or newer')
 
 # xrange was renamed range in Python 3 and the original range from Python 2 was removed.
 # To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.
 if sys.version_info >= (3,0):
     xrange = range
 
-import ctypes
-import os
 
 try: import numpy
-except: numpy = None
-
+except ImportError: numpy = None
 import logging
+import ctypes
 logger = logging.getLogger("pyassimp")
 # attach default null handler to logger so it doesn't complain
 # even if you don't attach another handler to logger
@@ -29,13 +27,12 @@ from . import structs
 from . import helper
 from . import postprocess
 from .errors import AssimpError
-from .formats import available_formats
 
 class AssimpLib(object):
     """
     Assimp-Singleton
     """
-    load, load_mem, export, release, dll = helper.search_library()
+    load, load_mem, export, export_blob, release, dll = helper.search_library()
 _assimp_lib = AssimpLib()
 
 def make_tuple(ai_obj, type = None):
@@ -66,6 +63,13 @@ def make_tuple(ai_obj, type = None):
 
     return res
 
+# Returns unicode object for Python 2, and str object for Python 3.
+def _convert_assimp_string(assimp_string):
+    if sys.version_info >= (3, 0):
+        return str(assimp_string.data, errors='ignore')
+    else:
+        return unicode(assimp_string.data, errors='ignore')
+
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
     aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
@@ -78,7 +82,8 @@ def call_init(obj, caller = None):
         _init(obj,parent=caller)
 
 def _is_init_type(obj):
-    if helper.hasattr_silent(obj,'contents'): #pointer
+
+    if obj and helper.hasattr_silent(obj,'contents'): #pointer
         return _is_init_type(obj[0])
     # null-pointer case that arises when we reach a mesh attribute
     # like mBitangents which use mNumVertices rather than mNumBitangents
@@ -89,7 +94,7 @@ def _is_init_type(obj):
         return False
     tname = obj.__class__.__name__
     return not (tname[:2] == 'c_' or tname == 'Structure' \
-            or tname == 'POINTER') and not isinstance(obj,int)
+            or tname == 'POINTER') and not isinstance(obj, (int, str, bytes))
 
 def _init(self, target = None, parent = None):
     """
@@ -118,14 +123,9 @@ def _init(self, target = None, parent = None):
                 continue
 
         if m == 'mName':
-            obj = self.mName
-            try:
-                uni = unicode(obj.data, errors='ignore')
-            except:
-                uni = str(obj.data, errors='ignore')
-            target.name = str( uni )
-            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + x.name + ")"
-            target.__class__.__str__ = lambda x: x.name
+            target.name = str(_convert_assimp_string(self.mName))
+            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + getattr(x, 'name','') + ")"
+            target.__class__.__str__ = lambda x: getattr(x, 'name', '')
             continue
 
         name = m[1:].lower()
@@ -220,6 +220,9 @@ def _init(self, target = None, parent = None):
     if isinstance(self, structs.Texture):
         _finalize_texture(self, target)
 
+    if isinstance(self, structs.Metadata):
+        _finalize_metadata(self, target)
+
 
     return self
 
@@ -295,15 +298,13 @@ def load(filename,
     '''
 
     if hasattr(filename, 'read'):
-        '''
-        This is the case where a file object has been passed to load.
-        It is calling the following function:
-        const aiScene* aiImportFileFromMemory(const char* pBuffer,
-                                              unsigned int pLength,
-                                              unsigned int pFlags,
-                                              const char* pHint)
-        '''
-        if file_type == None:
+        # This is the case where a file object has been passed to load.
+        # It is calling the following function:
+        # const aiScene* aiImportFileFromMemory(const char* pBuffer,
+        #                                      unsigned int pLength,
+        #                                      unsigned int pFlags,
+        #                                      const char* pHint)
+        if file_type is None:
             raise AssimpError('File type must be specified when passing file objects!')
         data  = filename.read()
         model = _assimp_lib.load_mem(data,
@@ -312,7 +313,7 @@ def load(filename,
                                      file_type)
     else:
         # a filename string has been passed
-        model = _assimp_lib.load(filename.encode("ascii"), processing)
+        model = _assimp_lib.load(filename.encode(sys.getfilesystemencoding()), processing)
 
     if not model:
         raise AssimpError('Could not import file!')
@@ -341,15 +342,39 @@ def export(scene,
 
     '''
 
-    from ctypes import pointer
-    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode("ascii"), processing)
+    exportStatus = _assimp_lib.export(ctypes.pointer(scene), file_type.encode("ascii"), filename.encode(sys.getfilesystemencoding()), processing)
 
     if exportStatus != 0:
         raise AssimpError('Could not export scene!')
 
+def export_blob(scene,
+                file_type = None,
+                processing = postprocess.aiProcess_Triangulate):
+    '''
+    Export a scene and return a blob in the correct format. On failure throws AssimpError.
+
+    Arguments
+    ---------
+    scene: scene to export.
+    file_type: string of file exporter to use. For example "collada".
+    processing: assimp postprocessing parameters. Verbose keywords are imported
+                from postprocessing, and the parameters can be combined bitwise to
+                generate the final processing value. Note that the default value will
+                triangulate quad faces. Example of generating other possible values:
+                processing = (pyassimp.postprocess.aiProcess_Triangulate |
+                              pyassimp.postprocess.aiProcess_OptimizeMeshes)
+    Returns
+    ---------
+    Pointer to structs.ExportDataBlob
+    '''
+    exportBlobPtr = _assimp_lib.export_blob(ctypes.pointer(scene), file_type.encode("ascii"), processing)
+
+    if exportBlobPtr == 0:
+        raise AssimpError('Could not export scene to blob!')
+    return exportBlobPtr
+
 def release(scene):
-    from ctypes import pointer
-    _assimp_lib.release(pointer(scene))
+    _assimp_lib.release(ctypes.pointer(scene))
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)
@@ -412,6 +437,41 @@ def _finalize_mesh(mesh, target):
         faces = [f.indices for f in target.faces]
     setattr(target, 'faces', faces)
 
+def _init_metadata_entry(entry):
+    entry.type = entry.mType
+    if entry.type == structs.MetadataEntry.AI_BOOL:
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_bool)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_INT32:
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_int32)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_UINT64:
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_uint64)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_FLOAT:
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_float)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_DOUBLE:
+        entry.data = ctypes.cast(entry.mData, ctypes.POINTER(ctypes.c_double)).contents.value
+    elif entry.type == structs.MetadataEntry.AI_AISTRING:
+        assimp_string = ctypes.cast(entry.mData, ctypes.POINTER(structs.String)).contents
+        entry.data = _convert_assimp_string(assimp_string)
+    elif entry.type == structs.MetadataEntry.AI_AIVECTOR3D:
+        assimp_vector = ctypes.cast(entry.mData, ctypes.POINTER(structs.Vector3D)).contents
+        entry.data = make_tuple(assimp_vector)
+
+    return entry
+
+def _finalize_metadata(metadata, target):
+    """ Building the metadata object is a bit specific.
+
+    Firstly, there are two separate arrays: one with metadata keys and one
+    with metadata values, and there are no corresponding mNum* attributes,
+    so the C arrays are not converted to Python arrays using the generic
+    code in the _init function.
+
+    Secondly, a metadata entry value has to be cast according to declared
+    metadata entry type.
+    """
+    length = metadata.mNumProperties
+    setattr(target, 'keys', [str(_convert_assimp_string(metadata.mKeys[i])) for i in range(length)])
+    setattr(target, 'values', [_init_metadata_entry(metadata.mValues[i]) for i in range(length)])
 
 class PropertyGetter(dict):
     def __getitem__(self, key):
@@ -443,26 +503,22 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        try:
-            uni = unicode(p.mKey.data, errors='ignore')
-        except:
-            uni = str(p.mKey.data, errors='ignore')
-        key = (str(uni).split('.')[1], p.mSemantic)
+        key = str(_convert_assimp_string(p.mKey))
+        key = (key.split('.')[1], p.mSemantic)
 
         #the data
-        from ctypes import POINTER, cast, c_int, c_float, sizeof
         if p.mType == 1:
-            arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
+            arr = ctypes.cast(p.mData,
+                              ctypes.POINTER(ctypes.c_float * int(p.mDataLength/ctypes.sizeof(ctypes.c_float)))
+                              ).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            try:
-                uni = unicode(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
-            except:
-                uni = str(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
-            value = uni
+            value = _convert_assimp_string(ctypes.cast(p.mData, ctypes.POINTER(structs.MaterialPropertyString)).contents)
 
         elif p.mType == 4:
-            arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents
+            arr = ctypes.cast(p.mData,
+                              ctypes.POINTER(ctypes.c_int * int(p.mDataLength/ctypes.sizeof(ctypes.c_int)))
+                              ).contents
             value = [x for x in arr]
         else:
             value = p.mData[:p.mDataLength]
@@ -482,7 +538,9 @@ def decompose_matrix(matrix):
     rotation = structs.Quaternion()
     position = structs.Vector3D()
 
-    from ctypes import byref, pointer
-    _assimp_lib.dll.aiDecomposeMatrix(pointer(matrix), byref(scaling), byref(rotation), byref(position))
+    _assimp_lib.dll.aiDecomposeMatrix(ctypes.pointer(matrix),
+                                      ctypes.byref(scaling),
+                                      ctypes.byref(rotation),
+                                      ctypes.byref(position))
     return scaling._init(), rotation._init(), position._init()
     

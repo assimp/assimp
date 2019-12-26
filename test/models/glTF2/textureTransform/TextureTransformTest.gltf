@@ -1,0 +1,540 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "max": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "min": [
+        -0.5,
+        -0.5,
+        0.0
+      ],
+      "name": "Positions"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC2",
+      "name": "UV0"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC2",
+      "name": "UV1"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 6,
+      "type": "SCALAR",
+      "name": "Indices"
+    }
+  ],
+  "asset": {
+    "version": "2.0"
+  },
+  "buffers": [
+    {
+      "uri": "TextureTransformTest.bin",
+      "byteLength": 136
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 48,
+      "name": "Positions"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 48,
+      "byteLength": 32,
+      "name": "UV0"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 80,
+      "byteLength": 32,
+      "name": "UV1"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 112,
+      "byteLength": 24,
+      "name": "Indices"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_texture_transform"
+  ],
+  "images": [
+    {
+      "uri": "UV.png"
+    },
+    {
+      "uri": "Arrow.png"
+    },
+    {
+      "uri": "Correct.png"
+    },
+    {
+      "uri": "NotSupported.png"
+    },
+    {
+      "uri": "Error.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "Offset U",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0,
+          "extensions": {
+            "KHR_texture_transform": {
+              "offset": [
+                0.5,
+                0.0
+              ]
+            }
+          }
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "Offset V",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0,
+          "extensions": {
+            "KHR_texture_transform": {
+              "offset": [
+                0.0,
+                0.5
+              ]
+            }
+          }
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "Offset UV",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0,
+          "extensions": {
+            "KHR_texture_transform": {
+              "offset": [
+                0.5,
+                0.5
+              ]
+            }
+          }
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "Rotation",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1,
+          "extensions": {
+            "KHR_texture_transform": {
+              "rotation": 0.39269908169872415480783042290994
+            }
+          }
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "Scale",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1,
+          "extensions": {
+            "KHR_texture_transform": {
+              "scale": [
+                1.5,
+                1.5
+              ]
+            }
+          }
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "All",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1,
+          "extensions": {
+            "KHR_texture_transform": {
+              "offset": [
+                -0.2,
+                -0.1
+              ],
+              "rotation": 0.3,
+              "scale": [
+                1.5,
+                1.5
+              ]
+            }
+          }
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "Correct",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 2
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "NotSupported",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 3
+        },
+        "metallicFactor": 0
+      }
+    },
+    {
+      "name": "Error",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 4
+        },
+        "metallicFactor": 0
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Offset U",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    },
+    {
+      "name": "Offset V",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 1
+        }
+      ]
+    },
+    {
+      "name": "Offset UV",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 2
+        }
+      ]
+    },
+    {
+      "name": "Rotation",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 3,
+          "material": 3
+        }
+      ]
+    },
+    {
+      "name": "Scale",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 3,
+          "material": 4
+        }
+      ]
+    },
+    {
+      "name": "All",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 3,
+          "material": 5
+        }
+      ]
+    },
+    {
+      "name": "Correct Marker",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 3,
+          "material": 6
+        }
+      ]
+    },
+    {
+      "name": "Not Supported Marker",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 3,
+          "material": 7
+        }
+      ]
+    },
+    {
+      "name": "Error Marker",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 3,
+          "material": 8
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "Offset U",
+      "mesh": 0,
+      "translation": [
+        -1.1,
+        0.55,
+        0
+      ]
+    },
+    {
+      "name": "Offset V",
+      "mesh": 1,
+      "translation": [
+        0,
+        0.55,
+        0
+      ]
+    },
+    {
+      "name": "Offset UV",
+      "mesh": 2,
+      "translation": [
+        1.1,
+        0.55,
+        0
+      ]
+    },
+    {
+      "name": "Rotation",
+      "mesh": 3,
+      "translation": [
+        -1.1,
+        -0.55,
+        0
+      ],
+      "children": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "name": "Rotation - Correct",
+      "mesh": 6,
+      "translation": [
+        -0.07904822439840125109869401756656,
+        -0.51626748576241543174100150833647,
+        0.01
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ]
+    },
+    {
+      "name": "Rotation - Not Supported",
+      "mesh": 7,
+      "translation": [
+        0.27781745930520227684092879831533,
+        -0.27781745930520227684092879831533,
+        0.01
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ]
+    },
+    {
+      "name": "Rotation - Error",
+      "mesh": 8,
+      "translation": [
+        0.51626748576241543174100150833647,
+        0.07904822439840125109869401756656,
+        0.01
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ]
+    },
+    {
+      "name": "Scale",
+      "mesh": 4,
+      "translation": [
+        0,
+        -0.55,
+        0
+      ],
+      "children": [
+        8,
+        9
+      ]
+    },
+    {
+      "name": "Scale - Correct",
+      "mesh": 6,
+      "translation": [
+        0.01854497287013485122728586554355,
+        -0.01854497287013485122728586554355,
+        0.01
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "name": "Scale - Not Supported",
+      "mesh": 7,
+      "translation": [
+        0.27781745930520227684092879831533,
+        -0.27781745930520227684092879831533,
+        0.01
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ]
+    },
+    {
+      "name": "All",
+      "mesh": 5,
+      "translation": [
+        1.1,
+        -0.55,
+        0
+      ],
+      "children": [
+        11
+      ]
+    },
+    {
+      "name": "All - Correct",
+      "mesh": 6,
+      "translation": [
+        -0.07,
+        -0.25,
+        0.01
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ]
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0,
+        1,
+        2,
+        3,
+        7,
+        10
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "source": 1,
+      "sampler": 0
+    },
+    {
+      "source": 2
+    },
+    {
+      "source": 3
+    },
+    {
+      "source": 4
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 33071,
+      "wrapT": 33071,
+      "magFilter": 9729,
+      "minFilter": 9729
+    }
+  ]
+}

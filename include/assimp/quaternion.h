@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -49,7 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __cplusplus
 
-#include "defs.h"
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
+#include <assimp/defs.h>
 
 template <typename TReal> class aiVector3t;
 template <typename TReal> class aiMatrix3x3t;
@@ -60,7 +64,7 @@ template <typename TReal>
 class aiQuaterniont
 {
 public:
-    aiQuaterniont() : w(1.0), x(), y(), z() {}
+    aiQuaterniont() AI_NO_EXCEPT : w(1.0), x(), y(), z() {}
     aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz)
         : w(pw), x(px), y(py), z(pz) {}
 

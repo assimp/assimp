@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -44,15 +44,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Defines the StreamReader class which reads data from
  *  a binary stream with a well-defined endianness.
  */
-
+#pragma once
 #ifndef AI_STREAMREADER_H_INCLUDED
 #define AI_STREAMREADER_H_INCLUDED
 
-#include "ByteSwapper.h"
-#include "Exceptional.h"
-#include <memory>
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
 #include <assimp/IOStream.hpp>
 #include <assimp/Defines.h>
+#include <assimp/ByteSwapper.h>
+#include <assimp/Exceptional.h>
+
+#include <memory>
 
 namespace Assimp {
 
@@ -67,16 +72,13 @@ namespace Assimp {
  *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?*/
 // --------------------------------------------------------------------------------------------
 template <bool SwapEndianess = false, bool RuntimeSwitch = false>
-class StreamReader
-{
+class StreamReader {
 public:
     // FIXME: use these data types throughout the whole library,
     // then change them to 64 bit values :-)
+    using diff = int;
+    using pos  = unsigned int;
 
-    typedef int diff;
-    typedef unsigned int pos;
-
-public:
     // ---------------------------------------------------------------------
     /** Construction from a given stream with a well-defined endianness.
      *
@@ -110,8 +112,6 @@ public:
     ~StreamReader() {
         delete[] buffer;
     }
-
-public:
 
     // deprecated, use overloaded operator>> instead
 
@@ -176,7 +176,6 @@ public:
         return Get<uint64_t>();
     }
 
-public:
     // ---------------------------------------------------------------------
     /** Get the remaining stream size (to the end of the stream) */
     unsigned int GetRemainingSize() const {
@@ -283,7 +282,6 @@ public:
         return *this;
     }
 
-private:
     // ---------------------------------------------------------------------
     /** Generic read method. ByteSwap::Swap(T*) *must* be defined */
     template <typename T>
@@ -300,6 +298,7 @@ private:
         return f;
     }
 
+private:
     // ---------------------------------------------------------------------
     void InternBegin() {
         if (!stream) {
@@ -320,7 +319,7 @@ private:
         const size_t read = stream->Read(current,1,s);
         // (read < s) can only happen if the stream was opened in text mode, in which case FileSize() is not reliable
         ai_assert(read <= s);
-        end = limit = &buffer[read];
+        end = limit = &buffer[read-1] + 1;
     }
 
 private:

@@ -164,7 +164,7 @@ If done correctly you should now be able to compile, link, run and use the appli
 @section install_own Building the library from scratch
 
 First you need to install cmake. Now just get the code from github or download the latest version from the webside.
-to buil the library just open a command-prompt / bash, navigate into the repo-folder and run cmake via:
+to build the library just open a command-prompt / bash, navigate into the repo-folder and run cmake via:
 
 @code
 cmake CMakeLists.txt
@@ -172,7 +172,6 @@ cmake CMakeLists.txt
 
 A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated. 
 Run the build and you are done. You can find the libs at assimp/lib and the dll's / so's at bin.
-
 
 @section assimp_dll Windows DLL Build
 
@@ -654,7 +653,7 @@ To apply such an animation you need to identify the animation tracks that refer 
 in your mesh. Then for every track: <br>
 a) Find the keys that lay right before the current anim time. <br>
 b) Optional: interpolate between these and the following keys. <br>
-c) Combine the calculated position, rotation and scaling to a tranformation matrix <br>
+c) Combine the calculated position, rotation and scaling to a transformation matrix <br>
 d) Set the affected node's transformation to the calculated matrix. <br>
 
 If you need hints on how to convert to or from quaternions, have a look at the
@@ -670,7 +669,7 @@ Such textures are loaded into an aiTexture structure.
 
 In previous versions, the path from the query for `AI_MATKEY_TEXTURE(textureType, index)` would be
 `*<index>` where `<index>` is the index of the texture in aiScene::mTextures. Now this call will
-return a file path for embedded textures in FBX files. To test if it is an embdedded texture use
+return a file path for embedded textures in FBX files. To test if it is an embedded texture use
 aiScene::GetEmbeddedTexture. If the returned pointer is not null, it is embedded und can be loaded
 from the data structure. If it is null, search for a separate file. Other file types still use the
 old behaviour.<br>
@@ -795,7 +794,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td><tt>COLOR_REFLECTIVE</tt></td>
     <td>aiColor3D</td>
     <td>black (0,0,0)</td>
-    <td>Defines the reflective color of the material. This is typically scaled by the amount of incoming light from the direction of mirror reflection. Usually combined with an enviroment lightmap of some kind for real-time applications.</td>
+    <td>Defines the reflective color of the material. This is typically scaled by the amount of incoming light from the direction of mirror reflection. Usually combined with an environment lightmap of some kind for real-time applications.</td>
     <td>---</td>
   </tr>
 
@@ -820,7 +819,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td>int</td>
     <td>false</td>
     <td>Specifies whether meshes using this material must be rendered without backface culling. 0 for false, !0 for true. </td>
-    <td>Some importers set this property if they don't know whether the output face oder is right. As long as it is not set, you may safely enable backface culling.</tt></td>
+    <td>Some importers set this property if they don't know whether the output face order is right. As long as it is not set, you may safely enable backface culling.</tt></td>
   </tr>
 
   <tr>
@@ -1174,6 +1173,18 @@ float4 PimpMyPixel (float4 prev)
 
 @endcode
 
+@section shdacc How to access shader-code from a texture (AI_MATKEY_GLOBAL_SHADERLANG and AI_MATKEY_SHADER_VERTEX, ...)
+
+You can get assigned shader sources by using the following material keys:
+
+<li>AI_MATKEY_GLOBAL_SHADERLANG</li>To get the used shader language.
+<li>AI_MATKEY_SHADER_VERTEX</li> Assigned vertex shader code stored as a string.
+<li>AI_MATKEY_SHADER_FRAGMENT</li> Assigned fragment shader code stored as a string.
+<li>AI_MATKEY_SHADER_GEO</li> Assigned geometry shader code stored as a string.
+<li>AI_MATKEY_SHADER_TESSELATION</li> Assigned tesselation shader code stored as a string.
+<li>AI_MATKEY_SHADER_PRIMITIVE</li> Assigned primitive shader code stored as a string.
+<li>AI_MATKEY_SHADER_COMPUTE</li> Assigned compute shader code stored as a string.
+
 */
 
 
@@ -1487,9 +1498,8 @@ Just copy'n'paste the template from Appendix A and adapt it for your needs.
 with DefaultLogger::get()->[error, warn, debug, info].
 </li>
 <li>
-Make sure that your loader compiles against all build configurations on all supported platforms. This includes <i>-noboost</i>! To avoid problems,
-see the boost section on this page for a list of all 'allowed' boost classes (again, this grew historically when we had to accept that boost
-is not THAT widely spread that one could rely on it being available everywhere).
+Make sure that your loader compiles against all build configurations on all supported platforms. You can use our CI-build to check several platforms 
+like Windows and Linux ( 32 bit and 64 bit ).
 </li>
 <li>
 Provide some _free_ test models in <tt>&lt;root&gt;/test/models/&lt;FormatName&gt;/</tt> and credit their authors.
@@ -1567,22 +1577,6 @@ NewMaterial->AddProperty(&aiString(MaterialName.c_str()), AI_MATKEY_NAME);//Mate
 //set the first diffuse texture
 NewMaterial->AddProperty(&aiString(Texturename.c_str()), AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));//again, Texturename is a std::string
 @endcode
-
-@section boost Boost
-
-The boost whitelist:
-<ul>
-<li><i>boost.scoped_ptr</i></li>
-<li><i>boost.scoped_array</i></li>
-<li><i>boost.format</i> </li>
-<li><i>boost.random</i> </li>
-<li><i>boost.common_factor</i> </li>
-<li><i>boost.foreach</i> </li>
-<li><i>boost.tuple</i></li>
-</ul>
-
-(if you happen to need something else, i.e. boost::thread, make this an optional feature.
-<tt>assimp_BUILD_BOOST_WORKAROUND</tt> is defined for <i>-noboost</i> builds)
 
 @section appa Appendix A - Template for BaseImporter's abstract methods
 

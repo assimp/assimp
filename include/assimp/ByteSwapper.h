@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -42,8 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Helper class tp perform various byte oder swappings
    (e.g. little to big endian) */
+#pragma once
 #ifndef AI_BYTESWAPPER_H_INC
 #define AI_BYTESWAPPER_H_INC
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
@@ -60,9 +65,8 @@ namespace Assimp    {
  * This is required to read big-endian model formats on little-endian machines,
  * and vice versa. Direct use of this class is DEPRECATED. Use #StreamReader instead. */
 // --------------------------------------------------------------------------------------
-class ByteSwap
-{
-    ByteSwap() {}
+class ByteSwap {
+    ByteSwap() AI_NO_EXCEPT {}
 
 public:
 

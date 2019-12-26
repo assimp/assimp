@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -124,4 +124,31 @@ TEST_F(BlendImportMaterials, testImportMaterial)
     ASSERT_PROPERTY_FLOAT_EQ(0.18f, "mirror.glossThreshold", mirrorGlossThreshold);
     ASSERT_PROPERTY_EQ(61, "mirror.glossSamples", mirrorGlossSamples);
     ASSERT_PROPERTY_FLOAT_EQ(0.87f, "mirror.glossAnisotropic", mirrorGlossAnisotropic);
+}
+
+TEST_F(BlendImportMaterials, testImportMaterialwith2texturesAnd2TexCoordMappings)
+{
+    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/plane_2_textures_2_texcoords_279.blend", aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(pTest != NULL);
+
+    // material has 2 diffuse textures
+    ASSERT_TRUE(pTest->HasMaterials());
+    EXPECT_EQ(1u, pTest->mNumMaterials);
+    const aiMaterial *pMat = pTest->mMaterials[0];
+    ASSERT_TRUE(nullptr != pMat);
+    ASSERT_EQ(2u, pMat->GetTextureCount(aiTextureType_DIFFUSE));
+    aiString aPath;
+    aiTextureMapping tm = aiTextureMapping::aiTextureMapping_OTHER;
+    aiReturn result = pMat->GetTexture(aiTextureType_DIFFUSE, 0, &aPath, &tm);
+    ASSERT_EQ(aiReturn_SUCCESS, result);
+    result = pMat->GetTexture(aiTextureType_DIFFUSE, 1, &aPath, &tm);
+    ASSERT_EQ(aiReturn_SUCCESS, result);
+
+    // mesh has 2 texturecoord sets
+    ASSERT_TRUE(pTest->HasMeshes());
+    EXPECT_EQ(1u, pTest->mNumMeshes);
+    const aiMesh *pMesh = pTest->mMeshes[0];
+    ASSERT_TRUE(nullptr != pMesh);
+    ASSERT_TRUE(pMesh->HasTextureCoords(0));
+    ASSERT_TRUE(pMesh->HasTextureCoords(1));
 }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -43,13 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
-#include <MaterialSystem.h>
+#include "Material/MaterialSystem.h"
 
 using namespace ::std;
 using namespace ::Assimp;
 
-class MaterialSystemTest : public ::testing::Test
-{
+class MaterialSystemTest : public ::testing::Test {
 public:
     virtual void SetUp() { this->pcMat = new aiMaterial(); }
     virtual void TearDown() { delete this->pcMat; }
@@ -120,12 +119,24 @@ TEST_F(MaterialSystemTest, testColorProperty)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(MaterialSystemTest, testStringProperty)
-{
+TEST_F(MaterialSystemTest, testStringProperty) {
     aiString s;
     s.Set("Hello, this is a small test");
     this->pcMat->AddProperty(&s,"testKey6");
     s.Set("358358");
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey6",0,0,s));
     EXPECT_STREQ("Hello, this is a small test", s.data);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testMaterialNameAccess) {
+    aiMaterial *mat = new aiMaterial();
+    EXPECT_NE(nullptr, mat);
+
+    aiString name = mat->GetName();
+    const int retValue(strncmp(name.C_Str(), AI_DEFAULT_MATERIAL_NAME, name.length));
+    EXPECT_EQ(0, retValue );
+
+    delete mat;
 }

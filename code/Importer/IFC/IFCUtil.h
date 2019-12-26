@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCReaderGen_2x3.h"
 #include "IFCLoader.h"
-#include "code/STEPFile.h"
+#include "code/Step/STEPFile.h"
 #include <assimp/mesh.h>
 #include <assimp/material.h>
 
@@ -205,7 +205,7 @@ struct ConversionData
         bool operator == (const MeshCacheIndex& o) const { return item == o.item && matindex == o.matindex; }
         bool operator < (const MeshCacheIndex& o) const { return item < o.item || (item == o.item && matindex < o.matindex); }
     };
-    typedef std::map<MeshCacheIndex, std::vector<unsigned int> > MeshCache;
+    typedef std::map<MeshCacheIndex, std::set<unsigned int> > MeshCache;
     MeshCache cached_meshes;
 
     typedef std::map<const IFC::Schema_2x3::IfcSurfaceStyle*, unsigned int> MaterialCache;
@@ -281,8 +281,8 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
 
 // IFCGeometry.cpp
 IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut);
-bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, unsigned int matid, std::vector<unsigned int>& mesh_indices, ConversionData& conv);
-void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/);
+bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, unsigned int matid, std::set<unsigned int>& mesh_indices, ConversionData& conv);
+void AssignAddedMeshes(std::set<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/);
 
 void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, TempMesh& meshout,
                            ConversionData& conv);

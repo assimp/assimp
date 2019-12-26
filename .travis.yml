@@ -27,16 +27,11 @@ compiler:
 
 env:
   global:
-  # COVERITY_SCAN_TOKEN
     - secure: "lZ7pHQvl5dpZWzBQAaIMf0wqrvtcZ4wiZKeIZjf83TEsflW8+z0uTpIuN30ZV6Glth/Sq1OhLnTP5+N57fZU/1ebA5twHdvP4bS5CIUUg71/CXQZNl36xeaqvxsG/xRrdpKOsPdjAOsQ9KPTQulsX43XDLS7CasMiLvYOpqKcPc="
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
 
 matrix:
   include:
-    # disabled until clang 5.0 analyzer issues are fixed
-    # - os: linux
-    #   compiler: clang
-    #   env: ANALYZE=ON
     - os: linux
       compiler: clang
       env: ASAN=ON
@@ -51,7 +46,7 @@ matrix:
       env: ANALYZE=ON
     - os: linux
       compiler: gcc
-      env: DISABLE_EXPORTERS=YES ENABLE_COVERALLS=ON
+      env: ENABLE_COVERALLS=ON
     - os: linux
       compiler: gcc
       env: SHARED_BUILD=ON
@@ -60,8 +55,7 @@ install:
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi
 
 before_script:
-  # init coverage to 0 (optional)
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd ${TRAVIS_BUILD_DIR} && lcov --directory . --zerocounters ; fi
+  cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
 
 script:
   - export COVERALLS_SERVICE_NAME=travis-ci
@@ -76,6 +70,6 @@ addons:
     project:
       name: "assimp/assimp"
     notification_email: kim.kulling@googlemail.com
-    build_command_prepend: "cmake"
-    build_command: "make"
+    build_command_prepend: "cmake ./"
+    build_command: "make -j4"
     branch_pattern: coverity_scan

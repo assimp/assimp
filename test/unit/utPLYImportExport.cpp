@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -56,6 +56,9 @@ public:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
         EXPECT_EQ( 1u, scene->mNumMeshes );
         EXPECT_NE( nullptr, scene->mMeshes[0] );
+        if (nullptr == scene->mMeshes[0]) {
+            return false;
+        }
         EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
         EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
         
@@ -68,7 +71,7 @@ public:
         Exporter exporter;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
-        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "ply", ASSIMP_TEST_MODELS_DIR "/PLY/cube_test.ply"));
+        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "ply", ASSIMP_TEST_MODELS_DIR "/PLY/cube_out.ply"));
 
         return true;
     }
@@ -138,18 +141,19 @@ TEST_F( utPLYImportExport, vertexColorTest ) {
     EXPECT_EQ(2u, first_face.mIndices[2]);
 }
 
-//Test issue #623, PLY importer should not automatically create faces
+// Test issue #623, PLY importer should not automatically create faces
 TEST_F(utPLYImportExport, pointcloudTest) {
-  Assimp::Importer importer;
-  //Could not use aiProcess_ValidateDataStructure since it's missing faces.
-  const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
-  EXPECT_NE(nullptr, scene);
+    Assimp::Importer importer;
 
-  EXPECT_EQ(1u, scene->mNumMeshes);
-  EXPECT_NE(nullptr, scene->mMeshes[0]);
-  EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
-  EXPECT_EQ(aiPrimitiveType::aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
-  EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(1u, scene->mNumMeshes);
+    EXPECT_NE(nullptr, scene->mMeshes[0]);
+    EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
+    EXPECT_EQ(aiPrimitiveType::aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
+    EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
 }
 
 static const char *test_file =

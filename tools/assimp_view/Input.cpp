@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -194,7 +194,7 @@ void HandleMouseInputSkyBox( void )
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleMouseInputLightIntensityAndColor( void )
+void HandleMouseInputLightIntensityAndColor()
     {
     POINT mousePos;
     GetCursorPos( &mousePos );

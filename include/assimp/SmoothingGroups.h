@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -43,21 +43,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Defines the helper data structures for importing 3DS files.
 http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 
+#pragma once
 #ifndef AI_SMOOTHINGGROUPS_H_INC
 #define AI_SMOOTHINGGROUPS_H_INC
 
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
+
 #include <assimp/vector3.h>
+
 #include <stdint.h>
 #include <vector>
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a face with smoothing groups assigned */
-struct FaceWithSmoothingGroup
-{
-    FaceWithSmoothingGroup()
-        : mIndices(),
-        iSmoothGroup(0)
-    {
+struct FaceWithSmoothingGroup {
+    FaceWithSmoothingGroup() AI_NO_EXCEPT
+    : mIndices()
+    , iSmoothGroup(0) {
         // in debug builds set all indices to a common magic value
 #ifdef ASSIMP_BUILD_DEBUG
         this->mIndices[0] = 0xffffffff;

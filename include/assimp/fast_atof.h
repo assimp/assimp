@@ -13,9 +13,13 @@
 //     to ensure long numbers are handled correctly
 // ------------------------------------------------------------------------------------
 
-
+#pragma once
 #ifndef FAST_A_TO_F_H_INCLUDED
 #define FAST_A_TO_F_H_INCLUDED
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #include <cmath>
 #include <limits>
@@ -195,11 +199,11 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
             break;
         }
 
-        const uint64_t new_value = ( value * 10 ) + ( *in - '0' );
+        const uint64_t new_value = ( value * (uint64_t) 10 ) + ( (uint64_t) ( *in - '0' ) );
 
         // numeric overflow, we rely on you
         if ( new_value < value ) {
-            DefaultLogger::get()->warn( std::string( "Converting the string \"" ) + in + "\" into a value resulted in overflow." );
+            ASSIMP_LOG_WARN_F( "Converting the string \"", in, "\" into a value resulted in overflow." );
             return 0;
         }
 

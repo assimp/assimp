@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -210,7 +210,7 @@ TEST_F( utMetadata, copy_test ) {
 
     // int32_t test
     {
-        int32_t v;
+		int32_t v = 0;
         bool ok = copy.Get( "int32", v );
         EXPECT_TRUE( ok );
         EXPECT_EQ( i32v, v );

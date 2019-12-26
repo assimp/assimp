@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 
@@ -67,4 +67,10 @@ TEST_F( utOpenGEXImportExport, Importissue1262_NoCrash ) {
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/light_issue1262.ogex", 0 );
     EXPECT_NE( nullptr, scene );
 
+}
+
+TEST_F(utOpenGEXImportExport, Importissue1340_EmptyCameraObject) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/empty_camera.ogex", 0);
+    EXPECT_NE(nullptr, scene);
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -43,8 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  LogAux.h
  *  @brief Common logging usage patterns for importer implementations
  */
+#pragma once
 #ifndef INCLUDED_AI_LOGAUX_H
 #define INCLUDED_AI_LOGAUX_H
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #include <assimp/TinyFormatter.h>
 #include <assimp/Exceptional.h>
@@ -64,28 +69,28 @@ public:
     // ------------------------------------------------------------------------------------------------
     static void LogWarn(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->warn(Prefix()+(std::string)message);
+            ASSIMP_LOG_WARN(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogError(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->error(Prefix()+(std::string)message);
+            ASSIMP_LOG_ERROR(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogInfo(const Formatter::format& message)   {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->info(Prefix()+(std::string)message);
+            ASSIMP_LOG_INFO(Prefix()+(std::string)message);
         }
     }
 
     // ------------------------------------------------------------------------------------------------
     static void LogDebug(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
-            DefaultLogger::get()->debug(Prefix()+(std::string)message);
+            ASSIMP_LOG_DEBUG(Prefix()+(std::string)message);
         }
     }
 
@@ -126,6 +131,6 @@ private:
     static const char* Prefix();
 
 };
-
 } // ! Assimp
+
 #endif

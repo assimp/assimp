@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
-
-
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -44,8 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file pbrmaterial.h
  *  @brief Defines the material system of the library
  */
+#pragma once
 #ifndef AI_PBRMATERIAL_H_INC
 #define AI_PBRMATERIAL_H_INC
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR "$mat.gltf.pbrMetallicRoughness.baseColorFactor", 0, 0
 #define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR "$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0
@@ -56,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATKEY_GLTF_ALPHACUTOFF "$mat.gltf.alphaCutoff", 0, 0
 #define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS "$mat.gltf.pbrSpecularGlossiness", 0, 0
 #define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR "$mat.gltf.pbrMetallicRoughness.glossinessFactor", 0, 0
+#define AI_MATKEY_GLTF_UNLIT "$mat.gltf.unlit", 0, 0
 
 #define _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE "$tex.file.texCoord"
 #define _AI_MATKEY_GLTF_MAPPINGNAME_BASE "$tex.mappingname"

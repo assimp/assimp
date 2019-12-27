@@ -129,12 +129,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-#   define ASSIMP_CALLCONV __stdcall
-#else
-#   define ASSIMP_CALLCONV
-#endif
-
-#ifdef _WIN32
 #   undef ASSIMP_API
     //////////////////////////////////////////////////////////////////////////
     /* Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library */

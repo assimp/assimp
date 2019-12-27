@@ -49,12 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_ASSIMP_H_INC
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 #include <assimp/importerdesc.h>
 #include <assimp/types.h>
-#include <assimp/cprogresshandler.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +61,8 @@ extern "C" {
 
 struct aiScene; // aiScene.h
 struct aiFileIO; // aiFileIO.h
-typedef void (ASSIMP_CALLCONV *aiLogStreamCallback)(const char * /* message */, char * /* user */);
+struct aiProgressHandler; //cprogresshandler.h
+typedef void (*aiLogStreamCallback)(const char * /* message */, char * /* user */);
 
 // --------------------------------------------------------------------------------
 /** C-API: Represents a log stream. A log stream receives all log messages and
@@ -71,15 +71,13 @@ typedef void (ASSIMP_CALLCONV *aiLogStreamCallback)(const char * /* message */, 
  *  @see aiAttachLogStream
  *  @see aiDetachLogStream */
 // --------------------------------------------------------------------------------
-struct aiLogStream
-{
-    /** callback to be called */
-    aiLogStreamCallback callback;
+struct aiLogStream {
+	/** callback to be called */
+	aiLogStreamCallback callback;
 
-    /** user data to be passed to the callback */
-    char* user;
+	/** user data to be passed to the callback */
+	char *user;
 };
-
 
 // --------------------------------------------------------------------------------
 /** C-API: Represents an opaque set of settings to be used during importing.
@@ -92,7 +90,9 @@ struct aiLogStream
  *  @see aiSetPropertyMatrix
  */
 // --------------------------------------------------------------------------------
-struct aiPropertyStore { char sentinel; };
+struct aiPropertyStore {
+	char sentinel;
+};
 
 /** Our own C boolean type */
 typedef int aiBool;
@@ -116,7 +116,7 @@ typedef int aiBool;
  *   #aiPostProcessSteps flags.
  * @return Pointer to the imported data or NULL if the import failed.
  */
-ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFile(
+ASSIMP_API const C_STRUCT aiScene *aiImportFile(
 		const char *pFile,
 		unsigned int pFlags);
 
@@ -141,7 +141,7 @@ ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFile(
  * @return Pointer to the imported data or NULL if the import failed.
  * @note Include <aiFileIO.h> for the definition of #aiFileIO.
  */
-ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileEx(
+ASSIMP_API const C_STRUCT aiScene *aiImportFileEx(
 		const char *pFile,
 		unsigned int pFlags,
 		C_STRUCT aiFileIO *pFS);
@@ -162,7 +162,7 @@ ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileEx(
  * @note Include <aiFileIO.h> for the definition of #aiFileIO.
  * @see aiImportFileEx
  */
-ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileExWithProperties(
+ASSIMP_API const C_STRUCT aiScene *aiImportFileExWithProperties(
 		const char *pFile,
 		unsigned int pFlags,
 		C_STRUCT aiFileIO *pFS,
@@ -199,7 +199,7 @@ ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileExWithProperties(
  * a custom IOSystem to make Assimp find these files and use
  * the regular aiImportFileEx()/aiImportFileExWithProperties() API.
  */
-ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileFromMemory(
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemory(
 		const char *pBuffer,
 		unsigned int pLength,
 		unsigned int pFlags,
@@ -233,7 +233,7 @@ ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileFromMemory(
  * the regular aiImportFileEx()/aiImportFileExWithProperties() API.
  * @see aiImportFileFromMemory
  */
-ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileFromMemoryWithProperties(
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryWithProperties(
 		const char *pBuffer,
 		unsigned int pLength,
 		unsigned int pFlags,
@@ -255,7 +255,7 @@ ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiImportFileFromMemoryWithPro
  *   the #aiProcess_ValidateDataStructure flag is currently the only post processing step
  *   which can actually cause the scene to be reset to NULL.
  */
-ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiApplyPostProcessing(
+ASSIMP_API const C_STRUCT aiScene *aiApplyPostProcessing(
 		const C_STRUCT aiScene *pScene,
 		unsigned int pFlags);
 
@@ -279,7 +279,7 @@ ASSIMP_API const C_STRUCT aiScene *ASSIMP_CALLCONV aiApplyPostProcessing(
  *    Pass NULL for all other flags.
  *  @return The log stream. callback is set to NULL if something went wrong.
  */
-ASSIMP_API C_STRUCT aiLogStream ASSIMP_CALLCONV aiGetPredefinedLogStream(
+ASSIMP_API C_STRUCT aiLogStream aiGetPredefinedLogStream(
 		C_ENUM aiDefaultLogStream pStreams,
 		const char *file);
 
@@ -293,7 +293,7 @@ ASSIMP_API C_STRUCT aiLogStream ASSIMP_CALLCONV aiGetPredefinedLogStream(
  *    call aiDetachLogStream() on every single log stream you attach.
  *    Alternatively (for the lazy folks) #aiDetachAllLogStreams is provided.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiAttachLogStream(
+ASSIMP_API void aiAttachLogStream(
 		const C_STRUCT aiLogStream *stream);
 
 // --------------------------------------------------------------------------------
@@ -303,7 +303,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiAttachLogStream(
  *  didn't read correctly.
  *  @param d AI_TRUE or AI_FALSE, your decision.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiEnableVerboseLogging(aiBool d);
+ASSIMP_API void aiEnableVerboseLogging(aiBool d);
 
 // --------------------------------------------------------------------------------
 /** Detach a custom log stream from the libraries' logging system.
@@ -314,7 +314,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiEnableVerboseLogging(aiBool d);
  *  @return AI_SUCCESS if the log stream has been detached successfully.
  *  @see aiDetachAllLogStreams
  */
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiDetachLogStream(
+ASSIMP_API C_ENUM aiReturn aiDetachLogStream(
 		const C_STRUCT aiLogStream *stream);
 
 // --------------------------------------------------------------------------------
@@ -325,7 +325,7 @@ ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiDetachLogStream(
  *  @see aiAttachLogStream
  *  @see aiDetachLogStream
  */
-ASSIMP_API void ASSIMP_CALLCONV aiDetachAllLogStreams(void);
+ASSIMP_API void aiDetachAllLogStreams(void);
 
 // --------------------------------------------------------------------------------
 /** Releases all resources associated with the given import process.
@@ -333,7 +333,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiDetachAllLogStreams(void);
  * Call this function after you're done with the imported data.
  * @param pScene The imported data to release. NULL is a valid value.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiReleaseImport(
+ASSIMP_API void aiReleaseImport(
 		const C_STRUCT aiScene *pScene);
 
 // --------------------------------------------------------------------------------
@@ -343,7 +343,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiReleaseImport(
  * import process. NULL if there was no error. There can't be an error if you
  * got a non-NULL #aiScene from #aiImportFile/#aiImportFileEx/#aiApplyPostProcessing.
  */
-ASSIMP_API const char *ASSIMP_CALLCONV aiGetErrorString(void);
+ASSIMP_API const char *aiGetErrorString(void);
 
 // --------------------------------------------------------------------------------
 /** Returns whether a given file extension is supported by ASSIMP
@@ -352,7 +352,7 @@ ASSIMP_API const char *ASSIMP_CALLCONV aiGetErrorString(void);
  * Must include a leading dot '.'. Example: ".3ds", ".md3"
  * @return AI_TRUE if the file extension is supported.
  */
-ASSIMP_API aiBool ASSIMP_CALLCONV aiIsExtensionSupported(
+ASSIMP_API aiBool aiIsExtensionSupported(
 		const char *szExtension);
 
 // --------------------------------------------------------------------------------
@@ -363,7 +363,7 @@ ASSIMP_API aiBool ASSIMP_CALLCONV aiIsExtensionSupported(
  * @param szOut String to receive the extension list.
  * Format of the list: "*.3ds;*.obj;*.dae". NULL is not a valid parameter.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiGetExtensionList(
+ASSIMP_API void aiGetExtensionList(
 		C_STRUCT aiString *szOut);
 
 // --------------------------------------------------------------------------------
@@ -371,7 +371,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiGetExtensionList(
  * @param pIn Input asset.
  * @param in Data structure to be filled.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiGetMemoryRequirements(
+ASSIMP_API void aiGetMemoryRequirements(
 		const C_STRUCT aiScene *pIn,
 		C_STRUCT aiMemoryInfo *in);
 
@@ -381,13 +381,13 @@ ASSIMP_API void ASSIMP_CALLCONV aiGetMemoryRequirements(
  * @return New property store. Property stores need to be manually destroyed using
  *   the #aiReleasePropertyStore API function.
  */
-ASSIMP_API C_STRUCT aiPropertyStore *ASSIMP_CALLCONV aiCreatePropertyStore(void);
+ASSIMP_API C_STRUCT aiPropertyStore *aiCreatePropertyStore(void);
 
 // --------------------------------------------------------------------------------
 /** Delete a property store.
  * @param p Property store to be deleted.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiReleasePropertyStore(C_STRUCT aiPropertyStore *p);
+ASSIMP_API void aiReleasePropertyStore(C_STRUCT aiPropertyStore *p);
 
 // --------------------------------------------------------------------------------
 /** Set an integer property.
@@ -401,7 +401,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiReleasePropertyStore(C_STRUCT aiPropertyStore 
  *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
  * @param value New value for the property
  */
-ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyInteger(
+ASSIMP_API void aiSetImportPropertyInteger(
 		C_STRUCT aiPropertyStore *store,
 		const char *szName,
 		int value);
@@ -418,7 +418,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyInteger(
  *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
  * @param value New value for the property
  */
-ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyFloat(
+ASSIMP_API void aiSetImportPropertyFloat(
 		C_STRUCT aiPropertyStore *store,
 		const char *szName,
 		ai_real value);
@@ -435,7 +435,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyFloat(
  *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
  * @param st New value for the property
  */
-ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyString(
+ASSIMP_API void aiSetImportPropertyString(
 		C_STRUCT aiPropertyStore *store,
 		const char *szName,
 		const C_STRUCT aiString *st);
@@ -452,7 +452,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyString(
  *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
  * @param mat New value for the property
  */
-ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyMatrix(
+ASSIMP_API void aiSetImportPropertyMatrix(
 		C_STRUCT aiPropertyStore *store,
 		const char *szName,
 		const C_STRUCT aiMatrix4x4 *mat);
@@ -463,7 +463,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiSetImportPropertyMatrix(
  *  @param mat Matrix to 'quaternionize'.
  *  @see aiQuaternion(const aiMatrix3x3& pRotMatrix)
  */
-ASSIMP_API void ASSIMP_CALLCONV aiCreateQuaternionFromMatrix(
+ASSIMP_API void aiCreateQuaternionFromMatrix(
 		C_STRUCT aiQuaternion *quat,
 		const C_STRUCT aiMatrix3x3 *mat);
 
@@ -477,7 +477,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiCreateQuaternionFromMatrix(
  * @param position Receives the translational component.
  * @see aiMatrix4x4::Decompose (aiVector3D&, aiQuaternion&, aiVector3D&) const;
  */
-ASSIMP_API void ASSIMP_CALLCONV aiDecomposeMatrix(
+ASSIMP_API void aiDecomposeMatrix(
 		const C_STRUCT aiMatrix4x4 *mat,
 		C_STRUCT aiVector3D *scaling,
 		C_STRUCT aiQuaternion *rotation,
@@ -487,14 +487,14 @@ ASSIMP_API void ASSIMP_CALLCONV aiDecomposeMatrix(
 /** Transpose a 4x4 matrix.
  *  @param mat Pointer to the matrix to be transposed
  */
-ASSIMP_API void ASSIMP_CALLCONV aiTransposeMatrix4(
+ASSIMP_API void aiTransposeMatrix4(
 		C_STRUCT aiMatrix4x4 *mat);
 
 // --------------------------------------------------------------------------------
 /** Transpose a 3x3 matrix.
  *  @param mat Pointer to the matrix to be transposed
  */
-ASSIMP_API void ASSIMP_CALLCONV aiTransposeMatrix3(
+ASSIMP_API void aiTransposeMatrix3(
 		C_STRUCT aiMatrix3x3 *mat);
 
 // --------------------------------------------------------------------------------
@@ -502,7 +502,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiTransposeMatrix3(
  *  @param vec Vector to be transformed.
  *  @param mat Matrix to transform the vector with.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiTransformVecByMatrix3(
+ASSIMP_API void aiTransformVecByMatrix3(
 		C_STRUCT aiVector3D *vec,
 		const C_STRUCT aiMatrix3x3 *mat);
 
@@ -511,7 +511,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiTransformVecByMatrix3(
  *  @param vec Vector to be transformed.
  *  @param mat Matrix to transform the vector with.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiTransformVecByMatrix4(
+ASSIMP_API void aiTransformVecByMatrix4(
 		C_STRUCT aiVector3D *vec,
 		const C_STRUCT aiMatrix4x4 *mat);
 
@@ -520,7 +520,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiTransformVecByMatrix4(
  *  @param dst First factor, receives result.
  *  @param src Matrix to be multiplied with 'dst'.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiMultiplyMatrix4(
+ASSIMP_API void aiMultiplyMatrix4(
 		C_STRUCT aiMatrix4x4 *dst,
 		const C_STRUCT aiMatrix4x4 *src);
 
@@ -529,7 +529,7 @@ ASSIMP_API void ASSIMP_CALLCONV aiMultiplyMatrix4(
  *  @param dst First factor, receives result.
  *  @param src Matrix to be multiplied with 'dst'.
  */
-ASSIMP_API void ASSIMP_CALLCONV aiMultiplyMatrix3(
+ASSIMP_API void aiMultiplyMatrix3(
 		C_STRUCT aiMatrix3x3 *dst,
 		const C_STRUCT aiMatrix3x3 *src);
 
@@ -537,21 +537,21 @@ ASSIMP_API void ASSIMP_CALLCONV aiMultiplyMatrix3(
 /** Get a 3x3 identity matrix.
  *  @param mat Matrix to receive its personal identity
  */
-ASSIMP_API void ASSIMP_CALLCONV aiIdentityMatrix3(
+ASSIMP_API void aiIdentityMatrix3(
 		C_STRUCT aiMatrix3x3 *mat);
 
 // --------------------------------------------------------------------------------
 /** Get a 4x4 identity matrix.
  *  @param mat Matrix to receive its personal identity
  */
-ASSIMP_API void ASSIMP_CALLCONV aiIdentityMatrix4(
+ASSIMP_API void aiIdentityMatrix4(
 		C_STRUCT aiMatrix4x4 *mat);
 
 // --------------------------------------------------------------------------------
 /** Returns the number of import file formats available in the current Assimp build.
  * Use aiGetImportFormatDescription() to retrieve infos of a specific import format.
  */
-ASSIMP_API size_t ASSIMP_CALLCONV aiGetImportFormatCount(void);
+ASSIMP_API size_t aiGetImportFormatCount(void);
 
 // --------------------------------------------------------------------------------
 /** Returns a description of the nth import file format. Use #aiGetImportFormatCount()
@@ -560,43 +560,43 @@ ASSIMP_API size_t ASSIMP_CALLCONV aiGetImportFormatCount(void);
  *    0 to #aiGetImportFormatCount()
  * @return A description of that specific import format. NULL if pIndex is out of range.
  */
-ASSIMP_API const C_STRUCT aiImporterDesc *ASSIMP_CALLCONV aiGetImportFormatDescription(size_t pIndex);
+ASSIMP_API const C_STRUCT aiImporterDesc *aiGetImportFormatDescription(size_t pIndex);
 
 // --------------------------------------------------------------------------------
 /*
     Imports a file using a custom progress handler
 */
-ASSIMP_API const aiScene *ASSIMP_CALLCONV aiImportFileP(const char *pFile, unsigned int pFlags, aiProgressHandler *pPH);
+ASSIMP_API const C_STRUCT aiScene *aiImportFileP(const char *pFile, unsigned int pFlags, C_STRUCT aiProgressHandler *pPH);
 
 // ------------------------------------------------------------------------------------------------
 /*
     Imports a file using a custom IO file-system and a custom progress handler
 */
-ASSIMP_API const aiScene *ASSIMP_CALLCONV aiImportFileIP(const char *pFile, unsigned int pFlags, C_STRUCT aiFileIO *pFS, aiProgressHandler *pPH);
+ASSIMP_API const C_STRUCT aiScene *aiImportFileIP(const char *pFile, unsigned int pFlags, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH);
 
 // ------------------------------------------------------------------------------------------------
 /*
     Imports a file using a custom IO file-system, a custom progress handler and a property store
 */
-ASSIMP_API const aiScene *ASSIMP_CALLCONV aiImportFileIPP(const char *pFile, unsigned int pFlags, aiFileIO *pFS, aiProgressHandler *pPH, const C_STRUCT aiPropertyStore *props);
+ASSIMP_API const C_STRUCT aiScene *aiImportFileIPP(const char *pFile, unsigned int pFlags, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH, const C_STRUCT aiPropertyStore *props);
 
 // ------------------------------------------------------------------------------------------------
 /*
     Imports a file from memory using a a custom progress handler
 */
-ASSIMP_API const aiScene *ASSIMP_CALLCONV aiImportFileFromMemoryP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, aiProgressHandler *pPH);
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiProgressHandler *pPH);
 
 // ------------------------------------------------------------------------------------------------
 /*
     Imports a file from memory using a custom IO file-system and a custom progress handler
 */
-ASSIMP_API const aiScene *ASSIMP_CALLCONV aiImportFileFromMemoryIP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiFileIO *pFS, aiProgressHandler *pPH);
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryIP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH);
 
 // ------------------------------------------------------------------------------------------------
 /*
     Imports a file from memory using a custom IO file-system, a custom progress handler and a property store
 */
-ASSIMP_API const aiScene *ASSIMP_CALLCONV aiImportFileFromMemoryIPP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiFileIO *pFS, aiProgressHandler *pPH, const C_STRUCT aiPropertyStore *props);
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryIPP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH, const C_STRUCT aiPropertyStore *props);
 #ifdef __cplusplus
 }
 #endif

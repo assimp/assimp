@@ -45,88 +45,92 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CInterfaceIOWrapper.h"
 
-namespace Assimp {
+namespace Assimp    {
 
-CIOStreamWrapper::~CIOStreamWrapper(void) {
-	/* Various places depend on this destructor to close the file */
-	if (mFile) {
-		mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
-		mFile = nullptr;
-	}
+CIOStreamWrapper::~CIOStreamWrapper(void)
+{
+    /* Various places depend on this destructor to close the file */
+    if (mFile) {
+        mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
+        mFile = nullptr;
+    }
 }
 
 // ...................................................................
-size_t CIOStreamWrapper::Read(void *pvBuffer,
-		size_t pSize,
-		size_t pCount) {
-	// need to typecast here as C has no void*
-	return mFile->ReadProc(mFile, (char *)pvBuffer, pSize, pCount);
+size_t CIOStreamWrapper::Read(void* pvBuffer,
+    size_t pSize,
+    size_t pCount
+){
+    // need to typecast here as C has no void*
+    return mFile->ReadProc(mFile,(char*)pvBuffer,pSize,pCount);
 }
 
 // ...................................................................
-size_t CIOStreamWrapper::Write(const void *pvBuffer,
-		size_t pSize,
-		size_t pCount) {
-	// need to typecast here as C has no void*
-	return mFile->WriteProc(mFile, (const char *)pvBuffer, pSize, pCount);
+size_t CIOStreamWrapper::Write(const void* pvBuffer,
+    size_t pSize,
+    size_t pCount
+){
+    // need to typecast here as C has no void*
+    return mFile->WriteProc(mFile,(const char*)pvBuffer,pSize,pCount);
 }
 
 // ...................................................................
 aiReturn CIOStreamWrapper::Seek(size_t pOffset,
-		aiOrigin pOrigin) {
-	return mFile->SeekProc(mFile, pOffset, pOrigin);
+    aiOrigin pOrigin
+){
+    return mFile->SeekProc(mFile,pOffset,pOrigin);
 }
 
 // ...................................................................
 size_t CIOStreamWrapper::Tell(void) const {
-	return mFile->TellProc(mFile);
+    return mFile->TellProc(mFile);
 }
 
 // ...................................................................
 size_t CIOStreamWrapper::FileSize() const {
-	return mFile->FileSizeProc(mFile);
+    return mFile->FileSizeProc(mFile);
 }
 
 // ...................................................................
-void CIOStreamWrapper::Flush() {
-	return mFile->FlushProc(mFile);
+void CIOStreamWrapper::Flush () {
+    return mFile->FlushProc(mFile);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Custom IOStream implementation for the C-API
-bool CIOSystemWrapper::Exists(const char *pFile) const {
-	aiFile *p = mFileSystem->OpenProc(mFileSystem, pFile, "rb");
-	if (p) {
-		mFileSystem->CloseProc(mFileSystem, p);
-		return true;
-	}
-	return false;
+bool CIOSystemWrapper::Exists( const char* pFile) const {
+    aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile,"rb");
+    if (p){
+        mFileSystem->CloseProc(mFileSystem,p);
+        return true;
+    }
+    return false;
 }
 
 // ...................................................................
 char CIOSystemWrapper::getOsSeparator() const {
 #ifndef _WIN32
-	return '/';
+    return '/';
 #else
-	return '\\';
+    return '\\';
 #endif
 }
 
 // ...................................................................
-IOStream *CIOSystemWrapper::Open(const char *pFile, const char *pMode) {
-	aiFile *p = mFileSystem->OpenProc(mFileSystem, pFile, pMode);
-	if (!p) {
-		return NULL;
-	}
-	return new CIOStreamWrapper(p, this);
+IOStream* CIOSystemWrapper::Open(const char* pFile,const char* pMode) {
+    aiFile* p = mFileSystem->OpenProc(mFileSystem,pFile,pMode);
+    if (!p) {
+        return NULL;
+    }
+    return new CIOStreamWrapper(p, this);
 }
 
 // ...................................................................
-void CIOSystemWrapper::Close(IOStream *pFile) {
-	if (!pFile) {
-		return;
-	}
-	delete pFile;
+void CIOSystemWrapper::Close( IOStream* pFile) {
+    if (!pFile) {
+        return;
+    }
+    delete pFile;
 }
 
-} // namespace Assimp
+}

@@ -61,10 +61,10 @@ extern "C" {
 struct aiProgressHandler;
 
 // aiProgressHandler callbacks
-typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdateProc)(C_STRUCT aiProgressHandler*, float);
-typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdateFileReadProc)(C_STRUCT aiProgressHandler*, int, int);
-typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdatePostProcessProc)(C_STRUCT aiProgressHandler*, int, int);
-typedef bool(ASSIMP_CALLCONV *aiProgressHandlerUpdateFileWriteProc)(C_STRUCT aiProgressHandler*, int, int);
+typedef bool (*aiProgressHandlerUpdateProc)(C_STRUCT aiProgressHandler *, float);
+typedef bool (*aiProgressHandlerUpdateFileReadProc)(C_STRUCT aiProgressHandler *, int, int);
+typedef bool (*aiProgressHandlerUpdatePostProcessProc)(C_STRUCT aiProgressHandler *, int, int);
+typedef bool (*aiProgressHandlerUpdateFileWriteProc)(C_STRUCT aiProgressHandler *, int, int);
 
 typedef char *aiProgressUserData;
 
@@ -84,15 +84,15 @@ struct aiProgressHandler {
      */
 	aiProgressHandlerUpdateFileReadProc UpdateFileReadProc;
 
-    /*
+	/*
         @brief Progress callback for post-processing steps
      */
-    aiProgressHandlerUpdatePostProcessProc UpdatePostProcessProc;
+	aiProgressHandlerUpdatePostProcessProc UpdatePostProcessProc;
 
-    /*
+	/*
         @brief Progress callback for export steps.
     */
-    aiProgressHandlerUpdateFileWriteProc UpdateFileWriteProc;
+	aiProgressHandlerUpdateFileWriteProc UpdateFileWriteProc;
 
 	/** User-defined, opaque data */
 	aiProgressUserData UserData;

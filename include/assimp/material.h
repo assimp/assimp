@@ -1369,7 +1369,7 @@ extern "C" {
  * @param pPropOut Pointer to receive a pointer to a valid aiMaterialProperty
  *        structure or NULL if the key has not been found. */
 // ---------------------------------------------------------------------------
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialProperty(
+ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
     const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
@@ -1402,7 +1402,7 @@ ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialProperty(
  * @return Specifies whether the key has been found. If not, the output
  *   arrays remains unmodified and pMax is set to 0.*/
 // ---------------------------------------------------------------------------
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialFloatArray(
+ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
     const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
@@ -1455,7 +1455,7 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
  *  from a material
  *
  * See the sample for aiGetMaterialFloatArray for more information.*/
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat,
+ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat,
      const char* pKey,
      unsigned int  type,
      unsigned int  index,
@@ -1492,7 +1492,7 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
 *
 * See the sample for aiGetMaterialFloat for more information*/
 // ---------------------------------------------------------------------------
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialColor(const C_STRUCT aiMaterial* pMat,
+ASSIMP_API C_ENUM aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -1504,7 +1504,7 @@ ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialColor(const C_STRUCT aiM
 *
 * See the sample for aiGetMaterialFloat for more information*/
 // ---------------------------------------------------------------------------
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialUVTransform(const C_STRUCT aiMaterial* pMat,
+ASSIMP_API C_ENUM aiReturn aiGetMaterialUVTransform(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -1516,7 +1516,7 @@ ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialUVTransform(const C_STRU
 *
 * See the sample for aiGetMaterialFloat for more information.*/
 // ---------------------------------------------------------------------------
-ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
+ASSIMP_API C_ENUM aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
@@ -1529,7 +1529,7 @@ ASSIMP_API C_ENUM aiReturn ASSIMP_CALLCONV aiGetMaterialString(const C_STRUCT ai
  *  @return Number of textures for this type.
  *  @note A texture can be easily queried using #aiGetMaterialTexture() */
 // ---------------------------------------------------------------------------
-ASSIMP_API unsigned int ASSIMP_CALLCONV aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
+ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
     C_ENUM aiTextureType type);
 
 // ---------------------------------------------------------------------------
@@ -1570,7 +1570,7 @@ ASSIMP_API unsigned int ASSIMP_CALLCONV aiGetMaterialTextureCount(const C_STRUCT
  *  @return AI_SUCCESS on success, otherwise something else. Have fun.*/
 // ---------------------------------------------------------------------------
 #ifdef __cplusplus
-ASSIMP_API aiReturn ASSIMP_CALLCONV aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
+ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     aiTextureType type,
     unsigned int  index,
     aiString* path,

@@ -325,7 +325,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
     }
     else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir + "/") : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir) : "";
 
             IOStream* file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -1426,9 +1426,6 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
             exts[(*extsUsed)[i].GetString()] = true;
         }
     }
-
-    #define CHECK_EXT(EXT) \
-        if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
     CHECK_EXT(KHR_binary_glTF);
     CHECK_EXT(KHR_materials_common);

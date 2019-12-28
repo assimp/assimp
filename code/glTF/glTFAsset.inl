@@ -325,7 +325,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
     }
     else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir + "/") : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir) : "";
 
             IOStream* file = r.OpenFile(dir + uri, "rb");
             if (file) {

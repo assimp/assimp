@@ -647,23 +647,37 @@ struct Animation
 
 	void CombineSingleChannelAnimationsRecursively(Animation *pParent)
 	{
+		std::set<std::string> childrenTargets;
+		bool childrenAnimationsHaveDifferentChannels = true;
+
 		for (std::vector<Animation*>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();)
 		{
 			Animation *anim = *it;
-
 			CombineSingleChannelAnimationsRecursively(anim);
 
-			if (anim->mChannels.size() == 1)
+			if (childrenAnimationsHaveDifferentChannels && anim->mChannels.size() == 1 &&
+				childrenTargets.find(anim->mChannels[0].mTarget) == childrenTargets.end()) {
+				childrenTargets.insert(anim->mChannels[0].mTarget);
+			} else {
+				childrenAnimationsHaveDifferentChannels = false;
+			}
+
+			++it;
+		}
+
+		// We only want to combine animations if they have different channels
+		if (childrenAnimationsHaveDifferentChannels)
+		{
+			for (std::vector<Animation*>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();)
 			{
+				Animation *anim = *it;
+
 				pParent->mChannels.push_back(anim->mChannels[0]);
 
 				it = pParent->mSubAnims.erase(it);
 
 				delete anim;
-			}
-			else
-			{
-				++it;
+				continue;
 			}
 		}
 	}

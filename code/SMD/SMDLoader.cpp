@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "SMDLoader.h"
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #define strtok_s strtok_r
 #endif
 

@@ -499,7 +499,7 @@ bool Curve::InRange(IfcFloat u) const {
     if (IsClosed()) {
         return true;
     }
-    const IfcFloat epsilon = Math::getEpsilon<float>();
+	const IfcFloat epsilon = Math::getEpsilon<IfcFloat>();
     return u - range.first > -epsilon && range.second - u > -epsilon;
 }
 #endif

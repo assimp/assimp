@@ -68,6 +68,7 @@ SET( PUBLIC_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
+  ${HEADER_PATH}/curve.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h

@@ -949,7 +949,7 @@ extern "C" {
 // Pure key names for all texture-related properties
 //! @cond MATS_DOC_FULL
 #define _AI_MATKEY_TEXTURE_BASE         "$tex.file"
-#define _AI_MATKEY_UVWSRC_BASE          "$tex.uvwsrc"
+#define _AI_MATKEY_UVWSRC_BASE          "$tex.file.texCoord"
 #define _AI_MATKEY_TEXOP_BASE           "$tex.op"
 #define _AI_MATKEY_MAPPING_BASE         "$tex.mapping"
 #define _AI_MATKEY_TEXBLEND_BASE        "$tex.blend"

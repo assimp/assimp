@@ -253,7 +253,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
                         continue;
                     }
 
-                    if ( !::strcmp( prop2->mKey.data, "$tex.uvwsrc")) {
+                    if ( !::strcmp( prop2->mKey.data, _AI_MATKEY_UVWSRC_BASE)) {
                         info.uvIndex = *((int*)prop2->mData);
 
                         // Store a direct pointer for later use

@@ -136,7 +136,7 @@ const AI_MATKEY_COLOR_REFLECTIVE = '$clr.reflective';
 const AI_MATKEY_GLOBAL_BACKGROUND_IMAGE = '?bg.global';
 
 const _AI_MATKEY_TEXTURE_BASE = '$tex.file';
-const _AI_MATKEY_UVWSRC_BASE = '$tex.uvwsrc';
+const _AI_MATKEY_UVWSRC_BASE = '$tex.file.texCoord';
 const _AI_MATKEY_TEXOP_BASE = '$tex.op';
 const _AI_MATKEY_MAPPING_BASE = '$tex.mapping';
 const _AI_MATKEY_TEXBLEND_BASE = '$tex.blend';

@@ -639,7 +639,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
             }
 			//mappings[prop->mIndex] = ((aiUVTransform*)prop->mData);
         }
-        else if (!::strcmp(prop->mKey.data,"$tex.uvwsrc")) {
+        else if (!::strcmp(prop->mKey.data,_AI_MATKEY_UVWSRC_BASE)) {
             if (aiPTI_Integer != prop->mType || sizeof(int) > prop->mDataLength)
             {
                 ReportError("Material property %s%i is expected to be an integer (size is %i)",

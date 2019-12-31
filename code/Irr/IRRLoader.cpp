@@ -629,7 +629,7 @@ void SetupMapping (aiMaterial* mat, aiTextureMapping mode, const aiVector3D& axi
                 p.push_back(m);
             }
         }
-        else if (! ::strcmp( prop->mKey.data, "$tex.uvwsrc"))   {
+        else if (! ::strcmp( prop->mKey.data, _AI_MATKEY_UVWSRC_BASE))   {
             delete mat->mProperties[i];
         }
         else p.push_back(prop);

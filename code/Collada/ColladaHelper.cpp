@@ -94,9 +94,10 @@ void ToCamelCase(std::string &text)
         }
         else
         {
-            // Make lower case
-            (*it) = ToLower(*it);
+            // Make next one lower case
             ++it;
+            if (it != text.end())
+                (*it) = ToLower(*it);
         }
     }
 }

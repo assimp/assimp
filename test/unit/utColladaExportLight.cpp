@@ -138,7 +138,7 @@ TEST_F(ColladaExportLight, testExportLight)
     aiString readModified;
 	EXPECT_TRUE(imported->mMetaData->Get("Modified", readModified)) << "No modified metadata";
     EXPECT_STRNE(origModified.C_Str(), readModified.C_Str()) << "Modified date did not change";
-    EXPECT_GT(readModified.length, 18) << "Modified date too short";
+    EXPECT_GT(readModified.length, ai_uint32(18)) << "Modified date too short";
 
     // Lights
     EXPECT_TRUE(imported->HasLights());

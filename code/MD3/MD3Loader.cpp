@@ -973,7 +973,7 @@ void MD3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
             AI_SWAP2( pcVertices[i].Z );
 
             AI_SWAP4( pcUVs[i].U );
-            AI_SWAP4( pcUVs[i].U );
+            AI_SWAP4( pcUVs[i].V );
         }
         for (uint32_t i = 0; i < pcSurfaces->NUM_TRIANGLES;++i) {
             AI_SWAP4(pcTriangles[i].INDEXES[0]);

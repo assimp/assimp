@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 #include <unordered_map>
@@ -201,14 +202,25 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 		}
 
         mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
+        mat->AddProperty(&prop.texCoord, 1, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(texType, texSlot));
 
 		if (prop.textureTransformSupported) {
 			aiUVTransform transform;
-			transform.mTranslation.x = prop.TextureTransformExt_t.offset[0];
-			transform.mTranslation.y = prop.TextureTransformExt_t.offset[0];
-			transform.mRotation = prop.TextureTransformExt_t.rotation;
 			transform.mScaling.x = prop.TextureTransformExt_t.scale[0];
 			transform.mScaling.y = prop.TextureTransformExt_t.scale[1];
+			transform.mRotation = -prop.TextureTransformExt_t.rotation; // must be negated
+
+			// A change of coordinates is required to map glTF UV transformations into the space used by
+			// Assimp. In glTF all UV origins are at 0,1 (top left of texture) in Assimp space. In Assimp
+			// rotation occurs around the image center (0.5,0.5) where as in glTF rotation is around the
+			// texture origin. All three can be corrected for solely by a change of the translation since
+			// the transformations available are shape preserving. Note the importer already flips the V
+			// coordinate of the actual meshes during import.
+			const ai_real rcos(cos(-transform.mRotation));
+			const ai_real rsin(sin(-transform.mRotation));
+			transform.mTranslation.x = (0.5 * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
+			transform.mTranslation.y = ((0.5 * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
+
 			mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
 		}
 
@@ -1291,6 +1303,29 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 	}
 }
 
+void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
+    ai_assert(mScene->mMetaData == nullptr);
+    const bool hasVersion = !a.asset.version.empty();
+    const bool hasGenerator = !a.asset.generator.empty();
+    const bool hasCopyright = !a.asset.copyright.empty();
+    if (hasVersion || hasGenerator || hasCopyright)
+    {
+        mScene->mMetaData = new aiMetadata;
+        if (hasVersion)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+        }
+        if (hasGenerator)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+        if (hasCopyright)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
+        }
+    }
+}
+
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
 	// clean all member arrays
 	meshOffsets.clear();
@@ -1317,6 +1352,8 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 	ImportNodes(asset);
 
 	ImportAnimations(asset);
+
+    ImportCommonMetadata(asset);
 
 	if (pScene->mNumMeshes == 0) {
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

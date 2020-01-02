@@ -387,8 +387,8 @@ namespace glTF2
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         size_t count;                //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-        std::vector<float> max;      //!< Maximum value of each component in this attribute.
-        std::vector<float> min;      //!< Minimum value of each component in this attribute.
+        std::vector<double> max;     //!< Maximum value of each component in this attribute.
+        std::vector<double> min;     //!< Minimum value of each component in this attribute.
 
         unsigned int GetNumComponents();
         unsigned int GetBytesPerComponent();
@@ -783,7 +783,7 @@ namespace glTF2
 		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
 		/// Get mesh data from JSON-object and place them to root asset.
 		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
-		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+		/// \param [out] pAsset_Root - reference to root asset where data will be stored.
 		void Read(Value& pJSON_Object, Asset& pAsset_Root);
     };
 
@@ -1034,6 +1034,12 @@ namespace glTF2
 			bool KHR_texture_transform;
         } extensionsUsed;
 
+        //! Keeps info about the required extensions
+        struct RequiredExtensions
+        {
+            bool KHR_draco_mesh_compression;
+        } extensionsRequired;
+
         AssetMetadata asset;
 
 
@@ -1076,6 +1082,7 @@ namespace glTF2
             , textures      (*this, "textures")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
+            memset(&extensionsRequired, 0, sizeof(extensionsRequired));
         }
 
         //! Main function
@@ -1094,6 +1101,7 @@ namespace glTF2
         void ReadBinaryHeader(IOStream& stream, std::vector<char>& sceneData);
 
         void ReadExtensionsUsed(Document& doc);
+        void ReadExtensionsRequired(Document& doc);
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };

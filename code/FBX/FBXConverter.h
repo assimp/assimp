@@ -421,6 +421,8 @@ private:
         double& minTime,
         Model::RotOrder order);
 
+    // ------------------------------------------------------------------------------------------------
+    // Copy global geometric data and some information about the source asset into scene metadata.
     void ConvertGlobalSettings();
 
     // ------------------------------------------------------------------------------------------------

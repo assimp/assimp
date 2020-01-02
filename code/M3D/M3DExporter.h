@@ -48,8 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
 
-#include "m3d.h"
-
 #include <assimp/types.h>
 //#include <assimp/material.h>
 #include <assimp/StreamWriter.h> // StreamWriterLE
@@ -68,6 +66,8 @@ namespace Assimp
     class IOStream;
     class ExportProperties;
 
+    class M3DWrapper;
+
     // ---------------------------------------------------------------------
     /** Helper class to export a given scene to an M3D file. */
     // ---------------------------------------------------------------------
@@ -83,13 +83,9 @@ namespace Assimp
         const aiScene* mScene; // the scene to export
         const ExportProperties* mProperties; // currently unused
         std::shared_ptr<IOStream> outfile; // file to write to
-        m3d_t *m3d; // model for the C library to convert to
 
         // helper to do the recursive walking
-        void NodeWalk(const aiNode* pNode, aiMatrix4x4 m);
-        uint32_t mkColor(aiColor4D* c);
-        M3D_INDEX addMaterial(const aiMaterial *mat);
-        void addProp(m3dm_t *m, uint8_t type, uint32_t value);
+        void NodeWalk(const M3DWrapper &m3d, const aiNode* pNode, aiMatrix4x4 m);
     };
 }
 

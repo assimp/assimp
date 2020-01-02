@@ -66,6 +66,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.h
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
+  ${HEADER_PATH}/commonMetaData.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
@@ -348,6 +349,7 @@ ADD_ASSIMP_IMPORTER( BVH
 )
 
 ADD_ASSIMP_IMPORTER( COLLADA
+  Collada/ColladaHelper.cpp
   Collada/ColladaHelper.h
   Collada/ColladaLoader.cpp
   Collada/ColladaLoader.h
@@ -411,6 +413,8 @@ ADD_ASSIMP_IMPORTER( M3D
   M3D/M3DMaterials.h
   M3D/M3DImporter.h
   M3D/M3DImporter.cpp
+  M3D/M3DWrapper.h
+  M3D/M3DWrapper.cpp
   M3D/m3d.h
 )
 
@@ -452,6 +456,16 @@ ADD_ASSIMP_IMPORTER( MDL
   MDL/MDLLoader.cpp
   MDL/MDLLoader.h
   MDL/MDLMaterialLoader.cpp
+  MDL/HalfLife/HalfLifeMDLBaseHeader.h
+  MDL/HalfLife/HL1FileData.h
+  MDL/HalfLife/HL1MDLLoader.cpp
+  MDL/HalfLife/HL1MDLLoader.h
+  MDL/HalfLife/HL1ImportDefinitions.h
+  MDL/HalfLife/HL1ImportSettings.h
+  MDL/HalfLife/HL1MeshTrivert.h
+  MDL/HalfLife/LogFunctions.h
+  MDL/HalfLife/UniqueNameGenerator.cpp
+  MDL/HalfLife/UniqueNameGenerator.h
 )
 
 SET( MaterialSystem_SRCS

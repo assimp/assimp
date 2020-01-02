@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glTF/glTFAssetWriter.h"
 #include "PostProcessing/SplitLargeMeshes.h"
 
+#include <assimp/commonMetaData.h>
 #include <assimp/Exceptional.h>
 #include <assimp/StringComparison.h>
 #include <assimp/ByteSwapper.h>
@@ -873,6 +874,12 @@ void glTFExporter::ExportMetadata()
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;
+
+	// Copyright
+	aiString copyright_str;
+	if (mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
+		asset.copyright = copyright_str.C_Str();
+	}
 }
 
 inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)

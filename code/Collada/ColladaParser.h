@@ -94,11 +94,8 @@ namespace Assimp
         /** Reads contributor information such as author and legal blah */
         void ReadContributorInfo();
 
-        /** Reads generic metadata into provided map */
+        /** Reads generic metadata into provided map and renames keys for Assimp */
         void ReadMetaDataItem(StringMetaData &metadata);
-
-        /** Convert underscore_seperated to CamelCase "authoring_tool" becomes "AuthoringTool" */
-        static void ToCamelCase(std::string &text);
 
         /** Reads the animation library */
         void ReadAnimationLibrary();

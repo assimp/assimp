@@ -95,10 +95,7 @@ namespace Assimp
         void ReadContributorInfo();
 
         /** Reads generic metadata into provided map and renames keys for Assimp */
-        void ReadMetaDataItem(StringMetaData &metadata, const Collada::MetaKeyPairVector &key_renaming);
-
-        /** Convert underscore_seperated to CamelCase "authoring_tool" becomes "AuthoringTool" */
-        static void ToCamelCase(std::string &text);
+        void ReadMetaDataItem(StringMetaData &metadata);
 
         /** Reads the animation library */
         void ReadAnimationLibrary();

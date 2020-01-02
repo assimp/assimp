@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/cexport.h>
+#include <assimp/commonMetaData.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -75,7 +76,7 @@ TEST_F(ColladaExportLight, testExportLight)
     const char* file = "lightsExp.dae";
 
     const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae", aiProcess_ValidateDataStructure);
-    ASSERT_TRUE(pTest!=NULL);
+    ASSERT_NE(pTest, nullptr);
     ASSERT_TRUE(pTest->HasLights());
 
     const unsigned int origNumLights( pTest->mNumLights );
@@ -86,15 +87,63 @@ TEST_F(ColladaExportLight, testExportLight)
         origLights[ i ] = *(pTest->mLights[ i ]);
     }
 
-    EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
+    // Common metadata
+    // Confirm was loaded by the Collada importer
+    aiString origImporter;
+    EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, origImporter)) << "No importer format metadata";
+	EXPECT_STREQ("Collada Importer", origImporter.C_Str());
+
+    aiString origGenerator;
+	EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, origGenerator)) << "No generator metadata";
+	EXPECT_EQ(strncmp(origGenerator.C_Str(), "Blender", 7), 0) << "AI_METADATA_SOURCE_GENERATOR was: " << origGenerator.C_Str();
+
+    aiString origCopyright;
+	EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, origCopyright)) << "No copyright metadata";
+    EXPECT_STREQ("BSD", origCopyright.C_Str());
+
+    aiString origCreated;
+	EXPECT_TRUE(pTest->mMetaData->Get("Created", origCreated)) << "No created metadata";
+    EXPECT_STREQ("2015-05-17T21:55:44", origCreated.C_Str());
+
+    aiString origModified;
+	EXPECT_TRUE(pTest->mMetaData->Get("Modified", origModified)) << "No modified metadata";
+    EXPECT_STREQ("2015-05-17T21:55:44", origModified.C_Str());
+
+    EXPECT_EQ(AI_SUCCESS, ex->Export(pTest, "collada", file));
+
+    // Drop the pointer as about to become invalid
+    pTest = nullptr;
 
     const aiScene* imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
 
-    ASSERT_TRUE(imported!=NULL);
+    ASSERT_TRUE(imported != NULL);
 
+    // Check common metadata survived roundtrip
+    aiString readImporter;
+    EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, readImporter)) << "No importer format metadata after export";
+    EXPECT_STREQ(origImporter.C_Str(), readImporter.C_Str()) << "Assimp Importer Format changed";
+
+    aiString readGenerator;
+	EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, readGenerator)) << "No generator metadata";
+	EXPECT_STREQ(origGenerator.C_Str(), readGenerator.C_Str()) << "Generator changed";
+
+    aiString readCopyright;
+	EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, readCopyright)) << "No copyright metadata";
+    EXPECT_STREQ(origCopyright.C_Str(), readCopyright.C_Str()) << "Copyright changed";
+
+    aiString readCreated;
+	EXPECT_TRUE(imported->mMetaData->Get("Created", readCreated)) << "No created metadata";
+    EXPECT_STREQ(origCreated.C_Str(), readCreated.C_Str()) << "Created date changed";
+
+    aiString readModified;
+	EXPECT_TRUE(imported->mMetaData->Get("Modified", readModified)) << "No modified metadata";
+    EXPECT_STRNE(origModified.C_Str(), readModified.C_Str()) << "Modified date did not change";
+    EXPECT_GT(readModified.length, 18) << "Modified date too short";
+
+    // Lights
     EXPECT_TRUE(imported->HasLights());
-    EXPECT_EQ( origNumLights,imported->mNumLights );
-    for(size_t i=0; i< origNumLights; i++) {
+    EXPECT_EQ(origNumLights, imported->mNumLights);
+    for(size_t i=0; i < origNumLights; i++) {
         const aiLight *orig = &origLights[ i ];
         const aiLight *read = imported->mLights[i];
         EXPECT_EQ( 0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );

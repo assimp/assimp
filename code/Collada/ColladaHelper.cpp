@@ -83,8 +83,10 @@ void ToCamelCase(std::string &text)
     if (text.empty())
         return;
     // Capitalise first character
-    text[0] = Assimp::ToUpper(text[0]);
-    for (auto it = text.begin(); it != text.end(); /*iterated below*/)
+    auto it = text.begin();
+    (*it) = ToUpper(*it);
+    ++it;
+    for (/*started above*/ ; it != text.end(); /*iterated below*/)
     {
         if ((*it) == '_')
         {
@@ -94,10 +96,9 @@ void ToCamelCase(std::string &text)
         }
         else
         {
-            // Make next one lower case
-            ++it;
-            if (it != text.end())
-                (*it) = ToLower(*it);
+            // Make lower case
+            (*it) = ToLower(*it);
+            ++it;               
         }
     }
 }

@@ -40,76 +40,91 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
+#include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
 class utColladaImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
-        if (scene == nullptr)
-            return false;
+	virtual bool importerTest() {
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
+		if (scene == nullptr)
+			return false;
 
-        // Expected number of items
-        EXPECT_EQ(scene->mNumMeshes, 1u);
-        EXPECT_EQ(scene->mNumMaterials, 1u);
-        EXPECT_EQ(scene->mNumAnimations, 0u);
-        EXPECT_EQ(scene->mNumTextures, 0u);
-        EXPECT_EQ(scene->mNumLights, 1u);
-        EXPECT_EQ(scene->mNumCameras, 1u);
+		// Expected number of items
+		EXPECT_EQ(scene->mNumMeshes, 1u);
+		EXPECT_EQ(scene->mNumMaterials, 1u);
+		EXPECT_EQ(scene->mNumAnimations, 0u);
+		EXPECT_EQ(scene->mNumTextures, 0u);
+		EXPECT_EQ(scene->mNumLights, 1u);
+		EXPECT_EQ(scene->mNumCameras, 1u);
 
-        return true;
-    }
+		// Expected common metadata
+		aiString value;
+		EXPECT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, value)) << "No importer format metadata";
+		EXPECT_STREQ("Collada Importer", value.C_Str());
+
+		EXPECT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT_VERSION, value)) << "No format version metadata";
+		EXPECT_STREQ("1.4.1", value.C_Str());
+
+		EXPECT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, value)) << "No generator metadata";
+		EXPECT_EQ(strncmp(value.C_Str(), "Maya 8.0", 8), 0) << "AI_METADATA_SOURCE_GENERATOR was: " << value.C_Str();
+
+		EXPECT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, value)) << "No copyright metadata";
+		EXPECT_EQ(strncmp(value.C_Str(), "Copyright 2006", 14), 0) << "AI_METADATA_SOURCE_COPYRIGHT was: " << value.C_Str();
+
+		return true;
+	}
 };
 
 TEST_F(utColladaImportExport, importBlenFromFileTest) {
-    EXPECT_TRUE(importerTest());
+	EXPECT_TRUE(importerTest());
 }
 
 class utColladaZaeImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
-        {
-            Assimp::Importer importer;
-            const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
-            if (scene == nullptr)
-                return false;
+	virtual bool importerTest() {
+		{
+			Assimp::Importer importer;
+			const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);
+			if (scene == nullptr)
+				return false;
 
-            // Expected number of items
-            EXPECT_EQ(scene->mNumMeshes, 1u);
-            EXPECT_EQ(scene->mNumMaterials, 1u);
-            EXPECT_EQ(scene->mNumAnimations, 0u);
-            EXPECT_EQ(scene->mNumTextures, 1u);
-            EXPECT_EQ(scene->mNumLights, 1u);
-            EXPECT_EQ(scene->mNumCameras, 1u);
-        }
+			// Expected number of items
+			EXPECT_EQ(scene->mNumMeshes, 1u);
+			EXPECT_EQ(scene->mNumMaterials, 1u);
+			EXPECT_EQ(scene->mNumAnimations, 0u);
+			EXPECT_EQ(scene->mNumTextures, 1u);
+			EXPECT_EQ(scene->mNumLights, 1u);
+			EXPECT_EQ(scene->mNumCameras, 1u);
+		}
 
-        {
-            Assimp::Importer importer;
-            const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck_nomanifest.zae", aiProcess_ValidateDataStructure);
-            if (scene == nullptr)
-                return false;
+		{
+			Assimp::Importer importer;
+			const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck_nomanifest.zae", aiProcess_ValidateDataStructure);
+			if (scene == nullptr)
+				return false;
 
-            // Expected number of items
-            EXPECT_EQ(scene->mNumMeshes, 1u);
-            EXPECT_EQ(scene->mNumMaterials, 1u);
-            EXPECT_EQ(scene->mNumAnimations, 0u);
-            EXPECT_EQ(scene->mNumTextures, 1u);
-            EXPECT_EQ(scene->mNumLights, 1u);
-            EXPECT_EQ(scene->mNumCameras, 1u);
-        }
+			// Expected number of items
+			EXPECT_EQ(scene->mNumMeshes, 1u);
+			EXPECT_EQ(scene->mNumMaterials, 1u);
+			EXPECT_EQ(scene->mNumAnimations, 0u);
+			EXPECT_EQ(scene->mNumTextures, 1u);
+			EXPECT_EQ(scene->mNumLights, 1u);
+			EXPECT_EQ(scene->mNumCameras, 1u);
+		}
 
-        return true;
-    }
+		return true;
+	}
 };
 
 TEST_F(utColladaZaeImportExport, importBlenFromFileTest) {
-    EXPECT_TRUE(importerTest());
+	EXPECT_TRUE(importerTest());
 }

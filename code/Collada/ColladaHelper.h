@@ -104,6 +104,17 @@ enum MorphMethod
     Relative
 };
 
+/** Common metadata keys as <Collada, Assimp> */
+typedef std::pair<std::string, std::string> MetaKeyPair;
+typedef std::vector<MetaKeyPair> MetaKeyPairVector;
+
+// Collada as lower_case (native)
+const MetaKeyPairVector &GetColladaAssimpMetaKeys();
+// Collada as CamelCase (used by Assimp for consistency)
+const MetaKeyPairVector &GetColladaAssimpMetaKeysCamelCase();
+
+/** Convert underscore_separated to CamelCase "authoring_tool" becomes "AuthoringTool" */
+void ToCamelCase(std::string &text);
 
 /** Contains all data for one of the different transformation types */
 struct Transform

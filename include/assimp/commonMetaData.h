@@ -60,4 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// Not all formats add this metadata.
 #define AI_METADATA_SOURCE_GENERATOR "SourceAsset_Generator"
 
+/// Scene metadata holding the source asset copyright statement, if available.
+/// Not all formats add this metadata.
+#define AI_METADATA_SOURCE_COPYRIGHT "SourceAsset_Copyright"
+
 #endif

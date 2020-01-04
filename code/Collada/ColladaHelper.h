@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <vector>
+#include <set>
 #include <stdint.h>
 #include <assimp/light.h>
 #include <assimp/mesh.h>

@@ -702,9 +702,11 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // data structures in the aiScene instance
     if (pcNew && pScene->mNumTextures <= 999)
     {
-        // place this as diffuse texture
-        char szTexCurrent[5];
-        ai_snprintf(szTexCurrent, 5, "*%i", this->pScene->mNumTextures);
+        // place this as diffuse texture + 1 for null-termination
+        static const size_t length = 5;
+        char szTexCurrent[length+1];
+        ::memset(szTexCurrent, '\0', length+1);
+        ai_snprintf(szTexCurrent, length, "*%i", this->pScene->mNumTextures);
 
         aiString szFile;
         const size_t iLen = strlen((const char *)szTexCurrent);

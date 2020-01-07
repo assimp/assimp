@@ -139,45 +139,6 @@ static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
 	}
 }
 
-/*static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}
-
-
-static void CopyValue(const glTF2::vec4& v, aiColor4D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
-}*/
-
-/*static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}*/
-
-/*static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = 1.0;
-}
-
-static void CopyValue(const glTF2::vec3& v, aiVector3D& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2];
-}
-
-static void CopyValue(const glTF2::vec4& v, aiQuaternion& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2]; out.w = v[3];
-}*/
-
-/*static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
-{
-    o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
-    o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
-    o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
-    o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}*/
-
 inline void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMaterial *mat, const char *pKey, unsigned int type, unsigned int idx) {
 	aiColor4D col;
 	CopyValue(prop, col);
@@ -512,7 +473,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				}
 			}
 
-			aiFace *faces = 0;
+			aiFace *faces = nullptr;
 			size_t nFaces = 0;
 
 			if (prim.indices) {
@@ -674,13 +635,13 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				}
 			}
 
-			if (faces) {
+			if (nullptr != faces) {
 				aim->mFaces = faces;
 				aim->mNumFaces = static_cast<unsigned int>(nFaces);
 				ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
 			}
 
-			if (prim.material) {
+			if (nullptr != prim.material) {
 				aim->mMaterialIndex = prim.material.GetIndex();
 			} else {
 				aim->mMaterialIndex = mScene->mNumMaterials - 1;
@@ -981,7 +942,9 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 }
 
 void glTF2Importer::ImportNodes(glTF2::Asset &r) {
-	if (!r.scene) return;
+	if (!r.scene) {
+        return;
+    }
 
 	std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
@@ -1292,7 +1255,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 		if (!img.mimeType.empty()) {
 			const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
 			if (ext) {
-				if (strcmp(ext, "jpeg") == 0) ext = "jpg";
+				if (strcmp(ext, "jpeg") == 0) {
+                    ext = "jpg";
+                }
 
 				size_t len = strlen(ext);
 				if (len <= 3) {
@@ -1308,19 +1273,15 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
     const bool hasCopyright = !a.asset.copyright.empty();
-    if (hasVersion || hasGenerator || hasCopyright)
-    {
+    if (hasVersion || hasGenerator || hasCopyright) {
         mScene->mMetaData = new aiMetadata;
-        if (hasVersion)
-        {
+        if (hasVersion) {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
         }
-        if (hasGenerator)
-        {
+        if (hasGenerator) {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
         }
-        if (hasCopyright)
-        {
+        if (hasCopyright) {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
         }
     }

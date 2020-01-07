@@ -1000,7 +1000,7 @@ void glTF2Exporter::ExportMetadata()
 
     // Copyright
 	aiString copyright_str;
-	if (mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
+	if (mScene->mMetaData != nullptr && mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
         asset.copyright = copyright_str.C_Str();
 	}
 }

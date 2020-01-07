@@ -179,8 +179,8 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 			// coordinate of the actual meshes during import.
 			const ai_real rcos(cos(-transform.mRotation));
 			const ai_real rsin(sin(-transform.mRotation));
-			transform.mTranslation.x = (0.5 * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-			transform.mTranslation.y = ((0.5 * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
+			transform.mTranslation.x = (static_cast<ai_real>( 0.5 ) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
+			transform.mTranslation.y = ((static_cast<ai_real>( 0.5 ) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
 
 			mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
 		}
@@ -641,7 +641,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
 			}
 
-			if (nullptr != prim.material) {
+			if (prim.material) {
 				aim->mMaterialIndex = prim.material.GetIndex();
 			} else {
 				aim->mMaterialIndex = mScene->mNumMaterials - 1;

@@ -394,18 +394,20 @@ ADD_ASSIMP_IMPORTER( IRR
 )
 
 ADD_ASSIMP_IMPORTER( JT
-  JT/JTImporter.h
-  JT/JTImporter.cpp
+    JT/JTData.h
+    JT/JTTypes.h
+    JT/JTImporter.h
+    JT/JTImporter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( LWO
-  LWO/LWOAnimation.cpp
-  LWO/LWOAnimation.h
-  LWO/LWOBLoader.cpp
-  LWO/LWOFileData.h
-  LWO/LWOLoader.cpp
-  LWO/LWOLoader.h
-  LWO/LWOMaterial.cpp
+    LWO/LWOAnimation.cpp
+    LWO/LWOAnimation.h
+    LWO/LWOBLoader.cpp
+    LWO/LWOFileData.h
+    LWO/LWOLoader.cpp
+    LWO/LWOLoader.h
+    LWO/LWOMaterial.cpp
 )
 
 ADD_ASSIMP_IMPORTER( LWS

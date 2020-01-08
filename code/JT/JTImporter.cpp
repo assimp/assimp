@@ -42,138 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_JT_IMPORTER
 
 #include "JTImporter.h"
+#include <assimp/Compiler/pushpack1.h>
+#include <assimp/Compiler/poppack1.h>
 
 #include <assimp/ByteSwapper.h>
 #include <assimp/DefaultIOSystem.h>
 
+#include "JTData.h"
+
 #include <memory>
 
 namespace Assimp {
-namespace JT {
-
-enum class SegmentTypeEnum {
-	LogicalScenegraph = 1,
-	JT_BRep,
-	PMIData,
-	MetaData,
-	Shape,
-	ShapeLOD0,
-	ShapeLOD1,
-	ShapeLOD2,
-	ShapeLOD3,
-	ShapeLOD4,
-	ShapeLOD5,
-	ShapeLOD6,
-	ShapeLOD7,
-	ShapeLOD8,
-	ShapeLOD9,
-	XT_BRep,
-	WireframeRepresentation,
-	ULP,
-	LWPA
-};
-
-static const char ZLibCompressionEnabled[] = {
-	1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-};
-
-bool isZLibCompressionEnabled(SegmentTypeEnum type) {
-	const size_t index = (size_t)type - 1;
-	return 1 == ZLibCompressionEnabled[index];
-}
-
-#pragma pack(1)
-struct JTHeader {
-	uchar version[80];
-	uchar byte_order;
-	i32 reserved;
-	i32 toc_offset;
-	union {
-		Guid LSG_segment_id;
-		Guid reserved_field;
-	};
-
-	JTHeader() :
-			byte_order(0),
-			reserved(0),
-			toc_offset(0) {
-		::memset(version, ' ', sizeof(uchar) * 80);
-	}
-};
-
-struct JTTOCEntry {
-	Guid segment_id;
-	i32 segment_offset;
-	i32 segment_lenght;
-	u32 segment_attributes;
-};
-
-struct JTTOCSegment {
-	i32 num_entries;
-	JTTOCEntry *entries;
-
-	JTTOCSegment() :
-			num_entries(0),
-			entries(nullptr) {
-		// empty
-	}
-
-	~JTTOCSegment() {
-		delete[] entries;
-	}
-
-	void allocEntries(i32 numEntries) {
-		num_entries = num_entries;
-		entries = new JTTOCEntry[num_entries];
-	}
-
-	JTTOCEntry *getEntryAt(size_t index) {
-		if (index > num_entries) {
-			return nullptr;
-		}
-
-		return &entries[index];
-	}
-};
-
-struct SegmentHeader {
-	Guid SegmentID;
-	i32 SegmentType;
-	i32 SegmentLength;
-};
-
-struct LogicalElementHeader {
-	i32 length;
-};
-
-struct LogicalElementHeaderZLib {
-	i32 CompressionFlag;
-	i32 CompressionDataLength;
-	u8 CompressionAlgo;
-};
-
-struct ElementHeader {
-	Guid ObjectTypeID;
-	uchar ObjectBaseType;
-};
-
-struct BaseNodeData {
-	i16 Version;
-	u32 NodeFlags;
-	i32 AttributeCount;
-	i32 *AttributeObjectIds;
-};
-
-struct JTModel {
-	JTHeader header;
-	JTTOCSegment toc_segment;
-
-	JTModel() {
-		// empty
-	}
-};
-
-} // namespace JT
 
 static const aiImporterDesc desc = {
 	"JT File Format from Siemens",
@@ -325,7 +204,10 @@ void JTImporter::readLogicalElementHeaderZLib(LogicalElementHeaderZLib &headerZL
 }
 
 void readBaseNodeData(BaseNodeData &baseNodeData, JTImporter::DataBuffer &buffer, size_t &offset) {
-	::memcpy(&baseNodeData.Version, &buffer[offset], sizeof(i16));
+
+    /* 0x10dd1035, 0x2ac8, 0x11d1, 0x9b, 0x6b, 0x00, 0x80, 0xc7, 0xbb, 0x59, 0x97 */
+
+    ::memcpy(&baseNodeData.Version, &buffer[offset], sizeof(i16));
 	offset += sizeof(i16);
 	::memcpy(&baseNodeData.NodeFlags, &buffer[offset], sizeof(u32));
 	offset += sizeof(u32);
@@ -335,6 +217,36 @@ void readBaseNodeData(BaseNodeData &baseNodeData, JTImporter::DataBuffer &buffer
 		baseNodeData.AttributeObjectIds = new i32[baseNodeData.AttributeCount];
 		::memcpy(baseNodeData.AttributeObjectIds, &buffer[offset], sizeof(i32) * baseNodeData.AttributeCount);
 	}
+}
+
+void readVertexCountRange(VertexCountRange &vcRange, JTImporter::DataBuffer &buffer, size_t &offset) {
+	::memcpy(&vcRange.MinCount, &buffer[offset], sizeof(i32));
+	offset += sizeof(i32);
+	::memcpy(&vcRange.MaxCount, &buffer[offset], sizeof(i32));
+	offset += sizeof(i32);
+}
+
+void readGroupNodeData( GroupNodeData &gnData, JTImporter::DataBuffer &buffer, size_t &offset ) {
+	readBaseNodeData(gnData.BNData, buffer, offset);
+	::memcpy(&gnData.VersionNumber, &buffer[offset], sizeof(i16));
+	offset += sizeof(i16);
+	::memcpy(&gnData.ChildCount, &buffer[offset], sizeof(i32));
+	offset += sizeof(i32);
+	if (gnData.ChildCount == 0) {
+		return;
+    }
+
+    gnData.ChildNodeObjIds = new i32[gnData.ChildCount];
+    for (i32 i = 0; i < gnData.ChildCount; ++i) {
+		::memcpy(gnData.ChildNodeObjIds, &buffer[offset], sizeof(i32) * gnData.ChildCount);
+    }
+}
+
+void readPartitionNodeData() {
+
+    /* : 0x10dd103e, 0x2ac8, 0x11d1, 0x9b, 0x6b, 0x00, 0x80, 0xc7, 0xbb, 0x59, 0x97 */
+
+
 }
 
 void JTImporter::readLSGSegment(SegmentHeader header, bool isCompressed, DataBuffer &buffer, size_t &offset) {

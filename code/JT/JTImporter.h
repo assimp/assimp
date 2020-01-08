@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <cstdint>
 
+#include "JTTypes.h"
+
 namespace Assimp {
 
 namespace JT {
@@ -59,8 +61,6 @@ namespace JT {
 
 class JTImporter : public BaseImporter {
 public:
-    using DataBuffer = std::vector<char>;
-
     JTImporter();
     ~JTImporter() override;
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const override;
@@ -68,11 +68,11 @@ public:
 
 protected:
     void InternReadFile(const std::string& pFile,aiScene* pScene,IOSystem* pIOHandler) override;
-    void readHeader(DataBuffer& buffer, size_t &offset);
-    void readTOCSegment(size_t toc_offset, DataBuffer& buffer, size_t& offset);
-    void readDataSegment( JT::JTTOCEntry *entry, DataBuffer &buffer, size_t &offset );
-	void readLogicalElementHeaderZLib(JT::LogicalElementHeaderZLib &headerZLib, DataBuffer &buffer, size_t &offset);
-	void readLSGSegment(JT::SegmentHeader header, bool isCompressed, DataBuffer &buffer, size_t &offset);
+	void readHeader(JT::DataBuffer &buffer, size_t &offset);
+	void readTOCSegment(size_t toc_offset, JT::DataBuffer &buffer, size_t &offset);
+	void readDataSegment(JT::JTTOCEntry *entry, JT::DataBuffer &buffer, size_t &offset);
+	void readLogicalElementHeaderZLib(JT::LogicalElementHeaderZLib &headerZLib, JT::DataBuffer &buffer, size_t &offset);
+	void readLSGSegment(JT::SegmentHeader header, bool isCompressed, JT::DataBuffer &buffer, size_t &offset);
     
 private:
     JT::JTModel* mModel;

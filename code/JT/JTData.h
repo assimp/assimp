@@ -111,7 +111,9 @@ struct ElementHeader {
 };
 
 struct BaseNodeData {
-	i16 Version;
+	const char *Id = "0x10dd1035-0x2ac8-0x11d1-0x9b-0x6b-0x00-0x80-0xc7-0xbb-0x59-0x97";
+					
+    i16 Version;
 	u32 NodeFlags;
 	i32 AttributeCount;
 	i32 *AttributeObjectIds;
@@ -120,18 +122,6 @@ struct BaseNodeData {
 struct VertexCountRange {
 	i32 MinCount;
 	i32 MaxCount;
-};
-
-struct PartitionNodeElement {
-	LogicalElementHeaderZLib LogicalHeaderZLib;
-	i32 PartitionFlags;
-	MbString Filename;
-	BBoxF32 TransformedBBox;
-	f32 Area;
-	VertexCountRange VCRange;
-	VertexCountRange NodeCountRange;
-	VertexCountRange PolygonCountRange;
-	BBoxF32 UntransformedBBox;
 };
 
 struct JTModel {
@@ -160,6 +150,21 @@ struct GroupNodeData {
     ~GroupNodeData() {
 		delete[] ChildNodeObjIds;
 	}
+};
+
+struct PartitionNodeElement {
+	const char *Id = "0x10dd103e-0x2ac8-0x11d1-0x9b-0x6b-0x00-0x80-0xc7-0xbb-0x59-0x97";
+
+	LogicalElementHeaderZLib LogicalHeaderZLib;
+	GroupNodeData GNdata;
+	i32 PartitionFlags;
+	MbString Filename;
+	BBoxF32 TransformedBBox;
+	f32 Area;
+	VertexCountRange VCRange;
+	VertexCountRange NodeCountRange;
+	VertexCountRange PolygonCountRange;
+	BBoxF32 UntransformedBBox;
 };
 
 struct JTNode {

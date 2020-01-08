@@ -203,7 +203,7 @@ void JTImporter::readLogicalElementHeaderZLib(LogicalElementHeaderZLib &headerZL
 	::memcpy(&headerZLib, &buffer[offset], sizeof(LogicalElementHeaderZLib));
 }
 
-void readBaseNodeData(BaseNodeData &baseNodeData, JTImporter::DataBuffer &buffer, size_t &offset) {
+void readBaseNodeData(BaseNodeData &baseNodeData, DataBuffer &buffer, size_t &offset) {
 
     /* 0x10dd1035, 0x2ac8, 0x11d1, 0x9b, 0x6b, 0x00, 0x80, 0xc7, 0xbb, 0x59, 0x97 */
 
@@ -219,14 +219,14 @@ void readBaseNodeData(BaseNodeData &baseNodeData, JTImporter::DataBuffer &buffer
 	}
 }
 
-void readVertexCountRange(VertexCountRange &vcRange, JTImporter::DataBuffer &buffer, size_t &offset) {
+void readVertexCountRange(VertexCountRange &vcRange, DataBuffer &buffer, size_t &offset) {
 	::memcpy(&vcRange.MinCount, &buffer[offset], sizeof(i32));
 	offset += sizeof(i32);
 	::memcpy(&vcRange.MaxCount, &buffer[offset], sizeof(i32));
 	offset += sizeof(i32);
 }
 
-void readGroupNodeData( GroupNodeData &gnData, JTImporter::DataBuffer &buffer, size_t &offset ) {
+void readGroupNodeData( GroupNodeData &gnData, DataBuffer &buffer, size_t &offset ) {
 	readBaseNodeData(gnData.BNData, buffer, offset);
 	::memcpy(&gnData.VersionNumber, &buffer[offset], sizeof(i16));
 	offset += sizeof(i16);
@@ -242,7 +242,7 @@ void readGroupNodeData( GroupNodeData &gnData, JTImporter::DataBuffer &buffer, s
     }
 }
 
-void readPartitionNodeData() {
+void readPartitionNodeData(PartitionNodeElement &tnElement) {
 
     /* : 0x10dd103e, 0x2ac8, 0x11d1, 0x9b, 0x6b, 0x00, 0x80, 0xc7, 0xbb, 0x59, 0x97 */
 

@@ -148,11 +148,11 @@ private:
 
         const char *attrib( nullptr );
         std::string name, type;
-        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::id.c_str() );
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::id );
         if ( nullptr != attrib ) {
             name = attrib;
         }
-        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::type.c_str() );
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::type );
         if ( nullptr != attrib ) {
             type = attrib;
         }
@@ -196,7 +196,7 @@ private:
     }
 
     void ReadMetadata() {
-        const std::string name = xmlReader->getAttributeValue( D3MF::XmlTag::meta_name.c_str() );
+        const std::string name = xmlReader->getAttributeValue( D3MF::XmlTag::meta_name );
         xmlReader->read();
         const std::string value = xmlReader->getNodeData();
 
@@ -211,12 +211,19 @@ private:
     }
 
     void ImportVertices(aiMesh* mesh) {
+        ai_assert( nullptr != mesh );
+
         std::vector<aiVector3D> vertices;
         while(ReadToEndElement(D3MF::XmlTag::vertices)) {
             if(xmlReader->getNodeName() == D3MF::XmlTag::vertex) {
                 vertices.push_back(ReadVertex());
             }
         }
+
+        if ( vertices.empty() ) {
+            return;
+        }
+
         mesh->mNumVertices = static_cast<unsigned int>(vertices.size());
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 
@@ -234,18 +241,24 @@ private:
     }
 
     void ImportTriangles(aiMesh* mesh) {
-         std::vector<aiFace> faces;
+        ai_assert( nullptr != mesh );
+
+        std::vector<aiFace> faces;
 
          while(ReadToEndElement(D3MF::XmlTag::triangles)) {
              const std::string nodeName( xmlReader->getNodeName() );
              if(xmlReader->getNodeName() == D3MF::XmlTag::triangle) {
                  faces.push_back(ReadTriangle());
-                 const char *pidToken( xmlReader->getAttributeValue( D3MF::XmlTag::p1.c_str() ) );
+                 const char *pidToken( xmlReader->getAttributeValue( D3MF::XmlTag::p1 ) );
                  if ( nullptr != pidToken ) {
                      int matIdx( std::atoi( pidToken ) );
                      mesh->mMaterialIndex = matIdx;
                  }
              }
+         }
+
+         if ( faces.empty() ) {
+             return;
          }
 
         mesh->mNumFaces = static_cast<unsigned int>(faces.size());
@@ -260,16 +273,16 @@ private:
 
         face.mNumIndices = 3;
         face.mIndices = new unsigned int[face.mNumIndices];
-        face.mIndices[0] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v1.c_str())));
-        face.mIndices[1] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v2.c_str())));
-        face.mIndices[2] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v3.c_str())));
+        face.mIndices[0] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue( D3MF::XmlTag::v1 )));
+        face.mIndices[1] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue (D3MF::XmlTag::v2 )));
+        face.mIndices[2] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue( D3MF::XmlTag::v3 )));
 
         return face;
     }
 
     void ReadBaseMaterials() {
         std::vector<unsigned int> MatIdArray;
-        const char *baseMaterialId( xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_id.c_str() ) );
+        const char *baseMaterialId( xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_id ) );
         if ( nullptr != baseMaterialId ) {
             unsigned int id = std::atoi( baseMaterialId );
             const size_t newMatIdx( mMatArray.size() );
@@ -341,7 +354,7 @@ private:
     }
 
     void assignDiffuseColor( aiMaterial *mat ) {
-        const char *color = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_displaycolor.c_str() );
+        const char *color = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_displaycolor );
         aiColor4D diffuse;
         if ( parseColor( color, diffuse ) ) {
             mat->AddProperty<aiColor4D>( &diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
@@ -353,7 +366,7 @@ private:
         const char *name( nullptr );
         const std::string nodeName( xmlReader->getNodeName() );
         if ( nodeName == D3MF::XmlTag::basematerials_base ) {
-            name = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_name.c_str() );
+            name = xmlReader->getAttributeValue( D3MF::XmlTag::basematerials_name );
             std::string stdMatName;
             aiString matName;
             std::string strId( to_string( mActiveMatGroup ) );
@@ -443,7 +456,7 @@ D3MFImporter::~D3MFImporter() {
 
 bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig) const {
     const std::string extension( GetExtension( filename ) );
-    if(extension == desc.mFileExtensions ) {
+    if ( extension == desc.mFileExtensions ) {
         return true;
     } else if ( !extension.length() || checkSig ) {
         if ( nullptr == pIOHandler ) {

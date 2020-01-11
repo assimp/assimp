@@ -67,7 +67,7 @@ namespace XmlTag {
     static const char *v2 = "v2";
     static const char *v3 = "v3";
     static const char *id = "id";
-    static const char *pid = "pid";
+    //static const char *pid = "pid";
     static const char *p1 = "p1";
     static const char *name = "name";
     static const char *type = "type";

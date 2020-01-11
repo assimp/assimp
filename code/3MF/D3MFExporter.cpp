@@ -136,15 +136,15 @@ bool D3MFExporter::exportContentTypes() {
     mContentOutput.clear();
 
     mContentOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    mContentOutput << std::endl;
+    mContentOutput << "\n";
     mContentOutput << "<Types xmlns = \"http://schemas.openxmlformats.org/package/2006/content-types\">";
-    mContentOutput << std::endl;
+    mContentOutput << "\n";
     mContentOutput << "<Default Extension = \"rels\" ContentType = \"application/vnd.openxmlformats-package.relationships+xml\" />";
-    mContentOutput << std::endl;
+    mContentOutput << "\n";
     mContentOutput << "<Default Extension = \"model\" ContentType = \"application/vnd.ms-package.3dmanufacturing-3dmodel+xml\" />";
-    mContentOutput << std::endl;
+    mContentOutput << "\n";
     mContentOutput << "</Types>";
-    mContentOutput << std::endl;
+    mContentOutput << "\n";
     exportContentTyp( XmlTag::CONTENT_TYPES_ARCHIVE );
 
     return true;
@@ -154,7 +154,7 @@ bool D3MFExporter::exportRelations() {
     mRelOutput.clear();
 
     mRelOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    mRelOutput << std::endl;
+    mRelOutput << "\n";
     mRelOutput << "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">";
 
     for ( size_t i = 0; i < mRelations.size(); ++i ) {
@@ -165,10 +165,10 @@ bool D3MFExporter::exportRelations() {
         }
         mRelOutput << "Id=\"" << mRelations[i]->id << "\" ";
         mRelOutput << "Type=\"" << mRelations[ i ]->type << "\" />";
-        mRelOutput << std::endl;
+        mRelOutput << "\n";
     }
     mRelOutput << "</Relationships>";
-    mRelOutput << std::endl;
+    mRelOutput << "\n";
 
     writeRelInfoToFile( "_rels", ".rels" );
     mRelOutput.flush();
@@ -240,7 +240,7 @@ void D3MFExporter::writeMetaData() {
 }
 
 void D3MFExporter::writeBaseMaterials() {
-    mModelOutput << "<basematerials id=\"1\">\n";
+    mModelOutput << "<"<<XmlTag::basematerials<<" "<<XmlTag::id <<"=\"1\">\n";
     std::string strName, hexDiffuseColor , tmp;
     for ( size_t i = 0; i < mScene->mNumMaterials; ++i ) {
         aiMaterial *mat = mScene->mMaterials[ i ];
@@ -310,18 +310,18 @@ void D3MFExporter::writeMesh( aiMesh *mesh ) {
     for ( unsigned int i = 0; i < mesh->mNumVertices; ++i ) {
         writeVertex( mesh->mVertices[ i ] );
     }
-    mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
+    mModelOutput << "</" << XmlTag::vertices << ">\n";
 
     const unsigned int matIdx( mesh->mMaterialIndex );
 
     writeFaces( mesh, matIdx );
 
-    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
+    mModelOutput << "</" << XmlTag::mesh << ">\n";
 }
 
 void D3MFExporter::writeVertex( const aiVector3D &pos ) {
-    mModelOutput << "<" << XmlTag::vertex << " x=\"" << pos.x << "\" y=\"" << pos.y << "\" z=\"" << pos.z << "\" />";
-    mModelOutput << std::endl;
+    mModelOutput << "<" << XmlTag::vertex << " "<<XmlTag::x<<"=\"" << pos.x << "\" " << XmlTag::y << "=\"" << pos.y << "\""<< XmlTag::z <<"=\"" << pos.z << "\" />";
+    mModelOutput << "\n";
 }
 
 void D3MFExporter::writeFaces( aiMesh *mesh, unsigned int matIdx ) {
@@ -335,8 +335,8 @@ void D3MFExporter::writeFaces( aiMesh *mesh, unsigned int matIdx ) {
     mModelOutput << "<" << XmlTag::triangles << ">" << std::endl;
     for ( unsigned int i = 0; i < mesh->mNumFaces; ++i ) {
         aiFace &currentFace = mesh->mFaces[ i ];
-        mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[ 0 ] << "\" v2=\""
-                << currentFace.mIndices[ 1 ] << "\" v3=\"" << currentFace.mIndices[ 2 ]
+        mModelOutput << "<" << XmlTag::triangle << " " << XmlTag::v1 << "=\"" << currentFace.mIndices[ 0 ] << "\"" << XmlTag::v2 <<"=\""
+                << currentFace.mIndices[ 1 ] << "\" "<< XmlTag::v3 << " <=\"" << currentFace.mIndices[ 2 ]
                 << "\" pid=\"1\" p1=\""+to_string(matIdx)+"\" />";
         mModelOutput << std::endl;
     }
@@ -348,7 +348,7 @@ void D3MFExporter::writeBuild() {
     mModelOutput << "<" << XmlTag::build << ">" << std::endl;
 
     for ( size_t i = 0; i < mBuildItems.size(); ++i ) {
-        mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 1 << "\"/>";
+        mModelOutput << "<" << XmlTag::item << " "<< XmlTag::objectid << "=\"" << i + 1 << "\"/>";
         mModelOutput << std::endl;
     }
     mModelOutput << "</" << XmlTag::build << ">";

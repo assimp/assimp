@@ -106,9 +106,9 @@ public:
     void ParseChildNode(XmlReader* xmlReader) {        
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
 
-        relPtr->id = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_ID.c_str());
-        relPtr->type = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TYPE.c_str());
-        relPtr->target = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TARGET.c_str());
+        relPtr->id = xmlReader->getAttributeValueSafe( XmlTag::RELS_ATTRIB_ID );
+        relPtr->type = xmlReader->getAttributeValueSafe( XmlTag::RELS_ATTRIB_TYPE );
+        relPtr->target = xmlReader->getAttributeValueSafe( XmlTag::RELS_ATTRIB_TARGET );
         if ( validateRels( relPtr ) ) {
             m_relationShips.push_back( relPtr );
         }
@@ -132,9 +132,9 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
     for (auto& file: fileList) {
         if(file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
             //PkgRelationshipReader pkgRelReader(file, archive);
-            ai_assert(mZipArchive->Exists(file.c_str()));
+	    ai_assert(mZipArchive->Exists( rFile.c_str() ));
 
-            IOStream *fileStream = mZipArchive->Open(file.c_str());
+            IOStream *fileStream = mZipArchive->Open( file.c_str() );
 
             ai_assert(fileStream != nullptr);
 
@@ -151,11 +151,11 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
 
             mZipArchive->Close(fileStream);
 
-            mRootStream = mZipArchive->Open(rootFile.c_str());
+            mRootStream = mZipArchive->Open( rootFile.c_str() );
             ai_assert( mRootStream != nullptr );
             if ( nullptr == mRootStream ) {
                 throw DeadlyExportError( "Cannot open root-file in archive : " + rootFile );
-            }
+            } 
 
         } else if( file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
             ASSIMP_LOG_WARN_F("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES",file);
@@ -167,7 +167,8 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
 }
 
 D3MFOpcPackage::~D3MFOpcPackage() {
-    mZipArchive->Close(mRootStream);
+    mZipArchive->Close( mRootStream );
+    mRootStream = nullptr;
 }
 
 IOStream* D3MFOpcPackage::RootStream() const {
@@ -195,7 +196,7 @@ std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream* stream) {
     });
 
     if ( itr == reader.m_relationShips.end() ) {
-        throw DeadlyImportError( "Cannot find " + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE );
+      throw DeadlyImportError( "Cannot find " + std::string( XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE ) );
     }
 
     return (*itr)->target;

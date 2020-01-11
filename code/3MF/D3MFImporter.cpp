@@ -70,7 +70,7 @@ namespace D3MF {
 
 class XmlSerializer {
 public:
-    using MatArray = std::vector<aiMaterial*>;
+    using MatArray       = std::vector<aiMaterial*>;
     using MatId2MatArray = std::map<unsigned int, std::vector<unsigned int>>;
 
     XmlSerializer(XmlReader* xmlReader)
@@ -233,9 +233,9 @@ private:
     aiVector3D ReadVertex() {
         aiVector3D vertex;
 
-        vertex.x = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
-        vertex.y = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::y.c_str()), nullptr);
-        vertex.z = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::z.c_str()), nullptr);
+        vertex.x = ai_strtof(xmlReader->getAttributeValue( D3MF::XmlTag::x ), nullptr);
+        vertex.y = ai_strtof(xmlReader->getAttributeValue( D3MF::XmlTag::y ), nullptr);
+        vertex.z = ai_strtof(xmlReader->getAttributeValue( D3MF::XmlTag::z ), nullptr);
 
         return vertex;
     }
@@ -273,9 +273,9 @@ private:
 
         face.mNumIndices = 3;
         face.mIndices = new unsigned int[face.mNumIndices];
-        face.mIndices[0] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue( D3MF::XmlTag::v1 )));
-        face.mIndices[1] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue (D3MF::XmlTag::v2 )));
-        face.mIndices[2] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue( D3MF::XmlTag::v3 )));
+        face.mIndices[0] = static_cast<unsigned int>(std::atoi( xmlReader->getAttributeValue( D3MF::XmlTag::v1 )));
+        face.mIndices[1] = static_cast<unsigned int>(std::atoi( xmlReader->getAttributeValue (D3MF::XmlTag::v2 )));
+        face.mIndices[2] = static_cast<unsigned int>(std::atoi( xmlReader->getAttributeValue( D3MF::XmlTag::v3 )));
 
         return face;
     }
@@ -318,7 +318,7 @@ private:
 
         const char *buf( color );
         if ( '#' != *buf ) {
-            return false;
+            return false; 
         }
         ++buf;
         char comp[ 3 ] = { 0,0,'\0' };

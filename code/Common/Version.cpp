@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include "ScenePrivate.h"
 
-static const unsigned int MajorVersion = 4;
-static const unsigned int MinorVersion = 1;
+static const unsigned int MajorVersion = 5;
+static const unsigned int MinorVersion = 0;
 
 // --------------------------------------------------------------------------------
 // Legal information string - don't remove this.
@@ -56,9 +56,9 @@ static const char* LEGAL_INFORMATION =
 "Open Asset Import Library (Assimp).\n"
 "A free C/C++ library to import various 3D file formats into applications\n\n"
 
-"(c) 2008-2017, assimp team\n"
+"(c) 2008-2020, assimp team\n"
 "License under the terms and conditions of the 3-clause BSD license\n"
-"http://assimp.sourceforge.net\n"
+"https://github.com/assimp/assimp\n"
 ;
 
 // ------------------------------------------------------------------------------------------------

@@ -161,7 +161,6 @@ static void WriteNode(const aiNode* node, IOStream * io, unsigned int depth) {
     ioprintf(io,"%s</Node>\n",prefix);
 }
 
-
 // -----------------------------------------------------------------------------------
 // Some chuncks of text will need to be encoded for XML
 // http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377

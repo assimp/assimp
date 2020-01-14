@@ -76,10 +76,12 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
 )
 
 SET( IMPORTERS
+  unit/ImportExport/Assxml/utAssxmlImportExport.cpp
   unit/utLWSImportExport.cpp
   unit/utLWOImportExport.cpp
   unit/utSMDImportExport.cpp

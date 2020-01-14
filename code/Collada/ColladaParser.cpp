@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdarg.h>
 #include "ColladaParser.h"
+#include <assimp/commonMetaData.h>
 #include <assimp/fast_atof.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/StringUtils.h>
@@ -183,7 +184,10 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
                 if (filepath == nullptr)
                     return std::string();
 
-                return std::string(filepath);
+                aiString ai_str(filepath);
+                UriDecodePath(ai_str);
+
+                return std::string(ai_str.C_Str());
             }
         }
     }
@@ -191,10 +195,64 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Convert a path read from a collada file to the usual representation
+void ColladaParser::UriDecodePath(aiString& ss)
+{
+    // TODO: collada spec, p 22. Handle URI correctly.
+    // For the moment we're just stripping the file:// away to make it work.
+    // Windows doesn't seem to be able to find stuff like
+    // 'file://..\LWO\LWO2\MappingModes\earthSpherical.jpg'
+    if (0 == strncmp(ss.data, "file://", 7))
+    {
+        ss.length -= 7;
+        memmove(ss.data, ss.data + 7, ss.length);
+        ss.data[ss.length] = '\0';
+    }
+
+    // Maxon Cinema Collada Export writes "file:///C:\andsoon" with three slashes...
+    // I need to filter it without destroying linux paths starting with "/somewhere"
+#if defined( _MSC_VER )
+    if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
+#else
+    if (ss.data[0] == '/' && isalpha(ss.data[1]) && ss.data[2] == ':') {
+#endif
+        --ss.length;
+        ::memmove(ss.data, ss.data + 1, ss.length);
+        ss.data[ss.length] = 0;
+    }
+
+    // find and convert all %xy special chars
+    char* out = ss.data;
+    for (const char* it = ss.data; it != ss.data + ss.length; /**/)
+    {
+        if (*it == '%' && (it + 3) < ss.data + ss.length)
+        {
+            // separate the number to avoid dragging in chars from behind into the parsing
+            char mychar[3] = { it[1], it[2], 0 };
+            size_t nbr = strtoul16(mychar);
+            it += 3;
+            *out++ = (char)(nbr & 0xFF);
+        }
+        else
+        {
+            *out++ = *it++;
+        }
+    }
+
+    // adjust length and terminator of the shortened string
+    *out = 0;
+    ai_assert(out > ss.data);
+    ss.length = static_cast<ai_uint32>(out - ss.data);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Read bool from text contents of current element
 bool ColladaParser::ReadBoolFromTextContent()
 {
     const char* cur = GetTextContent();
+    if ( nullptr == cur) {
+        return false;
+    }
     return (!ASSIMP_strincmp(cur, "true", 4) || '0' != *cur);
 }
 
@@ -203,6 +261,9 @@ bool ColladaParser::ReadBoolFromTextContent()
 ai_real ColladaParser::ReadFloatFromTextContent()
 {
     const char* cur = GetTextContent();
+    if ( nullptr == cur ) {
+        return 0.0;
+    }
     return fast_atof(cur);
 }
 
@@ -221,6 +282,11 @@ void ColladaParser::ReadContents()
                 const int attrib = TestAttribute("version");
                 if (attrib != -1) {
                     const char* version = mReader->getAttributeValue(attrib);
+
+                    // Store declared format version string
+                    aiString v;
+                    v.Set(version);
+                    mAssetMetaData.emplace(AI_METADATA_SOURCE_FORMAT_VERSION, v );
 
                     if (!::strncmp(version, "1.5", 3)) {
                         mFormat = FV_1_5_n;
@@ -380,49 +446,44 @@ void ColladaParser::ReadContributorInfo()
     }
 }
 
+static bool FindCommonKey(const std::string &collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
+    for (size_t i = 0; i < key_renaming.size(); ++i) {
+		if (key_renaming[i].first == collada_key) {
+            found_index = i;
+            return true;
+		}
+	}
+    found_index = std::numeric_limits<size_t>::max();
+    return false;
+}
+
 // ------------------------------------------------------------------------------------------------
 // Reads a single string metadata item
-void ColladaParser::ReadMetaDataItem(StringMetaData &metadata)
-{
-    // Metadata such as created, keywords, subject etc
-    const char* key_char = mReader->getNodeName();
-    if (key_char != nullptr)
-    {
+void ColladaParser::ReadMetaDataItem(StringMetaData &metadata) {
+    const Collada::MetaKeyPairVector &key_renaming = GetColladaAssimpMetaKeysCamelCase();
+	// Metadata such as created, keywords, subject etc
+	const char *key_char = mReader->getNodeName();
+	if (key_char != nullptr) {
         const std::string key_str(key_char);
-        const char* value_char = TestTextContent();
-        if (value_char != nullptr)
-        {
-            std::string camel_key_str = key_str;
-            ToCamelCase(camel_key_str);
+		const char *value_char = TestTextContent();
+		if (value_char != nullptr) {
             aiString aistr;
-            aistr.Set(value_char);
-            metadata.emplace(camel_key_str, aistr);
+			aistr.Set(value_char);
+
+            std::string camel_key_str(key_str);
+			ToCamelCase(camel_key_str);
+
+			size_t found_index;
+			if (FindCommonKey(camel_key_str, key_renaming, found_index)) {
+                metadata.emplace(key_renaming[found_index].second, aistr);
+            } else {
+				metadata.emplace(camel_key_str, aistr);
+			}
         }
         TestClosing(key_str.c_str());
     }
     else
         SkipElement();
-}
-
-// ------------------------------------------------------------------------------------------------
-// Convert underscore_seperated to CamelCase: "authoring_tool" becomes "AuthoringTool"
-void ColladaParser::ToCamelCase(std::string &text)
-{
-    if (text.empty())
-        return;
-    // Capitalise first character
-    text[0] = ToUpper(text[0]);
-    for (auto it = text.begin(); it != text.end(); /*iterated below*/)
-    {
-        if ((*it) == '_')
-        {
-            it = text.erase(it);
-            if (it != text.end())
-                (*it) = ToUpper(*it);
-        }
-        else
-            ++it;
-    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1120,7 +1181,12 @@ void ColladaParser::ReadImage(Collada::Image& pImage)
                     if (!mReader->isEmptyElement()) {
                         // element content is filename - hopefully
                         const char* sz = TestTextContent();
-                        if (sz)pImage.mFileName = sz;
+                        if (sz)
+                        {
+                            aiString filepath(sz);
+                            UriDecodePath(filepath);
+                            pImage.mFileName = filepath.C_Str();
+                        }
                         TestClosing("init_from");
                     }
                     if (!pImage.mFileName.length()) {
@@ -1153,7 +1219,12 @@ void ColladaParser::ReadImage(Collada::Image& pImage)
                 {
                     // element content is filename - hopefully
                     const char* sz = TestTextContent();
-                    if (sz)pImage.mFileName = sz;
+                    if (sz)
+                    {
+                        aiString filepath(sz);
+                        UriDecodePath(filepath);
+                        pImage.mFileName = filepath.C_Str();
+                    }
                     TestClosing("ref");
                 }
                 else if (IsElement("hex") && !pImage.mFileName.length())
@@ -3056,7 +3127,7 @@ void ColladaParser::ReadMaterialVertexInputBinding(Collada::SemanticMappingTable
     }
 }
 
-void Assimp::ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem& zip_archive)
+void ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem& zip_archive)
 {
     // Attempt to load any undefined Collada::Image in ImageLibrary
     for (ImageLibrary::iterator it = mImageLibrary.begin(); it != mImageLibrary.end(); ++it) {
@@ -3170,13 +3241,12 @@ void ColladaParser::ReadScene()
 
 // ------------------------------------------------------------------------------------------------
 // Aborts the file reading with an exception
-AI_WONT_RETURN void ColladaParser::ThrowException(const std::string& pError) const
-{
+AI_WONT_RETURN void ColladaParser::ThrowException(const std::string& pError) const {
     throw DeadlyImportError(format() << "Collada: " << mFileName << " - " << pError);
 }
-void ColladaParser::ReportWarning(const char* msg, ...)
-{
-    ai_assert(NULL != msg);
+
+void ColladaParser::ReportWarning(const char* msg, ...) {
+    ai_assert(nullptr != msg);
 
     va_list args;
     va_start(args, msg);
@@ -3191,11 +3261,11 @@ void ColladaParser::ReportWarning(const char* msg, ...)
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the current element
-void ColladaParser::SkipElement()
-{
+void ColladaParser::SkipElement() {
     // nothing to skip if it's an <element />
-    if (mReader->isEmptyElement())
+    if (mReader->isEmptyElement()) {
         return;
+    }
 
     // reroute
     SkipElement(mReader->getNodeName());
@@ -3203,63 +3273,75 @@ void ColladaParser::SkipElement()
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the given element
-void ColladaParser::SkipElement(const char* pElement)
-{
+void ColladaParser::SkipElement(const char* pElement) {
     // copy the current node's name because it'a pointer to the reader's internal buffer,
     // which is going to change with the upcoming parsing
     std::string element = pElement;
-    while (mReader->read())
-    {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
-            if (mReader->getNodeName() == element)
+    while (mReader->read()) {
+        if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+            if (mReader->getNodeName() == element) {
                 break;
+            }
+        }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Tests for an opening element of the given name, throws an exception if not found
-void ColladaParser::TestOpening(const char* pName)
-{
+void ColladaParser::TestOpening(const char* pName) {
     // read element start
-    if (!mReader->read())
+    if (!mReader->read()) {
         ThrowException(format() << "Unexpected end of file while beginning of <" << pName << "> element.");
+    }
     // whitespace in front is ok, just read again if found
-    if (mReader->getNodeType() == irr::io::EXN_TEXT)
-        if (!mReader->read())
+    if (mReader->getNodeType() == irr::io::EXN_TEXT) {
+        if (!mReader->read()) {
             ThrowException(format() << "Unexpected end of file while reading beginning of <" << pName << "> element.");
+        }
+    }
 
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp(mReader->getNodeName(), pName) != 0)
+    if (mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp(mReader->getNodeName(), pName) != 0) {
         ThrowException(format() << "Expected start of <" << pName << "> element.");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Tests for the closing tag of the given element, throws an exception if not found
-void ColladaParser::TestClosing(const char* pName)
-{
-    // check if we're already on the closing tag and return right away
-    if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp(mReader->getNodeName(), pName) == 0)
+void ColladaParser::TestClosing(const char* pName) {
+    // check if we have an empty (self-closing) element
+    if (mReader->isEmptyElement()) {
         return;
+    }
+
+    // check if we're already on the closing tag and return right away
+    if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp(mReader->getNodeName(), pName) == 0) {
+        return;
+    }
 
     // if not, read some more
-    if (!mReader->read())
+    if (!mReader->read()) {
         ThrowException(format() << "Unexpected end of file while reading end of <" << pName << "> element.");
+    }
     // whitespace in front is ok, just read again if found
-    if (mReader->getNodeType() == irr::io::EXN_TEXT)
-        if (!mReader->read())
+    if (mReader->getNodeType() == irr::io::EXN_TEXT) {
+        if (!mReader->read()) {
             ThrowException(format() << "Unexpected end of file while reading end of <" << pName << "> element.");
+        }
+    }
 
     // but this has the be the closing tag, or we're lost
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp(mReader->getNodeName(), pName) != 0)
+    if (mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp(mReader->getNodeName(), pName) != 0) {
         ThrowException(format() << "Expected end of <" << pName << "> element.");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns the index of the named attribute or -1 if not found. Does not throw, therefore useful for optional attributes
-int ColladaParser::GetAttribute(const char* pAttr) const
-{
+int ColladaParser::GetAttribute(const char* pAttr) const {
     int index = TestAttribute(pAttr);
-    if (index != -1)
+    if (index != -1) {
         return index;
+    }
 
     // attribute not found -> throw an exception
     ThrowException(format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.");

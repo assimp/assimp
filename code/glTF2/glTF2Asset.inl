@@ -270,13 +270,14 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
         throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" is not a JSON object");
     }
 
-    T* inst = new T();
+    // Unique ptr prevents memory leak in case of Read throws an exception
+    auto inst = std::unique_ptr<T>(new T());
     inst->id = std::string(mDictId) + "_" + to_string(i);
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
 
-    return Add(inst);
+    return Add(inst.release());
 }
 
 template<class T>
@@ -383,7 +384,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
     }
     else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir + "/") : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir) : "";
 
             IOStream* file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -800,8 +801,34 @@ inline void Texture::Read(Value& obj, Asset& r)
 }
 
 namespace {
-    inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out)
-    {
+    inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out) {
+	    if (r.extensionsUsed.KHR_texture_transform) {
+            if (Value *extensions = FindObject(*prop, "extensions")) {
+				out.textureTransformSupported = true;
+                if (Value *pKHR_texture_transform = FindObject(*extensions, "KHR_texture_transform")) {
+					if (Value *array = FindArray(*pKHR_texture_transform, "offset")) {
+						out.TextureTransformExt_t.offset[0] = (*array)[0].GetFloat();
+						out.TextureTransformExt_t.offset[1] = (*array)[1].GetFloat();
+					} else {
+						out.TextureTransformExt_t.offset[0] = 0;
+						out.TextureTransformExt_t.offset[1] = 0;
+					}      
+					
+                    if (!ReadMember(*pKHR_texture_transform, "rotation", out.TextureTransformExt_t.rotation)) {
+						out.TextureTransformExt_t.rotation = 0;					
+                    }
+					
+                    if (Value *array = FindArray(*pKHR_texture_transform, "scale")) {
+						out.TextureTransformExt_t.scale[0] = (*array)[0].GetFloat();
+						out.TextureTransformExt_t.scale[1] = (*array)[1].GetFloat();
+					} else {
+						out.TextureTransformExt_t.scale[0] = 1;
+						out.TextureTransformExt_t.scale[1] = 1;
+                    }
+				}
+			}
+        }
+
         if (Value* index = FindUInt(*prop, "index")) {
             out.texture = r.textures.Retrieve(index->GetUint());
         }
@@ -876,6 +903,9 @@ inline void Material::Read(Value& material, Asset& r)
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
+
+        if (r.extensionsUsed.KHR_texture_transform) {
+		}
 
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
@@ -1403,6 +1433,12 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
     // Load the metadata
     asset.Read(doc);
     ReadExtensionsUsed(doc);
+    ReadExtensionsRequired(doc);
+
+    // Currently Draco is not supported
+    if (extensionsRequired.KHR_draco_mesh_compression) {
+        throw DeadlyImportError("GLTF: Draco mesh compression not currently supported.");
+    }
 
     // Prepare the dictionaries
     for (size_t i = 0; i < mDicts.size(); ++i) {
@@ -1449,6 +1485,29 @@ inline void Asset::SetAsBinary()
     }
 }
 
+// As required extensions are only a concept in glTF 2.0, this is here
+// instead of glTFCommon.h
+#define CHECK_REQUIRED_EXT(EXT) \
+	if (exts.find(#EXT) != exts.end()) extensionsRequired.EXT = true;
+
+inline void Asset::ReadExtensionsRequired(Document& doc)
+{
+    Value* extsRequired = FindArray(doc, "extensionsRequired");
+    if (nullptr == extsRequired) {
+	return;
+    }
+
+    std::gltf_unordered_map<std::string, bool> exts;
+    for (unsigned int i = 0; i < extsRequired->Size(); ++i) {
+        if ((*extsRequired)[i].IsString()) {
+            exts[(*extsRequired)[i].GetString()] = true;
+        }
+    }
+
+    CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
+
+    #undef CHECK_REQUIRED_EXT
+}
 
 inline void Asset::ReadExtensionsUsed(Document& doc)
 {
@@ -1463,12 +1522,10 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
         }
     }
 
-    #define CHECK_EXT(EXT) \
-        if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
-
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
     CHECK_EXT(KHR_materials_unlit);
     CHECK_EXT(KHR_lights_punctual);
+	CHECK_EXT(KHR_texture_transform);
 
     #undef CHECK_EXT
 }

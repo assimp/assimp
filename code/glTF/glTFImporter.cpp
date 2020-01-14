@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 
@@ -170,6 +171,8 @@ void glTFImporter::ImportMaterials(glTF::Asset& r) {
 
     if (mScene->mNumMaterials == 0) {
         mScene->mNumMaterials = 1;
+        // Delete the array of length zero created above.
+        delete[] mScene->mMaterials;
         mScene->mMaterials = new aiMaterial*[1];
         mScene->mMaterials[0] = new aiMaterial();
     }
@@ -266,7 +269,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {
-                size_t& len = aim->mName.length;
+                ai_uint32& len = aim->mName.length;
                 aim->mName.data[len] = '-';
                 len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
             }
@@ -330,6 +333,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                     case PrimitiveMode_LINES: {
                         nFaces = count / 2;
+                        if (nFaces * 2 != count) {
+                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
+                            count = nFaces * 2;
+                        }
                         faces = new aiFace[nFaces];
                         for (unsigned int i = 0; i < count; i += 2) {
                             SetFace(faces[i / 2], data.GetUInt(i), data.GetUInt(i + 1));
@@ -353,6 +360,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                     case PrimitiveMode_TRIANGLES: {
                         nFaces = count / 3;
+                        if (nFaces * 3 != count) {
+                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
+                            count = nFaces * 3;
+                        }
                         faces = new aiFace[nFaces];
                         for (unsigned int i = 0; i < count; i += 3) {
                             SetFace(faces[i / 3], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
@@ -395,6 +406,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                 case PrimitiveMode_LINES: {
                     nFaces = count / 2;
+                    if (nFaces * 2 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
+                        count = nFaces * 2;
+                    }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 2) {
                         SetFace(faces[i / 2], i, i + 1);
@@ -418,6 +433,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                 case PrimitiveMode_TRIANGLES: {
                     nFaces = count / 3;
+                    if (nFaces * 3 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
+                        count = nFaces * 3;
+                    }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 3) {
                         SetFace(faces[i / 3], i, i + 1, i + 2);
@@ -679,6 +698,30 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
     }
 }
 
+void glTFImporter::ImportCommonMetadata(glTF::Asset& a)
+{
+    ai_assert(mScene->mMetaData == nullptr);
+    const bool hasVersion = !a.asset.version.empty();
+    const bool hasGenerator = !a.asset.generator.empty();
+    const bool hasCopyright = !a.asset.copyright.empty();
+    if (hasVersion || hasGenerator || hasCopyright)
+    {
+        mScene->mMetaData = new aiMetadata;
+        if (hasVersion)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+        }
+        if (hasGenerator)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+        if (hasCopyright)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
+        }
+    }
+}
+
 void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // clean all member arrays
@@ -705,7 +748,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportLights(asset);
 
     ImportNodes(asset);
-
+    ImportCommonMetadata(asset);
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

@@ -66,12 +66,15 @@ namespace Assimp
     {
         friend class ColladaLoader;
 
+        /** Converts a path read from a collada file to the usual representation */
+        static void UriDecodePath(aiString& ss);
+
     protected:
         /** Map for generic metadata as aiString */
         typedef std::map<std::string, aiString> StringMetaData;
 
         /** Constructor from XML file */
-        ColladaParser( IOSystem* pIOHandler, const std::string& pFile);
+        ColladaParser(IOSystem* pIOHandler, const std::string& pFile);
 
         /** Destructor */
         ~ColladaParser();
@@ -91,11 +94,8 @@ namespace Assimp
         /** Reads contributor information such as author and legal blah */
         void ReadContributorInfo();
 
-        /** Reads generic metadata into provided map */
+        /** Reads generic metadata into provided map and renames keys for Assimp */
         void ReadMetaDataItem(StringMetaData &metadata);
-
-        /** Convert underscore_seperated to CamelCase "authoring_tool" becomes "AuthoringTool" */
-        static void ToCamelCase(std::string &text);
 
         /** Reads the animation library */
         void ReadAnimationLibrary();

@@ -1,17 +1,31 @@
 # Build Instructions
-## Install CMake
+
+## Build on all platforms using vcpkg
+You can download and install assimp using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+```bash
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg integrate install
+    vcpkg install assimp
+```
+The assimp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
+## Manual build instructions
+
+### Install CMake
 Asset-Importer-Lib can be build for a lot of different platforms. We are using cmake to generate the build environment for these via cmake. So you have to make sure that you have a working cmake-installation on your system. You can download it at https://cmake.org/ or for linux install it via
 ```bash
 sudo apt-get install cmake
 ```
 
-## Get the source
+### Get the source
 Make sure you have a working git-installation. Open a command prompt and clone the Asset-Importer-Lib via:
 ```bash
 git clone https://github.com/assimp/assimp.git
 ```
 
-## Build instructions for Windows with Visual-Studio
+### Build instructions for Windows with Visual-Studio
 
 First you have to install Visual-Studio on your windows-system. You can get the Community-Version for free here: https://visualstudio.microsoft.com/de/downloads/
 To generate the build environment for your IDE open a command prompt, navigate to your repo and type:
@@ -20,10 +34,10 @@ cmake CMakeLists.txt
 ```
 This will generate the project files for the visual studio. All dependencies used to build Asset-IMporter-Lib shall be part of the repo. If you want to use you own zlib.installation this is possible as well. Check the options for it.
 
-## Build instructions for Windows with UWP
+### Build instructions for Windows with UWP
 See <https://stackoverflow.com/questions/40803170/cmake-uwp-using-cmake-to-build-universal-windows-app>
 
-## Build instructions for Linux / Unix
+### Build instructions for Linux / Unix
 Open a terminal and got to your repository. You can generate the makefiles and build the library via:
 
 ```bash
@@ -34,7 +48,7 @@ The option -j descripes the number of parallel processes for the build. In this 
 
 If you want to use a IDE for linux you can try QTCreator for instance. 
 
-## Build instructions for MinGW
+### Build instructions for MinGW
  Older versions of MinGW's compiler (e.g. 5.1.0) do not support the -mbig_obj flag 
 required to compile some of assimp's files, especially for debug builds.
 Version 7.3.0 of g++-mingw-w64 & gcc-mingw-w64 appears to work.
@@ -50,7 +64,7 @@ The following toolchain may or may not be helpful for building assimp using MinG
 
 Besides the toolchain, compilation should be the same as for Linux / Unix.
 
-## CMake build options
+### CMake build options
 The cmake-build-environment provides options to configure the build. The following options can be used:
 - **BUILD_SHARED_LIBS ( default ON )**: Generation of shared libs ( dll for windows, so for Linux ). Set this to OFF to get a static lib.
 - **BUILD_FRAMEWORK ( default OFF, MacOnly)**: Build package as Mac OS X Framework bundle
@@ -63,6 +77,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **ASSIMP_BUILD_SAMPLES ( default OFF )**: If the official samples are built as well (needs Glut).
 - **ASSIMP_BUILD_TESTS ( default ON )**: If the test suite for Assimp is built in addition to the library.
 - **ASSIMP_COVERALLS ( default OFF )**: Enable this to measure test coverage.
+- **ASSIMP_ERROR_MAX( default OFF)**: Enable all warnings.
 - **ASSIMP_WERROR( default OFF )**: Treat warnings as errors.
 - **ASSIMP_ASAN ( default OFF )**: Enable AddressSanitizer.
 - **ASSIMP_UBSAN ( default OFF )**: Enable Undefined Behavior sanitizer.

@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 
     // create a logger from both CPP
     Assimp::DefaultLogger::create("AssimpLog_Cpp.txt",Assimp::Logger::VERBOSE,
-        aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE);
+        aiDefaultLogStream_STDOUT | aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE);
 
     // .. and C. They should smoothly work together
     aiEnableVerboseLogging(AI_TRUE);

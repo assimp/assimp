@@ -54,9 +54,11 @@ cache:
   - bin\.mtime_cache
   
 before_build:
+  - echo NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%
   - ruby scripts\AppVeyor\mtime_cache -g scripts\AppVeyor\cacheglobs.txt -c bin\.mtime_cache\cache.json
   
 build:
+  - cmake --build . --use-stderr --target Release -- -j%NUMBER_OF_PROCESSORS%
   parallel: true
   project: Assimp.sln
   

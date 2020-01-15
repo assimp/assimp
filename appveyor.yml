@@ -4,6 +4,8 @@
 # clone directory
 clone_folder: c:\projects\assimp
 
+clone_depth: 1
+
 # branches to build
 branches:
   # whitelist

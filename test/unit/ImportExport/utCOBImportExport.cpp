@@ -50,6 +50,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 
+TEST(utCOBImporter, importDwarfASCII) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf_ascii.cob", aiProcess_ValidateDataStructure);
+    // FIXME: this is wrong, it should succeed
+    // change to ASSERT_NE after it's been fixed
+    ASSERT_EQ(nullptr, scene);
+}
+
+
+TEST(utCOBImporter, importDwarf) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf.cob", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utCOBImporter, importMoleculeASCII) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule_ascii.cob", aiProcess_ValidateDataStructure);
+    // FIXME: this is wrong, it should succeed
+    // change to ASSERT_NE after it's been fixed
+    ASSERT_EQ(nullptr, scene);
+}
+
+
 TEST(utCOBImporter, importMolecule) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule.cob", aiProcess_ValidateDataStructure);
@@ -57,3 +82,29 @@ TEST(utCOBImporter, importMolecule) {
 }
 
 
+TEST(utCOBImporter, importSpider43ASCII) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_4_3_ascii.cob", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utCOBImporter, importSpider43) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_4_3.cob", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utCOBImporter, importSpider66ASCII) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6_ascii.cob", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utCOBImporter, importSpider66) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6.cob", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}

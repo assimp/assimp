@@ -100,17 +100,16 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 {
     aiScene* sceneCopy_tmp;
     SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
-    aiScene *sceneCopy(sceneCopy_tmp);
 
     SplitLargeMeshesProcess_Triangle tri_splitter;
     tri_splitter.SetLimit(0xffff);
-    tri_splitter.Execute(sceneCopy);
+    tri_splitter.Execute(sceneCopy_tmp);
 
     SplitLargeMeshesProcess_Vertex vert_splitter;
     vert_splitter.SetLimit(0xffff);
-    vert_splitter.Execute(sceneCopy);
+    vert_splitter.Execute(sceneCopy_tmp);
 
-    mScene = sceneCopy;
+    mScene.reset(sceneCopy_tmp);
 
     mAsset.reset( new glTF::Asset( pIOSystem ) );
 
@@ -877,7 +876,7 @@ void glTFExporter::ExportMetadata()
 
 	// Copyright
 	aiString copyright_str;
-	if (mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
+	if (mScene->mMetaData != nullptr && mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
 		asset.copyright = copyright_str.C_Str();
 	}
 }

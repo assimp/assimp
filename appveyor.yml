@@ -58,7 +58,7 @@ before_build:
   - ruby scripts\AppVeyor\mtime_cache -g scripts\AppVeyor\cacheglobs.txt -c bin\.mtime_cache\cache.json
   
 build:
-  - cmake --build . --use-stderr --target Release -- -j%NUMBER_OF_PROCESSORS%
+  - cmake --build . --target Release -j%NUMBER_OF_PROCESSORS%
   
 after_build:
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (

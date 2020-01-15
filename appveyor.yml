@@ -59,8 +59,6 @@ before_build:
   
 build:
   - cmake --build . --use-stderr --target Release -- -j%NUMBER_OF_PROCESSORS%
-  parallel: true
-  project: Assimp.sln
   
 after_build:
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (

@@ -43,22 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 #include "SceneDiffer.h"
-#include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
 using namespace Assimp;
 
-class utCOBImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule.cob", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
-    }
-};
 
-TEST_F(utCOBImportExport, importAMFFromFileTest) {
-    EXPECT_TRUE(importerTest());
+TEST(utCOBImporter, importMolecule) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule.cob", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }
+
+

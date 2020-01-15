@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -42,69 +42,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+
 
 using namespace Assimp;
 
 
-TEST(utCOBImporter, importDwarfASCII) {
+
+TEST(utMD5Importer, importEmpty) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf_ascii.cob", aiProcess_ValidateDataStructure);
-    // FIXME: this is wrong, it should succeed
-    // change to ASSERT_NE after it's been fixed
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/empty.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_EQ(nullptr, scene);
 }
 
 
-TEST(utCOBImporter, importDwarf) {
+TEST(utMD5Importer, importSimpleCube) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf.cob", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/SimpleCube.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 
 
-TEST(utCOBImporter, importMoleculeASCII) {
+TEST(utMD5Importer, importBoarMan) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule_ascii.cob", aiProcess_ValidateDataStructure);
-    // FIXME: this is wrong, it should succeed
-    // change to ASSERT_NE after it's been fixed
-    ASSERT_EQ(nullptr, scene);
-}
-
-
-TEST(utCOBImporter, importMolecule) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule.cob", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 
 
-TEST(utCOBImporter, importSpider43ASCII) {
+TEST(utMD5Importer, importBob) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_4_3_ascii.cob", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utCOBImporter, importSpider43) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_4_3.cob", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utCOBImporter, importSpider66ASCII) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6_ascii.cob", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utCOBImporter, importSpider66) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6.cob", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/Bob.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }

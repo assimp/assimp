@@ -85,7 +85,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_d
     // we're allowed to dereference the pointers without risking to crash. We might still be
     // invoking UB btw - we're assuming that the ModifierData member of the respective modifier
     // structures is at offset sizeof(vftable) with no padding.
-    const SharedModifierData* cur = static_cast<const SharedModifierData *> ( orig_object.modifiers.first.get() );
+    const SharedModifierData* cur = (const SharedModifierData*) ( orig_object.modifiers.first.get() );
     for (; cur; cur =  static_cast<const SharedModifierData *> ( cur->modifier.next.get() ), ++ful) {
         ai_assert(cur->dna_type);
 

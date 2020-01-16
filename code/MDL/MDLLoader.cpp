@@ -179,9 +179,9 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     }
 
     // This should work for all other types of MDL files, too ...
-    // the quake header is one of the smallest, afaik
+    // the HL1 sequence group header is one of the smallest, afaik
     iFileSize = (unsigned int)file->FileSize();
-    if( iFileSize < sizeof(MDL::Header)) {
+    if( iFileSize < sizeof(MDL::HalfLife::SequenceHeader_HL1)) {
         throw DeadlyImportError( "MDL File is too small.");
     }
 

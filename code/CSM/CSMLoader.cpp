@@ -178,7 +178,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                         *ot++ = *buffer++;
 
                     *ot = '\0';
-                    nda->mNodeName.length = (size_t)(ot-nda->mNodeName.data);
+                    nda->mNodeName.length = static_cast<ai_uint32>(ot-nda->mNodeName.data);
                 }
 
                 anim->mNumChannels = static_cast<unsigned int>(anims_temp.size());

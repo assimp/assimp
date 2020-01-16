@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -48,8 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    http://local.wasp.uwa.edu.au/~pbourke/dataformats/unreal/
  */
 
-
-
 #ifndef ASSIMP_BUILD_NO_3D_IMPORTER
 
 #include "Unreal/UnrealLoader.h"
@@ -65,8 +61,98 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 
 #include <memory>
+#include <stdint.h>
 
 using namespace Assimp;
+
+namespace Unreal {
+
+    /*
+    0 = Normal one-sided
+    1 = Normal two-sided
+    2 = Translucent two-sided
+    3 = Masked two-sided
+    4 = Modulation blended two-sided
+    8 = Placeholder triangle for weapon positioning (invisible)
+    */
+enum MeshFlags {
+	MF_NORMAL_OS = 0,
+	MF_NORMAL_TS = 1,
+	MF_NORMAL_TRANS_TS = 2,
+	MF_NORMAL_MASKED_TS = 3,
+	MF_NORMAL_MOD_TS = 4,
+	MF_WEAPON_PLACEHOLDER = 8
+};
+
+// a single triangle
+struct Triangle {
+	uint16_t mVertex[3]; // Vertex indices
+	char mType; // James' Mesh Type
+	char mColor; // Color for flat and Gourand Shaded
+	unsigned char mTex[3][2]; // Texture UV coordinates
+	unsigned char mTextureNum; // Source texture offset
+	char mFlags; // Unreal Mesh Flags (unused)
+
+	unsigned int matIndex;
+};
+
+// temporary representation for a material
+struct TempMat {
+	TempMat() :
+			type(), tex(), numFaces(0) {}
+
+	explicit TempMat(const Triangle &in) :
+			type((Unreal::MeshFlags)in.mType), tex(in.mTextureNum), numFaces(0) {}
+
+	// type of mesh
+	Unreal::MeshFlags type;
+
+	// index of texture
+	unsigned int tex;
+
+	// number of faces using us
+	unsigned int numFaces;
+
+	// for std::find
+	bool operator==(const TempMat &o) {
+		return (tex == o.tex && type == o.type);
+	}
+};
+
+struct Vertex {
+	int32_t X : 11;
+	int32_t Y : 11;
+	int32_t Z : 10;
+};
+
+// UNREAL vertex compression
+inline void CompressVertex(const aiVector3D &v, uint32_t &out) {
+	union {
+		Vertex n;
+		int32_t t;
+	};
+	n.X = (int32_t)v.x;
+	n.Y = (int32_t)v.y;
+	n.Z = (int32_t)v.z;
+	::memcpy(&out, &t, sizeof(int32_t));
+	//out = t;
+}
+
+// UNREAL vertex decompression
+inline void DecompressVertex(aiVector3D &v, int32_t in) {
+	union {
+		Vertex n;
+		int32_t i;
+	};
+	i = in;
+
+	v.x = (float)n.X;
+	v.y = (float)n.Y;
+	v.z = (float)n.Z;
+}
+
+} // end namespace Unreal
+
 
 static const aiImporterDesc desc = {
     "Unreal Mesh Importer",
@@ -403,7 +489,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
         // set color and name
         mat->AddProperty(&color,1,AI_MATKEY_COLOR_DIFFUSE);
-        s.length = ::strlen(s.data);
+        s.length = static_cast<ai_uint32>(::strlen(s.data));
         mat->AddProperty(&s,AI_MATKEY_NAME);
 
         // set texture, if any

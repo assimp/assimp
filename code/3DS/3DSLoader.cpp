@@ -72,7 +72,6 @@ static const aiImporterDesc desc = {
 	"3ds prj"
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Begins a new parsing block
 // - Reads the current chunk and validates it
@@ -141,23 +140,19 @@ bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandle
 
 // ------------------------------------------------------------------------------------------------
 // Loader registry entry
-const aiImporterDesc* Discreet3DSImporter::GetInfo () const
-{
+const aiImporterDesc* Discreet3DSImporter::GetInfo () const {
     return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
-void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/)
-{
+void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/) {
     // nothing to be done for the moment
 }
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void Discreet3DSImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
-{
+void Discreet3DSImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
     StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
 
     // We should have at least one chunk
@@ -200,7 +195,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
         ComputeNormalsWithSmoothingsGroups<D3DS::Face>(mesh);
     }
 
-    // Replace all occurences of the default material with a
+    // Replace all occurrences of the default material with a
     // valid material. Generate it if no material containing
     // DEFAULT in its name has been found in the file
     ReplaceDefaultMaterial();
@@ -227,8 +222,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 
 // ------------------------------------------------------------------------------------------------
 // Applies a master-scaling factor to the imported scene
-void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene)
-{
+void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene) {
     // There are some 3DS files with a zero scaling factor
     if (!mMasterScale)mMasterScale = 1.0f;
     else mMasterScale = 1.0f / mMasterScale;

@@ -287,7 +287,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                             size_t iLen2 = iLen+1;
                             iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
                             memcpy(p_szString->data,szTempB,iLen2);
-                            p_szString->length = iLen;
+                            p_szString->length = static_cast<ai_uint32>(iLen);
                             return true;
                         }
                     }
@@ -301,7 +301,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                         size_t iLen2 = iLen+1;
                         iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
                         memcpy(p_szString->data,szTempB,iLen2);
-                        p_szString->length = iLen;
+						p_szString->length = static_cast<ai_uint32>(iLen);
                         return true;
                     }
                 }
@@ -392,7 +392,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
                         if((pFile=fopen( tmp2,"r" ))){
                             fclose( pFile );
                             strcpy(p_szString->data,tmp2);
-                            p_szString->length = strlen(tmp2);
+                            p_szString->length = static_cast<ai_uint32>(strlen(tmp2));
                             return 1;
                         }
                     }
@@ -403,11 +403,11 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
         fclose(pFile);
 
         // copy the result string back to the aiString
-        const size_t iLen = strlen(szTemp);
-        size_t iLen2 = iLen+1;
-        iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
-        memcpy(p_szString->data,szTemp,iLen2);
-        p_szString->length = iLen;
+        const size_t len = strlen(szTemp);
+        size_t len2 = len+1;
+        len2 = len2 > MAXLEN ? MAXLEN : len2;
+        memcpy(p_szString->data, szTemp, len2);
+        p_szString->length = static_cast<ai_uint32>(len);
 
     }
     return 1;

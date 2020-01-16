@@ -275,7 +275,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
     IDirect3DTexture9* piTexture = NULL;
     aiString szString;
     strcpy(szString.data,szPath);
-    szString.length = strlen(szPath);
+    szString.length = static_cast<ai_uint32>(strlen(szPath));
     CMaterialManager::Instance().LoadTexture(&piTexture,&szString);
 
     if (!piTexture) {

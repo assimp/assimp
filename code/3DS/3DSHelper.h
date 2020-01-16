@@ -55,8 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/anim.h>
 #include <stdio.h> //sprintf
 
-namespace Assimp    {
-namespace D3DS  {
+namespace Assimp {
+namespace D3DS {
 
 #include <assimp/Compiler/pushpack1.h>
 

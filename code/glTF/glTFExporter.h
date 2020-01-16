@@ -90,7 +90,7 @@ namespace Assimp
 
         const char* mFilename;
         IOSystem* mIOSystem;
-        const aiScene* mScene;
+        std::shared_ptr<const aiScene> mScene;
         const ExportProperties* mProperties;
 
         std::map<std::string, unsigned int> mTexturesByPath;

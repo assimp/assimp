@@ -1566,7 +1566,7 @@ namespace Assimp {
             }
             catch (std::exception&e) {
                 std::for_each(bones.begin(), bones.end(), Util::delete_fun<aiBone>());
-                throw;
+                throw e;
             }
 
             if (bones.empty()) {

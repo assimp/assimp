@@ -28,14 +28,23 @@ template<class char_type, class superclass>
 class CXMLReaderImpl : public IIrrXMLReader<char_type, superclass>
 {
 public:
-
 	//! Constructor
-	CXMLReaderImpl(IFileReadCallBack* callback, bool deleteCallBack = true)
-		: TextData(0), P(0), TextSize(0), TextBegin(0), CurrentNodeType(EXN_NONE),
-		SourceFormat(ETF_ASCII), TargetFormat(ETF_ASCII)
-	{
-		if (!callback)
+	CXMLReaderImpl(IFileReadCallBack* callback, bool deleteCallBack = true) 
+	: TextData(0)
+	, P(0)
+	, TextBegin(0)
+	, TextSize(0)
+	, CurrentNodeType(EXN_NONE)
+	, SourceFormat(ETF_ASCII)
+	, TargetFormat(ETF_ASCII)
+	, NodeName ()
+	, EmptyString()
+	, IsEmptyElement(false)
+	, SpecialCharacters()
+	, Attributes() {
+		if (!callback) {
 			return;
+		}
 
 		storeTargetFormat();
 

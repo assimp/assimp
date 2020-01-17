@@ -1575,7 +1575,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 				const size_t maxSize(buffersize - (i*AI_MDL7_MAX_GROUPNAMESIZE));
 				pcNode->mName.length = ai_snprintf(szBuffer, maxSize, "Group_%u", p);
 			} else {
-				pcNode->mName.length = ::strlen(szBuffer);
+				pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
 			}
             ::strncpy(pcNode->mName.data,szBuffer,MAXLEN-1);
             ++p;

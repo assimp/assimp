@@ -175,9 +175,9 @@ void HL1MDLLoader::load_file() {
 
         release_resources();
 
-    } catch (const std::exception &e) {
+    } catch (...) {
         release_resources();
-        throw e;
+        throw;
     }
 }
 

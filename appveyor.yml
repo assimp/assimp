@@ -58,7 +58,7 @@ before_build:
   - ruby scripts\AppVeyor\mtime_cache -g scripts\AppVeyor\cacheglobs.txt -c bin\.mtime_cache\cache.json
   
 build_script:
-  cmake --build . -- /maxcpucount:2
+  cmake --build . --config Release -- /maxcpucount:2
   
 after_build:
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (

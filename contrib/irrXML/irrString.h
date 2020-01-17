@@ -19,7 +19,7 @@ so you can assign unicode to string<c8> and ascii to string<wchar_t>
 Note that the conversation between both is not done using an encoding.
 
 Known bugs:
-Special characters like 'Ã„', 'Ãœ' and 'Ã–' are ignored in the
+Special characters like 'Ä', 'Ü' and 'Ö' are ignored in the
 methods make_upper, make_lower and equals_ignore_case.
 */
 template <class T>
@@ -29,7 +29,7 @@ public:
 
 	//! Default constructor
 	string()
-	: array(0), allocated(1), used(1)
+	: allocated(1), used(1), array(0)
 	{
 		array = new T[1];
 		array[0] = 0x0;
@@ -39,7 +39,7 @@ public:
 
 	//! Constructor
 	string(const string<T>& other)
-	: array(0), allocated(0), used(0)
+	: allocated(0), used(0), array(0)
 	{
 		*this = other;
 	}
@@ -47,7 +47,7 @@ public:
 
 	//! Constructs a string from an int
 	string(int number)
-	: array(0), allocated(0), used(0)
+	: allocated(0), used(0), array(0)
 	{
 		// store if negative and make positive
 
@@ -98,7 +98,7 @@ public:
 	//! Constructor for copying a string from a pointer with a given lenght
 	template <class B>
 	string(const B* c, s32 lenght)
-	: array(0), allocated(0), used(0)
+	: allocated(0), used(0), array(0)
 	{
 		if (!c)
 			return;
@@ -117,7 +117,7 @@ public:
 	//! Constructor for unicode and ascii strings
 	template <class B>
 	string(const B* c)
-	: array(0),allocated(0), used(0)
+	: allocated(0), used(0), array(0)
 	{
 		*this = c;
 	}

@@ -211,7 +211,7 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 
     // create node
     aiNode* node = new aiNode;
-    node->mName.length = pNode->mName.length();
+    node->mName.length = (ai_uint32)pNode->mName.length();
     node->mParent = pParent;
     memcpy( node->mName.data, pNode->mName.c_str(), pNode->mName.length());
     node->mName.data[node->mName.length] = 0;

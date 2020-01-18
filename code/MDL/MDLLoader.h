@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include "MDLFileData.h"
 #include "HMP/HalfLifeFileData.h"
+#include "HalfLife/HL1ImportSettings.h"
 
 struct aiNode;
 struct aiTexture;
@@ -77,6 +78,7 @@ using namespace MDL;
  *      <li>3D Game Studio MDL3, MDL4</li>
  *      <li>3D Game Studio MDL5</li>
  *      <li>3D Game Studio MDL7</li>
+ *      <li>Halflife 1</li>
  *      <li>Halflife 2</li>
  *   </ul>
  *  These formats are partially identical and it would be possible to load
@@ -89,15 +91,11 @@ public:
     MDLImporter();
     ~MDLImporter();
 
-
-public:
-
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
         bool checkSig) const;
-
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
@@ -107,8 +105,6 @@ public:
     void SetupProperties(const Importer* pImp);
 
 protected:
-
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
@@ -121,8 +117,6 @@ protected:
     */
     void InternReadFile( const std::string& pFile, aiScene* pScene,
         IOSystem* pIOHandler);
-
-protected:
 
     // -------------------------------------------------------------------
     /** Import a quake 1 MDL file (IDPO)
@@ -140,6 +134,11 @@ protected:
     void InternReadFile_3DGS_MDL7( );
 
     // -------------------------------------------------------------------
+    /** Import a Half-Life 1 MDL file
+    */
+    void InternReadFile_HL1(const std::string& pFile, const uint32_t iMagicWord);
+
+    // -------------------------------------------------------------------
     /** Import a CS:S/HL2 MDL file (not fully implemented)
     */
     void InternReadFile_HL2( );
@@ -154,7 +153,6 @@ protected:
     void SizeCheck(const void* szPos);
     void SizeCheck(const void* szPos, const char* szFile, unsigned int iLine);
 
-
     // -------------------------------------------------------------------
     /** Validate the header data structure of a game studio MDL7 file
      * \param pcHeader Input header to be validated
@@ -167,7 +165,6 @@ protected:
      */
     void ValidateHeader_Quake1(const MDL::Header* pcHeader);
 
-
     // -------------------------------------------------------------------
     /** Try to load a  palette from the current directory (colormap.lmp)
      *  If it is not found the default palette of Quake1 is returned
@@ -179,9 +176,8 @@ protected:
      */
     void FreePalette(const unsigned char* pszColorMap);
 
-
     // -------------------------------------------------------------------
-    /** Load a paletized texture from the file and convert it to 32bpp
+    /** Load a palletized texture from the file and convert it to 32bpp
     */
     void CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData);
 
@@ -195,7 +191,6 @@ protected:
         unsigned int iType,
         unsigned int* piSkip);
 
-
     // -------------------------------------------------------------------
     /** Used to load textures from MDL5
      * \param szData Input data
@@ -205,7 +200,6 @@ protected:
     void CreateTexture_3DGS_MDL5(const unsigned char* szData,
         unsigned int iType,
         unsigned int* piSkip);
-
 
     // -------------------------------------------------------------------
     /** Checks whether a texture can be replaced with a single color
@@ -218,13 +212,11 @@ protected:
     */
     aiColor4D ReplaceTextureWithColor(const aiTexture* pcTexture);
 
-
     // -------------------------------------------------------------------
     /** Converts the absolute texture coordinates in MDL5 files to
      *  relative in a range between 0 and 1
     */
     void CalculateUVCoordinates_MDL5();
-
 
     // -------------------------------------------------------------------
     /** Read an UV coordinate from the file. If the file format is not
@@ -244,7 +236,6 @@ protected:
      * all others.
      */
     void SetupMaterialProperties_3DGS_MDL5_Quake1( );
-
 
     // -------------------------------------------------------------------
     /** Parse a skin lump in a MDL7/HMP7 file with all of its features
@@ -452,6 +443,9 @@ protected:
 
     /** Size of the input file in bytes */
     unsigned int iFileSize;
+
+    /* Configuration for HL1 MDL */
+    HalfLife::HL1ImportSettings mHL1ImportSettings;
 };
 
 } // end of namespace Assimp

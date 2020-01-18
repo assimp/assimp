@@ -235,7 +235,7 @@ bool MD5Parser::ParseSection(Section& out)
     const char* szStart = ++sz; \
 	while('\"'!=*sz)++sz; \
     const char* szEnd = (sz++); \
-    out.length = (size_t)(szEnd - szStart); \
+    out.length = (ai_uint32) (szEnd - szStart); \
     ::memcpy(out.data,szStart,out.length); \
     out.data[out.length] = '\0';
 // ------------------------------------------------------------------------------------------------

@@ -52,8 +52,8 @@ BEGIN
             VALUE "FileDescription", "Open Asset Import Library"
             VALUE "FileVersion", VER_FILEVERSION
             VALUE "InternalName", "assimp "
-            VALUE "LegalCopyright", "Copyright (C) 2006-2010"
-            VALUE "OriginalFilename", "assimpNN.dll"
+            VALUE "LegalCopyright", "Copyright (C) 2006-2019"
+            VALUE "OriginalFilename", VER_ORIGINAL_FILENAME_STR
             VALUE "ProductName", "Open Asset Import Library"
             VALUE "ProductVersion", VER_FILEVERSION_STR
 		,0

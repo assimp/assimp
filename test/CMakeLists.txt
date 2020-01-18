@@ -118,6 +118,7 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
@@ -127,6 +128,13 @@ SET( IMPORTERS
   unit/ImportExport/utOFFImportExport.cpp
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
+  unit/ImportExport/utMD2Importer.cpp
+  unit/ImportExport/utMD5Importer.cpp
+  unit/ImportExport/utMDLImporter.cpp
+  unit/ImportExport/MDL/MDLHL1TestFiles.h
+  unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
+  unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
+  unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
 )
 
 SET( MATERIAL
@@ -148,6 +156,7 @@ SET( POST_PROCESSES
   unit/utRemoveRedundantMaterials.cpp
   unit/utRemoveVCProcess.cpp
   unit/utScaleProcess.cpp
+  unit/utArmaturePopulate.cpp
   unit/utJoinVertices.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp

@@ -295,7 +295,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
 		{
 			idx[2] = *idx_it;
 			if (idx[2] < 0)
@@ -413,7 +413,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
 		{
 			idx[counter++] = *idx_it;
 			if (counter > 2)
@@ -519,7 +519,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
 		{
 			idx[2] = *idx_it;
 			if (idx[2] < 0)
@@ -617,7 +617,7 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 		size_t coord_num = 0;
 
 		ne_alias.CoordIndex.clear();
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
 		{
 			if(*vc_it < 2) throw DeadlyImportError("LineSet. vertexCount shall be greater than or equal to two.");
 
@@ -765,7 +765,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 		// assign indices for first triangle
 		coord_num_first = 0;
 		coord_num_prev = 1;
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
 		{
 			if(*vc_it < 3) throw DeadlyImportError("TriangleFanSet. fanCount shall be greater than or equal to three.");
 
@@ -956,7 +956,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 
 		ne_alias.CoordIndex.clear();
 		coord_num_sb = 0;
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
 		{
 			if(*vc_it < 3) throw DeadlyImportError("TriangleStripSet. stripCount shall be greater than or equal to three.");
 

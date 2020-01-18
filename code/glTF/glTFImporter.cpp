@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 
@@ -82,7 +83,7 @@ glTFImporter::glTFImporter()
 : BaseImporter()
 , meshOffsets()
 , embeddedTexIdxs()
-, mScene( NULL ) {
+, mScene( nullptr ) {
     // empty
 }
 
@@ -90,17 +91,16 @@ glTFImporter::~glTFImporter() {
     // empty
 }
 
-const aiImporterDesc* glTFImporter::GetInfo() const
-{
+const aiImporterDesc* glTFImporter::GetInfo() const {
     return &desc;
 }
 
-bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool /* checkSig */) const
-{
+bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool /* checkSig */) const {
     const std::string &extension = GetExtension(pFile);
 
-    if (extension != "gltf" && extension != "glb")
+    if (extension != "gltf" && extension != "glb") {
         return false;
+    }
 
     if (pIOHandler) {
         glTF::Asset asset(pIOHandler);
@@ -116,44 +116,9 @@ bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
     return false;
 }
 
-
-
-//static void CopyValue(const glTF::vec3& v, aiColor3D& out)
-//{
-//    out.r = v[0]; out.g = v[1]; out.b = v[2];
-//}
-
-static void CopyValue(const glTF::vec4& v, aiColor4D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
-}
-
-static void CopyValue(const glTF::vec4& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}
-
-static void CopyValue(const glTF::vec3& v, aiVector3D& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2];
-}
-
-static void CopyValue(const glTF::vec4& v, aiQuaternion& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2]; out.w = v[3];
-}
-
-static void CopyValue(const glTF::mat4& v, aiMatrix4x4& o)
-{
-    o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
-    o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
-    o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
-    o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}
-
-inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /*r*/, glTF::TexProperty prop, aiMaterial* mat,
-    aiTextureType texType, const char* pKey, unsigned int type, unsigned int idx)
-{
+inline
+void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /*r*/, glTF::TexProperty prop, aiMaterial* mat,
+        aiTextureType texType, const char* pKey, unsigned int type, unsigned int idx) {
     if (prop.texture) {
         if (prop.texture->source) {
             aiString uri(prop.texture->source->uri);
@@ -167,16 +132,14 @@ inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& /
 
             mat->AddProperty(&uri, _AI_MATKEY_TEXTURE_BASE, texType, 0);
         }
-    }
-    else {
+    } else {
         aiColor4D col;
         CopyValue(prop.color, col);
         mat->AddProperty(&col, 1, pKey, type, idx);
     }
 }
 
-void glTFImporter::ImportMaterials(glTF::Asset& r)
-{
+void glTFImporter::ImportMaterials(glTF::Asset& r) {
     mScene->mNumMaterials = unsigned(r.materials.Size());
     mScene->mMaterials = new aiMaterial*[mScene->mNumMaterials];
 
@@ -208,6 +171,8 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
 
     if (mScene->mNumMaterials == 0) {
         mScene->mNumMaterials = 1;
+        // Delete the array of length zero created above.
+        delete[] mScene->mMaterials;
         mScene->mMaterials = new aiMaterial*[1];
         mScene->mMaterials[0] = new aiMaterial();
     }
@@ -304,7 +269,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {
-                size_t& len = aim->mName.length;
+                ai_uint32& len = aim->mName.length;
                 aim->mName.data[len] = '-';
                 len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
             }
@@ -368,6 +333,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                     case PrimitiveMode_LINES: {
                         nFaces = count / 2;
+                        if (nFaces * 2 != count) {
+                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
+                            count = nFaces * 2;
+                        }
                         faces = new aiFace[nFaces];
                         for (unsigned int i = 0; i < count; i += 2) {
                             SetFace(faces[i / 2], data.GetUInt(i), data.GetUInt(i + 1));
@@ -391,6 +360,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                     case PrimitiveMode_TRIANGLES: {
                         nFaces = count / 3;
+                        if (nFaces * 3 != count) {
+                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
+                            count = nFaces * 3;
+                        }
                         faces = new aiFace[nFaces];
                         for (unsigned int i = 0; i < count; i += 3) {
                             SetFace(faces[i / 3], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
@@ -433,6 +406,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                 case PrimitiveMode_LINES: {
                     nFaces = count / 2;
+                    if (nFaces * 2 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
+                        count = nFaces * 2;
+                    }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 2) {
                         SetFace(faces[i / 2], i, i + 1);
@@ -456,6 +433,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
                 case PrimitiveMode_TRIANGLES: {
                     nFaces = count / 3;
+                    if (nFaces * 3 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
+                        count = nFaces * 3;
+                    }
                     faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 3) {
                         SetFace(faces[i / 3], i, i + 1, i + 2);
@@ -499,27 +480,31 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
     CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
-void glTFImporter::ImportCameras(glTF::Asset& r)
-{
-    if (!r.cameras.Size()) return;
+void glTFImporter::ImportCameras(glTF::Asset& r) {
+    if (!r.cameras.Size()) {
+        return;
+    }
 
     mScene->mNumCameras = r.cameras.Size();
     mScene->mCameras = new aiCamera*[r.cameras.Size()];
-
     for (size_t i = 0; i < r.cameras.Size(); ++i) {
         Camera& cam = r.cameras[i];
 
         aiCamera* aicam = mScene->mCameras[i] = new aiCamera();
 
         if (cam.type == Camera::Perspective) {
-
             aicam->mAspect        = cam.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.perspective.yfov * aicam->mAspect;
+            aicam->mHorizontalFOV = cam.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar  = cam.perspective.zfar;
             aicam->mClipPlaneNear = cam.perspective.znear;
-        }
-        else {
-            // assimp does not support orthographic cameras
+        } else {
+            aicam->mClipPlaneFar = cam.ortographic.zfar;
+            aicam->mClipPlaneNear = cam.ortographic.znear;
+            aicam->mHorizontalFOV = 0.0;
+            aicam->mAspect = 1.0f;
+            if (0.f != cam.ortographic.ymag) {
+                aicam->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
+            }
         }
     }
 }
@@ -713,6 +698,30 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
     }
 }
 
+void glTFImporter::ImportCommonMetadata(glTF::Asset& a)
+{
+    ai_assert(mScene->mMetaData == nullptr);
+    const bool hasVersion = !a.asset.version.empty();
+    const bool hasGenerator = !a.asset.generator.empty();
+    const bool hasCopyright = !a.asset.copyright.empty();
+    if (hasVersion || hasGenerator || hasCopyright)
+    {
+        mScene->mMetaData = new aiMetadata;
+        if (hasVersion)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+        }
+        if (hasGenerator)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+        if (hasCopyright)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
+        }
+    }
+}
+
 void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // clean all member arrays
@@ -739,7 +748,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportLights(asset);
 
     ImportNodes(asset);
-
+    ImportCommonMetadata(asset);
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

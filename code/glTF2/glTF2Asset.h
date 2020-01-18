@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness full
  *   KHR_materials_unlit full
+ *   KHR_lights_punctual full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -94,38 +95,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/StringUtils.h>
 
+#include "glTF/glTFCommon.h"
+
 namespace glTF2
 {
-#ifdef ASSIMP_API
-    using Assimp::IOStream;
-    using Assimp::IOSystem;
-    using std::shared_ptr;
-#else
-    using std::shared_ptr;
-
-    typedef std::runtime_error DeadlyImportError;
-    typedef std::runtime_error DeadlyExportError;
-
-    enum aiOrigin { aiOrigin_SET = 0, aiOrigin_CUR = 1, aiOrigin_END = 2 };
-    class IOSystem;
-    class IOStream
-    {
-        FILE* f;
-    public:
-        IOStream(FILE* file) : f(file) {}
-        ~IOStream() { fclose(f); f = 0; }
-
-        size_t Read(void* b, size_t sz, size_t n) { return fread(b, sz, n, f); }
-        size_t Write(const void* b, size_t sz, size_t n) { return fwrite(b, sz, n, f); }
-        int    Seek(size_t off, aiOrigin orig) { return fseek(f, off, int(orig)); }
-        size_t Tell() const { return ftell(f); }
-
-        size_t FileSize() {
-            long p = Tell(), len = (Seek(0, aiOrigin_END), Tell());
-            return size_t((Seek(p, aiOrigin_SET), len));
-        }
-    };
-#endif
+    using glTFCommon::shared_ptr;
+    using glTFCommon::IOSystem;
+    using glTFCommon::IOStream;
 
     using rapidjson::Value;
     using rapidjson::Document;
@@ -137,35 +113,9 @@ namespace glTF2
     struct Texture;
     struct Skin;
 
-    // Vec/matrix types, as raw float arrays
-    typedef float (vec3)[3];
-    typedef float (vec4)[4];
-    typedef float (mat4)[16];
-
-    namespace Util
-    {
-        void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out);
-
-        size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
-
-        inline size_t DecodeBase64(const char* in, uint8_t*& out)
-        {
-            return DecodeBase64(in, strlen(in), out);
-        }
-
-        struct DataURI
-        {
-            const char* mediaType;
-            const char* charset;
-            bool base64;
-            const char* data;
-            size_t dataLength;
-        };
-
-        //! Check if a uri is a data URI
-        inline bool ParseDataURI(const char* uri, size_t uriLen, DataURI& out);
-    }
-
+    using glTFCommon::vec3;
+    using glTFCommon::vec4;
+    using glTFCommon::mat4;
 
     //! Magic number for GLB files
 	#define AI_GLB_MAGIC_NUMBER "glTF"
@@ -437,8 +387,8 @@ namespace glTF2
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         size_t count;                //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-        std::vector<float> max;      //!< Maximum value of each component in this attribute.
-        std::vector<float> min;      //!< Minimum value of each component in this attribute.
+        std::vector<double> max;     //!< Maximum value of each component in this attribute.
+        std::vector<double> min;     //!< Minimum value of each component in this attribute.
 
         unsigned int GetNumComponents();
         unsigned int GetBytesPerComponent();
@@ -551,7 +501,7 @@ namespace glTF2
 		/// but in real life you'll get:
 		/// "accessor_0" : { byteOffset: 0, byteLength: 4}, "accessor_1" : { byteOffset: 2, byteLength: 4}
 		/// Yes, accessor of next mesh has offset and length which mean: current mesh data is decoded, all other data is encoded.
-		/// And when before you start to read data of current mesh (with encoded data ofcourse) you must decode region of "bufferView", after read finished
+		/// And when before you start to read data of current mesh (with encoded data of course) you must decode region of "bufferView", after read finished
 		/// delete encoding mark. And after that you can repeat process: decode data of mesh, read, delete decoded data.
 		///
 		/// Remark. Encoding all data at once is good in world with computers which do not has RAM limitation. So, you must use step by step encoding in
@@ -668,6 +618,28 @@ namespace glTF2
         void Read(Value& obj, Asset& r);
     };
 
+    //! A light (from KHR_lights_punctual extension)
+    struct Light : public Object
+    {
+        enum Type
+        {
+            Directional,
+            Point,
+            Spot
+        };
+
+        Type type;
+
+        vec3 color;
+        float intensity;
+        Nullable<float> range;
+
+        float innerConeAngle;
+        float outerConeAngle;
+
+        Light() {}
+        void Read(Value& obj, Asset& r);
+    };
 
     //! Image data used to create a texture.
     struct Image : public Object
@@ -713,6 +685,13 @@ namespace glTF2
         Ref<Texture> texture;
         unsigned int index;
         unsigned int texCoord = 0;
+
+        bool textureTransformSupported = false;
+        struct TextureTransformExt {
+			float offset[2];
+			float rotation;
+			float scale[2];
+		} TextureTransformExt_t;
     };
 
     struct NormalTextureInfo : TextureInfo
@@ -804,7 +783,7 @@ namespace glTF2
 		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
 		/// Get mesh data from JSON-object and place them to root asset.
 		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
-		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+		/// \param [out] pAsset_Root - reference to root asset where data will be stored.
 		void Read(Value& pJSON_Object, Asset& pAsset_Root);
     };
 
@@ -819,6 +798,7 @@ namespace glTF2
         Nullable<vec3> scale;
 
         Ref<Camera> camera;
+        Ref<Light>  light;
 
         std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
         Ref<Skin> skin;                           //!< The ID of the skin referenced by this node.
@@ -1050,8 +1030,15 @@ namespace glTF2
         {
             bool KHR_materials_pbrSpecularGlossiness;
             bool KHR_materials_unlit;
-
+            bool KHR_lights_punctual;
+			bool KHR_texture_transform;
         } extensionsUsed;
+
+        //! Keeps info about the required extensions
+        struct RequiredExtensions
+        {
+            bool KHR_draco_mesh_compression;
+        } extensionsRequired;
 
         AssetMetadata asset;
 
@@ -1063,6 +1050,7 @@ namespace glTF2
         LazyDict<Buffer>      buffers;
         LazyDict<BufferView>  bufferViews;
         LazyDict<Camera>      cameras;
+        LazyDict<Light>       lights;
         LazyDict<Image>       images;
         LazyDict<Material>    materials;
         LazyDict<Mesh>        meshes;
@@ -1083,6 +1071,7 @@ namespace glTF2
             , buffers       (*this, "buffers")
             , bufferViews   (*this, "bufferViews")
             , cameras       (*this, "cameras")
+            , lights        (*this, "lights", "KHR_lights_punctual")
             , images        (*this, "images")
             , materials     (*this, "materials")
             , meshes        (*this, "meshes")
@@ -1093,6 +1082,7 @@ namespace glTF2
             , textures      (*this, "textures")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
+            memset(&extensionsRequired, 0, sizeof(extensionsRequired));
         }
 
         //! Main function
@@ -1111,6 +1101,7 @@ namespace glTF2
         void ReadBinaryHeader(IOStream& stream, std::vector<char>& sceneData);
 
         void ReadExtensionsUsed(Document& doc);
+        void ReadExtensionsRequired(Document& doc);
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };

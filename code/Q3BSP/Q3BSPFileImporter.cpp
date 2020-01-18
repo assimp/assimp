@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
 #include "Q3BSPFileImporter.h"
-#include "Q3BSPZipArchive.h"
 #include "Q3BSPFileParser.h"
 #include "Q3BSPFileData.h"
 
@@ -60,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/ZipArchiveIOSystem.h>
 #include <assimp/importerdesc.h>
 #include <vector>
 #include <sstream>
@@ -181,7 +181,7 @@ const aiImporterDesc* Q3BSPFileImporter::GetInfo () const {
 // ------------------------------------------------------------------------------------------------
 //  Import method.
 void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* scene, IOSystem* ioHandler) {
-    Q3BSPZipArchive Archive( ioHandler, rFile );
+    ZipArchiveIOSystem Archive( ioHandler, rFile );
     if ( !Archive.isOpen() ) {
         throw DeadlyImportError( "Failed to open file " + rFile + "." );
     }
@@ -223,10 +223,10 @@ void Q3BSPFileImporter::separateMapName( const std::string &importName, std::str
 
 // ------------------------------------------------------------------------------------------------
 //  Returns the first map in the map archive.
-bool Q3BSPFileImporter::findFirstMapInArchive( Q3BSPZipArchive &bspArchive, std::string &mapName ) {
+bool Q3BSPFileImporter::findFirstMapInArchive(ZipArchiveIOSystem &bspArchive, std::string &mapName ) {
     mapName = "";
     std::vector<std::string> fileList;
-    bspArchive.getFileList( fileList );
+    bspArchive.getFileListExtension( fileList, "bsp" );
     if (fileList.empty()) {
         return false;
     }
@@ -249,7 +249,7 @@ bool Q3BSPFileImporter::findFirstMapInArchive( Q3BSPZipArchive &bspArchive, std:
 // ------------------------------------------------------------------------------------------------
 //  Creates the assimp specific data.
 void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
-        Q3BSPZipArchive *pArchive ) {
+    ZipArchiveIOSystem *pArchive ) {
     if (nullptr == pModel || nullptr == pScene) {
         return;
     }
@@ -418,7 +418,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
 // ------------------------------------------------------------------------------------------------
 //  Creates all referenced materials.
 void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
-        Q3BSPZipArchive *pArchive ) {
+    ZipArchiveIOSystem *pArchive ) {
     if ( m_MaterialLookupMap.empty() ) {
         return;
     }
@@ -564,7 +564,7 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *mesh, unsigned int &faceIdx ) {
 // ------------------------------------------------------------------------------------------------
 //  Imports a texture file.
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *model,
-                                                 Q3BSP::Q3BSPZipArchive *archive, aiScene*,
+                                                 ZipArchiveIOSystem *archive, aiScene*,
                                                  aiMaterial *pMatHelper, int textureId ) {
     if (nullptr == archive || nullptr == pMatHelper ) {
         return false;
@@ -616,7 +616,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *model
             // We'll leave it up to the user to figure out which extension the file has.
             aiString name;
             strncpy( name.data, pTexture->strName, sizeof name.data );
-            name.length = strlen( name.data );
+            name.length = (ai_uint32)strlen( name.data );
             pMatHelper->AddProperty( &name, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
         }
     }
@@ -669,7 +669,7 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 
 // ------------------------------------------------------------------------------------------------
 //  Will search for a supported extension.
-bool Q3BSPFileImporter::expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std::string &rFilename,
+bool Q3BSPFileImporter::expandFile(ZipArchiveIOSystem *pArchive, const std::string &rFilename,
                                    const std::vector<std::string> &rExtList, std::string &rFile,
                                    std::string &rExt )
 {

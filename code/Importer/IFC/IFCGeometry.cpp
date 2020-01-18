@@ -128,7 +128,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
         outer_polygon_it = begin + master_bounds;
     }
     else {
-        for(iit = begin; iit != end; iit++) {
+        for(iit = begin; iit != end; ++iit) {
             // find the polygon with the largest area and take it as the outer bound.
             IfcVector3& n = normals[std::distance(begin,iit)];
             const IfcFloat area = n.SquareLength();
@@ -138,8 +138,9 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
             }
         }
     }
-
-    ai_assert(outer_polygon_it != end);
+	if (outer_polygon_it == end) {
+		return;
+	}
 
     const size_t outer_polygon_size = *outer_polygon_it;
     const IfcVector3& master_normal = normals[std::distance(begin, outer_polygon_it)];

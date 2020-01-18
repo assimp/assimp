@@ -51,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/Macros.h>
 
 using namespace Assimp;
 
@@ -274,14 +273,14 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Get a aiUVTransform (4 floats) from the material
+// Get a aiUVTransform (5 floats) from the material
 aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
     aiUVTransform* pOut)
 {
-    unsigned int iMax = 4;
+    unsigned int iMax = 5;
     return aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
 }
 
@@ -472,12 +471,12 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     aiPropertyTypeInfo pType
     )
 {
-    ai_assert( pInput != NULL );
-    ai_assert( pKey != NULL );
+    ai_assert( pInput != nullptr );
+	ai_assert(pKey != nullptr );
     ai_assert( 0 != pSizeInBytes );
 
     if ( 0 == pSizeInBytes ) {
-
+		return AI_FAILURE;
     }
 
     // first search the list whether there is already an entry with this key
@@ -505,7 +504,7 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     pcNew->mData = new char[pSizeInBytes];
     memcpy (pcNew->mData,pInput,pSizeInBytes);
 
-    pcNew->mKey.length = ::strlen(pKey);
+    pcNew->mKey.length = (ai_uint32)::strlen(pKey);
     ai_assert ( MAXLEN > pcNew->mKey.length);
     strcpy( pcNew->mKey.data, pKey );
 
@@ -545,23 +544,7 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
     unsigned int type,
     unsigned int index)
 {
-    // We don't want to add the whole buffer .. write a 32 bit length
-    // prefix followed by the zero-terminated UTF8 string.
-    // (HACK) I don't want to break the ABI now, but we definitely
-    // ought to change aiString::mLength to uint32_t one day.
-    if (sizeof(size_t) == 8) {
-        aiString copy = *pInput;
-        uint32_t* s = reinterpret_cast<uint32_t*>(&copy.length);
-        s[1] = static_cast<uint32_t>(pInput->length);
-
-        return AddBinaryProperty(s+1,
-            static_cast<unsigned int>(pInput->length+1+4),
-            pKey,
-            type,
-            index,
-            aiPTI_String);
-    }
-    ai_assert(sizeof(size_t)==4);
+    ai_assert(sizeof(ai_uint32)==4);
     return AddBinaryProperty(pInput,
         static_cast<unsigned int>(pInput->length+1+4),
         pKey,

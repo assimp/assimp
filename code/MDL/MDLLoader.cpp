@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,8 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDL/MDLLoader.h"
 #include "MDL/MDLDefaultColorMap.h"
 #include "MD2/MD2FileData.h"
+#include "MDL/HalfLife/HL1MDLLoader.h"
 
-#include <assimp/Macros.h>
 #include <assimp/qnan.h>
 #include <assimp/StringUtils.h>
 #include <assimp/Importer.hpp>
@@ -94,23 +92,24 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MDLImporter::MDLImporter()
-    : configFrameID(),
-    mBuffer(),
-    iGSFileVersion(),
-    pIOHandler(),
-    pScene(),
-    iFileSize()
-{}
+: configFrameID()
+, mBuffer()
+, iGSFileVersion()
+, pIOHandler()
+, pScene()
+, iFileSize() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MDLImporter::~MDLImporter()
-{}
+MDLImporter::~MDLImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
+bool MDLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(pFile);
 
     // if check for extension is not enough, check for the magic tokens
@@ -144,6 +143,18 @@ void MDLImporter::SetupProperties(const Importer* pImp)
 
     // AI_CONFIG_IMPORT_MDL_COLORMAP - palette file
     configPalette =  pImp->GetPropertyString(AI_CONFIG_IMPORT_MDL_COLORMAP,"colormap.lmp");
+
+    // Read configuration specific to MDL (Half-Life 1).
+    mHL1ImportSettings.read_animations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS, true);
+    if (mHL1ImportSettings.read_animations) {
+        mHL1ImportSettings.read_animation_events = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS, true);
+        mHL1ImportSettings.read_blend_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BLEND_CONTROLLERS, true);
+        mHL1ImportSettings.read_sequence_transitions = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_SEQUENCE_TRANSITIONS, true);
+    }
+    mHL1ImportSettings.read_attachments = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ATTACHMENTS, true);
+    mHL1ImportSettings.read_bone_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS, true);
+    mHL1ImportSettings.read_hitboxes = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES, true);
+    mHL1ImportSettings.read_misc_global_info = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -168,9 +179,9 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     }
 
     // This should work for all other types of MDL files, too ...
-    // the quake header is one of the smallest, afaik
+    // the HL1 sequence group header is one of the smallest, afaik
     iFileSize = (unsigned int)file->FileSize();
-    if( iFileSize < sizeof(MDL::Header)) {
+    if( iFileSize < sizeof(MDL::HalfLife::SequenceHeader_HL1)) {
         throw DeadlyImportError( "MDL File is too small.");
     }
 
@@ -226,9 +237,19 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
         AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
     {
-        ASSIMP_LOG_DEBUG("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
         iGSFileVersion = 0;
-        InternReadFile_HL2();
+
+        HalfLife::HalfLifeMDLBaseHeader *pHeader = (HalfLife::HalfLifeMDLBaseHeader *)mBuffer;
+        if (pHeader->version == AI_MDL_HL1_VERSION)
+        {
+            ASSIMP_LOG_DEBUG("MDL subtype: Half-Life 1/Goldsrc Engine, magic word is IDST/IDSQ");
+            InternReadFile_HL1(pFile, iMagicWord);
+        }
+        else
+        {
+            ASSIMP_LOG_DEBUG("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
+            InternReadFile_HL2();
+        }
     }
     else    {
         // print the magic word to the log file
@@ -404,23 +425,15 @@ void MDLImporter::InternReadFile_Quake1() {
 
     // now get a pointer to the first frame in the file
     BE_NCONST MDL::Frame* pcFrames = (BE_NCONST MDL::Frame*)szCurrent;
-    BE_NCONST MDL::SimpleFrame* pcFirstFrame;
+    MDL::SimpleFrame* pcFirstFrame;
 
     if (0 == pcFrames->type) {
         // get address of single frame
-        pcFirstFrame = &pcFrames->frame;
+        pcFirstFrame =( MDL::SimpleFrame*) &pcFrames->frame;
     } else {
         // get the first frame in the group
-
-#if 1
-        // FIXME: the cast is wrong and cause a warning on clang 5.0
-        // disable this code for now, fix it later
-        ai_assert(false && "Bad pointer cast");
-        pcFirstFrame = nullptr; // Workaround: msvc++ C4703 error
-#else
-        BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*)pcFrames;
-        pcFirstFrame = (BE_NCONST MDL::SimpleFrame*)(&pcFrames2->time + pcFrames->type);
-#endif
+        BE_NCONST MDL::GroupFrame* pcFrames2 = (BE_NCONST MDL::GroupFrame*) pcFrames;
+        pcFirstFrame = &(pcFrames2->frames[0]);
     }
     BE_NCONST MDL::Vertex* pcVertices = (BE_NCONST MDL::Vertex*) ((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char*)(pcVertices + pcHeader->num_verts));
@@ -1562,7 +1575,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 				const size_t maxSize(buffersize - (i*AI_MDL7_MAX_GROUPNAMESIZE));
 				pcNode->mName.length = ai_snprintf(szBuffer, maxSize, "Group_%u", p);
 			} else {
-				pcNode->mName.length = ::strlen(szBuffer);
+				pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
 			}
             ::strncpy(pcNode->mName.data,szBuffer,MAXLEN-1);
             ++p;
@@ -1963,6 +1976,23 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
         pcMatOut->AddProperty<int>(&iVal,1,AI_MATKEY_UVWSRC_DIFFUSE(1));
         pcMatOut->AddProperty(&sString,AI_MATKEY_TEXTURE_DIFFUSE(1));
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Read a Half-life 1 MDL
+void MDLImporter::InternReadFile_HL1(const std::string& pFile, const uint32_t iMagicWord)
+{
+    // We can't correctly load an MDL from a MDL "sequence" file.
+    if (iMagicWord == AI_MDL_MAGIC_NUMBER_BE_HL2b || iMagicWord == AI_MDL_MAGIC_NUMBER_LE_HL2b)
+        throw DeadlyImportError("Impossible to properly load a model from an MDL sequence file.");
+
+    // Read the MDL file.
+    HalfLife::HL1MDLLoader loader(
+        pScene,
+        pIOHandler,
+        mBuffer,
+        pFile,
+        mHL1ImportSettings);
 }
 
 // ------------------------------------------------------------------------------------------------

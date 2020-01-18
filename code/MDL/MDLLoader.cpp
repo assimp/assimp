@@ -179,9 +179,9 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     }
 
     // This should work for all other types of MDL files, too ...
-    // the quake header is one of the smallest, afaik
+    // the HL1 sequence group header is one of the smallest, afaik
     iFileSize = (unsigned int)file->FileSize();
-    if( iFileSize < sizeof(MDL::Header)) {
+    if( iFileSize < sizeof(MDL::HalfLife::SequenceHeader_HL1)) {
         throw DeadlyImportError( "MDL File is too small.");
     }
 
@@ -1575,7 +1575,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 				const size_t maxSize(buffersize - (i*AI_MDL7_MAX_GROUPNAMESIZE));
 				pcNode->mName.length = ai_snprintf(szBuffer, maxSize, "Group_%u", p);
 			} else {
-				pcNode->mName.length = ::strlen(szBuffer);
+				pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
 			}
             ::strncpy(pcNode->mName.data,szBuffer,MAXLEN-1);
             ++p;

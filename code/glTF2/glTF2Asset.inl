@@ -752,6 +752,7 @@ inline uint8_t* Image::StealData()
 	return mData.release();
 }
 
+// Never take over the ownership of data whenever binary or not
 inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
 {
     Ref<Buffer> b = r.GetBodyBuffer();
@@ -764,8 +765,10 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
         bufferView->byteOffset = b->AppendData(data, length);
     }
     else { // text file: will be stored as a data uri
-		this->mData.reset(data);
-		this->mDataLength = length;
+        uint8_t *temp = new uint8_t[length];
+        memcpy(temp, data, length);
+        this->mData.reset(temp);
+        this->mDataLength = length;
     }
 }
 

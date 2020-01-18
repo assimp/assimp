@@ -188,7 +188,7 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     // delete the file buffer and cleanup.
     auto DeleteBufferAndCleanup = [&]() {
         if (mBuffer) {
-            delete mBuffer;
+            delete [] mBuffer;
             mBuffer = nullptr;
         }
         AI_DEBUG_INVALIDATE_PTR(pIOHandler);

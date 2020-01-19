@@ -125,12 +125,14 @@ void HL1MDLLoader::release_resources() {
         anim_headers_ = nullptr;
     }
 
-    if (rootnode_children_.size()) {
+    // Root has some children ndoes. so let's proceed them
+    if (!rootnode_children_.empty()) {
         // Here, it means that the nodes were not added to the
         // scene root node. We still have to delete them.
         for (auto it = rootnode_children_.begin(); it != rootnode_children_.end(); ++it) {
-            if (*it)
+            if (*it) {
                 delete *it;
+            }
         }
         // Ensure this happens only once.
         rootnode_children_.clear();

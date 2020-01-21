@@ -42,22 +42,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+
 using namespace Assimp;
 
-class utXGLImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sample_official.xgl", 0);
-        return true;
-        return nullptr != scene;
-    }
-};
 
-TEST_F(utXGLImportExport, importXGLFromFileTest) {
-    EXPECT_TRUE(importerTest());
+TEST(utXGLImporter, importSample_official) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sample_official.xgl", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }
+

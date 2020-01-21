@@ -128,6 +128,9 @@ SET( IMPORTERS
   unit/ImportExport/utOFFImportExport.cpp
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
+  unit/ImportExport/utMD2Importer.cpp
+  unit/ImportExport/utMD3Importer.cpp
+  unit/ImportExport/utMD5Importer.cpp
   unit/ImportExport/utMDLImporter.cpp
   unit/ImportExport/MDL/MDLHL1TestFiles.h
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp

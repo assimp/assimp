@@ -352,10 +352,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     if (path[0] == '*') { // embedded
                         aiTexture* tex = mScene->mTextures[atoi(&path[1])];
 
-                        // copy data since lifetime control is handed over to the asset
-                        uint8_t* data = new uint8_t[tex->mWidth];
-                        memcpy(data, tex->pcData, tex->mWidth);
-                        texture->source->SetData(data, tex->mWidth, *mAsset);
+                        // The asset has its own buffer, see Image::SetData
+                        texture->source->SetData(reinterpret_cast<uint8_t*> (tex->pcData), tex->mWidth, *mAsset);
 
                         if (tex->achFormatHint[0]) {
                             std::string mimeType = "image/";

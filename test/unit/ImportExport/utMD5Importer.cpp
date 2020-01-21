@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -42,64 +42,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include <assimp/Importer.hpp>
+
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 
 
 using namespace Assimp;
 
 
-TEST(utXGLImporter, importBCN_Epileptic) {
+
+TEST(utMD5Importer, importEmpty) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/BCN_Epileptic.zgl", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/empty.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+
+TEST(utMD5Importer, importSimpleCube) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/SimpleCube.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 
 
-TEST(utXGLImporter, importCubesWithAlpha) {
+TEST(utMD5Importer, importBoarMan) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/cubes_with_alpha.zgl", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 
 
-TEST(utXGLImporter, importSample_official) {
+TEST(utMD5Importer, importBob) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sample_official.xgl", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utXGLImporter, importSample_official_asxml) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sample_official_asxml.xml", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utXGLImporter, importSphereWithMatGloss) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sphere_with_mat_gloss_10pc.zgl", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utXGLImporter, importSpiderASCII) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/Spider_ascii.zgl", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utXGLImporter, importWuson) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/Wuson.zgl", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(utXGLImporter, importWusonDXF) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/wuson_dxf.zgl", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/Bob.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }

@@ -67,3 +67,80 @@ TEST_F( utXImporterExporter, heap_overflow_in_tokenizer ) {
     Assimp::Importer importer;
     EXPECT_NO_THROW( importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/X/OV_GetNextToken", 0 ) );
 }
+
+
+TEST(utXImporter, importAnimTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/anim_test.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, importBCNEpileptic) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/BCN_Epileptic.X", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, importFromTrueSpaceBin32) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/fromtruespace_bin32.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, import_kwxport_test_cubewithvcolors) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/kwxport_test_cubewithvcolors.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, importTestCubeBinary) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test_cube_binary.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, importTestCubeCompressed) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test_cube_compressed.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, importTestCubeText) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test_cube_text.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, importTestWuson) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/Testwuson.X", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utXImporter, TestFormatDetection) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/TestFormatDetection", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+#if 0  // FIXME: disabled because it leaks memory
+
+
+TEST(utXImporter, importDwarf) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X/dwarf.x", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+#endif  // 0
+

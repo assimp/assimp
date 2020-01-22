@@ -51,7 +51,7 @@ IF(HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF(HUNTER_ENABLED)
 
-PROJECT( Assimp VERSION 5.0.0 )
+PROJECT( Assimp VERSION 5.0.1 )
 
 # All supported options ###############################################
 

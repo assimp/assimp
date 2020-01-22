@@ -316,36 +316,14 @@ void HL1MDLLoader::load_sequence_groups_files() {
 }
 
 // ------------------------------------------------------------------------------------------------
-/** @brief Read an MDL texture.
-*
-*   @note This method is taken from HL1 source code.
-*   source: file: studio_utils.c
-*           function(s): UploadTexture
-*/
+// Read an MDL texture.
 void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
         uint8_t *data, uint8_t *pal, aiTexture *pResult,
         aiColor3D &last_palette_color) {
-    int outwidth, outheight;
-    int i, j;
-    int row1[256], row2[256], col1[256], col2[256];
-    unsigned char *pix1, *pix2, *pix3, *pix4;
-
-    // convert texture to power of 2
-    for (outwidth = 1; outwidth < ptexture->width; outwidth <<= 1)
-        ;
-
-    if (outwidth > 256)
-        outwidth = 256;
-
-    for (outheight = 1; outheight < ptexture->height; outheight <<= 1)
-        ;
-
-    if (outheight > 256)
-        outheight = 256;
 
     pResult->mFilename = ptexture->name;
-    pResult->mWidth = outwidth;
-    pResult->mHeight = outheight;
+    pResult->mWidth = static_cast<unsigned int>(ptexture->width);
+    pResult->mHeight = static_cast<unsigned int>(ptexture->height);
     pResult->achFormatHint[0] = 'b';
     pResult->achFormatHint[1] = 'g';
     pResult->achFormatHint[2] = 'r';
@@ -356,31 +334,15 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->achFormatHint[7] = '8';
     pResult->achFormatHint[8] = '\0';
 
-    aiTexel *out = pResult->pcData = new aiTexel[outwidth * outheight];
+    const size_t num_pixels = pResult->mWidth * pResult->mHeight;
+    aiTexel *out = pResult->pcData = new aiTexel[num_pixels];
 
-    for (i = 0; i < outwidth; i++) {
-        col1[i] = (int)((i + 0.25) * (ptexture->width / (float)outwidth));
-        col2[i] = (int)((i + 0.75) * (ptexture->width / (float)outwidth));
-    }
-
-    for (i = 0; i < outheight; i++) {
-        row1[i] = (int)((i + 0.25) * (ptexture->height / (float)outheight)) * ptexture->width;
-        row2[i] = (int)((i + 0.75) * (ptexture->height / (float)outheight)) * ptexture->width;
-    }
-
-    // scale down and convert to 32bit RGB
-    for (i = 0; i < outheight; i++) {
-        for (j = 0; j < outwidth; j++, out++) {
-            pix1 = &pal[data[row1[i] + col1[j]] * 3];
-            pix2 = &pal[data[row1[i] + col2[j]] * 3];
-            pix3 = &pal[data[row2[i] + col1[j]] * 3];
-            pix4 = &pal[data[row2[i] + col2[j]] * 3];
-
-            out->r = (pix1[0] + pix2[0] + pix3[0] + pix4[0]) >> 2;
-            out->g = (pix1[1] + pix2[1] + pix3[1] + pix4[1]) >> 2;
-            out->b = (pix1[2] + pix2[2] + pix3[2] + pix4[2]) >> 2;
-            out->a = 0xFF;
-        }
+    // Convert indexed 8 bit to 32 bit RGBA.
+    for (size_t i = 0; i < num_pixels; ++i, ++out) {
+        out->r = pal[data[i] * 3];
+        out->g = pal[data[i] * 3 + 1];
+        out->b = pal[data[i] * 3 + 2];
+        out->a = 255;
     }
 
     // Get the last palette color.

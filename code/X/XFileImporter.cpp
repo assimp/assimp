@@ -513,6 +513,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
             } else {
                 // separate key sequences for position, rotation, scaling
                 nbone->mNumPositionKeys = (unsigned int)bone->mPosKeys.size();
+                if (nbone->mNumPositionKeys != 0) {
                 nbone->mPositionKeys = new aiVectorKey[nbone->mNumPositionKeys];
                 for( unsigned int c = 0; c < nbone->mNumPositionKeys; ++c ) {
                     aiVector3D pos = bone->mPosKeys[c].mValue;
@@ -520,9 +521,11 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
                     nbone->mPositionKeys[c].mTime = bone->mPosKeys[c].mTime;
                     nbone->mPositionKeys[c].mValue = pos;
                 }
+                }
 
                 // rotation
                 nbone->mNumRotationKeys = (unsigned int)bone->mRotKeys.size();
+                if (nbone->mNumRotationKeys != 0) {
                 nbone->mRotationKeys = new aiQuatKey[nbone->mNumRotationKeys];
                 for( unsigned int c = 0; c < nbone->mNumRotationKeys; ++c ) {
                     aiMatrix3x3 rotmat = bone->mRotKeys[c].mValue.GetMatrix();
@@ -531,12 +534,15 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
                     nbone->mRotationKeys[c].mValue = aiQuaternion( rotmat);
                     nbone->mRotationKeys[c].mValue.w *= -1.0f; // needs quat inversion
                 }
+                }
 
                 // scaling
                 nbone->mNumScalingKeys = (unsigned int)bone->mScaleKeys.size();
+                if (nbone->mNumScalingKeys != 0) {
                 nbone->mScalingKeys = new aiVectorKey[nbone->mNumScalingKeys];
                 for( unsigned int c = 0; c < nbone->mNumScalingKeys; c++)
                     nbone->mScalingKeys[c] = bone->mScaleKeys[c];
+                }
 
                 // longest lasting key sequence determines duration
                 if( bone->mPosKeys.size() > 0)

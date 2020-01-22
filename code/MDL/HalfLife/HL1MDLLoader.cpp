@@ -346,9 +346,9 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->mFilename = ptexture->name;
     pResult->mWidth = outwidth;
     pResult->mHeight = outheight;
-    pResult->achFormatHint[0] = 'b';
+    pResult->achFormatHint[0] = 'r';
     pResult->achFormatHint[1] = 'g';
-    pResult->achFormatHint[2] = 'r';
+    pResult->achFormatHint[2] = 'b';
     pResult->achFormatHint[3] = 'a';
     pResult->achFormatHint[4] = '8';
     pResult->achFormatHint[5] = '8';

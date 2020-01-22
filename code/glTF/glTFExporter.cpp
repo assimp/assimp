@@ -869,7 +869,7 @@ void glTFExporter::ExportMetadata()
     asset.version = "1.0";
 
     char buffer[256];
-    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",
+    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%x)",
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;

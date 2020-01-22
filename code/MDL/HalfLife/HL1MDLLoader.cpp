@@ -359,7 +359,7 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
         aiColor3D &last_palette_color) {
     int outwidth, outheight;
     int i, j;
-    static size_t BuffenLen = 256;
+    static const size_t BuffenLen = 256;
     int row1[BuffenLen], row2[BuffenLen], col1[BuffenLen], col2[BuffenLen];
     unsigned char *pix1, *pix2, *pix3, *pix4;
 

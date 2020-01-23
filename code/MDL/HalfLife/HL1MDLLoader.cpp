@@ -367,7 +367,7 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     for (outwidth = 1; outwidth < ptexture->width; outwidth <<= 1)
         ;
 
-    if (outwidth > BuffenLen) {
+    if ((size_t)outwidth > BuffenLen) {
         outwidth = BuffenLen;
     }
 

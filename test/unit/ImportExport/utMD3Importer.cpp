@@ -5,6 +5,8 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
+
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,27 +42,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
-#include "AbstractImportExportBase.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+
 
 using namespace Assimp;
 
-class utASEImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen.ASE", aiProcess_ValidateDataStructure );
-#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
-        return nullptr != scene;
-#else 
-        return nullptr == scene;
-#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
-    }
-};
 
-TEST_F( utASEImportExport, importACFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+
+TEST(utMD3Importer, importWatercan) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD3/watercan.md3", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utMD3Importer, importWatercan_dmg) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD3/watercan_dmg.md3", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utMD3Importer, importEuropean_fnt_v2) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD3/q3root/models/mapobjects/kt_kubalwagon/european_fnt_v2.md3", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }

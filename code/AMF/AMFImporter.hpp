@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include "assimp/types.h"
 #include <assimp/BaseImporter.h>
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 
 // Header files, stdlib.
 #include <set>
@@ -285,7 +285,10 @@ private:
 	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
 	/// return true if current node name is equal to pNodeName, else - false.
-	bool XML_CheckNode_NameEqual(const std::string& pNodeName) { return mReader->getNodeName() == pNodeName; }
+	bool XML_CheckNode_NameEqual(const std::string& pNodeName){
+//        return mReader->getNodeName() == pNodeName;
+        mReader->mDoc.
+    }
 
 	/// Skip unsupported node and report about that. Depend on node name can be skipped begin tag of node all whole node.
 	/// \param [in] pParentNodeName - parent node name. Used for reporting.
@@ -420,7 +423,8 @@ private:
 
     CAMFImporter_NodeElement* mNodeElement_Cur;///< Current element.
     std::list<CAMFImporter_NodeElement*> mNodeElement_List;///< All elements of scene graph.
-    irr::io::IrrXMLReader* mReader;///< Pointer to XML-reader object
+	XmlParser *mReader;
+    //irr::io::IrrXMLReader* mReader;///< Pointer to XML-reader object
     std::string mUnit;
     std::list<SPP_Material> mMaterial_Converted;///< List of converted materials for postprocessing step.
     std::list<SPP_Texture> mTexture_Converted;///< List of converted textures for postprocessing step.

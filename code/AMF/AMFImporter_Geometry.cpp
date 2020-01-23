@@ -61,7 +61,7 @@ namespace Assimp
 // Parent element - <object>.
 void AMFImporter::ParseNode_Mesh()
 {
-CAMFImporter_NodeElement* ne;
+    CAMFImporter_NodeElement* ne;
 
 	// create new mesh object.
 	ne = new CAMFImporter_NodeElement_Mesh(mNodeElement_Cur);

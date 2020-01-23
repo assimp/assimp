@@ -58,8 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, stdlib.
 #include <memory>
 
-namespace Assimp
-{
+namespace Assimp {
 
 /// \var aiImporterDesc AMFImporter::Description
 /// Conastant which hold importer description
@@ -76,24 +75,26 @@ const aiImporterDesc AMFImporter::Description = {
 	"amf"
 };
 
-void AMFImporter::Clear()
-{
+void AMFImporter::Clear() {
 	mNodeElement_Cur = nullptr;
 	mUnit.clear();
 	mMaterial_Converted.clear();
 	mTexture_Converted.clear();
 	// Delete all elements
-	if(!mNodeElement_List.empty())
-	{
-		for(CAMFImporter_NodeElement* ne: mNodeElement_List) { delete ne; }
+	if(!mNodeElement_List.empty()) {
+		for(CAMFImporter_NodeElement* ne: mNodeElement_List) {
+            delete ne;
+        }
 
 		mNodeElement_List.clear();
 	}
 }
 
-AMFImporter::~AMFImporter()
-{
-	if(mReader != nullptr) delete mReader;
+AMFImporter::~AMFImporter() {
+	if (mReader != nullptr) {
+		delete mReader;
+	}
+
 	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
 	Clear();
 }
@@ -117,15 +118,14 @@ bool AMFImporter::Find_NodeElement(const std::string& pID, const CAMFImporter_No
 	return false;
 }
 
-bool AMFImporter::Find_ConvertedNode(const std::string& pID, std::list<aiNode*>& pNodeList, aiNode** pNode) const
-{
-aiString node_name(pID.c_str());
+bool AMFImporter::Find_ConvertedNode(const std::string& id, std::list<aiNode*>& nodeList, aiNode** pNode) const {
+    aiString node_name(id.c_str());
 
-	for(aiNode* node: pNodeList)
-	{
-		if(node->mName == node_name)
-		{
-			if(pNode != nullptr) *pNode = node;
+	for(aiNode* node: nodeList) {
+		if(node->mName == node_name) {
+			if (pNode != nullptr) {
+				*pNode = node;
+			}
 
 			return true;
 		}
@@ -134,13 +134,12 @@ aiString node_name(pID.c_str());
 	return false;
 }
 
-bool AMFImporter::Find_ConvertedMaterial(const std::string& pID, const SPP_Material** pConvertedMaterial) const
-{
-	for(const SPP_Material& mat: mMaterial_Converted)
-	{
-		if(mat.ID == pID)
-		{
-			if(pConvertedMaterial != nullptr) *pConvertedMaterial = &mat;
+bool AMFImporter::Find_ConvertedMaterial(const std::string& id, const SPP_Material** pConvertedMaterial) const {
+	for(const SPP_Material& mat: mMaterial_Converted) {
+		if(mat.ID == id) {
+			if (pConvertedMaterial != nullptr) {
+				*pConvertedMaterial = &mat;
+			}
 
 			return true;
 		}
@@ -153,13 +152,11 @@ bool AMFImporter::Find_ConvertedMaterial(const std::string& pID, const SPP_Mater
 /************************************************************ Functions: throw set ***********************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::Throw_CloseNotFound(const std::string& pNode)
-{
+void AMFImporter::Throw_CloseNotFound(const std::string& pNode) {
 	throw DeadlyImportError("Close tag for node <" + pNode + "> not found. Seems file is corrupt.");
 }
 
-void AMFImporter::Throw_IncorrectAttr(const std::string& pAttrName)
-{
+void AMFImporter::Throw_IncorrectAttr(const std::string& pAttrName) {
 	throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
 }
 
@@ -234,11 +231,13 @@ casu_cres:
 	}
 }
 
-bool AMFImporter::XML_SearchNode(const std::string& pNodeName)
-{
-	while(mReader->read())
-	{
-		if((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
+bool AMFImporter::XML_SearchNode(const std::string& pNodeName) {
+    mReader->
+    while(mReader->read()) {
+		//if((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
+		if ((mReader->getNodeType() == pugi::node_element) && XML_CheckNode_NameEqual(pNodeName)) {
+			return true;
+		}
 	}
 
 	return false;
@@ -403,16 +402,22 @@ void AMFImporter::ParseHelper_Decode_Base64(const std::string& pInputBase64, std
 
 void AMFImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 {
-    irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
+ //   irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
 	if(file.get() == NULL) throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
 
+    mReader = new XmlParser;
+	if (!mReader->parse(file.get())) {
+		throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+	}
+
 	// generate a XML reader for it
-	std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
-	mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
-	if(!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+	//std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
+	//mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
+	//if(!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+
 	//
 	// start reading
 	// search for root tag <amf>

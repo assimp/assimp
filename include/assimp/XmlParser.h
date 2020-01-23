@@ -44,16 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IRRXML_WRAPPER
 
 // some long includes ....
-#ifdef ASSIMP_USE_HUNTER
-#  include <irrXML/irrXML.h>
-#else
-#  include <irrXML.h>
-#endif
-#include "IOStream.hpp"
 #include "BaseImporter.h"
+#include "IOStream.hpp"
+#include <pugixml.hpp>
 #include <vector>
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------------
 /** @brief Utility class to make IrrXML work together with our custom IO system
@@ -75,7 +71,7 @@ namespace Assimp    {
  * }
  * @endcode
  **/
-class CIrrXML_IOStreamReader : public irr::io::IFileReadCallBack {
+/*class CIrrXML_IOStreamReader : public irr::io::IFileReadCallBack {
 public:
 
     // ----------------------------------------------------------------------------------
@@ -110,14 +106,14 @@ public:
 
     // ----------------------------------------------------------------------------------
     //! Virtual destructor
-    virtual ~CIrrXML_IOStreamReader() {}
+    virtual ~CIrrXML_IOStreamReader() {}*/
 
-    // ----------------------------------------------------------------------------------
-    //!   Reads an amount of bytes from the file.
-    /**  @param buffer:       Pointer to output buffer.
+// ----------------------------------------------------------------------------------
+//!   Reads an amount of bytes from the file.
+/**  @param buffer:       Pointer to output buffer.
      *   @param sizeToRead:   Amount of bytes to read
      *   @return              Returns how much bytes were read.  */
-    virtual int read(void* buffer, int sizeToRead)  {
+/*virtual int read(void* buffer, int sizeToRead)  {
         if(sizeToRead<0) {
             return 0;
         }
@@ -143,7 +139,51 @@ private:
     size_t t;
 
 }; // ! class CIrrXML_IOStreamReader
+*/
 
-} // ! Assimp
+class XmlParser {
+public:
+	XmlParser() :
+			mDoc(nullptr), mRoot(nullptr), mData() {
+        // empty
+	}
+
+    ~XmlParser() {
+		clear();
+    }
+
+    void clear() {
+		mData.resize(0);
+		delete mDoc;
+		mDoc = nullptr;
+    }
+
+    pugi::xml_node *parse(IOStream *stream) {
+		if (nullptr == stream) {
+			return nullptr;
+		}
+
+        mData.resize(stream->FileSize());
+		stream->Read(&mData[0], mData.size(), 1);
+		mDoc = new pugi::xml_document();
+		pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
+        if (result.status == pugi::status_ok) {
+			mRoot = &mDoc->root();
+        }
+
+        return mRoot;
+    }
+
+    pugi::xml_document *getDocument() const {
+		return mDoc;
+    }
+
+private:
+	pugi::xml_document *mDoc;
+	pugi::xml_node *mRoot;
+	std::vector<char> mData;
+};
+
+} // namespace Assimp
 
 #endif // !! INCLUDED_AI_IRRXML_WRAPPER

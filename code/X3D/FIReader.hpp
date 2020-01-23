@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_USE_HUNTER
 #  include <irrXML/irrXML.h>
 #else
-#  include <irrXML.h>
+#  include <assimp/XmlParser.h>
 #endif
 
 namespace Assimp {

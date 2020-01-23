@@ -135,7 +135,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/XMLTools.h
   ${HEADER_PATH}/IOStreamBuffer.h
   ${HEADER_PATH}/CreateAnimMesh.h
-  ${HEADER_PATH}/irrXMLWrapper.h
+  ${HEADER_PATH}/XmlParser.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
@@ -703,8 +703,8 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
+#SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
+#SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
 
 ADD_ASSIMP_IMPORTER( Q3D
   Q3D/Q3DLoader.cpp
@@ -1105,7 +1105,7 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  ${IrrXML_SRCS}
+  #${IrrXML_SRCS}
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}

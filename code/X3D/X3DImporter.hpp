@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ProgressHandler.hpp>
 #include <assimp/types.h>
 #include <assimp/BaseImporter.h>
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 #include "FIReader.hpp"
 //#include <regex>
 

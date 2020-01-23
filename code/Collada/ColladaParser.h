@@ -47,7 +47,7 @@
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 #include "ColladaHelper.h"
 #include <assimp/ai_assert.h>
 #include <assimp/TinyFormatter.h>

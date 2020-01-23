@@ -7,7 +7,7 @@
 #ifndef INCLUDED_AI_IRRSHARED_H
 #define INCLUDED_AI_IRRSHARED_H
 
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 #include <assimp/BaseImporter.h>
 #include <stdint.h>
 
@@ -78,9 +78,8 @@ protected:
     typedef Property<aiVector3D>    VectorProperty;
     typedef Property<int>           IntProperty;
 
-    /** XML reader instance
-     */
-  irr::io::IrrXMLReader* reader;
+    /// XML reader instance
+	XmlParser mParser;
 
     // -------------------------------------------------------------------
     /** Parse a material description from the XML

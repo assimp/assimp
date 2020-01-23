@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_XGLLOADER_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 #include <assimp/LogAux.h>
 #include <assimp/material.h>
 #include <assimp/Importer.hpp>

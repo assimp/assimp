@@ -156,12 +156,11 @@ void AMFImporter::Throw_CloseNotFound(const std::string& pNode) {
 	throw DeadlyImportError("Close tag for node <" + pNode + "> not found. Seems file is corrupt.");
 }
 
-void AMFImporter::Throw_IncorrectAttr(const std::string& pAttrName) {
-	throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
+void AMFImporter::Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName) {
+	throw DeadlyImportError("Node <" + nodeName + "> has incorrect attribute \"" + pAttrName + "\".");
 }
 
-void AMFImporter::Throw_IncorrectAttrValue(const std::string& pAttrName)
-{
+void AMFImporter::Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) {
 	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
 }
 

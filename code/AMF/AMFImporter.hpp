@@ -256,12 +256,12 @@ private:
 	/// Call that function when attribute name is incorrect and exception must be raised.
 	/// \param [in] pAttrName - attribute name.
 	/// \throw DeadlyImportError.
-	void Throw_IncorrectAttr(const std::string& pAttrName);
+	void Throw_IncorrectAttr(const std::string &nodeName, const std::string& pAttrName);
 
 	/// Call that function when attribute value is incorrect and exception must be raised.
 	/// \param [in] pAttrName - attribute name.
 	/// \throw DeadlyImportError.
-	void Throw_IncorrectAttrValue(const std::string& pAttrName);
+	void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName);
 
 	/// Call that function when some type of nodes are defined twice or more when must be used only once and exception must be raised.
 	/// E.g.:
@@ -285,10 +285,10 @@ private:
 	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
 	/// return true if current node name is equal to pNodeName, else - false.
-	bool XML_CheckNode_NameEqual(const std::string& pNodeName){
+	//bool XML_CheckNode_NameEqual(const std::string& pNodeName){
 //        return mReader->getNodeName() == pNodeName;
-        mReader->mDoc.
-    }
+        //mReader->mDoc.
+    //}
 
 	/// Skip unsupported node and report about that. Depend on node name can be skipped begin tag of node all whole node.
 	/// \param [in] pParentNodeName - parent node name. Used for reporting.

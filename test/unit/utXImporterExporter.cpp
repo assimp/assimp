@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -132,15 +132,8 @@ TEST(utXImporter, TestFormatDetection) {
 }
 
 
-#if 0  // FIXME: disabled because it leaks memory
-
-
 TEST(utXImporter, importDwarf) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X/dwarf.x", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
-
-#endif  // 0
-

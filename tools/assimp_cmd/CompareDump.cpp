@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -800,6 +800,10 @@ void CompareOnTheFlyTexture(comparer_context& comp) {
     comp.cmp<char>("achFormatHint[1]");
     comp.cmp<char>("achFormatHint[2]");
     comp.cmp<char>("achFormatHint[3]");
+    comp.cmp<char>("achFormatHint[4]");
+    comp.cmp<char>("achFormatHint[5]");
+    comp.cmp<char>("achFormatHint[6]");
+    comp.cmp<char>("achFormatHint[7]");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

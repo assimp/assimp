@@ -43,7 +43,7 @@ FONT 9, "Courier New", 400, 0, 0x0
 BEGIN
     LTEXT           "Open Asset Import Library (Assimp)",IDC_STATIC,30,14,144,9
     LTEXT           "A free C/C++ library to read various well-known 3D model formats into a straightforward in-memory format for easy processing by applications. Licensed under a 3-clause BSD license and totally awesome.",IDC_STATIC,31,34,204,24
-    LTEXT           "(c) 2008-2009. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
+    LTEXT           "(c) 2008-2020. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,27,282,1
     LTEXT           "http://assimp.sourceforge.net  http://www.zfx.info",IDC_STATIC,31,101,127,22
     DEFPUSHBUTTON   "Love this library",IDOK,186,110,84,14

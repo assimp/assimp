@@ -312,7 +312,8 @@ uint32_t WriteBinaryTexture(const aiTexture* tex)
 
 	len += Write<unsigned int>(tex->mWidth);
 	len += Write<unsigned int>(tex->mHeight);
-	len += static_cast<uint32_t>(fwrite(tex->achFormatHint,1,4,out));
+	// Write the texture format, but don't include the null terminator.
+	len += static_cast<uint32_t>(fwrite(tex->achFormatHint,sizeof(char),HINTMAXTEXTURELEN - 1,out));
 
 	if(!shortened) {
 		if (!tex->mHeight) {

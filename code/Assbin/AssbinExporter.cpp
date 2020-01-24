@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -413,7 +413,8 @@ protected:
 
         Write<unsigned int>(&chunk,tex->mWidth);
         Write<unsigned int>(&chunk,tex->mHeight);
-        chunk.Write( tex->achFormatHint, sizeof(char), 4 );
+        // Write the texture format, but don't include the null terminator.
+        chunk.Write( tex->achFormatHint, sizeof(char), HINTMAXTEXTURELEN - 1 );
 
         if(!shortened) {
             if (!tex->mHeight) {

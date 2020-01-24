@@ -57,12 +57,23 @@ public:
     virtual bool importerTest() {
 
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(MDL_HL1_FILE_MAN, 0);
-        EXPECT_NE(nullptr, scene);
+        importerTest_HL1(&importer);
 
         // Add further MDL tests...
 
         return true;
+    }
+
+private:
+    void importerTest_HL1(Assimp::Importer* const importer) {
+        const aiScene *scene = importer->ReadFile(MDL_HL1_FILE_MAN, 0);
+        EXPECT_NE(nullptr, scene);
+
+        // Test that the importer can directly load an HL1 MDL external texture file.
+        scene = importer->ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "manT.mdl", aiProcess_ValidateDataStructure);
+        EXPECT_NE(nullptr, scene);
+        EXPECT_NE(0, scene->mNumTextures);
+        EXPECT_NE(0, scene->mNumMaterials);
     }
 };
 

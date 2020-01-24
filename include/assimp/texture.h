@@ -207,8 +207,7 @@ struct aiTexture {
     , mHeight(0)
     , pcData(nullptr)
     , mFilename() {
-        achFormatHint[0] = achFormatHint[1] = 0;
-        achFormatHint[2] = achFormatHint[3] = 0;
+        memset(achFormatHint, 0, sizeof(achFormatHint));
     }
 
     // Destruction

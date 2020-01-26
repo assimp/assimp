@@ -364,8 +364,8 @@ int Assimp_Extract (const char* const* params, unsigned int num)
 
         if (!tex->mHeight) {
             m = (1 != fwrite(tex->pcData,tex->mWidth,1,p)) 
-				? AssimpCmdError::Success 
-				: AssimpCmdExtractError::FailedToExportCompressedTexture;
+				? static_cast<int>(AssimpCmdError::Success) 
+				: static_cast<int>(AssimpCmdExtractError::FailedToExportCompressedTexture);
         }
         else m = DoExport(tex,p,extension,flags);
         ::fclose(p);

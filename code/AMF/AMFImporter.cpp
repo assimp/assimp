@@ -433,17 +433,17 @@ void AMFImporter::ParseNode_Root(XmlNode *root) {
 	// create root node element.
 	ne = new CAMFImporter_NodeElement_Root(nullptr);
 
-    // set first "current" element
-    mNodeElement_Cur = ne; 
+	// set first "current" element
+	mNodeElement_Cur = ne;
 
-    // and assign attributes values
+	// and assign attributes values
 	((CAMFImporter_NodeElement_Root *)ne)->Unit = unit;
 	((CAMFImporter_NodeElement_Root *)ne)->Version = version;
 
 	// Check for child nodes
 	for (pugi::xml_node child : node->children()) {
 		if (child.name() == "object") {
-			ParseNode_Object();
+			ParseNode_Object(&child);
 		} else if (child.name() == "material") {
 			ParseNode_Material();
 		} else if (child.name() == "texture") {
@@ -587,22 +587,37 @@ void AMFImporter::ParseNode_Instance() {
 // An object definition.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Object() {
+void AMFImporter::ParseNode_Object(XmlNode *nodeInst) {
 	std::string id;
 	CAMFImporter_NodeElement *ne(nullptr);
-
+	pugi::xml_node *node = nodeInst->getNode();
+	for (pugi::xml_attribute_iterator ait = node->attributes_begin(); ait != node->attributes_end(); ++ait) {
+		if (ait->name() == "id") {
+			id = ait->as_string();
+        }
+	}
 	// Read attributes for node <object>.
-	MACRO_ATTRREAD_LOOPBEG;
+	/*MACRO_ATTRREAD_LOOPBEG;
 	MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
-	MACRO_ATTRREAD_LOOPEND;
+	MACRO_ATTRREAD_LOOPEND;*/
 
 	// create and if needed - define new geometry object.
 	ne = new CAMFImporter_NodeElement_Object(mNodeElement_Cur);
 
 	CAMFImporter_NodeElement_Object &als = *((CAMFImporter_NodeElement_Object *)ne); // alias for convenience
 
-	if (!id.empty()) als.ID = id;
+	if (!id.empty()) {
+		als.ID = id;
+	}
+
 	// Check for child nodes
+
+    for (pugi::xml_node_iterator it = node->children().begin(); it != node->children->end(); ++it) {
+		bool col_read = false;
+		if (it->name() == "mesh") {
+			ParseNode_Mesh( it );
+		}
+	}
 	if (!mReader->isEmptyElement()) {
 		bool col_read = false;
 

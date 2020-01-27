@@ -348,46 +348,46 @@ private:
 	void ParseNode_Root(XmlNode *root);
 
 	/// Parse <constellation> node of the file.
-	void ParseNode_Constellation();
+	void ParseNode_Constellation(XmlNode *node);
 
 	/// Parse <instance> node of the file.
-	void ParseNode_Instance();
+	void ParseNode_Instance(XmlNode *node);
 
 	/// Parse <material> node of the file.
-	void ParseNode_Material();
+	void ParseNode_Material(XmlNode *node);
 
 	/// Parse <metadata> node.
-	void ParseNode_Metadata();
+	void ParseNode_Metadata(XmlNode *node);
 
 	/// Parse <object> node of the file.
-	void ParseNode_Object();
+	void ParseNode_Object(XmlNode *node);
 
 	/// Parse <texture> node of the file.
-	void ParseNode_Texture();
+	void ParseNode_Texture(XmlNode *node);
 
 	/// Parse <coordinates> node of the file.
-	void ParseNode_Coordinates();
+	void ParseNode_Coordinates(XmlNode *node);
 
 	/// Parse <edge> node of the file.
-	void ParseNode_Edge();
+	void ParseNode_Edge(XmlNode *node);
 
 	/// Parse <mesh> node of the file.
-	void ParseNode_Mesh();
+	void ParseNode_Mesh(XmlNode *node);
 
 	/// Parse <triangle> node of the file.
-	void ParseNode_Triangle();
+	void ParseNode_Triangle(XmlNode *node);
 
 	/// Parse <vertex> node of the file.
-	void ParseNode_Vertex();
+	void ParseNode_Vertex(XmlNode *node);
 
 	/// Parse <vertices> node of the file.
-	void ParseNode_Vertices();
+	void ParseNode_Vertices(XmlNode *node);
 
 	/// Parse <volume> node of the file.
-	void ParseNode_Volume();
+	void ParseNode_Volume(XmlNode *node);
 
 	/// Parse <color> node of the file.
-	void ParseNode_Color();
+	void ParseNode_Color(XmlNode *node);
 
 	/// Parse <texmap> of <map> node of the file.
 	/// \param [in] pUseOldName - if true then use old name of node(and children) - <map>, instead of new name - <texmap>.

@@ -52,16 +52,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter.hpp"
 #include "AMFImporter_Macro.hpp"
 
-#include <assimp/fast_atof.h>
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/fast_atof.h>
 
-// Header files, stdlib.
 #include <memory>
 
 namespace Assimp {
 
 /// \var aiImporterDesc AMFImporter::Description
-/// Conastant which hold importer description
+/// Constant which hold importer description
 const aiImporterDesc AMFImporter::Description = {
 	"Additive manufacturing file format(AMF) Importer",
 	"smalcom",
@@ -81,10 +80,10 @@ void AMFImporter::Clear() {
 	mMaterial_Converted.clear();
 	mTexture_Converted.clear();
 	// Delete all elements
-	if(!mNodeElement_List.empty()) {
-		for(CAMFImporter_NodeElement* ne: mNodeElement_List) {
-            delete ne;
-        }
+	if (!mNodeElement_List.empty()) {
+		for (CAMFImporter_NodeElement *ne : mNodeElement_List) {
+			delete ne;
+		}
 
 		mNodeElement_List.clear();
 	}
@@ -103,47 +102,44 @@ AMFImporter::~AMFImporter() {
 /************************************************************ Functions: find set ************************************************************/
 /*********************************************************************************************************************************************/
 
-bool AMFImporter::Find_NodeElement(const std::string& pID, const CAMFImporter_NodeElement::EType pType, CAMFImporter_NodeElement** pNodeElement) const
-{
-	for(CAMFImporter_NodeElement* ne: mNodeElement_List)
-	{
-		if((ne->ID == pID) && (ne->Type == pType))
-		{
-			if(pNodeElement != nullptr) *pNodeElement = ne;
+bool AMFImporter::Find_NodeElement(const std::string &pID, const CAMFImporter_NodeElement::EType pType, CAMFImporter_NodeElement **pNodeElement) const {
+	for (CAMFImporter_NodeElement *ne : mNodeElement_List) {
+		if ((ne->ID == pID) && (ne->Type == pType)) {
+			if (pNodeElement != nullptr) *pNodeElement = ne;
 
 			return true;
 		}
-	}// for(CAMFImporter_NodeElement* ne: mNodeElement_List)
+	} // for(CAMFImporter_NodeElement* ne: mNodeElement_List)
 
 	return false;
 }
 
-bool AMFImporter::Find_ConvertedNode(const std::string& id, std::list<aiNode*>& nodeList, aiNode** pNode) const {
-    aiString node_name(id.c_str());
+bool AMFImporter::Find_ConvertedNode(const std::string &id, std::list<aiNode *> &nodeList, aiNode **pNode) const {
+	aiString node_name(id.c_str());
 
-	for(aiNode* node: nodeList) {
-		if(node->mName == node_name) {
+	for (aiNode *node : nodeList) {
+		if (node->mName == node_name) {
 			if (pNode != nullptr) {
 				*pNode = node;
 			}
 
 			return true;
 		}
-	}// for(aiNode* node: pNodeList)
+	} // for(aiNode* node: pNodeList)
 
 	return false;
 }
 
-bool AMFImporter::Find_ConvertedMaterial(const std::string& id, const SPP_Material** pConvertedMaterial) const {
-	for(const SPP_Material& mat: mMaterial_Converted) {
-		if(mat.ID == id) {
+bool AMFImporter::Find_ConvertedMaterial(const std::string &id, const SPP_Material **pConvertedMaterial) const {
+	for (const SPP_Material &mat : mMaterial_Converted) {
+		if (mat.ID == id) {
 			if (pConvertedMaterial != nullptr) {
 				*pConvertedMaterial = &mat;
 			}
 
 			return true;
 		}
-	}// for(const SPP_Material& mat: mMaterial_Converted)
+	} // for(const SPP_Material& mat: mMaterial_Converted)
 
 	return false;
 }
@@ -152,7 +148,7 @@ bool AMFImporter::Find_ConvertedMaterial(const std::string& id, const SPP_Materi
 /************************************************************ Functions: throw set ***********************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::Throw_CloseNotFound(const std::string& pNode) {
+void AMFImporter::Throw_CloseNotFound(const std::string &pNode) {
 	throw DeadlyImportError("Close tag for node <" + pNode + "> not found. Seems file is corrupt.");
 }
 
@@ -164,13 +160,11 @@ void AMFImporter::Throw_IncorrectAttrValue(const std::string &nodeName, const st
 	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
 }
 
-void AMFImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription)
-{
+void AMFImporter::Throw_MoreThanOnceDefined(const std::string &pNodeType, const std::string &pDescription) {
 	throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + mReader->getNodeName() + ". Description: " + pDescription);
 }
 
-void AMFImporter::Throw_ID_NotFound(const std::string& pID) const
-{
+void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
 	throw DeadlyImportError("Not found node with name \"" + pID + "\".");
 }
 
@@ -178,61 +172,53 @@ void AMFImporter::Throw_ID_NotFound(const std::string& pID) const
 /************************************************************* Functions: XML set ************************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::XML_CheckNode_MustHaveChildren()
-{
-	if(mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
+void AMFImporter::XML_CheckNode_MustHaveChildren() {
+	if (mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
 }
 
-void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
-{
-    static const size_t Uns_Skip_Len = 3;
-    const char* Uns_Skip[Uns_Skip_Len] = { "composite", "edge", "normal" };
+void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
+	static const size_t Uns_Skip_Len = 3;
+	const char *Uns_Skip[Uns_Skip_Len] = { "composite", "edge", "normal" };
 
-    static bool skipped_before[Uns_Skip_Len] = { false, false, false };
+	static bool skipped_before[Uns_Skip_Len] = { false, false, false };
 
-    std::string nn(mReader->getNodeName());
-    bool found = false;
-    bool close_found = false;
-    size_t sk_idx;
+	std::string nn(mReader->getNodeName());
+	bool found = false;
+	bool close_found = false;
+	size_t sk_idx;
 
-	for(sk_idx = 0; sk_idx < Uns_Skip_Len; sk_idx++)
-	{
-		if(nn != Uns_Skip[sk_idx]) continue;
+	for (sk_idx = 0; sk_idx < Uns_Skip_Len; sk_idx++) {
+		if (nn != Uns_Skip[sk_idx]) continue;
 
 		found = true;
-		if(mReader->isEmptyElement())
-		{
+		if (mReader->isEmptyElement()) {
 			close_found = true;
 
 			goto casu_cres;
 		}
 
-		while(mReader->read())
-		{
-			if((mReader->getNodeType() == irr::io::EXN_ELEMENT_END) && (nn == mReader->getNodeName()))
-			{
+		while (mReader->read()) {
+			if ((mReader->getNodeType() == irr::io::EXN_ELEMENT_END) && (nn == mReader->getNodeName())) {
 				close_found = true;
 
 				goto casu_cres;
 			}
 		}
-	}// for(sk_idx = 0; sk_idx < Uns_Skip_Len; sk_idx++)
+	} // for(sk_idx = 0; sk_idx < Uns_Skip_Len; sk_idx++)
 
 casu_cres:
 
-	if(!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
-	if(!close_found) Throw_CloseNotFound(nn);
+	if (!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
+	if (!close_found) Throw_CloseNotFound(nn);
 
-	if(!skipped_before[sk_idx])
-	{
+	if (!skipped_before[sk_idx]) {
 		skipped_before[sk_idx] = true;
-        ASSIMP_LOG_WARN_F("Skipping node \"", nn, "\" in ", pParentNodeName, ".");
+		ASSIMP_LOG_WARN_F("Skipping node \"", nn, "\" in ", pParentNodeName, ".");
 	}
 }
 
-bool AMFImporter::XML_SearchNode(const std::string& pNodeName) {
-    mReader->
-    while(mReader->read()) {
+bool AMFImporter::XML_SearchNode(const std::string &pNodeName) {
+	mReader->while (mReader->read()) {
 		//if((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
 		if ((mReader->getNodeType() == pugi::node_element) && XML_CheckNode_NameEqual(pNodeName)) {
 			return true;
@@ -242,22 +228,20 @@ bool AMFImporter::XML_SearchNode(const std::string& pNodeName) {
 	return false;
 }
 
-bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx)
-{
-    std::string val(mReader->getAttributeValue(pAttrIdx));
+bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx) {
+	std::string val(mReader->getAttributeValue(pAttrIdx));
 
-	if((val == "false") || (val == "0"))
+	if ((val == "false") || (val == "0"))
 		return false;
-	else if((val == "true") || (val == "1"))
+	else if ((val == "true") || (val == "1"))
 		return true;
 	else
 		throw DeadlyImportError("Bool attribute value can contain \"false\"/\"0\" or \"true\"/\"1\" not the \"" + val + "\"");
 }
 
-float AMFImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx)
-{
-    std::string val;
-    float tvalf;
+float AMFImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx) {
+	std::string val;
+	float tvalf;
 
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), val);
 	fast_atoreal_move(val.c_str(), tvalf, false);
@@ -265,18 +249,16 @@ float AMFImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx)
 	return tvalf;
 }
 
-uint32_t AMFImporter::XML_ReadNode_GetAttrVal_AsU32(const int pAttrIdx)
-{
+uint32_t AMFImporter::XML_ReadNode_GetAttrVal_AsU32(const int pAttrIdx) {
 	return strtoul10(mReader->getAttributeValue(pAttrIdx));
 }
 
-float AMFImporter::XML_ReadNode_GetVal_AsFloat()
-{
-    std::string val;
-    float tvalf;
+float AMFImporter::XML_ReadNode_GetVal_AsFloat() {
+	std::string val;
+	float tvalf;
 
-	if(!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. No data, seems file is corrupt.");
-	if(mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. Invalid type of XML element, seems file is corrupt.");
+	if (!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. No data, seems file is corrupt.");
+	if (mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. Invalid type of XML element, seems file is corrupt.");
 
 	ParseHelper_FixTruncatedFloatString(mReader->getNodeData(), val);
 	fast_atoreal_move(val.c_str(), tvalf, false);
@@ -284,18 +266,16 @@ float AMFImporter::XML_ReadNode_GetVal_AsFloat()
 	return tvalf;
 }
 
-uint32_t AMFImporter::XML_ReadNode_GetVal_AsU32()
-{
-	if(!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. No data, seems file is corrupt.");
-	if(mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. Invalid type of XML element, seems file is corrupt.");
+uint32_t AMFImporter::XML_ReadNode_GetVal_AsU32() {
+	if (!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. No data, seems file is corrupt.");
+	if (mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. Invalid type of XML element, seems file is corrupt.");
 
 	return strtoul10(mReader->getNodeData());
 }
 
-void AMFImporter::XML_ReadNode_GetVal_AsString(std::string& pValue)
-{
-	if(!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsString. No data, seems file is corrupt.");
-	if(mReader->getNodeType() != irr::io::EXN_TEXT)
+void AMFImporter::XML_ReadNode_GetVal_AsString(std::string &pValue) {
+	if (!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsString. No data, seems file is corrupt.");
+	if (mReader->getNodeType() != irr::io::EXN_TEXT)
 		throw DeadlyImportError("XML_ReadNode_GetVal_AsString. Invalid type of XML element, seems file is corrupt.");
 
 	pValue = mReader->getNodeData();
@@ -305,129 +285,116 @@ void AMFImporter::XML_ReadNode_GetVal_AsString(std::string& pValue)
 /************************************************************ Functions: parse set ***********************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::ParseHelper_Node_Enter(CAMFImporter_NodeElement* pNode)
-{
-	mNodeElement_Cur->Child.push_back(pNode);// add new element to current element child list.
-	mNodeElement_Cur = pNode;// switch current element to new one.
+void AMFImporter::ParseHelper_Node_Enter(CAMFImporter_NodeElement *pNode) {
+	mNodeElement_Cur->Child.push_back(pNode); // add new element to current element child list.
+	mNodeElement_Cur = pNode; // switch current element to new one.
 }
 
-void AMFImporter::ParseHelper_Node_Exit()
-{
+void AMFImporter::ParseHelper_Node_Exit() {
 	// check if we can walk up.
-	if(mNodeElement_Cur != nullptr) mNodeElement_Cur = mNodeElement_Cur->Parent;
+	if (mNodeElement_Cur != nullptr) mNodeElement_Cur = mNodeElement_Cur->Parent;
 }
 
-void AMFImporter::ParseHelper_FixTruncatedFloatString(const char* pInStr, std::string& pOutString)
-{
-    size_t instr_len;
+void AMFImporter::ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString) {
+	size_t instr_len;
 
 	pOutString.clear();
 	instr_len = strlen(pInStr);
-	if(!instr_len) return;
+	if (!instr_len) return;
 
 	pOutString.reserve(instr_len * 3 / 2);
 	// check and correct floats in format ".x". Must be "x.y".
-	if(pInStr[0] == '.') pOutString.push_back('0');
+	if (pInStr[0] == '.') pOutString.push_back('0');
 
 	pOutString.push_back(pInStr[0]);
-	for(size_t ci = 1; ci < instr_len; ci++)
-	{
-		if((pInStr[ci] == '.') && ((pInStr[ci - 1] == ' ') || (pInStr[ci - 1] == '-') || (pInStr[ci - 1] == '+') || (pInStr[ci - 1] == '\t')))
-		{
+	for (size_t ci = 1; ci < instr_len; ci++) {
+		if ((pInStr[ci] == '.') && ((pInStr[ci - 1] == ' ') || (pInStr[ci - 1] == '-') || (pInStr[ci - 1] == '+') || (pInStr[ci - 1] == '\t'))) {
 			pOutString.push_back('0');
 			pOutString.push_back('.');
-		}
-		else
-		{
+		} else {
 			pOutString.push_back(pInStr[ci]);
 		}
 	}
 }
 
-static bool ParseHelper_Decode_Base64_IsBase64(const char pChar)
-{
+static bool ParseHelper_Decode_Base64_IsBase64(const char pChar) {
 	return (isalnum(pChar) || (pChar == '+') || (pChar == '/'));
 }
 
-void AMFImporter::ParseHelper_Decode_Base64(const std::string& pInputBase64, std::vector<uint8_t>& pOutputData) const
-{
-    // With help from
-    // René Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
-    const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+void AMFImporter::ParseHelper_Decode_Base64(const std::string &pInputBase64, std::vector<uint8_t> &pOutputData) const {
+	// With help from
+	// René Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
+	const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-    uint8_t tidx = 0;
-    uint8_t arr4[4], arr3[3];
+	uint8_t tidx = 0;
+	uint8_t arr4[4], arr3[3];
 
 	// check input data
-	if(pInputBase64.size() % 4) throw DeadlyImportError("Base64-encoded data must have size multiply of four.");
+	if (pInputBase64.size() % 4) throw DeadlyImportError("Base64-encoded data must have size multiply of four.");
 	// prepare output place
 	pOutputData.clear();
 	pOutputData.reserve(pInputBase64.size() / 4 * 3);
 
-	for(size_t in_len = pInputBase64.size(), in_idx = 0; (in_len > 0) && (pInputBase64[in_idx] != '='); in_len--)
-	{
-		if(ParseHelper_Decode_Base64_IsBase64(pInputBase64[in_idx]))
-		{
+	for (size_t in_len = pInputBase64.size(), in_idx = 0; (in_len > 0) && (pInputBase64[in_idx] != '='); in_len--) {
+		if (ParseHelper_Decode_Base64_IsBase64(pInputBase64[in_idx])) {
 			arr4[tidx++] = pInputBase64[in_idx++];
-			if(tidx == 4)
-			{
-				for(tidx = 0; tidx < 4; tidx++) arr4[tidx] = (uint8_t)base64_chars.find(arr4[tidx]);
+			if (tidx == 4) {
+				for (tidx = 0; tidx < 4; tidx++)
+					arr4[tidx] = (uint8_t)base64_chars.find(arr4[tidx]);
 
 				arr3[0] = (arr4[0] << 2) + ((arr4[1] & 0x30) >> 4);
 				arr3[1] = ((arr4[1] & 0x0F) << 4) + ((arr4[2] & 0x3C) >> 2);
 				arr3[2] = ((arr4[2] & 0x03) << 6) + arr4[3];
-				for(tidx = 0; tidx < 3; tidx++) pOutputData.push_back(arr3[tidx]);
+				for (tidx = 0; tidx < 3; tidx++)
+					pOutputData.push_back(arr3[tidx]);
 
 				tidx = 0;
-			}// if(tidx == 4)
-		}// if(ParseHelper_Decode_Base64_IsBase64(pInputBase64[in_idx]))
-		else
-		{
+			} // if(tidx == 4)
+		} // if(ParseHelper_Decode_Base64_IsBase64(pInputBase64[in_idx]))
+		else {
 			in_idx++;
-		}// if(ParseHelper_Decode_Base64_IsBase64(pInputBase64[in_idx])) else
+		} // if(ParseHelper_Decode_Base64_IsBase64(pInputBase64[in_idx])) else
 	}
 
-	if(tidx)
-	{
-		for(uint8_t i = tidx; i < 4; i++) arr4[i] = 0;
-		for(uint8_t i = 0; i < 4; i++) arr4[i] = (uint8_t)(base64_chars.find(arr4[i]));
+	if (tidx) {
+		for (uint8_t i = tidx; i < 4; i++)
+			arr4[i] = 0;
+		for (uint8_t i = 0; i < 4; i++)
+			arr4[i] = (uint8_t)(base64_chars.find(arr4[i]));
 
 		arr3[0] = (arr4[0] << 2) + ((arr4[1] & 0x30) >> 4);
 		arr3[1] = ((arr4[1] & 0x0F) << 4) + ((arr4[2] & 0x3C) >> 2);
 		arr3[2] = ((arr4[2] & 0x03) << 6) + arr4[3];
-		for(uint8_t i = 0; i < (tidx - 1); i++) pOutputData.push_back(arr3[i]);
+		for (uint8_t i = 0; i < (tidx - 1); i++)
+			pOutputData.push_back(arr3[i]);
 	}
 }
 
-void AMFImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
-{
- //   irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
-    std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
+void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
+	std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
-	if(file.get() == NULL) throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+	if (file.get() == nullptr) {
+		throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+	}
 
-    mReader = new XmlParser;
-	if (!mReader->parse(file.get())) {
+	mReader = new XmlParser;
+	XmlNode *root = mReader->parse(file.get());
+	if (nullptr == root) {
 		throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
 	}
 
-	// generate a XML reader for it
-	//std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
-	//mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
-	//if(!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
-
-	//
 	// start reading
 	// search for root tag <amf>
-	if(XML_SearchNode("amf"))
-		ParseNode_Root();
-	else
+
+	if (!root->getNode()->find_child("amf")) {
 		throw DeadlyImportError("Root node \"amf\" not found.");
+	}
+
+	ParseNode_Root(root);
 
 	delete mReader;
-	// restore old XMLreader
-	mReader = OldReader;
+	mReader = nullptr;
 }
 
 // <amf
@@ -437,44 +404,84 @@ void AMFImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 // </amf>
 // Root XML element.
 // Multi elements - No.
-void AMFImporter::ParseNode_Root()
-{
-    std::string unit, version;
-    CAMFImporter_NodeElement *ne( nullptr );
+void AMFImporter::ParseNode_Root(XmlNode *root) {
+	std::string unit, version;
+	CAMFImporter_NodeElement *ne(nullptr);
 
 	// Read attributes for node <amf>.
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("unit", unit, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("version", version, mReader->getAttributeValue);
-	MACRO_ATTRREAD_LOOPEND_WSKIP;
+	pugi::xml_node *node(root->getNode());
+	for (pugi::xml_attribute_iterator ait = node->attributes_begin(); ait != node->attributes_end(); ++ait) {
+		if (ait->name() == "unit") {
+			unit = ait->as_string();
+		} else if (ait->name() == "version") {
+			version = ait->as_string();
+		}
+	}
+
+	/*MACRO_ATTRREAD_LOOPBEG;
+	MACRO_ATTRREAD_CHECK_RET("unit", unit, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("version", version, mReader->getAttributeValue);
+	MACRO_ATTRREAD_LOOPEND_WSKIP;*/
 
 	// Check attributes
-	if(!mUnit.empty())
-	{
-		if((mUnit != "inch") && (mUnit != "millimeter") && (mUnit != "meter") && (mUnit != "feet") && (mUnit != "micron")) Throw_IncorrectAttrValue("unit");
+	if (!mUnit.empty()) {
+		if ((mUnit != "inch") && (mUnit != "millimeter") && (mUnit != "meter") && (mUnit != "feet") && (mUnit != "micron")) {
+			Throw_IncorrectAttrValue("unit");
+		}
 	}
 
 	// create root node element.
 	ne = new CAMFImporter_NodeElement_Root(nullptr);
-	mNodeElement_Cur = ne;// set first "current" element
-	// and assign attribute's values
-	((CAMFImporter_NodeElement_Root*)ne)->Unit = unit;
-	((CAMFImporter_NodeElement_Root*)ne)->Version = version;
+
+    // set first "current" element
+    mNodeElement_Cur = ne; 
+
+    // and assign attributes values
+	((CAMFImporter_NodeElement_Root *)ne)->Unit = unit;
+	((CAMFImporter_NodeElement_Root *)ne)->Version = version;
 
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		MACRO_NODECHECK_LOOPBEGIN("amf");
-			if(XML_CheckNode_NameEqual("object")) { ParseNode_Object(); continue; }
-			if(XML_CheckNode_NameEqual("material")) { ParseNode_Material(); continue; }
-			if(XML_CheckNode_NameEqual("texture")) { ParseNode_Texture(); continue; }
-			if(XML_CheckNode_NameEqual("constellation")) { ParseNode_Constellation(); continue; }
-			if(XML_CheckNode_NameEqual("metadata")) { ParseNode_Metadata(); continue; }
-		MACRO_NODECHECK_LOOPEND("amf");
-		mNodeElement_Cur = ne;// force restore "current" element
-	}// if(!mReader->isEmptyElement())
+	for (pugi::xml_node child : node->children()) {
+		if (child.name() == "object") {
+			ParseNode_Object();
+		} else if (child.name() == "material") {
+			ParseNode_Material();
+		} else if (child.name() == "texture") {
+			ParseNode_Texture();
+		} else if (child.name() == "constellation") {
+			ParseNode_Constellation();
+		} else if (child.name() == "metadata") {
+			ParseNode_Metadata();
+		}
+	}
 
-	mNodeElement_List.push_back(ne);// add to node element list because its a new object in graph.
+	/*if (!mReader->isEmptyElement()) {
+		MACRO_NODECHECK_LOOPBEGIN("amf");
+		if (XML_CheckNode_NameEqual("object")) {
+			ParseNode_Object();
+			continue;
+		}
+		if (XML_CheckNode_NameEqual("material")) {
+			ParseNode_Material();
+			continue;
+		}
+		if (XML_CheckNode_NameEqual("texture")) {
+			ParseNode_Texture();
+			continue;
+		}
+		if (XML_CheckNode_NameEqual("constellation")) {
+			ParseNode_Constellation();
+			continue;
+		}
+		if (XML_CheckNode_NameEqual("metadata")) {
+			ParseNode_Metadata();
+			continue;
+		}
+		MACRO_NODECHECK_LOOPEND("amf");
+		mNodeElement_Cur = ne; // force restore "current" element
+	} // if(!mReader->isEmptyElement())*/
+
+	mNodeElement_List.push_back(ne); // add to node element list because its a new object in graph.
 }
 
 // <constellation
@@ -484,38 +491,41 @@ void AMFImporter::ParseNode_Root()
 // A collection of objects or constellations with specific relative locations.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Constellation()
-{
-    std::string id;
-    CAMFImporter_NodeElement* ne( nullptr );
+void AMFImporter::ParseNode_Constellation() {
+	std::string id;
+	CAMFImporter_NodeElement *ne(nullptr);
 
 	// Read attributes for node <constellation>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create and if needed - define new grouping object.
 	ne = new CAMFImporter_NodeElement_Constellation(mNodeElement_Cur);
 
-	CAMFImporter_NodeElement_Constellation& als = *((CAMFImporter_NodeElement_Constellation*)ne);// alias for convenience
+	CAMFImporter_NodeElement_Constellation &als = *((CAMFImporter_NodeElement_Constellation *)ne); // alias for convenience
 
-	if(!id.empty()) als.ID = id;
+	if (!id.empty()) als.ID = id;
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
+	if (!mReader->isEmptyElement()) {
 		ParseHelper_Node_Enter(ne);
 		MACRO_NODECHECK_LOOPBEGIN("constellation");
-			if(XML_CheckNode_NameEqual("instance")) { ParseNode_Instance(); continue; }
-			if(XML_CheckNode_NameEqual("metadata")) { ParseNode_Metadata(); continue; }
+		if (XML_CheckNode_NameEqual("instance")) {
+			ParseNode_Instance();
+			continue;
+		}
+		if (XML_CheckNode_NameEqual("metadata")) {
+			ParseNode_Metadata();
+			continue;
+		}
 		MACRO_NODECHECK_LOOPEND("constellation");
 		ParseHelper_Node_Exit();
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
+	} // if(!mReader->isEmptyElement())
+	else {
+		mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+	} // if(!mReader->isEmptyElement()) else
 
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+	mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <instance
@@ -525,52 +535,49 @@ void AMFImporter::ParseNode_Constellation()
 // A collection of objects or constellations with specific relative locations.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Instance()
-{
-    std::string objectid;
-    CAMFImporter_NodeElement* ne( nullptr );
+void AMFImporter::ParseNode_Instance() {
+	std::string objectid;
+	CAMFImporter_NodeElement *ne(nullptr);
 
 	// Read attributes for node <constellation>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("objectid", objectid, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("objectid", objectid, mReader->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// used object id must be defined, check that.
-	if(objectid.empty()) throw DeadlyImportError("\"objectid\" in <instance> must be defined.");
+	if (objectid.empty()) throw DeadlyImportError("\"objectid\" in <instance> must be defined.");
 	// create and define new grouping object.
 	ne = new CAMFImporter_NodeElement_Instance(mNodeElement_Cur);
 
-	CAMFImporter_NodeElement_Instance& als = *((CAMFImporter_NodeElement_Instance*)ne);// alias for convenience
+	CAMFImporter_NodeElement_Instance &als = *((CAMFImporter_NodeElement_Instance *)ne); // alias for convenience
 
 	als.ObjectID = objectid;
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
+	if (!mReader->isEmptyElement()) {
 		bool read_flag[6] = { false, false, false, false, false, false };
 
 		als.Delta.Set(0, 0, 0);
 		als.Rotation.Set(0, 0, 0);
 		ParseHelper_Node_Enter(ne);
 		MACRO_NODECHECK_LOOPBEGIN("instance");
-			MACRO_NODECHECK_READCOMP_F("deltax", read_flag[0], als.Delta.x);
-			MACRO_NODECHECK_READCOMP_F("deltay", read_flag[1], als.Delta.y);
-			MACRO_NODECHECK_READCOMP_F("deltaz", read_flag[2], als.Delta.z);
-			MACRO_NODECHECK_READCOMP_F("rx", read_flag[3], als.Rotation.x);
-			MACRO_NODECHECK_READCOMP_F("ry", read_flag[4], als.Rotation.y);
-			MACRO_NODECHECK_READCOMP_F("rz", read_flag[5], als.Rotation.z);
+		MACRO_NODECHECK_READCOMP_F("deltax", read_flag[0], als.Delta.x);
+		MACRO_NODECHECK_READCOMP_F("deltay", read_flag[1], als.Delta.y);
+		MACRO_NODECHECK_READCOMP_F("deltaz", read_flag[2], als.Delta.z);
+		MACRO_NODECHECK_READCOMP_F("rx", read_flag[3], als.Rotation.x);
+		MACRO_NODECHECK_READCOMP_F("ry", read_flag[4], als.Rotation.y);
+		MACRO_NODECHECK_READCOMP_F("rz", read_flag[5], als.Rotation.z);
 		MACRO_NODECHECK_LOOPEND("instance");
 		ParseHelper_Node_Exit();
 		// also convert degrees to radians.
 		als.Rotation.x = AI_MATH_PI_F * als.Rotation.x / 180.0f;
 		als.Rotation.y = AI_MATH_PI_F * als.Rotation.y / 180.0f;
 		als.Rotation.z = AI_MATH_PI_F * als.Rotation.z / 180.0f;
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
+	} // if(!mReader->isEmptyElement())
+	else {
+		mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+	} // if(!mReader->isEmptyElement()) else
 
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+	mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <object
@@ -580,51 +587,53 @@ void AMFImporter::ParseNode_Instance()
 // An object definition.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Object()
-{
-    std::string id;
-    CAMFImporter_NodeElement* ne( nullptr );
+void AMFImporter::ParseNode_Object() {
+	std::string id;
+	CAMFImporter_NodeElement *ne(nullptr);
 
 	// Read attributes for node <object>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create and if needed - define new geometry object.
 	ne = new CAMFImporter_NodeElement_Object(mNodeElement_Cur);
 
-	CAMFImporter_NodeElement_Object& als = *((CAMFImporter_NodeElement_Object*)ne);// alias for convenience
+	CAMFImporter_NodeElement_Object &als = *((CAMFImporter_NodeElement_Object *)ne); // alias for convenience
 
-	if(!id.empty()) als.ID = id;
+	if (!id.empty()) als.ID = id;
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
+	if (!mReader->isEmptyElement()) {
 		bool col_read = false;
 
 		ParseHelper_Node_Enter(ne);
 		MACRO_NODECHECK_LOOPBEGIN("object");
-			if(XML_CheckNode_NameEqual("color"))
-			{
-				// Check if color already defined for object.
-				if(col_read) Throw_MoreThanOnceDefined("color", "Only one color can be defined for <object>.");
-				// read data and set flag about it
-				ParseNode_Color();
-				col_read = true;
+		if (XML_CheckNode_NameEqual("color")) {
+			// Check if color already defined for object.
+			if (col_read) Throw_MoreThanOnceDefined("color", "Only one color can be defined for <object>.");
+			// read data and set flag about it
+			ParseNode_Color();
+			col_read = true;
 
-				continue;
-			}
+			continue;
+		}
 
-			if(XML_CheckNode_NameEqual("mesh")) { ParseNode_Mesh(); continue; }
-			if(XML_CheckNode_NameEqual("metadata")) { ParseNode_Metadata(); continue; }
+		if (XML_CheckNode_NameEqual("mesh")) {
+			ParseNode_Mesh();
+			continue;
+		}
+		if (XML_CheckNode_NameEqual("metadata")) {
+			ParseNode_Metadata();
+			continue;
+		}
 		MACRO_NODECHECK_LOOPEND("object");
 		ParseHelper_Node_Exit();
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
+	} // if(!mReader->isEmptyElement())
+	else {
+		mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+	} // if(!mReader->isEmptyElement()) else
 
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+	mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <metadata
@@ -645,65 +654,59 @@ void AMFImporter::ParseNode_Object()
 // "Revision" - specifies the revision of the entity
 // "Tolerance" - specifies the desired manufacturing tolerance of the entity in entity's unit system
 // "Volume" - specifies the total volume of the entity, in the entity's unit system, to be used for verification (object and volume only)
-void AMFImporter::ParseNode_Metadata()
-{
-    std::string type, value;
-    CAMFImporter_NodeElement* ne( nullptr );
+void AMFImporter::ParseNode_Metadata() {
+	std::string type, value;
+	CAMFImporter_NodeElement *ne(nullptr);
 
 	// read attribute
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 	// and value of node.
 	value = mReader->getNodeData();
 	// Create node element and assign read data.
 	ne = new CAMFImporter_NodeElement_Metadata(mNodeElement_Cur);
-	((CAMFImporter_NodeElement_Metadata*)ne)->Type = type;
-	((CAMFImporter_NodeElement_Metadata*)ne)->Value = value;
-	mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+	((CAMFImporter_NodeElement_Metadata *)ne)->Type = type;
+	((CAMFImporter_NodeElement_Metadata *)ne)->Value = value;
+	mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+	mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 /*********************************************************************************************************************************************/
 /******************************************************** Functions: BaseImporter set ********************************************************/
 /*********************************************************************************************************************************************/
 
-bool AMFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig) const
-{
-    const std::string extension = GetExtension(pFile);
+bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const {
+	const std::string extension = GetExtension(pFile);
 
-    if ( extension == "amf" ) {
-        return true;
-    }
+	if (extension == "amf") {
+		return true;
+	}
 
-	if(!extension.length() || pCheckSig)
-	{
-		const char* tokens[] = { "<amf" };
+	if (!extension.length() || pCheckSig) {
+		const char *tokens[] = { "<amf" };
 
-		return SearchFileHeaderForToken( pIOHandler, pFile, tokens, 1 );
+		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 	}
 
 	return false;
 }
 
-void AMFImporter::GetExtensionList(std::set<std::string>& pExtensionList)
-{
+void AMFImporter::GetExtensionList(std::set<std::string> &pExtensionList) {
 	pExtensionList.insert("amf");
 }
 
-const aiImporterDesc* AMFImporter::GetInfo () const
-{
+const aiImporterDesc *AMFImporter::GetInfo() const {
 	return &Description;
 }
 
-void AMFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
-	Clear();// delete old graph.
+void AMFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+	Clear(); // delete old graph.
 	ParseFile(pFile, pIOHandler);
 	Postprocess_BuildScene(pScene);
 	// scene graph is ready, exit.
 }
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // !ASSIMP_BUILD_NO_AMF_IMPORTER

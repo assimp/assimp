@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -64,6 +62,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 
 namespace Assimp {
+
+class XmlNode;
 
 /// \class AMFImporter
 /// Class that holding scene graph which include: geometry, metadata, materials etc.
@@ -345,7 +345,7 @@ private:
 	void ParseHelper_Decode_Base64(const std::string& pInputBase64, std::vector<uint8_t>& pOutputData) const;
 
 	/// Parse <AMF> node of the file.
-	void ParseNode_Root();
+	void ParseNode_Root(XmlNode *root);
 
 	/// Parse <constellation> node of the file.
 	void ParseNode_Constellation();

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -564,7 +562,11 @@ void IRRImporter::ComputeAnimations(Node *root, aiNode *real, std::vector<aiNode
 // ------------------------------------------------------------------------------------------------
 // This function is maybe more generic than we'd need it here
 void SetupMapping(aiMaterial *mat, aiTextureMapping mode, const aiVector3D &axis = aiVector3D(0.f, 0.f, -1.f)) {
-	// Check whether there are texture properties defined - setup
+	if (nullptr == mat) {
+		return;
+	}
+
+    // Check whether there are texture properties defined - setup
 	// the desired texture mapping mode for all of them and ignore
 	// all UV settings we might encounter. WE HAVE NO UVS!
 
@@ -668,7 +670,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 			}
 
 			// NOTE: Each mesh should have exactly one material assigned,
-			// but we do it in a separate loop if this behaviour changes
+			// but we do it in a separate loop if this behavior changes
 			// in future.
 			for (unsigned int i = 0; i < localScene->mNumMeshes; ++i) {
 				// Process material flags
@@ -701,9 +703,9 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 				}
 
 				// If we have a second texture coordinate set and a second texture
-				// (either lightmap, normalmap, 2layered material) we need to
+				// (either light-map, normal-map, 2layered material) we need to
 				// setup the correct UV index for it. The texture can either
-				// be diffuse (lightmap & 2layer) or a normal map (normal & parallax)
+				// be diffuse (light-map & 2layer) or a normal map (normal & parallax)
 				if (mesh->HasTextureCoords(1)) {
 
 					int idx = 1;
@@ -726,8 +728,8 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 			// Generate the sphere model. Our input parameter to
 			// the sphere generation algorithm is the number of
 			// subdivisions of each triangle - but here we have
-			// the number of poylgons on a specific axis. Just
-			// use some hardcoded limits to approximate this ...
+			// the number of polygons on a specific axis. Just
+			// use some hard-coded limits to approximate this ...
 			unsigned int mul = root->spherePolyCountX * root->spherePolyCountY;
 			if (mul < 100)
 				mul = 2;
@@ -767,13 +769,13 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 		} break;
 
 		case Node::SKYBOX: {
-			// A skybox is defined by six materials
+			// A sky-box is defined by six materials
 			if (root->materials.size() < 6) {
 				ASSIMP_LOG_ERROR("IRR: There should be six materials for a skybox");
 				break;
 			}
 
-			// copy those materials and generate 6 meshes for our new skybox
+			// copy those materials and generate 6 meshes for our new sky-box
 			materials.reserve(materials.size() + 6);
 			for (unsigned int i = 0; i < 6; ++i)
 				materials.insert(materials.end(), root->materials[i].first);
@@ -880,7 +882,7 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 	// Current node parent
 	Node *curParent = root;
 
-	// Scenegraph node we're currently working on
+	// Scene-graph node we're currently working on
 	Node *curNode = nullptr;
 
 	// List of output cameras
@@ -905,7 +907,7 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 	for (pugi::xml_node child : rootElement->children())
 		switch (child.type()) {
 			case pugi::node_element:
-                if (!ASSIMP_stricmp(child.name(), "node")) {
+				if (!ASSIMP_stricmp(child.name(), "node")) {
 					// ***********************************************************************
 					/*  What we're going to do with the node depends
                      *  on its type:
@@ -986,7 +988,7 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 					inAnimator = true;
 				} else if (!ASSIMP_stricmp(child.name(), "attributes")) {
 					//  We should have a valid node here
-                    //  FIX: no ... the scene root node is also contained in an attributes block
+					//  FIX: no ... the scene root node is also contained in an attributes block
 					if (!curNode) {
 #if 0
                         ASSIMP_LOG_ERROR("IRR: Encountered <attributes> element, but "
@@ -1009,7 +1011,7 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 						continue;
 					} else if (inAnimator) {
 						//  This is an animation path - add a new animator
-                        //  to the list.
+						//  to the list.
 						curNode->animators.push_back(Animator());
 						curAnim = &curNode->animators.back();
 
@@ -1019,10 +1021,10 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 					/*  Parse all elements in the attributes block
                      *  and process them.
                      */
-//					while (reader->read()) {
+					//					while (reader->read()) {
 					for (pugi::xml_node attrib : child.children()) {
 						if (attrib.type() == pugi::node_element) {
-						//if (reader->getNodeType() == EXN_ELEMENT) {
+							//if (reader->getNodeType() == EXN_ELEMENT) {
 							//if (!ASSIMP_stricmp(reader->getNodeName(), "vector3d")) {
 							if (!ASSIMP_stricmp(attrib.name(), "vector3d")) {
 								VectorProperty prop;
@@ -1081,16 +1083,16 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 										}
 									}
 								}
-							//} else if (!ASSIMP_stricmp(reader->getNodeName(), "bool")) {
-                            } else if (!ASSIMP_stricmp(attrib.name(), "bool")) {
+								//} else if (!ASSIMP_stricmp(reader->getNodeName(), "bool")) {
+							} else if (!ASSIMP_stricmp(attrib.name(), "bool")) {
 								BoolProperty prop;
 								ReadBoolProperty(prop);
 
 								if (inAnimator && curAnim->type == Animator::FLY_CIRCLE && prop.name == "Loop") {
 									curAnim->loop = prop.value;
 								}
-							//} else if (!ASSIMP_stricmp(reader->getNodeName(), "float")) {
-                            } else if (!ASSIMP_stricmp(attrib.name(), "float")) {
+								//} else if (!ASSIMP_stricmp(reader->getNodeName(), "float")) {
+							} else if (!ASSIMP_stricmp(attrib.name(), "float")) {
 								FloatProperty prop;
 								ReadFloatProperty(prop);
 
@@ -1138,8 +1140,8 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 										curNode->sphereRadius = prop.value;
 									}
 								}
-							//} else if (!ASSIMP_stricmp(reader->getNodeName(), "int")) {
-                            } else if (!ASSIMP_stricmp(attrib.name(), "int")) {
+								//} else if (!ASSIMP_stricmp(reader->getNodeName(), "int")) {
+							} else if (!ASSIMP_stricmp(attrib.name(), "int")) {
 								IntProperty prop;
 								ReadIntProperty(prop);
 
@@ -1158,8 +1160,8 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 										}
 									}
 								}
-							//} else if (!ASSIMP_stricmp(reader->getNodeName(), "string") || !ASSIMP_stricmp(reader->getNodeName(), "enum")) {
-                            } else if (!ASSIMP_stricmp(attrib.name(), "string") || !ASSIMP_stricmp(attrib.name(), "enum")) {
+								//} else if (!ASSIMP_stricmp(reader->getNodeName(), "string") || !ASSIMP_stricmp(reader->getNodeName(), "enum")) {
+							} else if (!ASSIMP_stricmp(attrib.name(), "string") || !ASSIMP_stricmp(attrib.name(), "enum")) {
 								StringProperty prop;
 								ReadStringProperty(prop);
 								if (prop.value.length()) {
@@ -1209,11 +1211,11 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 										}
 
 										/*  TODO: maybe implement the protection against recursive
-                                    *  loading calls directly in BatchLoader? The current
-                                    *  implementation is not absolutely safe. A LWS and an IRR
-                                    *  file referencing each other *could* cause the system to
-                                    *  recurse forever.
-                                    */
+                                        *  loading calls directly in BatchLoader? The current
+                                        *  implementation is not absolutely safe. A LWS and an IRR
+                                        *  file referencing each other *could* cause the system to
+                                        *  recurse forever.
+                                        */
 
 										const std::string extension = GetExtension(prop.value);
 										if ("irr" == extension) {
@@ -1240,7 +1242,7 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 									}
 								}
 							}
-						//} else if (reader->getNodeType() == EXN_ELEMENT_END && !ASSIMP_stricmp(reader->getNodeName(), "attributes")) {
+							//} else if (reader->getNodeType() == EXN_ELEMENT_END && !ASSIMP_stricmp(reader->getNodeName(), "attributes")) {
 						} else if (attrib.type() == pugi::node_null && !ASSIMP_stricmp(attrib.name(), "attributes")) {
 							break;
 						}
@@ -1248,7 +1250,7 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 				}
 				break;
 
-			/*case EXN_ELEMENT_END:
+				/*case EXN_ELEMENT_END:
 
 				// If we reached the end of a node, we need to continue processing its parent
 				if (!ASSIMP_stricmp(reader->getNodeName(), "node")) {
@@ -1274,108 +1276,108 @@ void IRRImporter::InternReadFile(const std::string &pFile,
 			default:
 				// GCC complains that not all enumeration values are handled
 				break;
-    }
-    //}
+		}
+	//}
 
-    //  Now iterate through all cameras and compute their final (horizontal) FOV
-    for (aiCamera *cam : cameras) {
-	    // screen aspect could be missing
-	    if (cam->mAspect) {
-		    cam->mHorizontalFOV *= cam->mAspect;
-	    } else {
-		    ASSIMP_LOG_WARN("IRR: Camera aspect is not given, can't compute horizontal FOV");
-	    }
-    }
+	//  Now iterate through all cameras and compute their final (horizontal) FOV
+	for (aiCamera *cam : cameras) {
+		// screen aspect could be missing
+		if (cam->mAspect) {
+			cam->mHorizontalFOV *= cam->mAspect;
+		} else {
+			ASSIMP_LOG_WARN("IRR: Camera aspect is not given, can't compute horizontal FOV");
+		}
+	}
 
-    batch.LoadAll();
+	batch.LoadAll();
 
-    // Allocate a temporary scene data structure
-    aiScene *tempScene = new aiScene();
-    tempScene->mRootNode = new aiNode();
-    tempScene->mRootNode->mName.Set("<IRRRoot>");
+	// Allocate a temporary scene data structure
+	aiScene *tempScene = new aiScene();
+	tempScene->mRootNode = new aiNode();
+	tempScene->mRootNode->mName.Set("<IRRRoot>");
 
-    // Copy the cameras to the output array
-    if (!cameras.empty()) {
-	    tempScene->mNumCameras = (unsigned int)cameras.size();
-	    tempScene->mCameras = new aiCamera *[tempScene->mNumCameras];
-	    ::memcpy(tempScene->mCameras, &cameras[0], sizeof(void *) * tempScene->mNumCameras);
-    }
+	// Copy the cameras to the output array
+	if (!cameras.empty()) {
+		tempScene->mNumCameras = (unsigned int)cameras.size();
+		tempScene->mCameras = new aiCamera *[tempScene->mNumCameras];
+		::memcpy(tempScene->mCameras, &cameras[0], sizeof(void *) * tempScene->mNumCameras);
+	}
 
-    // Copy the light sources to the output array
-    if (!lights.empty()) {
-	    tempScene->mNumLights = (unsigned int)lights.size();
-	    tempScene->mLights = new aiLight *[tempScene->mNumLights];
-	    ::memcpy(tempScene->mLights, &lights[0], sizeof(void *) * tempScene->mNumLights);
-    }
+	// Copy the light sources to the output array
+	if (!lights.empty()) {
+		tempScene->mNumLights = (unsigned int)lights.size();
+		tempScene->mLights = new aiLight *[tempScene->mNumLights];
+		::memcpy(tempScene->mLights, &lights[0], sizeof(void *) * tempScene->mNumLights);
+	}
 
-    // temporary data
-    std::vector<aiNodeAnim *> anims;
-    std::vector<aiMaterial *> materials;
-    std::vector<AttachmentInfo> attach;
-    std::vector<aiMesh *> meshes;
+	// temporary data
+	std::vector<aiNodeAnim *> anims;
+	std::vector<aiMaterial *> materials;
+	std::vector<AttachmentInfo> attach;
+	std::vector<aiMesh *> meshes;
 
-    // try to guess how much storage we'll need
-    anims.reserve(guessedAnimCnt + (guessedAnimCnt >> 2));
-    meshes.reserve(guessedMeshCnt + (guessedMeshCnt >> 2));
-    materials.reserve(guessedMatCnt + (guessedMatCnt >> 2));
+	// try to guess how much storage we'll need
+	anims.reserve(guessedAnimCnt + (guessedAnimCnt >> 2));
+	meshes.reserve(guessedMeshCnt + (guessedMeshCnt >> 2));
+	materials.reserve(guessedMatCnt + (guessedMatCnt >> 2));
 
-    // Now process our scene-graph recursively: generate final
-    // meshes and generate animation channels for all nodes.
-    unsigned int defMatIdx = UINT_MAX;
-    GenerateGraph(root, tempScene->mRootNode, tempScene,
-		    batch, meshes, anims, attach, materials, defMatIdx);
+	// Now process our scene-graph recursively: generate final
+	// meshes and generate animation channels for all nodes.
+	unsigned int defMatIdx = UINT_MAX;
+	GenerateGraph(root, tempScene->mRootNode, tempScene,
+			batch, meshes, anims, attach, materials, defMatIdx);
 
-    if (!anims.empty()) {
-	    tempScene->mNumAnimations = 1;
-	    tempScene->mAnimations = new aiAnimation *[tempScene->mNumAnimations];
-	    aiAnimation *an = tempScene->mAnimations[0] = new aiAnimation();
+	if (!anims.empty()) {
+		tempScene->mNumAnimations = 1;
+		tempScene->mAnimations = new aiAnimation *[tempScene->mNumAnimations];
+		aiAnimation *an = tempScene->mAnimations[0] = new aiAnimation();
 
-	    // ***********************************************************
-	    // This is only the global animation channel of the scene.
-	    // If there are animated models, they will have separate
-	    // animation channels in the scene. To display IRR scenes
-	    // correctly, users will need to combine the global anim
-	    // channel with all the local animations they want to play
-	    // ***********************************************************
-	    an->mName.Set("Irr_GlobalAnimChannel");
+		// ***********************************************************
+		// This is only the global animation channel of the scene.
+		// If there are animated models, they will have separate
+		// animation channels in the scene. To display IRR scenes
+		// correctly, users will need to combine the global anim
+		// channel with all the local animations they want to play
+		// ***********************************************************
+		an->mName.Set("Irr_GlobalAnimChannel");
 
-	    // copy all node animation channels to the global channel
-	    an->mNumChannels = (unsigned int)anims.size();
-	    an->mChannels = new aiNodeAnim *[an->mNumChannels];
-	    ::memcpy(an->mChannels, &anims[0], sizeof(void *) * an->mNumChannels);
-    }
-    if (!meshes.empty()) {
-	    // copy all meshes to the temporary scene
-	    tempScene->mNumMeshes = (unsigned int)meshes.size();
-	    tempScene->mMeshes = new aiMesh *[tempScene->mNumMeshes];
-	    ::memcpy(tempScene->mMeshes, &meshes[0], tempScene->mNumMeshes * sizeof(void *));
-    }
+		// copy all node animation channels to the global channel
+		an->mNumChannels = (unsigned int)anims.size();
+		an->mChannels = new aiNodeAnim *[an->mNumChannels];
+		::memcpy(an->mChannels, &anims[0], sizeof(void *) * an->mNumChannels);
+	}
+	if (!meshes.empty()) {
+		// copy all meshes to the temporary scene
+		tempScene->mNumMeshes = (unsigned int)meshes.size();
+		tempScene->mMeshes = new aiMesh *[tempScene->mNumMeshes];
+		::memcpy(tempScene->mMeshes, &meshes[0], tempScene->mNumMeshes * sizeof(void *));
+	}
 
-    // Copy all materials to the output array
-    if (!materials.empty()) {
-	    tempScene->mNumMaterials = (unsigned int)materials.size();
-	    tempScene->mMaterials = new aiMaterial *[tempScene->mNumMaterials];
-	    ::memcpy(tempScene->mMaterials, &materials[0], sizeof(void *) * tempScene->mNumMaterials);
-    }
+	// Copy all materials to the output array
+	if (!materials.empty()) {
+		tempScene->mNumMaterials = (unsigned int)materials.size();
+		tempScene->mMaterials = new aiMaterial *[tempScene->mNumMaterials];
+		::memcpy(tempScene->mMaterials, &materials[0], sizeof(void *) * tempScene->mNumMaterials);
+	}
 
-    //  Now merge all sub scenes and attach them to the correct
-    //  attachment points in the scenegraph.
-    SceneCombiner::MergeScenes(&pScene, tempScene, attach,
-		    AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (
-																		      AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
-																      0));
+	//  Now merge all sub scenes and attach them to the correct
+	//  attachment points in the scenegraph.
+	SceneCombiner::MergeScenes(&pScene, tempScene, attach,
+			AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (
+																			  AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
+																	  0));
 
-    // If we have no meshes | no materials now set the INCOMPLETE
-    // scene flag. This is necessary if we failed to load all
-    // models from external files
-    if (!pScene->mNumMeshes || !pScene->mNumMaterials) {
-	    ASSIMP_LOG_WARN("IRR: No meshes loaded, setting AI_SCENE_FLAGS_INCOMPLETE");
-	    pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
-    }
+	// If we have no meshes | no materials now set the INCOMPLETE
+	// scene flag. This is necessary if we failed to load all
+	// models from external files
+	if (!pScene->mNumMeshes || !pScene->mNumMaterials) {
+		ASSIMP_LOG_WARN("IRR: No meshes loaded, setting AI_SCENE_FLAGS_INCOMPLETE");
+		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+	}
 
-// Finished ... everything destructs automatically and all
-// temporary scenes have already been deleted by MergeScenes()
-    delete root;
+	// Finished ... everything destructs automatically and all
+	// temporary scenes have already been deleted by MergeScenes()
+	delete root;
 }
 
 #endif // !! ASSIMP_BUILD_NO_IRR_IMPORTER

@@ -141,6 +141,25 @@ private:
 }; // ! class CIrrXML_IOStreamReader
 */
 
+class XmlNode {
+public:
+	XmlNode()
+    : mNode(nullptr){
+        // empty
+    }
+	XmlNode(pugi::xml_node *node)
+    : mNode(node) {
+        // empty
+	}
+
+    pugi::xml_node *getNode() const {
+		return mNode;
+	}
+
+private:
+	pugi::xml_node *mNode;
+};
+
 class XmlParser {
 public:
 	XmlParser() :
@@ -158,7 +177,7 @@ public:
 		mDoc = nullptr;
     }
 
-    pugi::xml_node *parse(IOStream *stream) {
+    XmlNode *parse(IOStream *stream) {
 		if (nullptr == stream) {
 			return nullptr;
 		}
@@ -168,7 +187,8 @@ public:
 		mDoc = new pugi::xml_document();
 		pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
         if (result.status == pugi::status_ok) {
-			mRoot = &mDoc->root();
+			pugi::xml_node *root = &mDoc->root();
+			mRoot = new XmlNode(root);
         }
 
         return mRoot;
@@ -180,7 +200,7 @@ public:
 
 private:
 	pugi::xml_document *mDoc;
-	pugi::xml_node *mRoot;
+	XmlNode *mRoot;
 	std::vector<char> mData;
 };
 

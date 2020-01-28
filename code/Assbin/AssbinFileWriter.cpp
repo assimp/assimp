@@ -795,13 +795,14 @@ public:
             Write<uint16_t>(out, compressed);
             // ==  20 bytes
 
-            char buff[256];
-            strncpy(buff, pFile, 256);
+            char buff[256] = {0};
+            ai_snprintf(buff, 256, "%s", pFile);
             out->Write(buff, sizeof(char), 256);
 
-            strncpy(buff, cmd, 128);
+            memset(buff, 0, sizeof(buff));
+            ai_snprintf(buff, 128, "%s", cmd);
             out->Write(buff, sizeof(char), 128);
-
+            
             // leave 64 bytes free for future extensions
             memset(buff, 0xcd, 64);
             out->Write(buff, sizeof(char), 64);

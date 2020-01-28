@@ -750,7 +750,7 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 				scene, shortened, compressed);
 		}
 		catch (const std::exception& e) {
-			printf(("assimp dump: " + std::string(e.what())).c_str());
+			printf("%s", ("assimp dump: " + std::string(e.what())).c_str());
 			return AssimpCmdError::ExceptionWasRaised;
 		}
 		catch (...) {

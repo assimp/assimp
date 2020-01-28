@@ -63,6 +63,8 @@ const char* AICMD_MSG_DUMP_HELP =
 #include <assimp/DefaultIOSystem.h>
 #include <code/Assbin/AssbinFileWriter.h>
 
+#include <memory>
+
 FILE* out = NULL;
 bool shortened = false;
 

@@ -39,25 +39,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/** @file  AssbinExporter.cpp
- *  ASSBIN exporter main code
+
+/** @file AssbinFileWriter.h
+ *  @brief Declaration of Assbin file writer.
  */
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-#ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
+#ifndef AI_ASSBINFILEWRITER_H_INC
+#define AI_ASSBINFILEWRITER_H_INC
 
-#include "AssbinFileWriter.h"
-
+#include <assimp/defs.h>
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
-#include <assimp/Exporter.hpp>
 
 namespace Assimp {
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
-    DumpSceneToAssbin(pFile, pIOSystem, pScene, false, false);
-}
-} // end of namespace Assimp
+void ASSIMP_API DumpSceneToAssbin(
+    const char* pFile,
+    IOSystem* pIOSystem,
+    const aiScene* pScene,
+    bool shortened,
+    bool compressed);
 
-#endif // ASSIMP_BUILD_NO_ASSBIN_EXPORTER
-#endif // ASSIMP_BUILD_NO_EXPORT
+}
+
+#endif // AI_ASSBINFILEWRITER_H_INC

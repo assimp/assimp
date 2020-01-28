@@ -126,6 +126,7 @@ enum AssimpCmdError {
 	UnknownFileFormat,
 	NoFileExtensionSpecified,
 	UnknownFileExtension,
+	ExceptionWasRaised,
 
 	// Add new error codes here...
 

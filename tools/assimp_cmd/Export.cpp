@@ -76,13 +76,13 @@ int Assimp_Export(const char* const* params, unsigned int num)
 	const char* const invalid = "assimp export: Invalid number of arguments. See \'assimp export --help\'\n";
 	if (num < 1) {
 		printf(invalid);
-		return 1;
+		return AssimpCmdError::InvalidNumberOfArguments;
 	}
 
 	// --help
 	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
 		printf("%s",AICMD_MSG_EXPORT_HELP_E);
-		return 0;
+		return AssimpCmdError::Success;
 	}
 
 	std::string in  = std::string(params[0]);
@@ -156,7 +156,7 @@ int Assimp_Export(const char* const* params, unsigned int num)
 	// import the  model
 	const aiScene* scene = ImportModel(import,in);
 	if (!scene) {
-		return -39;
+		return AssimpCmdExportError::FailedToImportModel;
 	}
 
 	// derive the final file name
@@ -164,10 +164,10 @@ int Assimp_Export(const char* const* params, unsigned int num)
 
 	// and call the export routine
 	if(!ExportModel(scene, import, out,e->id)) {
-		return -25;
+		return AssimpCmdExportError::FailedToExportModel;
 	}
 	printf("assimp export: wrote output file: %s\n",out.c_str());
-	return 0;
+	return AssimpCmdError::Success;
 }
 
 #endif // no export

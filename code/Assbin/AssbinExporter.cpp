@@ -55,7 +55,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
-    DumpSceneToAssbin(pFile, pIOSystem, pScene, false, false);
+    DumpSceneToAssbin(
+        pFile,
+        "\0", // no command(s).
+        pIOSystem,
+        pScene,
+        false, // shortened?
+        false); // compressed?
 }
 } // end of namespace Assimp
 

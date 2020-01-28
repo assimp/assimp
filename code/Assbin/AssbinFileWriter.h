@@ -55,6 +55,7 @@ namespace Assimp {
 
 void ASSIMP_API DumpSceneToAssbin(
     const char* pFile,
+    const char* cmd,
     IOSystem* pIOSystem,
     const aiScene* pScene,
     bool shortened,

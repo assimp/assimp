@@ -754,7 +754,7 @@ public:
 
     // -----------------------------------------------------------------------------------
     // Write a binary model dump
-    void WriteBinaryDump(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+    void WriteBinaryDump(const char* pFile, const char* cmd, IOSystem* pIOSystem, const aiScene* pScene)
     {
         IOStream * out = pIOSystem->Open( pFile, "wb" );
         if (!out)
@@ -799,7 +799,6 @@ public:
             strncpy(buff, pFile, 256);
             out->Write(buff, sizeof(char), 256);
 
-            char cmd[] = "\0";
             strncpy(buff, cmd, 128);
             out->Write(buff, sizeof(char), 128);
 
@@ -849,10 +848,10 @@ public:
 };
 
 void DumpSceneToAssbin(
-    const char* pFile, IOSystem* pIOSystem,
+    const char* pFile, const char* cmd, IOSystem* pIOSystem,
     const aiScene* pScene, bool shortened, bool compressed) {
     AssbinFileWriter fileWriter(shortened, compressed);
-    fileWriter.WriteBinaryDump(pFile, pIOSystem, pScene);
+    fileWriter.WriteBinaryDump(pFile, cmd, pIOSystem, pScene);
 }
 
 } // end of namespace Assimp

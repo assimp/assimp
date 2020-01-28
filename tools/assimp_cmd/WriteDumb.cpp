@@ -746,7 +746,7 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	if (binary) {
 		try {
 			std::unique_ptr<IOSystem> pIOSystem(new DefaultIOSystem());
-			DumpSceneToAssbin(out.c_str(), pIOSystem.get(),
+			DumpSceneToAssbin(out.c_str(), cmd.c_str(), pIOSystem.get(),
 				scene, shortened, compressed);
 		}
 		catch (const std::exception& e) {

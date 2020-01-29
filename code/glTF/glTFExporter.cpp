@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -100,17 +100,16 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 {
     aiScene* sceneCopy_tmp;
     SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
-    aiScene *sceneCopy(sceneCopy_tmp);
 
     SplitLargeMeshesProcess_Triangle tri_splitter;
     tri_splitter.SetLimit(0xffff);
-    tri_splitter.Execute(sceneCopy);
+    tri_splitter.Execute(sceneCopy_tmp);
 
     SplitLargeMeshesProcess_Vertex vert_splitter;
     vert_splitter.SetLimit(0xffff);
-    vert_splitter.Execute(sceneCopy);
+    vert_splitter.Execute(sceneCopy_tmp);
 
-    mScene = sceneCopy;
+    mScene.reset(sceneCopy_tmp);
 
     mAsset.reset( new glTF::Asset( pIOSystem ) );
 
@@ -870,14 +869,14 @@ void glTFExporter::ExportMetadata()
     asset.version = "1.0";
 
     char buffer[256];
-    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",
+    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%x)",
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;
 
 	// Copyright
 	aiString copyright_str;
-	if (mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
+	if (mScene->mMetaData != nullptr && mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
 		asset.copyright = copyright_str.C_Str();
 	}
 }

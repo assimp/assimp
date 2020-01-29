@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ColladaExporter.h"
 #include <assimp/Bitmap.h>
+#include <assimp/commonMetaData.h>
 #include <assimp/MathFunctions.h>
 #include <assimp/fast_atof.h>
 #include <assimp/SceneCombiner.h>
@@ -277,7 +278,7 @@ void ColladaExporter::WriteHeader() {
         mOutput << startstr << "<author>" << XMLEscape(value.C_Str()) << "</author>" << endstr;
     }
 
-    if (nullptr == meta || !meta->Get("AuthoringTool", value)) {
+    if (nullptr == meta || !meta->Get(AI_METADATA_SOURCE_GENERATOR, value)) {
         mOutput << startstr << "<authoring_tool>" << "Assimp Exporter" << "</authoring_tool>" << endstr;
     } else {
         mOutput << startstr << "<authoring_tool>" << XMLEscape(value.C_Str()) << "</authoring_tool>" << endstr;
@@ -287,7 +288,7 @@ void ColladaExporter::WriteHeader() {
         if (meta->Get("Comments", value)) {
             mOutput << startstr << "<comments>" << XMLEscape(value.C_Str()) << "</comments>" << endstr;
         }
-        if (meta->Get("Copyright", value)) {
+        if (meta->Get(AI_METADATA_SOURCE_COPYRIGHT, value)) {
             mOutput << startstr << "<copyright>" << XMLEscape(value.C_Str()) << "</copyright>" << endstr;
         }
         if (meta->Get("SourceData", value)) {

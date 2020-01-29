@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -373,10 +373,11 @@ void PlyExporter::WriteMeshIndices(const aiMesh* m, unsigned int offset)
 {
     for (unsigned int i = 0; i < m->mNumFaces; ++i) {
         const aiFace& f = m->mFaces[i];
-        mOutput << f.mNumIndices << " ";
+        mOutput << f.mNumIndices;
         for(unsigned int c = 0; c < f.mNumIndices; ++c) {
-            mOutput << (f.mIndices[c] + offset) << (c == f.mNumIndices-1 ? endl : " ");
+            mOutput << " " << (f.mIndices[c] + offset);
         }
+        mOutput << endl;
     }
 }
 

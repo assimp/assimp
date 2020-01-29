@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -42,23 +42,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
-#include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+
 using namespace Assimp;
 
-class ut3DImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3D/box_a.3d", aiProcess_ValidateDataStructure );
-        return nullptr != scene;
-    }
-};
 
-TEST_F( ut3DImportExport, import3DFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST(ut3DImportExport, importBoxA) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box_a.3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(ut3DImportExport, importBoxD) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box_d.3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(ut3DImportExport, importBoxUC) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box.uc", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }

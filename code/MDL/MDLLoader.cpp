@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDL/MDLLoader.h"
 #include "MDL/MDLDefaultColorMap.h"
 #include "MD2/MD2FileData.h"
+#include "MDL/HalfLife/HL1MDLLoader.h"
 
 #include <assimp/qnan.h>
 #include <assimp/StringUtils.h>
@@ -142,6 +143,18 @@ void MDLImporter::SetupProperties(const Importer* pImp)
 
     // AI_CONFIG_IMPORT_MDL_COLORMAP - palette file
     configPalette =  pImp->GetPropertyString(AI_CONFIG_IMPORT_MDL_COLORMAP,"colormap.lmp");
+
+    // Read configuration specific to MDL (Half-Life 1).
+    mHL1ImportSettings.read_animations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS, true);
+    if (mHL1ImportSettings.read_animations) {
+        mHL1ImportSettings.read_animation_events = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS, true);
+        mHL1ImportSettings.read_blend_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BLEND_CONTROLLERS, true);
+        mHL1ImportSettings.read_sequence_transitions = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_SEQUENCE_TRANSITIONS, true);
+    }
+    mHL1ImportSettings.read_attachments = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_ATTACHMENTS, true);
+    mHL1ImportSettings.read_bone_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS, true);
+    mHL1ImportSettings.read_hitboxes = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES, true);
+    mHL1ImportSettings.read_misc_global_info = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -166,83 +179,104 @@ void MDLImporter::InternReadFile( const std::string& pFile,
     }
 
     // This should work for all other types of MDL files, too ...
-    // the quake header is one of the smallest, afaik
+    // the HL1 sequence group header is one of the smallest, afaik
     iFileSize = (unsigned int)file->FileSize();
-    if( iFileSize < sizeof(MDL::Header)) {
+    if( iFileSize < sizeof(MDL::HalfLife::SequenceHeader_HL1)) {
         throw DeadlyImportError( "MDL File is too small.");
     }
+    
+    // delete the file buffer and cleanup.
+    auto DeleteBufferAndCleanup = [&]() {
+        if (mBuffer) {
+            delete [] mBuffer;
+            mBuffer = nullptr;
+        }
+        AI_DEBUG_INVALIDATE_PTR(pIOHandler);
+        AI_DEBUG_INVALIDATE_PTR(pScene);
+    };
+    
+    try {
+        // Allocate storage and copy the contents of the file to a memory buffer
+        mBuffer = new unsigned char[iFileSize+1];
+        file->Read( (void*)mBuffer, 1, iFileSize);
 
-    // Allocate storage and copy the contents of the file to a memory buffer
-    mBuffer =new unsigned char[iFileSize+1];
-    file->Read( (void*)mBuffer, 1, iFileSize);
+        // Append a binary zero to the end of the buffer.
+        // this is just for safety that string parsing routines
+        // find the end of the buffer ...
+        mBuffer[iFileSize] = '\0';
+        const uint32_t iMagicWord = *((uint32_t*)mBuffer);
 
-    // Append a binary zero to the end of the buffer.
-    // this is just for safety that string parsing routines
-    // find the end of the buffer ...
-    mBuffer[iFileSize] = '\0';
-    const uint32_t iMagicWord = *((uint32_t*)mBuffer);
+        // Determine the file subtype and call the appropriate member function
 
-    // Determine the file subtype and call the appropriate member function
+        // Original Quake1 format
+        if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord || AI_MDL_MAGIC_NUMBER_LE == iMagicWord)   {
+            ASSIMP_LOG_DEBUG("MDL subtype: Quake 1, magic word is IDPO");
+            iGSFileVersion = 0;
+            InternReadFile_Quake1();
+        }
+        // GameStudio A<old> MDL2 format - used by some test models that come with 3DGS
+        else if (AI_MDL_MAGIC_NUMBER_BE_GS3 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS3 == iMagicWord)  {
+            ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A2, magic word is MDL2");
+            iGSFileVersion = 2;
+            InternReadFile_Quake1();
+        }
+        // GameStudio A4 MDL3 format
+        else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS4 == iMagicWord)  {
+            ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A4, magic word is MDL3");
+            iGSFileVersion = 3;
+            InternReadFile_3DGS_MDL345();
+        }
+        // GameStudio A5+ MDL4 format
+        else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5a == iMagicWord)    {
+            ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A4, magic word is MDL4");
+            iGSFileVersion = 4;
+            InternReadFile_3DGS_MDL345();
+        }
+        // GameStudio A5+ MDL5 format
+        else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5b == iMagicWord)    {
+            ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A5, magic word is MDL5");
+            iGSFileVersion = 5;
+            InternReadFile_3DGS_MDL345();
+        }
+        // GameStudio A7 MDL7 format
+        else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)  {
+            ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A7, magic word is MDL7");
+            iGSFileVersion = 7;
+            InternReadFile_3DGS_MDL7();
+        }
+        // IDST/IDSQ Format (CS:S/HL^2, etc ...)
+        else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
+            AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
+        {
+            iGSFileVersion = 0;
 
-    // Original Quake1 format
-    if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord || AI_MDL_MAGIC_NUMBER_LE == iMagicWord)   {
-        ASSIMP_LOG_DEBUG("MDL subtype: Quake 1, magic word is IDPO");
-        iGSFileVersion = 0;
-        InternReadFile_Quake1();
-    }
-    // GameStudio A<old> MDL2 format - used by some test models that come with 3DGS
-    else if (AI_MDL_MAGIC_NUMBER_BE_GS3 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS3 == iMagicWord)  {
-        ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A2, magic word is MDL2");
-        iGSFileVersion = 2;
-        InternReadFile_Quake1();
-    }
-    // GameStudio A4 MDL3 format
-    else if (AI_MDL_MAGIC_NUMBER_BE_GS4 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS4 == iMagicWord)  {
-        ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A4, magic word is MDL3");
-        iGSFileVersion = 3;
-        InternReadFile_3DGS_MDL345();
-    }
-    // GameStudio A5+ MDL4 format
-    else if (AI_MDL_MAGIC_NUMBER_BE_GS5a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5a == iMagicWord)    {
-        ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A4, magic word is MDL4");
-        iGSFileVersion = 4;
-        InternReadFile_3DGS_MDL345();
-    }
-    // GameStudio A5+ MDL5 format
-    else if (AI_MDL_MAGIC_NUMBER_BE_GS5b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS5b == iMagicWord)    {
-        ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A5, magic word is MDL5");
-        iGSFileVersion = 5;
-        InternReadFile_3DGS_MDL345();
-    }
-    // GameStudio A7 MDL7 format
-    else if (AI_MDL_MAGIC_NUMBER_BE_GS7 == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_GS7 == iMagicWord)  {
-        ASSIMP_LOG_DEBUG("MDL subtype: 3D GameStudio A7, magic word is MDL7");
-        iGSFileVersion = 7;
-        InternReadFile_3DGS_MDL7();
-    }
-    // IDST/IDSQ Format (CS:S/HL^2, etc ...)
-    else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
-        AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord)
-    {
-        ASSIMP_LOG_DEBUG("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
-        iGSFileVersion = 0;
-        InternReadFile_HL2();
-    }
-    else    {
-        // print the magic word to the log file
-        throw DeadlyImportError( "Unknown MDL subformat " + pFile +
-            ". Magic word (" + std::string((char*)&iMagicWord,4) + ") is not known");
-    }
+            HalfLife::HalfLifeMDLBaseHeader *pHeader = (HalfLife::HalfLifeMDLBaseHeader *)mBuffer;
+            if (pHeader->version == AI_MDL_HL1_VERSION)
+            {
+                ASSIMP_LOG_DEBUG("MDL subtype: Half-Life 1/Goldsrc Engine, magic word is IDST/IDSQ");
+                InternReadFile_HL1(pFile, iMagicWord);
+            }
+            else
+            {
+                ASSIMP_LOG_DEBUG("MDL subtype: Source(tm) Engine, magic word is IDST/IDSQ");
+                InternReadFile_HL2();
+            }
+        }
+        else {
+            // print the magic word to the log file
+            throw DeadlyImportError( "Unknown MDL subformat " + pFile +
+                ". Magic word (" + std::string((char*)&iMagicWord,4) + ") is not known");
+        }
 
-    // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-    pScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
-        0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
+        // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+        pScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
+            0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
 
-    // delete the file buffer and cleanup
-    delete [] mBuffer;
-    mBuffer= nullptr;
-    AI_DEBUG_INVALIDATE_PTR(pIOHandler);
-    AI_DEBUG_INVALIDATE_PTR(pScene);
+        DeleteBufferAndCleanup();
+    } catch(...) {
+        DeleteBufferAndCleanup();
+        throw;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1552,7 +1586,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 				const size_t maxSize(buffersize - (i*AI_MDL7_MAX_GROUPNAMESIZE));
 				pcNode->mName.length = ai_snprintf(szBuffer, maxSize, "Group_%u", p);
 			} else {
-				pcNode->mName.length = ::strlen(szBuffer);
+				pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
 			}
             ::strncpy(pcNode->mName.data,szBuffer,MAXLEN-1);
             ++p;
@@ -1953,6 +1987,23 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
         pcMatOut->AddProperty<int>(&iVal,1,AI_MATKEY_UVWSRC_DIFFUSE(1));
         pcMatOut->AddProperty(&sString,AI_MATKEY_TEXTURE_DIFFUSE(1));
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Read a Half-life 1 MDL
+void MDLImporter::InternReadFile_HL1(const std::string& pFile, const uint32_t iMagicWord)
+{
+    // We can't correctly load an MDL from a MDL "sequence" file.
+    if (iMagicWord == AI_MDL_MAGIC_NUMBER_BE_HL2b || iMagicWord == AI_MDL_MAGIC_NUMBER_LE_HL2b)
+        throw DeadlyImportError("Impossible to properly load a model from an MDL sequence file.");
+
+    // Read the MDL file.
+    HalfLife::HL1MDLLoader loader(
+        pScene,
+        pIOHandler,
+        mBuffer,
+        pFile,
+        mHL1ImportSettings);
 }
 
 // ------------------------------------------------------------------------------------------------

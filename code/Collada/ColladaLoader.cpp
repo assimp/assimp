@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -963,17 +963,37 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
 
     // catch special case: many animations with the same length, each affecting only a single node.
     // we need to unite all those single-node-anims to a proper combined animation
-    for( size_t a = 0; a < mAnims.size(); ++a) {
+    for(size_t a = 0; a < mAnims.size(); ++a) {
         aiAnimation* templateAnim = mAnims[a];
-        if( templateAnim->mNumChannels == 1) {
+
+        if (templateAnim->mNumChannels == 1) {
             // search for other single-channel-anims with the same duration
             std::vector<size_t> collectedAnimIndices;
             for( size_t b = a+1; b < mAnims.size(); ++b) {
                 aiAnimation* other = mAnims[b];
                 if (other->mNumChannels == 1 && other->mDuration == templateAnim->mDuration &&
                     other->mTicksPerSecond == templateAnim->mTicksPerSecond)
-                    collectedAnimIndices.push_back(b);
+						collectedAnimIndices.push_back(b);
             }
+
+			// We only want to combine the animations if they have different channels
+			std::set<std::string> animTargets;
+			animTargets.insert(templateAnim->mChannels[0]->mNodeName.C_Str());
+			bool collectedAnimationsHaveDifferentChannels = true;
+			for (size_t b = 0; b < collectedAnimIndices.size(); ++b)
+			{
+				aiAnimation* srcAnimation = mAnims[collectedAnimIndices[b]];
+				std::string channelName = std::string(srcAnimation->mChannels[0]->mNodeName.C_Str());
+				if (animTargets.find(channelName) == animTargets.end()) {
+					animTargets.insert(channelName);
+				} else {
+					collectedAnimationsHaveDifferentChannels = false;
+					break;
+				}
+			}
+
+			if (!collectedAnimationsHaveDifferentChannels)
+				continue;
 
             // if there are other animations which fit the template anim, combine all channels into a single anim
             if (!collectedAnimIndices.empty())

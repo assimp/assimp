@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -798,7 +798,7 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
         if (!pTexture->mWidth) {
             ReportError("aiTexture::mWidth is zero (compressed texture)");
         }
-        if ('\0' != pTexture->achFormatHint[3]) {
+        if ('\0' != pTexture->achFormatHint[HINTMAXTEXTURELEN - 1]) {
             ReportWarning("aiTexture::achFormatHint must be zero-terminated");
         }
         else if ('.'  == pTexture->achFormatHint[0])    {

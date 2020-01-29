@@ -4,6 +4,8 @@
 # clone directory
 clone_folder: c:\projects\assimp
 
+clone_depth: 1
+
 # branches to build
 branches:
   # whitelist
@@ -15,10 +17,10 @@ matrix:
     
 image:
   - Visual Studio 2013
-  - Visual Studio 2015
-  - Visual Studio 2017
+  #- Visual Studio 2015
+  #- Visual Studio 2017
   - Visual Studio 2019
-  - MinGW  
+  #- MinGW  
     
 platform:
   - Win32
@@ -52,11 +54,11 @@ cache:
   - bin\.mtime_cache
   
 before_build:
+  - echo NUMBER_OF_PROCESSORS=%NUMBER_OF_PROCESSORS%
   - ruby scripts\AppVeyor\mtime_cache -g scripts\AppVeyor\cacheglobs.txt -c bin\.mtime_cache\cache.json
   
-build:
-  parallel: true
-  project: Assimp.sln
+build_script:
+  cmake --build . --config Release -- /maxcpucount:2
   
 after_build:
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (

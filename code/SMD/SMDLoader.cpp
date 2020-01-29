@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "SMDLoader.h"
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #define strtok_s strtok_r
 #endif
 
@@ -616,7 +616,7 @@ void SMDImporter::CreateOutputMaterials() {
         if (aszTextures[iMat].length())
         {
             ::strncpy(szName.data, aszTextures[iMat].c_str(),MAXLEN-1);
-            szName.length = aszTextures[iMat].length();
+            szName.length = (ai_uint32)aszTextures[iMat].length();
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }

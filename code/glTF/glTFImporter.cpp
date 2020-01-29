@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -703,7 +703,8 @@ void glTFImporter::ImportCommonMetadata(glTF::Asset& a)
     ai_assert(mScene->mMetaData == nullptr);
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
-    if (hasVersion || hasGenerator)
+    const bool hasCopyright = !a.asset.copyright.empty();
+    if (hasVersion || hasGenerator || hasCopyright)
     {
         mScene->mMetaData = new aiMetadata;
         if (hasVersion)
@@ -713,6 +714,10 @@ void glTFImporter::ImportCommonMetadata(glTF::Asset& a)
         if (hasGenerator)
         {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+        if (hasCopyright)
+        {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
         }
     }
 }

@@ -1421,7 +1421,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
         avOutList[i].reserve(3);
 
     // buffer to held the names of all groups in the file
-	const size_t buffersize( AI_MDL7_MAX_GROUPNAMESIZE*pcHeader->groups_num );
+    const size_t buffersize(AI_MDL7_MAX_GROUPNAMESIZE*pcHeader->groups_num);
 	char* aszGroupNameBuffer = new char[ buffersize ];
 
     // read all groups

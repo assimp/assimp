@@ -248,8 +248,9 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
 	mat->AddProperty(&c, 1, AI_MATKEY_COLOR_DIFFUSE);
 	mScene->mMaterials[0] = mat;
 
-	if (!m3d->nummaterial || !m3d->material)
+	if (!m3d->nummaterial || !m3d->material) {
 		return;
+    }
 
 	for (i = 0; i < m3d->nummaterial; i++) {
 		m = &m3d->material[i];

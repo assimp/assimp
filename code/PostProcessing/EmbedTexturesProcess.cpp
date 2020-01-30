@@ -128,7 +128,8 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     auto oldTextures = pScene->mTextures;
     pScene->mTextures = new aiTexture*[pScene->mNumTextures];
     ::memmove(pScene->mTextures, oldTextures, sizeof(aiTexture*) * (pScene->mNumTextures - 1u));
-
+    delete [] oldTextures;
+    
     // Add the new texture
     auto pTexture = new aiTexture;
     pTexture->mHeight = 0; // Means that this is still compressed

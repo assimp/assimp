@@ -353,7 +353,7 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
                     if (path[0] == '*') { // embedded
                         aiTexture* tex = mScene->mTextures[atoi(&path[1])];
 						
-						prop.texture->source->name = tex->mFilename.C_Str();
+                        prop.texture->source->name = tex->mFilename.C_Str();
 
                         uint8_t* data = reinterpret_cast<uint8_t*>(tex->pcData);
                         prop.texture->source->SetData(data, tex->mWidth, *mAsset);

@@ -39,30 +39,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/** @file  AssxmlExporter.cpp
- *  ASSXML exporter main code
+
+/** @file AssxmlFileWriter.h
+ *  @brief Declaration of Assxml file writer.
  */
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-#ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
+#ifndef AI_ASSXMLFILEWRITER_H_INC
+#define AI_ASSXMLFILEWRITER_H_INC
 
-#include "AssxmlFileWriter.h"
+#include <assimp/defs.h>
+#include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
-#include <assimp/Exporter.hpp>
 
-namespace Assimp    {
+namespace Assimp {
 
-void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
-{
-    DumpSceneToAssxml(
-        pFile,
-        "\0", // command(s)
-        pIOSystem,
-        pScene,
-        false); // shortened?
+void ASSIMP_API DumpSceneToAssxml(
+    const char* pFile,
+    const char* cmd,
+    IOSystem* pIOSystem,
+    const aiScene* pScene,
+    bool shortened);
+
 }
 
-} // end of namespace Assimp
-
-#endif // ASSIMP_BUILD_NO_ASSXML_EXPORTER
-#endif // ASSIMP_BUILD_NO_EXPORT
+#endif // AI_ASSXMLFILEWRITER_H_INC

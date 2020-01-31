@@ -345,8 +345,8 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
         uint8_t *data, uint8_t *pal, aiTexture *pResult,
         aiColor3D &last_palette_color) {
     pResult->mFilename = ptexture->name;
-    pResult->mWidth = outwidth;
-    pResult->mHeight = outheight;
+    pResult->mWidth = static_cast<unsigned int>(ptexture->width);
+    pResult->mHeight = static_cast<unsigned int>(ptexture->height);
     pResult->achFormatHint[0] = 'r';
     pResult->achFormatHint[1] = 'g';
     pResult->achFormatHint[2] = 'b';

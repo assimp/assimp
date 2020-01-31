@@ -331,11 +331,15 @@ ADD_ASSIMP_IMPORTER( ASSBIN
 ADD_ASSIMP_EXPORTER( ASSBIN
   Assbin/AssbinExporter.h
   Assbin/AssbinExporter.cpp
+  Assbin/AssbinFileWriter.h
+  Assbin/AssbinFileWriter.cpp
 )
 
 ADD_ASSIMP_EXPORTER( ASSXML
   Assxml/AssxmlExporter.h
   Assxml/AssxmlExporter.cpp
+  Assxml/AssxmlFileWriter.h
+  Assxml/AssxmlFileWriter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( B3D

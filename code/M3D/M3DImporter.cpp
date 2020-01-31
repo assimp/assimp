@@ -110,8 +110,8 @@ using namespace std;
 //  Default constructor
 M3DImporter::M3DImporter() :
 		mScene(nullptr) {
-    // empty
-}
+			// empty
+		}
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is a binary or ASCII Model 3D file.
@@ -128,8 +128,14 @@ bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 		if (!pIOHandler) {
 			return true;
 		}
+		/*
+         * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
+         * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
 
-        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
+        const char* tokens[] = {"3DMO", "3dmo"};
+        return CheckMagicToken(pIOHandler,pFile,tokens,2,0,4);
+        */
+		std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
 		unsigned char data[4];
 		if (4 != pStream->Read(data, 1, 4)) {
 			return false;
@@ -140,8 +146,7 @@ bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 #endif
 		;
 	}
-	
-    return false;
+	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -247,53 +252,50 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
 
 	if (!m3d->nummaterial || !m3d->material) {
 		return;
-    }
+	}
 
 	for (i = 0; i < m3d->nummaterial; i++) {
 		m = &m3d->material[i];
 		aiMaterial *mat = new aiMaterial;
 		name.Set(std::string(m->name));
 		mat->AddProperty(&name, AI_MATKEY_NAME);
-		for (j = 0; j < m->numprop; ++j) {
+		for (j = 0; j < m->numprop; j++) {
 			// look up property type
 			// 0 - 127 scalar values,
 			// 128 - 255 the same properties but for texture maps
 			k = 256;
-			for (l = 0; l < sizeof(m3d_propertytypes) / sizeof(m3d_propertytypes[0]); ++l) {
+			for (l = 0; l < sizeof(m3d_propertytypes) / sizeof(m3d_propertytypes[0]); l++)
 				if (m->prop[j].type == m3d_propertytypes[l].id ||
 						m->prop[j].type == m3d_propertytypes[l].id + 128) {
 					k = l;
 					break;
 				}
-                // should never happen, but be safe than sorry
-                if (k == 256) {
-                    continue;
-                }
+			// should never happen, but be safe than sorry
+			if (k == 256) continue;
 
-                // scalar properties
-                if (m->prop[j].type < 128 && aiProps[k].pKey) {
-                    switch (m3d_propertytypes[k].format) {
-                        case m3dpf_color:
-                            c = mkColor(m->prop[j].value.color);
-                            mat->AddProperty(&c, 1, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
-                            break;
-                        case m3dpf_float:
-                            f = m->prop[j].value.fnum;
-                            mat->AddProperty(&f, 1, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
-                            break;
-                        default:
-                            n = m->prop[j].value.num;
-                            if (m->prop[j].type == m3dp_il) {
-                                switch (n) {
-                                    case 0: n = aiShadingMode_NoShading; break;
-                                    case 2: n = aiShadingMode_Phong; break;
-                                    default: n = aiShadingMode_Gouraud; break;
-                                }
-                            }
-                            mat->AddProperty(&n, 1, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
-                            break;
-                    }
-                }
+			// scalar properties
+			if (m->prop[j].type < 128 && aiProps[k].pKey) {
+				switch (m3d_propertytypes[k].format) {
+					case m3dpf_color:
+						c = mkColor(m->prop[j].value.color);
+						mat->AddProperty(&c, 1, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
+						break;
+					case m3dpf_float:
+						f = m->prop[j].value.fnum;
+						mat->AddProperty(&f, 1, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
+						break;
+					default:
+						n = m->prop[j].value.num;
+						if (m->prop[j].type == m3dp_il) {
+							switch (n) {
+								case 0: n = aiShadingMode_NoShading; break;
+								case 2: n = aiShadingMode_Phong; break;
+								default: n = aiShadingMode_Gouraud; break;
+							}
+						}
+						mat->AddProperty(&n, 1, aiProps[k].pKey, aiProps[k].type, aiProps[k].index);
+						break;
+				}
 			}
 			// texture map properties
 			if (m->prop[j].type >= 128 && aiTxProps[k].pKey &&
@@ -314,11 +316,12 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
 // import textures, this is the simplest of all
 void M3DImporter::importTextures(const M3DWrapper &m3d) {
 	unsigned int i;
-	static const char *formatHint[] = { 
-        "rgba0800", 
-        "rgba0808", 
-        "rgba8880", 
-        "rgba8888" };
+	const char *formatHint[] = {
+		"rgba0800",
+		"rgba0808",
+		"rgba8880",
+		"rgba8888"
+	};
 	m3dtx_t *t;
 
 	ai_assert(mScene != nullptr);
@@ -329,7 +332,7 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 
 	if (!m3d->numtexture || !m3d->texture) {
 		return;
-    }
+	}
 
 	mScene->mTextures = new aiTexture *[m3d->numtexture];
 	for (i = 0; i < m3d->numtexture; i++) {
@@ -398,7 +401,7 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 
 	if (!m3d->numface || !m3d->face || !m3d->numvertex || !m3d->vertex) {
 		return;
-    }
+	}
 
 	for (i = 0; i < m3d->numface; i++) {
 		// we must switch mesh if material changes
@@ -482,12 +485,12 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 	}
 
 	delete meshes;
-	delete faces;
-	delete vertices;
-	delete normals;
-	delete texcoords;
-	delete colors;
-	delete vertexids;
+	if (faces) delete faces;
+	if (vertices) delete vertices;
+	if (normals) delete normals;
+	if (texcoords) delete texcoords;
+	if (colors) delete colors;
+	if (vertexids) delete vertexids;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -503,13 +506,13 @@ void M3DImporter::importBones(const M3DWrapper &m3d, unsigned int parentid, aiNo
 
 	if (!m3d->numbone || !m3d->bone) {
 		return;
-    }
+	}
 
 	for (n = 0, i = parentid + 1; i < m3d->numbone; i++) {
 		if (m3d->bone[i].parent == parentid) {
-            n++;
-        }
-    }
+			n++;
+		}
+	}
 	pParent->mChildren = new aiNode *[n];
 
 	for (i = parentid + 1; i < m3d->numbone; i++) {
@@ -544,7 +547,7 @@ void M3DImporter::importAnimations(const M3DWrapper &m3d) {
 
 	if (!m3d->numaction || !m3d->action || !m3d->numbone || !m3d->bone || !m3d->vertex) {
 		return;
-    }
+	}
 
 	mScene->mAnimations = new aiAnimation *[m3d->numaction];
 	for (i = 0; i < m3d->numaction; i++) {
@@ -659,12 +662,13 @@ aiNode *M3DImporter::findNode(aiNode *pNode, aiString name) {
 
 	if (pNode->mName == name) {
 		return pNode;
-    }
-	for ( unsigned int i = 0; i < pNode->mNumChildren; i++) {
+	}
+
+	for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
 		aiNode *pChild = findNode(pNode->mChildren[i], name);
 		if (pChild) {
-            return pChild;
-        }
+			return pChild;
+		}
 	}
 	return nullptr;
 }
@@ -726,8 +730,7 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 		// this is complicated, because M3D stores a list of bone id / weight pairs per
 		// vertex but assimp uses lists of local vertex id/weight pairs per local bone list
 		pMesh->mNumBones = m3d->numbone;
-		
-        // we need aiBone with mOffsetMatrix for bones without weights as well
+		// we need aiBone with mOffsetMatrix for bones without weights as well
 		if (pMesh->mNumBones && m3d->numbone && m3d->bone) {
 			pMesh->mBones = new aiBone *[pMesh->mNumBones];
 			for (unsigned int i = 0; i < m3d->numbone; i++) {
@@ -743,16 +746,17 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 					pMesh->mBones[i]->mOffsetMatrix = aiMatrix4x4();
 			}
 			if (vertexids->size() && m3d->numvertex && m3d->vertex && m3d->numskin && m3d->skin) {
+				unsigned int i, j;
 				// first count how many vertices we have per bone
-				for (unsigned int i = 0; i < vertexids->size(); i++) {
-					if (vertexids->at(i) >= m3d->numvertex) {
-                        continue;
-                    }
+				for (i = 0; i < vertexids->size(); i++) {
+					if(vertexids->at(i) >= m3d->numvertex) {
+						continue;
+					}
 					unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
 					if (s != M3D_UNDEF && s != M3D_INDEXMAX) {
 						for (unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
 							aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
-							for (unsigned int j = 0; j < pMesh->mNumBones; j++) {
+							for (j = 0; j < pMesh->mNumBones; j++) {
 								if (pMesh->mBones[j]->mName == name) {
 									pMesh->mBones[j]->mNumWeights++;
 									break;
@@ -761,8 +765,7 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 						}
 					}
 				}
-
-                // allocate mWeights
+				// allocate mWeights
 				for (j = 0; j < pMesh->mNumBones; j++) {
 					aiBone *pBone = pMesh->mBones[j];
 					if (pBone->mNumWeights) {

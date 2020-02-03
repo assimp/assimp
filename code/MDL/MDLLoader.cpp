@@ -1422,10 +1422,10 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 
     // buffer to held the names of all groups in the file
     const size_t buffersize(AI_MDL7_MAX_GROUPNAMESIZE*pcHeader->groups_num);
-	char* aszGroupNameBuffer = new char[ buffersize ];
+    char* aszGroupNameBuffer = new char[ buffersize ];
 
     // read all groups
-    for (unsigned int iGroup = 0; iGroup < (unsigned int)pcHeader->groups_num;++iGroup) {
+    for (unsigned int iGroup = 0; iGroup < (unsigned int)pcHeader->groups_num; ++iGroup) {
         MDL::IntGroupInfo_MDL7 groupInfo((BE_NCONST MDL::Group_MDL7*)szCurrent,iGroup);
         szCurrent = (const unsigned char*)(groupInfo.pcGroup+1);
 

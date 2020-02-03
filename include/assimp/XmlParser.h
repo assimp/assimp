@@ -141,43 +141,55 @@ private:
 }; // ! class CIrrXML_IOStreamReader
 */
 
-class XmlNode {
-public:
-	XmlNode()
-    : mNode(nullptr){
-        // empty
-    }
-	XmlNode(pugi::xml_node *node)
-    : mNode(node) {
+struct find_node_by_name_predicate {
+	std::string mName;
+	find_node_by_name_predicate(const std::string &name) :
+			mName(name) {
         // empty
 	}
 
-    pugi::xml_node *getNode() const {
-		return mNode;
+	bool operator()(pugi::xml_node node) const {
+		return node.name() == mName;
 	}
-
-private:
-	pugi::xml_node *mNode;
 };
 
-class XmlParser {
+
+template<class TNodeType>
+class TXmlParser {
 public:
-	XmlParser() :
+	TXmlParser() :
 			mDoc(nullptr), mRoot(nullptr), mData() {
         // empty
 	}
 
-    ~XmlParser() {
+    ~TXmlParser() {
 		clear();
     }
 
     void clear() {
 		mData.resize(0);
+		mRoot = nullptr;
 		delete mDoc;
 		mDoc = nullptr;
     }
 
-    XmlNode *parse(IOStream *stream) {
+    TNodeType *findNode(const std::string &name) {
+		if (name.empty()) {
+			return nullptr;
+		}
+		if (nullptr == mDoc) {
+			return nullptr;
+        }
+
+        find_node_by_name_predicate predicate(name);
+		pugi::xml_node node = mDoc->find_node(predicate);
+		if (node.empty()) {
+			return nullptr;
+        }
+
+    }
+
+    TNodeType *parse(IOStream *stream) {
 		if (nullptr == stream) {
 			return nullptr;
 		}
@@ -187,8 +199,7 @@ public:
 		mDoc = new pugi::xml_document();
 		pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
         if (result.status == pugi::status_ok) {
-			pugi::xml_node *root = &mDoc->root();
-			mRoot = new XmlNode(root);
+			mRoot = &mDoc->root();
         }
 
         return mRoot;
@@ -198,11 +209,17 @@ public:
 		return mDoc;
     }
 
+    TNodeType *getRootNode() const {
+		return mRoot;
+    }
+
 private:
 	pugi::xml_document *mDoc;
-	XmlNode *mRoot;
+	TNodeType *mRoot;
 	std::vector<char> mData;
 };
+
+using XmlParser = TXmlParser<pugi::xml_node>;
 
 } // namespace Assimp
 

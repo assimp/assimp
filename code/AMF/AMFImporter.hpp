@@ -272,15 +272,15 @@ private:
 	/// \throw DeadlyImportError.
 	/// \param [in] pNodeType - type of node which defined one more time.
 	/// \param [in] pDescription - message about error. E.g. what the node defined while exception raised.
-	void Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription);
+	void Throw_MoreThanOnceDefined(const std::string &nodeType, const std::string &nodeName, const std::string &pDescription);
 
 	/// Call that function when referenced element ID are not found in graph and exception must be raised.
 	/// \param [in] pID - ID of of element which not found.
 	/// \throw DeadlyImportError.
 	void Throw_ID_NotFound(const std::string& pID) const;
 
-	/// Check if current node have children: <node>...</node>. If not then exception will throwed.
-	void XML_CheckNode_MustHaveChildren();
+	/// Check if current node have children: <node>...</node>. If not then exception will thrown.
+	void XML_CheckNode_MustHaveChildren(XmlNode *node);
 
 	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
@@ -292,7 +292,7 @@ private:
 
 	/// Skip unsupported node and report about that. Depend on node name can be skipped begin tag of node all whole node.
 	/// \param [in] pParentNodeName - parent node name. Used for reporting.
-	void XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName);
+	//void XML_CheckNode_SkipUnsupported(XmlNode *node, const std::string &pParentNodeName);
 
 	/// Search for specified node in file. XML file read pointer(mReader) will point to found node or file end after search is end.
 	/// \param [in] pNodeName - requested node name.

@@ -92,6 +92,7 @@ void AMFImporter::Clear() {
 AMFImporter::~AMFImporter() {
 	if (mReader != nullptr) {
 		delete mReader;
+		mReader = nullptr;
 	}
 
 	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
@@ -157,11 +158,11 @@ void AMFImporter::Throw_IncorrectAttr(const std::string &nodeName, const std::st
 }
 
 void AMFImporter::Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) {
-	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
+	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + nodeName + "> has incorrect value.");
 }
 
-void AMFImporter::Throw_MoreThanOnceDefined(const std::string &pNodeType, const std::string &pDescription) {
-	throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + mReader->getNodeName() + ". Description: " + pDescription);
+void AMFImporter::Throw_MoreThanOnceDefined(const std::string &nodeType, const std::string &nodeName, const std::string &pDescription) {
+	throw DeadlyImportError("\"" + nodeType + "\" node can be used only once in " + nodeName + ". Description: " + pDescription);
 }
 
 void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
@@ -172,11 +173,14 @@ void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
 /************************************************************* Functions: XML set ************************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::XML_CheckNode_MustHaveChildren() {
-	if (mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
+void AMFImporter::XML_CheckNode_MustHaveChildren( XmlNode *node ) {
+	//if (mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
+	if (node->getNode()->children().begin() == node->getNode()->children().end()) {
+		throw DeadlyImportError(std::string("Node <") + std::string(node->getNode()->name()) + "> must have children.");
+    }
 }
 
-void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
+/*void AMFImporter::XML_CheckNode_SkipUnsupported(XmlNode *node, const std::string &pParentNodeName) {
 	static const size_t Uns_Skip_Len = 3;
 	const char *Uns_Skip[Uns_Skip_Len] = { "composite", "edge", "normal" };
 
@@ -216,9 +220,10 @@ casu_cres:
 		ASSIMP_LOG_WARN_F("Skipping node \"", nn, "\" in ", pParentNodeName, ".");
 	}
 }
-
+*/
 bool AMFImporter::XML_SearchNode(const std::string &pNodeName) {
-	mReader->while (mReader->read()) {
+	
+    mReader->while (mReader->read()) {
 		//if((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
 		if ((mReader->getNodeType() == pugi::node_element) && XML_CheckNode_NameEqual(pNodeName)) {
 			return true;
@@ -594,7 +599,7 @@ void AMFImporter::ParseNode_Object(XmlNode *nodeInst) {
 	for (pugi::xml_attribute_iterator ait = node->attributes_begin(); ait != node->attributes_end(); ++ait) {
 		if (ait->name() == "id") {
 			id = ait->as_string();
-        }
+		}
 	}
 	// Read attributes for node <object>.
 	/*MACRO_ATTRREAD_LOOPBEG;
@@ -612,11 +617,13 @@ void AMFImporter::ParseNode_Object(XmlNode *nodeInst) {
 
 	// Check for child nodes
 
-    for (pugi::xml_node_iterator it = node->children().begin(); it != node->children->end(); ++it) {
+	for (pugi::xml_node_iterator it = node->children().begin(); it != node->children->end(); ++it) {
 		bool col_read = false;
 		if (it->name() == "mesh") {
-			ParseNode_Mesh( it );
-		}
+			ParseNode_Mesh(*it);
+		} else if (it->name() == "metadata") {
+			ParseNode_Metadata(*it);
+        }
 	}
 	if (!mReader->isEmptyElement()) {
 		bool col_read = false;

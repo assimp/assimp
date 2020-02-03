@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -352,10 +352,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     if (path[0] == '*') { // embedded
                         aiTexture* tex = mScene->mTextures[atoi(&path[1])];
 
-                        // copy data since lifetime control is handed over to the asset
-                        uint8_t* data = new uint8_t[tex->mWidth];
-                        memcpy(data, tex->pcData, tex->mWidth);
-                        texture->source->SetData(data, tex->mWidth, *mAsset);
+                        // The asset has its own buffer, see Image::SetData
+                        texture->source->SetData(reinterpret_cast<uint8_t*> (tex->pcData), tex->mWidth, *mAsset);
 
                         if (tex->achFormatHint[0]) {
                             std::string mimeType = "image/";
@@ -993,7 +991,7 @@ void glTF2Exporter::ExportMetadata()
     asset.version = "2.0";
 
     char buffer[256];
-    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",
+    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%x)",
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;

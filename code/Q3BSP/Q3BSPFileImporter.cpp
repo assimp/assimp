@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -616,7 +616,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *model
             // We'll leave it up to the user to figure out which extension the file has.
             aiString name;
             strncpy( name.data, pTexture->strName, sizeof name.data );
-            name.length = strlen( name.data );
+            name.length = (ai_uint32)strlen( name.data );
             pMatHelper->AddProperty( &name, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
         }
     }

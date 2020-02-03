@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -42,23 +42,81 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
-#include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+
 using namespace Assimp;
 
-class utACImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/AC/Wuson.ac", aiProcess_ValidateDataStructure );
-        return nullptr != scene;
-    }
-};
 
-TEST_F( utACImportExport, importACFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST(utACImportExport, importClosedLine) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/closedLine.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }
+
+
+TEST(utACImportExport, importNoSurfaces) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/nosurfaces.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importOpenLine) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/openLine.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importSampleSubdiv) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/sample_subdiv.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importSphereWithLight) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importSphereWithLightUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight_UTF16LE.ac", aiProcess_ValidateDataStructure);
+    // FIXME: this is probably wrong, loading the file should succeed
+    ASSERT_EQ(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importSphereWithLightUTF8BOM) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight_UTF8BOM.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importSphereWithLightUvScaling4X) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLightUvScaling4X.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, importWuson) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/Wuson.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(utACImportExport, testFormatDetection) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/TestFormatDetection", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+

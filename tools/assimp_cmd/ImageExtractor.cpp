@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -219,9 +219,9 @@ int DoExport(const aiTexture* tx, FILE* p, const std::string& extension,
     }
     else {
         printf("assimp extract: No available texture encoder found for %s\n", extension.c_str());
-        return 1;
+        return AssimpCmdExtractError::NoAvailableTextureEncoderFound;
     }
-    return 0;
+    return AssimpCmdError::Success;
 }
 
 // -----------------------------------------------------------------------------------
@@ -232,13 +232,13 @@ int Assimp_Extract (const char* const* params, unsigned int num)
     // assimp extract in out [options]
     if (num < 1) {
         printf(invalid);
-        return 1;
+        return AssimpCmdError::InvalidNumberOfArguments;
     }
 
     // --help
     if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
         printf("%s",AICMD_MSG_DUMP_HELP_E);
-        return 0;
+        return AssimpCmdError::Success;
     }
 
 
@@ -308,7 +308,7 @@ int Assimp_Extract (const char* const* params, unsigned int num)
     const aiScene* scene = ImportModel(import,in);
     if (!scene) {
         printf("assimp extract: Unable to load input file %s\n",in.c_str());
-        return 5;
+        return AssimpCmdError::FailedToLoadInputFile;
     }
 
     // get the texture(s) to be exported
@@ -318,7 +318,7 @@ int Assimp_Extract (const char* const* params, unsigned int num)
         if (texIdx >= scene->mNumTextures) {
             ::printf("assimp extract: Texture %i requested, but there are just %i textures\n",
                 texIdx, scene->mNumTextures);
-            return 6;
+            return AssimpCmdExtractError::TextureIndexIsOutOfRange;
         }
     }
     else {
@@ -358,12 +358,14 @@ int Assimp_Extract (const char* const* params, unsigned int num)
         FILE* p = ::fopen(out_cpy.c_str(),"wb");
         if (!p)  {
             printf("assimp extract: Unable to open output file %s\n",out_cpy.c_str());
-            return 7;
+            return AssimpCmdError::FailedToOpenOutputFile;
         }
         int m;
 
         if (!tex->mHeight) {
-            m = (1 != fwrite(tex->pcData,tex->mWidth,1,p));
+            m = (1 != fwrite(tex->pcData,tex->mWidth,1,p)) 
+				? static_cast<int>(AssimpCmdError::Success) 
+				: static_cast<int>(AssimpCmdExtractError::FailedToExportCompressedTexture);
         }
         else m = DoExport(tex,p,extension,flags);
         ::fclose(p);
@@ -372,5 +374,5 @@ int Assimp_Extract (const char* const* params, unsigned int num)
         if (texIdx != 0xffffffff)
             return m;
     }
-    return 0;
+    return AssimpCmdError::Success;
 }

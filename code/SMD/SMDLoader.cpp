@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -616,7 +616,7 @@ void SMDImporter::CreateOutputMaterials() {
         if (aszTextures[iMat].length())
         {
             ::strncpy(szName.data, aszTextures[iMat].c_str(),MAXLEN-1);
-            szName.length = aszTextures[iMat].length();
+            szName.length = (ai_uint32)aszTextures[iMat].length();
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -541,7 +541,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         size_t iLen2 = iLen+1;
         iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
         memcpy(szFile.data,(const char*)szCurrent,iLen2);
-        szFile.length = iLen;
+        szFile.length = (ai_uint32)iLen;
 
         szCurrent += iLen2;
 
@@ -710,7 +710,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         aiString szFile;
         const size_t iLen = strlen((const char*)szCurrent);
         ::memcpy(szFile.data,(const char*)szCurrent,iLen+1);
-        szFile.length = iLen;
+        szFile.length = (ai_uint32)iLen;
 
         pcMatOut->AddProperty(&szFile,AI_MATKEY_TEXTURE_DIFFUSE(0));
 
@@ -831,7 +831,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         aiString szFile;
         ::memcpy(szFile.data,pcSkin->texture_name,sizeof(pcSkin->texture_name));
         szFile.data[sizeof(pcSkin->texture_name)] = '\0';
-        szFile.length = ::strlen(szFile.data);
+        szFile.length = (ai_uint32)::strlen(szFile.data);
 
         pcMatOut->AddProperty(&szFile,AI_MATKEY_NAME);
     }

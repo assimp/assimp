@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -688,7 +688,9 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
         bufferView->byteOffset = b->AppendData(data, length);
     }
     else { // text file: will be stored as a data uri
-        this->mData.reset(data);
+        uint8_t *temp = new uint8_t[length];
+        memcpy(temp, data, length);
+        this->mData.reset(temp);
         this->mDataLength = length;
     }
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -90,7 +90,7 @@ namespace Assimp
 
         const char* mFilename;
         IOSystem* mIOSystem;
-        const aiScene* mScene;
+        std::shared_ptr<const aiScene> mScene;
         const ExportProperties* mProperties;
 
         std::map<std::string, unsigned int> mTexturesByPath;

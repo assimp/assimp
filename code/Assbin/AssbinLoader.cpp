@@ -535,7 +535,7 @@ void AssbinImporter::ReadBinaryTexture(IOStream * stream, aiTexture* tex) {
 
     tex->mWidth = Read<unsigned int>(stream);
     tex->mHeight = Read<unsigned int>(stream);
-    stream->Read( tex->achFormatHint, sizeof(char), 4 );
+    stream->Read( tex->achFormatHint, sizeof(char), HINTMAXTEXTURELEN - 1 );
 
     if(!shortened) {
         if (!tex->mHeight) {

@@ -283,14 +283,14 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 	// --help
 	if (!strcmp( params[0],"-h")||!strcmp( params[0],"--help")||!strcmp( params[0],"-?") ) {
 		printf("%s",AICMD_MSG_INFO_HELP_E);
-		return 0;
+		return AssimpCmdError::Success;
 	}
 
 	// asssimp info <file> [-r]
 	if (num < 1) {
 		printf("assimp info: Invalid number of arguments. "
 			"See \'assimp info --help\'\n");
-		return 1;
+		return AssimpCmdError::InvalidNumberOfArguments;
 	}
 
 	const std::string in  = std::string(params[0]);
@@ -314,7 +314,7 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 	// Verbose and silent at the same time are not allowed
 	if ( verbose && silent ) {
 		printf("assimp info: Invalid arguments, verbose and silent at the same time are forbitten. ");
-		return 1;
+		return AssimpCmdInfoError::InvalidCombinaisonOfArguments;
 	}
 	
 	// Parse post-processing flags unless -r was specified
@@ -333,7 +333,7 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 	if (!scene) {
 		printf("assimp info: Unable to load input file %s\n",
 			in.c_str());
-		return 5;
+		return AssimpCmdError::FailedToLoadInputFile;
 	}
 
 	aiMemoryInfo mem;
@@ -391,7 +391,7 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 	if (silent)
 	{
 		printf("\n");
-		return 0;
+		return AssimpCmdError::Success;
 	}
 
 	// meshes
@@ -473,5 +473,5 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 	PrintHierarchy(scene->mRootNode,"",verbose);
 
 	printf("\n");
-	return 0;
+	return AssimpCmdError::Success;
 }

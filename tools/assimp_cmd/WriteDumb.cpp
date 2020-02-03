@@ -312,7 +312,8 @@ uint32_t WriteBinaryTexture(const aiTexture* tex)
 
 	len += Write<unsigned int>(tex->mWidth);
 	len += Write<unsigned int>(tex->mHeight);
-	len += static_cast<uint32_t>(fwrite(tex->achFormatHint,1,4,out));
+	// Write the texture format, but don't include the null terminator.
+	len += static_cast<uint32_t>(fwrite(tex->achFormatHint,sizeof(char),HINTMAXTEXTURELEN - 1,out));
 
 	if(!shortened) {
 		if (!tex->mHeight) {
@@ -1340,13 +1341,13 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	// --help
 	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
 		printf("%s",AICMD_MSG_DUMP_HELP);
-		return 0;
+		return AssimpCmdError::Success;
 	}
 
 	// asssimp dump in out [options]
 	if (num < 1) {
 		printf("%s", fail);
-		return 1;
+		return AssimpCmdError::InvalidNumberOfArguments;
 	}
 
 	std::string in  = std::string(params[0]);
@@ -1404,14 +1405,14 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	const aiScene* scene = ImportModel(import,in);
 	if (!scene) {
 		printf("assimp dump: Unable to load input file %s\n",in.c_str());
-		return 5;
+		return AssimpCmdError::FailedToLoadInputFile;
 	}
 
 	// open the output file and build the dump
 	FILE* o = ::fopen(out.c_str(),(binary ? "wb" : "wt"));
 	if (!o) {
 		printf("assimp dump: Unable to open output file %s\n",out.c_str());
-		return 12;
+		return AssimpCmdError::FailedToOpenOutputFile;
 	}
 
 	if (binary) {
@@ -1425,6 +1426,6 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	}
 
 	printf("assimp dump: Wrote output dump %s\n",out.c_str());
-	return 0;
+	return AssimpCmdError::Success;
 }
 

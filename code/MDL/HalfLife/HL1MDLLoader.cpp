@@ -182,6 +182,13 @@ void HL1MDLLoader::load_file() {
 
         read_global_info();
 
+        if (!header_->numbodyparts) {
+            // This could be an MDL external texture file. In this case,
+            // add this flag to allow the scene to be loaded even if it
+            // has no meshes.
+            scene_->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+        }
+
         // Append children to root node.
         if (rootnode_children_.size()) {
             scene_->mRootNode->addChildren(
@@ -218,21 +225,6 @@ void HL1MDLLoader::validate_header(const Header_HL1 *header, bool is_texture_hea
         }
 
     } else {
-        // Every single Half-Life model is assumed to have at least one bodypart.
-        if (!header->numbodyparts) {
-            throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Model has no bodyparts");
-        }
-
-        // Every single Half-Life model is assumed to have at least one bone.
-        if (!header->numbones) {
-            throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Model has no bones");
-        }
-
-        // Every single Half-Life model is assumed to have at least one sequence group,
-        // which is the "default" sequence group.
-        if (!header->numseqgroups) {
-            throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Model has no sequence groups");
-        }
 
         if (header->numbodyparts > AI_MDL_HL1_MAX_BODYPARTS) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_BODYPARTS>(header->numbodyparts, "bodyparts");
@@ -381,9 +373,9 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->mFilename = ptexture->name;
     pResult->mWidth = outwidth;
     pResult->mHeight = outheight;
-    pResult->achFormatHint[0] = 'b';
+    pResult->achFormatHint[0] = 'r';
     pResult->achFormatHint[1] = 'g';
-    pResult->achFormatHint[2] = 'r';
+    pResult->achFormatHint[2] = 'b';
     pResult->achFormatHint[3] = 'a';
     pResult->achFormatHint[4] = '8';
     pResult->achFormatHint[5] = '8';
@@ -498,6 +490,10 @@ void HL1MDLLoader::read_skins() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_bones() {
+    if (!header_->numbones) {
+        return;
+    }
+
     const Bone_HL1 *pbone = (const Bone_HL1 *)((uint8_t *)header_ + header_->boneindex);
 
     std::vector<std::string> unique_bones_names(header_->numbones);
@@ -588,6 +584,9 @@ void HL1MDLLoader::read_bones() {
     triangles, respectively (3 indices per face).
 */
 void HL1MDLLoader::read_meshes() {
+    if (!header_->numbodyparts) {
+        return;
+    }
 
     int total_verts = 0;
     int total_triangles = 0;
@@ -964,8 +963,9 @@ void HL1MDLLoader::read_meshes() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_animations() {
-    if (!header_->numseq)
+    if (!header_->numseq) {
         return;
+    }
 
     const SequenceDesc_HL1 *pseqdesc = (const SequenceDesc_HL1 *)((uint8_t *)header_ + header_->seqindex);
     const SequenceGroup_HL1 *pseqgroup = nullptr;
@@ -1067,6 +1067,9 @@ void HL1MDLLoader::read_animations() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_sequence_groups_info() {
+    if (!header_->numseqgroups) {
+        return;
+    }
 
     aiNode *sequence_groups_node = new aiNode(AI_MDL_HL1_NODE_SEQUENCE_GROUPS);
     rootnode_children_.push_back(sequence_groups_node);

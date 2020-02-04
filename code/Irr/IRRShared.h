@@ -15,7 +15,6 @@ struct aiMaterial;
 
 namespace Assimp    {
 
-
 /** @brief Matrix to convert from Assimp to IRR and backwards
  */
 extern const aiMatrix4x4 AI_TO_IRR_MATRIX;
@@ -80,6 +79,7 @@ protected:
 
     /// XML reader instance
 	XmlParser mParser;
+	pugi::xml_node &mNode;
 
     // -------------------------------------------------------------------
     /** Parse a material description from the XML
@@ -103,14 +103,13 @@ protected:
 
 // ------------------------------------------------------------------------------------------------
 // Unpack a hex color, e.g. 0xdcdedfff
-inline void ColorFromARGBPacked(uint32_t in, aiColor4D& clr)
-{
+inline
+void ColorFromARGBPacked(uint32_t in, aiColor4D& clr) {
     clr.a = ((in >> 24) & 0xff) / 255.f;
     clr.r = ((in >> 16) & 0xff) / 255.f;
     clr.g = ((in >>  8) & 0xff) / 255.f;
     clr.b = ((in      ) & 0xff) / 255.f;
 }
-
 
 } // end namespace Assimp
 

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  WriteTextDumb.cpp
+/** @file  WriteDump.cpp
  *  @brief Implementation of the 'assimp dump' utility
  */
 

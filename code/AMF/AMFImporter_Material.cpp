@@ -74,7 +74,7 @@ void AMFImporter::ParseNode_Color() {
 
 	// Read attributes for node <color>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("profile", profile, mReader->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("profile", profile, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create new color object.
@@ -84,7 +84,7 @@ void AMFImporter::ParseNode_Color() {
 
 	als.Profile = profile;
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool read_flag[4] = { false, false, false, false };
 
@@ -128,7 +128,7 @@ void AMFImporter::ParseNode_Material() {
 
 	// Read attributes for node <color>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("id", id, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create new object.
@@ -138,7 +138,7 @@ void AMFImporter::ParseNode_Material() {
 	((CAMFImporter_NodeElement_Material*)ne)->ID = id;
 
     // Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool col_read = false;
 
@@ -183,25 +183,13 @@ void AMFImporter::ParseNode_Material() {
 // then layer by layer.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Texture()
-{
-    std::string id;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    uint32_t depth = 1;
-    std::string type;
-    bool tiled = false;
-    std::string enc64_data;
-
-	// Read attributes for node <color>.
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("width", width, XML_ReadNode_GetAttrVal_AsU32);
-		MACRO_ATTRREAD_CHECK_RET("height", height, XML_ReadNode_GetAttrVal_AsU32);
-		MACRO_ATTRREAD_CHECK_RET("depth", depth, XML_ReadNode_GetAttrVal_AsU32);
-		MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("tiled", tiled, XML_ReadNode_GetAttrVal_AsBool);
-	MACRO_ATTRREAD_LOOPEND;
+void AMFImporter::ParseNode_Texture(XmlNode &node) {
+    std::string id = node.attribute("id").as_string();
+	uint32_t width = node.attribute("width").as_uint();
+	uint32_t height = node.attribute("height").as_uint();
+	uint32_t depth = node.attribute("depth").as_uint();
+	std::string type = node.attribute("type").as_string();
+	bool tiled = node.attribute("tiled").as_bool();
 
 	// create new texture object.
     CAMFImporter_NodeElement *ne = new CAMFImporter_NodeElement_Texture(mNodeElement_Cur);
@@ -209,7 +197,7 @@ void AMFImporter::ParseNode_Texture()
 	CAMFImporter_NodeElement_Texture& als = *((CAMFImporter_NodeElement_Texture*)ne);// alias for convenience
 
 	// Check for child nodes
-    if (!mReader->isEmptyElement()) {
+    if (!mXmlParser->isEmptyElement()) {
         XML_ReadNode_GetVal_AsString(enc64_data);
     }
 
@@ -268,10 +256,10 @@ void AMFImporter::ParseNode_TexMap(const bool pUseOldName) {
 
 	// Read attributes for node <color>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("rtexid", rtexid, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("gtexid", gtexid, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("btexid", btexid, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("atexid", atexid, mReader->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("rtexid", rtexid, mXmlParser->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("gtexid", gtexid, mXmlParser->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("btexid", btexid, mXmlParser->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("atexid", atexid, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create new texture coordinates object.

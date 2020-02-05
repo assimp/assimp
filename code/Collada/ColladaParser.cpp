@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -68,11 +66,8 @@ using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ColladaParser::ColladaParser(IOSystem* pIOHandler, const std::string& pFile)
-    : mFileName(pFile)
-    , mReader(nullptr)
-    , mDataLibrary()
-    , mAccessorLibrary()
+ColladaParser::ColladaParser(IOSystem* pIOHandler, const std::string& pFile) :
+		mFileName(pFile), mXmlParser(nullptr), mDataLibrary(), mAccessorLibrary()
     , mMeshLibrary()
     , mNodeLibrary()
     , mImageLibrary()
@@ -1532,7 +1527,7 @@ void ColladaParser::ReadLight(Collada::Light& pLight)
 
 // ------------------------------------------------------------------------------------------------
 // Reads a camera entry into the given light
-void ColladaParser::ReadCamera(Collada::Camera& pCamera)
+void ColladaParser::ReadCamera(Collada::Camera& camera)
 {
     while (mReader->read())
     {
@@ -1541,26 +1536,26 @@ void ColladaParser::ReadCamera(Collada::Camera& pCamera)
                 SkipElement();
             }
             else if (IsElement("orthographic")) {
-                pCamera.mOrtho = true;
+                camera.mOrtho = true;
             }
             else if (IsElement("xfov") || IsElement("xmag")) {
-                pCamera.mHorFov = ReadFloatFromTextContent();
-                TestClosing((pCamera.mOrtho ? "xmag" : "xfov"));
+                camera.mHorFov = ReadFloatFromTextContent();
+                TestClosing((camera.mOrtho ? "xmag" : "xfov"));
             }
             else if (IsElement("yfov") || IsElement("ymag")) {
-                pCamera.mVerFov = ReadFloatFromTextContent();
-                TestClosing((pCamera.mOrtho ? "ymag" : "yfov"));
+                camera.mVerFov = ReadFloatFromTextContent();
+                TestClosing((camera.mOrtho ? "ymag" : "yfov"));
             }
             else if (IsElement("aspect_ratio")) {
-                pCamera.mAspect = ReadFloatFromTextContent();
+                camera.mAspect = ReadFloatFromTextContent();
                 TestClosing("aspect_ratio");
             }
             else if (IsElement("znear")) {
-                pCamera.mZNear = ReadFloatFromTextContent();
+                camera.mZNear = ReadFloatFromTextContent();
                 TestClosing("znear");
             }
             else if (IsElement("zfar")) {
-                pCamera.mZFar = ReadFloatFromTextContent();
+                camera.mZFar = ReadFloatFromTextContent();
                 TestClosing("zfar");
             }
         }

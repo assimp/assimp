@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -90,9 +88,9 @@ void AMFImporter::Clear() {
 }
 
 AMFImporter::~AMFImporter() {
-	if (mReader != nullptr) {
-		delete mReader;
-		mReader = nullptr;
+	if (mXmlParser != nullptr) {
+		delete mXmlParser;
+		mXmlParser = nullptr;
 	}
 
 	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
@@ -106,7 +104,9 @@ AMFImporter::~AMFImporter() {
 bool AMFImporter::Find_NodeElement(const std::string &pID, const CAMFImporter_NodeElement::EType pType, CAMFImporter_NodeElement **pNodeElement) const {
 	for (CAMFImporter_NodeElement *ne : mNodeElement_List) {
 		if ((ne->ID == pID) && (ne->Type == pType)) {
-			if (pNodeElement != nullptr) *pNodeElement = ne;
+			if (pNodeElement != nullptr) {
+				*pNodeElement = ne;
+			}
 
 			return true;
 		}
@@ -173,10 +173,9 @@ void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
 /************************************************************* Functions: XML set ************************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::XML_CheckNode_MustHaveChildren( XmlNode *node ) {
-	//if (mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
-	if (node->getNode()->children().begin() == node->getNode()->children().end()) {
-		throw DeadlyImportError(std::string("Node <") + std::string(node->getNode()->name()) + "> must have children.");
+void AMFImporter::XML_CheckNode_MustHaveChildren( XmlNode &node ) {
+	if (node.children().begin() == node.children().end()) {
+		throw DeadlyImportError(std::string("Node <") + std::string(node.name()) + "> must have children.");
     }
 }
 
@@ -221,20 +220,23 @@ casu_cres:
 	}
 }
 */
-bool AMFImporter::XML_SearchNode(const std::string &pNodeName) {
-	
-    mReader->while (mReader->read()) {
-		//if((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
-		if ((mReader->getNodeType() == pugi::node_element) && XML_CheckNode_NameEqual(pNodeName)) {
-			return true;
-		}
-	}
+bool AMFImporter::XML_SearchNode(const std::string &nodeName) {
+	XmlNode *root = mXmlParser->getRootNode();
+	if (nullptr == root) {
+		return false;
+    }
 
-	return false;
+    find_node_by_name_predicate predicate(nodeName);
+	XmlNode node = root->find_node(predicate);
+	if (node.empty()) {
+		return false;
+    }
+
+	return true;
 }
 
-bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx) {
-	std::string val(mReader->getAttributeValue(pAttrIdx));
+bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool (const int pAttrIdx) {
+	std::string val(mXmlParser->getAttributeValue(pAttrIdx));
 
 	if ((val == "false") || (val == "0"))
 		return false;
@@ -248,42 +250,42 @@ float AMFImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx) {
 	std::string val;
 	float tvalf;
 
-	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), val);
+	ParseHelper_FixTruncatedFloatString(mXmlParser->getAttributeValue(pAttrIdx), val);
 	fast_atoreal_move(val.c_str(), tvalf, false);
 
 	return tvalf;
 }
 
 uint32_t AMFImporter::XML_ReadNode_GetAttrVal_AsU32(const int pAttrIdx) {
-	return strtoul10(mReader->getAttributeValue(pAttrIdx));
+	return strtoul10(mXmlParser->getAttributeValue(pAttrIdx));
 }
 
 float AMFImporter::XML_ReadNode_GetVal_AsFloat() {
 	std::string val;
 	float tvalf;
 
-	if (!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. No data, seems file is corrupt.");
-	if (mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. Invalid type of XML element, seems file is corrupt.");
+	if (!mXmlParser->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. No data, seems file is corrupt.");
+	if (mXmlParser->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. Invalid type of XML element, seems file is corrupt.");
 
-	ParseHelper_FixTruncatedFloatString(mReader->getNodeData(), val);
+	ParseHelper_FixTruncatedFloatString(mXmlParser->getNodeData(), val);
 	fast_atoreal_move(val.c_str(), tvalf, false);
 
 	return tvalf;
 }
 
 uint32_t AMFImporter::XML_ReadNode_GetVal_AsU32() {
-	if (!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. No data, seems file is corrupt.");
-	if (mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. Invalid type of XML element, seems file is corrupt.");
+	if (!mXmlParser->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. No data, seems file is corrupt.");
+	if (mXmlParser->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsU32. Invalid type of XML element, seems file is corrupt.");
 
-	return strtoul10(mReader->getNodeData());
+	return strtoul10(mXmlParser->getNodeData());
 }
 
 void AMFImporter::XML_ReadNode_GetVal_AsString(std::string &pValue) {
-	if (!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsString. No data, seems file is corrupt.");
-	if (mReader->getNodeType() != irr::io::EXN_TEXT)
+	if (!mXmlParser->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsString. No data, seems file is corrupt.");
+	if (mXmlParser->getNodeType() != irr::io::EXN_TEXT)
 		throw DeadlyImportError("XML_ReadNode_GetVal_AsString. Invalid type of XML element, seems file is corrupt.");
 
-	pValue = mReader->getNodeData();
+	pValue = mXmlParser->getNodeData();
 }
 
 /*********************************************************************************************************************************************/
@@ -383,8 +385,8 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 		throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
 	}
 
-	mReader = new XmlParser;
-	XmlNode *root = mReader->parse(file.get());
+	mXmlParser = new XmlParser;
+	XmlNode *root = mXmlParser->parse(file.get());
 	if (nullptr == root) {
 		throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
 	}
@@ -398,8 +400,8 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 
 	ParseNode_Root(root);
 
-	delete mReader;
-	mReader = nullptr;
+	delete mXmlParser;
+	mXmlParser = nullptr;
 }
 
 // <amf
@@ -502,7 +504,7 @@ void AMFImporter::ParseNode_Constellation() {
 
 	// Read attributes for node <constellation>.
 	MACRO_ATTRREAD_LOOPBEG;
-	MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("id", id, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create and if needed - define new grouping object.
@@ -512,7 +514,7 @@ void AMFImporter::ParseNode_Constellation() {
 
 	if (!id.empty()) als.ID = id;
 	// Check for child nodes
-	if (!mReader->isEmptyElement()) {
+	if (!mXmlParser->isEmptyElement()) {
 		ParseHelper_Node_Enter(ne);
 		MACRO_NODECHECK_LOOPBEGIN("constellation");
 		if (XML_CheckNode_NameEqual("instance")) {
@@ -546,7 +548,7 @@ void AMFImporter::ParseNode_Instance() {
 
 	// Read attributes for node <constellation>.
 	MACRO_ATTRREAD_LOOPBEG;
-	MACRO_ATTRREAD_CHECK_RET("objectid", objectid, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("objectid", objectid, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// used object id must be defined, check that.
@@ -558,7 +560,7 @@ void AMFImporter::ParseNode_Instance() {
 
 	als.ObjectID = objectid;
 	// Check for child nodes
-	if (!mReader->isEmptyElement()) {
+	if (!mXmlParser->isEmptyElement()) {
 		bool read_flag[6] = { false, false, false, false, false, false };
 
 		als.Delta.Set(0, 0, 0);
@@ -625,7 +627,7 @@ void AMFImporter::ParseNode_Object(XmlNode *nodeInst) {
 			ParseNode_Metadata(*it);
         }
 	}
-	if (!mReader->isEmptyElement()) {
+	if (!mXmlParser->isEmptyElement()) {
 		bool col_read = false;
 
 		ParseHelper_Node_Enter(ne);
@@ -682,10 +684,10 @@ void AMFImporter::ParseNode_Metadata() {
 
 	// read attribute
 	MACRO_ATTRREAD_LOOPBEG;
-	MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
+	MACRO_ATTRREAD_CHECK_RET("type", type, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 	// and value of node.
-	value = mReader->getNodeData();
+	value = mXmlParser->getNodeData();
 	// Create node element and assign read data.
 	ne = new CAMFImporter_NodeElement_Metadata(mNodeElement_Cur);
 	((CAMFImporter_NodeElement_Metadata *)ne)->Type = type;

@@ -4,7 +4,6 @@
 
  Copyright (c) 2006-2020, assimp team
 
-
  All rights reserved.
 
  Redistribution and use of this software in source and binary forms,
@@ -55,6 +54,7 @@
 namespace Assimp
 {
     class ZipArchiveIOSystem;
+    class XmlParser;
 
     // ------------------------------------------------------------------------------------------
     /** Parser helper class for the Collada loader.
@@ -112,7 +112,7 @@ namespace Assimp
         /** Reads an animation into the given parent structure */
         void ReadAnimation( Collada::Animation* pParent);
 
-        /** Reads an animation sampler into the given anim channel */
+        /** Reads an animation sampler into the given animation channel */
         void ReadAnimationSampler( Collada::AnimationChannel& pChannel);
 
         /** Reads the skeleton controller library */
@@ -157,16 +157,16 @@ namespace Assimp
         /** Reads an effect entry into the given effect*/
         void ReadEffect( Collada::Effect& pEffect);
 
-        /** Reads an COMMON effect profile */
+        /// Reads an COMMON effect profile
         void ReadEffectProfileCommon( Collada::Effect& pEffect);
 
-        /** Read sampler properties */
+        /// Read sampler properties
         void ReadSamplerProperties( Collada::Sampler& pSampler);
 
-        /** Reads an effect entry containing a color or a texture defining that color */
+        /// Reads an effect entry containing a color or a texture defining that color
         void ReadEffectColor( aiColor4D& pColor, Collada::Sampler& pSampler);
 
-        /** Reads an effect entry containing a float */
+        /// Reads an effect entry containing a float
         void ReadEffectFloat( ai_real& pFloat);
 
         /** Reads an effect parameter specification of any kind */
@@ -182,7 +182,7 @@ namespace Assimp
         void ReadMesh( Collada::Mesh* pMesh);
 
         /** Reads a source element - a combination of raw data and an accessor defining
-         * things that should not be redefinable. Yes, that's another rant.
+         * things that should not be re-definable. Yes, that's another rant.
          */
         void ReadSource();
 
@@ -214,7 +214,7 @@ namespace Assimp
                         Collada::Mesh* pMesh, std::vector<Collada::InputChannel>& pPerIndexChannels,
                         size_t currentPrimitive, const std::vector<size_t>& indices);
 
-        /** Reads one triangle of a tristrip into the mesh */
+        /** Reads one triangle of a triangle-strip into the mesh */
         void ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Collada::Mesh* pMesh,
                                std::vector<Collada::InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices);
 
@@ -298,7 +298,8 @@ namespace Assimp
         std::string mFileName;
 
         /** XML reader, member for everyday use */
-        irr::io::IrrXMLReader* mReader;
+        //irr::io::IrrXMLReader* mReader;
+		XmlParser *mXmlParser;
 
         /** All data arrays found in the file by ID. Might be referred to by actually
          everyone. Collada, you are a steaming pile of indirection. */
@@ -359,19 +360,24 @@ namespace Assimp
         /** Size unit: how large compared to a meter */
         ai_real mUnitSize;
 
-        /** Which is the up vector */
-        enum { UP_X, UP_Y, UP_Z } mUpDirection;
+        /// Which is the up vector.
+        enum {
+            UP_X,
+            UP_Y,
+            UP_Z
+        } mUpDirection;
 
-        /** Asset metadata (global for scene) */
+        /// Asset metadata (global for scene)
         StringMetaData mAssetMetaData;
 
-        /** Collada file format version */
+        /// Collada file format version
         Collada::FormatVersion mFormat;
     };
 
     // ------------------------------------------------------------------------------------------------
     // Check for element match
-    inline bool ColladaParser::IsElement( const char* pName) const
+    inline
+    bool ColladaParser::IsElement( const char* pName) const
     {
         ai_assert( mReader->getNodeType() == irr::io::EXN_ELEMENT);
         return ::strcmp( mReader->getNodeName(), pName) == 0;
@@ -380,11 +386,11 @@ namespace Assimp
     // ------------------------------------------------------------------------------------------------
     // Finds the item in the given library by its reference, throws if not found
     template <typename Type>
-    const Type& ColladaParser::ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const
+    const Type& ColladaParser::ResolveLibraryReference( const std::map<std::string, Type>& library, const std::string& url) const
     {
-        typename std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);
-        if( it == pLibrary.end())
-            ThrowException( Formatter::format() << "Unable to resolve library reference \"" << pURL << "\"." );
+        typename std::map<std::string, Type>::const_iterator it = library.find( url);
+        if( it == library.end())
+            ThrowException( Formatter::format() << "Unable to resolve library reference \"" << url << "\"." );
         return it->second;
     }
 

@@ -66,7 +66,7 @@ void AMFImporter::ParseNode_Mesh()
 	// create new mesh object.
 	ne = new CAMFImporter_NodeElement_Mesh(mNodeElement_Cur);
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool vert_read = false;
 
@@ -107,7 +107,7 @@ CAMFImporter_NodeElement* ne;
 	// create new mesh object.
 	ne = new CAMFImporter_NodeElement_Vertices(mNodeElement_Cur);
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		ParseHelper_Node_Enter(ne);
 		MACRO_NODECHECK_LOOPBEGIN("vertices");
@@ -135,7 +135,7 @@ CAMFImporter_NodeElement* ne;
 	// create new mesh object.
 	ne = new CAMFImporter_NodeElement_Vertex(mNodeElement_Cur);
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool col_read = false;
 		bool coord_read = false;
@@ -196,7 +196,7 @@ CAMFImporter_NodeElement* ne;
 	CAMFImporter_NodeElement_Coordinates& als = *((CAMFImporter_NodeElement_Coordinates*)ne);// alias for convenience
 
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool read_flag[3] = { false, false, false };
 
@@ -236,8 +236,8 @@ CAMFImporter_NodeElement* ne;
 
 	// Read attributes for node <color>.
 	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("materialid", materialid, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("materialid", materialid, mXmlParser->getAttributeValue);
+		MACRO_ATTRREAD_CHECK_RET("type", type, mXmlParser->getAttributeValue);
 	MACRO_ATTRREAD_LOOPEND;
 
 	// create new object.
@@ -246,7 +246,7 @@ CAMFImporter_NodeElement* ne;
 	((CAMFImporter_NodeElement_Volume*)ne)->MaterialID = materialid;
 	((CAMFImporter_NodeElement_Volume*)ne)->Type = type;
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool col_read = false;
 
@@ -296,7 +296,7 @@ CAMFImporter_NodeElement* ne;
 	CAMFImporter_NodeElement_Triangle& als = *((CAMFImporter_NodeElement_Triangle*)ne);// alias for convenience
 
 	// Check for child nodes
-	if(!mReader->isEmptyElement())
+	if(!mXmlParser->isEmptyElement())
 	{
 		bool col_read = false, tex_read = false;
 		bool read_flag[3] = { false, false, false };

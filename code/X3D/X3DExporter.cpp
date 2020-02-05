@@ -14,23 +14,14 @@
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 
-using namespace std;
+namespace Assimp {
 
-namespace Assimp
-{
-
-void ExportSceneX3D(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
-{
+void ExportSceneX3D(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
 	X3DExporter exporter(pFile, pIOSystem, pScene, pProperties);
 }
 
-}// namespace Assimp
 
-namespace Assimp
-{
-
-void X3DExporter::IndentationStringSet(const size_t pNewLevel)
-{
+void X3DExporter::IndentationStringSet(const size_t pNewLevel) {
 	if(pNewLevel > mIndentationString.size())
 	{
 		if(pNewLevel > mIndentationString.capacity()) mIndentationString.reserve(pNewLevel + 1);
@@ -43,31 +34,33 @@ void X3DExporter::IndentationStringSet(const size_t pNewLevel)
 	}
 }
 
-void X3DExporter::XML_Write(const string& pData)
-{
-	if(pData.size() == 0) return;
-	if(mOutFile->Write((void*)pData.data(), pData.length(), 1) != 1) throw DeadlyExportError("Failed to write scene data!");
+void X3DExporter::XML_Write(const std::string& pData) {
+	if (pData.empty() ) {
+		return;
+	}
+
+	if (mOutFile->Write((void *)pData.data(), pData.length(), 1) != 1) {
+		throw DeadlyExportError("Failed to write scene data!");
+	}
 }
 
-aiMatrix4x4 X3DExporter::Matrix_GlobalToCurrent(const aiNode& pNode) const
-{
-aiNode* cur_node;
-std::list<aiMatrix4x4> matr;
-aiMatrix4x4 out_matr;
+aiMatrix4x4 X3DExporter::Matrix_GlobalToCurrent(const aiNode& pNode) const {
+	aiNode *cur_node;
+	std::list<aiMatrix4x4> matr;
+	aiMatrix4x4 out_matr;
 
 	// starting walk from current element to root
 	matr.push_back(pNode.mTransformation);
 	cur_node = pNode.mParent;
 	if(cur_node != nullptr)
 	{
-		do
-		{
+		do {
 			matr.push_back(cur_node->mTransformation);
 			cur_node = cur_node->mParent;
 		} while(cur_node != nullptr);
 	}
 
-	// multiplicate all matrices in reverse order
+	// Multiplication of all matrices in reverse order
 	for(std::list<aiMatrix4x4>::reverse_iterator rit = matr.rbegin(); rit != matr.rend(); ++rit) out_matr = out_matr * (*rit);
 
 	return out_matr;
@@ -142,7 +135,7 @@ void X3DExporter::AttrHelper_Col3DArrToString(const aiColor3D* pArray, const siz
 
 void X3DExporter::AttrHelper_Color3ToAttrList(std::list<SAttribute>& pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue)
 {
-string tstr;
+    string tstr;
 
 	if(pValue == pDefaultValue) return;
 
@@ -152,7 +145,7 @@ string tstr;
 
 void X3DExporter::AttrHelper_FloatToAttrList(std::list<SAttribute>& pList, const string& pName, const float pValue, const float pDefaultValue)
 {
-string tstr;
+        string tstr;
 
 	if(pValue == pDefaultValue) return;
 
@@ -183,7 +176,7 @@ void X3DExporter::NodeHelper_OpenNode(const string& pNodeName, const size_t pTab
 
 void X3DExporter::NodeHelper_OpenNode(const string& pNodeName, const size_t pTabLevel, const bool pEmptyElement)
 {
-const list<SAttribute> attr_list;
+    const list<SAttribute> attr_list;
 
 	NodeHelper_OpenNode(pNodeName, pTabLevel, pEmptyElement, attr_list);
 }
@@ -199,8 +192,8 @@ void X3DExporter::NodeHelper_CloseNode(const string& pNodeName, const size_t pTa
 
 void X3DExporter::Export_Node(const aiNode *pNode, const size_t pTabLevel)
 {
-bool transform = false;
-list<SAttribute> attr_list;
+    bool transform = false;
+    list<SAttribute> attr_list;
 
 	// In Assimp lights is stored in next way: light source store in mScene->mLights and in node tree must present aiNode with name same as
 	// light source has. Considering it we must compare every aiNode name with light sources names. Why not to look where ligths is present
@@ -303,11 +296,11 @@ list<SAttribute> attr_list;
 
 void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel)
 {
-const char* NodeName_IFS = "IndexedFaceSet";
-const char* NodeName_Shape = "Shape";
+    const char* NodeName_IFS = "IndexedFaceSet";
+    const char* NodeName_Shape = "Shape";
 
-list<SAttribute> attr_list;
-aiMesh& mesh = *mScene->mMeshes[pIdxMesh];// create alias for conveniance.
+    list<SAttribute> attr_list;
+    aiMesh& mesh = *mScene->mMeshes[pIdxMesh];// create alias for conveniance.
 
 	// Check if mesh already defined early.
 	if(mDEF_Map_Mesh.find(pIdxMesh) != mDEF_Map_Mesh.end())
@@ -407,10 +400,10 @@ aiMesh& mesh = *mScene->mMeshes[pIdxMesh];// create alias for conveniance.
 
 void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLevel)
 {
-const char* NodeName_A = "Appearance";
+    const char* NodeName_A = "Appearance";
 
-list<SAttribute> attr_list;
-aiMaterial& material = *mScene->mMaterials[pIdxMaterial];// create alias for conveniance.
+    list<SAttribute> attr_list;
+    aiMaterial& material = *mScene->mMaterials[pIdxMaterial];// create alias for conveniance.
 
 	// Check if material already defined early.
 	if(mDEF_Map_Material.find(pIdxMaterial) != mDEF_Map_Material.end())
@@ -564,7 +557,7 @@ aiMaterial& material = *mScene->mMaterials[pIdxMaterial];// create alias for con
 
 void X3DExporter::Export_MetadataBoolean(const aiString& pKey, const bool pValue, const size_t pTabLevel)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 	attr_list.push_back({"name", pKey.C_Str()});
 	attr_list.push_back({"value", pValue ? "true" : "false"});
@@ -573,7 +566,7 @@ list<SAttribute> attr_list;
 
 void X3DExporter::Export_MetadataDouble(const aiString& pKey, const double pValue, const size_t pTabLevel)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 	attr_list.push_back({"name", pKey.C_Str()});
 	attr_list.push_back({"value", to_string(pValue)});
@@ -582,7 +575,7 @@ list<SAttribute> attr_list;
 
 void X3DExporter::Export_MetadataFloat(const aiString& pKey, const float pValue, const size_t pTabLevel)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 	attr_list.push_back({"name", pKey.C_Str()});
 	attr_list.push_back({"value", to_string(pValue)});
@@ -591,7 +584,7 @@ list<SAttribute> attr_list;
 
 void X3DExporter::Export_MetadataInteger(const aiString& pKey, const int32_t pValue, const size_t pTabLevel)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 	attr_list.push_back({"name", pKey.C_Str()});
 	attr_list.push_back({"value", to_string(pValue)});
@@ -600,7 +593,7 @@ list<SAttribute> attr_list;
 
 void X3DExporter::Export_MetadataString(const aiString& pKey, const aiString& pValue, const size_t pTabLevel)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 	attr_list.push_back({"name", pKey.C_Str()});
 	attr_list.push_back({"value", pValue.C_Str()});
@@ -609,7 +602,7 @@ list<SAttribute> attr_list;
 
 bool X3DExporter::CheckAndExport_Light(const aiNode& pNode, const size_t pTabLevel)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 auto Vec3ToAttrList = [&](const string& pAttrName, const aiVector3D& pAttrValue, const aiVector3D& pAttrDefaultValue)
 {
@@ -622,8 +615,8 @@ auto Vec3ToAttrList = [&](const string& pAttrName, const aiVector3D& pAttrValue,
 	}
 };
 
-size_t idx_light;
-bool found = false;
+    size_t idx_light;
+    bool found = false;
 
 	// Name of the light source can not be empty.
 	if(pNode.mName.length == 0) return false;
@@ -699,7 +692,7 @@ bool found = false;
 X3DExporter::X3DExporter(const char* pFileName, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 	: mScene(pScene)
 {
-list<SAttribute> attr_list;
+    list<SAttribute> attr_list;
 
 	mOutFile = pIOSystem->Open(pFileName, "wt");
 	if(mOutFile == nullptr) throw DeadlyExportError("Could not open output .x3d file: " + string(pFileName));

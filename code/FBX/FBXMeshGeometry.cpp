@@ -446,20 +446,19 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             return;
         }
         std::vector<T> tempData;
-		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
+        ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
-        if (tempData.size() != vertex_count) {
+        if (tempData.size() != mapping_offsets.size()) {
             FBXImporter::LogError(Formatter::format("length of input data unexpected for ByVertice mapping: ")
-                                  << tempData.size() << ", expected " << vertex_count);
+                                  << tempData.size() << ", expected " << mapping_offsets.size());
             return;
         }
 
         data_out.resize(vertex_count);
-		for (size_t i = 0, e = tempData.size(); i < e; ++i) {
-
+        for (size_t i = 0, e = tempData.size(); i < e; ++i) {
             const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
             for (unsigned int j = istart; j < iend; ++j) {
-				data_out[mappings[j]] = tempData[i];
+                data_out[mappings[j]] = tempData[i];
             }
         }
     }

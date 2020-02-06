@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -355,7 +355,7 @@ void MDCImporter::InternReadFile(
         // swap all texture coordinates
         for (unsigned int i = 0; i < pcSurface->ulNumVertices;++i)
         {
-            AI_SWAP4( pcUVs->v );
+            AI_SWAP4( pcUVs->u );
             AI_SWAP4( pcUVs->v );
         }
 

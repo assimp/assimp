@@ -4,7 +4,7 @@ package jassimp;
 Open Asset Import Library - Java Binding (jassimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 

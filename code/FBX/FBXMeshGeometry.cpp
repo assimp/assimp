@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -448,6 +448,12 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
+        if (tempData.size() != vertex_count) {
+            FBXImporter::LogError(Formatter::format("length of input data unexpected for ByVertice mapping: ")
+                                  << tempData.size() << ", expected " << vertex_count);
+            return;
+        }
+
         data_out.resize(vertex_count);
 		for (size_t i = 0, e = tempData.size(); i < e; ++i) {
 
@@ -461,10 +467,17 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
-        data_out.resize(vertex_count);
-
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+
+        if (uvIndices.size() != vertex_count) {
+            FBXImporter::LogError(Formatter::format("length of input data unexpected for ByVertice mapping: ")
+                                  << uvIndices.size() << ", expected " << vertex_count);
+            return;
+        }
+
+        data_out.resize(vertex_count);
+
         for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {
 
             const unsigned int istart = mapping_offsets[i], iend = istart + mapping_counts[i];
@@ -493,15 +506,16 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
-        data_out.resize(vertex_count);
-
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
         if (uvIndices.size() != vertex_count) {
-            FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping");
+            FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygonVertex mapping: ")
+                                  << uvIndices.size() << ", expected " << vertex_count);
             return;
         }
+
+        data_out.resize(vertex_count);
 
         const T empty;
         unsigned int next = 0;

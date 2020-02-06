@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 # 
-# Copyright (c) 2006-2019, assimp team
+# Copyright (c) 2006-2020, assimp team
 
 
 # All rights reserved.
@@ -54,7 +54,7 @@ ADD_EXECUTABLE( assimp_cmd
   Main.cpp
   Main.h
   resource.h
-  WriteDumb.cpp
+  WriteDump.cpp
   Info.cpp
   Export.cpp
 )

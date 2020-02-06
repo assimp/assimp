@@ -150,7 +150,8 @@ void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
     aiNode *child = current_node->mChildren[nodeId];
     ai_assert(child);
 
-    nodes.push_back(child);
+    if (child->mNumMeshes == 0)
+        nodes.push_back(child);
 
     BuildNodeList(child, nodes);
   }

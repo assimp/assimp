@@ -338,6 +338,8 @@ ADD_ASSIMP_EXPORTER( ASSBIN
 ADD_ASSIMP_EXPORTER( ASSXML
   Assxml/AssxmlExporter.h
   Assxml/AssxmlExporter.cpp
+  Assxml/AssxmlFileWriter.h
+  Assxml/AssxmlFileWriter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( B3D

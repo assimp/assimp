@@ -368,8 +368,9 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
     // which fast_atof could interpret as decimal point.
 #define MAX_FLOAT_LENGTH 31
     const size_t length = static_cast<size_t>(t.end()-t.begin());
-    if (length > MAX_FLOAT_LENGTH)
+    if (length > MAX_FLOAT_LENGTH) {
         return 0.f;
+    }
 
     char temp[MAX_FLOAT_LENGTH + 1];
     std::copy(t.begin(), t.end(), temp);

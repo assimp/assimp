@@ -203,7 +203,9 @@ namespace glTF {
         obj.AddMember("buffer", Value(bv.buffer->id, w.mAl).Move(), w.mAl);
         obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
         obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
-        obj.AddMember("target", int(bv.target), w.mAl);
+        if (bv.target != BufferViewTarget_NONE) {
+            obj.AddMember("target", int(bv.target), w.mAl);
+        }
     }
 
     inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)

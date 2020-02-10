@@ -198,6 +198,7 @@ SET( Common_SRCS
   Common/CreateAnimMesh.cpp
   Common/simd.h
   Common/simd.cpp
+  Common/material.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

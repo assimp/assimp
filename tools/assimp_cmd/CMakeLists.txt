@@ -54,7 +54,7 @@ ADD_EXECUTABLE( assimp_cmd
   Main.cpp
   Main.h
   resource.h
-  WriteDumb.cpp
+  WriteDump.cpp
   Info.cpp
   Export.cpp
 )

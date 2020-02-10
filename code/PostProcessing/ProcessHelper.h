@@ -316,12 +316,6 @@ typedef std::vector <PerVertexWeight> VertexWeightTable;
 // Compute a per-vertex bone weight table
 VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh);
 
-
-// -------------------------------------------------------------------------------
-// Get a string for a given aiTextureType
-const char* TextureTypeToString(aiTextureType in);
-
-
 // -------------------------------------------------------------------------------
 // Get a string for a given aiTextureMapping
 const char* MappingTypeToString(aiTextureMapping in);

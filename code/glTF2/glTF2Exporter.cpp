@@ -351,6 +351,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
 
                     if (path[0] == '*') { // embedded
                         aiTexture* tex = mScene->mTextures[atoi(&path[1])];
+						
+                        texture->source->name = tex->mFilename.C_Str();
 
                         // The asset has its own buffer, see Image::SetData
                         texture->source->SetData(reinterpret_cast<uint8_t*> (tex->pcData), tex->mWidth, *mAsset);

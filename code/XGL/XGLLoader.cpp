@@ -685,7 +685,7 @@ bool XGLImporter::ReadMesh(TempScope& scope)
     }
 
     // finally extract output meshes and add them to the scope
-    typedef std::pair<unsigned int, TempMaterialMesh> pairt;
+    typedef std::pair<const unsigned int, TempMaterialMesh> pairt;
     for(const pairt& p : bymat) {
         aiMesh* const m  = ToOutputMesh(p.second);
         scope.meshes_linear.push_back(m);

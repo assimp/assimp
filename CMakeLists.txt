@@ -41,13 +41,13 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 # Toggles the use of the hunter package manager
 option(HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
-include("cmake/HunterGate.cmake")
-HunterGate(
+IF(HUNTER_ENABLED)
+  include("cmake/HunterGate.cmake")
+  HunterGate(
     URL "https://github.com/ruslo/hunter/archive/v0.23.176.tar.gz"
     SHA1 "2e9ae973d028660b735ac4c6142725ca36a0048a"
-)
+  )
 
-IF(HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF(HUNTER_ENABLED)
 
@@ -437,7 +437,9 @@ ELSE(HUNTER_ENABLED)
     DESTINATION "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 ENDIF(HUNTER_ENABLED)
 
-FIND_PACKAGE( DirectX )
+if (ASSIMP_BUILD_SAMPLES OR ASSIMP_BUILD_SAMPLES)
+  FIND_PACKAGE(DirectX)
+endif(ASSIMP_BUILD_SAMPLES OR ASSIMP_BUILD_SAMPLES)
 
 IF( BUILD_DOCS )
   ADD_SUBDIRECTORY(doc)

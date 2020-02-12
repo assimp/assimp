@@ -383,7 +383,13 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 // individually. In assimp there're per mesh vertex and UV lists, and they must be
 // indexed simultaneously.
 void M3DImporter::importMeshes(const M3DWrapper &m3d) {
-	unsigned int i, j, k, l, numpoly = 3, lastMat = M3D_INDEXMAX;
+	ASSIMP_LOG_DEBUG_F("M3D: importMeshes ", m3d->numface);
+
+	if (!m3d->numface || !m3d->face || !m3d->numvertex || !m3d->vertex) {
+		return;
+	}
+
+    unsigned int i, j, k, l, numpoly = 3, lastMat = M3D_INDEXMAX;
 	std::vector<aiMesh *> *meshes = new std::vector<aiMesh *>();
 	std::vector<aiFace> *faces = nullptr;
 	std::vector<aiVector3D> *vertices = nullptr;
@@ -397,11 +403,6 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 	ai_assert(m3d);
 	ai_assert(mScene->mRootNode != nullptr);
 
-	ASSIMP_LOG_DEBUG_F("M3D: importMeshes ", m3d->numface);
-
-	if (!m3d->numface || !m3d->face || !m3d->numvertex || !m3d->vertex) {
-		return;
-	}
 
 	for (i = 0; i < m3d->numface; i++) {
 		// we must switch mesh if material changes

@@ -843,7 +843,7 @@ bool ObjFileParser::needsNewMesh( const std::string &materialName )
     }
     bool newMat = false;
     int matIdx = getMaterialIndex( materialName );
-    unsigned int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
+    int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
     if ( curMatIdx != int(ObjFile::Mesh::NoMaterial)
         && curMatIdx != matIdx
         // no need create a new mesh if no faces in current

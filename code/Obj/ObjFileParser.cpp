@@ -431,9 +431,9 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
 
     const bool vt = (!m_pModel->m_TextureCoord.empty());
     const bool vn = (!m_pModel->m_Normals.empty());
-    int iStep, iPos = 0;
+    int iPos = 0;
     while ( m_DataIt != m_DataItEnd ) {
-        iStep = 1;
+        int iStep = 1;
 
         if ( IsLineEnd( *m_DataIt ) ) {
             break;

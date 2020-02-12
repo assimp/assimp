@@ -29,6 +29,7 @@ env:
   global:
     - secure: "lZ7pHQvl5dpZWzBQAaIMf0wqrvtcZ4wiZKeIZjf83TEsflW8+z0uTpIuN30ZV6Glth/Sq1OhLnTP5+N57fZU/1ebA5twHdvP4bS5CIUUg71/CXQZNl36xeaqvxsG/xRrdpKOsPdjAOsQ9KPTQulsX43XDLS7CasMiLvYOpqKcPc="
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
+    - CLANG_FORMAT=true
 
 git:
   depth: 1
@@ -69,6 +70,14 @@ after_success:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd ${TRAVIS_BUILD_DIR} && lcov --directory . --capture --output-file coverage.info && lcov --remove coverage.info '/usr/*' 'contrib/*' 'test/*' --output-file coverage.info && lcov --list coverage.info && coveralls-lcov --source-encoding=ISO-8859-1 --repo-token=${COVERALLS_TOKEN} coverage.info ; fi
 
 addons:
+  apt:
+    sources:
+      - llvm-toolchain-trusty-6.0
+      - ubuntu-toolchain-r-test
+    packages:
+      - clang-6.0
+      - clang-tidy-6.0
+      - clang-format-6.0
   coverity_scan:
     project:
       name: "assimp/assimp"

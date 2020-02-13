@@ -2,8 +2,7 @@
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 2006-2020, assimp team
-
-
+#
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -40,8 +39,8 @@
 cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
-	${Assimp_SOURCE_DIR}/contrib/gtest/include
-	${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/contrib/gtest/include
+    ${Assimp_SOURCE_DIR}/contrib/gtest/
     ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
@@ -187,10 +186,10 @@ add_executable( unit
     unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Common/Version.cpp
-	${COMMON}
-	${IMPORTERS}
-	${MATERIAL}
-	${MATH}
+    ${COMMON}
+    ${IMPORTERS}
+    ${MATERIAL}
+    ${MATH}
     ${POST_PROCESSES}
 )
 
@@ -201,20 +200,20 @@ SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 IF( WIN32 )
     SET( platform_libs )
-ELSE( WIN32 )
+ELSE()
     SET( platform_libs pthread )
-ENDIF( WIN32 )
+ENDIF()
 
 IF( WIN32 )
   ADD_CUSTOM_COMMAND(TARGET unit
     PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:unit>
     MAIN_DEPENDENCY assimp)
-ENDIF( WIN32 )
+ENDIF()
 
 IF(MSVC)
-		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+ENDIF()
 
 target_link_libraries( unit assimp ${platform_libs} )
 

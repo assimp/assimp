@@ -2,8 +2,7 @@
 # ----------------------------------------------------------------------
 # 
 # Copyright (c) 2006-2020, assimp team
-
-
+#
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -37,7 +36,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #----------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/include
@@ -66,7 +65,7 @@ IF( WIN32 )
     PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:assimp_cmd>
     MAIN_DEPENDENCY assimp)
-ENDIF( WIN32 )
+ENDIF()
 
 TARGET_LINK_LIBRARIES( assimp_cmd assimp ${ZLIB_LIBRARIES} )
 SET_TARGET_PROPERTIES( assimp_cmd PROPERTIES
@@ -76,3 +75,4 @@ SET_TARGET_PROPERTIES( assimp_cmd PROPERTIES
 INSTALL( TARGETS assimp_cmd
   DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-bin
 )
+

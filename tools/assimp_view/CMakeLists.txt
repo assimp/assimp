@@ -2,8 +2,7 @@
 # ----------------------------------------------------------------------
 # 
 # Copyright (c) 2006-2020, assimp team
-
-
+#
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -37,7 +36,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #----------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 3.0 )
 
 FIND_PACKAGE(DirectX REQUIRED)
 
@@ -90,8 +89,7 @@ IF ( MSVC )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
   # assimp_viewer is ANSI (MBCS) throughout
   REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
-ENDIF ( MSVC )
-
+ENDIF ()
 
 #
 ADD_CUSTOM_COMMAND(TARGET assimp_viewer
@@ -105,3 +103,4 @@ TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_
 INSTALL( TARGETS assimp_viewer
   DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev
 )
+

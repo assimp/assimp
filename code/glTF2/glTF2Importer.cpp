@@ -335,6 +335,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 	std::vector<aiMesh *> meshes;
 
 	unsigned int k = 0;
+    meshOffsets.clear();
 
 	for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
 		Mesh &mesh = r.meshes[m];

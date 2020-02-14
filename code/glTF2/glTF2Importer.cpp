@@ -925,6 +925,11 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
 	if (node.camera) {
 		pScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
+		if (node.translation.isPresent) {
+			aiVector3D trans;
+			CopyValue(node.translation.value, trans);
+			pScene->mCameras[node.camera.GetIndex()]->mPosition = trans;
+		}
 	}
 
 	if (node.light) {

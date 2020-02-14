@@ -160,10 +160,7 @@ static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
 
 static void CopyValue(const aiMatrix4x4& v, aiMatrix4x4& o)
 {
-    o.a1 = v.a1; o.a2 = v.a2; o.a3 = v.a3; o.a4 = v.a4;
-    o.b1 = v.b1; o.b2 = v.b2; o.b3 = v.b3; o.b4 = v.b4;
-    o.c1 = v.c1; o.c2 = v.c2; o.c3 = v.c3; o.c4 = v.c4;
-    o.d1 = v.d1; o.d2 = v.d2; o.d3 = v.d3; o.d4 = v.d4;
+    memcpy(&o, &v, sizeof(aiMatrix4x4));
 }
 
 static void IdentityMatrix4(glTF::mat4& o)
@@ -230,9 +227,8 @@ inline void SetAccessorRange(ComponentType compType, Ref<Accessor> acc, void* da
 	}
 }
 
-inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
-    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
-{
+inline Ref<Accessor> ExportData(Asset &a, std::string &meshName, Ref<Buffer> &buffer,
+        unsigned int count, void *data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE) {
     if (!count || !data) return Ref<Accessor>();
 
     unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
@@ -251,7 +247,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     bv->buffer = buffer;
     bv->byteOffset = unsigned(offset);
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
-    bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
+    bv->target = target;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
@@ -616,13 +612,13 @@ void glTFExporter::ExportMeshes()
 		// If compression is used then you need parameters of uncompressed region: begin and size. At this step "begin" is stored.
 		if(comp_allow) idx_srcdata_begin = b->byteLength;
 
-        Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 		if (v) p.attributes.position.push_back(v);
 
 		/******************** Normals ********************/
 		if(comp_allow && (aim->mNormals != 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
 
-		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 		if (n) p.attributes.normal.push_back(n);
 
 		/************** Texture coordinates **************/
@@ -639,7 +635,7 @@ void glTFExporter::ExportMeshes()
 
 				if(comp_allow) idx_srcdata_tc.push_back(b->byteLength);// Store index of texture coordinates array.
 
-				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, false);
+				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 				if (tc) p.attributes.texcoord.push_back(tc);
 			}
 		}
@@ -657,7 +653,7 @@ void glTFExporter::ExportMeshes()
                 }
             }
 
-			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
+			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
 		}
 
         switch (aim->mPrimitiveTypes) {

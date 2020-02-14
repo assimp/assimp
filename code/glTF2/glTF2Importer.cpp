@@ -1253,6 +1253,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 		size_t length = img.GetDataLength();
 		void *data = img.StealData();
 
+		tex->mFilename = img.name;
 		tex->mWidth = static_cast<unsigned int>(length);
 		tex->mHeight = 0;
 		tex->pcData = reinterpret_cast<aiTexel *>(data);

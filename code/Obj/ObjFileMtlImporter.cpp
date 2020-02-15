@@ -274,7 +274,7 @@ void ObjFileMtlImporter::getFloatValue( ai_real &value )
 //  Creates a material from loaded data.
 void ObjFileMtlImporter::createMaterial()
 {
-    std::string line( "" );
+    std::string line;
     while( !IsLineEnd( *m_DataIt ) ) {
         line += *m_DataIt;
         ++m_DataIt;
@@ -282,7 +282,7 @@ void ObjFileMtlImporter::createMaterial()
 
     std::vector<std::string> token;
     const unsigned int numToken = tokenize<std::string>( line, token, " \t" );
-    std::string name( "" );
+    std::string name;
     if ( numToken == 1 ) {
         name = AI_DEFAULT_MATERIAL_NAME;
     } else {

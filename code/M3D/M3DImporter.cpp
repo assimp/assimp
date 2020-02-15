@@ -109,7 +109,9 @@ using namespace std;
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
 M3DImporter::M3DImporter() :
-		mScene(nullptr) {}
+		mScene(nullptr) {
+			// empty
+		}
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is a binary or ASCII Model 3D file.
@@ -225,7 +227,7 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
 // ------------------------------------------------------------------------------------------------
 // convert materials. properties are converted using a static table in M3DMaterials.h
-void M3DImporter::importMaterials(const M3DWrapper &m3d_wrap) {
+void M3DImporter::importMaterials(const M3DWrapper &m3d) {
 	unsigned int i, j, k, l, n;
 	m3dm_t *m;
 	aiString name = aiString(AI_DEFAULT_MATERIAL_NAME);
@@ -233,9 +235,9 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d_wrap) {
 	ai_real f;
 
 	ai_assert(mScene != nullptr);
-	ai_assert(m3d_wrap);
+	ai_assert(m3d);
 
-	mScene->mNumMaterials = m3d_wrap->nummaterial + 1;
+	mScene->mNumMaterials = m3d->nummaterial + 1;
 	mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
 
 	ASSIMP_LOG_DEBUG_F("M3D: importMaterials ", mScene->mNumMaterials);
@@ -248,8 +250,12 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d_wrap) {
 	mat->AddProperty(&c, 1, AI_MATKEY_COLOR_DIFFUSE);
 	mScene->mMaterials[0] = mat;
 
-	for (i = 0; i < m3d_wrap->nummaterial; i++) {
-		m = &m3d_wrap->material[i];
+	if (!m3d->nummaterial || !m3d->material) {
+		return;
+	}
+
+	for (i = 0; i < m3d->nummaterial; i++) {
+		m = &m3d->material[i];
 		aiMaterial *mat = new aiMaterial;
 		name.Set(std::string(m->name));
 		mat->AddProperty(&name, AI_MATKEY_NAME);
@@ -294,9 +300,9 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d_wrap) {
 			// texture map properties
 			if (m->prop[j].type >= 128 && aiTxProps[k].pKey &&
 					// extra check, should never happen, do we have the refered texture?
-					m->prop[j].value.textureid < m3d_wrap->numtexture &&
-					m3d_wrap->texture[m->prop[j].value.textureid].name) {
-				name.Set(std::string(std::string(m3d_wrap->texture[m->prop[j].value.textureid].name) + ".png"));
+					m->prop[j].value.textureid < m3d->numtexture &&
+					m3d->texture[m->prop[j].value.textureid].name) {
+				name.Set(std::string(std::string(m3d->texture[m->prop[j].value.textureid].name) + ".png"));
 				mat->AddProperty(&name, aiTxProps[k].pKey, aiTxProps[k].type, aiTxProps[k].index);
 				n = 0;
 				mat->AddProperty(&n, 1, _AI_MATKEY_UVWSRC_BASE, aiProps[k].type, aiProps[k].index);
@@ -310,7 +316,12 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d_wrap) {
 // import textures, this is the simplest of all
 void M3DImporter::importTextures(const M3DWrapper &m3d) {
 	unsigned int i;
-	const char *formatHint[] = { "rgba0800", "rgba0808", "rgba8880", "rgba8888" };
+	const char *formatHint[] = {
+		"rgba0800",
+		"rgba0808",
+		"rgba8880",
+		"rgba8888"
+	};
 	m3dtx_t *t;
 
 	ai_assert(mScene != nullptr);
@@ -319,8 +330,9 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 	mScene->mNumTextures = m3d->numtexture;
 	ASSIMP_LOG_DEBUG_F("M3D: importTextures ", mScene->mNumTextures);
 
-	if (!m3d->numtexture)
+	if (!m3d->numtexture || !m3d->texture) {
 		return;
+	}
 
 	mScene->mTextures = new aiTexture *[m3d->numtexture];
 	for (i = 0; i < m3d->numtexture; i++) {
@@ -371,7 +383,13 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 // individually. In assimp there're per mesh vertex and UV lists, and they must be
 // indexed simultaneously.
 void M3DImporter::importMeshes(const M3DWrapper &m3d) {
-	unsigned int i, j, k, l, numpoly = 3, lastMat = M3D_INDEXMAX;
+	ASSIMP_LOG_DEBUG_F("M3D: importMeshes ", m3d->numface);
+
+	if (!m3d->numface || !m3d->face || !m3d->numvertex || !m3d->vertex) {
+		return;
+	}
+
+    unsigned int i, j, k, l, numpoly = 3, lastMat = M3D_INDEXMAX;
 	std::vector<aiMesh *> *meshes = new std::vector<aiMesh *>();
 	std::vector<aiFace> *faces = nullptr;
 	std::vector<aiVector3D> *vertices = nullptr;
@@ -385,7 +403,6 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 	ai_assert(m3d);
 	ai_assert(mScene->mRootNode != nullptr);
 
-	ASSIMP_LOG_DEBUG_F("M3D: importMeshes ", m3d->numface);
 
 	for (i = 0; i < m3d->numface; i++) {
 		// we must switch mesh if material changes
@@ -420,6 +437,7 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 			k = static_cast<unsigned int>(vertices->size());
 			pFace->mIndices[j] = k;
 			l = m3d->face[i].vertex[j];
+			if(l >= m3d->numvertex) continue;
 			pos.x = m3d->vertex[l].x;
 			pos.y = m3d->vertex[l].y;
 			pos.z = m3d->vertex[l].z;
@@ -432,14 +450,14 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
 				vertexids->push_back(l);
 			}
 			l = m3d->face[i].texcoord[j];
-			if (l != M3D_UNDEF) {
+			if (l != M3D_UNDEF && l < m3d->numtmap) {
 				uv.x = m3d->tmap[l].u;
 				uv.y = m3d->tmap[l].v;
 				uv.z = 0.0;
 				texcoords->push_back(uv);
 			}
 			l = m3d->face[i].normal[j];
-			if (l != M3D_UNDEF) {
+			if (l != M3D_UNDEF && l < m3d->numvertex) {
 				norm.x = m3d->vertex[l].x;
 				norm.y = m3d->vertex[l].y;
 				norm.z = m3d->vertex[l].z;
@@ -487,8 +505,15 @@ void M3DImporter::importBones(const M3DWrapper &m3d, unsigned int parentid, aiNo
 
 	ASSIMP_LOG_DEBUG_F("M3D: importBones ", m3d->numbone, " parentid ", (int)parentid);
 
-	for (n = 0, i = parentid + 1; i < m3d->numbone; i++)
-		if (m3d->bone[i].parent == parentid) n++;
+	if (!m3d->numbone || !m3d->bone) {
+		return;
+	}
+
+	for (n = 0, i = parentid + 1; i < m3d->numbone; i++) {
+		if (m3d->bone[i].parent == parentid) {
+			n++;
+		}
+	}
 	pParent->mChildren = new aiNode *[n];
 
 	for (i = parentid + 1; i < m3d->numbone; i++) {
@@ -521,8 +546,9 @@ void M3DImporter::importAnimations(const M3DWrapper &m3d) {
 
 	ASSIMP_LOG_DEBUG_F("M3D: importAnimations ", mScene->mNumAnimations);
 
-	if (!m3d->numaction || !m3d->numbone)
+	if (!m3d->numaction || !m3d->action || !m3d->numbone || !m3d->bone || !m3d->vertex) {
 		return;
+	}
 
 	mScene->mAnimations = new aiAnimation *[m3d->numaction];
 	for (i = 0; i < m3d->numaction; i++) {
@@ -552,6 +578,7 @@ void M3DImporter::importAnimations(const M3DWrapper &m3d) {
 						ori = a->frame[j].transform[k].ori;
 					}
 				}
+				if(pos >= m3d->numvertex || ori >= m3d->numvertex) continue;
 				m3dv_t *v = &m3d->vertex[pos];
 				m3dv_t *q = &m3d->vertex[ori];
 				pAnim->mChannels[l]->mPositionKeys[j].mTime = t;
@@ -587,6 +614,8 @@ void M3DImporter::convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned in
 	ai_assert(m3d);
 	ai_assert(posid != M3D_UNDEF && posid < m3d->numvertex);
 	ai_assert(orientid != M3D_UNDEF && orientid < m3d->numvertex);
+	if (!m3d->numvertex || !m3d->vertex)
+		return;
 	m3dv_t *p = &m3d->vertex[posid];
 	m3dv_t *q = &m3d->vertex[orientid];
 
@@ -629,16 +658,18 @@ void M3DImporter::convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned in
 // ------------------------------------------------------------------------------------------------
 // find a node by name
 aiNode *M3DImporter::findNode(aiNode *pNode, aiString name) {
-	unsigned int i;
-
 	ai_assert(pNode != nullptr);
 	ai_assert(mScene != nullptr);
 
-	if (pNode->mName == name)
+	if (pNode->mName == name) {
 		return pNode;
-	for (i = 0; i < pNode->mNumChildren; i++) {
+	}
+
+	for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
 		aiNode *pChild = findNode(pNode->mChildren[i], name);
-		if (pChild) return pChild;
+		if (pChild) {
+			return pChild;
+		}
 	}
 	return nullptr;
 }
@@ -700,8 +731,8 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 		// this is complicated, because M3D stores a list of bone id / weight pairs per
 		// vertex but assimp uses lists of local vertex id/weight pairs per local bone list
 		pMesh->mNumBones = m3d->numbone;
-		/* we need aiBone with mOffsetMatrix for bones without weights as well */
-		if (pMesh->mNumBones) {
+		// we need aiBone with mOffsetMatrix for bones without weights as well
+		if (pMesh->mNumBones && m3d->numbone && m3d->bone) {
 			pMesh->mBones = new aiBone *[pMesh->mNumBones];
 			for (unsigned int i = 0; i < m3d->numbone; i++) {
 				aiNode *pNode;
@@ -715,10 +746,13 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 				} else
 					pMesh->mBones[i]->mOffsetMatrix = aiMatrix4x4();
 			}
-			if (vertexids->size()) {
+			if (vertexids->size() && m3d->numvertex && m3d->vertex && m3d->numskin && m3d->skin) {
 				unsigned int i, j;
 				// first count how many vertices we have per bone
 				for (i = 0; i < vertexids->size(); i++) {
+					if(vertexids->at(i) >= m3d->numvertex) {
+						continue;
+					}
 					unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
 					if (s != M3D_UNDEF && s != M3D_INDEXMAX) {
 						for (unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
@@ -742,9 +776,11 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 				}
 				// fill up with data
 				for (i = 0; i < vertexids->size(); i++) {
+					if(vertexids->at(i) >= m3d->numvertex) continue;
 					unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
-					if (s != M3D_UNDEF && s != M3D_INDEXMAX) {
+					if (s != M3D_UNDEF && s != M3D_INDEXMAX && s < m3d->numskin) {
 						for (unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
+							if(m3d->skin[s].boneid[k] >= m3d->numbone) continue;
 							aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
 							for (j = 0; j < pMesh->mNumBones; j++) {
 								if (pMesh->mBones[j]->mName == name) {

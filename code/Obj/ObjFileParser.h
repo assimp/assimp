@@ -78,9 +78,9 @@ public:
     /// @brief  The default constructor.
     ObjFileParser();
     /// @brief  Constructor with data array.
-    ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem* io, ProgressHandler* progress, const std::string &originalObjFileName);
+    ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem* io, ProgressHandler* progress, std::string originalObjFileName);
     /// @brief  Destructor
-    ~ObjFileParser();
+    ~ObjFileParser() = default;
     /// @brief  If you want to load in-core data.
     void setBuffer( std::vector<char> &buffer );
     /// @brief  Model getter.

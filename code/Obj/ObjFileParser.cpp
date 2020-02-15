@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/Importer.hpp>
 #include <cstdlib>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 
@@ -71,19 +73,19 @@ ObjFileParser::ObjFileParser()
 
 ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName,
                               IOSystem *io, ProgressHandler* progress,
-                              const std::string &originalObjFileName) :
+                              std::string originalObjFileName) :
     m_DataIt(),
     m_DataItEnd(),
     m_pModel(nullptr),
     m_uiLine(0),
-    m_pIO( io ),
+    m_pIO(io),
     m_progress(progress),
-    m_originalObjFileName(originalObjFileName)
+    m_originalObjFileName(std::move(originalObjFileName))
 {
-    std::fill_n(m_buffer,Buffersize,0);
+    std::fill_n(m_buffer, Buffersize,0);
 
     // Create the model instance to store all the data
-    m_pModel.reset(new ObjFile::Model());
+    m_pModel = std::make_unique<ObjFile::Model>();
     m_pModel->m_ModelName = modelName;
 
     // create default material and store it
@@ -94,9 +96,6 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
 
     // Start parsing the file
     parseFile( streamBuffer );
-}
-
-ObjFileParser::~ObjFileParser() {
 }
 
 void ObjFileParser::setBuffer( std::vector<char> &buffer ) {
@@ -128,7 +127,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             processed = static_cast<unsigned int>(filePos);
             lastFilePos = filePos;
             progressCounter++;
-            m_progress->UpdateFileRead( processed, progressTotal );
+            m_progress->UpdateFileRead(processed, progressTotal);
         }
 
         // parse line

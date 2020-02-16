@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -191,6 +191,7 @@ namespace glTF
     //! Values for the BufferView::target field
     enum BufferViewTarget
     {
+        BufferViewTarget_NONE = 0,
         BufferViewTarget_ARRAY_BUFFER = 34962,
         BufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963
     };

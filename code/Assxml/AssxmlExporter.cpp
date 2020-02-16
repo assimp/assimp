@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -46,28 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
 
-#include "PostProcessing/ProcessHelper.h"
-
-#include <assimp/version.h>
-#include <assimp/IOStream.hpp>
+#include "AssxmlFileWriter.h"
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
 
-#include <stdarg.h>
-
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#   include <zlib.h>
-#else
-#   include <contrib/zlib/zlib.h>
-#endif
-
-#include <time.h>
-#include <stdio.h>
-
-using namespace Assimp;
-
-namespace Assimp    {
-
+namespace Assimp   { 
 namespace AssxmlExport  {
 
 // -----------------------------------------------------------------------------------
@@ -639,13 +622,12 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
 
 void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/)
 {
-    IOStream * out = pIOSystem->Open( pFile, "wt" );
-    if (!out) return;
-
-    bool shortened = false;
-    AssxmlExport::WriteDump( pScene, out, shortened );
-
-    pIOSystem->Close( out );
+    DumpSceneToAssxml(
+        pFile,
+        "\0", // command(s)
+        pIOSystem,
+        pScene,
+        false); // shortened?
 }
 
 } // end of namespace Assimp

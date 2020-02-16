@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -176,13 +176,13 @@ namespace glTF2 {
                 valSampler.AddMember("input", s.input->index, w.mAl);
                 switch (s.interpolation) {
                     case Interpolation_LINEAR:
-                        valSampler.AddMember("path", "LINEAR", w.mAl);
+                        valSampler.AddMember("interpolation", "LINEAR", w.mAl);
                         break;
                     case Interpolation_STEP:
-                        valSampler.AddMember("path", "STEP", w.mAl);
+                        valSampler.AddMember("interpolation", "STEP", w.mAl);
                         break;
                     case Interpolation_CUBICSPLINE:
-                        valSampler.AddMember("path", "CUBICSPLINE", w.mAl);
+                        valSampler.AddMember("interpolation", "CUBICSPLINE", w.mAl);
                         break;
                 }
                 valSampler.AddMember("output", s.output->index, w.mAl);
@@ -209,7 +209,7 @@ namespace glTF2 {
         if (bv.byteStride != 0) {
             obj.AddMember("byteStride", bv.byteStride, w.mAl);
         }
-        if (bv.target != 0) {
+        if (bv.target != BufferViewTarget_NONE) {
             obj.AddMember("target", int(bv.target), w.mAl);
         }
     }

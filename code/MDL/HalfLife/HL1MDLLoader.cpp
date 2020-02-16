@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -124,11 +124,23 @@ void HL1MDLLoader::release_resources() {
         delete[] anim_headers_;
         anim_headers_ = nullptr;
     }
+
+    // Root has some children nodes. so let's proceed them
+    if (!rootnode_children_.empty()) {
+        // Here, it means that the nodes were not added to the
+        // scene root node. We still have to delete them.
+        for (auto it = rootnode_children_.begin(); it != rootnode_children_.end(); ++it) {
+            if (*it) {
+                delete *it;
+            }
+        }
+        // Ensure this happens only once.
+        rootnode_children_.clear();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::load_file() {
-
     try {
         header_ = (const Header_HL1 *)buffer_;
         validate_header(header_, false);
@@ -138,8 +150,9 @@ void HL1MDLLoader::load_file() {
 
         load_texture_file();
 
-        if (import_settings_.read_animations)
+        if (import_settings_.read_animations) {
             load_sequence_groups_files();
+        }
 
         read_textures();
         read_skins();
@@ -155,22 +168,36 @@ void HL1MDLLoader::load_file() {
                 read_sequence_transitions();
         }
 
-        if (import_settings_.read_attachments)
+        if (import_settings_.read_attachments) {
             read_attachments();
+        }
 
-        if (import_settings_.read_hitboxes)
+        if (import_settings_.read_hitboxes) {
             read_hitboxes();
+        }
 
-        if (import_settings_.read_bone_controllers)
+        if (import_settings_.read_bone_controllers) {
             read_bone_controllers();
+        }
 
         read_global_info();
+
+        if (!header_->numbodyparts) {
+            // This could be an MDL external texture file. In this case,
+            // add this flag to allow the scene to be loaded even if it
+            // has no meshes.
+            scene_->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+        }
 
         // Append children to root node.
         if (rootnode_children_.size()) {
             scene_->mRootNode->addChildren(
                     static_cast<unsigned int>(rootnode_children_.size()),
                     rootnode_children_.data());
+
+            // Clear the list of nodes so they will not be destroyed
+            // when resources are released.
+            rootnode_children_.clear();
         }
 
         release_resources();
@@ -185,46 +212,43 @@ void HL1MDLLoader::load_file() {
 void HL1MDLLoader::validate_header(const Header_HL1 *header, bool is_texture_header) {
     if (is_texture_header) {
         // Every single Half-Life model is assumed to have at least one texture.
-        if (!header->numtextures)
+        if (!header->numtextures) {
             throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "There are no textures in the file");
+        }
 
-        if (header->numtextures > AI_MDL_HL1_MAX_TEXTURES)
+        if (header->numtextures > AI_MDL_HL1_MAX_TEXTURES) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_TEXTURES>(header->numtextures, "textures");
+        }
 
-        if (header->numskinfamilies > AI_MDL_HL1_MAX_SKIN_FAMILIES)
+        if (header->numskinfamilies > AI_MDL_HL1_MAX_SKIN_FAMILIES) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_SKIN_FAMILIES>(header->numskinfamilies, "skin families");
+        }
 
     } else {
-        // Every single Half-Life model is assumed to have at least one bodypart.
-        if (!header->numbodyparts)
-            throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Model has no bodyparts");
 
-        // Every single Half-Life model is assumed to have at least one bone.
-        if (!header->numbones)
-            throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Model has no bones");
-
-        // Every single Half-Life model is assumed to have at least one sequence group,
-        // which is the "default" sequence group.
-        if (!header->numseqgroups)
-            throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Model has no sequence groups");
-
-        if (header->numbodyparts > AI_MDL_HL1_MAX_BODYPARTS)
+        if (header->numbodyparts > AI_MDL_HL1_MAX_BODYPARTS) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_BODYPARTS>(header->numbodyparts, "bodyparts");
+        }
 
-        if (header->numbones > AI_MDL_HL1_MAX_BONES)
+        if (header->numbones > AI_MDL_HL1_MAX_BONES) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_BONES>(header->numbones, "bones");
+        }
 
-        if (header->numbonecontrollers > AI_MDL_HL1_MAX_BONE_CONTROLLERS)
+        if (header->numbonecontrollers > AI_MDL_HL1_MAX_BONE_CONTROLLERS) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_BONE_CONTROLLERS>(header->numbonecontrollers, "bone controllers");
+        }
 
-        if (header->numseq > AI_MDL_HL1_MAX_SEQUENCES)
+        if (header->numseq > AI_MDL_HL1_MAX_SEQUENCES) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_SEQUENCES>(header->numseq, "sequences");
+        }
 
-        if (header->numseqgroups > AI_MDL_HL1_MAX_SEQUENCE_GROUPS)
+        if (header->numseqgroups > AI_MDL_HL1_MAX_SEQUENCE_GROUPS) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_SEQUENCE_GROUPS>(header->numseqgroups, "sequence groups");
+        }
 
-        if (header->numattachments > AI_MDL_HL1_MAX_ATTACHMENTS)
+        if (header->numattachments > AI_MDL_HL1_MAX_ATTACHMENTS) {
             log_warning_limit_exceeded<AI_MDL_HL1_MAX_ATTACHMENTS>(header->numattachments, "attachments");
+        }
     }
 }
 
@@ -256,8 +280,7 @@ void HL1MDLLoader::load_texture_file() {
 
         load_file_into_buffer<Header_HL1>(texture_file_path, texture_buffer_);
     } else {
-        /* Model has no external texture file. This means the texture
-        is stored inside the main MDL file. */
+        // Model has no external texture file. This means the texture is stored inside the main MDL file.
         texture_buffer_ = const_cast<unsigned char *>(buffer_);
     }
 
@@ -284,16 +307,17 @@ void HL1MDLLoader::load_texture_file() {
 
 */
 void HL1MDLLoader::load_sequence_groups_files() {
-    if (header_->numseqgroups <= 1)
+    if (header_->numseqgroups <= 1) {
         return;
+    }
 
     num_sequence_groups_ = header_->numseqgroups;
 
     anim_buffers_ = new unsigned char *[num_sequence_groups_];
     anim_headers_ = new SequenceHeader_HL1 *[num_sequence_groups_];
     for (int i = 0; i < num_sequence_groups_; ++i) {
-        anim_buffers_[i] = NULL;
-        anim_headers_[i] = NULL;
+        anim_buffers_[i] = nullptr;
+        anim_headers_[i] = nullptr;
     }
 
     std::string file_path_without_extension =
@@ -316,39 +340,16 @@ void HL1MDLLoader::load_sequence_groups_files() {
 }
 
 // ------------------------------------------------------------------------------------------------
-/** @brief Read an MDL texture.
-*
-*   @note This method is taken from HL1 source code.
-*   source: file: studio_utils.c
-*           function(s): UploadTexture
-*/
+// Read an MDL texture.
 void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
         uint8_t *data, uint8_t *pal, aiTexture *pResult,
         aiColor3D &last_palette_color) {
-    int outwidth, outheight;
-    int i, j;
-    int row1[256], row2[256], col1[256], col2[256];
-    unsigned char *pix1, *pix2, *pix3, *pix4;
-
-    // convert texture to power of 2
-    for (outwidth = 1; outwidth < ptexture->width; outwidth <<= 1)
-        ;
-
-    if (outwidth > 256)
-        outwidth = 256;
-
-    for (outheight = 1; outheight < ptexture->height; outheight <<= 1)
-        ;
-
-    if (outheight > 256)
-        outheight = 256;
-
     pResult->mFilename = ptexture->name;
-    pResult->mWidth = outwidth;
-    pResult->mHeight = outheight;
-    pResult->achFormatHint[0] = 'b';
+    pResult->mWidth = static_cast<unsigned int>(ptexture->width);
+    pResult->mHeight = static_cast<unsigned int>(ptexture->height);
+    pResult->achFormatHint[0] = 'r';
     pResult->achFormatHint[1] = 'g';
-    pResult->achFormatHint[2] = 'r';
+    pResult->achFormatHint[2] = 'b';
     pResult->achFormatHint[3] = 'a';
     pResult->achFormatHint[4] = '8';
     pResult->achFormatHint[5] = '8';
@@ -356,31 +357,15 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->achFormatHint[7] = '8';
     pResult->achFormatHint[8] = '\0';
 
-    aiTexel *out = pResult->pcData = new aiTexel[outwidth * outheight];
+    const size_t num_pixels = pResult->mWidth * pResult->mHeight;
+    aiTexel *out = pResult->pcData = new aiTexel[num_pixels];
 
-    for (i = 0; i < outwidth; i++) {
-        col1[i] = (int)((i + 0.25) * (ptexture->width / (float)outwidth));
-        col2[i] = (int)((i + 0.75) * (ptexture->width / (float)outwidth));
-    }
-
-    for (i = 0; i < outheight; i++) {
-        row1[i] = (int)((i + 0.25) * (ptexture->height / (float)outheight)) * ptexture->width;
-        row2[i] = (int)((i + 0.75) * (ptexture->height / (float)outheight)) * ptexture->width;
-    }
-
-    // scale down and convert to 32bit RGB
-    for (i = 0; i < outheight; i++) {
-        for (j = 0; j < outwidth; j++, out++) {
-            pix1 = &pal[data[row1[i] + col1[j]] * 3];
-            pix2 = &pal[data[row1[i] + col2[j]] * 3];
-            pix3 = &pal[data[row2[i] + col1[j]] * 3];
-            pix4 = &pal[data[row2[i] + col2[j]] * 3];
-
-            out->r = (pix1[0] + pix2[0] + pix3[0] + pix4[0]) >> 2;
-            out->g = (pix1[1] + pix2[1] + pix3[1] + pix4[1]) >> 2;
-            out->b = (pix1[2] + pix2[2] + pix3[2] + pix4[2]) >> 2;
-            out->a = 0xFF;
-        }
+    // Convert indexed 8 bit to 32 bit RGBA.
+    for (size_t i = 0; i < num_pixels; ++i, ++out) {
+        out->r = pal[data[i] * 3];
+        out->g = pal[data[i] * 3 + 1];
+        out->b = pal[data[i] * 3 + 2];
+        out->a = 255;
     }
 
     // Get the last palette color.
@@ -440,8 +425,9 @@ void HL1MDLLoader::read_textures() {
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_skins() {
     // Read skins, if any.
-    if (texture_header_->numskinfamilies <= 1)
+    if (texture_header_->numskinfamilies <= 1) {
         return;
+    }
 
     // Pointer to base texture index.
     short *default_skin_ptr = (short *)((uint8_t *)texture_header_ + texture_header_->skinindex);
@@ -462,11 +448,16 @@ void HL1MDLLoader::read_skins() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_bones() {
+    if (!header_->numbones) {
+        return;
+    }
+
     const Bone_HL1 *pbone = (const Bone_HL1 *)((uint8_t *)header_ + header_->boneindex);
 
     std::vector<std::string> unique_bones_names(header_->numbones);
-    for (int i = 0; i < header_->numbones; ++i)
+    for (int i = 0; i < header_->numbones; ++i) {
         unique_bones_names[i] = pbone[i].name;
+    }
 
     // Ensure bones have unique names.
     unique_name_generator_.set_template_name("Bone");
@@ -551,6 +542,9 @@ void HL1MDLLoader::read_bones() {
     triangles, respectively (3 indices per face).
 */
 void HL1MDLLoader::read_meshes() {
+    if (!header_->numbodyparts) {
+        return;
+    }
 
     int total_verts = 0;
     int total_triangles = 0;
@@ -583,14 +577,17 @@ void HL1MDLLoader::read_meshes() {
     }
 
     // Display limit infos.
-    if (total_verts > AI_MDL_HL1_MAX_VERTICES)
+    if (total_verts > AI_MDL_HL1_MAX_VERTICES) {
         log_warning_limit_exceeded<AI_MDL_HL1_MAX_VERTICES>(total_verts, "vertices");
+    }
 
-    if (scene_->mNumMeshes > AI_MDL_HL1_MAX_MESHES)
+    if (scene_->mNumMeshes > AI_MDL_HL1_MAX_MESHES) {
         log_warning_limit_exceeded<AI_MDL_HL1_MAX_MESHES>(scene_->mNumMeshes, "meshes");
+    }
 
-    if (total_models_ > AI_MDL_HL1_MAX_MODELS)
+    if (total_models_ > AI_MDL_HL1_MAX_MODELS) {
         log_warning_limit_exceeded<AI_MDL_HL1_MAX_MODELS>(total_models_, "models");
+    }
 
     // Ensure bodyparts have unique names.
     unique_name_generator_.set_template_name("Bodypart");
@@ -917,14 +914,16 @@ void HL1MDLLoader::read_meshes() {
         }
     }
 
-    if (total_triangles > AI_MDL_HL1_MAX_TRIANGLES)
+    if (total_triangles > AI_MDL_HL1_MAX_TRIANGLES) {
         log_warning_limit_exceeded<AI_MDL_HL1_MAX_TRIANGLES>(total_triangles, "triangles");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_animations() {
-    if (!header_->numseq)
+    if (!header_->numseq) {
         return;
+    }
 
     const SequenceDesc_HL1 *pseqdesc = (const SequenceDesc_HL1 *)((uint8_t *)header_ + header_->seqindex);
     const SequenceGroup_HL1 *pseqgroup = nullptr;
@@ -959,10 +958,11 @@ void HL1MDLLoader::read_animations() {
     for (int sequence = 0; sequence < header_->numseq; ++sequence, ++pseqdesc) {
         pseqgroup = (const SequenceGroup_HL1 *)((uint8_t *)header_ + header_->seqgroupindex) + pseqdesc->seqgroup;
 
-        if (pseqdesc->seqgroup == 0)
+        if (pseqdesc->seqgroup == 0) {
             panim = (const AnimValueOffset_HL1 *)((uint8_t *)header_ + pseqgroup->unused2 + pseqdesc->animindex);
-        else
+        } else {
             panim = (const AnimValueOffset_HL1 *)((uint8_t *)anim_headers_[pseqdesc->seqgroup] + pseqdesc->animindex);
+        }
 
         for (int blend = 0; blend < pseqdesc->numblends; ++blend, ++scene_animations_ptr) {
 
@@ -1025,6 +1025,9 @@ void HL1MDLLoader::read_animations() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_sequence_groups_info() {
+    if (!header_->numseqgroups) {
+        return;
+    }
 
     aiNode *sequence_groups_node = new aiNode(AI_MDL_HL1_NODE_SEQUENCE_GROUPS);
     rootnode_children_.push_back(sequence_groups_node);
@@ -1035,8 +1038,9 @@ void HL1MDLLoader::read_sequence_groups_info() {
     const SequenceGroup_HL1 *pseqgroup = (const SequenceGroup_HL1 *)((uint8_t *)header_ + header_->seqgroupindex);
 
     unique_sequence_groups_names_.resize(header_->numseqgroups);
-    for (int i = 0; i < header_->numseqgroups; ++i)
+    for (int i = 0; i < header_->numseqgroups; ++i) {
         unique_sequence_groups_names_[i] = pseqgroup[i].label;
+    }
 
     // Ensure sequence groups have unique names.
     unique_name_generator_.set_template_name("SequenceGroup");
@@ -1059,8 +1063,9 @@ void HL1MDLLoader::read_sequence_groups_info() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_sequence_infos() {
-    if (!header_->numseq)
+    if (!header_->numseq) {
         return;
+    }
 
     const SequenceDesc_HL1 *pseqdesc = (const SequenceDesc_HL1 *)((uint8_t *)header_ + header_->seqindex);
 
@@ -1163,8 +1168,9 @@ void HL1MDLLoader::read_sequence_infos() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_sequence_transitions() {
-    if (!header_->numtransitions)
+    if (!header_->numtransitions) {
         return;
+    }
 
     // Read sequence transition graph.
     aiNode *transition_graph_node = new aiNode(AI_MDL_HL1_NODE_SEQUENCE_TRANSITION_GRAPH);
@@ -1177,8 +1183,9 @@ void HL1MDLLoader::read_sequence_transitions() {
 }
 
 void HL1MDLLoader::read_attachments() {
-    if (!header_->numattachments)
+    if (!header_->numattachments) {
         return;
+    }
 
     const Attachment_HL1 *pattach = (const Attachment_HL1 *)((uint8_t *)header_ + header_->attachmentindex);
 
@@ -1200,8 +1207,9 @@ void HL1MDLLoader::read_attachments() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_hitboxes() {
-    if (!header_->numhitboxes)
+    if (!header_->numhitboxes) {
         return;
+    }
 
     const Hitbox_HL1 *phitbox = (const Hitbox_HL1 *)((uint8_t *)header_ + header_->hitboxindex);
 
@@ -1226,8 +1234,9 @@ void HL1MDLLoader::read_hitboxes() {
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_bone_controllers() {
-    if (!header_->numbonecontrollers)
+    if (!header_->numbonecontrollers) {
         return;
+    }
 
     const BoneController_HL1 *pbonecontroller = (const BoneController_HL1 *)((uint8_t *)header_ + header_->bonecontrollerindex);
 
@@ -1306,10 +1315,11 @@ void HL1MDLLoader::extract_anim_value(
     }
 
     // Bah, missing blend!
-    if (panimvalue->num.valid > k)
+    if (panimvalue->num.valid > k) {
         value = panimvalue[k + 1].value * bone_scale;
-    else
+    } else {
         value = panimvalue[panimvalue->num.valid].value * bone_scale;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

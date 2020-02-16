@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -1565,9 +1565,8 @@ namespace Assimp {
                 bone_map.clear();
             }
             catch (std::exception &e) {
-				FBXImporter::LogError(e.what());
+				        FBXImporter::LogError(e.what());
                 std::for_each(bones.begin(), bones.end(), Util::delete_fun<aiBone>());
-
                 throw;
             }
 

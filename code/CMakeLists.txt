@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2019, assimp team
+# Copyright (c) 2006-2020, assimp team
 #
 # All rights reserved.
 #
@@ -198,6 +198,7 @@ SET( Common_SRCS
   Common/CreateAnimMesh.cpp
   Common/simd.h
   Common/simd.cpp
+  Common/material.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -331,11 +332,15 @@ ADD_ASSIMP_IMPORTER( ASSBIN
 ADD_ASSIMP_EXPORTER( ASSBIN
   Assbin/AssbinExporter.h
   Assbin/AssbinExporter.cpp
+  Assbin/AssbinFileWriter.h
+  Assbin/AssbinFileWriter.cpp
 )
 
 ADD_ASSIMP_EXPORTER( ASSXML
   Assxml/AssxmlExporter.h
   Assxml/AssxmlExporter.cpp
+  Assxml/AssxmlFileWriter.h
+  Assxml/AssxmlFileWriter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( B3D
@@ -1213,10 +1218,6 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 )
 
 if (APPLE)
-  SET_TARGET_PROPERTIES( assimp PROPERTIES
-    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR}"
-  )
-
   if (BUILD_FRAMEWORK)
     SET_TARGET_PROPERTIES( assimp PROPERTIES
       FRAMEWORK TRUE

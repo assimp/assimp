@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -141,10 +141,7 @@ static void CopyValue(const aiMatrix4x4& v, mat4& o) {
 }
 
 static void CopyValue(const aiMatrix4x4& v, aiMatrix4x4& o) {
-    o.a1 = v.a1; o.a2 = v.a2; o.a3 = v.a3; o.a4 = v.a4;
-    o.b1 = v.b1; o.b2 = v.b2; o.b3 = v.b3; o.b4 = v.b4;
-    o.c1 = v.c1; o.c2 = v.c2; o.c3 = v.c3; o.c4 = v.c4;
-    o.d1 = v.d1; o.d2 = v.d2; o.d3 = v.d3; o.d4 = v.d4;
+    memcpy(&o, &v, sizeof(aiMatrix4x4));
 }
 
 static void IdentityMatrix4(mat4& o) {
@@ -211,7 +208,7 @@ inline void SetAccessorRange(ComponentType compType, Ref<Accessor> acc, void* da
 }
 
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
-    size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
+    size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE)
 {
     if (!count || !data) {
         return Ref<Accessor>();
@@ -234,7 +231,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     bv->byteOffset = offset;
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->byteStride = 0;
-    bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
+    bv->target = target;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
@@ -351,6 +348,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
 
                     if (path[0] == '*') { // embedded
                         aiTexture* tex = mScene->mTextures[atoi(&path[1])];
+						
+                        texture->source->name = tex->mFilename.C_Str();
 
                         // The asset has its own buffer, see Image::SetData
                         texture->source->SetData(reinterpret_cast<uint8_t*> (tex->pcData), tex->mWidth, *mAsset);
@@ -745,7 +744,7 @@ void glTF2Exporter::ExportMeshes()
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
 
 		/******************* Vertices ********************/
-        Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+		Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 		if (v) p.attributes.position.push_back(v);
 
 		/******************** Normals ********************/
@@ -756,7 +755,7 @@ void glTF2Exporter::ExportMeshes()
             }
         }
 
-		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
         if (n) p.attributes.normal.push_back(n);
 
 		/************** Texture coordinates **************/
@@ -774,14 +773,14 @@ void glTF2Exporter::ExportMeshes()
             if (aim->mNumUVComponents[i] > 0) {
                 AttribType::Value type = (aim->mNumUVComponents[i] == 2) ? AttribType::VEC2 : AttribType::VEC3;
 
-				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, false);
+				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 				if (tc) p.attributes.texcoord.push_back(tc);
 			}
 		}
 
 		/*************** Vertex colors ****************/
 		for (unsigned int indexColorChannel = 0; indexColorChannel < aim->GetNumColorChannels(); ++indexColorChannel) {
-			Ref<Accessor> c = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mColors[indexColorChannel], AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT, false);
+			Ref<Accessor> c = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mColors[indexColorChannel], AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 			if (c)
 				p.attributes.color.push_back(c);
 		}
@@ -797,7 +796,7 @@ void glTF2Exporter::ExportMeshes()
                 }
             }
 
-			p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, true);
+			p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_INT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
 		}
 
         switch (aim->mPrimitiveTypes) {
@@ -954,8 +953,27 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
     node->name = name;
 
     if (!n->mTransformation.IsIdentity()) {
-        node->matrix.isPresent = true;
-        CopyValue(n->mTransformation, node->matrix.value);
+		if (mScene->mNumAnimations > 0) {
+			aiQuaternion quaternion;
+			n->mTransformation.Decompose(*reinterpret_cast<aiVector3D *>(&node->scale.value), quaternion, *reinterpret_cast<aiVector3D *>(&node->translation.value));
+
+			aiVector3D vector(static_cast<ai_real>(1.0f), static_cast<ai_real>(1.0f), static_cast<ai_real>(1.0f));
+			if (!reinterpret_cast<aiVector3D *>(&node->scale.value)->Equal(vector)) {
+				node->scale.isPresent = true;
+			}
+			if (!reinterpret_cast<aiVector3D *>(&node->translation.value)->Equal(vector)) {
+				node->translation.isPresent = true;
+			}
+			node->rotation.isPresent = true;
+			node->rotation.value[0] = quaternion.x;
+			node->rotation.value[1] = quaternion.y;
+			node->rotation.value[2] = quaternion.z;
+			node->rotation.value[3] = quaternion.w;
+			node->matrix.isPresent = false;
+		} else {
+			node->matrix.isPresent = true;
+			CopyValue(n->mTransformation, node->matrix.value);
+		}
     }
 
     for (unsigned int i = 0; i < n->mNumMeshes; ++i) {
@@ -991,7 +1009,7 @@ void glTF2Exporter::ExportMetadata()
     asset.version = "2.0";
 
     char buffer[256];
-    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",
+    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%x)",
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;

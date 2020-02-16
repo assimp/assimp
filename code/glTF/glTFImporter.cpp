@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -680,6 +680,7 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
         size_t length = img.GetDataLength();
         void* data = img.StealData();
 
+        tex->mFilename = img.name;
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
         tex->pcData = reinterpret_cast<aiTexel*>(data);

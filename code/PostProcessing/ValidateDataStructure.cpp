@@ -777,6 +777,12 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
     SearchForInvalidTextures(pMaterial,aiTextureType_DISPLACEMENT);
     SearchForInvalidTextures(pMaterial,aiTextureType_LIGHTMAP);
     SearchForInvalidTextures(pMaterial,aiTextureType_REFLECTION);
+    SearchForInvalidTextures(pMaterial,aiTextureType_BASE_COLOR);
+    SearchForInvalidTextures(pMaterial,aiTextureType_NORMAL_CAMERA);
+    SearchForInvalidTextures(pMaterial,aiTextureType_EMISSION_COLOR);
+    SearchForInvalidTextures(pMaterial,aiTextureType_METALNESS);
+    SearchForInvalidTextures(pMaterial,aiTextureType_DIFFUSE_ROUGHNESS);
+    SearchForInvalidTextures(pMaterial,aiTextureType_AMBIENT_OCCLUSION);
 }
 
 // ------------------------------------------------------------------------------------------------

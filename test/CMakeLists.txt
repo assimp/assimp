@@ -137,7 +137,7 @@ SET( IMPORTERS
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
-  unit/ImportExport/IRR/utIrrImportExport.cpp
+  #unit/ImportExport/IRR/utIrrImportExport.cpp
   unit/ImportExport/RAW/utRAWImportExport.cpp
 )
 

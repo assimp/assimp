@@ -99,8 +99,8 @@ void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMap
         }
         // just let the members that are unused, that's much cheaper
         // than a full array realloc'n'copy party ...
-        if(!(node->mNumMeshes = out))   {
-
+		node->mNumMeshes = out;
+        if ( 0 == out )   {
             delete[] node->mMeshes;
             node->mMeshes = NULL;
         }
@@ -122,9 +122,8 @@ void FindInvalidDataProcess::Execute( aiScene* pScene) {
 
     // Process meshes
     for( unsigned int a = 0; a < pScene->mNumMeshes; a++)   {
-
-        int result;
-        if ((result = ProcessMesh( pScene->mMeshes[a])))    {
+        int result = ProcessMesh(pScene->mMeshes[a]);
+        if (0 == result )    {
             out = true;
 
             if (2 == result)    {
@@ -141,8 +140,8 @@ void FindInvalidDataProcess::Execute( aiScene* pScene) {
     }
 
     // Process animations
-    for (unsigned int a = 0; a < pScene->mNumAnimations;++a) {
-        ProcessAnimation( pScene->mAnimations[a]);
+	for (unsigned int animIdx = 0; animIdx < pScene->mNumAnimations; ++animIdx) {
+		ProcessAnimation(pScene->mAnimations[animIdx]);
     }
 
 

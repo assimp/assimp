@@ -62,7 +62,7 @@ bool ArmaturePopulate::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_PopulateArmatureData) != 0;
 }
 
-void ArmaturePopulate::SetupProperties(const Importer *pImp) {
+void ArmaturePopulate::SetupProperties(const Importer *) {
     // do nothing
 }
 
@@ -162,7 +162,7 @@ void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
 // A bone stack allows us to have multiple armatures, with the same bone names
 // A bone stack allows us also to retrieve bones true transform even with
 // duplicate names :)
-void ArmaturePopulate::BuildBoneStack(aiNode *current_node,
+void ArmaturePopulate::BuildBoneStack(aiNode *,
                                       const aiNode *root_node,
                                       const aiScene *scene,
                                       const std::vector<aiBone *> &bones,

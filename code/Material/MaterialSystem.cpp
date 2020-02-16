@@ -332,8 +332,7 @@ unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
         aiMaterialProperty* prop = pMat->mProperties[i];
 
         if ( prop /* just a sanity check ... */
-            && 0 == strcmp( prop->mKey.data, _AI_MATKEY_TEXTURE_BASE )
-            && prop->mSemantic == type) {
+				&& 0 == strcmp(prop->mKey.data, _AI_MATKEY_TEXTURE_BASE) && static_cast < aiTextureType>(prop->mSemantic) == type) {
 
             max = std::max(max,prop->mIndex+1);
         }

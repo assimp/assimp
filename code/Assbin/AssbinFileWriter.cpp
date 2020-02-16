@@ -371,7 +371,7 @@ protected:
             void* value = node->mMetaData->mValues[i].mData;
 
             Write<aiString>(&chunk, key);
-            Write<uint16_t>(&chunk, type);
+            Write<uint16_t>(&chunk, (uint16_t) type);
 
             switch (type) {
                 case AI_BOOL:
@@ -553,13 +553,14 @@ protected:
                 const aiFace& f = mesh->mFaces[i];
 
                 static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
-                Write<uint16_t>(&chunk,f.mNumIndices);
+                Write<uint32_t>(&chunk,f.mNumIndices);
 
                 for (unsigned int a = 0; a < f.mNumIndices;++a) {
                     if (mesh->mNumVertices < (1u<<16)) {
-                        Write<uint16_t>(&chunk,f.mIndices[a]);
-                    }
-                    else Write<unsigned int>(&chunk,f.mIndices[a]);
+                        Write<uint32_t>(&chunk,f.mIndices[a]);
+					} else {
+						Write<unsigned int>(&chunk, f.mIndices[a]);
+					}
                 }
             }
         }

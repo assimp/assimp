@@ -342,6 +342,20 @@ struct Texture {
         mTextureBlend = get_qnan();
     }
 
+    Texture(Texture &&other) AI_NO_EXCEPT : 
+		    mTextureBlend(std::move(other.mTextureBlend)),
+											mMapName(std::move(mMapName)),
+											mOffsetU(std::move(mOffsetU)),
+											mOffsetV(std::move(mOffsetV)),
+											mScaleU(std::move(mScaleU)),
+											mScaleV(std::move(mScaleV)),
+											mRotation(std::move(mRotation)),
+											mMapMode(std::move(mMapMode)),
+											bPrivate(std::move(bPrivate)),
+											iUVSrc(std::move(iUVSrc)) {
+
+    }
+
     //! Specifies the blend factor for the texture
     ai_real mTextureBlend;
 

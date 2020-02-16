@@ -53,6 +53,8 @@ using namespace Assimp;
 #   define CHAR_BIT 8
 #endif
 
+#pragma warning(disable : 4127)  
+
 // ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
 SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions,

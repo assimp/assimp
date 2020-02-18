@@ -189,7 +189,7 @@ struct Material {
     ,   ior     ( ai_real( 1.0 ) )
     ,   transparent( ai_real( 1.0), ai_real (1.0), ai_real(1.0)) {
 
-	    std::fill_n(clamp, TextureTypeCount, false);
+	    std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }
 
     // Destructor

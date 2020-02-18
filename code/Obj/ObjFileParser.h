@@ -80,7 +80,7 @@ public:
     /// @brief  Constructor with data array.
     ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem* io, ProgressHandler* progress, std::string originalObjFileName);
     /// @brief  Destructor
-    ~ObjFileParser() = default;
+    ~ObjFileParser();
     /// @brief  If you want to load in-core data.
     void setBuffer( std::vector<char> &buffer );
     /// @brief  Model getter.

@@ -85,7 +85,7 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
     std::fill_n(m_buffer, Buffersize,0);
 
     // Create the model instance to store all the data
-    m_pModel = std::make_unique<ObjFile::Model>();
+    m_pModel.reset(new ObjFile::Model());
     m_pModel->m_ModelName = modelName;
 
     // create default material and store it

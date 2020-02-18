@@ -35,7 +35,7 @@ ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
 
 SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES( assimp_simpletexturedogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} DevIL.lib )
+TARGET_LINK_LIBRARIES( assimp_simpletexturedogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} )
 
 SET_TARGET_PROPERTIES( assimp_simpletexturedogl PROPERTIES
   OUTPUT_NAME assimp_simpletexturedogl

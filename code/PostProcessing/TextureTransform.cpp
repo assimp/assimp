@@ -125,7 +125,8 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
      * type (e.g. if mirroring is active there IS a difference between
      * offset 2 and 3)
      */
-    if ((rounded  = (int)info.mTranslation.x))  {
+    rounded = (int)info.mTranslation.x;
+    if (rounded) {
         float out = 0.0f;
         szTemp[0] = 0;
         if (aiTextureMapMode_Wrap == info.mapU) {
@@ -158,7 +159,8 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
      * type (e.g. if mirroring is active there IS a difference between
      * offset 2 and 3)
      */
-    if ((rounded  = (int)info.mTranslation.y))  {
+    rounded = (int)info.mTranslation.y;
+    if (rounded) {
         float out = 0.0f;
         szTemp[0] = 0;
         if (aiTextureMapMode_Wrap == info.mapV) {

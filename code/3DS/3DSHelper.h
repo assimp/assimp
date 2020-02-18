@@ -45,18 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_3DSFILEHELPER_H_INC
 #define AI_3DSFILEHELPER_H_INC
 
-#include <assimp/SpatialSort.h>
 #include <assimp/SmoothingGroups.h>
+#include <assimp/SpatialSort.h>
 #include <assimp/StringUtils.h>
-#include <assimp/qnan.h>
-#include <assimp/material.h>
+#include <assimp/anim.h>
 #include <assimp/camera.h>
 #include <assimp/light.h>
-#include <assimp/anim.h>
+#include <assimp/material.h>
+#include <assimp/qnan.h>
 #include <stdio.h> //sprintf
 
-namespace Assimp    {
-namespace D3DS  {
+namespace Assimp {
+namespace D3DS {
 
 #include <assimp/Compiler/pushpack1.h>
 
@@ -77,15 +77,13 @@ private:
 public:
     //! data structure for a single chunk in a .3ds file
     struct Chunk {
-        uint16_t    Flag;
-        uint32_t    Size;
+        uint16_t Flag;
+        uint32_t Size;
     } PACK_STRUCT;
-
 
     //! Used for shading field in material3ds structure
     //! From AutoDesk 3ds SDK
-    typedef enum
-    {
+    typedef enum {
         // translated to gouraud shading with wireframe active
         Wire = 0x0,
 
@@ -109,59 +107,57 @@ public:
     } shadetype3ds;
 
     // Flags for animated keys
-    enum
-    {
-        KEY_USE_TENS         = 0x1,
-        KEY_USE_CONT         = 0x2,
-        KEY_USE_BIAS         = 0x4,
-        KEY_USE_EASE_TO      = 0x8,
-        KEY_USE_EASE_FROM    = 0x10
-    } ;
+    enum {
+        KEY_USE_TENS = 0x1,
+        KEY_USE_CONT = 0x2,
+        KEY_USE_BIAS = 0x4,
+        KEY_USE_EASE_TO = 0x8,
+        KEY_USE_EASE_FROM = 0x10
+    };
 
-    enum
-    {
+    enum {
 
         // ********************************************************************
         // Basic chunks which can be found everywhere in the file
-        CHUNK_VERSION   = 0x0002,
-        CHUNK_RGBF      = 0x0010,       // float4 R; float4 G; float4 B
-        CHUNK_RGBB      = 0x0011,       // int1 R; int1 G; int B
+        CHUNK_VERSION = 0x0002,
+        CHUNK_RGBF = 0x0010, // float4 R; float4 G; float4 B
+        CHUNK_RGBB = 0x0011, // int1 R; int1 G; int B
 
         // Linear color values (gamma = 2.2?)
-        CHUNK_LINRGBF      = 0x0013,    // float4 R; float4 G; float4 B
-        CHUNK_LINRGBB      = 0x0012,    // int1 R; int1 G; int B
+        CHUNK_LINRGBF = 0x0013, // float4 R; float4 G; float4 B
+        CHUNK_LINRGBB = 0x0012, // int1 R; int1 G; int B
 
-        CHUNK_PERCENTW  = 0x0030,       // int2   percentage
-        CHUNK_PERCENTF  = 0x0031,       // float4  percentage
-        CHUNK_PERCENTD  = 0x0032,       // float8  percentage
+        CHUNK_PERCENTW = 0x0030, // int2   percentage
+        CHUNK_PERCENTF = 0x0031, // float4  percentage
+        CHUNK_PERCENTD = 0x0032, // float8  percentage
         // ********************************************************************
 
         // Prj master chunk
-        CHUNK_PRJ       = 0xC23D,
+        CHUNK_PRJ = 0xC23D,
 
         // MDLI master chunk
-        CHUNK_MLI       = 0x3DAA,
+        CHUNK_MLI = 0x3DAA,
 
         // Primary main chunk of the .3ds file
-        CHUNK_MAIN      = 0x4D4D,
+        CHUNK_MAIN = 0x4D4D,
 
         // Mesh main chunk
-        CHUNK_OBJMESH   = 0x3D3D,
+        CHUNK_OBJMESH = 0x3D3D,
 
         // Specifies the background color of the .3ds file
         // This is passed through the material system for
         // viewing purposes.
-        CHUNK_BKGCOLOR  = 0x1200,
+        CHUNK_BKGCOLOR = 0x1200,
 
         // Specifies the ambient base color of the scene.
         // This is added to all materials in the file
-        CHUNK_AMBCOLOR  = 0x2100,
+        CHUNK_AMBCOLOR = 0x2100,
 
         // Specifies the background image for the whole scene
         // This value is passed through the material system
         // to the viewer
-        CHUNK_BIT_MAP   = 0x1100,
-        CHUNK_BIT_MAP_EXISTS  = 0x1101,
+        CHUNK_BIT_MAP = 0x1100,
+        CHUNK_BIT_MAP_EXISTS = 0x1101,
 
         // ********************************************************************
         // Viewport related stuff. Ignored
@@ -177,183 +173,204 @@ public:
         // ********************************************************************
 
         // Mesh chunks
-        CHUNK_OBJBLOCK  = 0x4000,
-        CHUNK_TRIMESH   = 0x4100,
-        CHUNK_VERTLIST  = 0x4110,
+        CHUNK_OBJBLOCK = 0x4000,
+        CHUNK_TRIMESH = 0x4100,
+        CHUNK_VERTLIST = 0x4110,
         CHUNK_VERTFLAGS = 0x4111,
-        CHUNK_FACELIST  = 0x4120,
-        CHUNK_FACEMAT   = 0x4130,
-        CHUNK_MAPLIST   = 0x4140,
-        CHUNK_SMOOLIST  = 0x4150,
-        CHUNK_TRMATRIX  = 0x4160,
+        CHUNK_FACELIST = 0x4120,
+        CHUNK_FACEMAT = 0x4130,
+        CHUNK_MAPLIST = 0x4140,
+        CHUNK_SMOOLIST = 0x4150,
+        CHUNK_TRMATRIX = 0x4160,
         CHUNK_MESHCOLOR = 0x4165,
-        CHUNK_TXTINFO   = 0x4170,
-        CHUNK_LIGHT     = 0x4600,
-        CHUNK_CAMERA    = 0x4700,
+        CHUNK_TXTINFO = 0x4170,
+        CHUNK_LIGHT = 0x4600,
+        CHUNK_CAMERA = 0x4700,
         CHUNK_HIERARCHY = 0x4F00,
 
         // Specifies the global scaling factor. This is applied
         // to the root node's transformation matrix
-        CHUNK_MASTER_SCALE    = 0x0100,
+        CHUNK_MASTER_SCALE = 0x0100,
 
         // ********************************************************************
         // Material chunks
-        CHUNK_MAT_MATERIAL  = 0xAFFF,
+        CHUNK_MAT_MATERIAL = 0xAFFF,
 
-            // asciiz containing the name of the material
-            CHUNK_MAT_MATNAME   = 0xA000,
-            CHUNK_MAT_AMBIENT   = 0xA010, // followed by color chunk
-            CHUNK_MAT_DIFFUSE   = 0xA020, // followed by color chunk
-            CHUNK_MAT_SPECULAR  = 0xA030, // followed by color chunk
+        // asciiz containing the name of the material
+        CHUNK_MAT_MATNAME = 0xA000,
+        CHUNK_MAT_AMBIENT = 0xA010, // followed by color chunk
+        CHUNK_MAT_DIFFUSE = 0xA020, // followed by color chunk
+        CHUNK_MAT_SPECULAR = 0xA030, // followed by color chunk
 
-            // Specifies the shininess of the material
-            // followed by percentage chunk
-            CHUNK_MAT_SHININESS  = 0xA040,
-            CHUNK_MAT_SHININESS_PERCENT  = 0xA041 ,
+        // Specifies the shininess of the material
+        // followed by percentage chunk
+        CHUNK_MAT_SHININESS = 0xA040,
+        CHUNK_MAT_SHININESS_PERCENT = 0xA041,
 
-            // Specifies the shading mode to be used
-            // followed by a short
-            CHUNK_MAT_SHADING  = 0xA100,
+        // Specifies the shading mode to be used
+        // followed by a short
+        CHUNK_MAT_SHADING = 0xA100,
 
-            // NOTE: Emissive color (self illumination) seems not
-            // to be a color but a single value, type is unknown.
-            // Make the parser accept both of them.
-            // followed by percentage chunk (?)
-            CHUNK_MAT_SELF_ILLUM = 0xA080,
+        // NOTE: Emissive color (self illumination) seems not
+        // to be a color but a single value, type is unknown.
+        // Make the parser accept both of them.
+        // followed by percentage chunk (?)
+        CHUNK_MAT_SELF_ILLUM = 0xA080,
 
-            // Always followed by percentage chunk  (?)
-            CHUNK_MAT_SELF_ILPCT = 0xA084,
+        // Always followed by percentage chunk  (?)
+        CHUNK_MAT_SELF_ILPCT = 0xA084,
 
-            // Always followed by percentage chunk
-            CHUNK_MAT_TRANSPARENCY = 0xA050,
+        // Always followed by percentage chunk
+        CHUNK_MAT_TRANSPARENCY = 0xA050,
 
-            // Diffuse texture channel 0
-            CHUNK_MAT_TEXTURE   = 0xA200,
+        // Diffuse texture channel 0
+        CHUNK_MAT_TEXTURE = 0xA200,
 
-            // Contains opacity information for each texel
-            CHUNK_MAT_OPACMAP = 0xA210,
+        // Contains opacity information for each texel
+        CHUNK_MAT_OPACMAP = 0xA210,
 
-            // Contains a reflection map to be used to reflect
-            // the environment. This is partially supported.
-            CHUNK_MAT_REFLMAP = 0xA220,
+        // Contains a reflection map to be used to reflect
+        // the environment. This is partially supported.
+        CHUNK_MAT_REFLMAP = 0xA220,
 
-            // Self Illumination map (emissive colors)
-            CHUNK_MAT_SELFIMAP = 0xA33d,
+        // Self Illumination map (emissive colors)
+        CHUNK_MAT_SELFIMAP = 0xA33d,
 
-            // Bumpmap. Not specified whether it is a heightmap
-            // or a normal map. Assme it is a heightmap since
-            // artist normally prefer this format.
-            CHUNK_MAT_BUMPMAP = 0xA230,
+        // Bumpmap. Not specified whether it is a heightmap
+        // or a normal map. Assme it is a heightmap since
+        // artist normally prefer this format.
+        CHUNK_MAT_BUMPMAP = 0xA230,
 
-            // Specular map. Seems to influence the specular color
-            CHUNK_MAT_SPECMAP = 0xA204,
+        // Specular map. Seems to influence the specular color
+        CHUNK_MAT_SPECMAP = 0xA204,
 
-            // Holds shininess data.
-            CHUNK_MAT_MAT_SHINMAP = 0xA33C,
+        // Holds shininess data.
+        CHUNK_MAT_MAT_SHINMAP = 0xA33C,
 
-            // Scaling in U/V direction.
-            // (need to gen separate UV coordinate set
-            // and do this by hand)
-            CHUNK_MAT_MAP_USCALE      = 0xA354,
-            CHUNK_MAT_MAP_VSCALE      = 0xA356,
+        // Scaling in U/V direction.
+        // (need to gen separate UV coordinate set
+        // and do this by hand)
+        CHUNK_MAT_MAP_USCALE = 0xA354,
+        CHUNK_MAT_MAP_VSCALE = 0xA356,
 
-            // Translation in U/V direction.
-            // (need to gen separate UV coordinate set
-            // and do this by hand)
-            CHUNK_MAT_MAP_UOFFSET     = 0xA358,
-            CHUNK_MAT_MAP_VOFFSET     = 0xA35a,
+        // Translation in U/V direction.
+        // (need to gen separate UV coordinate set
+        // and do this by hand)
+        CHUNK_MAT_MAP_UOFFSET = 0xA358,
+        CHUNK_MAT_MAP_VOFFSET = 0xA35a,
 
-            // UV-coordinates rotation around the z-axis
-            // Assumed to be in radians.
-            CHUNK_MAT_MAP_ANG = 0xA35C,
+        // UV-coordinates rotation around the z-axis
+        // Assumed to be in radians.
+        CHUNK_MAT_MAP_ANG = 0xA35C,
 
-            // Tiling flags for 3DS files
-            CHUNK_MAT_MAP_TILING = 0xa351,
+        // Tiling flags for 3DS files
+        CHUNK_MAT_MAP_TILING = 0xa351,
 
-            // Specifies the file name of a texture
-            CHUNK_MAPFILE   = 0xA300,
+        // Specifies the file name of a texture
+        CHUNK_MAPFILE = 0xA300,
 
-            // Specifies whether a materail requires two-sided rendering
-            CHUNK_MAT_TWO_SIDE = 0xA081,
+        // Specifies whether a materail requires two-sided rendering
+        CHUNK_MAT_TWO_SIDE = 0xA081,
         // ********************************************************************
 
         // Main keyframer chunk. Contains translation/rotation/scaling data
-        CHUNK_KEYFRAMER     = 0xB000,
+        CHUNK_KEYFRAMER = 0xB000,
 
         // Supported sub chunks
-        CHUNK_TRACKINFO     = 0xB002,
-        CHUNK_TRACKOBJNAME  = 0xB010,
-        CHUNK_TRACKDUMMYOBJNAME  = 0xB011,
-        CHUNK_TRACKPIVOT    = 0xB013,
-        CHUNK_TRACKPOS      = 0xB020,
-        CHUNK_TRACKROTATE   = 0xB021,
-        CHUNK_TRACKSCALE    = 0xB022,
+        CHUNK_TRACKINFO = 0xB002,
+        CHUNK_TRACKOBJNAME = 0xB010,
+        CHUNK_TRACKDUMMYOBJNAME = 0xB011,
+        CHUNK_TRACKPIVOT = 0xB013,
+        CHUNK_TRACKPOS = 0xB020,
+        CHUNK_TRACKROTATE = 0xB021,
+        CHUNK_TRACKSCALE = 0xB022,
 
         // ********************************************************************
         // Keyframes for various other stuff in the file
         // Partially ignored
-        CHUNK_AMBIENTKEY    = 0xB001,
-        CHUNK_TRACKMORPH    = 0xB026,
-        CHUNK_TRACKHIDE     = 0xB029,
-        CHUNK_OBJNUMBER     = 0xB030,
-        CHUNK_TRACKCAMERA   = 0xB003,
-        CHUNK_TRACKFOV      = 0xB023,
-        CHUNK_TRACKROLL     = 0xB024,
-        CHUNK_TRACKCAMTGT   = 0xB004,
-        CHUNK_TRACKLIGHT    = 0xB005,
-        CHUNK_TRACKLIGTGT   = 0xB006,
-        CHUNK_TRACKSPOTL    = 0xB007,
-        CHUNK_FRAMES        = 0xB008,
+        CHUNK_AMBIENTKEY = 0xB001,
+        CHUNK_TRACKMORPH = 0xB026,
+        CHUNK_TRACKHIDE = 0xB029,
+        CHUNK_OBJNUMBER = 0xB030,
+        CHUNK_TRACKCAMERA = 0xB003,
+        CHUNK_TRACKFOV = 0xB023,
+        CHUNK_TRACKROLL = 0xB024,
+        CHUNK_TRACKCAMTGT = 0xB004,
+        CHUNK_TRACKLIGHT = 0xB005,
+        CHUNK_TRACKLIGTGT = 0xB006,
+        CHUNK_TRACKSPOTL = 0xB007,
+        CHUNK_FRAMES = 0xB008,
         // ********************************************************************
 
         // light sub-chunks
-        CHUNK_DL_OFF                 = 0x4620,
-        CHUNK_DL_OUTER_RANGE         = 0x465A,
-        CHUNK_DL_INNER_RANGE         = 0x4659,
-        CHUNK_DL_MULTIPLIER          = 0x465B,
-        CHUNK_DL_EXCLUDE             = 0x4654,
-        CHUNK_DL_ATTENUATE           = 0x4625,
-        CHUNK_DL_SPOTLIGHT           = 0x4610,
+        CHUNK_DL_OFF = 0x4620,
+        CHUNK_DL_OUTER_RANGE = 0x465A,
+        CHUNK_DL_INNER_RANGE = 0x4659,
+        CHUNK_DL_MULTIPLIER = 0x465B,
+        CHUNK_DL_EXCLUDE = 0x4654,
+        CHUNK_DL_ATTENUATE = 0x4625,
+        CHUNK_DL_SPOTLIGHT = 0x4610,
 
         // camera sub-chunks
-        CHUNK_CAM_RANGES             = 0x4720
+        CHUNK_CAM_RANGES = 0x4720
     };
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
-struct Face : public FaceWithSmoothingGroup
-{
+struct Face : public FaceWithSmoothingGroup {
 };
+
+#pragma warning(disable : 4315 )
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
 struct Texture {
     //! Default constructor
     Texture() AI_NO_EXCEPT
-    : mOffsetU  (0.0)
-    , mOffsetV  (0.0)
-    , mScaleU   (1.0)
-    , mScaleV   (1.0)
-    , mRotation (0.0)
-    , mMapMode  (aiTextureMapMode_Wrap)
-    , bPrivate()
-    , iUVSrc    (0) {
+            : mTextureBlend(0.0f),
+              mMapName(),
+              mOffsetU(0.0),
+              mOffsetV(0.0),
+              mScaleU(1.0),
+              mScaleV(1.0),
+              mRotation(0.0),
+              mMapMode(aiTextureMapMode_Wrap),
+              bPrivate(),
+              iUVSrc(0) {
         mTextureBlend = get_qnan();
     }
 
-    Texture(Texture &&other) AI_NO_EXCEPT : 
-		    mTextureBlend(std::move(other.mTextureBlend)),
-											mMapName(std::move(mMapName)),
-											mOffsetU(std::move(mOffsetU)),
-											mOffsetV(std::move(mOffsetV)),
-											mScaleU(std::move(mScaleU)),
-											mScaleV(std::move(mScaleV)),
-											mRotation(std::move(mRotation)),
-											mMapMode(std::move(mMapMode)),
-											bPrivate(std::move(bPrivate)),
-											iUVSrc(std::move(iUVSrc)) {
+    Texture(Texture &&other) AI_NO_EXCEPT : mTextureBlend(std::move(other.mTextureBlend)),
+                                            mMapName(std::move(mMapName)),
+                                            mOffsetU(std::move(mOffsetU)),
+                                            mOffsetV(std::move(mOffsetV)),
+                                            mScaleU(std::move(mScaleU)),
+                                            mScaleV(std::move(mScaleV)),
+                                            mRotation(std::move(mRotation)),
+                                            mMapMode(std::move(mMapMode)),
+                                            bPrivate(std::move(bPrivate)),
+                                            iUVSrc(std::move(iUVSrc)) {
+        // empty
+    }
 
+    Texture &operator=(Texture &&other) AI_NO_EXCEPT {
+        if (this == &other) {
+            return *this;
+        }
+
+        mTextureBlend = std::move(other.mTextureBlend);
+        mMapName = std::move(other.mMapName);
+        mOffsetU = std::move(other.mOffsetU);
+        mOffsetV = std::move(other.mOffsetV);
+        mScaleU = std::move(other.mScaleU);
+        mScaleV = std::move(other.mScaleV);
+        mRotation = std::move(other.mRotation);
+        mMapMode = std::move(other.mMapMode);
+        bPrivate = std::move(other.bPrivate);
+        iUVSrc = std::move(other.iUVSrc);
+
+        return *this;
     }
 
     //! Specifies the blend factor for the texture
@@ -381,54 +398,47 @@ struct Texture {
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */
-struct Material
-{
+struct Material {
     //! Default constructor has been deleted
     Material() = delete;
 
-
     //! Constructor with explicit name
-    explicit Material(const std::string &name)
-    : mName(name)
-    , mDiffuse            ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) ) // FIX ... we won't want object to be black
-    , mSpecularExponent   ( ai_real( 0.0 ) )
-    , mShininessStrength  ( ai_real( 1.0 ) )
-    , mShading(Discreet3DS::Gouraud)
-    , mTransparency       ( ai_real( 1.0 ) )
-    , mBumpHeight         ( ai_real( 1.0 ) )
-    , mTwoSided           (false)
-    {
+    explicit Material(const std::string &name) :
+            mName(name), mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)) // FIX ... we won't want object to be black
+            ,
+            mSpecularExponent(ai_real(0.0)),
+            mShininessStrength(ai_real(1.0)),
+            mShading(Discreet3DS::Gouraud),
+            mTransparency(ai_real(1.0)),
+            mBumpHeight(ai_real(1.0)),
+            mTwoSided(false) {
     }
 
-
-    Material(const Material &other)            = default;
+    Material(const Material &other) = default;
     Material &operator=(const Material &other) = default;
-
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
     Material(Material &&other) AI_NO_EXCEPT
-    : mName(std::move(other.mName))
-    , mDiffuse(std::move(other.mDiffuse))
-    , mSpecularExponent(std::move(other.mSpecularExponent))
-    , mShininessStrength(std::move(other.mShininessStrength))
-    , mSpecular(std::move(other.mSpecular))
-    , mAmbient(std::move(other.mAmbient))
-    , mShading(std::move(other.mShading))
-    , mTransparency(std::move(other.mTransparency))
-    , sTexDiffuse(std::move(other.sTexDiffuse))
-    , sTexOpacity(std::move(other.sTexOpacity))
-    , sTexSpecular(std::move(other.sTexSpecular))
-    , sTexReflective(std::move(other.sTexReflective))
-    , sTexBump(std::move(other.sTexBump))
-    , sTexEmissive(std::move(other.sTexEmissive))
-    , sTexShininess(std::move(other.sTexShininess))
-    , mBumpHeight(std::move(other.mBumpHeight))
-    , mEmissive(std::move(other.mEmissive))
-    , sTexAmbient(std::move(other.sTexAmbient))
-    , mTwoSided(std::move(other.mTwoSided))
-    {
+            : mName(std::move(other.mName)),
+              mDiffuse(std::move(other.mDiffuse)),
+              mSpecularExponent(std::move(other.mSpecularExponent)),
+              mShininessStrength(std::move(other.mShininessStrength)),
+              mSpecular(std::move(other.mSpecular)),
+              mAmbient(std::move(other.mAmbient)),
+              mShading(std::move(other.mShading)),
+              mTransparency(std::move(other.mTransparency)),
+              sTexDiffuse(std::move(other.sTexDiffuse)),
+              sTexOpacity(std::move(other.sTexOpacity)),
+              sTexSpecular(std::move(other.sTexSpecular)),
+              sTexReflective(std::move(other.sTexReflective)),
+              sTexBump(std::move(other.sTexBump)),
+              sTexEmissive(std::move(other.sTexEmissive)),
+              sTexShininess(std::move(other.sTexShininess)),
+              mBumpHeight(std::move(other.mBumpHeight)),
+              mEmissive(std::move(other.mEmissive)),
+              sTexAmbient(std::move(other.sTexAmbient)),
+              mTwoSided(std::move(other.mTwoSided)) {
     }
-
 
     Material &operator=(Material &&other) AI_NO_EXCEPT {
         if (this == &other) {
@@ -458,9 +468,7 @@ struct Material
         return *this;
     }
 
-
     virtual ~Material() {}
-
 
     //! Name of the material
     std::string mName;
@@ -505,17 +513,14 @@ struct Material
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file mesh */
-struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
-{
+struct Mesh : public MeshWithSmoothingGroups<D3DS::Face> {
     //! Default constructor has been deleted
     Mesh() = delete;
 
     //! Constructor with explicit name
-    explicit Mesh(const std::string &name)
-    : mName(name)
-    {
+    explicit Mesh(const std::string &name) :
+            mName(name) {
     }
-
 
     //! Name of the mesh
     std::string mName;
@@ -533,62 +538,48 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 // ---------------------------------------------------------------------------
 /** Float key - quite similar to aiVectorKey and aiQuatKey. Both are in the
     C-API, so it would be difficult to make them a template. */
-struct aiFloatKey
-{
-    double mTime;      ///< The time of this key
-    ai_real mValue;   ///< The value of this key
+struct aiFloatKey {
+    double mTime; ///< The time of this key
+    ai_real mValue; ///< The value of this key
 
 #ifdef __cplusplus
 
     // time is not compared
-    bool operator == (const aiFloatKey& o) const
-        {return o.mValue == this->mValue;}
+    bool operator==(const aiFloatKey &o) const { return o.mValue == this->mValue; }
 
-    bool operator != (const aiFloatKey& o) const
-        {return o.mValue != this->mValue;}
+    bool operator!=(const aiFloatKey &o) const { return o.mValue != this->mValue; }
 
     // Only time is compared. This operator is defined
     // for use with std::sort
-    bool operator < (const aiFloatKey& o) const
-        {return mTime < o.mTime;}
+    bool operator<(const aiFloatKey &o) const { return mTime < o.mTime; }
 
-    bool operator > (const aiFloatKey& o) const
-        {return mTime > o.mTime;}
+    bool operator>(const aiFloatKey &o) const { return mTime > o.mTime; }
 
 #endif
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent a 3ds file node */
-struct Node
-{
+struct Node {
     Node() = delete;
 
-    explicit Node(const std::string &name)
-    : mParent(NULL)
-    , mName(name)
-    , mInstanceNumber(0)
-    , mHierarchyPos       (0)
-    , mHierarchyIndex     (0)
-    , mInstanceCount      (1)
-    {
-        aRotationKeys.reserve (20);
-        aPositionKeys.reserve (20);
-        aScalingKeys.reserve  (20);
+    explicit Node(const std::string &name) :
+            mParent(NULL), mName(name), mInstanceNumber(0), mHierarchyPos(0), mHierarchyIndex(0), mInstanceCount(1) {
+        aRotationKeys.reserve(20);
+        aPositionKeys.reserve(20);
+        aScalingKeys.reserve(20);
     }
 
-
-    ~Node()
-    {
-        for (unsigned int i = 0; i < mChildren.size();++i)
+    ~Node() {
+        for (unsigned int i = 0; i < mChildren.size(); ++i)
             delete mChildren[i];
     }
 
     //! Pointer to the parent node
-    Node* mParent;
+    Node *mParent;
 
     //! Holds all child nodes
-    std::vector<Node*> mChildren;
+    std::vector<Node *> mChildren;
 
     //! Name of the node
     std::string mName;
@@ -614,13 +605,12 @@ struct Node
     //! Scaling keys loaded from the file
     std::vector<aiVectorKey> aScalingKeys;
 
-
     // For target lights (spot lights and directional lights):
     // The position of the target
-    std::vector< aiVectorKey > aTargetPositionKeys;
+    std::vector<aiVectorKey> aTargetPositionKeys;
 
     // For cameras: the camera roll angle
-    std::vector< aiFloatKey > aCameraRollKeys;
+    std::vector<aiFloatKey> aCameraRollKeys;
 
     //! Pivot position loaded from the file
     aiVector3D vPivot;
@@ -630,8 +620,7 @@ struct Node
 
     //! Add a child node, setup the right parent node for it
     //! \param pc Node to be 'adopted'
-    inline Node& push_back(Node* pc)
-    {
+    inline Node &push_back(Node *pc) {
         mChildren.push_back(pc);
         pc->mParent = this;
         return *this;
@@ -639,8 +628,7 @@ struct Node
 };
 // ---------------------------------------------------------------------------
 /** Helper structure analogue to aiScene */
-struct Scene
-{
+struct Scene {
     //! List of all materials loaded
     //! NOTE: 3ds references materials globally
     std::vector<Material> mMaterials;
@@ -649,16 +637,15 @@ struct Scene
     std::vector<Mesh> mMeshes;
 
     //! List of all cameras loaded
-    std::vector<aiCamera*> mCameras;
+    std::vector<aiCamera *> mCameras;
 
     //! List of all lights loaded
-    std::vector<aiLight*> mLights;
+    std::vector<aiLight *> mLights;
 
     //! Pointer to the root node of the scene
     // --- moved to main class
     // Node* pcRootNode;
 };
-
 
 } // end of namespace D3DS
 } // end of namespace Assimp

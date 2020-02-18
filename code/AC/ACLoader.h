@@ -268,7 +268,7 @@ private:
     std::vector<aiLight*>* mLights;
 
     // name counters
-    unsigned int lights, groups, polys, worlds;
+    unsigned int mLightsCounter, mGroupsCounter, mPolysCounter, mWorldsCounter;
 };
 
 } // end of namespace Assimp

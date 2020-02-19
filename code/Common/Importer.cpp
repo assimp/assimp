@@ -1071,7 +1071,7 @@ ai_real Importer::GetPropertyFloat(const char* szName, ai_real iErrorReturn /*= 
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const std::string Importer::GetPropertyString(const char* szName, const std::string& iErrorReturn /*= ""*/) const {
+std::string Importer::GetPropertyString(const char* szName, const std::string& iErrorReturn /*= ""*/) const {
     ai_assert(nullptr != pimpl);
     
     return GetGenericProperty<std::string>(pimpl->mStringProperties,szName,iErrorReturn);
@@ -1079,7 +1079,7 @@ const std::string Importer::GetPropertyString(const char* szName, const std::str
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const {
+aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const {
     ai_assert(nullptr != pimpl);
     
     return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
@@ -1110,9 +1110,8 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const {
     aiScene* mScene = pimpl->mScene;
 
     // return if we have no scene loaded
-    if (!pimpl->mScene)
+    if (!mScene)
         return;
-
 
     in.total = sizeof(aiScene);
 
@@ -1202,5 +1201,6 @@ void Importer::GetMemoryRequirements(aiMemoryInfo& in) const {
             in.materials += pc->mProperties[a]->mDataLength;
         }
     }
+
     in.total += in.materials;
 }

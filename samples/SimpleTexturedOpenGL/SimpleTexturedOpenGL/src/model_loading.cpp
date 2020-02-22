@@ -21,6 +21,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "contrib/stb_image/stb_image.h"
 
+#include <locale>
+#include <codecvt>
 #include <fstream>
 
 //to map image filenames to textureIds
@@ -75,6 +77,36 @@ GLuint*		textureIds;							// pointer to texture Array
 // Create an instance of the Importer class
 Assimp::Importer importer;
 
+// Used to convert between multibyte and unicode strings.
+class UTFConverter {
+	using UTFConverterImpl = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>;
+public:
+	UTFConverter(const char* s) :
+		s_(s),
+		ws_(impl_.from_bytes(s)) {
+	}
+	UTFConverter(const std::string& s) :
+		s_(s),
+		ws_(impl_.from_bytes(s)) {
+	}
+	UTFConverter(const std::wstring& s) :
+		s_(impl_.to_bytes(s)),
+		ws_(s) {
+	}
+	inline const std::string& str() const {
+		return s_;
+	}
+	inline const wchar_t* c_wstr() const {
+		return ws_.c_str();
+	}
+private:
+	static UTFConverterImpl impl_;
+	std::string s_;
+	std::wstring ws_;
+};
+
+typename UTFConverter::UTFConverterImpl UTFConverter::impl_;
+
 void createAILogger()
 {
     // Change this line to normal if you not want to analyse the import process
@@ -120,7 +152,7 @@ bool Import3DFromFile( const std::string& pFile)
 	}
 	else
 	{
-		MessageBox(NULL, ("Couldn't open file: " + pFile).c_str() , "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(NULL, UTFConverter("Couldn't open file: " + pFile).c_wstr() , TEXT("ERROR"), MB_OK | MB_ICONEXCLAMATION);
 		logInfo( importer.GetErrorString());
 		return false;
 	}
@@ -170,8 +202,21 @@ std::string getBasePath(const std::string& path)
 	return (std::string::npos == pos) ? "" : path.substr(0, pos + 1);
 }
 
+void freeTextureIds()
+{
+	textureIdMap.clear(); //no need to delete pointers in it manually here. (Pointers point to textureIds deleted in next step)
+
+	if (textureIds)
+	{
+		delete[] textureIds;
+		textureIds = NULL;
+	}
+}
+
 int LoadGLTextures(const aiScene* scene)
 {
+	freeTextureIds();
+
 	//ILboolean success;
 
 	/* Before calling ilInit() version should be checked. */
@@ -205,7 +250,7 @@ int LoadGLTextures(const aiScene* scene)
 		}
 	}
 
-	int numTextures = textureIdMap.size();
+	const size_t numTextures = textureIdMap.size();
 
 
 	/* array with DevIL image IDs */
@@ -217,13 +262,13 @@ int LoadGLTextures(const aiScene* scene)
 
 	/* create and fill array with GL texture ids */
 	textureIds = new GLuint[numTextures];
-	glGenTextures(numTextures, textureIds); /* Texture name generation */
+	glGenTextures(static_cast<GLsizei>(numTextures), textureIds); /* Texture name generation */
 
 	/* get iterator */
 	std::map<std::string, GLuint*>::iterator itr = textureIdMap.begin();
 
 	std::string basepath = getBasePath(modelpath);
-	for (int i=0; i<numTextures; i++)
+	for (size_t i=0; i<numTextures; i++)
 	{
 
 		//save IL image ID
@@ -268,7 +313,7 @@ int LoadGLTextures(const aiScene* scene)
 		else
 		{
 			/* Error occurred */
-			MessageBox(NULL, ("Couldn't load Image: " + fileloc).c_str() , "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, UTFConverter("Couldn't load Image: " + fileloc).c_wstr(), TEXT("ERROR"), MB_OK | MB_ICONEXCLAMATION);
 		}
 	}
     // Because we have already copied image data into texture data  we can release memory used by image.
@@ -534,31 +579,34 @@ void KillGLWindow()			// Properly Kill The Window
 	{
 		if (!wglMakeCurrent(NULL, NULL))	// Are We Able To Release The DC And RC Contexts?
 		{
-			MessageBox(NULL, "Release Of DC And RC Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			MessageBox(NULL, TEXT("Release Of DC And RC Failed."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		}
 
 		if (!wglDeleteContext(hRC))			// Are We Able To Delete The RC?
 		{
-			MessageBox(NULL, "Release Rendering Context Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			MessageBox(NULL, TEXT("Release Rendering Context Failed."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		}
 		hRC = NULL;
 	}
 
-	if (hDC && !ReleaseDC(hWnd, hDC))	// Are We able to Release The DC?
+	if (hDC)
 	{
-		MessageBox(NULL, "Release Device Context Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-		hDC=NULL;
+		if (!ReleaseDC(hWnd, hDC)) // Are We able to Release The DC?
+			MessageBox(NULL, TEXT("Release Device Context Failed."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
+		hDC = NULL;
 	}
 
-	if (hWnd && !DestroyWindow(hWnd))	// Are We Able To Destroy The Window
+	if (hWnd)
 	{
-		MessageBox(NULL, "Could Not Release hWnd.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+		if (!DestroyWindow(hWnd)) // Are We Able To Destroy The Window
+			MessageBox(NULL, TEXT("Could Not Release hWnd."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		hWnd = NULL;
-	}
+	} 
 
-	if (!UnregisterClass("OpenGL", hInstance))	// Are We Able To Unregister Class
+	if (hInstance)
 	{
-		MessageBox(NULL, "Could Not Unregister Class.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+		if (!UnregisterClass(TEXT("OpenGL"), hInstance)) // Are We Able To Unregister Class
+			MessageBox(NULL, TEXT("Could Not Unregister Class."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		hInstance = NULL;
 	}
 }
@@ -566,7 +614,7 @@ void KillGLWindow()			// Properly Kill The Window
 GLboolean abortGLInit(const char* abortMessage)
 {
 	KillGLWindow();									// Reset Display
-	MessageBox(NULL, abortMessage, "ERROR", MB_OK|MB_ICONEXCLAMATION);
+	MessageBox(NULL, UTFConverter(abortMessage).c_wstr(), TEXT("ERROR"), MB_OK|MB_ICONEXCLAMATION);
 	return FALSE;									// quit and return False
 }
 
@@ -594,11 +642,11 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 	wc.hCursor		= LoadCursor(NULL, IDC_ARROW);	// Load the default arrow
 	wc.hbrBackground= NULL;							// No Background required for OpenGL
 	wc.lpszMenuName	= NULL;							// No Menu
-	wc.lpszClassName= "OpenGL";						// Class Name
+	wc.lpszClassName= TEXT("OpenGL");		        // Class Name
 
 	if (!RegisterClass(&wc))
 	{
-		MessageBox(NULL, "Failed to register the window class", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(NULL, TEXT("Failed to register the window class"), TEXT("ERROR"), MB_OK | MB_ICONEXCLAMATION);
 		return FALSE;		//exit and return false
 	}
 
@@ -616,14 +664,14 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
 		{
 			// If The Mode Fails, Offer Two Options.  Quit Or Run In A Window.
-			if (MessageBox(NULL,"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?","NeHe GL",MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
+			if (MessageBox(NULL,TEXT("The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?"),TEXT("NeHe GL"),MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
 			{
 				fullscreen = FALSE;		// Select Windowed Mode (Fullscreen = FALSE)
 			}
 			else
 			{
 				//Popup Messagebox: Closing
-				MessageBox(NULL, "Program will close now.", "ERROR", MB_OK|MB_ICONSTOP);
+				MessageBox(NULL, TEXT("Program will close now."), TEXT("ERROR"), MB_OK|MB_ICONSTOP);
 				return FALSE; //exit, return false
 			}
 		}
@@ -644,8 +692,8 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requestes Size
 
 	if (!(hWnd=CreateWindowEx(	dwExStyle,						// Extended Style For The Window
-								"OpenGL",						// Class Name
-								title,							// Window Title
+								TEXT("OpenGL"),						// Class Name
+								UTFConverter(title).c_wstr(),							// Window Title
 								WS_CLIPSIBLINGS |				// Required Window Style
 								WS_CLIPCHILDREN |				// Required Window Style
 								dwStyle,						// Selected WIndow Style
@@ -729,6 +777,16 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 	return TRUE;
 }
 
+void cleanup()
+{
+	freeTextureIds();
+
+	destroyAILogger();
+
+	if (hWnd)
+		KillGLWindow();
+};
+
 LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 						 UINT uMsg,				// Message for this Window
 						 WPARAM wParam,			// additional message Info
@@ -807,20 +865,25 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 	if (argv != NULL && argc > 1)
 	{
 		std::wstring modelpathW(argv[1]);
-		modelpath = std::string(modelpathW.begin(), modelpathW.end());
+		modelpath = UTFConverter(modelpathW).str();
 	}
 
-	if (!Import3DFromFile(modelpath)) return 0;
+	if (!Import3DFromFile(modelpath))
+	{
+		cleanup();
+		return 0;
+	}
 
 	logInfo("=============== Post Import ====================");
 
-	if (MessageBox(NULL, "Would You Like To Run In Fullscreen Mode?", "Start Fullscreen?", MB_YESNO|MB_ICONEXCLAMATION)==IDNO)
+	if (MessageBox(NULL, TEXT("Would You Like To Run In Fullscreen Mode?"), TEXT("Start Fullscreen?"), MB_YESNO|MB_ICONEXCLAMATION)==IDNO)
 	{
 		fullscreen=FALSE;
 	}
 
 	if (!CreateGLWindow(windowTitle, 640, 480, 16, fullscreen))
 	{
+		cleanup();
 		return 0;
 	}
 
@@ -861,6 +924,7 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 				fullscreen=!fullscreen;
 				if (!CreateGLWindow(windowTitle, 640, 480, 16, fullscreen))
 				{
+					cleanup();
 					return 0;
 				}
 			}
@@ -868,18 +932,6 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 	}
 
 	// *** cleanup ***
-
-	textureIdMap.clear(); //no need to delete pointers in it manually here. (Pointers point to textureIds deleted in next step)
-
-	if (textureIds)
-	{
-		delete[] textureIds;
-		textureIds = NULL;
-	}
-
-	// *** cleanup end ***
-
-	destroyAILogger();
-	KillGLWindow();
-	return (msg.wParam);
+	cleanup();
+	return static_cast<int>(msg.wParam);
 }

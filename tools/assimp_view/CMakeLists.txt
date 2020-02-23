@@ -90,7 +90,7 @@ IF ( MSVC )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
   # assimp_viewer is ANSI (MBCS) throughout
   REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
-ENDIF ( MSVC )
+ENDIF ()
 
 # Link the executable to the assimp + dx libs.
 TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib winmm.lib )

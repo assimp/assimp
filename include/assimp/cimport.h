@@ -562,6 +562,42 @@ ASSIMP_API size_t aiGetImportFormatCount(void);
  * @return A description of that specific import format. NULL if pIndex is out of range.
  */
 ASSIMP_API const C_STRUCT aiImporterDesc* aiGetImportFormatDescription( size_t pIndex);
+
+// --------------------------------------------------------------------------------
+/*
+    Imports a file using a custom progress handler
+*/
+ASSIMP_API const C_STRUCT aiScene *aiImportFileP(const char *pFile, unsigned int pFlags, C_STRUCT aiProgressHandler *pPH);
+
+// ------------------------------------------------------------------------------------------------
+/*
+    Imports a file using a custom IO file-system and a custom progress handler
+*/
+ASSIMP_API const C_STRUCT aiScene *aiImportFileIP(const char *pFile, unsigned int pFlags, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH);
+
+// ------------------------------------------------------------------------------------------------
+/*
+    Imports a file using a custom IO file-system, a custom progress handler and a property store
+*/
+ASSIMP_API const C_STRUCT aiScene *aiImportFileIPP(const char *pFile, unsigned int pFlags, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH, const C_STRUCT aiPropertyStore *props);
+
+// ------------------------------------------------------------------------------------------------
+/*
+    Imports a file from memory using a a custom progress handler
+*/
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiProgressHandler *pPH);
+
+// ------------------------------------------------------------------------------------------------
+/*
+    Imports a file from memory using a custom IO file-system and a custom progress handler
+*/
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryIP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH);
+
+// ------------------------------------------------------------------------------------------------
+/*
+    Imports a file from memory using a custom IO file-system, a custom progress handler and a property store
+*/
+ASSIMP_API const C_STRUCT aiScene *aiImportFileFromMemoryIPP(const char *pBuffer, unsigned int pLength, unsigned int pFlags, const char *pHint, C_STRUCT aiFileIO *pFS, C_STRUCT aiProgressHandler *pPH, const C_STRUCT aiPropertyStore *props);
 #ifdef __cplusplus
 }
 #endif

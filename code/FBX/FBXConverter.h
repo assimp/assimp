@@ -226,6 +226,9 @@ private:
                         std::vector<unsigned int> *outputVertStartIndices = NULL);
     // lookup
     static const aiNode* GetNodeByName( const aiString& name, aiNode *current_node );
+   	//TODO: rickomax - void ConvertBlendShapes(aiMesh* out, const Model& model, const MeshGeometry& geo,
+    //    unsigned int materialIndex = NO_MATERIAL_SEPARATION,
+    //    std::vector<unsigned int>* outputVertStartIndices = NULL);
     // ------------------------------------------------------------------------------------------------
     void ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
                         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,

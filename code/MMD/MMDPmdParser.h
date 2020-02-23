@@ -41,557 +41,534 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
+#include <map>
 #include <vector>
 #include <string>
 #include <memory>
-#include <iostream>
-#include <fstream>
+#include <assimp/DefaultIOSystem.h>
 #include "MMDCpp14.h"
+#include "PmdHelper.h"
+
+using namespace::Assimp;
 
 namespace pmd
 {
-	class PmdHeader
-	{
-	public:
-		std::string name;
-		std::string name_english;
-		std::string comment;
-		std::string comment_english;
+    class PmdHeader
+    {
+    public:
+        std::string name;
+        std::string name_english;
+        std::string comment;
+        std::string comment_english;
 
-		bool Read(std::ifstream* stream)
-		{
-			char buffer[256];
-			stream->read(buffer, 20);
-			name = std::string(buffer);
-			stream->read(buffer, 256);
-			comment = std::string(buffer);
-			return true;
-		}
+        bool Read(IOStream* stream)
+        {
+            name = PmdHelper::ReadString(stream, 20);
+            comment = PmdHelper::ReadString(stream, 256);
+            return true;
+        }
 
-		bool ReadExtension(std::ifstream* stream)
-		{
-			char buffer[256];
-			stream->read(buffer, 20);
-			name_english = std::string(buffer);
-			stream->read(buffer, 256);
-			comment_english = std::string(buffer);
-			return true;
-		}
-	};
+        bool ReadExtension(IOStream* stream)
+        {
+            name_english = PmdHelper::ReadString(stream, 20);
+            comment_english = PmdHelper::ReadString(stream, 256);
+            return true;
+        }
+    };
 
-	class PmdVertex
-	{
-	public:
-		float position[3];
+    class PmdVertex
+    {
+    public:
+        float position[3];
 
-		float normal[3];
+        float normal[3];
 
-		float uv[2];
+        float uv[2];
 
-		uint16_t bone_index[2];
+        uint16_t bone_index[2];
 
-		uint8_t bone_weight;
+        uint8_t bone_weight;
 
-		bool edge_invisible;
+        bool edge_invisible;
 
-		bool Read(std::ifstream* stream)
-		{
-			stream->read((char*) position, sizeof(float) * 3);
-			stream->read((char*) normal, sizeof(float) * 3);
-			stream->read((char*) uv, sizeof(float) * 2);
-			stream->read((char*) bone_index, sizeof(uint16_t) * 2);
-			stream->read((char*) &bone_weight, sizeof(uint8_t));
-			stream->read((char*) &edge_invisible, sizeof(uint8_t));
-			return true;
-		}
-	};
+        bool Read(IOStream* stream)
+        {
+            stream->Read((char*)position, sizeof(float) * 3, 1);
+            stream->Read((char*)normal, sizeof(float) * 3, 1);
+            stream->Read((char*)uv, sizeof(float) * 2, 1);
+            stream->Read((char*)bone_index, sizeof(uint16_t) * 2, 1);
+            stream->Read((char*)&bone_weight, sizeof(uint8_t), 1);
+            stream->Read((char*)&edge_invisible, sizeof(uint8_t), 1);
+            return true;
+        }
+    };
 
-	class PmdMaterial
-	{
-	public:
-		float diffuse[4];
-		float power;
-		float specular[3];
-		float ambient[3];
-		uint8_t toon_index;
-		uint8_t edge_flag;
-		uint32_t index_count;
-		std::string texture_filename;
-		std::string sphere_filename;
+    class PmdMaterial
+    {
+    public:
+        float diffuse[4];
+        float power;
+        float specular[3];
+        float ambient[3];
+        uint8_t toon_index;
+        uint8_t edge_flag;
+        uint32_t index_count;
+        std::string texture_filename;
+        std::string sphere_filename;
 
-		bool Read(std::ifstream* stream)
-		{
-			char buffer[20];
-			stream->read((char*) &diffuse, sizeof(float) * 4);
-			stream->read((char*) &power, sizeof(float));
-			stream->read((char*) &specular, sizeof(float) * 3);
-			stream->read((char*) &ambient, sizeof(float) * 3);
-			stream->read((char*) &toon_index, sizeof(uint8_t));
-			stream->read((char*) &edge_flag, sizeof(uint8_t));
-			stream->read((char*) &index_count, sizeof(uint32_t));
-			stream->read((char*) &buffer, sizeof(char) * 20);
-			char* pstar = strchr(buffer, '*');
-			if (NULL == pstar)
-			{
-				texture_filename = std::string(buffer);
-				sphere_filename.clear();
-			}
-			else {
-				*pstar = 0;
-				texture_filename = std::string(buffer);
-				sphere_filename = std::string(pstar+1);
-			}
-			return true;
-		}
-	};
+        bool Read(IOStream* stream)
+        {
+            stream->Read((char*)&diffuse, sizeof(float) * 4, 1);
+            stream->Read((char*)&power, sizeof(float), 1);
+            stream->Read((char*)&specular, sizeof(float) * 3, 1);
+            stream->Read((char*)&ambient, sizeof(float) * 3, 1);
+            stream->Read((char*)&toon_index, sizeof(uint8_t), 1);
+            stream->Read((char*)&edge_flag, sizeof(uint8_t), 1);
+            stream->Read((char*)&index_count, sizeof(uint32_t), 1);
+            std::string buffer = PmdHelper::ReadString(stream, 20);
+            size_t pstar = buffer.find('*');
+            if (pstar == std::string::npos)
+            {
+                texture_filename = buffer;
+                sphere_filename.clear();
+            }
+            else {
+                texture_filename = buffer;
+                sphere_filename = buffer.substr(pstar + 1);
+            }
+            return true;
+        }
+    };
 
-	enum class BoneType : uint8_t
-	{
-		Rotation,
-		RotationAndMove,
-		IkEffector,
-		Unknown,
-		IkEffectable,
-		RotationEffectable,
-		IkTarget,
-		Invisible,
-		Twist,
-		RotationMovement
-	};
+    enum class BoneType : uint8_t
+    {
+        Rotation,
+        RotationAndMove,
+        IkEffector,
+        Unknown,
+        IkEffectable,
+        RotationEffectable,
+        IkTarget,
+        Invisible,
+        Twist,
+        RotationMovement
+    };
 
-	class PmdBone
-	{
-	public:
-		std::string name;
-		std::string name_english;
-		uint16_t parent_bone_index;
-		uint16_t tail_pos_bone_index;
-		BoneType bone_type;
-		uint16_t ik_parent_bone_index;
-		float bone_head_pos[3];
+    class PmdBone
+    {
+    public:
+        std::string name;
+        std::string name_english;
+        uint16_t parent_bone_index;
+        uint16_t tail_pos_bone_index;
+        BoneType bone_type;
+        uint16_t ik_parent_bone_index;
+        float bone_head_pos[3];
 
-		void Read(std::istream *stream)
-		{
-			char buffer[20];
-			stream->read(buffer, 20);
-			name = std::string(buffer);
-			stream->read((char*) &parent_bone_index, sizeof(uint16_t));
-			stream->read((char*) &tail_pos_bone_index, sizeof(uint16_t));
-			stream->read((char*) &bone_type, sizeof(uint8_t));
-			stream->read((char*) &ik_parent_bone_index, sizeof(uint16_t));
-			stream->read((char*) &bone_head_pos, sizeof(float) * 3);
-		}
+        void Read(IOStream* stream)
+        {
+            name = PmdHelper::ReadString(stream, 20);
+            stream->Read((char*)&parent_bone_index, sizeof(uint16_t), 1);
+            stream->Read((char*)&tail_pos_bone_index, sizeof(uint16_t), 1);
+            stream->Read((char*)&bone_type, sizeof(uint8_t), 1);
+            stream->Read((char*)&ik_parent_bone_index, sizeof(uint16_t), 1);
+            stream->Read((char*)&bone_head_pos, sizeof(float) * 3, 1);
+        }
 
-		void ReadExpantion(std::istream *stream)
-		{
-			char buffer[20];
-			stream->read(buffer, 20);
-			name_english = std::string(buffer);
-		}
-	};
+        void ReadExpantion(IOStream *stream)
+        {
+            name_english = PmdHelper::ReadString(stream, 20);
+        }
+    };
 
-	class PmdIk
-	{
-	public:
-		uint16_t ik_bone_index;
-		uint16_t target_bone_index;
-		uint16_t interations;
-		float angle_limit;
-		std::vector<uint16_t> ik_child_bone_index;
+    class PmdIk
+    {
+    public:
+        uint16_t ik_bone_index;
+        uint16_t target_bone_index;
+        uint16_t interations;
+        float angle_limit;
+        std::vector<uint16_t> ik_child_bone_index;
 
-		void Read(std::istream *stream)
-		{
-			stream->read((char *) &ik_bone_index, sizeof(uint16_t));
-			stream->read((char *) &target_bone_index, sizeof(uint16_t));
-			uint8_t ik_chain_length;
-			stream->read((char*) &ik_chain_length, sizeof(uint8_t));
-			stream->read((char *) &interations, sizeof(uint16_t));
-			stream->read((char *) &angle_limit, sizeof(float));
-			ik_child_bone_index.resize(ik_chain_length);
-			for (int i = 0; i < ik_chain_length; i++)
-			{
-				stream->read((char *) &ik_child_bone_index[i], sizeof(uint16_t));
-			}
-		}
-	};
+        void Read(IOStream *stream)
+        {
+            stream->Read((char *)&ik_bone_index, sizeof(uint16_t), 1);
+            stream->Read((char *)&target_bone_index, sizeof(uint16_t), 1);
+            uint8_t ik_chain_length;
+            stream->Read((char*)&ik_chain_length, sizeof(uint8_t), 1);
+            stream->Read((char *)&interations, sizeof(uint16_t), 1);
+            stream->Read((char *)&angle_limit, sizeof(float), 1);
+            ik_child_bone_index.resize(ik_chain_length);
+            for (int i = 0; i < ik_chain_length; i++)
+            {
+                stream->Read((char *)&ik_child_bone_index[i], sizeof(uint16_t), 1);
+            }
+        }
+    };
 
-	class PmdFaceVertex
-	{
-	public:
-		int vertex_index;
-		float position[3];
+    class PmdFaceVertex
+    {
+    public:
+        int vertex_index;
+        float position[3];
 
-		void Read(std::istream *stream)
-		{
-			stream->read((char *) &vertex_index, sizeof(int));
-			stream->read((char *) position, sizeof(float) * 3);
-		}
-	};
+        void Read(IOStream *stream)
+        {
+            stream->Read((char *)&vertex_index, sizeof(int), 1);
+            stream->Read((char *)position, sizeof(float) * 3, 1);
+        }
+    };
 
-	enum class FaceCategory : uint8_t
-	{
-		Base,
-		Eyebrow,
-		Eye,
-		Mouth,
-		Other
-	};
+    enum class FaceCategory : uint8_t
+    {
+        Base,
+        Eyebrow,
+        Eye,
+        Mouth,
+        Other
+    };
 
-	class PmdFace
-	{
-	public:
-		std::string name;
-		FaceCategory type;
-		std::vector<PmdFaceVertex> vertices;
-		std::string name_english;
+    class PmdFace
+    {
+    public:
+        std::string name;
+        FaceCategory type;
+        std::vector<PmdFaceVertex> vertices;
+        std::string name_english;
 
-		void Read(std::istream *stream)
-		{
-			char buffer[20];
-			stream->read(buffer, 20);
-			name = std::string(buffer);
-			int vertex_count;
-			stream->read((char*) &vertex_count, sizeof(int));
-			stream->read((char*) &type, sizeof(uint8_t));
-			vertices.resize(vertex_count);
-			for (int i = 0; i < vertex_count; i++)
-			{
-				vertices[i].Read(stream);
-			}
-		}
+        void Read(IOStream *stream)
+        {
+            name = PmdHelper::ReadString(stream, 20);
+            int vertex_count;
+            stream->Read((char*)&vertex_count, sizeof(int), 1);
+            stream->Read((char*)&type, sizeof(uint8_t), 1);
+            vertices.resize(vertex_count);
+            for (int i = 0; i < vertex_count; i++)
+            {
+                vertices[i].Read(stream);
+            }
+        }
 
-		void ReadExpantion(std::istream *stream)
-		{
-			char buffer[20];
-			stream->read(buffer, 20);
-			name_english = std::string(buffer);
-		}
-	};
+        void ReadExpantion(IOStream *stream)
+        {
+            name_english = PmdHelper::ReadString(stream, 20);
+        }
+    };
 
-	class PmdBoneDispName
-	{
-	public:
-		std::string bone_disp_name;
-		std::string bone_disp_name_english;
+    class PmdBoneDispName
+    {
+    public:
+        std::string bone_disp_name;
+        std::string bone_disp_name_english;
 
-		void Read(std::istream *stream)
-		{
-			char buffer[50];
-			stream->read(buffer, 50);
-			bone_disp_name = std::string(buffer);
-			bone_disp_name_english.clear();
-		}
-		void ReadExpantion(std::istream *stream)
-		{
-			char buffer[50];
-			stream->read(buffer, 50);
-			bone_disp_name_english = std::string(buffer);
-		}
-	};
+        void Read(IOStream *stream)
+        {
+            bone_disp_name = PmdHelper::ReadString(stream, 50);
+            bone_disp_name_english.clear();
+        }
+        void ReadExpantion(IOStream *stream)
+        {
+            bone_disp_name_english = PmdHelper::ReadString(stream, 50);
+        }
+    };
 
-	class PmdBoneDisp
-	{
-	public:
-		uint16_t bone_index;
-		uint8_t bone_disp_index;
+    class PmdBoneDisp
+    {
+    public:
+        uint16_t bone_index;
+        uint8_t bone_disp_index;
 
-		void Read(std::istream *stream)
-		{
-			stream->read((char*) &bone_index, sizeof(uint16_t));
-			stream->read((char*) &bone_disp_index, sizeof(uint8_t));
-		}
-	};
+        void Read(IOStream *stream)
+        {
+            stream->Read((char*)&bone_index, sizeof(uint16_t), 1);
+            stream->Read((char*)&bone_disp_index, sizeof(uint8_t), 1);
+        }
+    };
 
-	enum class RigidBodyShape : uint8_t
-	{
-		Sphere = 0,
-		Box = 1,
-		Cpusel = 2
-	};
+    enum class RigidBodyShape : uint8_t
+    {
+        Sphere = 0,
+        Box = 1,
+        Cpusel = 2
+    };
 
-	enum class RigidBodyType : uint8_t
-	{
-		BoneConnected = 0,
-		Physics = 1,
-		ConnectedPhysics = 2
-	};
+    enum class RigidBodyType : uint8_t
+    {
+        BoneConnected = 0,
+        Physics = 1,
+        ConnectedPhysics = 2
+    };
 
-	class PmdRigidBody
-	{
-	public:
-		std::string name;
-		uint16_t related_bone_index;
-		uint8_t group_index;
-		uint16_t mask;
-		RigidBodyShape shape;
-		float size[3];
-		float position[3];
-		float orientation[3];
-		float weight;
-		float linear_damping;
-		float anglar_damping;
-		float restitution;
-		float friction;
-		RigidBodyType rigid_type;
+    class PmdRigidBody
+    {
+    public:
+        std::string name;
+        uint16_t related_bone_index;
+        uint8_t group_index;
+        uint16_t mask;
+        RigidBodyShape shape;
+        float size[3];
+        float position[3];
+        float orientation[3];
+        float weight;
+        float linear_damping;
+        float anglar_damping;
+        float restitution;
+        float friction;
+        RigidBodyType rigid_type;
 
-		void Read(std::istream *stream)
-		{
-			char buffer[20];
-			stream->read(buffer, sizeof(char) * 20);
-			name = (std::string(buffer));
-			stream->read((char*) &related_bone_index, sizeof(uint16_t));
-			stream->read((char*) &group_index, sizeof(uint8_t));
-			stream->read((char*) &mask, sizeof(uint16_t));
-			stream->read((char*) &shape, sizeof(uint8_t));
-			stream->read((char*) size, sizeof(float) * 3);
-			stream->read((char*) position, sizeof(float) * 3);
-			stream->read((char*) orientation, sizeof(float) * 3);
-			stream->read((char*) &weight, sizeof(float));
-			stream->read((char*) &linear_damping, sizeof(float));
-			stream->read((char*) &anglar_damping, sizeof(float));
-			stream->read((char*) &restitution, sizeof(float));
-			stream->read((char*) &friction, sizeof(float));
-			stream->read((char*) &rigid_type, sizeof(char));
-		}
-	};
+        void Read(IOStream *stream)
+        {
+            name = PmdHelper::ReadString(stream, 20);
+            stream->Read((char*)&related_bone_index, sizeof(uint16_t), 1);
+            stream->Read((char*)&group_index, sizeof(uint8_t), 1);
+            stream->Read((char*)&mask, sizeof(uint16_t), 1);
+            stream->Read((char*)&shape, sizeof(uint8_t), 1);
+            stream->Read((char*)size, sizeof(float) * 3, 1);
+            stream->Read((char*)position, sizeof(float) * 3, 1);
+            stream->Read((char*)orientation, sizeof(float) * 3, 1);
+            stream->Read((char*)&weight, sizeof(float), 1);
+            stream->Read((char*)&linear_damping, sizeof(float), 1);
+            stream->Read((char*)&anglar_damping, sizeof(float), 1);
+            stream->Read((char*)&restitution, sizeof(float), 1);
+            stream->Read((char*)&friction, sizeof(float), 1);
+            stream->Read((char*)&rigid_type, sizeof(char), 1);
+        }
+    };
 
-	class PmdConstraint
-	{
-	public:
-		std::string name;
-		uint32_t rigid_body_index_a;
-		uint32_t rigid_body_index_b;
-		float position[3];
-		float orientation[3];
-		float linear_lower_limit[3];
-		float linear_upper_limit[3];
-		float angular_lower_limit[3];
-		float angular_upper_limit[3];
-		float linear_stiffness[3];
-		float angular_stiffness[3];
+    class PmdConstraint
+    {
+    public:
+        std::string name;
+        uint32_t rigid_body_index_a;
+        uint32_t rigid_body_index_b;
+        float position[3];
+        float orientation[3];
+        float linear_lower_limit[3];
+        float linear_upper_limit[3];
+        float angular_lower_limit[3];
+        float angular_upper_limit[3];
+        float linear_stiffness[3];
+        float angular_stiffness[3];
 
-		void Read(std::istream *stream)
-		{
-			char buffer[20];
-			stream->read(buffer, 20);
-			name = std::string(buffer);
-			stream->read((char *) &rigid_body_index_a, sizeof(uint32_t));
-			stream->read((char *) &rigid_body_index_b, sizeof(uint32_t));
-			stream->read((char *) position, sizeof(float) * 3);
-			stream->read((char *) orientation, sizeof(float) * 3);
-			stream->read((char *) linear_lower_limit, sizeof(float) * 3);
-			stream->read((char *) linear_upper_limit, sizeof(float) * 3);
-			stream->read((char *) angular_lower_limit, sizeof(float) * 3);
-			stream->read((char *) angular_upper_limit, sizeof(float) * 3);
-			stream->read((char *) linear_stiffness, sizeof(float) * 3);
-			stream->read((char *) angular_stiffness, sizeof(float) * 3);
-		}
-	};
+        void Read(IOStream *stream)
+        {
+            name = PmdHelper::ReadString(stream, 20);
+            stream->Read((char *)&rigid_body_index_a, sizeof(uint32_t), 1);
+            stream->Read((char *)&rigid_body_index_b, sizeof(uint32_t), 1);
+            stream->Read((char *)position, sizeof(float) * 3, 1);
+            stream->Read((char *)orientation, sizeof(float) * 3, 1);
+            stream->Read((char *)linear_lower_limit, sizeof(float) * 3, 1);
+            stream->Read((char *)linear_upper_limit, sizeof(float) * 3, 1);
+            stream->Read((char *)angular_lower_limit, sizeof(float) * 3, 1);
+            stream->Read((char *)angular_upper_limit, sizeof(float) * 3, 1);
+            stream->Read((char *)linear_stiffness, sizeof(float) * 3, 1);
+            stream->Read((char *)angular_stiffness, sizeof(float) * 3, 1);
+        }
+    };
+    class PmdModel
+    {
+    public:
+        float version;
+        PmdHeader header;
+        std::vector<PmdVertex> vertices;
+        std::vector<uint16_t> indices;
+        std::vector<PmdMaterial> materials;
+        std::vector<PmdBone> bones;
+        std::vector<PmdIk> iks;
+        std::vector<PmdFace> faces;
+        std::vector<uint16_t> faces_indices;
+        std::vector<PmdBoneDispName> bone_disp_name;
+        std::vector<PmdBoneDisp> bone_disp;
+        std::vector<std::string> toon_filenames;
+        std::vector<PmdRigidBody> rigid_bodies;
+        std::vector<PmdConstraint> constraints;
 
-	class PmdModel
-	{
-	public:
-		float version;
-		PmdHeader header;
-		std::vector<PmdVertex> vertices;
-		std::vector<uint16_t> indices;
-		std::vector<PmdMaterial> materials;
-		std::vector<PmdBone> bones;
-		std::vector<PmdIk> iks;
-		std::vector<PmdFace> faces;
-		std::vector<uint16_t> faces_indices;
-		std::vector<PmdBoneDispName> bone_disp_name;
-		std::vector<PmdBoneDisp> bone_disp;
-		std::vector<std::string> toon_filenames;
-		std::vector<PmdRigidBody> rigid_bodies;
-		std::vector<PmdConstraint> constraints;
+        static std::unique_ptr<PmdModel> LoadFromFile(const char *file, IOSystem * pIOHandler)
+        {
+            std::unique_ptr<IOStream> fileStreamPtr(pIOHandler->Open(file, "rb"));
+            IOStream* stream = fileStreamPtr.get();
+            if (!stream)
+            {
+                std::cerr << "could not open \"" << file << "\"" << std::endl;
+                return nullptr;
+            }
+            auto result = LoadFromStream(stream);
+            //stream.Flush();
+            return result;
+        }
 
-		static std::unique_ptr<PmdModel> LoadFromFile(const char *filename)
-		{
-			std::ifstream stream(filename, std::ios::binary);
-			if (stream.fail())
-			{
-				std::cerr << "could not open \"" << filename << "\"" << std::endl;
-				return nullptr;
-			}
-			auto result = LoadFromStream(&stream);
-			stream.close();
-			return result;
-		}
+        static std::unique_ptr<PmdModel> LoadFromStream(IOStream *stream)
+        {
+            auto result = mmd::make_unique<PmdModel>();
 
-		static std::unique_ptr<PmdModel> LoadFromStream(std::ifstream *stream)
-		{
-			auto result = mmd::make_unique<PmdModel>();
-			char buffer[100];
+            // magic
+            char magic[3];
+            stream->Read(magic, 3, 1);
+            if (magic[0] != 'P' || magic[1] != 'm' || magic[2] != 'd')
+            {
+                std::cerr << "invalid file" << std::endl;
+                return nullptr;
+            }
 
-			// magic
-			char magic[3];
-			stream->read(magic, 3);
-			if (magic[0] != 'P' || magic[1] != 'm' || magic[2] != 'd')
-			{
-				std::cerr << "invalid file" << std::endl;
-				return nullptr;
-			}
+            // version
+            stream->Read((char*) &(result->version), sizeof(float), 1);
+            if (result->version != 1.0f)
+            {
+                std::cerr << "invalid version" << std::endl;
+                return nullptr;
+            }
 
-			// version
-			stream->read((char*) &(result->version), sizeof(float));
-			if (result ->version != 1.0f)
-			{
-				std::cerr << "invalid version" << std::endl;
-				return nullptr;
-			}
+            // header
+            result->header.Read(stream);
 
-			// header
-			result->header.Read(stream);
+            // vertices
+            uint32_t vertex_num;
+            stream->Read((char*)&vertex_num, sizeof(uint32_t), 1);
+            result->vertices.resize(vertex_num);
+            for (uint32_t i = 0; i < vertex_num; i++)
+            {
+                result->vertices[i].Read(stream);
+            }
 
-			// vertices
-			uint32_t vertex_num;
-			stream->read((char*) &vertex_num, sizeof(uint32_t));
-			result->vertices.resize(vertex_num);
-			for (uint32_t i = 0; i < vertex_num; i++)
-			{
-				result->vertices[i].Read(stream);
-			}
+            // indices
+            uint32_t index_num;
+            stream->Read((char*)&index_num, sizeof(uint32_t), 1);
+            result->indices.resize(index_num);
+            for (uint32_t i = 0; i < index_num; i++)
+            {
+                stream->Read((char*)&result->indices[i], sizeof(uint16_t), 1);
+            }
 
-			// indices
-			uint32_t index_num;
-			stream->read((char*) &index_num, sizeof(uint32_t));
-			result->indices.resize(index_num);
-			for (uint32_t i = 0; i < index_num; i++)
-			{
-				stream->read((char*) &result->indices[i], sizeof(uint16_t));
-			}
+            // materials
+            uint32_t material_num;
+            stream->Read((char*)&material_num, sizeof(uint32_t), 1);
+            result->materials.resize(material_num);
+            for (uint32_t i = 0; i < material_num; i++)
+            {
+                result->materials[i].Read(stream);
+            }
 
-			// materials
-			uint32_t material_num;
-			stream->read((char*) &material_num, sizeof(uint32_t));
-			result->materials.resize(material_num);
-			for (uint32_t i = 0; i < material_num; i++)
-			{
-				result->materials[i].Read(stream);
-			}
+            // bones
+            uint16_t bone_num;
+            stream->Read((char*)&bone_num, sizeof(uint16_t), 1);
+            result->bones.resize(bone_num);
+            for (uint32_t i = 0; i < bone_num; i++)
+            {
+                result->bones[i].Read(stream);
+            }
 
-			// bones
-			uint16_t bone_num;
-			stream->read((char*) &bone_num, sizeof(uint16_t));
-			result->bones.resize(bone_num);
-			for (uint32_t i = 0; i < bone_num; i++)
-			{
-				result->bones[i].Read(stream);
-			}
+            // iks
+            uint16_t ik_num;
+            stream->Read((char*)&ik_num, sizeof(uint16_t), 1);
+            result->iks.resize(ik_num);
+            for (uint32_t i = 0; i < ik_num; i++)
+            {
+                result->iks[i].Read(stream);
+            }
 
-			// iks
-			uint16_t ik_num;
-			stream->read((char*) &ik_num, sizeof(uint16_t));
-			result->iks.resize(ik_num);
-			for (uint32_t i = 0; i < ik_num; i++)
-			{
-				result->iks[i].Read(stream);
-			}
+            // faces
+            uint16_t face_num;
+            stream->Read((char*)&face_num, sizeof(uint16_t), 1);
+            result->faces.resize(face_num);
+            for (uint32_t i = 0; i < face_num; i++)
+            {
+                result->faces[i].Read(stream);
+            }
 
-			// faces
-			uint16_t face_num;
-			stream->read((char*) &face_num, sizeof(uint16_t));
-			result->faces.resize(face_num);
-			for (uint32_t i = 0; i < face_num; i++)
-			{
-				result->faces[i].Read(stream);
-			}
+            // face frames
+            uint8_t face_frame_num;
+            stream->Read((char*)&face_frame_num, sizeof(uint8_t), 1);
+            result->faces_indices.resize(face_frame_num);
+            for (uint32_t i = 0; i < face_frame_num; i++)
+            {
+                stream->Read((char*)&result->faces_indices[i], sizeof(uint16_t), 1);
+            }
 
-			// face frames
-			uint8_t face_frame_num;
-			stream->read((char*) &face_frame_num, sizeof(uint8_t));
-			result->faces_indices.resize(face_frame_num);
-			for (uint32_t i = 0; i < face_frame_num; i++)
-			{
-				stream->read((char*) &result->faces_indices[i], sizeof(uint16_t));
-			}
+            // bone names
+            uint8_t bone_disp_num;
+            stream->Read((char*)&bone_disp_num, sizeof(uint8_t), 1);
+            result->bone_disp_name.resize(bone_disp_num);
+            for (uint32_t i = 0; i < bone_disp_num; i++)
+            {
+                result->bone_disp_name[i].Read(stream);
+            }
 
-			// bone names
-			uint8_t bone_disp_num;
-			stream->read((char*) &bone_disp_num, sizeof(uint8_t));
-			result->bone_disp_name.resize(bone_disp_num);
-			for (uint32_t i = 0; i < bone_disp_num; i++)
-			{
-				result->bone_disp_name[i].Read(stream);
-			}
+            // bone frame
+            uint32_t bone_frame_num;
+            stream->Read((char*)&bone_frame_num, sizeof(uint32_t), 1);
+            result->bone_disp.resize(bone_frame_num);
+            for (uint32_t i = 0; i < bone_frame_num; i++)
+            {
+                result->bone_disp[i].Read(stream);
+            }
 
-			// bone frame
-			uint32_t bone_frame_num;
-			stream->read((char*) &bone_frame_num, sizeof(uint32_t));
-			result->bone_disp.resize(bone_frame_num);
-			for (uint32_t i = 0; i < bone_frame_num; i++)
-			{
-				result->bone_disp[i].Read(stream);
-			}
+            // english name
+            bool english;
+            stream->Read((char*)&english, sizeof(char), 1);
+            if (english)
+            {
+                result->header.ReadExtension(stream);
+                for (uint32_t i = 0; i < bone_num; i++)
+                {
+                    result->bones[i].ReadExpantion(stream);
+                }
+                for (uint32_t i = 0; i < face_num; i++)
+                {
+                    if (result->faces[i].type == pmd::FaceCategory::Base)
+                    {
+                        continue;
+                    }
+                    result->faces[i].ReadExpantion(stream);
+                }
+                for (uint32_t i = 0; i < result->bone_disp_name.size(); i++)
+                {
+                    result->bone_disp_name[i].ReadExpantion(stream);
+                }
+            }
 
-			// english name
-			bool english;
-			stream->read((char*) &english, sizeof(char));
-			if (english)
-			{
-				result->header.ReadExtension(stream);
-				for (uint32_t i = 0; i < bone_num; i++)
-				{
-					result->bones[i].ReadExpantion(stream);
-				}
-				for (uint32_t i = 0; i < face_num; i++)
-				{
-					if (result->faces[i].type == pmd::FaceCategory::Base)
-					{
-						continue;
-					}
-					result->faces[i].ReadExpantion(stream);
-				}
-				for (uint32_t i = 0; i < result->bone_disp_name.size(); i++)
-				{
-					result->bone_disp_name[i].ReadExpantion(stream);
-				}
-			}
+            // toon textures
+            if (stream->Tell() >= stream->FileSize())
+            {
+                result->toon_filenames.clear();
+            }
+            else {
+                result->toon_filenames.resize(10);
+                for (uint32_t i = 0; i < 10; i++)
+                {
+                    result->toon_filenames[i] = PmdHelper::ReadString(stream, 100);
+                }
+            }
 
-			// toon textures
-			if (stream->peek() == std::ios::traits_type::eof())
-			{
-				result->toon_filenames.clear();
-			}
-			else {
-				result->toon_filenames.resize(10);
-				for (uint32_t i = 0; i < 10; i++)
-				{
-					stream->read(buffer, 100);
-					result->toon_filenames[i] = std::string(buffer);
-				}
-			}
+            // physics
+            if (stream->Tell() >= stream->FileSize())
+            {
+                result->rigid_bodies.clear();
+                result->constraints.clear();
+            }
+            else {
+                uint32_t rigid_body_num;
+                stream->Read((char*)&rigid_body_num, sizeof(uint32_t), 1);
+                result->rigid_bodies.resize(rigid_body_num);
+                for (uint32_t i = 0; i < rigid_body_num; i++)
+                {
+                    result->rigid_bodies[i].Read(stream);
+                }
+                uint32_t constraint_num;
+                stream->Read((char*)&constraint_num, sizeof(uint32_t), 1);
+                result->constraints.resize(constraint_num);
+                for (uint32_t i = 0; i < constraint_num; i++)
+                {
+                    result->constraints[i].Read(stream);
+                }
+            }
 
-			// physics
-			if (stream->peek() == std::ios::traits_type::eof())
-			{
-				result->rigid_bodies.clear();
-				result->constraints.clear();
-			}
-			else {
-				uint32_t rigid_body_num;
-				stream->read((char*) &rigid_body_num, sizeof(uint32_t));
-				result->rigid_bodies.resize(rigid_body_num);
-				for (uint32_t i = 0; i < rigid_body_num; i++)
-				{
-					result->rigid_bodies[i].Read(stream);
-				}
-				uint32_t constraint_num;
-				stream->read((char*) &constraint_num, sizeof(uint32_t));
-				result->constraints.resize(constraint_num);
-				for (uint32_t i = 0; i < constraint_num; i++)
-				{
-					result->constraints[i].Read(stream);
-				}
-			}
+            if (stream->Tell() < stream->FileSize())
+            {
+                std::cerr << "there is unknown data" << std::endl;
+            }
 
-			if (stream->peek() != std::ios::traits_type::eof())
-			{
-				std::cerr << "there is unknown data" << std::endl;
-			}
-
-			return result;
-		}
-	};
+            return result;
+        }
+    };
 }

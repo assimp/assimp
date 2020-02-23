@@ -138,6 +138,17 @@ OPTION ( IGNORE_GIT_HASH
    OFF
 )
 
+OPTION ( SKIP_MSVC_UPDATE
+	"Skip MSVC symbols update and DLL renaming. Generates assimp.dll and assimp.lib files without suffixes."
+	OFF
+)
+
+#rickomax: setting Emscripten paths
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+	FILE(TO_CMAKE_PATH $ENV{EMSCRIPTEN}\\system\\include EMS_INCLUDE_PATH)
+	SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${EMS_INCLUDE_PATH})
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+
 IF (IOS AND NOT HUNTER_ENABLED)
   IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Release")

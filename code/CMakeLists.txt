@@ -69,7 +69,8 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/commonMetaData.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
-  ${HEADER_PATH}/cfileio.h
+  ${HEADER_PATH}/cfileio.h  
+  ${HEADER_PATH}/cprogresshandler.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h
   ${HEADER_PATH}/material.inl
@@ -205,6 +206,8 @@ SOURCE_GROUP(Common FILES ${Common_SRCS})
 SET( CApi_SRCS
   CApi/CInterfaceIOWrapper.cpp
   CApi/CInterfaceIOWrapper.h
+  CApi/CProgressHandlerWrapper.h
+  CApi/CProgressHandlerWrapper.cpp
 )
 SOURCE_GROUP(CApi FILES ${CApi_SRCS})
 
@@ -842,6 +845,10 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDPmxParser.h
   MMD/MMDPmxParser.cpp
   MMD/MMDVmdParser.h
+  MMD/PmdHelper.h
+  MMD/PmdHelper.cpp
+  MMD/PmdStringHelper.h
+  MMD/PmdStringHelper.cpp  
 )
 
 ADD_ASSIMP_EXPORTER( ASSJSON
@@ -1174,7 +1181,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
-if( MSVC )
+if( MSVC AND NOT SKIP_MSVC_UPDATE)
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
   # CMake 3.12 added a variable for this
   if(MSVC_TOOLSET_VERSION)
@@ -1218,6 +1225,10 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 )
 
 if (APPLE)
+  SET_TARGET_PROPERTIES( assimp PROPERTIES
+    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR}"
+  )
+
   if (BUILD_FRAMEWORK)
     SET_TARGET_PROPERTIES( assimp PROPERTIES
       FRAMEWORK TRUE

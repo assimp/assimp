@@ -659,6 +659,8 @@ private:
 
     uint64_t contentLength;
     uint8_t* content;
+	
+	size_t Base64Decode(const char *pInputBase64, size_t len, uint8_t*& pOutputData);
 };
 
 /** DOM class for generic FBX materials */

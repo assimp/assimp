@@ -65,8 +65,10 @@ struct ImportSettings
     , preservePivots(true)
     , optimizeEmptyAnimationCurves(true)
     , useLegacyEmbeddedTextureNaming(false)
-    , removeEmptyBones( true )
-    , convertToMeters( false ) {
+	, removeEmptyBones(true)
+	, convertToMeters(false)
+	, disableDiffuseFactor(true)
+	{
         // empty
     }
 
@@ -154,6 +156,10 @@ struct ImportSettings
     /** Set to true to perform a conversion from cm to meter after the import
     */
     bool convertToMeters;
+	
+	/** disable material factor applying eg: (when enabled, won't use DiffuseFactor to multiply Diffuse color)
+    **/
+    bool disableDiffuseFactor;
 };
 
 

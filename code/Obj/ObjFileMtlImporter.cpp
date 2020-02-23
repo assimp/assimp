@@ -165,12 +165,19 @@ void ObjFileMtlImporter::load()
         case 'T':
             {
                 ++m_DataIt;
-                if (*m_DataIt == 'f') // Material transmission
+                switch (*m_DataIt)
                 {
+                case 'f':  // Material transmission
                     ++m_DataIt;
-                    getColorRGBA( &m_pModel->m_pCurrentMaterial->transparent);
+                    getColorRGBA(&m_pModel->m_pCurrentMaterial->transparent);
+                    break;
+                case 'r': //Material alpha
+                    ++m_DataIt;
+                    getFloatValue(m_pModel->m_pCurrentMaterial->alpha);
+					m_pModel->m_pCurrentMaterial->alpha = 1.0 - m_pModel->m_pCurrentMaterial->alpha; //rickomax- this value is the inverse of alpha
+                    break;
                 }
-                m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             }
             break;
         case 'd':

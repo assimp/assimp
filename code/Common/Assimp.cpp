@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 
 #include "CApi/CInterfaceIOWrapper.h"
+#include "CApi/CProgressHandlerWrapper.h"
 #include "Importer.h"
 #include "ScenePrivate.h"
 
@@ -693,3 +694,145 @@ ASSIMP_API C_STRUCT const aiImporterDesc* aiGetImporterDesc( const char *extensi
 }
 
 // ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene *aiImportFileP(
+		const char *pFile,
+		unsigned int pFlags,
+		aiProgressHandler *pPH = nullptr) {
+	return aiImportFileIP(pFile, pFlags, NULL, pPH);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene *aiImportFileIP(
+		const char *pFile,
+		unsigned int pFlags,
+		aiFileIO *pFS = nullptr,
+		aiProgressHandler *pPH = nullptr) {
+	return aiImportFileIPP(pFile, pFlags, pFS, pPH, NULL);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene *aiImportFileIPP(
+		const char *pFile,
+		unsigned int pFlags,
+		aiFileIO *pFS = nullptr,
+		aiProgressHandler *pPH = nullptr,
+		const aiPropertyStore *props = nullptr) {
+	ai_assert(NULL != pFile);
+
+	const aiScene *scene = NULL;
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
+	// create an Importer for this file
+	Assimp::Importer *imp = new Assimp::Importer();
+
+	// copy properties
+	if (props) {
+		const PropertyMap *pp = reinterpret_cast<const PropertyMap *>(props);
+		ImporterPimpl *pimpl = imp->Pimpl();
+		pimpl->mIntProperties = pp->ints;
+		pimpl->mFloatProperties = pp->floats;
+		pimpl->mStringProperties = pp->strings;
+		pimpl->mMatrixProperties = pp->matrices;
+	}
+
+	// setup a custom IO system if necessary
+	if (pFS) {
+		imp->SetIOHandler(new CIOSystemWrapper(pFS));
+	}
+
+	if (pPH) {
+		imp->SetProgressHandler(new CProgressHandlerWrapper(pPH));
+	}
+
+	// and have it read the file
+	scene = imp->ReadFile(pFile, pFlags);
+
+	// if succeeded, store the importer in the scene and keep it alive
+	if (scene) {
+		ScenePrivateData *priv = const_cast<ScenePrivateData *>(ScenePriv(scene));
+		priv->mOrigImporter = imp;
+	} else {
+		// if failed, extract error code and destroy the import
+		gLastErrorString = imp->GetErrorString();
+		delete imp;
+	}
+
+	// return imported data. If the import failed the pointer is NULL anyways
+	ASSIMP_END_EXCEPTION_REGION(const aiScene *);
+
+	return scene;
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene *aiImportFileFromMemoryP(
+		const char *pBuffer,
+		unsigned int pLength,
+		unsigned int pFlags,
+		const char *pHint,
+		aiProgressHandler *pPH = nullptr) {
+	return aiImportFileFromMemoryIPP(pBuffer, pLength, pFlags, pHint, NULL, pPH, NULL);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene *aiImportFileFromMemoryIP(
+		const char *pBuffer,
+		unsigned int pLength,
+		unsigned int pFlags,
+		const char *pHint,
+		aiFileIO *pFS = nullptr,
+		aiProgressHandler *pPH = nullptr) {
+	return aiImportFileFromMemoryIPP(pBuffer, pLength, pFlags, pHint, pFS, pPH, NULL);
+}
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API const aiScene *aiImportFileFromMemoryIPP(
+		const char *pBuffer,
+		unsigned int pLength,
+		unsigned int pFlags,
+		const char *pHint,
+		aiFileIO *pFS = nullptr,
+		aiProgressHandler *pPH = nullptr,
+		const aiPropertyStore *props = nullptr) {
+	ai_assert(NULL != pBuffer);
+	ai_assert(0 != pLength);
+
+	const aiScene *scene = NULL;
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+
+	// create an Importer for this file
+	Assimp::Importer *imp = new Assimp::Importer();
+
+	// copy properties
+	if (props) {
+		const PropertyMap *pp = reinterpret_cast<const PropertyMap *>(props);
+		ImporterPimpl *pimpl = imp->Pimpl();
+		pimpl->mIntProperties = pp->ints;
+		pimpl->mFloatProperties = pp->floats;
+		pimpl->mStringProperties = pp->strings;
+		pimpl->mMatrixProperties = pp->matrices;
+	}
+
+	if (pFS) {
+		imp->SetIOHandler(new CIOSystemWrapper(pFS));
+	}
+
+	if (pPH) {
+		imp->SetProgressHandler(new CProgressHandlerWrapper(pPH));
+	}
+
+	// and have it read the file from the memory buffer
+	scene = imp->ReadFileFromMemory(pBuffer, pLength, pFlags, pHint);
+
+	// if succeeded, store the importer in the scene and keep it alive
+	if (scene) {
+		ScenePrivateData *priv = const_cast<ScenePrivateData *>(ScenePriv(scene));
+		priv->mOrigImporter = imp;
+	} else {
+		// if failed, extract error code and destroy the import
+		gLastErrorString = imp->GetErrorString();
+		delete imp;
+	}
+	// return imported data. If the import failed the pointer is NULL anyways
+	ASSIMP_END_EXCEPTION_REGION(const aiScene *);
+	return scene;
+}

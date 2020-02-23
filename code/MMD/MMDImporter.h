@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/BaseImporter.h>
 #include "MMDPmxParser.h"
+#include "MMDPmdParser.h"
 #include <assimp/material.h>
 #include <vector>
 
@@ -81,6 +82,15 @@ private:
 
     //! \brief Create the material
     aiMaterial* CreateMaterial(const pmx::PmxMaterial* pMat, const pmx::PmxModel* pModel);
+
+    //! \brief  Create the data from imported content.
+    void CreateDataFromImportPmd(const pmd::PmdModel* pModel, aiScene* pScene);
+
+    //! \brief Create the mesh
+    aiMesh* CreateMeshPmd(const pmd::PmdModel* pModel, const int indexStart, const int indexCount);
+
+    //! \brief Create the material
+    aiMaterial* CreateMaterialPmd(const pmd::PmdMaterial* pMat, const pmd::PmdModel* pModel);
 
 private:
     //! Data buffer

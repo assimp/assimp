@@ -656,7 +656,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING \
-	"AI_CONFIG_IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
+	"IMPORT_FBX_EMBEDDED_TEXTURES_LEGACY_NAMING"
 
 // ---------------------------------------------------------------------------
 /** @brief  Set wether the importer shall not remove empty bones.
@@ -672,6 +672,15 @@ enum aiComponent
  */
 #define AI_CONFIG_FBX_CONVERT_TO_M \
     "AI_CONFIG_FBX_CONVERT_TO_M"
+    
+// --------------------------------------------------------------------------- 
+/** @brief disable material factor applying eg: (when enabled, won't use DiffuseFactor to multiply Diffuse color)
+*
+* The default value is false (0)
+* Property type: bool
+*/
+#define AI_CONFIG_IMPORT_FBX_DISABLE_DIFFUSE_FACTOR \
+	"IMPORT_FBX_DISABLE_DIFFUSE_FACTOR"
 
 // ---------------------------------------------------------------------------
 /** @brief  Set the vertex animation keyframe to be imported

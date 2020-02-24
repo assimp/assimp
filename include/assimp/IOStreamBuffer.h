@@ -105,7 +105,7 @@ public:
     /// @brief  Will read the next line.
     /// @param  buffer      The buffer for the next line.
     /// @return true if successful.
-    bool getNextDataLine( std::vector<T> &buffer, T continuationToken );
+    bool getNextDataLine( std::vector<T> &buffer, T continuationToken, T stringToken);
 
     /// @brief  Will read the next line ascii or binary end line char.
     /// @param  buffer      The buffer for the next line.
@@ -246,7 +246,7 @@ size_t IOStreamBuffer<T>::getFilePos() const {
 
 template<class T>
 AI_FORCE_INLINE
-bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationToken ) {
+bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationToken, T stringToken) {
     buffer.resize( m_cacheSize );
     if ( m_cachePos >= m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
@@ -254,10 +254,14 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
         }
     }
 
+    bool insideString(false);
     bool continuationFound( false );
     size_t i = 0;
     for( ;; ) {
-        if ( continuationToken == m_cache[ m_cachePos ] ) {
+        if (stringToken == m_cache[m_cachePos]) {
+            insideString = !insideString;
+        }
+        if (!insideString && continuationToken == m_cache[ m_cachePos ] ) {
             continuationFound = true;
             ++m_cachePos;
         }

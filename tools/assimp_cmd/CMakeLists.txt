@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 # 
-# Copyright (c) 2006-2019, assimp team
+# Copyright (c) 2006-2020, assimp team
 
 
 # All rights reserved.
@@ -54,19 +54,12 @@ ADD_EXECUTABLE( assimp_cmd
   Main.cpp
   Main.h
   resource.h
-  WriteDumb.cpp
+  WriteDump.cpp
   Info.cpp
   Export.cpp
 )
 
 SET_PROPERTY(TARGET assimp_cmd PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-
-IF( WIN32 )
-  ADD_CUSTOM_COMMAND(TARGET assimp_cmd
-    PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:assimp_cmd>
-    MAIN_DEPENDENCY assimp)
-ENDIF( WIN32 )
 
 TARGET_LINK_LIBRARIES( assimp_cmd assimp ${ZLIB_LIBRARIES} )
 SET_TARGET_PROPERTIES( assimp_cmd PROPERTIES

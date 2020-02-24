@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -54,9 +54,9 @@ namespace glTF {
 
     namespace {
 
-        template<size_t N>
+        template<typename T, size_t N>
         inline 
-        Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
+        Value& MakeValue(Value& val, T(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
             for (decltype(N) i = 0; i < N; ++i) {
@@ -65,12 +65,23 @@ namespace glTF {
             return val;
         }
 
+        template<typename T>
         inline 
-        Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
+        Value& MakeValue(Value& val, const std::vector<T> & r, MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
             for (unsigned int i = 0; i < r.size(); ++i) {
                 val.PushBack(r[i], al);
+            }
+            return val;
+        }
+
+        template<typename C, typename T>
+        inline Value& MakeValueCast(Value& val, const std::vector<T> & r, MemoryPoolAllocator<>& al) {
+            val.SetArray();
+            val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
+            for (unsigned int i = 0; i < r.size(); ++i) {
+                val.PushBack(static_cast<C>(r[i]), al);
             }
             return val;
         }
@@ -100,8 +111,13 @@ namespace glTF {
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
 
         Value vTmpMax, vTmpMin;
-        obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
-        obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+		if (a.componentType == ComponentType_FLOAT) {
+			obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+			obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+		} else {
+			obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
+			obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
+		}
     }
 
     inline void Write(Value& obj, Animation& a, AssetWriter& w)
@@ -187,7 +203,9 @@ namespace glTF {
         obj.AddMember("buffer", Value(bv.buffer->id, w.mAl).Move(), w.mAl);
         obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
         obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
-        obj.AddMember("target", int(bv.target), w.mAl);
+        if (bv.target != BufferViewTarget_NONE) {
+            obj.AddMember("target", int(bv.target), w.mAl);
+        }
     }
 
     inline void Write(Value& /*obj*/, Camera& /*c*/, AssetWriter& /*w*/)
@@ -611,6 +629,9 @@ namespace glTF {
         asset.SetObject();
         asset.AddMember("version", Value(mAsset.asset.version, mAl).Move(), mAl);
         asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
+        if (!mAsset.asset.copyright.empty())
+            asset.AddMember("copyright", Value(mAsset.asset.copyright, mAl).Move(), mAl);
+
         mDoc.AddMember("asset", asset, mAl);
     }
 

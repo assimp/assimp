@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -103,7 +103,7 @@ void ExportSceneFBX(const char*, IOSystem*, const aiScene*, const ExportProperti
 void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
 void ExportSceneM3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
-void ExportSceneA3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneM3DA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::ExportProperties*);
 
 
@@ -177,7 +177,7 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 
 #ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
 	exporters.push_back(Exporter::ExportFormatEntry("m3d", "Model 3D (binary)", "m3d", &ExportSceneM3D, 0));
-	exporters.push_back(Exporter::ExportFormatEntry("a3d", "Model 3D (ascii)", "m3d", &ExportSceneA3D, 0));
+	exporters.push_back(Exporter::ExportFormatEntry("m3da", "Model 3D (ascii)", "a3d", &ExportSceneM3DA, 0));
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
@@ -445,7 +445,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
 
                 ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
                 ExportProperties* pProp = pProperties ? (ExportProperties*)pProperties : &emptyProperties;
-                pProp->SetPropertyBool("bJoinIdenticalVertices", must_join_again);
+        		pProp->SetPropertyBool("bJoinIdenticalVertices", pp & aiProcess_JoinIdenticalVertices);
                 exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProp);
 
                 pimpl->mProgressHandler->UpdateFileWrite(4, 4);

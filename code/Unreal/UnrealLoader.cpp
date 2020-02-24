@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -403,7 +403,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
         // set color and name
         mat->AddProperty(&color,1,AI_MATKEY_COLOR_DIFFUSE);
-        s.length = ::strlen(s.data);
+        s.length = (ai_uint32)::strlen(s.data);
         mat->AddProperty(&s,AI_MATKEY_NAME);
 
         // set texture, if any

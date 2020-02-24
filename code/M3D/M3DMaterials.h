@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -84,19 +84,19 @@ static const aiMatProp aiProps[] = {
 /* --- Texture Map Properties ---   !!!!! must match m3d_propertytypes !!!!! */
 static const aiMatProp aiTxProps[] = {
     { AI_MATKEY_TEXTURE_DIFFUSE(0) },                        /* m3dp_map_Kd */
-    { AI_MATKEY_TEXTURE_AMBIENT(0) },                        /* m3dp_map_Ka */
+    { AI_MATKEY_TEXTURE(aiTextureType_AMBIENT_OCCLUSION,0) },/* m3dp_map_Ka */
     { AI_MATKEY_TEXTURE_SPECULAR(0) },                       /* m3dp_map_Ks */
     { AI_MATKEY_TEXTURE_SHININESS(0) },                      /* m3dp_map_Ns */
     { AI_MATKEY_TEXTURE_EMISSIVE(0) },                       /* m3dp_map_Ke */
     { NULL, 0, 0 },                                          /* m3dp_map_Tf */
     { AI_MATKEY_TEXTURE_HEIGHT(0) },                         /* m3dp_bump */
     { AI_MATKEY_TEXTURE_OPACITY(0) },                        /* m3dp_map_d */
-    { AI_MATKEY_TEXTURE_REFLECTION(0) },                     /* m3dp_refl */
+    { AI_MATKEY_TEXTURE_NORMALS(0) },                        /* m3dp_map_N */
 
     { AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE_ROUGHNESS,0) },/* m3dp_map_Pr */
     { AI_MATKEY_TEXTURE(aiTextureType_METALNESS,0) },        /* m3dp_map_Pm */
     { NULL, 0, 0 },                                          /* m3dp_map_Ps */
-    { AI_MATKEY_TEXTURE(aiTextureType_AMBIENT_OCCLUSION,0) },/* m3dp_map_Ni */
+    { AI_MATKEY_TEXTURE(aiTextureType_REFLECTION,0) },       /* m3dp_map_Ni */
     { NULL, 0, 0 },                                          /* m3dp_map_Nt */
     { NULL, 0, 0 },
     { NULL, 0, 0 },

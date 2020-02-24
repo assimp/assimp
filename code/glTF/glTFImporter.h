@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -83,7 +83,7 @@ private:
     void ImportCameras(glTF::Asset& a);
     void ImportLights(glTF::Asset& a);
     void ImportNodes(glTF::Asset& a);
-
+    void ImportCommonMetadata(glTF::Asset& a);
 };
 
 } // Namespace assimp

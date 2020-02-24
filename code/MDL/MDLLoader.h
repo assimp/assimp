@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include "MDLFileData.h"
 #include "HMP/HalfLifeFileData.h"
+#include "HalfLife/HL1ImportSettings.h"
 
 struct aiNode;
 struct aiTexture;
@@ -77,6 +78,7 @@ using namespace MDL;
  *      <li>3D Game Studio MDL3, MDL4</li>
  *      <li>3D Game Studio MDL5</li>
  *      <li>3D Game Studio MDL7</li>
+ *      <li>Halflife 1</li>
  *      <li>Halflife 2</li>
  *   </ul>
  *  These formats are partially identical and it would be possible to load
@@ -130,6 +132,11 @@ protected:
     /** Import a GameStudio A7 file (MDL 7)
     */
     void InternReadFile_3DGS_MDL7( );
+
+    // -------------------------------------------------------------------
+    /** Import a Half-Life 1 MDL file
+    */
+    void InternReadFile_HL1(const std::string& pFile, const uint32_t iMagicWord);
 
     // -------------------------------------------------------------------
     /** Import a CS:S/HL2 MDL file (not fully implemented)
@@ -436,6 +443,9 @@ protected:
 
     /** Size of the input file in bytes */
     unsigned int iFileSize;
+
+    /* Configuration for HL1 MDL */
+    HalfLife::HL1ImportSettings mHL1ImportSettings;
 };
 
 } // end of namespace Assimp

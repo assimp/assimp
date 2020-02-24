@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2019, assimp team
+# Copyright (c) 2006-2020, assimp team
 #
 # All rights reserved.
 #
@@ -66,6 +66,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.h
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
+  ${HEADER_PATH}/commonMetaData.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
@@ -197,6 +198,7 @@ SET( Common_SRCS
   Common/CreateAnimMesh.cpp
   Common/simd.h
   Common/simd.cpp
+  Common/material.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -330,11 +332,15 @@ ADD_ASSIMP_IMPORTER( ASSBIN
 ADD_ASSIMP_EXPORTER( ASSBIN
   Assbin/AssbinExporter.h
   Assbin/AssbinExporter.cpp
+  Assbin/AssbinFileWriter.h
+  Assbin/AssbinFileWriter.cpp
 )
 
 ADD_ASSIMP_EXPORTER( ASSXML
   Assxml/AssxmlExporter.h
   Assxml/AssxmlExporter.cpp
+  Assxml/AssxmlFileWriter.h
+  Assxml/AssxmlFileWriter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( B3D
@@ -348,6 +354,7 @@ ADD_ASSIMP_IMPORTER( BVH
 )
 
 ADD_ASSIMP_IMPORTER( COLLADA
+  Collada/ColladaHelper.cpp
   Collada/ColladaHelper.h
   Collada/ColladaLoader.cpp
   Collada/ColladaLoader.h
@@ -411,6 +418,8 @@ ADD_ASSIMP_IMPORTER( M3D
   M3D/M3DMaterials.h
   M3D/M3DImporter.h
   M3D/M3DImporter.cpp
+  M3D/M3DWrapper.h
+  M3D/M3DWrapper.cpp
   M3D/m3d.h
 )
 
@@ -452,6 +461,16 @@ ADD_ASSIMP_IMPORTER( MDL
   MDL/MDLLoader.cpp
   MDL/MDLLoader.h
   MDL/MDLMaterialLoader.cpp
+  MDL/HalfLife/HalfLifeMDLBaseHeader.h
+  MDL/HalfLife/HL1FileData.h
+  MDL/HalfLife/HL1MDLLoader.cpp
+  MDL/HalfLife/HL1MDLLoader.h
+  MDL/HalfLife/HL1ImportDefinitions.h
+  MDL/HalfLife/HL1ImportSettings.h
+  MDL/HalfLife/HL1MeshTrivert.h
+  MDL/HalfLife/LogFunctions.h
+  MDL/HalfLife/UniqueNameGenerator.cpp
+  MDL/HalfLife/UniqueNameGenerator.h
 )
 
 SET( MaterialSystem_SRCS
@@ -1199,10 +1218,6 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 )
 
 if (APPLE)
-  SET_TARGET_PROPERTIES( assimp PROPERTIES
-    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR}"
-  )
-
   if (BUILD_FRAMEWORK)
     SET_TARGET_PROPERTIES( assimp PROPERTIES
       FRAMEWORK TRUE

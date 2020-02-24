@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -343,8 +343,6 @@ namespace Assimp {
     }
 
     ZipArchiveIOSystem::Implement::~Implement() {
-        m_ArchiveMap.clear();
-
         if (m_ZipFileHandle != nullptr) {
             unzClose(m_ZipFileHandle);
             m_ZipFileHandle = nullptr;

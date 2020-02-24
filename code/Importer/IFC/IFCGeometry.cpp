@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2010, assimp team
+Copyright (c) 2006-2020, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -138,8 +138,9 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
             }
         }
     }
-
-    ai_assert(outer_polygon_it != end);
+	if (outer_polygon_it == end) {
+		return;
+	}
 
     const size_t outer_polygon_size = *outer_polygon_it;
     const IfcVector3& master_normal = normals[std::distance(begin, outer_polygon_it)];

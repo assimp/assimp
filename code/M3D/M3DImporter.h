@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 
-#include "m3d.h"
 #include <assimp/BaseImporter.h>
 #include <assimp/material.h>
 #include <vector>
@@ -60,43 +59,41 @@ struct aiFace;
 
 namespace Assimp {
 
+class M3DWrapper;
+
 class M3DImporter : public BaseImporter {
 public:
-    /// \brief  Default constructor
-    M3DImporter();
-
-    /// \brief  Destructor
-    ~M3DImporter();
+	/// \brief  Default constructor
+	M3DImporter();
 
 public:
-    /// \brief  Returns whether the class can handle the format of the given file.
-    /// \remark See BaseImporter::CanRead() for details.
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
+	/// \brief  Returns whether the class can handle the format of the given file.
+	/// \remark See BaseImporter::CanRead() for details.
+	bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
 
 private:
-    aiScene* mScene; // the scene to import to
-    m3d_t *m3d; // model for the C library to convert from
+	aiScene *mScene = nullptr; // the scene to import to
 
-    //! \brief  Appends the supported extension.
-    const aiImporterDesc* GetInfo () const;
+	//! \brief  Appends the supported extension.
+	const aiImporterDesc *GetInfo() const;
 
-    //! \brief  File import implementation.
-    void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+	//! \brief  File import implementation.
+	void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
 
-    void importMaterials();
-    void importTextures();
-    void importMeshes();
-    void importBones(unsigned int parentid, aiNode *pParent);
-    void importAnimations();
+	void importMaterials(const M3DWrapper &m3d);
+	void importTextures(const M3DWrapper &m3d);
+	void importMeshes(const M3DWrapper &m3d);
+	void importBones(const M3DWrapper &m3d, unsigned int parentid, aiNode *pParent);
+	void importAnimations(const M3DWrapper &m3d);
 
-    // helper functions
-    aiColor4D mkColor(uint32_t c);
-    void convertPose(aiMatrix4x4 *m, unsigned int posid, unsigned int orientid);
-    aiNode *findNode(aiNode *pNode, aiString name);
-    void calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m);
-    void populateMesh(aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *verteces,
-        std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
-        std::vector<unsigned int> *vertexids);
+	// helper functions
+	aiColor4D mkColor(uint32_t c);
+	void convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned int posid, unsigned int orientid);
+	aiNode *findNode(aiNode *pNode, aiString name);
+	void calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m);
+	void populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *verteces,
+			std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
+			std::vector<unsigned int> *vertexids);
 };
 
 } // Namespace Assimp

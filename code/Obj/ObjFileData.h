@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -110,10 +110,7 @@ struct Object {
     std::vector<unsigned int> m_Meshes;
 
     //! \brief  Default constructor
-    Object() 
-    : m_strObjName("") {
-        // empty
-    }
+    Object() = default;
 
     //! \brief  Destructor
     ~Object() {
@@ -191,16 +188,12 @@ struct Material {
     ,   illumination_model (1)
     ,   ior     ( ai_real( 1.0 ) )
     ,   transparent( ai_real( 1.0), ai_real (1.0), ai_real(1.0)) {
-        // empty
-        for (size_t i = 0; i < TextureTypeCount; ++i) {
-            clamp[ i ] = false;
-        }
+
+	    std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }
 
     // Destructor
-    ~Material() {
-        // empty
-    }
+    ~Material() = default;
 };
 
 // ------------------------------------------------------------------------------------------------

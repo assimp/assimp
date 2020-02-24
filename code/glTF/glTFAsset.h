@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -191,6 +191,7 @@ namespace glTF
     //! Values for the BufferView::target field
     enum BufferViewTarget
     {
+        BufferViewTarget_NONE = 0,
         BufferViewTarget_ARRAY_BUFFER = 34962,
         BufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963
     };
@@ -362,8 +363,8 @@ namespace glTF
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         unsigned int count;          //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-        std::vector<float> max;      //!< Maximum value of each component in this attribute.
-        std::vector<float> min;      //!< Minimum value of each component in this attribute.
+        std::vector<double> max;     //!< Maximum value of each component in this attribute.
+        std::vector<double> min;     //!< Minimum value of each component in this attribute.
 
         unsigned int GetNumComponents();
         unsigned int GetBytesPerComponent();
@@ -749,7 +750,7 @@ namespace glTF
 		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
 		/// Get mesh data from JSON-object and place them to root asset.
 		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
-		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+		/// \param [out] pAsset_Root - reference to root asset where data will be stored.
 		void Read(Value& pJSON_Object, Asset& pAsset_Root);
 
 		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC

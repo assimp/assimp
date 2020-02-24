@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -78,7 +78,7 @@ public:
     /// @brief  The default constructor.
     ObjFileParser();
     /// @brief  Constructor with data array.
-    ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem* io, ProgressHandler* progress, const std::string &originalObjFileName);
+    ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem* io, ProgressHandler* progress, std::string originalObjFileName);
     /// @brief  Destructor
     ~ObjFileParser();
     /// @brief  If you want to load in-core data.

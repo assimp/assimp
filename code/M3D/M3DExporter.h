@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -48,8 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
 
-#include "m3d.h"
-
 #include <assimp/types.h>
 //#include <assimp/material.h>
 #include <assimp/StreamWriter.h> // StreamWriterLE
@@ -68,6 +66,8 @@ namespace Assimp
     class IOStream;
     class ExportProperties;
 
+    class M3DWrapper;
+
     // ---------------------------------------------------------------------
     /** Helper class to export a given scene to an M3D file. */
     // ---------------------------------------------------------------------
@@ -83,15 +83,9 @@ namespace Assimp
         const aiScene* mScene; // the scene to export
         const ExportProperties* mProperties; // currently unused
         std::shared_ptr<IOStream> outfile; // file to write to
-        m3d_t *m3d; // model for the C library to convert to
 
         // helper to do the recursive walking
-        void NodeWalk(const aiNode* pNode, aiMatrix4x4 m);
-        m3dv_t *AddVrtx(m3dv_t *vrtx, uint32_t *numvrtx, m3dv_t *v, uint32_t *idx);
-        m3dti_t *AddTmap(m3dti_t *tmap, uint32_t *numtmap, m3dti_t *ti, uint32_t *idx);
-        uint32_t mkColor(aiColor4D* c);
-        M3D_INDEX addMaterial(const aiMaterial *mat);
-        void addProp(m3dm_t *m, uint8_t type, uint32_t value);
+        void NodeWalk(const M3DWrapper &m3d, const aiNode* pNode, aiMatrix4x4 m);
     };
 }
 

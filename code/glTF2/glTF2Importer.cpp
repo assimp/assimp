@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/commonMetaData.h>
 
 #include <memory>
 #include <unordered_map>
@@ -138,45 +139,6 @@ static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
 	}
 }
 
-/*static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}
-
-
-static void CopyValue(const glTF2::vec4& v, aiColor4D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
-}*/
-
-/*static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}*/
-
-/*static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = 1.0;
-}
-
-static void CopyValue(const glTF2::vec3& v, aiVector3D& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2];
-}
-
-static void CopyValue(const glTF2::vec4& v, aiQuaternion& out)
-{
-    out.x = v[0]; out.y = v[1]; out.z = v[2]; out.w = v[3];
-}*/
-
-/*static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
-{
-    o.a1 = v[ 0]; o.b1 = v[ 1]; o.c1 = v[ 2]; o.d1 = v[ 3];
-    o.a2 = v[ 4]; o.b2 = v[ 5]; o.c2 = v[ 6]; o.d2 = v[ 7];
-    o.a3 = v[ 8]; o.b3 = v[ 9]; o.c3 = v[10]; o.d3 = v[11];
-    o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
-}*/
-
 inline void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMaterial *mat, const char *pKey, unsigned int type, unsigned int idx) {
 	aiColor4D col;
 	CopyValue(prop, col);
@@ -201,6 +163,7 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 		}
 
         mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
+        mat->AddProperty(&prop.texCoord, 1, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(texType, texSlot));
 
 		if (prop.textureTransformSupported) {
 			aiUVTransform transform;
@@ -216,8 +179,8 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
 			// coordinate of the actual meshes during import.
 			const ai_real rcos(cos(-transform.mRotation));
 			const ai_real rsin(sin(-transform.mRotation));
-			transform.mTranslation.x = (0.5 * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-			transform.mTranslation.y = ((0.5 * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
+			transform.mTranslation.x = (static_cast<ai_real>( 0.5 ) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
+			transform.mTranslation.y = ((static_cast<ai_real>( 0.5 ) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
 
 			mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
 		}
@@ -372,6 +335,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 	std::vector<aiMesh *> meshes;
 
 	unsigned int k = 0;
+    meshOffsets.clear();
 
 	for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
 		Mesh &mesh = r.meshes[m];
@@ -510,7 +474,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				}
 			}
 
-			aiFace *faces = 0;
+			aiFace *faces = nullptr;
 			size_t nFaces = 0;
 
 			if (prim.indices) {
@@ -672,7 +636,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				}
 			}
 
-			if (faces) {
+			if (nullptr != faces) {
 				aim->mFaces = faces;
 				aim->mNumFaces = static_cast<unsigned int>(nFaces);
 				ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
@@ -962,6 +926,11 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
 	if (node.camera) {
 		pScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
+		if (node.translation.isPresent) {
+			aiVector3D trans;
+			CopyValue(node.translation.value, trans);
+			pScene->mCameras[node.camera.GetIndex()]->mPosition = trans;
+		}
 	}
 
 	if (node.light) {
@@ -979,7 +948,9 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 }
 
 void glTF2Importer::ImportNodes(glTF2::Asset &r) {
-	if (!r.scene) return;
+	if (!r.scene) {
+        return;
+    }
 
 	std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
@@ -1283,6 +1254,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 		size_t length = img.GetDataLength();
 		void *data = img.StealData();
 
+		tex->mFilename = img.name;
 		tex->mWidth = static_cast<unsigned int>(length);
 		tex->mHeight = 0;
 		tex->pcData = reinterpret_cast<aiTexel *>(data);
@@ -1290,7 +1262,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 		if (!img.mimeType.empty()) {
 			const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
 			if (ext) {
-				if (strcmp(ext, "jpeg") == 0) ext = "jpg";
+				if (strcmp(ext, "jpeg") == 0) {
+                    ext = "jpg";
+                }
 
 				size_t len = strlen(ext);
 				if (len <= 3) {
@@ -1299,6 +1273,25 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 			}
 		}
 	}
+}
+
+void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
+    ai_assert(mScene->mMetaData == nullptr);
+    const bool hasVersion = !a.asset.version.empty();
+    const bool hasGenerator = !a.asset.generator.empty();
+    const bool hasCopyright = !a.asset.copyright.empty();
+    if (hasVersion || hasGenerator || hasCopyright) {
+        mScene->mMetaData = new aiMetadata;
+        if (hasVersion) {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
+        }
+        if (hasGenerator) {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(a.asset.generator));
+        }
+        if (hasCopyright) {
+            mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
+        }
+    }
 }
 
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
@@ -1327,6 +1320,8 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 	ImportNodes(asset);
 
 	ImportAnimations(asset);
+
+    ImportCommonMetadata(asset);
 
 	if (pScene->mNumMeshes == 0) {
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

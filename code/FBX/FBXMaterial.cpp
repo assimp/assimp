@@ -371,8 +371,10 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
         fileName(copyFrom.fileName),
         props(copyFrom.props),
         contentLength(copyFrom.contentLength),
-        Object(copyFrom) {
-            content = (uint8_t *)malloc(copyFrom.contentLength);
+        content((uint8_t *)malloc(copyFrom.contentLength)),
+        Object(copyFrom)
+        {
+         
         }
 
         template<bool B>

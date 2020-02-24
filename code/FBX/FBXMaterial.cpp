@@ -365,7 +365,13 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
             props = GetPropertyTable(doc, "Video.FbxVideo", element, sc);
 }
 
-        Video::Video(const Video &copyFrom) : type(copyFrom.type), relativeFileName(copyFrom.relativeFileName), fileName(copyFrom.fileName), props(copyFrom.Props), contentLength(copyFrom.ContentLength), Object(copyFrom) {
+        Video::Video(const Video &copyFrom) :
+        type(copyFrom.type),
+        relativeFileName(copyFrom.relativeFileName),
+        fileName(copyFrom.fileName),
+        props(copyFrom.props),
+        contentLength(copyFrom.contentLength),
+        Object(copyFrom) {
             content = (uint8_t *)malloc(copyFrom.contentLength);
         }
 

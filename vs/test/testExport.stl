@@ -1,0 +1,33 @@
+ solid Assimp_Pointcloud
+ facet normal 0 0 0
+  vertex 0 0 0
+  vertex 0 0 0
+  vertex 0 0 0
+  vertex 1 1 1
+  vertex 1 1 1
+  vertex 1 1 1
+  vertex 2 2 2
+  vertex 2 2 2
+  vertex 2 2 2
+  vertex 3 3 3
+  vertex 3 3 3
+  vertex 3 3 3
+  vertex 4 4 4
+  vertex 4 4 4
+  vertex 4 4 4
+  vertex 5 5 5
+  vertex 5 5 5
+  vertex 5 5 5
+  vertex 6 6 6
+  vertex 6 6 6
+  vertex 6 6 6
+  vertex 7 7 7
+  vertex 7 7 7
+  vertex 7 7 7
+  vertex 8 8 8
+  vertex 8 8 8
+  vertex 8 8 8
+  vertex 9 9 9
+  vertex 9 9 9
+  vertex 9 9 9
+endsolid Assimp_Pointcloud

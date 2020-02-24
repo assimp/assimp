@@ -26,9 +26,9 @@ extern "C" {
 // 64-bit Windows is the only mainstream platform
 // where sizeof(long) != sizeof(void*)
 #ifdef _WIN64
-typedef long long ssize_t; /* byte count or error */
+typedef long long zip_ssize_t; /* byte count or error */
 #else
-typedef long ssize_t; /* byte count or error */
+typedef long zip_ssize_t; /* byte count or error */
 #endif
 
 #define _SSIZE_T_DEFINED
@@ -214,7 +214,7 @@ extern int zip_entry_fwrite(struct zip_t *zip, const char *filename);
  * @return the return code - the number of bytes actually read on success.
  *         Otherwise a -1 on error.
  */
-extern ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize);
+extern zip_ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize);
 
 /**
  * Extracts the current zip entry into a memory buffer using no memory
@@ -232,7 +232,7 @@ extern ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize);
  * @return the return code - the number of bytes actually read on success.
  *         Otherwise a -1 on error (e.g. bufsize is not large enough).
  */
-extern ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf,
+extern zip_ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf,
                                      size_t bufsize);
 
 /**

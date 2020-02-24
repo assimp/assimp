@@ -630,7 +630,7 @@ int zip_entry_fwrite(struct zip_t *zip, const char *filename) {
   return status;
 }
 
-ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize) {
+zip_ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize) {
   mz_zip_archive *pzip = NULL;
   mz_uint idx;
   size_t size = 0;
@@ -659,7 +659,7 @@ ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize) {
   return size;
 }
 
-ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf, size_t bufsize) {
+zip_ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf, size_t bufsize) {
   mz_zip_archive *pzip = NULL;
 
   if (!zip) {
@@ -678,7 +678,7 @@ ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf, size_t bufsize) {
     return -1;
   }
 
-  return (ssize_t)zip->entry.uncomp_size;
+  return (zip_ssize_t)zip->entry.uncomp_size;
 }
 
 int zip_entry_fread(struct zip_t *zip, const char *filename) {

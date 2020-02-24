@@ -60,8 +60,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "SMDLoader.h"
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 #define strtok_s strtok_r
+#else
+char *strtok_s (
+        char *str,
+        const char *delim,
+        char **nextp) {
+    char *ret;
+
+    if (str == NULL) {
+        str = *nextp;
+    }
+
+    str += strspn(str, delim);
+
+    if (*str == '\0') {
+        return NULL;
+    }
+
+    ret = str;
+
+    str += strcspn(str, delim);
+
+    if (*str) {
+        *str++ = '\0';
+    }
+
+    *nextp = str;
+
+    return ret;
+}
 #endif
 
 using namespace Assimp;

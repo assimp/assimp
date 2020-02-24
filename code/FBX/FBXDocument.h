@@ -595,15 +595,7 @@ class Video : public Object {
 public:
     Video(uint64_t id, const Element &element, const Document &doc, const std::string &name);
 
-    Video(const Video &copyFrom): Object(copyFrom) {
-        type = copyFrom.type;
-        relativeFileName = copyFrom.relativeFileName;
-        fileName = copyFrom.fileName;
-        props = copyFrom.props;
-        contentLength = copyFrom.contentLength;
-        content = (uint8_t *)malloc(copyFrom.contentLength);
-        memcpy(content, copyFrom.content, contentLength);
-    }
+    Video(const Video &copyFrom);
 
     virtual ~Video();
 

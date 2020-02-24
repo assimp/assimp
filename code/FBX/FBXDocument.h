@@ -601,7 +601,8 @@ public:
         fileName = copyFrom.fileName;
         props = copyFrom.props;
         contentLength = copyFrom.contentLength;
-        content = copyFrom.content;
+        content = (uint8_t *)malloc(copyFrom.contentLength);
+        memcpy(content, copyFrom.content, contentLength);
     }
 
     virtual ~Video();

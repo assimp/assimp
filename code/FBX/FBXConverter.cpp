@@ -2068,39 +2068,35 @@ namespace Assimp {
             TrySetTextureProperties(out_mat, textures, "ShininessExponent", aiTextureType_SHININESS, mesh);
 			TrySetTextureProperties( out_mat, textures, "TransparencyFactor", aiTextureType_OPACITY, mesh );
 			TrySetTextureProperties( out_mat, textures, "EmissiveFactor", aiTextureType_EMISSIVE, mesh );
-            			
-			//rickomax: the values bellow are wrong interpretations I've added to these properties.
-			//the right way to get PBR data from properties is reading the raw properties values and interpreting accordingly
-			//commenting out, so we can remove it definetly on a next update
 			
 			//Maya counterparts
-            //TrySetTextureProperties(out_mat, textures, "Maya|DiffuseTexture", aiTextureType_DIFFUSE, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|NormalTexture", aiTextureType_NORMALS, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|SpecularTexture", aiTextureType_SPECULAR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|FalloffTexture", aiTextureType_OPACITY, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|DiffuseTexture", aiTextureType_DIFFUSE, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|NormalTexture", aiTextureType_NORMALS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|SpecularTexture", aiTextureType_SPECULAR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|FalloffTexture", aiTextureType_OPACITY, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
             
             // Maya PBR
-            //TrySetTextureProperties(out_mat, textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
             
             // Maya stingray
-            //TrySetTextureProperties(out_mat, textures, "Maya|TEX_color_map|file", aiTextureType_BASE_COLOR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|TEX_normal_map|file", aiTextureType_NORMAL_CAMERA, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-            //TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_color_map|file", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_normal_map|file", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);
 
             // 3DSMax PBR
-            //TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|base_color_map", aiTextureType_BASE_COLOR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|bump_map", aiTextureType_NORMAL_CAMERA, mesh);
-            //TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|emission_map", aiTextureType_EMISSION_COLOR, mesh);
-            //TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|metalness_map", aiTextureType_METALNESS, mesh);
-            //TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|base_color_map", aiTextureType_BASE_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|bump_map", aiTextureType_NORMAL_CAMERA, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|emission_map", aiTextureType_EMISSION_COLOR, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|metalness_map", aiTextureType_METALNESS, mesh);
+            TrySetTextureProperties(out_mat, textures, "3dsMax|Parameters|roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
         }
 
         void FBXConverter::SetTextureProperties(aiMaterial* out_mat, const LayeredTextureMap& layeredTextures, const MeshGeometry* const mesh)
@@ -2202,7 +2198,7 @@ namespace Assimp {
             // and also try to get SHININESS_STRENGTH
             const float SpecularFactor = PropertyGet<float>(props, "SpecularFactor", ok, true);
             if (ok) {
-				out_mat->AddProperty(&SpecularFactor, 1, AI_MATKEY_SHININESS_STRENGTH);
+                out_mat->AddProperty(&SpecularFactor, 1, AI_MATKEY_SHININESS);
             }
 
             // rickomax- shinniness exponent is not specular factor, commenting!
@@ -2212,23 +2208,26 @@ namespace Assimp {
 			//	out_mat->AddProperty(&ShininessExponent, 1, AI_MATKEY_SHININESS_STRENGTH);
             //}
 
-			//rickomax- as per various tests I've made in FBX files, we aren't evaluating these properties correctly
-			// and neither they seems to be default FBX properties, so I'll comment as this is breaking compatibility with some models
-            
+
             // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:
-            //const aiColor3D& Transparent = GetColorPropertyFactored(props, "TransparentColor", "TransparencyFactor", ok);
+            const aiColor3D& Transparent = GetColorPropertyFactored(props, "TransparentColor", "TransparencyFactor", ok);
+
             //float CalculatedOpacity = 1.0f;
-            //if (ok) {
-            //    out_mat->AddProperty(&Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
-            //    // as calculated by FBX SDK 2017:
-            //    CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
-            //}
+            if (ok) {
+                out_mat->AddProperty(&Transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
+
+                // rickomax- as per various tests I've made in FBX files, I've discovered we cannot apply the transparent color as a opacity factor
+                // transparent color may refer to the masked transparent color and has nothing to do with opacity value itself
+
+                // as calculated by FBX SDK 2017:
+                //CalculatedOpacity = 1.0f - ((Transparent.r + Transparent.g + Transparent.b) / 3.0f);
+            }
 
             // try to get the transparency factor
-            //const float TransparencyFactor = PropertyGet<float>(props, "TransparencyFactor", ok);
-            //if (ok) {
-            //    out_mat->AddProperty(&TransparencyFactor, 1, AI_MATKEY_TRANSPARENCYFACTOR);
-            //}
+            const float TransparencyFactor = PropertyGet<float>(props, "TransparencyFactor", ok);
+            if (ok) {
+                out_mat->AddProperty(&TransparencyFactor, 1, AI_MATKEY_TRANSPARENCYFACTOR);
+            }
 
             // use of TransparencyFactor is inconsistent.
             // Maya always stores it as 1.0,
@@ -2244,7 +2243,7 @@ namespace Assimp {
             //
             // There's no consistent way to interpret this opacity value,
             // so it's up to clients to do the correct thing.
-			//rickomax- commented by the reason above
+			// rickomax- commented by the reason above
             //else if (CalculatedOpacity != 1.0) {
             //    out_mat->AddProperty(&CalculatedOpacity, 1, AI_MATKEY_OPACITY);
             //}

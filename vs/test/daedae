@@ -5,8 +5,8 @@
       <author>Assimp</author>
       <authoring_tool>Assimp Exporter</authoring_tool>
     </contributor>
-    <created>2020-02-24T13:47:38</created>
-    <modified>2020-02-24T13:47:38</modified>
+    <created>2020-02-24T15:07:24</created>
+    <modified>2020-02-24T15:07:24</modified>
     <unit name="meter" meter="1" />
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -19,7 +19,7 @@
               <color sid="diffuse">1   0   0   1</color>
             </diffuse>
             <transparency>
-              <float sid="transparency">0.36851099</float>
+              <float sid="transparency">0.84548479</float>
             </transparency>
           </phong>
         </technique>
@@ -59,7 +59,7 @@
   </library_controllers>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="Node_009757A8"  name="Node_009757A8" type="NODE">
+      <node id="Node_01616868"  name="Node_01616868" type="NODE">
         <matrix sid="matrix">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#meshId0">
           <bind_material>

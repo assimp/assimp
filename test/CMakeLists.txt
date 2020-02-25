@@ -201,13 +201,13 @@ SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 IF( WIN32 )
     SET( platform_libs )
-ELSE( WIN32 )
+ELSE()
     SET( platform_libs pthread )
-ENDIF( WIN32 )
+ENDIF()
 
 IF(MSVC)
 		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF(MSVC)
+ENDIF()
 
 target_link_libraries( unit assimp ${platform_libs} )
 

@@ -1087,10 +1087,10 @@ inline void Camera::Read(Value& obj, Asset& /*r*/)
         cameraProperties.perspective.znear       = MemberOrDefault(*it, "znear", 0.01f);
     }
     else {
-        cameraProperties.ortographic.xmag  = MemberOrDefault(obj, "xmag", 1.f);
-        cameraProperties.ortographic.ymag  = MemberOrDefault(obj, "ymag", 1.f);
-        cameraProperties.ortographic.zfar  = MemberOrDefault(obj, "zfar", 100.f);
-        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag  = MemberOrDefault(*it, "xmag", 1.f);
+        cameraProperties.ortographic.ymag  = MemberOrDefault(*it, "ymag", 1.f);
+        cameraProperties.ortographic.zfar  = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 

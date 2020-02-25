@@ -49,7 +49,7 @@ SET( HEADER_PATH ../include/assimp )
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
     message(WARNING "Requesting Android JNI I/O-System in non-Android toolchain. Resetting ASSIMP_ANDROID_JNIIOSYSTEM to OFF.")
     set(ASSIMP_ANDROID_JNIIOSYSTEM OFF)
-endif(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
+endif()
 
 SET( COMPILER_HEADERS
   ${HEADER_PATH}/Compiler/pushpack1.h
@@ -148,7 +148,7 @@ SET( Core_SRCS
 
 IF(MSVC)
   list(APPEND Core_SRCS "res/assimp.rc")
-ENDIF(MSVC)
+ENDIF()
 
 SET( Logging_SRCS
   ${HEADER_PATH}/DefaultLogger.hpp
@@ -222,7 +222,7 @@ IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
     C4D/C4DImporter.h
   )
   SOURCE_GROUP( C4D FILES ${C4D_SRCS})
-ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+ENDIF ()
 
 # if this variable is set to TRUE, the user can manually disable importers by setting
 # ASSIMP_BUILD_XXX_IMPORTER to FALSE for each importer
@@ -599,7 +599,7 @@ if (ASSIMP_BUILD_IFC_IMPORTER)
   elseif(CMAKE_COMPILER_IS_MINGW)
     set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
   endif()
-endif (ASSIMP_BUILD_IFC_IMPORTER)
+endif ()
 
 ADD_ASSIMP_IMPORTER( XGL
   XGL/XGLLoader.cpp
@@ -897,35 +897,35 @@ SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 IF(HUNTER_ENABLED)
   hunter_add_package(irrXML)
   find_package(irrXML CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   # irrXML already included in contrib directory by parent CMakeLists.txt.
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # utf8
 IF(HUNTER_ENABLED)
   hunter_add_package(utf8)
   find_package(utf8 CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   # utf8 is header-only, so Assimp doesn't need to do anything.
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # polyclipping
 IF(HUNTER_ENABLED)
   hunter_add_package(polyclipping)
   find_package(polyclipping CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   SET( Clipper_SRCS
     ../contrib/clipper/clipper.hpp
     ../contrib/clipper/clipper.cpp
   )
   SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # poly2tri
 IF(HUNTER_ENABLED)
   hunter_add_package(poly2tri)
   find_package(poly2tri CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   SET( Poly2Tri_SRCS
     ../contrib/poly2tri/poly2tri/common/shapes.cc
     ../contrib/poly2tri/poly2tri/common/shapes.h
@@ -940,13 +940,13 @@ ELSE(HUNTER_ENABLED)
     ../contrib/poly2tri/poly2tri/sweep/sweep_context.h
   )
   SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # minizip/unzip
 IF(HUNTER_ENABLED)
   hunter_add_package(minizip)
   find_package(minizip CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   SET( unzip_SRCS
     ../contrib/unzip/crypt.h
     ../contrib/unzip/ioapi.c
@@ -955,13 +955,13 @@ ELSE(HUNTER_ENABLED)
     ../contrib/unzip/unzip.h
   )
   SOURCE_GROUP(Contrib\\unzip FILES ${unzip_SRCS})
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # zip (https://github.com/kuba--/zip)
 IF(HUNTER_ENABLED)
   hunter_add_package(zip)
   find_package(zip CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   SET( ziplib_SRCS
     ../contrib/zip/src/miniz.h
     ../contrib/zip/src/zip.c
@@ -976,13 +976,13 @@ ELSE(HUNTER_ENABLED)
   endif()
 
   SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # openddlparser
 IF(HUNTER_ENABLED)
   hunter_add_package(openddlparser)
   find_package(openddlparser CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   SET ( openddl_parser_SRCS
     ../contrib/openddlparser/code/OpenDDLParser.cpp
     ../contrib/openddlparser/code/DDLNode.cpp
@@ -999,12 +999,12 @@ ELSE(HUNTER_ENABLED)
     ../contrib/openddlparser/include/openddlparser/Value.h
   )
   SOURCE_GROUP( Contrib\\openddl_parser FILES ${openddl_parser_SRCS})
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # Open3DGC
 IF(HUNTER_ENABLED)
   # Nothing to do, not available in Hunter yet.
-ELSE(HUNTER_ENABLED)
+ELSE()
   SET ( open3dgc_SRCS
     ../contrib/Open3DGC/o3dgcAdjacencyInfo.h
     ../contrib/Open3DGC/o3dgcArithmeticCodec.cpp
@@ -1037,7 +1037,7 @@ ELSE(HUNTER_ENABLED)
     ../contrib/Open3DGC/o3dgcVector.inl
   )
   SOURCE_GROUP( Contrib\\open3dgc FILES ${open3dgc_SRCS})
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
@@ -1056,34 +1056,34 @@ ENDIF ()
 IF(HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
-ELSE(HUNTER_ENABLED)
+ELSE()
   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
   INCLUDE_DIRECTORIES( "../contrib" )
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 # VC2010 fixes
 if(MSVC10)
   option( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )
   if( VC10_STDINT_FIX )
     ADD_DEFINITIONS( -D_STDINT )
-  endif( VC10_STDINT_FIX )
-endif(MSVC10)
+  endif()
+endif()
 
 ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
 
 if ( MSVC )
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-endif ( MSVC )
+endif ()
 
 IF(NOT HUNTER_ENABLED)
   if (UNZIP_FOUND)
     SET (unzip_compile_SRCS "")
-  else (UNZIP_FOUND)
+  else ()
     SET (unzip_compile_SRCS ${unzip_SRCS})
     INCLUDE_DIRECTORIES( "../contrib/unzip/" )
-  endif (UNZIP_FOUND)
-ENDIF(NOT HUNTER_ENABLED)
+  endif ()
+ENDIF()
 
 MESSAGE(STATUS "Enabled importer formats:${ASSIMP_IMPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
@@ -1129,12 +1129,12 @@ IF(NOT HUNTER_ENABLED)
       ${IRRXML_INCLUDE_DIR}
       ../contrib/openddlparser/include
   )
-ENDIF(NOT HUNTER_ENABLED)
+ENDIF()
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   SET( assimp_src ${assimp_src} ${C4D_SRCS})
   INCLUDE_DIRECTORIES(${C4D_INCLUDES})
-ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+ENDIF ()
 
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
@@ -1158,21 +1158,21 @@ IF(HUNTER_ENABLED)
       utf8::utf8
       zip::zip
   )
-ELSE(HUNTER_ENABLED)
+ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)
   set(ASSIMP_ANDROID_JNIIOSYSTEM_PATH port/AndroidJNI)
   add_subdirectory(../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/ ../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/)
   target_link_libraries(assimp android_jniiosystem)
-endif(ASSIMP_ANDROID_JNIIOSYSTEM)
+endif()
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   TARGET_LINK_LIBRARIES(assimp optimized ${C4D_RELEASE_LIBRARIES})
   TARGET_LINK_LIBRARIES(assimp debug ${C4D_DEBUG_LIBRARIES})
   TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
-ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+ENDIF ()
 
 if( MSVC )
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
@@ -1233,8 +1233,8 @@ if (APPLE)
          "../${HEADER_PATH}/Compiler"
          assimp.framework/Headers/Compiler
       COMMENT "Copying public ./Compiler/ header files to framework bundle's Headers/Compiler/")
-  ENDIF(BUILD_FRAMEWORK)
-ENDIF(APPLE)
+  ENDIF()
+ENDIF()
 
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
@@ -1242,15 +1242,15 @@ IF(NOT HUNTER_ENABLED)
   if (UNZIP_FOUND)
     INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
     TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
-  else (UNZIP_FOUND)
+  else ()
     INCLUDE_DIRECTORIES("../")
-  endif (UNZIP_FOUND)
-ENDIF(NOT HUNTER_ENABLED)
+  endif ()
+ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
-ENDIF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
+ENDIF ()
 
 IF(HUNTER_ENABLED)
   INSTALL( TARGETS assimp
@@ -1261,14 +1261,14 @@ IF(HUNTER_ENABLED)
     FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     COMPONENT ${LIBASSIMP_COMPONENT}
     INCLUDES DESTINATION "include")
-ELSE(HUNTER_ENABLED)
+ELSE()
 INSTALL( TARGETS assimp
     LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
     FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     COMPONENT ${LIBASSIMP_COMPONENT})
-ENDIF(HUNTER_ENABLED)
+ENDIF()
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
 
@@ -1276,7 +1276,7 @@ if (ASSIMP_ANDROID_JNIIOSYSTEM)
   INSTALL(FILES ${HEADER_PATH}/${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
     DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
     COMPONENT assimp-dev)
-ENDIF(ASSIMP_ANDROID_JNIIOSYSTEM)
+ENDIF()
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
   # When only the static library is built, these properties must

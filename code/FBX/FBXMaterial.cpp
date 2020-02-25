@@ -336,6 +336,9 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
                         else {
                             DOMWarning("invalid base64 video content", &element);
                         }
+                        if (decoded) {
+                            delete[] decoded;
+                        }
                     }
                     else if (size < 5) {
                         DOMWarning("binary data array is too short, need five (5) bytes for type signature and element count", &element);

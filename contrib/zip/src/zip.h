@@ -10,39 +10,39 @@
 
 #pragma once
 #ifndef ZIP_H
-#define ZIP_H
+#    define ZIP_H
 
-#include <string.h>
-#include <sys/types.h>
+#    include <string.h>
+#    include <sys/types.h>
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 extern "C" {
-#endif
+#    endif
 
-#if !defined(_SSIZE_T_DEFINED) && !defined(_SSIZE_T_DEFINED_) &&               \
-    !defined(__DEFINED_ssize_t) && !defined(__ssize_t_defined) &&              \
-    !defined(_SSIZE_T) && !defined(_SSIZE_T_)
+#    if !defined(_SSIZE_T_DEFINED) && !defined(_SSIZE_T_DEFINED_) &&      \
+            !defined(__DEFINED_ssize_t) && !defined(__ssize_t_defined) && \
+            !defined(_SSIZE_T) && !defined(_SSIZE_T_)
 
 // 64-bit Windows is the only mainstream platform
 // where sizeof(long) != sizeof(void*)
-#ifdef _WIN64
-typedef long long zip_ssize_t; /* byte count or error */
-#else
-typedef long zip_ssize_t; /* byte count or error */
-#endif
+#        ifdef _WIN64
+typedef long long ssize_t; /* byte count or error */
+#        else
+typedef long ssize_t; /* byte count or error */
+#        endif
 
-#define _SSIZE_T_DEFINED
-#define _SSIZE_T_DEFINED_
-#define __DEFINED_ssize_t
-#define __ssize_t_defined
-#define _SSIZE_T
-#define _SSIZE_T_
+#        define _SSIZE_T_DEFINED
+#        define _SSIZE_T_DEFINED_
+#        define __DEFINED_ssize_t
+#        define __ssize_t_defined
+#        define _SSIZE_T
+#        define _SSIZE_T_
 
-#endif
+#    endif
 
-#ifndef MAX_PATH
-#define MAX_PATH 32767 /* # chars in a path name including NULL */
-#endif
+#    ifndef MAX_PATH
+#        define MAX_PATH 32767 /* # chars in a path name including NULL */
+#    endif
 
 /**
  * @mainpage
@@ -59,7 +59,7 @@ typedef long zip_ssize_t; /* byte count or error */
  * Default zip compression level.
  */
 
-#define ZIP_DEFAULT_COMPRESSION_LEVEL 6
+#    define ZIP_DEFAULT_COMPRESSION_LEVEL 6
 
 /**
  * @struct zip_t
@@ -214,7 +214,7 @@ extern int zip_entry_fwrite(struct zip_t *zip, const char *filename);
  * @return the return code - the number of bytes actually read on success.
  *         Otherwise a -1 on error.
  */
-extern zip_ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize);
+extern ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize);
 
 /**
  * Extracts the current zip entry into a memory buffer using no memory
@@ -232,8 +232,8 @@ extern zip_ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize
  * @return the return code - the number of bytes actually read on success.
  *         Otherwise a -1 on error (e.g. bufsize is not large enough).
  */
-extern zip_ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf,
-                                     size_t bufsize);
+extern ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf,
+        size_t bufsize);
 
 /**
  * Extracts the current zip entry into output file.
@@ -257,9 +257,9 @@ extern int zip_entry_fread(struct zip_t *zip, const char *filename);
  */
 extern int
 zip_entry_extract(struct zip_t *zip,
-                  size_t (*on_extract)(void *arg, unsigned long long offset,
-                                       const void *data, size_t size),
-                  void *arg);
+        size_t (*on_extract)(void *arg, unsigned long long offset,
+                const void *data, size_t size),
+        void *arg);
 
 /**
  * Returns the number of all entries (files and directories) in the zip archive.
@@ -299,13 +299,13 @@ extern int zip_create(const char *zipname, const char *filenames[], size_t len);
  * @return the return code - 0 on success, negative number (< 0) on error.
  */
 extern int zip_extract(const char *zipname, const char *dir,
-                       int (*on_extract_entry)(const char *filename, void *arg),
-                       void *arg);
+        int (*on_extract_entry)(const char *filename, void *arg),
+        void *arg);
 
 /** @} */
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 }
-#endif
+#    endif
 
 #endif

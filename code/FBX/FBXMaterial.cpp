@@ -443,7 +443,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
         Video::~Video()
         {
             if (content) {
-                delete[] content;
+                delete content;
             }
         }
 

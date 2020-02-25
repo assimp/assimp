@@ -357,7 +357,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
                 }
                 contentLength = composedData.size();
                 if (contentLength > 0) {
-                    content = (uint8_t*)malloc(contentLength);
+                    content = new uint8_t[contentLength];
                     std::copy(composedData.begin(), composedData.end(), content);
                 }
             }
@@ -371,10 +371,9 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
         relativeFileName(copyFrom.relativeFileName),
         fileName(copyFrom.fileName),
         props(copyFrom.props),
-        contentLength(copyFrom.contentLength),
-        content((uint8_t *)malloc(copyFrom.contentLength))
+        contentLength(copyFrom.contentLength)
         {
-         
+            content = new uint8_t[copyFrom.contentLength];
         }
 
         template<bool B>
@@ -443,7 +442,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
         Video::~Video()
         {
             if (content) {
-                delete content;
+                delete[] content;
             }
         }
 

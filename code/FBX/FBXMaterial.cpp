@@ -357,7 +357,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
                 }
                 contentLength = composedData.size();
                 if (contentLength > 0) {
-                    content = new uint8_t[contentLength];
+                    content = (uint8_t*)malloc(contentLength);
                     std::copy(composedData.begin(), composedData.end(), content);
                 }
             }

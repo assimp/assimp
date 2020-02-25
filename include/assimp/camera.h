@@ -180,7 +180,7 @@ struct aiCamera
      *  and mHorizontalFOV should be set to 0.
      *  The default value is 0 (not orthographic).
      */
-	float mOrthographicWidth;
+    float mOrthographicWidth;
 #ifdef __cplusplus
 
     aiCamera() AI_NO_EXCEPT
@@ -190,7 +190,7 @@ struct aiCamera
         , mClipPlaneNear     (0.1f)
         , mClipPlaneFar      (1000.f)
         , mAspect            (0.f)
-	    , mOrthographicWidth (0.f)
+        , mOrthographicWidth (0.f)
     {}
 
     /** @brief Get a *right-handed* camera matrix from me

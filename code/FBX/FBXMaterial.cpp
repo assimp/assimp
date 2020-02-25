@@ -366,13 +366,13 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
 }
 
         Video::Video(const Video &copyFrom) :
+        Object(copyFrom),
         type(copyFrom.type),
         relativeFileName(copyFrom.relativeFileName),
         fileName(copyFrom.fileName),
         props(copyFrom.props),
         contentLength(copyFrom.contentLength),
-        content((uint8_t *)malloc(copyFrom.contentLength)),
-        Object(copyFrom)
+        content((uint8_t *)malloc(copyFrom.contentLength))
         {
          
         }

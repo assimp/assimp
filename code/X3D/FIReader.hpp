@@ -49,19 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
-//#include <wchar.h>
 #include <string>
 #include <memory>
 #include <cerrno>
 #include <cwchar>
 #include <vector>
-//#include <stdio.h>
-//#include <cstdint>
-#ifdef ASSIMP_USE_HUNTER
-#  include <irrXML/irrXML.h>
-#else
-#  include <assimp/XmlParser.h>
-#endif
+
+#include <assimp/XmlParser.h>
 
 namespace Assimp {
 
@@ -165,9 +159,10 @@ struct FIVocabulary {
 
 class IOStream;
 
-class FIReader: public irr::io::IIrrXMLReader<char, irr::io::IXMLBase> {
+class FIReader {
 public:
 	virtual ~FIReader();
+
     virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const = 0;
 
     virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char *name) const = 0;

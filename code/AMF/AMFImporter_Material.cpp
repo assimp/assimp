@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
 
 #include "AMFImporter.hpp"
-#include "AMFImporter_Macro.hpp"
+//#include "AMFImporter_Macro.hpp"
 
 namespace Assimp
 {
@@ -68,46 +68,41 @@ namespace Assimp
 //   Multi elements - No.
 //   Red, Greed, Blue and Alpha (transparency) component of a color in sRGB space, values ranging from 0 to 1. The
 //   values can be specified as constants, or as a formula depending on the coordinates.
-void AMFImporter::ParseNode_Color() {
-    std::string profile;
-    CAMFImporter_NodeElement* ne;
-
-	// Read attributes for node <color>.
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("profile", profile, mXmlParser->getAttributeValue);
-	MACRO_ATTRREAD_LOOPEND;
-
+void AMFImporter::ParseNode_Color(XmlNode &node) {
+    std::string profile = node.attribute("profile").as_string();
+    
 	// create new color object.
-	ne = new CAMFImporter_NodeElement_Color(mNodeElement_Cur);
-
-	CAMFImporter_NodeElement_Color& als = *((CAMFImporter_NodeElement_Color*)ne);// alias for convenience
+	AMFNodeElementBase *ne = new AMFColor(mNodeElement_Cur);
+	AMFColor& als = *((AMFColor*)ne);// alias for convenience
 
 	als.Profile = profile;
-	// Check for child nodes
-	if(!mXmlParser->isEmptyElement())
-	{
+	if (!node.empty()) {
 		bool read_flag[4] = { false, false, false, false };
-
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("color");
-			MACRO_NODECHECK_READCOMP_F("r", read_flag[0], als.Color.r);
-			MACRO_NODECHECK_READCOMP_F("g", read_flag[1], als.Color.g);
-			MACRO_NODECHECK_READCOMP_F("b", read_flag[2], als.Color.b);
-			MACRO_NODECHECK_READCOMP_F("a", read_flag[3], als.Color.a);
-		MACRO_NODECHECK_LOOPEND("color");
-		ParseHelper_Node_Exit();
+		for (pugi::xml_node &child : node.children()) {
+			if (child.name() == "r") {
+				read_flag[0] = true;
+				als.Color.r = atof(child.value());
+			} else if (child.name() == "g") {
+				read_flag[1] = true;
+				als.Color.g = atof(child.value());
+			} else if (child.name() == "b") {
+				read_flag[2] = true;
+				als.Color.b = atof(child.value());
+			} else if (child.name() == "g") {
+			    read_flag[3] = true;
+		    	als.Color.a = atof(child.value());
+		    }
+        }
 		// check that all components was defined
-        if (!(read_flag[0] && read_flag[1] && read_flag[2])) {
-            throw DeadlyImportError("Not all color components are defined.");
-        }
+		if (!(read_flag[0] && read_flag[1] && read_flag[2])) {
+			throw DeadlyImportError("Not all color components are defined.");
+		}
 
-        // check if <a> is absent. Then manually add "a == 1".
-        if (!read_flag[3]) {
-            als.Color.a = 1;
-        }
-	}
-	else
-	{
+		// check if <a> is absent. Then manually add "a == 1".
+		if (!read_flag[3]) {
+			als.Color.a = 1;
+		}
+	} else {
 		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
 	}
 
@@ -122,45 +117,24 @@ void AMFImporter::ParseNode_Color() {
 // An available material.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Material() {
-    std::string id;
-    CAMFImporter_NodeElement* ne;
-
-	// Read attributes for node <color>.
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("id", id, mXmlParser->getAttributeValue);
-	MACRO_ATTRREAD_LOOPEND;
-
-	// create new object.
-	ne = new CAMFImporter_NodeElement_Material(mNodeElement_Cur);
-
-    // and assign read data
-	((CAMFImporter_NodeElement_Material*)ne)->ID = id;
+void AMFImporter::ParseNode_Material(XmlNode &node) {
+    // create new object and assign read data
+	std::string id = node.attribute("id").as_string();
+	AMFNodeElementBase *ne = new AMFMaterial(mNodeElement_Cur);
+	((AMFMaterial*)ne)->ID = id;
 
     // Check for child nodes
-	if(!mXmlParser->isEmptyElement())
-	{
+	if (!node.empty()) {
 		bool col_read = false;
-
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("material");
-			if(XML_CheckNode_NameEqual("color"))
-			{
-				// Check if data already defined.
-				if(col_read) Throw_MoreThanOnceDefined("color", "Only one color can be defined for <material>.");
-				// read data and set flag about it
-				ParseNode_Color();
+        for (pugi::xml_node &child : node.children()) {
+			if (child.name() == "color") {
 				col_read = true;
-
-				continue;
+				ParseNode_Color(child);
+			} else if (child.name() == "metadata") {
+				ParseNode_Metadata(child);
 			}
-
-			if(XML_CheckNode_NameEqual("metadata")) { ParseNode_Metadata(); continue; }
-		MACRO_NODECHECK_LOOPEND("material");
-		ParseHelper_Node_Exit();
-	}
-	else
-	{
+		}
+	} else {
 		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
 	}
 
@@ -192,30 +166,35 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 	bool tiled = node.attribute("tiled").as_bool();
 
 	// create new texture object.
-    CAMFImporter_NodeElement *ne = new CAMFImporter_NodeElement_Texture(mNodeElement_Cur);
+    AMFNodeElementBase *ne = new AMFTexture(mNodeElement_Cur);
 
-	CAMFImporter_NodeElement_Texture& als = *((CAMFImporter_NodeElement_Texture*)ne);// alias for convenience
+	AMFTexture& als = *((AMFTexture*)ne);// alias for convenience
 
-	// Check for child nodes
-    if (!mXmlParser->isEmptyElement()) {
-        XML_ReadNode_GetVal_AsString(enc64_data);
+    if (node.empty()) {
+		return;
     }
+
+    std::string enc64_data = node.value();
+	// Check for child nodes
+    //if (!mXmlParser->isEmptyElement()) {
+    //    XML_ReadNode_GetVal_AsString(enc64_data);
+    //}
 
 	// check that all components was defined
     if (id.empty()) {
-        throw DeadlyImportError("ID for texture must be defined.");
+		throw DeadlyImportError("ID for texture must be defined.");
     }
     if (width < 1) {
-        Throw_IncorrectAttrValue("width");
+		throw DeadlyImportError("INvalid width for texture.");
     }
     if (height < 1) {
-        Throw_IncorrectAttrValue("height");
-    }
+		throw DeadlyImportError("Invalid height for texture.");
+	}
     if (depth < 1) {
-        Throw_IncorrectAttrValue("depth");
+		throw DeadlyImportError("Invalid depth for texture.");
     }
     if (type != "grayscale") {
-        Throw_IncorrectAttrValue("type");
+		throw DeadlyImportError("Invalid type for texture.");
     }
     if (enc64_data.empty()) {
         throw DeadlyImportError("Texture data not defined.");
@@ -251,57 +230,80 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 //   <utex1>, <utex2>, <utex3>, <vtex1>, <vtex2>, <vtex3>. Old name: <u1>, <u2>, <u3>, <v1>, <v2>, <v3>.
 //   Multi elements - No.
 //   Texture coordinates for every vertex of triangle.
-void AMFImporter::ParseNode_TexMap(const bool pUseOldName) {
-    std::string rtexid, gtexid, btexid, atexid;
-
+void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 	// Read attributes for node <color>.
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("rtexid", rtexid, mXmlParser->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("gtexid", gtexid, mXmlParser->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("btexid", btexid, mXmlParser->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("atexid", atexid, mXmlParser->getAttributeValue);
-	MACRO_ATTRREAD_LOOPEND;
+	std::string rtexid = node.attribute("rtexid").as_string();
+	std::string gtexid = node.attribute("gtexid").as_string();
+	std::string btexid = node.attribute("btexid").as_string();
+	std::string atexid = node.attribute("atexid").as_string();
 
-	// create new texture coordinates object.
-    CAMFImporter_NodeElement *ne = new CAMFImporter_NodeElement_TexMap(mNodeElement_Cur);
 
-	CAMFImporter_NodeElement_TexMap& als = *((CAMFImporter_NodeElement_TexMap*)ne);// alias for convenience
+	// create new texture coordinates object, alias for convenience
+    AMFNodeElementBase *ne = new AMFTexMap(mNodeElement_Cur);
+	AMFTexMap& als = *((AMFTexMap*)ne);// 
 	// check data
-	if(rtexid.empty() && gtexid.empty() && btexid.empty()) throw DeadlyImportError("ParseNode_TexMap. At least one texture ID must be defined.");
+	if (rtexid.empty() && gtexid.empty() && btexid.empty()) {
+		throw DeadlyImportError("ParseNode_TexMap. At least one texture ID must be defined.");
+	}
+
 	// Check for children nodes
-	XML_CheckNode_MustHaveChildren();
+	//XML_CheckNode_MustHaveChildren();
+	if (node.children().begin() == node.children().end()) {
+		throw DeadlyImportError("Invalid children definition.");
+	}
 	// read children nodes
 	bool read_flag[6] = { false, false, false, false, false, false };
 
-	ParseHelper_Node_Enter(ne);
-	if(!pUseOldName)
-	{
-		MACRO_NODECHECK_LOOPBEGIN("texmap");
-			MACRO_NODECHECK_READCOMP_F("utex1", read_flag[0], als.TextureCoordinate[0].x);
-			MACRO_NODECHECK_READCOMP_F("utex2", read_flag[1], als.TextureCoordinate[1].x);
-			MACRO_NODECHECK_READCOMP_F("utex3", read_flag[2], als.TextureCoordinate[2].x);
-			MACRO_NODECHECK_READCOMP_F("vtex1", read_flag[3], als.TextureCoordinate[0].y);
-			MACRO_NODECHECK_READCOMP_F("vtex2", read_flag[4], als.TextureCoordinate[1].y);
-			MACRO_NODECHECK_READCOMP_F("vtex3", read_flag[5], als.TextureCoordinate[2].y);
-		MACRO_NODECHECK_LOOPEND("texmap");
+	if (!pUseOldName) {
+		for (pugi::xml_attribute &attr : node.attributes()) {
+			if (attr.name() == "utex1") {
+				read_flag[0] = true;
+				als.TextureCoordinate[0].x = attr.as_float();
+			} else if (attr.name() == "utex2") {
+				read_flag[1] = true;
+				als.TextureCoordinate[1].x = attr.as_float();
+			} else if (attr.name() == "utex3") {
+				read_flag[2] = true;
+				als.TextureCoordinate[2].x = attr.as_float();
+			} else if (attr.name() == "vtex1") {
+				read_flag[3] = true;
+				als.TextureCoordinate[0].y = attr.as_float();
+			} else if (attr.name() == "vtex2") {
+				read_flag[4] = true;
+				als.TextureCoordinate[1].y = attr.as_float();
+			} else if (attr.name() == "vtex3") {
+				read_flag[5] = true;
+				als.TextureCoordinate[0].y = attr.as_float();
+			}
+		}
+	} else {
+		for (pugi::xml_attribute &attr : node.attributes()) {
+			if (attr.name() == "u") {
+				read_flag[0] = true;
+				als.TextureCoordinate[0].x = attr.as_float();
+			} else if (attr.name() == "u2") {
+				read_flag[1] = true;
+				als.TextureCoordinate[1].x = attr.as_float();
+			} else if (attr.name() == "u3") {
+				read_flag[2] = true;
+				als.TextureCoordinate[2].x = attr.as_float();
+			} else if (attr.name() == "v1") {
+				read_flag[3] = true;
+				als.TextureCoordinate[0].y = attr.as_float();
+			} else if (attr.name() == "v2") {
+				read_flag[4] = true;
+				als.TextureCoordinate[1].y = attr.as_float();
+			} else if (attr.name() == "v3") {
+				read_flag[5] = true;
+				als.TextureCoordinate[0].y = attr.as_float();
+			}
+		}
 	}
-	else
-	{
-		MACRO_NODECHECK_LOOPBEGIN("map");
-			MACRO_NODECHECK_READCOMP_F("u1", read_flag[0], als.TextureCoordinate[0].x);
-			MACRO_NODECHECK_READCOMP_F("u2", read_flag[1], als.TextureCoordinate[1].x);
-			MACRO_NODECHECK_READCOMP_F("u3", read_flag[2], als.TextureCoordinate[2].x);
-			MACRO_NODECHECK_READCOMP_F("v1", read_flag[3], als.TextureCoordinate[0].y);
-			MACRO_NODECHECK_READCOMP_F("v2", read_flag[4], als.TextureCoordinate[1].y);
-			MACRO_NODECHECK_READCOMP_F("v3", read_flag[5], als.TextureCoordinate[2].y);
-		MACRO_NODECHECK_LOOPEND("map");
-	}// if(!pUseOldName) else
-
-	ParseHelper_Node_Exit();
 
 	// check that all components was defined
-	if(!(read_flag[0] && read_flag[1] && read_flag[2] && read_flag[3] && read_flag[4] && read_flag[5]))
+	if (!(read_flag[0] && read_flag[1] && read_flag[2] && read_flag[3] && read_flag[4] && read_flag[5])) {
 		throw DeadlyImportError("Not all texture coordinates are defined.");
+	}
 
 	// copy attributes data
 	als.TextureID_R = rtexid;
@@ -309,7 +311,7 @@ void AMFImporter::ParseNode_TexMap(const bool pUseOldName) {
 	als.TextureID_B = btexid;
 	als.TextureID_A = atexid;
 
-	mNodeElement_List.push_back(ne);// add to node element list because its a new object in graph.
+	mNodeElement_List.push_back(ne);
 }
 
 }// namespace Assimp

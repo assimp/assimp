@@ -291,10 +291,8 @@ SET(ASSIMP_EXPORTERS_DISABLED "") # disabled exporters list (used to print)
 
 ADD_ASSIMP_IMPORTER( AMF
   AMF/AMFImporter.hpp
-  AMF/AMFImporter_Macro.hpp
   AMF/AMFImporter_Node.hpp
   AMF/AMFImporter.cpp
-  AMF/AMFImporter_Geometry.cpp
   AMF/AMFImporter_Material.cpp
   AMF/AMFImporter_Postprocess.cpp
 )

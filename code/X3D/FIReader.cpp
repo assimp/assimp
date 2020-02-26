@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -59,7 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/types.h>
 #include <assimp/MemoryIOWrapper.h>
-#include <assimp/irrXMLWrapper.h>
 #ifdef ASSIMP_USE_HUNTER
 #  include <utf8/utf8.h>
 #else
@@ -140,8 +138,13 @@ static std::string parseUTF16String(const uint8_t *data, size_t len) {
 }
 
 struct FIStringValueImpl: public FIStringValue {
-    inline FIStringValueImpl(std::string &&value_) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ { return value; }
+    FIStringValueImpl(std::string &&value_) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
+        return value;
+    }
 };
 
 std::shared_ptr<FIStringValue> FIStringValue::create(std::string &&value) {
@@ -151,8 +154,13 @@ std::shared_ptr<FIStringValue> FIStringValue::create(std::string &&value) {
 struct FIHexValueImpl: public FIHexValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIHexValueImpl(std::vector<uint8_t> &&value_):  strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIHexValueImpl(std::vector<uint8_t> &&value_)
+    : strValueValid( false ) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -160,8 +168,9 @@ struct FIHexValueImpl: public FIHexValue {
             std::for_each(value.begin(), value.end(), [&](uint8_t c) { os << std::setw(2) << static_cast<int>(c); });
             strValue = os.str();
         }
+
         return strValue;
-    };
+    }
 };
 
 std::shared_ptr<FIHexValue> FIHexValue::create(std::vector<uint8_t> &&value) {
@@ -171,8 +180,13 @@ std::shared_ptr<FIHexValue> FIHexValue::create(std::vector<uint8_t> &&value) {
 struct FIBase64ValueImpl: public FIBase64Value {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIBase64ValueImpl(std::vector<uint8_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIBase64ValueImpl(std::vector<uint8_t> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -182,33 +196,35 @@ struct FIBase64ValueImpl: public FIBase64Value {
             for (std::vector<uint8_t>::size_type i = 0; i < valueSize; ++i) {
                 c2 = value[i];
                 switch (imod3) {
-                case 0:
-                    os << basis_64[c2 >> 2];
-                    imod3 = 1;
-                    break;
-                case 1:
-                    os << basis_64[((c1 & 0x03) << 4) | ((c2 & 0xf0) >> 4)];
-                    imod3 = 2;
-                    break;
-                case 2:
-                    os << basis_64[((c1 & 0x0f) << 2) | ((c2 & 0xc0) >> 6)] << basis_64[c2 & 0x3f];
-                    imod3 = 0;
-                    break;
-                }
-                c1 = c2;
+                    case 0:
+                        os << basis_64[c2 >> 2];
+                        imod3 = 1;
+                        break;
+                    case 1:
+                        os << basis_64[((c1 & 0x03) << 4) | ((c2 & 0xf0) >> 4)];
+                        imod3 = 2;
+                        break;
+                    case 2:
+                        os << basis_64[((c1 & 0x0f) << 2) | ((c2 & 0xc0) >> 6)] << basis_64[c2 & 0x3f];
+                        imod3 = 0;
+                        break;
+                    }
+                    c1 = c2;
             }
             switch (imod3) {
-            case 1:
-                os << basis_64[(c1 & 0x03) << 4] << "==";
-                break;
-            case 2:
-                os << basis_64[(c1 & 0x0f) << 2] << '=';
-                break;
+                case 1:
+                    os << basis_64[(c1 & 0x03) << 4] << "==";
+                    break;
+                case 2:
+                    os << basis_64[(c1 & 0x0f) << 2] << '=';
+                    break;
             }
             strValue = os.str();
         }
+
         return strValue;
     };
+
     static const char basis_64[];
 };
 
@@ -221,8 +237,13 @@ std::shared_ptr<FIBase64Value> FIBase64Value::create(std::vector<uint8_t> &&valu
 struct FIShortValueImpl: public FIShortValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIShortValueImpl(std::vector<int16_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIShortValueImpl(std::vector<int16_t> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -230,6 +251,7 @@ struct FIShortValueImpl: public FIShortValue {
             std::for_each(value.begin(), value.end(), [&](int16_t s) { if (++n > 1) os << ' '; os << s; });
             strValue = os.str();
         }
+
         return strValue;
     }
 };
@@ -241,8 +263,13 @@ std::shared_ptr<FIShortValue> FIShortValue::create(std::vector<int16_t> &&value)
 struct FIIntValueImpl: public FIIntValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIIntValueImpl(std::vector<int32_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIIntValueImpl(std::vector<int32_t> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -250,8 +277,9 @@ struct FIIntValueImpl: public FIIntValue {
             std::for_each(value.begin(), value.end(), [&](int32_t i) { if (++n > 1) os << ' '; os << i; });
             strValue = os.str();
         }
+
         return strValue;
-    };
+    }
 };
 
 std::shared_ptr<FIIntValue> FIIntValue::create(std::vector<int32_t> &&value) {
@@ -261,8 +289,13 @@ std::shared_ptr<FIIntValue> FIIntValue::create(std::vector<int32_t> &&value) {
 struct FILongValueImpl: public FILongValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FILongValueImpl(std::vector<int64_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FILongValueImpl(std::vector<int64_t> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -270,8 +303,9 @@ struct FILongValueImpl: public FILongValue {
             std::for_each(value.begin(), value.end(), [&](int64_t l) { if (++n > 1) os << ' '; os << l; });
             strValue = os.str();
         }
+
         return strValue;
-    };
+    }
 };
 
 std::shared_ptr<FILongValue> FILongValue::create(std::vector<int64_t> &&value) {
@@ -281,16 +315,24 @@ std::shared_ptr<FILongValue> FILongValue::create(std::vector<int64_t> &&value) {
 struct FIBoolValueImpl: public FIBoolValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIBoolValueImpl(std::vector<bool> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIBoolValueImpl(std::vector<bool> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
             os << std::boolalpha;
             int n = 0;
-            std::for_each(value.begin(), value.end(), [&](bool b) { if (++n > 1) os << ' '; os << b; });
+            std::for_each(value.begin(), value.end(), [&](bool b) {
+                if (++n > 1) os << ' '; os << b;
+            });
             strValue = os.str();
         }
+
         return strValue;
     };
 };
@@ -302,8 +344,13 @@ std::shared_ptr<FIBoolValue> FIBoolValue::create(std::vector<bool> &&value) {
 struct FIFloatValueImpl: public FIFloatValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIFloatValueImpl(std::vector<float> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIFloatValueImpl(std::vector<float> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -311,6 +358,7 @@ struct FIFloatValueImpl: public FIFloatValue {
             std::for_each(value.begin(), value.end(), [&](float f) { if (++n > 1) os << ' '; os << f; });
             strValue = os.str();
         }
+
         return strValue;
     }
 };
@@ -322,8 +370,13 @@ std::shared_ptr<FIFloatValue> FIFloatValue::create(std::vector<float> &&value) {
 struct FIDoubleValueImpl: public FIDoubleValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIDoubleValueImpl(std::vector<double> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIDoubleValueImpl(std::vector<double> &&value_)
+            : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -342,8 +395,13 @@ std::shared_ptr<FIDoubleValue> FIDoubleValue::create(std::vector<double> &&value
 struct FIUUIDValueImpl: public FIUUIDValue {
     mutable std::string strValue;
     mutable bool strValueValid;
-    inline FIUUIDValueImpl(std::vector<uint8_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ {
+
+    FIUUIDValueImpl(std::vector<uint8_t> &&value_)
+                : strValueValid(false) {
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -381,7 +439,7 @@ struct FIUUIDValueImpl: public FIUUIDValue {
             strValue = os.str();
         }
         return strValue;
-    };
+    }
 };
 
 std::shared_ptr<FIUUIDValue> FIUUIDValue::create(std::vector<uint8_t> &&value) {
@@ -389,8 +447,13 @@ std::shared_ptr<FIUUIDValue> FIUUIDValue::create(std::vector<uint8_t> &&value) {
 }
 
 struct FICDATAValueImpl: public FICDATAValue {
-    inline FICDATAValueImpl(std::string &&value_) { value = std::move(value_); }
-    virtual const std::string &toString() const /*override*/ { return value; }
+    FICDATAValueImpl(std::string &&value_){
+        value = std::move(value_);
+    }
+
+    const std::string &toString() const override {
+        return value;
+    }
 };
 
 std::shared_ptr<FICDATAValue> FICDATAValue::create(std::string &&value) {
@@ -398,19 +461,19 @@ std::shared_ptr<FICDATAValue> FICDATAValue::create(std::string &&value) {
 }
 
 struct FIHexDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
+    std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         return FIHexValue::create(std::vector<uint8_t>(data, data + len));
     }
 };
 
 struct FIBase64Decoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
+    std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         return FIBase64Value::create(std::vector<uint8_t>(data, data + len));
     }
 };
 
 struct FIShortDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
+    std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         if (len & 1) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -427,7 +490,7 @@ struct FIShortDecoder: public FIDecoder {
 };
 
 struct FIIntDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
+    std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         if (len & 3) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -444,7 +507,7 @@ struct FIIntDecoder: public FIDecoder {
 };
 
 struct FILongDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
+    std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         if (len & 7) {
             throw DeadlyImportError(parseErrorMessage);
         }

@@ -8,11 +8,12 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - name: 'Run CMake on VS 2019'
-      uses: lukka/run-cmake@v0
-      with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        useVcpkgToolchainFile: false
-        buildDirectory: '${{ runner.workspace }}/b//win64'
-        cmakeAppendedArgs: '-G "Visual Studio 16 2019" '
+      - name: 'Run CMake on VS 2019'
+      - uses: actions/checkout@v2
+      - uses: lukka/run-cmake@v0
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          useVcpkgToolchainFile: false
+          buildDirectory: '${{ runner.workspace }}/b//win64'
+          cmakeAppendedArgs: '-G "Visual Studio 16 2019" '

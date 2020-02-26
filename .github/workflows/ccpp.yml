@@ -15,4 +15,4 @@ jobs:
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
         useVcpkgToolchainFile: false
         buildDirectory: '${{ runner.workspace }}/b//win64'
-        cmakeAppendedArgs: '-G "Visual Studio 2019" '
+        cmakeAppendedArgs: '-G "Visual Studio 16 2019" '

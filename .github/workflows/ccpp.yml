@@ -8,7 +8,6 @@ jobs:
     runs-on: windows-latest
     
     steps:
-      - name: 'Run CMake on VS 2019'
       - uses: actions/checkout@v2
       - uses: lukka/run-cmake@v0
         with:

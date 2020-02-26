@@ -14,5 +14,10 @@ jobs:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: false
-          buildDirectory: '${{ runner.workspace }}/b//win64'
-          cmakeAppendedArgs: '-G "Visual Studio 16 2019" '
+          buildDirectory: '${{ runner.workspace }}/build//win64'
+          cmakeAppendedArgs: '-G "Visual Studio 15 2017"'
+      - uses: actions/upload-artifact@v1
+        with:
+          name: win-64
+          path: '/build/win64/code/release/assimp-vc141-mtd.dll'
+    

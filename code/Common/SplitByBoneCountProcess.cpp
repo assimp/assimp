@@ -224,7 +224,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             }
 
             if (newBonesAtCurrentFace.size() > mMaxBoneCount)
-            {   
+            {
                 throw DeadlyImportError("SplitByBoneCountProcess: Single face requires more bones than specified max bone count!");
             }
             // leave out the face if the new bones required for this face don't fit the bone count limit anymore

@@ -864,17 +864,17 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 			for (int primitiveNo = 0; primitiveNo < count; ++primitiveNo) {
 				aiMesh *mesh = pScene->mMeshes[meshOffsets[mesh_idx] + primitiveNo];
 				unsigned int numBones =static_cast<unsigned int>(node.skin->jointNames.size());
-				
+
 				std::vector<std::vector<aiVertexWeight>> weighting(numBones);
 				BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
-				
+
 				unsigned int realNumBones = 0;
 				for (uint32_t i = 0; i < numBones; ++i) {
 					if (weighting[i].size() > 0) {
 						realNumBones++;
 					}
 				}
-				
+
 				mesh->mNumBones = static_cast<unsigned int>(realNumBones);
 				mesh->mBones = new aiBone *[mesh->mNumBones];
 
@@ -890,7 +890,7 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
 				mat4 *pbindMatrices = nullptr;
 				node.skin->inverseBindMatrices->ExtractData(pbindMatrices);
-        
+
 				int cb = 0;
 				for (uint32_t i = 0; i < numBones; ++i) {
 					const std::vector<aiVertexWeight> &weights = weighting[i];

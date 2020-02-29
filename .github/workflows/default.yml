@@ -19,5 +19,5 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: win-64
-          path: '/build/win64/bin/Release/assimp.dll'
+          path: '/build/win64/bin/Debug/dassimp.dll'
     

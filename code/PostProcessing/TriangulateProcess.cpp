@@ -476,7 +476,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
         for(aiFace* f = last_face; f != curOut; ++f) {
             unsigned int* i = f->mIndices;
-            fprintf(fout," (%i %i %i)",i[0],i[1],i[2]);
+            fprintf(fout," (%u %u %u)",i[0],i[1],i[2]);
         }
 
         fprintf(fout,"\n*********************************************************************\n");

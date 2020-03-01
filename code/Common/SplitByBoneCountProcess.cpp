@@ -165,7 +165,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
     {
         const aiBone* bone = pMesh->mBones[a];
         for( unsigned int b = 0; b < bone->mNumWeights; ++b)
-	        vertexBones[ bone->mWeights[b].mVertexId ].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
+			vertexBones[ bone->mWeights[b].mVertexId ].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
     }
 
     unsigned int numFacesHandled = 0;

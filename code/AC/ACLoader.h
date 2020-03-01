@@ -68,8 +68,6 @@ public:
     AC3DImporter();
     ~AC3DImporter();
 
-
-
     // Represents an AC3D material
     struct Material
     {
@@ -245,8 +243,6 @@ private:
         aiMaterial& matDest);
 
 private:
-
-
     // points to the next data line
     const char* buffer;
 

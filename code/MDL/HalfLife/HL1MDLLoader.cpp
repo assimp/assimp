@@ -817,20 +817,20 @@ void HL1MDLLoader::read_meshes() {
                     mesh_faces.reserve(num_faces);
 
                     if (is_triangle_fan) {
-                        for (int i = 0; i < num_faces; ++i) {
+                        for (int faceIdx = 0; faceIdx < num_faces; ++faceIdx) {
                             mesh_faces.push_back(HL1MeshFace{
                                     tricmds[0],
-                                    tricmds[i + 1],
-                                    tricmds[i + 2] });
+                                    tricmds[faceIdx + 1],
+                                    tricmds[faceIdx + 2] });
                         }
                     } else {
-                        for (int i = 0; i < num_faces; ++i) {
+                        for (int faceIdx = 0; faceIdx < num_faces; ++faceIdx) {
                             if (i & 1) {
                                 // Preserve winding order.
                                 mesh_faces.push_back(HL1MeshFace{
-                                        tricmds[i + 1],
-                                        tricmds[i],
-                                        tricmds[i + 2] });
+                                        tricmds[faceIdx + 1],
+                                        tricmds[faceIdx],
+                                        tricmds[faceIdx + 2] });
                             } else {
                                 mesh_faces.push_back(HL1MeshFace{
                                         tricmds[i],
@@ -1122,10 +1122,10 @@ void HL1MDLLoader::read_sequence_infos() {
                     aiNode *blend_controller_node = blend_controllers_node->mChildren[j] = new aiNode();
                     blend_controller_node->mParent = blend_controllers_node;
 
-                    aiMetadata *md = blend_controller_node->mMetaData = aiMetadata::Alloc(3);
-                    md->Set(0, "Start", pseqdesc->blendstart[j]);
-                    md->Set(1, "End", pseqdesc->blendend[j]);
-                    md->Set(2, "MotionFlags", pseqdesc->blendtype[j]);
+                    aiMetadata *metaData = blend_controller_node->mMetaData = aiMetadata::Alloc(3);
+                    metaData->Set(0, "Start", pseqdesc->blendstart[j]);
+                    metaData->Set(1, "End", pseqdesc->blendend[j]);
+                    metaData->Set(2, "MotionFlags", pseqdesc->blendtype[j]);
                 }
             }
         }
@@ -1151,10 +1151,10 @@ void HL1MDLLoader::read_sequence_infos() {
                 aiNode *pEvent = pEventsNode->mChildren[j] = new aiNode();
                 pEvent->mParent = pEventsNode;
 
-                aiMetadata *md = pEvent->mMetaData = aiMetadata::Alloc(3);
-                md->Set(0, "Frame", pevent->frame);
-                md->Set(1, "ScriptEvent", pevent->event);
-                md->Set(2, "Options", aiString(pevent->options));
+                aiMetadata *metaData = pEvent->mMetaData = aiMetadata::Alloc(3);
+                metaData->Set(0, "Frame", pevent->frame);
+                metaData->Set(1, "ScriptEvent", pevent->event);
+                metaData->Set(2, "Options", aiString(pevent->options));
             }
         }
 

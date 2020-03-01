@@ -1,12 +1,9 @@
-
 /*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2020, assimp team
-
-
 
 All rights reserved.
 
@@ -80,47 +77,60 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // skip to the next token
-#define AI_AC_SKIP_TO_NEXT_TOKEN()                    \
-    if (!SkipSpaces(&buffer)) {                       \
-        ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL"); \
-        continue;                                     \
+inline
+const char *AcSkipToNextToken( const char *buffer ) {
+    if (!SkipSpaces( &buffer )) {
+        ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL");
     }
+    return buffer;
+}
 
 // ------------------------------------------------------------------------------------------------
 // read a string (may be enclosed in double quotation marks). buffer must point to "
-#define AI_AC_GET_STRING(out)                                       \
-    if (*buffer == '\0') {                                          \
-        throw DeadlyImportError("AC3D: Unexpected EOF in string");  \
-    }                                                               \
-    ++buffer;                                                       \
-    const char *sz = buffer;                                        \
-    while ('\"' != *buffer) {                                       \
-        if (IsLineEnd(*buffer)) {                                   \
-            ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL in string"); \
-            out = "ERROR";                                          \
-            break;                                                  \
-        }                                                           \
-        ++buffer;                                                   \
-    }                                                               \
-    if (IsLineEnd(*buffer)) continue;                               \
-    out = std::string(sz, (unsigned int)(buffer - sz));             \
+inline
+const char *AcGetString(const char *buffer, std::string &out) {
+    if (*buffer == '\0') {
+        throw DeadlyImportError("AC3D: Unexpected EOF in string");
+    }
     ++buffer;
+    const char *sz = buffer;
+    while ('\"' != *buffer) {
+        if (IsLineEnd(*buffer)) {
+            ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL in string");
+            out = "ERROR";
+            break;
+        }
+        ++buffer;
+    }
+    if (IsLineEnd(*buffer)) {
+        return buffer;
+    }
+    out = std::string(sz, (unsigned int)(buffer - sz));
+    ++buffer;
+
+    return buffer;
+}
 
 // ------------------------------------------------------------------------------------------------
 // read 1 to n floats prefixed with an optional predefined identifier
-#define AI_AC_CHECKED_LOAD_FLOAT_ARRAY(name, name_length, num, out)                \
-    AI_AC_SKIP_TO_NEXT_TOKEN();                                                    \
-    if (name_length) {                                                             \
-        if (strncmp(buffer, name, name_length) || !IsSpace(buffer[name_length])) { \
-            ASSIMP_LOG_ERROR("AC3D: Unexpexted token. " name " was expected.");    \
-            continue;                                                              \
-        }                                                                          \
-        buffer += name_length + 1;                                                 \
-    }                                                                              \
-    for (unsigned int _i = 0; _i < num; ++_i) {                                    \
-        AI_AC_SKIP_TO_NEXT_TOKEN();                                                \
-        buffer = fast_atoreal_move<float>(buffer, ((float *)out)[_i]);             \
+template<class T>
+inline
+const char *TAcCheckedLoadFloatArray(const char *buffer, const char *name, size_t name_length, size_t num, T *out) {
+    AcSkipToNextToken(buffer);
+    if (0 != name_length) {
+        if (0 != strncmp(buffer, name, name_length) || !IsSpace(buffer[name_length])) {
+            ASSIMP_LOG_ERROR("AC3D: Unexpexted token. " + std::string( name ) + " was expected.");
+            return buffer;
+        }
+        buffer += name_length + 1;
     }
+    for (unsigned int _i = 0; _i < num; ++_i) {
+        AcSkipToNextToken(buffer);
+        buffer = fast_atoreal_move<float>(buffer, ((float *)out)[_i]);
+    }
+
+    return buffer;
+}
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -222,7 +232,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
             return;
         } else if (TokenMatch(buffer, "name", 4)) {
             SkipSpaces(&buffer);
-            AI_AC_GET_STRING(obj.name);
+            buffer = AcGetString(buffer, obj.name);
 
             // If this is a light source, we'll also need to store
             // the name of the node in it.
@@ -231,21 +241,21 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
             }
         } else if (TokenMatch(buffer, "texture", 7)) {
             SkipSpaces(&buffer);
-            AI_AC_GET_STRING(obj.texture);
+            buffer = AcGetString(buffer, obj.texture);
         } else if (TokenMatch(buffer, "texrep", 6)) {
             SkipSpaces(&buffer);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("", 0, 2, &obj.texRepeat);
+            buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 2, &obj.texRepeat);
             if (!obj.texRepeat.x || !obj.texRepeat.y)
                 obj.texRepeat = aiVector2D(1.f, 1.f);
         } else if (TokenMatch(buffer, "texoff", 6)) {
             SkipSpaces(&buffer);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("", 0, 2, &obj.texOffset);
+            buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 2, &obj.texOffset);
         } else if (TokenMatch(buffer, "rot", 3)) {
             SkipSpaces(&buffer);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("", 0, 9, &obj.rotation);
+            buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 9, &obj.rotation);
         } else if (TokenMatch(buffer, "loc", 3)) {
             SkipSpaces(&buffer);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("", 0, 3, &obj.translation);
+            buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 3, &obj.translation);
         } else if (TokenMatch(buffer, "subdiv", 6)) {
             SkipSpaces(&buffer);
             obj.subDiv = strtoul10(buffer, &buffer);
@@ -271,7 +281,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                 }
                 obj.vertices.push_back(aiVector3D());
                 aiVector3D &v = obj.vertices.back();
-                AI_AC_CHECKED_LOAD_FLOAT_ARRAY("", 0, 3, &v.x);
+                buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 3, &v.x);
             }
         } else if (TokenMatch(buffer, "numsurf", 7)) {
             SkipSpaces(&buffer);
@@ -331,10 +341,9 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
 
                             entry.first = strtoul10(buffer, &buffer);
                             SkipSpaces(&buffer);
-                            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("", 0, 2, &entry.second);
+                            buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 2, &entry.second);
                         }
                     } else {
-
                         --buffer; // make sure the line is processed a second time
                         break;
                     }
@@ -496,7 +505,9 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
             const size_t oldm = meshes.size();
             for (MatTable::const_iterator cit = needMat.begin(), cend = needMat.end();
                     cit != cend; ++cit, ++mat) {
-                if (!(*cit).first) continue;
+                if (!(*cit).first) {
+                    continue;
+                }
 
                 // allocate a new aiMesh object
                 *pip++ = (unsigned int)meshes.size();
@@ -541,7 +552,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                         unsigned int type = (*it).flags & 0xf;
                         if (!type) {
                             aiFace &face = *faces++;
-                            if ((face.mNumIndices = (unsigned int)src.entries.size())) {
+                            face.mNumIndices = (unsigned int)src.entries.size();
+                            if (0 != face.mNumIndices) {
                                 face.mIndices = new unsigned int[face.mNumIndices];
                                 for (unsigned int i = 0; i < face.mNumIndices; ++i, ++vertices) {
                                     const Surface::SurfaceEntry &entry = src.entries[i];
@@ -726,18 +738,18 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
             // manually parse the material ... sscanf would use the buldin atof ...
             // Format: (name) rgb %f %f %f  amb %f %f %f  emis %f %f %f  spec %f %f %f  shi %d  trans %f
 
-            AI_AC_SKIP_TO_NEXT_TOKEN();
+            buffer = AcSkipToNextToken(buffer);
             if ('\"' == *buffer) {
-                AI_AC_GET_STRING(mat.name);
-                AI_AC_SKIP_TO_NEXT_TOKEN();
+                buffer = AcGetString(buffer, mat.name);
+                buffer = AcSkipToNextToken(buffer);
             }
 
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("rgb", 3, 3, &mat.rgb);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("amb", 3, 3, &mat.amb);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("emis", 4, 3, &mat.emis);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("spec", 4, 3, &mat.spec);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("shi", 3, 1, &mat.shin);
-            AI_AC_CHECKED_LOAD_FLOAT_ARRAY("trans", 5, 1, &mat.trans);
+            buffer = TAcCheckedLoadFloatArray(buffer, "rgb", 3, 3, &mat.rgb);
+            buffer = TAcCheckedLoadFloatArray(buffer, "amb", 3, 3, &mat.amb);
+            buffer = TAcCheckedLoadFloatArray(buffer, "emis", 4, 3, &mat.emis);
+            buffer = TAcCheckedLoadFloatArray(buffer, "spec", 4, 3, &mat.spec);
+            buffer = TAcCheckedLoadFloatArray(buffer, "shi", 3, 1, &mat.shin);
+            buffer = TAcCheckedLoadFloatArray(buffer, "trans", 5, 1, &mat.trans);
         }
         LoadObjectSection(rootObjects);
     }

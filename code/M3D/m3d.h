@@ -99,6 +99,10 @@ typedef uint16_t M3D_INDEX;
 #define _register
 #endif
 
+#pragma warning(push)
+#pragma warning(disable : 4127 )
+#pragma warning(disable : 4505 )
+
 /*** File format structures ***/
 
 /**
@@ -2162,8 +2166,8 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
             w = h = len = 0;
             ri.bits_per_channel = 8;
             model->texture[i].d = (uint8_t*)stbi__png_load(&s, (int*)&w, (int*)&h, (int*)&len, 0, &ri);
-            model->texture[i].w = w;
-            model->texture[i].h = h;
+            model->texture[i].w = (uint16_t) w;
+            model->texture[i].h = (uint16_t) h;
             model->texture[i].f = (uint8_t)len;
 #endif
         } else {
@@ -5605,6 +5609,9 @@ namespace M3D {
 
 #endif /* impl */
 }
+
+#pragma warning(pop<)
+
 #endif
 
 #endif /* __cplusplus */

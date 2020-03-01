@@ -80,7 +80,7 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
     m_progress(progress),
     m_originalObjFileName(originalObjFileName)
 {
-    std::fill_n(m_buffer,Buffersize,0);
+    std::fill_n(m_buffer,Buffersize,'\0');
 
     // Create the model instance to store all the data
     m_pModel.reset(new ObjFile::Model());

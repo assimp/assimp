@@ -668,8 +668,8 @@ void OgreBinarySerializer::ReadEdgeList(Mesh * /*mesh*/)
 
                 for (size_t i=0; i<numEdgeGroups; ++i)
                 {
-                    uint16_t id = ReadHeader();
-                    if (id != M_EDGE_GROUP)
+                    uint16_t curId = ReadHeader();
+                    if (curId != M_EDGE_GROUP)
                         throw DeadlyImportError("M_EDGE_GROUP not found in M_EDGE_LIST_LOD");
 
                     m_reader->IncPtr(sizeof(uint32_t) * 3);

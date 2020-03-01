@@ -321,7 +321,7 @@ public:
 struct Face : public FaceWithSmoothingGroup {
 };
 
-#pragma warning(disable : 4315 )
+#pragma warning(disable : 4315)
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
@@ -339,6 +339,20 @@ struct Texture {
               bPrivate(),
               iUVSrc(0) {
         mTextureBlend = get_qnan();
+    }
+
+    Texture(const Texture &other) :
+            mTextureBlend(other.mTextureBlend),
+            mMapName(other.mMapName),
+            mOffsetU(other.mOffsetU),
+            mOffsetV(other.mOffsetV),
+            mScaleU(other.mScaleU),
+            mScaleV(other.mScaleV),
+            mRotation(other.mRotation),
+            mMapMode(other.mMapMode),
+            bPrivate(other.bPrivate),
+            iUVSrc(other.iUVSrc) {
+        // empty
     }
 
     Texture(Texture &&other) AI_NO_EXCEPT : mTextureBlend(std::move(other.mTextureBlend)),
@@ -400,18 +414,29 @@ struct Texture {
 /** Helper structure representing a 3ds material */
 struct Material {
     //! Default constructor has been deleted
-    Material() = delete;
-
-    //! Constructor with explicit name
-    explicit Material(const std::string &name) :
-            mName(name), mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)) // FIX ... we won't want object to be black
-            ,
+    Material() :
+            mName(),
+            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
             mSpecularExponent(ai_real(0.0)),
             mShininessStrength(ai_real(1.0)),
             mShading(Discreet3DS::Gouraud),
             mTransparency(ai_real(1.0)),
             mBumpHeight(ai_real(1.0)),
             mTwoSided(false) {
+        // empty
+    }
+
+    //! Constructor with explicit name
+    explicit Material(const std::string &name) :
+            mName(name),
+            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            mSpecularExponent(ai_real(0.0)),
+            mShininessStrength(ai_real(1.0)),
+            mShading(Discreet3DS::Gouraud),
+            mTransparency(ai_real(1.0)),
+            mBumpHeight(ai_real(1.0)),
+            mTwoSided(false) {
+        // empty
     }
 
     Material(const Material &other) = default;
@@ -468,7 +493,9 @@ struct Material {
         return *this;
     }
 
-    virtual ~Material() {}
+    virtual ~Material() {
+        // empty
+    }
 
     //! Name of the material
     std::string mName;

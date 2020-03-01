@@ -517,8 +517,8 @@ outer:
         for (FaceIdxArray::const_iterator it = fidx[i].begin(),end = fidx[i].end();
              it != end; ++it, ++faces)
         {
-            Mesh& m    = meshes[(*it).first];
-            Face& face = m.faces[(*it).second];
+            Mesh& curMesh = meshes[(*it).first];
+            Face &face = curMesh.faces[(*it).second];
             faces->mNumIndices = (unsigned int)face.indices.size();
             faces->mIndices = new unsigned int [faces->mNumIndices];
 
@@ -528,29 +528,30 @@ outer:
 
             for (unsigned int n = 0; n < faces->mNumIndices;++n, ++cnt, ++norms, ++verts)
             {
-                if (face.indices[n] >= m.verts.size())
+                if (face.indices[n] >= curMesh.verts.size())
                 {
                     ASSIMP_LOG_WARN("Quick3D: Vertex index overflow");
                     face.indices[n] = 0;
                 }
 
                 // copy vertices
-                *verts =  m.verts[ face.indices[n] ];
+                *verts = curMesh.verts[face.indices[n]];
 
-                if (face.indices[n] >= m.normals.size() && faces->mNumIndices >= 3)
+                if (face.indices[n] >= curMesh.normals.size() && faces->mNumIndices >= 3)
                 {
                     // we have no normal here - assign the face normal
                     if (!fnOK)
                     {
-                        const aiVector3D& pV1 =  m.verts[ face.indices[0] ];
-                        const aiVector3D& pV2 =  m.verts[ face.indices[1] ];
-                        const aiVector3D& pV3 =  m.verts[ face.indices.size() - 1 ];
+                        const aiVector3D &pV1 = curMesh.verts[face.indices[0]];
+                        const aiVector3D &pV2 = curMesh.verts[face.indices[1]];
+                        const aiVector3D &pV3 = curMesh.verts[face.indices.size() - 1];
                         faceNormal = (pV2 - pV1) ^ (pV3 - pV1).Normalize();
                         fnOK = true;
                     }
                     *norms = faceNormal;
+                } else {
+                    *norms = curMesh.normals[face.indices[n]];
                 }
-                else *norms =  m.normals[ face.indices[n] ];
 
                 // copy texture coordinates
                 if (uv && m.uv.size())

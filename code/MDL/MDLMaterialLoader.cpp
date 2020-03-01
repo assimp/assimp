@@ -68,7 +68,7 @@ static aiTexel* const bad_texel = reinterpret_cast<aiTexel*>(SIZE_MAX);
 void MDLImporter::SearchPalette(const unsigned char** pszColorMap)
 {
     // now try to find the color map in the current directory
-    IOStream* pcStream = pIOHandler->Open(configPalette,"rb");
+    IOStream* pcStream = mIOHandler->Open(configPalette,"rb");
 
     const unsigned char* szColorMap = (const unsigned char*)::g_aclrDefaultColorMap;
     if(pcStream)
@@ -702,14 +702,13 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // data structures in the aiScene instance
     if (pcNew && pScene->mNumTextures <= 999)
     {
-
         // place this as diffuse texture
-        char szCurrent[5];
-        ai_snprintf(szCurrent,5,"*%i",this->pScene->mNumTextures);
+        char current[5];
+        ai_snprintf(current, 5, "*%i", this->pScene->mNumTextures);
 
         aiString szFile;
-        const size_t iLen = strlen((const char*)szCurrent);
-        ::memcpy(szFile.data,(const char*)szCurrent,iLen+1);
+        const size_t iLen = strlen((const char *)current);
+        ::memcpy(szFile.data, (const char *)current, iLen + 1);
         szFile.length = (ai_uint32)iLen;
 
         pcMatOut->AddProperty(&szFile,AI_MATKEY_TEXTURE_DIFFUSE(0));

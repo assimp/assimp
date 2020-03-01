@@ -105,7 +105,8 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
     if (info.mRotation)
     {
         float out = info.mRotation;
-        if ((rounded = static_cast<int>((info.mRotation / static_cast<float>(AI_MATH_TWO_PI)))))
+        rounded = static_cast<int>((info.mRotation / static_cast<float>(AI_MATH_TWO_PI)));
+        if (rounded)
         {
             out -= rounded * static_cast<float>(AI_MATH_PI);
             ASSIMP_LOG_INFO_F("Texture coordinate rotation ", info.mRotation, " can be simplified to ", out);

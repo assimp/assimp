@@ -90,14 +90,7 @@ IF ( MSVC )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
   # assimp_viewer is ANSI (MBCS) throughout
   REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
-ENDIF ( MSVC )
-
-
-#
-ADD_CUSTOM_COMMAND(TARGET assimp_viewer
-  PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:assimp_viewer>
-  MAIN_DEPENDENCY assimp)
+ENDIF ()
 
 # Link the executable to the assimp + dx libs.
 TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib winmm.lib )

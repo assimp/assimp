@@ -4,9 +4,7 @@ on: [push]
 
 jobs:
   build:
-
-    runs-on: windows-latest
-    
+    runs-on: windows-latest    
     steps:
       - uses: actions/checkout@v2
       - uses: lukka/run-cmake@v0

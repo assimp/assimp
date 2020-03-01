@@ -18,8 +18,4 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-linux64
-          path: 'D:\a\assimp\build\linux64\bin\MinSizeRel\libassimp.so'
-      - uses: actions/upload-artifact@v1
-        with:
-          name: zlib-linux64
-          path: 'D:\a\assimp\build\linux64\bin\MinSizeRel\libzlib.so'    
+          path: 'bin/libassimp.so'

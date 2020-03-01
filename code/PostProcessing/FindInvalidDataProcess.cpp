@@ -183,7 +183,7 @@ const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsigned in
     unsigned int cnt = 0;
     for (unsigned int i = 0; i < size;++i)  {
 
-        if (dirtyMask.size() && dirtyMask[i]) {
+        if (!dirtyMask.empty() && dirtyMask[i]) {
             continue;
         }
         ++cnt;

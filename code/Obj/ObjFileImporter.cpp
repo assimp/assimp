@@ -112,7 +112,7 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     // Read file into memory
     static const std::string mode = "rb";
     std::unique_ptr<IOStream> fileStream( pIOHandler->Open( file, mode));
-    if( !fileStream.get() ) {
+    if(!fileStream) {
         throw DeadlyImportError( "Failed to open file " + file + "." );
     }
 

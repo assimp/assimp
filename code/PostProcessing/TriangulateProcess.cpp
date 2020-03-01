@@ -200,7 +200,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         aiFace& face = pMesh->mFaces[a];
 
         unsigned int* idx = face.mIndices;
-        int num = (int)face.mNumIndices, ear = 0, tmp, prev = num-1, next = 0, max = num;
+        int num = (int)face.mNumIndices, ear, tmp, prev = num - 1, next = 0, max = num;
 
         // Apply vertex colors to represent the face winding?
 #ifdef AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING

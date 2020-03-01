@@ -503,7 +503,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master, std::vector<At
             OffsetNodeMeshIndices(node,offset[n]);
         }
         if (n) // src[0] is the master node
-            nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode,n ));
+            nodes.emplace_back( node,srcList[n-1].attachToNode,n );
 
         // add name prefixes?
         if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
@@ -662,7 +662,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master, std::vector<At
 // Build a list of unique bones
 void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
     std::vector<aiMesh*>::const_iterator it,
-    std::vector<aiMesh*>::const_iterator end)
+    const std::vector<aiMesh*>::const_iterator& end)
 {
     unsigned int iOffset = 0;
     for (; it != end;++it)  {
@@ -670,24 +670,24 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
             aiBone* p = (*it)->mBones[l];
             uint32_t itml = SuperFastHash(p->mName.data,(unsigned int)p->mName.length);
 
-            std::list<BoneWithHash>::iterator it2  = asBones.begin();
-            std::list<BoneWithHash>::iterator end2 = asBones.end();
+	        auto it2  = asBones.begin();
+	        auto end2 = asBones.end();
 
             for (;it2 != end2;++it2)    {
                 if ((*it2).first == itml)   {
-                    (*it2).pSrcBones.push_back(BoneSrcIndex(p,iOffset));
+                    (*it2).pSrcBones.emplace_back(p,iOffset);
                     break;
                 }
             }
             if (end2 == it2)    {
                 // need to begin a new bone entry
-                asBones.push_back(BoneWithHash());
+                asBones.emplace_back();
                 BoneWithHash& btz = asBones.back();
 
                 // setup members
                 btz.first = itml;
                 btz.second = &p->mName;
-                btz.pSrcBones.push_back(BoneSrcIndex(p,iOffset));
+                btz.pSrcBones.emplace_back(p,iOffset);
             }
         }
         iOffset += (*it)->mNumVertices;
@@ -697,7 +697,7 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
 // ------------------------------------------------------------------------------------------------
 // Merge a list of bones
 void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator it,
-    std::vector<aiMesh*>::const_iterator end)
+    const std::vector<aiMesh*>::const_iterator& end)
 {
     if ( nullptr == out || out->mNumBones == 0 ) {
         return;

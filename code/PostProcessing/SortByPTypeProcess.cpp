@@ -293,7 +293,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
                         for (VertexWeightTable::const_iterator it = tbl.begin(), end = tbl.end();
                              it != end; ++it)
                         {
-                            tempBones[ (*it).first ].push_back( aiVertexWeight(outIdx, (*it).second) );
+                            tempBones[ (*it).first ].emplace_back(outIdx, (*it).second );
                         }
                     }
 

@@ -111,7 +111,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
         for( unsigned int b = 0; b < bone->mNumWeights; b++)
         {
             const aiVertexWeight& w = bone->mWeights[b];
-            vertexWeights[w.mVertexId].push_back( Weight( a, w.mWeight));
+            vertexWeights[w.mVertexId].emplace_back( a, w.mWeight);
         }
     }
 
@@ -156,7 +156,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
         {
             const std::vector<Weight>& vw = vertexWeights[a];
             for( std::vector<Weight>::const_iterator it = vw.begin(); it != vw.end(); ++it)
-                boneWeights[it->mBone].push_back( aiVertexWeight( a, it->mWeight));
+                boneWeights[it->mBone].emplace_back( a, it->mWeight);
         }
 
         // and finally copy the vertex weight list over to the mesh's bones

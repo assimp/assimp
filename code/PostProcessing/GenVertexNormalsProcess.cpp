@@ -158,9 +158,9 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 
     // Set up a SpatialSort to quickly find all vertices close to a given position
     // check whether we can reuse the SpatialSort of a previous step.
-    SpatialSort* vertexFinder = NULL;
+    SpatialSort* vertexFinder = nullptr;
     SpatialSort  _vertexFinder;
-    ai_real posEpsilon = ai_real( 1e-5 );
+    ai_real posEpsilon;
     if (shared) {
         std::vector<std::pair<SpatialSort,ai_real> >* avf;
         shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);

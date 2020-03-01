@@ -66,8 +66,7 @@ ObjFileParser::ObjFileParser()
 , m_pModel( nullptr )
 , m_uiLine( 0 )
 , m_pIO( nullptr )
-, m_progress( nullptr )
-, m_originalObjFileName() {
+, m_progress( nullptr ) {
     // empty
 }
 
@@ -567,7 +566,7 @@ void ObjFileParser::getMaterialDesc() {
 
     if (!skip) {
         // Search for material
-        std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
+        auto it = m_pModel->m_MaterialMap.find(strName);
         if (it == m_pModel->m_MaterialMap.end()) {
 			// Not found, so we don't know anything about the material except for its name.
 			// This may be the case if the material library is missing. We don't want to lose all
@@ -674,7 +673,7 @@ void ObjFileParser::getNewMaterial() {
     while( m_DataIt != m_DataItEnd && IsSpaceOrNewLine( *m_DataIt ) ) {
         ++m_DataIt;
     }
-    std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
+    auto it = m_pModel->m_MaterialMap.find( strMat );
     if ( it == m_pModel->m_MaterialMap.end() ) {
         // Show a warning, if material was not found
         ASSIMP_LOG_WARN("OBJ: Unsupported material requested: " + strMat);

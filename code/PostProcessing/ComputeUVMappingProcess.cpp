@@ -51,10 +51,10 @@ using namespace Assimp;
 
 namespace {
 
-    const static aiVector3D base_axis_y(0.0,1.0,0.0);
-    const static aiVector3D base_axis_x(1.0,0.0,0.0);
-    const static aiVector3D base_axis_z(0.0,0.0,1.0);
-    const static ai_real angle_epsilon = ai_real( 0.95 );
+    const aiVector3D base_axis_y(0.0,1.0,0.0);
+    const aiVector3D base_axis_x(1.0,0.0,0.0);
+    const aiVector3D base_axis_z(0.0,0.0,1.0);
+    const ai_real angle_epsilon = ai_real( 0.95 );
 }
 
 // ------------------------------------------------------------------------------------------------

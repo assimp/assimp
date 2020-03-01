@@ -242,7 +242,7 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
         // diff is now the vector in which our camera is pointing
     }
 
-    if (real.size()) {
+    if (!real.empty()) {
         *distanceTrack = real;
     }
 }

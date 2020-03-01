@@ -274,7 +274,7 @@ public:
      *  @param end Points to the mesh after the last mesh to be processed
      */
     static void MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator it,
-        std::vector<aiMesh*>::const_iterator end);
+        const std::vector<aiMesh*>::const_iterator& end);
 
     // -------------------------------------------------------------------
     /** Merges two or more materials
@@ -300,7 +300,7 @@ public:
      */
     static void BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
         std::vector<aiMesh*>::const_iterator it,
-        std::vector<aiMesh*>::const_iterator end);
+        const std::vector<aiMesh*>::const_iterator& end);
 
     // -------------------------------------------------------------------
     /** Add a name prefix to all nodes in a scene.

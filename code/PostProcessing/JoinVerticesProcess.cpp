@@ -423,7 +423,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             ASSIMP_LOG_ERROR( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
         }
 
-        if (newWeights.size() > 0) {
+        if (!newWeights.empty()) {
             // kill the old and replace them with the translated weights
             delete [] bone->mWeights;
             bone->mNumWeights = (unsigned int)newWeights.size();

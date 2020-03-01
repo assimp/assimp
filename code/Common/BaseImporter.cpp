@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <sstream>
 #include <cctype>
+#include <utility>
 
 using namespace Assimp;
 
@@ -484,11 +485,11 @@ void BaseImporter::TextFileToBuffer(IOStream* stream,
 namespace Assimp {
     // Represents an import request
     struct LoadRequest {
-        LoadRequest(const std::string& _file, unsigned int _flags,const BatchLoader::PropertyMap* _map, unsigned int _id)
-        : file(_file)
+        LoadRequest(std::string _file, unsigned int _flags,const BatchLoader::PropertyMap* _map, unsigned int _id)
+        : file(std::move(_file))
         , flags(_flags)
         , refCnt(1)
-        , scene(NULL)
+        , scene(nullptr)
         , loaded(false)
         , id(_id) {
             if ( _map ) {

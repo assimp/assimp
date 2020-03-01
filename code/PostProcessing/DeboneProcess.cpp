@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers of the post-processing framework
 #include "ProcessHelper.h"
 #include "DeboneProcess.h"
-#include <stdio.h>
+#include <cstdio>
 
 
 using namespace Assimp;
@@ -83,7 +83,7 @@ bool DeboneProcess::IsActive( unsigned int pFlags) const
 void DeboneProcess::SetupProperties(const Importer* pImp)
 {
     // get the current value of the property
-    mAllOrNone = pImp->GetPropertyInteger(AI_CONFIG_PP_DB_ALL_OR_NONE,0)?true:false;
+    mAllOrNone = pImp->GetPropertyInteger(AI_CONFIG_PP_DB_ALL_OR_NONE, 0) != 0;
     mThreshold = pImp->GetPropertyFloat(AI_CONFIG_PP_DB_THRESHOLD,AI_DEBONE_THRESHOLD);
 }
 
@@ -104,7 +104,7 @@ void DeboneProcess::Execute( aiScene* pScene)
 
     int numSplits = 0;
 
-    if(!!mNumBonesCanDoWithout && (!mAllOrNone||mNumBonesCanDoWithout==mNumBones))  {
+    if(mNumBonesCanDoWithout != 0 && (!mAllOrNone || mNumBonesCanDoWithout == mNumBones))  {
         for(unsigned int a = 0; a < pScene->mNumMeshes; a++)    {
             if(splitList[a]) {
                 numSplits++;
@@ -156,7 +156,7 @@ void DeboneProcess::Execute( aiScene* pScene)
             }
             else    {
                 // Mesh is kept unchanged - store it's new place in the mesh array
-                mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(static_cast<unsigned int>(meshes.size()),(aiNode*)0));
+                mSubMeshIndices[a].emplace_back(static_cast<unsigned int>(meshes.size()),(aiNode*)0);
                 meshes.push_back(srcMesh);
             }
         }

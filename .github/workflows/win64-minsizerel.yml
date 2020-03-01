@@ -1,4 +1,4 @@
-name: Windows
+name: win64
 
 on: [push]
 

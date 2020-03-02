@@ -20,4 +20,4 @@ jobs:
      - uses: actions/upload-artifact@v1
        with:
          name: assimp-androidarmv7
-         path: '${{ runner.workspace }}/build/androidarmv7/bin/libassimp.so' #'/home/runner/work/assimp/build/androidarmv7/bin/libassimp.so'
+         path: '${{ runner.workspace }}/build/androidarmv7/bin/libassimp.so'

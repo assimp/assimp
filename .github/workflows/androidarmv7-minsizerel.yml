@@ -5,16 +5,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest    
-    steps:
-      - name: 'install android ndk'
-        uses: ravinderjangra/android-ndk-toolchain-setup@v0.1
-        with: 
-          api: '21'
-          arch: 'arm'
-          install-location: 'toolchains'
-          force: true
+    steps:    
       - name: 'find android ndk'
-        run: echo android home $ANDROID_NDK_ROOT
+        run: find / -name "ndk-bundle"
      # - uses: actions/checkout@v2
      # - uses: lukka/run-cmake@v0
      #   with:

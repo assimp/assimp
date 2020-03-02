@@ -7,7 +7,9 @@ jobs:
     runs-on: ubuntu-latest    
     steps:    
       - name: 'find android ndk'
-        run: echo ${ANDROID_SDK_ROOT}
+        run: test -f ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/android.toolchain.cmake && ECHO "$FILE exists"
+      - name: 'test'
+        run: test -f ${ANDROID_SDK_ROOT}/ndasdndle/build/cmake/android.toolchain.cmake && ECHO "$FILE exists"
      # - uses: actions/checkout@v2
      # - uses: lukka/run-cmake@v0
      #   with:

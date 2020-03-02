@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest    
     steps:    
       - name: 'find android ndk'
-        run: echo ${ANDROID_NDK_ROOT}
+        run: echo ${ANDROID_SDK_ROOT}
      # - uses: actions/checkout@v2
      # - uses: lukka/run-cmake@v0
      #   with:

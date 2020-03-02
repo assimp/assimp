@@ -17,5 +17,5 @@ jobs:
           buildWithCMakeArgs: '--config MinSizeRel' 
       - uses: actions/upload-artifact@v1
         with:
-          name: assimp-linux64
+          name: assimp-osxuniversal
           path: '/Users/runner/runners/2.165.2/work/assimp/build/osx/bin/libassimp.dylib'

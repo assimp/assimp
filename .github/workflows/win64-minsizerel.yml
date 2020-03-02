@@ -14,7 +14,7 @@ jobs:
           useVcpkgToolchainFile: false
           buildDirectory: '${{ runner.workspace }}/build/win64'
           cmakeAppendedArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
-          buildWithCMakeArgs: '--build build64 --config MinSizeRel' 
+          buildWithCMakeArgs: 'build64 --config MinSizeRel' 
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-win64

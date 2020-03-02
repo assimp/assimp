@@ -6,7 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest    
     steps:
-      run: echo android home: $ANDROID_NDK_HOME
+      - name: 'find arndroid ndk'
+        run: echo android home $ANDROID_NDK_HOME
      # - uses: actions/checkout@v2
      # - uses: lukka/run-cmake@v0
      #   with:

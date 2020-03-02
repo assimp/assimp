@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest    
     steps:
      - name: 'find'
-       run: find -f ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/android.toolchain.cmake && echo "found"
+       run: test -f ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/android.toolchain.cmake && echo "found"
      - name: 'fail'
-       run: find -f ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/andsroid.toolchain.cmake && echo "found"
+       run: test -f ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/andsroid.toolchain.cmake && echo "found"
      #- uses: actions/checkout@v2
      #- uses: lukka/run-cmake@v0
      #  with:

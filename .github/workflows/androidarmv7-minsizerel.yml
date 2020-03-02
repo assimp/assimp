@@ -6,8 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest    
     steps:
-     - name: 'find'
-       run: echo ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/android.toolchain.cmake
+     #- name: 'find'
+     #  run: echo ${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/android.toolchain.cmake
      - uses: actions/checkout@v2
      - uses: lukka/run-cmake@v0
        with:
@@ -15,7 +15,7 @@ jobs:
          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
          useVcpkgToolchainFile: false
          buildDirectory: '${{ runner.workspace }}/build/androidarmv7'
-         cmakeAppendedArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE="${ANDROID_SDK_ROOT}/ndk-bundle/build/cmake/android.toolchain.cmake" -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
+         cmakeAppendedArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE="/usr/local/lib/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake" -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
          buildWithCMakeArgs: '--config MinSizeRel'
      #- uses: actions/upload-artifact@v1
      #  with:

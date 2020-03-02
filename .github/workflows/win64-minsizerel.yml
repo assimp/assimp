@@ -18,8 +18,8 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-win64
-          path: 'D:\a\assimp\build\win64\bin\MinSizeRel\assimp.dll'
+          path: '${{ runner.workspace }}\build\win64\bin\MinSizeRel\assimp.dll' #'D:\a\assimp\build\win64\bin\MinSizeRel\assimp.dll'
       - uses: actions/upload-artifact@v1
         with:
           name: zlib-win64
-          path: 'D:\a\assimp\build\win64\bin\MinSizeRel\zlib.dll'    
+          path: '${{ runner.workspace }}\build\win64\bin\MinSizeRel\zlib.dll' #'D:\a\assimp\build\win64\bin\MinSizeRel\zlib.dll'    

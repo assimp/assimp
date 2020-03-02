@@ -1,0 +1,22 @@
+name: androidarmv7
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    steps:
+      run: echo android home: $ANDROID_NDK_HOME
+     # - uses: actions/checkout@v2
+     # - uses: lukka/run-cmake@v0
+     #   with:
+     #     cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+     #     cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+     #     useVcpkgToolchainFile: false
+     #     buildDirectory: '${{ runner.workspace }}/build/androidarmv7'
+     #     cmakeAppendedArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
+     #     buildWithCMakeArgs: '--config MinSizeRel' 
+     #- uses: actions/upload-artifact@v1
+     #  with:
+     #    name: assimp-linux64
+     #    path: '${{ runner.workspace }}/build/linux64/bin/libassimp.so' #'/home/runner/work/assimp/build/linux64/bin/libassimp.so'

@@ -4,7 +4,7 @@
 # Written and maintained by the.arul@gmail.com (2014)
 #
 
-$ echo Working dir: $PWD
+echo Working directory is: $PWD
 
 BUILD_DIR="./lib/iOS"
 

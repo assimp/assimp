@@ -1,0 +1,14 @@
+name: iosdevice
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: 'build'
+      
+      #- uses: actions/upload-artifact@v1
+      #  with:
+      #    name: assimp-osxuniversal
+      #    path: '${{ runner.workspace }}/build/osx/bin/libassimp.dylib' #'/Users/runner/runners/2.165.2/work/assimp/build/osx/bin/libassimp.dylib'

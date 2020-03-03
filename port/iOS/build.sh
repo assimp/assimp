@@ -206,7 +206,7 @@ if [[ "$DEPLOY_FAT" -eq 1 ]]; then
 	    make_fat_static_binary 'libzlibstatic'
 	fi
     
-    echo "[!] Done! The fat binaries can be found at $BUILD_DIR"
+    echo "[!] Done! The fat binaries can be found at $PWD/$BUILD_DIR"
 fi
 
 

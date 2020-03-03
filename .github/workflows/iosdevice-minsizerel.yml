@@ -12,9 +12,9 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-iosdevice
-          path: '${{ runner.workspace }}/./lib/iOS/libassimp-fat.a'
+          path: '${{ runner.workspace }}/../lib/iOS/libassimp-fat.a'
       - uses: actions/upload-artifact@v1
         with:
           name: irrxml-iosdevice
-          path: '${{ runner.workspace }}./lib/iOS/libIrrXML-fat.a'
+          path: '${{ runner.workspace }}../lib/iOS/libIrrXML-fat.a'
 

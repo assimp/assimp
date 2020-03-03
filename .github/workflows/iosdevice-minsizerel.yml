@@ -9,7 +9,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: 'build'
         run: ./port/iOS/build.sh --stdlib=libc++ --archs="armv7 armv7s arm64 arm64e" --sourcedir="./assimp/assimp"
-      #- uses: actions/upload-artifact@v1
-      #  with:
-      #    name: assimp-osxuniversal
-      #    path: '${{ runner.workspace }}/build/osx/bin/libassimp.dylib' #'/Users/runner/runners/2.165.2/work/assimp/build/osx/bin/libassimp.dylib'
+      - uses: actions/upload-artifact@v1
+        with:
+          name: assimp-iosdevice
+          path: '${{ runner.workspace }}/lib/iOS/libassimp-fat.a'
+      - uses: actions/upload-artifact@v1
+        with:
+          name: irrxml-iosdevice
+          path: '${{ runner.workspace }}/lib/iOS/libIrrXML-fat.a'
+

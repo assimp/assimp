@@ -80,7 +80,7 @@ build_arch()
     
     echo "[!] Running CMake with -G 'Unix Makefiles' $CMAKE_CLI_INPUT"
     
-    cmake -G 'Unix Makefiles' ${CMAKE_CLI_INPUT}
+    cmake ${SOURCE_DIR} -G 'Unix Makefiles' ${CMAKE_CLI_INPUT}
 
     echo "[!] Building $1 library"
 
@@ -102,9 +102,14 @@ CPP_STD_LIB=${CPP_STD_LIB_LIST[0]}
 CPP_STD=${CPP_STD_LIST[0]}
 DEPLOY_ARCHS=${BUILD_ARCHS_ALL[*]}
 DEPLOY_FAT=1
+SOURCE_DIR=""
 
 for i in "$@"; do
     case $i in
+    --sourcedir=*)
+        SOURCE_DIR=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
+        echo "[!] Selecting Source Directory: $SOURCE_DIR"
+    ;;
     -s=*|--std=*)
         CPP_STD=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
         echo "[!] Selecting c++ standard: $CPP_STD"
@@ -136,6 +141,7 @@ for i in "$@"; do
         echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
         echo " - supported C++ STD libs (--stdlib): $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"
         echo " - supported C++ standards (--std): $(echo $(join , ${CPP_STD_LIST[*]}) | sed 's/,/, /g')"
+        echo " - change source directory (--sourcedir)."
         exit
     ;;
     *)

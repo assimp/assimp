@@ -6,8 +6,9 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
+      - uses: actions/checkout@v2
       - name: 'build'
-      
+        run: ./port/iOS/build.sh --stdlib=libc++ --archs="armv7 armv7s arm64 arm64e"
       #- uses: actions/upload-artifact@v1
       #  with:
       #    name: assimp-osxuniversal

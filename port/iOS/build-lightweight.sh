@@ -40,7 +40,6 @@ build_arch()
 
 	echo "Working directory is: $PWD"
 	echo "Built $arch"
-	find ./ -name *.a
 	cd ../..
 }
 
@@ -77,6 +76,8 @@ do_lipo()
 	#output=$baseOutputDir/libminizip$BUILD_TYPE.a
 	#LIPO_ARGS4="$LIPO_ARGS4-create -output $output"
 	#lipo $LIPO_ARGS4
+	
+	find ./ -name *.a
 }
 
 ARCH_RELEASE=(armv7 armv7s arm64)

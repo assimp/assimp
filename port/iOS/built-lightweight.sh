@@ -9,7 +9,6 @@ CPP_STD=0
 srcDir=assimp
 baseOutputDir=libs/iOS
 buildType=MinSizeRel
-assimpArgs=-DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON
 
 mkdir $baseOutputDir
 
@@ -34,7 +33,7 @@ build_arch()
     export CPPFLAGS=$CFLAGS
     export CXXFLAGS="$CFLAGS -std=$CPP_STD"
 
-    cmake "../../$srcDir" -G "$generator" -DCMAKE_TOOLCHAIN_FILE=$toolchain -DCMAKE_BUILD_TYPE=$buildType -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=OFF -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON $assimpArgs
+    cmake "../../$srcDir" -G "$generator" -DCMAKE_TOOLCHAIN_FILE=$toolchain -DCMAKE_BUILD_TYPE=$buildType -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=OFF -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON
 
     $XCODE_ROOT_DIR/Developer/usr/bin/make clean
     $XCODE_ROOT_DIR/Developer/usr/bin/make assimp -j 8 -l

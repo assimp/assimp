@@ -40,7 +40,7 @@ build_arch()
 
 	echo "Working directory is: $PWD"
 	echo "Built $arch"
-	find ./ -name *.a
+	#find ./ -name *.a
 	cd ../..
 }
 
@@ -58,14 +58,14 @@ do_lipo()
 	lipo $LIPO_ARGS
 
 	for ARCH_TARGET2 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2 $baseOutputDir/$ARCH_TARGET2/contrib/irrXML/libirrxml.a "
+	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2 $baseOutputDir/$ARCH_TARGET2/lib/contrib/irrXML/libirrxml.a "
 	done
 	output=$baseOutputDir/libirrxml$BUILD_TYPE.a
 	LIPO_ARGS2="$LIPO_ARGS2-create -output $output"
 	lipo $LIPO_ARGS2
 
 	#for ARCH_TARGET3 in $DEPLOY_ARCHS; do
-	#    LIPO_ARGS3="$LIPO_ARGS3-arch $ARCH_TARGET3 $baseOutputDir/$ARCH_TARGET3/contrib/zlib/zlib/libz.a "
+	#    LIPO_ARGS3="$LIPO_ARGS3-arch $ARCH_TARGET3 $baseOutputDir/$ARCH_TARGET3/lib/contrib/zlib/zlib/libz.a "
 	#done
 	#output=$baseOutputDir/libzlib$BUILD_TYPE.a
 	#LIPO_ARGS3="$LIPO_ARGS3-create -output $output"

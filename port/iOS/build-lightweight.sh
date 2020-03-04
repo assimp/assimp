@@ -6,11 +6,10 @@ CPP_DEV_TARGET=0
 CPP_STD_LIB=0
 CPP_STD=0
 
-srcDir=./
-baseOutputDir=./lib
+srcDir=../../.
 buildType=MinSizeRel
 
-mkdir $baseOutputDir
+mkdir ./lib
 
 build_arch()
 {
@@ -19,7 +18,7 @@ build_arch()
 	generator="Unix Makefiles"
 	toolchain="../../port/iOS/IPHONEOS_${archUp}_TOOLCHAIN.cmake"
 
-	cd $baseOutputDir
+	cd ./lib
 	mkdir $arch
 	cd $arch
 	rm CMakeCache.txt
@@ -33,7 +32,7 @@ build_arch()
     export CPPFLAGS=$CFLAGS
     export CXXFLAGS="$CFLAGS -std=$CPP_STD"
 
-    cmake "../../$srcDir" -G "$generator" -DCMAKE_TOOLCHAIN_FILE=$toolchain -DCMAKE_BUILD_TYPE=$buildType -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=OFF -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON
+    cmake "$srcDir" -G "$generator" -DCMAKE_TOOLCHAIN_FILE=$toolchain -DCMAKE_BUILD_TYPE=$buildType -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=OFF -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON
 
     $XCODE_ROOT_DIR/Developer/usr/bin/make clean
     $XCODE_ROOT_DIR/Developer/usr/bin/make assimp -j 8 -l
@@ -50,32 +49,18 @@ do_lipo()
 	echo "Working directory is: $PWD"
 	
 	for ARCH_TARGET1 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 $baseOutputDir/$ARCH_TARGET1/lib/libassimp.a "
+	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 ./lib/$ARCH_TARGET1/lib/libassimp.a "
 	done
-	output=$baseOutputDir/libassimp$BUILD_TYPE.a
+	output=./lib/libassimp$BUILD_TYPE.a
 	LIPO_ARGS="$LIPO_ARGS-create -output $output"
 	lipo $LIPO_ARGS
 
 	for ARCH_TARGET2 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2 $baseOutputDir/$ARCH_TARGET2/lib/libirrxml.a "
+	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2./lib/$ARCH_TARGET2/lib/libirrxml.a "
 	done
-	output=$baseOutputDir/libirrxml$BUILD_TYPE.a
+	output=./lib/libirrxml$BUILD_TYPE.a
 	LIPO_ARGS2="$LIPO_ARGS2-create -output $output"
 	lipo $LIPO_ARGS2
-
-	#for ARCH_TARGET3 in $DEPLOY_ARCHS; do
-	#    LIPO_ARGS3="$LIPO_ARGS3-arch $ARCH_TARGET3 $baseOutputDir/$ARCH_TARGET3/lib/contrib/zlib/zlib/libz.a "
-	#done
-	#output=$baseOutputDir/libzlib$BUILD_TYPE.a
-	#LIPO_ARGS3="$LIPO_ARGS3-create -output $output"
-	#lipo $LIPO_ARGS3
-
-	#for ARCH_TARGET4 in $DEPLOY_ARCHS; do
-	#    LIPO_ARGS4="$LIPO_ARGS4-arch $ARCH_TARGET4 $baseOutputDir/$ARCH_TARGET4/contrib/minizip/libminizipstatic.a "
-	#done
-	#output=$baseOutputDir/libminizip$BUILD_TYPE.a
-	#LIPO_ARGS4="$LIPO_ARGS4-create -output $output"
-	#lipo $LIPO_ARGS4
 	
 	find ./ -name *.a
 }

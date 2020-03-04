@@ -38,6 +38,7 @@ build_arch()
     $XCODE_ROOT_DIR/Developer/usr/bin/make clean
     $XCODE_ROOT_DIR/Developer/usr/bin/make assimp -j 8 -l
 
+	echo "Working directory is: $PWD"
 	echo "Built $arch"
 	cd ../..
 }

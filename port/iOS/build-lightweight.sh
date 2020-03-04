@@ -40,7 +40,7 @@ build_arch()
 
 	echo "Working directory is: $PWD"
 	echo "Built $arch"
-	find -f *.a
+	find ./ -name *.a
 	cd ../..
 }
 

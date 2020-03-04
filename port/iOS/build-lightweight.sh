@@ -7,7 +7,7 @@ CPP_STD_LIB=0
 CPP_STD=0
 
 srcDir=./
-baseOutputDir=lib
+baseOutputDir=./lib
 buildType=MinSizeRel
 
 mkdir $baseOutputDir
@@ -45,32 +45,32 @@ build_arch()
 do_lipo()
 {
 	for ARCH_TARGET1 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 $baseOutputDir/$ARCH_TARGET1/code/libassimp.a "
+	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 $baseOutputDir/$ARCH_TARGET1/libassimp.a "
 	done
 	output=$baseOutputDir/libassimp$BUILD_TYPE.a
 	LIPO_ARGS="$LIPO_ARGS-create -output $output"
 	lipo $LIPO_ARGS
 
 	for ARCH_TARGET2 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2 $baseOutputDir/$ARCH_TARGET2/contrib/irrXML/libirrxml.a "
+	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2 $baseOutputDir/$ARCH_TARGET2/libirrxml.a "
 	done
 	output=$baseOutputDir/libirrxml$BUILD_TYPE.a
 	LIPO_ARGS2="$LIPO_ARGS2-create -output $output"
 	lipo $LIPO_ARGS2
 
-	for ARCH_TARGET3 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS3="$LIPO_ARGS3-arch $ARCH_TARGET3 $baseOutputDir/$ARCH_TARGET3/contrib/zlib/zlib/libz.a "
-	done
-	output=$baseOutputDir/libzlib$BUILD_TYPE.a
-	LIPO_ARGS3="$LIPO_ARGS3-create -output $output"
-	lipo $LIPO_ARGS3
+	#for ARCH_TARGET3 in $DEPLOY_ARCHS; do
+	#    LIPO_ARGS3="$LIPO_ARGS3-arch $ARCH_TARGET3 $baseOutputDir/$ARCH_TARGET3/contrib/zlib/zlib/libz.a "
+	#done
+	#output=$baseOutputDir/libzlib$BUILD_TYPE.a
+	#LIPO_ARGS3="$LIPO_ARGS3-create -output $output"
+	#lipo $LIPO_ARGS3
 
-	for ARCH_TARGET4 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS4="$LIPO_ARGS4-arch $ARCH_TARGET4 $baseOutputDir/$ARCH_TARGET4/contrib/minizip/libminizipstatic.a "
-	done
-	output=$baseOutputDir/libminizip$BUILD_TYPE.a
-	LIPO_ARGS4="$LIPO_ARGS4-create -output $output"
-	lipo $LIPO_ARGS4
+	#for ARCH_TARGET4 in $DEPLOY_ARCHS; do
+	#    LIPO_ARGS4="$LIPO_ARGS4-arch $ARCH_TARGET4 $baseOutputDir/$ARCH_TARGET4/contrib/minizip/libminizipstatic.a "
+	#done
+	#output=$baseOutputDir/libminizip$BUILD_TYPE.a
+	#LIPO_ARGS4="$LIPO_ARGS4-create -output $output"
+	#lipo $LIPO_ARGS4
 }
 
 ARCH_RELEASE=(armv7 armv7s arm64)

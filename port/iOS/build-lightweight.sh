@@ -6,7 +6,7 @@ CPP_DEV_TARGET=0
 CPP_STD_LIB=0
 CPP_STD=0
 
-srcDir=assimp
+srcDir=./
 baseOutputDir=libs
 buildType=MinSizeRel
 

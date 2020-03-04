@@ -7,7 +7,7 @@ CPP_STD_LIB=0
 CPP_STD=0
 
 srcDir=assimp
-baseOutputDir=libs/iOS
+baseOutputDir=libs
 buildType=MinSizeRel
 
 mkdir $baseOutputDir

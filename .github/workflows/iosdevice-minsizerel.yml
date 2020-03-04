@@ -12,9 +12,9 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-iosdevice
-          path: '${{ runner.workspace }}/../libs/libassimp.a'
+          path: '${{ runner.workspace }}/lib/libassimprelease.a'
       - uses: actions/upload-artifact@v1
         with:
           name: irrxml-iosdevice
-          path: '${{ runner.workspace }}../libs/libIrrXML.a'
+          path: '${{ runner.workspace }/lib/libirrxmlrelease.a'
 

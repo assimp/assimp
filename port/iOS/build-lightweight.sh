@@ -7,7 +7,7 @@ CPP_STD_LIB=0
 CPP_STD=0
 
 srcDir=./
-baseOutputDir=/lib
+baseOutputDir=./lib
 buildType=MinSizeRel
 
 mkdir $baseOutputDir

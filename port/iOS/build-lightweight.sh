@@ -51,7 +51,7 @@ do_lipo()
 	echo "Working directory is: $PWD"
 	
 	for ARCH_TARGET1 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 $baseOutputDir/$ARCH_TARGET1/code/libassimp.a "
+	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 $baseOutputDir/$ARCH_TARGET1/lib/code/libassimp.a "
 	done
 	output=$baseOutputDir/libassimp$BUILD_TYPE.a
 	LIPO_ARGS="$LIPO_ARGS-create -output $output"

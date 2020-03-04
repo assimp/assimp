@@ -49,16 +49,16 @@ do_lipo()
 	echo "Working directory is: $PWD"
 	
 	for ARCH_TARGET1 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 ./lib/$ARCH_TARGET1/lib/libassimp.a "
+	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1/lib/$ARCH_TARGET1/lib/libassimp.a"
 	done
-	output=./lib/libassimp$BUILD_TYPE.a
+	output=lib/libassimp$BUILD_TYPE.a
 	LIPO_ARGS="$LIPO_ARGS-create -output $output"
 	lipo $LIPO_ARGS
 
 	for ARCH_TARGET2 in $DEPLOY_ARCHS; do
-	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2./lib/$ARCH_TARGET2/lib/libirrxml.a "
+	    LIPO_ARGS2="$LIPO_ARGS2-arch $ARCH_TARGET2/lib/$ARCH_TARGET2/lib/libirrxml.a"
 	done
-	output=./lib/libirrxml$BUILD_TYPE.a
+	output=lib/libirrxml$BUILD_TYPE.a
 	LIPO_ARGS2="$LIPO_ARGS2-create -output $output"
 	lipo $LIPO_ARGS2
 	

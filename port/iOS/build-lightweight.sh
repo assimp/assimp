@@ -45,6 +45,10 @@ build_arch()
 
 do_lipo()
 {
+
+	echo "Lipo"
+	echo "Working directory is: $PWD"
+	
 	for ARCH_TARGET1 in $DEPLOY_ARCHS; do
 	    LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET1 $baseOutputDir/$ARCH_TARGET1/libassimp.a "
 	done

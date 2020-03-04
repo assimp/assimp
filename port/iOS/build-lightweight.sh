@@ -17,7 +17,7 @@ build_arch()
 	arch=$1
 	archUp=$(echo $arch | tr '[:lower:]' '[:upper:]')
 	generator="Unix Makefiles"
-	toolchain="../../IPHONEOS_${archUp}_TOOLCHAIN.cmake"
+	toolchain="../../port/iOS/IPHONEOS_${archUp}_TOOLCHAIN.cmake"
 
 	cd $baseOutputDir
 	mkdir $arch

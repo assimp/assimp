@@ -218,7 +218,7 @@ public:
 
 public:
     aiExportDataBlob* blob;
-    std::shared_ptr< Assimp::IOSystem > mIOSystem;
+    Assimp::IOSystem* mIOSystem;
     bool mIsDefaultIOHandler;
 
     /** The progress handler */
@@ -243,26 +243,43 @@ using namespace Assimp;
 Exporter :: Exporter()
 : pimpl(new ExporterPimpl()) {
     pimpl->mProgressHandler = new DefaultProgressHandler();
+    pimpl->mIOSystem = new DefaultIOSystem;
+    pimpl->mIsDefaultIOHandler = true;
 }
 
 // ------------------------------------------------------------------------------------------------
 Exporter::~Exporter() {
 	ai_assert(nullptr != pimpl);
 	FreeBlob();
+    delete pimpl->mIOSystem;
     delete pimpl;
 }
 
 // ------------------------------------------------------------------------------------------------
 void Exporter::SetIOHandler( IOSystem* pIOHandler) {
 	ai_assert(nullptr != pimpl);
-	pimpl->mIsDefaultIOHandler = !pIOHandler;
-    pimpl->mIOSystem.reset(pIOHandler);
+
+    ASSIMP_BEGIN_EXCEPTION_REGION();
+    // If the new handler is zero, allocate a default IO implementation.
+    if (pIOHandler == nullptr) {
+        if (pimpl->mIOSystem == nullptr
+            || (pimpl->mIOSystem != nullptr && !pimpl->mIsDefaultIOHandler)) {
+            delete pimpl->mIOSystem;
+            pimpl->mIOSystem = new DefaultIOSystem();
+            pimpl->mIsDefaultIOHandler = true;
+        }
+    } else if (pimpl->mIOSystem != pIOHandler) { // Otherwise register the custom handler
+        delete pimpl->mIOSystem;
+        pimpl->mIOSystem = pIOHandler;
+        pimpl->mIsDefaultIOHandler = false;
+    }
+    ASSIMP_END_EXCEPTION_REGION(void);
 }
 
 // ------------------------------------------------------------------------------------------------
 IOSystem* Exporter::GetIOHandler() const {
 	ai_assert(nullptr != pimpl);
-	return pimpl->mIOSystem.get();
+	return pimpl->mIOSystem;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -300,17 +317,20 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
         pimpl->blob = nullptr;
     }
 
-    std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
-    BlobIOSystem* blobio = new BlobIOSystem();
-    pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
+    // Claim ownership of old IO
+    IOSystem* old = pimpl->mIOSystem;
+    pimpl->mIOSystem = nullptr;
 
-    if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName(), pPreprocessing, pProperties)) {
-        pimpl->mIOSystem = old;
+    BlobIOSystem* blobio = new BlobIOSystem();
+    SetIOHandler(blobio);
+
+    if (AI_SUCCESS != Export(pScene,pFormatId, blobio->GetMagicFileName(), pPreprocessing, pProperties)) {
+        SetIOHandler(old);
         return nullptr;
     }
 
     pimpl->blob = blobio->GetBlobChain();
-    pimpl->mIOSystem = old;
+    SetIOHandler(old);
 
     return pimpl->blob;
 }
@@ -446,7 +466,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                 ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
                 ExportProperties* pProp = pProperties ? (ExportProperties*)pProperties : &emptyProperties;
         		pProp->SetPropertyBool("bJoinIdenticalVertices", pp & aiProcess_JoinIdenticalVertices);
-                exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProp);
+                exp.mExportFunction(pPath,pimpl->mIOSystem,scenecopy.get(), pProp);
 
                 pimpl->mProgressHandler->UpdateFileWrite(4, 4);
             } catch (DeadlyExportError& err) {

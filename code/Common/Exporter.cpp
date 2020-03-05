@@ -252,6 +252,7 @@ Exporter::~Exporter() {
 	ai_assert(nullptr != pimpl);
 	FreeBlob();
     delete pimpl->mIOSystem;
+    delete pimpl->mProgressHandler;
     delete pimpl;
 }
 

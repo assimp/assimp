@@ -262,8 +262,7 @@ void Exporter::SetIOHandler( IOSystem* pIOHandler) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     // If the new handler is zero, allocate a default IO implementation.
     if (pIOHandler == nullptr) {
-        if (pimpl->mIOSystem == nullptr
-            || (pimpl->mIOSystem != nullptr && !pimpl->mIsDefaultIOHandler)) {
+        if (pimpl->mIOSystem == nullptr || !pimpl->mIsDefaultIOHandler) {
             delete pimpl->mIOSystem;
             pimpl->mIOSystem = new DefaultIOSystem();
             pimpl->mIsDefaultIOHandler = true;
@@ -292,10 +291,13 @@ bool Exporter::IsDefaultIOHandler() const {
 void Exporter::SetProgressHandler(ProgressHandler* pHandler) {
     ai_assert(nullptr != pimpl);
 
-    if ( nullptr == pHandler) {
+    if (pHandler == nullptr) {
         // Release pointer in the possession of the caller
-        pimpl->mProgressHandler = new DefaultProgressHandler();
-        pimpl->mIsDefaultProgressHandler = true;
+        if (pimpl->mProgressHandler == nullptr || !pimpl->mIsDefaultProgressHandler) {
+            delete pimpl->mProgressHandler;
+            pimpl->mProgressHandler = new DefaultProgressHandler();
+            pimpl->mIsDefaultProgressHandler = true;
+        }
         return;
     }
 

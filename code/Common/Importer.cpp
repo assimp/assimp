@@ -299,8 +299,7 @@ void Importer::SetIOHandler( IOSystem* pIOHandler) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     // If the new handler is zero, allocate a default IO implementation.
     if (pIOHandler == nullptr) {
-        if (pimpl->mIOHandler == nullptr
-            || (pimpl->mIOHandler != nullptr && !pimpl->mIsDefaultHandler)) {
+        if (pimpl->mIOHandler == nullptr || !pimpl->mIsDefaultHandler) {
             delete pimpl->mIOHandler;
             pimpl->mIOHandler = new DefaultIOSystem();
             pimpl->mIsDefaultHandler = true;
@@ -339,8 +338,11 @@ void Importer::SetProgressHandler ( ProgressHandler* pHandler ) {
     // If the new handler is zero, allocate a default implementation.
     if (!pHandler) {
         // Release pointer in the possession of the caller
-        pimpl->mProgressHandler = new DefaultProgressHandler();
-        pimpl->mIsDefaultProgressHandler = true;
+        if (pimpl->mProgressHandler == nullptr || !pimpl->mIsDefaultProgressHandler) {
+            delete pimpl->mProgressHandler;
+            pimpl->mProgressHandler = new DefaultProgressHandler();
+            pimpl->mIsDefaultProgressHandler = true;
+        }
     } else if (pimpl->mProgressHandler != pHandler) { // Otherwise register the custom handler
         delete pimpl->mProgressHandler;
         pimpl->mProgressHandler = pHandler;

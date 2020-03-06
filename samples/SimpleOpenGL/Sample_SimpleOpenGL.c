@@ -15,9 +15,9 @@
 #include <stdio.h>
 
 #ifdef __APPLE__
-#include <glut.h>
+#include <freeglut.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
 
 /* assimp include files. These three are usually needed. */
@@ -392,6 +392,7 @@ int main(int argc, char **argv)
 	glutInitWindowPosition(100,100);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInit(&argc, argv);
+	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
 	glutCreateWindow("Assimp - Very simple OpenGL sample");
 	glutDisplayFunc(display);

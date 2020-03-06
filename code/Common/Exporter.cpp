@@ -213,6 +213,7 @@ public:
         for( unsigned int a = 0; a < mPostProcessingSteps.size(); a++) {
             delete mPostProcessingSteps[a];
         }
+        delete mIOSystem;
         delete mProgressHandler;
     }
 
@@ -250,9 +251,6 @@ Exporter :: Exporter()
 // ------------------------------------------------------------------------------------------------
 Exporter::~Exporter() {
 	ai_assert(nullptr != pimpl);
-	FreeBlob();
-    delete pimpl->mIOSystem;
-    delete pimpl->mProgressHandler;
     delete pimpl;
 }
 

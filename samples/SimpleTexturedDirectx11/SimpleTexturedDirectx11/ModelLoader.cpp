@@ -1,6 +1,12 @@
 #include "ModelLoader.h"
 
-ModelLoader::ModelLoader()
+ModelLoader::ModelLoader() : 
+	dev(nullptr),
+	devcon(nullptr),
+	meshes(),
+	directory(),
+	textures_loaded(),
+	hwnd(nullptr)
 {
 }
 
@@ -20,9 +26,10 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device * dev, ID3D11DeviceContext * devc
 	if (pScene == NULL)
 		return false;
 
-	this->directory = filename.substr(0, filename.find_last_of('/'));
+	this->directory = filename.substr(0, filename.find_last_of("/\\"));
 
 	this->dev = dev;
+	this->devcon = devcon;
 	this->hwnd = hwnd;
 
 	processNode(pScene->mRootNode, pScene);
@@ -138,12 +145,13 @@ vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextureTyp
 
 void ModelLoader::Close()
 {
+	for (auto& t : textures_loaded)
+		t.Release();
+
 	for (int i = 0; i < meshes.size(); i++)
 	{
 		meshes[i].Close();
 	}
-
-	dev->Release();
 }
 
 void ModelLoader::processNode(aiNode * node, const aiScene * scene)

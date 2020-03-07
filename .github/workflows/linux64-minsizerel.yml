@@ -17,5 +17,5 @@ jobs:
           buildWithCMakeArgs: '--config MinSizeRel' 
       - uses: actions/upload-artifact@v1
         with:
-          name: assimp-linux64
-          path: '${{ runner.workspace }}/build/linux64/bin/libassimp.so' #'/home/runner/work/assimp/build/linux64/bin/libassimp.so'
+          name: assimp
+          path: '${{ runner.workspace }}/build/linux64/bin/libassimp.so'

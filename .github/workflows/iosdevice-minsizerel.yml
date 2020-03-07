@@ -9,6 +9,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: 'build'
         run: ./port/iOS/build-lightweight.sh iphone
+      - name: 'find'
+        run: find ./ -name *.a
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-iosdevice

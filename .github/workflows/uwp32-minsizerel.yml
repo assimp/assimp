@@ -17,9 +17,9 @@ jobs:
           buildWithCMakeArgs: '--config MinSizeRel' 
       - uses: actions/upload-artifact@v1
         with:
-          name: assimp-uwp32
+          name: assimp
           path: '${{ runner.workspace }}\build\uwp32\bin\MinSizeRel\assimp.dll'
       - uses: actions/upload-artifact@v1
         with:
-          name: zlib-uwp32
+          name: zlib
           path: '${{ runner.workspace }}\build\uwp32\bin\MinSizeRel\zlib.dll'  

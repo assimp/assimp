@@ -10,7 +10,7 @@ jobs:
       - name: 'build'
         run: ./port/iOS/build-lightweight.sh iphone
       - name: 'find'
-        run: find ./ -name *.a
+        run: find "$(pwd)" -name *.a
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-iosdevice

@@ -19,5 +19,5 @@ jobs:
          buildWithCMakeArgs: '--config MinSizeRel'
      - uses: actions/upload-artifact@v1
        with:
-         name: assimp-androidx86
+         name: assimp
          path: '${{ runner.workspace }}/build/androidx86/bin/libassimp.so'

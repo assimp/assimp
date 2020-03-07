@@ -17,4 +17,3 @@ jobs:
         with:
           name: irrxml
           path: '${{ runner.workspace }}/assimp/lib/libirrxmlrelease.a'
-

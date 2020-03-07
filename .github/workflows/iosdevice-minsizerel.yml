@@ -9,14 +9,14 @@ jobs:
       - uses: actions/checkout@v2
       - name: 'build'
         run: ./port/iOS/build-lightweight.sh iphone
-      - name: 'find'
-        run: find "$(pwd)" -name *.a
+      #- name: 'find'
+      #  run: find "$(pwd)" -name *.a
       - uses: actions/upload-artifact@v1
         with:
           name: assimp-iosdevice
-          path: '${{ runner.workspace }}//lib/libassimprelease.a'
+          path: '${{ runner.workspace }}/assimp/lib/libassimprelease.a'
       - uses: actions/upload-artifact@v1
         with:
           name: irrxml-iosdevice
-          path: '${{ runner.workspace }}//lib/libirrxmlrelease.a'
+          path: '${{ runner.workspace }}/assimp/lib/libirrxmlrelease.a'
 

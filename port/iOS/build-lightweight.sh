@@ -61,8 +61,6 @@ do_lipo()
 	output=lib/libirrxml$BUILD_TYPE.a
 	LIPO_ARGS2="$LIPO_ARGS2 -create -output $output"
 	lipo $LIPO_ARGS2
-	
-	find ./ -name *.a
 }
 
 ARCH_RELEASE=(armv7 armv7s arm64)

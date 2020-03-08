@@ -3,7 +3,6 @@ name: buildall-minsizerel
 on: [push]
 
 jobs:  
-#------------------------------------------------------------------------------------------------------------------
   androidarm64:
     runs-on: ubuntu-latest    
     steps:

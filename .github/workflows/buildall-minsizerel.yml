@@ -37,7 +37,7 @@ jobs:
          name: assimp-androidarmv7
          path: '${{ runner.workspace }}/build/androidarmv7/bin/libassimp.so'
  #------------------------------------------------------------------------------------------------------------------
-   androidx86:
+  androidx86:
     runs-on: ubuntu-latest    
     steps:
      - uses: actions/checkout@v2

@@ -18,6 +18,9 @@
 /* Win32, DOS, MSVC, MSVS */
 #include <direct.h>
 
+#pragma warning(push)
+#pragma warning(disable : 4706)
+
 #define MKDIR(DIRNAME) _mkdir(DIRNAME)
 #define STRCLONE(STR) ((STR) ? _strdup(STR) : NULL)
 #define HAS_DEVICE(P)                                                          \
@@ -684,7 +687,7 @@ ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf, size_t bufsize) {
 int zip_entry_fread(struct zip_t *zip, const char *filename) {
   mz_zip_archive *pzip = NULL;
   mz_uint idx;
-  mz_uint32 xattr = 0;
+  //mz_uint32 xattr = 0;
   mz_zip_archive_file_stat info;
 
   if (!zip) {
@@ -826,7 +829,7 @@ int zip_extract(const char *zipname, const char *dir,
   mz_zip_archive zip_archive;
   mz_zip_archive_file_stat info;
   size_t dirlen = 0;
-  mz_uint32 xattr = 0;
+  //mz_uint32 xattr = 0;
 
   memset(path, 0, sizeof(path));
   memset(symlink_to, 0, sizeof(symlink_to));
@@ -942,3 +945,5 @@ out:
 
   return status;
 }
+
+#pragma warning(pop)

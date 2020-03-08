@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,6 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
+
+#pragma warning(push)
+#pragma warning( disable : 4706)
 
 namespace glTF {
 
@@ -699,6 +701,6 @@ namespace glTF {
         w.WriteObjects(d);
     }
 
+#pragma warning(pop)
+
 }
-
-

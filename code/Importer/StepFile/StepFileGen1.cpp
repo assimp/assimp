@@ -1311,11 +1311,11 @@ void StepFile::GetSchema(EXPRESS::ConversionSchema& out)
 namespace STEP {
 
     // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<NotImplemented>(const STEP::DB& db, const LIST& params, NotImplemented* in)
+/*template <> size_t GenericFill<NotImplemented>(const STEP::DB& db, const LIST& params, NotImplemented* in)
 {
 	return 0;
 }
-
+*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<measure_with_unit>(const DB& db, const LIST& params, measure_with_unit* in)
 {
@@ -1359,11 +1359,11 @@ template <> size_t GenericFill<absorbed_dose_unit>(const DB& db, const LIST& par
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to absorbed_dose_unit"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<abstract_variable>(const DB& db, const LIST& params, abstract_variable* in)
+/*template <> size_t GenericFill<abstract_variable>(const DB& db, const LIST& params, abstract_variable* in)
 {
 	size_t base = 0;
 	return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<acceleration_measure_with_unit>(const DB& db, const LIST& params, acceleration_measure_with_unit* in)
 {
@@ -1680,11 +1680,11 @@ template <> size_t GenericFill<amount_of_substance_unit>(const DB& db, const LIS
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to amount_of_substance_unit"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<angle_direction_reference>(const DB& db, const LIST& params, angle_direction_reference* in)
+/*template <> size_t GenericFill<angle_direction_reference>(const DB& db, const LIST& params, angle_direction_reference* in)
 {
 	size_t base = 0;
 	return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<representation_item>(const DB& db, const LIST& params, representation_item* in)
 {

@@ -266,8 +266,11 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
                 Material& mat = materials.back();
 
                 // read the material name
-                while (( c = stream.GetI1()))
+                c = stream.GetI1();
+                while (c) {
                     mat.name.data[mat.name.length++] = c;
+                    c = stream.GetI1();
+                }
 
                 // add the terminal character
                 mat.name.data[mat.name.length] = '\0';
@@ -554,20 +557,20 @@ outer:
                 }
 
                 // copy texture coordinates
-                if (uv && m.uv.size())
+                if (uv && curMesh.uv.size())
                 {
-                    if (m.prevUVIdx != 0xffffffff && m.uv.size() >= m.verts.size()) // workaround
+                    if (curMesh.prevUVIdx != 0xffffffff && curMesh.uv.size() >= curMesh.verts.size()) // workaround
                     {
-                        *uv = m.uv[face.indices[n]];
+                        *uv = curMesh.uv[face.indices[n]];
                     }
                     else
                     {
-                        if (face.uvindices[n] >= m.uv.size())
+                        if (face.uvindices[n] >= curMesh.uv.size())
                         {
                             ASSIMP_LOG_WARN("Quick3D: Texture coordinate index overflow");
                             face.uvindices[n] = 0;
                         }
-                        *uv = m.uv[face.uvindices[n]];
+                        *uv = curMesh.uv[face.uvindices[n]];
                     }
                     uv->y = 1.f - uv->y;
                     ++uv;

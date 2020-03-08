@@ -89,6 +89,8 @@ typedef unsigned long z_crc_t;
 #define SIZEZIPLOCALHEADER (0x1e)
 
 
+#pragma warning(push)
+#pragma warning(disable : 4131 4244 4189 4245)
 
 
 const char unz_copyright[] =
@@ -1613,3 +1615,5 @@ extern int ZEXPORT unzSetOffset (file, pos)
     s->current_file_ok = (err == UNZ_OK);
     return err;
 }
+
+#pragma warning(pop)

@@ -373,25 +373,25 @@ void WriteDump(const char* pFile, const char* cmd, const aiScene* scene, IOStrea
                     ioprintf(io," size=\"%i\">\n\t\t\t\t",
                         static_cast<int>(prop->mDataLength/sizeof(float)));
 
-                    for (unsigned int p = 0; p < prop->mDataLength/sizeof(float);++p) {
-                        ioprintf(io,"%f ",*((float*)(prop->mData+p*sizeof(float))));
+                    for (unsigned int pp = 0; pp < prop->mDataLength/sizeof(float);++pp) {
+                        ioprintf(io,"%f ",*((float*)(prop->mData+pp*sizeof(float))));
                     }
                 }
                 else if (prop->mType == aiPTI_Integer) {
                     ioprintf(io," size=\"%i\">\n\t\t\t\t",
                         static_cast<int>(prop->mDataLength/sizeof(int)));
 
-                    for (unsigned int p = 0; p < prop->mDataLength/sizeof(int);++p) {
-                        ioprintf(io,"%i ",*((int*)(prop->mData+p*sizeof(int))));
+                    for (unsigned int pp = 0; pp < prop->mDataLength/sizeof(int);++pp) {
+                        ioprintf(io,"%i ",*((int*)(prop->mData+pp*sizeof(int))));
                     }
                 }
                 else if (prop->mType == aiPTI_Buffer) {
                     ioprintf(io," size=\"%i\">\n\t\t\t\t",
                         static_cast<int>(prop->mDataLength));
 
-                    for (unsigned int p = 0; p < prop->mDataLength;++p) {
-                        ioprintf(io,"%2x ",prop->mData[p]);
-                        if (p && 0 == p%30) {
+                    for (unsigned int pp = 0; pp< prop->mDataLength;++pp) {
+                        ioprintf(io,"%2x ",prop->mData[pp]);
+                        if (pp && 0 == pp%30) {
                             ioprintf(io,"\n\t\t\t\t");
                         }
                     }

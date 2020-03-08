@@ -24,7 +24,6 @@ THE SOFTWARE.
 #ifndef O3DGC_SC3DMC_ENCODER_INL
 #define O3DGC_SC3DMC_ENCODER_INL
 
-
 #include "o3dgcArithmeticCodec.h"
 #include "o3dgcTimer.h"
 #include "o3dgcVector.h"
@@ -32,6 +31,9 @@ THE SOFTWARE.
 #include "o3dgcCommon.h"
 
 //#define DEBUG_VERBOSE
+
+#pragma warning(push)
+#pragma warning(disable : 4456)
 
 namespace o3dgc
 {
@@ -247,8 +249,8 @@ namespace o3dgc
 
         if (predMode == O3DGC_SC3DMC_SURF_NORMALS_PREDICTION)
         {
-            const Real minFloatArray[2] = {(Real)(-2.0),(Real)(-2.0)};
-            const Real maxFloatArray[2] = {(Real)(2.0),(Real)(2.0)};
+            const Real curMinFloatArray[2] = {(Real)(-2.0),(Real)(-2.0)};
+            const Real curMaxFloatArray[2] = {(Real)(2.0),(Real)(2.0)};
             if (m_streamType == O3DGC_STREAM_TYPE_ASCII)
             {
                 for(unsigned long i = 0; i < numFloatArray; ++i)
@@ -264,7 +266,7 @@ namespace o3dgc
                     ace.encode(IntToUInt(m_predictors[i]), dModel);
                 }
             }
-            QuantizeFloatArray(floatArray, numFloatArray, dimFloatArray, stride, minFloatArray, maxFloatArray, nQBits+1);
+            QuantizeFloatArray(floatArray, numFloatArray, dimFloatArray, stride, curMinFloatArray, curMaxFloatArray, nQBits + 1);
         }
         else
         {
@@ -921,7 +923,10 @@ namespace o3dgc
 #endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
-}
+} // namespace o3dgc
+
+#pragma warning(pop)
+
 #endif // O3DGC_SC3DMC_ENCODER_INL
 
 

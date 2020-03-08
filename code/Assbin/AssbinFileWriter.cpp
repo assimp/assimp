@@ -61,6 +61,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <time.h>
 
+#pragma warning(push)
+#pragma warning(disable : 4706)
+
 namespace Assimp {
 
 template <typename T>
@@ -530,7 +533,6 @@ protected:
         if (shortened) {
             unsigned int processed = 0;
             for (unsigned int job;(job = std::min(mesh->mNumFaces-processed,512u));processed += job) {
-
                 uint32_t hash = 0;
                 for (unsigned int a = 0; a < job;++a) {
 
@@ -855,5 +857,6 @@ void DumpSceneToAssbin(
     AssbinFileWriter fileWriter(shortened, compressed);
     fileWriter.WriteBinaryDump(pFile, cmd, pIOSystem, pScene);
 }
+#pragma warning(pop)
 
 } // end of namespace Assimp

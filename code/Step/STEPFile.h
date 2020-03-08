@@ -725,6 +725,8 @@ struct InternGenericConvert<Maybe<T>> {
     }
 };
 
+#pragma warning( push )
+#pragma warning( disable : 4127)
 template <typename T, uint64_t min_cnt, uint64_t max_cnt>
 struct InternGenericConvertList {
     void operator()(ListOf<T, min_cnt, max_cnt> &out, const std::shared_ptr<const EXPRESS::DataType> &inp_base, const STEP::DB &db) {
@@ -735,9 +737,10 @@ struct InternGenericConvertList {
         }
 
         // XXX is this really how the EXPRESS notation ([?:3],[1:3]) is intended?
-        if (max_cnt && inp->GetSize() > max_cnt) {
+        const size_t len = inp->GetSize();
+        if (0 != max_cnt && len > max_cnt) {
             ASSIMP_LOG_WARN("too many aggregate elements");
-        } else if (inp->GetSize() < min_cnt) {
+        } else if (len < min_cnt) {
             ASSIMP_LOG_WARN("too few aggregate elements");
         }
 
@@ -753,6 +756,8 @@ struct InternGenericConvertList {
         }
     }
 };
+
+#pragma warning( pop )
 
 template <typename T>
 struct InternGenericConvert<Lazy<T>> {

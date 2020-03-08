@@ -847,8 +847,6 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDVmdParser.h
   MMD/PmdHelper.h
   MMD/PmdHelper.cpp
-  MMD/PmdStringHelper.h
-  MMD/PmdStringHelper.cpp  
 )
 
 ADD_ASSIMP_EXPORTER( ASSJSON

@@ -3,7 +3,6 @@ name: buildall-minsizerel
 on: [push]
 
 jobs:  
-#------------------------------------------------------------------------------------------------------------------
   androidarm64:
     runs-on: ubuntu-latest    
     steps:
@@ -38,24 +37,24 @@ jobs:
          name: assimp-androidarmv7
          path: '${{ runner.workspace }}/build/androidarmv7/bin/libassimp.so'
  #------------------------------------------------------------------------------------------------------------------
-   androidx86:
-    runs-on: ubuntu-latest    
-    steps:
-     - uses: actions/checkout@v2
-     - uses: lukka/run-cmake@v0
-       with:
-         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-         useVcpkgToolchainFile: false
-         buildDirectory: '${{ runner.workspace }}/build/androidx86'
-         cmakeAppendedArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE="/usr/local/lib/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake" -DANDROID_TOOLCHAIN=clang -DANDROID_TOOLCHAIN_NAME=x86-4.9 -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
-         buildWithCMakeArgs: '--config MinSizeRel'
-     - uses: actions/upload-artifact@v1
-       with:
-         name: assimp-androidx86
-         path: '${{ runner.workspace }}/build/androidx86/bin/libassimp.so'
+  androidx86:
+   runs-on: ubuntu-latest    
+   steps:
+    - uses: actions/checkout@v2
+    - uses: lukka/run-cmake@v0
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        useVcpkgToolchainFile: false
+        buildDirectory: '${{ runner.workspace }}/build/androidx86'
+        cmakeAppendedArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE="/usr/local/lib/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake" -DANDROID_TOOLCHAIN=clang -DANDROID_TOOLCHAIN_NAME=x86-4.9 -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
+        buildWithCMakeArgs: '--config MinSizeRel'
+    - uses: actions/upload-artifact@v1
+      with:
+        name: assimp-androidx86
+        path: '${{ runner.workspace }}/build/androidx86/bin/libassimp.so'
  #------------------------------------------------------------------------------------------------------------------
-   iosdevice:
+  iosdevice:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,7 +69,7 @@ jobs:
           name: irrxml-iosdevice
           path: '${{ runner.workspace }}/assimp/lib/libirrxmlrelease.a'
  #------------------------------------------------------------------------------------------------------------------
-   iossimulator:
+  iossimulator:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -85,7 +84,7 @@ jobs:
           name: irrxml-iossimulator
           path: '${{ runner.workspace }}/assimp/lib/libirrxmldebug.a'
  #------------------------------------------------------------------------------------------------------------------
-   linux64:
+  linux64:
     runs-on: ubuntu-latest    
     steps:
       - uses: actions/checkout@v2
@@ -102,7 +101,7 @@ jobs:
           name: assimp-linux64
           path: '${{ runner.workspace }}/build/linux64/bin/libassimp.so'
  #------------------------------------------------------------------------------------------------------------------
-   osxuniversal:
+  osxuniversal:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -119,7 +118,7 @@ jobs:
           name: assimp-osxuniversal
           path: '${{ runner.workspace }}/build/osx/bin/libassimp.dylib'
  #------------------------------------------------------------------------------------------------------------------
-   uwp32:
+  uwp32:
     runs-on: windows-latest    
     steps:
       - uses: actions/checkout@v2
@@ -140,7 +139,7 @@ jobs:
           name: zlib-uwp32
           path: '${{ runner.workspace }}\build\uwp32\bin\MinSizeRel\zlib.dll'  
  #------------------------------------------------------------------------------------------------------------------
-   uwp64:
+  uwp64:
     runs-on: windows-latest    
     steps:
       - uses: actions/checkout@v2
@@ -154,14 +153,14 @@ jobs:
           buildWithCMakeArgs: '--config MinSizeRel' 
       - uses: actions/upload-artifact@v1
         with:
-          name: assimp-uwp64-uwp64
+          name: assimp-uwp64
           path: '${{ runner.workspace }}\build\uwp64\bin\MinSizeRel\assimp.dll'
       - uses: actions/upload-artifact@v1
         with:
-          name: zlib-uwp64-uwp64
+          name: zlib-uwp64
           path: '${{ runner.workspace }}\build\uwp64\bin\MinSizeRel\zlib.dll'  
  #------------------------------------------------------------------------------------------------------------------
-   win32:
+  win32:
     runs-on: windows-latest    
     steps:
       - uses: actions/checkout@v2
@@ -182,7 +181,7 @@ jobs:
           name: zlib-win32
           path: '${{ runner.workspace }}\build\win32\bin\MinSizeRel\zlib.dll'   
  #------------------------------------------------------------------------------------------------------------------
-   win64:
+  win64:
     runs-on: windows-latest    
     steps:
       - uses: actions/checkout@v2

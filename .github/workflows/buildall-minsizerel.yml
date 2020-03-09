@@ -205,12 +205,12 @@ jobs:
  pack-libraries:
     runs-on: windows-latest
     needs: [androidarm64, androidarmv7, androidx86, iosdevice, iossimulator, linux64, osxuniversal, uwp32, uwp64, win32, win64]
+#------------------------------------------------------------------------------------------------------------------
     steps:
      - uses: actions/download-artifact@v1
        with:
         name: zlib-win64
         path: TriLib/Assets/TriLib/TriLib/Plugins/Windows/x86_64
-#------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:
         name: assimp-win64
@@ -220,7 +220,6 @@ jobs:
        with:
         name: zlib-win32
         path: TriLib/Assets/TriLib/TriLib/Plugins/Windows/x86
-#------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:
         name: assimp-win32
@@ -230,7 +229,6 @@ jobs:
        with:
         name: zlib-uwp32
         path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86
-#------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:
         name: assimp-uwp32
@@ -240,8 +238,50 @@ jobs:
        with:
         name: zlib-uwp64
         path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86_64
-#------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:
         name: assimp-uwp64
         path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86_64
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-osxuniversal
+        path: TriLib/Assets/TriLib/TriLib/Plugins/OSX
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-linux64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Linux
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-iossimulator
+        path: TriLib/Assets/TriLib/TriLib/Plugins/iOS/simulator
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-iosdevice
+        path: TriLib/Assets/TriLib/TriLib/Plugins/iOS/device
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-androidx86
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Android/x86
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-androidarmv7
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Android/armeabi-v7a
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-androidarm64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Android/arm64
+#------------------------------------------------------------------------------------------------------------------
+     - uses: montudor/action-zip@v0.1.0
+       with:
+        args: zip -qq -r "/TriLibPlugins/TriLibPlugins.zip" /TriLib
+     - uses: actions/upload-artifact@master
+       with:
+        name: TriLibPlugins
+        path: /TriLibPlugins

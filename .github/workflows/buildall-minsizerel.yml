@@ -204,6 +204,7 @@ jobs:
 #------------------------------------------------------------------------------------------------------------------
  pack-libraries:
     runs-on: windows-latest
+    needs: [androidarm64, androidarmv7, androidx86, iosdevice, iossimulator, linux64, osxuniversal, uwp32, uwp64, win32, win64]
     steps:
      - uses: actions/download-artifact@v1
        with:

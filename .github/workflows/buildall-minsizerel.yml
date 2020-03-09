@@ -256,12 +256,12 @@ jobs:
      - uses: actions/download-artifact@v1
        with:
         name: assimp-iossimulator
-        path: TriLib/Assets/TriLib/TriLib/Plugins/iOS/simulator
+        path: TriLib/Assets/TriLib/TriLib/Plugins/iOS
 #------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:
         name: assimp-iosdevice
-        path: TriLib/Assets/TriLib/TriLib/Plugins/iOS/device
+        path: TriLib/Assets/TriLib/TriLib/Plugins/iOS
 #------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:

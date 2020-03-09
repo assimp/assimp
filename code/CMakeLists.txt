@@ -185,8 +185,6 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
-  Common/SplitByBoneCountProcess.cpp
-  Common/SplitByBoneCountProcess.h
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -737,6 +735,8 @@ SET( PostProcessing_SRCS
   PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
+  PostProcessing/SplitByBoneCountProcess.cpp
+  PostProcessing/SplitByBoneCountProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 

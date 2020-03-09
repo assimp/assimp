@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/code
   ${OPENGL_INCLUDE_DIR}
   ${GLUT_INCLUDE_DIR}
+  ${SAMPLES_SHARED_CODE_DIR}
 )
 
 LINK_DIRECTORIES(
@@ -31,6 +32,8 @@ LINK_DIRECTORIES(
 ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
   SimpleTexturedOpenGL/include/boost_includes.h
   SimpleTexturedOpenGL/src/model_loading.cpp
+  ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.cpp
+  ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h
 )
 
 SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})

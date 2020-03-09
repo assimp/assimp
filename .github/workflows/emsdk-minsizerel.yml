@@ -8,6 +8,8 @@ jobs:
       - uses: lovasoa/setup-emscripten@master
         with:
           emscripten-version: '1.38.47'
+      - name: find-toolchain
+        run: locate Emscripten.cmake
 #    - name: Cache emsdk
 #      uses: actions/cache@v4
 #      id: cache # This is important!

@@ -15,7 +15,7 @@ jobs:
         key: ${{ runner.os }}-emsdk-1.38.40
     - name: Setup EmSdk
       uses: mymindstorm/setup-emsdk@v2
-        with:
+      with:
         # Make sure to set a version number!
         version: 1.38.40
         # This is the name of the cache folder.

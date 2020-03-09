@@ -225,7 +225,7 @@ namespace {
 ,		SchemaEntry("presentation_representation_select",NULL )
 ,		SchemaEntry("presentation_size_assignment_select",NULL )
 ,		SchemaEntry("presentation_style_select",NULL )
-,		SchemaEntry("presented_item_select",NULL )
+//,		SchemaEntry("presented_item_select",NULL )
 ,		SchemaEntry("pressure_measure",NULL )
 ,		SchemaEntry("product_definition_or_assembly_relationship",NULL )
 ,		SchemaEntry("product_definition_or_breakdown_element_usage",NULL )
@@ -397,7 +397,7 @@ namespace {
 ,		SchemaEntry("applied_organizational_project_assignment",&STEP::ObjectHelper<applied_organizational_project_assignment,1>::Construct )
 ,		SchemaEntry("person_and_organization_assignment",&STEP::ObjectHelper<person_and_organization_assignment,2>::Construct )
 ,		SchemaEntry("applied_person_and_organization_assignment",&STEP::ObjectHelper<applied_person_and_organization_assignment,1>::Construct )
-,		SchemaEntry("presented_item",&STEP::ObjectHelper<presented_item,0>::Construct )
+//,		SchemaEntry("presented_item",&STEP::ObjectHelper<presented_item,0>::Construct )
 ,		SchemaEntry("applied_presented_item",&STEP::ObjectHelper<applied_presented_item,1>::Construct )
 ,		SchemaEntry("security_classification_assignment",&STEP::ObjectHelper<security_classification_assignment,1>::Construct )
 ,		SchemaEntry("applied_security_classification_assignment",&STEP::ObjectHelper<applied_security_classification_assignment,1>::Construct )
@@ -1014,7 +1014,7 @@ namespace {
 ,		SchemaEntry("presentation_size",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("presentation_style_assignment",&STEP::ObjectHelper<presentation_style_assignment,1>::Construct )
 ,		SchemaEntry("presentation_style_by_context",&STEP::ObjectHelper<presentation_style_by_context,1>::Construct )
-,		SchemaEntry("presented_item_representation",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+//,		SchemaEntry("presented_item_representation",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("pressure_measure_with_unit",&STEP::ObjectHelper<pressure_measure_with_unit,0>::Construct )
 ,		SchemaEntry("pressure_unit",&STEP::ObjectHelper<pressure_unit,0>::Construct )
 ,		SchemaEntry("procedural_representation",&STEP::ObjectHelper<procedural_representation,0>::Construct )
@@ -1359,11 +1359,10 @@ template <> size_t GenericFill<absorbed_dose_unit>(const DB& db, const LIST& par
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to absorbed_dose_unit"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-/*template <> size_t GenericFill<abstract_variable>(const DB& db, const LIST& params, abstract_variable* in)
-{
+template <> size_t GenericFill<abstract_variable>(const DB&, const LIST&, abstract_variable*) {
 	size_t base = 0;
 	return base;
-}*/
+}
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<acceleration_measure_with_unit>(const DB& db, const LIST& params, acceleration_measure_with_unit* in)
 {
@@ -1680,11 +1679,11 @@ template <> size_t GenericFill<amount_of_substance_unit>(const DB& db, const LIS
 	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to amount_of_substance_unit"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-/*template <> size_t GenericFill<angle_direction_reference>(const DB& db, const LIST& params, angle_direction_reference* in)
+template <> size_t GenericFill<angle_direction_reference>(const DB&, const LIST&, angle_direction_reference*)
 {
 	size_t base = 0;
 	return base;
-}*/
+}
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<representation_item>(const DB& db, const LIST& params, representation_item* in)
 {

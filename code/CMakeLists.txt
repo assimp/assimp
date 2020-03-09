@@ -864,15 +864,15 @@ if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
 endif()
 
-ADD_ASSIMP_IMPORTER( STEP
-    Step/STEPFile.h
-    Importer/StepFile/StepFileImporter.h
-    Importer/StepFile/StepFileImporter.cpp
-    Importer/StepFile/StepFileGen1.cpp
-    Importer/StepFile/StepFileGen2.cpp
-    Importer/StepFile/StepFileGen3.cpp
-    Importer/StepFile/StepReaderGen.h
-)
+#ADD_ASSIMP_IMPORTER( STEP
+#    Step/STEPFile.h
+#    Importer/StepFile/StepFileImporter.h
+#    Importer/StepFile/StepFileImporter.cpp
+#    Importer/StepFile/StepFileGen1.cpp
+#    Importer/StepFile/StepFileGen2.cpp
+#    Importer/StepFile/StepFileGen3.cpp
+#    Importer/StepFile/StepReaderGen.h
+#)
 
 ADD_ASSIMP_EXPORTER( STEP
     Step/StepExporter.h

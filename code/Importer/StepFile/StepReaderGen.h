@@ -404,7 +404,7 @@ namespace StepFile {
     // C++ wrapper type for presentation_style_select
     typedef SELECT presentation_style_select;
     // C++ wrapper type for presented_item_select
-    typedef SELECT presented_item_select;
+    //typedef SELECT presented_item_select;
     // C++ wrapper type for pressure_measure
     typedef REAL pressure_measure;
     // C++ wrapper type for product_definition_or_assembly_relationship
@@ -545,7 +545,7 @@ namespace StepFile {
 	struct absorbed_dose_measure_with_unit;
 	struct derived_unit;
 	struct absorbed_dose_unit;
-	struct abstract_variable;
+	//struct abstract_variable;
 	struct acceleration_measure_with_unit;
 	struct acceleration_unit;
 	struct action;
@@ -646,7 +646,7 @@ namespace StepFile {
 	struct applied_organizational_project_assignment;
 	struct person_and_organization_assignment;
 	struct applied_person_and_organization_assignment;
-	struct presented_item;
+	//struct presented_item;
 	struct applied_presented_item;
 	struct security_classification_assignment;
 	struct applied_security_classification_assignment;

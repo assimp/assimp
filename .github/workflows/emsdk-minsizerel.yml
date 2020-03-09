@@ -8,6 +8,8 @@ jobs:
       - uses: lovasoa/setup-emscripten@master
         with:
           emscripten-version: '1.38.47'
+      - name: find-cmake
+        run: find $EMSDK -type d -name "cmake"
       - name: find-toolchain
         run: TOOLCHAIN=$(find $EMSDK -name "Emscripten.cmake")
 #    - name: Cache emsdk

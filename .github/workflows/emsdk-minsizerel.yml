@@ -5,27 +5,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-- name: Cache emsdk
-  uses: actions/cache@v4
-  id: cache # This is important!
-  with:
-    # Set to the same folder as actions-cache-folder (more below)
-    path: 'emsdk-cache'
-    # Set the end bit to emsdk version
-    key: ${{ runner.os }}-emsdk-1.38.40
-
-- name: Setup emsdk (use cache if found, create otherwise)
-  uses: mymindstorm/setup-emsdk@v2
-  with:
-    # Make sure to set a version number!
-    version: 1.38.40
-    # This is the name of the cache folder.
-    # The cache folder will be placed in the build directory,
-    #  so make sure it doesn't conflict with anything!
-    actions-cache-folder: 'emsdk-cache'
-    # This stops it from using tc.cacheDir since we are using
-    #  actions/cache.
-    no-cache: true
-
-- name: Verify
-  run: emcc -v
+    - name: Cache emsdk
+      uses: actions/cache@v4
+      id: cache # This is important!
+      with:
+        # Set to the same folder as actions-cache-folder (more below)
+        path: 'emsdk-cache'
+        # Set the end bit to emsdk version
+        key: ${{ runner.os }}-emsdk-1.38.40
+    - name: Setup EmSdk
+      uses: mymindstorm/setup-emsdk@v2
+        with:
+        # Make sure to set a version number!
+        version: 1.38.40
+        # This is the name of the cache folder.
+        # The cache folder will be placed in the build directory,
+        #  so make sure it doesn't conflict with anything!
+        actions-cache-folder: 'emsdk-cache'
+        # This stops it from using tc.cacheDir since we are using
+        #  actions/cache.
+        no-cache: true
+   - name: Verify
+     run: emcc -v

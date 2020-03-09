@@ -160,6 +160,27 @@ jobs:
          name: zlib-uwp64
          path: '${{ runner.workspace }}\build\uwp64\bin\MinSizeRel\zlib.dll'  
 #------------------------------------------------------------------------------------------------------------------
+ uwparm64:
+   runs-on: windows-latest    
+   steps:
+     - uses: actions/checkout@v2
+     - uses: lukka/run-cmake@v0
+       with:
+         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+         useVcpkgToolchainFile: false
+         buildDirectory: '${{ runner.workspace }}/build/uwparm64'
+         cmakeAppendedArgs: '-G "Visual Studio 16 2019" -A arm64 -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE="port\uwp\uwp-toolchain.cmake" -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DBUILD_SHARED_LIBS=ON -DUSE_AES=OFF -DZIP_64=ON -DSKIP_INSTALL_ALL=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON -DSKIP_MSVC_UPDATE=ON -DCMAKE_CONFIGURATION_TYPES="MinSizeRel"'
+         buildWithCMakeArgs: '--config MinSizeRel' 
+     - uses: actions/upload-artifact@v1
+       with:
+         name: assimp-uwparm64
+         path: '${{ runner.workspace }}\build\uwparm64\bin\MinSizeRel\assimp.dll'
+     - uses: actions/upload-artifact@v1
+       with:
+         name: zlib-uwparm64
+         path: '${{ runner.workspace }}\build\uwparm64\bin\MinSizeRel\zlib.dll'
+#------------------------------------------------------------------------------------------------------------------
  win32:
    runs-on: windows-latest    
    steps:
@@ -204,7 +225,7 @@ jobs:
 #------------------------------------------------------------------------------------------------------------------
  pack-libraries:
     runs-on: windows-latest
-    needs: [androidarm64, androidarmv7, androidx86, iosdevice, iossimulator, linux64, osxuniversal, uwp32, uwp64, win32, win64]
+    needs: [androidarm64, androidarmv7, androidx86, iosdevice, iossimulator, linux64, osxuniversal, uwp32, uwp64, uwparm64, win32, win64]
 #------------------------------------------------------------------------------------------------------------------
     steps:
      - uses: actions/download-artifact@v1
@@ -242,6 +263,15 @@ jobs:
        with:
         name: assimp-uwp64
         path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86_64
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: zlib-uwparm64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/arm64
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-uwparm64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/arm64
 #------------------------------------------------------------------------------------------------------------------
      - uses: actions/download-artifact@v1
        with:

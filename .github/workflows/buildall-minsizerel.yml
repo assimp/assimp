@@ -202,3 +202,45 @@ jobs:
          name: zlib-win64
          path: '${{ runner.workspace }}\build\win64\bin\MinSizeRel\zlib.dll'   
 #------------------------------------------------------------------------------------------------------------------
+ pack-libraries:
+    runs-on: windows-latest
+    steps:
+     - uses: actions/download-artifact@v1
+       with:
+        name: zlib-win64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Windows/x86_64
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-win64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Windows/x86_64
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: zlib-win32
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Windows/x86
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-win32
+        path: TriLib/Assets/TriLib/TriLib/Plugins/Windows/x86
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: zlib-uwp32
+        path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-uwp32
+        path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: zlib-uwp64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86_64
+#------------------------------------------------------------------------------------------------------------------
+     - uses: actions/download-artifact@v1
+       with:
+        name: assimp-uwp64
+        path: TriLib/Assets/TriLib/TriLib/Plugins/UWP/x86_64

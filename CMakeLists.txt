@@ -589,7 +589,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ()
   ENDIF ()
-  # Te command line tool
+  # The command line tool
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ()
 

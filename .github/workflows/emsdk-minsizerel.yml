@@ -9,7 +9,7 @@ jobs:
         with:
           emscripten-version: '1.38.47'
       - name: find-toolchain
-        run: find ./ -name "Emscripten.cmake"
+        run: find $EMSDK -name "Emscripten.cmake"
 #    - name: Cache emsdk
 #      uses: actions/cache@v4
 #      id: cache # This is important!

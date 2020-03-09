@@ -25,5 +25,5 @@ jobs:
         # This stops it from using tc.cacheDir since we are using
         #  actions/cache.
         no-cache: true
-   - name: Verify
-     run: emcc -v
+    - name: Verify
+      run: emcc -v

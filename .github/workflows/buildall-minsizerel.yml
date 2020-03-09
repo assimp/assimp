@@ -280,7 +280,7 @@ jobs:
 #------------------------------------------------------------------------------------------------------------------
      - name: create-dir
        run: md "${{ github.workspace }}\TriLibPlugins"
-     - name: zip-files
+     - name: zipfiles
        run: compress-archive -path "${{ github.workspace }}\TriLib" -destinationpath "${{ github.workspace }}\TriLibPlugins\TriLibPlugins.zip" -compressionlevel optimal
      - uses: actions/upload-artifact@master
        with:

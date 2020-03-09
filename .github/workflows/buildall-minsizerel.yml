@@ -279,8 +279,8 @@ jobs:
         path: TriLib/Assets/TriLib/TriLib/Plugins/Android/arm64
 #------------------------------------------------------------------------------------------------------------------
      - name: zip-files
-       run: compress-archive -path "\TriLib" -destinationpath "\TriLibPlugins\TriLibPlugins.zip" -compressionlevel optimal
+       run: compress-archive -path "${{ github.workspace }}\TriLib" -destinationpath "${{ github.workspace }}\TriLibPlugins\TriLibPlugins.zip" -compressionlevel optimal
      - uses: actions/upload-artifact@master
        with:
         name: TriLibPlugins
-        path: /TriLibPlugins
+        path: ${{ github.workspace }}\TriLibPlugins

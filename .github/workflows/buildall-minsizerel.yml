@@ -278,6 +278,8 @@ jobs:
         name: assimp-androidarm64
         path: TriLib/Assets/TriLib/TriLib/Plugins/Android/arm64
 #------------------------------------------------------------------------------------------------------------------
+     - name: create-dir
+       run: md "${{ github.workspace }}\TriLibPlugins"
      - name: zip-files
        run: compress-archive -path "${{ github.workspace }}\TriLib" -destinationpath "${{ github.workspace }}\TriLibPlugins\TriLibPlugins.zip" -compressionlevel optimal
      - uses: actions/upload-artifact@master

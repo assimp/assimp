@@ -278,9 +278,8 @@ jobs:
         name: assimp-androidarm64
         path: TriLib/Assets/TriLib/TriLib/Plugins/Android/arm64
 #------------------------------------------------------------------------------------------------------------------
-     - uses: montudor/action-zip@v0.1.0
-       with:
-        args: zip -qq -r "/TriLibPlugins/TriLibPlugins.zip" /TriLib
+     - name: zip-files
+       run: compress-archive -path "\TriLib" -destinationpath "\TriLibPlugins\TriLibPlugins.zip" -compressionlevel optimal
      - uses: actions/upload-artifact@master
        with:
         name: TriLibPlugins

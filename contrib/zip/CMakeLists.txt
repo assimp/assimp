@@ -5,7 +5,7 @@ project(zip
   VERSION "0.1.15")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-option(CMAKE_DISABLE_TESTING "Disable test creation" OFF)
+option(CMAKE_DISABLE_TESTING "Disable test creation" ON)
 
 if (MSVC)
   # Use secure functions by default and suppress warnings about "deprecated" functions

@@ -17,3 +17,5 @@ jobs:
         run: emcmake cmake -Wno-dev -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" -DCMAKE_MODULE_PATH="$MODULE" -DCMAKE_BUILD_TYPE=MinSizeRel -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DASSIMP_BUILD_MINIZIP=ON -DASSIMP_BUILD_ZLIB=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_C_FLAGS=-Wno-implicit-function-declaration -DCMAKE_C_FLAGS=-Wno-implicit-function-declaration -DCMAKE_CXX_FLAGS=-Wno-implicit-function-declaration -DZIP_64=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON
       - name: build-2
         run: emmake make
+      - name: find-artifacts
+        run: find "${{ github.workspace }}" -name "*.so"

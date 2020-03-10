@@ -711,8 +711,8 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
+#SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
+#SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
 
 ADD_ASSIMP_IMPORTER( Q3D
   Q3D/Q3DLoader.cpp
@@ -914,13 +914,13 @@ if ( MSVC )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
 
-IF(NOT HUNTER_ENABLED)
-  if (UNZIP_FOUND)
-    SET (unzip_compile_SRCS "")
-  else ()
-    # moved to own CMakeLists.txt
-  endif ()
-ENDIF()
+#IF(NOT HUNTER_ENABLED)
+#  if (UNZIP_FOUND)
+#    SET (unzip_compile_SRCS "")
+#  else ()
+#    # moved to own CMakeLists.txt
+#  endif ()
+#ENDIF()
 
 MESSAGE(STATUS "Enabled importer formats:${ASSIMP_IMPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
@@ -947,13 +947,14 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  ${IrrXML_SRCS}
-  ${unzip_compile_SRCS}
-  ${Poly2Tri_SRCS}
-  ${Clipper_SRCS}
-  ${openddl_parser_SRCS}
-  ${open3dgc_SRCS}
-  ${ziplib_SRCS}
+  #${IrrXML_SRCS}
+  #${unzip_compile_SRCS}
+  #${zip_compile_SRCS}
+  #${Poly2Tri_SRCS}
+  #${Clipper_SRCS}
+  #${openddl_parser_SRCS}
+  #${open3dgc_SRCS}
+  #${ziplib_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -964,7 +965,15 @@ ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
 IF(NOT HUNTER_ENABLED)
   INCLUDE_DIRECTORIES(
       ${IRRXML_INCLUDE_DIR}
-      ../contrib/openddlparser/include
+	  ${unzip_INCLUDE_DIR}
+	  ${zip_INCLUDE_DIR}
+	  ${Poly2Tri_INCLUDE_DIR}
+	  ${Clipper_INCLUDE_DIR}
+      ${openddl_INCLUDE_DIR}
+	  ${Open3DGC_INCLUDE_DIR}
+	  ${ZLIB_INCLUDE_DIR}
+	  ${rapidjson_INCLUDE_DIR}
+	  ${utf8cpp_INCLUDE_DIR}
   )
 ENDIF()
 
@@ -985,18 +994,28 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      polyclipping::polyclipping
       irrXML::irrXML
-      openddlparser::openddl_parser
-      poly2tri::poly2tri
       minizip::minizip
+      zip::zip
+      poly2tri::poly2tri
+      polyclipping::polyclipping
+      openddlparser::openddl_parser
       ZLIB::zlib
       RapidJSON::rapidjson
       utf8::utf8
-      zip::zip
   )
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
+  TARGET_LINK_LIBRARIES(assimp 
+  ${IRRXML_LIBRARY}
+  ${unzip_LIBRARY}
+  ${zip_LIBRARY}
+  ${Poly2Tri_LIBRARY}
+  ${Clipper_LIBRARY}
+  ${OPENDDL_PARSER_LIBRARIES}
+  ${Open3DGC_LIBRARY}
+  ${ZLIB_LIBRARIES}
+  ${rapidjson_LIBRARY}
+  ${utf8cpp_LIBRARY}
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -1079,14 +1098,14 @@ ENDIF()
 
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
-IF(NOT HUNTER_ENABLED)
-  if (UNZIP_FOUND)
-    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
-    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
-  else ()
-    INCLUDE_DIRECTORIES("../")
-  endif ()
-ENDIF()
+#IF(NOT HUNTER_ENABLED)
+#  if (UNZIP_FOUND)
+#    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
+#    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+#  else ()
+#    INCLUDE_DIRECTORIES("../")
+#  endif ()
+#ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)

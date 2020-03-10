@@ -5,33 +5,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: lovasoa/setup-emscripten@master
         with:
           emscripten-version: '1.38.47'
-      - name: find-cmake
-        run: find $EMSDK -type d -name "cmake"
-      - name: find-toolchain
-        run: TOOLCHAIN=$(find $EMSDK -name "Emscripten.cmake")
-#    - name: Cache emsdk
-#      uses: actions/cache@v4
-#      id: cache # This is important!
-#      with:
-#        # Set to the same folder as actions-cache-folder (more below)
-#        path: 'emsdk-cache'
-#        # Set the end bit to emsdk version
-#        key: ${{ runner.os }}latest
-#    - name: Setup EmSdk
-#      uses: mymindstorm/setup-emsdk@v2
-#      with:
-#        # Make sure to set a version number!
-#        version: latest
-#        # This is the name of the cache folder.
-#        # The cache folder will be placed in the build directory,
-#        #  so make sure it doesn't conflict with anything!
-#        actions-cache-folder: 'emsdk-cache'
-#        # This stops it from using tc.cacheDir since we are using
-#        #  actions/cache.
-#        no-cache: true
-#    - name: Verify
-#      run: emcc -v
-#
+      - name: setup-1
+        run: MODULE=$EMSDK/fastcomp/emscripten/cmake
+      - name: setup-2
+        run: TOOLCHAIN=$MODULE/Modules/Platform/Emscripten.cmake
+      - name: build-1
+        run: emccmake cmake -Wno-dev -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" -DCMAKE_MODULE_PATH="$MODULE" -DCMAKE_BUILD_TYPE=MinSizeRel -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON -DASSIMP_BUILD_MINIZIP=ON -DASSIMP_BUILD_ZLIB=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_C_FLAGS=-Wno-implicit-function-declaration -DCMAKE_C_FLAGS=-Wno-implicit-function-declaration -DCMAKE_CXX_FLAGS=-Wno-implicit-function-declaration -DZIP_64=ON -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=ON
+      - name: build-2
+        run: emmake make

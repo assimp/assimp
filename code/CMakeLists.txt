@@ -911,7 +911,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(utf8)
   find_package(utf8 CONFIG REQUIRED)
 ELSE()
-  # utf8 is header-only, so Assimp doesn't need to do anything.
+  add_subdirectory(contrib/utf8cpp)
 ENDIF()
 
 # polyclipping
@@ -919,7 +919,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(polyclipping)
   find_package(polyclipping CONFIG REQUIRED)
 ELSE()
- # moved to own CMakeLists.txt
+  add_subdirectory(contrib/clipper)
 ENDIF()
 
 # poly2tri
@@ -927,7 +927,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(poly2tri)
   find_package(poly2tri CONFIG REQUIRED)
 ELSE()
- # moved to own CMakeLists.txt
+  add_subdirectory(contrib/poly2tri)
 ENDIF()
 
 # minizip/unzip
@@ -935,7 +935,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(minizip)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
- # moved to own CMakeLists.txt
+  add_subdirectory(contrib/unzip)
 ENDIF()
 
 # zip (https://github.com/kuba--/zip)
@@ -943,7 +943,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(zip)
   find_package(zip CONFIG REQUIRED)
 ELSE()
-  #moved to own CMakeLists.txt
+  add_subdirectory(contrib/zip)
 ENDIF()
 
 # openddlparser
@@ -951,14 +951,14 @@ IF(HUNTER_ENABLED)
   hunter_add_package(openddlparser)
   find_package(openddlparser CONFIG REQUIRED)
 ELSE()
-  #moved to own CMakeLists.txt
+  add_subdirectory(contrib/openddlparser)
 ENDIF()
 
 # Open3DGC
 IF(HUNTER_ENABLED)
   # Nothing to do, not available in Hunter yet.
 ELSE()
-# moved to own CMakeLists.txt
+  add_subdirectory(contrib/Open3DGC)
 ENDIF()
 
 # Check dependencies for glTF importer with Open3DGC-compression.
@@ -979,7 +979,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
-# moved to own CMakeLists.txt
+  add_subdirectory(contrib/rapidjson)
 ENDIF()
 
 # VC2010 fixes

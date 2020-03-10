@@ -1096,16 +1096,16 @@ if (APPLE)
   ENDIF()
 ENDIF()
 
-# Build against external unzip, or add ../contrib/unzip so
-# assimp can #include "unzip.h"
-#IF(NOT HUNTER_ENABLED)
-#  if (UNZIP_FOUND)
-#    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
-#    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
-#  else ()
-#    INCLUDE_DIRECTORIES("../")
-#  endif ()
-#ENDIF()
+## Build against external unzip, or add ../contrib/unzip so
+## assimp can #include "unzip.h"
+##IF(NOT HUNTER_ENABLED)
+##  if (UNZIP_FOUND)
+##    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
+##    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+##  else ()
+##    INCLUDE_DIRECTORIES("../")
+##  endif ()
+##ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)

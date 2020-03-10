@@ -1016,6 +1016,7 @@ ELSE()
   ${ZLIB_LIBRARIES}
   ${rapidjson_LIBRARY}
   ${utf8cpp_LIBRARY}
+  )
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)

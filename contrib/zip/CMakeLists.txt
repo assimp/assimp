@@ -7,6 +7,13 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(CMAKE_DISABLE_TESTING "Disable test creation" OFF)
 
+# TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
+if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+  add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
+else()
+  add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
+endif()
+
 if (MSVC)
   # Use secure functions by default and suppress warnings about "deprecated" functions
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1")

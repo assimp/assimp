@@ -456,20 +456,21 @@ IF( BUILD_DOCS )
   ADD_SUBDIRECTORY(doc)
 ENDIF()
 
+#----------------------------------------------------------------------------------------------------
+# Search for external dependencies, and build them from source if not found
+#----------------------------------------------------------------------------------------------------
+# irrXML
 # Look for system installed irrXML
 IF ( SYSTEM_IRRXML )
   FIND_PACKAGE( IrrXML REQUIRED )
 ENDIF()
-
-# Search for external dependencies, and build them from source if not found
-# irrXML
 IF(HUNTER_ENABLED)
   hunter_add_package(irrXML)
   find_package(irrXML CONFIG REQUIRED)
 ELSE()
-  add_subdirectory(/contrib/iirXML)
+  add_subdirectory(/contrib/irrXML)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # utf8
 IF(HUNTER_ENABLED)
   hunter_add_package(utf8)
@@ -477,7 +478,7 @@ IF(HUNTER_ENABLED)
 ELSE()
   add_subdirectory(/contrib/utf8cpp)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # polyclipping
 IF(HUNTER_ENABLED)
   hunter_add_package(polyclipping)
@@ -485,7 +486,7 @@ IF(HUNTER_ENABLED)
 ELSE()
   add_subdirectory(/contrib/clipper)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # poly2tri
 IF(HUNTER_ENABLED)
   hunter_add_package(poly2tri)
@@ -493,15 +494,26 @@ IF(HUNTER_ENABLED)
 ELSE()
   add_subdirectory(/contrib/poly2tri)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # minizip/unzip
+IF( NOT IOS )
+  IF( NOT ASSIMP_BUILD_MINIZIP )
+    use_pkgconfig(UNZIP minizip)
+  ENDIF()
+ELSE ()
+  IF( NOT BUILD_SHARED_LIBS )
+    IF( NOT ASSIMP_BUILD_MINIZIP )
+      use_pkgconfig(UNZIP minizip)
+    ENDIF()
+  ENDIF ()
+ENDIF ()
 IF(HUNTER_ENABLED)
   hunter_add_package(minizip)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
   add_subdirectory(/contrib/unzip)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # zip (https://github.com/kuba--/zip)
 IF(HUNTER_ENABLED)
   hunter_add_package(zip)
@@ -509,7 +521,7 @@ IF(HUNTER_ENABLED)
 ELSE()
   add_subdirectory(/contrib/zip)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # openddlparser
 IF(HUNTER_ENABLED)
   hunter_add_package(openddlparser)
@@ -517,14 +529,14 @@ IF(HUNTER_ENABLED)
 ELSE()
   add_subdirectory(/contrib/openddlparser)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # Open3DGC
 IF(HUNTER_ENABLED)
   # Nothing to do, not available in Hunter yet.
 ELSE()
   add_subdirectory(/contrib/Open3DGC)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # RapidJSON
 IF(HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
@@ -532,7 +544,7 @@ IF(HUNTER_ENABLED)
 ELSE()
   add_subdirectory(/contrib/rapidjson)
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
@@ -545,8 +557,8 @@ ELSE ()
   MESSAGE (INFO " Hunter enabled or RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
   #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
 ENDIF ()
-
-# Search for zlib
+#----------------------------------------------------------------------------------------------------
+# zlib
 IF(HUNTER_ENABLED)
   hunter_add_package(ZLIB)
   find_package(ZLIB CONFIG REQUIRED)
@@ -587,18 +599,7 @@ ELSE()
   ENDIF()
   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ENDIF()
-
-IF( NOT IOS )
-  IF( NOT ASSIMP_BUILD_MINIZIP )
-    use_pkgconfig(UNZIP minizip)
-  ENDIF()
-ELSE ()
-  IF( NOT BUILD_SHARED_LIBS )
-    IF( NOT ASSIMP_BUILD_MINIZIP )
-      use_pkgconfig(UNZIP minizip)
-    ENDIF()
-  ENDIF ()
-ENDIF ()
+#----------------------------------------------------------------------------------------------------
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)

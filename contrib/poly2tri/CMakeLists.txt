@@ -8,4 +8,5 @@ set(SOURCE_FILES poly2tri/common/shapes.cc
                  poly2tri/sweep/sweep_context.cc)
 
 include_directories(${CMAKE_SOURCE_DIR}/poly2tri)
-add_library(Poly2Tri ${SOURCE_FILES})
+add_library(Poly2Tri SHARED ${SOURCE_FILES})
+add_library(Poly2Tristatic STATIC ${SOURCE_FILES})

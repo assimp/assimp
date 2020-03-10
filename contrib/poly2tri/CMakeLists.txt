@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(Poly2Tri)
 enable_language(CXX)
+
 set(SOURCE_FILES poly2tri/common/shapes.cc 
                  poly2tri/sweep/advancing_front.cc 
                  poly2tri/sweep/cdt.cc 

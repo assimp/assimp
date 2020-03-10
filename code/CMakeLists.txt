@@ -919,11 +919,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(polyclipping)
   find_package(polyclipping CONFIG REQUIRED)
 ELSE()
-  SET( Clipper_SRCS
-    ../contrib/clipper/clipper.hpp
-    ../contrib/clipper/clipper.cpp
-  )
-  SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
+ # moved to own CMakeLists.txt
 ENDIF()
 
 # poly2tri
@@ -931,20 +927,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(poly2tri)
   find_package(poly2tri CONFIG REQUIRED)
 ELSE()
-  SET( Poly2Tri_SRCS
-    ../contrib/poly2tri/poly2tri/common/shapes.cc
-    ../contrib/poly2tri/poly2tri/common/shapes.h
-    ../contrib/poly2tri/poly2tri/common/utils.h
-    ../contrib/poly2tri/poly2tri/sweep/advancing_front.h
-    ../contrib/poly2tri/poly2tri/sweep/advancing_front.cc
-    ../contrib/poly2tri/poly2tri/sweep/cdt.cc
-    ../contrib/poly2tri/poly2tri/sweep/cdt.h
-    ../contrib/poly2tri/poly2tri/sweep/sweep.cc
-    ../contrib/poly2tri/poly2tri/sweep/sweep.h
-    ../contrib/poly2tri/poly2tri/sweep/sweep_context.cc
-    ../contrib/poly2tri/poly2tri/sweep/sweep_context.h
-  )
-  SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
+ # moved to own CMakeLists.txt
 ENDIF()
 
 # minizip/unzip
@@ -952,14 +935,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(minizip)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
-  SET( unzip_SRCS
-    ../contrib/unzip/crypt.h
-    ../contrib/unzip/ioapi.c
-    ../contrib/unzip/ioapi.h
-    ../contrib/unzip/unzip.c
-    ../contrib/unzip/unzip.h
-  )
-  SOURCE_GROUP(Contrib\\unzip FILES ${unzip_SRCS})
+ # moved to own CMakeLists.txt
 ENDIF()
 
 # zip (https://github.com/kuba--/zip)
@@ -967,20 +943,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(zip)
   find_package(zip CONFIG REQUIRED)
 ELSE()
-  SET( ziplib_SRCS
-    ../contrib/zip/src/miniz.h
-    ../contrib/zip/src/zip.c
-    ../contrib/zip/src/zip.h
-  )
-
-  # TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
-  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
-  	add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-  else()
-  	add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-  endif()
-
-  SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
+  #moved to own CMakeLists.txt
 ENDIF()
 
 # openddlparser
@@ -988,60 +951,14 @@ IF(HUNTER_ENABLED)
   hunter_add_package(openddlparser)
   find_package(openddlparser CONFIG REQUIRED)
 ELSE()
-  SET ( openddl_parser_SRCS
-    ../contrib/openddlparser/code/OpenDDLParser.cpp
-    ../contrib/openddlparser/code/DDLNode.cpp
-    ../contrib/openddlparser/code/OpenDDLCommon.cpp
-    ../contrib/openddlparser/code/OpenDDLExport.cpp
-    ../contrib/openddlparser/code/Value.cpp
-    ../contrib/openddlparser/code/OpenDDLStream.cpp
-    ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLExport.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLStream.h
-    ../contrib/openddlparser/include/openddlparser/DDLNode.h
-    ../contrib/openddlparser/include/openddlparser/Value.h
-  )
-  SOURCE_GROUP( Contrib\\openddl_parser FILES ${openddl_parser_SRCS})
+  #moved to own CMakeLists.txt
 ENDIF()
 
 # Open3DGC
 IF(HUNTER_ENABLED)
   # Nothing to do, not available in Hunter yet.
 ELSE()
-  SET ( open3dgc_SRCS
-    ../contrib/Open3DGC/o3dgcAdjacencyInfo.h
-    ../contrib/Open3DGC/o3dgcArithmeticCodec.cpp
-    ../contrib/Open3DGC/o3dgcArithmeticCodec.h
-    ../contrib/Open3DGC/o3dgcBinaryStream.h
-    ../contrib/Open3DGC/o3dgcCommon.h
-    ../contrib/Open3DGC/o3dgcDVEncodeParams.h
-    ../contrib/Open3DGC/o3dgcDynamicVectorDecoder.cpp
-    ../contrib/Open3DGC/o3dgcDynamicVectorDecoder.h
-    ../contrib/Open3DGC/o3dgcDynamicVectorEncoder.cpp
-    ../contrib/Open3DGC/o3dgcDynamicVectorEncoder.h
-    ../contrib/Open3DGC/o3dgcDynamicVector.h
-    ../contrib/Open3DGC/o3dgcFIFO.h
-    ../contrib/Open3DGC/o3dgcIndexedFaceSet.h
-    ../contrib/Open3DGC/o3dgcIndexedFaceSet.inl
-    ../contrib/Open3DGC/o3dgcSC3DMCDecoder.h
-    ../contrib/Open3DGC/o3dgcSC3DMCDecoder.inl
-    ../contrib/Open3DGC/o3dgcSC3DMCEncodeParams.h
-    ../contrib/Open3DGC/o3dgcSC3DMCEncoder.h
-    ../contrib/Open3DGC/o3dgcSC3DMCEncoder.inl
-    ../contrib/Open3DGC/o3dgcTimer.h
-    ../contrib/Open3DGC/o3dgcTools.cpp
-    ../contrib/Open3DGC/o3dgcTriangleFans.cpp
-    ../contrib/Open3DGC/o3dgcTriangleFans.h
-    ../contrib/Open3DGC/o3dgcTriangleListDecoder.h
-    ../contrib/Open3DGC/o3dgcTriangleListDecoder.inl
-    ../contrib/Open3DGC/o3dgcTriangleListEncoder.h
-    ../contrib/Open3DGC/o3dgcTriangleListEncoder.inl
-    ../contrib/Open3DGC/o3dgcVector.h
-    ../contrib/Open3DGC/o3dgcVector.inl
-  )
-  SOURCE_GROUP( Contrib\\open3dgc FILES ${open3dgc_SRCS})
+# moved to own CMakeLists.txt
 ENDIF()
 
 # Check dependencies for glTF importer with Open3DGC-compression.
@@ -1062,8 +979,7 @@ IF(HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
-  INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
-  INCLUDE_DIRECTORIES( "../contrib" )
+# moved to own CMakeLists.txt
 ENDIF()
 
 # VC2010 fixes
@@ -1085,8 +1001,7 @@ IF(NOT HUNTER_ENABLED)
   if (UNZIP_FOUND)
     SET (unzip_compile_SRCS "")
   else ()
-    SET (unzip_compile_SRCS ${unzip_SRCS})
-    INCLUDE_DIRECTORIES( "../contrib/unzip/" )
+    # moved to own CMakeLists.txt
   endif ()
 ENDIF()
 

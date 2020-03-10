@@ -462,6 +462,90 @@ IF ( SYSTEM_IRRXML )
 ENDIF()
 
 # Search for external dependencies, and build them from source if not found
+# irrXML
+IF(HUNTER_ENABLED)
+  hunter_add_package(irrXML)
+  find_package(irrXML CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/iirXML)
+ENDIF()
+
+# utf8
+IF(HUNTER_ENABLED)
+  hunter_add_package(utf8)
+  find_package(utf8 CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/utf8cpp)
+ENDIF()
+
+# polyclipping
+IF(HUNTER_ENABLED)
+  hunter_add_package(polyclipping)
+  find_package(polyclipping CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/clipper)
+ENDIF()
+
+# poly2tri
+IF(HUNTER_ENABLED)
+  hunter_add_package(poly2tri)
+  find_package(poly2tri CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/poly2tri)
+ENDIF()
+
+# minizip/unzip
+IF(HUNTER_ENABLED)
+  hunter_add_package(minizip)
+  find_package(minizip CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/unzip)
+ENDIF()
+
+# zip (https://github.com/kuba--/zip)
+IF(HUNTER_ENABLED)
+  hunter_add_package(zip)
+  find_package(zip CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/zip)
+ENDIF()
+
+# openddlparser
+IF(HUNTER_ENABLED)
+  hunter_add_package(openddlparser)
+  find_package(openddlparser CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/openddlparser)
+ENDIF()
+
+# Open3DGC
+IF(HUNTER_ENABLED)
+  # Nothing to do, not available in Hunter yet.
+ELSE()
+  add_subdirectory(/contrib/Open3DGC)
+ENDIF()
+
+# RapidJSON
+IF(HUNTER_ENABLED)
+  hunter_add_package(RapidJSON)
+  find_package(RapidJSON CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(/contrib/rapidjson)
+ENDIF()
+
+# Check dependencies for glTF importer with Open3DGC-compression.
+# RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
+# has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
+FIND_PACKAGE(RT QUIET)
+IF (NOT HUNTER_ENABLED AND (RT_FOUND OR MSVC))
+  SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
+  ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
+ELSE ()
+  SET (open3dgc_SRCS "")
+  MESSAGE (INFO " Hunter enabled or RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
+  #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
+ENDIF ()
+
 # Search for zlib
 IF(HUNTER_ENABLED)
   hunter_add_package(ZLIB)

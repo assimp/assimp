@@ -9,3 +9,6 @@ set(SOURCE_FILES poly2tri/common/shapes.cc
 
 include_directories(${CMAKE_SOURCE_DIR}/poly2tri)
 add_library(Poly2Tri ${SOURCE_FILES})
+
+set(Poly2Tri_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+set(Poly2Tri_Library "Poly2Tri")

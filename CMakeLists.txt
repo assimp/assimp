@@ -495,6 +495,44 @@ ELSE()
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/poly2tri)
 ENDIF()
 #----------------------------------------------------------------------------------------------------
+# zlib
+IF(HUNTER_ENABLED)
+  hunter_add_package(ZLIB)
+  find_package(ZLIB CONFIG REQUIRED)
+  add_definitions(-DASSIMP_BUILD_NO_OWN_ZLIB)
+  set(ZLIB_FOUND TRUE)
+  set(ZLIB_LIBRARIES ZLIB::zlib)
+  set(ASSIMP_BUILD_MINIZIP TRUE)
+ELSE()
+  IF ( NOT ASSIMP_BUILD_ZLIB )
+    FIND_PACKAGE(ZLIB)
+  ENDIF()
+  IF( NOT ZLIB_FOUND )
+    MESSAGE(STATUS "compiling zlib from sources")
+    INCLUDE(CheckIncludeFile)
+    INCLUDE(CheckTypeSize)
+    INCLUDE(CheckFunctionExists)
+    # Explicitly turn off ASM686 and AMD64 cmake options.
+    # The AMD64 option causes a build failure on MSVC and the ASM builds seem to have problems:
+    #		https://github.com/madler/zlib/issues/41#issuecomment-125848075
+    # Also prevents these options from "polluting" the cmake options if assimp is being
+    # included as a submodule.
+    set( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+    set( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+    # compile from sources
+    ADD_SUBDIRECTORY(contrib/zlib)
+    SET(ZLIB_FOUND 1)
+    SET(ZLIB_LIBRARIES zlibstatic)
+    SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
+    # need to ensure we don't link with system zlib or minizip as well.
+    SET(ASSIMP_BUILD_MINIZIP 1)
+  ELSE()
+    ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
+    SET(ZLIB_LIBRARIES_LINKED -lz)
+  ENDIF()
+  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ENDIF()
+#----------------------------------------------------------------------------------------------------
 # minizip/unzip
 IF( NOT IOS )
   IF( NOT ASSIMP_BUILD_MINIZIP )
@@ -563,48 +601,6 @@ ELSE ()
   MESSAGE (INFO " Hunter enabled or RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
   #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
 ENDIF ()
-#----------------------------------------------------------------------------------------------------
-# zlib
-IF(HUNTER_ENABLED)
-  hunter_add_package(ZLIB)
-  find_package(ZLIB CONFIG REQUIRED)
-
-  add_definitions(-DASSIMP_BUILD_NO_OWN_ZLIB)
-  set(ZLIB_FOUND TRUE)
-  set(ZLIB_LIBRARIES ZLIB::zlib)
-  set(ASSIMP_BUILD_MINIZIP TRUE)
-ELSE()
-  IF ( NOT ASSIMP_BUILD_ZLIB )
-    FIND_PACKAGE(ZLIB)
-  ENDIF()
-
-  IF( NOT ZLIB_FOUND )
-    MESSAGE(STATUS "compiling zlib from sources")
-    INCLUDE(CheckIncludeFile)
-    INCLUDE(CheckTypeSize)
-    INCLUDE(CheckFunctionExists)
-
-    # Explicitly turn off ASM686 and AMD64 cmake options.
-    # The AMD64 option causes a build failure on MSVC and the ASM builds seem to have problems:
-    #		https://github.com/madler/zlib/issues/41#issuecomment-125848075
-    # Also prevents these options from "polluting" the cmake options if assimp is being
-    # included as a submodule.
-    set( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
-    set( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
-
-    # compile from sources
-    ADD_SUBDIRECTORY(contrib/zlib)
-    SET(ZLIB_FOUND 1)
-    SET(ZLIB_LIBRARIES zlibstatic)
-    SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
-    # need to ensure we don't link with system zlib or minizip as well.
-    SET(ASSIMP_BUILD_MINIZIP 1)
-  ELSE()
-    ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
-    SET(ZLIB_LIBRARIES_LINKED -lz)
-  ENDIF()
-  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-ENDIF()
 #----------------------------------------------------------------------------------------------------
 
 IF ( ASSIMP_NO_EXPORT )

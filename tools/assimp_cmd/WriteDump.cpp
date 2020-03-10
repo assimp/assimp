@@ -48,16 +48,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Main.h"
 #include "PostProcessing/ProcessHelper.h"
 
-const char* AICMD_MSG_DUMP_HELP = 
-"assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
-"\t -b Binary output \n"
-"\t -s Shortened  \n"
-"\t -z Compressed  \n"
-"\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
-"\t -cfast    Fast post processing preset, runs just a few important steps \n"
-"\t -cdefault Default post processing: runs all recommended steps\n"
-"\t -cfull    Fires almost all post processing steps \n"
-;
+const char *AICMD_MSG_DUMP_HELP =
+        "assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
+        "\t -b Binary output \n"
+        "\t -s Shortened  \n"
+        "\t -z Compressed  \n"
+        "\t[See the assimp_cmd docs for a full list of all common parameters]  \n"
+        "\t -cfast    Fast post processing preset, runs just a few important steps \n"
+        "\t -cdefault Default post processing: runs all recommended steps\n"
+        "\t -cfull    Fires almost all post processing steps \n";
 
 #include "Common/assbin_chunks.h"
 #include <assimp/DefaultIOSystem.h>
@@ -66,107 +65,102 @@ const char* AICMD_MSG_DUMP_HELP =
 
 #include <memory>
 
-FILE* out = NULL;
+FILE *out = NULL;
 bool shortened = false;
 
 // -----------------------------------------------------------------------------------
-int Assimp_Dump (const char* const* params, unsigned int num)
-{
-	const char* fail = "assimp dump: Invalid number of arguments. "
-			"See \'assimp dump --help\'\r\n";
+int Assimp_Dump(const char *const *params, unsigned int num) {
+    const char *fail = "assimp dump: Invalid number of arguments. "
+                       "See \'assimp dump --help\'\r\n";
 
-	// --help
-	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
-		printf("%s",AICMD_MSG_DUMP_HELP);
-		return AssimpCmdError::Success;
-	}
+    // --help
+    if (!strcmp(params[0], "-h") || !strcmp(params[0], "--help") || !strcmp(params[0], "-?")) {
+        printf("%s", AICMD_MSG_DUMP_HELP);
+        return AssimpCmdError::Success;
+    }
 
-	// asssimp dump in out [options]
-	if (num < 1) {
-		printf("%s", fail);
-		return AssimpCmdError::InvalidNumberOfArguments;
-	}
+    // asssimp dump in out [options]
+    if (num < 1) {
+        printf("%s", fail);
+        return AssimpCmdError::InvalidNumberOfArguments;
+    }
 
-	std::string in  = std::string(params[0]);
-	std::string out = (num > 1 ? std::string(params[1]) : std::string("-"));
+    std::string in = std::string(params[0]);
+    std::string cur_out = (num > 1 ? std::string(params[1]) : std::string("-"));
 
-	// store full command line
-	std::string cmd;
-	for (unsigned int i = (out[0] == '-' ? 1 : 2); i < num;++i)	{
-		if (!params[i])continue;
-		cmd.append(params[i]);
-		cmd.append(" ");
-	}
+    // store full command line
+    std::string cmd;
+    for (unsigned int i = (cur_out[0] == '-' ? 1 : 2); i < num; ++i) {
+        if (!params[i]) continue;
+        cmd.append(params[i]);
+        cmd.append(" ");
+    }
 
-	// get import flags
-	ImportData import;
-	ProcessStandardArguments(import,params+1,num-1);
+    // get import flags
+    ImportData import;
+    ProcessStandardArguments(import, params + 1, num - 1);
 
-	bool binary = false, shortened = false,compressed=false;
-	
-	// process other flags
-	for (unsigned int i = 1; i < num;++i)		{
-		if (!params[i])continue;
-		if (!strcmp( params[i], "-b") || !strcmp( params[i], "--binary")) {
-			binary = true;
-		}
-		else if (!strcmp( params[i], "-s") || !strcmp( params[i], "--short")) {
-			shortened = true;
-		}
-		else if (!strcmp( params[i], "-z") || !strcmp( params[i], "--compressed")) {
-			compressed = true;
-		}
+    bool binary = false, cur_shortened = false, compressed = false;
+
+    // process other flags
+    for (unsigned int i = 1; i < num; ++i) {
+        if (!params[i]) {
+            continue;
+        }
+        if (!strcmp(params[i], "-b") || !strcmp(params[i], "--binary")) {
+            binary = true;
+        } else if (!strcmp(params[i], "-s") || !strcmp(params[i], "--short")) {
+            shortened = true;
+        } else if (!strcmp(params[i], "-z") || !strcmp(params[i], "--compressed")) {
+            compressed = true;
+        }
 #if 0
 		else if (i > 2 || params[i][0] == '-') {
 			::printf("Unknown parameter: %s\n",params[i]);
 			return 10;
 		}
 #endif
-	}
+    }
 
-	if (out[0] == '-') {
-		// take file name from input file
-		std::string::size_type s = in.find_last_of('.');
-		if (s == std::string::npos) {
-			s = in.length();
-		}
+    if (cur_out[0] == '-') {
+        // take file name from input file
+        std::string::size_type pos = in.find_last_of('.');
+        if (pos == std::string::npos) {
+            pos = in.length();
+        }
 
-		out = in.substr(0,s);
-		out.append((binary ? ".assbin" : ".assxml"));
-		if (shortened && binary) {
-			out.append(".regress");
-		}
-	}
+        cur_out = in.substr(0, pos);
+        cur_out.append((binary ? ".assbin" : ".assxml"));
+        if (cur_shortened && binary) {
+            cur_out.append(".regress");
+        }
+    }
 
-	// import the main model
-	const aiScene* scene = ImportModel(import,in);
-	if (!scene) {
-		printf("assimp dump: Unable to load input file %s\n",in.c_str());
-		return AssimpCmdError::FailedToLoadInputFile;
-	}
+    // import the main model
+    const aiScene *scene = ImportModel(import, in);
+    if (!scene) {
+        printf("assimp dump: Unable to load input file %s\n", in.c_str());
+        return AssimpCmdError::FailedToLoadInputFile;
+    }
 
-	try {
-		// Dump the main model, using the appropriate method.
-		std::unique_ptr<IOSystem> pIOSystem(new DefaultIOSystem());
-		if (binary) {
-			DumpSceneToAssbin(out.c_str(), cmd.c_str(), pIOSystem.get(),
-				scene, shortened, compressed);
-		}
-		else {
-			DumpSceneToAssxml(out.c_str(), cmd.c_str(), pIOSystem.get(),
-				scene, shortened);
-		}
-	}
-	catch (const std::exception& e) {
-		printf("%s", ("assimp dump: " + std::string(e.what())).c_str());
-		return AssimpCmdError::ExceptionWasRaised;
-	}
-	catch (...) {
-		printf("assimp dump: An unknown exception occured.\n");
-		return AssimpCmdError::ExceptionWasRaised;
-	}
+    try {
+        // Dump the main model, using the appropriate method.
+        std::unique_ptr<IOSystem> pIOSystem(new DefaultIOSystem());
+        if (binary) {
+            DumpSceneToAssbin(cur_out.c_str(), cmd.c_str(), pIOSystem.get(),
+                    scene, shortened, compressed);
+        } else {
+            DumpSceneToAssxml(cur_out.c_str(), cmd.c_str(), pIOSystem.get(),
+                    scene, shortened);
+        }
+    } catch (const std::exception &e) {
+        printf("%s", ("assimp dump: " + std::string(e.what())).c_str());
+        return AssimpCmdError::ExceptionWasRaised;
+    } catch (...) {
+        printf("assimp dump: An unknown exception occurred.\n");
+        return AssimpCmdError::ExceptionWasRaised;
+    }
 
-	printf("assimp dump: Wrote output dump %s\n",out.c_str());
-	return AssimpCmdError::Success;
+    printf("assimp dump: Wrote output dump %s\n", cur_out.c_str());
+    return AssimpCmdError::Success;
 }
-

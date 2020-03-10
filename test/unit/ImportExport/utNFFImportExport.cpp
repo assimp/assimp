@@ -53,7 +53,6 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NFF/NFF/ManyEarthsNotJustOne.nff", 0);
-        return true;
         return nullptr != scene;
     }
 };

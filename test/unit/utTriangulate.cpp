@@ -112,11 +112,11 @@ TEST_F(TriangulateProcessTest, testTriangulation) {
             std::vector<bool> ait(q,false);
 
             for (unsigned int i = 0, tt = q-2; i < tt; ++i,++m) {
-                aiFace& face = pcMesh->mFaces[m];
-                EXPECT_EQ(3U, face.mNumIndices);
+                aiFace& curFace = pcMesh->mFaces[m];
+                EXPECT_EQ(3U, curFace.mNumIndices);
 
-                for (unsigned int qqq = 0; qqq < face.mNumIndices; ++qqq) {
-                    ait[face.mIndices[qqq]-idx] = true;
+                for (unsigned int qqq = 0; qqq < curFace.mNumIndices; ++qqq) {
+                    ait[curFace.mIndices[qqq] - idx] = true;
                 }
             }
             for (std::vector<bool>::const_iterator it = ait.begin(); it != ait.end(); ++it) {

@@ -39,7 +39,7 @@ ADD_EXECUTABLE( assimp_simpletextureddirectx11 WIN32
 
 SET_PROPERTY(TARGET assimp_simpletextureddirectx11 PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES( assimp_simpletextureddirectx11 assimp ${DirectX_LIBRARY} comctl32.lib winmm.lib )
+TARGET_LINK_LIBRARIES( assimp_simpletextureddirectx11 assimp comctl32.lib winmm.lib )
 SET_TARGET_PROPERTIES( assimp_simpletextureddirectx11 PROPERTIES
   OUTPUT_NAME assimp_simpletextureddirectx11
 )

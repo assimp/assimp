@@ -198,8 +198,7 @@ int SaveAsTGA(FILE *file, const aiTexel *data, unsigned int width, unsigned int 
 
 // -----------------------------------------------------------------------------------
 // Do the texture import for a given aiTexture
-int DoExport(const aiTexture *tx, FILE *p, const std::string &extension,
-        unsigned int flags) {
+int DoExport(const aiTexture *tx, FILE *p, const std::string &extension, unsigned int flags) {
     // export the image to the appropriate decoder
     if (extension == "bmp") {
         SaveAsBMP(p, tx->pcData, tx->mWidth, tx->mHeight,
@@ -355,6 +354,7 @@ int Assimp_Extract(const char *const *params, unsigned int num) {
         if (texIdx != 0xffffffff) {
             return m;
         }
-
+    }
+    
     return AssimpCmdError::Success;
 }

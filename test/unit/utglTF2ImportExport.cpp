@@ -493,3 +493,9 @@ TEST_F(utglTF2ImportExport, texcoords) {
     EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_UNKNOWN, 0), &uvIndex), aiReturn_SUCCESS);
     EXPECT_EQ(uvIndex, 1);
 }
+
+TEST_F(utglTF2ImportExport, recursive_nodes) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/RecursiveNodes/RecursiveNodes.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+}

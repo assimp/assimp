@@ -183,7 +183,7 @@ TEST_F(SortByPTypeProcessTest, SortByPTypeStep) {
     unsigned int idx = 0;
     for (unsigned int m = 0,real = 0; m< 10;++m) {
         for (unsigned int n = 0; n < 4;++n) {
-            idx = num[m][n])
+            idx = num[m][n];
             if (idx) {
                 EXPECT_TRUE(real < mScene->mNumMeshes);
 

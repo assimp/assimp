@@ -142,9 +142,9 @@ int Assimp_Export(const char* const* params, unsigned int num)
 	
 	// if no output file is specified, take the file name from input file
 	if (out[0] == '-') {
-		std::string::size_type s = in.find_last_of('.');
-		if (s == std::string::npos) {
-			s = in.length();
+		std::string::size_type pos = in.find_last_of('.');
+        if (pos == std::string::npos) {
+            pos = in.length();
 		}
 
 		out = in.substr(0,s);

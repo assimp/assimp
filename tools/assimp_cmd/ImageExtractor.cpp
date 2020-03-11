@@ -155,7 +155,7 @@ int SaveAsBMP (FILE* file, const aiTexel* data, unsigned int width, unsigned int
     info.biWidth    = width;
     info.biHeight   = height;
     info.biPlanes   = 1;
-    info.biBitCount = numc<<3;
+    info.biBitCount = (int16_t) numc<<3;
     info.biCompression = 0;
     info.biSizeImage   = width*height*numc;
     info.biXPelsPerMeter = 1; // dummy

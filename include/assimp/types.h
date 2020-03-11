@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -70,10 +68,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
 
-typedef int32_t ai_int32;
-typedef uint32_t ai_uint32 ;
+typedef int32_t  ai_int32;
+typedef uint32_t ai_uint32;
 
 #ifdef __cplusplus
+
 #include <cstring>
 #include <new>      // for std::nothrow_t
 #include <string>   // for aiString::Set(const std::string&)

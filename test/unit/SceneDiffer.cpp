@@ -88,8 +88,6 @@ bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
         }
     }
 
-    // ToDo!
-    return true;
     // materials
     if ( expected->mNumMaterials != toCompare->mNumMaterials ) {
         std::stringstream stream;
@@ -112,6 +110,7 @@ bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
             std::stringstream stream;
             stream << "Materials are not equal, index : " << i << "\n";
             addDiff( stream.str() );
+            return false;
         }
     }
 

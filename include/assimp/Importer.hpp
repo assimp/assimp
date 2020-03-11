@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Public ASSIMP data structures
 #include <assimp/types.h>
 
-namespace Assimp    {
+namespace Assimp {
     // =======================================================================
     // Public interface to Assimp
     class Importer;

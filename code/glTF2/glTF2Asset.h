@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exceptional.h>
 
 #include <map>
+#include <set>
 #include <string>
 #include <list>
 #include <vector>
@@ -82,14 +83,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #       define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #   else
 #       define gltf_unordered_map map
+#       define gltf_unordered_set set
 #endif
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #   include <unordered_map>
+#   include <unordered_set>
 #   if _MSC_VER > 1600
 #       define gltf_unordered_map unordered_map
+#       define gltf_unordered_set unordered_set
 #   else
 #       define gltf_unordered_map tr1::unordered_map
+#       define gltf_unordered_set tr1::unordered_set
 #   endif
 #endif
 
@@ -941,6 +946,8 @@ namespace glTF2
         const char*         mExtId;        //! ID of the extension defining the dictionary
         Value*              mDict;         //! JSON dictionary object
         Asset&              mAsset;        //! The asset instance
+
+        std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck;  //! Used by Retrieve to prevent recursive lookups
 
         void AttachToDocument(Document& doc);
         void DetachFromDocument();

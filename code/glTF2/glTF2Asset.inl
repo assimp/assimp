@@ -637,10 +637,12 @@ namespace {
 }
 
 template<class T>
-bool Accessor::ExtractData(T*& outData)
+void Accessor::ExtractData(T*& outData)
 {
     uint8_t* data = GetPointer();
-    if (!data) return false;
+	if (!data) {
+		throw DeadlyImportError("GLTF: data is NULL");
+	}
 
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
@@ -661,8 +663,6 @@ bool Accessor::ExtractData(T*& outData)
             memcpy(outData + i, data + i*stride, elemSize);
         }
     }
-
-    return true;
 }
 
 inline void Accessor::WriteData(size_t count, const void* src_buffer, size_t src_stride)

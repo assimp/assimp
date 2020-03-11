@@ -398,7 +398,7 @@ namespace glTF2
         inline uint8_t* GetPointer();
 
         template<class T>
-        bool ExtractData(T*& outData);
+        void ExtractData(T*& outData);
 
         void WriteData(size_t count, const void* src_buffer, size_t src_stride);
 

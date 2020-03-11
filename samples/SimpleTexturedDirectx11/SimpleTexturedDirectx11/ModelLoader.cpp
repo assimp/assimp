@@ -42,13 +42,13 @@ void ModelLoader::Draw(ID3D11DeviceContext * devcon) {
 	}
 }
 
-string textype;
+std::string textype;
 
 Mesh ModelLoader::processMesh(aiMesh * mesh, const aiScene * scene) {
 	// Data to fill
-	vector<VERTEX> vertices;
-	vector<UINT> indices;
-	vector<Texture> textures;
+	std::vector<VERTEX> vertices;
+	std::vector<UINT> indices;
+	std::vector<Texture> textures;
 
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
@@ -84,15 +84,15 @@ Mesh ModelLoader::processMesh(aiMesh * mesh, const aiScene * scene) {
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
+		std::vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	}
 
 	return Mesh(dev, vertices, indices, textures);
 }
 
-vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextureType type, string typeName, const aiScene * scene) {
-	vector<Texture> textures;
+std::vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName, const aiScene * scene) {
+	std::vector<Texture> textures;
 	for (UINT i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
@@ -112,9 +112,9 @@ vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextureTyp
 				int textureindex = getTextureIndex(&str);
 				texture.texture = getTextureFromModel(scene, textureindex);
 			} else {
-				string filename = string(str.C_Str());
+				std::string filename = std::string(str.C_Str());
 				filename = directory + '/' + filename;
-				wstring filenamews = wstring(filename.begin(), filename.end());
+				std::wstring filenamews = std::wstring(filename.begin(), filename.end());
 				hr = CreateWICTextureFromFile(dev, devcon, filenamews.c_str(), nullptr, &texture.texture);
 				if (FAILED(hr))
 					MessageBox(hwnd, "Texture couldn't be loaded", "Error!", MB_ICONERROR | MB_OK);
@@ -148,10 +148,10 @@ void ModelLoader::processNode(aiNode * node, const aiScene * scene) {
 	}
 }
 
-string ModelLoader::determineTextureType(const aiScene * scene, aiMaterial * mat) {
+std::string ModelLoader::determineTextureType(const aiScene * scene, aiMaterial * mat) {
 	aiString textypeStr;
 	mat->GetTexture(aiTextureType_DIFFUSE, 0, &textypeStr);
-	string textypeteststr = textypeStr.C_Str();
+	std::string textypeteststr = textypeStr.C_Str();
 	if (textypeteststr == "*0" || textypeteststr == "*1" || textypeteststr == "*2" || textypeteststr == "*3" || textypeteststr == "*4" || textypeteststr == "*5") {
 		if (scene->mTextures[0]->mHeight == 0) {
 			return "embedded compressed texture";
@@ -159,7 +159,7 @@ string ModelLoader::determineTextureType(const aiScene * scene, aiMaterial * mat
 			return "embedded non-compressed texture";
 		}
 	}
-	if (textypeteststr.find('.') != string::npos) {
+	if (textypeteststr.find('.') != std::string::npos) {
 		return "textures are on disk";
 	}
 
@@ -167,7 +167,7 @@ string ModelLoader::determineTextureType(const aiScene * scene, aiMaterial * mat
 }
 
 int ModelLoader::getTextureIndex(aiString * str) {
-	string tistr;
+	std::string tistr;
 	tistr = str->C_Str();
 	tistr = tistr.substr(1);
 	return stoi(tistr);

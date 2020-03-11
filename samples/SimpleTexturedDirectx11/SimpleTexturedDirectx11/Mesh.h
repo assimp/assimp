@@ -20,8 +20,8 @@ struct VERTEX {
 };
 
 struct Texture {
-	string type;
-	string path;
+	std::string type;
+	std::string path;
 	ID3D11ShaderResourceView *texture;
 
 	void Release() {
@@ -36,7 +36,7 @@ public:
     std::vector<Texture> textures;
     ID3D11Device *dev;
 
-    Mesh(ID3D11Device *dev, const vector<VERTEX>& vertices, const vector<UINT>& indices, const vector<Texture>& textures) :
+    Mesh(ID3D11Device *dev, const std::vector<VERTEX>& vertices, const std::vector<UINT>& indices, const std::vector<Texture>& textures) :
             vertices(vertices),
             indices(indices),
             textures(textures),

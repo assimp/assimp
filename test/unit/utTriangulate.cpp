@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -112,11 +110,11 @@ TEST_F(TriangulateProcessTest, testTriangulation) {
             std::vector<bool> ait(q,false);
 
             for (unsigned int i = 0, tt = q-2; i < tt; ++i,++m) {
-                const aiFace& curFace = pcMesh->mFaces[m];
+                aiFace& curFace = pcMesh->mFaces[m];
                 EXPECT_EQ(3U, curFace.mNumIndices);
 
                 for (unsigned int qqq = 0; qqq < curFace.mNumIndices; ++qqq) {
-                    ait[face.mIndices[qqq]-idx] = true;
+                    ait[curFace.mIndices[qqq] - idx] = true;
                 }
             }
             for (std::vector<bool>::const_iterator it = ait.begin(); it != ait.end(); ++it) {
@@ -139,3 +137,4 @@ TEST_F(TriangulateProcessTest, testTriangulation) {
     // we should have no valid normal vectors now necause we aren't a pure polygon mesh
     EXPECT_TRUE(pcMesh->mNormals == NULL);
 }
+

@@ -155,12 +155,14 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     // Allocate storage and copy the contents of the file to a memory buffer
     std::vector<uint8_t> mBuffer(fileSize);
     file->Read(&mBuffer[0], 1, fileSize);
-    this->mScene = pScene;
+    mScene = pScene;
 
     // Determine the type of the file
     uint32_t fileType;
     const char *sz = IFF::ReadHeader(&mBuffer[0], fileType);
-    if (sz) throw DeadlyImportError(sz);
+    if (sz) {
+        throw DeadlyImportError(sz);
+    }
 
     mFileBuffer = &mBuffer[0] + 12;
     fileSize -= 12;
@@ -194,18 +196,15 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         mIsLWO2 = false;
         mIsLXOB = false;
         LoadLWOBFile();
-    }
-    // New lightwave format
-    else if (AI_LWO_FOURCC_LWO2 == fileType) {
+    } else if (AI_LWO_FOURCC_LWO2 == fileType) {
+        // New lightwave format
         mIsLXOB = false;
         ASSIMP_LOG_INFO("LWO file format: LWO2 (>= LightWave 6)");
-    }
-    // MODO file format
-    else if (AI_LWO_FOURCC_LXOB == fileType) {
+    } else if (AI_LWO_FOURCC_LXOB == fileType) {
+        // MODO file format
         mIsLXOB = true;
         ASSIMP_LOG_INFO("LWO file format: LXOB (Modo)");
     }
-    // we don't know this format
     else {
         char szBuff[5];
         szBuff[0] = (char)(fileType >> 24u);
@@ -421,7 +420,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                     // Compute normal vectors for the mesh - we can't use our GenSmoothNormal-
                     // Step here since it wouldn't handle smoothing groups correctly for LWO.
                     // So we use a separate implementation.
-                    ComputeNormals(mesh, smoothingGroups, _mSurfaces[i]);
+                    ComputeNormals(mesh, smoothingGroups, _mSurfaces[j]);
                 } else {
                     ASSIMP_LOG_DEBUG("LWO2: No need to compute normals, they're already there");
                 }

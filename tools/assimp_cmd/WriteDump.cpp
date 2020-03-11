@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
@@ -79,7 +77,7 @@ int Assimp_Dump(const char *const *params, unsigned int num) {
         return AssimpCmdError::Success;
     }
 
-    // assimp dump in out [options]
+    // asssimp dump in out [options]
     if (num < 1) {
         printf("%s", fail);
         return AssimpCmdError::InvalidNumberOfArguments;
@@ -104,11 +102,13 @@ int Assimp_Dump(const char *const *params, unsigned int num) {
 
     // process other flags
     for (unsigned int i = 1; i < num; ++i) {
-        if (!params[i]) continue;
+        if (!params[i]) {
+            continue;
+        }
         if (!strcmp(params[i], "-b") || !strcmp(params[i], "--binary")) {
             binary = true;
         } else if (!strcmp(params[i], "-s") || !strcmp(params[i], "--short")) {
-            cur_shortened = true;
+            shortened = true;
         } else if (!strcmp(params[i], "-z") || !strcmp(params[i], "--compressed")) {
             compressed = true;
         }
@@ -122,12 +122,12 @@ int Assimp_Dump(const char *const *params, unsigned int num) {
 
     if (cur_out[0] == '-') {
         // take file name from input file
-        std::string::size_type s = in.find_last_of('.');
-        if (s == std::string::npos) {
-            s = in.length();
+        std::string::size_type pos = in.find_last_of('.');
+        if (pos == std::string::npos) {
+            pos = in.length();
         }
 
-        cur_out = in.substr(0, s);
+        cur_out = in.substr(0, pos);
         cur_out.append((binary ? ".assbin" : ".assxml"));
         if (cur_shortened && binary) {
             cur_out.append(".regress");
@@ -155,10 +155,10 @@ int Assimp_Dump(const char *const *params, unsigned int num) {
         printf("%s", ("assimp dump: " + std::string(e.what())).c_str());
         return AssimpCmdError::ExceptionWasRaised;
     } catch (...) {
-        printf("assimp dump: An unknown exception occured.\n");
+        printf("assimp dump: An unknown exception occurred.\n");
         return AssimpCmdError::ExceptionWasRaised;
     }
 
-    printf("assimp dump: Wrote output dump %s\n", out.c_str());
+    printf("assimp dump: Wrote output dump %s\n", cur_out.c_str());
     return AssimpCmdError::Success;
 }

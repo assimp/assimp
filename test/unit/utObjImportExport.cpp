@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -121,11 +119,11 @@ static const char *ObjModel_Issue1111 =
 
 class utObjImportExport : public AbstractImportExportBase {
 protected:
-    virtual void SetUp() {
+    void SetUp() override {
         m_im = new Assimp::Importer;
     }
 
-    virtual void TearDown() {
+    void TearDown() override {
         delete m_im;
         m_im = nullptr;
     }
@@ -289,7 +287,7 @@ TEST_F(utObjImportExport, issue1923_vertex_color_Test) {
 }
 
 TEST_F(utObjImportExport, issue1453_segfault) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v  0.0  0.0  0.0\n"
             "v  0.0  0.0  1.0\n"
             "v  0.0  1.0  0.0\n"
@@ -300,12 +298,12 @@ TEST_F(utObjImportExport, issue1453_segfault) {
             "v  1.0  1.0  1.0\nB";
 
     Assimp::Importer myimporter;
-    const aiScene *scene = myimporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), aiProcess_ValidateDataStructure);
+    const aiScene *scene = myimporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), aiProcess_ValidateDataStructure);
     EXPECT_EQ(nullptr, scene);
 }
 
 TEST_F(utObjImportExport, relative_indices_Test) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v -0.500000 0.000000 0.400000\n"
             "v -0.500000 0.000000 -0.800000\n"
             "v -0.500000 1.000000 -0.800000\n"
@@ -313,7 +311,7 @@ TEST_F(utObjImportExport, relative_indices_Test) {
             "f -4 -3 -2 -1\nB";
 
     Assimp::Importer myimporter;
-    const aiScene *scene = myimporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), aiProcess_ValidateDataStructure);
+    const aiScene *scene = myimporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
     EXPECT_EQ(scene->mNumMeshes, 1U);
@@ -328,14 +326,14 @@ TEST_F(utObjImportExport, relative_indices_Test) {
 }
 
 TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v -0.500000 0.000000 0.400000 0.50000\n"
             "v -0.500000 0.000000 -0.800000 1.00000\n"
             "v 0.500000 1.000000 -0.800000 0.5000\n"
             "f 1 2 3\nB";
 
     Assimp::Importer myimporter;
-    const aiScene *scene = myimporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), aiProcess_ValidateDataStructure);
+    const aiScene *scene = myimporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
     EXPECT_EQ(scene->mNumMeshes, 1U);
@@ -351,31 +349,31 @@ TEST_F(utObjImportExport, homogeneous_coordinates_Test) {
 }
 
 TEST_F(utObjImportExport, homogeneous_coordinates_divide_by_zero_Test) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v -0.500000 0.000000 0.400000 0.\n"
             "v -0.500000 0.000000 -0.800000 1.00000\n"
             "v 0.500000 1.000000 -0.800000 0.5000\n"
             "f 1 2 3\nB";
 
     Assimp::Importer myimporter;
-    const aiScene *scene = myimporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), aiProcess_ValidateDataStructure);
+    const aiScene *scene = myimporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), aiProcess_ValidateDataStructure);
     EXPECT_EQ(nullptr, scene);
 }
 
 TEST_F(utObjImportExport, 0based_array_Test) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v -0.500000 0.000000 0.400000\n"
             "v -0.500000 0.000000 -0.800000\n"
             "v -0.500000 1.000000 -0.800000\n"
             "f 0 1 2\nB";
 
     Assimp::Importer myImporter;
-    const aiScene *scene = myImporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), 0);
+    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), 0);
     EXPECT_EQ(nullptr, scene);
 }
 
 TEST_F(utObjImportExport, invalid_normals_uvs) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v -0.500000 0.000000 0.400000\n"
             "v -0.500000 0.000000 -0.800000\n"
             "v -0.500000 1.000000 -0.800000\n"
@@ -384,12 +382,12 @@ TEST_F(utObjImportExport, invalid_normals_uvs) {
             "f 1/1/1 1/1/1 2/2/2\nB";
 
     Assimp::Importer myImporter;
-    const aiScene *scene = myImporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), 0);
+    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), 0);
     EXPECT_NE(nullptr, scene);
 }
 
 TEST_F(utObjImportExport, no_vt_just_vns) {
-    static const char *CurObjModel =
+    static const char *curObjModel =
             "v 0 0 0\n"
             "v 0 0 0\n"
             "v 0 0 0\n"
@@ -417,7 +415,7 @@ TEST_F(utObjImportExport, no_vt_just_vns) {
             "f 10/10 11/11 12/12\n";
 
     Assimp::Importer myImporter;
-    const aiScene *scene = myImporter.ReadFileFromMemory(CurObjModel, strlen(CurObjModel), 0);
+    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), 0);
     EXPECT_NE(nullptr, scene);
 }
 
@@ -447,7 +445,7 @@ TEST_F(utObjImportExport, import_without_linend) {
 }
 
 TEST_F(utObjImportExport, import_with_line_continuations) {
-    static const char *ObjModel =
+    static const char *curObjModel =
             "v -0.5 -0.5 0.5\n"
             "v -0.5 \\\n"
             "  -0.5 -0.5\n"
@@ -457,7 +455,7 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
             "f 1 2 3\n";
 
     Assimp::Importer myImporter;
-    const aiScene *scene = myImporter.ReadFileFromMemory(ObjModel, strlen(ObjModel), 0);
+    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), 0);
     EXPECT_NE(nullptr, scene);
 
     EXPECT_EQ(scene->mNumMeshes, 1U);
@@ -479,3 +477,4 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
     EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
     EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
 }
+

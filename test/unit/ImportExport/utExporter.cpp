@@ -50,8 +50,8 @@ using namespace Assimp;
 class TestProgressHandler : public ProgressHandler {
 public:
     TestProgressHandler() :
-            ProgressHandler(),
-            mPercentage (0.f) {
+            ProgressHandler(), 
+            mPercentage(0.f) {
         // empty
     }
 
@@ -60,6 +60,7 @@ public:
     }
 
     bool Update(float percentage = -1.f) override {
+        mPercentage = percentage;
         return true;
     }
     float mPercentage;

@@ -833,9 +833,9 @@ void HL1MDLLoader::read_meshes() {
                                         tricmds[faceIdx + 2] });
                             } else {
                                 mesh_faces.push_back(HL1MeshFace{
-                                        tricmds[i],
-                                        tricmds[i + 1],
-                                        tricmds[i + 2] });
+                                        tricmds[faceIdx],
+                                        tricmds[faceIdx + 1],
+                                        tricmds[faceIdx + 2] });
                             }
                         }
                     }

@@ -940,7 +940,7 @@ inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, con
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     Value *curName = FindMember(pJSON_Object, "name");
     if (nullptr != curName) {
-        this->name = curName->GetString();
+        name = curName->GetString();
     }
 
     /****************** Mesh primitives ******************/
@@ -951,7 +951,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             Value &primitive = (*curPrimitives)[i];
 
             Primitive &prim = this->primitives[i];
-            prim.mode = MemberOrDefault(*curPrimitives, "mode", PrimitiveMode_TRIANGLES);
+            prim.mode = MemberOrDefault(primitive, "mode", PrimitiveMode_TRIANGLES);
 
             if (Value *attrs = FindObject(primitive, "attributes")) {
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
@@ -1328,10 +1328,8 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
 
 inline void Asset::Load(const std::string &pFile, bool isBinary) {
     mCurrentAssetDir.clear();
-    std::string::size_type pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != std::string::npos ) {
-        mCurrentAssetDir = pFile.substr(0, pos + 1l);
-    }
+    int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
+    if (pos != int(std::string::npos)) mCurrentAssetDir = pFile.substr(0, pos + 1);
 
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {

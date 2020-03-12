@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -766,7 +765,7 @@ namespace glTF2 {
         }
 
         Value *dict = FindArray(*container, d.mDictId);
-        if (nullptr != dict) {
+        if (nullptr == dict) {
             container->AddMember(StringRef(d.mDictId), Value().SetArray().Move(), mDoc.GetAllocator());
             dict = FindArray(*container, d.mDictId);
             if (nullptr == dict) {

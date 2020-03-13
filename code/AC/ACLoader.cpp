@@ -77,9 +77,8 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // skip to the next token
-inline
-const char *AcSkipToNextToken( const char *buffer ) {
-    if (!SkipSpaces( &buffer )) {
+inline const char *AcSkipToNextToken(const char *buffer) {
+    if (!SkipSpaces(&buffer)) {
         ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL");
     }
     return buffer;
@@ -87,8 +86,7 @@ const char *AcSkipToNextToken( const char *buffer ) {
 
 // ------------------------------------------------------------------------------------------------
 // read a string (may be enclosed in double quotation marks). buffer must point to "
-inline
-const char *AcGetString(const char *buffer, std::string &out) {
+inline const char *AcGetString(const char *buffer, std::string &out) {
     if (*buffer == '\0') {
         throw DeadlyImportError("AC3D: Unexpected EOF in string");
     }
@@ -113,19 +111,18 @@ const char *AcGetString(const char *buffer, std::string &out) {
 
 // ------------------------------------------------------------------------------------------------
 // read 1 to n floats prefixed with an optional predefined identifier
-template<class T>
-inline
-const char *TAcCheckedLoadFloatArray(const char *buffer, const char *name, size_t name_length, size_t num, T *out) {
-    AcSkipToNextToken(buffer);
+template <class T>
+inline const char *TAcCheckedLoadFloatArray(const char *buffer, const char *name, size_t name_length, size_t num, T *out) {
+    buffer = AcSkipToNextToken(buffer);
     if (0 != name_length) {
         if (0 != strncmp(buffer, name, name_length) || !IsSpace(buffer[name_length])) {
-            ASSIMP_LOG_ERROR("AC3D: Unexpexted token. " + std::string( name ) + " was expected.");
+            ASSIMP_LOG_ERROR("AC3D: Unexpexted token. " + std::string(name) + " was expected.");
             return buffer;
         }
         buffer += name_length + 1;
     }
     for (unsigned int _i = 0; _i < num; ++_i) {
-        AcSkipToNextToken(buffer);
+        buffer = AcSkipToNextToken(buffer);
         buffer = fast_atoreal_move<float>(buffer, ((float *)out)[_i]);
     }
 
@@ -384,12 +381,13 @@ void AC3DImporter::ConvertMaterial(const Object &object,
     matDest.AddProperty<aiColor3D>(&matSrc.emis, 1, AI_MATKEY_COLOR_EMISSIVE);
     matDest.AddProperty<aiColor3D>(&matSrc.spec, 1, AI_MATKEY_COLOR_SPECULAR);
 
-    int n;
+    int n = -1;
     if (matSrc.shin) {
         n = aiShadingMode_Phong;
         matDest.AddProperty<float>(&matSrc.shin, 1, AI_MATKEY_SHININESS);
-    } else
+    } else {
         n = aiShadingMode_Gouraud;
+    }
     matDest.AddProperty<int>(&n, 1, AI_MATKEY_SHADING_MODEL);
 
     float f = 1.f - matSrc.trans;
@@ -469,26 +467,25 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     }
                 }
 
-                if (!needMat[idx].first) ++node->mNumMeshes;
+                if (!needMat[idx].first) {
+                    ++node->mNumMeshes;
+                }
 
                 switch ((*it).flags & 0xf) {
                         // closed line
                     case 0x1:
-
                         needMat[idx].first += (unsigned int)(*it).entries.size();
                         needMat[idx].second += (unsigned int)(*it).entries.size() << 1u;
                         break;
 
                         // unclosed line
                     case 0x2:
-
                         needMat[idx].first += (unsigned int)(*it).entries.size() - 1;
                         needMat[idx].second += ((unsigned int)(*it).entries.size() - 1) << 1u;
                         break;
 
                         // 0 == polygon, else unknown
                     default:
-
                         if ((*it).flags & 0xf) {
                             ASSIMP_LOG_WARN("AC3D: The type flag of a surface is unknown");
                             (*it).flags &= ~(0xf);
@@ -514,7 +511,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 aiMesh *mesh = new aiMesh();
                 meshes.push_back(mesh);
 
-                mesh->mMaterialIndex = (unsigned int)outMaterials.size();
+                mesh->mMaterialIndex = static_cast<unsigned int>(outMaterials.size());
                 outMaterials.push_back(new aiMaterial());
                 ConvertMaterial(object, materials[mat], *outMaterials.back());
 
@@ -699,8 +696,9 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == NULL)
+    if ( file.get() == nullptr ) {
         throw DeadlyImportError("Failed to open AC3D file " + pFile + ".");
+    }
 
     // allocate storage and copy the contents of the file to a memory buffer
     std::vector<char> mBuffer2;
@@ -779,10 +777,13 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
 
     // now convert the imported stuff to our output data structure
     pScene->mRootNode = ConvertObjectSection(*root, meshes, omaterials, materials);
-    if (1 != rootObjects.size()) delete root;
+    if (1 != rootObjects.size()) {
+        delete root;
+    }
 
-    if (!::strncmp(pScene->mRootNode->mName.data, "Node", 4))
+    if (!::strncmp(pScene->mRootNode->mName.data, "Node", 4)) {
         pScene->mRootNode->mName.Set("<AC3DWorld>");
+    }
 
     // copy meshes
     if (meshes.empty()) {

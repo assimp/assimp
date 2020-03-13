@@ -133,7 +133,7 @@ protected:
         expScene->mNumMeshes = 1;
         expScene->mMeshes = new aiMesh *[1];
         aiMesh *mesh = new aiMesh;
-        mesh->mName.Set("1");
+        mesh->mName.Set("Box01");
         mesh->mNumVertices = 24;
         mesh->mVertices = new aiVector3D[24];
         ::memcpy(&mesh->mVertices->x, &VertComponents[0], sizeof(float) * 24 * 3);

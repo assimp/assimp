@@ -5,6 +5,8 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
+
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,62 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of BaseProcess */
+#ifdef _MSC_VER
+#pragma once
+#endif
 
-#include "BaseProcess.h"
-#include "Importer.h"
-#include <assimp/BaseImporter.h>
-#include <assimp/scene.h>
-#include <assimp/DefaultLogger.hpp>
-
-using namespace Assimp;
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-BaseProcess::BaseProcess() AI_NO_EXCEPT
-        : shared(),
-          progress() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseProcess::~BaseProcess() {
-    // nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-void BaseProcess::ExecuteOnScene(Importer *pImp) {
-    ai_assert( nullptr != pImp );
-    ai_assert( nullptr != pImp->Pimpl()->mScene);
-
-    progress = pImp->GetProgressHandler();
-    ai_assert(nullptr != progress);
-
-    SetupProperties(pImp);
-
-    // catch exceptions thrown inside the PostProcess-Step
-    try {
-        Execute(pImp->Pimpl()->mScene);
-
-    } catch (const std::exception &err) {
-
-        // extract error description
-        pImp->Pimpl()->mErrorString = err.what();
-        ASSIMP_LOG_ERROR(pImp->Pimpl()->mErrorString);
-
-        // and kill the partially imported data
-        delete pImp->Pimpl()->mScene;
-        pImp->Pimpl()->mScene = nullptr;
+/* Used to reduce to reduce the number of lines when calling Release()
+   on a D3D interface. Implemented as a template instead of a 'SAFE_RELEASE'
+   MACRO to ease debugging. */
+template<typename T>
+inline void SafeRelease(T*& x) {
+    if (x) {
+        x->Release();
+        x = nullptr;
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-void BaseProcess::SetupProperties(const Importer * /*pImp*/) {
-    // the default implementation does nothing
-}
-
-// ------------------------------------------------------------------------------------------------
-bool BaseProcess::RequireVerboseFormat() const {
-    return true;
 }

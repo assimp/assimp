@@ -220,7 +220,7 @@ struct aiVertexWeight {
 
     //! The strength of the influence in the range (0...1).
     //! The influence from all bones at one vertex amounts to 1.
-    float mWeight;
+    ai_real mWeight;
 
 #ifdef __cplusplus
 

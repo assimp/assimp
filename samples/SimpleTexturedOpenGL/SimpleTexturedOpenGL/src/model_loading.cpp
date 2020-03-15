@@ -21,8 +21,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "contrib/stb_image/stb_image.h"
 
-#include <locale>
-#include <codecvt>
 #include <fstream>
 
 //to map image filenames to textureIds
@@ -35,7 +33,7 @@
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/LogStream.hpp>
-
+#include "UTFConverter.h"
 
 // The default hard-coded path. Can be overridden by supplying a path through the command line.
 static std::string modelpath = "../../test/models/OBJ/spider.obj";
@@ -77,35 +75,7 @@ GLuint*		textureIds;							// pointer to texture Array
 // Create an instance of the Importer class
 Assimp::Importer importer;
 
-// Used to convert between multibyte and unicode strings.
-class UTFConverter {
-	using UTFConverterImpl = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>;
-public:
-	UTFConverter(const char* s) :
-		s_(s),
-		ws_(impl_.from_bytes(s)) {
-	}
-	UTFConverter(const std::string& s) :
-		s_(s),
-		ws_(impl_.from_bytes(s)) {
-	}
-	UTFConverter(const std::wstring& s) :
-		s_(impl_.to_bytes(s)),
-		ws_(s) {
-	}
-	inline const std::string& str() const {
-		return s_;
-	}
-	inline const wchar_t* c_wstr() const {
-		return ws_.c_str();
-	}
-private:
-	static UTFConverterImpl impl_;
-	std::string s_;
-	std::wstring ws_;
-};
-
-typename UTFConverter::UTFConverterImpl UTFConverter::impl_;
+using namespace AssimpSamples::SharedCode;
 
 void createAILogger()
 {
@@ -202,8 +172,21 @@ std::string getBasePath(const std::string& path)
 	return (std::string::npos == pos) ? "" : path.substr(0, pos + 1);
 }
 
+void freeTextureIds()
+{
+	textureIdMap.clear(); //no need to delete pointers in it manually here. (Pointers point to textureIds deleted in next step)
+
+	if (textureIds)
+	{
+		delete[] textureIds;
+		textureIds = NULL;
+	}
+}
+
 int LoadGLTextures(const aiScene* scene)
 {
+	freeTextureIds();
+
 	//ILboolean success;
 
 	/* Before calling ilInit() version should be checked. */
@@ -576,21 +559,24 @@ void KillGLWindow()			// Properly Kill The Window
 		hRC = NULL;
 	}
 
-	if (hDC && !ReleaseDC(hWnd, hDC))	// Are We able to Release The DC?
+	if (hDC)
 	{
-		MessageBox(NULL, TEXT("Release Device Context Failed."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
-		hDC=NULL;
+		if (!ReleaseDC(hWnd, hDC)) // Are We able to Release The DC?
+			MessageBox(NULL, TEXT("Release Device Context Failed."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
+		hDC = NULL;
 	}
 
-	if (hWnd && !DestroyWindow(hWnd))	// Are We Able To Destroy The Window
+	if (hWnd)
 	{
-		MessageBox(NULL, TEXT("Could Not Release hWnd."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
+		if (!DestroyWindow(hWnd)) // Are We Able To Destroy The Window
+			MessageBox(NULL, TEXT("Could Not Release hWnd."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		hWnd = NULL;
-	}
+	} 
 
-	if (!UnregisterClass(TEXT("OpenGL"), hInstance))	// Are We Able To Unregister Class
+	if (hInstance)
 	{
-		MessageBox(NULL, TEXT("Could Not Unregister Class."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
+		if (!UnregisterClass(TEXT("OpenGL"), hInstance)) // Are We Able To Unregister Class
+			MessageBox(NULL, TEXT("Could Not Unregister Class."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		hInstance = NULL;
 	}
 }
@@ -761,6 +747,16 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 	return TRUE;
 }
 
+void cleanup()
+{
+	freeTextureIds();
+
+	destroyAILogger();
+
+	if (hWnd)
+		KillGLWindow();
+};
+
 LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 						 UINT uMsg,				// Message for this Window
 						 WPARAM wParam,			// additional message Info
@@ -842,7 +838,11 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 		modelpath = UTFConverter(modelpathW).str();
 	}
 
-	if (!Import3DFromFile(modelpath)) return 0;
+	if (!Import3DFromFile(modelpath))
+	{
+		cleanup();
+		return 0;
+	}
 
 	logInfo("=============== Post Import ====================");
 
@@ -853,6 +853,7 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 
 	if (!CreateGLWindow(windowTitle, 640, 480, 16, fullscreen))
 	{
+		cleanup();
 		return 0;
 	}
 
@@ -893,6 +894,7 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 				fullscreen=!fullscreen;
 				if (!CreateGLWindow(windowTitle, 640, 480, 16, fullscreen))
 				{
+					cleanup();
 					return 0;
 				}
 			}
@@ -900,18 +902,6 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 	}
 
 	// *** cleanup ***
-
-	textureIdMap.clear(); //no need to delete pointers in it manually here. (Pointers point to textureIds deleted in next step)
-
-	if (textureIds)
-	{
-		delete[] textureIds;
-		textureIds = NULL;
-	}
-
-	// *** cleanup end ***
-
-	destroyAILogger();
-	KillGLWindow();
+	cleanup();
 	return static_cast<int>(msg.wParam);
 }

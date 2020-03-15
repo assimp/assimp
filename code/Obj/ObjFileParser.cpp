@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <cstdlib>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 
@@ -87,7 +89,8 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
     parseFile(streamBuffer);
 }
 
-ObjFileParser::~ObjFileParser() {
+ObjFileParser::~ObjFileParser()
+{
 }
 
 void ObjFileParser::setBuffer(std::vector<char> &buffer) {

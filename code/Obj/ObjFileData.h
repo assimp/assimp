@@ -41,12 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 #ifndef OBJ_FILEDATA_H_INC
-#define OBJ_FILEDATA_H_INC
+#    define OBJ_FILEDATA_H_INC
 
-#include <assimp/mesh.h>
-#include <assimp/types.h>
-#include <map>
-#include <vector>
+#    include <assimp/mesh.h>
+#    include <assimp/types.h>
+#    include <map>
+#    include <vector>
 
 namespace Assimp {
 namespace ObjFile {
@@ -105,10 +105,7 @@ struct Object {
     std::vector<unsigned int> m_Meshes;
 
     //! \brief  Default constructor
-    Object() :
-            m_strObjName("") {
-        // empty
-    }
+    Object() = default;
 
     //! \brief  Destructor
     ~Object() {
@@ -180,17 +177,17 @@ struct Material {
 
     //! Constructor
     Material() :
-            diffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)), alpha(ai_real(1.0)), shineness(ai_real(0.0)), illumination_model(1), ior(ai_real(1.0)), transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)) {
-        // empty
-        for (size_t i = 0; i < TextureTypeCount; ++i) {
-            clamp[i] = false;
-        }
+            diffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            alpha(ai_real(1.0)),
+            shineness(ai_real(0.0)),
+            illumination_model(1),
+            ior(ai_real(1.0)),
+            transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)) {
+        std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }
 
     // Destructor
-    ~Material() {
-        // empty
-    }
+    ~Material() = default;
 };
 
 // ------------------------------------------------------------------------------------------------

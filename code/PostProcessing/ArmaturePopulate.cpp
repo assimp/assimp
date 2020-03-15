@@ -164,7 +164,7 @@ void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
 // duplicate names :)
 void ArmaturePopulate::BuildBoneStack(aiNode *,
                                       const aiNode *root_node,
-                                      const aiScene *scene,
+                                      const aiScene*,
                                       const std::vector<aiBone *> &bones,
                                       std::map<aiBone *, aiNode *> &bone_stack,
                                   std::vector<aiNode *> &node_stack) {

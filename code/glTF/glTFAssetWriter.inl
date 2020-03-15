@@ -43,8 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 
-#pragma warning(push)
-#pragma warning( disable : 4706)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning( disable : 4706)
+#endif // _WIN32
 
 namespace glTF {
 
@@ -701,6 +703,8 @@ namespace glTF {
         w.WriteObjects(d);
     }
 
-#pragma warning(pop)
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // _WIN32
 
 }

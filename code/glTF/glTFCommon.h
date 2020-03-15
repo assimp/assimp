@@ -189,8 +189,11 @@ inline void CopyValue(const glTFCommon::mat4 &v, aiMatrix4x4 &o) {
     o.d4 = v[15];
 }
 
-#pragma warning(push)
-#pragma warning(disable : 4310)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4310)
+#endif // _WIN32
+
 inline std::string getCurrentAssetDir(const std::string &pFile) {
     std::string path = pFile;
     int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
@@ -200,7 +203,9 @@ inline std::string getCurrentAssetDir(const std::string &pFile) {
 
     return path;
 }
-#pragma warning(pop)
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // _WIN32
 
 namespace Util {
 

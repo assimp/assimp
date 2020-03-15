@@ -321,7 +321,9 @@ public:
 struct Face : public FaceWithSmoothingGroup {
 };
 
-#pragma warning(disable : 4315)
+#ifdef _WIN32
+#    pragma warning(disable : 4315)
+#endif
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */

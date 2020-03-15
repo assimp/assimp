@@ -57,8 +57,10 @@ namespace glTF {
 
 namespace {
 
-#pragma warning(push)
-#pragma warning(disable : 4706)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4706)
+#endif // _WIN32
 
 //
 // JSON Value reading helpers
@@ -1410,6 +1412,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#pragma warning(pop)
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // WIN32
 
 } // namespace glTF

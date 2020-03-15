@@ -99,8 +99,10 @@ typedef uint16_t M3D_INDEX;
 #define _register
 #endif
 
-#pragma warning(push)
-#pragma warning(disable : 4127 5573 4505 4244 4403 5744 4701 4703)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4127 5573 4505 4244 4403 5744 4701 4703)
+#endif // _WIN32
 
 /*** File format structures ***/
 
@@ -6134,7 +6136,9 @@ public:
 #endif /* impl */
 } // namespace M3D
 
-#pragma warning(pop <)
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // _WIN32
 
 #endif
 

@@ -54,15 +54,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
+#    include <zlib.h>
 #else
-#include "../contrib/zlib/zlib.h"
+#    include "../contrib/zlib/zlib.h"
 #endif
 
 #include <time.h>
 
-#pragma warning(push)
-#pragma warning(disable : 4706)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4706)
+#endif // _WIN32
 
 namespace Assimp {
 
@@ -824,6 +826,8 @@ void DumpSceneToAssbin(
     AssbinFileWriter fileWriter(shortened, compressed);
     fileWriter.WriteBinaryDump(pFile, cmd, pIOSystem, pScene);
 }
-#pragma warning(pop)
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // _WIN32
 
 } // end of namespace Assimp

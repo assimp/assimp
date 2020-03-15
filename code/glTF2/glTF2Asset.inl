@@ -901,8 +901,11 @@ inline int Compare(const char *attr, const char (&str)[N]) {
     return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
 }
 
-#pragma warning(push)
-#pragma warning(disable : 4706)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4706)
+#endif // _WIN32
+
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
     if ((pos = Compare(attr, "POSITION"))) {
         v = &(p.attributes.position);
@@ -1504,8 +1507,9 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     id += suffix;
 
     Asset::IdMap::iterator it = mUsedIds.find(id);
-    if (it == mUsedIds.end())
+    if (it == mUsedIds.end()) {
         return id;
+    }
 
     std::vector<char> buffer;
     buffer.resize(id.size() + 16);
@@ -1519,6 +1523,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#pragma warning(pop)
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // _WIN32
 
 } // namespace glTF2

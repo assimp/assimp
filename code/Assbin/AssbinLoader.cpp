@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -105,8 +103,9 @@ template <typename T>
 T Read(IOStream *stream) {
     T t;
     size_t res = stream->Read(&t, sizeof(T), 1);
-    if (res != 1)
+    if (res != 1) {
         throw DeadlyImportError("Unexpected EOF");
+    }
     return t;
 }
 
@@ -313,6 +312,7 @@ void AssbinImporter::ReadBinaryBone(IOStream *stream, aiBone *b) {
 static bool fitsIntoUI16(unsigned int mNumVertices) {
     return (mNumVertices < (1u << 16));
 }
+
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
     if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AIMESH)

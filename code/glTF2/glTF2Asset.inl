@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#include "glTF/glTFCommon.h"
 #include <assimp/StringUtils.h>
 
 // Header files, Assimp
@@ -901,7 +902,7 @@ inline int Compare(const char *attr, const char (&str)[N]) {
 }
 
 #pragma warning(push)
-#pragma warning(disable: 4706 )
+#pragma warning(disable : 4706)
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
     if ((pos = Compare(attr, "POSITION"))) {
         v = &(p.attributes.position);
@@ -1106,7 +1107,7 @@ inline void Node::Read(Value &obj, Asset &r) {
     }
 
     Value *curMesh = FindUInt(obj, "mesh");
-    if (nullptr != curMesh ) {
+    if (nullptr != curMesh) {
         unsigned int numMeshes = 1;
         this->meshes.reserve(numMeshes);
         Ref<Mesh> meshRef = r.meshes.Retrieve((*curMesh).GetUint());
@@ -1116,12 +1117,12 @@ inline void Node::Read(Value &obj, Asset &r) {
     }
 
     Value *curSkin = FindUInt(obj, "skin");
-    if (nullptr != curSkin ) {
+    if (nullptr != curSkin) {
         this->skin = r.skins.Retrieve(curSkin->GetUint());
     }
 
     Value *curCamera = FindUInt(obj, "camera");
-    if (nullptr != curCamera ) {
+    if (nullptr != curCamera) {
         this->camera = r.cameras.Retrieve(curCamera->GetUint());
         if (this->camera) {
             this->camera->id = this->id;
@@ -1328,8 +1329,10 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
 
 inline void Asset::Load(const std::string &pFile, bool isBinary) {
     mCurrentAssetDir.clear();
-    int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) mCurrentAssetDir = pFile.substr(0, pos + 1);
+    /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
+    if (pos != int(std::string::npos)) */
+
+    mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
 
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
@@ -1516,6 +1519,6 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#pragma warning( pop )
+#pragma warning(pop)
 
 } // namespace glTF2

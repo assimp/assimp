@@ -618,7 +618,7 @@ inline void Image::Read(Value &obj, Asset &r) {
 
     if (!mDataLength) {
         Value *curUri = FindString(obj, "uri");
-        if (nullptr != curUri ) {
+        if (nullptr != curUri) {
             const char *uristr = curUri->GetString();
 
             glTFCommon::Util::DataURI dataURI;
@@ -1272,13 +1272,9 @@ inline void Asset::ReadBinaryHeader(IOStream &stream) {
 inline void Asset::Load(const std::string &pFile, bool isBinary) {
     mCurrentAssetDir.clear();
 
-    int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) mCurrentAssetDir = pFile.substr(0, pos + 1);
-
-/*    std::string::size_type pos = std::max(pFile.rfind('/'), pFile.rfind('\\'));
-    if (pos != std::string::npos) {
-        mCurrentAssetDir = pFile.substr(0, pos + 1);
-    }*/
+    /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
+    if (pos != int(std::string::npos)) mCurrentAssetDir = pFile.substr(0, pos + 1);*/
+    mCurrentAssetDir = getCurrentAssetDir(pFile);
 
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
@@ -1373,9 +1369,9 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool absolute ) {
+inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool absolute) {
 #ifdef ASSIMP_API
-    (void) absolute;
+    (void)absolute;
     return mIOSystem->Open(path, mode);
 #else
     if (path.size() < 2) return 0;

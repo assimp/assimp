@@ -110,8 +110,9 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
 bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /* checkSig */) const {
 	const std::string &extension = GetExtension(pFile);
 
-	if (extension != "gltf" && extension != "glb")
-		return false;
+	if (extension != "gltf" && extension != "glb") {
+        return false;
+    }
 
 	if (pIOHandler) {
 		glTF2::Asset asset(pIOHandler);

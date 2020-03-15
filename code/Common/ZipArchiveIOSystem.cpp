@@ -343,8 +343,6 @@ namespace Assimp {
     }
 
     ZipArchiveIOSystem::Implement::~Implement() {
-        m_ArchiveMap.clear();
-
         if (m_ZipFileHandle != nullptr) {
             unzClose(m_ZipFileHandle);
             m_ZipFileHandle = nullptr;

@@ -54,26 +54,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#pragma warning( push )
-#pragma warning( disable : 4456 )
-#pragma warning(disable : 4245)
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4127 4456 4245 4512 )
+#endif // _WIN32 
+
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)
-#define ASSIMP_STEP_USE_UNORDERED_MULTIMAP
+#    define ASSIMP_STEP_USE_UNORDERED_MULTIMAP
 #else
-#define step_unordered_map map
-#define step_unordered_multimap multimap
+#    define step_unordered_map map
+#    define step_unordered_multimap multimap
 #endif
 
 #ifdef ASSIMP_STEP_USE_UNORDERED_MULTIMAP
-#include <unordered_map>
-#if _MSC_VER > 1600
-#define step_unordered_map unordered_map
-#define step_unordered_multimap unordered_multimap
-#else
-#define step_unordered_map tr1::unordered_map
-#define step_unordered_multimap tr1::unordered_multimap
-#endif
+#    include <unordered_map>
+#    if _MSC_VER > 1600
+#        define step_unordered_map unordered_map
+#        define step_unordered_multimap unordered_multimap
+#    else
+#        define step_unordered_map tr1::unordered_map
+#        define step_unordered_multimap tr1::unordered_multimap
+#    endif
 #endif
 
 #include <assimp/LineSplitter.h>
@@ -725,8 +727,8 @@ struct InternGenericConvert<Maybe<T>> {
     }
 };
 
-#pragma warning( push )
-#pragma warning( disable : 4127)
+#pragma warning(push)
+#pragma warning(disable : 4127)
 template <typename T, uint64_t min_cnt, uint64_t max_cnt>
 struct InternGenericConvertList {
     void operator()(ListOf<T, min_cnt, max_cnt> &out, const std::shared_ptr<const EXPRESS::DataType> &inp_base, const STEP::DB &db) {
@@ -757,7 +759,7 @@ struct InternGenericConvertList {
     }
 };
 
-#pragma warning( pop )
+#pragma warning(pop)
 
 template <typename T>
 struct InternGenericConvert<Lazy<T>> {
@@ -957,7 +959,7 @@ private:
     const EXPRESS::ConversionSchema *schema;
 };
 
-#pragma warning( pop )
+#pragma warning(pop)
 
 } // namespace STEP
 

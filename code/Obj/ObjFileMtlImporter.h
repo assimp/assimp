@@ -65,19 +65,18 @@ public:
     typedef std::vector<char>::iterator DataArrayIt;
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
-public:
-    //! \brief  Default constructor
+    //! \brief  The class default constructor
     ObjFileMtlImporter(std::vector<char> &buffer, const std::string &strAbsPath,
             ObjFile::Model *pModel);
 
-    //! \brief  DEstructor
+    //! \brief  The class destructor
     ~ObjFileMtlImporter();
+
+    ObjFileMtlImporter(const ObjFileMtlImporter &rOther) = delete;
+    ObjFileMtlImporter &operator=(const ObjFileMtlImporter &rOther) = delete;
 
 private:
     /// Copy constructor, empty.
-    ObjFileMtlImporter(const ObjFileMtlImporter &rOther);
-    /// \brief  Assignment operator, returns only a reference of this instance.
-    ObjFileMtlImporter &operator=(const ObjFileMtlImporter &rOther);
     /// Load the whole material description
     void load();
     /// Get color data.
@@ -104,7 +103,7 @@ private:
     //! Current line in file
     unsigned int m_uiLine;
     //! Helper buffer
-    char m_buffer[BUFFERSIZE];
+    std::vector<char> m_buffer;
 };
 
 // ------------------------------------------------------------------------------------------------

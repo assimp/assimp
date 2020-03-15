@@ -5,7 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,12 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 // internal headers
-#include "PlyLoader.h"
-#include <assimp/IOStreamBuffer.h>
-#include <assimp/importerdesc.h>
-#include <assimp/scene.h>
-#include <assimp/IOSystem.hpp>
-#include <memory>
+#    include "PlyLoader.h"
+#    include <assimp/IOStreamBuffer.h>
+#    include <assimp/importerdesc.h>
+#    include <assimp/scene.h>
+#    include <assimp/IOSystem.hpp>
+#    include <memory>
 
 using namespace ::Assimp;
 
@@ -87,7 +86,9 @@ inline const T &GetProperty(const std::vector<T> &props, int idx) {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter() :
-        mBuffer(nullptr), pcDOM(nullptr), mGeneratedMesh(nullptr) {
+        mBuffer(nullptr),
+        pcDOM(nullptr),
+        mGeneratedMesh(nullptr) {
     // empty
 }
 
@@ -127,15 +128,15 @@ static bool isBigEndian(const char *szMe) {
     // binary_little_endian
     // binary_big_endian
     bool isBigEndian(false);
-#if (defined AI_BUILD_BIG_ENDIAN)
+#    if (defined AI_BUILD_BIG_ENDIAN)
     if ('l' == *szMe || 'L' == *szMe) {
         isBigEndian = true;
     }
-#else
+#    else
     if ('b' == *szMe || 'B' == *szMe) {
         isBigEndian = true;
     }
-#endif // ! AI_BUILD_BIG_ENDIAN
+#    endif // ! AI_BUILD_BIG_ENDIAN
 
     return isBigEndian;
 }

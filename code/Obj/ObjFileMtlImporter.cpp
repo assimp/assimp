@@ -89,9 +89,12 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
         m_DataIt(buffer.begin()),
         m_DataItEnd(buffer.end()),
         m_pModel(pModel),
-        m_uiLine(0) {
-    ai_assert(NULL != m_pModel);
-    if (NULL == m_pModel->m_pDefaultMaterial) {
+        m_uiLine(0),
+        m_buffer() {
+    ai_assert(nullptr != m_pModel);
+    m_buffer.resize(BUFFERSIZE);
+    std::fill(m_buffer.begin(), m_buffer.end(), '\0');
+    if (nullptr == m_pModel->m_pDefaultMaterial) {
         m_pModel->m_pDefaultMaterial = new ObjFile::Material;
         m_pModel->m_pDefaultMaterial->MaterialName.Set("default");
     }
@@ -102,18 +105,6 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
 //  Destructor
 ObjFileMtlImporter::~ObjFileMtlImporter() {
     // empty
-}
-
-// -------------------------------------------------------------------
-//  Private copy constructor
-ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter &) {
-    // empty
-}
-
-// -------------------------------------------------------------------
-//  Private copy constructor
-ObjFileMtlImporter &ObjFileMtlImporter::operator=(const ObjFileMtlImporter &) {
-    return *this;
 }
 
 // -------------------------------------------------------------------
@@ -227,15 +218,15 @@ void ObjFileMtlImporter::getColorRGBA(aiColor3D *pColor) {
 // -------------------------------------------------------------------
 //  Loads the kind of illumination model.
 void ObjFileMtlImporter::getIlluminationModel(int &illum_model) {
-    m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE);
-    illum_model = atoi(m_buffer);
+    m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    illum_model = atoi(&m_buffer[0]);
 }
 
 // -------------------------------------------------------------------
 //  Loads a single float value.
 void ObjFileMtlImporter::getFloatValue(ai_real &value) {
-    m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE);
-    value = (ai_real)fast_atof(m_buffer);
+    m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    value = (ai_real)fast_atof(&m_buffer[0]);
 }
 
 // -------------------------------------------------------------------

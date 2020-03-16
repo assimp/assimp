@@ -446,6 +446,24 @@ namespace glTF2 {
                     WriteAttrs(w, attrs, p.attributes.weight, "WEIGHTS", true);
                 }
                 prim.AddMember("attributes", attrs, w.mAl);
+
+                // targets for blendshapes
+                if (p.targets.size() > 0) {
+                    Value tjs;
+                    tjs.SetArray();
+                    tjs.Reserve(unsigned(p.targets.size()), w.mAl);
+                    for (unsigned int t = 0; t < p.targets.size(); ++t) {
+                        Value tj;
+                        tj.SetObject();
+                        {
+                            WriteAttrs(w, tj, p.targets[t].position, "POSITION");
+                            WriteAttrs(w, tj, p.targets[t].normal, "NORMAL");
+                            WriteAttrs(w, tj, p.targets[t].tangent, "TANGENT");
+                        }
+                        tjs.PushBack(tj, w.mAl);
+                    }
+                    prim.AddMember("targets", tjs, w.mAl);
+                }
             }
             primitives.PushBack(prim, w.mAl);
         }

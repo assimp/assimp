@@ -814,6 +814,47 @@ void glTF2Exporter::ExportMeshes()
         if(aim->HasBones()) {
             ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
         }
+
+        /*************** Targets for blendshapes ****************/
+        if (aim->mNumAnimMeshes > 0) {
+            p.targets.resize(aim->mNumAnimMeshes);
+            for (unsigned int am = 0; am < aim->mNumAnimMeshes; ++am) {
+                aiAnimMesh *pAnimMesh = aim->mAnimMeshes[am];
+
+                // position
+                if (pAnimMesh->HasPositions()) {
+                    // NOTE: in gltf it is the diff stored
+                    aiVector3D *pPositionDiff = new aiVector3D[pAnimMesh->mNumVertices];
+                    for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
+                        pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
+                    }
+                    Ref<Accessor> v = ExportData(*mAsset, meshId, b,
+                            pAnimMesh->mNumVertices, pPositionDiff,
+                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    if (v) {
+                        p.targets[am].position.push_back(v);
+                    }
+                    delete[] pPositionDiff;
+                }
+
+                // normal
+                if (pAnimMesh->HasNormals()) {
+                    aiVector3D *pNormalDiff = new aiVector3D[pAnimMesh->mNumVertices];
+                    for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
+                        pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
+                    }
+                    Ref<Accessor> v = ExportData(*mAsset, meshId, b,
+                            pAnimMesh->mNumVertices, pNormalDiff,
+                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    if (v) {
+                        p.targets[am].normal.push_back(v);
+                    }
+                    delete[] pNormalDiff;
+                }
+
+                // tangent?
+            }
+        }
     }
 
     //----------------------------------------

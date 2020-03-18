@@ -68,6 +68,10 @@ namespace Assimp {
 namespace MDL {
 namespace HalfLife {
 
+#ifdef _WIN32
+#    pragma warning(disabe : 4706) 
+#endif // _WIN32
+
 // ------------------------------------------------------------------------------------------------
 HL1MDLLoader::HL1MDLLoader(
     aiScene *scene,

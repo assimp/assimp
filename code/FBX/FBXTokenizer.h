@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXCompileConfig.h"
 #include <assimp/ai_assert.h>
+#include <assimp/defs.h>
 #include <vector>
 #include <string>
 

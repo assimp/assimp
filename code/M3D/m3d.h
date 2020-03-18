@@ -101,9 +101,9 @@ typedef uint16_t M3D_INDEX;
 
 #ifdef _WIN32
 #    pragma warning(push)
-#    pragma warning(disable : 4127 4505 4244 4403 5744 4701 4703)
+#    pragma warning(disable : 4100 4127 4189 4505 4244 4403  4701 4703)
 #    if (_MSC_VER > 1800 )
-#        pragma warning(disable : 5573 )
+#        pragma warning(disable : 5573 5744)
 #    endif
 #endif // _WIN32
 

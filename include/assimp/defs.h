@@ -158,6 +158,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef _MSC_VER
+#        pragma warning(disable : 4521 4714 4127)
 #   ifdef ASSIMP_BUILD_DLL_EXPORT
 #       pragma warning (disable : 4251)
 #   endif

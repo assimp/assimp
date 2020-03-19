@@ -65,7 +65,7 @@ class X3DExporter {
 
         SAttribute(SAttribute && rhs) :
                 Name(std::move(rhs.Name)),
-                Value(std::move(rhs.Value) {
+                Value(std::move(rhs.Value)) {
             // empty
         }
     };

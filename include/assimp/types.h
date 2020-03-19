@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_TYPES_H_INC
 
 #ifdef __GNUC__
-#    pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 // Some runtime headers
@@ -58,24 +58,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 
 // Our compile configuration
-#    include <assimp/defs.h>
+#include <assimp/defs.h>
 
 // Some types moved to separate header due to size of operators
-#    include <assimp/color4.h>
-#    include <assimp/matrix3x3.h>
-#    include <assimp/matrix4x4.h>
-#    include <assimp/quaternion.h>
-#    include <assimp/vector2.h>
-#    include <assimp/vector3.h>
+#include <assimp/color4.h>
+#include <assimp/matrix3x3.h>
+#include <assimp/matrix4x4.h>
+#include <assimp/quaternion.h>
+#include <assimp/vector2.h>
+#include <assimp/vector3.h>
 
 typedef int32_t ai_int32;
 typedef uint32_t ai_uint32;
 
-#    ifdef __cplusplus
+#ifdef __cplusplus
 
-#        include <cstring>
-#        include <new> // for std::nothrow_t
-#        include <string> // for aiString::Set(const std::string&)
+#include <cstring>
+#include <new> // for std::nothrow_t
+#include <string> // for aiString::Set(const std::string&)
 
 namespace Assimp {
 //! @cond never
@@ -93,7 +93,7 @@ namespace Intern {
      * the application is determined to crash.
      */
 // --------------------------------------------------------------------
-#        ifndef SWIG
+#ifndef SWIG
 struct ASSIMP_API AllocateFromAssimpHeap {
     // http://www.gotw.ca/publications/mill15.htm
 
@@ -108,26 +108,26 @@ struct ASSIMP_API AllocateFromAssimpHeap {
     void operator delete[](void *data);
 
 }; // struct AllocateFromAssimpHeap
-#        endif
+#endif
 } // namespace Intern
 //! @endcond
 } // namespace Assimp
 
 extern "C" {
-#    endif
+#endif
 
 /** Maximum dimension for strings, ASSIMP strings are zero terminated. */
-#    ifdef __cplusplus
+#ifdef __cplusplus
 static const size_t MAXLEN = 1024;
-#    else
-#        define MAXLEN 1024
-#    endif
+#else
+#define MAXLEN 1024
+#endif
 
 // ----------------------------------------------------------------------------------
 /** Represents a plane in a three-dimensional, euclidean space
 */
 struct aiPlane {
-#    ifdef __cplusplus
+#ifdef __cplusplus
     aiPlane() AI_NO_EXCEPT : a(0.f), b(0.f), c(0.f), d(0.f) {}
     aiPlane(ai_real _a, ai_real _b, ai_real _c, ai_real _d) :
             a(_a), b(_b), c(_c), d(_d) {}
@@ -135,7 +135,7 @@ struct aiPlane {
     aiPlane(const aiPlane &o) :
             a(o.a), b(o.b), c(o.c), d(o.d) {}
 
-#    endif // !__cplusplus
+#endif // !__cplusplus
 
     //! Plane equation
     ai_real a, b, c, d;
@@ -145,7 +145,7 @@ struct aiPlane {
 /** Represents a ray
 */
 struct aiRay {
-#    ifdef __cplusplus
+#ifdef __cplusplus
     aiRay() AI_NO_EXCEPT {}
     aiRay(const aiVector3D &_pos, const aiVector3D &_dir) :
             pos(_pos), dir(_dir) {}
@@ -153,7 +153,7 @@ struct aiRay {
     aiRay(const aiRay &o) :
             pos(o.pos), dir(o.dir) {}
 
-#    endif // !__cplusplus
+#endif // !__cplusplus
 
     //! Position and direction of the ray
     C_STRUCT aiVector3D pos, dir;
@@ -163,7 +163,7 @@ struct aiRay {
 /** Represents a color in Red-Green-Blue space.
 */
 struct aiColor3D {
-#    ifdef __cplusplus
+#ifdef __cplusplus
     aiColor3D() AI_NO_EXCEPT : r(0.0f), g(0.0f), b(0.0f) {}
     aiColor3D(ai_real _r, ai_real _g, ai_real _b) :
             r(_r), g(_g), b(_b) {}
@@ -236,7 +236,7 @@ struct aiColor3D {
         return std::fabs(r) < epsilon && std::fabs(g) < epsilon && std::fabs(b) < epsilon;
     }
 
-#    endif // !__cplusplus
+#endif // !__cplusplus
 
     //! Red, green and blue color values
     ai_real r, g, b;
@@ -264,16 +264,16 @@ struct aiColor3D {
  *  the terminating zero).
 */
 struct aiString {
-#    ifdef __cplusplus
+#ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
     aiString() AI_NO_EXCEPT
             : length(0) {
         data[0] = '\0';
 
-#        ifdef ASSIMP_BUILD_DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
         // Debug build: overwrite the string on its full length with ESC (27)
         memset(data + 1, 27, MAXLEN - 1);
-#        endif
+#endif
     }
 
     /** Copy constructor */
@@ -368,10 +368,10 @@ struct aiString {
         length = 0;
         data[0] = '\0';
 
-#        ifdef ASSIMP_BUILD_DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
         // Debug build: overwrite the string on its full length with ESC (27)
         memset(data + 1, 27, MAXLEN - 1);
-#        endif
+#endif
     }
 
     /** Returns a pointer to the underlying zero-terminated array of characters */
@@ -379,7 +379,7 @@ struct aiString {
         return data;
     }
 
-#    endif // !__cplusplus
+#endif // !__cplusplus
 
     /** Binary length of the string excluding the terminal 0. This is NOT the
      *  logical length of strings containing UTF-8 multi-byte sequences! It's
@@ -415,9 +415,9 @@ typedef enum aiReturn {
 } aiReturn; // !enum aiReturn
 
 // just for backwards compatibility, don't use these constants anymore
-#    define AI_SUCCESS aiReturn_SUCCESS
-#    define AI_FAILURE aiReturn_FAILURE
-#    define AI_OUTOFMEMORY aiReturn_OUTOFMEMORY
+#define AI_SUCCESS aiReturn_SUCCESS
+#define AI_FAILURE aiReturn_FAILURE
+#define AI_OUTOFMEMORY aiReturn_OUTOFMEMORY
 
 // ----------------------------------------------------------------------------------
 /** Seek origins (for the virtual file system API).
@@ -469,10 +469,10 @@ enum aiDefaultLogStream {
 }; // !enum aiDefaultLogStream
 
 // just for backwards compatibility, don't use these constants anymore
-#    define DLS_FILE aiDefaultLogStream_FILE
-#    define DLS_STDOUT aiDefaultLogStream_STDOUT
-#    define DLS_STDERR aiDefaultLogStream_STDERR
-#    define DLS_DEBUGGER aiDefaultLogStream_DEBUGGER
+#define DLS_FILE aiDefaultLogStream_FILE
+#define DLS_STDOUT aiDefaultLogStream_STDOUT
+#define DLS_STDERR aiDefaultLogStream_STDERR
+#define DLS_DEBUGGER aiDefaultLogStream_DEBUGGER
 
 // ----------------------------------------------------------------------------------
 /** Stores the memory requirements for different components (e.g. meshes, materials,
@@ -480,7 +480,7 @@ enum aiDefaultLogStream {
  *  @see Importer::GetMemoryRequirements()
 */
 struct aiMemoryInfo {
-#    ifdef __cplusplus
+#ifdef __cplusplus
 
     /** Default constructor */
     aiMemoryInfo() AI_NO_EXCEPT
@@ -493,7 +493,7 @@ struct aiMemoryInfo {
               lights(0),
               total(0) {}
 
-#    endif
+#endif
 
     /** Storage allocated for texture data */
     unsigned int textures;
@@ -520,16 +520,16 @@ struct aiMemoryInfo {
     unsigned int total;
 }; // !struct aiMemoryInfo
 
-#    ifdef __cplusplus
+#ifdef __cplusplus
 }
-#    endif //!  __cplusplus
+#endif //!  __cplusplus
 
 // Include implementation files
-#    include "color4.inl"
-#    include "matrix3x3.inl"
-#    include "matrix4x4.inl"
-#    include "quaternion.inl"
-#    include "vector2.inl"
-#    include "vector3.inl"
+#include "color4.inl"
+#include "matrix3x3.inl"
+#include "matrix4x4.inl"
+#include "quaternion.inl"
+#include "vector2.inl"
+#include "vector3.inl"
 
 #endif // AI_TYPES_H_INC

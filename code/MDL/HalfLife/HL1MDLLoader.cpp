@@ -69,7 +69,7 @@ namespace MDL {
 namespace HalfLife {
 
 #ifdef _WIN32
-#    pragma warning(disabe : 4706) 
+#    pragma warning(disable : 4706) 
 #endif // _WIN32
 
 // ------------------------------------------------------------------------------------------------

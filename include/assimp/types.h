@@ -44,18 +44,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #pragma once
 #ifndef AI_TYPES_H_INC
-#    define AI_TYPES_H_INC
+#define AI_TYPES_H_INC
 
-#    ifdef __GNUC__
-#        pragma GCC system_header
-#    endif
+#ifdef __GNUC__
+#    pragma GCC system_header
+#endif
 
 // Some runtime headers
-#    include <limits.h>
-#    include <stddef.h>
-#    include <stdint.h>
-#    include <string.h>
-#    include <sys/types.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <sys/types.h>
 
 // Our compile configuration
 #    include <assimp/defs.h>

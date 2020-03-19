@@ -828,11 +828,11 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
                     }
-                    Ref<Accessor> v = ExportData(*mAsset, meshId, b,
+                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pPositionDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-                    if (v) {
-                        p.targets[am].position.push_back(v);
+                    if (vec) {
+                        p.targets[am].position.push_back(vec);
                     }
                     delete[] pPositionDiff;
                 }
@@ -843,11 +843,11 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
                     }
-                    Ref<Accessor> v = ExportData(*mAsset, meshId, b,
+                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pNormalDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-                    if (v) {
-                        p.targets[am].normal.push_back(v);
+                    if (vec) {
+                        p.targets[am].normal.push_back(vec);
                     }
                     delete[] pNormalDiff;
                 }

@@ -69,6 +69,7 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
         m_DataIt(),
         m_DataItEnd(),
         m_pModel(nullptr),
+        m_buffer(),
         m_uiLine(0),
         m_pIO(io),
         m_progress(progress),
@@ -89,8 +90,7 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
     parseFile(streamBuffer);
 }
 
-ObjFileParser::~ObjFileParser()
-{
+ObjFileParser::~ObjFileParser() {
 }
 
 void ObjFileParser::setBuffer(std::vector<char> &buffer) {
@@ -127,96 +127,96 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         // parse line
         switch (*m_DataIt) {
-            case 'v': // Parse a vertex texture coordinate
-            {
+        case 'v': // Parse a vertex texture coordinate
+        {
+            ++m_DataIt;
+            if (*m_DataIt == ' ' || *m_DataIt == '\t') {
+                size_t numComponents = getNumComponentsInDataDefinition();
+                if (numComponents == 3) {
+                    // read in vertex definition
+                    getVector3(m_pModel->m_Vertices);
+                } else if (numComponents == 4) {
+                    // read in vertex definition (homogeneous coords)
+                    getHomogeneousVector3(m_pModel->m_Vertices);
+                } else if (numComponents == 6) {
+                    // read vertex and vertex-color
+                    getTwoVectors3(m_pModel->m_Vertices, m_pModel->m_VertexColors);
+                }
+            } else if (*m_DataIt == 't') {
+                // read in texture coordinate ( 2D or 3D )
                 ++m_DataIt;
-                if (*m_DataIt == ' ' || *m_DataIt == '\t') {
-                    size_t numComponents = getNumComponentsInDataDefinition();
-                    if (numComponents == 3) {
-                        // read in vertex definition
-                        getVector3(m_pModel->m_Vertices);
-                    } else if (numComponents == 4) {
-                        // read in vertex definition (homogeneous coords)
-                        getHomogeneousVector3(m_pModel->m_Vertices);
-                    } else if (numComponents == 6) {
-                        // read vertex and vertex-color
-                        getTwoVectors3(m_pModel->m_Vertices, m_pModel->m_VertexColors);
-                    }
-                } else if (*m_DataIt == 't') {
-                    // read in texture coordinate ( 2D or 3D )
-                    ++m_DataIt;
-                    size_t dim = getTexCoordVector(m_pModel->m_TextureCoord);
-                    m_pModel->m_TextureCoordDim = std::max(m_pModel->m_TextureCoordDim, (unsigned int)dim);
-                } else if (*m_DataIt == 'n') {
-                    // Read in normal vector definition
-                    ++m_DataIt;
-                    getVector3(m_pModel->m_Normals);
-                }
-            } break;
+                size_t dim = getTexCoordVector(m_pModel->m_TextureCoord);
+                m_pModel->m_TextureCoordDim = std::max(m_pModel->m_TextureCoordDim, (unsigned int)dim);
+            } else if (*m_DataIt == 'n') {
+                // Read in normal vector definition
+                ++m_DataIt;
+                getVector3(m_pModel->m_Normals);
+            }
+        } break;
 
-            case 'p': // Parse a face, line or point statement
-            case 'l':
-            case 'f': {
-                getFace(*m_DataIt == 'f' ? aiPrimitiveType_POLYGON : (*m_DataIt == 'l' ? aiPrimitiveType_LINE : aiPrimitiveType_POINT));
-            } break;
+        case 'p': // Parse a face, line or point statement
+        case 'l':
+        case 'f': {
+            getFace(*m_DataIt == 'f' ? aiPrimitiveType_POLYGON : (*m_DataIt == 'l' ? aiPrimitiveType_LINE : aiPrimitiveType_POINT));
+        } break;
 
-            case '#': // Parse a comment
-            {
-                getComment();
-            } break;
+        case '#': // Parse a comment
+        {
+            getComment();
+        } break;
 
-            case 'u': // Parse a material desc. setter
-            {
-                std::string name;
+        case 'u': // Parse a material desc. setter
+        {
+            std::string name;
 
-                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+            getNameNoSpace(m_DataIt, m_DataItEnd, name);
 
-                size_t nextSpace = name.find(' ');
-                if (nextSpace != std::string::npos)
-                    name = name.substr(0, nextSpace);
+            size_t nextSpace = name.find(' ');
+            if (nextSpace != std::string::npos)
+                name = name.substr(0, nextSpace);
 
-                if (name == "usemtl") {
-                    getMaterialDesc();
-                }
-            } break;
+            if (name == "usemtl") {
+                getMaterialDesc();
+            }
+        } break;
 
-            case 'm': // Parse a material library or merging group ('mg')
-            {
-                std::string name;
+        case 'm': // Parse a material library or merging group ('mg')
+        {
+            std::string name;
 
-                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+            getNameNoSpace(m_DataIt, m_DataItEnd, name);
 
-                size_t nextSpace = name.find(' ');
-                if (nextSpace != std::string::npos)
-                    name = name.substr(0, nextSpace);
+            size_t nextSpace = name.find(' ');
+            if (nextSpace != std::string::npos)
+                name = name.substr(0, nextSpace);
 
-                if (name == "mg")
-                    getGroupNumberAndResolution();
-                else if (name == "mtllib")
-                    getMaterialLib();
-                else
-                    goto pf_skip_line;
-            } break;
+            if (name == "mg")
+                getGroupNumberAndResolution();
+            else if (name == "mtllib")
+                getMaterialLib();
+            else
+                goto pf_skip_line;
+        } break;
 
-            case 'g': // Parse group name
-            {
-                getGroupName();
-            } break;
+        case 'g': // Parse group name
+        {
+            getGroupName();
+        } break;
 
-            case 's': // Parse group number
-            {
-                getGroupNumber();
-            } break;
+        case 's': // Parse group number
+        {
+            getGroupNumber();
+        } break;
 
-            case 'o': // Parse object name
-            {
-                getObjectName();
-            } break;
+        case 'o': // Parse object name
+        {
+            getObjectName();
+        } break;
 
-            default: {
-            pf_skip_line:
-                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
-            } break;
+        default: {
+        pf_skip_line:
+            m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+        } break;
         }
     }
 }

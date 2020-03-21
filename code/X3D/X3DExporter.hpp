@@ -57,7 +57,7 @@ class X3DExporter {
                 Value() {
             // empty
         }
-        SAttribute(std::string name, std::string value) :
+        SAttribute(const std::string &name, const std::string &value) :
                 Name(name),
                 Value(value) {
             // empty

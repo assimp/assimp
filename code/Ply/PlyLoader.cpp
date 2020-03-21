@@ -105,11 +105,15 @@ bool PLYImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 
     if (extension == "ply") {
         return true;
-    } else if (!extension.length() || checkSig) {
+    }
+
+    if (!extension.length() || checkSig) {
         if (!pIOHandler) {
             return true;
         }
-        static const char *tokens[] = { "ply" };
+        static const char *tokens[] = {
+            "ply"
+        };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

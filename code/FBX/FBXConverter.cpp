@@ -2715,7 +2715,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
             // check if this curves contains redundant information by looking
             // up the corresponding node's transformation chain.
             if (doc.Settings().optimizeEmptyAnimationCurves &&
-                    IsRedundantAnimationData(target, comp, (*chain[i]).second)) {
+                    IsRedundantAnimationData(target, comp, (chain[i]->second))) {
 
                 FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
                 continue;

@@ -310,3 +310,10 @@ TEST_F(utFBXImporterExporter, sceneMetadata) {
         ASSERT_EQ(strncmp(generator.C_Str(), "Blender", 7), 0);
     }
 }
+
+TEST_F(utFBXImporterExporter, importCubesWithOutOfRangeFloat) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/cubes_with_outofrange_float.fbx", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_TRUE(scene->mRootNode);
+}

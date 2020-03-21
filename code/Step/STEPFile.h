@@ -727,8 +727,11 @@ struct InternGenericConvert<Maybe<T>> {
     }
 };
 
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable : 4127)
+#endif // _WIN32
+
 template <typename T, uint64_t min_cnt, uint64_t max_cnt>
 struct InternGenericConvertList {
     void operator()(ListOf<T, min_cnt, max_cnt> &out, const std::shared_ptr<const EXPRESS::DataType> &inp_base, const STEP::DB &db) {
@@ -758,8 +761,6 @@ struct InternGenericConvertList {
         }
     }
 };
-
-#pragma warning(pop)
 
 template <typename T>
 struct InternGenericConvert<Lazy<T>> {
@@ -959,7 +960,9 @@ private:
     const EXPRESS::ConversionSchema *schema;
 };
 
+#ifdef _WIN32
 #pragma warning(pop)
+#endif // _WIN32
 
 } // namespace STEP
 

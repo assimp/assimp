@@ -85,6 +85,9 @@ public:
     /// @brief  Model getter.
     ObjFile::Model *GetModel() const;
 
+    ObjFileParser(const ObjFileParser&) = delete;
+    ObjFileParser &operator=(const ObjFileParser& ) = delete;
+
 protected:
     /// Parse the loaded file
     void parseFile(IOStreamBuffer<char> &streamBuffer);
@@ -136,8 +139,6 @@ protected:
 private:
     // Copy and assignment constructor should be private
     // because the class contains pointer to allocated memory
-    ObjFileParser(const ObjFileParser &rhs);
-    ObjFileParser &operator=(const ObjFileParser &rhs);
 
     /// Default material name
     static const std::string DEFAULT_MATERIAL;

@@ -358,15 +358,15 @@ struct Texture {
     }
 
     Texture(Texture &&other) AI_NO_EXCEPT : mTextureBlend(std::move(other.mTextureBlend)),
-                                            mMapName(std::move(mMapName)),
-                                            mOffsetU(std::move(mOffsetU)),
-                                            mOffsetV(std::move(mOffsetV)),
-                                            mScaleU(std::move(mScaleU)),
-                                            mScaleV(std::move(mScaleV)),
-                                            mRotation(std::move(mRotation)),
-                                            mMapMode(std::move(mMapMode)),
-                                            bPrivate(std::move(bPrivate)),
-                                            iUVSrc(std::move(iUVSrc)) {
+                                            mMapName(std::move(other.mMapName)),
+                                            mOffsetU(std::move(other.mOffsetU)),
+                                            mOffsetV(std::move(other.mOffsetV)),
+                                            mScaleU(std::move(other.mScaleU)),
+                                            mScaleV(std::move(other.mScaleV)),
+                                            mRotation(std::move(other.mRotation)),
+                                            mMapMode(std::move(other.mMapMode)),
+                                            bPrivate(std::move(other.bPrivate)),
+                                            iUVSrc(std::move(other.iUVSrc)) {
         // empty
     }
 

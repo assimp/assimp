@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright (c) 2013 Khaled Mammou - Advanced Micro Devices, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

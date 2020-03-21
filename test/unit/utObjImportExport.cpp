@@ -190,7 +190,7 @@ protected:
         return expScene;
     }
 
-    virtual bool importerTest() {
+    bool importerTest() override {
         ::Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
         return nullptr != scene;
@@ -477,4 +477,3 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
     EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
     EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
 }
-

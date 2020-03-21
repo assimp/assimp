@@ -61,12 +61,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/defs.h>
 
 // Some types moved to separate header due to size of operators
+#include <assimp/vector2.h>
+#include <assimp/vector3.h>
 #include <assimp/color4.h>
 #include <assimp/matrix3x3.h>
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
-#include <assimp/vector2.h>
-#include <assimp/vector3.h>
 
 typedef int32_t ai_int32;
 typedef uint32_t ai_uint32;
@@ -525,11 +525,11 @@ struct aiMemoryInfo {
 #endif //!  __cplusplus
 
 // Include implementation files
+#include "vector2.inl"
+#include "vector3.inl"
 #include "color4.inl"
 #include "matrix3x3.inl"
 #include "matrix4x4.inl"
 #include "quaternion.inl"
-#include "vector2.inl"
-#include "vector3.inl"
 
 #endif // AI_TYPES_H_INC

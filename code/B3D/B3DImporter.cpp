@@ -364,7 +364,7 @@ void B3DImporter::ReadVRTS(){
     int v0=static_cast<int>(_vertices.size());
     _vertices.resize( v0+n_verts );
 
-    for( int i=0;i<n_verts;++i ){
+    for( unsigned int i=0;i<n_verts;++i ){
         Vertex &v=_vertices[v0+i];
 
         memset( v.bones,0,sizeof(v.bones) );
@@ -414,7 +414,7 @@ void B3DImporter::ReadTRIS(int v0) {
 	size_t n_tris = ChunkSize() / 12;
 	aiFace *face = mesh->mFaces = new aiFace[n_tris];
 
-	for (int i = 0; i < n_tris; ++i) {
+    for (unsigned int i = 0; i < n_tris; ++i) {
 		int i0 = ReadInt() + v0;
 		int i1 = ReadInt() + v0;
 		int i2 = ReadInt() + v0;

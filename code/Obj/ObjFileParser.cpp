@@ -59,7 +59,14 @@ namespace Assimp {
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 ObjFileParser::ObjFileParser() :
-        m_DataIt(), m_DataItEnd(), m_pModel(nullptr), m_uiLine(0), m_pIO(nullptr), m_progress(nullptr), m_originalObjFileName() {
+        m_DataIt(),
+        m_DataItEnd(),
+        m_pModel(nullptr),
+        m_uiLine(0),
+        m_buffer(),
+        m_pIO(nullptr),
+        m_progress(nullptr),
+        m_originalObjFileName() {
     // empty
 }
 
@@ -69,8 +76,8 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
         m_DataIt(),
         m_DataItEnd(),
         m_pModel(nullptr),
-        m_buffer(),
         m_uiLine(0),
+        m_buffer(),
         m_pIO(io),
         m_progress(progress),
         m_originalObjFileName(originalObjFileName) {

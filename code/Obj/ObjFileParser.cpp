@@ -67,7 +67,7 @@ ObjFileParser::ObjFileParser() :
         m_pIO(nullptr),
         m_progress(nullptr),
         m_originalObjFileName() {
-    // empty
+    std::fill_n(m_buffer, Buffersize, '\0');
 }
 
 ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName,

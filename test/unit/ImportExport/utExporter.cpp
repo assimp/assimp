@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,7 +48,7 @@ using namespace Assimp;
 class TestProgressHandler : public ProgressHandler {
 public:
     TestProgressHandler() :
-            ProgressHandler(), 
+            ProgressHandler(),
             mPercentage(0.f) {
         // empty
     }

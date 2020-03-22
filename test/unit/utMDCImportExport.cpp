@@ -52,7 +52,7 @@ public:
         Assimp::Importer importer;
 
         //const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0);
-        static_cast<void>( importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0) );
+        static_cast<void>(importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0));
         return true;
     }
 };

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,13 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Half-Life 1 MDL loader nodes tests.
  */
 
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "MDL/HalfLife/HL1ImportDefinitions.h"
+#include "MDLHL1TestFiles.h"
+#include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
-#include "MDLHL1TestFiles.h"
-#include "MDL/HalfLife/HL1ImportDefinitions.h"
 
 using namespace Assimp;
 
@@ -117,7 +115,7 @@ public:
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_bodyparts.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
-        
+
         const std::vector<std::string> expected_bodyparts_names = {
             "Bodypart",
             "Bodypart_1",
@@ -196,16 +194,16 @@ public:
 
         const std::vector<std::vector<std::string>> expected_bodypart_sub_models_names = {
             {
-                "triangle",
-                "triangle_0",
+                    "triangle",
+                    "triangle_0",
             },
             {
-                "triangle_1",
-                "triangle_2",
+                    "triangle_1",
+                    "triangle_2",
             },
             {
-                "triangle2",
-                "triangle2_0",
+                    "triangle2",
+                    "triangle2_0",
             }
         };
 

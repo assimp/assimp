@@ -103,7 +103,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
         return;
 
     // collect all bone weights per vertex
-    typedef SmallVector<Weight,AI_LMW_MAX_WEIGHTS*2> VertexWeightArray;
+    typedef SmallVector<Weight,8> VertexWeightArray;
     typedef std::vector<VertexWeightArray> WeightsPerVertex;
     WeightsPerVertex vertexWeights(pMesh->mNumVertices);
     unsigned int maxVertexWeights = 0;

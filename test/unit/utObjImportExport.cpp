@@ -198,7 +198,7 @@ protected:
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-    virtual bool exporterTest() {
+    bool exporterTest() override {
         ::Assimp::Importer importer;
         ::Assimp::Exporter exporter;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);

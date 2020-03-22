@@ -419,7 +419,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                     num = 0;
                     break;
 
-                    curOut -= (max-num); /* undo all previous work */
+                    /*curOut -= (max-num); // undo all previous work 
                     for (tmp = 0; tmp < max-2; ++tmp) {
                         aiFace& nface = *curOut++;
 
@@ -433,7 +433,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
                     }
                     num = 0;
-                    break;
+                    break;*/
                 }
 
                 aiFace& nface = *curOut++;

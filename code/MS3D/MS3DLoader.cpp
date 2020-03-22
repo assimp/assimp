@@ -261,19 +261,19 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         TempTriangle& t = triangles[i];
 
         stream.IncPtr(2);
-        for (unsigned int i = 0; i < 3; ++i) {
-            t.indices[i] = stream.GetI2();
+        for (unsigned int j = 0; j < 3; ++j) {
+            t.indices[j] = stream.GetI2();
         }
 
-        for (unsigned int i = 0; i < 3; ++i) {
-            ReadVector(stream,t.normals[i]);
+        for (unsigned int j = 0; j < 3; ++j) {
+            ReadVector(stream,t.normals[j]);
         }
 
-        for (unsigned int i = 0; i < 3; ++i) {
-            stream >> (float&)(t.uv[i].x); // see note in ReadColor()
+        for (unsigned int j = 0; j < 3; ++j) {
+            stream >> (float&)(t.uv[j].x); // see note in ReadColor()
         }
-        for (unsigned int i = 0; i < 3; ++i) {
-            stream >> (float&)(t.uv[i].y);
+        for (unsigned int j = 0; j < 3; ++j) {
+            stream >> (float&)(t.uv[j].y);
         }
 
         t.sg    = stream.GetI1();
@@ -296,8 +296,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         stream >> num;
 
         t.triangles.resize(num);
-        for (unsigned int i = 0; i < num; ++i) {
-            t.triangles[i] = stream.GetI2();
+        for (unsigned int j = 0; j < num; ++j) {
+            t.triangles[j] = stream.GetI2();
         }
         t.mat = stream.GetI1();
         if (t.mat == UINT_MAX) {
@@ -309,8 +309,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
     stream >> mat;
 
     std::vector<TempMaterial> materials(mat);
-    for (unsigned int i = 0;i < mat; ++i) {
-        TempMaterial& t = materials[i];
+    for (unsigned int j = 0;j < mat; ++j) {
+        TempMaterial& t = materials[j];
 
         stream.CopyAndAdvance(t.name,32);
         t.name[32] = '\0';
@@ -338,8 +338,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
     stream >> joint;
 
     std::vector<TempJoint> joints(joint);
-    for(unsigned int i = 0; i < joint; ++i) {
-        TempJoint& j = joints[i];
+    for(unsigned int ii = 0; ii < joint; ++ii) {
+        TempJoint& j = joints[ii];
 
         stream.IncPtr(1);
         stream.CopyAndAdvance(j.name,32);
@@ -494,17 +494,17 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         typedef std::map<unsigned int,unsigned int> BoneSet;
         BoneSet mybones;
 
-        for (unsigned int i = 0,n = 0; i < m->mNumFaces; ++i) {
-            aiFace& f = m->mFaces[i];
-            if (g.triangles[i]>triangles.size()) {
+        for (unsigned int j = 0,n = 0; j < m->mNumFaces; ++j) {
+            aiFace& f = m->mFaces[j];
+            if (g.triangles[j]>triangles.size()) {
                 throw DeadlyImportError("MS3D: Encountered invalid triangle index, file is malformed");
             }
 
             TempTriangle& t = triangles[g.triangles[i]];
             f.mIndices = new unsigned int[f.mNumIndices=3];
 
-            for (unsigned int i = 0; i < 3; ++i,++n) {
-                if (t.indices[i]>vertices.size()) {
+            for (unsigned int k = 0; k < 3; ++k,++n) {
+                if (t.indices[k]>vertices.size()) {
                     throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
                 }
 
@@ -545,11 +545,11 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
             }
 
             // .. and collect bone weights
-            for (unsigned int i = 0,n = 0; i < m->mNumFaces; ++i) {
-                TempTriangle& t = triangles[g.triangles[i]];
+            for (unsigned int j = 0,n = 0; j < m->mNumFaces; ++j) {
+                TempTriangle& t = triangles[g.triangles[j]];
 
-                for (unsigned int i = 0; i < 3; ++i,++n) {
-                    const TempVertex& v = vertices[t.indices[i]];
+                for (unsigned int k = 0; k < 3; ++k,++n) {
+                    const TempVertex& v = vertices[t.indices[k]];
                     for(unsigned int a = 0; a < 4; ++a) {
                         const unsigned int bone = v.bone_id[a];
                         if(bone==UINT_MAX){

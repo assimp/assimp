@@ -347,16 +347,16 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     texture->source = mAsset->images.Create(imgId);
 
                     if (path[0] == '*') { // embedded
-                        aiTexture* tex = mScene->mTextures[atoi(&path[1])];
+                        aiTexture* curTex = mScene->mTextures[atoi(&path[1])];
 						
-                        texture->source->name = tex->mFilename.C_Str();
+                        texture->source->name = curTex->mFilename.C_Str();
 
                         // The asset has its own buffer, see Image::SetData
-                        texture->source->SetData(reinterpret_cast<uint8_t*> (tex->pcData), tex->mWidth, *mAsset);
+                        texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
 
-                        if (tex->achFormatHint[0]) {
+                        if (curTex->achFormatHint[0]) {
                             std::string mimeType = "image/";
-                            mimeType += (memcmp(tex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : tex->achFormatHint;
+                            mimeType += (memcmp(curTex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : curTex->achFormatHint;
                             texture->source->mimeType = mimeType;
                         }
                     }
@@ -828,11 +828,11 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
                     }
-                    Ref<Accessor> v = ExportData(*mAsset, meshId, b,
+                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pPositionDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-                    if (v) {
-                        p.targets[am].position.push_back(v);
+                    if (vec) {
+                        p.targets[am].position.push_back(vec);
                     }
                     delete[] pPositionDiff;
                 }
@@ -843,11 +843,11 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
                     }
-                    Ref<Accessor> v = ExportData(*mAsset, meshId, b,
+                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pNormalDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-                    if (v) {
-                        p.targets[am].normal.push_back(v);
+                    if (vec) {
+                        p.targets[am].normal.push_back(vec);
                     }
                     delete[] pNormalDiff;
                 }
@@ -931,14 +931,14 @@ void glTF2Exporter::MergeMeshes()
 
                 //find the presence of the removed mesh in other nodes
                 for (unsigned int nn = 0; nn < mAsset->nodes.Size(); ++nn) {
-                    Ref<Node> node = mAsset->nodes.Get(nn);
+                    Ref<Node> curNode = mAsset->nodes.Get(nn);
 
-                    for (unsigned int mm = 0; mm < node->meshes.size(); ++mm) {
-                        Ref<Mesh>& meshRef = node->meshes.at(mm);
+                    for (unsigned int mm = 0; mm < curNode->meshes.size(); ++mm) {
+                        Ref<Mesh> &meshRef = curNode->meshes.at(mm);
                         unsigned int meshIndex = meshRef.GetIndex();
 
                         if (meshIndex == removedIndex) {
-                            node->meshes.erase(node->meshes.begin() + mm);
+                            node->meshes.erase(curNode->meshes.begin() + mm);
                         } else if (meshIndex > removedIndex) {
                             Ref<Mesh> newMeshRef = mAsset->meshes.Get(meshIndex - 1);
 

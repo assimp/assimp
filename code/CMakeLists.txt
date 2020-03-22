@@ -121,6 +121,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/GenericProperty.h
   ${HEADER_PATH}/SpatialSort.h
   ${HEADER_PATH}/SkeletonMeshBuilder.h
+  ${HEADER_PATH}/SmallVector.h
   ${HEADER_PATH}/SmoothingGroups.h
   ${HEADER_PATH}/SmoothingGroups.inl
   ${HEADER_PATH}/StandardShapes.h

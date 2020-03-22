@@ -255,8 +255,7 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
-  ADD_COMPILE_OPTIONS(/MP)
-  ADD_COMPILE_OPTIONS( /bigobj )
+  ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX ) 
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)
@@ -583,17 +582,19 @@ ENDIF()
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
-  IF ( WIN32 AND DirectX_D3DX9_LIBRARY )
-    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${DirectX_FOUND} )
+  IF ( WIN32 )
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" OFF )
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ()
   ENDIF ()
-  # Te command line tool
+  # The command line tool
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ()
 
 IF ( ASSIMP_BUILD_SAMPLES)
+  SET( SAMPLES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples )
+  SET( SAMPLES_SHARED_CODE_DIR ${SAMPLES_DIR}/SharedCode )
   IF ( WIN32 )
     ADD_SUBDIRECTORY( samples/SimpleTexturedOpenGL/ )
     ADD_SUBDIRECTORY( samples/SimpleTexturedDirectx11 )

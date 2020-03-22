@@ -132,11 +132,9 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
             // need to build a clean list of bones, too
             for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
             {
-                for (unsigned int a = 0;  a < pcMesh->mBones[i]->mNumWeights;a++)
-                {
-                    const aiVertexWeight& w = pcMesh->mBones[i]->mWeights[a];
-                    if(pcFace->mIndices[q] == w.mVertexId)
-                    {
+				for (unsigned int boneIdx = 0; boneIdx < pcMesh->mBones[i]->mNumWeights; ++boneIdx) {
+					const aiVertexWeight &w = pcMesh->mBones[i]->mWeights[boneIdx];
+                    if(pcFace->mIndices[q] == w.mVertexId) {
                         aiVertexWeight wNew;
                         wNew.mVertexId = iIndex;
                         wNew.mWeight = w.mWeight;
@@ -157,17 +155,17 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
                 pvBitangents[iIndex] = pcMesh->mBitangents[pcFace->mIndices[q]];
             }
 
-            unsigned int p = 0;
-            while (pcMesh->HasTextureCoords(p))
+            unsigned int pp = 0;
+			while (pcMesh->HasTextureCoords(pp))
             {
-                apvTextureCoords[p][iIndex] = pcMesh->mTextureCoords[p][pcFace->mIndices[q]];
-                ++p;
+				apvTextureCoords[pp][iIndex] = pcMesh->mTextureCoords[pp][pcFace->mIndices[q]];
+				++pp;
             }
-            p = 0;
-            while (pcMesh->HasVertexColors(p))
+			pp = 0;
+			while (pcMesh->HasVertexColors(pp))
             {
-                apvColorSets[p][iIndex] = pcMesh->mColors[p][pcFace->mIndices[q]];
-                ++p;
+				apvColorSets[pp][iIndex] = pcMesh->mColors[pp][pcFace->mIndices[q]];
+				++pp;
             }
             pcFace->mIndices[q] = iIndex;
         }

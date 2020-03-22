@@ -185,8 +185,6 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
-  Common/SplitByBoneCountProcess.cpp
-  Common/SplitByBoneCountProcess.h
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -737,6 +735,8 @@ SET( PostProcessing_SRCS
   PostProcessing/ArmaturePopulate.h
   PostProcessing/GenBoundingBoxesProcess.cpp
   PostProcessing/GenBoundingBoxesProcess.h
+  PostProcessing/SplitByBoneCountProcess.cpp
+  PostProcessing/SplitByBoneCountProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
@@ -861,15 +861,15 @@ if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
 endif()
 
-ADD_ASSIMP_IMPORTER( STEP
-    Step/STEPFile.h
-    Importer/StepFile/StepFileImporter.h
-    Importer/StepFile/StepFileImporter.cpp
-    Importer/StepFile/StepFileGen1.cpp
-    Importer/StepFile/StepFileGen2.cpp
-    Importer/StepFile/StepFileGen3.cpp
-    Importer/StepFile/StepReaderGen.h
-)
+#ADD_ASSIMP_IMPORTER( STEP
+#    Step/STEPFile.h
+#    Importer/StepFile/StepFileImporter.h
+#    Importer/StepFile/StepFileImporter.cpp
+#    Importer/StepFile/StepFileGen1.cpp
+#    Importer/StepFile/StepFileGen2.cpp
+#    Importer/StepFile/StepFileGen3.cpp
+#    Importer/StepFile/StepReaderGen.h
+#)
 
 if ((NOT ASSIMP_NO_EXPORT) OR (NOT ASSIMP_EXPORTERS_ENABLED STREQUAL ""))
 	SET( Exporter_SRCS

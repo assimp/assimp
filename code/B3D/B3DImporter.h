@@ -82,7 +82,7 @@ private:
     std::string ReadString();
     std::string ReadChunk();
     void ExitChunk();
-    unsigned ChunkSize();
+    size_t ChunkSize();
 
     template<class T>
     T *to_array( const std::vector<T> &v );
@@ -112,10 +112,10 @@ private:
 
     void ReadBB3D( aiScene *scene );
 
-    unsigned _pos;
+    size_t _pos;
 //  unsigned _size;
     std::vector<unsigned char> _buf;
-    std::vector<unsigned> _stack;
+    std::vector<size_t> _stack;
 
     std::vector<std::string> _textures;
     std::vector<std::unique_ptr<aiMaterial> > _materials;

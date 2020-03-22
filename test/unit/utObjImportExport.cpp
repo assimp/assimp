@@ -356,7 +356,7 @@ TEST_F(utObjImportExport, homogeneous_coordinates_divide_by_zero_Test) {
             "f 1 2 3\nB";
 
     Assimp::Importer myimporter;
-    const aiScene *scene = myimporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), aiProcess_ValidateDataStructure);
+    const aiScene *scene = myimporter.ReadFileFromMemory(curObjModel, std::strlen(curObjModel), aiProcess_ValidateDataStructure);
     EXPECT_EQ(nullptr, scene);
 }
 

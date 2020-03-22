@@ -46,12 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 // internal headers
-#    include "PlyLoader.h"
-#    include <assimp/IOStreamBuffer.h>
-#    include <assimp/importerdesc.h>
-#    include <assimp/scene.h>
-#    include <assimp/IOSystem.hpp>
-#    include <memory>
+#include "PlyLoader.h"
+#include <assimp/IOStreamBuffer.h>
+#include <assimp/importerdesc.h>
+#include <assimp/scene.h>
+#include <assimp/IOSystem.hpp>
+#include <memory>
 
 using namespace ::Assimp;
 
@@ -132,15 +132,15 @@ static bool isBigEndian(const char *szMe) {
     // binary_little_endian
     // binary_big_endian
     bool isBigEndian(false);
-#    if (defined AI_BUILD_BIG_ENDIAN)
+#if (defined AI_BUILD_BIG_ENDIAN)
     if ('l' == *szMe || 'L' == *szMe) {
         isBigEndian = true;
     }
-#    else
+#else
     if ('b' == *szMe || 'B' == *szMe) {
         isBigEndian = true;
     }
-#    endif // ! AI_BUILD_BIG_ENDIAN
+#endif // ! AI_BUILD_BIG_ENDIAN
 
     return isBigEndian;
 }
@@ -487,24 +487,24 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
 // Convert a color component to [0...1]
 ai_real PLYImporter::NormalizeColorValue(PLY::PropertyInstance::ValueUnion val, PLY::EDataType eType) {
     switch (eType) {
-        case EDT_Float:
-            return val.fFloat;
-        case EDT_Double:
-            return (ai_real)val.fDouble;
-        case EDT_UChar:
-            return (ai_real)val.iUInt / (ai_real)0xFF;
-        case EDT_Char:
-            return (ai_real)(val.iInt + (0xFF / 2)) / (ai_real)0xFF;
-        case EDT_UShort:
-            return (ai_real)val.iUInt / (ai_real)0xFFFF;
-        case EDT_Short:
-            return (ai_real)(val.iInt + (0xFFFF / 2)) / (ai_real)0xFFFF;
-        case EDT_UInt:
-            return (ai_real)val.iUInt / (ai_real)0xFFFF;
-        case EDT_Int:
-            return ((ai_real)val.iInt / (ai_real)0xFF) + 0.5f;
-        default:
-            break;
+    case EDT_Float:
+        return val.fFloat;
+    case EDT_Double:
+        return (ai_real)val.fDouble;
+    case EDT_UChar:
+        return (ai_real)val.iUInt / (ai_real)0xFF;
+    case EDT_Char:
+        return (ai_real)(val.iInt + (0xFF / 2)) / (ai_real)0xFF;
+    case EDT_UShort:
+        return (ai_real)val.iUInt / (ai_real)0xFFFF;
+    case EDT_Short:
+        return (ai_real)(val.iInt + (0xFFFF / 2)) / (ai_real)0xFFFF;
+    case EDT_UInt:
+        return (ai_real)val.iUInt / (ai_real)0xFFFF;
+    case EDT_Int:
+        return ((ai_real)val.iInt / (ai_real)0xFF) + 0.5f;
+    default:
+        break;
     }
 
     return 0.0f;

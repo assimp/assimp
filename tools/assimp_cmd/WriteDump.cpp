@@ -63,7 +63,7 @@ const char *AICMD_MSG_DUMP_HELP =
 
 #include <memory>
 
-FILE *out = NULL;
+FILE *out = nullptr;
 bool shortened = false;
 
 // -----------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ int Assimp_Dump(const char *const *params, unsigned int num) {
         if (!strcmp(params[i], "-b") || !strcmp(params[i], "--binary")) {
             binary = true;
         } else if (!strcmp(params[i], "-s") || !strcmp(params[i], "--short")) {
-            shortened = true;
+            cur_shortened = true;
         } else if (!strcmp(params[i], "-z") || !strcmp(params[i], "--compressed")) {
             compressed = true;
         }

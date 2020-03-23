@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,18 +38,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "TestModelFactory.h"
+#include "UnitTestPCH.h"
 
-
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "SceneDiffer.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
 #include <assimp/material.h>
+#include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
+#include <assimp/Importer.hpp>
 
 #include "PostProcessing/ArmaturePopulate.h"
 
@@ -62,18 +59,18 @@ class utArmaturePopulate : public ::testing::Test {
     // empty
 };
 
-TEST_F( utArmaturePopulate, importCheckForArmatureTest) {
+TEST_F(utArmaturePopulate, importCheckForArmatureTest) {
     Assimp::Importer importer;
     unsigned int mask = aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/huesitos.fbx", mask);
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/huesitos.fbx", mask);
+    EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mNumMeshes, 1u);
-    aiMesh* mesh = scene->mMeshes[0];
+    aiMesh *mesh = scene->mMeshes[0];
     EXPECT_EQ(mesh->mNumFaces, 68u);
     EXPECT_EQ(mesh->mNumVertices, 256u);
     EXPECT_GT(mesh->mNumBones, 0u);
 
-    aiBone* exampleBone = mesh->mBones[0];
+    aiBone *exampleBone = mesh->mBones[0];
     EXPECT_NE(exampleBone, nullptr);
     EXPECT_NE(exampleBone->mArmature, nullptr);
     EXPECT_NE(exampleBone->mNode, nullptr);

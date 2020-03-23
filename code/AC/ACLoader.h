@@ -68,8 +68,6 @@ public:
     AC3DImporter();
     ~AC3DImporter();
 
-
-
     // Represents an AC3D material
     struct Material
     {
@@ -245,8 +243,6 @@ private:
         aiMaterial& matDest);
 
 private:
-
-
     // points to the next data line
     const char* buffer;
 
@@ -268,7 +264,7 @@ private:
     std::vector<aiLight*>* mLights;
 
     // name counters
-    unsigned int lights, groups, polys, worlds;
+    unsigned int mLightsCounter, mGroupsCounter, mPolysCounter, mWorldsCounter;
 };
 
 } // end of namespace Assimp

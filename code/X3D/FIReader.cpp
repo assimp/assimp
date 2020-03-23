@@ -774,8 +774,8 @@ public:
         decoderMap[algorithmUri] = std::move(decoder);
     }
 
-    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) /*override*/ {
-        vocabularyMap[vocabularyUri] = vocabulary;
+    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *_vocabulary) /*override*/ {
+        vocabularyMap[vocabularyUri] = _vocabulary;
     }
 
 private:
@@ -1055,11 +1055,10 @@ private:
             bitsAvail += 8;
             while (bitsAvail >= bitsPerCharacter) {
                 bitsAvail -= bitsPerCharacter;
-                size_t charIndex = (bits >> bitsAvail) & mask;
+                const size_t charIndex = (bits >> bitsAvail) & mask;
                 if (charIndex < alphabetLength) {
-                    s.push_back(alphabetUTF32[charIndex]);
-                }
-                else if (charIndex != mask) {
+                    s += (char) alphabetUTF32[charIndex];
+                } else if (charIndex != mask) {
                     throw DeadlyImportError(parseErrorMessage);
                 }
             }

@@ -163,6 +163,16 @@ IF(NOT BUILD_SHARED_LIBS)
   SET(LINK_SEARCH_START_STATIC TRUE)
 ELSE()
   MESSAGE(STATUS "Shared libraries enabled")
+  IF(APPLE)
+      SET(basePoint @loader_path)
+    ELSE()
+        SET(basePoint $ORIGIN)
+  ENDIF()
+  FILE(RELATIVE_PATH relDir
+    ${CMAKE_CURRENT_BINARY_DIR}/${ASSIMP_BIN_INSTALL_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/${ASSIMP_LIB_INSTALL_DIR}
+  )
+  SET(CMAKE_INSTALL_RPATH ${basePoint} ${basePoint}/${relDir})
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -222,6 +221,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
     std::vector<aiMesh*> meshes;
 
     unsigned int k = 0;
+    meshOffsets.clear();
 
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh& mesh = r.meshes[m];

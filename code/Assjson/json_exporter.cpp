@@ -91,20 +91,20 @@ public:
         base64_encodestate s;
         base64_init_encodestate(&s);
 
-        char* const out = new char[std::max(len * 2, static_cast<size_t>(16u))];
-        const int n = base64_encode_block(reinterpret_cast<const char*>(buffer), static_cast<int>(len), out, &s);
-        out[n + base64_encode_blockend(out + n, &s)] = '\0';
+        char* const cur_out = new char[std::max(len * 2, static_cast<size_t>(16u))];
+        const int n = base64_encode_block(reinterpret_cast<const char *>(buffer), static_cast<int>(len), cur_out, &s);
+        cur_out[n + base64_encode_blockend(cur_out + n, &s)] = '\0';
 
         // base64 encoding may add newlines, but JSON strings may not contain 'real' newlines
         // (only escaped ones). Remove any newlines in out.
-        for (char* cur = out; *cur; ++cur) {
+        for (char *cur = cur_out; *cur; ++cur) {
             if (*cur == '\n') {
                 *cur = ' ';
             }
         }
 
-        buff << '\"' << out << "\"\n";
-        delete[] out;
+        buff << '\"' << cur_out << "\"\n";
+        delete[] cur_out;
     }
 
     void StartObj(bool is_element = false) {
@@ -464,8 +464,8 @@ void Write(JSONWriter& out, const aiMaterial& ai, bool is_elem = true) {
             case aiPTI_Float:
                 if (prop->mDataLength / sizeof(float) > 1) {
                     out.StartArray();
-                    for (unsigned int i = 0; i < prop->mDataLength / sizeof(float); ++i) {
-                        out.Element(reinterpret_cast<float*>(prop->mData)[i]);
+                    for (unsigned int ii = 0; ii < prop->mDataLength / sizeof(float); ++ii) {
+                        out.Element(reinterpret_cast<float*>(prop->mData)[ii]);
                     }
                     out.EndArray();
                 }
@@ -477,8 +477,8 @@ void Write(JSONWriter& out, const aiMaterial& ai, bool is_elem = true) {
             case aiPTI_Integer:
                 if (prop->mDataLength / sizeof(int) > 1) {
                     out.StartArray();
-                    for (unsigned int i = 0; i < prop->mDataLength / sizeof(int); ++i) {
-                        out.Element(reinterpret_cast<int*>(prop->mData)[i]);
+                    for (unsigned int ii = 0; ii < prop->mDataLength / sizeof(int); ++ii) {
+                        out.Element(reinterpret_cast<int*>(prop->mData)[ii]);
                     }
                     out.EndArray();
                 } else {

@@ -152,14 +152,16 @@ void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/) {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void Discreet3DSImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
-    StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
+void Discreet3DSImporter::InternReadFile( const std::string& pFile,
+    aiScene* pScene, IOSystem* pIOHandler)
+{
+    StreamReaderLE theStream(pIOHandler->Open(pFile,"rb"));
 
     // We should have at least one chunk
-    if (stream.GetRemainingSize() < 16) {
+    if (theStream.GetRemainingSize() < 16) {
         throw DeadlyImportError("3DS file is either empty or corrupt: " + pFile);
     }
-    this->stream = &stream;
+    this->stream = &theStream;
 
     // Allocate our temporary 3DS representation
     D3DS::Scene _scene;
@@ -593,16 +595,19 @@ void Discreet3DSImporter::InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCur
 
 // ------------------------------------------------------------------------------------------------
 // Find a node with a specific name in the import hierarchy
-D3DS::Node* FindNode(D3DS::Node* root, const std::string& name)
-{
-    if (root->mName == name)
+D3DS::Node* FindNode(D3DS::Node* root, const std::string& name) {
+    if (root->mName == name) {
         return root;
-    for (std::vector<D3DS::Node*>::iterator it = root->mChildren.begin();it != root->mChildren.end(); ++it) {
-        D3DS::Node* nd;
-        if (( nd = FindNode(*it,name)))
-            return nd;
     }
-    return NULL;
+
+    for (std::vector<D3DS::Node*>::iterator it = root->mChildren.begin();it != root->mChildren.end(); ++it) {
+        D3DS::Node *nd = FindNode(*it, name);
+        if (nullptr != nd) {
+            return nd;
+        }
+    }
+
+    return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

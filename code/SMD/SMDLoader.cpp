@@ -89,7 +89,7 @@ SMDImporter::SMDImporter()
 , iSmallestFrame( INT_MAX )
 , dLengthOfAnim( 0.0 )
 , bHasUVs(false )
-, iLineNumber(-1)  {
+, iLineNumber((unsigned int)-1)  {
     // empty
 }
 
@@ -129,8 +129,8 @@ void SMDImporter::SetupProperties(const Importer* pImp) {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
-    this->pScene = pScene;
+void SMDImporter::InternReadFile( const std::string& pFile, aiScene* scene, IOSystem* pIOHandler) {
+    this->pScene = scene;
     ReadSmd(pFile, pIOHandler);
 
     // If there are no triangles it seems to be an animation SMD,
@@ -190,19 +190,19 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 // ------------------------------------------------------------------------------------------------
 // Write an error message with line number to the log file
 void SMDImporter::LogErrorNoThrow(const char* msg) {
-    const size_t BufferSize = 1024;
-    char szTemp[BufferSize];
-    ai_snprintf(szTemp,BufferSize,"Line %u: %s",iLineNumber,msg);
+    const size_t _BufferSize = 1024;
+    char szTemp[_BufferSize];
+    ai_snprintf(szTemp,_BufferSize,"Line %u: %s",iLineNumber,msg);
     DefaultLogger::get()->error(szTemp);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Write a warning with line number to the log file
 void SMDImporter::LogWarning(const char* msg) {
-    const size_t BufferSize = 1024;
-    char szTemp[BufferSize];
+    const size_t _BufferSize = 1024;
+    char szTemp[_BufferSize];
     ai_assert(strlen(msg) < 1000);
-    ai_snprintf(szTemp,BufferSize,"Line %u: %s",iLineNumber,msg);
+    ai_snprintf(szTemp,_BufferSize,"Line %u: %s",iLineNumber,msg);
     ASSIMP_LOG_WARN(szTemp);
 }
 

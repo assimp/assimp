@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2020, assimp tea
 
 
 All rights reserved.
@@ -41,13 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "SceneDiffer.h"
+#include "UnitTestPCH.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
@@ -55,7 +55,7 @@ class utM3DImportExport : public AbstractImportExportBase {
 public:
 	bool importerTest() override  {
         Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 		return nullptr != scene;
 #else
@@ -74,8 +74,8 @@ public:
 #endif
 };
 
-TEST_F( utM3DImportExport, importM3DFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utM3DImportExport, importM3DFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

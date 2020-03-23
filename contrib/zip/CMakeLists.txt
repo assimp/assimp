@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(zip
   LANGUAGES C
-  VERSION "0.1.15")
+  VERSION "0.1.18")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(CMAKE_DISABLE_TESTING "Disable test creation" OFF)
@@ -16,10 +16,6 @@ elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR
         "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR
         "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -Wextra -Werror -pedantic")
-  if(ENABLE_COVERAGE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-  endif()
 endif (MSVC)
 
 # zip
@@ -35,7 +31,7 @@ if (NOT CMAKE_DISABLE_TESTING)
   enable_testing()
   add_subdirectory(test)
   find_package(Sanitizers)
-  add_sanitizers(${PROJECT_NAME} ${test_out} ${test_miniz_out})
+  add_sanitizers(${PROJECT_NAME} ${test_out})
 endif()
 
 ####

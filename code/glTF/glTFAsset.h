@@ -183,7 +183,7 @@ namespace glTF
                 return 1;
             default:
                 std::string err = "GLTF: Unsupported Component Type ";
-                err += t;
+                err += std::to_string( t );
                 throw DeadlyImportError(err);
         }
     }

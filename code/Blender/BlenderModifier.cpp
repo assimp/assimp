@@ -57,52 +57,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::Blender;
 
-template <typename T> BlenderModifier* god() {
+template <typename T>
+BlenderModifier *god() {
     return new T();
 }
 
 // add all available modifiers here
-typedef BlenderModifier* (*fpCreateModifier)();
+typedef BlenderModifier *(*fpCreateModifier)();
 static const fpCreateModifier creators[] = {
-        &god<BlenderModifier_Mirror>,
-        &god<BlenderModifier_Subdivision>,
+    &god<BlenderModifier_Mirror>,
+    &god<BlenderModifier_Subdivision>,
 
-        NULL // sentinel
+    NULL // sentinel
 };
 
 // ------------------------------------------------------------------------------------------------
-struct SharedModifierData : ElemBase
-{
+struct SharedModifierData : ElemBase {
     ModifierData modifier;
 };
 
 // ------------------------------------------------------------------------------------------------
-void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_data, const Scene& in, const Object& orig_object )
-{
+void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_data, const Scene &in, const Object &orig_object) {
     size_t cnt = 0u, ful = 0u;
 
     // NOTE: this cast is potentially unsafe by design, so we need to perform type checks before
     // we're allowed to dereference the pointers without risking to crash. We might still be
     // invoking UB btw - we're assuming that the ModifierData member of the respective modifier
     // structures is at offset sizeof(vftable) with no padding.
-    const SharedModifierData* cur = static_cast<const SharedModifierData *> ( orig_object.modifiers.first.get() );
-    for (; cur; cur =  static_cast<const SharedModifierData *> ( cur->modifier.next.get() ), ++ful) {
+    const SharedModifierData *cur = static_cast<const SharedModifierData *>(orig_object.modifiers.first.get());
+    for (; cur; cur = static_cast<const SharedModifierData *>(cur->modifier.next.get()), ++ful) {
         ai_assert(cur->dna_type);
 
-        const Structure* s = conv_data.db.dna.Get( cur->dna_type );
+        const Structure *s = conv_data.db.dna.Get(cur->dna_type);
         if (!s) {
-            ASSIMP_LOG_WARN_F("BlendModifier: could not resolve DNA name: ",cur->dna_type);
+            ASSIMP_LOG_WARN_F("BlendModifier: could not resolve DNA name: ", cur->dna_type);
             continue;
         }
 
         // this is a common trait of all XXXMirrorData structures in BlenderDNA
-        const Field* f = s->Get("modifier");
+        const Field *f = s->Get("modifier");
         if (!f || f->offset != 0) {
             ASSIMP_LOG_WARN("BlendModifier: expected a `modifier` member at offset 0");
             continue;
         }
 
-        s = conv_data.db.dna.Get( f->type );
+        s = conv_data.db.dna.Get(f->type);
         if (!s || s->name != "ModifierData") {
             ASSIMP_LOG_WARN("BlendModifier: expected a ModifierData structure as first member");
             continue;
@@ -110,22 +109,22 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_d
 
         // now, we can be sure that we should be fine to dereference *cur* as
         // ModifierData (with the above note).
-        const ModifierData& dat = cur->modifier;
+        const ModifierData &dat = cur->modifier;
 
-        const fpCreateModifier* curgod = creators;
-        std::vector< BlenderModifier* >::iterator curmod = cached_modifiers->begin(), endmod = cached_modifiers->end();
+        const fpCreateModifier *curgod = creators;
+        std::vector<BlenderModifier *>::iterator curmod = cached_modifiers->begin(), endmod = cached_modifiers->end();
 
-        for (;*curgod;++curgod,++curmod) { // allocate modifiers on the fly
+        for (; *curgod; ++curgod, ++curmod) { // allocate modifiers on the fly
             if (curmod == endmod) {
                 cached_modifiers->push_back((*curgod)());
 
                 endmod = cached_modifiers->end();
-                curmod = endmod-1;
+                curmod = endmod - 1;
             }
 
-            BlenderModifier* const modifier = *curmod;
-            if(modifier->IsActive(dat)) {
-                modifier->DoIt(out,conv_data,*static_cast<const ElemBase *>(cur),in,orig_object);
+            BlenderModifier *const modifier = *curmod;
+            if (modifier->IsActive(dat)) {
+                modifier->DoIt(out, conv_data, *static_cast<const ElemBase *>(cur), in, orig_object);
                 cnt++;
 
                 curgod = NULL;
@@ -133,7 +132,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_d
             }
         }
         if (curgod) {
-            ASSIMP_LOG_WARN_F("Couldn't find a handler for modifier: ",dat.name);
+            ASSIMP_LOG_WARN_F("Couldn't find a handler for modifier: ", dat.name);
         }
     }
 
@@ -141,26 +140,22 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_d
     // object, we still can't say whether our modifier implementations were
     // able to fully do their job.
     if (ful) {
-        ASSIMP_LOG_DEBUG_F("BlendModifier: found handlers for ",cnt," of ",ful," modifiers on `",orig_object.id.name,
-            "`, check log messages above for errors");
+        ASSIMP_LOG_DEBUG_F("BlendModifier: found handlers for ", cnt, " of ", ful, " modifiers on `", orig_object.id.name,
+                "`, check log messages above for errors");
     }
 }
 
-
-
 // ------------------------------------------------------------------------------------------------
-bool BlenderModifier_Mirror :: IsActive (const ModifierData& modin)
-{
+bool BlenderModifier_Mirror ::IsActive(const ModifierData &modin) {
     return modin.type == ModifierData::eModifierType_Mirror;
 }
 
 // ------------------------------------------------------------------------------------------------
-void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier,
-    const Scene& /*in*/,
-    const Object& orig_object )
-{
+void BlenderModifier_Mirror ::DoIt(aiNode &out, ConversionData &conv_data, const ElemBase &orig_modifier,
+        const Scene & /*in*/,
+        const Object &orig_object) {
     // hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()
-    const MirrorModifierData& mir = static_cast<const MirrorModifierData&>(orig_modifier);
+    const MirrorModifierData &mir = static_cast<const MirrorModifierData &>(orig_modifier);
     ai_assert(mir.modifier.type == ModifierData::eModifierType_Mirror);
 
     conv_data.meshes->reserve(conv_data.meshes->size() + out.mNumMeshes);
@@ -169,48 +164,55 @@ void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  co
 
     // take all input meshes and clone them
     for (unsigned int i = 0; i < out.mNumMeshes; ++i) {
-        aiMesh* mesh;
-        SceneCombiner::Copy(&mesh,conv_data.meshes[out.mMeshes[i]]);
+        aiMesh *mesh;
+        SceneCombiner::Copy(&mesh, conv_data.meshes[out.mMeshes[i]]);
 
         const float xs = mir.flag & MirrorModifierData::Flags_AXIS_X ? -1.f : 1.f;
         const float ys = mir.flag & MirrorModifierData::Flags_AXIS_Y ? -1.f : 1.f;
         const float zs = mir.flag & MirrorModifierData::Flags_AXIS_Z ? -1.f : 1.f;
 
         if (mir.mirror_ob) {
-            const aiVector3D center( mir.mirror_ob->obmat[3][0],mir.mirror_ob->obmat[3][1],mir.mirror_ob->obmat[3][2] );
-            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                aiVector3D& v = mesh->mVertices[i];
+            const aiVector3D center(mir.mirror_ob->obmat[3][0], mir.mirror_ob->obmat[3][1], mir.mirror_ob->obmat[3][2]);
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
+                aiVector3D &v = mesh->mVertices[j];
 
-                v.x = center.x + xs*(center.x - v.x);
-                v.y = center.y + ys*(center.y - v.y);
-                v.z = center.z + zs*(center.z - v.z);
+                v.x = center.x + xs * (center.x - v.x);
+                v.y = center.y + ys * (center.y - v.y);
+                v.z = center.z + zs * (center.z - v.z);
             }
-        }
-        else {
-            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                aiVector3D& v = mesh->mVertices[i];
-                v.x *= xs;v.y *= ys;v.z *= zs;
+        } else {
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
+                aiVector3D &v = mesh->mVertices[j];
+                v.x *= xs;
+                v.y *= ys;
+                v.z *= zs;
             }
         }
 
         if (mesh->mNormals) {
-            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                aiVector3D& v = mesh->mNormals[i];
-                v.x *= xs;v.y *= ys;v.z *= zs;
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
+                aiVector3D &v = mesh->mNormals[j];
+                v.x *= xs;
+                v.y *= ys;
+                v.z *= zs;
             }
         }
 
         if (mesh->mTangents) {
-            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                aiVector3D& v = mesh->mTangents[i];
-                v.x *= xs;v.y *= ys;v.z *= zs;
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
+                aiVector3D &v = mesh->mTangents[j];
+                v.x *= xs;
+                v.y *= ys;
+                v.z *= zs;
             }
         }
 
         if (mesh->mBitangents) {
-            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                aiVector3D& v = mesh->mBitangents[i];
-                v.x *= xs;v.y *= ys;v.z *= zs;
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
+                aiVector3D &v = mesh->mBitangents[j];
+                v.x *= xs;
+                v.y *= ys;
+                v.z *= zs;
             }
         }
 
@@ -218,82 +220,80 @@ void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  co
         const float vs = mir.flag & MirrorModifierData::Flags_MIRROR_V ? -1.f : 1.f;
 
         for (unsigned int n = 0; mesh->HasTextureCoords(n); ++n) {
-            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-                aiVector3D& v = mesh->mTextureCoords[n][i];
-                v.x *= us;v.y *= vs;
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
+                aiVector3D &v = mesh->mTextureCoords[n][j];
+                v.x *= us;
+                v.y *= vs;
             }
         }
 
         // Only reverse the winding order if an odd number of axes were mirrored.
         if (xs * ys * zs < 0) {
-            for( unsigned int i = 0; i < mesh->mNumFaces; i++) {
-                aiFace& face = mesh->mFaces[i];
-                for( unsigned int fi = 0; fi < face.mNumIndices / 2; ++fi)
-                    std::swap( face.mIndices[fi], face.mIndices[face.mNumIndices - 1 - fi]);
+            for (unsigned int j = 0; j < mesh->mNumFaces; ++j ) {
+                aiFace &face = mesh->mFaces[j];
+                for (unsigned int fi = 0; fi < face.mNumIndices / 2; ++fi)
+                    std::swap(face.mIndices[fi], face.mIndices[face.mNumIndices - 1 - fi]);
             }
         }
 
         conv_data.meshes->push_back(mesh);
     }
-    unsigned int* nind = new unsigned int[out.mNumMeshes*2];
+    unsigned int *nind = new unsigned int[out.mNumMeshes * 2];
 
-    std::copy(out.mMeshes,out.mMeshes+out.mNumMeshes,nind);
-    std::transform(out.mMeshes,out.mMeshes+out.mNumMeshes,nind+out.mNumMeshes,
-        [&out](unsigned int n) { return out.mNumMeshes + n; });
+    std::copy(out.mMeshes, out.mMeshes + out.mNumMeshes, nind);
+    std::transform(out.mMeshes, out.mMeshes + out.mNumMeshes, nind + out.mNumMeshes,
+            [&out](unsigned int n) { return out.mNumMeshes + n; });
 
     delete[] out.mMeshes;
     out.mMeshes = nind;
     out.mNumMeshes *= 2;
 
     ASSIMP_LOG_INFO_F("BlendModifier: Applied the `Mirror` modifier to `",
-        orig_object.id.name,"`");
+            orig_object.id.name, "`");
 }
 
 // ------------------------------------------------------------------------------------------------
-bool BlenderModifier_Subdivision :: IsActive (const ModifierData& modin)
-{
+bool BlenderModifier_Subdivision ::IsActive(const ModifierData &modin) {
     return modin.type == ModifierData::eModifierType_Subsurf;
 }
 
 // ------------------------------------------------------------------------------------------------
-void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier,
-    const Scene& /*in*/,
-    const Object& orig_object )
-{
+void BlenderModifier_Subdivision ::DoIt(aiNode &out, ConversionData &conv_data, const ElemBase &orig_modifier,
+        const Scene & /*in*/,
+        const Object &orig_object) {
     // hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()
-    const SubsurfModifierData& mir = static_cast<const SubsurfModifierData&>(orig_modifier);
+    const SubsurfModifierData &mir = static_cast<const SubsurfModifierData &>(orig_modifier);
     ai_assert(mir.modifier.type == ModifierData::eModifierType_Subsurf);
 
     Subdivider::Algorithm algo;
-    switch (mir.subdivType)
-    {
-    case SubsurfModifierData::TYPE_CatmullClarke:
-        algo = Subdivider::CATMULL_CLARKE;
-        break;
+    switch (mir.subdivType) {
+        case SubsurfModifierData::TYPE_CatmullClarke:
+            algo = Subdivider::CATMULL_CLARKE;
+            break;
 
-    case SubsurfModifierData::TYPE_Simple:
-        ASSIMP_LOG_WARN("BlendModifier: The `SIMPLE` subdivision algorithm is not currently implemented, using Catmull-Clarke");
-        algo = Subdivider::CATMULL_CLARKE;
-        break;
+        case SubsurfModifierData::TYPE_Simple:
+            ASSIMP_LOG_WARN("BlendModifier: The `SIMPLE` subdivision algorithm is not currently implemented, using Catmull-Clarke");
+            algo = Subdivider::CATMULL_CLARKE;
+            break;
 
-    default:
-        ASSIMP_LOG_WARN_F("BlendModifier: Unrecognized subdivision algorithm: ",mir.subdivType);
-        return;
+        default:
+            ASSIMP_LOG_WARN_F("BlendModifier: Unrecognized subdivision algorithm: ", mir.subdivType);
+            return;
     };
 
     std::unique_ptr<Subdivider> subd(Subdivider::Create(algo));
     ai_assert(subd);
-    if ( conv_data.meshes->empty() ) {
+    if (conv_data.meshes->empty()) {
         return;
     }
-    aiMesh** const meshes = &conv_data.meshes[conv_data.meshes->size() - out.mNumMeshes];
-    std::unique_ptr<aiMesh*[]> tempmeshes(new aiMesh*[out.mNumMeshes]());
+    aiMesh **const meshes = &conv_data.meshes[conv_data.meshes->size() - out.mNumMeshes];
+    std::unique_ptr<aiMesh *[]> tempmeshes(new aiMesh *[out.mNumMeshes]());
 
-    subd->Subdivide(meshes,out.mNumMeshes,tempmeshes.get(),std::max( mir.renderLevels, mir.levels ),true);
-    std::copy(tempmeshes.get(),tempmeshes.get()+out.mNumMeshes,meshes);
+    subd->Subdivide(meshes, out.mNumMeshes, tempmeshes.get(), std::max(mir.renderLevels, mir.levels), true);
+    std::copy(tempmeshes.get(), tempmeshes.get() + out.mNumMeshes, meshes);
 
     ASSIMP_LOG_INFO_F("BlendModifier: Applied the `Subdivision` modifier to `",
-        orig_object.id.name,"`");
+            orig_object.id.name, "`");
 }
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

@@ -189,8 +189,7 @@ private:
                 const aiMatrix4x4 &absolute_transform);
 
     // ------------------------------------------------------------------------------------------------
-    std::vector<unsigned int> ConvertLine(const LineGeometry& line, const Model& model,
-                                          aiNode *parent, aiNode *root_node);
+    std::vector<unsigned int> ConvertLine(const LineGeometry& line, aiNode *root_node);
 
     // ------------------------------------------------------------------------------------------------
     aiMesh* SetupEmptyMesh(const Geometry& mesh, aiNode *parent);
@@ -220,17 +219,15 @@ private:
     *  - outputVertStartIndices is only used when a material index is specified, it gives for
     *    each output vertex the DOM index it maps to.
     */
-    void ConvertWeights(aiMesh *out, const Model &model, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
-                        aiNode *parent = NULL, aiNode *root_node = NULL,
-                        unsigned int materialIndex = NO_MATERIAL_SEPARATION,
+    void ConvertWeights(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
+                        aiNode *parent = NULL, unsigned int materialIndex = NO_MATERIAL_SEPARATION,
                         std::vector<unsigned int> *outputVertStartIndices = NULL);
-    // lookup
-    static const aiNode* GetNodeByName( const aiString& name, aiNode *current_node );
+
     // ------------------------------------------------------------------------------------------------
     void ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
                         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
                         std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform,
-                        aiNode *parent, aiNode *root_node);
+                        aiNode *parent );
 
     // ------------------------------------------------------------------------------------------------
     void ConvertMaterialForMesh(aiMesh* out, const Model& model, const MeshGeometry& geo,
@@ -437,7 +434,7 @@ private:
     // 0: not assigned yet, others: index is value - 1
     unsigned int defaultMaterialIndex;
 
-    std::vector<aiMesh*> meshes;
+    std::vector<aiMesh*> mMeshes;
     std::vector<aiMaterial*> materials;
     std::vector<aiAnimation*> animations;
     std::vector<aiLight*> lights;
@@ -467,9 +464,9 @@ private:
 
     double anim_fps;
 
-    aiScene* const out;
+    aiScene* const mSceneOut;
     const FBX::Document& doc;
-
+    bool mRemoveEmptyBones;
     static void BuildBoneList(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
                              std::vector<aiBone*>& bones);
 

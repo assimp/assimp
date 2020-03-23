@@ -211,11 +211,12 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
     // read number of frames
     const uint32_t numFrames = a_reader.GetI2();
-    if (configFrameID >= numFrames)
+    if (configFrameID >= numFrames) {
         throw DeadlyImportError("UNREAL: The requested frame does not exist");
+    }
 
     uint32_t st = a_reader.GetI2();
-    if (st != numVert*4)
+    if (st != numVert*4u)
         throw DeadlyImportError("UNREAL: Unexpected aniv file length");
 
     // skip to our frame

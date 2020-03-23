@@ -428,8 +428,8 @@ void Document::ReadPropertyTemplates()
     const ElementCollection otypes = sdefs.GetCollection("ObjectType");
     for(ElementMap::const_iterator it = otypes.first; it != otypes.second; ++it) {
         const Element& el = *(*it).second;
-        const Scope* sc = el.Compound();
-        if(!sc) {
+        const Scope* curSc = el.Compound();
+        if (!curSc) {
             DOMWarning("expected nested scope in ObjectType, ignoring",&el);
             continue;
         }
@@ -442,24 +442,24 @@ void Document::ReadPropertyTemplates()
 
         const std::string& oname = ParseTokenAsString(*tok[0]);
 
-        const ElementCollection templs = sc->GetCollection("PropertyTemplate");
-        for(ElementMap::const_iterator it = templs.first; it != templs.second; ++it) {
-            const Element& el = *(*it).second;
-            const Scope* sc = el.Compound();
-            if(!sc) {
+        const ElementCollection templs = curSc->GetCollection("PropertyTemplate");
+        for (ElementMap::const_iterator elemIt = templs.first; elemIt != templs.second; ++elemIt) {
+            const Element &innerEl = *(*elemIt).second;
+            const Scope *innerSc = innerEl.Compound();
+            if (!innerSc) {
                 DOMWarning("expected nested scope in PropertyTemplate, ignoring",&el);
                 continue;
             }
 
-            const TokenList& tok = el.Tokens();
-            if(tok.empty()) {
+            const TokenList &curTok = innerEl.Tokens();
+            if (curTok.empty()) {
                 DOMWarning("expected name for PropertyTemplate element, ignoring",&el);
                 continue;
             }
 
-            const std::string& pname = ParseTokenAsString(*tok[0]);
+            const std::string &pname = ParseTokenAsString(*curTok[0]);
 
-            const Element* Properties70 = (*sc)["Properties70"];
+            const Element *Properties70 = (*innerSc)["Properties70"];
             if(Properties70) {
                 std::shared_ptr<const PropertyTable> props = std::make_shared<const PropertyTable>(
                     *Properties70,std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
@@ -529,8 +529,8 @@ const std::vector<const AnimationStack*>& Document::AnimationStacks() const
     animationStacksResolved.reserve(animationStacks.size());
     for(uint64_t id : animationStacks) {
         LazyObject* const lazy = GetObject(id);
-        const AnimationStack* stack;
-        if(!lazy || !(stack = lazy->Get<AnimationStack>())) {
+        const AnimationStack *stack = lazy->Get<AnimationStack>();
+        if(!lazy || nullptr == stack ) {
             DOMWarning("failed to read AnimationStack object");
             continue;
         }

@@ -856,13 +856,14 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
 
     // name passed to the method is already unique
     nd->mName.Set(name);
-
-    for (const auto &transform : chain) {
-        nd->mTransformation = nd->mTransformation * transform;
+    // for (const auto &transform : chain) {
+    // skip inverse chain for no preservePivots
+    for (unsigned int i = TransformationComp_Translation; i < TransformationComp_MAXIMUM; i++) {
+      nd->mTransformation = nd->mTransformation * chain[i];
     }
     return false;
 }
-
+  
 void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
     const PropertyTable &props = model.Props();
     DirectPropertyMap unparsedProperties = props.GetUnparsedProperties();

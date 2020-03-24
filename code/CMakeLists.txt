@@ -887,7 +887,7 @@ SET( Extra_SRCS
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
 # irrXML
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(irrXML)
   find_package(irrXML CONFIG REQUIRED)
 ELSE()
@@ -895,7 +895,7 @@ ELSE()
 ENDIF()
 
 # utf8
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
   find_package(utf8 CONFIG REQUIRED)
 ELSE()
@@ -903,7 +903,7 @@ ELSE()
 ENDIF()
 
 # polyclipping
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(polyclipping)
   find_package(polyclipping CONFIG REQUIRED)
 ELSE()
@@ -915,7 +915,7 @@ ELSE()
 ENDIF()
 
 # poly2tri
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(poly2tri)
   find_package(poly2tri CONFIG REQUIRED)
 ELSE()
@@ -936,7 +936,7 @@ ELSE()
 ENDIF()
 
 # minizip/unzip
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(minizip)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
@@ -951,7 +951,7 @@ ELSE()
 ENDIF()
 
 # zip (https://github.com/kuba--/zip)
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(zip)
   find_package(zip CONFIG REQUIRED)
 ELSE()
@@ -972,7 +972,7 @@ ELSE()
 ENDIF()
 
 # openddlparser
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(openddlparser)
   find_package(openddlparser CONFIG REQUIRED)
 ELSE()
@@ -995,7 +995,7 @@ ELSE()
 ENDIF()
 
 # Open3DGC
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   # Nothing to do, not available in Hunter yet.
 ELSE()
   SET ( open3dgc_SRCS
@@ -1036,7 +1036,7 @@ ENDIF()
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
 FIND_PACKAGE(RT QUIET)
-IF (NOT HUNTER_ENABLED AND (RT_FOUND OR MSVC))
+IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR MSVC))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
 ELSE ()
@@ -1046,7 +1046,7 @@ ELSE ()
 ENDIF ()
 
 # RapidJSON
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
@@ -1069,7 +1069,7 @@ if ( MSVC )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
 
-IF(NOT HUNTER_ENABLED)
+IF(NOT ASSIMP_HUNTER_ENABLED)
   if (UNZIP_FOUND)
     SET (unzip_compile_SRCS "")
   else ()
@@ -1119,7 +1119,7 @@ SET( assimp_src
 )
 ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
 
-IF(NOT HUNTER_ENABLED)
+IF(NOT ASSIMP_HUNTER_ENABLED)
   INCLUDE_DIRECTORIES(
       ${IRRXML_INCLUDE_DIR}
       ../contrib/openddlparser/include
@@ -1140,7 +1140,7 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
       polyclipping::polyclipping
@@ -1213,7 +1213,7 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 )
 
 if (APPLE)
-  if (BUILD_FRAMEWORK)
+  if (ASSIMP_BUILD_FRAMEWORK)
     SET_TARGET_PROPERTIES( assimp PROPERTIES
       FRAMEWORK TRUE
       FRAMEWORK_VERSION C
@@ -1233,7 +1233,7 @@ ENDIF()
 
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
-IF(NOT HUNTER_ENABLED)
+IF(NOT ASSIMP_HUNTER_ENABLED)
   if (UNZIP_FOUND)
     INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
     TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
@@ -1247,7 +1247,7 @@ IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
 ENDIF ()
 
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   INSTALL( TARGETS assimp
     EXPORT "${TARGETS_EXPORT_NAME}"
     LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}

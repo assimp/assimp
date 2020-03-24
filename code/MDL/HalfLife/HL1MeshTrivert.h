@@ -56,27 +56,27 @@ namespace HalfLife {
 /* A class to help map model triverts to mesh triverts. */
 struct HL1MeshTrivert {
     HL1MeshTrivert() :
-        vertindex(-1),
-        normindex(-1),
-        s(0),
-        t(0),
-        localindex(-1) {
+            vertindex(-1),
+            normindex(-1),
+            s(0),
+            t(0),
+            localindex(-1) {
     }
 
     HL1MeshTrivert(short vertindex, short normindex, short s, short t, short localindex) :
-        vertindex(vertindex),
-        normindex(normindex),
-        s(s),
-        t(t),
-        localindex() {
+            vertindex(vertindex),
+            normindex(normindex),
+            s(s),
+            t(t),
+            localindex(localindex) {
     }
 
     HL1MeshTrivert(const Trivert &a) :
-        vertindex(a.vertindex),
-        normindex(a.normindex),
-        s(a.s),
-        t(a.t),
-        localindex(-1) {
+            vertindex(a.vertindex),
+            normindex(a.normindex),
+            s(a.s),
+            t(a.t),
+            localindex(-1) {
     }
 
     inline bool operator==(const Trivert &a) const {

@@ -62,90 +62,81 @@ namespace Assimp {
 // so they are specified with an 'A' suffix.
 
 void FBX::Node::AddP70int(
-    const std::string& name, int32_t value
+    const std::string& cur_name, int32_t value
 ) {
     FBX::Node n("P");
-    n.AddProperties(name, "int", "Integer", "", value);
+    n.AddProperties(cur_name, "int", "Integer", "", value);
     AddChild(n);
 }
 
 void FBX::Node::AddP70bool(
-    const std::string& name, bool value
+    const std::string& cur_name, bool value
 ) {
     FBX::Node n("P");
-    n.AddProperties(name, "bool", "", "", int32_t(value));
+    n.AddProperties(cur_name, "bool", "", "", int32_t(value));
     AddChild(n);
 }
 
 void FBX::Node::AddP70double(
-    const std::string& name, double value
-) {
+        const std::string &cur_name, double value) {
     FBX::Node n("P");
-    n.AddProperties(name, "double", "Number", "", value);
+    n.AddProperties(cur_name, "double", "Number", "", value);
     AddChild(n);
 }
 
 void FBX::Node::AddP70numberA(
-    const std::string& name, double value
-) {
+        const std::string &cur_name, double value) {
     FBX::Node n("P");
-    n.AddProperties(name, "Number", "", "A", value);
+    n.AddProperties(cur_name, "Number", "", "A", value);
     AddChild(n);
 }
 
 void FBX::Node::AddP70color(
-    const std::string& name, double r, double g, double b
-) {
+        const std::string &cur_name, double r, double g, double b) {
     FBX::Node n("P");
-    n.AddProperties(name, "ColorRGB", "Color", "", r, g, b);
+    n.AddProperties(cur_name, "ColorRGB", "Color", "", r, g, b);
     AddChild(n);
 }
 
 void FBX::Node::AddP70colorA(
-    const std::string& name, double r, double g, double b
-) {
+        const std::string &cur_name, double r, double g, double b) {
     FBX::Node n("P");
-    n.AddProperties(name, "Color", "", "A", r, g, b);
+    n.AddProperties(cur_name, "Color", "", "A", r, g, b);
     AddChild(n);
 }
 
 void FBX::Node::AddP70vector(
-    const std::string& name, double x, double y, double z
-) {
+        const std::string &cur_name, double x, double y, double z) {
     FBX::Node n("P");
-    n.AddProperties(name, "Vector3D", "Vector", "", x, y, z);
+    n.AddProperties(cur_name, "Vector3D", "Vector", "", x, y, z);
     AddChild(n);
 }
 
 void FBX::Node::AddP70vectorA(
-    const std::string& name, double x, double y, double z
-) {
+        const std::string &cur_name, double x, double y, double z) {
     FBX::Node n("P");
-    n.AddProperties(name, "Vector", "", "A", x, y, z);
+    n.AddProperties(cur_name, "Vector", "", "A", x, y, z);
     AddChild(n);
 }
 
 void FBX::Node::AddP70string(
-    const std::string& name, const std::string& value
-) {
+        const std::string &cur_name, const std::string &value) {
     FBX::Node n("P");
-    n.AddProperties(name, "KString", "", "", value);
+    n.AddProperties(cur_name, "KString", "", "", value);
     AddChild(n);
 }
 
 void FBX::Node::AddP70enum(
-    const std::string& name, int32_t value
-) {
+        const std::string &cur_name, int32_t value) {
     FBX::Node n("P");
-    n.AddProperties(name, "enum", "", "", value);
+    n.AddProperties(cur_name, "enum", "", "", value);
     AddChild(n);
 }
 
 void FBX::Node::AddP70time(
-    const std::string& name, int64_t value
-) {
+        const std::string &cur_name, int64_t value) {
     FBX::Node n("P");
-    n.AddProperties(name, "KTime", "Time", "", value);
+    n.AddProperties(cur_name, "KTime", "Time", "", value);
     AddChild(n);
 }
 

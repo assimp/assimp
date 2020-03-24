@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,16 +39,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "SceneDiffer.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include <assimp/commonMetaData.h>
 #include <assimp/material.h>
+#include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
-#include <assimp/commonMetaData.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
@@ -58,25 +56,24 @@ class utFBXImporterExporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/spider.fbx", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/spider.fbx", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utFBXImporterExporter, importXFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utFBXImporterExporter, importXFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
-TEST_F( utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords ) {
+TEST_F(utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mNumMeshes, 1u);
-    aiMesh* mesh = scene->mMeshes[0];
+    aiMesh *mesh = scene->mMeshes[0];
     EXPECT_EQ(mesh->mNumFaces, 12u);
     EXPECT_EQ(mesh->mNumVertices, 36u);
 }
-
 
 TEST_F(utFBXImporterExporter, importCubesWithNoNames) {
     Assimp::Importer importer;
@@ -149,7 +146,7 @@ TEST_F(utFBXImporterExporter, importCubesComplexTransform) {
 
     auto parent = child1;
     const size_t chain_length = 8u;
-    const char* chainStr[chain_length] = {
+    const char *chainStr[chain_length] = {
         "Cube1_$AssimpFbx$_Translation",
         "Cube1_$AssimpFbx$_RotationPivot",
         "Cube1_$AssimpFbx$_RotationPivotInverse",
@@ -178,33 +175,33 @@ TEST_F(utFBXImporterExporter, importCloseToIdentityTransforms) {
     ASSERT_TRUE(scene);
 }
 
-TEST_F( utFBXImporterExporter, importPhongMaterial ) {
+TEST_F(utFBXImporterExporter, importPhongMaterial) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/FBX/phong_cube.fbx", aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
-    EXPECT_EQ( 1u, scene->mNumMaterials );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/phong_cube.fbx", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(1u, scene->mNumMaterials);
     const aiMaterial *mat = scene->mMaterials[0];
-    EXPECT_NE( nullptr, mat );
+    EXPECT_NE(nullptr, mat);
     float f;
     aiColor3D c;
 
     // phong_cube.fbx has all properties defined
-    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_DIFFUSE, c), aiReturn_SUCCESS );
-    EXPECT_EQ( c, aiColor3D(0.5, 0.25, 0.25) );
-    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_SPECULAR, c), aiReturn_SUCCESS );
-    EXPECT_EQ( c, aiColor3D(0.25, 0.25, 0.5) );
-    EXPECT_EQ( mat->Get(AI_MATKEY_SHININESS_STRENGTH, f), aiReturn_SUCCESS );
-    EXPECT_EQ( f, 0.5f );
-    EXPECT_EQ( mat->Get(AI_MATKEY_SHININESS, f), aiReturn_SUCCESS );
-    EXPECT_EQ( f, 10.0f );
-    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_AMBIENT, c), aiReturn_SUCCESS );
-    EXPECT_EQ( c, aiColor3D(0.125, 0.25, 0.25) );
-    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_EMISSIVE, c), aiReturn_SUCCESS );
-    EXPECT_EQ( c, aiColor3D(0.25, 0.125, 0.25) );
-    EXPECT_EQ( mat->Get(AI_MATKEY_COLOR_TRANSPARENT, c), aiReturn_SUCCESS );
-    EXPECT_EQ( c, aiColor3D(0.75, 0.5, 0.25) );
-    EXPECT_EQ( mat->Get(AI_MATKEY_OPACITY, f), aiReturn_SUCCESS );
-    EXPECT_EQ( f, 0.5f );
+    EXPECT_EQ(mat->Get(AI_MATKEY_COLOR_DIFFUSE, c), aiReturn_SUCCESS);
+    EXPECT_EQ(c, aiColor3D(0.5, 0.25, 0.25));
+    EXPECT_EQ(mat->Get(AI_MATKEY_COLOR_SPECULAR, c), aiReturn_SUCCESS);
+    EXPECT_EQ(c, aiColor3D(0.25, 0.25, 0.5));
+    EXPECT_EQ(mat->Get(AI_MATKEY_SHININESS_STRENGTH, f), aiReturn_SUCCESS);
+    EXPECT_EQ(f, 0.5f);
+    EXPECT_EQ(mat->Get(AI_MATKEY_SHININESS, f), aiReturn_SUCCESS);
+    EXPECT_EQ(f, 10.0f);
+    EXPECT_EQ(mat->Get(AI_MATKEY_COLOR_AMBIENT, c), aiReturn_SUCCESS);
+    EXPECT_EQ(c, aiColor3D(0.125, 0.25, 0.25));
+    EXPECT_EQ(mat->Get(AI_MATKEY_COLOR_EMISSIVE, c), aiReturn_SUCCESS);
+    EXPECT_EQ(c, aiColor3D(0.25, 0.125, 0.25));
+    EXPECT_EQ(mat->Get(AI_MATKEY_COLOR_TRANSPARENT, c), aiReturn_SUCCESS);
+    EXPECT_EQ(c, aiColor3D(0.75, 0.5, 0.25));
+    EXPECT_EQ(mat->Get(AI_MATKEY_OPACITY, f), aiReturn_SUCCESS);
+    EXPECT_EQ(f, 0.5f);
 }
 
 TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
@@ -288,7 +285,7 @@ TEST_F(utFBXImporterExporter, importOrphantEmbeddedTextureTest) {
 TEST_F(utFBXImporterExporter, sceneMetadata) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/global_settings.fbx",
-        aiProcess_ValidateDataStructure);
+            aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
     ASSERT_NE(scene->mMetaData, nullptr);
     {

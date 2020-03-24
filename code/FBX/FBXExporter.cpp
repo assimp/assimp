@@ -944,7 +944,9 @@ void FBXExporter::WriteDefinitions ()
     FBX::Node defs("Definitions");
     defs.AddChild("Version", int32_t(100));
     defs.AddChild("Count", int32_t(total_count));
-    for (auto &n : object_nodes) { defs.AddChild(n); }
+    for (auto &on : object_nodes) {
+        defs.AddChild(on);
+    }
     defs.Dump(outfile, binary, 0);
 }
 
@@ -1119,10 +1121,10 @@ void FBXExporter::WriteObjects ()
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiVector3D &n = m->mNormals[f.mIndices[pvi]];
-                    normal_data.push_back(n.x);
-                    normal_data.push_back(n.y);
-                    normal_data.push_back(n.z);
+                    const aiVector3D &curN = m->mNormals[f.mIndices[pvi]];
+                    normal_data.push_back(curN.x);
+                    normal_data.push_back(curN.y);
+                    normal_data.push_back(curN.z);
                 }
             }
             FBX::Node::WritePropertyNode(
@@ -1226,14 +1228,14 @@ void FBXExporter::WriteObjects ()
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiVector3D &uv =
+                    const aiVector3D &curUv =
                         m->mTextureCoords[uvi][f.mIndices[pvi]];
-                    auto elem = index_by_uv.find(uv);
+                    auto elem = index_by_uv.find(curUv);
                     if (elem == index_by_uv.end()) {
-                        index_by_uv[uv] = index;
+                        index_by_uv[curUv] = index;
                         uv_indices.push_back(index);
                         for (unsigned int x = 0; x < m->mNumUVComponents[uvi]; ++x) {
-                            uv_data.push_back(uv[x]);
+                            uv_data.push_back(curUv[x]);
                         }
                         ++index;
                     } else {
@@ -2246,7 +2248,7 @@ const std::map<std::string,std::pair<std::string,char>> transform_types = {
 // write a single model node to the stream
 void FBXExporter::WriteModelNode(
     StreamWriterLE& outstream,
-    bool binary,
+    bool,
     const aiNode* node,
     int64_t node_uid,
     const std::string& type,
@@ -2299,16 +2301,13 @@ void FBXExporter::WriteModelNode(
                 err << item.first;
                 throw DeadlyExportError(err.str());
             }
-            const std::string &name = elem->second.first;
+            const std::string &cur_name = elem->second.first;
             const aiVector3D &v = item.second;
-            if (name.compare(0, 4, "Lcl ") == 0) {
+            if (cur_name.compare(0, 4, "Lcl ") == 0) {
                 // special handling for animatable properties
-                p.AddP70(
-                    name, name, "", "A",
-                    double(v.x), double(v.y), double(v.z)
-                );
+                p.AddP70( cur_name, cur_name, "", "A", double(v.x), double(v.y), double(v.z) );
             } else {
-                p.AddP70vector(name, v.x, v.y, v.z);
+                p.AddP70vector(cur_name, v.x, v.y, v.z);
             }
         }
     }

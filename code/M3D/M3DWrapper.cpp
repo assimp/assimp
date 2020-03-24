@@ -100,6 +100,10 @@ M3DWrapper::M3DWrapper() {
 }
 
 M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer) {
+    if (nullptr == pIOHandler) {
+        ai_assert(nullptr != pIOHandler);
+    }
+
 #ifdef ASSIMP_USE_M3D_READFILECB
 	// pass this IOHandler to the C callback in a thread-local pointer
 	m3dimporter_pIOHandler = pIOHandler;

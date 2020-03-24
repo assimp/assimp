@@ -70,7 +70,7 @@ namespace
     template<>
     size_t select_ftell<8>(FILE* file)
     {
-        return ::_ftelli64(file);
+        return (size_t)::_ftelli64(file);
     }
 
     template<>

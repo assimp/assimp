@@ -256,13 +256,13 @@ void D3MFExporter::writeBaseMaterials() {
             tmp.clear();
             hexDiffuseColor = "#";
             
-            tmp = DecimalToHexa( color.r );
+            tmp = DecimalToHexa( (ai_real) color.r );
             hexDiffuseColor += tmp;
-            tmp = DecimalToHexa( color.g );
+            tmp = DecimalToHexa((ai_real)color.g);
             hexDiffuseColor += tmp;
-            tmp = DecimalToHexa( color.b );
+            tmp = DecimalToHexa((ai_real)color.b);
             hexDiffuseColor += tmp;
-            tmp = DecimalToHexa( color.a );
+            tmp = DecimalToHexa((ai_real)color.a);
             hexDiffuseColor += tmp;
         } else {
             hexDiffuseColor = "#FFFFFFFF";

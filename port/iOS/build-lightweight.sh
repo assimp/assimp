@@ -80,6 +80,7 @@ do
 		build_arch armv7
 		build_arch armv7s
 		build_arch arm64
+		build_arch arm64e
 		DEPLOY_ARCHS=${ARCH_RELEASE[*]}
 		BUILD_TYPE=release
 		do_lipo

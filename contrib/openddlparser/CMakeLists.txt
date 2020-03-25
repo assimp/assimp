@@ -112,59 +112,59 @@ else()
 	)
 endif()
 
-SET ( GTEST_PATH contrib/gtest-1.7.0 )
+#SET ( GTEST_PATH contrib/gtest-1.7.0 )
 
-SET ( gtest_src
-    ${GTEST_PATH}/src/gtest-death-test.cc
-    ${GTEST_PATH}/src/gtest-filepath.cc
-    ${GTEST_PATH}/src/gtest-internal-inl.h
-    ${GTEST_PATH}/src/gtest-port.cc
-    ${GTEST_PATH}/src/gtest-printers.cc
-    ${GTEST_PATH}/src/gtest-test-part.cc
-    ${GTEST_PATH}/src/gtest-typed-test.cc
-    ${GTEST_PATH}/src/gtest.cc
-    ${GTEST_PATH}/src/gtest_main.cc
-)
+#SET ( gtest_src
+#    ${GTEST_PATH}/src/gtest-death-test.cc
+#    ${GTEST_PATH}/src/gtest-filepath.cc
+#    ${GTEST_PATH}/src/gtest-internal-inl.h
+#    ${GTEST_PATH}/src/gtest-port.cc
+#    ${GTEST_PATH}/src/gtest-printers.cc
+#    ${GTEST_PATH}/src/gtest-test-part.cc
+#    ${GTEST_PATH}/src/gtest-typed-test.cc
+#    ${GTEST_PATH}/src/gtest.cc
+#    ${GTEST_PATH}/src/gtest_main.cc
+#)
 
-SET( openddl_parser_unittest_src  
-    test/UnitTestCommon.h
-    test/DDLNodeTest.cpp
-    test/OpenDDLCommonTest.cpp
-    test/OpenDDLExportTest.cpp
-    test/OpenDDLParserTest.cpp
-    test/OpenDDLParserUtilsTest.cpp
-    test/OpenDDLStreamTest.cpp
-    test/OpenDDLIntegrationTest.cpp
-    test/ValueTest.cpp
-    test/OpenDDLDefectsTest.cpp
-)
+#SET( openddl_parser_unittest_src  
+#    test/UnitTestCommon.h
+#    test/DDLNodeTest.cpp
+#    test/OpenDDLCommonTest.cpp
+#    test/OpenDDLExportTest.cpp
+#    test/OpenDDLParserTest.cpp
+#    test/OpenDDLParserUtilsTest.cpp
+#    test/OpenDDLStreamTest.cpp
+#    test/OpenDDLIntegrationTest.cpp
+#    test/ValueTest.cpp
+#    test/OpenDDLDefectsTest.cpp
+#)
 
-SOURCE_GROUP( code  FILES ${openddl_parser_unittest_src} )
-SOURCE_GROUP( gtest FILES ${gtest_src} )
+#SOURCE_GROUP( code  FILES ${openddl_parser_unittest_src} )
+#SOURCE_GROUP( gtest FILES ${gtest_src} )
 
-ADD_EXECUTABLE( openddl_parser_unittest 
-    ${gtest_src}
-    ${openddl_parser_unittest_src}
-)
+#ADD_EXECUTABLE( openddl_parser_unittest 
+#    ${gtest_src}
+#    ${openddl_parser_unittest_src}
+#)
 
-target_link_libraries( openddl_parser_unittest openddl_parser ${CMAKE_THREAD_LIBS_INIT} )
+#target_link_libraries( openddl_parser_unittest openddl_parser ${CMAKE_THREAD_LIBS_INIT} )
 
-SET( openddl_parser_demo_src  
-    demo/main.cpp 
-)
+#SET( openddl_parser_demo_src  
+#    demo/main.cpp 
+#)
 
-if (COVERALLS)
-    set(COVERAGE_SRCS     ${gtest_src} ${openddl_parser_unittest_src} )
+#if (COVERALLS)
+#    set(COVERAGE_SRCS     ${gtest_src} ${openddl_parser_unittest_src} )
+#
+#    # Create the coveralls target.
+#    coveralls_setup(
+#        "${COVERAGE_SRCS}" # The source files.
+#        ON                 # If we should upload.
+#        "${PROJECT_SOURCE_DIR}/cmake/") # (Optional) Alternate project cmake module path.
+#endif()
 
-    # Create the coveralls target.
-    coveralls_setup(
-        "${COVERAGE_SRCS}" # The source files.
-        ON                 # If we should upload.
-        "${PROJECT_SOURCE_DIR}/cmake/") # (Optional) Alternate project cmake module path.
-endif()
+#ADD_EXECUTABLE( openddl_parser_demo
+#    ${openddl_parser_demo_src}
+#) 
 
-ADD_EXECUTABLE( openddl_parser_demo
-    ${openddl_parser_demo_src}
-) 
-
-target_link_libraries( openddl_parser_demo openddl_parser )
+#target_link_libraries( openddl_parser_demo openddl_parser )

@@ -456,17 +456,49 @@ IF( BUILD_DOCS )
   ADD_SUBDIRECTORY(doc)
 ENDIF()
 
+#----------------------------------------------------------------------------------------------------
+# Search for external dependencies, and build them from source if not found
+#----------------------------------------------------------------------------------------------------
+# irrXML
 # Look for system installed irrXML
 IF ( SYSTEM_IRRXML )
   FIND_PACKAGE( IrrXML REQUIRED )
 ENDIF()
-
-# Search for external dependencies, and build them from source if not found
-# Search for zlib
+IF(HUNTER_ENABLED)
+  hunter_add_package(irrXML)
+  find_package(irrXML CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/irrXML)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# utf8
+IF(HUNTER_ENABLED)
+  hunter_add_package(utf8)
+  find_package(utf8 CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/utf8cpp)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# polyclipping
+IF(HUNTER_ENABLED)
+  hunter_add_package(polyclipping)
+  find_package(polyclipping CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/clipper)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# poly2tri
+IF(HUNTER_ENABLED)
+  hunter_add_package(poly2tri)
+  find_package(poly2tri CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/poly2tri)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# zlib
 IF(HUNTER_ENABLED)
   hunter_add_package(ZLIB)
   find_package(ZLIB CONFIG REQUIRED)
-
   add_definitions(-DASSIMP_BUILD_NO_OWN_ZLIB)
   set(ZLIB_FOUND TRUE)
   set(ZLIB_LIBRARIES ZLIB::zlib)
@@ -475,13 +507,11 @@ ELSE()
   IF ( NOT ASSIMP_BUILD_ZLIB )
     FIND_PACKAGE(ZLIB)
   ENDIF()
-
   IF( NOT ZLIB_FOUND )
     MESSAGE(STATUS "compiling zlib from sources")
     INCLUDE(CheckIncludeFile)
     INCLUDE(CheckTypeSize)
     INCLUDE(CheckFunctionExists)
-
     # Explicitly turn off ASM686 and AMD64 cmake options.
     # The AMD64 option causes a build failure on MSVC and the ASM builds seem to have problems:
     #		https://github.com/madler/zlib/issues/41#issuecomment-125848075
@@ -489,7 +519,6 @@ ELSE()
     # included as a submodule.
     set( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
     set( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
-
     # compile from sources
     ADD_SUBDIRECTORY(contrib/zlib)
     SET(ZLIB_FOUND 1)
@@ -503,7 +532,8 @@ ELSE()
   ENDIF()
   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ENDIF()
-
+#----------------------------------------------------------------------------------------------------
+# minizip/unzip
 IF( NOT IOS )
   IF( NOT ASSIMP_BUILD_MINIZIP )
     use_pkgconfig(UNZIP minizip)
@@ -515,6 +545,63 @@ ELSE ()
     ENDIF()
   ENDIF ()
 ENDIF ()
+IF(HUNTER_ENABLED)
+  hunter_add_package(minizip)
+  find_package(minizip CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/unzip)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# zip (https://github.com/kuba--/zip)
+# TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
+if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+  add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
+else()
+  add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
+endif()
+IF(HUNTER_ENABLED)
+  hunter_add_package(zip)
+  find_package(zip CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/zip)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# openddlparser
+IF(HUNTER_ENABLED)
+  hunter_add_package(openddlparser)
+  find_package(openddlparser CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/openddlparser)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# Open3DGC
+IF(HUNTER_ENABLED)
+  # Nothing to do, not available in Hunter yet.
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/Open3DGC)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# RapidJSON
+IF(HUNTER_ENABLED)
+  hunter_add_package(RapidJSON)
+  find_package(RapidJSON CONFIG REQUIRED)
+ELSE()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/contrib/rapidjson)
+ENDIF()
+#----------------------------------------------------------------------------------------------------
+# Check dependencies for glTF importer with Open3DGC-compression.
+# RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
+# has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
+FIND_PACKAGE(RT QUIET)
+IF (NOT HUNTER_ENABLED AND (RT_FOUND OR MSVC))
+  SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
+  ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
+ELSE ()
+  SET (open3dgc_SRCS "")
+  MESSAGE (INFO " Hunter enabled or RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
+  #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
+ENDIF ()
+#----------------------------------------------------------------------------------------------------
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)
@@ -587,9 +674,9 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
-IF(NOT HUNTER_ENABLED)
-  ADD_SUBDIRECTORY(contrib)
-ENDIF()
+#IF(NOT HUNTER_ENABLED)
+#  ADD_SUBDIRECTORY(contrib)
+#ENDIF()
 
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )

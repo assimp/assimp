@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,14 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
 #include "SceneDiffer.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
-
 
 TEST(utCOBImporter, importDwarfASCII) {
     Assimp::Importer importer;
@@ -58,13 +55,11 @@ TEST(utCOBImporter, importDwarfASCII) {
     ASSERT_EQ(nullptr, scene);
 }
 
-
 TEST(utCOBImporter, importDwarf) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf.cob", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utCOBImporter, importMoleculeASCII) {
     Assimp::Importer importer;
@@ -74,13 +69,11 @@ TEST(utCOBImporter, importMoleculeASCII) {
     ASSERT_EQ(nullptr, scene);
 }
 
-
 TEST(utCOBImporter, importMolecule) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule.cob", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utCOBImporter, importSpider43ASCII) {
     Assimp::Importer importer;
@@ -88,20 +81,17 @@ TEST(utCOBImporter, importSpider43ASCII) {
     ASSERT_NE(nullptr, scene);
 }
 
-
 TEST(utCOBImporter, importSpider43) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_4_3.cob", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 
-
 TEST(utCOBImporter, importSpider66ASCII) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6_ascii.cob", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utCOBImporter, importSpider66) {
     Assimp::Importer importer;

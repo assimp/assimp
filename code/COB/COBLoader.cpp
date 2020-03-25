@@ -1015,8 +1015,8 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
         // XXX backface culling flag is 0x10 in flags
 
         // hole?
-        bool hole;
-        if ((hole = (reader.GetI1() & 0x08) != 0)) {
+        bool hole = (reader.GetI1() & 0x08) != 0;
+        if ( hole ) {
             // XXX Basically this should just work fine - then triangulator
             // should output properly triangulated data even for polygons
             // with holes. Test data specific to COB is needed to confirm it.

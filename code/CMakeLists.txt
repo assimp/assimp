@@ -852,8 +852,6 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDVmdParser.h
   MMD/PmdHelper.h
   MMD/PmdHelper.cpp
-  MMD/PmdStringHelper.h
-  MMD/PmdStringHelper.cpp  
 )
 
 # Workaround for issue #2406 - force problematic large file to be optimized to prevent string table overflow error

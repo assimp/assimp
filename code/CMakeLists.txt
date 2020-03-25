@@ -711,8 +711,8 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
+#SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
+#SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
 
 ADD_ASSIMP_IMPORTER( Q3D
   Q3D/Q3DLoader.cpp
@@ -847,8 +847,6 @@ ADD_ASSIMP_IMPORTER( MMD
   MMD/MMDVmdParser.h
   MMD/PmdHelper.h
   MMD/PmdHelper.cpp
-  MMD/PmdStringHelper.h
-  MMD/PmdStringHelper.cpp  
 )
 
 ADD_ASSIMP_EXPORTER( ASSJSON
@@ -900,173 +898,6 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-# irrXML
-IF(HUNTER_ENABLED)
-  hunter_add_package(irrXML)
-  find_package(irrXML CONFIG REQUIRED)
-ELSE()
-  # irrXML already included in contrib directory by parent CMakeLists.txt.
-ENDIF()
-
-# utf8
-IF(HUNTER_ENABLED)
-  hunter_add_package(utf8)
-  find_package(utf8 CONFIG REQUIRED)
-ELSE()
-  # utf8 is header-only, so Assimp doesn't need to do anything.
-ENDIF()
-
-# polyclipping
-IF(HUNTER_ENABLED)
-  hunter_add_package(polyclipping)
-  find_package(polyclipping CONFIG REQUIRED)
-ELSE()
-  SET( Clipper_SRCS
-    ../contrib/clipper/clipper.hpp
-    ../contrib/clipper/clipper.cpp
-  )
-  SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
-ENDIF()
-
-# poly2tri
-IF(HUNTER_ENABLED)
-  hunter_add_package(poly2tri)
-  find_package(poly2tri CONFIG REQUIRED)
-ELSE()
-  SET( Poly2Tri_SRCS
-    ../contrib/poly2tri/poly2tri/common/shapes.cc
-    ../contrib/poly2tri/poly2tri/common/shapes.h
-    ../contrib/poly2tri/poly2tri/common/utils.h
-    ../contrib/poly2tri/poly2tri/sweep/advancing_front.h
-    ../contrib/poly2tri/poly2tri/sweep/advancing_front.cc
-    ../contrib/poly2tri/poly2tri/sweep/cdt.cc
-    ../contrib/poly2tri/poly2tri/sweep/cdt.h
-    ../contrib/poly2tri/poly2tri/sweep/sweep.cc
-    ../contrib/poly2tri/poly2tri/sweep/sweep.h
-    ../contrib/poly2tri/poly2tri/sweep/sweep_context.cc
-    ../contrib/poly2tri/poly2tri/sweep/sweep_context.h
-  )
-  SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
-ENDIF()
-
-# minizip/unzip
-IF(HUNTER_ENABLED)
-  hunter_add_package(minizip)
-  find_package(minizip CONFIG REQUIRED)
-ELSE()
-  SET( unzip_SRCS
-    ../contrib/unzip/crypt.h
-    ../contrib/unzip/ioapi.c
-    ../contrib/unzip/ioapi.h
-    ../contrib/unzip/unzip.c
-    ../contrib/unzip/unzip.h
-  )
-  SOURCE_GROUP(Contrib\\unzip FILES ${unzip_SRCS})
-ENDIF()
-
-# zip (https://github.com/kuba--/zip)
-IF(HUNTER_ENABLED)
-  hunter_add_package(zip)
-  find_package(zip CONFIG REQUIRED)
-ELSE()
-  SET( ziplib_SRCS
-    ../contrib/zip/src/miniz.h
-    ../contrib/zip/src/zip.c
-    ../contrib/zip/src/zip.h
-  )
-
-  # TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
-  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
-  	add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-  else()
-  	add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-  endif()
-
-  SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
-ENDIF()
-
-# openddlparser
-IF(HUNTER_ENABLED)
-  hunter_add_package(openddlparser)
-  find_package(openddlparser CONFIG REQUIRED)
-ELSE()
-  SET ( openddl_parser_SRCS
-    ../contrib/openddlparser/code/OpenDDLParser.cpp
-    ../contrib/openddlparser/code/DDLNode.cpp
-    ../contrib/openddlparser/code/OpenDDLCommon.cpp
-    ../contrib/openddlparser/code/OpenDDLExport.cpp
-    ../contrib/openddlparser/code/Value.cpp
-    ../contrib/openddlparser/code/OpenDDLStream.cpp
-    ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLExport.h
-    ../contrib/openddlparser/include/openddlparser/OpenDDLStream.h
-    ../contrib/openddlparser/include/openddlparser/DDLNode.h
-    ../contrib/openddlparser/include/openddlparser/Value.h
-  )
-  SOURCE_GROUP( Contrib\\openddl_parser FILES ${openddl_parser_SRCS})
-ENDIF()
-
-# Open3DGC
-IF(HUNTER_ENABLED)
-  # Nothing to do, not available in Hunter yet.
-ELSE()
-  SET ( open3dgc_SRCS
-    ../contrib/Open3DGC/o3dgcAdjacencyInfo.h
-    ../contrib/Open3DGC/o3dgcArithmeticCodec.cpp
-    ../contrib/Open3DGC/o3dgcArithmeticCodec.h
-    ../contrib/Open3DGC/o3dgcBinaryStream.h
-    ../contrib/Open3DGC/o3dgcCommon.h
-    ../contrib/Open3DGC/o3dgcDVEncodeParams.h
-    ../contrib/Open3DGC/o3dgcDynamicVectorDecoder.cpp
-    ../contrib/Open3DGC/o3dgcDynamicVectorDecoder.h
-    ../contrib/Open3DGC/o3dgcDynamicVectorEncoder.cpp
-    ../contrib/Open3DGC/o3dgcDynamicVectorEncoder.h
-    ../contrib/Open3DGC/o3dgcDynamicVector.h
-    ../contrib/Open3DGC/o3dgcFIFO.h
-    ../contrib/Open3DGC/o3dgcIndexedFaceSet.h
-    ../contrib/Open3DGC/o3dgcIndexedFaceSet.inl
-    ../contrib/Open3DGC/o3dgcSC3DMCDecoder.h
-    ../contrib/Open3DGC/o3dgcSC3DMCDecoder.inl
-    ../contrib/Open3DGC/o3dgcSC3DMCEncodeParams.h
-    ../contrib/Open3DGC/o3dgcSC3DMCEncoder.h
-    ../contrib/Open3DGC/o3dgcSC3DMCEncoder.inl
-    ../contrib/Open3DGC/o3dgcTimer.h
-    ../contrib/Open3DGC/o3dgcTools.cpp
-    ../contrib/Open3DGC/o3dgcTriangleFans.cpp
-    ../contrib/Open3DGC/o3dgcTriangleFans.h
-    ../contrib/Open3DGC/o3dgcTriangleListDecoder.h
-    ../contrib/Open3DGC/o3dgcTriangleListDecoder.inl
-    ../contrib/Open3DGC/o3dgcTriangleListEncoder.h
-    ../contrib/Open3DGC/o3dgcTriangleListEncoder.inl
-    ../contrib/Open3DGC/o3dgcVector.h
-    ../contrib/Open3DGC/o3dgcVector.inl
-  )
-  SOURCE_GROUP( Contrib\\open3dgc FILES ${open3dgc_SRCS})
-ENDIF()
-
-# Check dependencies for glTF importer with Open3DGC-compression.
-# RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
-# has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
-FIND_PACKAGE(RT QUIET)
-IF (NOT HUNTER_ENABLED AND (RT_FOUND OR MSVC))
-  SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
-  ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
-ELSE ()
-  SET (open3dgc_SRCS "")
-  MESSAGE (INFO " Hunter enabled or RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
-  #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
-ENDIF ()
-
-# RapidJSON
-IF(HUNTER_ENABLED)
-  hunter_add_package(RapidJSON)
-  find_package(RapidJSON CONFIG REQUIRED)
-ELSE()
-  INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
-  INCLUDE_DIRECTORIES( "../contrib" )
-ENDIF()
 
 # VC2010 fixes
 if(MSVC10)
@@ -1083,14 +914,13 @@ if ( MSVC )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
 
-IF(NOT HUNTER_ENABLED)
-  if (UNZIP_FOUND)
-    SET (unzip_compile_SRCS "")
-  else ()
-    SET (unzip_compile_SRCS ${unzip_SRCS})
-    INCLUDE_DIRECTORIES( "../contrib/unzip/" )
-  endif ()
-ENDIF()
+#IF(NOT HUNTER_ENABLED)
+#  if (UNZIP_FOUND)
+#    SET (unzip_compile_SRCS "")
+#  else ()
+#    # moved to own CMakeLists.txt
+#  endif ()
+#ENDIF()
 
 MESSAGE(STATUS "Enabled importer formats:${ASSIMP_IMPORTERS_ENABLED}")
 MESSAGE(STATUS "Disabled importer formats:${ASSIMP_IMPORTERS_DISABLED}")
@@ -1117,13 +947,14 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  ${IrrXML_SRCS}
-  ${unzip_compile_SRCS}
-  ${Poly2Tri_SRCS}
-  ${Clipper_SRCS}
-  ${openddl_parser_SRCS}
-  ${open3dgc_SRCS}
-  ${ziplib_SRCS}
+  #${IrrXML_SRCS}
+  #${unzip_compile_SRCS}
+  #${zip_compile_SRCS}
+  #${Poly2Tri_SRCS}
+  #${Clipper_SRCS}
+  #${openddl_parser_SRCS}
+  #${open3dgc_SRCS}
+  #${ziplib_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1134,7 +965,15 @@ ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
 IF(NOT HUNTER_ENABLED)
   INCLUDE_DIRECTORIES(
       ${IRRXML_INCLUDE_DIR}
-      ../contrib/openddlparser/include
+	  ${unzip_INCLUDE_DIR}
+	  ${zip_INCLUDE_DIR}
+	  ${Poly2Tri_INCLUDE_DIR}
+	  ${Clipper_INCLUDE_DIR}
+      ${openddl_INCLUDE_DIR}
+	  ${Open3DGC_INCLUDE_DIR}
+	  ${ZLIB_INCLUDE_DIR}
+	  ${rapidjson_INCLUDE_DIR}
+	  ${utf8cpp_INCLUDE_DIR}
   )
 ENDIF()
 
@@ -1155,18 +994,29 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      polyclipping::polyclipping
       irrXML::irrXML
-      openddlparser::openddl_parser
-      poly2tri::poly2tri
       minizip::minizip
+      zip::zip
+      poly2tri::poly2tri
+      polyclipping::polyclipping
+      openddlparser::openddl_parser
       ZLIB::zlib
       RapidJSON::rapidjson
       utf8::utf8
-      zip::zip
   )
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
+  TARGET_LINK_LIBRARIES(assimp 
+  ${IRRXML_LIBRARY}
+  ${unzip_LIBRARY}
+  ${zip_LIBRARY}
+  ${Poly2Tri_LIBRARY}
+  ${Clipper_LIBRARY}
+  ${OPENDDL_PARSER_LIBRARIES}
+  ${Open3DGC_LIBRARY}
+  ${ZLIB_LIBRARIES}
+  ${rapidjson_LIBRARY}
+  ${utf8cpp_LIBRARY}
+  )
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -1247,16 +1097,16 @@ if (APPLE)
   ENDIF()
 ENDIF()
 
-# Build against external unzip, or add ../contrib/unzip so
-# assimp can #include "unzip.h"
-IF(NOT HUNTER_ENABLED)
-  if (UNZIP_FOUND)
-    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
-    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
-  else ()
-    INCLUDE_DIRECTORIES("../")
-  endif ()
-ENDIF()
+## Build against external unzip, or add ../contrib/unzip so
+## assimp can #include "unzip.h"
+##IF(NOT HUNTER_ENABLED)
+##  if (UNZIP_FOUND)
+##    INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
+##    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+##  else ()
+##    INCLUDE_DIRECTORIES("../")
+##  endif ()
+##ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)

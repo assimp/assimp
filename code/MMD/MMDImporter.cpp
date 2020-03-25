@@ -225,13 +225,13 @@ void MMDImporter::CreateDataFromImportPmd(const pmd::PmdModel *pModel,
     pNode->mName.Set(string(modelName) + string("_mesh"));
 
     // split mesh by materials
-    pNode->mNumMeshes = pModel->materials.size();
+    pNode->mNumMeshes = static_cast<unsigned int>(pModel->materials.size();
     pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
     for (unsigned int index = 0; index < pNode->mNumMeshes; index++) {
         pNode->mMeshes[index] = index;
     }
 
-    pScene->mNumMeshes = pModel->materials.size();
+    pScene->mNumMeshes = static_cast<unsigned int>(pModel->materials.size());
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
     for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
@@ -264,7 +264,7 @@ void MMDImporter::CreateDataFromImportPmd(const pmd::PmdModel *pModel,
     }
 
     // create materials
-    pScene->mNumMaterials = pModel->materials.size();
+    pScene->mNumMaterials = static_cast<unsigned int>(pModel->materials.size());
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
     for (unsigned int i = 0; i < pScene->mNumMaterials; i++) {
         pScene->mMaterials[i] = CreateMaterialPmd(&pModel->materials[i], pModel);
@@ -455,7 +455,7 @@ aiMesh *MMDImporter::CreateMeshPmd(const pmd::PmdModel *pModel,
     // make all bones for each mesh
     // assign bone weights to skinned bones (otherwise just initialize)
     auto bone_ptr_ptr = new aiBone *[pModel->bones.size()];
-    pMesh->mNumBones = pModel->bones.size();
+    pMesh->mNumBones = static_cast<unsigned int>(pModel->bones.size());
     pMesh->mBones = bone_ptr_ptr;
     for (unsigned int ii = 0; ii < pModel->bones.size(); ++ii) {
         auto pBone = new aiBone;
@@ -508,7 +508,7 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
 }
 
 aiMaterial *MMDImporter::CreateMaterialPmd(const pmd::PmdMaterial *pMat,
-    const pmd::PmdModel *pModel) {
+    const pmd::PmdModel /**pModel*/) {
     aiMaterial *mat = new aiMaterial();
     aiString name(pMat->texture_filename);
     mat->AddProperty(&name, AI_MATKEY_NAME);

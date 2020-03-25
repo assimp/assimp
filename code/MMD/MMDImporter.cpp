@@ -225,7 +225,7 @@ void MMDImporter::CreateDataFromImportPmd(const pmd::PmdModel *pModel,
     pNode->mName.Set(string(modelName) + string("_mesh"));
 
     // split mesh by materials
-    pNode->mNumMeshes = static_cast<unsigned int>(pModel->materials.size();
+    pNode->mNumMeshes = static_cast<unsigned int>(pModel->materials.size());
     pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
     for (unsigned int index = 0; index < pNode->mNumMeshes; index++) {
         pNode->mMeshes[index] = index;
@@ -267,7 +267,7 @@ void MMDImporter::CreateDataFromImportPmd(const pmd::PmdModel *pModel,
     pScene->mNumMaterials = static_cast<unsigned int>(pModel->materials.size());
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
     for (unsigned int i = 0; i < pScene->mNumMaterials; i++) {
-        pScene->mMaterials[i] = CreateMaterialPmd(&pModel->materials[i], pModel);
+        pScene->mMaterials[i] = CreateMaterialPmd(&pModel->materials[i] /*, pModel*/);
     }
 
     // Convert everything to OpenGL space
@@ -507,8 +507,7 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
   return mat;
 }
 
-aiMaterial *MMDImporter::CreateMaterialPmd(const pmd::PmdMaterial *pMat,
-    const pmd::PmdModel /**pModel*/) {
+aiMaterial *MMDImporter::CreateMaterialPmd(const pmd::PmdMaterial *pMat/*, const pmd::PmdModel *pModel*/) {
     aiMaterial *mat = new aiMaterial();
     aiString name(pMat->texture_filename);
     mat->AddProperty(&name, AI_MATKEY_NAME);

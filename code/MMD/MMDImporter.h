@@ -90,7 +90,7 @@ private:
     aiMesh* CreateMeshPmd(const pmd::PmdModel* pModel, const int indexStart, const int indexCount);
 
     //! \brief Create the material
-    aiMaterial* CreateMaterialPmd(const pmd::PmdMaterial* pMat, const pmd::PmdModel* pModel);
+    aiMaterial* CreateMaterialPmd(const pmd::PmdMaterial* pMat /*, const pmd::PmdModel* pModel*/);
 
 private:
     //! Data buffer

@@ -2,10 +2,11 @@
 #include <string>
 #include <unordered_map>
 #include <assimp/IOStream.hpp>
+	
 namespace pmd {
-
+#pragma warning(disable:2220)
     std::unordered_map<uint16_t, uint16_t> PmdHelper::Sjis2Unicode = {
-        { 0x20, 0x0020 },
+    { 0x20, 0x0020 },
     { 0x21, 0x0021 },
     { 0x22, 0x0022 },
     { 0x23, 0x0023 },
@@ -7043,7 +7044,8 @@ namespace pmd {
     { 0xEAA3, 0x51DC },
     { 0xEAA4, 0x7199 },
     };
-    std::string PmdHelper::ShitfJISToUtf8(std::string input) {
+#pragma warning(default:2220)
+   std::string PmdHelper::ShitfJISToUtf8(std::string input) {
         uint8_t firstByte = 0, secondByte = 0;
         uint16_t sjisValue = 0, unicodeValue = 0;
         std::string output;

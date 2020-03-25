@@ -199,9 +199,9 @@ namespace vmd
 			stream->Write((char*)&ik_count, sizeof(int), 1);
 			for (int i = 0; i < ik_count; i++)
 			{
-				const VmdIkEnable& ik_enable = this->ik_enable.at(i);
-				stream->Write(ik_enable.ik_name.c_str(), 20, 1);
-				stream->Write((char*)&ik_enable.enable, sizeof(uint8_t), 1);
+				const VmdIkEnable& ik_enable_local = this->ik_enable.at(i);
+				stream->Write(ik_enable_local.ik_name.c_str(), 20, 1);
+				stream->Write((char*)&ik_enable_local.enable, sizeof(uint8_t), 1);
 			}
 		}
 	};

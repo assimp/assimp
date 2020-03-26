@@ -952,8 +952,8 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
 void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 	if (!r.scene) {
-        return;
-    }
+		throw DeadlyImportError("GLTF: No scene");
+	}
 
 	std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
@@ -970,6 +970,8 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 			root->mChildren[root->mNumChildren++] = node;
 		}
 		mScene->mRootNode = root;
+	} else {
+		mScene->mRootNode = new aiNode("ROOT");
 	}
 }
 

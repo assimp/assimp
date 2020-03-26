@@ -159,7 +159,7 @@ void ObjFileMtlImporter::load()
                 case 'r': //Material alpha
                     ++m_DataIt;
                     getFloatValue(m_pModel->m_pCurrentMaterial->alpha);
-					m_pModel->m_pCurrentMaterial->alpha = 1.0 - m_pModel->m_pCurrentMaterial->alpha; //rickomax- this value is the inverse of alpha
+					m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0 - m_pModel->m_pCurrentMaterial->alpha); //rickomax- this value is the inverse of alpha
                     break;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);

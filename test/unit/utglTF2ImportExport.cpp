@@ -496,3 +496,16 @@ TEST_F(utglTF2ImportExport, recursive_nodes) {
     const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/RecursiveNodes/RecursiveNodes.gltf", aiProcess_ValidateDataStructure);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utglTF2ImportExport, norootnode_noscene) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/NoScene.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+}
+
+TEST_F(utglTF2ImportExport, norootnode_scenewithoutnodes) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/SceneWithoutNodes.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+}

@@ -1173,7 +1173,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
 ENDIF ()
 
-if( MSVC )
+if( MSVC AND NOT SKIP_MSVC_UPDATE)
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
   # CMake 3.12 added a variable for this
   if(MSVC_TOOLSET_VERSION)

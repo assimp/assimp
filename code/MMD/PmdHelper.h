@@ -8,7 +8,7 @@ namespace pmd {
     public:
         static std::string ShitfJISToUtf8(std::string input);
         static std::string ReadString(Assimp::IOStream* ioStream, int size);
-        static std::unordered_map<uint16_t, uint16_t> Sjis2Unicode;
+        static std::unordered_map<uint32_t, uint32_t> Sjis2Unicode;
     };
 }
 #endif //PMDHELPER_INC

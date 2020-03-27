@@ -5440,13 +5440,13 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out += 2;
                         break;
                     case 4:
-                        *((float *)out) = vrtx[i].data.x;
+                        memcpy(out, &vrtx[i].data.x, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.y;
+                        memcpy(out, &vrtx[i].data.y, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.z;
+                        memcpy(out, &vrtx[i].data.z, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.w;
+                        memcpy(out, &vrtx[i].data.w, sizeof(float));
                         out += 4;
                         break;
                     case 8:

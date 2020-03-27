@@ -92,7 +92,6 @@ struct Triangle {
 	unsigned char mTex[3][2]; // Texture UV coordinates
 	unsigned char mTextureNum; // Source texture offset
 	char mFlags; // Unreal Mesh Flags (unused)
-
 	unsigned int matIndex;
 };
 
@@ -131,11 +130,11 @@ inline void CompressVertex(const aiVector3D &v, uint32_t &out) {
 		Vertex n;
 		int32_t t;
 	};
+    t = 0;
 	n.X = (int32_t)v.x;
 	n.Y = (int32_t)v.y;
 	n.Z = (int32_t)v.z;
 	::memcpy(&out, &t, sizeof(int32_t));
-	//out = t;
 }
 
 // UNREAL vertex decompression
@@ -152,7 +151,6 @@ inline void DecompressVertex(aiVector3D &v, int32_t in) {
 }
 
 } // end namespace Unreal
-
 
 static const aiImporterDesc desc = {
     "Unreal Mesh Importer",

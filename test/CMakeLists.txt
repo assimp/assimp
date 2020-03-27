@@ -61,6 +61,14 @@ SET( COMMON
   unit/utIssues.cpp
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
+  unit/AssimpAPITest_aiMatrix3x3.cpp
+  unit/AssimpAPITest_aiMatrix4x4.cpp
+  unit/AssimpAPITest_aiQuaternion.cpp
+  unit/AssimpAPITest_aiVector2D.cpp
+  unit/AssimpAPITest_aiVector3D.cpp
+  unit/MathTest.cpp
+  unit/MathTest.h
+  unit/RandomNumberGeneration.h
   unit/utBatchLoader.cpp
   unit/utDefaultIOStream.cpp
   unit/utFastAtof.cpp

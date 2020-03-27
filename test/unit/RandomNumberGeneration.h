@@ -5,6 +5,8 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
+
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -12,18 +14,18 @@ with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
+copyright notice, this list of conditions and the
+following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
 
 * Neither the name of the assimp team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the assimp team.
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -39,58 +41,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#pragma once
+#ifndef ASSIMP_RANDOM_NUMBER_GENERATION_H
+#define ASSIMP_RANDOM_NUMBER_GENERATION_H
 
-#ifdef __GNUC__
-#   pragma GCC system_header
-#endif
-
-/** @file  MathFunctions.h
-*  @brief Implementation of math utility functions.
- *
-*/
-
-#include <limits>
+#include <random>
 
 namespace Assimp {
-namespace Math {
 
-// TODO: use binary GCD for unsigned integers ....
-template < typename IntegerType >
-inline
-IntegerType gcd( IntegerType a, IntegerType b ) {
-	const IntegerType zero = (IntegerType)0;
-	while ( true ) {
-		if ( a == zero )
-			return b;
-		b %= a;
+/** Helper class to use for generating pseudo-random
+ *  real numbers, with a uniform distribution. */
+template<typename T>
+class RandomUniformRealGenerator {
+public:
+    RandomUniformRealGenerator() :
+        rd_(), re_(rd_()), dist_() {
+    }
+    RandomUniformRealGenerator(T min, T max) :
+        rd_(), re_(rd_()), dist_(min, max) {
+    }
 
-		if ( b == zero )
-			return a;
-		a %= b;
-	}
-}
+    inline T next() {
+        return dist_(re_);
+    }
 
-template < typename IntegerType >
-inline
-IntegerType lcm( IntegerType a, IntegerType b ) {
-	const IntegerType t = gcd (a,b);
-	if (!t)
-        return t;
-	return a / t * b;
-}
+private:
 
-template<class T>
-inline
-T getEpsilon() {
-    return std::numeric_limits<T>::epsilon();
-}
+    std::uniform_real_distribution<T> dist_;
+    std::default_random_engine re_;
+    std::random_device rd_;
+};
 
-template<class T>
-inline
-T PI() {
-    return static_cast<T>(3.14159265358979323846);
-}
+using RandomUniformFloatGenerator = RandomUniformRealGenerator<float>;
 
 }
-}
+
+#endif // ASSIMP_RANDOM_NUMBER_GENERATION_H

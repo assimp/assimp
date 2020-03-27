@@ -5478,7 +5478,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             memcpy(length, &v, sizeof(uint32_t));
             //*length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
             out = NULL;
-            len += *length;
+            len += v;
         }
         /* bones chunk */
         if (model->numbone && model->bone && !(flags & M3D_EXP_NOBONE)) {

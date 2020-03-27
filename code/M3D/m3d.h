@@ -5662,8 +5662,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out = _m3d_addidx(out, vi_s, vrtxidx[face[i].data.normal[j]]);
                 }
             }
-            *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-            len += *length;
+            uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            memcpy(length, &v, sizeof(uint32_t));
+            len += v;
             out = NULL;
         }
         /* mathematical shapes face */
@@ -5723,8 +5724,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         }
                     }
                 }
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));
+                len += v;
                 out = NULL;
             }
         }
@@ -5767,8 +5769,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->label[l].text));
             }
             if (length) {
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));                
+                len += v;
             }
             out = NULL;
             sn = sl = NULL;
@@ -5798,8 +5801,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out = _m3d_addidx(out, vi_s, vrtxidx[a->frame[i].transform[k].ori]);
                     }
                 }
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));                
+                len += v;
                 out = NULL;
             }
         }

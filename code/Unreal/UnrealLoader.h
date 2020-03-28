@@ -62,41 +62,38 @@ public:
      *
      *  See BaseImporter::CanRead() for details.
      **/
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const;
 
 protected:
-
     // -------------------------------------------------------------------
     /** @brief Called by Importer::GetExtensionList()
      *
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
-
+    const aiImporterDesc *GetInfo() const;
 
     // -------------------------------------------------------------------
     /** @brief Setup properties for the importer
      *
      * See BaseImporter::SetupProperties() for details
      */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp);
 
     // -------------------------------------------------------------------
     /** @brief Imports the given file into the given scene structure.
      *
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler);
 
 private:
-
     //! frame to be loaded
-    uint32_t configFrameID;
+    uint32_t mConfigFrameID;
 
     //! process surface flags
-    bool configHandleFlags;
+    bool mConfigHandleFlags;
 
 }; // !class UnrealImporter
 

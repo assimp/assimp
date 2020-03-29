@@ -39,6 +39,9 @@
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 3.0 )
 
+# Used to output compiled libraries and binaries to a common directory.
+USE_COMMON_OUTPUT_DIRECTORY()
+
 INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code

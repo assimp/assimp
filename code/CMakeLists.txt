@@ -44,6 +44,10 @@
 #    source groups and library command)
 #
 cmake_minimum_required( VERSION 3.0 )
+
+# Used to output compiled libraries and binaries to a common directory.
+USE_COMMON_OUTPUT_DIRECTORY()
+
 SET( HEADER_PATH ../include/assimp )
 
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)

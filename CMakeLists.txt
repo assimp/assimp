@@ -336,19 +336,31 @@ ENDIF()
 INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
-# If this is an in-source build (CMAKE_SOURCE_DIR == CMAKE_BINARY_DIR),
-# write the library/executable files to the respective directories in the
-# source tree. During an out-of-source build, however, do not litter this
-# directory, since that is probably what the user wanted to avoid.
-IF ( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR )
-  SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_HOME_DIRECTORY}/bin" )
-  SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_HOME_DIRECTORY}/lib" )
-  SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_HOME_DIRECTORY}/bin" )
+# Determine the appropriate location where to output
+# Assimp static and shared libraries.
+IF (CMAKE_GENERATOR_PLATFORM STREQUAL "")
+  # Unknown platform. Use the architecture name as
+  # the output directory name.
+  IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(ASSIMP_OUTPUT_BIN_DIR "bin/x64")
+    SET(ASSIMP_OUTPUT_LIB_DIR "lib/x64")
+  ELSE()
+    SET(ASSIMP_OUTPUT_BIN_DIR "bin/x86")
+    SET(ASSIMP_OUTPUT_LIB_DIR "lib/x86")
+  ENDIF()
 ELSE()
-  SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
-  SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
-  SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
-ENDIF ()
+  # Set the platform name as the output lib/bin directory.
+  SET(ASSIMP_OUTPUT_BIN_DIR "bin/${CMAKE_GENERATOR_PLATFORM}")
+  SET(ASSIMP_OUTPUT_LIB_DIR "lib/${CMAKE_GENERATOR_PLATFORM}")
+ENDIF()
+
+# Macro used to set the output directories of a target/project to
+# lib/bin directory.
+MACRO(USE_COMMON_OUTPUT_DIRECTORY)
+  SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/${ASSIMP_OUTPUT_LIB_DIR}")
+  SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/${ASSIMP_OUTPUT_BIN_DIR}")
+  SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/${ASSIMP_OUTPUT_BIN_DIR}")
+ENDMACRO()
 
 # Cache these to allow the user to override them manually.
 SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
@@ -662,49 +674,3 @@ IF ( ASSIMP_INSTALL )
     INCLUDE(DebSourcePPA)
   ENDIF()
 ENDIF()
-
-if(WIN32)
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin64/")
-    SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib64/")
-  else()
-    SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin32/")
-    SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib32/")
-  ENDIF()
-
-  IF(MSVC_TOOLSET_VERSION)
-    set(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
-  ELSE()
-    IF(MSVC12)
-      SET(ASSIMP_MSVC_VERSION "vc120")
-    ELSEIF(MSVC14)
-      SET(ASSIMP_MSVC_VERSION "vc140")
-    ELSEIF(MSVC15)
-      SET(ASSIMP_MSVC_VERSION "vc141")
-    ENDIF()
-  ENDIF()
-
-  IF(MSVC12 OR MSVC14 OR MSVC15 )
-    ADD_CUSTOM_TARGET(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)
-    IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll	${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.dll VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.exp	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.exp VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.lib	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.lib VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll		${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.dll  VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.exp		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.exp VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.lib		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.lib VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
-    ELSE()
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mt.dll	${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.dll VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mt.exp	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.exp VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mt.lib	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.lib VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll		${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.dll  VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.exp		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.exp VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.lib		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.lib VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
-    ENDIF()
-  ENDIF()
-ENDIF ()

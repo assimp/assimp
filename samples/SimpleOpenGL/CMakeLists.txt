@@ -1,3 +1,6 @@
+# Used to output compiled libraries and binaries to a common directory.
+USE_COMMON_OUTPUT_DIRECTORY()
+
 FIND_PACKAGE(OpenGL)
 FIND_PACKAGE(GLUT)
 IF ( MSVC )

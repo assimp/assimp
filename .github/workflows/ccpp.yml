@@ -30,3 +30,15 @@ jobs:
       run: cmake --build .
     - name: test
       run: cd bin && ./unit
+
+  windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: configure
+      run: cmake CMakeLists.txt
+    - name: build
+      run: cmake --build .
+    - name: test
+      run: cd bin && ./unit

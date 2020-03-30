@@ -173,7 +173,15 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         const aiBone* bone = pMesh->mBones[a];
         for( unsigned int b = 0; b < bone->mNumWeights; ++b)
         {
-            vertexBones[ bone->mWeights[b].mVertexId ].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
+          if (bone->mWeights[b].mWeight > 0.0f)
+          {
+            int vertexId = bone->mWeights[b].mVertexId;
+            vertexBones[vertexId].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
+            if (vertexBones[vertexId].size() > mMaxBoneCount)
+            {
+              throw DeadlyImportError("SplitByBoneCountProcess: Single face requires more bones than specified max bone count!");
+            }
+          }
         }
     }
 

@@ -37,10 +37,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: configure
-      run: cmake CMakeLists.txt
+      run: cmake CMakeLists.txt --config Release
     - name: build
       run: cmake --build .
     - name: test
       run: | 
-        cd bin 
+        cd bin\Release
         .\unit

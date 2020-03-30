@@ -41,4 +41,6 @@ jobs:
     - name: build
       run: cmake --build .
     - name: test
-      run: cd bin && ./unit
+      run: | 
+        cd bin 
+        .\unit

@@ -30,7 +30,6 @@ LINK_DIRECTORIES(
 )
 
 ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
-  SimpleTexturedOpenGL/include/boost_includes.h
   SimpleTexturedOpenGL/src/model_loading.cpp
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.cpp
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h

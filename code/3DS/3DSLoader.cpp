@@ -1078,7 +1078,7 @@ void Discreet3DSImporter::ParseMeshChunk()
         mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
         // Larger 3DS files could have multiple FACE chunks here
-        chunkSize = stream->GetRemainingSizeToLimit();
+        chunkSize = (int)stream->GetRemainingSizeToLimit();
         if ( chunkSize > (int) sizeof(Discreet3DS::Chunk ) )
             ParseFaceChunk();
         }

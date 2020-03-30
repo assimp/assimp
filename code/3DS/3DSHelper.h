@@ -464,7 +464,6 @@ struct Material {
         // empty
 
     }
-    //Material &operator=(const Material &other) = default;
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
     Material(Material &&other) AI_NO_EXCEPT :

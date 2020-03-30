@@ -322,7 +322,7 @@ struct Face : public FaceWithSmoothingGroup {
 };
 
 #ifdef _WIN32
-#    pragma warning(disable : 4315)
+#pragma warning(disable : 4315)
 #endif
 
 // ---------------------------------------------------------------------------
@@ -441,30 +441,53 @@ struct Material {
         // empty
     }
 
-    Material(const Material &other) = default;
-    Material &operator=(const Material &other) = default;
+    Material(const Material &other) :
+            mName(other.mName),
+            mDiffuse(other.mDiffuse),
+            mSpecularExponent(other.mSpecularExponent),
+            mShininessStrength(other.mShininessStrength),
+            mSpecular(other.mSpecular),
+            mAmbient(other.mAmbient),
+            mShading(other.mShading),
+            mTransparency(other.mTransparency),
+            sTexDiffuse(other.sTexDiffuse),
+            sTexOpacity(other.sTexOpacity),
+            sTexSpecular(other.sTexSpecular),
+            sTexReflective(other.sTexReflective),
+            sTexBump(other.sTexBump),
+            sTexEmissive(other.sTexEmissive),
+            sTexShininess(other.sTexShininess),
+            mBumpHeight(other.mBumpHeight),
+            mEmissive(other.mEmissive),
+            sTexAmbient(other.sTexAmbient),
+            mTwoSided(other.mTwoSided) {
+        // empty
+
+    }
+    //Material &operator=(const Material &other) = default;
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
-    Material(Material &&other) AI_NO_EXCEPT
-            : mName(std::move(other.mName)),
-              mDiffuse(std::move(other.mDiffuse)),
-              mSpecularExponent(std::move(other.mSpecularExponent)),
-              mShininessStrength(std::move(other.mShininessStrength)),
-              mSpecular(std::move(other.mSpecular)),
-              mAmbient(std::move(other.mAmbient)),
-              mShading(std::move(other.mShading)),
-              mTransparency(std::move(other.mTransparency)),
-              sTexDiffuse(std::move(other.sTexDiffuse)),
-              sTexOpacity(std::move(other.sTexOpacity)),
-              sTexSpecular(std::move(other.sTexSpecular)),
-              sTexReflective(std::move(other.sTexReflective)),
-              sTexBump(std::move(other.sTexBump)),
-              sTexEmissive(std::move(other.sTexEmissive)),
-              sTexShininess(std::move(other.sTexShininess)),
-              mBumpHeight(std::move(other.mBumpHeight)),
-              mEmissive(std::move(other.mEmissive)),
-              sTexAmbient(std::move(other.sTexAmbient)),
-              mTwoSided(std::move(other.mTwoSided)) {
+    Material(Material &&other) AI_NO_EXCEPT :
+            mName(std::move(other.mName)),
+            mDiffuse(std::move(other.mDiffuse)),
+            mSpecularExponent(std::move(other.mSpecularExponent)),
+            mShininessStrength(std::move(other.mShininessStrength)),
+            mSpecular(std::move(other.mSpecular)),
+            mAmbient(std::move(other.mAmbient)),
+            mShading(std::move(other.mShading)),
+            mTransparency(std::move(other.mTransparency)),
+            sTexDiffuse(std::move(other.sTexDiffuse)),
+            sTexOpacity(std::move(other.sTexOpacity)),
+            sTexSpecular(std::move(other.sTexSpecular)),
+            sTexReflective(std::move(other.sTexReflective)),
+            sTexBump(std::move(other.sTexBump)),
+            sTexEmissive(std::move(other.sTexEmissive)),
+            sTexShininess(std::move(other.sTexShininess)),
+            mBumpHeight(std::move(other.mBumpHeight)),
+            mEmissive(std::move(other.mEmissive)),
+            sTexAmbient(std::move(other.sTexAmbient)),
+            mTwoSided(std::move(other.mTwoSided)) {
+        // empty
     }
 
     Material &operator=(Material &&other) AI_NO_EXCEPT {

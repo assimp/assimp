@@ -48,17 +48,17 @@ using namespace Assimp;
 
 class utRAWImportExport : public AbstractImportExportBase {
 public:
-	virtual bool importerTest() {
-		Assimp::Importer importer;
+    virtual bool importerTest() {
+        Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/RAW/Wuson.raw", aiProcess_ValidateDataStructure);
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
-		return nullptr != scene;
+        return nullptr != scene;
 #else
-		return nullptr == scene;
+        return nullptr == scene;
 #endif
-	}
+    }
 };
 
 TEST_F(utRAWImportExport, importSimpleRAWTest) {
-	EXPECT_TRUE(importerTest());
+    EXPECT_TRUE(importerTest());
 }

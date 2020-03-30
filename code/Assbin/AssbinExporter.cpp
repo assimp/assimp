@@ -49,19 +49,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssbinFileWriter.h"
 
 #include <assimp/scene.h>
-#include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
+#include <assimp/IOSystem.hpp>
 
 namespace Assimp {
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* /*pProperties*/) {
+void ExportSceneAssbin(const char *pFile, IOSystem *pIOSystem, const aiScene *pScene, const ExportProperties * /*pProperties*/) {
     DumpSceneToAssbin(
-        pFile,
-        "\0", // no command(s).
-        pIOSystem,
-        pScene,
-        false, // shortened?
-        false); // compressed?
+            pFile,
+            "\0", // no command(s).
+            pIOSystem,
+            pScene,
+            false, // shortened?
+            false); // compressed?
 }
 } // end of namespace Assimp
 

@@ -26,11 +26,9 @@ jobs:
     - uses: actions/checkout@v1
     - name: configure
       run: |
-        set(ENV{CC} clang)
-        cmake CMakeLists.txt -DASSIMP_ASAN=ON
+        cmake CMakeLists.txt -DASSIMP_ASAN=ON -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang
     - name: build
       run: |
-        set(ENV{CC} clang)
         cmake --build .
     - name: test
       run: cd bin && ./unit

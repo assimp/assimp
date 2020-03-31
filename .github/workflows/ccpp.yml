@@ -18,7 +18,23 @@ jobs:
       run: cmake --build .
     - name: test
       run: cd bin && ./unit
-  
+      
+  Adress-Sanitizer:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: configure
+      run: |
+        set(ENV{CC} clang)
+        cmake CMakeLists.txt -DASSIMP_ASAN=ON
+    - name: build
+      run: |
+        set(ENV{CC} clang)
+        cmake --build .
+    - name: test
+      run: cd bin && ./unit
+
   mac:
     runs-on: macos-latest
     

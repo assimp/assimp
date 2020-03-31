@@ -217,7 +217,11 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
               const std::vector<BoneWeight>& vb = vertexBones[face.mIndices[b]];
               for( unsigned int c = 0; c < vb.size(); ++c)
               {
-                newBonesAtCurrentFace.insert(vb[c].first);
+                unsigned int boneIndex = vb[c].first;
+                if( !isBoneUsed[boneIndex] )
+                {
+                  newBonesAtCurrentFace.insert(boneIndex);
+                }   
               }
             }
 

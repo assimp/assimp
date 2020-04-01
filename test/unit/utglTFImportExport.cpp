@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,14 +38,14 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
-#include <assimp/scene.h>
 #include <assimp/commonMetaData.h>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -55,19 +53,19 @@ class utglTFImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utglTFImportExport, importglTFFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utglTFImportExport, importglTFFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
 TEST_F(utglTFImportExport, incorrect_vertex_arrays) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/IncorrectVertexArrays/Cube_v1.gltf",
-        aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/IncorrectVertexArrays/Cube_v1.gltf",
+            aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);

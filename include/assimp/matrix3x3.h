@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 template <typename T> class aiMatrix4x4t;
 template <typename T> class aiVector2t;
+template <typename T> class aiVector3t;
 
 // ---------------------------------------------------------------------------
 /** @brief Represents a row-major 3x3 matrix
@@ -93,10 +94,10 @@ public:
     const TReal* operator[] (unsigned int p_iIndex) const;
 
     // comparison operators
-    bool operator== (const aiMatrix4x4t<TReal>& m) const;
-    bool operator!= (const aiMatrix4x4t<TReal>& m) const;
+    bool operator== (const aiMatrix3x3t<TReal>& m) const;
+    bool operator!= (const aiMatrix3x3t<TReal>& m) const;
 
-    bool Equal(const aiMatrix4x4t<TReal>& m, TReal epsilon = 1e-6) const;
+    bool Equal(const aiMatrix3x3t<TReal>& m, TReal epsilon = 1e-6) const;
 
     template <typename TOther>
     operator aiMatrix3x3t<TOther> () const;
@@ -136,8 +137,7 @@ public:
      *  @param axis Axis to rotate around
      *  @param out To be filled
      */
-    static aiMatrix3x3t& Rotation( TReal a,
-        const aiVector3t<TReal>& axis, aiMatrix3x3t& out);
+    static aiMatrix3x3t& Rotation( TReal a, const aiVector3t<TReal>& axis, aiMatrix3x3t& out);
 
     // -------------------------------------------------------------------
     /** @brief Returns a translation matrix

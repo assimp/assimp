@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,10 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-
 using namespace Assimp;
-
-
 
 TEST(utMD5Importer, importEmpty) {
     Assimp::Importer importer;
@@ -58,20 +53,17 @@ TEST(utMD5Importer, importEmpty) {
     ASSERT_EQ(nullptr, scene);
 }
 
-
 TEST(utMD5Importer, importSimpleCube) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/SimpleCube.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 
-
 TEST(utMD5Importer, importBoarMan) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utMD5Importer, importBob) {
     Assimp::Importer importer;

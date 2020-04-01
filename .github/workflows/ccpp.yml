@@ -1,0 +1,46 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: configure
+      run: cmake CMakeLists.txt
+    - name: build
+      run: cmake --build .
+    - name: test
+      run: cd bin && ./unit
+  
+  mac:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: configure
+      run: cmake CMakeLists.txt
+    - name: build
+      run: cmake --build .
+    - name: test
+      run: cd bin && ./unit
+
+  windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: configure
+      run: cmake CMakeLists.txt
+    - name: build
+      run: cmake --build . --config Release
+    - name: test
+      run: | 
+        cd bin\Release
+        .\unit

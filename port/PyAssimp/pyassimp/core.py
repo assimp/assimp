@@ -138,7 +138,7 @@ def _init(self, target = None, parent = None):
             logger.debug(str(self) + ": Added array " + str(getattr(target, name)) +  " as self." + name.lower())
             continue
 
-        if m.startswith('m'):
+        if m.startswith('m') and len(m) > 1 and m[1].upper() == m[1]:
 
             if name == "parent":
                 setattr(target, name, parent)

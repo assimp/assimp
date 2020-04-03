@@ -245,7 +245,7 @@ void do_motion (void)
 	static int frames = 0;
 
 	int time = glutGet(GLUT_ELAPSED_TIME);
-	angle += (time-prev_time)*0.01;
+	angle += (time-prev_time)*0.01f;
 	prev_time = time;
 
 	frames += 1;

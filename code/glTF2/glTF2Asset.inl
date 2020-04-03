@@ -515,18 +515,23 @@ inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
 }
 
 inline void Buffer::Grow(size_t amount) {
-    if (amount <= 0) return;
+    if (amount <= 0) {
+        return;
+    }
+    
+    // Capacity is big enough
     if (capacity >= byteLength + amount) {
         byteLength += amount;
         return;
     }
 
-    // Shift operation is standard way to divide integer by 2, it doesn't cast it to float back and forth, also works for odd numbers,
-    // originally it would look like: static_cast<size_t>(capacity * 1.5f)
-    capacity = std::max(capacity + (capacity >> 1), byteLength + amount);
+    // Just allocate data which we need
+    capacity = byteLength + amount;
 
     uint8_t *b = new uint8_t[capacity];
-    if (mData) memcpy(b, mData.get(), byteLength);
+    if (nullptr != mData) {
+        memcpy(b, mData.get(), byteLength);
+    }
     mData.reset(b, std::default_delete<uint8_t[]>());
     byteLength += amount;
 }

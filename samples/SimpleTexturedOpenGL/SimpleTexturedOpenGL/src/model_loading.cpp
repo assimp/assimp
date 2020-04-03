@@ -18,8 +18,10 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#pragma warning(disable: 4100) // Disable warning 'unreferenced formal parameter'
 #define STB_IMAGE_IMPLEMENTATION
 #include "contrib/stb_image/stb_image.h"
+#pragma warning(default: 4100) // Enable warning 'unreferenced formal parameter'
 
 #include <fstream>
 

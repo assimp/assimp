@@ -37,7 +37,7 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device * dev, ID3D11DeviceContext * devc
 }
 
 void ModelLoader::Draw(ID3D11DeviceContext * devcon) {
-	for (int i = 0; i < meshes_.size(); ++i ) {
+	for (size_t i = 0; i < meshes_.size(); ++i ) {
 		meshes_[i].Draw(devcon);
 	}
 }
@@ -132,7 +132,7 @@ void ModelLoader::Close() {
 	for (auto& t : textures_loaded_)
 		t.Release();
 
-	for (int i = 0; i < meshes_.size(); i++) {
+	for (size_t i = 0; i < meshes_.size(); i++) {
 		meshes_[i].Close();
 	}
 }

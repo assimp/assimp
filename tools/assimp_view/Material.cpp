@@ -287,7 +287,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                             size_t iLen2 = iLen+1;
                             iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
                             memcpy(p_szString->data,szTempB,iLen2);
-                            p_szString->length = iLen;
+                            p_szString->length = static_cast<ai_uint32>(iLen);
                             return true;
                         }
                     }
@@ -301,7 +301,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                         size_t iLen2 = iLen+1;
                         iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
                         memcpy(p_szString->data,szTempB,iLen2);
-                        p_szString->length = iLen;
+                        p_szString->length = static_cast<ai_uint32>(iLen);
                         return true;
                     }
                 }
@@ -389,10 +389,10 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
                     if( !q ) q=strrchr( tmp2,'\\' );
                     if( q ){
                         strcpy( q+1,p+1 );
-                        if((pFile=fopen( tmp2,"r" ))){
+                        if((pFile=fopen( tmp2,"r" )) != nullptr){
                             fclose( pFile );
                             strcpy(p_szString->data,tmp2);
-                            p_szString->length = strlen(tmp2);
+                            p_szString->length = static_cast<ai_uint32>(strlen(tmp2));
                             return 1;
                         }
                     }
@@ -407,7 +407,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
         size_t iLen2 = iLen+1;
         iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
         memcpy(p_szString->data,szTemp,iLen2);
-        p_szString->length = iLen;
+        p_szString->length = static_cast<ai_uint32>(iLen);
 
     }
     return 1;
@@ -627,7 +627,7 @@ void CMaterialManager::HMtoNMIfNecessary(
     {
         union
         {
-            struct {unsigned char b,g,r,a;};
+            struct {unsigned char b,g,r,a;} _data;
             char _array[4];
         };
     };
@@ -646,7 +646,7 @@ void CMaterialManager::HMtoNMIfNecessary(
     {
         for (unsigned int x = 0; x <  sDesc.Width;++x)
         {
-            if (pcPointer->b != pcPointer->r || pcPointer->b != pcPointer->g)
+            if (pcPointer->_data.b != pcPointer->_data.r || pcPointer->_data.b != pcPointer->_data.g)
             {
                 bIsEqual = false;
                 break;
@@ -705,9 +705,9 @@ void CMaterialManager::HMtoNMIfNecessary(
                     aiColor3D clrColorLine;
                     for (unsigned int x = 0; x <  sDesc.Width;++x)
                     {
-                        clrColorLine.r += pcPointer->r;
-                        clrColorLine.g += pcPointer->g;
-                        clrColorLine.b += pcPointer->b;
+                        clrColorLine.r += pcPointer->_data.r;
+                        clrColorLine.g += pcPointer->_data.g;
+                        clrColorLine.b += pcPointer->_data.b;
                         pcPointer++;
                     }
                     clrColor.r += clrColorLine.r /= (float)sDesc.Width;
@@ -739,17 +739,17 @@ void CMaterialManager::HMtoNMIfNecessary(
     // need to convert it NOW
     if (bMustConvert)
     {
-        D3DSURFACE_DESC sDesc;
-        piTexture->GetLevelDesc(0, &sDesc);
+        D3DSURFACE_DESC sDesc2;
+        piTexture->GetLevelDesc(0, &sDesc2);
 
         IDirect3DTexture9* piTempTexture;
         if(FAILED(g_piDevice->CreateTexture(
-            sDesc.Width,
-            sDesc.Height,
+            sDesc2.Width,
+            sDesc2.Height,
             piTexture->GetLevelCount(),
-            sDesc.Usage,
-            sDesc.Format,
-            sDesc.Pool, &piTempTexture, NULL)))
+            sDesc2.Usage,
+            sDesc2.Format,
+            sDesc2.Pool, &piTempTexture, NULL)))
         {
             CLogDisplay::Instance().AddEntry(
                 "[ERROR] Unable to create normal map texture",

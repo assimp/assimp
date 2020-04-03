@@ -107,7 +107,7 @@ void MakeFileAssociations() {
         RegCreateKeyEx(HKEY_CURRENT_USER,buf,0,NULL,0,KEY_ALL_ACCESS, NULL, &hRegistry,NULL);
         RegSetValueEx(hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
         RegCloseKey(hRegistry);
-    } while ((sz = strtok(NULL,";")));
+    } while ((sz = strtok(NULL,";")) != nullptr);
 
     RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",0,NULL,0,KEY_ALL_ACCESS, NULL, &hRegistry,NULL);
     RegCloseKey(hRegistry);

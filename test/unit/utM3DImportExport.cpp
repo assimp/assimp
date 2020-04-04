@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AbstractImportExportBase.h"
-#include "SceneDiffer.h"
 #include "UnitTestPCH.h"
 
 #include <assimp/Importer.hpp>

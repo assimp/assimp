@@ -627,7 +627,7 @@ void CMaterialManager::HMtoNMIfNecessary(
     {
         union
         {
-            struct {unsigned char b,g,r,a;} _data;
+            struct {unsigned char b,g,r,a;} data;
             char _array[4];
         };
     };
@@ -646,7 +646,7 @@ void CMaterialManager::HMtoNMIfNecessary(
     {
         for (unsigned int x = 0; x <  sDesc.Width;++x)
         {
-            if (pcPointer->_data.b != pcPointer->_data.r || pcPointer->_data.b != pcPointer->_data.g)
+            if (pcPointer->data.b != pcPointer->data.r || pcPointer->data.b != pcPointer->data.g)
             {
                 bIsEqual = false;
                 break;
@@ -705,9 +705,9 @@ void CMaterialManager::HMtoNMIfNecessary(
                     aiColor3D clrColorLine;
                     for (unsigned int x = 0; x <  sDesc.Width;++x)
                     {
-                        clrColorLine.r += pcPointer->_data.r;
-                        clrColorLine.g += pcPointer->_data.g;
-                        clrColorLine.b += pcPointer->_data.b;
+                        clrColorLine.r += pcPointer->data.r;
+                        clrColorLine.g += pcPointer->data.g;
+                        clrColorLine.b += pcPointer->data.b;
                         pcPointer++;
                     }
                     clrColor.r += clrColorLine.r /= (float)sDesc.Width;

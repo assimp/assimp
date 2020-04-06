@@ -107,6 +107,7 @@ void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportPropert
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
 void ExportSceneM3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneM3DA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportScenePbrt(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::ExportProperties*);
 
 
@@ -185,6 +186,10 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
 	exporters.push_back(Exporter::ExportFormatEntry("3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0));
+#endif
+
+#ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
+	exporters.push_back(Exporter::ExportFormatEntry("pbrt", "Pbrt scene description file", "pbrt", &ExportScenePbrt, 0));
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER

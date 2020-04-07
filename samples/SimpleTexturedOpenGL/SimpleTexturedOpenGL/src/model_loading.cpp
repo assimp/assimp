@@ -183,7 +183,7 @@ void freeTextureIds()
 	}
 }
 
-int LoadGLTextures(const aiScene* scene)
+int LoadGLTextures(const aiScene* scene_)
 {
 	freeTextureIds();
 
@@ -201,7 +201,7 @@ int LoadGLTextures(const aiScene* scene)
 
 	//ilInit(); /* Initialization of DevIL */
 
-    if (scene->HasTextures()) return 1;
+    if (scene_->HasTextures()) return 1;
         //abortGLInit("Support for meshes with embedded textures is not implemented");
 
 	/* getTexture Filenames and Numb of Textures */
@@ -506,11 +506,11 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd, float 
 }
 
 
-void drawAiScene(const aiScene* scene)
+void drawAiScene(const aiScene* scene_)
 {
 	logInfo("drawing objects");
 
-	recursive_render(scene, scene->mRootNode, 0.5);
+	recursive_render(scene_, scene->mRootNode, 0.5);
 
 }
 
@@ -661,19 +661,20 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 
 	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requestes Size
 
-	if (!(hWnd=CreateWindowEx(	dwExStyle,						// Extended Style For The Window
-								TEXT("OpenGL"),						// Class Name
-								UTFConverter(title).c_wstr(),							// Window Title
-								WS_CLIPSIBLINGS |				// Required Window Style
-								WS_CLIPCHILDREN |				// Required Window Style
-								dwStyle,						// Selected WIndow Style
-								0, 0,							// Window Position
-								WindowRect.right-WindowRect.left, // Calc adjusted Window Width
-								WindowRect.bottom-WindowRect.top, // Calc adjustes Window Height
-								NULL,							// No Parent Window
-								NULL,							// No Menu
-								hInstance,						// Instance
-								NULL )))						// Don't pass anything To WM_CREATE
+	hWnd = CreateWindowEx(dwExStyle, // Extended Style For The Window
+            TEXT("OpenGL"), // Class Name
+            UTFConverter(title).c_wstr(), // Window Title
+            WS_CLIPSIBLINGS | // Required Window Style
+                    WS_CLIPCHILDREN | // Required Window Style
+                    dwStyle, // Selected WIndow Style
+            0, 0, // Window Position
+            WindowRect.right - WindowRect.left, // Calc adjusted Window Width
+            WindowRect.bottom - WindowRect.top, // Calc adjustes Window Height
+            NULL, // No Parent Window
+            NULL, // No Menu
+            hInstance, // Instance
+            NULL);
+	if (!hWnd)						// Don't pass anything To WM_CREATE
 	{
 		abortGLInit("Window Creation Error.");
 		return FALSE;
@@ -701,13 +702,15 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		0, 0, 0											// Layer Masks Ignored
 	};
 
-	if (!(hDC=GetDC(hWnd)))								// Did we get the Device Context?
+	hDC = GetDC(hWnd);
+	if (!hDC)								// Did we get the Device Context?
 	{
 		abortGLInit("Can't Create A GL Device Context.");
 		return FALSE;
 	}
 
-	if (!(PixelFormat=ChoosePixelFormat(hDC, &pfd)))	// Did We Find a matching pixel Format?
+	PixelFormat = ChoosePixelFormat(hDC, &pfd);
+    if (!PixelFormat) // Did We Find a matching pixel Format?
 	{
 		abortGLInit("Can't Find Suitable PixelFormat");
 		return FALSE;
@@ -719,7 +722,8 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		return FALSE;
 	}
 
-	if (!(hRC=wglCreateContext(hDC)))
+	hRC = wglCreateContext(hDC);
+	if (!hRC)
 	{
 		abortGLInit("Can't Create A GL Rendering Context.");
 		return FALSE;
@@ -757,7 +761,7 @@ void cleanup()
 		KillGLWindow();
 };
 
-LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
+LRESULT CALLBACK WndProc(HWND wnd,				// Handles for this Window
 						 UINT uMsg,				// Message for this Window
 						 WPARAM wParam,			// additional message Info
 						 LPARAM lParam)			// additional message Info
@@ -815,15 +819,15 @@ LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 	}
 
 	// Pass All unhandled Messaged To DefWindowProc
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+    return DefWindowProc(wnd, uMsg, wParam, lParam);
 }
 
-int WINAPI WinMain( HINSTANCE hInstance,         // The instance
-				   HINSTANCE hPrevInstance,      // Previous instance
-				   LPSTR lpCmdLine,              // Command Line Parameters
-				   int nShowCmd )                // Window Show State
+int WINAPI WinMain( HINSTANCE,          // The instance
+				   HINSTANCE,           // Previous instance
+				   LPSTR,               // Command Line Parameters
+				   int  )               // Window Show State
 {
-	MSG msg;
+    MSG msg = {};
 	BOOL done=FALSE;
 
 	createAILogger();
@@ -905,3 +909,4 @@ int WINAPI WinMain( HINSTANCE hInstance,         // The instance
 	cleanup();
 	return static_cast<int>(msg.wParam);
 }
+

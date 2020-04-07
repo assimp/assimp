@@ -505,7 +505,7 @@ int CreateAssetData()
         if (g_pcAsset->apcMeshes[i]->piOpacityTexture || 1.0f != g_pcAsset->apcMeshes[i]->fOpacity)
             dwUsage |= D3DUSAGE_DYNAMIC;
 
-        unsigned int nidx;
+        unsigned int nidx = 0;
         switch (mesh->mPrimitiveTypes) {
             case aiPrimitiveType_POINT:
                 nidx = 1;
@@ -639,7 +639,7 @@ int CreateAssetData()
                 ai_assert( weightsPerVertex[x].size() <= 4);
                 for( unsigned int a = 0; a < weightsPerVertex[x].size(); a++)
                 {
-                    boneIndices[a] = weightsPerVertex[x][a].mVertexId;
+                    boneIndices[a] = static_cast<unsigned char>(weightsPerVertex[x][a].mVertexId);
                     boneWeights[a] = (unsigned char) (weightsPerVertex[x][a].mWeight * 255.0f);
                 }
 
@@ -802,10 +802,10 @@ int ShutdownD3D(void)
 
 template<class TComPtr>
 inline 
-void SafeRelease(TComPtr *ptr) {
-    if (nullptr != g_piPassThroughEffect) {
-        g_piPassThroughEffect->Release();
-        g_piPassThroughEffect = nullptr;
+void SafeRelease(TComPtr *&ptr) {
+    if (nullptr != ptr) {
+        ptr->Release();
+        ptr = nullptr;
     }
 }
 

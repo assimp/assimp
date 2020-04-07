@@ -275,7 +275,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
     IDirect3DTexture9* piTexture = NULL;
     aiString szString;
     strcpy(szString.data,szPath);
-    szString.length = strlen(szPath);
+    szString.length = static_cast<ai_uint32>(strlen(szPath));
     CMaterialManager::Instance().LoadTexture(&piTexture,&szString);
 
     if (!piTexture) {
@@ -388,8 +388,8 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
     {
         if ('*' == *szPath->data)
         {
-            int iIndex = atoi(szPath->data+1);
-            ai_snprintf(chTempEmb,256,"Embedded #%i",iIndex);
+            int iIndex2 = atoi(szPath->data+1);
+            ai_snprintf(chTempEmb,256,"Embedded #%i",iIndex2);
             sz = chTempEmb;
         }
         else
@@ -1308,7 +1308,7 @@ int CALLBACK TreeViewCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
     return 0;
 }
 //-------------------------------------------------------------------------------
-int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
+int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM /*lParam*/)
 {
     char szFileName[MAX_PATH];
     DWORD dwTemp = MAX_PATH;
@@ -1795,11 +1795,11 @@ int CDisplay::RenderFullScene()
         g_piDevice->SetVertexDeclaration( gDefaultVertexDecl);
         // this is very similar to the code in SetupMaterial()
         ID3DXEffect* piEnd = g_piNormalsEffect;
-        aiMatrix4x4 pcProj = m * mViewProjection;
+        aiMatrix4x4 pcProj2 = m * mViewProjection;
 
         D3DXVECTOR4 vVector(1.f,0.f,0.f,1.f);
         piEnd->SetVector("OUTPUT_COLOR",&vVector);
-        piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX*)&pcProj);
+        piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX*)&pcProj2);
 
         UINT dwPasses = 0;
         piEnd->Begin(&dwPasses,0);

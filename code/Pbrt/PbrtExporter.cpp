@@ -100,7 +100,7 @@ PbrtExporter::PbrtExporter (
 {
     std::unique_ptr<IOStream> outfile;
 
-    // open the indicated file for writing
+    // Open the indicated file for writing
     outfile.reset(mIOSystem->Open(mPath,"wt"));
     if (!outfile) {
         throw DeadlyExportError(
@@ -108,10 +108,21 @@ PbrtExporter::PbrtExporter (
         );
     }
 
-    outfile->Write("Writing to pbrt file\n", 21 , 1);
-    outfile->Write(mPath.c_str(), mPath.size() , 1);
-    outfile->Write("\n", 1, 1);
-    outfile->Write(mFile.c_str(), mFile.size() , 1);
+    // Write Header
+    WriteHeader();
+
+    // Write metadata to file
+    WriteMetaData();
+
+    // Write preamble
+    WritePreamble();
+
+    // Write World Description
+    WriteWorldDefinition();
+
+    // Write out to file
+    outfile->Write(mOutput.str().c_str(), 
+            mOutput.str().length(), 1);
     
     // explicitly release file pointer,
     // so we don't have to rely on class destruction.
@@ -121,6 +132,76 @@ PbrtExporter::PbrtExporter (
 // Destructor
 PbrtExporter::~PbrtExporter() {
     // Empty
+}
+
+void PbrtExporter::WriteHeader() {
+
+}
+
+void PbrtExporter::WriteMetaData() {
+    mOutput << "# Writing out scene metadata:" << std::endl;
+    aiMetadata* pMetaData = mScene->mMetaData;
+    for (int i = 0; i < pMetaData->mNumProperties; i++) {
+        mOutput << "# - ";
+        mOutput << pMetaData->mKeys[i].C_Str() << " :";
+        switch(pMetaData->mValues[i].mType) {
+            case AI_BOOL : {
+                mOutput << " ";
+                if (*static_cast<bool*>(pMetaData->mValues[i].mData))
+                    mOutput << "TRUE" << std::endl;
+                else
+                    mOutput << "FALSE" << std::endl;
+                break;
+            }
+            case AI_INT32 : {
+                mOutput << " " <<
+                    *static_cast<int32_t*>(pMetaData->mValues[i].mData) <<
+                    std::endl;
+                break;
+            }    
+            case AI_UINT64 :
+                mOutput << " " <<
+                    *static_cast<uint64_t*>(pMetaData->mValues[i].mData) <<
+                    std::endl;
+                break;
+            case AI_FLOAT :
+                mOutput << " " <<
+                    *static_cast<float*>(pMetaData->mValues[i].mData) <<
+                    std::endl;
+                break;
+            case AI_DOUBLE :
+                mOutput << " " <<
+                    *static_cast<double*>(pMetaData->mValues[i].mData) <<
+                    std::endl;
+                break;
+            case AI_AISTRING : {
+                aiString* value = 
+                    static_cast<aiString*>(pMetaData->mValues[i].mData); 
+                std::string svalue = value->C_Str();
+                std::size_t found = svalue.find_first_of("\n");
+                mOutput << std::endl;
+                while (found != std::string::npos) {
+                    mOutput << "#     " << svalue.substr(0, found) << std::endl;
+                    svalue = svalue.substr(found + 1);
+                    found = svalue.find_first_of("\n");
+                }
+                mOutput << "#     " << svalue << std::endl;
+                break;
+            }
+            case AI_AIVECTOR3D :
+                
+                break;
+        }
+        mOutput << std::endl;
+    }
+}
+
+void PbrtExporter::WritePreamble() {
+
+}
+
+void PbrtExporter::WriteWorldDefinition() {
+
 }
 
 #endif // ASSIMP_BUILD_NO_PBRT_EXPORTER

@@ -83,7 +83,8 @@ public:
     virtual ~PbrtExporter();
 
 private:
-    const aiScene* mScene; // the scene to export
+    // the scene to export
+    const aiScene* mScene;
     
     /// Stringstream to write all output into
     std::stringstream mOutput;
@@ -96,6 +97,19 @@ private:
 
     /// Name of the file (without extension) where the scene will be exported
     const std::string mFile;
+
+private:
+    // Writing the comment header
+    void WriteHeader();
+
+    // Writing the metadata into a comment
+    void WriteMetaData();
+
+    // Writing the pbrt file preamble
+    void WritePreamble();
+
+    // Writing the pbrt world defintion
+    void WriteWorldDefinition();
 };
 
 } // namespace Assimp

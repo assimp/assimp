@@ -101,7 +101,7 @@ void CBackgroundPainter::SetColor (D3DCOLOR p_clrNew)
     if (pcTexture)
     {
         pcTexture->Release();
-        pcTexture = NULL;
+        pcTexture = nullptr;
     }
 }
 //-------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ void CBackgroundPainter::SetCubeMapBG (const char* p_szPath)
     if (pcTexture)
     {
         pcTexture->Release();
-        pcTexture = NULL;
+        pcTexture = nullptr;
         if(TEXTURE_CUBE ==eMode)bHad = true;
     }
 
@@ -199,7 +199,7 @@ void CBackgroundPainter::SetTextureBG (const char* p_szPath)
     if (pcTexture)
     {
         pcTexture->Release();
-        pcTexture = NULL;
+        pcTexture = nullptr;
     }
 
     eMode = TEXTURE_2D;
@@ -223,12 +223,12 @@ void CBackgroundPainter::OnPreRender()
         // the color buffer )
         if (g_sOptions.eDrawMode == RenderOptions::WIREFRAME)
         {
-            g_piDevice->Clear(0,NULL,D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET,
+            g_piDevice->Clear(0,nullptr,D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET,
                 D3DCOLOR_ARGB(0xff,100,100,100),1.0f,0);
         }
         else
         {
-            g_piDevice->Clear(0,NULL,D3DCLEAR_ZBUFFER,0,1.0f,0);
+            g_piDevice->Clear(0,nullptr,D3DCLEAR_ZBUFFER,0,1.0f,0);
         }
 
         if (TEXTURE_2D == eMode)
@@ -293,7 +293,7 @@ void CBackgroundPainter::OnPreRender()
         return;
     }
     // clear both the render target and the z-buffer
-    g_piDevice->Clear(0,NULL,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
+    g_piDevice->Clear(0,nullptr,D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
         clrColor,1.0f,0);
 }
 //-------------------------------------------------------------------------------
@@ -342,12 +342,12 @@ void CBackgroundPainter::ReleaseNativeResource()
     if ( piSkyBoxEffect)
     {
         piSkyBoxEffect->Release();
-        piSkyBoxEffect = NULL;
+        piSkyBoxEffect = nullptr;
     }
     if (pcTexture)
     {
         pcTexture->Release();
-        pcTexture = NULL;
+        pcTexture = nullptr;
     }
 }
 //-------------------------------------------------------------------------------
@@ -377,8 +377,8 @@ void CBackgroundPainter::RecreateNativeResource()
             D3DX_DEFAULT,
             D3DX_DEFAULT,
             0,
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             (IDirect3DCubeTexture9**)&pcTexture)))
         {
             const char* szEnd = strrchr(szPath.c_str(),'\\');
@@ -411,8 +411,8 @@ void CBackgroundPainter::RecreateNativeResource()
             D3DX_DEFAULT,
             D3DX_DEFAULT,
             0,
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             (IDirect3DTexture9**)&pcTexture)))
         {
             const char* szEnd = strrchr(szPath.c_str(),'\\');
@@ -433,15 +433,15 @@ void CBackgroundPainter::RecreateNativeResource()
     }
     if (!piSkyBoxEffect)
     {
-        ID3DXBuffer* piBuffer = NULL;
+        ID3DXBuffer* piBuffer = nullptr;
         if(FAILED( D3DXCreateEffect(
             g_piDevice,
             g_szSkyboxShader.c_str(),
             (UINT)g_szSkyboxShader.length(),
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             AI_SHADER_COMPILE_FLAGS,
-            NULL,
+            nullptr,
             &piSkyBoxEffect,&piBuffer)))
         {
             // failed to compile the shader

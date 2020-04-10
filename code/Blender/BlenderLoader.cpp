@@ -206,7 +206,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
         inflateInit2(&zstream, 16+MAX_WBITS);
 
         zstream.next_in   = reinterpret_cast<Bytef*>( reader->GetPtr() );
-        zstream.avail_in  = reader->GetRemainingSize();
+        zstream.avail_in  = (uInt) reader->GetRemainingSize();
 
         size_t total = 0l;
 

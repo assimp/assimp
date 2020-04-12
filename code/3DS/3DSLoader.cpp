@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -71,7 +69,6 @@ static const aiImporterDesc desc = {
     0,
 	"3ds prj"
 };
-
 
 // ------------------------------------------------------------------------------------------------
 // Begins a new parsing block
@@ -141,15 +138,13 @@ bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandle
 
 // ------------------------------------------------------------------------------------------------
 // Loader registry entry
-const aiImporterDesc* Discreet3DSImporter::GetInfo () const
-{
+const aiImporterDesc* Discreet3DSImporter::GetInfo () const {
     return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
-void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/)
-{
+void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/) {
     // nothing to be done for the moment
 }
 
@@ -200,7 +195,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
         ComputeNormalsWithSmoothingsGroups<D3DS::Face>(mesh);
     }
 
-    // Replace all occurences of the default material with a
+    // Replace all occurrences of the default material with a
     // valid material. Generate it if no material containing
     // DEFAULT in its name has been found in the file
     ReplaceDefaultMaterial();
@@ -227,8 +222,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 
 // ------------------------------------------------------------------------------------------------
 // Applies a master-scaling factor to the imported scene
-void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene)
-{
+void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene) {
     // There are some 3DS files with a zero scaling factor
     if (!mMasterScale)mMasterScale = 1.0f;
     else mMasterScale = 1.0f / mMasterScale;
@@ -1084,7 +1078,7 @@ void Discreet3DSImporter::ParseMeshChunk()
         mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
         // Larger 3DS files could have multiple FACE chunks here
-        chunkSize = stream->GetRemainingSizeToLimit();
+        chunkSize = (int)stream->GetRemainingSizeToLimit();
         if ( chunkSize > (int) sizeof(Discreet3DS::Chunk ) )
             ParseFaceChunk();
         }

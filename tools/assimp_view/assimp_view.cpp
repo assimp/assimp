@@ -61,17 +61,17 @@ extern std::string g_szDefaultShader;
 extern std::string g_szPassThroughShader;
 
 //-------------------------------------------------------------------------------
-HINSTANCE g_hInstance				= NULL;
-HWND g_hDlg							= NULL;
-IDirect3D9* g_piD3D					= NULL;
-IDirect3DDevice9* g_piDevice		= NULL;
-IDirect3DVertexDeclaration9* gDefaultVertexDecl = NULL;
+HINSTANCE g_hInstance				= nullptr;
+HWND g_hDlg							= nullptr;
+IDirect3D9* g_piD3D					= nullptr;
+IDirect3DDevice9* g_piDevice		= nullptr;
+IDirect3DVertexDeclaration9* gDefaultVertexDecl = nullptr;
 double g_fFPS						= 0.0f;
 char g_szFileName[MAX_PATH];
-ID3DXEffect* g_piDefaultEffect		= NULL;
-ID3DXEffect* g_piNormalsEffect		= NULL;
-ID3DXEffect* g_piPassThroughEffect	= NULL;
-ID3DXEffect* g_piPatternEffect		= NULL;
+ID3DXEffect* g_piDefaultEffect		= nullptr;
+ID3DXEffect* g_piNormalsEffect		= nullptr;
+ID3DXEffect* g_piPassThroughEffect	= nullptr;
+ID3DXEffect* g_piPatternEffect		= nullptr;
 bool g_bMousePressed				= false;
 bool g_bMousePressedR				= false;
 bool g_bMousePressedM				= false;
@@ -79,10 +79,10 @@ bool g_bMousePressedBoth			= false;
 float g_fElpasedTime				= 0.0f;
 D3DCAPS9 g_sCaps;
 bool g_bLoadingFinished				= false;
-HANDLE g_hThreadHandle				= NULL;
+HANDLE g_hThreadHandle				= nullptr;
 float g_fWheelPos					= -10.0f;
 bool g_bLoadingCanceled				= false;
-IDirect3DTexture9* g_pcTexture		= NULL;
+IDirect3DTexture9* g_pcTexture		= nullptr;
 bool g_bPlay						= false;
 double g_dCurrent = 0.;
 
@@ -135,13 +135,13 @@ float g_fLightColor					= 1.0f;
 
 RenderOptions g_sOptions;
 Camera g_sCamera;
-AssetHelper *g_pcAsset				= NULL;
+AssetHelper *g_pcAsset				= nullptr;
 
 //
 // Contains the mask image for the HUD 
 // (used to determine the position of a click)
 //
-unsigned char* g_szImageMask		= NULL;
+unsigned char* g_szImageMask		= nullptr;
 
 float g_fLoadTime = 0.0f;
 
@@ -175,7 +175,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
         aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
         aiProcess_SortByPType              | // make 'clean' meshes which consist of a single typ of primitives
         0,
-        NULL,
+        nullptr,
         props);
 
     aiReleasePropertyStore(props);
@@ -186,7 +186,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     g_bLoadingFinished = true;
 
     // check whether the loading process has failed ...
-    if (NULL == g_pcAsset->pcScene)
+    if (nullptr == g_pcAsset->pcScene)
     {
         CLogDisplay::Instance().AddEntry("[ERROR] Unable to load this asset:",
             D3DCOLOR_ARGB(0xFF,0xFF,0,0));
@@ -223,7 +223,7 @@ int LoadAsset()
     DWORD dwID;
     g_bLoadingCanceled = false;
     g_pcAsset = new AssetHelper();
-    g_hThreadHandle = CreateThread(NULL,0,&LoadThreadProc,NULL,0,&dwID);
+    g_hThreadHandle = CreateThread(nullptr,0,&LoadThreadProc,nullptr,0,&dwID);
 
     if (!g_hThreadHandle)
     {
@@ -248,7 +248,7 @@ int LoadAsset()
         if (g_pcAsset)
         {
             delete g_pcAsset;
-            g_pcAsset = NULL;
+            g_pcAsset = nullptr;
         }
         return 0;
     }
@@ -328,7 +328,7 @@ int DeleteAsset(void) {
     delete[] g_pcAsset->apcMeshes;
     delete g_pcAsset->mAnimator;
     delete g_pcAsset;
-    g_pcAsset = NULL;
+    g_pcAsset = nullptr;
 
     // reset the caption of the viewer window
     SetWindowText(g_hDlg,AI_VIEW_CAPTION_BASE);
@@ -351,8 +351,8 @@ int DeleteAsset(void) {
 // piMatrix Transformation matrix of the graph at this position
 //-------------------------------------------------------------------------------
 int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut, const aiMatrix4x4& piMatrix) {
-    ai_assert(NULL != piNode);
-    ai_assert(NULL != p_avOut);
+    ai_assert(nullptr != piNode);
+    ai_assert(nullptr != p_avOut);
 
     aiMatrix4x4 mTemp = piNode->mTransformation;
     mTemp.Transpose();
@@ -424,8 +424,8 @@ int ScaleAsset(void)
 //-------------------------------------------------------------------------------
 int GenerateNormalsAsLineList(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource)
 {
-    ai_assert(NULL != pcMesh);
-    ai_assert(NULL != pcSource);
+    ai_assert(nullptr != pcMesh);
+    ai_assert(nullptr != pcSource);
 
     if (!pcSource->mNormals)return 0;
 
@@ -434,7 +434,7 @@ int GenerateNormalsAsLineList(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSo
         pcSource->mNumVertices * 2,
         D3DUSAGE_WRITEONLY,
         AssetHelper::LineVertex::GetFVF(),
-        D3DPOOL_DEFAULT, &pcMesh->piVBNormals,NULL)))
+        D3DPOOL_DEFAULT, &pcMesh->piVBNormals,nullptr)))
     {
         CLogDisplay::Instance().AddEntry("Failed to create vertex buffer for the normal list",
             D3DCOLOR_ARGB(0xFF,0xFF,0,0));
@@ -495,7 +495,7 @@ int CreateAssetData()
             mesh->mNumVertices,
             D3DUSAGE_WRITEONLY,
             0,
-            D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,NULL)))	{
+            D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,nullptr)))	{
             MessageBox(g_hDlg,"Failed to create vertex buffer",
                 "ASSIMP Viewer Utility",MB_OK);
             return 2;
@@ -534,7 +534,7 @@ int CreateAssetData()
                 D3DFMT_INDEX32,
                 D3DPOOL_DEFAULT, 
                 &g_pcAsset->apcMeshes[i]->piIB,
-                NULL)))
+                nullptr)))
             {
                 MessageBox(g_hDlg,"Failed to create 32 Bit index buffer",
                     "ASSIMP Viewer Utility",MB_OK);
@@ -560,7 +560,7 @@ int CreateAssetData()
                 D3DFMT_INDEX16,
                 D3DPOOL_DEFAULT,
                 &g_pcAsset->apcMeshes[i]->piIB,
-                NULL)))
+                nullptr)))
             {
                 MessageBox(g_hDlg,"Failed to create 16 Bit index buffer",
                     "ASSIMP Viewer Utility",MB_OK);
@@ -595,11 +595,11 @@ int CreateAssetData()
         {
             pbData2->vPosition = mesh->mVertices[x];
 
-            if (NULL == mesh->mNormals)
+            if (nullptr == mesh->mNormals)
                 pbData2->vNormal = aiVector3D(0.0f,0.0f,0.0f);
             else pbData2->vNormal = mesh->mNormals[x];
 
-            if (NULL == mesh->mTangents)	{
+            if (nullptr == mesh->mTangents)	{
                 pbData2->vTangent = aiVector3D(0.0f,0.0f,0.0f);
                 pbData2->vBitangent = aiVector3D(0.0f,0.0f,0.0f);
             }
@@ -677,17 +677,17 @@ int DeleteAssetData(bool bNoMaterials)
         if(g_pcAsset->apcMeshes[i]->piVB)
         {
             g_pcAsset->apcMeshes[i]->piVB->Release();
-            g_pcAsset->apcMeshes[i]->piVB = NULL;
+            g_pcAsset->apcMeshes[i]->piVB = nullptr;
         }
         if(g_pcAsset->apcMeshes[i]->piVBNormals)
         {
             g_pcAsset->apcMeshes[i]->piVBNormals->Release();
-            g_pcAsset->apcMeshes[i]->piVBNormals = NULL;
+            g_pcAsset->apcMeshes[i]->piVBNormals = nullptr;
         }
         if(g_pcAsset->apcMeshes[i]->piIB)
         {
             g_pcAsset->apcMeshes[i]->piIB->Release();
-            g_pcAsset->apcMeshes[i]->piIB = NULL;
+            g_pcAsset->apcMeshes[i]->piIB = nullptr;
         }
 
         // TODO ... unfixed memory leak
@@ -703,42 +703,42 @@ int DeleteAssetData(bool bNoMaterials)
             if(g_pcAsset->apcMeshes[i]->piEffect)
             {
                 g_pcAsset->apcMeshes[i]->piEffect->Release();
-                g_pcAsset->apcMeshes[i]->piEffect = NULL;
+                g_pcAsset->apcMeshes[i]->piEffect = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piDiffuseTexture)
             {
                 g_pcAsset->apcMeshes[i]->piDiffuseTexture->Release();
-                g_pcAsset->apcMeshes[i]->piDiffuseTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piDiffuseTexture = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piNormalTexture)
             {
                 g_pcAsset->apcMeshes[i]->piNormalTexture->Release();
-                g_pcAsset->apcMeshes[i]->piNormalTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piNormalTexture = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piSpecularTexture)
             {
                 g_pcAsset->apcMeshes[i]->piSpecularTexture->Release();
-                g_pcAsset->apcMeshes[i]->piSpecularTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piSpecularTexture = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piAmbientTexture)
             {
                 g_pcAsset->apcMeshes[i]->piAmbientTexture->Release();
-                g_pcAsset->apcMeshes[i]->piAmbientTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piAmbientTexture = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piEmissiveTexture)
             {
                 g_pcAsset->apcMeshes[i]->piEmissiveTexture->Release();
-                g_pcAsset->apcMeshes[i]->piEmissiveTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piEmissiveTexture = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piOpacityTexture)
             {
                 g_pcAsset->apcMeshes[i]->piOpacityTexture->Release();
-                g_pcAsset->apcMeshes[i]->piOpacityTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piOpacityTexture = nullptr;
             }
             if(g_pcAsset->apcMeshes[i]->piShininessTexture)
             {
                 g_pcAsset->apcMeshes[i]->piShininessTexture->Release();
-                g_pcAsset->apcMeshes[i]->piShininessTexture = NULL;
+                g_pcAsset->apcMeshes[i]->piShininessTexture = nullptr;
             }
         }
     }
@@ -776,10 +776,10 @@ int SetupFPSView()
 //-------------------------------------------------------------------------------
 int InitD3D(void)
 {
-    if (NULL == g_piD3D)
+    if (nullptr == g_piD3D)
     {
         g_piD3D = Direct3DCreate9(D3D_SDK_VERSION);
-        if (NULL == g_piD3D)return 0;
+        if (nullptr == g_piD3D)return 0;
     }
     return 1;
 }
@@ -792,10 +792,10 @@ int InitD3D(void)
 int ShutdownD3D(void)
 {
     ShutdownDevice();
-    if (NULL != g_piD3D)
+    if (nullptr != g_piD3D)
     {
         g_piD3D->Release();
-        g_piD3D = NULL;
+        g_piD3D = nullptr;
     }
     return 1;
 }
@@ -843,12 +843,12 @@ int ShutdownDevice(void)
 int CreateHUDTexture()
 {
     // lock the memory resource ourselves
-    HRSRC res = FindResource(NULL,MAKEINTRESOURCE(IDR_HUD),RT_RCDATA);
-    HGLOBAL hg = LoadResource(NULL,res);
+    HRSRC res = FindResource(nullptr,MAKEINTRESOURCE(IDR_HUD),RT_RCDATA);
+    HGLOBAL hg = LoadResource(nullptr,res);
     void* pData = LockResource(hg);
 
     if(FAILED(D3DXCreateTextureFromFileInMemoryEx(g_piDevice,
-        pData,SizeofResource(NULL,res),
+        pData,SizeofResource(nullptr,res),
         D3DX_DEFAULT_NONPOW2,
         D3DX_DEFAULT_NONPOW2,
         1,
@@ -858,15 +858,15 @@ int CreateHUDTexture()
         D3DX_DEFAULT,
         D3DX_DEFAULT,
         0,
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         &g_pcTexture)))
     {
         CLogDisplay::Instance().AddEntry("[ERROR] Unable to load HUD texture",
             D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 
-        g_pcTexture  = NULL;
-        g_szImageMask = NULL;
+        g_pcTexture  = nullptr;
+        g_szImageMask = nullptr;
 
         FreeResource(hg);
         return 0;
@@ -879,13 +879,13 @@ int CreateHUDTexture()
 
 
     // lock the memory resource ourselves
-    res = FindResource(NULL,MAKEINTRESOURCE(IDR_HUDMASK),RT_RCDATA);
-    hg = LoadResource(NULL,res);
+    res = FindResource(nullptr,MAKEINTRESOURCE(IDR_HUDMASK),RT_RCDATA);
+    hg = LoadResource(nullptr,res);
     pData = LockResource(hg);
 
     IDirect3DTexture9* pcTex;
     if(FAILED(D3DXCreateTextureFromFileInMemoryEx(g_piDevice,
-        pData,SizeofResource(NULL,res),
+        pData,SizeofResource(nullptr,res),
         sDesc.Width,
         sDesc.Height,
         1,
@@ -895,13 +895,13 @@ int CreateHUDTexture()
         D3DX_DEFAULT,
         D3DX_DEFAULT,
         0,
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         &pcTex)))
     {
         CLogDisplay::Instance().AddEntry("[ERROR] Unable to load HUD mask texture",
             D3DCOLOR_ARGB(0xFF,0xFF,0,0));
-        g_szImageMask = NULL;
+        g_szImageMask = nullptr;
 
         FreeResource(hg);
         return 0;
@@ -911,7 +911,7 @@ int CreateHUDTexture()
 
     // lock the texture and copy it to get a pointer
     D3DLOCKED_RECT sRect;
-    pcTex->LockRect(0,&sRect,NULL,D3DLOCK_READONLY);
+    pcTex->LockRect(0,&sRect,nullptr,D3DLOCK_READONLY);
 
     unsigned char* szOut = new unsigned char[sDesc.Width * sDesc.Height];
     unsigned char* _szOut = szOut;
@@ -1023,14 +1023,14 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     }
 
     // compile the default material shader (gray gouraud/phong)
-    ID3DXBuffer* piBuffer = NULL;
+    ID3DXBuffer* piBuffer = nullptr;
     if(FAILED( D3DXCreateEffect(g_piDevice,
         g_szDefaultShader.c_str(),
         (UINT)g_szDefaultShader.length(),
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         AI_SHADER_COMPILE_FLAGS,
-        NULL,
+        nullptr,
         &g_piDefaultEffect,&piBuffer)))
     {
         if( piBuffer) 
@@ -1043,7 +1043,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     if( piBuffer) 
     {
         piBuffer->Release();
-        piBuffer = NULL;
+        piBuffer = nullptr;
     }
 
     // use Fixed Function effect when working with shaderless cards
@@ -1053,7 +1053,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     // create the shader used to draw the HUD
     if(FAILED( D3DXCreateEffect(g_piDevice,
         g_szPassThroughShader.c_str(),(UINT)g_szPassThroughShader.length(),
-        NULL,NULL,AI_SHADER_COMPILE_FLAGS,NULL,&g_piPassThroughEffect,&piBuffer)))
+        nullptr,nullptr,AI_SHADER_COMPILE_FLAGS,nullptr,&g_piPassThroughEffect,&piBuffer)))
     {
         if( piBuffer) 
         {
@@ -1065,7 +1065,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     if( piBuffer) 
     {
         piBuffer->Release();
-        piBuffer = NULL;
+        piBuffer = nullptr;
     }
 
     // use Fixed Function effect when working with shaderless cards
@@ -1075,7 +1075,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     // create the shader used to visualize normal vectors
     if(FAILED( D3DXCreateEffect(g_piDevice,
         g_szNormalsShader.c_str(),(UINT)g_szNormalsShader.length(),
-        NULL,NULL,AI_SHADER_COMPILE_FLAGS,NULL,&g_piNormalsEffect, &piBuffer)))
+        nullptr,nullptr,AI_SHADER_COMPILE_FLAGS,nullptr,&g_piNormalsEffect, &piBuffer)))
     {
         if( piBuffer) 
         {
@@ -1087,7 +1087,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     if( piBuffer) 
     {
         piBuffer->Release();
-        piBuffer = NULL;
+        piBuffer = nullptr;
     }
 
     //MessageBox( g_hDlg, "Failed to create vertex declaration", "Init", MB_OK);

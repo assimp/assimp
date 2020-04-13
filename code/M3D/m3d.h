@@ -5440,13 +5440,13 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out += 2;
                         break;
                     case 4:
-                        *((float *)out) = vrtx[i].data.x;
+                        memcpy(out, &vrtx[i].data.x, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.y;
+                        memcpy(out, &vrtx[i].data.y, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.z;
+                        memcpy(out, &vrtx[i].data.z, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.w;
+                        memcpy(out, &vrtx[i].data.w, sizeof(float));
                         out += 4;
                         break;
                     case 8:
@@ -5474,9 +5474,11 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 out = _m3d_addidx(out, sk_s, vrtx[i].data.skinid);
             }
-            *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            memcpy(length, &v, sizeof(uint32_t));
+            //*length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
             out = NULL;
-            len += *length;
+            len += v;
         }
         /* bones chunk */
         if (model->numbone && model->bone && !(flags & M3D_EXP_NOBONE)) {
@@ -5660,8 +5662,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out = _m3d_addidx(out, vi_s, vrtxidx[face[i].data.normal[j]]);
                 }
             }
-            *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-            len += *length;
+            uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            memcpy(length, &v, sizeof(uint32_t));
+            len += v;
             out = NULL;
         }
         /* mathematical shapes face */
@@ -5721,8 +5724,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         }
                     }
                 }
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));
+                len += v;
                 out = NULL;
             }
         }
@@ -5765,8 +5769,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->label[l].text));
             }
             if (length) {
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));                
+                len += v;
             }
             out = NULL;
             sn = sl = NULL;
@@ -5796,8 +5801,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out = _m3d_addidx(out, vi_s, vrtxidx[a->frame[i].transform[k].ori]);
                     }
                 }
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));                
+                len += v;
                 out = NULL;
             }
         }

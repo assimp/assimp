@@ -38,24 +38,29 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
-
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
-class utOgreImportExport : public AbstractImportExportBase {
+class utIrrImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Ogre/TheThing/Mesh.mesh.xml", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
-    }
+	virtual bool importerTest() {
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/box.irr", aiProcess_ValidateDataStructure);
+		return nullptr != scene;
+	}
 };
 
-TEST_F(utOgreImportExport, importerTest) {
-    EXPECT_TRUE(importerTest());
+TEST_F(utIrrImportExport, importSimpleIrrTest) {
+	EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utIrrImportExport, importSGIrrTest) {
+	Assimp::Importer importer;
+	const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_SameHierarchy.irr", aiProcess_ValidateDataStructure);
+	EXPECT_NE( nullptr,scene);
 }

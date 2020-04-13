@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 All rights reserved.
 
@@ -40,22 +40,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AbstractImportExportBase.h"
+#include "SceneDiffer.h"
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 
 using namespace Assimp;
 
-class utOgreImportExport : public AbstractImportExportBase {
+class utAssxmlImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Ogre/TheThing/Mesh.mesh.xml", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+	bool importerTest() override {
+		return true;
     }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+	bool exporterTest() override {
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
+		EXPECT_NE(scene, nullptr );
+
+        ::Assimp::Exporter exporter;
+		return AI_SUCCESS == exporter.Export(scene, "assxml", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.assxml");
+    }
+#endif
 };
 
-TEST_F(utOgreImportExport, importerTest) {
-    EXPECT_TRUE(importerTest());
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utAssxmlImportExport, exportAssxmlTest) {
+	EXPECT_TRUE(exporterTest());
 }
+
+#endif

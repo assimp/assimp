@@ -84,10 +84,12 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
 )
 
 SET( IMPORTERS
+  unit/ImportExport/Assxml/utAssxmlImportExport.cpp
   unit/utLWSImportExport.cpp
   unit/utLWOImportExport.cpp
   unit/utSMDImportExport.cpp
@@ -144,6 +146,9 @@ SET( IMPORTERS
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
+  #unit/ImportExport/IRR/utIrrImportExport.cpp
+  unit/ImportExport/RAW/utRAWImportExport.cpp
+  unit/ImportExport/Terragen/utTerragenImportExport.cpp
 )
 
 SET( MATERIAL

@@ -49,7 +49,7 @@ class AssimpAPITest_aiVector2D : public AssimpMathTest {
 protected:
     virtual void SetUp() {
         result_c = result_cpp = aiVector2D();
-        temp = random_vec2();
+        temp = random_vec2(); // Generates a random 2D vector != null vector.
     }
 
     aiVector2D result_c, result_cpp, temp;
@@ -82,7 +82,7 @@ TEST_F(AssimpAPITest_aiVector2D, aiVector2SubtractTest) {
 }
 
 TEST_F(AssimpAPITest_aiVector2D, aiVector2ScaleTest) {
-    const float FACTOR = Rand.next();
+    const float FACTOR = RandNonZero.next();
     result_c = result_cpp = random_vec2();
     result_cpp *= FACTOR;
     aiVector2Scale(&result_c, FACTOR);
@@ -97,7 +97,7 @@ TEST_F(AssimpAPITest_aiVector2D, aiVector2SymMulTest) {
 }
 
 TEST_F(AssimpAPITest_aiVector2D, aiVector2DivideByScalarTest) {
-    const float DIVISOR = Rand.next();
+    const float DIVISOR = RandNonZero.next();
     result_c = result_cpp = random_vec2();
     result_cpp /= DIVISOR;
     aiVector2DivideByScalar(&result_c, DIVISOR);

@@ -143,7 +143,8 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3TranslationTest) {
 }
 
 TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3FromToTest) {
-    const auto from = random_vec3(), to = random_vec3();
+    // Use predetermined vectors to prevent running into division by zero.
+    const auto from = aiVector3D(1,2,1).Normalize(), to = aiVector3D(-1,1,1).Normalize();
     aiMatrix3x3::FromToMatrix(from, to, result_cpp);
     aiMatrix3FromTo(&result_c, &from, &to);
     EXPECT_EQ(result_cpp, result_c);

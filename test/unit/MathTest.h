@@ -53,14 +53,14 @@ namespace Assimp {
 /** Custom test class providing several math related utilities. */
 class AssimpMathTest : public ::testing::Test {
 public:
-    /** Return a random 2D vector. */
+    /** Return a random non-null 2D vector. */
     inline static aiVector2D random_vec2() {
-        return aiVector2D(Rand.next(), Rand.next());
+        return aiVector2D(RandNonZero.next(), RandNonZero.next());
     }
 
-    /** Return a random 3D vector. */
+    /** Return a random non-null 3D vector. */
     inline static aiVector3D random_vec3() {
-        return aiVector3D(Rand.next(), Rand.next(),Rand.next());
+        return aiVector3D(RandNonZero.next(), RandNonZero.next(),RandNonZero.next());
     }
 
     /** Return a random unit 3D vector. */
@@ -74,28 +74,28 @@ public:
         return aiQuaternion(random_unit_vec3(), RandPI.next());
     }
 
-    /** Return a random 3x3 matrix. */
+    /** Return a random non-null 3x3 matrix. */
     inline static aiMatrix3x3 random_mat3() {
         return aiMatrix3x3(
-            Rand.next(), Rand.next(),Rand.next(),
-            Rand.next(), Rand.next(),Rand.next(),
-            Rand.next(), Rand.next(),Rand.next());
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next(),
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next(),
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next());
     }
 
-    /** Return a random 4x4 matrix. */
+    /** Return a random non-null 4x4 matrix. */
     inline static aiMatrix4x4 random_mat4() {
         return aiMatrix4x4(
-            Rand.next(), Rand.next(),Rand.next(), Rand.next(),
-            Rand.next(), Rand.next(),Rand.next(), Rand.next(),
-            Rand.next(), Rand.next(),Rand.next(), Rand.next(),
-            Rand.next(), Rand.next(),Rand.next(), Rand.next());
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next(), RandNonZero.next(),
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next(), RandNonZero.next(),
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next(), RandNonZero.next(),
+            RandNonZero.next(), RandNonZero.next(),RandNonZero.next(), RandNonZero.next());
     }
 
     /** Epsilon value to use in tests. */
     static const float Epsilon;
 
     /** Random number generators. */
-    static RandomUniformFloatGenerator Rand, RandPI, RandUnit;
+    static RandomUniformFloatGenerator RandNonZero, RandPI;
 };
 
 }

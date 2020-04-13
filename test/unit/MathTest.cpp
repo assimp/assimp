@@ -47,13 +47,10 @@ namespace Assimp {
 // Initialize epsilon value.
 const float AssimpMathTest::Epsilon = Math::getEpsilon<float>();
 
-// Initialize with an interval of [1,100] to avoid null values.
-RandomUniformFloatGenerator AssimpMathTest::Rand(1.0f, 100.0f);
+// Initialize with an interval of [1,100].
+RandomUniformFloatGenerator AssimpMathTest::RandNonZero(1.0f, 100.0f);
 
 // Initialize with an interval of [-PI,PI] inclusively.
 RandomUniformFloatGenerator AssimpMathTest::RandPI(-Math::PI<float>(), Math::PI<float>());
-
-// Initialize with an interval of [0,1] inclusively.
-RandomUniformFloatGenerator AssimpMathTest::RandUnit(0.0f, 1.0f);
 
 }

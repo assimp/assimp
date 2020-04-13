@@ -49,7 +49,7 @@ class AssimpAPITest_aiVector3D : public AssimpMathTest {
 protected:
     virtual void SetUp() {
         result_c = result_cpp = aiVector3D();
-        temp = random_vec3();
+        temp = random_vec3(); // Generates a random 3D vector != null vector.
     }
 
     aiVector3D result_c, result_cpp, temp;
@@ -88,7 +88,7 @@ TEST_F(AssimpAPITest_aiVector3D, aiVector3SubtractTest) {
 }
 
 TEST_F(AssimpAPITest_aiVector3D, aiVector3ScaleTest) {
-    const float FACTOR = Rand.next();
+    const float FACTOR = RandNonZero.next();
     result_c = result_cpp = random_vec3();
     result_cpp *= FACTOR;
     aiVector3Scale(&result_c, FACTOR);
@@ -103,7 +103,7 @@ TEST_F(AssimpAPITest_aiVector3D, aiVector3SymMulTest) {
 }
 
 TEST_F(AssimpAPITest_aiVector3D, aiVector3DivideByScalarTest) {
-    const float DIVISOR = Rand.next();
+    const float DIVISOR = RandNonZero.next();
     result_c = result_cpp = random_vec3();
     result_cpp /= DIVISOR;
     aiVector3DivideByScalar(&result_c, DIVISOR);

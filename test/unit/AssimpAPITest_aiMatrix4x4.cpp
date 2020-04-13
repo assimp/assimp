@@ -51,6 +51,16 @@ protected:
         result_c = result_cpp = aiMatrix4x4();
     }
 
+    /* Generates a predetermined transformation matrix to use
+       for the aiDecompose functions to prevent running into
+       division by zero. */
+    aiMatrix4x4 get_predetermined_transformation_matrix_for_decomposition() const {
+        aiMatrix4x4 t, r;
+        aiMatrix4x4::Translation(aiVector3D(14,-25,-8), t);
+        aiMatrix4x4::Rotation(Math::PI<float>() / 4.0f, aiVector3D(1).Normalize(), r);
+        return t * r;
+    }
+
     aiMatrix4x4 result_c, result_cpp;
 };
 
@@ -142,7 +152,7 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiDecomposeMatrixTest) {
         position_c, position_cpp;
     aiQuaternion rotation_c, rotation_cpp;
 
-    result_c = result_cpp = random_mat4();
+    result_c = result_cpp = get_predetermined_transformation_matrix_for_decomposition();
     result_cpp.Decompose(scaling_cpp, rotation_cpp, position_cpp);
     aiDecomposeMatrix(&result_c, &scaling_c, &rotation_c, &position_c);
     EXPECT_EQ(scaling_cpp, scaling_c);
@@ -155,7 +165,7 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4DecomposeIntoScalingEulerAnglesPositi
         rotation_c, rotation_cpp,
         position_c, position_cpp;
 
-    result_c = result_cpp = random_mat4();
+    result_c = result_cpp = get_predetermined_transformation_matrix_for_decomposition();
     result_cpp.Decompose(scaling_cpp, rotation_cpp, position_cpp);
     aiMatrix4DecomposeIntoScalingEulerAnglesPosition(&result_c, &scaling_c, &rotation_c, &position_c);
     EXPECT_EQ(scaling_cpp, scaling_c);
@@ -169,7 +179,7 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4DecomposeIntoScalingAxisAnglePosition
         position_c, position_cpp;
     float angle_c, angle_cpp;
 
-    result_c = result_cpp = random_mat4();
+    result_c = result_cpp = get_predetermined_transformation_matrix_for_decomposition();
     result_cpp.Decompose(scaling_cpp, axis_cpp, angle_cpp, position_cpp);
     aiMatrix4DecomposeIntoScalingAxisAnglePosition(&result_c, &scaling_c, &axis_c, &angle_c, &position_c);
     EXPECT_EQ(scaling_cpp, scaling_c);
@@ -182,7 +192,7 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4DecomposeNoScalingTest) {
     aiVector3D position_c, position_cpp;
     aiQuaternion rotation_c, rotation_cpp;
 
-    result_c = result_cpp = random_mat4();
+    result_c = result_cpp = get_predetermined_transformation_matrix_for_decomposition();
     result_cpp.DecomposeNoScaling(rotation_cpp, position_cpp);
     aiMatrix4DecomposeNoScaling(&result_c, &rotation_c, &position_c);
     EXPECT_EQ(position_cpp, position_c);
@@ -242,7 +252,8 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4ScalingTest) {
 }
 
 TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4FromToTest) {
-    const auto from = random_vec3(), to = random_vec3();
+    // Use predetermined vectors to prevent running into division by zero.
+    const auto from = aiVector3D(1,2,1).Normalize(), to = aiVector3D(-1,1,1).Normalize();
     aiMatrix4x4::FromToMatrix(from, to, result_cpp);
     aiMatrix4FromTo(&result_c, &from, &to);
     EXPECT_EQ(result_cpp, result_c);

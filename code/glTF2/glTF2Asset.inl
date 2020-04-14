@@ -1026,6 +1026,18 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             }
         }
     }
+
+    if (Value* extras = FindObject(pJSON_Object, "extras")) {
+        if (Value* curTargetNames = FindArray(*extras, "targetNames")) {
+            this->targetNames.resize(curTargetNames->Size());
+            for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
+                Value& targetNameValue = (*curTargetNames)[i];
+                if (targetNameValue.IsString()) {
+                    this->targetNames[i] = targetNameValue.GetString();
+                }
+            }
+        }
+    }
 }
 
 inline void Camera::Read(Value &obj, Asset & /*r*/) {

@@ -54,14 +54,14 @@ public:
     RandomUniformRealGenerator() :
             dist_(),
             rd_(), 
-            re_(rd_()),  {
+            re_(rd_())  {
         // empty
     }
     
     RandomUniformRealGenerator(T min, T max) :
             dist_(min, max),
             rd_(),
-            re_(rd_()),  {
+            re_(rd_())  {
         // empty
     }
 

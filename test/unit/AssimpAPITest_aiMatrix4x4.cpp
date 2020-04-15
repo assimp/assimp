@@ -82,7 +82,6 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4FromScalingQuaternionPositionTest) {
     const aiVector3D s = random_vec3();
     const aiQuaternion q = random_quat();
     const aiVector3D t = random_vec3();
-    aiMatrix3x3 m = random_mat3();
     result_cpp = aiMatrix4x4(s, q, t);
     aiMatrix4FromScalingQuaternionPosition(&result_c, &s, &q, &t);
     EXPECT_EQ(result_cpp, result_c);

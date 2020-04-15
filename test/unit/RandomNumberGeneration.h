@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -54,10 +52,17 @@ template<typename T>
 class RandomUniformRealGenerator {
 public:
     RandomUniformRealGenerator() :
-        rd_(), re_(rd_()), dist_() {
+            dist_(),
+            rd_(), 
+            re_(rd_()),  {
+        // empty
     }
+    
     RandomUniformRealGenerator(T min, T max) :
-        rd_(), re_(rd_()), dist_(min, max) {
+            dist_(min, max),
+            rd_(),
+            re_(rd_()),  {
+        // empty
     }
 
     inline T next() {
@@ -65,10 +70,9 @@ public:
     }
 
 private:
-
     std::uniform_real_distribution<T> dist_;
-    std::default_random_engine re_;
     std::random_device rd_;
+    std::default_random_engine re_;
 };
 
 using RandomUniformFloatGenerator = RandomUniformRealGenerator<float>;

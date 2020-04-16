@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AbstractImportExportBase.h"
-#include "SceneDiffer.h"
 #include "UnitTestPCH.h"
 
 #include <assimp/commonMetaData.h>
@@ -214,6 +213,10 @@ TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
     double factor(0.0);
     scene->mMetaData->Get("UnitScaleFactor", factor);
     EXPECT_DOUBLE_EQ(500.0, factor);
+
+    scene->mMetaData->Set("UnitScaleFactor", factor * 2);
+    scene->mMetaData->Get("UnitScaleFactor", factor);
+    EXPECT_DOUBLE_EQ(1000.0, factor);
 }
 
 TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {

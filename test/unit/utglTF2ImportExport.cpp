@@ -490,3 +490,16 @@ TEST_F(utglTF2ImportExport, texcoords) {
     EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_UNKNOWN, 0), &uvIndex), aiReturn_SUCCESS);
     EXPECT_EQ(uvIndex, 1);
 }
+
+TEST_F(utglTF2ImportExport, norootnode_noscene) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/NoScene.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+}
+
+TEST_F(utglTF2ImportExport, norootnode_scenewithoutnodes) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/SceneWithoutNodes.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+}

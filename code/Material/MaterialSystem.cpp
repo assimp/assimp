@@ -503,7 +503,7 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     pcNew->mData = new char[pSizeInBytes];
     memcpy (pcNew->mData,pInput,pSizeInBytes);
 
-    pcNew->mKey.length = (ai_uint32)::strlen(pKey);
+    pcNew->mKey.length = static_cast<ai_uint32>( ::strlen(pKey) );
     ai_assert ( MAXLEN > pcNew->mKey.length);
     strcpy( pcNew->mKey.data, pKey );
 

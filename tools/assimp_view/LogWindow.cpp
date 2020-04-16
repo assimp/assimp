@@ -70,7 +70,7 @@ static const char* AI_VIEW_RTF_LOG_HEADER =
 // Message procedure for the log window
 //-------------------------------------------------------------------------------
 INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
-    WPARAM wParam,LPARAM lParam)
+    WPARAM /*wParam*/,LPARAM lParam)
     {
     (void)lParam;
     switch (uMsg)
@@ -86,7 +86,7 @@ INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
             int x = LOWORD(lParam);
             int y = HIWORD(lParam);
 
-            SetWindowPos(GetDlgItem(hwndDlg,IDC_EDIT1),NULL,0,0,
+            SetWindowPos(GetDlgItem(hwndDlg,IDC_EDIT1),nullptr,0,0,
                 x-10,y-12,SWP_NOMOVE|SWP_NOZORDER);
 
             return TRUE;
@@ -103,7 +103,7 @@ INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
 //-------------------------------------------------------------------------------
 void CLogWindow::Init () {
     this->hwnd = ::CreateDialog(g_hInstance,MAKEINTRESOURCE(IDD_LOGVIEW),
-        NULL,&LogDialogProc);
+        nullptr,&LogDialogProc);
 
     if (!this->hwnd) {
         CLogDisplay::Instance().AddEntry("[ERROR] Unable to create logger window",
@@ -156,7 +156,7 @@ void CLogWindow::Save() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LogDestination",NULL,NULL,(BYTE*)szFileName,&dwTemp)) {
+    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LogDestination",nullptr,nullptr,(BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
         strcpy(szFileName,"");
     } else {
@@ -169,12 +169,12 @@ void CLogWindow::Save() {
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL),
-        "Log files\0*.txt", NULL, 0, 1,
-        szFileName, MAX_PATH, NULL, 0, NULL,
+        g_hDlg,GetModuleHandle(nullptr),
+        "Log files\0*.txt", nullptr, 0, 1,
+        szFileName, MAX_PATH, nullptr, 0, nullptr,
         "Save log to file",
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
-        0, 1, ".txt", 0, NULL, NULL
+        0, 1, ".txt", 0, nullptr, nullptr
     };
     if(GetSaveFileName(&sFilename1) == 0) return;
 

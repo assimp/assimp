@@ -349,12 +349,10 @@ private:
     aiNodeAnim* GenerateSimpleNodeAnim(const std::string& name,
         const Model& target,
         NodeMap::const_iterator chain[TransformationComp_MAXIMUM],
-        NodeMap::const_iterator iter_end,
-        const LayerMap& layer_map,
+        NodeMap::const_iterator iterEnd,
         int64_t start, int64_t stop,
-        double& max_time,
-        double& min_time,
-        bool reverse_order = false);
+        double& maxTime,
+        double& minTime);
 
     // key (time), value, mapto (component index)
     typedef std::tuple<std::shared_ptr<KeyTimeList>, std::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
@@ -378,20 +376,6 @@ private:
         double& maxTime,
         double& minTime,
         Model::RotOrder order);
-
-    // ------------------------------------------------------------------------------------------------
-    void ConvertTransformOrder_TRStoSRT(aiQuatKey* out_quat, aiVectorKey* out_scale,
-        aiVectorKey* out_translation,
-        const KeyFrameListList& scaling,
-        const KeyFrameListList& translation,
-        const KeyFrameListList& rotation,
-        const KeyTimeList& times,
-        double& maxTime,
-        double& minTime,
-        Model::RotOrder order,
-        const aiVector3D& def_scale,
-        const aiVector3D& def_translate,
-        const aiVector3D& def_rotation);
 
     // ------------------------------------------------------------------------------------------------
     // euler xyz -> quat

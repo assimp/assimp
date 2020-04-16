@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp tea
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,45 +39,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
 
 using namespace Assimp;
 
-class utM3DImportExport : public AbstractImportExportBase {
-public:
-	bool importerTest() override  {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
-#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-		return nullptr != scene;
-#else
-        return nullptr == scene;
-#endif // ASSIMP_BUILD_NO_M3D_IMPORTER
+class utScene : public ::testing::Test {
+protected:
+	aiScene *scene;
+
+    void SetUp() override {
+		scene = new aiScene;
     }
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-    bool exporterTest() override {
-		Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
-		Exporter exporter;
-		aiReturn ret = exporter.Export(scene, "m3d", ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals_out.m3d");
-		return ret == AI_SUCCESS;
+    void TearDown() override {
+		delete scene;
+		scene = nullptr;
     }
-#endif
 };
 
-TEST_F(utM3DImportExport, importM3DFromFileTest) {
-    EXPECT_TRUE(importerTest());
+TEST_F(utScene, findNodeTest) {
+	scene->mRootNode = new aiNode();
+	scene->mRootNode->mName.Set("test");
+	aiNode *child = new aiNode;
+	child->mName.Set("child");
+	scene->mRootNode->addChildren(1, &child);
+	aiNode *found = scene->mRootNode->FindNode("child");
+	EXPECT_EQ(child, found);
 }
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-TEST_F(utM3DImportExport, exportM3DFromFileTest) {
-	EXPECT_TRUE(exporterTest());
+TEST_F(utScene, sceneHasContentTest) {
+    EXPECT_FALSE(scene->HasAnimations());
+	EXPECT_FALSE(scene->HasMaterials());
+	EXPECT_FALSE(scene->HasMeshes());
+	EXPECT_FALSE(scene->HasCameras());
+	EXPECT_FALSE(scene->HasLights());
+	EXPECT_FALSE(scene->HasTextures());
 }
-#endif //  ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utScene, getShortFilenameTest) {
+	std::string long_filename1 = "foo_bar/name";
+    const char *name1 = scene->GetShortFilename(long_filename1.c_str());
+	EXPECT_NE(nullptr, name1);
+
+    std::string long_filename2 = "foo_bar\\name";
+    const char *name2 = scene->GetShortFilename(long_filename2.c_str());
+	EXPECT_NE(nullptr, name2);
+}
+
+TEST_F(utScene, getEmbeddedTextureTest) {
+}

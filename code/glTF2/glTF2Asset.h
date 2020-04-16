@@ -380,8 +380,8 @@ struct Accessor : public Object {
 
     inline uint8_t *GetPointer();
 
-    template <class T>
-    bool ExtractData(T *&outData);
+    template<class T>
+    void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
 

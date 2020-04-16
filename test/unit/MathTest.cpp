@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp tea
+Copyright (c) 2006-2020, assimp team
+
 
 
 All rights reserved.
@@ -39,46 +40,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#include "MathTest.h"
 
-#include "AbstractImportExportBase.h"
-#include "UnitTestPCH.h"
+namespace Assimp {
 
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/Importer.hpp>
+// Initialize epsilon value.
+const float AssimpMathTest::Epsilon = Math::getEpsilon<float>();
 
-using namespace Assimp;
+// Initialize with an interval of [1,100].
+RandomUniformFloatGenerator AssimpMathTest::RandNonZero(1.0f, 100.0f);
 
-class utM3DImportExport : public AbstractImportExportBase {
-public:
-	bool importerTest() override  {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
-#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-		return nullptr != scene;
-#else
-        return nullptr == scene;
-#endif // ASSIMP_BUILD_NO_M3D_IMPORTER
-    }
+// Initialize with an interval of [-PI,PI] inclusively.
+RandomUniformFloatGenerator AssimpMathTest::RandPI(-Math::PI<float>(), Math::PI<float>());
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-    bool exporterTest() override {
-		Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
-		Exporter exporter;
-		aiReturn ret = exporter.Export(scene, "m3d", ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals_out.m3d");
-		return ret == AI_SUCCESS;
-    }
-#endif
-};
-
-TEST_F(utM3DImportExport, importM3DFromFileTest) {
-    EXPECT_TRUE(importerTest());
 }
-
-#ifndef ASSIMP_BUILD_NO_EXPORT
-TEST_F(utM3DImportExport, exportM3DFromFileTest) {
-	EXPECT_TRUE(exporterTest());
-}
-#endif //  ASSIMP_BUILD_NO_EXPORT

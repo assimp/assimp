@@ -95,7 +95,7 @@ void ExportSceneStep(const char*,IOSystem*, const aiScene*, const ExportProperti
 void ExportSceneObj(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneObjNoMtl(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 #endif
-#ifdef ASSIMP_BUILD_NO_STL_EXPORTER
+#ifndef ASSIMP_BUILD_NO_STL_EXPORTER
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 #endif

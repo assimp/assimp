@@ -53,8 +53,8 @@ INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM ) {
         case WM_INITDIALOG:
         {
             // load the help file ...
-            HRSRC res = FindResource(NULL,MAKEINTRESOURCE(IDR_TEXT1),"TEXT");
-            HGLOBAL hg = LoadResource(NULL,res);
+            HRSRC res = FindResource(nullptr,MAKEINTRESOURCE(IDR_TEXT1),"TEXT");
+            HGLOBAL hg = LoadResource(nullptr,res);
             void* pData = LockResource(hg);
 
             SETTEXTEX sInfo;

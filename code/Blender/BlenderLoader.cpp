@@ -206,7 +206,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
         inflateInit2(&zstream, 16+MAX_WBITS);
 
         zstream.next_in   = reinterpret_cast<Bytef*>( reader->GetPtr() );
-        zstream.avail_in  = reader->GetRemainingSize();
+        zstream.avail_in  = (uInt) reader->GetRemainingSize();
 
         size_t total = 0l;
 
@@ -429,7 +429,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         name.length = 1+ ASSIMP_itoa10(name.data+1,static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
-        aiTexture* tex = conv_data.textures->back();
+        aiTexture* curTex = conv_data.textures->back();
 
         // usually 'img->name' will be the original file name of the embedded textures,
         // so we can extract the file extension from it.
@@ -439,19 +439,19 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
             --s;
         }
 
-        tex->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
-        tex->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
-        tex->achFormatHint[2] = s+3>e ? '\0' : ::tolower( s[3] );
-        tex->achFormatHint[3] = '\0';
+        curTex->achFormatHint[0] = s + 1 > e ? '\0' : (char)::tolower(s[1]);
+        curTex->achFormatHint[1] = s + 2 > e ? '\0' : (char)::tolower(s[2]);
+        curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower(s[3]);
+        curTex->achFormatHint[3] = '\0';
 
         // tex->mHeight = 0;
-        tex->mWidth = img->packedfile->size;
-        uint8_t* ch = new uint8_t[tex->mWidth];
+        curTex->mWidth = img->packedfile->size;
+        uint8_t *ch = new uint8_t[curTex->mWidth];
 
         conv_data.db.reader->SetCurrentPos(static_cast<size_t>( img->packedfile->data->val));
-        conv_data.db.reader->CopyAndAdvance(ch,tex->mWidth);
+        conv_data.db.reader->CopyAndAdvance(ch, curTex->mWidth);
 
-        tex->pcData = reinterpret_cast<aiTexel*>(ch);
+        curTex->pcData = reinterpret_cast<aiTexel *>(ch);
 
         LogInfo("Reading embedded texture, original file was "+std::string(img->name));
     } else {
@@ -1078,9 +1078,9 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             const aiFace& f = out->mFaces[out->mNumFaces++];
 
             aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
-            for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo,++out->mNumVertices) {
-                vo->x = v->uv[i][0];
-                vo->y = v->uv[i][1];
+            for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+                vo->x = v->uv[j][0];
+                vo->y = v->uv[j][1];
             }
         }
 
@@ -1098,8 +1098,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
                     vo->x = uv.uv[0];
                     vo->y = uv.uv[1];
                 }
-            }
-            else {
+            } else {
                 // create textureCoords for every mapped tex
                 for (uint32_t m = 0; m < itMatTexUvMapping->second.size(); ++m) {
                     const MLoopUV *tm = itMatTexUvMapping->second[m];
@@ -1139,9 +1138,9 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             const aiFace& f = out->mFaces[out->mNumFaces++];
 
             aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
-            for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo,++out->mNumVertices) {
-                vo->x = v->uv[i][0];
-                vo->y = v->uv[i][1];
+            for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+                vo->x = v->uv[j][0];
+                vo->y = v->uv[j][1];
             }
         }
     }

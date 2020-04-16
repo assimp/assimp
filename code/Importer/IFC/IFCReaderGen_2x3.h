@@ -45,6 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "code/Step/STEPFile.h"
 
+#ifdef _WIN32
+#    pragma warning( disable : 4512 )
+#endif // _WIN32
+
 namespace Assimp {
 namespace IFC {
     namespace Schema_2x3 {

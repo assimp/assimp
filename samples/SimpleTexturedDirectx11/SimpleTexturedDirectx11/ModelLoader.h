@@ -25,17 +25,17 @@ public:
 
 	void Close();
 private:
-	ID3D11Device *dev;
-	ID3D11DeviceContext *devcon;
-	std::vector<Mesh> meshes;
-	string directory;
-	vector<Texture> textures_loaded;
-	HWND hwnd;
+	ID3D11Device *dev_;
+	ID3D11DeviceContext *devcon_;
+	std::vector<Mesh> meshes_;
+	std::string directory_;
+	std::vector<Texture> textures_loaded_;
+	HWND hwnd_;
 
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName, const aiScene* scene);
-	string determineTextureType(const aiScene* scene, aiMaterial* mat);
+	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene);
+	std::string determineTextureType(const aiScene* scene, aiMaterial* mat);
 	int getTextureIndex(aiString* str);
 	ID3D11ShaderResourceView* getTextureFromModel(const aiScene* scene, int textureindex);
 };

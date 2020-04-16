@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2020, assimp tea
 
 
 All rights reserved.
@@ -41,28 +40,45 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
 class utM3DImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+	bool importerTest() override  {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-        return nullptr != scene;
+		return nullptr != scene;
 #else
         return nullptr == scene;
 #endif // ASSIMP_BUILD_NO_M3D_IMPORTER
     }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    bool exporterTest() override {
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
+		Exporter exporter;
+		aiReturn ret = exporter.Export(scene, "m3d", ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals_out.m3d");
+		return ret == AI_SUCCESS;
+    }
+#endif
 };
 
-TEST_F( utM3DImportExport, importM3DFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utM3DImportExport, importM3DFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F(utM3DImportExport, exportM3DFromFileTest) {
+	EXPECT_TRUE(exporterTest());
+}
+#endif //  ASSIMP_BUILD_NO_EXPORT

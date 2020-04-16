@@ -39,9 +39,9 @@ SET(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 
 # Toggles the use of the hunter package manager
-option(HUNTER_ENABLED "Enable Hunter package manager support" OFF)
+option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   include("cmake/HunterGate.cmake")
   HunterGate(
     URL "https://github.com/ruslo/hunter/archive/v0.23.176.tar.gz"
@@ -60,7 +60,7 @@ OPTION( BUILD_SHARED_LIBS
   ON
 )
 
-OPTION( BUILD_FRAMEWORK
+OPTION( ASSIMP_BUILD_FRAMEWORK
   "Build package as Mac OS X Framework bundle."
   OFF
 )
@@ -101,7 +101,7 @@ OPTION ( ASSIMP_COVERALLS
   OFF
 )
 OPTION( ASSIMP_INSTALL
-  "DIsable this if you want to use assimp as a submodule."
+  "Disable this if you want to use assimp as a submodule."
   ON
 )
 OPTION ( ASSIMP_ERROR_MAX
@@ -120,25 +120,25 @@ OPTION ( ASSIMP_UBSAN
   "Enable Undefined Behavior sanitizer."
   OFF
 )
-OPTION ( SYSTEM_IRRXML
+OPTION ( ASSIMP_SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
 )
-OPTION ( BUILD_DOCS
+OPTION ( ASSIMP_BUILD_DOCS
   "Build documentation using Doxygen."
   OFF
 )
-OPTION( INJECT_DEBUG_POSTFIX
+OPTION( ASSIMP_INJECT_DEBUG_POSTFIX
   "Inject debug postfix in .a/.so/.dll lib names"
   ON
 )
 
-OPTION ( IGNORE_GIT_HASH
+OPTION ( ASSIMP_IGNORE_GIT_HASH
    "Don't call git to get the hash."
    OFF
 )
 
-IF (IOS AND NOT HUNTER_ENABLED)
+IF (IOS AND NOT ASSIMP_HUNTER_ENABLED)
   IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Release")
   ENDIF ()
@@ -161,7 +161,7 @@ IF(MSVC)
   ENDIF()
 ENDIF()
 
-IF (BUILD_FRAMEWORK)
+IF (ASSIMP_BUILD_FRAMEWORK)
   SET (BUILD_SHARED_LIBS ON)
   MESSAGE(STATUS "Framework bundle building enabled")
 ENDIF()
@@ -181,12 +181,12 @@ SET (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VER
 SET (ASSIMP_SOVERSION 5)
 
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
-if(NOT HUNTER_ENABLED)
+if(NOT ASSIMP_HUNTER_ENABLED)
   # Enable C++11 support globally
   set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
 endif()
 
-IF(NOT IGNORE_GIT_HASH)
+IF(NOT ASSIMP_IGNORE_GIT_HASH)
   # Get the current working branch
   EXECUTE_PROCESS(
     COMMAND git rev-parse --abbrev-ref HEAD
@@ -238,14 +238,9 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-IF( UNIX )
-  # Use GNUInstallDirs for Unix predefined directories
-  INCLUDE(GNUInstallDirs)
-ENDIF()
-
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
-  IF(NOT HUNTER_ENABLED)
+  IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_FLAGS "-fPIC -std=c++0x ${CMAKE_CXX_FLAGS}")
     SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
   ENDIF()
@@ -255,15 +250,14 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
-  ADD_COMPILE_OPTIONS(/MP)
-  ADD_COMPILE_OPTIONS( /bigobj )
+  ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX ) 
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)
   ENDIF()
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  IF(NOT HUNTER_ENABLED)
+  IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_FLAGS "-fPIC -std=c++11 ${CMAKE_CXX_FLAGS}")
     SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
   ENDIF()
@@ -275,7 +269,7 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
   ELSEIF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.3)
     message(WARNING "MinGW is old, if you experience errors, update MinGW.")
   ENDIF()
-  IF(NOT HUNTER_ENABLED)
+  IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
     SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
   ENDIF()
@@ -284,7 +278,7 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
   ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
-IF ( IOS AND NOT HUNTER_ENABLED)
+IF ( IOS AND NOT ASSIMP_HUNTER_ENABLED)
   IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode -Og")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode -Og")
@@ -351,17 +345,9 @@ ELSE()
   SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 ENDIF ()
 
-# Cache these to allow the user to override them manually.
-SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
-  "Path the built library files are installed to." )
-SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
-  "Path the header files are installed to." )
-SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
-  "Path the tool executables are installed to." )
-
 get_cmake_property(is_multi_config GENERATOR_IS_MULTI_CONFIG)
 
-IF (INJECT_DEBUG_POSTFIX AND (is_multi_config OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
+IF (ASSIMP_INJECT_DEBUG_POSTFIX AND (is_multi_config OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
   SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfix for lib, samples and tools")
 ELSE()
   SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Debug Postfix for lib, samples and tools")
@@ -374,7 +360,7 @@ IF (NOT TARGET uninstall)
   ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 ENDIF()
 
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
   set(INCLUDE_INSTALL_DIR "include")
 
@@ -418,6 +404,28 @@ ELSE()
   else()
     set(BUILD_LIB_TYPE STATIC)
   endif()
+
+  IF( UNIX )
+    # Use GNUInstallDirs for Unix predefined directories
+    INCLUDE(GNUInstallDirs)
+
+    SET( ASSIMP_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+    SET( ASSIMP_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+    SET( ASSIMP_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+  ELSE()
+    # Cache these to allow the user to override them on non-Unix platforms
+    SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
+      "Path the built library files are installed to." )
+    SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
+      "Path the header files are installed to." )
+    SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
+      "Path the tool executables are installed to." )
+
+    SET(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_INCLUDE_INSTALL_DIR})
+    SET(CMAKE_INSTALL_FULL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR})
+    SET(CMAKE_INSTALL_FULL_BINDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_BIN_INSTALL_DIR})
+  ENDIF()
+
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets.cmake" @ONLY IMMEDIATE)
   IF (is_multi_config)
@@ -441,18 +449,18 @@ ELSE()
     DESTINATION "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 ENDIF()
 
-IF( BUILD_DOCS )
+IF( ASSIMP_BUILD_DOCS )
   ADD_SUBDIRECTORY(doc)
 ENDIF()
 
 # Look for system installed irrXML
-IF ( SYSTEM_IRRXML )
+IF ( ASSIMP_SYSTEM_IRRXML )
   FIND_PACKAGE( IrrXML REQUIRED )
 ENDIF()
 
 # Search for external dependencies, and build them from source if not found
 # Search for zlib
-IF(HUNTER_ENABLED)
+IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(ZLIB)
   find_package(ZLIB CONFIG REQUIRED)
 
@@ -576,24 +584,26 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
-IF(NOT HUNTER_ENABLED)
+IF(NOT ASSIMP_HUNTER_ENABLED)
   ADD_SUBDIRECTORY(contrib)
 ENDIF()
 
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
-  IF ( WIN32 AND DirectX_D3DX9_LIBRARY )
-    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${DirectX_FOUND} )
+  IF ( WIN32 )
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" OFF )
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ()
   ENDIF ()
-  # Te command line tool
+  # The command line tool
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ()
 
 IF ( ASSIMP_BUILD_SAMPLES)
+  SET( SAMPLES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples )
+  SET( SAMPLES_SHARED_CODE_DIR ${SAMPLES_DIR}/SharedCode )
   IF ( WIN32 )
     ADD_SUBDIRECTORY( samples/SimpleTexturedOpenGL/ )
     ADD_SUBDIRECTORY( samples/SimpleTexturedDirectx11 )

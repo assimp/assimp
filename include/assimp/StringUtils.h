@@ -139,7 +139,7 @@ std::string DecimalToHexa( T toConvert ) {
     ss >> result;
 
     for ( size_t i = 0; i < result.size(); ++i ) {
-        result[ i ] = toupper( result[ i ] );
+        result[ i ] = (char) toupper( result[ i ] );
     }
 
     return result;

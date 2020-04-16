@@ -476,9 +476,10 @@ size_t Q3BSPFileImporter::countData( const std::vector<sQ3BSPFace*> &faceArray )
         sQ3BSPFace *pQ3BSPFace = *it;
         if ( pQ3BSPFace->iType == Polygon || pQ3BSPFace->iType == TriangleMesh )
         {
-            Q3BSP::sQ3BSPFace *pQ3BSPFace = *it;
-            ai_assert( nullptr != pQ3BSPFace );
-            numVerts += pQ3BSPFace->iNumOfFaceVerts;
+            Q3BSP::sQ3BSPFace *face = *it;
+            if (nullptr != face) {
+                numVerts += face->iNumOfFaceVerts;
+            }
         }
     }
 
@@ -589,18 +590,18 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *model
         IOStream *pTextureStream = archive->Open( textureName.c_str() );
         if ( pTextureStream ) {
             size_t texSize = pTextureStream->FileSize();
-            aiTexture *pTexture = new aiTexture;
-            pTexture->mHeight = 0;
-            pTexture->mWidth = static_cast<unsigned int>(texSize);
-            unsigned char *pData = new unsigned char[ pTexture->mWidth ];
-            size_t readSize = pTextureStream->Read( pData, sizeof( unsigned char ), pTexture->mWidth );
+            aiTexture *curTexture = new aiTexture;
+            curTexture->mHeight = 0;
+            curTexture->mWidth = static_cast<unsigned int>(texSize);
+            unsigned char *pData = new unsigned char[curTexture->mWidth];
+            size_t readSize = pTextureStream->Read(pData, sizeof(unsigned char), curTexture->mWidth);
             (void)readSize;
-            ai_assert( readSize == pTexture->mWidth );
-            pTexture->pcData = reinterpret_cast<aiTexel*>( pData );
-            pTexture->achFormatHint[ 0 ] = ext[ 1 ];
-            pTexture->achFormatHint[ 1 ] = ext[ 2 ];
-            pTexture->achFormatHint[ 2 ] = ext[ 3 ];
-            pTexture->achFormatHint[ 3 ] = '\0';
+            ai_assert(readSize == curTexture->mWidth);
+            curTexture->pcData = reinterpret_cast<aiTexel *>(pData);
+            curTexture->achFormatHint[0] = ext[1];
+            curTexture->achFormatHint[1] = ext[2];
+            curTexture->achFormatHint[2] = ext[3];
+            curTexture->achFormatHint[3] = '\0';
             res = true;
 
             aiString name;
@@ -610,13 +611,13 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *model
             archive->Close( pTextureStream );
 
             pMatHelper->AddProperty( &name, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
-            mTextures.push_back( pTexture );
+            mTextures.push_back(curTexture);
         } else {
             // If it doesn't exist in the archive, it is probably just a reference to an external file.
             // We'll leave it up to the user to figure out which extension the file has.
             aiString name;
             strncpy( name.data, pTexture->strName, sizeof name.data );
-            name.length = (ai_uint32)strlen( name.data );
+            name.length = static_cast<ai_uint32>(strlen( name.data ));
             pMatHelper->AddProperty( &name, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
         }
     }

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -75,6 +73,11 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include <memory>
 
 namespace Assimp {
+
+#ifdef _WIN32
+#    pragma warning( disable : 4800 ) 
+#endif // _WIN32
+
 
 // PostStepRegistry.cpp
 void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);

@@ -176,7 +176,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
         raw_reader->IncPtr(2);
 
         zstream.next_in   = reinterpret_cast<Bytef*>( raw_reader->GetPtr() );
-        zstream.avail_in  = raw_reader->GetRemainingSize();
+        zstream.avail_in  = (uInt) raw_reader->GetRemainingSize();
 
         size_t total = 0l;
 
@@ -297,8 +297,7 @@ std::string XGLImporter::GetElementName()
 
     std::string ret;
     ret.resize(len);
-
-    std::transform(s,s+len,ret.begin(),::tolower);
+    std::transform(s, s + len, ret.begin(), ::ToLower<char>);
     return ret;
 }
 
@@ -618,26 +617,22 @@ bool XGLImporter::ReadMesh(TempScope& scope)
             bool has[3] = {0};
 
             while (ReadElementUpToClosing(s.c_str()))   {
-                const std::string& s = GetElementName();
-                if (s == "fv1" || s == "lv1" || s == "pv1") {
+                const std::string& elemName = GetElementName();
+                if (elemName == "fv1" || elemName == "lv1" || elemName == "pv1") {
                     ReadFaceVertex(t,tf[0]);
                     has[0] = true;
-                }
-                else if (s == "fv2" || s == "lv2") {
-                    ReadFaceVertex(t,tf[1]);
+                } else if (elemName == "fv2" || elemName == "lv2") {
+                    ReadFaceVertex(t, tf[1]);
                     has[1] = true;
-                }
-                else if (s == "fv3") {
-                    ReadFaceVertex(t,tf[2]);
+                } else if (elemName == "fv3") {
+                    ReadFaceVertex(t, tf[2]);
                     has[2] = true;
-                }
-                else if (s == "mat") {
+                } else if (elemName == "mat") {
                     if (mid != ~0u) {
                         LogWarn("only one material tag allowed per <f>");
                     }
                     mid = ResolveMaterialRef(scope);
-                }
-                else if (s == "matref") {
+                } else if (elemName == "matref") {
                     if (mid != ~0u) {
                         LogWarn("only one material tag allowed per <f>");
                     }

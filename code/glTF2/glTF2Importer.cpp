@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -96,7 +95,7 @@ glTF2Importer::glTF2Importer() :
 		BaseImporter(),
 		meshOffsets(),
 		embeddedTexIdxs(),
-		mScene(NULL) {
+		mScene(nullptr) {
 	// empty
 }
 
@@ -112,8 +111,8 @@ bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
 	const std::string &extension = GetExtension(pFile);
 
 	if (extension != "gltf" && extension != "glb") {
-		return false;
-	}
+        return false;
+  }
 
 	if (pIOHandler) {
 		glTF2::Asset asset(pIOHandler);
@@ -953,8 +952,8 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
 void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 	if (!r.scene) {
-        return;
-    }
+		throw DeadlyImportError("GLTF: No scene");
+	}
 
 	std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
@@ -971,6 +970,8 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 			root->mChildren[root->mNumChildren++] = node;
 		}
 		mScene->mRootNode = root;
+	} else {
+		mScene->mRootNode = new aiNode("ROOT");
 	}
 }
 
@@ -989,7 +990,7 @@ struct AnimationSamplers {
 	Animation::Sampler *weight;
 };
 
-aiNodeAnim *CreateNodeAnim(glTF2::Asset &r, Node &node, AnimationSamplers &samplers) {
+aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &samplers) {
 	aiNodeAnim *anim = new aiNodeAnim();
 	anim->mNodeName = GetNodeName(node);
 
@@ -1068,7 +1069,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &r, Node &node, AnimationSamplers &sampl
 	return anim;
 }
 
-aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &r, Node &node, AnimationSamplers &samplers) {
+aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSamplers &samplers) {
 	aiMeshMorphAnim *anim = new aiMeshMorphAnim();
 	anim->mName = GetNodeName(node);
 

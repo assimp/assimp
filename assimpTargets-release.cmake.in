@@ -52,12 +52,12 @@ if(MSVC)
     # Import target "assimp::assimp" for configuration "Release"
     set_property(TARGET assimp::assimp APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
     set_target_properties(assimp::assimp PROPERTIES
-      IMPORTED_IMPLIB_RELEASE "${_IMPORT_PREFIX}/lib/${importLibraryName}"
-      IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/${sharedLibraryName}"
+      IMPORTED_IMPLIB_RELEASE "@CMAKE_INSTALL_FULL_LIBDIR@/${importLibraryName}"
+      IMPORTED_LOCATION_RELEASE "@CMAKE_INSTALL_FULL_BINDIR@/${sharedLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/lib/${importLibraryName}")
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/bin/${sharedLibraryName}" )
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${importLibraryName}")
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_BINDIR@/${sharedLibraryName}" )
   else()
     set(staticLibraryName "assimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_STATIC_LIBRARY_SUFFIX@")
 
@@ -67,7 +67,7 @@ if(MSVC)
       IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/${staticLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/lib/${staticLibraryName}")
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${staticLibraryName}")
   endif()
 
 else()
@@ -83,7 +83,6 @@ else()
     endif()
     set_target_properties(assimp::assimp PROPERTIES
       IMPORTED_SONAME_RELEASE "${sharedLibraryName}"
-
       IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib${LIBSUFFIX}/${sharedLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )

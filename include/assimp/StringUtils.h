@@ -154,7 +154,7 @@ std::string DecimalToHexa( T toConvert ) {
 ///	@param	with_head   # 
 ///	@return	The hexadecimal string, is empty in case of an error.
 AI_FORCE_INLINE
-std::string Rgba2Hex(float r, float g, float b, float a, bool with_head)
+std::string Rgba2Hex(int r, int g, int b, int a, bool with_head)
 {
 	std::stringstream ss;
 	if (with_head)

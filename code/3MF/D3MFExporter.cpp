@@ -254,16 +254,23 @@ void D3MFExporter::writeBaseMaterials() {
         if ( mat->Get( AI_MATKEY_COLOR_DIFFUSE, color ) == aiReturn_SUCCESS ) {
             hexDiffuseColor.clear();
             tmp.clear();
-            hexDiffuseColor = "#";
+           
+            // rgbs %
+    		if(color.r <= 1 && color.g <= 1 && color.b <= 1 && color.a <= 1){
+    			 hexDiffuseColor = Rgba2Hex( color.r*255, color.g*255, color.b*255, color.a*255, true);
+                
+    		}else{
+                hexDiffuseColor = "#";
+                tmp = DecimalToHexa( (ai_real) color.r );
+                hexDiffuseColor += tmp;
+                tmp = DecimalToHexa((ai_real)color.g);
+                hexDiffuseColor += tmp;
+                tmp = DecimalToHexa((ai_real)color.b);
+                hexDiffuseColor += tmp;
+                tmp = DecimalToHexa((ai_real)color.a);
+                hexDiffuseColor += tmp;
+            }
             
-            tmp = DecimalToHexa( (ai_real) color.r );
-            hexDiffuseColor += tmp;
-            tmp = DecimalToHexa((ai_real)color.g);
-            hexDiffuseColor += tmp;
-            tmp = DecimalToHexa((ai_real)color.b);
-            hexDiffuseColor += tmp;
-            tmp = DecimalToHexa((ai_real)color.a);
-            hexDiffuseColor += tmp;
         } else {
             hexDiffuseColor = "#FFFFFFFF";
         }

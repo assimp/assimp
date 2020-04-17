@@ -145,7 +145,6 @@ std::string DecimalToHexa( T toConvert ) {
     return result;
 }
 
-///	@fn		Rgba2Hex
 ///	@brief	translate RGBA to String
 ///	@param	r   aiColor.r
 ///	@param	g   aiColor.g
@@ -153,14 +152,14 @@ std::string DecimalToHexa( T toConvert ) {
 ///	@param	a   aiColor.a
 ///	@param	with_head   # 
 ///	@return	The hexadecimal string, is empty in case of an error.
-AI_FORCE_INLINE
-std::string Rgba2Hex(int r, int g, int b, int a, bool with_head)
-{
+AI_FORCE_INLINE std::string Rgba2Hex(int r, int g, int b, int a, bool with_head) {
 	std::stringstream ss;
-	if (with_head)
+	if (with_head) {
 		ss << "#";
+    }
 	ss << std::hex << (r << 24 | g << 16 | b << 8 | a);
-	return ss.str();
+	
+    return ss.str();
 }
 
 #endif // INCLUDED_AI_STRINGUTILS_H

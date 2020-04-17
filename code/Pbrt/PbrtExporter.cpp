@@ -114,8 +114,11 @@ PbrtExporter::PbrtExporter (
     // Write metadata to file
     WriteMetaData();
 
-    // Write preamble
-    WritePreamble();
+    // Write scene-wide rendering options
+    WriteSceneWide();
+
+    // Write geometry
+    WriteGeometry();
 
     // Write World Description
     WriteWorldDefinition();
@@ -127,6 +130,9 @@ PbrtExporter::PbrtExporter (
     // explicitly release file pointer,
     // so we don't have to rely on class destruction.
     outfile.reset();
+
+    // TODO Prettify the output
+    // TODO Do Animation
 }
 
 // Destructor
@@ -135,7 +141,7 @@ PbrtExporter::~PbrtExporter() {
 }
 
 void PbrtExporter::WriteHeader() {
-
+    // TODO
 }
 
 void PbrtExporter::WriteMetaData() {
@@ -189,18 +195,117 @@ void PbrtExporter::WriteMetaData() {
                 break;
             }
             case AI_AIVECTOR3D :
-                
+                // TODO
+                mOutput << " Vector3D (unable to print)" << std::endl;
+                break;
+            default:
+                // AI_META_MAX and FORCE_32BIT
+                mOutput << " META_MAX or FORCE_32Bit (unable to print)" << std::endl;
                 break;
         }
-        mOutput << std::endl;
     }
 }
 
-void PbrtExporter::WritePreamble() {
+void PbrtExporter::WriteSceneWide() {
+    // Cameras
+    WriteCameras();
 
+    // Samplers
+   
+    // Film
+   
+    // Filters
+   
+    // Integrators
+   
+    // Accelerators
+   
+    // Participating Media
 }
 
 void PbrtExporter::WriteWorldDefinition() {
+
+}
+
+void PbrtExporter::WriteCameras() {
+    mOutput << std::endl;
+    mOutput << "# Writing Camera data:" << std::endl;
+    mOutput << "# - Number of Cameras found in scene: ";
+    mOutput << mScene->mNumCameras << std::endl;
+    
+    if (mScene->mNumCameras == 0){
+        mOutput << "# - No Cameras found in the scene" << std::endl;
+        return;
+    }
+
+    if (mScene->mNumCameras > 1) {
+        mOutput << "# - Multiple Cameras found in scene" << std::endl;
+        mOutput << "#   - Defaulting to first Camera specified" << std::endl;
+    }
+    
+    for(int i = 0; i < mScene->mNumCameras; i++){
+        WriteCamera(i);
+    }
+}
+
+void PbrtExporter::WriteCamera(int i) {
+    auto camera = mScene->mCameras[i]; 
+    bool cameraActive = i == 0;
+
+    mOutput << "# - Camera " << i+1  <<  ": "
+        << camera->mName.C_Str() << std::endl;
+
+    // Get camera aspect ratio
+    // IMMEDIATELY
+
+    // Get camera hfov
+    if (!cameraActive)
+        mOutput << "# ";
+    mOutput << "\"float hfov_" << camera->mName.C_Str() << "\" ["
+        << AI_RAD_TO_DEG(camera->mHorizontalFOV)
+        << "]" << std::endl;
+
+    // Get Camera clipping planes?
+    // TODO
+
+    // Get camera transform
+    // Isn't optimally efficient, but is the simplest implementation
+    //   Get camera node
+    auto cameraNode = mScene->mRootNode->FindNode(camera->mName);
+
+    if (!cameraNode) {
+        mOutput << "# ERROR: Camera declared but not found in scene tree" << std::endl;
+    }
+    else {
+        std::vector<aiMatrix4x4> matrixChain;
+        auto tempNode = cameraNode;
+        while(tempNode) {
+            matrixChain.insert(matrixChain.begin(), tempNode->mTransformation);
+            tempNode = tempNode->mParent;
+        }
+
+        aiMatrix4x4 w2c = matrixChain[0];
+        for(int i = 1; i < matrixChain.size(); i++){
+            w2c *= matrixChain[i];
+        }
+        
+        if (!cameraActive)
+            mOutput << "# ";
+
+        mOutput << "Transform "
+            << w2c.a1 << " " << w2c.a2 << " " << w2c.a3 << " " << w2c.a4 << " "
+            << w2c.b1 << " " << w2c.b2 << " " << w2c.b3 << " " << w2c.b4 << " "
+            << w2c.c1 << " " << w2c.c2 << " " << w2c.c3 << " " << w2c.c4 << " "
+            << w2c.d1 << " " << w2c.d2 << " " << w2c.d3 << " " << w2c.d4
+            << std::endl;
+    }
+    
+    // Print camera descriptor
+
+}
+
+
+void PbrtExporter::WriteGeometry() {
 
 }
 

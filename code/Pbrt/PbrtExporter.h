@@ -105,11 +105,19 @@ private:
     // Writing the metadata into a comment
     void WriteMetaData();
 
-    // Writing the pbrt file preamble
-    void WritePreamble();
+    // Writing the pbrt scene-wide rendering options
+    void WriteSceneWide();
+
+    // Writing the geometry to distinct files
+    void WriteGeometry();
 
     // Writing the pbrt world defintion
     void WriteWorldDefinition();
+
+
+    // Writing the Camera data
+    void WriteCameras();
+    void WriteCamera(int i);
 };
 
 } // namespace Assimp

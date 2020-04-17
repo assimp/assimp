@@ -181,7 +181,7 @@ bool D3MFExporter::export3DModel() {
 
     writeHeader();
     mModelOutput << "<" << XmlTag::model << " " << XmlTag::model_unit << "=\"millimeter\""
-            << "xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">"
+            << " xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">"
             << std::endl;
     mModelOutput << "<" << XmlTag::resources << ">";
     mModelOutput << std::endl;
@@ -212,7 +212,7 @@ bool D3MFExporter::export3DModel() {
 }
 
 void D3MFExporter::writeHeader() {
-    mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
+    mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     mModelOutput << std::endl;
 }
 
@@ -296,7 +296,7 @@ void D3MFExporter::writeObjects() {
         if ( nullptr == currentNode ) {
             continue;
         }
-        mModelOutput << "<" << XmlTag::object << " id=\"" << currentNode->mName.C_Str() << "\" type=\"model\">";
+        mModelOutput << "<" << XmlTag::object << " id=\"" << i + 2 << "\" type=\"model\">";
         mModelOutput << std::endl;
         for ( unsigned int j = 0; j < currentNode->mNumMeshes; ++j ) {
             aiMesh *currentMesh = mScene->mMeshes[ currentNode->mMeshes[ j ] ];
@@ -360,7 +360,7 @@ void D3MFExporter::writeBuild() {
     mModelOutput << "<" << XmlTag::build << ">" << std::endl;
 
     for ( size_t i = 0; i < mBuildItems.size(); ++i ) {
-        mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 1 << "\"/>";
+        mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 2 << "\"/>";
         mModelOutput << std::endl;
     }
     mModelOutput << "</" << XmlTag::build << ">";

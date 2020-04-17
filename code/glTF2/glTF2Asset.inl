@@ -280,6 +280,11 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
         throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" is not a JSON object");
     }
 
+    if (mRecursiveReferenceCheck.find(i) != mRecursiveReferenceCheck.end()) {
+        throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" has recursive reference to itself");
+    }
+    mRecursiveReferenceCheck.insert(i);
+
     // Unique ptr prevents memory leak in case of Read throws an exception
     auto inst = std::unique_ptr<T>(new T());
     inst->id = std::string(mDictId) + "_" + to_string(i);
@@ -287,7 +292,9 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
 
-    return Add(inst.release());
+    Ref<T> result = Add(inst.release());
+    mRecursiveReferenceCheck.erase(i);
+    return result;
 }
 
 template <class T>
@@ -508,18 +515,23 @@ inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
 }
 
 inline void Buffer::Grow(size_t amount) {
-    if (amount <= 0) return;
+    if (amount <= 0) {
+        return;
+    }
+    
+    // Capacity is big enough
     if (capacity >= byteLength + amount) {
         byteLength += amount;
         return;
     }
 
-    // Shift operation is standard way to divide integer by 2, it doesn't cast it to float back and forth, also works for odd numbers,
-    // originally it would look like: static_cast<size_t>(capacity * 1.5f)
-    capacity = std::max(capacity + (capacity >> 1), byteLength + amount);
+    // Just allocate data which we need
+    capacity = byteLength + amount;
 
     uint8_t *b = new uint8_t[capacity];
-    if (mData) memcpy(b, mData.get(), byteLength);
+    if (nullptr != mData) {
+        memcpy(b, mData.get(), byteLength);
+    }
     mData.reset(b, std::default_delete<uint8_t[]>());
     byteLength += amount;
 }
@@ -608,10 +620,13 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
-template <class T>
-bool Accessor::ExtractData(T *&outData) {
-    uint8_t *data = GetPointer();
-    if (!data) return false;
+template<class T>
+void Accessor::ExtractData(T *&outData)
+{
+    uint8_t* data = GetPointer();
+    if (!data) {
+        throw DeadlyImportError("GLTF: data is NULL");
+    }
 
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
@@ -631,8 +646,6 @@ bool Accessor::ExtractData(T *&outData) {
             memcpy(outData + i, data + i * stride, elemSize);
         }
     }
-
-    return true;
 }
 
 inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t src_stride) {

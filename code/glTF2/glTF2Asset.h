@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <list>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -81,14 +82,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #else
 #define gltf_unordered_map map
+#define gltf_unordered_set set
 #endif
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #include <unordered_map>
+#include <unordered_set>
 #if _MSC_VER > 1600
 #define gltf_unordered_map unordered_map
+#define gltf_unordered_set unordered_set
 #else
 #define gltf_unordered_map tr1::unordered_map
+#define gltf_unordered_set tr1::unordered_set
 #endif
 #endif
 
@@ -375,8 +380,8 @@ struct Accessor : public Object {
 
     inline uint8_t *GetPointer();
 
-    template <class T>
-    bool ExtractData(T *&outData);
+    template<class T>
+    void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
 
@@ -873,6 +878,8 @@ class LazyDict : public LazyDictBase {
     const char *mExtId; //! ID of the extension defining the dictionary
     Value *mDict; //! JSON dictionary object
     Asset &mAsset; //! The asset instance
+
+    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck;  //! Used by Retrieve to prevent recursive lookups
 
     void AttachToDocument(Document &doc);
     void DetachFromDocument();

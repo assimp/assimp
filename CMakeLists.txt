@@ -238,11 +238,6 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-IF( UNIX )
-  # Use GNUInstallDirs for Unix predefined directories
-  INCLUDE(GNUInstallDirs)
-ENDIF()
-
 # Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
@@ -350,14 +345,6 @@ ELSE()
   SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 ENDIF ()
 
-# Cache these to allow the user to override them manually.
-SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
-  "Path the built library files are installed to." )
-SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
-  "Path the header files are installed to." )
-SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
-  "Path the tool executables are installed to." )
-
 get_cmake_property(is_multi_config GENERATOR_IS_MULTI_CONFIG)
 
 IF (ASSIMP_INJECT_DEBUG_POSTFIX AND (is_multi_config OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
@@ -417,6 +404,28 @@ ELSE()
   else()
     set(BUILD_LIB_TYPE STATIC)
   endif()
+
+  IF( UNIX )
+    # Use GNUInstallDirs for Unix predefined directories
+    INCLUDE(GNUInstallDirs)
+
+    SET( ASSIMP_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+    SET( ASSIMP_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+    SET( ASSIMP_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+  ELSE()
+    # Cache these to allow the user to override them on non-Unix platforms
+    SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
+      "Path the built library files are installed to." )
+    SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
+      "Path the header files are installed to." )
+    SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
+      "Path the tool executables are installed to." )
+
+    SET(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_INCLUDE_INSTALL_DIR})
+    SET(CMAKE_INSTALL_FULL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR})
+    SET(CMAKE_INSTALL_FULL_BINDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_BIN_INSTALL_DIR})
+  ENDIF()
+
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets.cmake" @ONLY IMMEDIATE)
   IF (is_multi_config)

@@ -7,6 +7,8 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 
 set(ASSIMP_BUILD_SHARED_LIBS @BUILD_SHARED_LIBS@)
 
+get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+
 if(MSVC)
   if(MSVC_TOOLSET_VERSION)
     set(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
@@ -35,8 +37,6 @@ if(MSVC)
   endif()
   set(ASSIMP_LIBRARY_SUFFIX "@ASSIMP_LIBRARY_SUFFIX@-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" )
 
-  file(TO_NATIVE_PATH "${_IMPORT_PREFIX}" _IMPORT_PREFIX)
-
   if(ASSIMP_BUILD_SHARED_LIBS)
     set(sharedLibraryName "assimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@")
     set(importLibraryName "assimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_IMPORT_LIBRARY_SUFFIX@")
@@ -44,22 +44,22 @@ if(MSVC)
     # Import target "assimp::assimp" for configuration "Debug"
     set_property(TARGET assimp::assimp APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
     set_target_properties(assimp::assimp PROPERTIES
-      IMPORTED_IMPLIB_DEBUG "${_IMPORT_PREFIX}/lib/${importLibraryName}"
-      IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/bin/${sharedLibraryName}"
+      IMPORTED_IMPLIB_DEBUG "@CMAKE_INSTALL_FULL_LIBDIR@/${importLibraryName}"
+      IMPORTED_LOCATION_DEBUG "@CMAKE_INSTALL_FULL_BINDIR@/${sharedLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/lib/${importLibraryName}")
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/bin/${sharedLibraryName}" )
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${importLibraryName}")
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_BINDIR@/${sharedLibraryName}" )
   else()
     set(staticLibraryName "assimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_STATIC_LIBRARY_SUFFIX@")
 
     # Import target "assimp::assimp" for configuration "Debug"
     set_property(TARGET assimp::assimp APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
     set_target_properties(assimp::assimp PROPERTIES
-      IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/lib/${staticLibraryName}"
+      IMPORTED_LOCATION_DEBUG "@CMAKE_INSTALL_FULL_LIBDIR@/${staticLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/lib/${staticLibraryName}")
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${staticLibraryName}")
   endif()
 
 else()
@@ -75,22 +75,19 @@ else()
     endif()
     set_target_properties(assimp::assimp PROPERTIES
       IMPORTED_SONAME_DEBUG "${sharedLibraryName}"
-      IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/lib/${sharedLibraryName}"
+      IMPORTED_LOCATION_DEBUG "@CMAKE_INSTALL_FULL_LIBDIR@/${sharedLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/lib/${sharedLibraryName}" )
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${sharedLibraryName}" )
   else()
     set(staticLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_STATIC_LIBRARY_SUFFIX@")
     set_target_properties(assimp::assimp PROPERTIES
-      IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/lib/${staticLibraryName}"
+      IMPORTED_LOCATION_DEBUG "@CMAKE_INSTALL_FULL_LIBDIR@/${staticLibraryName}"
     )
     list(APPEND _IMPORT_CHECK_TARGETS assimp::assimp )
-    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "${_IMPORT_PREFIX}/lib/${staticLibraryName}" )
+    list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${staticLibraryName}" )
   endif()
 endif()
-
-
-
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

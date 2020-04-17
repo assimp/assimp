@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -39,8 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#pragma once
 #ifndef INCLUDED_AI_STRINGUTILS_H
 #define INCLUDED_AI_STRINGUTILS_H
+
+#ifdef __GNUC__
+#   pragma GCC system_header
+#endif
 
 #include <assimp/defs.h>
 
@@ -134,7 +139,7 @@ std::string DecimalToHexa( T toConvert ) {
     ss >> result;
 
     for ( size_t i = 0; i < result.size(); ++i ) {
-        result[ i ] = toupper( result[ i ] );
+        result[ i ] = (char) toupper( result[ i ] );
     }
 
     return result;

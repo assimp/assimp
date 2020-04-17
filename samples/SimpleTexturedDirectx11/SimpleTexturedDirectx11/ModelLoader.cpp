@@ -22,7 +22,7 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device * dev, ID3D11DeviceContext * devc
 		aiProcess_Triangulate |
 		aiProcess_ConvertToLeftHanded);
 
-	if (pScene == NULL)
+	if (pScene == nullptr)
 		return false;
 
 	this->directory_ = filename.substr(0, filename.find_last_of("/\\"));

@@ -280,6 +280,11 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
         throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" is not a JSON object");
     }
 
+    if (mRecursiveReferenceCheck.find(i) != mRecursiveReferenceCheck.end()) {
+        throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" has recursive reference to itself");
+    }
+    mRecursiveReferenceCheck.insert(i);
+
     // Unique ptr prevents memory leak in case of Read throws an exception
     auto inst = std::unique_ptr<T>(new T());
     inst->id = std::string(mDictId) + "_" + to_string(i);
@@ -287,7 +292,9 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
 
-    return Add(inst.release());
+    Ref<T> result = Add(inst.release());
+    mRecursiveReferenceCheck.erase(i);
+    return result;
 }
 
 template <class T>
@@ -613,10 +620,13 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
-template <class T>
-bool Accessor::ExtractData(T *&outData) {
-    uint8_t *data = GetPointer();
-    if (!data) return false;
+template<class T>
+void Accessor::ExtractData(T *&outData)
+{
+    uint8_t* data = GetPointer();
+    if (!data) {
+        throw DeadlyImportError("GLTF: data is NULL");
+    }
 
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
@@ -636,8 +646,6 @@ bool Accessor::ExtractData(T *&outData) {
             memcpy(outData + i, data + i * stride, elemSize);
         }
     }
-
-    return true;
 }
 
 inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t src_stride) {

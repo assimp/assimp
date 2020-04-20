@@ -207,12 +207,10 @@ void PbrtExporter::WriteMetaData() {
 }
 
 void PbrtExporter::WriteSceneWide() {
-    // Cameras
+    // Cameras & Film
     WriteCameras();
 
     // Samplers
-   
-    // Film
    
     // Filters
    
@@ -256,14 +254,52 @@ void PbrtExporter::WriteCamera(int i) {
         << camera->mName.C_Str() << std::endl;
 
     // Get camera aspect ratio
-    // IMMEDIATELY
+    float aspect = camera->mAspect;
+    if(aspect == 0){
+        mOutput << "# No aspect ratio set, defaulting to 4/3" << std::endl;
+        aspect = 4.0/3.0;
+    }
+    if(!cameraActive)
+        mOutput << "# ";
+    mOutput << "\"float aspect_" << camera->mName.C_Str() << "\" ["
+        << aspect << "]" << std::endl;
 
-    // Get camera hfov
+    // Get camera fov
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "\"float hfov_" << camera->mName.C_Str() << "\" ["
-        << AI_RAD_TO_DEG(camera->mHorizontalFOV)
-        << "]" << std::endl;
+    if (aspect >= 1.0) {
+        mOutput << "\"float fov_" << camera->mName.C_Str() << "\" ["
+            << AI_RAD_TO_DEG(camera->mHorizontalFOV)
+            << "]" << std::endl;
+    } else {
+        mOutput << "\"float fov_" << camera->mName.C_Str() << "\" ["
+            << AI_RAD_TO_DEG(camera->mHorizontalFOV * aspect)
+            << "]" << std::endl;
+    }
+
+    // Get Film xres and yres
+    if(!cameraActive)
+        mOutput << "# ";
+    mOutput << "\"integer xres_" << camera->mName.C_Str() << "\" ["
+        << (int)640 << "]" << std::endl;
+    if(!cameraActive)
+        mOutput << "# ";
+    mOutput << "\"integer yres_" << camera->mName.C_Str() << "\" ["
+        << (int)round(640/aspect) << "]" << std::endl;
+
+
+    // Print Film for this camera
+    if (!cameraActive)
+        mOutput << "# ";
+    mOutput << "Film \"image\" " << std::endl;
+    if (!cameraActive)
+        mOutput << "# ";
+    mOutput << "    \"integer xresolution\" \"xres_" 
+        << camera->mName.C_Str() << "\"" << std::endl;
+    if (!cameraActive)
+        mOutput << "# ";
+    mOutput << "    \"integer yresolution\" \"yres_" 
+        << camera->mName.C_Str() << "\"" << std::endl;
 
     // Get Camera clipping planes?
     // TODO
@@ -272,7 +308,6 @@ void PbrtExporter::WriteCamera(int i) {
     // Isn't optimally efficient, but is the simplest implementation
     //   Get camera node
     auto cameraNode = mScene->mRootNode->FindNode(camera->mName);
-
     if (!cameraNode) {
         mOutput << "# ERROR: Camera declared but not found in scene tree" << std::endl;
     }
@@ -301,7 +336,10 @@ void PbrtExporter::WriteCamera(int i) {
     }
     
     // Print camera descriptor
-
+    if(!cameraActive)
+        mOutput << "# ";
+    mOutput << "Camera \"perspective\" \"float fov\" " 
+        << "\"fov_" << camera->mName.C_Str() << "\"" << std::endl;
 }
 
 

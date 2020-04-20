@@ -145,7 +145,9 @@ void PbrtExporter::WriteHeader() {
 }
 
 void PbrtExporter::WriteMetaData() {
+    mOutput << "#############################" << std::endl;
     mOutput << "# Writing out scene metadata:" << std::endl;
+    mOutput << "#############################" << std::endl;
     aiMetadata* pMetaData = mScene->mMetaData;
     for (int i = 0; i < pMetaData->mNumProperties; i++) {
         mOutput << "# - ";
@@ -210,24 +212,36 @@ void PbrtExporter::WriteSceneWide() {
     // Cameras & Film
     WriteCameras();
 
+    mOutput << std::endl;
+    mOutput << "#####################################################################" << std::endl;
+    mOutput << "# Assimp does not support explicit Sampler, Filter, Integrator, Accel" << std::endl;
+    mOutput << "#####################################################################" << std::endl;
+    mOutput << "# Setting to reasonable default values" << std::endl;
+
     // Samplers
+    mOutput << "Sampler \"halton\" \"integer pixelsamples\" [16]" << std::endl;
    
     // Filters
-   
+    mOutput << "Filter \"box\"" << std::endl;
+
     // Integrators
+    mOutput << "Integrator \"path\" \"integer maxdepth\" [5]" << std::endl;
    
     // Accelerators
+    mOutput << "Accelerator \"bvh\"" << std::endl;
    
     // Participating Media
-}
-
-void PbrtExporter::WriteWorldDefinition() {
-
+    mOutput << std::endl;
+    mOutput << "#############################################" << std::endl;
+    mOutput << "# Assimp does not support Participating Media" << std::endl;
+    mOutput << "#############################################" << std::endl;
 }
 
 void PbrtExporter::WriteCameras() {
     mOutput << std::endl;
-    mOutput << "# Writing Camera data:" << std::endl;
+    mOutput << "###############################" << std::endl;
+    mOutput << "# Writing Camera and Film data:" << std::endl;
+    mOutput << "###############################" << std::endl;
     mOutput << "# - Number of Cameras found in scene: ";
     mOutput << mScene->mNumCameras << std::endl;
     
@@ -289,6 +303,7 @@ void PbrtExporter::WriteCamera(int i) {
 
 
     // Print Film for this camera
+    // TODO print to an explicit image file name
     if (!cameraActive)
         mOutput << "# ";
     mOutput << "Film \"image\" " << std::endl;
@@ -340,6 +355,10 @@ void PbrtExporter::WriteCamera(int i) {
         mOutput << "# ";
     mOutput << "Camera \"perspective\" \"float fov\" " 
         << "\"fov_" << camera->mName.C_Str() << "\"" << std::endl;
+}
+
+void PbrtExporter::WriteWorldDefinition() {
+
 }
 
 

@@ -66,7 +66,7 @@ public:
     SmallVector() : 
             mStorage(mInplaceStorage),
             mSize(0),
-            mCapacity(Capasity) {
+            mCapacity(Capacity) {
         // empty
     }
 

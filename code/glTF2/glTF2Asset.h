@@ -725,6 +725,7 @@ struct Mesh : public Object {
     std::vector<Primitive> primitives;
 
     std::vector<float> weights;
+    std::vector<std::string> targetNames;
 
     Mesh() {}
 

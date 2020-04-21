@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -57,89 +56,82 @@ namespace Assimp {
 /** \brief Small vector with inplace storage. Reduces heap allocations when list is shorter
 than initial capasity
  */
-template<typename T, unsigned int Capasity>
-class SmallVector
-{
+template<typename T, unsigned int Capacity>
+class SmallVector {
 public:
-    SmallVector()
-        : mStorage(mInplaceStorage)
-        , mSize(0)
-        , mCapasity(Capasity)
-    {
+    SmallVector() : 
+            mStorage(mInplaceStorage),
+            mSize(0),
+            mCapacity(Capasity) {
+        // empty
     }
 
-    ~SmallVector()
-    {
+    ~SmallVector() {
         if (mStorage != mInplaceStorage) {
             delete [] mStorage;
         }
     }
 
-    void push_back(const T& item)
-    {
-        if (mSize < mCapasity) {
+    void push_back(const T& item) {
+        if (mSize < mCapacity) {
             mStorage[mSize++] = item;
+            return;
         }
-        else push_back_and_grow(item);
+        
+        push_back_and_grow(item);
     }
 
-    void resize(unsigned int newSize)
-    {
-        if (newSize > mCapasity)
+    void resize(unsigned int newSize) {
+        if (newSize > mCapacity) {
             grow(newSize);
+        }
         mSize = newSize;
     }
 
-    unsigned int size() const
-    {
+    size_t size() const {
         return mSize;
     }
 
-    T* begin()
-    {
+    T* begin() {
         return mStorage;
     }
 
-    T* end()
-    {
+    T* end() {
         return &mStorage[mSize];
     }
 
-    T* begin() const
-    {
+    T* begin() const {
         return mStorage;
     }
 
-    T* end() const
-    {
+    T* end() const {
         return &mStorage[mSize];
     }
 
 private:
-    void grow(unsigned int newCapasity)
-    {
-        T* pOldStorage = mStorage;
-        T* pNewStorage = new T[newCapasity];
+    void grow( size_t newCapacity) {
+        T* oldStorage = mStorage;
+        T* newStorage = new T[newCapacity];
 
-        std::memcpy(pNewStorage, pOldStorage, mSize * sizeof(T));
+        std::memcpy(newStorage, oldStorage, mSize * sizeof(T));
 
-        mStorage = pNewStorage;
-        mCapasity = newCapasity;
+        mStorage = newStorage;
+        mCapacity = newCapacity;
 
-        if (pOldStorage != mInplaceStorage)
-            delete [] pOldStorage;
+        if (oldStorage != mInplaceStorage) {
+            delete [] oldStorage;
+        }
     }
 
-    void push_back_and_grow(const T& item)
-    {
-        grow(mCapasity + Capasity);
+    void push_back_and_grow(const T& item) {
+        grow(mCapacity + Capacity);
 
         mStorage[mSize++] = item;
     }
 
     T* mStorage;
-    unsigned int mSize;
-    unsigned int mCapasity;
+    size_t mSize;
+    size_t mCapacity;
     T mInplaceStorage[Capasity];
 };
 

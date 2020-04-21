@@ -53,12 +53,16 @@ Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data S
 namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
-/** \brief Small vector with inplace storage. Reduces heap allocations when list is shorter
-than initial capasity
- */
+/// @brief Small vector with inplace storage. 
+///
+/// Reduces heap allocations when list is shorter. It uses a small array for a dedicated size.
+/// When the growing gets bigger than this small cache a dynamic growing algorithm will be 
+/// used.
+// --------------------------------------------------------------------------------------------
 template<typename T, unsigned int Capacity>
 class SmallVector {
 public:
+    /// @brief  The default class constructor.
     SmallVector() : 
             mStorage(mInplaceStorage),
             mSize(0),
@@ -66,12 +70,15 @@ public:
         // empty
     }
 
+    /// @brief  The class destructor.
     ~SmallVector() {
         if (mStorage != mInplaceStorage) {
             delete [] mStorage;
         }
     }
 
+    /// @brief  Will push a new item. The capacity will grow in case of a too small capacity.
+    /// @param  item    [in] The item to push at the end of the vector.
     void push_back(const T& item) {
         if (mSize < mCapacity) {
             mStorage[mSize++] = item;
@@ -81,32 +88,49 @@ public:
         push_back_and_grow(item);
     }
 
-    void resize(unsigned int newSize) {
+    /// @brief  Will resize the vector.
+    /// @param  newSize     [in] The new size.
+    void resize(size_t newSize) {
         if (newSize > mCapacity) {
             grow(newSize);
         }
         mSize = newSize;
     }
 
+    /// @brief  Returns the current size of the vector.
+    /// @return The current size.
     size_t size() const {
         return mSize;
     }
 
+    /// @brief  Returns a pointer to the first item.
+    /// @return The first item as a pointer.
     T* begin() {
         return mStorage;
     }
 
+    /// @brief  Returns a pointer to the end.
+    /// @return The end as a pointer.
     T* end() {
         return &mStorage[mSize];
     }
 
+    /// @brief  Returns a const pointer to the first item.
+    /// @return The first item as a const pointer.
     T* begin() const {
         return mStorage;
     }
 
+    /// @brief  Returns a const pointer to the end.
+    /// @return The end as a const pointer.
     T* end() const {
         return &mStorage[mSize];
     }
+
+    SmallVector(const SmallVector &) = delete;
+    SmallVector(SmallVector &&) = delete;
+    SmallVector &operator = (const SmallVector &) = delete;
+    SmallVector &operator = (SmallVector &&) = delete;
 
 private:
     void grow( size_t newCapacity) {

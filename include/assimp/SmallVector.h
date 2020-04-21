@@ -156,7 +156,7 @@ private:
     T* mStorage;
     size_t mSize;
     size_t mCapacity;
-    T mInplaceStorage[Capasity];
+    T mInplaceStorage[Capacity];
 };
 
 } // end namespace Assimp

@@ -114,10 +114,23 @@ private:
     // Writing the pbrt world defintion
     void WriteWorldDefinition();
 
-
     // Writing the Camera data
     void WriteCameras();
     void WriteCamera(int i);
+    
+    // Writing the Texture data
+    void WriteTextures();
+
+    // Writing the Material data
+    void WriteMaterials();
+    void WriteMaterial(int i);
+
+    // Writing the Light data
+    void WriteLights();
+    
+    // Writing the Shape data
+    void WriteShapes();
+    void WriteShape(int i);
 };
 
 } // namespace Assimp

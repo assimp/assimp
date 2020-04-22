@@ -131,7 +131,6 @@ PbrtExporter::PbrtExporter (
     // so we don't have to rely on class destruction.
     outfile.reset();
 
-    // TODO Prettify the output
     // TODO Do Animation
 }
 
@@ -142,6 +141,10 @@ PbrtExporter::~PbrtExporter() {
 
 void PbrtExporter::WriteHeader() {
     // TODO
+
+    // TODO warn user if scene has animations
+    // TODO warn user if mScene->mFlags is nonzero
+    // TODO warn if a metadata defines the ambient term
 }
 
 void PbrtExporter::WriteMetaData() {
@@ -209,6 +212,11 @@ void PbrtExporter::WriteMetaData() {
 }
 
 void PbrtExporter::WriteSceneWide() {
+    // If there are 0 cameras in the scene, it is purely geometric
+    //   Don't write any scene wide description
+    if (mScene->mNumCameras == 0)
+        return;
+    
     // Cameras & Film
     WriteCameras();
 
@@ -222,7 +230,7 @@ void PbrtExporter::WriteSceneWide() {
     mOutput << "Sampler \"halton\" \"integer pixelsamples\" [16]" << std::endl;
    
     // Filters
-    mOutput << "Filter \"box\"" << std::endl;
+    mOutput << "PixelFilter \"box\"" << std::endl;
 
     // Integrators
     mOutput << "Integrator \"path\" \"integer maxdepth\" [5]" << std::endl;
@@ -231,10 +239,7 @@ void PbrtExporter::WriteSceneWide() {
     mOutput << "Accelerator \"bvh\"" << std::endl;
    
     // Participating Media
-    mOutput << std::endl;
-    mOutput << "#############################################" << std::endl;
-    mOutput << "# Assimp does not support Participating Media" << std::endl;
-    mOutput << "#############################################" << std::endl;
+    // Assimp does not support participating media
 }
 
 void PbrtExporter::WriteCameras() {
@@ -270,54 +275,38 @@ void PbrtExporter::WriteCamera(int i) {
     // Get camera aspect ratio
     float aspect = camera->mAspect;
     if(aspect == 0){
-        mOutput << "# No aspect ratio set, defaulting to 4/3" << std::endl;
         aspect = 4.0/3.0;
+        mOutput << "#   - Aspect ratio : 1.33333 (no aspect found, defaulting to 4/3)" << std::endl;
+    } else {
+        mOutput << "#   - Aspect ratio : " << aspect << std::endl;
     }
-    if(!cameraActive)
-        mOutput << "# ";
-    mOutput << "\"float aspect_" << camera->mName.C_Str() << "\" ["
-        << aspect << "]" << std::endl;
 
     // Get camera fov
-    if (!cameraActive)
-        mOutput << "# ";
-    if (aspect >= 1.0) {
-        mOutput << "\"float fov_" << camera->mName.C_Str() << "\" ["
-            << AI_RAD_TO_DEG(camera->mHorizontalFOV)
-            << "]" << std::endl;
-    } else {
-        mOutput << "\"float fov_" << camera->mName.C_Str() << "\" ["
-            << AI_RAD_TO_DEG(camera->mHorizontalFOV * aspect)
-            << "]" << std::endl;
-    }
+    float hfov = AI_RAD_TO_DEG(camera->mHorizontalFOV);
+    float fov;
+    mOutput << "#   - Horizontal fov : " << hfov << std::endl;
+    if (aspect >= 1.0)
+        fov = hfov;
+    else
+        fov = hfov * aspect;
 
     // Get Film xres and yres
-    if(!cameraActive)
-        mOutput << "# ";
-    mOutput << "\"integer xres_" << camera->mName.C_Str() << "\" ["
-        << (int)640 << "]" << std::endl;
-    if(!cameraActive)
-        mOutput << "# ";
-    mOutput << "\"integer yres_" << camera->mName.C_Str() << "\" ["
-        << (int)round(640/aspect) << "]" << std::endl;
-
+    int xres = 640;
+    int yres = (int)round(640/aspect);
 
     // Print Film for this camera
-    // TODO print to an explicit image file name
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "Film \"image\" " << std::endl;
+    mOutput << "Film \"image\" \"string filename\" \""
+        << mFile << "_pbrt.exr\"" << std::endl;
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "    \"integer xresolution\" \"xres_" 
-        << camera->mName.C_Str() << "\"" << std::endl;
+    mOutput << "    \"integer xresolution\" ["
+        << xres << "]" << std::endl;
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "    \"integer yresolution\" \"yres_" 
-        << camera->mName.C_Str() << "\"" << std::endl;
-
-    // Get Camera clipping planes?
-    // TODO
+    mOutput << "    \"integer yresolution\" ["
+        << yres << "]" << std::endl;
 
     // Get camera transform
     // Isn't optimally efficient, but is the simplest implementation
@@ -342,28 +331,146 @@ void PbrtExporter::WriteCamera(int i) {
         if (!cameraActive)
             mOutput << "# ";
 
-        mOutput << "Transform "
+        mOutput << "Transform ["
             << w2c.a1 << " " << w2c.a2 << " " << w2c.a3 << " " << w2c.a4 << " "
             << w2c.b1 << " " << w2c.b2 << " " << w2c.b3 << " " << w2c.b4 << " "
             << w2c.c1 << " " << w2c.c2 << " " << w2c.c3 << " " << w2c.c4 << " "
             << w2c.d1 << " " << w2c.d2 << " " << w2c.d3 << " " << w2c.d4
-            << std::endl;
+            << "]" << std::endl;
     }
     
     // Print camera descriptor
     if(!cameraActive)
         mOutput << "# ";
     mOutput << "Camera \"perspective\" \"float fov\" " 
-        << "\"fov_" << camera->mName.C_Str() << "\"" << std::endl;
+        << "[" << fov << "]" << std::endl;
+}
+
+void PbrtExporter::WriteGeometry() {
+    // - figure out if should all be in 1 file (no camera?)
+    // - if more than 1 file, place each geo in separate directory
+    // - NEED to figure out how meshes are/should be split up
+
+    // create geometry_<filename> folder
+    // bool mIOSystem->CreateDirectory(path)
+    
+    // TODO worry about sequestering geo later, after giant print
 }
 
 void PbrtExporter::WriteWorldDefinition() {
+    mOutput << std::endl;
+    mOutput << "############################" << std::endl;
+    mOutput << "# Writing World Definitiion:" << std::endl;
+    mOutput << "############################" << std::endl;
+    
+    // Print WorldBegin
+    mOutput << "WorldBegin" << std::endl;
+    
+    // Print Textures
+    WriteTextures();
 
+    // Print materials
+    WriteMaterials();
+
+    // Print Lights (w/o geometry)
+    WriteLights();
+    
+    // Print Shapes
+    WriteShapes();
+    
+    // Print Object Instancing (no emissive)
+
+    // Print Area Lights (w/ geometry)
+
+    // Print WorldEnd
+    mOutput << std::endl << "WorldEnd";
 }
 
 
-void PbrtExporter::WriteGeometry() {
+void PbrtExporter::WriteTextures() {
+    mOutput << std::endl;
+    mOutput << "###################" << std::endl;
+    mOutput << "# Writing Textures:" << std::endl;
+    mOutput << "###################" << std::endl;
+    mOutput << "# - Number of Textures found in scene: ";
+    mOutput << mScene->mNumTextures << std::endl;
 
+    if (mScene->mNumTextures == 0)
+        return;
+
+    for (int i = 0 ; i < mScene->mNumTextures; i++) {
+        // TODO
+    }
+
+}
+
+void PbrtExporter::WriteMaterials() {
+    mOutput << std::endl;
+    mOutput << "####################" << std::endl;
+    mOutput << "# Writing Materials:" << std::endl;
+    mOutput << "####################" << std::endl;
+    mOutput << "# - Number of Materials found in scene: ";
+    mOutput << mScene->mNumMaterials << std::endl;
+
+    if (mScene->mNumMaterials == 0)
+        return;
+
+    // TODO remove default when numCameras == 0
+    //      For now, only on debug
+    mOutput << "# - Creating a default grey matte material" << std::endl;
+    mOutput << "Material \"matte\" \"rgb Kd\" [.8 .8 .8]" << std::endl; 
+
+    for (int i = 0 ; i < mScene->mNumMaterials; i++) {
+        WriteMaterial(i);
+    }
+
+}
+
+void PbrtExporter::WriteMaterial(int i) {
+    // TODO
+
+    // Use MakeNamedMaterial to give variable names to materials
+}
+
+
+void PbrtExporter::WriteLights() {
+    mOutput << std::endl;
+    mOutput << "#################" << std::endl;
+    mOutput << "# Writing Lights:" << std::endl;
+    mOutput << "#################" << std::endl;
+    mOutput << "# - Number of Lights found in scene: ";
+    mOutput << mScene->mNumLights << std::endl;
+    
+    // TODO remove default ambient term when numCameras == 0
+    //      For now, ambient may only be necessary for debug
+    mOutput << "# - Creating a default blueish ambient light source" << std::endl;
+    mOutput << "LightSource \"infinite\" \"rgb L\" [.4 .45 .5]" << std::endl; 
+
+}
+
+void PbrtExporter::WriteShapes() {
+    mOutput << std::endl;
+    mOutput << "#################" << std::endl;
+    mOutput << "# Writing Shapes:" << std::endl;
+    mOutput << "#################" << std::endl;
+    mOutput << "# - Number of Meshes found in scene: ";
+    mOutput << mScene->mNumMeshes << std::endl;
+
+    if (mScene->mNumMeshes == 0)
+        return;
+
+    for (int i = 0 ; i < mScene->mNumMeshes; i++) {
+        WriteShape(i);
+    }
+}
+
+void PbrtExporter::WriteShape(int i) {
+    // TODO IMMEDIATELY
+    
+    
+    // if aiPrimtiveType == Tri -> you're fine
+    // if aiPrimitiveType == Poly -> use aiProcess_triangulate
+    // if aiPrimitiveType == anything else -> throw error
 }
 
 #endif // ASSIMP_BUILD_NO_PBRT_EXPORTER

@@ -472,6 +472,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					if (mesh.weights.size() > i) {
 						aiAnimMesh.mWeight = mesh.weights[i];
 					}
+					if (mesh.targetNames.size() > i) {
+						aiAnimMesh.mName = mesh.targetNames[i];
+					}
 				}
 			}
 

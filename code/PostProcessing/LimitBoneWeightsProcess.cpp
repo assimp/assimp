@@ -137,14 +137,12 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
 
         // and renormalize the weights
         float sum = 0.0f;
-        for (const Weight* it = vit->begin(); it != vit->end(); ++it)
-        {
+        for (const Weight* it = vit->begin(); it != vit->end(); ++it) {
             sum += it->mWeight;
         }
         if (0.0f != sum) {
             const float invSum = 1.0f / sum;
-            for (Weight* it = vit->begin(); it != vit->end(); ++it)
-            {
+            for (Weight* it = vit->begin(); it != vit->end(); ++it) {
                 it->mWeight *= invSum;
             }
         }

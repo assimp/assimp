@@ -78,11 +78,11 @@ bool LimitBoneWeightsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 {
-	ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
+  ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
 
-	for (unsigned int m = 0; m < pScene->mNumMeshes; ++m) {
-		ProcessMesh(pScene->mMeshes[m]);
-	}
+  for (unsigned int m = 0; m < pScene->mNumMeshes; ++m) {
+    ProcessMesh(pScene->mMeshes[m]);
+  }
 
 	ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess end");
 }

@@ -73,7 +73,7 @@ bool LimitBoneWeightsProcess::IsActive(unsigned int pFlags) const {
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void LimitBoneWeightsProcess::Execute(aiScene *pScene)
+void LimitBoneWeightsProcess::Execute( aiScene *pScene)
 {
     ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
 
@@ -93,7 +93,7 @@ void LimitBoneWeightsProcess::SetupProperties(const Importer *pImp) {
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
-void LimitBoneWeightsProcess::ProcessMesh(aiMesh *pMesh)
+void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
 {
     if (!pMesh->HasBones())
         return;
@@ -104,9 +104,11 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh *pMesh)
     WeightsPerVertex vertexWeights(pMesh->mNumVertices);
     size_t maxVertexWeights = 0;
 
-    for (unsigned int b = 0; b < pMesh->mNumBones; ++b) {
+    for (unsigned int b = 0; b < pMesh->mNumBones; ++b)
+    {
         const aiBone *bone = pMesh->mBones[b];
-        for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
+        for (unsigned int w = 0; w < bone->mNumWeights; ++w)
+        {
             const aiVertexWeight &vw = bone->mWeights[w];
             vertexWeights[vw.mVertexId].push_back(Weight(b, vw.mWeight));
             maxVertexWeights = std::max(maxVertexWeights, vertexWeights[vw.mVertexId].size());
@@ -134,12 +136,14 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh *pMesh)
 
         // and renormalize the weights
         float sum = 0.0f;
-        for (const Weight *it = vit->begin(); it != vit->end(); ++it) {
+        for (const Weight *it = vit->begin(); it != vit->end(); ++it)
+        {
             sum += it->mWeight;
         }
         if (0.0f != sum) {
             const float invSum = 1.0f / sum;
-            for (Weight *it = vit->begin(); it != vit->end(); ++it) {
+            for (Weight *it = vit->begin(); it != vit->end(); ++it)
+            {
                 it->mWeight *= invSum;
             }
         }

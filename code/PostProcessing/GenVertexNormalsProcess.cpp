@@ -160,7 +160,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
     // check whether we can reuse the SpatialSort of a previous step.
     SpatialSort* vertexFinder = nullptr;
     SpatialSort  _vertexFinder;
-    ai_real posEpsilon;
+    ai_real posEpsilon = ai_real( 1e-5 );
     if (shared) {
         std::vector<std::pair<SpatialSort,ai_real> >* avf;
         shared->GetProperty(AI_SPP_SPATIAL_SORT,avf);

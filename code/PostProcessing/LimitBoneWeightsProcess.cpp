@@ -100,7 +100,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
 
     // collect all bone weights per vertex
     typedef SmallVector<Weight,8> VertexWeightArray;
-    typedef std::vector <VertexWeightArray> WeightsPerVertex;
+    typedef std::vector<VertexWeightArray> WeightsPerVertex;
     WeightsPerVertex vertexWeights(pMesh->mNumVertices);
     size_t maxVertexWeights = 0;
 
@@ -109,7 +109,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
         const aiBone* bone = pMesh->mBones[b];
         for (unsigned int w = 0; w < bone->mNumWeights; ++w)
         {
-            const aiVertexWeight &vw = bone->mWeights[w];
+            const aiVertexWeight& vw = bone->mWeights[w];
             vertexWeights[vw.mVertexId].push_back(Weight(b, vw.mWeight));
             maxVertexWeights = std::max(maxVertexWeights, vertexWeights[vw.mVertexId].size());
         }
@@ -137,13 +137,13 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
 
         // and renormalize the weights
         float sum = 0.0f;
-        for (const Weight *it = vit->begin(); it != vit->end(); ++it)
+        for (const Weight* it = vit->begin(); it != vit->end(); ++it)
         {
             sum += it->mWeight;
         }
         if (0.0f != sum) {
             const float invSum = 1.0f / sum;
-            for (Weight *it = vit->begin(); it != vit->end(); ++it)
+            for (Weight* it = vit->begin(); it != vit->end(); ++it)
             {
                 it->mWeight *= invSum;
             }
@@ -159,7 +159,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     // rebuild the vertex weight array for all bones
     for (unsigned int a = 0; a < vertexWeights.size(); ++a)
     {
-        const VertexWeightArray &vw = vertexWeights[a];
+        const VertexWeightArray& vw = vertexWeights[a];
         for (const Weight* it = vw.begin(); it != vw.end(); ++it)
         {
             aiBone* bone = pMesh->mBones[it->mBone];
@@ -170,7 +170,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     // remove empty bones
     unsigned int writeBone = 0;
 
-    for (unsigned int readBone = 0; readBone < pMesh->mNumBones; ++readBone)
+    for (unsigned int readBone = 0; readBone< pMesh->mNumBones; ++readBone)
     {
         aiBone* bone = pMesh->mBones[readBone];
         if (bone->mNumWeights > 0)

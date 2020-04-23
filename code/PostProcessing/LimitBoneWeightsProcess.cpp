@@ -151,7 +151,8 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     }
 
     // clear weight count for all bone
-    for (unsigned int a = 0; a < pMesh->mNumBones; ++a) {
+    for (unsigned int a = 0; a < pMesh->mNumBones; ++a)
+    {
         pMesh->mBones[a]->mNumWeights = 0;
     }
 
@@ -159,9 +160,9 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     for (unsigned int a = 0; a < vertexWeights.size(); ++a)
     {
         const VertexWeightArray &vw = vertexWeights[a];
-        for (const Weight *it = vw.begin(); it != vw.end(); ++it)
+        for (const Weight* it = vw.begin(); it != vw.end(); ++it)
         {
-            aiBone *bone = pMesh->mBones[it->mBone];
+            aiBone* bone = pMesh->mBones[it->mBone];
             bone->mWeights[bone->mNumWeights++] = aiVertexWeight(a, it->mWeight);
         }
     }
@@ -171,7 +172,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
 
     for (unsigned int readBone = 0; readBone < pMesh->mNumBones; ++readBone)
     {
-        aiBone *bone = pMesh->mBones[readBone];
+        aiBone* bone = pMesh->mBones[readBone];
         if (bone->mNumWeights > 0)
         {
             pMesh->mBones[writeBone++] = bone;
@@ -184,7 +185,6 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     pMesh->mNumBones = writeBone;
 
     if (!DefaultLogger::isNullLogger()) {
-        ASSIMP_LOG_INFO_F("Removed ", removed, " weights. Input bones: ", old_bones, ". Output bones: ",
-                          pMesh->mNumBones);
+        ASSIMP_LOG_INFO_F("Removed ", removed, " weights. Input bones: ", old_bones, ". Output bones: ", pMesh->mNumBones);
     }
 }

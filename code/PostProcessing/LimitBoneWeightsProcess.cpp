@@ -73,7 +73,7 @@ bool LimitBoneWeightsProcess::IsActive(unsigned int pFlags) const {
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void LimitBoneWeightsProcess::Execute( aiScene *pScene)
+void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 {
     ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
 
@@ -99,14 +99,14 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
         return;
 
     // collect all bone weights per vertex
-    typedef SmallVector<Weight, 8> VertexWeightArray;
+    typedef SmallVector<Weight,8> VertexWeightArray;
     typedef std::vector <VertexWeightArray> WeightsPerVertex;
     WeightsPerVertex vertexWeights(pMesh->mNumVertices);
     size_t maxVertexWeights = 0;
 
     for (unsigned int b = 0; b < pMesh->mNumBones; ++b)
     {
-        const aiBone *bone = pMesh->mBones[b];
+        const aiBone* bone = pMesh->mBones[b];
         for (unsigned int w = 0; w < bone->mNumWeights; ++w)
         {
             const aiVertexWeight &vw = bone->mWeights[w];
@@ -121,7 +121,8 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     unsigned int removed = 0, old_bones = pMesh->mNumBones;
 
     // now cut the weight count if it exceeds the maximum
-    for (WeightsPerVertex::iterator vit = vertexWeights.begin(); vit != vertexWeights.end(); ++vit) {
+    for (WeightsPerVertex::iterator vit = vertexWeights.begin(); vit != vertexWeights.end(); ++vit)
+    {
         if (vit->size() <= mMaxWeights)
             continue;
 
@@ -155,9 +156,11 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     }
 
     // rebuild the vertex weight array for all bones
-    for (unsigned int a = 0; a < vertexWeights.size(); ++a) {
+    for (unsigned int a = 0; a < vertexWeights.size(); ++a)
+    {
         const VertexWeightArray &vw = vertexWeights[a];
-        for (const Weight *it = vw.begin(); it != vw.end(); ++it) {
+        for (const Weight *it = vw.begin(); it != vw.end(); ++it)
+        {
             aiBone *bone = pMesh->mBones[it->mBone];
             bone->mWeights[bone->mNumWeights++] = aiVertexWeight(a, it->mWeight);
         }
@@ -166,11 +169,15 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     // remove empty bones
     unsigned int writeBone = 0;
 
-    for (unsigned int readBone = 0; readBone < pMesh->mNumBones; ++readBone) {
+    for (unsigned int readBone = 0; readBone < pMesh->mNumBones; ++readBone)
+    {
         aiBone *bone = pMesh->mBones[readBone];
-        if (bone->mNumWeights > 0) {
+        if (bone->mNumWeights > 0)
+        {
             pMesh->mBones[writeBone++] = bone;
-        } else {
+        }
+        else
+        {
             delete bone;
         }
     }

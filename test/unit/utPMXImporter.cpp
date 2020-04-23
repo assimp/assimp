@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
 #include "MMD/MMDImporter.h"
 

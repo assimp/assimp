@@ -1,12 +1,12 @@
 #include "ModelLoader.h"
 
 ModelLoader::ModelLoader() : 
-        dev(nullptr),
-        devcon(nullptr),
-        meshes(),
-        directory(),
-        textures_loaded(),
-        hwnd(nullptr) {
+        dev_(nullptr),
+        devcon_(nullptr),
+        meshes_(),
+        directory_(),
+        textures_loaded_(),
+        hwnd_(nullptr) {
     // empty
 }
 
@@ -22,14 +22,14 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device * dev, ID3D11DeviceContext * devc
 		aiProcess_Triangulate |
 		aiProcess_ConvertToLeftHanded);
 
-	if (pScene == NULL)
+	if (pScene == nullptr)
 		return false;
 
-	this->directory = filename.substr(0, filename.find_last_of("/\\"));
+	this->directory_ = filename.substr(0, filename.find_last_of("/\\"));
 
-	this->dev = dev;
-	this->devcon = devcon;
-	this->hwnd = hwnd;
+	this->dev_ = dev;
+	this->devcon_ = devcon;
+	this->hwnd_ = hwnd;
 
 	processNode(pScene->mRootNode, pScene);
 
@@ -37,8 +37,8 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device * dev, ID3D11DeviceContext * devc
 }
 
 void ModelLoader::Draw(ID3D11DeviceContext * devcon) {
-	for (int i = 0; i < meshes.size(); ++i ) {
-		meshes[i].Draw(devcon);
+	for (size_t i = 0; i < meshes_.size(); ++i ) {
+		meshes_[i].Draw(devcon);
 	}
 }
 
@@ -88,7 +88,7 @@ Mesh ModelLoader::processMesh(aiMesh * mesh, const aiScene * scene) {
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	}
 
-	return Mesh(dev, vertices, indices, textures);
+	return Mesh(dev_, vertices, indices, textures);
 }
 
 std::vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName, const aiScene * scene) {
@@ -98,9 +98,9 @@ std::vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextu
 		mat->GetTexture(type, i, &str);
 		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 		bool skip = false;
-		for (UINT j = 0; j < textures_loaded.size(); j++) {
-			if (std::strcmp(textures_loaded[j].path.c_str(), str.C_Str()) == 0) {
-				textures.push_back(textures_loaded[j]);
+		for (UINT j = 0; j < textures_loaded_.size(); j++) {
+			if (std::strcmp(textures_loaded_[j].path.c_str(), str.C_Str()) == 0) {
+				textures.push_back(textures_loaded_[j]);
 				skip = true; // A texture with the same filepath has already been loaded, continue to next one. (optimization)
 				break;
 			}
@@ -113,34 +113,34 @@ std::vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextu
 				texture.texture = getTextureFromModel(scene, textureindex);
 			} else {
 				std::string filename = std::string(str.C_Str());
-				filename = directory + '/' + filename;
+				filename = directory_ + '/' + filename;
 				std::wstring filenamews = std::wstring(filename.begin(), filename.end());
-				hr = CreateWICTextureFromFile(dev, devcon, filenamews.c_str(), nullptr, &texture.texture);
+				hr = CreateWICTextureFromFile(dev_, devcon_, filenamews.c_str(), nullptr, &texture.texture);
 				if (FAILED(hr))
-					MessageBox(hwnd, "Texture couldn't be loaded", "Error!", MB_ICONERROR | MB_OK);
+					MessageBox(hwnd_, "Texture couldn't be loaded", "Error!", MB_ICONERROR | MB_OK);
 			}
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);
-			this->textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+			this->textures_loaded_.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 		}
 	}
 	return textures;
 }
 
 void ModelLoader::Close() {
-	for (auto& t : textures_loaded)
+	for (auto& t : textures_loaded_)
 		t.Release();
 
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i].Close();
+	for (size_t i = 0; i < meshes_.size(); i++) {
+		meshes_[i].Close();
 	}
 }
 
 void ModelLoader::processNode(aiNode * node, const aiScene * scene) {
 	for (UINT i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(this->processMesh(mesh, scene));
+		meshes_.push_back(this->processMesh(mesh, scene));
 	}
 
 	for (UINT i = 0; i < node->mNumChildren; i++) {
@@ -179,9 +179,9 @@ ID3D11ShaderResourceView * ModelLoader::getTextureFromModel(const aiScene * scen
 
 	int* size = reinterpret_cast<int*>(&scene->mTextures[textureindex]->mWidth);
 
-	hr = CreateWICTextureFromMemory(dev, devcon, reinterpret_cast<unsigned char*>(scene->mTextures[textureindex]->pcData), *size, nullptr, &texture);
+	hr = CreateWICTextureFromMemory(dev_, devcon_, reinterpret_cast<unsigned char*>(scene->mTextures[textureindex]->pcData), *size, nullptr, &texture);
 	if (FAILED(hr))
-		MessageBox(hwnd, "Texture couldn't be created from memory!", "Error!", MB_ICONERROR | MB_OK);
+		MessageBox(hwnd_, "Texture couldn't be created from memory!", "Error!", MB_ICONERROR | MB_OK);
 
 	return texture;
 }

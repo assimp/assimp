@@ -73,7 +73,8 @@ bool LimitBoneWeightsProcess::IsActive(unsigned int pFlags) const {
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void LimitBoneWeightsProcess::Execute(aiScene *pScene) {
+void LimitBoneWeightsProcess::Execute(aiScene *pScene)
+{
     ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
 
     for (unsigned int m = 0; m < pScene->mNumMeshes; ++m) {
@@ -92,7 +93,8 @@ void LimitBoneWeightsProcess::SetupProperties(const Importer *pImp) {
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
-void LimitBoneWeightsProcess::ProcessMesh(aiMesh *pMesh) {
+void LimitBoneWeightsProcess::ProcessMesh(aiMesh *pMesh)
+{
     if (!pMesh->HasBones())
         return;
 

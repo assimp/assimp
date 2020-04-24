@@ -108,10 +108,6 @@ OPTION ( ASSIMP_ERROR_MAX
   "Enable all warnings."
   OFF
 )
-OPTION ( ASSIMP_WERROR
-  "Treat warnings as errors."
-  OFF
-)
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
   OFF
@@ -238,7 +234,20 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-# Grouped compiler settings
+IF( UNIX )
+  # Use GNUInstallDirs for Unix predefined directories
+  INCLUDE(GNUInstallDirs)
+ENDIF()
+
+# enable warnings as errors ########################################
+IF (MSVC)
+  ADD_COMPILE_OPTIONS(/WX)
+ELSE()
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+ENDIF()
+
+# Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_FLAGS "-fPIC -std=c++0x ${CMAKE_CXX_FLAGS}")
@@ -303,16 +312,6 @@ IF (ASSIMP_ERROR_MAX)
   ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-  ENDIF()
-ENDIF()
-
-IF (ASSIMP_WERROR)
-  MESSAGE(STATUS "Treating warnings as errors")
-  IF (MSVC)
-    ADD_COMPILE_OPTIONS(/WX)
-  ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   ENDIF()
 ENDIF()
 

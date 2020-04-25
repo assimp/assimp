@@ -128,9 +128,13 @@ private:
     // Writing the Light data
     void WriteLights();
     
-    // Writing the Shape data
-    void WriteShapes();
-    void WriteShape(int i);
+    // Writing the Object data
+    void WriteObjects();
+    void WriteObject(int i);
+
+    // Writing the Object Instances
+    void WriteObjectInstances();
+    void WriteObjectInstance(aiNode* node, aiMatrix4x4 parentTransform);
 };
 
 } // namespace Assimp

@@ -311,6 +311,7 @@ void PbrtExporter::WriteCamera(int i) {
     // Get camera transform
     // Isn't optimally efficient, but is the simplest implementation
     //   Get camera node
+    aiMatrix4x4 w2c;
     auto cameraNode = mScene->mRootNode->FindNode(camera->mName);
     if (!cameraNode) {
         mOutput << "# ERROR: Camera declared but not found in scene tree" << std::endl;
@@ -323,21 +324,28 @@ void PbrtExporter::WriteCamera(int i) {
             tempNode = tempNode->mParent;
         }
 
-        aiMatrix4x4 w2c = matrixChain[0];
+        w2c = matrixChain[0];
         for(int i = 1; i < matrixChain.size(); i++){
             w2c *= matrixChain[i];
         }
-        
-        if (!cameraActive)
-            mOutput << "# ";
-
-        mOutput << "Transform ["
-            << w2c.a1 << " " << w2c.a2 << " " << w2c.a3 << " " << w2c.a4 << " "
-            << w2c.b1 << " " << w2c.b2 << " " << w2c.b3 << " " << w2c.b4 << " "
-            << w2c.c1 << " " << w2c.c2 << " " << w2c.c3 << " " << w2c.c4 << " "
-            << w2c.d1 << " " << w2c.d2 << " " << w2c.d3 << " " << w2c.d4
-            << "]" << std::endl;
     }
+    
+    // Print Camera LookAt
+    auto position = w2c * camera->mPosition;
+    auto lookAt = w2c * camera->mLookAt;
+    auto up = w2c * camera->mUp;
+    if  (!cameraActive)
+        mOutput << "# ";
+    mOutput << "LookAt "
+        << position.x << " " << position.y << " " << position.z << std::endl;
+    if  (!cameraActive)
+        mOutput << "# ";
+    mOutput << "       "
+        << lookAt.x << " " << lookAt.y << " " << lookAt.z << std::endl;
+    if  (!cameraActive)
+        mOutput << "# ";
+    mOutput << "       "
+        << up.x << " " << up.y << " " << up.z << std::endl;
     
     // Print camera descriptor
     if(!cameraActive)
@@ -355,6 +363,7 @@ void PbrtExporter::WriteGeometry() {
     // bool mIOSystem->CreateDirectory(path)
     
     // TODO worry about sequestering geo later, after giant print
+    // TODO rewrite as WriteShapes & WriteShape
 }
 
 void PbrtExporter::WriteWorldDefinition() {
@@ -372,13 +381,15 @@ void PbrtExporter::WriteWorldDefinition() {
     // Print materials
     WriteMaterials();
 
+    // Print Objects
+    // Both PBRT's `Shape` and `Object` are in Assimp's `aiMesh` class
+    WriteObjects();
+
+    // Print Object Instancing (nodes)
+    WriteObjectInstances();
+
     // Print Lights (w/o geometry)
     WriteLights();
-    
-    // Print Shapes
-    WriteShapes();
-    
-    // Print Object Instancing (no emissive)
 
     // Print Area Lights (w/ geometry)
 
@@ -427,7 +438,7 @@ void PbrtExporter::WriteMaterials() {
 }
 
 void PbrtExporter::WriteMaterial(int i) {
-    // TODO
+    // TODO IMMEDIATELY
 
     // Use MakeNamedMaterial to give variable names to materials
 }
@@ -444,15 +455,15 @@ void PbrtExporter::WriteLights() {
     // TODO remove default ambient term when numCameras == 0
     //      For now, ambient may only be necessary for debug
     mOutput << "# - Creating a default blueish ambient light source" << std::endl;
-    mOutput << "LightSource \"infinite\" \"rgb L\" [.4 .45 .5]" << std::endl; 
-
+    mOutput << "LightSource \"infinite\" \"rgb L\" [0.4 0.45 0.5]" << std::endl;
+    mOutput << "    \"integer samples\" [8]" << std::endl;
 }
 
-void PbrtExporter::WriteShapes() {
+void PbrtExporter::WriteObjects() {
     mOutput << std::endl;
-    mOutput << "#################" << std::endl;
-    mOutput << "# Writing Shapes:" << std::endl;
-    mOutput << "#################" << std::endl;
+    mOutput << "#############################" << std::endl;
+    mOutput << "# Writing Object Definitions:" << std::endl;
+    mOutput << "#############################" << std::endl;
     mOutput << "# - Number of Meshes found in scene: ";
     mOutput << mScene->mNumMeshes << std::endl;
 
@@ -460,17 +471,164 @@ void PbrtExporter::WriteShapes() {
         return;
 
     for (int i = 0 ; i < mScene->mNumMeshes; i++) {
-        WriteShape(i);
+        WriteObject(i);
     }
 }
 
-void PbrtExporter::WriteShape(int i) {
-    // TODO IMMEDIATELY
+void PbrtExporter::WriteObject(int i) {
+    auto mesh = mScene->mMeshes[i]; 
+    mOutput << "# - Mesh " << i+1  <<  ": ";
+    if (mesh->mName == aiString(""))
+        mOutput << "<No Name>" << std::endl;
+    else
+        mOutput << mesh->mName.C_Str() << std::endl;
+   
+    // Print out primitive types found
+    mOutput << "#   - Primitive Type(s):" << std::endl;
+    if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
+        mOutput << "#     - POINT" << std::endl;
+    if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
+        mOutput << "#     - LINE" << std::endl;
+    if (mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)
+        mOutput << "#     - TRIANGLE" << std::endl;
+    if (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)
+        mOutput << "#     - POLYGON" << std::endl;
     
+    // Check if any types other than tri
+    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT) 
+        || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
+        || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
+        mOutput << "# ERROR: PBRT Does not support POINT, LINE, POLY meshes" << std::endl;
+    }
+
+    // Check for Normals
+    mOutput << "#   - Normals: ";
+    if (mesh->mNormals)
+        mOutput << "TRUE" << std::endl;
+    else
+        mOutput << "FALSE" << std::endl;
     
-    // if aiPrimtiveType == Tri -> you're fine
-    // if aiPrimitiveType == Poly -> use aiProcess_triangulate
-    // if aiPrimitiveType == anything else -> throw error
+    // Check for Tangents
+    mOutput << "#   - Tangents: ";
+    if (mesh->mTangents)
+        mOutput << "TRUE" << std::endl;
+    else
+        mOutput << "FALSE" << std::endl;
+
+    // Count number of texture coordinates
+    int numTextureCoords = 0;
+    for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++) {
+        if (mesh->mTextureCoords[i])
+            numTextureCoords++;
+    }
+    mOutput << "#   - Number of Texture Coordinates: "
+        << numTextureCoords << std::endl;
+    if (numTextureCoords > 1) {
+        mOutput << "# - Multiple Texture Coordinates found in scene" << std::endl;
+        mOutput << "#   - Defaulting to first Texture Coordinate specified" << std::endl;
+    }
+
+    // Check for Alpha texture
+    mOutput << "#   - Alpha texture: " << std::endl;
+    // TODO
+
+    // Create ObjectBegin
+    mOutput << "ObjectBegin \"";
+    if (mesh->mName == aiString(""))
+        mOutput << "mesh_" << i+1 << "\"" << std::endl;
+    else
+        mOutput << mesh->mName.C_Str() << "_" << i+1 << "\"" << std::endl;
+
+    // Write Shapes
+    mOutput << "Shape \"trianglemesh\"" << std::endl
+        << "    \"integer indices\" [";
+    //   Start with faces (which hold indices)
+    for(int i = 0; i < mesh->mNumFaces; i++) {
+        auto face = mesh->mFaces[i];
+        for(int j = 0; j < face.mNumIndices; j++) {
+            mOutput << face.mIndices[j] << " ";
+        }
+    }
+    mOutput << "]" << std::endl;
+    //   Then go to vertices
+    mOutput << "    \"point P\" [";
+    for(int i = 0; i < mesh->mNumVertices; i++) {
+        auto vector = mesh->mVertices[i];
+        mOutput << vector.x << " " << vector.y << " " << vector.z << "  ";
+    }
+    mOutput << "]" << std::endl;
+    //   Normals (if present)
+    if (mesh->mNormals) {
+        mOutput << "    \"normal N\" [";
+        for(int i = 0; i < mesh->mNumVertices; i++) {
+            auto normal = mesh->mNormals[i];
+            mOutput << normal.x << " " << normal.y << " " << normal.z << "  ";
+        }
+        mOutput << "]" << std::endl;
+    }
+    //   Tangents (if present)
+    if (mesh->mTangents) {
+        mOutput << "    \"vector S\" [";
+        for(int i = 0; i < mesh->mNumVertices; i++) {
+            auto tangent = mesh->mTangents[i];
+            mOutput << tangent.x << " " << tangent.y << " " << tangent.z << "  ";
+        }
+        mOutput << "]" << std::endl;
+    }
+    //   Texture Coords (if present)
+    //   TODO comment out wrong ones, only choose 1st 2d texture coord
+
+
+    // Close ObjectBegin
+    mOutput << "ObjectEnd" << std::endl;
+}
+
+void PbrtExporter::WriteObjectInstances() {
+    mOutput << std::endl;
+    mOutput << "###########################" << std::endl;
+    mOutput << "# Writing Object Instances:" << std::endl;
+    mOutput << "###########################" << std::endl;
+
+    // Get root node of the scene
+    auto rootNode = mScene->mRootNode;
+
+    // Set base transform to identity
+    aiMatrix4x4 parentTransform;
+
+    // Recurse into root node
+    WriteObjectInstance(rootNode, parentTransform);
+}
+
+void PbrtExporter::WriteObjectInstance(aiNode* node, aiMatrix4x4 parent) {
+    // TODO IMMEDIATELY fix transforms for nodes
+
+    auto w2o = parent * node->mTransformation;
+
+    // Print transformation for this node
+    if(node->mNumMeshes > 0) {
+        mOutput << "Transform ["
+            << w2o.a1 << " " << w2o.a2 << " " << w2o.a3 << " " << w2o.a4 << " "
+            << w2o.b1 << " " << w2o.b2 << " " << w2o.b3 << " " << w2o.b4 << " "
+            << w2o.c1 << " " << w2o.c2 << " " << w2o.c3 << " " << w2o.c4 << " "
+            << w2o.d1 << " " << w2o.d2 << " " << w2o.d3 << " " << w2o.d4
+            << "]" << std::endl;
+    }
+
+    // Loop over number of meshes in node
+    for(int i = 0; i < node->mNumMeshes; i++) {
+        // Print ObjectInstance
+        mOutput << "ObjectInstance \"";
+        auto mesh = mScene->mMeshes[node->mMeshes[i]];
+        if (mesh->mName == aiString(""))
+            mOutput << "mesh_" << node->mMeshes[i] + 1 << "\"" << std::endl;
+        else
+            mOutput << mesh->mName.C_Str() << "_" << node->mMeshes[i] + 1 << "\"" << std::endl;
+    }
+
+    // Recurse through children
+    for (int i = 0; i < node->mNumChildren; i++) {
+        WriteObjectInstance(node->mChildren[i], w2o);
+    }
 }
 
 #endif // ASSIMP_BUILD_NO_PBRT_EXPORTER

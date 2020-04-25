@@ -189,7 +189,7 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 #endif
 
 #ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("pbrt", "Pbrt scene description file", "pbrt", &ExportScenePbrt, 0));
+	exporters.push_back(Exporter::ExportFormatEntry("pbrt", "Pbrt scene description file", "pbrt", &ExportScenePbrt, aiProcess_Triangulate | aiProcess_SortByPType));
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER

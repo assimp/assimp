@@ -2,14 +2,10 @@
 // This file is part of the "Irrlicht Engine" and the "irrXML" project.
 // For conditions of distribution and use, see copyright notice in irrlicht.h and/or irrXML.h
 
-// Need to include Assimp, too. We're using Assimp's version of fast_atof
-// so we need stdint.h. But no PCH.
-
-
 #include "irrXML.h"
 #include "irrString.h"
 #include "irrArray.h"
-//#include <assimp/fast_atof.h>
+#include "fast_atof.h"
 #include "CXMLReaderImpl.h"
 
 namespace irr
@@ -18,7 +14,7 @@ namespace io
 {
 
 //! Implementation of the file read callback for ordinary files
-class IRRXML_API CFileReadCallBack : public IFileReadCallBack
+class CFileReadCallBack : public IFileReadCallBack
 {
 public:
 

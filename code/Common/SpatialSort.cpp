@@ -51,13 +51,9 @@ using namespace Assimp;
 #define CHAR_BIT 8
 #endif
 
-#ifdef _WIN32
-//#    pragma warning(disable : 4127)
-#endif // _WIN32
+const aiVector3D PlaneInit(0.8523f, 0.34321f, 0.5736f);
 
-const aiVector3D PlaneInit( 0.8523f, 0.34321f, 0.5736f );
-
-        // ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
 // define the reference plane. We choose some arbitrary vector away from all basic axises
 // in the hope that no model spreads all its vertices along this plane.
@@ -214,17 +210,20 @@ BinFloat ToBinary(const ai_real &pValue) {
     // See http://en.wikipedia.org/wiki/Signed_number_representations.
 
     // Two's complement?
-    /*if ((-42 == (~42 + 1)) && (binValue & 0x80000000))
+    bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & 0x80000000));
+    bool OneComplement = ((-42 == ~42) && (binValue & 0x80000000));
+    bool SignedMagnitude = ((-42 == (42 | (-0))) && (binValue & 0x80000000));
+
+    if (DefaultValue)
         return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
     // One's complement?
-    else if ((-42 == ~42) && (binValue & 0x80000000))
+    else if (OneComplement)
         return BinFloat(-0) - binValue;
     // Sign-magnitude?
-    else if ((-42 == (42 | (-0))) && (binValue & 0x80000000)) // -0 = 1000... binary
+    else if (SignedMagnitude) // -0 = 1000... binary
         return binValue;
-    else*/
-
-    return binValue;
+    else
+        return binValue;
 }
 
 } // namespace

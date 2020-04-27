@@ -19,9 +19,12 @@ jobs:
           - os: windows-latest
             cxx: cl.exe
             cc: cl.exe
-          - os: ubuntu-latest
+          - os: ubuntu-latest.clang
             cxx: clang++
             cc: clang
+          - os: ubuntu-latest.gcc
+            cxx: g++
+            cc: gcc
           - os: macos-latest
             cxx: clang++
             cc: clang

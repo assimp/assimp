@@ -6,7 +6,7 @@ set( HTML_OUTPUT "AssimpDoc_Html" CACHE STRING "Output directory for generated H
 set( MICROSOFT_HELP_WORKSHOP "NO")
 if( MSVC )
     set( MICROSOFT_HELP_WORKSHOP "YES" )
-endif( MSVC )
+endif()
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
@@ -38,5 +38,5 @@ if( DEFINED CMAKE_INSTALL_DOCDIR )
         ${CMAKE_CURRENT_SOURCE_DIR}/AssimpDoc_Html/dragonsplash.png
         DESTINATION ${CMAKE_INSTALL_DOCDIR}/${HTML_OUTPUT}
     )
-endif( DEFINED CMAKE_INSTALL_DOCDIR )
+endif()
 

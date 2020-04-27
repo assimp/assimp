@@ -185,9 +185,11 @@ void AnimResolver::UpdateAnimRangeSetup()
                 for (unsigned int i = 0; i < num; ++i) {
                     m = n+old_size*(i+1);
                     std::copy(n,n+old_size,m);
-
-                    if ((*it).pre == LWO::PrePostBehaviour_Oscillate && (reverse = !reverse))
+                    const bool res = ((*it).pre == LWO::PrePostBehaviour_Oscillate);
+                    reverse = !reverse;
+                    if (res && reverse ) {
                         std::reverse(m,m+old_size-1);
+                    }
                 }
 
                 // update time values
@@ -533,7 +535,7 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 
 // ------------------------------------------------------------------------------------------------
 // Extract animation channel
-void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0*/)
+void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int /*= 0*/)
 {
     *out = NULL;
 

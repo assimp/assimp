@@ -994,8 +994,7 @@ void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src) {
     } else {
         *_dest = new aiScene();
     }
-
-    ::memcpy(*_dest,src,sizeof(aiScene));
+    CopyScene(_dest, src, false);
 }
 
 // ------------------------------------------------------------------------------------------------

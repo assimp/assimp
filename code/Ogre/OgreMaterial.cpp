@@ -206,8 +206,8 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
     aiMaterial *material = new aiMaterial();
     m_textures.clear();
 
-    aiString ts(materialName);
-    material->AddProperty(&ts, AI_MATKEY_NAME);
+    aiString matName(materialName);
+    material->AddProperty(&matName, AI_MATKEY_NAME);
 
     // The stringstream will push words from a line until newline.
     // It will also trim whitespace from line start and between words.
@@ -279,14 +279,14 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
                 else if (linePart=="$colormap")
                 {
                     ss >> linePart;
-                    aiString ts(linePart);
-                    material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+                    aiString cm(linePart);
+                    material->AddProperty(&cm, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
                 }
                 else if (linePart=="$normalmap")
                 {
                     ss >> linePart;
-                    aiString ts(linePart);
-                    material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+                    aiString nm(linePart);
+                    material->AddProperty(&nm, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
                 }
                 else if (linePart=="$shininess_strength")
                 {

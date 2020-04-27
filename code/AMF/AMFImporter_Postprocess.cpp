@@ -465,7 +465,7 @@ std::list<unsigned int> mesh_idx;
 			{
 				auto VertexIndex_GetMinimal = [](const std::list<SComplexFace>& pFaceList, const size_t* pBiggerThan) -> size_t
 				{
-					size_t rv;
+					size_t rv=0;
 
 					if(pBiggerThan != nullptr)
 					{

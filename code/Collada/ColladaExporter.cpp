@@ -1335,32 +1335,34 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 	mOutput << startstr << "<animation id=\"" + idstrEscaped + "\" name=\"" + animation_name_escaped + "\">" << endstr;
 	PushTag();
 
-    std::string node_idstr;
+    std::string cur_node_idstr;
 	for (size_t a = 0; a < anim->mNumChannels; ++a) {
 		const aiNodeAnim * nodeAnim = anim->mChannels[a];
 		
 		// sanity check
-		if ( nodeAnim->mNumPositionKeys != nodeAnim->mNumScalingKeys ||  nodeAnim->mNumPositionKeys != nodeAnim->mNumRotationKeys ) continue;
+        if (nodeAnim->mNumPositionKeys != nodeAnim->mNumScalingKeys || nodeAnim->mNumPositionKeys != nodeAnim->mNumRotationKeys) {
+            continue;
+        }
 		
 		{
-            node_idstr.clear();
-            node_idstr += nodeAnim->mNodeName.data;
-            node_idstr += std::string( "_matrix-input" );
+            cur_node_idstr.clear();
+            cur_node_idstr += nodeAnim->mNodeName.data;
+            cur_node_idstr += std::string("_matrix-input");
 
 			std::vector<ai_real> frames;
 			for( size_t i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
 				frames.push_back(static_cast<ai_real>(nodeAnim->mPositionKeys[i].mTime));
 			}
 			
-			WriteFloatArray( node_idstr , FloatType_Time, (const ai_real*) frames.data(), frames.size());
+			WriteFloatArray(cur_node_idstr, FloatType_Time, (const ai_real *)frames.data(), frames.size());
 			frames.clear();
 		}
 		
 		{
-            node_idstr.clear();
+            cur_node_idstr.clear();
 
-            node_idstr += nodeAnim->mNodeName.data;
-            node_idstr += std::string("_matrix-output");
+            cur_node_idstr += nodeAnim->mNodeName.data;
+            cur_node_idstr += std::string("_matrix-output");
 			
 			std::vector<ai_real> keyframes;
 			keyframes.reserve(nodeAnim->mNumPositionKeys * 16);
@@ -1385,7 +1387,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
                 }
 			}
 			
-			WriteFloatArray( node_idstr, FloatType_Mat4x4, (const ai_real*) keyframes.data(), keyframes.size() / 16);
+			WriteFloatArray(cur_node_idstr, FloatType_Mat4x4, (const ai_real *)keyframes.data(), keyframes.size() / 16);
 		}
 		
 		{
@@ -1401,16 +1403,16 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 				}
 			}
 			
-			const std::string node_idstr = nodeAnim->mNodeName.data + std::string("_matrix-interpolation");
-            std::string arrayId = XMLIDEncode(node_idstr) + "-array";
+			const std::string cur_node_idstr2 = nodeAnim->mNodeName.data + std::string("_matrix-interpolation");
+            std::string arrayId = XMLIDEncode(cur_node_idstr2) + "-array";
 			
-			mOutput << startstr << "<source id=\"" << XMLIDEncode(node_idstr) << "\">" << endstr;
+			mOutput << startstr << "<source id=\"" << XMLIDEncode(cur_node_idstr2) << "\">" << endstr;
 			PushTag();
 			
 			// source array
 			mOutput << startstr << "<Name_array id=\"" << arrayId << "\" count=\"" << names.size() << "\"> ";
-			for( size_t a = 0; a < names.size(); ++a ) {
-				mOutput << names[a] << " ";
+			for( size_t aa = 0; aa < names.size(); ++aa ) {
+				mOutput << names[aa] << " ";
             }
 			mOutput << "</Name_array>" << endstr;
 			
@@ -1672,13 +1674,13 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
         PushTag();
         mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLIDEncode(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
         PushTag();
-        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        for( size_t aa = 0; aa < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++aa )
         {
-            if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
+            if( mesh->HasTextureCoords( static_cast<unsigned int>(aa) ) )
                 // semantic       as in <texture texcoord=...>
                 // input_semantic as in <input semantic=...>
                 // input_set      as in <input set=...>
-                mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+                mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << aa << "\" input_semantic=\"TEXCOORD\" input_set=\"" << aa << "\"/>" << endstr;
         }
         PopTag();
         mOutput << startstr << "</instance_material>" << endstr;

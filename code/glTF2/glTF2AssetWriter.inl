@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -446,6 +445,24 @@ namespace glTF2 {
                     WriteAttrs(w, attrs, p.attributes.weight, "WEIGHTS", true);
                 }
                 prim.AddMember("attributes", attrs, w.mAl);
+
+                // targets for blendshapes
+                if (p.targets.size() > 0) {
+                    Value tjs;
+                    tjs.SetArray();
+                    tjs.Reserve(unsigned(p.targets.size()), w.mAl);
+                    for (unsigned int t = 0; t < p.targets.size(); ++t) {
+                        Value tj;
+                        tj.SetObject();
+                        {
+                            WriteAttrs(w, tj, p.targets[t].position, "POSITION");
+                            WriteAttrs(w, tj, p.targets[t].normal, "NORMAL");
+                            WriteAttrs(w, tj, p.targets[t].tangent, "TANGENT");
+                        }
+                        tjs.PushBack(tj, w.mAl);
+                    }
+                    prim.AddMember("targets", tjs, w.mAl);
+                }
             }
             primitives.PushBack(prim, w.mAl);
         }
@@ -675,7 +692,7 @@ namespace glTF2 {
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
             binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
-            auto paddingLength = binaryChunkLength - bodyBuffer->byteLength;
+            //auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
 
             GLB_Chunk binaryChunk;
             binaryChunk.chunkLength = binaryChunkLength;
@@ -753,19 +770,20 @@ namespace glTF2 {
 
         if (d.mExtId) {
             Value* exts = FindObject(mDoc, "extensions");
-            if (!exts) {
+            if (nullptr != exts) {
                 mDoc.AddMember("extensions", Value().SetObject().Move(), mDoc.GetAllocator());
                 exts = FindObject(mDoc, "extensions");
             }
 
-            if (!(container = FindObject(*exts, d.mExtId))) {
+            container = FindObject(*exts, d.mExtId);
+            if (nullptr != container) {
                 exts->AddMember(StringRef(d.mExtId), Value().SetObject().Move(), mDoc.GetAllocator());
                 container = FindObject(*exts, d.mExtId);
             }
         }
 
-        Value* dict;
-        if (!(dict = FindArray(*container, d.mDictId))) {
+        Value *dict = FindArray(*container, d.mDictId);
+        if (nullptr == dict) {
             container->AddMember(StringRef(d.mDictId), Value().SetArray().Move(), mDoc.GetAllocator());
             dict = FindArray(*container, d.mDictId);
             if (nullptr == dict) {
@@ -774,7 +792,9 @@ namespace glTF2 {
         }
 
         for (size_t i = 0; i < d.mObjs.size(); ++i) {
-            if (d.mObjs[i]->IsSpecial()) continue;
+            if (d.mObjs[i]->IsSpecial()) {
+                continue;
+            }
 
             Value obj;
             obj.SetObject();

@@ -104,7 +104,8 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
     if (info.mRotation)
     {
         float out = info.mRotation;
-        if ((rounded = static_cast<int>((info.mRotation / static_cast<float>(AI_MATH_TWO_PI)))))
+        rounded = static_cast<int>((info.mRotation / static_cast<float>(AI_MATH_TWO_PI)));
+        if (rounded)
         {
             out -= rounded * static_cast<float>(AI_MATH_PI);
             ASSIMP_LOG_INFO_F("Texture coordinate rotation ", info.mRotation, " can be simplified to ", out);
@@ -124,7 +125,8 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
      * type (e.g. if mirroring is active there IS a difference between
      * offset 2 and 3)
      */
-    if ((rounded  = (int)info.mTranslation.x))  {
+    rounded = (int)info.mTranslation.x;
+    if (rounded) {
         float out = 0.0f;
         szTemp[0] = 0;
         if (aiTextureMapMode_Wrap == info.mapU) {
@@ -157,7 +159,8 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
      * type (e.g. if mirroring is active there IS a difference between
      * offset 2 and 3)
      */
-    if ((rounded  = (int)info.mTranslation.y))  {
+    rounded = (int)info.mTranslation.y;
+    if (rounded) {
         float out = 0.0f;
         szTemp[0] = 0;
         if (aiTextureMapMode_Wrap == info.mapV) {

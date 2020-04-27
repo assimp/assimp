@@ -452,11 +452,11 @@ template <> size_t GenericFill<applied_person_and_organization_assignment>(const
     return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<presented_item>(const DB& db, const LIST& params, presented_item* in)
+/*template <> size_t GenericFill<presented_item>(const DB& db, const LIST& params, presented_item* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<applied_presented_item>(const DB& db, const LIST& params, applied_presented_item* in)
 {
@@ -642,11 +642,11 @@ template <> size_t GenericFill<atomic_formula>(const DB& db, const LIST& params,
     if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to atomic_formula"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<attribute_assertion>(const DB& db, const LIST& params, attribute_assertion* in)
+/*template <> size_t GenericFill<attribute_assertion>(const DB& db, const LIST& params, attribute_assertion* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<attribute_language_assignment>(const DB& db, const LIST& params, attribute_language_assignment* in)
 {
@@ -683,11 +683,11 @@ template <> size_t GenericFill<attribute_value_assignment>(const DB& db, const L
     return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<auxiliary_geometric_representation_item>(const DB& db, const LIST& params, auxiliary_geometric_representation_item* in)
+/*template <> size_t GenericFill<auxiliary_geometric_representation_item>(const DB& db, const LIST& params, auxiliary_geometric_representation_item* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<placement>(const DB& db, const LIST& params, placement* in)
 {
@@ -946,7 +946,7 @@ template <> size_t GenericFill<back_chaining_rule>(const DB& db, const LIST& par
     if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to back_chaining_rule"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<back_chaining_rule_body>(const DB& db, const LIST& params, back_chaining_rule_body* in)
+/*template <> size_t GenericFill<back_chaining_rule_body>(const DB& db, const LIST& params, back_chaining_rule_body* in)
 {
     size_t base = 0;
     return base;
@@ -956,7 +956,7 @@ template <> size_t GenericFill<colour>(const DB& db, const LIST& params, colour*
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<background_colour>(const DB& db, const LIST& params, background_colour* in)
 {
@@ -987,11 +987,11 @@ template <> size_t GenericFill<bezier_surface>(const DB& db, const LIST& params,
     if (params.GetSize() < 7) { throw STEP::TypeError("expected 7 arguments to bezier_surface"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<generic_expression>(const DB& db, const LIST& params, generic_expression* in)
+/*template <> size_t GenericFill<generic_expression>(const DB& db, const LIST& params, generic_expression* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<binary_generic_expression>(const DB& db, const LIST& params, binary_generic_expression* in)
 {
@@ -1004,11 +1004,11 @@ template <> size_t GenericFill<binary_generic_expression>(const DB& db, const LI
     return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<binary_numeric_expression>(const DB& db, const LIST& params, binary_numeric_expression* in)
+/*template <> size_t GenericFill<binary_numeric_expression>(const DB& db, const LIST& params, binary_numeric_expression* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<binary_representation_item>(const DB& db, const LIST& params, binary_representation_item* in)
 {
@@ -1071,11 +1071,11 @@ template <> size_t GenericFill<boolean_literal>(const DB& db, const LIST& params
     return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<boolean_representation_item>(const DB& db, const LIST& params, boolean_representation_item* in)
+/*template <> size_t GenericFill<boolean_representation_item>(const DB& db, const LIST& params, boolean_representation_item* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<boolean_result>(const DB& db, const LIST& params, boolean_result* in)
 {
@@ -1128,7 +1128,7 @@ template <> size_t GenericFill<boundary_curve>(const DB& db, const LIST& params,
     if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to boundary_curve"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<bounded_pcurve>(const DB& db, const LIST& params, bounded_pcurve* in)
+/*template <> size_t GenericFill<bounded_pcurve>(const DB& db, const LIST& params, bounded_pcurve* in)
 {
     size_t base = 0;
     return base;
@@ -1144,7 +1144,7 @@ template <> size_t GenericFill<founded_item>(const DB& db, const LIST& params, f
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<box_domain>(const DB& db, const LIST& params, box_domain* in)
 {
@@ -1218,11 +1218,11 @@ template <> size_t GenericFill<breakdown_element_group_assignment>(const DB& db,
     return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<breakdown_element_realization>(const DB& db, const LIST& params, breakdown_element_realization* in)
+/*template <> size_t GenericFill<breakdown_element_realization>(const DB& db, const LIST& params, breakdown_element_realization* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<breakdown_element_usage>(const DB& db, const LIST& params, breakdown_element_usage* in)
 {
@@ -1784,11 +1784,11 @@ template <> size_t GenericFill<characteristic_type>(const DB& db, const LIST& pa
     if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to characteristic_type"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<characterized_class>(const DB& db, const LIST& params, characterized_class* in)
+/*template <> size_t GenericFill<characterized_class>(const DB& db, const LIST& params, characterized_class* in)
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<characterized_object>(const DB& db, const LIST& params, characterized_object* in)
 {
@@ -1947,6 +1947,7 @@ template <> size_t GenericFill<colour_rgb>(const DB& db, const LIST& params, col
     } while (0);
     return base;
 }
+/*
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<common_datum>(const DB& db, const LIST& params, common_datum* in)
 {
@@ -1958,7 +1959,7 @@ template <> size_t GenericFill<comparison_expression>(const DB& db, const LIST& 
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<complex_clause>(const DB& db, const LIST& params, complex_clause* in)
 {
@@ -2792,7 +2793,7 @@ template <> size_t GenericFill<cylindricity_tolerance>(const DB& db, const LIST&
     if (params.GetSize() < 4) { throw STEP::TypeError("expected 4 arguments to cylindricity_tolerance"); }	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<date_representation_item>(const DB& db, const LIST& params, date_representation_item* in)
+/*template <> size_t GenericFill<date_representation_item>(const DB& db, const LIST& params, date_representation_item* in)
 {
     size_t base = 0;
     return base;
@@ -2802,7 +2803,7 @@ template <> size_t GenericFill<date_time_representation_item>(const DB& db, cons
 {
     size_t base = 0;
     return base;
-}
+}*/
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<dated_effectivity>(const DB& db, const LIST& params, dated_effectivity* in)
 {

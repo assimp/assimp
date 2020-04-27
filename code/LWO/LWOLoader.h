@@ -76,16 +76,12 @@ public:
     LWOImporter();
     ~LWOImporter();
 
-
-public:
-
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
         bool checkSig) const;
-
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
@@ -389,7 +385,7 @@ protected:
     unsigned int fileSize;
 
     /** Output scene */
-    aiScene* pScene;
+    aiScene* mScene;
 
     /** Configuration option: speed flag set? */
     bool configSpeedFlag;
@@ -406,8 +402,8 @@ protected:
 
 
 // ------------------------------------------------------------------------------------------------
-inline float LWOImporter::GetF4()
-{
+inline
+float LWOImporter::GetF4() {
     float f;
     ::memcpy(&f, mFileBuffer, 4);
     mFileBuffer += 4;

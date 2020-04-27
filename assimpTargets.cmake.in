@@ -43,23 +43,13 @@ unset(_targetsDefined)
 unset(_targetsNotDefined)
 unset(_expectedTargets)
 
-
-# Compute the installation prefix relative to this file.
-get_filename_component(_IMPORT_PREFIX "${CMAKE_CURRENT_LIST_FILE}" PATH)
-get_filename_component(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
-get_filename_component(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
-get_filename_component(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
-if(_IMPORT_PREFIX STREQUAL "/")
-  set(_IMPORT_PREFIX "")
-endif()
-
 # Create imported target assimp::assimp
 add_library(assimp::assimp @BUILD_LIB_TYPE@ IMPORTED)
 
 set_target_properties(assimp::assimp PROPERTIES
   COMPATIBLE_INTERFACE_STRING "assimp_MAJOR_VERSION"
   INTERFACE_assimp_MAJOR_VERSION "1"
-  INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;${_IMPORT_PREFIX}/include"
+  INTERFACE_INCLUDE_DIRECTORIES "@CMAKE_INSTALL_FULL_INCLUDEDIR@"
   #INTERFACE_LINK_LIBRARIES "TxtUtils::TxtUtils;MealyMachine::MealyMachine"
 )
 
@@ -73,9 +63,6 @@ file(GLOB CONFIG_FILES "${_DIR}/assimpTargets-*.cmake")
 foreach(f ${CONFIG_FILES})
   include(${f})
 endforeach()
-
-# Cleanup temporary variables.
-set(_IMPORT_PREFIX)
 
 # Loop over all imported files and verify that they actually exist
 foreach(target ${_IMPORT_CHECK_TARGETS} )

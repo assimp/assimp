@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <map>
 #include <memory>
+#include <vector>
 #include <assimp/LogAux.h>
 #include <assimp/fast_atof.h>
 
@@ -126,7 +126,7 @@ public:
 
     const Element* operator[] (const std::string& index) const {
         ElementMap::const_iterator it = elements.find(index);
-        return it == elements.end() ? NULL : (*it).second;
+        return it == elements.end() ? nullptr : (*it).second;
     }
 
 	const Element* FindElementCaseInsensitive(const std::string& elementName) const {

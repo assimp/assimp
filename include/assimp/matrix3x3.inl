@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -141,7 +139,7 @@ const TReal* aiMatrix3x3t<TReal>::operator[] (unsigned int p_iIndex) const {
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 AI_FORCE_INLINE
-bool aiMatrix3x3t<TReal>::operator== (const aiMatrix4x4t<TReal>& m) const {
+bool aiMatrix3x3t<TReal>::operator== (const aiMatrix3x3t<TReal>& m) const {
     return a1 == m.a1 && a2 == m.a2 && a3 == m.a3 &&
            b1 == m.b1 && b2 == m.b2 && b3 == m.b3 &&
            c1 == m.c1 && c2 == m.c2 && c3 == m.c3;
@@ -150,14 +148,14 @@ bool aiMatrix3x3t<TReal>::operator== (const aiMatrix4x4t<TReal>& m) const {
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 AI_FORCE_INLINE
-bool aiMatrix3x3t<TReal>::operator!= (const aiMatrix4x4t<TReal>& m) const {
+bool aiMatrix3x3t<TReal>::operator!= (const aiMatrix3x3t<TReal>& m) const {
     return !(*this == m);
 }
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
 AI_FORCE_INLINE
-bool aiMatrix3x3t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, TReal epsilon) const {
+bool aiMatrix3x3t<TReal>::Equal(const aiMatrix3x3t<TReal>& m, TReal epsilon) const {
     return
         std::abs(a1 - m.a1) <= epsilon &&
         std::abs(a2 - m.a2) <= epsilon &&

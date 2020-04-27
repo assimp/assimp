@@ -50,12 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/TinyFormatter.h>
 #include <assimp/fast_atof.h>
 #include <memory>
-
+#include <functional>
 
 using namespace Assimp;
-namespace EXPRESS = STEP::EXPRESS;
 
-#include <functional>
+namespace EXPRESS = STEP::EXPRESS;
 
 // ------------------------------------------------------------------------------------------------
 std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = "")
@@ -127,8 +126,8 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
                 if (list->GetSize() > 1)    {
                     ASSIMP_LOG_WARN(AddLineNumber("multiple schemas currently not supported",line));
                 }
-                const EXPRESS::STRING* string( nullptr );
-                if (!list->GetSize() || !(string=dynamic_cast<const EXPRESS::STRING*>( (*list)[0].get() ))) {
+                const EXPRESS::STRING *string = dynamic_cast<const EXPRESS::STRING *>((*list)[0].get());
+                if (!list->GetSize() || nullptr == string ) {
                     throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal",line);
                 }
                 head.fileSchema =  *string;
@@ -539,7 +538,7 @@ void STEP::LazyObject::LazyInit() const {
     }
 
     const char* acopy = args;
-    std::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy,STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
+    std::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy,(uint64_t)STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
     delete[] args;
     args = NULL;
 

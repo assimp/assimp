@@ -294,7 +294,7 @@ void InsertWindowContours(const ContourVector& contours,
         const IfcFloat epsilon = diag/1000.f;
 
         // walk through all contour points and find those that lie on the BB corner
-        size_t last_hit = -1, very_first_hit = -1;
+        size_t last_hit = (size_t)-1, very_first_hit = (size_t)-1;
         IfcVector2 edge;
         for(size_t n = 0, e=0, size = contour.size();; n=(n+1)%size, ++e) {
 
@@ -330,7 +330,7 @@ void InsertWindowContours(const ContourVector& contours,
 
                     const size_t old = curmesh.mVerts.size();
                     size_t cnt = last_hit > n ? size-(last_hit-n) : n-last_hit;
-                    for(size_t a = last_hit, e = 0; e <= cnt; a=(a+1)%size, ++e) {
+                    for(size_t a = last_hit, ee = 0; ee <= cnt; a=(a+1)%size, ++ee) {
                         // hack: this is to fix cases where opening contours are self-intersecting.
                         // Clipper doesn't produce such polygons, but as soon as we're back in
                         // our brave new floating-point world, very small distances are consumed

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -57,7 +56,6 @@ struct aiNode;
 struct aiTexture;
 
 namespace Assimp    {
-
 
 using namespace MDL;
 
@@ -436,7 +434,7 @@ protected:
     unsigned int iGSFileVersion;
 
     /** Output I/O handler. used to load external lmp files */
-    IOSystem* pIOHandler;
+    IOSystem* mIOHandler;
 
     /** Output scene to be filled */
     aiScene* pScene;

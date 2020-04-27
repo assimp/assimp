@@ -238,7 +238,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     // FIX: check whether we can reuse the SpatialSort of a previous step
     SpatialSort* vertexFinder = NULL;
     SpatialSort  _vertexFinder;
-    float posEpsilon;
+    float posEpsilon = 10e-6f;
     if (shared)
     {
         std::vector<std::pair<SpatialSort,float> >* avf;

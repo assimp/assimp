@@ -209,21 +209,25 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
     DirectPropertyMap result;
 
     // Loop through all the lazy properties (which is all the properties)
-    for(const LazyPropertyMap::value_type& element : lazyProps) {
+    for(const LazyPropertyMap::value_type& currentElement : lazyProps) {
 
         // Skip parsed properties
-        if (props.end() != props.find(element.first)) continue;
+        if (props.end() != props.find(currentElement.first)) {
+            continue;
+        }
 
         // Read the element's value.
         // Wrap the naked pointer (since the call site is required to acquire ownership)
         // std::unique_ptr from C++11 would be preferred both as a wrapper and a return value.
-        std::shared_ptr<Property> prop = std::shared_ptr<Property>(ReadTypedProperty(*element.second));
+        std::shared_ptr<Property> prop = std::shared_ptr<Property>(ReadTypedProperty(*currentElement.second));
 
         // Element could not be read. Skip it.
-        if (!prop) continue;
+        if (!prop) {
+            continue;
+        }
 
         // Add to result
-        result[element.first] = prop;
+        result[currentElement.first] = prop;
     }
 
     return result;

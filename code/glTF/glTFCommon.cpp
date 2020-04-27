@@ -46,7 +46,7 @@ using namespace glTFCommon::Util;
 
 namespace Util {
 
-size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out) {
+size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out) {
     ai_assert(inLength % 4 == 0);
 
     if (inLength < 4) {
@@ -55,7 +55,7 @@ size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out) {
     }
 
     int nEquals = int(in[inLength - 1] == '=') +
-        int(in[inLength - 2] == '=');
+                  int(in[inLength - 2] == '=');
 
     size_t outLength = (inLength * 3) / 4 - nEquals;
     out = new uint8_t[outLength];
@@ -88,7 +88,7 @@ size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out) {
     return outLength;
 }
 
-void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out) {
+void EncodeBase64(const uint8_t *in, size_t inLength, std::string &out) {
     size_t outLength = ((inLength + 2) / 3) * 4;
 
     size_t j = out.size();
@@ -110,13 +110,11 @@ void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out) {
 
                 b = in[i + 2] & 0x3F;
                 out[j++] = EncodeCharBase64(b);
-            }
-            else {
+            } else {
                 out[j++] = EncodeCharBase64(b);
                 out[j++] = '=';
             }
-        }
-        else {
+        } else {
             out[j++] = EncodeCharBase64(b);
             out[j++] = '=';
             out[j++] = '=';
@@ -124,7 +122,7 @@ void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out) {
     }
 }
 
-bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
+bool ParseDataURI(const char *const_uri, size_t uriLen, DataURI &out) {
     if (nullptr == const_uri) {
         return false;
     }
@@ -139,7 +137,7 @@ bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
     out.charset = "US-ASCII";
     out.base64 = false;
 
-    char* uri = const_cast<char*>(const_uri);
+    char *uri = const_cast<char *>(const_uri);
     if (uri[0] != 0x10) {
         uri[0] = 0x10;
         uri[1] = uri[2] = uri[3] = uri[4] = 0;
@@ -159,16 +157,14 @@ bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
 
             if (strncmp(uri + j, "charset=", 8) == 0) {
                 uri[2] = char(j + 8);
-            }
-            else if (strncmp(uri + j, "base64", 6) == 0) {
+            } else if (strncmp(uri + j, "base64", 6) == 0) {
                 uri[3] = char(j);
             }
         }
         if (i < uriLen) {
             uri[i++] = '\0';
             uri[4] = char(i);
-        }
-        else {
+        } else {
             uri[1] = uri[2] = uri[3] = 0;
             uri[4] = 5;
         }
@@ -189,5 +185,5 @@ bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
     return true;
 }
 
-}
-}
+} // namespace Util
+} // namespace glTFCommon

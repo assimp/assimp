@@ -75,10 +75,10 @@ struct Face
 
 // ------------------
 /** COB chunk header information */
+const unsigned int NO_SIZE = UINT_MAX;
+
 struct ChunkInfo
 {
-    enum {NO_SIZE=UINT_MAX};
-
     ChunkInfo ()
         :   id        (0)
         ,   parent_id (0)

@@ -612,7 +612,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
     bool bNoSpecified = true;
     for (unsigned int i = 0; i < pMaterial->mNumProperties;++i) {
         aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (prop->mSemantic != type) {
+		if (static_cast<aiTextureType>(prop->mSemantic) != type) {
 			continue;
 		}
 

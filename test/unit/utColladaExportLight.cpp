@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,69 +42,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/cexport.h>
 #include <assimp/commonMetaData.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 class ColladaExportLight : public ::testing::Test {
 public:
-    virtual void SetUp()
-    {
+    void SetUp() override {
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
     }
 
-    virtual void TearDown()
-    {
+    void TearDown() override {
         delete ex;
         delete im;
     }
 
 protected:
-    Assimp::Exporter* ex;
-    Assimp::Importer* im;
+    Assimp::Exporter *ex;
+    Assimp::Importer *im;
 };
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(ColladaExportLight, testExportLight)
-{
-    const char* file = "lightsExp.dae";
+TEST_F(ColladaExportLight, testExportLight) {
+    const char *file = "lightsExp.dae";
 
-    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae", aiProcess_ValidateDataStructure);
+    const aiScene *pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae", aiProcess_ValidateDataStructure);
     ASSERT_NE(pTest, nullptr);
     ASSERT_TRUE(pTest->HasLights());
 
-    const unsigned int origNumLights( pTest->mNumLights );
-    std::unique_ptr<aiLight[]> origLights( new aiLight[ origNumLights ] );
+    const unsigned int origNumLights(pTest->mNumLights);
+    std::unique_ptr<aiLight[]> origLights(new aiLight[origNumLights]);
     std::vector<std::string> origNames;
     for (size_t i = 0; i < origNumLights; i++) {
-        origNames.push_back( pTest->mLights[ i ]->mName.C_Str() );
-        origLights[ i ] = *(pTest->mLights[ i ]);
+        origNames.push_back(pTest->mLights[i]->mName.C_Str());
+        origLights[i] = *(pTest->mLights[i]);
     }
 
     // Common metadata
     // Confirm was loaded by the Collada importer
     aiString origImporter;
     EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, origImporter)) << "No importer format metadata";
-	EXPECT_STREQ("Collada Importer", origImporter.C_Str());
+    EXPECT_STREQ("Collada Importer", origImporter.C_Str());
 
     aiString origGenerator;
-	EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, origGenerator)) << "No generator metadata";
-	EXPECT_EQ(strncmp(origGenerator.C_Str(), "Blender", 7), 0) << "AI_METADATA_SOURCE_GENERATOR was: " << origGenerator.C_Str();
+    EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, origGenerator)) << "No generator metadata";
+    EXPECT_EQ(strncmp(origGenerator.C_Str(), "Blender", 7), 0) << "AI_METADATA_SOURCE_GENERATOR was: " << origGenerator.C_Str();
 
     aiString origCopyright;
-	EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, origCopyright)) << "No copyright metadata";
+    EXPECT_TRUE(pTest->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, origCopyright)) << "No copyright metadata";
     EXPECT_STREQ("BSD", origCopyright.C_Str());
 
     aiString origCreated;
-	EXPECT_TRUE(pTest->mMetaData->Get("Created", origCreated)) << "No created metadata";
+    EXPECT_TRUE(pTest->mMetaData->Get("Created", origCreated)) << "No created metadata";
     EXPECT_STREQ("2015-05-17T21:55:44", origCreated.C_Str());
 
     aiString origModified;
-	EXPECT_TRUE(pTest->mMetaData->Get("Modified", origModified)) << "No modified metadata";
+    EXPECT_TRUE(pTest->mMetaData->Get("Modified", origModified)) << "No modified metadata";
     EXPECT_STREQ("2015-05-17T21:55:44", origModified.C_Str());
 
     EXPECT_EQ(AI_SUCCESS, ex->Export(pTest, "collada", file));
@@ -114,7 +109,7 @@ TEST_F(ColladaExportLight, testExportLight)
     // Drop the pointer as about to become invalid
     pTest = nullptr;
 
-    const aiScene* imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
+    const aiScene *imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
 
     ASSERT_TRUE(imported != NULL);
 
@@ -124,48 +119,48 @@ TEST_F(ColladaExportLight, testExportLight)
     EXPECT_STREQ(origImporter.C_Str(), readImporter.C_Str()) << "Assimp Importer Format changed";
 
     aiString readGenerator;
-	EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, readGenerator)) << "No generator metadata";
-	EXPECT_STREQ(origGenerator.C_Str(), readGenerator.C_Str()) << "Generator changed";
+    EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, readGenerator)) << "No generator metadata";
+    EXPECT_STREQ(origGenerator.C_Str(), readGenerator.C_Str()) << "Generator changed";
 
     aiString readCopyright;
-	EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, readCopyright)) << "No copyright metadata";
+    EXPECT_TRUE(imported->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, readCopyright)) << "No copyright metadata";
     EXPECT_STREQ(origCopyright.C_Str(), readCopyright.C_Str()) << "Copyright changed";
 
     aiString readCreated;
-	EXPECT_TRUE(imported->mMetaData->Get("Created", readCreated)) << "No created metadata";
+    EXPECT_TRUE(imported->mMetaData->Get("Created", readCreated)) << "No created metadata";
     EXPECT_STREQ(origCreated.C_Str(), readCreated.C_Str()) << "Created date changed";
 
     aiString readModified;
-	EXPECT_TRUE(imported->mMetaData->Get("Modified", readModified)) << "No modified metadata";
+    EXPECT_TRUE(imported->mMetaData->Get("Modified", readModified)) << "No modified metadata";
     EXPECT_STRNE(origModified.C_Str(), readModified.C_Str()) << "Modified date did not change";
     EXPECT_GT(readModified.length, ai_uint32(18)) << "Modified date too short";
 
     // Lights
     EXPECT_TRUE(imported->HasLights());
     EXPECT_EQ(origNumLights, imported->mNumLights);
-    for(size_t i=0; i < origNumLights; i++) {
-        const aiLight *orig = &origLights[ i ];
+    for (size_t i = 0; i < origNumLights; i++) {
+        const aiLight *orig = &origLights[i];
         const aiLight *read = imported->mLights[i];
-        EXPECT_EQ( 0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );
-        EXPECT_EQ( orig->mType,read->mType);
-        EXPECT_FLOAT_EQ(orig->mAttenuationConstant,read->mAttenuationConstant);
-        EXPECT_FLOAT_EQ(orig->mAttenuationLinear,read->mAttenuationLinear);
-        EXPECT_NEAR(orig->mAttenuationQuadratic,read->mAttenuationQuadratic, 0.001f);
+        EXPECT_EQ(0, strncmp(origNames[i].c_str(), read->mName.C_Str(), origNames[i].size()));
+        EXPECT_EQ(orig->mType, read->mType);
+        EXPECT_FLOAT_EQ(orig->mAttenuationConstant, read->mAttenuationConstant);
+        EXPECT_FLOAT_EQ(orig->mAttenuationLinear, read->mAttenuationLinear);
+        EXPECT_NEAR(orig->mAttenuationQuadratic, read->mAttenuationQuadratic, 0.001f);
 
-        EXPECT_FLOAT_EQ(orig->mColorAmbient.r,read->mColorAmbient.r);
-        EXPECT_FLOAT_EQ(orig->mColorAmbient.g,read->mColorAmbient.g);
-        EXPECT_FLOAT_EQ(orig->mColorAmbient.b,read->mColorAmbient.b);
+        EXPECT_FLOAT_EQ(orig->mColorAmbient.r, read->mColorAmbient.r);
+        EXPECT_FLOAT_EQ(orig->mColorAmbient.g, read->mColorAmbient.g);
+        EXPECT_FLOAT_EQ(orig->mColorAmbient.b, read->mColorAmbient.b);
 
-        EXPECT_FLOAT_EQ(orig->mColorDiffuse.r,read->mColorDiffuse.r);
-        EXPECT_FLOAT_EQ(orig->mColorDiffuse.g,read->mColorDiffuse.g);
-        EXPECT_FLOAT_EQ(orig->mColorDiffuse.b,read->mColorDiffuse.b);
+        EXPECT_FLOAT_EQ(orig->mColorDiffuse.r, read->mColorDiffuse.r);
+        EXPECT_FLOAT_EQ(orig->mColorDiffuse.g, read->mColorDiffuse.g);
+        EXPECT_FLOAT_EQ(orig->mColorDiffuse.b, read->mColorDiffuse.b);
 
-        EXPECT_FLOAT_EQ(orig->mColorSpecular.r,read->mColorSpecular.r);
-        EXPECT_FLOAT_EQ(orig->mColorSpecular.g,read->mColorSpecular.g);
-        EXPECT_FLOAT_EQ(orig->mColorSpecular.b,read->mColorSpecular.b);
+        EXPECT_FLOAT_EQ(orig->mColorSpecular.r, read->mColorSpecular.r);
+        EXPECT_FLOAT_EQ(orig->mColorSpecular.g, read->mColorSpecular.g);
+        EXPECT_FLOAT_EQ(orig->mColorSpecular.b, read->mColorSpecular.b);
 
-        EXPECT_NEAR(orig->mAngleInnerCone,read->mAngleInnerCone,0.001);
-        EXPECT_NEAR(orig->mAngleOuterCone,read->mAngleOuterCone,0.001);
+        EXPECT_NEAR(orig->mAngleInnerCone, read->mAngleInnerCone, 0.001);
+        EXPECT_NEAR(orig->mAngleOuterCone, read->mAngleOuterCone, 0.001);
     }
 }
 

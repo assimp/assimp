@@ -155,36 +155,37 @@ AI_WONT_RETURN void B3DImporter::Fail( string str ){
 
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadByte(){
-    if( _pos<_buf.size() ) {
-        return _buf[_pos++];
-    }
-    
-    Fail( "EOF" );
-    return 0;
+	if (_pos > _buf.size()) {
+		Fail("EOF");
+	}
+
+    return _buf[_pos++];
 }
 
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadInt(){
-    if( _pos+4<=_buf.size() ){
-        int n;
-        memcpy(&n, &_buf[_pos], 4);
-        _pos+=4;
-        return n;
+	if (_pos + 4 > _buf.size()) {
+		Fail("EOF");
     }
-    Fail( "EOF" );
-    return 0;
+
+    int n;
+    memcpy(&n, &_buf[_pos], 4);
+    _pos+=4;
+
+    return n;
 }
 
 // ------------------------------------------------------------------------------------------------
-float B3DImporter::ReadFloat(){
-    if( _pos+4<=_buf.size() ){
-        float n;
-        memcpy(&n, &_buf[_pos], 4);
-        _pos+=4;
-        return n;
-    }
-    Fail( "EOF" );
-    return 0.0f;
+float B3DImporter::ReadFloat() {
+	if (_pos + 4 > _buf.size()) {
+		Fail("EOF");
+	}
+
+    float n;
+    memcpy(&n, &_buf[_pos], 4);
+    _pos+=4;
+
+    return n;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -214,6 +215,9 @@ aiQuaternion B3DImporter::ReadQuat(){
 
 // ------------------------------------------------------------------------------------------------
 string B3DImporter::ReadString(){
+	if (_pos > _buf.size()) {
+		Fail("EOF");
+	}
     string str;
     while( _pos<_buf.size() ){
         char c=(char)ReadByte();
@@ -222,7 +226,6 @@ string B3DImporter::ReadString(){
         }
         str+=c;
     }
-    Fail( "EOF" );
     return string();
 }
 
@@ -247,7 +250,7 @@ void B3DImporter::ExitChunk(){
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned B3DImporter::ChunkSize(){
+size_t B3DImporter::ChunkSize(){
     return _stack.back()-_pos;
 }
 // ------------------------------------------------------------------------------------------------
@@ -355,13 +358,13 @@ void B3DImporter::ReadVRTS(){
         Fail( "Bad texcoord data" );
     }
 
-    int sz=12+(_vflags&1?12:0)+(_vflags&2?16:0)+(_tcsets*_tcsize*4);
-    int n_verts=ChunkSize()/sz;
+    int sz = 12+(_vflags&1?12:0)+(_vflags&2?16:0)+(_tcsets*_tcsize*4);
+    size_t n_verts = ChunkSize()/sz;
 
     int v0=static_cast<int>(_vertices.size());
     _vertices.resize( v0+n_verts );
 
-    for( int i=0;i<n_verts;++i ){
+    for( unsigned int i=0;i<n_verts;++i ){
         Vertex &v=_vertices[v0+i];
 
         memset( v.bones,0,sizeof(v.bones) );
@@ -377,14 +380,14 @@ void B3DImporter::ReadVRTS(){
             ReadQuat();	//skip v 4bytes...
         }
 
-        for( int i=0;i<_tcsets;++i ){
+        for( int j=0;j<_tcsets;++j ){
             float t[4]={0,0,0,0};
-            for( int j=0;j<_tcsize;++j ){
-                t[j]=ReadFloat();
+            for( int k=0;k<_tcsize;++k ){
+                t[k]=ReadFloat();
             }
-            t[1]=1-t[1];
-            if( !i ) {
-                v.texcoords=aiVector3D( t[0],t[1],t[2] );
+            t[1] = 1 - t[1];
+            if( !j ) {
+                v.texcoords = aiVector3D( t[0],t[1],t[2] );
             }
         }
     }
@@ -408,10 +411,10 @@ void B3DImporter::ReadTRIS(int v0) {
 	mesh->mNumFaces = 0;
 	mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
-	int n_tris = ChunkSize() / 12;
+	size_t n_tris = ChunkSize() / 12;
 	aiFace *face = mesh->mFaces = new aiFace[n_tris];
 
-	for (int i = 0; i < n_tris; ++i) {
+    for (unsigned int i = 0; i < n_tris; ++i) {
 		int i0 = ReadInt() + v0;
 		int i1 = ReadInt() + v0;
 		int i2 = ReadInt() + v0;
@@ -463,7 +466,7 @@ void B3DImporter::ReadBONE(int id) {
 		Vertex &v = _vertices[vertex];
 		for (int i = 0; i < 4; ++i) {
 			if (!v.weights[i]) {
-				v.bones[i] = id;
+				v.bones[i] = static_cast<unsigned char>(id);
 				v.weights[i] = weight;
 				break;
 			}
@@ -547,24 +550,24 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
     vector<aiNode*> children;
 
     while( ChunkSize() ){
-        string t=ReadChunk();
-        if( t=="MESH" ){
+        const string chunk = ReadChunk();
+		if (chunk == "MESH") {
             unsigned int n= static_cast<unsigned int>(_meshes.size());
             ReadMESH();
             for( unsigned int i=n;i<static_cast<unsigned int>(_meshes.size());++i ){
                 meshes.push_back( i );
             }
-        }else if( t=="BONE" ){
+		} else if (chunk == "BONE") {
             ReadBONE( nodeid );
-        }else if( t=="ANIM" ){
+		} else if (chunk == "ANIM") {
             ReadANIM();
-        }else if( t=="KEYS" ){
+		} else if (chunk == "KEYS") {
             if( !nodeAnim ){
                 nodeAnim.reset(new aiNodeAnim);
                 nodeAnim->mNodeName=node->mName;
             }
             ReadKEYS( nodeAnim.get() );
-        }else if( t=="NODE" ){
+		} else if (chunk == "NODE") {
             aiNode *child=ReadNODE( node );
             children.push_back( child );
         }
@@ -613,12 +616,12 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
         }
 
         while( ChunkSize() ){
-            string t=ReadChunk();
-            if( t=="TEXS" ){
+            const string chunk = ReadChunk();
+			if (chunk == "TEXS") {
                 ReadTEXS();
-            }else if( t=="BRUS" ){
+			} else if (chunk == "BRUS") {
                 ReadBRUS();
-            }else if( t=="NODE" ){
+			} else if (chunk == "NODE") {
                 ReadNODE( 0 );
             }
             ExitChunk();
@@ -656,48 +659,51 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
             vector< vector<aiVertexWeight> > vweights( _nodes.size() );
 
-            for( int i=0;i<n_verts;i+=3 ){
-                for( int j=0;j<3;++j ){
-                    Vertex &v=_vertices[face->mIndices[j]];
+            for (int vertIdx = 0; vertIdx < n_verts; vertIdx += 3) {
+				for (int faceIndex = 0; faceIndex < 3; ++faceIndex) {
+					Vertex &v = _vertices[face->mIndices[faceIndex]];
 
                     *mv++=v.vertex;
                     if( mn ) *mn++=v.normal;
                     if( mc ) *mc++=v.texcoords;
 
-                    face->mIndices[j]=i+j;
+                    face->mIndices[faceIndex] = vertIdx + faceIndex;
 
                     for( int k=0;k<4;++k ){
-                        if( !v.weights[k] ) break;
+                        if( !v.weights[k] )
+                            break;
 
-                        int bone=v.bones[k];
-                        float weight=v.weights[k];
+                        int bone = v.bones[k];
+                        float weight = v.weights[k];
 
-                        vweights[bone].push_back( aiVertexWeight(i+j,weight) );
+                        vweights[bone].push_back(aiVertexWeight(vertIdx + faceIndex, weight));
                     }
                 }
                 ++face;
             }
 
             vector<aiBone*> bones;
-            for(size_t i=0;i<vweights.size();++i ){
-                vector<aiVertexWeight> &weights=vweights[i];
-                if( !weights.size() ) continue;
+			for (size_t weightIndx = 0; weightIndx < vweights.size(); ++weightIndx) {
+				vector<aiVertexWeight> &weights = vweights[weightIndx];
+				if (!weights.size()) {
+					continue;
+				}
 
-                aiBone *bone=new aiBone;
+                aiBone *bone = new aiBone;
                 bones.push_back( bone );
 
-                aiNode *bnode=_nodes[i];
+                aiNode *bnode = _nodes[weightIndx];
 
-                bone->mName=bnode->mName;
-                bone->mNumWeights= static_cast<unsigned int>(weights.size());
-                bone->mWeights=to_array( weights );
+                bone->mName = bnode->mName;
+                bone->mNumWeights = static_cast<unsigned int>(weights.size());
+                bone->mWeights = to_array( weights );
 
-                aiMatrix4x4 mat=bnode->mTransformation;
+                aiMatrix4x4 mat = bnode->mTransformation;
                 while( bnode->mParent ){
                     bnode=bnode->mParent;
                     mat=bnode->mTransformation * mat;
                 }
-                bone->mOffsetMatrix=mat.Inverse();
+                bone->mOffsetMatrix = mat.Inverse();
             }
             mesh->mNumBones= static_cast<unsigned int>(bones.size());
             mesh->mBones=to_array( bones );

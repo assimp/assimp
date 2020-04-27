@@ -714,8 +714,8 @@ void ColladaParser::ReadAnimation(Collada::Animation* pParent)
             else if (IsElement("sampler"))
             {
                 // read the ID to assign the corresponding collada channel afterwards.
-                int indexID = GetAttribute("id");
-                std::string id = mReader->getAttributeValue(indexID);
+                int indexId = GetAttribute("id");
+                std::string id = mReader->getAttributeValue(indexId);
                 ChannelMap::iterator newChannel = channels.insert(std::make_pair(id, AnimationChannel())).first;
 
                 // have it read into a channel
@@ -3339,13 +3339,12 @@ void ColladaParser::TestClosing(const char* pName) {
 // Returns the index of the named attribute or -1 if not found. Does not throw, therefore useful for optional attributes
 int ColladaParser::GetAttribute(const char* pAttr) const {
     int index = TestAttribute(pAttr);
-    if (index != -1) {
-        return index;
+    if (index == -1) {
+        ThrowException(format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.");
     }
 
     // attribute not found -> throw an exception
-    ThrowException(format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.");
-    return -1;
+    return index;
 }
 
 // ------------------------------------------------------------------------------------------------

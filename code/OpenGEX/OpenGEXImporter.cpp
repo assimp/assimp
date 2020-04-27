@@ -1212,8 +1212,8 @@ void OpenGEXImporter::resolveReferences() {
             if( RefInfo::MeshRef == currentRefInfo->m_type ) {
                 for( size_t i = 0; i < currentRefInfo->m_Names.size(); ++i ) {
                     const std::string &name( currentRefInfo->m_Names[ i ] );
-                    ReferenceMap::const_iterator it( m_mesh2refMap.find( name ) );
-                    if( m_mesh2refMap.end() != it ) {
+                    ReferenceMap::const_iterator curIt( m_mesh2refMap.find( name ) );
+                    if (m_mesh2refMap.end() != curIt) {
                         unsigned int meshIdx = static_cast<unsigned int>(m_mesh2refMap[ name ]);
                         node->mMeshes[ i ] = meshIdx;
                     }
@@ -1221,8 +1221,8 @@ void OpenGEXImporter::resolveReferences() {
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
                 for ( size_t i = 0; i < currentRefInfo->m_Names.size(); ++i ) {
                     const std::string name( currentRefInfo->m_Names[ i ] );
-                    ReferenceMap::const_iterator it( m_material2refMap.find( name ) );
-                    if ( m_material2refMap.end() != it ) {
+                    ReferenceMap::const_iterator curIt(m_material2refMap.find(name));
+                    if (m_material2refMap.end() != curIt) {
                         if ( nullptr != m_currentMesh ) {
                             unsigned int matIdx = static_cast< unsigned int >( m_material2refMap[ name ] );
                             if ( m_currentMesh->mMaterialIndex != 0 ) {

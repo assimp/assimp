@@ -285,11 +285,11 @@ public:
         out.mVerts.reserve(out.mVerts.size() + cnt);
 
         for(const CurveEntry& entry : curves) {
-            const size_t cnt = out.mVerts.size();
+            const size_t curCnt = out.mVerts.size();
             entry.first->SampleDiscrete(out);
 
-            if (!entry.second && cnt != out.mVerts.size()) {
-                std::reverse(out.mVerts.begin()+cnt,out.mVerts.end());
+            if (!entry.second && curCnt != out.mVerts.size()) {
+                std::reverse(out.mVerts.begin() + curCnt, out.mVerts.end());
             }
         }
     }
@@ -329,8 +329,8 @@ public:
                 have_param = true;
                 break;
             }
-            else if (const Schema_2x3::IfcCartesianPoint* const r = sel->ResolveSelectPtr<Schema_2x3::IfcCartesianPoint>(conv.db)) {
-                ConvertCartesianPoint(point,*r);
+            else if (const Schema_2x3::IfcCartesianPoint* const curR = sel->ResolveSelectPtr<Schema_2x3::IfcCartesianPoint>(conv.db)) {
+                ConvertCartesianPoint(point, *curR);
                 have_point = true;
             }
         }
@@ -346,8 +346,8 @@ public:
                 have_param = true;
                 break;
             }
-            else if (const Schema_2x3::IfcCartesianPoint* const r = sel->ResolveSelectPtr<Schema_2x3::IfcCartesianPoint>(conv.db)) {
-                ConvertCartesianPoint(point,*r);
+            else if (const Schema_2x3::IfcCartesianPoint* const curR = sel->ResolveSelectPtr<Schema_2x3::IfcCartesianPoint>(conv.db)) {
+                ConvertCartesianPoint(point, *curR);
                 have_point = true;
             }
         }

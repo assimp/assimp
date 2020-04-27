@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 #include <assimp/ByteSwapper.h>
+#include <assimp/ParsingUtils.h>
 
 #include <algorithm> // std::transform
 #include "FBXUtil.h"
@@ -86,7 +86,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
     std::string templateName;
 
     // lower-case shading because Blender (for example) writes "Phong"
-    std::transform(shading.begin(), shading.end(), shading.begin(), ::tolower);
+    std::transform(shading.begin(), shading.end(), shading.begin(), Assimp::ToLower<char>);
     if(shading == "phong") {
         templateName = "Material.FbxSurfacePhong";
     }

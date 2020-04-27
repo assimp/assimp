@@ -592,9 +592,9 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
         XFile::Material& oldMat = pMaterials[a];
         if( oldMat.mIsReference) {
             // find the material it refers to by name, and store its index
-            for( size_t a = 0; a < pScene->mNumMaterials; ++a ) {
+            for( size_t b = 0; b < pScene->mNumMaterials; ++b ) {
                 aiString name;
-                pScene->mMaterials[a]->Get( AI_MATKEY_NAME, name);
+                pScene->mMaterials[b]->Get( AI_MATKEY_NAME, name);
                 if( strcmp( name.C_Str(), oldMat.mName.data()) == 0 ) {
                     oldMat.sceneIndex = a;
                     break;
@@ -668,7 +668,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
                 // convert to lower case for easier comparison
                 for ( unsigned int c = 0; c < sz.length(); ++c ) {
                     if ( isalpha( sz[ c ] ) ) {
-                        sz[ c ] = tolower( sz[ c ] );
+                        sz[ c ] = (char) tolower( sz[ c ] );
                     }
                 }
 

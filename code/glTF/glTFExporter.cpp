@@ -347,20 +347,19 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
                     prop.texture->source = mAsset->images.Create(imgId);
 
                     if (path[0] == '*') { // embedded
-                        aiTexture* tex = mScene->mTextures[atoi(&path[1])];
+                        aiTexture* curTex = mScene->mTextures[atoi(&path[1])];
 						
-                        prop.texture->source->name = tex->mFilename.C_Str();
+                        prop.texture->source->name = curTex->mFilename.C_Str();
 
-                        uint8_t* data = reinterpret_cast<uint8_t*>(tex->pcData);
-                        prop.texture->source->SetData(data, tex->mWidth, *mAsset);
+                        uint8_t *data = reinterpret_cast<uint8_t *>(curTex->pcData);
+                        prop.texture->source->SetData(data, curTex->mWidth, *mAsset);
 
-                        if (tex->achFormatHint[0]) {
+                        if (curTex->achFormatHint[0]) {
                             std::string mimeType = "image/";
-                            mimeType += (memcmp(tex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : tex->achFormatHint;
+                            mimeType += (memcmp(curTex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : curTex->achFormatHint;
                             prop.texture->source->mimeType = mimeType;
                         }
-                    }
-                    else {
+                    } else {
                         prop.texture->source->uri = path;
                     }
 
@@ -993,7 +992,7 @@ void glTFExporter::ExportAnimations()
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;
-                int channelSize;
+                int channelSize=0;
                 switch (j) {
                     case 0:
                         channelType = "rotation";

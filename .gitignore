@@ -105,6 +105,7 @@ lib64/assimp-vc120-mtd.ilk
 lib64/assimp-vc120-mtd.exp
 lib64/assimp-vc120-mt.exp
 xcuserdata
+*.swp
 
 cmake-build-debug
 install_manifest.txt

@@ -602,6 +602,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Obj/ObjExporter.h
     AssetLib/Obj/ObjExporter.cpp)
 
+  ADD_ASSIMP_IMPORTER( REX
+    REX/RexExporter.h
+    REX/RexExporter.cpp)
+
   ADD_ASSIMP_EXPORTER( OPENGEX
     AssetLib/OpenGEX/OpenGEXExporter.cpp
     AssetLib/OpenGEX/OpenGEXExporter.h)
@@ -1090,6 +1094,26 @@ endif()
 
 SOURCE_GROUP( include\\assimp    FILES ${PUBLIC_HEADERS} )
 
+# Add sources for OpenREX
+set(OPENREX_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-header.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block-image.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block-lineset.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block-material.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block-mesh.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block-pointlist.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/rex-block-text.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/list.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/openrex/src/util.c
+    )
+
+# if(UNIX)
+# 	add_definitions(-D_POSIX_C_SOURCE=200809L -pedantic -Wno-format-truncation -fPIC)
+# endif()
+
+INCLUDE_DIRECTORIES("../contrib/openrex/src")
+
 SET( assimp_src
   # Assimp Files
   ${Core_SRCS}
@@ -1114,6 +1138,7 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${OPENREX_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1149,6 +1174,10 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
+link_directories(
+    /usr/local/lib
+)
+
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
@@ -1163,7 +1192,7 @@ IF(ASSIMP_HUNTER_ENABLED)
       zip::zip
   )
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
+  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY})
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)

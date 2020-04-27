@@ -107,6 +107,8 @@ ColladaLoader::~ColladaLoader() {
     // empty
 }
 
+static const float kMillisecondsFromSeconds = 1000.f;
+
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool ColladaLoader::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
@@ -1420,9 +1422,9 @@ void ColladaLoader::CreateAnimation(aiScene* pScene, const ColladaParser& pParse
                 double time = double(mat.d4); // remember? time is stored in mat.d4
                 mat.d4 = 1.0f;
 
-                dstAnim->mPositionKeys[a].mTime = time;
-                dstAnim->mRotationKeys[a].mTime = time;
-                dstAnim->mScalingKeys[a].mTime = time;
+                dstAnim->mPositionKeys[a].mTime = time * kMillisecondsFromSeconds ;
+                dstAnim->mRotationKeys[a].mTime = time * kMillisecondsFromSeconds ;
+                dstAnim->mScalingKeys[a].mTime = time * kMillisecondsFromSeconds ;
                 mat.Decompose(dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
             }
 
@@ -1484,7 +1486,7 @@ void ColladaLoader::CreateAnimation(aiScene* pScene, const ColladaParser& pParse
                     morphAnim->mKeys[key].mValues = new unsigned int[morphChannels.size()];
                     morphAnim->mKeys[key].mWeights = new double[morphChannels.size()];
 
-                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime;
+                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime * kMillisecondsFromSeconds ;
                     for (unsigned int valueIndex = 0; valueIndex < morphChannels.size(); valueIndex++)
                     {
                         morphAnim->mKeys[key].mValues[valueIndex] = valueIndex;

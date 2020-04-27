@@ -1314,6 +1314,8 @@ void ColladaExporter::WriteSceneLibrary()
 // ------------------------------------------------------------------------------------------------
 void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 {
+    static const float kSecondsFromMilliseconds = .001f;
+
 	const aiAnimation * anim = mScene->mAnimations[pIndex];
 	
 	if ( anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels ==0 )
@@ -1351,7 +1353,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 
 			std::vector<ai_real> frames;
 			for( size_t i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
-				frames.push_back(static_cast<ai_real>(nodeAnim->mPositionKeys[i].mTime));
+				frames.push_back(static_cast<ai_real>(nodeAnim->mPositionKeys[i].mTime) * kSecondsFromMilliseconds);
 			}
 			
 			WriteFloatArray(cur_node_idstr, FloatType_Time, (const ai_real *)frames.data(), frames.size());

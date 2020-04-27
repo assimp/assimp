@@ -8,13 +8,13 @@ on:
 
 jobs:
   job:
-    name: ${{ matrix.os }}-build-and-test
+    name: ${{ matrix.os }}-${{ matrix.cxx }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        # For Windows msvc, for Linux and macOS let's use the clang compiler
+        # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
           - os: windows-latest
             cxx: cl.exe
@@ -22,6 +22,9 @@ jobs:
           - os: ubuntu-latest
             cxx: clang++
             cc: clang
+          - os: ubuntu-latest
+            cxx: g++
+            cc: gcc
           - os: macos-latest
             cxx: clang++
             cc: clang

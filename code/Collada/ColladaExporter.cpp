@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -1316,10 +1315,11 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 {
     static const float kSecondsFromMilliseconds = .001f;
 
-	const aiAnimation * anim = mScene->mAnimations[pIndex];
+    const aiAnimation * anim = mScene->mAnimations[pIndex];
 	
-	if ( anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels ==0 )
-		return;
+    if ( anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels ==0 ) {
+        return;
+    }
 	
 	const std::string animation_name_escaped = XMLEscape( anim->mName.C_Str() );
 	std::string idstr = anim->mName.C_Str();

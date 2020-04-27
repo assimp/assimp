@@ -7,40 +7,46 @@ on:
     branches: [ master ]
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: configure
-      run: cmake CMakeLists.txt
-    - name: build
-      run: cmake --build .
-    - name: test
-      run: cd bin && ./unit
-  
-  mac:
-    runs-on: macos-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: configure
-      run: cmake CMakeLists.txt
-    - name: build
-      run: cmake --build .
-    - name: test
-      run: cd bin && ./unit
+  job:
+    name: ${{ matrix.os }}-build-and-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # For Windows msvc, for Linux and macOS let's use the clang compiler
+        include:
+          - os: windows-latest
+            cxx: cl.exe
+            cc: cl.exe
+          - os: ubuntu-latest
+            cxx: clang++
+            cc: clang
+          - os: macos-latest
+            cxx: clang++
+            cc: clang
 
-  windows:
-    runs-on: windows-latest
-    
     steps:
     - uses: actions/checkout@v2
-    - name: configure
-      run: cmake CMakeLists.txt
-    - name: build
-      run: cmake --build . --config Release
+    
+    - uses: lukka/get-cmake@latest
+    
+    - uses: ilammy/msvc-dev-cmd@v1
+    
+    - uses: lukka/set-shell-env@v1
+      with:
+        CXX: ${{ matrix.cxx }}
+        CC: ${{ matrix.cc }}
+    
+    - name: configure and build
+      uses: lukka/run-cmake@v2
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release'
+        buildWithCMakeArgs: '-- -v'
+        buildDirectory: '${{ github.workspace }}/build/'
+        
     - name: test
-      run: | 
-        cd bin\Release
-        .\unit
+      run: cd build/bin && ./unit
+      shell: bash

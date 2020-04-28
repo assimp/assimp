@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  job-build:
+  job:
     name: ${{ matrix.os }}-${{ matrix.cxx }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -58,8 +58,7 @@ jobs:
       run: cd build/bin && ./unit
       shell: bash
 
-  job-sanitizer:
-    needs: job-build
+  sanitizer:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

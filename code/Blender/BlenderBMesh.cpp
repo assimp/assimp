@@ -181,6 +181,7 @@ void BlenderBMeshConverter::AddFace( int v1, int v2, int v3, int v4 )
     face.v2 = v2;
     face.v3 = v3;
     face.v4 = v4;
+    face.flag = 0;
     // TODO - Work out how materials work
     face.mat_nr = 0;
     triMesh->mface.push_back( face );

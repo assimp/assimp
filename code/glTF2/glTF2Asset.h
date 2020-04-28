@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <list>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -81,14 +82,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #else
 #define gltf_unordered_map map
+#define gltf_unordered_set set
 #endif
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #include <unordered_map>
+#include <unordered_set>
 #if _MSC_VER > 1600
 #define gltf_unordered_map unordered_map
+#define gltf_unordered_set unordered_set
 #else
 #define gltf_unordered_map tr1::unordered_map
+#define gltf_unordered_set tr1::unordered_set
 #endif
 #endif
 
@@ -375,8 +380,8 @@ struct Accessor : public Object {
 
     inline uint8_t *GetPointer();
 
-    template <class T>
-    bool ExtractData(T *&outData);
+    template<class T>
+    void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
 
@@ -384,12 +389,18 @@ struct Accessor : public Object {
     class Indexer {
         friend struct Accessor;
 
+    // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
+    // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
+    protected:
         Accessor &accessor;
+
+    private:
         uint8_t *data;
         size_t elemSize, stride;
 
         Indexer(Accessor &acc);
-
+    
+        
     public:
         //! Accesses the i-th value as defined by the accessor
         template <class T>
@@ -720,6 +731,7 @@ struct Mesh : public Object {
     std::vector<Primitive> primitives;
 
     std::vector<float> weights;
+    std::vector<std::string> targetNames;
 
     Mesh() {}
 
@@ -873,6 +885,8 @@ class LazyDict : public LazyDictBase {
     const char *mExtId; //! ID of the extension defining the dictionary
     Value *mDict; //! JSON dictionary object
     Asset &mAsset; //! The asset instance
+
+    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck;  //! Used by Retrieve to prevent recursive lookups
 
     void AttachToDocument(Document &doc);
     void DetachFromDocument();

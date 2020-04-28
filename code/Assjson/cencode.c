@@ -9,6 +9,9 @@ For details, see http://sourceforge.net/projects/libb64
 
 const int CHARS_PER_LINE = 72;
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+
 void base64_init_encodestate(base64_encodestate* state_in)
 {
 	state_in->step = step_A;
@@ -107,3 +110,4 @@ int base64_encode_blockend(char* code_out, base64_encodestate* state_in)
 	return (int)(codechar - code_out);
 }
 
+#pragma warning(pop)

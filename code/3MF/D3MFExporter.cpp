@@ -181,7 +181,7 @@ bool D3MFExporter::export3DModel() {
 
     writeHeader();
     mModelOutput << "<" << XmlTag::model << " " << XmlTag::model_unit << "=\"millimeter\""
-            << "xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">"
+            << " xmlns=\"http://schemas.microsoft.com/3dmanufacturing/core/2015/02\">"
             << std::endl;
     mModelOutput << "<" << XmlTag::resources << ">";
     mModelOutput << std::endl;
@@ -212,7 +212,7 @@ bool D3MFExporter::export3DModel() {
 }
 
 void D3MFExporter::writeHeader() {
-    mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
+    mModelOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     mModelOutput << std::endl;
 }
 
@@ -254,16 +254,28 @@ void D3MFExporter::writeBaseMaterials() {
         if ( mat->Get( AI_MATKEY_COLOR_DIFFUSE, color ) == aiReturn_SUCCESS ) {
             hexDiffuseColor.clear();
             tmp.clear();
-            hexDiffuseColor = "#";
-            
-            tmp = DecimalToHexa( (ai_real) color.r );
-            hexDiffuseColor += tmp;
-            tmp = DecimalToHexa((ai_real)color.g);
-            hexDiffuseColor += tmp;
-            tmp = DecimalToHexa((ai_real)color.b);
-            hexDiffuseColor += tmp;
-            tmp = DecimalToHexa((ai_real)color.a);
-            hexDiffuseColor += tmp;
+            // rgbs %
+    		if(color.r <= 1 && color.g <= 1 && color.b <= 1 && color.a <= 1){
+    	
+    			 hexDiffuseColor = Rgba2Hex(
+    			 	(int)((ai_real)color.r)*255,
+    			 	(int)((ai_real)color.g)*255,
+    			 	(int)((ai_real)color.b)*255,
+    			 	(int)((ai_real)color.a)*255,
+    			 	true
+    			 );
+    			 
+    		}else{
+    			hexDiffuseColor = "#";
+            	tmp = DecimalToHexa( (ai_real) color.r );
+            	hexDiffuseColor += tmp;
+            	tmp = DecimalToHexa((ai_real)color.g);
+            	hexDiffuseColor += tmp;
+            	tmp = DecimalToHexa((ai_real)color.b);
+            	hexDiffuseColor += tmp;
+            	tmp = DecimalToHexa((ai_real)color.a);
+            	hexDiffuseColor += tmp;
+    		}
         } else {
             hexDiffuseColor = "#FFFFFFFF";
         }
@@ -284,7 +296,7 @@ void D3MFExporter::writeObjects() {
         if ( nullptr == currentNode ) {
             continue;
         }
-        mModelOutput << "<" << XmlTag::object << " id=\"" << currentNode->mName.C_Str() << "\" type=\"model\">";
+        mModelOutput << "<" << XmlTag::object << " id=\"" << i + 2 << "\" type=\"model\">";
         mModelOutput << std::endl;
         for ( unsigned int j = 0; j < currentNode->mNumMeshes; ++j ) {
             aiMesh *currentMesh = mScene->mMeshes[ currentNode->mMeshes[ j ] ];
@@ -348,7 +360,7 @@ void D3MFExporter::writeBuild() {
     mModelOutput << "<" << XmlTag::build << ">" << std::endl;
 
     for ( size_t i = 0; i < mBuildItems.size(); ++i ) {
-        mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 1 << "\"/>";
+        mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 2 << "\"/>";
         mModelOutput << std::endl;
     }
     mModelOutput << "</" << XmlTag::build << ">";

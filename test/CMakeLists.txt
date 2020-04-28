@@ -61,6 +61,14 @@ SET( COMMON
   unit/utIssues.cpp
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
+  unit/AssimpAPITest_aiMatrix3x3.cpp
+  unit/AssimpAPITest_aiMatrix4x4.cpp
+  unit/AssimpAPITest_aiQuaternion.cpp
+  unit/AssimpAPITest_aiVector2D.cpp
+  unit/AssimpAPITest_aiVector3D.cpp
+  unit/MathTest.cpp
+  unit/MathTest.h
+  unit/RandomNumberGeneration.h
   unit/utBatchLoader.cpp
   unit/utDefaultIOStream.cpp
   unit/utFastAtof.cpp
@@ -76,10 +84,13 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
+  unit/Common/utSpatialSort.cpp
 )
 
 SET( IMPORTERS
+  unit/ImportExport/Assxml/utAssxmlImportExport.cpp
   unit/utLWSImportExport.cpp
   unit/utLWOImportExport.cpp
   unit/utSMDImportExport.cpp
@@ -136,6 +147,9 @@ SET( IMPORTERS
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
+  #unit/ImportExport/IRR/utIrrImportExport.cpp
+  unit/ImportExport/RAW/utRAWImportExport.cpp
+  unit/ImportExport/Terragen/utTerragenImportExport.cpp
 )
 
 SET( MATERIAL

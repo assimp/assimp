@@ -189,42 +189,42 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
                     continue;
                 if (aiProps[k].pKey) {
                     switch (m3d_propertytypes[k].format) {
-                        case m3dpf_color:
-                            if (mat->Get(aiProps[k].pKey, aiProps[k].type,
-                                        aiProps[k].index, c) == AI_SUCCESS)
-                                addProp(&m3d->material[mi],
-                                        m3d_propertytypes[k].id, mkColor(&c));
-                            break;
-                        case m3dpf_float:
-                            if (mat->Get(aiProps[k].pKey, aiProps[k].type,
-                                        aiProps[k].index, f) == AI_SUCCESS)
-                                addProp(&m3d->material[mi],
-                                        m3d_propertytypes[k].id,
-                                        /* not (uint32_t)f, because we don't want to convert
+                    case m3dpf_color:
+                        if (mat->Get(aiProps[k].pKey, aiProps[k].type,
+                                    aiProps[k].index, c) == AI_SUCCESS)
+                            addProp(&m3d->material[mi],
+                                    m3d_propertytypes[k].id, mkColor(&c));
+                        break;
+                    case m3dpf_float:
+                        if (mat->Get(aiProps[k].pKey, aiProps[k].type,
+                                    aiProps[k].index, f) == AI_SUCCESS)
+                            addProp(&m3d->material[mi],
+                                    m3d_propertytypes[k].id,
+                                    /* not (uint32_t)f, because we don't want to convert
                                          * it, we want to see it as 32 bits of memory */
-                                        *((uint32_t *)&f));
-                            break;
-                        case m3dpf_uint8:
-                            if (mat->Get(aiProps[k].pKey, aiProps[k].type,
-                                        aiProps[k].index, j) == AI_SUCCESS) {
-                                // special conversion for illumination model property
-                                if (m3d_propertytypes[k].id == m3dp_il) {
-                                    switch (j) {
-                                        case aiShadingMode_NoShading: j = 0; break;
-                                        case aiShadingMode_Phong: j = 2; break;
-                                        default: j = 1; break;
-                                    }
+                                    *((uint32_t *)&f));
+                        break;
+                    case m3dpf_uint8:
+                        if (mat->Get(aiProps[k].pKey, aiProps[k].type,
+                                    aiProps[k].index, j) == AI_SUCCESS) {
+                            // special conversion for illumination model property
+                            if (m3d_propertytypes[k].id == m3dp_il) {
+                                switch (j) {
+                                case aiShadingMode_NoShading: j = 0; break;
+                                case aiShadingMode_Phong: j = 2; break;
+                                default: j = 1; break;
                                 }
-                                addProp(&m3d->material[mi],
-                                        m3d_propertytypes[k].id, j);
                             }
-                            break;
-                        default:
-                            if (mat->Get(aiProps[k].pKey, aiProps[k].type,
-                                        aiProps[k].index, j) == AI_SUCCESS)
-                                addProp(&m3d->material[mi],
-                                        m3d_propertytypes[k].id, j);
-                            break;
+                            addProp(&m3d->material[mi],
+                                    m3d_propertytypes[k].id, j);
+                        }
+                        break;
+                    default:
+                        if (mat->Get(aiProps[k].pKey, aiProps[k].type,
+                                    aiProps[k].index, j) == AI_SUCCESS)
+                            addProp(&m3d->material[mi],
+                                    m3d_propertytypes[k].id, j);
+                        break;
                     }
                 }
                 if (aiTxProps[k].pKey &&
@@ -292,8 +292,8 @@ void ExportSceneM3D(
 // Prototyped and registered in Exporter.cpp
 void ExportSceneM3DA(
         const char *,
-        IOSystem*,
-        const aiScene*,
+        IOSystem *,
+        const aiScene *,
         const ExportProperties *
 
 ) {
@@ -312,7 +312,9 @@ void ExportSceneM3DA(
 M3DExporter::M3DExporter(const aiScene *pScene, const ExportProperties *pProperties) :
         mScene(pScene),
         mProperties(pProperties),
-        outfile() {}
+        outfile() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 void M3DExporter::doExport(
@@ -352,6 +354,9 @@ void M3DExporter::doExport(
     // explicitly release file pointer,
     // so we don't have to rely on class destruction.
     outfile.reset();
+
+    M3D_FREE(m3d->name);
+    m3d->name = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

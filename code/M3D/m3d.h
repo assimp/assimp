@@ -1556,7 +1556,7 @@ static int _m3dstbi__create_png_image(_m3dstbi__png *a, unsigned char *image_dat
     return 1;
 }
 
-static int _m3dstbi__compute_transparency(_m3dstbi__png *z, unsigned char tc[3], int out_n) {
+static int _m3dstbi__compute_transparency(_m3dstbi__png *z, unsigned char* tc, int out_n) {
     _m3dstbi__context *s = z->s;
     _m3dstbi__uint32 i, pixel_count = s->img_x * s->img_y;
     unsigned char *p = z->out;
@@ -1639,7 +1639,7 @@ static int _m3dstbi__expand_png_palette(_m3dstbi__png *a, unsigned char *palette
 
 static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp) {
     unsigned char palette[1024], pal_img_n = 0;
-    unsigned char has_trans = 0, tc[3];
+    unsigned char has_trans = 0, tc[3] = {};
     _m3dstbi__uint16 tc16[3];
     _m3dstbi__uint32 ioff = 0, idata_limit = 0, i, pal_len = 0;
     int first = 1, k, interlace = 0, color = 0;
@@ -4350,7 +4350,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     M3D_INDEX last, *vrtxidx = NULL, *mtrlidx = NULL, *tmapidx = NULL, *skinidx = NULL;
     uint32_t idx, numcmap = 0, *cmap = NULL, numvrtx = 0, maxvrtx = 0, numtmap = 0, maxtmap = 0, numproc = 0;
     uint32_t numskin = 0, maxskin = 0, numstr = 0, maxt = 0, maxbone = 0, numgrp = 0, maxgrp = 0, *grpidx = NULL;
-    uint8_t *opa;
+    uint8_t *opa = nullptr;
     m3dcd_t *cd;
     m3dc_t *cmd;
     m3dstr_t *str = NULL;
@@ -5440,13 +5440,13 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out += 2;
                         break;
                     case 4:
-                        *((float *)out) = vrtx[i].data.x;
+                        memcpy(out, &vrtx[i].data.x, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.y;
+                        memcpy(out, &vrtx[i].data.y, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.z;
+                        memcpy(out, &vrtx[i].data.z, sizeof(float));
                         out += 4;
-                        *((float *)out) = vrtx[i].data.w;
+                        memcpy(out, &vrtx[i].data.w, sizeof(float));
                         out += 4;
                         break;
                     case 8:
@@ -5474,9 +5474,11 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 out = _m3d_addidx(out, sk_s, vrtx[i].data.skinid);
             }
-            *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            memcpy(length, &v, sizeof(uint32_t));
+            //*length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
             out = NULL;
-            len += *length;
+            len += v;
         }
         /* bones chunk */
         if (model->numbone && model->bone && !(flags & M3D_EXP_NOBONE)) {
@@ -5660,8 +5662,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out = _m3d_addidx(out, vi_s, vrtxidx[face[i].data.normal[j]]);
                 }
             }
-            *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-            len += *length;
+            uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+            memcpy(length, &v, sizeof(uint32_t));
+            len += v;
             out = NULL;
         }
         /* mathematical shapes face */
@@ -5721,8 +5724,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         }
                     }
                 }
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));
+                len += v;
                 out = NULL;
             }
         }
@@ -5765,8 +5769,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->label[l].text));
             }
             if (length) {
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));                
+                len += v;
             }
             out = NULL;
             sn = sl = NULL;
@@ -5796,8 +5801,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         out = _m3d_addidx(out, vi_s, vrtxidx[a->frame[i].transform[k].ori]);
                     }
                 }
-                *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                len += *length;
+                uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
+                memcpy( length, &v, sizeof(uint32_t));                
+                len += v;
                 out = NULL;
             }
         }

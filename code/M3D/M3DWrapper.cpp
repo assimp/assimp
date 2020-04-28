@@ -50,15 +50,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_USE_M3D_READFILECB
 
-# if (__cplusplus >= 201103L) || !defined(_MSC_VER) || (_MSC_VER >= 1900) // C++11 and MSVC 2015 onwards
-#  define threadlocal thread_local
-# else
-#  if defined(_MSC_VER) && (_MSC_VER >= 1800) // there's an alternative for MSVC 2013
-#   define threadlocal __declspec(thread)
-#  else
-#   define threadlocal
-#  endif
-# endif
+#if (__cplusplus >= 201103L) || !defined(_MSC_VER) || (_MSC_VER >= 1900) // C++11 and MSVC 2015 onwards
+#define threadlocal thread_local
+#else
+#if defined(_MSC_VER) && (_MSC_VER >= 1800) // there's an alternative for MSVC 2013
+#define threadlocal __declspec(thread)
+#else
+#define threadlocal
+#endif
+#endif
 
 extern "C" {
 
@@ -66,37 +66,37 @@ extern "C" {
 threadlocal void *m3dimporter_pIOHandler;
 
 unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
-	ai_assert(nullptr != fn);
-	ai_assert(nullptr != size);
-	std::string file(fn);
-	std::unique_ptr<Assimp::IOStream> pStream(
-			(reinterpret_cast<Assimp::IOSystem *>(m3dimporter_pIOHandler))->Open(file, "rb"));
-	size_t fileSize = 0;
-	unsigned char *data = NULL;
-	// sometimes pStream is nullptr in a single-threaded scenario too for some reason
-	// (should be an empty object returning nothing I guess)
-	if (pStream) {
-		fileSize = pStream->FileSize();
-		// should be allocated with malloc(), because the library will call free() to deallocate
-		data = (unsigned char *)malloc(fileSize);
-		if (!data || !pStream.get() || !fileSize || fileSize != pStream->Read(data, 1, fileSize)) {
-			pStream.reset();
-			*size = 0;
-			// don't throw a deadly exception, it's not fatal if we can't read an external asset
-			return nullptr;
-		}
-		pStream.reset();
-	}
-	*size = (int)fileSize;
-	return data;
+    ai_assert(nullptr != fn);
+    ai_assert(nullptr != size);
+    std::string file(fn);
+    std::unique_ptr<Assimp::IOStream> pStream(
+            (reinterpret_cast<Assimp::IOSystem *>(m3dimporter_pIOHandler))->Open(file, "rb"));
+    size_t fileSize = 0;
+    unsigned char *data = NULL;
+    // sometimes pStream is nullptr in a single-threaded scenario too for some reason
+    // (should be an empty object returning nothing I guess)
+    if (pStream) {
+        fileSize = pStream->FileSize();
+        // should be allocated with malloc(), because the library will call free() to deallocate
+        data = (unsigned char *)malloc(fileSize);
+        if (!data || !pStream.get() || !fileSize || fileSize != pStream->Read(data, 1, fileSize)) {
+            pStream.reset();
+            *size = 0;
+            // don't throw a deadly exception, it's not fatal if we can't read an external asset
+            return nullptr;
+        }
+        pStream.reset();
+    }
+    *size = (int)fileSize;
+    return data;
 }
 }
 #endif
 
 namespace Assimp {
 M3DWrapper::M3DWrapper() {
-	// use malloc() here because m3d_free() will call free()
-	m3d_ = (m3d_t *)calloc(1, sizeof(m3d_t));
+    // use malloc() here because m3d_free() will call free()
+    m3d_ = (m3d_t *)calloc(1, sizeof(m3d_t));
 }
 
 M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer) {
@@ -105,41 +105,42 @@ M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &b
     }
 
 #ifdef ASSIMP_USE_M3D_READFILECB
-	// pass this IOHandler to the C callback in a thread-local pointer
-	m3dimporter_pIOHandler = pIOHandler;
-	m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), m3dimporter_readfile, free, nullptr);
-	// Clear the C callback
-	m3dimporter_pIOHandler = nullptr;
+    // pass this IOHandler to the C callback in a thread-local pointer
+    m3dimporter_pIOHandler = pIOHandler;
+    m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), m3dimporter_readfile, free, nullptr);
+    // Clear the C callback
+    m3dimporter_pIOHandler = nullptr;
 #else
-	m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), nullptr, nullptr, nullptr);
+    m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), nullptr, nullptr, nullptr);
 #endif
 }
 
 M3DWrapper::~M3DWrapper() {
-	reset();
+    reset();
 }
 
 void M3DWrapper::reset() {
-	ClearSave();
-	if (m3d_)
-		m3d_free(m3d_);
-	m3d_ = nullptr;
+    ClearSave();
+    if (m3d_) {
+        m3d_free(m3d_);
+    }
+    m3d_ = nullptr;
 }
 
 unsigned char *M3DWrapper::Save(int quality, int flags, unsigned int &size) {
 #if (!(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER))
-	ClearSave();
-	saved_output_ = m3d_save(m3d_, quality, flags, &size);
-	return saved_output_;
+    ClearSave();
+    saved_output_ = m3d_save(m3d_, quality, flags, &size);
+    return saved_output_;
 #else
-	return nullptr;
+    return nullptr;
 #endif
 }
 
 void M3DWrapper::ClearSave() {
-	if (saved_output_)
-		M3D_FREE(saved_output_);
-	saved_output_ = nullptr;
+    if (saved_output_)
+        M3D_FREE(saved_output_);
+    saved_output_ = nullptr;
 }
 } // namespace Assimp
 

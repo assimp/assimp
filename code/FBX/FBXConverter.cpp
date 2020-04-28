@@ -655,7 +655,8 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
 
-        if (comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation) {
+        if (comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
+            comp == TransformationComp_PreRotation || comp == TransformationComp_PostRotation) {
             continue;
         }
 
@@ -2739,15 +2740,12 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
     // be invoked _later_ (animations come first). If this node has only rotation,
     // scaling and translation _and_ there are no animated other components either,
     // we can use a single node and also a single node animation channel.
-    if (!has_complex && !NeedsComplexTransformationChain(target)) {
-
-        aiNodeAnim *const nd = GenerateSimpleNodeAnim(fixed_name, target, chain,
+    if( !has_complex && !NeedsComplexTransformationChain(target)) {
+        aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain,
                 node_property_map.end(),
-                layer_map,
                 start, stop,
                 max_time,
-                min_time,
-                true // input is TRS order, assimp is SRT
+                min_time
         );
 
         ai_assert(nd);
@@ -3021,133 +3019,121 @@ aiNodeAnim *FBXConverter::GenerateTranslationNodeAnim(const std::string &name,
     return na.release();
 }
 
-aiNodeAnim *FBXConverter::GenerateSimpleNodeAnim(const std::string &name,
-        const Model &target,
+aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
+        const Model& target,
         NodeMap::const_iterator chain[TransformationComp_MAXIMUM],
-        NodeMap::const_iterator iter_end,
-        const LayerMap &layer_map,
+        NodeMap::const_iterator iterEnd,
         int64_t start, int64_t stop,
-        double &max_time,
-        double &min_time,
-        bool reverse_order)
-
+        double& maxTime,
+        double& minTime)
 {
     std::unique_ptr<aiNodeAnim> na(new aiNodeAnim());
     na->mNodeName.Set(name);
 
     const PropertyTable &props = target.Props();
 
-    // need to convert from TRS order to SRT?
-    if (reverse_order) {
+    // collect unique times and keyframe lists
+    KeyFrameListList keyframeLists[TransformationComp_MAXIMUM];
+    KeyTimeList keytimes;
 
-        aiVector3D def_scale = PropertyGet(props, "Lcl Scaling", aiVector3D(1.f, 1.f, 1.f));
-        aiVector3D def_translate = PropertyGet(props, "Lcl Translation", aiVector3D(0.f, 0.f, 0.f));
-        aiVector3D def_rot = PropertyGet(props, "Lcl Rotation", aiVector3D(0.f, 0.f, 0.f));
+    for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+        if (chain[i] == iterEnd)
+            continue;
 
-        KeyFrameListList scaling;
-        KeyFrameListList translation;
-        KeyFrameListList rotation;
+        keyframeLists[i] = GetKeyframeList((*chain[i]).second, start, stop);
 
-        if (chain[TransformationComp_Scaling] != iter_end) {
-            scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second, start, stop);
+        for (KeyFrameListList::const_iterator it = keyframeLists[i].begin(); it != keyframeLists[i].end(); ++it) {
+            const KeyTimeList& times = *std::get<0>(*it);
+            keytimes.insert(keytimes.end(), times.begin(), times.end());
         }
 
-        if (chain[TransformationComp_Translation] != iter_end) {
-            translation = GetKeyframeList((*chain[TransformationComp_Translation]).second, start, stop);
-        }
+        // remove duplicates
+        std::sort(keytimes.begin(), keytimes.end());
 
-        if (chain[TransformationComp_Rotation] != iter_end) {
-            rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second, start, stop);
-        }
+        auto last = std::unique(keytimes.begin(), keytimes.end());
+        keytimes.erase(last, keytimes.end());
+    }
 
-        KeyFrameListList joined;
-        joined.insert(joined.end(), scaling.begin(), scaling.end());
-        joined.insert(joined.end(), translation.begin(), translation.end());
-        joined.insert(joined.end(), rotation.begin(), rotation.end());
+    const Model::RotOrder rotOrder = target.RotationOrder();
+    const size_t keyCount = keytimes.size();
 
-        const KeyTimeList &times = GetKeyTimeList(joined);
+    aiVector3D defTranslate = PropertyGet(props, "Lcl Translation", aiVector3D(0.f, 0.f, 0.f));
+    aiVector3D defRotation = PropertyGet(props, "Lcl Rotation", aiVector3D(0.f, 0.f, 0.f));
+    aiVector3D defScale = PropertyGet(props, "Lcl Scaling", aiVector3D(1.f, 1.f, 1.f));
+    aiQuaternion defQuat = EulerToQuaternion(defRotation, rotOrder);
 
-        aiQuatKey *out_quat = new aiQuatKey[times.size()];
-        aiVectorKey *out_scale = new aiVectorKey[times.size()];
-        aiVectorKey *out_translation = new aiVectorKey[times.size()];
+    aiVectorKey* outTranslations = new aiVectorKey[keyCount];
+    aiQuatKey* outRotations = new aiQuatKey[keyCount];
+    aiVectorKey* outScales = new aiVectorKey[keyCount];
 
-        if (times.size()) {
-            ConvertTransformOrder_TRStoSRT(out_quat, out_scale, out_translation,
-                    scaling,
-                    translation,
-                    rotation,
-                    times,
-                    max_time,
-                    min_time,
-                    target.RotationOrder(),
-                    def_scale,
-                    def_translate,
-                    def_rot);
-        }
-
-        // XXX remove duplicates / redundant keys which this operation did
-        // likely produce if not all three channels were equally dense.
-
-        na->mNumScalingKeys = static_cast<unsigned int>(times.size());
-        na->mNumRotationKeys = na->mNumScalingKeys;
-        na->mNumPositionKeys = na->mNumScalingKeys;
-
-        na->mScalingKeys = out_scale;
-        na->mRotationKeys = out_quat;
-        na->mPositionKeys = out_translation;
+    if (keyframeLists[TransformationComp_Translation].size() > 0) {
+        InterpolateKeys(outTranslations, keytimes, keyframeLists[TransformationComp_Translation], defTranslate, maxTime, minTime);
     } else {
-
-        // if a particular transformation is not given, grab it from
-        // the corresponding node to meet the semantics of aiNodeAnim,
-        // which requires all of rotation, scaling and translation
-        // to be set.
-        if (chain[TransformationComp_Scaling] != iter_end) {
-            ConvertScaleKeys(na.get(), (*chain[TransformationComp_Scaling]).second,
-                    layer_map,
-                    start, stop,
-                    max_time,
-                    min_time);
-        } else {
-            na->mScalingKeys = new aiVectorKey[1];
-            na->mNumScalingKeys = 1;
-
-            na->mScalingKeys[0].mTime = 0.;
-            na->mScalingKeys[0].mValue = PropertyGet(props, "Lcl Scaling",
-                    aiVector3D(1.f, 1.f, 1.f));
-        }
-
-        if (chain[TransformationComp_Rotation] != iter_end) {
-            ConvertRotationKeys(na.get(), (*chain[TransformationComp_Rotation]).second,
-                    layer_map,
-                    start, stop,
-                    max_time,
-                    min_time,
-                    target.RotationOrder());
-        } else {
-            na->mRotationKeys = new aiQuatKey[1];
-            na->mNumRotationKeys = 1;
-
-            na->mRotationKeys[0].mTime = 0.;
-            na->mRotationKeys[0].mValue = EulerToQuaternion(
-                    PropertyGet(props, "Lcl Rotation", aiVector3D(0.f, 0.f, 0.f)),
-                    target.RotationOrder());
-        }
-
-        if (chain[TransformationComp_Translation] != iter_end) {
-            ConvertTranslationKeys(na.get(), (*chain[TransformationComp_Translation]).second,
-                    layer_map,
-                    start, stop,
-                    max_time,
-                    min_time);
-        } else {
-            na->mPositionKeys = new aiVectorKey[1];
-            na->mNumPositionKeys = 1;
-
-            na->mPositionKeys[0].mTime = 0.;
-            na->mPositionKeys[0].mValue = PropertyGet(props, "Lcl Translation",
-                    aiVector3D(0.f, 0.f, 0.f));
+        for (size_t i = 0; i < keyCount; ++i) {
+            outTranslations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
+            outTranslations[i].mValue = defTranslate;
         }
     }
+
+    if (keyframeLists[TransformationComp_Rotation].size() > 0) {
+        InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], defRotation, maxTime, minTime, rotOrder);
+    } else {
+        for (size_t i = 0; i < keyCount; ++i) {
+            outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
+            outRotations[i].mValue = defQuat;
+        }
+    }
+
+    if (keyframeLists[TransformationComp_Scaling].size() > 0) {
+        InterpolateKeys(outScales, keytimes, keyframeLists[TransformationComp_Scaling], defScale, maxTime, minTime);
+    } else {
+        for (size_t i = 0; i < keyCount; ++i) {
+            outScales[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
+            outScales[i].mValue = defScale;
+        }
+    }
+
+    bool ok = false;
+    const float zero_epsilon = 1e-6f;
+
+    const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
+    if (ok && preRotation.SquareLength() > zero_epsilon) {
+        const aiQuaternion preQuat = EulerToQuaternion(preRotation, Model::RotOrder_EulerXYZ);
+        for (size_t i = 0; i < keyCount; ++i) {
+            outRotations[i].mValue = preQuat * outRotations[i].mValue;
+        }
+    }
+
+    const aiVector3D& postRotation = PropertyGet<aiVector3D>(props, "PostRotation", ok);
+    if (ok && postRotation.SquareLength() > zero_epsilon) {
+        const aiQuaternion postQuat = EulerToQuaternion(postRotation, Model::RotOrder_EulerXYZ);
+        for (size_t i = 0; i < keyCount; ++i) {
+            outRotations[i].mValue = outRotations[i].mValue * postQuat;
+        }
+    }
+
+    // convert TRS to SRT
+    for (size_t i = 0; i < keyCount; ++i) {
+        aiQuaternion& r = outRotations[i].mValue;
+        aiVector3D& s = outScales[i].mValue;
+        aiVector3D& t = outTranslations[i].mValue;
+
+        aiMatrix4x4 mat, temp;
+        aiMatrix4x4::Translation(t, mat);
+        mat *= aiMatrix4x4(r.GetMatrix());
+        mat *= aiMatrix4x4::Scaling(s, temp);
+
+        mat.Decompose(s, r, t);
+    }
+
+    na->mNumScalingKeys = static_cast<unsigned int>(keyCount);
+    na->mNumRotationKeys = na->mNumScalingKeys;
+    na->mNumPositionKeys = na->mNumScalingKeys;
+
+    na->mScalingKeys = outScales;
+    na->mRotationKeys = outRotations;
+    na->mPositionKeys = outTranslations;
+
     return na.release();
 }
 
@@ -3328,68 +3314,11 @@ void FBXConverter::InterpolateKeys(aiQuatKey *valOut, const KeyTimeList &keys, c
         // take shortest path by checking the inner product
         // http://www.3dkingdoms.com/weekly/weekly.php?a=36
         if (quat.x * lastq.x + quat.y * lastq.y + quat.z * lastq.z + quat.w * lastq.w < 0) {
-            quat.x = -quat.x;
-            quat.y = -quat.y;
-            quat.z = -quat.z;
-            quat.w = -quat.w;
+            quat.Conjugate();
         }
         lastq = quat;
 
         valOut[i].mValue = quat;
-    }
-}
-
-void FBXConverter::ConvertTransformOrder_TRStoSRT(aiQuatKey *out_quat, aiVectorKey *out_scale,
-        aiVectorKey *out_translation,
-        const KeyFrameListList &scaling,
-        const KeyFrameListList &translation,
-        const KeyFrameListList &rotation,
-        const KeyTimeList &times,
-        double &maxTime,
-        double &minTime,
-        Model::RotOrder order,
-        const aiVector3D &def_scale,
-        const aiVector3D &def_translate,
-        const aiVector3D &def_rotation) {
-    if (rotation.size()) {
-        InterpolateKeys(out_quat, times, rotation, def_rotation, maxTime, minTime, order);
-    } else {
-        for (size_t i = 0; i < times.size(); ++i) {
-            out_quat[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-            out_quat[i].mValue = EulerToQuaternion(def_rotation, order);
-        }
-    }
-
-    if (scaling.size()) {
-        InterpolateKeys(out_scale, times, scaling, def_scale, maxTime, minTime);
-    } else {
-        for (size_t i = 0; i < times.size(); ++i) {
-            out_scale[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-            out_scale[i].mValue = def_scale;
-        }
-    }
-
-    if (translation.size()) {
-        InterpolateKeys(out_translation, times, translation, def_translate, maxTime, minTime);
-    } else {
-        for (size_t i = 0; i < times.size(); ++i) {
-            out_translation[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-            out_translation[i].mValue = def_translate;
-        }
-    }
-
-    const size_t count = times.size();
-    for (size_t i = 0; i < count; ++i) {
-        aiQuaternion &r = out_quat[i].mValue;
-        aiVector3D &s = out_scale[i].mValue;
-        aiVector3D &t = out_translation[i].mValue;
-
-        aiMatrix4x4 mat, temp;
-        aiMatrix4x4::Translation(t, mat);
-        mat *= aiMatrix4x4(r.GetMatrix());
-        mat *= aiMatrix4x4::Scaling(s, temp);
-
-        mat.Decompose(s, r, t);
     }
 }
 

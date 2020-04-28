@@ -29,7 +29,7 @@ public:
 
 	//! Default constructor
 	string()
-	: array(0), allocated(1), used(1)
+	: array(0), allocated(1), used(1) 
 	{
 		array = new T[1];
 		array[0] = 0x0;
@@ -39,7 +39,7 @@ public:
 
 	//! Constructor
 	string(const string<T>& other)
-	: array(0), allocated(0), used(0)
+	:  array(0), allocated(0), used(0)
 	{
 		*this = other;
 	}
@@ -47,7 +47,7 @@ public:
 
 	//! Constructs a string from an int
 	string(int number)
-	: array(0), allocated(0), used(0)
+	: array(0), allocated(0), used(0) 
 	{
 		// store if negative and make positive
 
@@ -117,7 +117,7 @@ public:
 	//! Constructor for unicode and ascii strings
 	template <class B>
 	string(const B* c)
-	: array(0),allocated(0), used(0)
+	: array(0), allocated(0), used(0)
 	{
 		*this = c;
 	}
@@ -635,9 +635,6 @@ private:
 		s32 amount = used < new_size ? used : new_size;
 		for (s32 i=0; i<amount; ++i)
 			array[i] = old_array[i];
-
-		if (allocated < used)
-			used = allocated;
 		
 		delete [] old_array;
 	}

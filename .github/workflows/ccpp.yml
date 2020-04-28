@@ -58,7 +58,31 @@ jobs:
       run: cd build/bin && ./unit
       shell: bash
 
-  sanitizer:
+  adress-sanitizer:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: lukka/get-cmake@latest    
+    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: lukka/set-shell-env@v1
+      with:
+        CXX: clang++
+        CC: clang
+    
+    - name: configure and build
+      uses: lukka/run-cmake@v2
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release -DASSIMP_ASAN=ON'
+        buildWithCMakeArgs: '-- -v'
+        buildDirectory: '${{ github.workspace }}/build/'
+    
+    - name: test
+      run: cd build/bin && ./unit
+      shell: bash
+
+  undefined-behavior-sanitizer:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

@@ -7,13 +7,13 @@ on:
     branches: [ master ]
 
 jobs:
-  job:
+  job-build:
     name: ${{ matrix.os }}-${{ matrix.cxx }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-gcc, macos-clang, windows-msvc, ubuntu-clang]
+        name: [ubuntu-gcc, macos-clang, windows-msvc, ubuntu-clang, ubuntu-memory-sanitizer]
         # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
           - name: windows-msvc
@@ -54,6 +54,30 @@ jobs:
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
         
+    - name: test
+      run: cd build/bin && ./unit
+      shell: bash
+
+  job-sanitizer:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: lukka/get-cmake@latest    
+    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: lukka/set-shell-env@v1
+      with:
+        CXX: clang++
+        CC: clang
+    
+    - name: configure and build
+      uses: lukka/run-cmake@v2
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release -DASSIMP_ASAN=ON'
+        buildWithCMakeArgs: '-- -v'
+        buildDirectory: '${{ github.workspace }}/build/'
+    
     - name: test
       run: cd build/bin && ./unit
       shell: bash

@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  job:
+  job1:
     name: ${{ matrix.os }}-${{ matrix.cxx }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -58,7 +58,8 @@ jobs:
       run: cd build/bin && ./unit
       shell: bash
 
-  adress-sanitizer:
+  job2:
+    name: adress-sanitizer
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -82,7 +83,8 @@ jobs:
       run: cd build/bin && ./unit
       shell: bash
 
-  undefined-behavior-sanitizer:
+  job3:
+    name: undefined-behavior-sanitizer
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

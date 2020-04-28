@@ -59,6 +59,7 @@ jobs:
       shell: bash
 
   job-sanitizer:
+    needs: job-build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

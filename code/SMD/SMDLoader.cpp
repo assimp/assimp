@@ -616,7 +616,7 @@ void SMDImporter::CreateOutputMaterials() {
         if (aszTextures[iMat].length())
         {
             ::strncpy(szName.data, aszTextures[iMat].c_str(),MAXLEN-1);
-            szName.length = (ai_uint32)aszTextures[iMat].length();
+            szName.length = static_cast<ai_uint32>( aszTextures[iMat].length() );
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }

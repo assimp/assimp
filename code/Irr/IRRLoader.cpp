@@ -1483,6 +1483,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
      */
 
     delete root;
+	delete reader;
 }
 
 #endif // !! ASSIMP_BUILD_NO_IRR_IMPORTER

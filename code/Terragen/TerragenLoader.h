@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,21 +46,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 
 #include <assimp/BaseImporter.h>
-namespace Assimp    {
+namespace Assimp {
 
 // Magic strings
-#define AI_TERR_BASE_STRING         "TERRAGEN"
-#define AI_TERR_TERRAIN_STRING      "TERRAIN "
-#define AI_TERR_EOF_STRING          "EOF "
+#define AI_TERR_BASE_STRING "TERRAGEN"
+#define AI_TERR_TERRAIN_STRING "TERRAIN "
+#define AI_TERR_EOF_STRING "EOF "
 
 // Chunka
-#define AI_TERR_CHUNK_XPTS          "XPTS"
-#define AI_TERR_CHUNK_YPTS          "YPTS"
-#define AI_TERR_CHUNK_SIZE          "SIZE"
-#define AI_TERR_CHUNK_SCAL          "SCAL"
-#define AI_TERR_CHUNK_CRAD          "CRAD"
-#define AI_TERR_CHUNK_CRVM          "CRVM"
-#define AI_TERR_CHUNK_ALTW          "ALTW"
+#define AI_TERR_CHUNK_XPTS "XPTS"
+#define AI_TERR_CHUNK_YPTS "YPTS"
+#define AI_TERR_CHUNK_SIZE "SIZE"
+#define AI_TERR_CHUNK_SCAL "SCAL"
+#define AI_TERR_CHUNK_CRAD "CRAD"
+#define AI_TERR_CHUNK_CRVM "CRVM"
+#define AI_TERR_CHUNK_ALTW "ALTW"
 
 // ---------------------------------------------------------------------------
 /** @brief Importer class to load Terragen (0.9) terrain files.
@@ -69,33 +68,28 @@ namespace Assimp    {
  *  The loader is basing on the information found here:
  *  http://www.planetside.co.uk/terragen/dev/tgterrain.html#chunks
 */
-class TerragenImporter : public BaseImporter
-{
+class TerragenImporter : public BaseImporter {
 public:
     TerragenImporter();
     ~TerragenImporter();
 
-
 public:
-
     // -------------------------------------------------------------------
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const;
 
 protected:
+    // -------------------------------------------------------------------
+    const aiImporterDesc *GetInfo() const;
 
     // -------------------------------------------------------------------
-    const aiImporterDesc* GetInfo () const;
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler);
 
     // -------------------------------------------------------------------
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
-
-    // -------------------------------------------------------------------
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp);
 
 private:
-
     bool configComputeUVs;
 
 }; //! class TerragenImporter

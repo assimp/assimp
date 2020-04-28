@@ -17,7 +17,6 @@ if ( MSVC )
 endif ()
 
 INCLUDE_DIRECTORIES(
-  ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code
   ${OPENGL_INCLUDE_DIR}
   ${GLUT_INCLUDE_DIR}
@@ -30,7 +29,6 @@ LINK_DIRECTORIES(
 )
 
 ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
-  SimpleTexturedOpenGL/include/boost_includes.h
   SimpleTexturedOpenGL/src/model_loading.cpp
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.cpp
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h
@@ -47,3 +45,4 @@ SET_TARGET_PROPERTIES( assimp_simpletexturedogl PROPERTIES
 INSTALL( TARGETS assimp_simpletexturedogl
   DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev
 )
+

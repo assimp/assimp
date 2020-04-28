@@ -25,12 +25,12 @@ public:
 
 	void Close();
 private:
-	ID3D11Device *dev;
-	ID3D11DeviceContext *devcon;
-	std::vector<Mesh> meshes;
-	std::string directory;
-	std::vector<Texture> textures_loaded;
-	HWND hwnd;
+	ID3D11Device *dev_;
+	ID3D11DeviceContext *devcon_;
+	std::vector<Mesh> meshes_;
+	std::string directory_;
+	std::vector<Texture> textures_loaded_;
+	HWND hwnd_;
 
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);

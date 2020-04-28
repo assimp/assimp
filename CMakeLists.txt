@@ -108,10 +108,6 @@ OPTION ( ASSIMP_ERROR_MAX
   "Enable all warnings."
   OFF
 )
-OPTION ( ASSIMP_WERROR
-  "Treat warnings as errors."
-  OFF
-)
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
   OFF
@@ -243,14 +239,14 @@ IF( UNIX )
   INCLUDE(GNUInstallDirs)
 ENDIF()
 
-# Grouped compiler settings
+# Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++0x ${CMAKE_CXX_FLAGS}")
-    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+    SET(CMAKE_CXX_STANDARD 11)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
@@ -263,10 +259,10 @@ ELSEIF(MSVC)
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++11 ${CMAKE_CXX_FLAGS}")
-    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+    SET(CMAKE_CXX_STANDARD 11)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
   IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
@@ -311,16 +307,6 @@ IF (ASSIMP_ERROR_MAX)
   ENDIF()
 ENDIF()
 
-IF (ASSIMP_WERROR)
-  MESSAGE(STATUS "Treating warnings as errors")
-  IF (MSVC)
-    ADD_COMPILE_OPTIONS(/WX)
-  ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-  ENDIF()
-ENDIF()
-
 IF (ASSIMP_ASAN)
   MESSAGE(STATUS "AddressSanitizer enabled")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
@@ -349,14 +335,6 @@ ELSE()
   SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
   SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 ENDIF ()
-
-# Cache these to allow the user to override them manually.
-SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
-  "Path the built library files are installed to." )
-SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
-  "Path the header files are installed to." )
-SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
-  "Path the tool executables are installed to." )
 
 get_cmake_property(is_multi_config GENERATOR_IS_MULTI_CONFIG)
 
@@ -417,6 +395,28 @@ ELSE()
   else()
     set(BUILD_LIB_TYPE STATIC)
   endif()
+
+  IF( UNIX )
+    # Use GNUInstallDirs for Unix predefined directories
+    INCLUDE(GNUInstallDirs)
+
+    SET( ASSIMP_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+    SET( ASSIMP_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+    SET( ASSIMP_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+  ELSE()
+    # Cache these to allow the user to override them on non-Unix platforms
+    SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
+      "Path the built library files are installed to." )
+    SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
+      "Path the header files are installed to." )
+    SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
+      "Path the tool executables are installed to." )
+
+    SET(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_INCLUDE_INSTALL_DIR})
+    SET(CMAKE_INSTALL_FULL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR})
+    SET(CMAKE_INSTALL_FULL_BINDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_BIN_INSTALL_DIR})
+  ENDIF()
+
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets.cmake" @ONLY IMMEDIATE)
   IF (is_multi_config)

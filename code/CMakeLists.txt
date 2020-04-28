@@ -121,6 +121,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/GenericProperty.h
   ${HEADER_PATH}/SpatialSort.h
   ${HEADER_PATH}/SkeletonMeshBuilder.h
+  ${HEADER_PATH}/SmallVector.h
   ${HEADER_PATH}/SmoothingGroups.h
   ${HEADER_PATH}/SmoothingGroups.inl
   ${HEADER_PATH}/StandardShapes.h
@@ -1132,6 +1133,13 @@ ENDIF ()
 
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
+
+# enable warnings as errors ########################################
+IF (MSVC)
+  TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
+ELSE()
+  TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
+ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>

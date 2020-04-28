@@ -56,7 +56,7 @@ const char g_szClassName[] = "directxWindowClass";
 static std::string g_ModelPath;
 
 UINT width, height;
-HWND hwnd = nullptr;
+HWND g_hwnd = nullptr;
 
 // ------------------------------------------------------------
 //                        DirectX Variables
@@ -120,13 +120,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPWSTR lpCmdLine, int nCmdShow)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
+	LPWSTR /*lpCmdLine*/, int nCmdShow)
 {
 	int argc;
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	if (!argv) {
-		MessageBox(NULL, 
+		MessageBox(nullptr, 
 			TEXT("An error occured while reading command line arguments."),
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
@@ -143,7 +143,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	// Ensure that a model file has been specified.
 	if (argc < 2) {
-		MessageBox(NULL, 
+		MessageBox(nullptr, 
 			TEXT("No model file specified. The program will now close."), 
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
@@ -165,16 +165,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
+	wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hbrBackground = nullptr;
+	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = g_szClassName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
 
 	if (!RegisterClassEx(&wc))
 	{
-		MessageBox(NULL, "Window Registration Failed!", "Error!",
+		MessageBox(nullptr, "Window Registration Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
@@ -182,35 +182,35 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	RECT wr = { 0,0, SCREEN_WIDTH, SCREEN_HEIGHT };
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
-	hwnd = CreateWindowEx(
+	g_hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
 		" Simple Textured Directx11 Sample ",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top,
-		NULL, NULL, hInstance, NULL
+		nullptr, nullptr, hInstance, nullptr
 	);
 
-	if (hwnd == NULL)
+	if (g_hwnd == nullptr)
 	{
-		MessageBox(NULL, "Window Creation Failed!", "Error!",
+		MessageBox(nullptr, "Window Creation Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
 
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+	ShowWindow(g_hwnd, nCmdShow);
+	UpdateWindow(g_hwnd);
 
 	width = wr.right - wr.left;
 	height = wr.bottom - wr.top;
 
 	try {
-		InitD3D(hInstance, hwnd);
+		InitD3D(hInstance, g_hwnd);
 
 		while (true)
 		{
 
-			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -225,17 +225,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		CleanD3D();
 		return static_cast<int>(msg.wParam);
 	} catch (const std::exception& e) {
-		MessageBox(hwnd, e.what(), TEXT("Error!"), MB_ICONERROR | MB_OK);
+		MessageBox(g_hwnd, e.what(), TEXT("Error!"), MB_ICONERROR | MB_OK);
 		CleanD3D();
 		return EXIT_FAILURE;
 	} catch (...) {
-		MessageBox(hwnd, TEXT("Caught an unknown exception."), TEXT("Error!"), MB_ICONERROR | MB_OK);
+		MessageBox(g_hwnd, TEXT("Caught an unknown exception."), TEXT("Error!"), MB_ICONERROR | MB_OK);
 		CleanD3D();
 		return EXIT_FAILURE;
 	}
 }
 
-void InitD3D(HINSTANCE hinstance, HWND hWnd)
+void InitD3D(HINSTANCE /*hinstance*/, HWND hWnd)
 {
 	HRESULT hr;
 
@@ -362,7 +362,7 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	}
 
 	// Note this tutorial doesn't handle full-screen swapchains so we block the ALT+ENTER shortcut
-	dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+	dxgiFactory->MakeWindowAssociation(g_hwnd, DXGI_MWA_NO_ALT_ENTER);
 
 	dxgiFactory->Release();
 
@@ -372,7 +372,7 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	ID3D11Texture2D *pBackBuffer;
 	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	dev->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
+	dev->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
 	pBackBuffer->Release();
 
 	D3D11_TEXTURE2D_DESC descDepth;
@@ -440,7 +440,7 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 void CleanD3D(void)
 {
 	if (swapchain)
-		swapchain->SetFullscreenState(FALSE, NULL);
+		swapchain->SetFullscreenState(FALSE, nullptr);
 
 	if (ourModel) {
 		ourModel->Close();
@@ -513,8 +513,8 @@ void InitPipeline()
 	if(FAILED(CompileShaderFromFile(SHADER_PATH PIXEL_SHADER_FILE, 0, "main", "ps_4_0", &PS)))
 		Throwanerror(UTFConverter(L"Failed to compile shader from file " PIXEL_SHADER_FILE).c_str());
 
-	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
-	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
+	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), nullptr, &pVS);
+	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &pPS);
 
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
@@ -564,7 +564,7 @@ void InitGraphics()
 	m_View = XMMatrixLookAtLH(Eye, At, Up);
 
 	ourModel = new ModelLoader;
-	if (!ourModel->Load(hwnd, dev, devcon, g_ModelPath))
+	if (!ourModel->Load(g_hwnd, dev, devcon, g_ModelPath))
 		Throwanerror("Model couldn't be loaded");
 }
 
@@ -576,16 +576,16 @@ HRESULT	CompileShaderFromFile(LPCWSTR pFileName, const D3D_SHADER_MACRO* pDefine
 	compileFlags |= D3DCOMPILE_DEBUG;
 #endif
 
-	ID3DBlob* pErrorBlob = NULL;
+	ID3DBlob* pErrorBlob = nullptr;
 
 	HRESULT result = D3DCompileFromFile(pFileName, pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, pEntryPoint, pShaderModel, compileFlags, 0, ppBytecodeBlob, &pErrorBlob);
 	if (FAILED(result))
 	{
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 			OutputDebugStringA((LPCSTR)pErrorBlob->GetBufferPointer());
 	}
 
-	if (pErrorBlob != NULL)
+	if (pErrorBlob != nullptr)
 		pErrorBlob->Release();
 
 	return result;

@@ -176,7 +176,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
         raw_reader->IncPtr(2);
 
         zstream.next_in   = reinterpret_cast<Bytef*>( raw_reader->GetPtr() );
-        zstream.avail_in  = raw_reader->GetRemainingSize();
+        zstream.avail_in  = (uInt) raw_reader->GetRemainingSize();
 
         size_t total = 0l;
 

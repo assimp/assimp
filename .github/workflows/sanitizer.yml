@@ -49,7 +49,7 @@ jobs:
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_ASAN=ON'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_UBSAN=ON'
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
     

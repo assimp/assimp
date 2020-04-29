@@ -44,13 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
 class utColladaImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    virtual bool importerTest() final {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
         if (scene == nullptr)
@@ -80,15 +81,61 @@ public:
 
         return true;
     }
+
+    void ImportAndCheckIds(const char *file, size_t meshCount) {
+        // Import the Collada using the 'default' where mesh names are the ids
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
+        ASSERT_TRUE(scene != nullptr) << "Fatal: could not re-import " << file;
+        EXPECT_EQ(meshCount, scene->mNumMeshes) << "in " << file;
+
+        // Check the mesh ids are unique
+        std::map<std::string, size_t> meshNameMap;
+        for (size_t idx = 0; idx < scene->mNumMeshes; ++idx) {
+            std::string meshName(scene->mMeshes[idx]->mName.C_Str());
+            const auto result = meshNameMap.insert(std::make_pair(meshName, idx));
+            EXPECT_TRUE(result.second) << "Duplicate name: " << meshName << " index " << result.first->second;
+        }
+    }
 };
 
-TEST_F(utColladaImportExport, importBlenFromFileTest) {
+TEST_F(utColladaImportExport, importDaeFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utColladaImportExport, exporterUniqueIdsTest) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const char *outFileEmpty = "exportMeshIdTest_empty_out.dae";
+    const char *outFileNamed = "exportMeshIdTest_named_out.dae";
+
+    // Load a sample file containing multiple meshes
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/teapots.DAE", aiProcess_ValidateDataStructure);
+
+    ASSERT_TRUE(scene != nullptr) << "Fatal: could not import teapots.DAE!";
+    ASSERT_EQ(3u, scene->mNumMeshes) << "Fatal: teapots.DAE initial load failed";
+
+    // Clear the mesh names
+    for (size_t idx = 0; idx < scene->mNumMeshes; ++idx) {
+        scene->mMeshes[idx]->mName.Clear();
+    }
+    ASSERT_EQ(AI_SUCCESS, exporter.Export(scene, "collada", outFileEmpty)) << "Fatal: Could not export un-named meshes file";
+
+    ImportAndCheckIds(outFileEmpty, 3);
+
+    // Force the meshes to have the same non-empty name
+    aiString testName("test_mesh");
+    for (size_t idx = 0; idx < scene->mNumMeshes; ++idx) {
+        scene->mMeshes[idx]->mName = testName;
+    }
+    ASSERT_EQ(AI_SUCCESS, exporter.Export(scene, "collada", outFileNamed)) << "Fatal: Could not export named meshes file";
+
+    ImportAndCheckIds(outFileNamed, 3);
 }
 
 class utColladaZaeImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    virtual bool importerTest() final {
         {
             Assimp::Importer importer;
             const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.zae", aiProcess_ValidateDataStructure);

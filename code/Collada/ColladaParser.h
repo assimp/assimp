@@ -174,10 +174,10 @@ protected:
     void ReadGeometryLibrary();
 
     /** Reads a geometry from the geometry library. */
-    void ReadGeometry(Collada::Mesh *pMesh);
+    void ReadGeometry(Collada::Mesh &pMesh);
 
     /** Reads a mesh from the geometry library */
-    void ReadMesh(Collada::Mesh *pMesh);
+    void ReadMesh(Collada::Mesh &pMesh);
 
     /** Reads a source element - a combination of raw data and an accessor defining
          * things that should not be redefinable. Yes, that's another rant.
@@ -195,29 +195,29 @@ protected:
     void ReadAccessor(const std::string &pID);
 
     /** Reads input declarations of per-vertex mesh data into the given mesh */
-    void ReadVertexData(Collada::Mesh *pMesh);
+    void ReadVertexData(Collada::Mesh &pMesh);
 
     /** Reads input declarations of per-index mesh data into the given mesh */
-    void ReadIndexData(Collada::Mesh *pMesh);
+    void ReadIndexData(Collada::Mesh &pMesh);
 
     /** Reads a single input channel element and stores it in the given array, if valid */
     void ReadInputChannel(std::vector<Collada::InputChannel> &poChannels);
 
     /** Reads a <p> primitive index list and assembles the mesh data into the given mesh */
-    size_t ReadPrimitives(Collada::Mesh *pMesh, std::vector<Collada::InputChannel> &pPerIndexChannels,
+    size_t ReadPrimitives(Collada::Mesh &pMesh, std::vector<Collada::InputChannel> &pPerIndexChannels,
             size_t pNumPrimitives, const std::vector<size_t> &pVCount, Collada::PrimitiveType pPrimType);
 
     /** Copies the data for a single primitive into the mesh, based on the InputChannels */
     void CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset,
-            Collada::Mesh *pMesh, std::vector<Collada::InputChannel> &pPerIndexChannels,
+            Collada::Mesh &pMesh, std::vector<Collada::InputChannel> &pPerIndexChannels,
             size_t currentPrimitive, const std::vector<size_t> &indices);
 
     /** Reads one triangle of a tristrip into the mesh */
-    void ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Collada::Mesh *pMesh,
+    void ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Collada::Mesh &pMesh,
             std::vector<Collada::InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices);
 
     /** Extracts a single object from an input channel and stores it in the appropriate mesh data array */
-    void ExtractDataObjectFromChannel(const Collada::InputChannel &pInput, size_t pLocalIndex, Collada::Mesh *pMesh);
+    void ExtractDataObjectFromChannel(const Collada::InputChannel &pInput, size_t pLocalIndex, Collada::Mesh &pMesh);
 
     /** Reads the library of node hierarchies and scene parts */
     void ReadSceneLibrary();

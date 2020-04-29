@@ -1716,18 +1716,25 @@ void ColladaParser::ReadGeometryLibrary() {
                 // TODO: (thom) support SIDs
                 // ai_assert( TestAttribute( "sid") == -1);
 
-                // create a mesh and store it in the library under its ID
-                Mesh *mesh = new Mesh;
-                mMeshLibrary[id] = mesh;
+                // create a mesh and store it in the library under its (resolved) ID
+                // Skip and warn if ID is not unique
+                if (mMeshLibrary.find(id) == mMeshLibrary.cend()) {
+                    std::unique_ptr<Mesh> mesh(new Mesh(id));
 
-                // read the mesh name if it exists
-                const int nameIndex = TestAttribute("name");
-                if (nameIndex != -1) {
-                    mesh->mName = mReader->getAttributeValue(nameIndex);
+                    // read the mesh name if it exists
+                    const int nameIndex = TestAttribute("name");
+                    if (nameIndex != -1) {
+                        mesh->mName = mReader->getAttributeValue(nameIndex);
+                    }
+
+                    // read on from there
+                    ReadGeometry(*mesh);
+                    // Read successfully, add to library
+                    mMeshLibrary.insert({ id, mesh.release() });
+                } else {
+                    ASSIMP_LOG_ERROR_F("Collada: Skipped duplicate geometry id: \"", id, "\"");
+                    SkipElement();
                 }
-
-                // read on from there
-                ReadGeometry(mesh);
             } else {
                 // ignore the rest
                 SkipElement();
@@ -1743,7 +1750,7 @@ void ColladaParser::ReadGeometryLibrary() {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a geometry from the geometry library.
-void ColladaParser::ReadGeometry(Collada::Mesh *pMesh) {
+void ColladaParser::ReadGeometry(Collada::Mesh &pMesh) {
     if (mReader->isEmptyElement())
         return;
 
@@ -1767,7 +1774,7 @@ void ColladaParser::ReadGeometry(Collada::Mesh *pMesh) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a mesh from the geometry library
-void ColladaParser::ReadMesh(Mesh *pMesh) {
+void ColladaParser::ReadMesh(Mesh &pMesh) {
     if (mReader->isEmptyElement())
         return;
 
@@ -1997,16 +2004,16 @@ void ColladaParser::ReadAccessor(const std::string &pID) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads input declarations of per-vertex mesh data into the given mesh
-void ColladaParser::ReadVertexData(Mesh *pMesh) {
+void ColladaParser::ReadVertexData(Mesh &pMesh) {
     // extract the ID of the <vertices> element. Not that we care, but to catch strange referencing schemes we should warn about
     int attrID = GetAttribute("id");
-    pMesh->mVertexID = mReader->getAttributeValue(attrID);
+    pMesh.mVertexID = mReader->getAttributeValue(attrID);
 
     // a number of <input> elements
     while (mReader->read()) {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if (IsElement("input")) {
-                ReadInputChannel(pMesh->mPerVertexData);
+                ReadInputChannel(pMesh.mPerVertexData);
             } else {
                 ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <vertices>");
             }
@@ -2021,7 +2028,7 @@ void ColladaParser::ReadVertexData(Mesh *pMesh) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads input declarations of per-index mesh data into the given mesh
-void ColladaParser::ReadIndexData(Mesh *pMesh) {
+void ColladaParser::ReadIndexData(Mesh &pMesh) {
     std::vector<size_t> vcount;
     std::vector<InputChannel> perIndexData;
 
@@ -2111,7 +2118,7 @@ void ColladaParser::ReadIndexData(Mesh *pMesh) {
 
     // only when we're done reading all <p> tags (and thus know the final vertex count) can we commit the submesh
     subgroup.mNumFaces = actualPrimitives;
-    pMesh->mSubMeshes.push_back(subgroup);
+    pMesh.mSubMeshes.push_back(subgroup);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2158,7 +2165,7 @@ void ColladaParser::ReadInputChannel(std::vector<InputChannel> &poChannels) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a <p> primitive index list and assembles the mesh data into the given mesh
-size_t ColladaParser::ReadPrimitives(Mesh *pMesh, std::vector<InputChannel> &pPerIndexChannels,
+size_t ColladaParser::ReadPrimitives(Mesh &pMesh, std::vector<InputChannel> &pPerIndexChannels,
         size_t pNumPrimitives, const std::vector<size_t> &pVCount, PrimitiveType pPrimType) {
     // determine number of indices coming per vertex
     // find the offset index for all per-vertex channels
@@ -2220,7 +2227,7 @@ size_t ColladaParser::ReadPrimitives(Mesh *pMesh, std::vector<InputChannel> &pPe
         ThrowException("Expected different index count in <p> element.");
 
     // find the data for all sources
-    for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it) {
+    for (std::vector<InputChannel>::iterator it = pMesh.mPerVertexData.begin(); it != pMesh.mPerVertexData.end(); ++it) {
         InputChannel &input = *it;
         if (input.mResolved)
             continue;
@@ -2241,7 +2248,7 @@ size_t ColladaParser::ReadPrimitives(Mesh *pMesh, std::vector<InputChannel> &pPe
         // ignore vertex pointer, it doesn't refer to an accessor
         if (input.mType == IT_Vertex) {
             // warn if the vertex channel does not refer to the <vertices> element in the same mesh
-            if (input.mAccessor != pMesh->mVertexID)
+            if (input.mAccessor != pMesh.mVertexID)
                 ThrowException("Unsupported vertex referencing scheme.");
             continue;
         }
@@ -2268,8 +2275,8 @@ size_t ColladaParser::ReadPrimitives(Mesh *pMesh, std::vector<InputChannel> &pPe
         numPrimitives = numberOfVertices - 1;
     }
 
-    pMesh->mFaceSize.reserve(numPrimitives);
-    pMesh->mFacePosIndices.reserve(indices.size() / numOffsets);
+    pMesh.mFaceSize.reserve(numPrimitives);
+    pMesh.mFacePosIndices.reserve(indices.size() / numOffsets);
 
     size_t polylistStartVertex = 0;
     for (size_t currentPrimitive = 0; currentPrimitive < numPrimitives; currentPrimitive++) {
@@ -2314,7 +2321,7 @@ size_t ColladaParser::ReadPrimitives(Mesh *pMesh, std::vector<InputChannel> &pPe
         }
 
         // store the face size to later reconstruct the face from
-        pMesh->mFaceSize.push_back(numPoints);
+        pMesh.mFaceSize.push_back(numPoints);
     }
 
     // if I ever get my hands on that guy who invented this steaming pile of indirection...
@@ -2325,7 +2332,7 @@ size_t ColladaParser::ReadPrimitives(Mesh *pMesh, std::vector<InputChannel> &pPe
 ///@note This function willn't work correctly if both PerIndex and PerVertex channels have same channels.
 ///For example if TEXCOORD present in both <vertices> and <polylist> tags this function will create wrong uv coordinates.
 ///It's not clear from COLLADA documentation is this allowed or not. For now only exporter fixed to avoid such behavior
-void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh *pMesh, std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
+void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh &pMesh, std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
     // calculate the base offset of the vertex whose attributes we ant to copy
     size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
 
@@ -2333,17 +2340,17 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
     ai_assert((baseOffset + numOffsets - 1) < indices.size());
 
     // extract per-vertex channels using the global per-vertex offset
-    for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
+    for (std::vector<InputChannel>::iterator it = pMesh.mPerVertexData.begin(); it != pMesh.mPerVertexData.end(); ++it)
         ExtractDataObjectFromChannel(*it, indices[baseOffset + perVertexOffset], pMesh);
     // and extract per-index channels using there specified offset
     for (std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
         ExtractDataObjectFromChannel(*it, indices[baseOffset + it->mOffset], pMesh);
 
     // store the vertex-data index for later assignment of bone vertex weights
-    pMesh->mFacePosIndices.push_back(indices[baseOffset + perVertexOffset]);
+    pMesh.mFacePosIndices.push_back(indices[baseOffset + perVertexOffset]);
 }
 
-void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Mesh *pMesh, std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
+void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Mesh &pMesh, std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
     if (currentPrimitive % 2 != 0) {
         //odd tristrip triangles need their indices mangled, to preserve winding direction
         CopyVertex(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
@@ -2358,7 +2365,7 @@ void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset,
 
 // ------------------------------------------------------------------------------------------------
 // Extracts a single object from an input channel and stores it in the appropriate mesh data array
-void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, size_t pLocalIndex, Mesh *pMesh) {
+void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, size_t pLocalIndex, Mesh &pMesh) {
     // ignore vertex referrer - we handle them that separate
     if (pInput.mType == IT_Vertex)
         return;
@@ -2380,40 +2387,40 @@ void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, siz
     switch (pInput.mType) {
     case IT_Position: // ignore all position streams except 0 - there can be only one position
         if (pInput.mIndex == 0)
-            pMesh->mPositions.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            pMesh.mPositions.push_back(aiVector3D(obj[0], obj[1], obj[2]));
         else
             ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
         break;
     case IT_Normal:
         // pad to current vertex count if necessary
-        if (pMesh->mNormals.size() < pMesh->mPositions.size() - 1)
-            pMesh->mNormals.insert(pMesh->mNormals.end(), pMesh->mPositions.size() - pMesh->mNormals.size() - 1, aiVector3D(0, 1, 0));
+        if (pMesh.mNormals.size() < pMesh.mPositions.size() - 1)
+            pMesh.mNormals.insert(pMesh.mNormals.end(), pMesh.mPositions.size() - pMesh.mNormals.size() - 1, aiVector3D(0, 1, 0));
 
         // ignore all normal streams except 0 - there can be only one normal
         if (pInput.mIndex == 0)
-            pMesh->mNormals.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            pMesh.mNormals.push_back(aiVector3D(obj[0], obj[1], obj[2]));
         else
             ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
         break;
     case IT_Tangent:
         // pad to current vertex count if necessary
-        if (pMesh->mTangents.size() < pMesh->mPositions.size() - 1)
-            pMesh->mTangents.insert(pMesh->mTangents.end(), pMesh->mPositions.size() - pMesh->mTangents.size() - 1, aiVector3D(1, 0, 0));
+        if (pMesh.mTangents.size() < pMesh.mPositions.size() - 1)
+            pMesh.mTangents.insert(pMesh.mTangents.end(), pMesh.mPositions.size() - pMesh.mTangents.size() - 1, aiVector3D(1, 0, 0));
 
         // ignore all tangent streams except 0 - there can be only one tangent
         if (pInput.mIndex == 0)
-            pMesh->mTangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            pMesh.mTangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
         else
             ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
         break;
     case IT_Bitangent:
         // pad to current vertex count if necessary
-        if (pMesh->mBitangents.size() < pMesh->mPositions.size() - 1)
-            pMesh->mBitangents.insert(pMesh->mBitangents.end(), pMesh->mPositions.size() - pMesh->mBitangents.size() - 1, aiVector3D(0, 0, 1));
+        if (pMesh.mBitangents.size() < pMesh.mPositions.size() - 1)
+            pMesh.mBitangents.insert(pMesh.mBitangents.end(), pMesh.mPositions.size() - pMesh.mBitangents.size() - 1, aiVector3D(0, 0, 1));
 
         // ignore all bitangent streams except 0 - there can be only one bitangent
         if (pInput.mIndex == 0)
-            pMesh->mBitangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            pMesh.mBitangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
         else
             ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
         break;
@@ -2421,13 +2428,13 @@ void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, siz
         // up to 4 texture coord sets are fine, ignore the others
         if (pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             // pad to current vertex count if necessary
-            if (pMesh->mTexCoords[pInput.mIndex].size() < pMesh->mPositions.size() - 1)
-                pMesh->mTexCoords[pInput.mIndex].insert(pMesh->mTexCoords[pInput.mIndex].end(),
-                        pMesh->mPositions.size() - pMesh->mTexCoords[pInput.mIndex].size() - 1, aiVector3D(0, 0, 0));
+            if (pMesh.mTexCoords[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
+                pMesh.mTexCoords[pInput.mIndex].insert(pMesh.mTexCoords[pInput.mIndex].end(),
+                        pMesh.mPositions.size() - pMesh.mTexCoords[pInput.mIndex].size() - 1, aiVector3D(0, 0, 0));
 
-            pMesh->mTexCoords[pInput.mIndex].push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            pMesh.mTexCoords[pInput.mIndex].push_back(aiVector3D(obj[0], obj[1], obj[2]));
             if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) /* hack ... consider cleaner solution */
-                pMesh->mNumUVComponents[pInput.mIndex] = 3;
+                pMesh.mNumUVComponents[pInput.mIndex] = 3;
         } else {
             ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
         }
@@ -2436,15 +2443,15 @@ void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, siz
         // up to 4 color sets are fine, ignore the others
         if (pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS) {
             // pad to current vertex count if necessary
-            if (pMesh->mColors[pInput.mIndex].size() < pMesh->mPositions.size() - 1)
-                pMesh->mColors[pInput.mIndex].insert(pMesh->mColors[pInput.mIndex].end(),
-                        pMesh->mPositions.size() - pMesh->mColors[pInput.mIndex].size() - 1, aiColor4D(0, 0, 0, 1));
+            if (pMesh.mColors[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
+                pMesh.mColors[pInput.mIndex].insert(pMesh.mColors[pInput.mIndex].end(),
+                        pMesh.mPositions.size() - pMesh.mColors[pInput.mIndex].size() - 1, aiColor4D(0, 0, 0, 1));
 
             aiColor4D result(0, 0, 0, 1);
             for (size_t i = 0; i < pInput.mResolved->mSize; ++i) {
                 result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
             }
-            pMesh->mColors[pInput.mIndex].push_back(result);
+            pMesh.mColors[pInput.mIndex].push_back(result);
         } else {
             ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
         }

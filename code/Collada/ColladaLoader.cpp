@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaLoader.h"
 #include "ColladaParser.h"
 
+#include <assimp/ColladaMetaData.h>
 #include <assimp/Defines.h>
 #include <assimp/anim.h>
 #include <assimp/importerdesc.h>
@@ -265,6 +266,13 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
 
     // find a name for the new node. It's more complicated than you might think
     node->mName.Set(FindNameForNode(pNode));
+    // if we're not using the unique IDs, hold onto them for reference and export
+    if (useColladaName) {
+        if (!pNode->mID.empty())
+            node->mMetaData->Add(AI_METADATA_COLLADA_ID, aiString(pNode->mID));
+        if (!pNode->mSID.empty())
+            node->mMetaData->Add(AI_METADATA_COLLADA_SID, aiString(pNode->mSID));
+    }
 
     // calculate the transformation matrix for it
     node->mTransformation = pParser.CalculateResultTransform(pNode->mTransforms);
@@ -603,7 +611,11 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Collada::M
         const Collada::Controller *pSrcController, size_t pStartVertex, size_t pStartFace) {
     std::unique_ptr<aiMesh> dstMesh(new aiMesh);
 
-    dstMesh->mName = pSrcMesh->mName;
+    if (useColladaName) {
+        dstMesh->mName = pSrcMesh->mName;
+    } else {
+        dstMesh->mName = pSrcMesh->mId;
+    }
 
     // count the vertices addressed by its faces
     const size_t numVertices = std::accumulate(pSrcMesh->mFaceSize.begin() + pStartFace,
@@ -700,10 +712,10 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Collada::M
             for (unsigned int i = 0; i < targetData.mStrings.size(); ++i) {
                 const Collada::Mesh *targetMesh = pParser.ResolveLibraryReference(pParser.mMeshLibrary, targetData.mStrings.at(i));
 
-                aiMesh *aimesh = findMesh(targetMesh->mName);
+                aiMesh *aimesh = findMesh(useColladaName ? targetMesh->mName : targetMesh->mId);
                 if (!aimesh) {
                     if (targetMesh->mSubMeshes.size() > 1) {
-                        throw DeadlyImportError("Morhing target mesh must be a single");
+                        throw DeadlyImportError("Morphing target mesh must be a single");
                     }
                     aimesh = CreateMesh(pParser, targetMesh, targetMesh->mSubMeshes.at(0), NULL, 0, 0);
                     mTargetMeshes.push_back(aimesh);

@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ColladaExporter.h"
 #include <assimp/Bitmap.h>
+#include <assimp/ColladaMetaData.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/MathFunctions.h>
 #include <assimp/SceneCombiner.h>
@@ -115,7 +116,7 @@ static const std::string XMLIDEncode(const std::string &name) {
         if (strchr(XML_ID_CHARS, *it) != nullptr) {
             idEncoded << *it;
         } else {
-            // Select placeholder character based on invalid character to prevent name collisions
+            // Select placeholder character based on invalid character to reduce ID collisions
             idEncoded << XML_ID_CHARS[(*it) % XML_ID_CHARS_COUNT];
         }
     }
@@ -854,8 +855,8 @@ void ColladaExporter::WriteControllerLibrary() {
 // Writes a skin controller of the given mesh
 void ColladaExporter::WriteController(size_t pIndex) {
     const aiMesh *mesh = mScene->mMeshes[pIndex];
-    const std::string idstr = mesh->mName.length == 0 ? GetMeshId(pIndex) : mesh->mName.C_Str();
-    const std::string idstrEscaped = XMLIDEncode(idstr);
+    const std::string idstr = GetMeshUniqueId(pIndex);
+    const std::string namestr = GetMeshName(pIndex);
 
     if (mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
         return;
@@ -863,11 +864,11 @@ void ColladaExporter::WriteController(size_t pIndex) {
     if (mesh->mNumBones == 0)
         return;
 
-    mOutput << startstr << "<controller id=\"" << idstrEscaped << "-skin\" ";
+    mOutput << startstr << "<controller id=\"" << idstr << "-skin\" ";
     mOutput << "name=\"skinCluster" << pIndex << "\">" << endstr;
     PushTag();
 
-    mOutput << startstr << "<skin source=\"#" << idstrEscaped << "\">" << endstr;
+    mOutput << startstr << "<skin source=\"#" << idstr << "\">" << endstr;
     PushTag();
 
     // bind pose matrix
@@ -884,10 +885,10 @@ void ColladaExporter::WriteController(size_t pIndex) {
     PopTag();
     mOutput << startstr << "</bind_shape_matrix>" << endstr;
 
-    mOutput << startstr << "<source id=\"" << idstrEscaped << "-skin-joints\" name=\"" << idstrEscaped << "-skin-joints\">" << endstr;
+    mOutput << startstr << "<source id=\"" << idstr << "-skin-joints\" name=\"" << namestr << "-skin-joints\">" << endstr;
     PushTag();
 
-    mOutput << startstr << "<Name_array id=\"" << idstrEscaped << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\">";
+    mOutput << startstr << "<Name_array id=\"" << idstr << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\">";
 
     for (size_t i = 0; i < mesh->mNumBones; ++i)
         mOutput << XMLIDEncode(mesh->mBones[i]->mName.C_Str()) << " ";
@@ -897,7 +898,7 @@ void ColladaExporter::WriteController(size_t pIndex) {
     mOutput << startstr << "<technique_common>" << endstr;
     PushTag();
 
-    mOutput << startstr << "<accessor source=\"#" << idstrEscaped << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\" stride=\"" << 1 << "\">" << endstr;
+    mOutput << startstr << "<accessor source=\"#" << idstr << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\" stride=\"" << 1 << "\">" << endstr;
     PushTag();
 
     mOutput << startstr << "<param name=\"JOINT\" type=\"Name\"></param>" << endstr;
@@ -934,8 +935,8 @@ void ColladaExporter::WriteController(size_t pIndex) {
     mOutput << startstr << "<joints>" << endstr;
     PushTag();
 
-    mOutput << startstr << "<input semantic=\"JOINT\" source=\"#" << idstrEscaped << "-skin-joints\"></input>" << endstr;
-    mOutput << startstr << "<input semantic=\"INV_BIND_MATRIX\" source=\"#" << idstrEscaped << "-skin-bind_poses\"></input>" << endstr;
+    mOutput << startstr << "<input semantic=\"JOINT\" source=\"#" << idstr << "-skin-joints\"></input>" << endstr;
+    mOutput << startstr << "<input semantic=\"INV_BIND_MATRIX\" source=\"#" << idstr << "-skin-bind_poses\"></input>" << endstr;
 
     PopTag();
     mOutput << startstr << "</joints>" << endstr;
@@ -943,8 +944,8 @@ void ColladaExporter::WriteController(size_t pIndex) {
     mOutput << startstr << "<vertex_weights count=\"" << mesh->mNumVertices << "\">" << endstr;
     PushTag();
 
-    mOutput << startstr << "<input semantic=\"JOINT\" source=\"#" << idstrEscaped << "-skin-joints\" offset=\"0\"></input>" << endstr;
-    mOutput << startstr << "<input semantic=\"WEIGHT\" source=\"#" << idstrEscaped << "-skin-weights\" offset=\"1\"></input>" << endstr;
+    mOutput << startstr << "<input semantic=\"JOINT\" source=\"#" << idstr << "-skin-joints\" offset=\"0\"></input>" << endstr;
+    mOutput << startstr << "<input semantic=\"WEIGHT\" source=\"#" << idstr << "-skin-weights\" offset=\"1\"></input>" << endstr;
 
     mOutput << startstr << "<vcount>";
 
@@ -1019,9 +1020,8 @@ void ColladaExporter::WriteGeometryLibrary() {
 // Writes the given mesh
 void ColladaExporter::WriteGeometry(size_t pIndex) {
     const aiMesh *mesh = mScene->mMeshes[pIndex];
-    const std::string idstr = mesh->mName.length == 0 ? GetMeshId(pIndex) : mesh->mName.C_Str();
-    const std::string geometryName = XMLEscape(idstr);
-    const std::string geometryId = XMLIDEncode(idstr);
+    const std::string geometryName = GetMeshName(pIndex);
+    const std::string geometryId = GetMeshUniqueId(pIndex);
 
     if (mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
         return;
@@ -1034,15 +1034,15 @@ void ColladaExporter::WriteGeometry(size_t pIndex) {
     PushTag();
 
     // Positions
-    WriteFloatArray(idstr + "-positions", FloatType_Vector, (ai_real *)mesh->mVertices, mesh->mNumVertices);
+    WriteFloatArray(geometryId + "-positions", FloatType_Vector, (ai_real *)mesh->mVertices, mesh->mNumVertices);
     // Normals, if any
     if (mesh->HasNormals())
-        WriteFloatArray(idstr + "-normals", FloatType_Vector, (ai_real *)mesh->mNormals, mesh->mNumVertices);
+        WriteFloatArray(geometryId + "-normals", FloatType_Vector, (ai_real *)mesh->mNormals, mesh->mNumVertices);
 
     // texture coords
     for (size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
         if (mesh->HasTextureCoords(static_cast<unsigned int>(a))) {
-            WriteFloatArray(idstr + "-tex" + to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
+            WriteFloatArray(geometryId + "-tex" + to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
                     (ai_real *)mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
@@ -1050,7 +1050,7 @@ void ColladaExporter::WriteGeometry(size_t pIndex) {
     // vertex colors
     for (size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
         if (mesh->HasVertexColors(static_cast<unsigned int>(a)))
-            WriteFloatArray(idstr + "-color" + to_string(a), FloatType_Color, (ai_real *)mesh->mColors[a], mesh->mNumVertices);
+            WriteFloatArray(geometryId + "-color" + to_string(a), FloatType_Color, (ai_real *)mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure
@@ -1530,13 +1530,13 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
     const std::string node_name = XMLEscape(pNode->mName.data);
     mOutput << startstr << "<node ";
     if (is_skeleton_root) {
-        mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\"" : ""); // For now, only support one skeleton in a scene.
+        mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\" " : ""); // For now, only support one skeleton in a scene.
         mFoundSkeletonRootNodeID = node_id;
     } else {
-        mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\"" : "");
+        mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\" " : "");
     }
 
-    mOutput << " name=\"" << node_name
+    mOutput << "name=\"" << node_name
             << "\" type=\"" << node_type
             << "\">" << endstr;
     PushTag();
@@ -1595,14 +1595,14 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
             if (mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
                 continue;
 
-            const std::string meshName = mesh->mName.length == 0 ? GetMeshId(pNode->mMeshes[a]) : mesh->mName.C_Str();
+            const std::string meshId = GetMeshUniqueId(pNode->mMeshes[a]);
 
             if (mesh->mNumBones == 0) {
-                mOutput << startstr << "<instance_geometry url=\"#" << XMLIDEncode(meshName) << "\">" << endstr;
+                mOutput << startstr << "<instance_geometry url=\"#" << meshId << "\">" << endstr;
                 PushTag();
             } else {
                 mOutput << startstr
-                        << "<instance_controller url=\"#" << XMLIDEncode(meshName) << "-skin\">"
+                        << "<instance_controller url=\"#" << meshId << "-skin\">"
                         << endstr;
                 PushTag();
 
@@ -1647,6 +1647,60 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;
+}
+
+/// Get or Create a unique mesh ID string for the given mesh index
+std::string Assimp::ColladaExporter::GetMeshUniqueId(size_t pIndex) {
+    auto meshId = mMeshIdMap.find(pIndex);
+    if (meshId != mMeshIdMap.cend())
+        return meshId->second;
+
+    // Not seen this mesh before, create and add
+    return AddMeshIndexToMaps(pIndex, true);
+}
+
+std::string Assimp::ColladaExporter::GetMeshName(size_t pIndex) {
+    auto meshName = mMeshNameMap.find(pIndex);
+    if (meshName != mMeshNameMap.cend())
+        return meshName->second;
+
+    // Not seen this mesh before, create and add
+    return AddMeshIndexToMaps(pIndex, false);
+}
+
+inline bool ValueIsUnique(const std::map<size_t, std::string> &map, const std::string &value) {
+    for (const auto &map_val : map) {
+        if (value == map_val.second)
+            return false;
+    }
+    return true;
+}
+
+// Add the mesh index to both Id and Name maps and return either Id or Name
+std::string Assimp::ColladaExporter::AddMeshIndexToMaps(size_t pIndex, bool meshId) {
+    const aiMesh *mesh = mScene->mMeshes[pIndex];
+    std::string idStr = mesh->mName.length == 0 ? std::string("meshId_") + to_string(pIndex) : XMLIDEncode(mesh->mName.C_Str());
+    // Ensure is unique. Relatively slow but will only happen once per mesh
+    if (!ValueIsUnique(mMeshIdMap, idStr)) {
+        // Select a number to append
+        size_t postfix = 1;
+        idStr.append("_");
+        while (!ValueIsUnique(mMeshIdMap, idStr + to_string(postfix))) {
+            ++postfix;
+        }
+        idStr = idStr + to_string(postfix);
+    }
+    // Add to map
+    mMeshIdMap.insert(std::make_pair(pIndex, idStr));
+
+    // Add name to map
+    const std::string nameStr = mesh->mName.length == 0 ? idStr : XMLEscape(mesh->mName.C_Str());
+    mMeshNameMap.insert(std::make_pair(pIndex, nameStr));
+
+    if (meshId)
+        return idStr;
+    else
+        return nameStr;
 }
 
 #endif

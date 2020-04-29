@@ -145,10 +145,14 @@ protected:
         startstr.erase(startstr.length() - 2);
     }
 
-    /// Creates a mesh ID for the given mesh
-    std::string GetMeshId(size_t pIndex) const {
-        return std::string("meshId") + to_string(pIndex);
-    }
+    /// Get or Create a unique mesh ID string for the given mesh index
+    std::string GetMeshUniqueId(size_t pIndex);
+    std::string GetMeshName(size_t pIndex);
+
+private:
+    std::string AddMeshIndexToMaps(size_t pIndex, bool meshId);
+    mutable std::map<size_t, std::string> mMeshIdMap; // Cache of encoded unique IDs
+    mutable std::map<size_t, std::string> mMeshNameMap; // Cache of encoded mesh names
 
 public:
     /// Stringstream to write all output into

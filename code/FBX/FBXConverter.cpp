@@ -3392,7 +3392,7 @@ void FBXConverter::ConvertGlobalSettings() {
 
     const bool hasGenerator = !doc.Creator().empty();
 
-    mSceneOut->mMetaData = aiMetadata::Alloc(16 + (hasGenerator ? 1 : 0));
+    mSceneOut->mMetaData = aiMetadata::Alloc(17 + (hasGenerator ? 1 : 0));
     mSceneOut->mMetaData->Set(0, "UpAxis", doc.GlobalSettings().UpAxis());
     mSceneOut->mMetaData->Set(1, "UpAxisSign", doc.GlobalSettings().UpAxisSign());
     mSceneOut->mMetaData->Set(2, "FrontAxis", doc.GlobalSettings().FrontAxis());

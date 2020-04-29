@@ -3401,7 +3401,7 @@ void FBXConverter::ConvertGlobalSettings() {
     mSceneOut->mMetaData->Set(5, "CoordAxisSign", doc.GlobalSettings().CoordAxisSign());
     mSceneOut->mMetaData->Set(6, "OriginalUpAxis", doc.GlobalSettings().OriginalUpAxis());
     mSceneOut->mMetaData->Set(7, "OriginalUpAxisSign", doc.GlobalSettings().OriginalUpAxisSign());
-    const double unitScaleFactor = (double)doc.GlobalSettings().UnitScaleFactor();
+    //const double unitScaleFactor = (double)doc.GlobalSettings().UnitScaleFactor();
     mSceneOut->mMetaData->Set(8, "UnitScaleFactor", doc.GlobalSettings().UnitScaleFactor());
     mSceneOut->mMetaData->Set(9, "OriginalUnitScaleFactor", doc.GlobalSettings().OriginalUnitScaleFactor());
     mSceneOut->mMetaData->Set(10, "AmbientColor", doc.GlobalSettings().AmbientColor());

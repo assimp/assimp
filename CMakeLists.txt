@@ -239,22 +239,14 @@ IF( UNIX )
   INCLUDE(GNUInstallDirs)
 ENDIF()
 
-# enable warnings as errors ########################################
-IF (MSVC)
-  ADD_COMPILE_OPTIONS(/WX)
-ELSE()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-ENDIF()
-
 # Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++0x ${CMAKE_CXX_FLAGS}")
-    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+    SET(CMAKE_CXX_STANDARD 11)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)

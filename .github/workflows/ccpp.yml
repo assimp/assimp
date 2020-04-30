@@ -8,23 +8,30 @@ on:
 
 jobs:
   job:
-    name: ${{ matrix.os }}-build-and-test
+    name: ${{ matrix.os }}-${{ matrix.cxx }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        # For Windows msvc, for Linux and macOS let's use the clang compiler
+        name: [ubuntu-gcc, macos-clang, windows-msvc, ubuntu-clang]
+        # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
-          - os: windows-latest
+          - name: windows-msvc
+            os: windows-latest
             cxx: cl.exe
             cc: cl.exe
-          - os: ubuntu-latest
+          - name: ubuntu-clang
+            os: ubuntu-latest
             cxx: clang++
             cc: clang
-          - os: macos-latest
+          - name: macos-clang
+            os: macos-latest
             cxx: clang++
             cc: clang
+          - name: ubuntu-gcc
+            os: ubuntu-latest
+            cxx: g++
+            cc: gcc
 
     steps:
     - uses: actions/checkout@v2

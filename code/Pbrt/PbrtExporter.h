@@ -54,13 +54,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <map>
+#include <set>
 #include <unordered_set>
 #include <memory> // shared_ptr
 #include <sstream> // stringstream
 
 struct aiScene;
 struct aiNode;
-//struct aiMaterial;
+struct aiMaterial;
 
 namespace Assimp
 {
@@ -99,6 +100,10 @@ private:
     const std::string mFile;
 
 private:
+    //  A private set to keep track of which textures have been declared
+    std::set<std::string> mTextureSet;
+
+private:
     // Writing the comment header
     void WriteHeader();
 
@@ -108,8 +113,8 @@ private:
     // Writing the pbrt scene-wide rendering options
     void WriteSceneWide();
 
-    // Writing the geometry to distinct files
-    void WriteGeometry();
+    // Writing the shapes to distinct files
+    void WriteShapes();
 
     // Writing the pbrt world defintion
     void WriteWorldDefinition();
@@ -118,12 +123,13 @@ private:
     void WriteCameras();
     void WriteCamera(int i);
     
-    // Writing the Texture data
-    void WriteTextures();
+    // Writing the Embedded Texture data
+    void WriteEmbeddedTextures();
 
     // Writing the Material data
     void WriteMaterials();
     void WriteMaterial(int i);
+    void WriteNewTextures(aiMaterial* material);
 
     // Writing the Light data
     void WriteLights();

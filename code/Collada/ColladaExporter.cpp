@@ -164,6 +164,9 @@ void ColladaExporter::WriteFile() {
     WriteTextures();
     WriteHeader();
 
+    // Add node names to the unique id database first so they are most likely to use their names as unique ids
+    CreateNodeIds(mScene->mRootNode);
+
     WriteCamerasLibrary();
     WriteLightsLibrary();
     WriteMaterials();
@@ -178,7 +181,7 @@ void ColladaExporter::WriteFile() {
     // useless Collada fu at the end, just in case we haven't had enough indirections, yet.
     mOutput << startstr << "<scene>" << endstr;
     PushTag();
-    mOutput << startstr << "<instance_visual_scene url=\"#" + XMLIDEncode(mScene->mRootNode->mName.C_Str()) + "\" />" << endstr;
+    mOutput << startstr << "<instance_visual_scene url=\"#" + GetNodeUniqueId(mScene->mRootNode) + "\" />" << endstr;
     PopTag();
     mOutput << startstr << "</scene>" << endstr;
     PopTag();
@@ -391,8 +394,8 @@ void ColladaExporter::WriteCamerasLibrary() {
 void ColladaExporter::WriteCamera(size_t pIndex) {
 
     const aiCamera *cam = mScene->mCameras[pIndex];
-    const std::string cameraName = XMLEscape(cam->mName.C_Str());
-    const std::string cameraId = XMLIDEncode(cam->mName.C_Str());
+    const std::string cameraId = GetObjectUniqueId(AiObjectType::Camera, pIndex);
+    const std::string cameraName = GetObjectName(AiObjectType::Camera, pIndex);
 
     mOutput << startstr << "<camera id=\"" << cameraId << "-camera\" name=\"" << cameraName << "\" >" << endstr;
     PushTag();
@@ -444,8 +447,8 @@ void ColladaExporter::WriteLightsLibrary() {
 void ColladaExporter::WriteLight(size_t pIndex) {
 
     const aiLight *light = mScene->mLights[pIndex];
-    const std::string lightName = XMLEscape(light->mName.C_Str());
-    const std::string lightId = XMLIDEncode(light->mName.C_Str());
+    const std::string lightId = GetObjectUniqueId(AiObjectType::Light, pIndex);
+    const std::string lightName = GetObjectName(AiObjectType::Light, pIndex);
 
     mOutput << startstr << "<light id=\"" << lightId << "-light\" name=\""
             << lightName << "\" >" << endstr;
@@ -564,12 +567,11 @@ void ColladaExporter::WriteAmbienttLight(const aiLight *const light) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a single surface entry from the given material keys
-void ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial *pSrcMat,
-        aiTextureType pTexture, const char *pKey, size_t pType, size_t pIndex) {
-    if (pSrcMat->GetTextureCount(pTexture) > 0) {
+bool ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial &pSrcMat, aiTextureType pTexture, const char *pKey, size_t pType, size_t pIndex) {
+    if (pSrcMat.GetTextureCount(pTexture) > 0) {
         aiString texfile;
         unsigned int uvChannel = 0;
-        pSrcMat->GetTexture(pTexture, 0, &texfile, NULL, &uvChannel);
+        pSrcMat.GetTexture(pTexture, 0, &texfile, NULL, &uvChannel);
 
         std::string index_str(texfile.C_Str());
 
@@ -599,8 +601,9 @@ void ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial *
         poSurface.exist = true;
     } else {
         if (pKey)
-            poSurface.exist = pSrcMat->Get(pKey, static_cast<unsigned int>(pType), static_cast<unsigned int>(pIndex), poSurface.color) == aiReturn_SUCCESS;
+            poSurface.exist = pSrcMat.Get(pKey, static_cast<unsigned int>(pType), static_cast<unsigned int>(pIndex), poSurface.color) == aiReturn_SUCCESS;
     }
+    return poSurface.exist;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -611,9 +614,9 @@ static bool isalnum_C(char c) {
 
 // ------------------------------------------------------------------------------------------------
 // Writes an image entry for the given surface
-void ColladaExporter::WriteImageEntry(const Surface &pSurface, const std::string &pNameAdd) {
+void ColladaExporter::WriteImageEntry(const Surface &pSurface, const std::string &imageId) {
     if (!pSurface.texture.empty()) {
-        mOutput << startstr << "<image id=\"" << XMLIDEncode(pNameAdd) << "\">" << endstr;
+        mOutput << startstr << "<image id=\"" << imageId << "\">" << endstr;
         PushTag();
         mOutput << startstr << "<init_from>";
 
@@ -634,14 +637,14 @@ void ColladaExporter::WriteImageEntry(const Surface &pSurface, const std::string
 
 // ------------------------------------------------------------------------------------------------
 // Writes a color-or-texture entry into an effect definition
-void ColladaExporter::WriteTextureColorEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &pImageName) {
+void ColladaExporter::WriteTextureColorEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &imageId) {
     if (pSurface.exist) {
         mOutput << startstr << "<" << pTypeName << ">" << endstr;
         PushTag();
         if (pSurface.texture.empty()) {
             mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
         } else {
-            mOutput << startstr << "<texture texture=\"" << XMLIDEncode(pImageName) << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
+            mOutput << startstr << "<texture texture=\"" << imageId << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
         }
         PopTag();
         mOutput << startstr << "</" << pTypeName << ">" << endstr;
@@ -650,24 +653,24 @@ void ColladaExporter::WriteTextureColorEntry(const Surface &pSurface, const std:
 
 // ------------------------------------------------------------------------------------------------
 // Writes the two parameters necessary for referencing a texture in an effect entry
-void ColladaExporter::WriteTextureParamEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &pMatName) {
+void ColladaExporter::WriteTextureParamEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &materialId) {
     // if surface is a texture, write out the sampler and the surface parameters necessary to reference the texture
     if (!pSurface.texture.empty()) {
-        mOutput << startstr << "<newparam sid=\"" << XMLIDEncode(pMatName) << "-" << pTypeName << "-surface\">" << endstr;
+        mOutput << startstr << "<newparam sid=\"" << materialId << "-" << pTypeName << "-surface\">" << endstr;
         PushTag();
         mOutput << startstr << "<surface type=\"2D\">" << endstr;
         PushTag();
-        mOutput << startstr << "<init_from>" << XMLIDEncode(pMatName) << "-" << pTypeName << "-image</init_from>" << endstr;
+        mOutput << startstr << "<init_from>" << materialId << "-" << pTypeName << "-image</init_from>" << endstr;
         PopTag();
         mOutput << startstr << "</surface>" << endstr;
         PopTag();
         mOutput << startstr << "</newparam>" << endstr;
 
-        mOutput << startstr << "<newparam sid=\"" << XMLIDEncode(pMatName) << "-" << pTypeName << "-sampler\">" << endstr;
+        mOutput << startstr << "<newparam sid=\"" << materialId << "-" << pTypeName << "-sampler\">" << endstr;
         PushTag();
         mOutput << startstr << "<sampler2D>" << endstr;
         PushTag();
-        mOutput << startstr << "<source>" << XMLIDEncode(pMatName) << "-" << pTypeName << "-surface</source>" << endstr;
+        mOutput << startstr << "<source>" << materialId << "-" << pTypeName << "-surface</source>" << endstr;
         PopTag();
         mOutput << startstr << "</sampler2D>" << endstr;
         PopTag();
@@ -690,80 +693,63 @@ void ColladaExporter::WriteFloatEntry(const Property &pProperty, const std::stri
 // ------------------------------------------------------------------------------------------------
 // Writes the material setup
 void ColladaExporter::WriteMaterials() {
+    std::vector<Material> materials;
     materials.resize(mScene->mNumMaterials);
 
     /// collect all materials from the scene
     size_t numTextures = 0;
     for (size_t a = 0; a < mScene->mNumMaterials; ++a) {
-        const aiMaterial *mat = mScene->mMaterials[a];
+        Material &material = materials[a];
+        material.id = GetObjectUniqueId(AiObjectType::Material, a);
+        material.name = GetObjectName(AiObjectType::Material, a);
 
-        aiString name;
-        if (mat->Get(AI_MATKEY_NAME, name) != aiReturn_SUCCESS) {
-            name = "mat";
-            materials[a].name = std::string("m") + to_string(a) + name.C_Str();
-        } else {
-            // try to use the material's name if no other material has already taken it, else append #
-            std::string testName = name.C_Str();
-            size_t materialCountWithThisName = 0;
-            for (size_t i = 0; i < a; i++) {
-                if (materials[i].name == testName) {
-                    materialCountWithThisName++;
-                }
-            }
-            if (materialCountWithThisName == 0) {
-                materials[a].name = name.C_Str();
-            } else {
-                materials[a].name = std::string(name.C_Str()) + to_string(materialCountWithThisName);
-            }
-        }
-
+        const aiMaterial &mat = *(mScene->mMaterials[a]);
         aiShadingMode shading = aiShadingMode_Flat;
-        materials[a].shading_model = "phong";
-        if (mat->Get(AI_MATKEY_SHADING_MODEL, shading) == aiReturn_SUCCESS) {
+        material.shading_model = "phong";
+        if (mat.Get(AI_MATKEY_SHADING_MODEL, shading) == aiReturn_SUCCESS) {
             if (shading == aiShadingMode_Phong) {
-                materials[a].shading_model = "phong";
+                material.shading_model = "phong";
             } else if (shading == aiShadingMode_Blinn) {
-                materials[a].shading_model = "blinn";
+                material.shading_model = "blinn";
             } else if (shading == aiShadingMode_NoShading) {
-                materials[a].shading_model = "constant";
+                material.shading_model = "constant";
             } else if (shading == aiShadingMode_Gouraud) {
-                materials[a].shading_model = "lambert";
+                material.shading_model = "lambert";
             }
         }
 
-        ReadMaterialSurface(materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
-        if (!materials[a].ambient.texture.empty()) numTextures++;
-        ReadMaterialSurface(materials[a].diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
-        if (!materials[a].diffuse.texture.empty()) numTextures++;
-        ReadMaterialSurface(materials[a].specular, mat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
-        if (!materials[a].specular.texture.empty()) numTextures++;
-        ReadMaterialSurface(materials[a].emissive, mat, aiTextureType_EMISSIVE, AI_MATKEY_COLOR_EMISSIVE);
-        if (!materials[a].emissive.texture.empty()) numTextures++;
-        ReadMaterialSurface(materials[a].reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE);
-        if (!materials[a].reflective.texture.empty()) numTextures++;
-        ReadMaterialSurface(materials[a].transparent, mat, aiTextureType_OPACITY, AI_MATKEY_COLOR_TRANSPARENT);
-        if (!materials[a].transparent.texture.empty()) numTextures++;
-        ReadMaterialSurface(materials[a].normal, mat, aiTextureType_NORMALS, NULL, 0, 0);
-        if (!materials[a].normal.texture.empty()) numTextures++;
+        if (ReadMaterialSurface(material.ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT))
+            ++numTextures;
+        if (ReadMaterialSurface(material.diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE))
+            ++numTextures;
+        if (ReadMaterialSurface(material.specular, mat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR))
+            ++numTextures;
+        if (ReadMaterialSurface(material.emissive, mat, aiTextureType_EMISSIVE, AI_MATKEY_COLOR_EMISSIVE))
+            ++numTextures;
+        if (ReadMaterialSurface(material.reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE))
+            ++numTextures;
+        if (ReadMaterialSurface(material.transparent, mat, aiTextureType_OPACITY, AI_MATKEY_COLOR_TRANSPARENT))
+            ++numTextures;
+        if (ReadMaterialSurface(material.normal, mat, aiTextureType_NORMALS, nullptr, 0, 0))
+            ++numTextures;
 
-        materials[a].shininess.exist = mat->Get(AI_MATKEY_SHININESS, materials[a].shininess.value) == aiReturn_SUCCESS;
-        materials[a].transparency.exist = mat->Get(AI_MATKEY_OPACITY, materials[a].transparency.value) == aiReturn_SUCCESS;
-        materials[a].index_refraction.exist = mat->Get(AI_MATKEY_REFRACTI, materials[a].index_refraction.value) == aiReturn_SUCCESS;
+        material.shininess.exist = mat.Get(AI_MATKEY_SHININESS, material.shininess.value) == aiReturn_SUCCESS;
+        material.transparency.exist = mat.Get(AI_MATKEY_OPACITY, material.transparency.value) == aiReturn_SUCCESS;
+        material.index_refraction.exist = mat.Get(AI_MATKEY_REFRACTI, material.index_refraction.value) == aiReturn_SUCCESS;
     }
 
     // output textures if present
     if (numTextures > 0) {
         mOutput << startstr << "<library_images>" << endstr;
         PushTag();
-        for (std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it) {
-            const Material &mat = *it;
-            WriteImageEntry(mat.ambient, mat.name + "-ambient-image");
-            WriteImageEntry(mat.diffuse, mat.name + "-diffuse-image");
-            WriteImageEntry(mat.specular, mat.name + "-specular-image");
-            WriteImageEntry(mat.emissive, mat.name + "-emission-image");
-            WriteImageEntry(mat.reflective, mat.name + "-reflective-image");
-            WriteImageEntry(mat.transparent, mat.name + "-transparent-image");
-            WriteImageEntry(mat.normal, mat.name + "-normal-image");
+        for (const Material &mat : materials) {
+            WriteImageEntry(mat.ambient, mat.id + "-ambient-image");
+            WriteImageEntry(mat.diffuse, mat.id + "-diffuse-image");
+            WriteImageEntry(mat.specular, mat.id + "-specular-image");
+            WriteImageEntry(mat.emissive, mat.id + "-emission-image");
+            WriteImageEntry(mat.reflective, mat.id + "-reflective-image");
+            WriteImageEntry(mat.transparent, mat.id + "-transparent-image");
+            WriteImageEntry(mat.normal, mat.id + "-normal-image");
         }
         PopTag();
         mOutput << startstr << "</library_images>" << endstr;
@@ -773,40 +759,39 @@ void ColladaExporter::WriteMaterials() {
     if (!materials.empty()) {
         mOutput << startstr << "<library_effects>" << endstr;
         PushTag();
-        for (std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it) {
-            const Material &mat = *it;
+        for (const Material &mat : materials) {
             // this is so ridiculous it must be right
-            mOutput << startstr << "<effect id=\"" << XMLIDEncode(mat.name) << "-fx\" name=\"" << XMLEscape(mat.name) << "\">" << endstr;
+            mOutput << startstr << "<effect id=\"" << mat.id << "-fx\" name=\"" << mat.name << "\">" << endstr;
             PushTag();
             mOutput << startstr << "<profile_COMMON>" << endstr;
             PushTag();
 
             // write sampler- and surface params for the texture entries
-            WriteTextureParamEntry(mat.emissive, "emission", mat.name);
-            WriteTextureParamEntry(mat.ambient, "ambient", mat.name);
-            WriteTextureParamEntry(mat.diffuse, "diffuse", mat.name);
-            WriteTextureParamEntry(mat.specular, "specular", mat.name);
-            WriteTextureParamEntry(mat.reflective, "reflective", mat.name);
-            WriteTextureParamEntry(mat.transparent, "transparent", mat.name);
-            WriteTextureParamEntry(mat.normal, "normal", mat.name);
+            WriteTextureParamEntry(mat.emissive, "emission", mat.id);
+            WriteTextureParamEntry(mat.ambient, "ambient", mat.id);
+            WriteTextureParamEntry(mat.diffuse, "diffuse", mat.id);
+            WriteTextureParamEntry(mat.specular, "specular", mat.id);
+            WriteTextureParamEntry(mat.reflective, "reflective", mat.id);
+            WriteTextureParamEntry(mat.transparent, "transparent", mat.id);
+            WriteTextureParamEntry(mat.normal, "normal", mat.id);
 
             mOutput << startstr << "<technique sid=\"standard\">" << endstr;
             PushTag();
             mOutput << startstr << "<" << mat.shading_model << ">" << endstr;
             PushTag();
 
-            WriteTextureColorEntry(mat.emissive, "emission", mat.name + "-emission-sampler");
-            WriteTextureColorEntry(mat.ambient, "ambient", mat.name + "-ambient-sampler");
-            WriteTextureColorEntry(mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
-            WriteTextureColorEntry(mat.specular, "specular", mat.name + "-specular-sampler");
+            WriteTextureColorEntry(mat.emissive, "emission", mat.id + "-emission-sampler");
+            WriteTextureColorEntry(mat.ambient, "ambient", mat.id + "-ambient-sampler");
+            WriteTextureColorEntry(mat.diffuse, "diffuse", mat.id + "-diffuse-sampler");
+            WriteTextureColorEntry(mat.specular, "specular", mat.id + "-specular-sampler");
             WriteFloatEntry(mat.shininess, "shininess");
-            WriteTextureColorEntry(mat.reflective, "reflective", mat.name + "-reflective-sampler");
-            WriteTextureColorEntry(mat.transparent, "transparent", mat.name + "-transparent-sampler");
+            WriteTextureColorEntry(mat.reflective, "reflective", mat.id + "-reflective-sampler");
+            WriteTextureColorEntry(mat.transparent, "transparent", mat.id + "-transparent-sampler");
             WriteFloatEntry(mat.transparency, "transparency");
             WriteFloatEntry(mat.index_refraction, "index_of_refraction");
 
             if (!mat.normal.texture.empty()) {
-                WriteTextureColorEntry(mat.normal, "bump", mat.name + "-normal-sampler");
+                WriteTextureColorEntry(mat.normal, "bump", mat.id + "-normal-sampler");
             }
 
             PopTag();
@@ -826,9 +811,9 @@ void ColladaExporter::WriteMaterials() {
         PushTag();
         for (std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it) {
             const Material &mat = *it;
-            mOutput << startstr << "<material id=\"" << XMLIDEncode(mat.name) << "\" name=\"" << XMLEscape(mat.name) << "\">" << endstr;
+            mOutput << startstr << "<material id=\"" << mat.id << "\" name=\"" << mat.name << "\">" << endstr;
             PushTag();
-            mOutput << startstr << "<instance_effect url=\"#" << XMLIDEncode(mat.name) << "-fx\"/>" << endstr;
+            mOutput << startstr << "<instance_effect url=\"#" << mat.id << "-fx\"/>" << endstr;
             PopTag();
             mOutput << startstr << "</material>" << endstr;
         }
@@ -855,14 +840,12 @@ void ColladaExporter::WriteControllerLibrary() {
 // Writes a skin controller of the given mesh
 void ColladaExporter::WriteController(size_t pIndex) {
     const aiMesh *mesh = mScene->mMeshes[pIndex];
-    const std::string idstr = GetMeshUniqueId(pIndex);
-    const std::string namestr = GetMeshName(pIndex);
-
-    if (mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
+    // Is there a skin controller?
+    if (mesh->mNumBones == 0 || mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
         return;
 
-    if (mesh->mNumBones == 0)
-        return;
+    const std::string idstr = GetObjectUniqueId(AiObjectType::Mesh, pIndex);
+    const std::string namestr = GetObjectName(AiObjectType::Mesh, pIndex);
 
     mOutput << startstr << "<controller id=\"" << idstr << "-skin\" ";
     mOutput << "name=\"skinCluster" << pIndex << "\">" << endstr;
@@ -891,7 +874,7 @@ void ColladaExporter::WriteController(size_t pIndex) {
     mOutput << startstr << "<Name_array id=\"" << idstr << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\">";
 
     for (size_t i = 0; i < mesh->mNumBones; ++i)
-        mOutput << XMLIDEncode(mesh->mBones[i]->mName.C_Str()) << " ";
+        mOutput << GetBoneUniqueId(mesh->mBones[i]) << " ";
 
     mOutput << "</Name_array>" << endstr;
 
@@ -1020,8 +1003,8 @@ void ColladaExporter::WriteGeometryLibrary() {
 // Writes the given mesh
 void ColladaExporter::WriteGeometry(size_t pIndex) {
     const aiMesh *mesh = mScene->mMeshes[pIndex];
-    const std::string geometryName = GetMeshName(pIndex);
-    const std::string geometryId = GetMeshUniqueId(pIndex);
+    const std::string geometryId = GetObjectUniqueId(AiObjectType::Mesh, pIndex);
+    const std::string geometryName = GetObjectName(AiObjectType::Mesh, pIndex);
 
     if (mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
         return;
@@ -1250,8 +1233,8 @@ void ColladaExporter::WriteFloatArray(const std::string &pIdString, FloatDataTyp
 // ------------------------------------------------------------------------------------------------
 // Writes the scene library
 void ColladaExporter::WriteSceneLibrary() {
-    const std::string sceneName = XMLEscape(mScene->mRootNode->mName.C_Str());
-    const std::string sceneId = XMLIDEncode(mScene->mRootNode->mName.C_Str());
+    const std::string sceneName = GetNodeUniqueId(mScene->mRootNode);
+    const std::string sceneId = GetNodeName(mScene->mRootNode);
 
     mOutput << startstr << "<library_visual_scenes>" << endstr;
     PushTag();
@@ -1260,7 +1243,7 @@ void ColladaExporter::WriteSceneLibrary() {
 
     // start recursive write at the root node
     for (size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a)
-        WriteNode(mScene, mScene->mRootNode->mChildren[a]);
+        WriteNode(mScene->mRootNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</visual_scene>" << endstr;
@@ -1274,20 +1257,10 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex) {
     if (anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels == 0)
         return;
 
-    const std::string animation_name_escaped = XMLEscape(anim->mName.C_Str());
-    std::string idstr = anim->mName.C_Str();
-    std::string ending = std::string("AnimId") + to_string(pIndex);
-    if (idstr.length() >= ending.length()) {
-        if (0 != idstr.compare(idstr.length() - ending.length(), ending.length(), ending)) {
-            idstr = idstr + ending;
-        }
-    } else {
-        idstr = idstr + ending;
-    }
+    const std::string animationNameEscaped = GetObjectName(AiObjectType::Animation, pIndex);
+    const std::string idstrEscaped = GetObjectUniqueId(AiObjectType::Animation, pIndex);
 
-    const std::string idstrEscaped = XMLIDEncode(idstr);
-
-    mOutput << startstr << "<animation id=\"" + idstrEscaped + "\" name=\"" + animation_name_escaped + "\">" << endstr;
+    mOutput << startstr << "<animation id=\"" + idstrEscaped + "\" name=\"" + animationNameEscaped + "\">" << endstr;
     PushTag();
 
     std::string cur_node_idstr;
@@ -1503,31 +1476,25 @@ const aiNode *findSkeletonRootNode(const aiScene *scene, const aiMesh *mesh) {
 
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
-    // the node must have a name
-    if (pNode->mName.length == 0) {
-        std::stringstream ss;
-        ss << "Node_" << pNode;
-        pNode->mName.Set(ss.str());
-    }
-
+void ColladaExporter::WriteNode(const aiNode *pNode) {
     // If the node is associated with a bone, it is a joint node (JOINT)
     // otherwise it is a normal node (NODE)
+    // Assimp-specific: nodes with no name cannot be associated with bones
     const char *node_type;
     bool is_joint, is_skeleton_root = false;
-    if (nullptr == findBone(pScene, pNode->mName.C_Str())) {
+    if (pNode->mName.length == 0 && nullptr == findBone(mScene, pNode->mName.C_Str())) {
         node_type = "NODE";
         is_joint = false;
     } else {
         node_type = "JOINT";
         is_joint = true;
-        if (!pNode->mParent || nullptr == findBone(pScene, pNode->mParent->mName.C_Str())) {
+        if (!pNode->mParent || nullptr == findBone(mScene, pNode->mParent->mName.C_Str())) {
             is_skeleton_root = true;
         }
     }
 
-    const std::string node_id = XMLIDEncode(pNode->mName.data);
-    const std::string node_name = XMLEscape(pNode->mName.data);
+    const std::string node_id = GetNodeUniqueId(pNode);
+    const std::string node_name = GetNodeName(pNode);
     mOutput << startstr << "<node ";
     if (is_skeleton_root) {
         mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\" " : ""); // For now, only support one skeleton in a scene.
@@ -1595,7 +1562,7 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
             if (mesh->mNumFaces == 0 || mesh->mNumVertices == 0)
                 continue;
 
-            const std::string meshId = GetMeshUniqueId(pNode->mMeshes[a]);
+            const std::string meshId = GetObjectUniqueId(AiObjectType::Mesh, pNode->mMeshes[a]);
 
             if (mesh->mNumBones == 0) {
                 mOutput << startstr << "<instance_geometry url=\"#" << meshId << "\">" << endstr;
@@ -1608,9 +1575,9 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
 
                 // note! this mFoundSkeletonRootNodeID some how affects animation, it makes the mesh attaches to armature skeleton root node.
                 // use the first bone to find skeleton root
-                const aiNode *skeletonRootBoneNode = findSkeletonRootNode(pScene, mesh);
+                const aiNode *skeletonRootBoneNode = findSkeletonRootNode(mScene, mesh);
                 if (skeletonRootBoneNode) {
-                    mFoundSkeletonRootNodeID = XMLIDEncode(skeletonRootBoneNode->mName.C_Str());
+                    mFoundSkeletonRootNodeID = GetNodeUniqueId(skeletonRootBoneNode);
                 }
                 mOutput << startstr << "<skeleton>#" << mFoundSkeletonRootNodeID << "</skeleton>" << endstr;
             }
@@ -1618,7 +1585,7 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
             PushTag();
             mOutput << startstr << "<technique_common>" << endstr;
             PushTag();
-            mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLIDEncode(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
+            mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << GetObjectUniqueId(AiObjectType::Material, mesh->mMaterialIndex) << "\">" << endstr;
             PushTag();
             for (size_t aa = 0; aa < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++aa) {
                 if (mesh->HasTextureCoords(static_cast<unsigned int>(aa)))
@@ -1643,64 +1610,154 @@ void ColladaExporter::WriteNode(const aiScene *pScene, aiNode *pNode) {
 
     // recurse into subnodes
     for (size_t a = 0; a < pNode->mNumChildren; ++a)
-        WriteNode(pScene, pNode->mChildren[a]);
+        WriteNode(pNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;
 }
 
-/// Get or Create a unique mesh ID string for the given mesh index
-std::string Assimp::ColladaExporter::GetMeshUniqueId(size_t pIndex) {
-    auto meshId = mMeshIdMap.find(pIndex);
-    if (meshId != mMeshIdMap.cend())
-        return meshId->second;
-
-    // Not seen this mesh before, create and add
-    return AddMeshIndexToMaps(pIndex, true);
+inline bool IsUniqueId(const std::unordered_set<std::string> &idSet, const std::string &idStr) {
+    return (idSet.find(idStr) == idSet.end());
 }
 
-std::string Assimp::ColladaExporter::GetMeshName(size_t pIndex) {
-    auto meshName = mMeshNameMap.find(pIndex);
-    if (meshName != mMeshNameMap.cend())
-        return meshName->second;
-
-    // Not seen this mesh before, create and add
-    return AddMeshIndexToMaps(pIndex, false);
-}
-
-inline bool ValueIsUnique(const std::map<size_t, std::string> &map, const std::string &value) {
-    for (const auto &map_val : map) {
-        if (value == map_val.second)
-            return false;
-    }
-    return true;
-}
-
-// Add the mesh index to both Id and Name maps and return either Id or Name
-std::string Assimp::ColladaExporter::AddMeshIndexToMaps(size_t pIndex, bool meshId) {
-    const aiMesh *mesh = mScene->mMeshes[pIndex];
-    std::string idStr = mesh->mName.length == 0 ? std::string("meshId_") + to_string(pIndex) : XMLIDEncode(mesh->mName.C_Str());
-    // Ensure is unique. Relatively slow but will only happen once per mesh
-    if (!ValueIsUnique(mMeshIdMap, idStr)) {
+inline void MakeUniqueId(const std::unordered_set<std::string> &idSet, std::string &idStr) {
+    if (!IsUniqueId(idSet, idStr)) {
         // Select a number to append
         size_t postfix = 1;
         idStr.append("_");
-        while (!ValueIsUnique(mMeshIdMap, idStr + to_string(postfix))) {
+        while (!IsUniqueId(idSet, idStr + to_string(postfix))) {
             ++postfix;
         }
-        idStr = idStr + to_string(postfix);
+        idStr.append(to_string(postfix));
     }
-    // Add to map
-    mMeshIdMap.insert(std::make_pair(pIndex, idStr));
+}
 
-    // Add name to map
-    const std::string nameStr = mesh->mName.length == 0 ? idStr : XMLEscape(mesh->mName.C_Str());
-    mMeshNameMap.insert(std::make_pair(pIndex, nameStr));
+void Assimp::ColladaExporter::CreateNodeIds(const aiNode *node) {
+    GetNodeUniqueId(node);
+    for (size_t a = 0; a < node->mNumChildren; ++a)
+        CreateNodeIds(node->mChildren[a]);
+}
 
-    if (meshId)
-        return idStr;
+std::string Assimp::ColladaExporter::GetNodeUniqueId(const aiNode *node) {
+    // Use the pointer as the key. This is safe because the scene is immutable.
+    auto idIt = mNodeIdMap.find(node);
+    if (idIt != mNodeIdMap.cend())
+        return idIt->second;
+
+    // Prefer the requested Collada Id if extant
+    std::string idStr;
+    aiString origId;
+    if (node->mMetaData && node->mMetaData->Get(AI_METADATA_COLLADA_ID, origId)) {
+        idStr = origId.C_Str();
+    } else {
+        idStr = node->mName.C_Str();
+    }
+    // Make sure the requested id is valid
+    if (idStr.empty())
+        idStr = "node";
     else
-        return nameStr;
+        idStr = XMLIDEncode(idStr);
+
+    // Ensure it's unique
+    MakeUniqueId(mUniqueIds, idStr);
+    mUniqueIds.insert(idStr);
+    mNodeIdMap.insert(std::make_pair(node, idStr));
+    return idStr;
+}
+
+std::string Assimp::ColladaExporter::GetNodeName(const aiNode *node) {
+
+    return XMLEscape(node->mName.C_Str());
+}
+
+std::string Assimp::ColladaExporter::GetBoneUniqueId(const aiBone *bone) {
+    // Use the pointer as the key. This is safe because the scene is immutable.
+    auto idIt = mNodeIdMap.find(bone);
+    if (idIt != mNodeIdMap.cend())
+        return idIt->second;
+
+    // New, create an id
+    std::string idStr(bone->mName.C_Str());
+
+    // Make sure the requested id is valid
+    if (idStr.empty())
+        idStr = "bone";
+    else
+        idStr = XMLIDEncode(idStr);
+
+    // Ensure it's unique
+    MakeUniqueId(mUniqueIds, idStr);
+    mUniqueIds.insert(idStr);
+    mNodeIdMap.insert(std::make_pair(bone, idStr));
+    return idStr;
+}
+
+std::string Assimp::ColladaExporter::GetObjectUniqueId(AiObjectType type, size_t pIndex) {
+    auto idIt = GetObjectIdMap(type).find(pIndex);
+    if (idIt != GetObjectIdMap(type).cend())
+        return idIt->second;
+
+    // Not seen this object before, create and add
+    NameIdPair result = AddObjectIndexToMaps(type, pIndex);
+    return result.second;
+}
+
+std::string Assimp::ColladaExporter::GetObjectName(AiObjectType type, size_t pIndex) {
+    auto meshName = GetObjectNameMap(type).find(pIndex);
+    if (meshName != GetObjectNameMap(type).cend())
+        return meshName->second;
+
+    // Not seen this object before, create and add
+    NameIdPair result = AddObjectIndexToMaps(type, pIndex);
+    return result.first;
+}
+
+// Determine unique id and add the name and id to the maps
+// @param type object type
+// @param index object index
+// @param name in/out. Caller to set the original name if known.
+// @param idStr in/out. Caller to set the preferred id if known.
+Assimp::ColladaExporter::NameIdPair Assimp::ColladaExporter::AddObjectIndexToMaps(AiObjectType type, size_t index) {
+
+    std::string idStr;
+    std::string name;
+
+    // Get the name
+    switch (type) {
+    case AiObjectType::Mesh: name = mScene->mMeshes[index]->mName.C_Str(); break;
+    case AiObjectType::Material: name = mScene->mMaterials[index]->GetName().C_Str(); break;
+    case AiObjectType::Animation: name = mScene->mAnimations[index]->mName.C_Str(); break;
+    case AiObjectType::Light: name = mScene->mLights[index]->mName.C_Str(); break;
+    case AiObjectType::Camera: name = mScene->mCameras[index]->mName.C_Str(); break;
+    case AiObjectType::Count: throw std::logic_error("ColladaExporter::AiObjectType::Count is not an object type");
+    }
+
+    if (name.empty()) {
+        // Default ids if empty name
+        switch (type) {
+        case AiObjectType::Mesh: idStr = std::string("meshId_"); break;
+        case AiObjectType::Material: idStr = std::string("materialId_"); break; // This one should never happen
+        case AiObjectType::Animation: idStr = std::string("animationId_"); break;
+        case AiObjectType::Light: idStr = std::string("lightId_"); break;
+        case AiObjectType::Camera: idStr = std::string("cameraId_"); break;
+        case AiObjectType::Count: throw std::logic_error("ColladaExporter::AiObjectType::Count is not an object type");
+        }
+        idStr.append(to_string(index));
+    } else {
+        idStr = XMLIDEncode(name);
+    }
+
+    if (!name.empty())
+        name = XMLEscape(name);
+
+    MakeUniqueId(mUniqueIds, idStr);
+
+    // Add to maps
+    mUniqueIds.insert(idStr);
+    GetObjectIdMap(type).insert(std::make_pair(index, idStr));
+    GetObjectNameMap(type).insert(std::make_pair(index, idStr));
+
+    return std::make_pair(name, idStr);
 }
 
 #endif

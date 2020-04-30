@@ -82,20 +82,75 @@ public:
         return true;
     }
 
+    typedef std::pair<std::string, std::string> IdNameString;
+    typedef std::map<std::string, std::string> IdNameMap;
+
+    template <typename T>
+    static inline IdNameString GetItemIdName(const T *item, size_t index) {
+        std::ostringstream stream;
+        stream << typeid(T).name() << "@" << index;
+        return std::make_pair(std::string(item->mName.C_Str()), stream.str());
+    }
+
+    // Specialisations
+    static inline IdNameString GetItemIdName(aiMaterial *item, size_t index) {
+        std::ostringstream stream;
+        stream << typeid(aiMaterial).name() << "@" << index;
+        return std::make_pair(std::string(item->GetName().C_Str()), stream.str());
+    }
+
+    static inline IdNameString GetItemIdName(aiTexture *item, size_t index) {
+        std::ostringstream stream;
+        stream << typeid(aiTexture).name() << "@" << index;
+        return std::make_pair(std::string(item->mFilename.C_Str()), stream.str());
+    }
+
+    static inline void ReportDuplicate(IdNameMap &itemIdMap, const IdNameString &namePair, const char *typeNameStr) {
+        const auto result = itemIdMap.insert(namePair);
+        EXPECT_TRUE(result.second) << "Duplicate '" << typeNameStr << "' name: '" << namePair.first << "'. " << namePair.second << " == " << result.first->second;
+    }
+
+    template <typename T>
+    static inline void CheckUniqueIds(IdNameMap &itemIdMap, unsigned int itemCount, T **itemArray) {
+        for (size_t idx = 0; idx < itemCount; ++idx) {
+            IdNameString namePair = GetItemIdName(itemArray[idx], idx);
+            ReportDuplicate(itemIdMap, namePair, typeid(T).name());
+        }
+    }
+
+    static inline void CheckUniqueIds(IdNameMap &itemIdMap, const aiNode *parent, size_t index) {
+        IdNameString namePair = GetItemIdName(parent, index);
+        ReportDuplicate(itemIdMap, namePair, typeid(aiNode).name());
+        for (size_t idx = 0; idx < parent->mNumChildren; ++idx) {
+            CheckUniqueIds(itemIdMap, parent->mChildren[idx], idx);
+        }
+    }
+
+    static inline void SetAllNodeNames(const aiString &newName, aiNode *node) {
+        node->mName = newName;
+        for (size_t idx = 0; idx < node->mNumChildren; ++idx) {
+            SetAllNodeNames(newName, node->mChildren[idx]);
+        }
+    }
+
     void ImportAndCheckIds(const char *file, size_t meshCount) {
-        // Import the Collada using the 'default' where mesh names are the ids
+        // Import the Collada using the 'default' where aiMesh names are the Collada ids
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
         ASSERT_TRUE(scene != nullptr) << "Fatal: could not re-import " << file;
         EXPECT_EQ(meshCount, scene->mNumMeshes) << "in " << file;
 
-        // Check the mesh ids are unique
-        std::map<std::string, size_t> meshNameMap;
-        for (size_t idx = 0; idx < scene->mNumMeshes; ++idx) {
-            std::string meshName(scene->mMeshes[idx]->mName.C_Str());
-            const auto result = meshNameMap.insert(std::make_pair(meshName, idx));
-            EXPECT_TRUE(result.second) << "Duplicate name: " << meshName << " index " << result.first->second;
-        }
+        // Check the ids are unique
+        IdNameMap itemIdMap;
+        // Recurse the Nodes
+        CheckUniqueIds(itemIdMap, scene->mRootNode, 0);
+        // Check the lists
+        CheckUniqueIds(itemIdMap, scene->mNumMeshes, scene->mMeshes);
+        CheckUniqueIds(itemIdMap, scene->mNumAnimations, scene->mAnimations);
+        CheckUniqueIds(itemIdMap, scene->mNumMaterials, scene->mMaterials);
+        CheckUniqueIds(itemIdMap, scene->mNumTextures, scene->mTextures);
+        CheckUniqueIds(itemIdMap, scene->mNumLights, scene->mLights);
+        CheckUniqueIds(itemIdMap, scene->mNumCameras, scene->mCameras);
     }
 };
 
@@ -115,19 +170,49 @@ TEST_F(utColladaImportExport, exporterUniqueIdsTest) {
     ASSERT_TRUE(scene != nullptr) << "Fatal: could not import teapots.DAE!";
     ASSERT_EQ(3u, scene->mNumMeshes) << "Fatal: teapots.DAE initial load failed";
 
-    // Clear the mesh names
+    // Clear all the names
     for (size_t idx = 0; idx < scene->mNumMeshes; ++idx) {
         scene->mMeshes[idx]->mName.Clear();
     }
+    for (size_t idx = 0; idx < scene->mNumMaterials; ++idx) {
+        scene->mMaterials[idx]->RemoveProperty(AI_MATKEY_NAME);
+    }
+    for (size_t idx = 0; idx < scene->mNumAnimations; ++idx) {
+        scene->mAnimations[idx]->mName.Clear();
+    }
+    // Can't clear texture names
+    for (size_t idx = 0; idx < scene->mNumLights; ++idx) {
+        scene->mLights[idx]->mName.Clear();
+    }
+    for (size_t idx = 0; idx < scene->mNumCameras; ++idx) {
+        scene->mCameras[idx]->mName.Clear();
+    }
+
+    SetAllNodeNames(aiString(), scene->mRootNode);
+
     ASSERT_EQ(AI_SUCCESS, exporter.Export(scene, "collada", outFileEmpty)) << "Fatal: Could not export un-named meshes file";
 
     ImportAndCheckIds(outFileEmpty, 3);
 
-    // Force the meshes to have the same non-empty name
-    aiString testName("test_mesh");
+    // Force everything to have the same non-empty name
+    aiString testName("test_name");
     for (size_t idx = 0; idx < scene->mNumMeshes; ++idx) {
         scene->mMeshes[idx]->mName = testName;
     }
+    for (size_t idx = 0; idx < scene->mNumMaterials; ++idx) {
+        scene->mMaterials[idx]->AddProperty(&testName, AI_MATKEY_NAME);
+    }
+    for (size_t idx = 0; idx < scene->mNumAnimations; ++idx) {
+        scene->mAnimations[idx]->mName = testName;
+    }
+    // Can't clear texture names
+    for (size_t idx = 0; idx < scene->mNumLights; ++idx) {
+        scene->mLights[idx]->mName = testName;
+    }
+    for (size_t idx = 0; idx < scene->mNumCameras; ++idx) {
+        scene->mCameras[idx]->mName = testName;
+    }
+
     ASSERT_EQ(AI_SUCCESS, exporter.Export(scene, "collada", outFileNamed)) << "Fatal: Could not export named meshes file";
 
     ImportAndCheckIds(outFileNamed, 3);

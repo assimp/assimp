@@ -46,16 +46,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAEXPORTER_H_INC
 #define AI_COLLADAEXPORTER_H_INC
 
+#include <assimp/StringUtils.h>
 #include <assimp/ai_assert.h>
 #include <assimp/light.h>
 #include <assimp/material.h>
 #include <assimp/mesh.h>
 #include <assimp/Exporter.hpp>
+
+#include <array>
 #include <map>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
-
-#include <assimp/StringUtils.h>
 
 struct aiScene;
 struct aiNode;
@@ -135,7 +137,7 @@ protected:
     std::string mFoundSkeletonRootNodeID = "skeleton_root"; // will be replaced by found node id in the WriteNode call.
 
     /// Recursively writes the given node
-    void WriteNode(const aiScene *scene, aiNode *pNode);
+    void WriteNode(const aiNode *pNode);
 
     /// Enters a new xml element, which increases the indentation
     void PushTag() { startstr.append("  "); }
@@ -145,14 +147,40 @@ protected:
         startstr.erase(startstr.length() - 2);
     }
 
-    /// Get or Create a unique mesh ID string for the given mesh index
-    std::string GetMeshUniqueId(size_t pIndex);
-    std::string GetMeshName(size_t pIndex);
+    void CreateNodeIds(const aiNode *node);
+
+    /// Get or Create a unique Node ID string for the given Node
+    std::string GetNodeUniqueId(const aiNode *node);
+    std::string GetNodeName(const aiNode *node);
+
+    std::string GetBoneUniqueId(const aiBone *bone);
+
+    enum class AiObjectType {
+        Mesh,
+        Material,
+        Animation,
+        Light,
+        Camera,
+        Count,
+    };
+    /// Get or Create a unique ID string for the given scene object index
+    std::string GetObjectUniqueId(AiObjectType type, size_t pIndex);
+    /// Get or Create a name string for the given scene object index
+    std::string GetObjectName(AiObjectType type, size_t pIndex);
+
+    typedef std::map<size_t, std::string> IndexIdMap;
+    typedef std::pair<std::string, std::string> NameIdPair;
+    NameIdPair AddObjectIndexToMaps(AiObjectType type, size_t pIndex);
+
+    // Helpers
+    inline IndexIdMap &GetObjectIdMap(AiObjectType type) { return mObjectIdMap[static_cast<size_t>(type)]; }
+    inline IndexIdMap &GetObjectNameMap(AiObjectType type) { return mObjectNameMap[static_cast<size_t>(type)]; }
 
 private:
-    std::string AddMeshIndexToMaps(size_t pIndex, bool meshId);
-    mutable std::map<size_t, std::string> mMeshIdMap; // Cache of encoded unique IDs
-    mutable std::map<size_t, std::string> mMeshNameMap; // Cache of encoded mesh names
+    std::unordered_set<std::string> mUniqueIds; // Cache of used unique ids
+    std::map<const void *, std::string> mNodeIdMap; // Cache of encoded node and bone ids
+    std::array<IndexIdMap, static_cast<size_t>(AiObjectType::Count)> mObjectIdMap; // Cache of encoded unique IDs
+    std::array<IndexIdMap, static_cast<size_t>(AiObjectType::Count)> mObjectNameMap; // Cache of encoded names
 
 public:
     /// Stringstream to write all output into
@@ -198,6 +226,7 @@ public:
 
     // summarize a material in an convenient way.
     struct Material {
+        std::string id;
         std::string name;
         std::string shading_model;
         Surface ambient, diffuse, specular, emissive, reflective, transparent, normal;
@@ -206,20 +235,18 @@ public:
         Material() {}
     };
 
-    std::vector<Material> materials;
-
     std::map<unsigned int, std::string> textures;
 
 public:
     /// Dammit C++ - y u no compile two-pass? No I have to add all methods below the struct definitions
     /// Reads a single surface entry from the given material keys
-    void ReadMaterialSurface(Surface &poSurface, const aiMaterial *pSrcMat, aiTextureType pTexture, const char *pKey, size_t pType, size_t pIndex);
+    bool ReadMaterialSurface(Surface &poSurface, const aiMaterial &pSrcMat, aiTextureType pTexture, const char *pKey, size_t pType, size_t pIndex);
     /// Writes an image entry for the given surface
-    void WriteImageEntry(const Surface &pSurface, const std::string &pNameAdd);
+    void WriteImageEntry(const Surface &pSurface, const std::string &imageId);
     /// Writes the two parameters necessary for referencing a texture in an effect entry
-    void WriteTextureParamEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &pMatName);
+    void WriteTextureParamEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &materialId);
     /// Writes a color-or-texture entry into an effect definition
-    void WriteTextureColorEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &pImageName);
+    void WriteTextureColorEntry(const Surface &pSurface, const std::string &pTypeName, const std::string &imageId);
     /// Writes a scalar property
     void WriteFloatEntry(const Property &pProperty, const std::string &pTypeName);
 };

@@ -979,7 +979,7 @@ void GetArrayCopy(Type*& dest, ai_uint num ) {
 
     dest = new Type[num];
     ::memcpy(dest, old, sizeof(Type) * num);
-    }
+}
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src) {
@@ -1269,9 +1269,6 @@ void SceneCombiner::Copy(aiBone** _dest, const aiBone* src) {
 
     // get a flat copy
     *dest = *src;
-
-    // and reallocate all arrays
-    GetArrayCopy( dest->mWeights, dest->mNumWeights );
 }
 
 // ------------------------------------------------------------------------------------------------

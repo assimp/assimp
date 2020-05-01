@@ -397,7 +397,7 @@ void ColladaExporter::WriteCamera(size_t pIndex) {
     const std::string cameraId = GetObjectUniqueId(AiObjectType::Camera, pIndex);
     const std::string cameraName = GetObjectName(AiObjectType::Camera, pIndex);
 
-    mOutput << startstr << "<camera id=\"" << cameraId << "-camera\" name=\"" << cameraName << "\" >" << endstr;
+    mOutput << startstr << "<camera id=\"" << cameraId << "\" name=\"" << cameraName << "\" >" << endstr;
     PushTag();
     mOutput << startstr << "<optics>" << endstr;
     PushTag();
@@ -450,7 +450,7 @@ void ColladaExporter::WriteLight(size_t pIndex) {
     const std::string lightId = GetObjectUniqueId(AiObjectType::Light, pIndex);
     const std::string lightName = GetObjectName(AiObjectType::Light, pIndex);
 
-    mOutput << startstr << "<light id=\"" << lightId << "-light\" name=\""
+    mOutput << startstr << "<light id=\"" << lightId << "\" name=\""
             << lightName << "\" >" << endstr;
     PushTag();
     mOutput << startstr << "<technique_common>" << endstr;
@@ -874,7 +874,7 @@ void ColladaExporter::WriteController(size_t pIndex) {
     mOutput << startstr << "<Name_array id=\"" << idstr << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\">";
 
     for (size_t i = 0; i < mesh->mNumBones; ++i)
-        mOutput << GetBoneUniqueId(mesh->mBones[i]) << " ";
+        mOutput << GetBoneUniqueId(mesh->mBones[i]) << ' ';
 
     mOutput << "</Name_array>" << endstr;
 
@@ -1410,12 +1410,12 @@ void ColladaExporter::WriteAnimationsLibrary() {
 }
 // ------------------------------------------------------------------------------------------------
 // Helper to find a bone by name in the scene
-aiBone *findBone(const aiScene *scene, const char *name) {
+aiBone *findBone(const aiScene *scene, const aiString &name) {
     for (size_t m = 0; m < scene->mNumMeshes; m++) {
         aiMesh *mesh = scene->mMeshes[m];
         for (size_t b = 0; b < mesh->mNumBones; b++) {
             aiBone *bone = mesh->mBones[b];
-            if (0 == strcmp(name, bone->mName.C_Str())) {
+            if (name == bone->mName) {
                 return bone;
             }
         }
@@ -1424,6 +1424,7 @@ aiBone *findBone(const aiScene *scene, const char *name) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Helper to find the node associated with a bone in the scene
 const aiNode *findBoneNode(const aiNode *aNode, const aiBone *bone) {
     if (aNode && bone && aNode->mName == bone->mName) {
         return aNode;
@@ -1432,15 +1433,17 @@ const aiNode *findBoneNode(const aiNode *aNode, const aiBone *bone) {
     if (aNode && bone) {
         for (unsigned int i = 0; i < aNode->mNumChildren; ++i) {
             aiNode *aChild = aNode->mChildren[i];
-            const aiNode *foundFromChild = 0;
+            const aiNode *foundFromChild = nullptr;
             if (aChild) {
                 foundFromChild = findBoneNode(aChild, bone);
-                if (foundFromChild) return foundFromChild;
+                if (foundFromChild) {
+                    return foundFromChild;
+                }
             }
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const aiNode *findSkeletonRootNode(const aiScene *scene, const aiMesh *mesh) {
@@ -1451,7 +1454,7 @@ const aiNode *findSkeletonRootNode(const aiScene *scene, const aiMesh *mesh) {
 
             const aiNode *node = findBoneNode(scene->mRootNode, bone);
             if (node) {
-                while (node->mParent && findBone(scene, node->mParent->mName.C_Str()) != 0) {
+                while (node->mParent && findBone(scene, node->mParent->mName) != nullptr) {
                     node = node->mParent;
                 }
                 topParentBoneNodes.insert(node);
@@ -1482,13 +1485,13 @@ void ColladaExporter::WriteNode(const aiNode *pNode) {
     // Assimp-specific: nodes with no name cannot be associated with bones
     const char *node_type;
     bool is_joint, is_skeleton_root = false;
-    if (pNode->mName.length == 0 && nullptr == findBone(mScene, pNode->mName.C_Str())) {
+    if (pNode->mName.length == 0 || nullptr == findBone(mScene, pNode->mName)) {
         node_type = "NODE";
         is_joint = false;
     } else {
         node_type = "JOINT";
         is_joint = true;
-        if (!pNode->mParent || nullptr == findBone(mScene, pNode->mParent->mName.C_Str())) {
+        if (!pNode->mParent || nullptr == findBone(mScene, pNode->mParent->mName)) {
             is_skeleton_root = true;
         }
     }
@@ -1542,14 +1545,14 @@ void ColladaExporter::WriteNode(const aiNode *pNode) {
         //check if it is a camera node
         for (size_t i = 0; i < mScene->mNumCameras; i++) {
             if (mScene->mCameras[i]->mName == pNode->mName) {
-                mOutput << startstr << "<instance_camera url=\"#" << node_id << "-camera\"/>" << endstr;
+                mOutput << startstr << "<instance_camera url=\"#" << GetObjectUniqueId(AiObjectType::Camera, i) << "\"/>" << endstr;
                 break;
             }
         }
         //check if it is a light node
         for (size_t i = 0; i < mScene->mNumLights; i++) {
             if (mScene->mLights[i]->mName == pNode->mName) {
-                mOutput << startstr << "<instance_light url=\"#" << node_id << "-light\"/>" << endstr;
+                mOutput << startstr << "<instance_light url=\"#" << GetObjectUniqueId(AiObjectType::Light, i) << "\"/>" << endstr;
                 break;
             }
         }
@@ -1620,16 +1623,17 @@ inline bool IsUniqueId(const std::unordered_set<std::string> &idSet, const std::
     return (idSet.find(idStr) == idSet.end());
 }
 
-inline void MakeUniqueId(const std::unordered_set<std::string> &idSet, std::string &idStr) {
-    if (!IsUniqueId(idSet, idStr)) {
+inline std::string MakeUniqueId(const std::unordered_set<std::string> &idSet, const std::string &idPrefix, const std::string &postfix) {
+    std::string result(idPrefix + postfix);
+    if (!IsUniqueId(idSet, result)) {
         // Select a number to append
-        size_t postfix = 1;
-        idStr.append("_");
-        while (!IsUniqueId(idSet, idStr + to_string(postfix))) {
-            ++postfix;
-        }
-        idStr.append(to_string(postfix));
+        size_t idnum = 1;
+        do {
+            result = idPrefix + '_' + to_string(idnum) + postfix;
+            ++idnum;
+        } while (!IsUniqueId(idSet, result));
     }
+    return result;
 }
 
 void Assimp::ColladaExporter::CreateNodeIds(const aiNode *node) {
@@ -1659,7 +1663,7 @@ std::string Assimp::ColladaExporter::GetNodeUniqueId(const aiNode *node) {
         idStr = XMLIDEncode(idStr);
 
     // Ensure it's unique
-    MakeUniqueId(mUniqueIds, idStr);
+    idStr = MakeUniqueId(mUniqueIds, idStr, std::string());
     mUniqueIds.insert(idStr);
     mNodeIdMap.insert(std::make_pair(node, idStr));
     return idStr;
@@ -1671,25 +1675,12 @@ std::string Assimp::ColladaExporter::GetNodeName(const aiNode *node) {
 }
 
 std::string Assimp::ColladaExporter::GetBoneUniqueId(const aiBone *bone) {
-    // Use the pointer as the key. This is safe because the scene is immutable.
-    auto idIt = mNodeIdMap.find(bone);
-    if (idIt != mNodeIdMap.cend())
-        return idIt->second;
+    // Find the Node that is this Bone
+    const aiNode *boneNode = findBoneNode(mScene->mRootNode, bone);
+    if (boneNode == nullptr)
+        return std::string();
 
-    // New, create an id
-    std::string idStr(bone->mName.C_Str());
-
-    // Make sure the requested id is valid
-    if (idStr.empty())
-        idStr = "bone";
-    else
-        idStr = XMLIDEncode(idStr);
-
-    // Ensure it's unique
-    MakeUniqueId(mUniqueIds, idStr);
-    mUniqueIds.insert(idStr);
-    mNodeIdMap.insert(std::make_pair(bone, idStr));
-    return idStr;
+    return GetNodeUniqueId(boneNode);
 }
 
 std::string Assimp::ColladaExporter::GetObjectUniqueId(AiObjectType type, size_t pIndex) {
@@ -1703,9 +1694,9 @@ std::string Assimp::ColladaExporter::GetObjectUniqueId(AiObjectType type, size_t
 }
 
 std::string Assimp::ColladaExporter::GetObjectName(AiObjectType type, size_t pIndex) {
-    auto meshName = GetObjectNameMap(type).find(pIndex);
-    if (meshName != GetObjectNameMap(type).cend())
-        return meshName->second;
+    auto objectName = GetObjectNameMap(type).find(pIndex);
+    if (objectName != GetObjectNameMap(type).cend())
+        return objectName->second;
 
     // Not seen this object before, create and add
     NameIdPair result = AddObjectIndexToMaps(type, pIndex);
@@ -1719,27 +1710,34 @@ std::string Assimp::ColladaExporter::GetObjectName(AiObjectType type, size_t pIn
 // @param idStr in/out. Caller to set the preferred id if known.
 Assimp::ColladaExporter::NameIdPair Assimp::ColladaExporter::AddObjectIndexToMaps(AiObjectType type, size_t index) {
 
-    std::string idStr;
     std::string name;
+    std::string idStr;
+    std::string idPostfix;
 
-    // Get the name
+    // Get the name and id postfix
     switch (type) {
     case AiObjectType::Mesh: name = mScene->mMeshes[index]->mName.C_Str(); break;
     case AiObjectType::Material: name = mScene->mMaterials[index]->GetName().C_Str(); break;
     case AiObjectType::Animation: name = mScene->mAnimations[index]->mName.C_Str(); break;
-    case AiObjectType::Light: name = mScene->mLights[index]->mName.C_Str(); break;
-    case AiObjectType::Camera: name = mScene->mCameras[index]->mName.C_Str(); break;
+    case AiObjectType::Light:
+        name = mScene->mLights[index]->mName.C_Str();
+        idPostfix = "-light";
+        break;
+    case AiObjectType::Camera:
+        name = mScene->mCameras[index]->mName.C_Str();
+        idPostfix = "-camera";
+        break;
     case AiObjectType::Count: throw std::logic_error("ColladaExporter::AiObjectType::Count is not an object type");
     }
 
     if (name.empty()) {
         // Default ids if empty name
         switch (type) {
-        case AiObjectType::Mesh: idStr = std::string("meshId_"); break;
-        case AiObjectType::Material: idStr = std::string("materialId_"); break; // This one should never happen
-        case AiObjectType::Animation: idStr = std::string("animationId_"); break;
-        case AiObjectType::Light: idStr = std::string("lightId_"); break;
-        case AiObjectType::Camera: idStr = std::string("cameraId_"); break;
+        case AiObjectType::Mesh: idStr = std::string("mesh_"); break;
+        case AiObjectType::Material: idStr = std::string("material_"); break; // This one should never happen
+        case AiObjectType::Animation: idStr = std::string("animation_"); break;
+        case AiObjectType::Light: idStr = std::string("light_"); break;
+        case AiObjectType::Camera: idStr = std::string("camera_"); break;
         case AiObjectType::Count: throw std::logic_error("ColladaExporter::AiObjectType::Count is not an object type");
         }
         idStr.append(to_string(index));
@@ -1750,12 +1748,12 @@ Assimp::ColladaExporter::NameIdPair Assimp::ColladaExporter::AddObjectIndexToMap
     if (!name.empty())
         name = XMLEscape(name);
 
-    MakeUniqueId(mUniqueIds, idStr);
+    idStr = MakeUniqueId(mUniqueIds, idStr, idPostfix);
 
     // Add to maps
     mUniqueIds.insert(idStr);
     GetObjectIdMap(type).insert(std::make_pair(index, idStr));
-    GetObjectNameMap(type).insert(std::make_pair(index, idStr));
+    GetObjectNameMap(type).insert(std::make_pair(index, name));
 
     return std::make_pair(name, idStr);
 }

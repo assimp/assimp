@@ -123,13 +123,18 @@ private:
     void WriteCameras();
     void WriteCamera(int i);
     
-    // Writing the Embedded Texture data
-    void WriteEmbeddedTextures();
+    // Check for Embedded Texture data
+    void CheckEmbeddedTextures();
+
+    // Writing the Texture data
+    void WriteTextures();
+    std::string GetTextureName(std::string path, unsigned int textureType);
 
     // Writing the Material data
     void WriteMaterials();
     void WriteMaterial(int i);
-    void WriteNewTextures(aiMaterial* material);
+    void WriteDisneyMaterial(aiMaterial* material);
+    void WriteUberMaterial(aiMaterial* material);
 
     // Writing the Light data
     void WriteLights();

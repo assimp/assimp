@@ -376,7 +376,10 @@ void PbrtExporter::WriteWorldDefinition() {
     mOutput << "WorldBegin" << std::endl;
     
     // Check to see if the scene has Embedded Textures
-    WriteEmbeddedTextures();
+    CheckEmbeddedTextures();
+    
+    // Print Textures
+    WriteTextures();
 
     // Print materials
     WriteMaterials();
@@ -398,7 +401,7 @@ void PbrtExporter::WriteWorldDefinition() {
 }
 
 
-void PbrtExporter::WriteEmbeddedTextures() {
+void PbrtExporter::CheckEmbeddedTextures() {
     mOutput << std::endl;
     mOutput << "###################" << std::endl;
     mOutput << "# Checking Embededded Textures:" << std::endl;
@@ -410,6 +413,62 @@ void PbrtExporter::WriteEmbeddedTextures() {
         return;
 
     mOutput << "# ERROR: PBRT does not support Embedded Textures" << std::endl;
+}
+
+void PbrtExporter::WriteTextures() {
+    mOutput << std::endl;
+    mOutput << "###################" << std::endl;
+    mOutput << "# Writing Textures:" << std::endl;
+    mOutput << "####################" << std::endl;
+
+    std::stringstream texStream;
+    int numTotalTextures = 0;
+        
+    C_STRUCT aiString path;
+    aiTextureMapping mapping;
+    unsigned int uvindex;
+    ai_real blend;
+    aiTextureOp op;
+    aiTextureMapMode mapmode[3];
+
+    // For every material in the scene,
+    for (int m = 0 ; m < mScene->mNumMaterials; m++) {
+        auto material = mScene->mMaterials[m];
+        // Parse through all texture types,
+        for (int tt = 1; tt <= aiTextureType_UNKNOWN; tt++) {
+            int ttCount = material->GetTextureCount(aiTextureType(tt));
+            // ... and get every texture
+            for (int t = 0; t < ttCount; t++) {
+                // TODO write out texture specifics
+                // TODO UV transforms may be material specific
+                //        so those may need to be baked into unique tex name  
+                material->GetTexture(
+                    aiTextureType(tt),
+                    t,
+                    &path,
+                    &mapping,
+                    &uvindex,
+                    &blend,
+                    &op,
+                    mapmode);
+
+                std::string spath = std::string(path.C_Str());
+                std::replace(spath.begin(), spath.end(), '\\', '/');
+                std::string name = GetTextureName(spath, tt);
+
+                if (mTextureSet.find(name) == mTextureSet.end()) {
+                    numTotalTextures++;
+                    texStream << "Texture \"" << name << "\" \"spectrum\" "
+                        << "\"string filename\" \"" << spath << "\"" << std::endl;
+                }
+            }
+        }
+    }
+
+    // Write out to file
+    mOutput << "# - Number of Textures found in scene: ";
+    mOutput << numTotalTextures << std::endl;
+    mOutput << texStream.str();
 }
 
 void PbrtExporter::WriteMaterials() {
@@ -446,23 +505,38 @@ void PbrtExporter::WriteMaterial(int m) {
     mOutput << "#   - Number of Material Properties: "
         << material->mNumProperties << std::endl;
 
-    // print out texture properties parsing through by type
-    //   then print out any new textures
-    WriteNewTextures(material);
+    // Print out texture type counts
+    int textureCounts[aiTextureType_UNKNOWN];
+    for (int i = 1; i <= aiTextureType_UNKNOWN; i++) {
+        textureCounts[i-1] = material->GetTextureCount(aiTextureType(i));
+    }
+    mOutput << "#   - Texture Type Counts:" << std::endl;
+    for (int tt = 1; tt <= aiTextureType_UNKNOWN; tt++) {
+        mOutput << "#     - " << TextureTypeToString(aiTextureType(tt)); 
+        mOutput << ": " <<  textureCounts[tt - 1] << std::endl;
+    }
 
-    // TODO IMMEDIATELY
-    //      Determine if this material should be one of:
-    //      - disney  (has BASE_COLOR?)
+    // Decide which material PBRT should set this to
+    //   if contains any PBR textures, then Disney
+    if(    textureCounts[aiTextureType_BASE_COLOR -1] > 0
+        || textureCounts[aiTextureType_NORMAL_CAMERA -1] > 0
+        || textureCounts[aiTextureType_EMISSION_COLOR -1] > 0
+        || textureCounts[aiTextureType_METALNESS -1] > 0
+        || textureCounts[aiTextureType_DIFFUSE_ROUGHNESS -1] > 0
+        || textureCounts[aiTextureType_AMBIENT_OCCLUSION -1] > 0) {
+        WriteDisneyMaterial(material);
+        return;
+    }
+    else {
+        WriteUberMaterial(material);
+        return;
+    }
+
+    // TODO
     //      - matte   (has only kd?)
     //      - metal   (never? has only ks?)
     //      - mirror  (has reflection)
     //      - plastic (never?)
-    //      - uber    (general?)
-
-    // Use MakeNamedMaterial to give variable names to materials
-    mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
-        << " \"string type\" \"uber\"" << std::endl;
-
 }
 
 
@@ -475,7 +549,6 @@ void PbrtExporter::WriteLights() {
     mOutput << mScene->mNumLights << std::endl;
     
     // TODO remove default ambient term when numCameras == 0
-
     //      For now, ambient may only be necessary for debug
     mOutput << "# - Creating a default blueish ambient light source" << std::endl;
     mOutput << "LightSource \"infinite\" \"rgb L\" [0.4 0.45 0.5]" << std::endl;
@@ -489,9 +562,6 @@ void PbrtExporter::WriteObjects() {
     mOutput << "#############################" << std::endl;
     mOutput << "# - Number of Meshes found in scene: ";
     mOutput << mScene->mNumMeshes << std::endl;
-
-    if (mScene->mNumMeshes == 0)
-        return;
 
     for (int i = 0 ; i < mScene->mNumMeshes; i++) {
         WriteObject(i);
@@ -651,141 +721,41 @@ void PbrtExporter::WriteObjectInstance(aiNode* node, aiMatrix4x4 parent) {
     }
 }
 
-void PbrtExporter::WriteNewTextures(aiMaterial* material) {
-    // Print out texture type counts
+std::string PbrtExporter::GetTextureName(
+    std::string spath, unsigned int textureType) {
+
+    std::stringstream name;
+    name << TextureTypeToString(aiTextureType(textureType));
+    name << ":" << spath;
+    return name.str();
+}
+
+void PbrtExporter::WriteDisneyMaterial(aiMaterial* material) {
+    auto materialName = material->GetName();
+
+    // Get texture type counts
     int textureCounts[aiTextureType_UNKNOWN];
     for (int i = 1; i <= aiTextureType_UNKNOWN; i++) {
         textureCounts[i-1] = material->GetTextureCount(aiTextureType(i));
     }
-    mOutput << "#   - Texture Type Counts:" << std::endl;
-    mOutput << "#     - aiTextureType_DIFFUSE: " << textureCounts[0] << std::endl;
-    mOutput << "#     - aiTextureType_SPECULAR: " << textureCounts[1] << std::endl;
-    mOutput << "#     - aiTextureType_AMBIENT: " << textureCounts[2] << std::endl;
-    mOutput << "#     - aiTextureType_EMISSIVE: " << textureCounts[3] << std::endl;
-    mOutput << "#     - aiTextureType_HEIGHT: " << textureCounts[4] << std::endl;
-    mOutput << "#     - aiTextureType_NORMALS: " << textureCounts[5] << std::endl;
-    mOutput << "#     - aiTextureType_SHININESS: " << textureCounts[6] << std::endl;
-    mOutput << "#     - aiTextureType_OPACITY: " << textureCounts[7] << std::endl;
-    mOutput << "#     - aiTextureType_DISPLACEMENT: " << textureCounts[8] << std::endl;
-    mOutput << "#     - aiTextureType_LIGHTMAP: " << textureCounts[9] << std::endl;
-    mOutput << "#     - aiTextureType_REFLECTION: " << textureCounts[10] << std::endl;
-    mOutput << "#     - aiTextureType_BASE_COLOR: " << textureCounts[11] << std::endl;
-    mOutput << "#     - aiTextureType_NORMAL_CAMERA: " << textureCounts[12] << std::endl;
-    mOutput << "#     - aiTextureType_EMISSION_COLOR: " << textureCounts[13] << std::endl;
-    mOutput << "#     - aiTextureType_METALNESS: " << textureCounts[14] << std::endl;
-    mOutput << "#     - aiTextureType_DIFFUSE_ROUGHNESS: " << textureCounts[15] << std::endl;
-    mOutput << "#     - aiTextureType_AMBIENT_OCCLUSION: " << textureCounts[16] << std::endl;
-    mOutput << "#     - aiTextureType_UNKNOWN: " << textureCounts[17] << std::endl;
 
-    for (int tt = 1; tt <= aiTextureType_UNKNOWN; tt++) {
-        C_STRUCT aiString path;
-        //aiTextureMapping mapping;
-        //unsigned int uvindex;
-        //ai_real blend;
-        //aiTextureOp op;
-        aiTextureMapMode mapmode;
+    // Get diffuse
+    std::stringstream diffuse;
 
-        for (int t = 0; t < textureCounts[tt-1]; t++) {
-            material->GetTexture(
-                aiTextureType(tt),
-                t,
-                &path,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                &mapmode);
+    // Use MakeNamedMaterial to give variable names to materials
+    mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
+        << " \"string type\" \"disney\"" << std::endl;
 
-            std::stringstream name;
-            std::string spath = std::string(path.C_Str());
-            std::replace(spath.begin(), spath.end(), '\\', '/');
-            name << spath << "_";
-            switch(aiTextureType(tt)) {
-                case aiTextureType_DIFFUSE :
-                    name << "diffuse";
-                    break;
-                case aiTextureType_SPECULAR :
-                    name << "specular";
-                    break;
-                case aiTextureType_AMBIENT :
-                    name << "ambient";
-                    break;
-                case aiTextureType_EMISSIVE :
-                    name << "emissive";
-                    break;
-                case aiTextureType_HEIGHT :
-                    name << "height";
-                    break;
-                case aiTextureType_NORMALS :
-                    name << "normals";
-                    break;
-                case aiTextureType_SHININESS :
-                    name << "shininess";
-                    break;
-                case aiTextureType_OPACITY :
-                    name << "opacity";
-                    break;
-                case aiTextureType_DISPLACEMENT :
-                    name << "displacement";
-                    break;
-                case aiTextureType_LIGHTMAP :
-                    name << "lightmap";
-                    break;
-                case aiTextureType_REFLECTION :
-                    name << "reflection";
-                    break;
-                case aiTextureType_BASE_COLOR :
-                    name << "base_color";
-                    break;
-                case aiTextureType_NORMAL_CAMERA :
-                    name << "normal_camera";
-                    break;
-                case aiTextureType_EMISSION_COLOR :
-                    name << "emission_color";
-                    break;
-                case aiTextureType_METALNESS :
-                    name << "metalness";
-                    break;
-                case aiTextureType_DIFFUSE_ROUGHNESS :
-                    name << "diffuse_roughness";
-                    break;
-                case aiTextureType_AMBIENT_OCCLUSION :
-                    name << "ambient_occlusion";
-                    break;
-                case aiTextureType_UNKNOWN :
-                    name << "unknown";
-                    break;
-                default :
-                    break;
-            }
-
-            if (mTextureSet.find(name.str()) == mTextureSet.end()) {
-                mOutput << "Texture \"" << name.str() << "\" \"spectrum\" "
-                    << "\"string filename\" \"" << spath << "\" "
-                    << "\"string wrap\" \"";
-                switch (mapmode) {
-                    case aiTextureMapMode_Wrap :
-                        mOutput << "repeat\"" << std::endl; 
-                        break;
-                    case aiTextureMapMode_Clamp :
-                        mOutput << "clamp\"" << std::endl; 
-                        break;
-                    case aiTextureMapMode_Decal :
-                        mOutput << "black\"" << std::endl; 
-                        break;
-                    case aiTextureMapMode_Mirror :
-                        // PBRT doesn't support mirroring textures
-                        mOutput << "repeat\"" << std::endl; 
-                        break;
-                    default:
-                        mOutput << "ERROR\"" << std::endl; 
-                        break;
-                }
-            }
-        }
-    }
 }
 
+void PbrtExporter::WriteUberMaterial(aiMaterial* material) {
+    auto materialName = material->GetName();
+
+    // Use MakeNamedMaterial to give variable names to materials
+    mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
+        << " \"string type\" \"uber\"" << std::endl;
+
+}
 
 #endif // ASSIMP_BUILD_NO_PBRT_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

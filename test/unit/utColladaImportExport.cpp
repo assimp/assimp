@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 
+#include <assimp/ColladaMetaData.h>
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -86,6 +87,18 @@ public:
     typedef std::map<std::string, std::string> IdNameMap;
 
     template <typename T>
+    static inline IdNameString GetColladaIdName(const T *item, size_t index) {
+        std::ostringstream stream;
+        stream << typeid(T).name() << "@" << index;
+        if (item->mMetaData) {
+            aiString aiStr;
+            if (item->mMetaData->Get(AI_METADATA_COLLADA_ID, aiStr))
+                return std::make_pair(std::string(aiStr.C_Str()), stream.str());
+        }
+        return std::make_pair(std::string(), stream.str());
+    }
+
+    template <typename T>
     static inline IdNameString GetItemIdName(const T *item, size_t index) {
         std::ostringstream stream;
         stream << typeid(T).name() << "@" << index;
@@ -121,8 +134,20 @@ public:
     static inline void CheckUniqueIds(IdNameMap &itemIdMap, const aiNode *parent, size_t index) {
         IdNameString namePair = GetItemIdName(parent, index);
         ReportDuplicate(itemIdMap, namePair, typeid(aiNode).name());
+
         for (size_t idx = 0; idx < parent->mNumChildren; ++idx) {
             CheckUniqueIds(itemIdMap, parent->mChildren[idx], idx);
+        }
+    }
+
+    static inline void CheckNodeIdNames(IdNameMap &nodeIdMap, IdNameMap &nodeNameMap, const aiNode *parent, size_t index) {
+        IdNameString namePair = GetItemIdName(parent, index);
+        const auto result = nodeNameMap.insert(namePair);
+        IdNameString idPair = GetColladaIdName(parent, index);
+        ReportDuplicate(nodeIdMap, idPair, typeid(aiNode).name());
+
+        for (size_t idx = 0; idx < parent->mNumChildren; ++idx) {
+            CheckNodeIdNames(nodeIdMap, nodeNameMap, parent->mChildren[idx], idx);
         }
     }
 
@@ -133,12 +158,12 @@ public:
         }
     }
 
-    void ImportAndCheckIds(const char *file, size_t meshCount) {
-        // Import the Collada using the 'default' where aiMesh names are the Collada ids
+    void ImportAndCheckIds(const char *file, const aiScene *origScene) {
+        // Import the Collada using the 'default' where aiNode and aiMesh names are the Collada ids
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
         ASSERT_TRUE(scene != nullptr) << "Fatal: could not re-import " << file;
-        EXPECT_EQ(meshCount, scene->mNumMeshes) << "in " << file;
+        EXPECT_EQ(origScene->mNumMeshes, scene->mNumMeshes) << "in " << file;
 
         // Check the ids are unique
         IdNameMap itemIdMap;
@@ -146,11 +171,39 @@ public:
         CheckUniqueIds(itemIdMap, scene->mRootNode, 0);
         // Check the lists
         CheckUniqueIds(itemIdMap, scene->mNumMeshes, scene->mMeshes);
-        CheckUniqueIds(itemIdMap, scene->mNumAnimations, scene->mAnimations);
-        CheckUniqueIds(itemIdMap, scene->mNumMaterials, scene->mMaterials);
-        CheckUniqueIds(itemIdMap, scene->mNumTextures, scene->mTextures);
-        CheckUniqueIds(itemIdMap, scene->mNumLights, scene->mLights);
-        CheckUniqueIds(itemIdMap, scene->mNumCameras, scene->mCameras);
+        // The remaining will come in using the name, which may not be unique
+        // Check we have the right number
+        EXPECT_EQ(origScene->mNumAnimations, scene->mNumAnimations);
+        EXPECT_EQ(origScene->mNumMaterials, scene->mNumMaterials);
+        EXPECT_EQ(origScene->mNumTextures, scene->mNumTextures);
+        EXPECT_EQ(origScene->mNumLights, scene->mNumLights);
+        EXPECT_EQ(origScene->mNumCameras, scene->mNumCameras);
+    }
+
+    void ImportAsNames(const char *file, const aiScene *origScene) {
+        // Import the Collada but using the user-visible names for aiNode and aiMesh
+        // Note that this mode may not support bones or animations
+        Assimp::Importer importer;
+        importer.SetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES, 1);
+
+        const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
+        ASSERT_TRUE(scene != nullptr) << "Fatal: could not re-import " << file;
+        EXPECT_EQ(origScene->mNumMeshes, scene->mNumMeshes) << "in " << file;
+
+        // Check the node ids are unique but the node names are not
+        IdNameMap nodeIdMap;
+        IdNameMap nodeNameMap;
+        // Recurse the Nodes
+        CheckNodeIdNames(nodeIdMap, nodeNameMap, scene->mRootNode, 0);
+
+        // nodeNameMap should have fewer than nodeIdMap
+        EXPECT_LT(nodeNameMap.size(), nodeIdMap.size()) << "Some nodes should have the same names";
+        // Check the counts haven't changed
+        EXPECT_EQ(origScene->mNumAnimations, scene->mNumAnimations);
+        EXPECT_EQ(origScene->mNumMaterials, scene->mNumMaterials);
+        EXPECT_EQ(origScene->mNumTextures, scene->mNumTextures);
+        EXPECT_EQ(origScene->mNumLights, scene->mNumLights);
+        EXPECT_EQ(origScene->mNumCameras, scene->mNumCameras);
     }
 };
 
@@ -192,7 +245,7 @@ TEST_F(utColladaImportExport, exporterUniqueIdsTest) {
 
     ASSERT_EQ(AI_SUCCESS, exporter.Export(scene, "collada", outFileEmpty)) << "Fatal: Could not export un-named meshes file";
 
-    ImportAndCheckIds(outFileEmpty, 3);
+    ImportAndCheckIds(outFileEmpty, scene);
 
     // Force everything to have the same non-empty name
     aiString testName("test_name");
@@ -213,9 +266,12 @@ TEST_F(utColladaImportExport, exporterUniqueIdsTest) {
         scene->mCameras[idx]->mName = testName;
     }
 
+    SetAllNodeNames(testName, scene->mRootNode);
+
     ASSERT_EQ(AI_SUCCESS, exporter.Export(scene, "collada", outFileNamed)) << "Fatal: Could not export named meshes file";
 
-    ImportAndCheckIds(outFileNamed, 3);
+    ImportAndCheckIds(outFileNamed, scene);
+    ImportAsNames(outFileNamed, scene);
 }
 
 class utColladaZaeImportExport : public AbstractImportExportBase {

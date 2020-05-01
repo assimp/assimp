@@ -258,6 +258,15 @@ void ColladaLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     }
 }
 
+// Add an item of metadata to a node
+// Assumes the key is not already in the list
+template <typename T>
+inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
+    if (nullptr == node->mMetaData)
+        node->mMetaData = new aiMetadata();
+    node->mMetaData->Add(key, value);
+}
+
 // ------------------------------------------------------------------------------------------------
 // Recursively constructs a scene node for the given parser node and returns it.
 aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collada::Node *pNode) {
@@ -269,9 +278,9 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
     // if we're not using the unique IDs, hold onto them for reference and export
     if (useColladaName) {
         if (!pNode->mID.empty())
-            node->mMetaData->Add(AI_METADATA_COLLADA_ID, aiString(pNode->mID));
+            AddNodeMetaData(node, AI_METADATA_COLLADA_ID, aiString(pNode->mID));
         if (!pNode->mSID.empty())
-            node->mMetaData->Add(AI_METADATA_COLLADA_SID, aiString(pNode->mSID));
+            AddNodeMetaData(node, AI_METADATA_COLLADA_SID, aiString(pNode->mSID));
     }
 
     // calculate the transformation matrix for it

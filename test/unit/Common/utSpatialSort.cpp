@@ -39,30 +39,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include <assimp/StringUtils.h>
 
-class utStringUtils : public ::testing::Test {
+#include <assimp/SpatialSort.h>
+
+using namespace Assimp;
+
+class utSpatialSort : public ::testing::Test {
+public
+        :
+    aiVector3D *vecs;
+
+protected:
+    void SetUp() override {
+        ::srand(static_cast<unsigned>(time(0)));
+        vecs = new aiVector3D[100];
+        for (size_t i = 0; i < 100; ++i) {
+            vecs[i].x = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 100));
+            vecs[i].y = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 100));
+            vecs[i].z = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 100));
+        }
+    }
+
+    void TearDown() override {
+        delete[] vecs;
+    }
 };
 
-TEST_F( utStringUtils, to_string_Test ) {
-    std::string res = to_string( 1 );
-    EXPECT_EQ( res, "1" );
+TEST_F( utSpatialSort, findIdenticalsTest ) {
+    SpatialSort sSort;
+    sSort.Fill(vecs, 100, sizeof(aiVector3D));
 
-    res = to_string( 1.0f );
-    EXPECT_EQ( res, "1" );
+    std::vector<unsigned int> indices;
+    sSort.FindIdenticalPositions(vecs[0], indices);
+    EXPECT_EQ(1u, indices.size());
 }
 
-TEST_F( utStringUtils, ai_strtofTest ) {
-    float res = ai_strtof( nullptr, nullptr );
-    EXPECT_FLOAT_EQ( res, 0.0f );
+TEST_F(utSpatialSort, findPositionsTest) {
+    SpatialSort sSort;
+    sSort.Fill(vecs, 100, sizeof(aiVector3D));
 
-    std::string testStr1 = "200.0";
-    res = ai_strtof( testStr1.c_str(), nullptr );
-    EXPECT_FLOAT_EQ( res, 200.0f );
-
-    std::string testStr2 = "200.0 xxx";
-    const char *begin( testStr2.c_str() );
-    const char *end( begin + 6 );
-    res = ai_strtof( begin, end );
-    EXPECT_FLOAT_EQ( res, 200.0f );
+    std::vector<unsigned int> indices;
+    sSort.FindPositions(vecs[0], 0.01f, indices);
+    EXPECT_EQ(1u, indices.size());
 }

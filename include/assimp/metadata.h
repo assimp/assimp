@@ -320,7 +320,7 @@ struct aiMetadata {
     }
 
     template <typename T>
-    inline bool Set( const std::string &key, const T &value ) {
+    inline bool Set(const std::string &key, const T &value) {
         if (key.empty()) {
             return false;
         }

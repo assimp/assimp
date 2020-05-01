@@ -44,9 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 
 #include "ColladaExporter.h"
+
 #include <assimp/Bitmap.h>
 #include <assimp/ColladaMetaData.h>
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/Exceptional.h>
 #include <assimp/MathFunctions.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
@@ -57,15 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 
-#include <assimp/Exceptional.h>
-
 #include <ctime>
-#include <iostream>
 #include <memory>
-#include <set>
-#include <vector>
-
-using namespace Assimp;
 
 namespace Assimp {
 
@@ -84,15 +79,13 @@ void ExportSceneCollada(const char *pFile, IOSystem *pIOSystem, const aiScene *p
 
     // we're still here - export successfully completed. Write result to the given IOSYstem
     std::unique_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wt"));
-    if (outfile == NULL) {
+    if (outfile == nullptr) {
         throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
     }
 
     // XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
     outfile->Write(iDoTheExportThing.mOutput.str().c_str(), static_cast<size_t>(iDoTheExportThing.mOutput.tellp()), 1);
 }
-
-} // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Encodes a string into a valid XML ID using the xsd:ID schema qualifications.
@@ -207,7 +200,7 @@ void ColladaExporter::WriteHeader() {
 
     static const unsigned int date_nb_chars = 20;
     char date_str[date_nb_chars];
-    std::time_t date = std::time(NULL);
+    std::time_t date = std::time(nullptr);
     std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
 
     aiVector3D scaling;
@@ -358,7 +351,7 @@ void ColladaExporter::WriteTextures() {
             std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char *)texture->achFormatHint);
 
             std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath + mIOSystem->getOsSeparator() + name, "wb"));
-            if (outfile == NULL) {
+            if (outfile == nullptr) {
                 throw DeadlyExportError("could not open output texture file: " + mPath + name);
             }
 
@@ -571,7 +564,7 @@ bool ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial &
     if (pSrcMat.GetTextureCount(pTexture) > 0) {
         aiString texfile;
         unsigned int uvChannel = 0;
-        pSrcMat.GetTexture(pTexture, 0, &texfile, NULL, &uvChannel);
+        pSrcMat.GetTexture(pTexture, 0, &texfile, nullptr, &uvChannel);
 
         std::string index_str(texfile.C_Str());
 
@@ -1420,7 +1413,7 @@ aiBone *findBone(const aiScene *scene, const aiString &name) {
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1474,7 +1467,7 @@ const aiNode *findSkeletonRootNode(const aiScene *scene, const aiMesh *mesh) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1636,13 +1629,13 @@ inline std::string MakeUniqueId(const std::unordered_set<std::string> &idSet, co
     return result;
 }
 
-void Assimp::ColladaExporter::CreateNodeIds(const aiNode *node) {
+void ColladaExporter::CreateNodeIds(const aiNode *node) {
     GetNodeUniqueId(node);
     for (size_t a = 0; a < node->mNumChildren; ++a)
         CreateNodeIds(node->mChildren[a]);
 }
 
-std::string Assimp::ColladaExporter::GetNodeUniqueId(const aiNode *node) {
+std::string ColladaExporter::GetNodeUniqueId(const aiNode *node) {
     // Use the pointer as the key. This is safe because the scene is immutable.
     auto idIt = mNodeIdMap.find(node);
     if (idIt != mNodeIdMap.cend())
@@ -1669,12 +1662,12 @@ std::string Assimp::ColladaExporter::GetNodeUniqueId(const aiNode *node) {
     return idStr;
 }
 
-std::string Assimp::ColladaExporter::GetNodeName(const aiNode *node) {
+std::string ColladaExporter::GetNodeName(const aiNode *node) {
 
     return XMLEscape(node->mName.C_Str());
 }
 
-std::string Assimp::ColladaExporter::GetBoneUniqueId(const aiBone *bone) {
+std::string ColladaExporter::GetBoneUniqueId(const aiBone *bone) {
     // Find the Node that is this Bone
     const aiNode *boneNode = findBoneNode(mScene->mRootNode, bone);
     if (boneNode == nullptr)
@@ -1683,7 +1676,7 @@ std::string Assimp::ColladaExporter::GetBoneUniqueId(const aiBone *bone) {
     return GetNodeUniqueId(boneNode);
 }
 
-std::string Assimp::ColladaExporter::GetObjectUniqueId(AiObjectType type, size_t pIndex) {
+std::string ColladaExporter::GetObjectUniqueId(AiObjectType type, size_t pIndex) {
     auto idIt = GetObjectIdMap(type).find(pIndex);
     if (idIt != GetObjectIdMap(type).cend())
         return idIt->second;
@@ -1693,7 +1686,7 @@ std::string Assimp::ColladaExporter::GetObjectUniqueId(AiObjectType type, size_t
     return result.second;
 }
 
-std::string Assimp::ColladaExporter::GetObjectName(AiObjectType type, size_t pIndex) {
+std::string ColladaExporter::GetObjectName(AiObjectType type, size_t pIndex) {
     auto objectName = GetObjectNameMap(type).find(pIndex);
     if (objectName != GetObjectNameMap(type).cend())
         return objectName->second;
@@ -1708,7 +1701,7 @@ std::string Assimp::ColladaExporter::GetObjectName(AiObjectType type, size_t pIn
 // @param index object index
 // @param name in/out. Caller to set the original name if known.
 // @param idStr in/out. Caller to set the preferred id if known.
-Assimp::ColladaExporter::NameIdPair Assimp::ColladaExporter::AddObjectIndexToMaps(AiObjectType type, size_t index) {
+ColladaExporter::NameIdPair ColladaExporter::AddObjectIndexToMaps(AiObjectType type, size_t index) {
 
     std::string name;
     std::string idStr;
@@ -1757,6 +1750,8 @@ Assimp::ColladaExporter::NameIdPair Assimp::ColladaExporter::AddObjectIndexToMap
 
     return std::make_pair(name, idStr);
 }
+
+} // end of namespace Assimp
 
 #endif
 #endif

@@ -46,12 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAEXPORTER_H_INC
 #define AI_COLLADAEXPORTER_H_INC
 
-#include <assimp/StringUtils.h>
 #include <assimp/ai_assert.h>
-#include <assimp/light.h>
 #include <assimp/material.h>
-#include <assimp/mesh.h>
-#include <assimp/Exporter.hpp>
 
 #include <array>
 #include <map>
@@ -61,8 +57,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiScene;
 struct aiNode;
+struct aiLight;
+struct aiBone;
 
 namespace Assimp {
+
+class IOSystem;
 
 /// Helper class to export a given scene to a Collada file. Just for my personal
 /// comfort when implementing it.

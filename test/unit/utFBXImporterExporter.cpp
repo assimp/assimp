@@ -210,13 +210,13 @@ TEST_F(utFBXImporterExporter, importUnitScaleFactor) {
     EXPECT_NE(nullptr, scene);
     EXPECT_NE(nullptr, scene->mMetaData);
 
-    double factor(0.0);
+    float factor(0.0f);
     scene->mMetaData->Get("UnitScaleFactor", factor);
-    EXPECT_DOUBLE_EQ(500.0, factor);
+    EXPECT_EQ(500.0f, factor);
 
-    scene->mMetaData->Set("UnitScaleFactor", factor * 2);
+    scene->mMetaData->Set("UnitScaleFactor", factor * 2.0f);
     scene->mMetaData->Get("UnitScaleFactor", factor);
-    EXPECT_DOUBLE_EQ(1000.0, factor);
+    EXPECT_EQ(1000.0f, factor);
 }
 
 TEST_F(utFBXImporterExporter, importEmbeddedAsciiTest) {

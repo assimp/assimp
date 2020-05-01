@@ -142,11 +142,11 @@ void Parser::LogWarning(const char* szWarn)
 {
     ai_assert(NULL != szWarn);
 
-    char szTemp[1024];
+    char szTemp[2048];
 #if _MSC_VER >= 1400
     sprintf_s(szTemp, "Line %u: %s",iLineNumber,szWarn);
 #else
-    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,sizeof(szTemp),"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // output the warning to the logger ...

@@ -1556,7 +1556,7 @@ static int _m3dstbi__create_png_image(_m3dstbi__png *a, unsigned char *image_dat
     return 1;
 }
 
-static int _m3dstbi__compute_transparency(_m3dstbi__png *z, unsigned char tc[3], int out_n) {
+static int _m3dstbi__compute_transparency(_m3dstbi__png *z, unsigned char* tc, int out_n) {
     _m3dstbi__context *s = z->s;
     _m3dstbi__uint32 i, pixel_count = s->img_x * s->img_y;
     unsigned char *p = z->out;
@@ -1639,7 +1639,7 @@ static int _m3dstbi__expand_png_palette(_m3dstbi__png *a, unsigned char *palette
 
 static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp) {
     unsigned char palette[1024], pal_img_n = 0;
-    unsigned char has_trans = 0, tc[3];
+    unsigned char has_trans = 0, tc[3] = {};
     _m3dstbi__uint16 tc16[3];
     _m3dstbi__uint32 ioff = 0, idata_limit = 0, i, pal_len = 0;
     int first = 1, k, interlace = 0, color = 0;
@@ -4350,7 +4350,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     M3D_INDEX last, *vrtxidx = NULL, *mtrlidx = NULL, *tmapidx = NULL, *skinidx = NULL;
     uint32_t idx, numcmap = 0, *cmap = NULL, numvrtx = 0, maxvrtx = 0, numtmap = 0, maxtmap = 0, numproc = 0;
     uint32_t numskin = 0, maxskin = 0, numstr = 0, maxt = 0, maxbone = 0, numgrp = 0, maxgrp = 0, *grpidx = NULL;
-    uint8_t *opa;
+    uint8_t *opa = nullptr;
     m3dcd_t *cd;
     m3dc_t *cmd;
     m3dstr_t *str = NULL;

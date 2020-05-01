@@ -389,12 +389,18 @@ struct Accessor : public Object {
     class Indexer {
         friend struct Accessor;
 
+    // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
+    // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
+    protected:
         Accessor &accessor;
+
+    private:
         uint8_t *data;
         size_t elemSize, stride;
 
         Indexer(Accessor &acc);
-
+    
+        
     public:
         //! Accesses the i-th value as defined by the accessor
         template <class T>

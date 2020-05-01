@@ -308,7 +308,10 @@ struct aiBone {
 
     //! Copy constructor
     aiBone(const aiBone &other) :
-            mName(other.mName), mNumWeights(other.mNumWeights), mWeights(nullptr), mOffsetMatrix(other.mOffsetMatrix) {
+            mName(other.mName),
+            mNumWeights(other.mNumWeights),
+            mWeights(nullptr),
+            mOffsetMatrix(other.mOffsetMatrix) {
         if (other.mWeights && other.mNumWeights) {
             mWeights = new aiVertexWeight[mNumWeights];
             ::memcpy(mWeights, other.mWeights, mNumWeights * sizeof(aiVertexWeight));

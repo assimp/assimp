@@ -65,7 +65,7 @@ using namespace Assimp::Formatter;
 BlenderBMeshConverter::BlenderBMeshConverter(const Mesh *mesh) :
         BMesh(mesh),
         triMesh(nullptr) {
-    // empty
+    ai_assert(nullptr != mesh);
 }
 
 // ------------------------------------------------------------------------------------------------

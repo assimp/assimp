@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include "SIB/SIBImporter.h"
+#include "AssetLib/SIB/SIBImporter.h"
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>

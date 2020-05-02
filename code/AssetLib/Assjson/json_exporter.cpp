@@ -14,6 +14,7 @@ Licensed under a 3-clause BSD license. See the LICENSE file for more information
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/Exceptional.h>
 
 #include <cassert>
 #include <limits>
@@ -767,7 +768,7 @@ void Write(JSONWriter &out, const aiScene &ai) {
 void ExportAssimp2Json(const char *file, Assimp::IOSystem *io, const aiScene *scene, const Assimp::ExportProperties *) {
     std::unique_ptr<Assimp::IOStream> str(io->Open(file, "wt"));
     if (!str) {
-        throw Assimp::DeadlyExportError("could not open output file");
+        throw DeadlyExportError("could not open output file");
     }
 
     // get a copy of the scene so we can modify it

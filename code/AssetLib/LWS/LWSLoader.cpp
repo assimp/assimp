@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -117,13 +115,15 @@ void LWS::Element::Parse(const char *&buffer) {
         }
 
         cur = buffer;
-        while (!IsLineEnd(*buffer))
+        while (!IsLineEnd(*buffer)) {
             ++buffer;
+        }
         children.back().tokens[1] = std::string(cur, (size_t)(buffer - cur));
 
         // parse more elements recursively
-        if (sub)
+        if (sub) {
             children.back().Parse(buffer);
+        }
     }
 }
 
@@ -149,8 +149,9 @@ LWSImporter::~LWSImporter() {
 // Returns whether the class can handle the format of the given file.
 bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(pFile);
-    if (extension == "lws" || extension == "mot")
+    if (extension == "lws" || extension == "mot") {
         return true;
+    }
 
     // if check for extension is not enough, check for the magic tokens LWSC and LWMO
     if (!extension.length() || checkSig) {
@@ -199,7 +200,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
     // reserve enough storage
     std::list<LWS::Element>::const_iterator it = dad.children.begin();
-    ;
+    
     fill.keys.reserve(strtoul10(it->tokens[1].c_str()));
 
     for (++it; it != dad.children.end(); ++it) {
@@ -219,7 +220,6 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
             unsigned int span = strtoul10(c, &c), num = 0;
             switch (span) {
-
                 case 0:
                     key.inter = LWO::IT_TCB;
                     num = 5;
@@ -276,7 +276,9 @@ void LWSImporter::ReadEnvelope_Old(
         envl.index = i;
         envl.type = (LWO::EnvelopeType)(i + 1);
 
-        if (++it == end) goto unexpected_end;
+        if (++it == end) {
+            goto unexpected_end;
+        }
         sub_num = strtoul10((*it).tokens[0].c_str());
 
         for (unsigned int n = 0; n < sub_num; ++n) {
@@ -311,10 +313,11 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
 
         if (src.path.length()) {
             std::string::size_type s = src.path.find_last_of("\\/");
-            if (s == std::string::npos)
+            if (s == std::string::npos) {
                 s = 0;
-            else
+            } else {
                 ++s;
+            }
             std::string::size_type t = src.path.substr(s).find_last_of(".");
 
             nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
@@ -325,7 +328,7 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Recursively build the scenegraph
+// Recursively build the scene-graph
 void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<AttachmentInfo> &attach,
         BatchLoader &batch,
         aiCamera **&camOut,
@@ -409,20 +412,19 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
 
         } else if (src.lightType == 1) { /* directional light source */
             lit->mType = aiLightSource_DIRECTIONAL;
-        } else
+        } else {
             lit->mType = aiLightSource_POINT;
+        }
 
         // fixme: no proper handling of light falloffs yet
-        if (src.lightFalloffType == 1)
+        if (src.lightFalloffType == 1) {
             lit->mAttenuationConstant = 1.f;
-        else if (src.lightFalloffType == 1)
+        } else if (src.lightFalloffType == 2) {
             lit->mAttenuationLinear = 1.f;
-        else
+        } else {
             lit->mAttenuationQuadratic = 1.f;
-    }
-
-    // If object is a camera - setup a corresponding ai structure
-    else if (src.type == LWS::NodeDesc::CAMERA) {
+        }
+    } else if (src.type == LWS::NodeDesc::CAMERA) { // If object is a camera - setup a corresponding ai structure
         aiCamera *cam = *camOut++ = new aiCamera();
 
         // name to attach cam to node -> unique due to LWs indexing system
@@ -434,7 +436,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
     resolver.ExtractBindPose(ndAnim->mTransformation);
 
     // .. and construct animation channels
-    aiNodeAnim *anim = NULL;
+    aiNodeAnim *anim = nullptr;
 
     if (first != last) {
         resolver.SetAnimationRange(first, last);
@@ -461,11 +463,10 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
 // Determine the exact location of a LWO file
 std::string LWSImporter::FindLWOFile(const std::string &in) {
     // insert missing directory separator if necessary
-    std::string tmp;
+    std::string tmp(in);
     if (in.length() > 3 && in[1] == ':' && in[2] != '\\' && in[2] != '/') {
         tmp = in[0] + (std::string(":\\") + in.substr(2));
-    } else
-        tmp = in;
+    } 
 
     if (io->Exists(tmp)) {
         return in;
@@ -495,13 +496,12 @@ std::string LWSImporter::FindLWOFile(const std::string &in) {
 
 // ------------------------------------------------------------------------------------------------
 // Read file into given scene data structure
-void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
-        IOSystem *pIOHandler) {
+void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     io = pIOHandler;
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == NULL) {
+    if (file.get() == nullptr) {
         throw DeadlyImportError("Failed to open LWS file " + pFile + ".");
     }
 
@@ -514,9 +514,8 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
     const char *dummy = &mBuffer[0];
     root.Parse(dummy);
 
-    // Construct a Batchimporter to read more files recursively
+    // Construct a Batch-importer to read more files recursively
     BatchLoader batch(pIOHandler);
-    //  batch.SetBasePath(pFile);
 
     // Construct an array to receive the flat output graph
     std::list<LWS::NodeDesc> nodes;
@@ -528,11 +527,13 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
     bool motion_file = false;
     std::list<LWS::Element>::const_iterator it = root.children.begin();
 
-    if ((*it).tokens[0] == "LWMO")
+    if ((*it).tokens[0] == "LWMO") {
         motion_file = true;
+    }
 
-    if ((*it).tokens[0] != "LWSC" && !motion_file)
+    if ((*it).tokens[0] != "LWSC" && !motion_file) {
         throw DeadlyImportError("LWS: Not a LightWave scene, magic tag LWSC not found");
+    }
 
     // get file format version and print to log
     ++it;
@@ -540,31 +541,26 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
     ASSIMP_LOG_INFO("LWS file format version is " + (*it).tokens[0]);
     first = 0.;
     last = 60.;
-    fps = 25.; /* seems to be a good default frame rate */
+    fps = 25.; // seems to be a good default frame rate
 
-    // Now read all elements in a very straghtforward manner
+    // Now read all elements in a very straightforward manner
     for (; it != root.children.end(); ++it) {
         const char *c = (*it).tokens[1].c_str();
 
         // 'FirstFrame': begin of animation slice
         if ((*it).tokens[0] == "FirstFrame") {
-            if (150392. != first /* see SetupProperties() */)
-                first = strtoul10(c, &c) - 1.; /* we're zero-based */
-        }
-
-        // 'LastFrame': end of animation slice
-        else if ((*it).tokens[0] == "LastFrame") {
-            if (150392. != last /* see SetupProperties() */)
-                last = strtoul10(c, &c) - 1.; /* we're zero-based */
-        }
-
-        // 'FramesPerSecond': frames per second
-        else if ((*it).tokens[0] == "FramesPerSecond") {
+            // see SetupProperties()
+            if (150392. != first ) {
+                first = strtoul10(c, &c) - 1.; // we're zero-based
+            }
+        } else if ((*it).tokens[0] == "LastFrame") { // 'LastFrame': end of animation slice
+            // see SetupProperties()
+            if (150392. != last ) {
+                last = strtoul10(c, &c) - 1.; // we're zero-based
+            }
+        } else if ((*it).tokens[0] == "FramesPerSecond") { // 'FramesPerSecond': frames per second
             fps = strtoul10(c, &c);
-        }
-
-        // 'LoadObjectLayer': load a layer of a specific LWO file
-        else if ((*it).tokens[0] == "LoadObjectLayer") {
+        } else if ((*it).tokens[0] == "LoadObjectLayer") { // 'LoadObjectLayer': load a layer of a specific LWO file
 
             // get layer index
             const int layer = strtoul10(c, &c);
@@ -579,8 +575,9 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
             if (version >= 4) { // handle LWSC 4 explicit ID
                 SkipSpaces(&c);
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
-            } else
+            } else {
                 d.number = cur_object++;
+            }
 
             // and add the file to the import list
             SkipSpaces(&c);
@@ -589,10 +586,8 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
             d.id = batch.AddLoadRequest(path, 0, &props);
 
             nodes.push_back(d);
-            num_object++;
-        }
-        // 'LoadObject': load a LWO file into the scenegraph
-        else if ((*it).tokens[0] == "LoadObject") {
+            ++num_object;
+        } else if ((*it).tokens[0] == "LoadObject") { // 'LoadObject': load a LWO file into the scene-graph
 
             // add node to list
             LWS::NodeDesc d;
@@ -601,17 +596,16 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
             if (version >= 4) { // handle LWSC 4 explicit ID
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
                 SkipSpaces(&c);
-            } else
+            } else {
                 d.number = cur_object++;
+            }
             std::string path = FindLWOFile(c);
             d.id = batch.AddLoadRequest(path, 0, NULL);
 
             d.path = path;
             nodes.push_back(d);
-            num_object++;
-        }
-        // 'AddNullObject': add a dummy node to the hierarchy
-        else if ((*it).tokens[0] == "AddNullObject") {
+            ++num_object;
+        } else if ((*it).tokens[0] == "AddNullObject") { // 'AddNullObject': add a dummy node to the hierarchy
 
             // add node to list
             LWS::NodeDesc d;
@@ -619,8 +613,9 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
             if (version >= 4) { // handle LWSC 4 explicit ID
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
                 SkipSpaces(&c);
-            } else
+            } else {
                 d.number = cur_object++;
+            }
             d.name = c;
             nodes.push_back(d);
 
@@ -775,7 +770,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
         else if ((*it).tokens[0] == "LightFalloffType") {
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightFalloffType\'");
-
             else
                 nodes.back().lightFalloffType = strtoul10(c);
 

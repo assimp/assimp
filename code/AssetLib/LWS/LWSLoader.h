@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,17 +47,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/LWO/LWOFileData.h"
 
-#include <assimp/SceneCombiner.h>
 #include <assimp/BaseImporter.h>
+#include <assimp/SceneCombiner.h>
 
 struct aiImporterDesc;
 
-namespace Assimp    {
-    class BatchLoader;
-    class Importer;
-    class IOSystem;
+namespace Assimp {
+class BatchLoader;
+class Importer;
+class IOSystem;
 
-    namespace LWS   {
+namespace LWS {
 
 // ---------------------------------------------------------------------------
 /** Represents an element in a LWS file.
@@ -66,18 +65,16 @@ namespace Assimp    {
  *  This can either be a single data line - <name> <value> or a data
  *  group - { name <data_line0> ... n }
  */
-class Element
-{
+class Element {
 public:
-    Element()
-    {}
+    Element() {}
 
     // first: name, second: rest
     std::string tokens[2];
     std::list<Element> children;
 
     //! Recursive parsing function
-    void Parse (const char*& buffer);
+    void Parse(const char *&buffer);
 };
 
 #define AI_LWS_MASK (0xffffffff >> 4u)
@@ -85,30 +82,16 @@ public:
 // ---------------------------------------------------------------------------
 /** Represents a LWS scenegraph element
  */
-struct NodeDesc
-{
-    NodeDesc()
-        :   type()
-        ,   id()
-        ,   number  (0)
-        ,   parent  (0)
-        ,   name    ("")
-        ,   isPivotSet (false)
-        ,   lightColor (1.f,1.f,1.f)
-        ,   lightIntensity (1.f)
-        ,   lightType (0)
-        ,   lightFalloffType (0)
-        ,   lightConeAngle (45.f)
-        ,   lightEdgeAngle()
-        ,   parent_resolved (NULL)
-    {}
+struct NodeDesc {
+    NodeDesc() :
+            type(), id(), number(0), parent(0), name(""), isPivotSet(false), lightColor(1.f, 1.f, 1.f), lightIntensity(1.f), lightType(0), lightFalloffType(0), lightConeAngle(45.f), lightEdgeAngle(), parent_resolved(NULL) {}
 
     enum {
 
         OBJECT = 1,
-        LIGHT  = 2,
+        LIGHT = 2,
         CAMERA = 3,
-        BONE   = 4
+        BONE = 4
     } type; // type of node
 
     // if object: path
@@ -122,16 +105,14 @@ struct NodeDesc
     unsigned int parent;
 
     // lights & cameras & dummies: name
-    const char* name;
+    const char *name;
 
     // animation channels
-    std::list< LWO::Envelope > channels;
+    std::list<LWO::Envelope> channels;
 
     // position of pivot point
     aiVector3D pivotPos;
     bool isPivotSet;
-
-
 
     // color of light source
     aiColor3D lightColor;
@@ -151,17 +132,14 @@ struct NodeDesc
     // soft cone angle of (spot) light source
     float lightEdgeAngle;
 
-
-
     // list of resolved children
-    std::list< NodeDesc* > children;
+    std::list<NodeDesc *> children;
 
     // resolved parent node
-    NodeDesc* parent_resolved;
-
+    NodeDesc *parent_resolved;
 
     // for std::find()
-    bool operator == (unsigned int num)  const {
+    bool operator==(unsigned int num) const {
         if (!num)
             return false;
         unsigned int _type = num >> 28u;
@@ -179,73 +157,65 @@ struct NodeDesc
  *  contain mainly descriptions how LWO objects are composed together
  *  in a scene.
 */
-class LWSImporter : public BaseImporter
-{
+class LWSImporter : public BaseImporter {
 public:
     LWSImporter();
     ~LWSImporter();
 
-
-public:
-
     // -------------------------------------------------------------------
     // Check whether we can read a specific file
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const;
 
 protected:
-
     // -------------------------------------------------------------------
     // Get list of supported extensions
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const;
 
     // -------------------------------------------------------------------
     // Import file into given scene data structure
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler);
 
     // -------------------------------------------------------------------
     // Setup import properties
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp);
 
 private:
-
-
     // -------------------------------------------------------------------
     // Read an envelope description
-    void ReadEnvelope(const LWS::Element& dad, LWO::Envelope& out );
+    void ReadEnvelope(const LWS::Element &dad, LWO::Envelope &out);
 
     // -------------------------------------------------------------------
     // Read an envelope description for the older LW file format
-    void ReadEnvelope_Old(std::list< LWS::Element >::const_iterator& it,
-        const std::list< LWS::Element >::const_iterator& end,
-        LWS::NodeDesc& nodes,
-        unsigned int version);
+    void ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,
+            const std::list<LWS::Element>::const_iterator &end,
+            LWS::NodeDesc &nodes,
+            unsigned int version);
 
     // -------------------------------------------------------------------
     // Setup a nice name for a node
-    void SetupNodeName(aiNode* nd, LWS::NodeDesc& src);
+    void SetupNodeName(aiNode *nd, LWS::NodeDesc &src);
 
     // -------------------------------------------------------------------
     // Recursively build the scenegraph
-    void BuildGraph(aiNode* nd,
-        LWS::NodeDesc& src,
-        std::vector<AttachmentInfo>& attach,
-        BatchLoader& batch,
-        aiCamera**& camOut,
-        aiLight**& lightOut,
-        std::vector<aiNodeAnim*>& animOut);
+    void BuildGraph(aiNode *nd,
+            LWS::NodeDesc &src,
+            std::vector<AttachmentInfo> &attach,
+            BatchLoader &batch,
+            aiCamera **&camOut,
+            aiLight **&lightOut,
+            std::vector<aiNodeAnim *> &animOut);
 
     // -------------------------------------------------------------------
     // Try several dirs until we find the right location of a LWS file.
-    std::string FindLWOFile(const std::string& in);
+    std::string FindLWOFile(const std::string &in);
 
 private:
-
     bool configSpeedFlag;
-    IOSystem* io;
+    IOSystem *io;
 
-    double first,last,fps;
+    double first, last, fps;
 
     bool noSkeletonMesh;
 };

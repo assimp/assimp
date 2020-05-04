@@ -86,6 +86,12 @@ typedef enum aiMetadataType {
 struct aiMetadataEntry {
     aiMetadataType mType;
     void *mData;
+
+    aiMetadataEntry() :
+            mType(AI_META_MAX),
+            mData( nullptr ) {
+        // empty
+    }
 };
 
 #ifdef __cplusplus

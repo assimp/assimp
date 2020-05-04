@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include "AbstractImportExportBase.h"
-#include "SMD/SMDLoader.h"
+#include "AssetLib/SMD/SMDLoader.h"
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 

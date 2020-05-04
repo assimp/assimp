@@ -58,8 +58,8 @@ const char *AICMD_MSG_DUMP_HELP =
 
 #include "Common/assbin_chunks.h"
 #include <assimp/DefaultIOSystem.h>
-#include <code/Assbin/AssbinFileWriter.h>
-#include <code/Assxml/AssxmlFileWriter.h>
+#include "AssetLib/Assbin/AssbinFileWriter.h"
+#include "AssetLib/Assxml/AssxmlFileWriter.h"
 
 #include <memory>
 

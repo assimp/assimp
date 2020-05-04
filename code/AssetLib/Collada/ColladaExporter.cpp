@@ -233,12 +233,13 @@ void ColladaExporter::WriteHeader() {
         add_root_node = true;
     }
 
-    if (mScene->mRootNode->mNumChildren == 0) {
+    // Assimp root nodes can have meshes, Collada Scenes cannot
+    if (mScene->mRootNode->mNumChildren == 0 || mScene->mRootNode->mMeshes != 0) {
         add_root_node = true;
     }
 
     if (add_root_node) {
-        aiScene *scene;
+        aiScene *scene = nullptr;
         SceneCombiner::CopyScene(&scene, mScene);
 
         aiNode *root = new aiNode("Scene");
@@ -1493,12 +1494,9 @@ void ColladaExporter::WriteNode(const aiNode *pNode) {
     const std::string node_name = GetNodeName(pNode);
     mOutput << startstr << "<node ";
     if (is_skeleton_root) {
-        mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\" " : ""); // For now, only support one skeleton in a scene.
-        mFoundSkeletonRootNodeID = node_id;
-    } else {
-        mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\" " : "");
+        mFoundSkeletonRootNodeID = node_id; // For now, only support one skeleton in a scene.
     }
-
+    mOutput << "id=\"" << node_id << "\" " << (is_joint ? "sid=\"" + node_id + "\" " : "");
     mOutput << "name=\"" << node_name
             << "\" type=\"" << node_type
             << "\">" << endstr;

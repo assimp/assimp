@@ -87,11 +87,13 @@ struct aiMetadataEntry {
     aiMetadataType mType;
     void *mData;
 
+#ifdef __cplusplus
     aiMetadataEntry() :
             mType(AI_META_MAX),
             mData( nullptr ) {
         // empty
     }
+#endif
 };
 
 #ifdef __cplusplus

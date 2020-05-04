@@ -66,10 +66,16 @@ public:
     : runtime_error(errorText) {
         // empty
     }
-
 };
 
-typedef DeadlyImportError DeadlyExportError;
+class DeadlyExportError : public runtime_error {
+public:
+    /** Constructor with arguments */
+    explicit DeadlyExportError(const std::string &errorText) :
+            runtime_error(errorText) {
+        // empty
+    }
+};
 
 #ifdef _MSC_VER
 #   pragma warning(default : 4275)

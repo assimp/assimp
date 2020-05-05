@@ -196,13 +196,14 @@ public:
     const std::string mFile;
 
     /// The scene to be written
-    const aiScene *mScene;
-    bool mSceneOwned;
+    const aiScene *const mScene;
+    std::string mSceneId;
+    bool mAdd_root_node = false;
 
     /// current line start string, contains the current indentation for simple stream insertion
     std::string startstr;
     /// current line end string for simple stream insertion
-    std::string endstr;
+    const std::string endstr;
 
     // pair of color and texture - texture precedences color
     struct Surface {

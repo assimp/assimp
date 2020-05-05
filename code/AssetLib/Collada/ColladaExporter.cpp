@@ -118,20 +118,35 @@ static const std::string XMLIDEncode(const std::string &name) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Helper functions to create unique ids
+inline bool IsUniqueId(const std::unordered_set<std::string> &idSet, const std::string &idStr) {
+    return (idSet.find(idStr) == idSet.end());
+}
+
+inline std::string MakeUniqueId(const std::unordered_set<std::string> &idSet, const std::string &idPrefix, const std::string &postfix) {
+    std::string result(idPrefix + postfix);
+    if (!IsUniqueId(idSet, result)) {
+        // Select a number to append
+        size_t idnum = 1;
+        do {
+            result = idPrefix + '_' + to_string(idnum) + postfix;
+            ++idnum;
+        } while (!IsUniqueId(idSet, result));
+    }
+    return result;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
 ColladaExporter::ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, const std::string &path, const std::string &file) :
         mIOSystem(pIOSystem),
         mPath(path),
-        mFile(file) {
+        mFile(file),
+        mScene(pScene),
+        endstr("\n") {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue(std::locale("C"));
     mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
-
-    mScene = pScene;
-    mSceneOwned = false;
-
-    // set up strings
-    endstr = "\n";
 
     // start writing the file
     WriteFile();
@@ -140,9 +155,6 @@ ColladaExporter::ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, con
 // ------------------------------------------------------------------------------------------------
 // Destructor
 ColladaExporter::~ColladaExporter() {
-    if (mSceneOwned) {
-        delete mScene;
-    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -171,10 +183,11 @@ void ColladaExporter::WriteFile() {
     // customized, Writes the animation library
     WriteAnimationsLibrary();
 
-    // useless Collada fu at the end, just in case we haven't had enough indirections, yet.
+    // instantiate the scene(s)
+    // For Assimp there will only ever be one
     mOutput << startstr << "<scene>" << endstr;
     PushTag();
-    mOutput << startstr << "<instance_visual_scene url=\"#" + GetNodeUniqueId(mScene->mRootNode) + "\" />" << endstr;
+    mOutput << startstr << "<instance_visual_scene url=\"#" + mSceneId + "\" />" << endstr;
     PopTag();
     mOutput << startstr << "</scene>" << endstr;
     PopTag();
@@ -209,13 +222,13 @@ void ColladaExporter::WriteHeader() {
     mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
     rotation.Normalize();
 
-    bool add_root_node = false;
+    mAdd_root_node = false;
 
     ai_real scale = 1.0;
     if (std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
         scale = (ai_real)((((double)scaling.x) + ((double)scaling.y) + ((double)scaling.z)) / 3.0);
     } else {
-        add_root_node = true;
+        mAdd_root_node = true;
     }
 
     std::string up_axis = "Y_UP";
@@ -226,34 +239,19 @@ void ColladaExporter::WriteHeader() {
     } else if (rotation.Equal(z_rot, epsilon)) {
         up_axis = "Z_UP";
     } else {
-        add_root_node = true;
+        mAdd_root_node = true;
     }
 
     if (!position.Equal(aiVector3D(0, 0, 0))) {
-        add_root_node = true;
+        mAdd_root_node = true;
     }
 
     // Assimp root nodes can have meshes, Collada Scenes cannot
     if (mScene->mRootNode->mNumChildren == 0 || mScene->mRootNode->mMeshes != 0) {
-        add_root_node = true;
+        mAdd_root_node = true;
     }
 
-    if (add_root_node) {
-        aiScene *scene = nullptr;
-        SceneCombiner::CopyScene(&scene, mScene);
-
-        aiNode *root = new aiNode("Scene");
-
-        root->mNumChildren = 1;
-        root->mChildren = new aiNode *[root->mNumChildren];
-
-        root->mChildren[0] = scene->mRootNode;
-        scene->mRootNode->mParent = root;
-        scene->mRootNode = root;
-
-        mScene = scene;
-        mSceneOwned = true;
-
+    if (mAdd_root_node) {
         up_axis = "Y_UP";
         scale = 1.0;
     }
@@ -1227,17 +1225,29 @@ void ColladaExporter::WriteFloatArray(const std::string &pIdString, FloatDataTyp
 // ------------------------------------------------------------------------------------------------
 // Writes the scene library
 void ColladaExporter::WriteSceneLibrary() {
-    const std::string sceneId = GetNodeUniqueId(mScene->mRootNode);
-    const std::string sceneName = GetNodeName(mScene->mRootNode);
+    // Determine if we are using the aiScene root or our own
+    std::string sceneName("Scene");
+    if (mAdd_root_node) {
+        mSceneId = MakeUniqueId(mUniqueIds, sceneName, std::string());
+        mUniqueIds.insert(mSceneId);
+    } else {
+        mSceneId = GetNodeUniqueId(mScene->mRootNode);
+        sceneName = GetNodeName(mScene->mRootNode);
+    }
 
     mOutput << startstr << "<library_visual_scenes>" << endstr;
     PushTag();
-    mOutput << startstr << "<visual_scene id=\"" + sceneId + "\" name=\"" + sceneName + "\">" << endstr;
+    mOutput << startstr << "<visual_scene id=\"" + mSceneId + "\" name=\"" + sceneName + "\">" << endstr;
     PushTag();
 
-    // start recursive write at the root node
-    for (size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a)
-        WriteNode(mScene->mRootNode->mChildren[a]);
+    if (mAdd_root_node) {
+        // Export the root node
+        WriteNode(mScene->mRootNode);
+    } else {
+        // Have already exported the root node
+        for (size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a)
+            WriteNode(mScene->mRootNode->mChildren[a]);
+    }
 
     PopTag();
     mOutput << startstr << "</visual_scene>" << endstr;
@@ -1608,23 +1618,6 @@ void ColladaExporter::WriteNode(const aiNode *pNode) {
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;
-}
-
-inline bool IsUniqueId(const std::unordered_set<std::string> &idSet, const std::string &idStr) {
-    return (idSet.find(idStr) == idSet.end());
-}
-
-inline std::string MakeUniqueId(const std::unordered_set<std::string> &idSet, const std::string &idPrefix, const std::string &postfix) {
-    std::string result(idPrefix + postfix);
-    if (!IsUniqueId(idSet, result)) {
-        // Select a number to append
-        size_t idnum = 1;
-        do {
-            result = idPrefix + '_' + to_string(idnum) + postfix;
-            ++idnum;
-        } while (!IsUniqueId(idSet, result));
-    }
-    return result;
 }
 
 void ColladaExporter::CreateNodeIds(const aiNode *node) {

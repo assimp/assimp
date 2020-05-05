@@ -787,8 +787,10 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
 			// Add an element according to its type.
 			if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaBoolean)
 			{
-				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.begin()));
+				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0) {
+					const bool v = (bool) *( ( (CX3DImporter_NodeElement_MetaBoolean*) cur_meta )->Value.begin());
+                    pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, v);
+                }
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaDouble)
 			{

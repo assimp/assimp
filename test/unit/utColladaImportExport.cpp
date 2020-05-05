@@ -53,6 +53,20 @@ using namespace Assimp;
 
 class utColladaImportExport : public AbstractImportExportBase {
 public:
+    // Clones the scene in an exception-safe way
+    struct SceneCloner {
+        SceneCloner(const aiScene *scene) {
+            sceneCopy = nullptr;
+            SceneCombiner::CopyScene(&sceneCopy, scene);
+        }
+
+        ~SceneCloner() {
+            delete sceneCopy;
+            sceneCopy = nullptr;
+        }
+        aiScene *sceneCopy;
+    };
+
     virtual bool importerTest() final {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
@@ -231,12 +245,10 @@ TEST_F(utColladaImportExport, exportRootNodeMeshTest) {
     ASSERT_EQ(0u, scene->mRootNode->mNumMeshes) << "Collada import should not give the root node a mesh";
 
     {
-        // Clone the scene and give the root node a mesh and a transform
-        aiScene *rootMeshScene = nullptr;
-        SceneCombiner::CopyScene(&rootMeshScene, scene);
-        ASSERT_TRUE(rootMeshScene != nullptr) << "Fatal: could not copy scene!";
+        SceneCloner clone(scene);
+        ASSERT_TRUE(clone.sceneCopy != nullptr) << "Fatal: could not copy scene!";
         // Do this by moving the meshes from the first child that has some
-        aiNode *rootNode = rootMeshScene->mRootNode;
+        aiNode *rootNode = clone.sceneCopy->mRootNode;
         ASSERT_TRUE(rootNode->mNumChildren > 0) << "Fatal: root has no children";
         aiNode *meshNode = rootNode->mChildren[0];
         ASSERT_EQ(1u, meshNode->mNumMeshes) << "Fatal: First child node has no duck mesh";
@@ -248,10 +260,12 @@ TEST_F(utColladaImportExport, exportRootNodeMeshTest) {
             rootNode->mMeshes[i] = meshNode->mMeshes[i];
         }
 
+        // Remove the meshes from the original node
         meshNode->mNumMeshes = 0;
         delete[] meshNode->mMeshes;
+        meshNode->mMeshes = nullptr;
 
-        ASSERT_EQ(AI_SUCCESS, exporter.Export(rootMeshScene, "collada", outFile)) << "Fatal: Could not export file";
+        ASSERT_EQ(AI_SUCCESS, exporter.Export(clone.sceneCopy, "collada", outFile)) << "Fatal: Could not export file";
     }
 
     // Reimport and look for meshes

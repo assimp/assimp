@@ -1227,8 +1227,8 @@ void ColladaExporter::WriteFloatArray(const std::string &pIdString, FloatDataTyp
 // ------------------------------------------------------------------------------------------------
 // Writes the scene library
 void ColladaExporter::WriteSceneLibrary() {
-    const std::string sceneName = GetNodeUniqueId(mScene->mRootNode);
-    const std::string sceneId = GetNodeName(mScene->mRootNode);
+    const std::string sceneId = GetNodeUniqueId(mScene->mRootNode);
+    const std::string sceneName = GetNodeName(mScene->mRootNode);
 
     mOutput << startstr << "<library_visual_scenes>" << endstr;
     PushTag();

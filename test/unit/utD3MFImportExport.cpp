@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
-#include "3MF/D3MFExporter.h"
+#include "AssetLib/3MF/D3MFExporter.h"
 
 class utD3MFImporterExporter : public AbstractImportExportBase {
 public:

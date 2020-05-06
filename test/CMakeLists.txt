@@ -89,6 +89,7 @@ SET( COMMON
   unit/utStringUtils.cpp
   unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
+  unit/Common/utSpatialSort.cpp
 )
 
 SET( IMPORTERS

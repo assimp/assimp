@@ -1002,7 +1002,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                         // Valid attribute semantics include POSITION, NORMAL, TANGENT
                         int undPos = 0;
                         Mesh::AccessorList *vec = 0;
-                        if (GetAttribTargetVector(prim, i, attr, vec, undPos)) {
+                        if (GetAttribTargetVector(prim, j, attr, vec, undPos)) {
                             size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                             if ((*vec).size() <= idx) {
                                 (*vec).resize(idx + 1);

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AbstractImportExportBase.h"
-#include "MDL/HalfLife/HL1ImportDefinitions.h"
+#include "AssetLib/MDL/HalfLife/HL1ImportDefinitions.h"
 #include "MDLHL1TestFiles.h"
 #include "UnitTestPCH.h"
 #include <assimp/postprocess.h>

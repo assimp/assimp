@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // Simple Assimp Directx11 Sample
 // This is a very basic sample and only reads diffuse texture
 // but this can load both embedded textures in fbx and non-embedded textures

@@ -41,10 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp_view.h"
 
+#include "PostProcessing/CalcTangentsProcess.h"
 #include "PostProcessing/GenFaceNormalsProcess.h"
 #include "PostProcessing/GenVertexNormalsProcess.h"
 #include "PostProcessing/JoinVerticesProcess.h"
-#include "PostProcessing/CalcTangentsProcess.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 
 namespace AssimpView {
@@ -59,14 +59,14 @@ float g_smoothAngle = 80.f;
 //-------------------------------------------------------------------------------
 void AssetHelper::FlipNormalsInt() {
     // invert all normal vectors
-    for (unsigned int i = 0; i < this->pcScene->mNumMeshes;++i) {
-        aiMesh* pcMesh = this->pcScene->mMeshes[i];
+    for (unsigned int i = 0; i < this->pcScene->mNumMeshes; ++i) {
+        aiMesh *pcMesh = this->pcScene->mMeshes[i];
 
         if (!pcMesh->mNormals) {
             continue;
         }
 
-        for (unsigned int a = 0; a < pcMesh->mNumVertices;++a){
+        for (unsigned int a = 0; a < pcMesh->mNumVertices; ++a) {
             pcMesh->mNormals[a] *= -1.0f;
         }
     }
@@ -79,7 +79,7 @@ void AssetHelper::FlipNormals() {
     // recreate native data
     DeleteAssetData(true);
     CreateAssetData();
-    g_bWasFlipped = ! g_bWasFlipped;
+    g_bWasFlipped = !g_bWasFlipped;
 }
 
 //-------------------------------------------------------------------------------
@@ -88,15 +88,15 @@ void AssetHelper::FlipNormals() {
 void AssetHelper::SetNormalSet(unsigned int iSet) {
     // we need to build an unique set of vertices for this ...
     {
-        MakeVerboseFormatProcess* pcProcess = new MakeVerboseFormatProcess();
+        MakeVerboseFormatProcess *pcProcess = new MakeVerboseFormatProcess();
         pcProcess->Execute(pcScene);
         delete pcProcess;
 
-        for (unsigned int i = 0; i < pcScene->mNumMeshes;++i) {
+        for (unsigned int i = 0; i < pcScene->mNumMeshes; ++i) {
             if (!apcMeshes[i]->pvOriginalNormals) {
                 apcMeshes[i]->pvOriginalNormals = new aiVector3D[pcScene->mMeshes[i]->mNumVertices];
-                memcpy( apcMeshes[i]->pvOriginalNormals,pcScene->mMeshes[i]->mNormals,
-                    pcScene->mMeshes[i]->mNumVertices * sizeof(aiVector3D));
+                memcpy(apcMeshes[i]->pvOriginalNormals, pcScene->mMeshes[i]->mNormals,
+                        pcScene->mMeshes[i]->mNumVertices * sizeof(aiVector3D));
             }
             delete[] pcScene->mMeshes[i]->mNormals;
             pcScene->mMeshes[i]->mNormals = nullptr;
@@ -105,18 +105,18 @@ void AssetHelper::SetNormalSet(unsigned int iSet) {
 
     // now we can start to calculate a new set of normals
     if (HARD == iSet) {
-        GenFaceNormalsProcess* pcProcess = new GenFaceNormalsProcess();
+        GenFaceNormalsProcess *pcProcess = new GenFaceNormalsProcess();
         pcProcess->Execute(pcScene);
         FlipNormalsInt();
         delete pcProcess;
     } else if (SMOOTH == iSet) {
-        GenVertexNormalsProcess* pcProcess = new GenVertexNormalsProcess();
+        GenVertexNormalsProcess *pcProcess = new GenVertexNormalsProcess();
         pcProcess->SetMaxSmoothAngle((float)AI_DEG_TO_RAD(g_smoothAngle));
         pcProcess->Execute(pcScene);
         FlipNormalsInt();
         delete pcProcess;
     } else if (ORIGINAL == iSet) {
-        for (unsigned int i = 0; i < pcScene->mNumMeshes;++i) {
+        for (unsigned int i = 0; i < pcScene->mNumMeshes; ++i) {
             if (apcMeshes[i]->pvOriginalNormals) {
                 delete[] pcScene->mMeshes[i]->mNormals;
                 pcScene->mMeshes[i]->mNormals = apcMeshes[i]->pvOriginalNormals;
@@ -126,7 +126,7 @@ void AssetHelper::SetNormalSet(unsigned int iSet) {
     }
 
     // recalculate tangents and bitangents
-    Assimp::BaseProcess* pcProcess = new CalcTangentsProcess();
+    Assimp::BaseProcess *pcProcess = new CalcTangentsProcess();
     pcProcess->Execute(pcScene);
     delete pcProcess;
 
@@ -139,9 +139,9 @@ void AssetHelper::SetNormalSet(unsigned int iSet) {
 
     if (g_bWasFlipped) {
         // invert all normal vectors
-        for (unsigned int i = 0; i < pcScene->mNumMeshes;++i) {
-            aiMesh* pcMesh = pcScene->mMeshes[i];
-            for (unsigned int a = 0; a < pcMesh->mNumVertices;++a) {
+        for (unsigned int i = 0; i < pcScene->mNumMeshes; ++i) {
+            aiMesh *pcMesh = pcScene->mMeshes[i];
+            for (unsigned int a = 0; a < pcMesh->mNumVertices; ++a) {
                 pcMesh->mNormals[a] *= -1.0f;
             }
         }
@@ -152,4 +152,4 @@ void AssetHelper::SetNormalSet(unsigned int iSet) {
     CreateAssetData();
 }
 
-}
+} // namespace AssimpView

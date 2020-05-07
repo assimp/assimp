@@ -48,7 +48,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
 
     Importer importer;
     const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
-        aiProcessPreset_TargetRealtime_Quality, "3ds");
+        aiProcessPreset_TargetRealtime_Quality, nullptr );
 
     aiDetachLogStream(&stream);
     

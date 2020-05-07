@@ -58,7 +58,7 @@ public:
     /// the object.
     /// @param pAnim    The animation to calculate poses for. Ownership of the animation object stays
     ///                 at the caller, the evaluator just keeps a reference to it as long as it persists.
-    AnimEvaluator( const aiAnimation* pAnim);
+    AnimEvaluator(const aiAnimation *pAnim);
 
     /// @brief  The class destructor.
     ~AnimEvaluator();
@@ -68,16 +68,16 @@ public:
      * @param pTime The time for which you want to evaluate the animation, in seconds. Will be mapped into the animation cycle, so
      *   it can be an arbitrary value. Best use with ever-increasing time stamps.
      */
-    void Evaluate( double pTime);
+    void Evaluate(double pTime);
 
     /** Returns the transform matrices calculated at the last Evaluate() call. The array matches the mChannels array of
      * the aiAnimation. */
-    const std::vector<aiMatrix4x4>& GetTransformations() const { return mTransforms; }
+    const std::vector<aiMatrix4x4> &GetTransformations() const { return mTransforms; }
 
 protected:
-    const aiAnimation* mAnim;
+    const aiAnimation *mAnim;
     double mLastTime;
-    std::vector<std::tuple<unsigned int, unsigned int, unsigned int> > mLastPositions;
+    std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> mLastPositions;
     std::vector<aiMatrix4x4> mTransforms;
 };
 

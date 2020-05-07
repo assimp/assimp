@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,50 +48,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 
-namespace Assimp    {
+namespace Assimp {
 
 class CIOSystemWrapper;
 
 // ------------------------------------------------------------------------------------------------
 // Custom IOStream implementation for the C-API
-class CIOStreamWrapper : public IOStream
-{
+class CIOStreamWrapper : public IOStream {
 public:
-    explicit CIOStreamWrapper(aiFile* pFile, CIOSystemWrapper* io)
-        : mFile(pFile),
-        mIO(io)
-    {}
+    explicit CIOStreamWrapper(aiFile *pFile, CIOSystemWrapper *io) :
+            mFile(pFile),
+            mIO(io) {}
     ~CIOStreamWrapper(void);
 
-    size_t Read(void* pvBuffer, size_t pSize, size_t pCount);
-    size_t Write(const void* pvBuffer, size_t pSize, size_t pCount);
+    size_t Read(void *pvBuffer, size_t pSize, size_t pCount);
+    size_t Write(const void *pvBuffer, size_t pSize, size_t pCount);
     aiReturn Seek(size_t pOffset, aiOrigin pOrigin);
     size_t Tell(void) const;
     size_t FileSize() const;
     void Flush();
 
 private:
-    aiFile* mFile;
-    CIOSystemWrapper* mIO;
+    aiFile *mFile;
+    CIOSystemWrapper *mIO;
 };
 
-class CIOSystemWrapper : public IOSystem
-{
+class CIOSystemWrapper : public IOSystem {
     friend class CIOStreamWrapper;
-public:
-    explicit CIOSystemWrapper(aiFileIO* pFile)
-        : mFileSystem(pFile)
-    {}
 
-    bool Exists( const char* pFile) const;
+public:
+    explicit CIOSystemWrapper(aiFileIO *pFile) :
+            mFileSystem(pFile) {}
+
+    bool Exists(const char *pFile) const;
     char getOsSeparator() const;
-    IOStream* Open(const char* pFile,const char* pMode = "rb");
-    void Close( IOStream* pFile);
+    IOStream *Open(const char *pFile, const char *pMode = "rb");
+    void Close(IOStream *pFile);
+
 private:
-    aiFileIO* mFileSystem;
+    aiFileIO *mFileSystem;
 };
 
-}
+} // namespace Assimp
 
 #endif
-

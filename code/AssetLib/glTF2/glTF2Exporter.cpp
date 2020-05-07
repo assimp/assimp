@@ -758,7 +758,7 @@ void glTF2Exporter::ExportMeshes()
         // Normalize all normals as the validator can emit a warning otherwise
         if ( nullptr != aim->mNormals) {
             for ( auto i = 0u; i < aim->mNumVertices; ++i ) {
-                aim->mNormals[ i ].Normalize();
+                aim->mNormals[ i ].NormalizeSafe();
             }
         }
 

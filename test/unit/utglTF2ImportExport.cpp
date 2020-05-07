@@ -436,6 +436,16 @@ TEST_F(utglTF2ImportExport, error_string_preserved) {
     ASSERT_NE(error.find("BoxTextured0.bin"), std::string::npos) << "Error string should contain an error about missing .bin file";
 }
 
+TEST_F(utglTF2ImportExport, export_bad_accessor_bounds) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites.glb", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+
+    EXPECT_EQ(aiReturn_FAILURE, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.glb"));
+    EXPECT_EQ(aiReturn_FAILURE, exporter.Export(scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.gltf"));
+}
+
 #endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utglTF2ImportExport, sceneMetadata) {

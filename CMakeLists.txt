@@ -108,10 +108,6 @@ OPTION ( ASSIMP_ERROR_MAX
   "Enable all warnings."
   OFF
 )
-OPTION ( ASSIMP_WERROR
-  "Treat warnings as errors."
-  OFF
-)
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
   OFF
@@ -137,6 +133,12 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
    "Don't call git to get the hash."
    OFF
 )
+
+IF ( WIN32 )
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW 
+      "If the Assimp view tool is built. (requires DirectX)" 
+      OFF )
+ENDIF()
 
 IF (IOS AND NOT ASSIMP_HUNTER_ENABLED)
   IF (NOT CMAKE_BUILD_TYPE)
@@ -238,14 +240,19 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-# Grouped compiler settings
+IF( UNIX )
+  # Use GNUInstallDirs for Unix predefined directories
+  INCLUDE(GNUInstallDirs)
+ENDIF()
+
+# Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++0x ${CMAKE_CXX_FLAGS}")
-    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+    SET(CMAKE_CXX_STANDARD 11)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
@@ -258,10 +265,10 @@ ELSEIF(MSVC)
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-fPIC -std=c++11 ${CMAKE_CXX_FLAGS}")
-    SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+    SET(CMAKE_CXX_STANDARD 11)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
-  SET(CMAKE_CXX_FLAGS "-g -fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
   IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
@@ -303,16 +310,6 @@ IF (ASSIMP_ERROR_MAX)
   ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-  ENDIF()
-ENDIF()
-
-IF (ASSIMP_WERROR)
-  MESSAGE(STATUS "Treating warnings as errors")
-  IF (MSVC)
-    ADD_COMPILE_OPTIONS(/WX)
-  ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   ENDIF()
 ENDIF()
 
@@ -521,19 +518,19 @@ ENDIF()
 SET ( ASSIMP_BUILD_ARCHITECTURE "" CACHE STRING
   "describe the current architecture."
 )
-IF    ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
-ELSE  ()
+IF( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
+ELSE()
   ADD_DEFINITIONS ( -D'ASSIMP_BUILD_ARCHITECTURE="${ASSIMP_BUILD_ARCHITECTURE}"' )
-ENDIF ()
+ENDIF()
 
 # ${CMAKE_GENERATOR}
 SET ( ASSIMP_BUILD_COMPILER "" CACHE STRING
   "describe the current compiler."
 )
-IF    ( ASSIMP_BUILD_COMPILER STREQUAL "")
-ELSE  ()
+IF( ASSIMP_BUILD_COMPILER STREQUAL "")
+ELSE()
   ADD_DEFINITIONS ( -D'ASSIMP_BUILD_COMPILER="${ASSIMP_BUILD_COMPILER}"' )
-ENDIF ()
+ENDIF()
 
 MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 

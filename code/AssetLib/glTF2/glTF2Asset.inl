@@ -550,9 +550,62 @@ inline void BufferView::Read(Value &obj, Asset &r) {
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
 }
 
+inline uint8_t *BufferView::GetPointer(size_t accOffset) {
+    if (!buffer) return 0;
+    uint8_t *basePtr = buffer->GetPointer();
+    if (!basePtr) return 0;
+
+    size_t offset = accOffset + byteOffset;
+    if (buffer->EncodedRegion_Current != nullptr) {
+        const size_t begin = buffer->EncodedRegion_Current->Offset;
+        const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
+        if ((offset >= begin) && (offset < end))
+            return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+    }
+
+    return basePtr + offset;
+}
 //
 // struct Accessor
 //
+inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
+    if (bytes) {
+        data.assign(bytes, bytes + numBytes);
+    } else {
+        data.resize(numBytes, 0x00);
+    }
+}
+
+inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
+    uint8_t *pIndices = indices->GetPointer(indicesByteOffset);
+    const unsigned int indexSize = int(ComponentTypeSize(indicesType));
+    uint8_t *indicesEnd = pIndices + count * indexSize;
+
+    uint8_t *pValues = values->GetPointer(valuesByteOffset);
+    while (pIndices != indicesEnd) {
+        size_t offset;
+        switch (indicesType) {
+        case ComponentType_UNSIGNED_BYTE:
+            offset = *pIndices;
+            break;
+        case ComponentType_UNSIGNED_SHORT:
+            offset = *reinterpret_cast<uint16_t *>(pIndices);
+            break;
+        case ComponentType_UNSIGNED_INT:
+            offset = *reinterpret_cast<uint32_t *>(pIndices);
+            break;
+        default:
+            // have fun with float and negative values from signed types as indices.
+            throw DeadlyImportError("Unsupported component type in index.");
+        }
+
+        offset *= elementSize;
+        std::memcpy(data.data() + offset, pValues, elementSize);
+
+        pValues += elementSize;
+        pIndices += indexSize;
+    }
+}
 
 inline void Accessor::Read(Value &obj, Asset &r) {
 
@@ -566,6 +619,40 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+
+    if (Value *sparseValue = FindObject(obj, "sparse")) {
+        sparse.reset(new Sparse);
+        // count
+        ReadMember(*sparseValue, "count", sparse->count);
+
+        // indices
+        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
+            //indices bufferView
+            Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
+            sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
+            //indices byteOffset
+            sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
+            //indices componentType
+            sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
+        }
+
+        // value
+        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
+            //value bufferView
+            Value *valueViewID = FindUInt(*valuesValue, "bufferView");
+            sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
+            //value byteOffset
+            sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
+        }
+
+        // indicesType
+        sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
+
+        const unsigned int elementSize = GetElementSize();
+        const size_t dataSize = count * elementSize;
+        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : 0);
+        sparse->PatchData(elementSize);
+    }
 }
 
 inline unsigned int Accessor::GetNumComponents() {
@@ -581,6 +668,9 @@ inline unsigned int Accessor::GetElementSize() {
 }
 
 inline uint8_t *Accessor::GetPointer() {
+    if (sparse)
+        return sparse->data.data();
+
     if (!bufferView || !bufferView->buffer) return 0;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
     if (!basePtr) return 0;
@@ -634,8 +724,7 @@ void Accessor::ExtractData(T *&outData)
 
     const size_t targetElemSize = sizeof(T);
     ai_assert(elemSize <= targetElemSize);
-
-    ai_assert(count * stride <= bufferView->byteLength);
+    ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {

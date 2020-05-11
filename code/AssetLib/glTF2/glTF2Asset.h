@@ -367,6 +367,7 @@ struct Object {
 //! An accessor provides a typed view into a BufferView or a subset of a BufferView
 //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
 struct Accessor : public Object {
+    struct Sparse;
     Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
     size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
     ComponentType componentType; //!< The datatype of components in the attribute. (required)
@@ -374,6 +375,7 @@ struct Accessor : public Object {
     AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
     std::vector<double> max; //!< Maximum value of each component in this attribute.
     std::vector<double> min; //!< Minimum value of each component in this attribute.
+    std::unique_ptr<Sparse> sparse;
 
     unsigned int GetNumComponents();
     unsigned int GetBytesPerComponent();
@@ -423,6 +425,21 @@ struct Accessor : public Object {
 
     Accessor() {}
     void Read(Value &obj, Asset &r);
+
+    //sparse
+    struct Sparse {
+        size_t count;
+        ComponentType indicesType;
+        Ref<BufferView> indices;
+        size_t indicesByteOffset;
+        Ref<BufferView> values;
+        size_t valuesByteOffset;
+
+        std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
+
+        void PopulateData(size_t numBytes, uint8_t *bytes);
+        void PatchData(unsigned int elementSize);
+    };
 };
 
 //! A buffer points to binary geometry, animation, or skins.
@@ -555,6 +572,7 @@ struct BufferView : public Object {
     BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
     void Read(Value &obj, Asset &r);
+    uint8_t *GetPointer(size_t accOffset);
 };
 
 struct Camera : public Object {

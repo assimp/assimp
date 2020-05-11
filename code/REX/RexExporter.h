@@ -67,6 +67,7 @@ file = fopen ( filename, mode )
 struct aiScene;
 struct aiNode;
 struct aiMesh;
+struct aiFace;
 
 namespace rex
 {
@@ -82,7 +83,7 @@ namespace rex
         void Start();
 
     private:
-        struct Triangle {
+        struct IndexList {
             std::vector<uint32_t> indices;
         };
 
@@ -98,15 +99,22 @@ namespace rex
         };
 
         void WriteGeometryFile();
-        void WriteMeshes(rex_header *header, int startId, int startMaterials, std::vector<DataPtr> &meshPtrs);
-        void WriteImages(rex_header *header, int startId, std::vector<DataPtr> &meshPtrs);
-        void WriteMaterials(rex_header *header, int startId, std::vector<DataPtr> &materialPtrs);
+        void WriteObjects(rex_header *header, uint64_t startId, uint64_t startMaterials, std::vector<DataPtr> &meshPtrs, std::vector<DataPtr> &linePtrs, DataPtr &pointPtrs);
+        void WriteMeshes(rex_header *header, uint64_t startId, uint64_t startMaterials, std::vector<DataPtr> &meshPtrs);
+
+        void WriteImages(rex_header *header, uint64_t startId, std::vector<DataPtr> &meshPtrs);
+        void WriteLines(uint64_t startId, rex_header *header, std::vector<DataPtr> &linePtrs);
+        void WritePoints(uint64_t startId, rex_header *header, DataPtr &pointPtrs);
+        void WriteMaterials(rex_header *header, uint64_t startId, std::vector<DataPtr> &materialPtrs);
         void GetMaterialsAndTextures();
 
         void AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat);
+        void AddLine(const aiMesh *m, const aiFace *f, const aiMatrix4x4 &mat);
+        void AddPoint(const aiMesh *m, const aiFace *f, const aiMatrix4x4 &mat);
+        void AddPoints(const aiMesh *m, const aiMatrix4x4 &mat);
         void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
 
-        void GetTriangleArray(const std::vector<Triangle>& triangles, std::vector<uint32_t> &triangleArray );
+        void GetTriangleArray(const std::vector<IndexList>& triangles, std::vector<uint32_t> &triangleArray );
         void GetVertexArray( const std::vector<aiVector3D> vector, std::vector<float>& vectorArray );
         void GetColorArray( const std::vector<aiColor3D> vector, std::vector<float>& colorArray );
         void GetTextureCoordArray( const std::vector<aiVector3D> vector, std::vector<float>& textureCoordArray );
@@ -184,8 +192,19 @@ namespace rex
             std::string                             name;
             bool                                    useColors;
             uint32_t                                materialId;
-            std::vector<Triangle>                   triangles;
-            indexMap<VertexData, vertexDataCompare> verticesWithColors;
+            std::vector<IndexList>                   triangles;
+            indexMap<VertexData, vertexDataCompare> verticesWithColorsAndTextureCoords;
+        };
+
+        struct LineInstance {
+            aiColor4D                              color;
+            std::vector<aiVector3D>                vertices;
+        };
+
+        struct PointInstance {
+            bool                                   hasColor;
+            aiColor3D                              color;
+            aiVector3D                             vertex;
         };
 
     private:
@@ -194,6 +213,8 @@ namespace rex
         indexMap<std::string>               m_TextureMap;
         std::vector<rex_material_standard>  m_Materials;
         std::vector<MeshInstance>           m_Meshes;
+        std::vector<LineInstance>           m_Lines;
+        std::vector<PointInstance>           m_Points;
     };
 
     /**

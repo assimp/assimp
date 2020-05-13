@@ -1233,7 +1233,7 @@ if (APPLE)
     # add ./Compiler/*.h to assimp.framework via copy command
     ADD_CUSTOM_COMMAND(TARGET assimp POST_BUILD
       COMMAND "${CMAKE_COMMAND}" -E copy_directory
-         "../${HEADER_PATH}/Compiler"
+         "${HEADER_PATH}/Compiler"
          assimp.framework/Headers/Compiler
       COMMENT "Copying public ./Compiler/ header files to framework bundle's Headers/Compiler/")
   ENDIF()

@@ -428,7 +428,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
 {
 	ai_assert(input);
-	ASSIMP_FBX_LOG_DEBUG("Tokenizing binary FBX file");
+	ASSIMP_LOG_DEBUG("Tokenizing binary FBX file");
 
     if(length < 0x1b) {
         TokenizeError("file is too short",0);
@@ -453,7 +453,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
 	/*Result ignored*/ ReadByte(input, cursor, input + length);
 	/*Result ignored*/ ReadByte(input, cursor, input + length);
 	const uint32_t version = ReadWord(input, cursor, input + length);
-	ASSIMP_FBX_LOG_DEBUG_F("FBX version: ", version);
+	ASSIMP_LOG_DEBUG_F("FBX version: ", version);
 	const bool is64bits = version >= 7500;
     const char *end = input + length;
     while (cursor < end ) {

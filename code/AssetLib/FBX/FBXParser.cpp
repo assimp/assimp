@@ -221,7 +221,7 @@ Parser::Parser (const TokenList& tokens, bool is_binary)
 , cursor(tokens.begin())
 , is_binary(is_binary)
 {
-    ASSIMP_FBX_LOG_DEBUG("Parsing FBX tokens");
+    ASSIMP_LOG_DEBUG("Parsing FBX tokens");
     root.reset(new Scope(*this,true));
 }
 

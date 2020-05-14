@@ -266,7 +266,7 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 : settings(settings)
 , parser(parser)
 {
-	ASSIMP_FBX_LOG_DEBUG("Creating FBX Document");
+	ASSIMP_LOG_DEBUG("Creating FBX Document");
 
     // Cannot use array default initialization syntax because vc8 fails on it
     for (auto &timeStamp : creationTimeStamp) {
@@ -312,7 +312,7 @@ void Document::ReadHeader() {
 
     const Scope& shead = *ehead->Compound();
     fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
-	ASSIMP_FBX_LOG_DEBUG_F("FBX Version: ", fbxVersion);
+	ASSIMP_LOG_DEBUG_F("FBX Version: ", fbxVersion);
 
     // While we may have some success with newer files, we don't support
     // the older 6.n fbx format

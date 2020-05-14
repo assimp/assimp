@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/ByteSwapper.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include <iostream>
 
@@ -220,6 +221,7 @@ Parser::Parser (const TokenList& tokens, bool is_binary)
 , cursor(tokens.begin())
 , is_binary(is_binary)
 {
+    ASSIMP_FBX_LOG_DEBUG("Parsing FBX tokens");
     root.reset(new Scope(*this,true));
 }
 

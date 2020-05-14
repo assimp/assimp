@@ -273,33 +273,31 @@ void Logger::info(const std::string &message) {
     return info(message.c_str());
 }
 
-// ------------------------------------------------------------------------------------------------
-#define ASSIMP_LOG_WARN_F(string,...)\
-    DefaultLogger::get()->warn((Formatter::format(string),__VA_ARGS__))
-
-#define ASSIMP_LOG_ERROR_F(string,...)\
-    DefaultLogger::get()->error((Formatter::format(string),__VA_ARGS__))
-
-#define ASSIMP_LOG_DEBUG_F(string,...)\
-    DefaultLogger::get()->debug((Formatter::format(string),__VA_ARGS__))
-
-#define ASSIMP_LOG_INFO_F(string,...)\
-    DefaultLogger::get()->info((Formatter::format(string),__VA_ARGS__))
-
-
-#define ASSIMP_LOG_WARN(string)\
-    DefaultLogger::get()->warn(string)
-
-#define ASSIMP_LOG_ERROR(string)\
-    DefaultLogger::get()->error(string)
-
-#define ASSIMP_LOG_DEBUG(string)\
-    DefaultLogger::get()->debug(string)
-
-#define ASSIMP_LOG_INFO(string)\
-    DefaultLogger::get()->info(string)
-
-
 } // Namespace Assimp
+
+// ------------------------------------------------------------------------------------------------
+#define ASSIMP_LOG_WARN_F(string, ...) \
+	Assimp::DefaultLogger::get()->warn((Assimp::Formatter::format(string), __VA_ARGS__))
+
+#define ASSIMP_LOG_ERROR_F(string, ...) \
+	Assimp::DefaultLogger::get()->error((Assimp::Formatter::format(string), __VA_ARGS__))
+
+#define ASSIMP_LOG_DEBUG_F(string, ...) \
+	Assimp::DefaultLogger::get()->debug((Assimp::Formatter::format(string), __VA_ARGS__))
+
+#define ASSIMP_LOG_INFO_F(string, ...) \
+	Assimp::DefaultLogger::get()->info((Assimp::Formatter::format(string), __VA_ARGS__))
+
+#define ASSIMP_LOG_WARN(string) \
+	Assimp::DefaultLogger::get()->warn(string)
+
+#define ASSIMP_LOG_ERROR(string) \
+	Assimp::DefaultLogger::get()->error(string)
+
+#define ASSIMP_LOG_DEBUG(string) \
+	Assimp::DefaultLogger::get()->debug(string)
+
+#define ASSIMP_LOG_INFO(string) \
+	Assimp::DefaultLogger::get()->info(string)
 
 #endif // !! INCLUDED_AI_LOGGER_H

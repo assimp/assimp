@@ -74,7 +74,8 @@ public:
      */
     enum LogSeverity {
         NORMAL,     //!< Normal granularity of logging
-        VERBOSE     //!< Debug infos will be logged, too
+        DEBUG,      //!< Debug messages will be logged, but not verbose debug messages.
+        VERBOSE     //!< All messages will be logged
     };
 
     // ----------------------------------------------------------------------
@@ -102,6 +103,12 @@ public:
      *   @param message Debug message*/
     void debug(const char* message);
     void debug(const std::string &message);
+
+    // ----------------------------------------------------------------------
+	/** @brief  Writes a debug message
+     *   @param message Debug message*/
+	void verboseDebug(const char *message);
+	void verboseDebug(const std::string &message);
 
     // ----------------------------------------------------------------------
     /** @brief  Writes a info message
@@ -154,7 +161,7 @@ public:
      *    if the result is 0 the stream is detached from the Logger and
      *    the caller retakes the possession of the stream.
      *  @return true if the stream has been detached, false otherwise.*/
-    virtual bool detatchStream(LogStream *pStream,
+    virtual bool detachStream(LogStream *pStream,
         unsigned int severity = Debugging | Err | Warn | Info) = 0;
 
 protected:
@@ -177,6 +184,16 @@ protected:
      *    the function is left.
      */
     virtual void OnDebug(const char* message)= 0;
+
+    // ----------------------------------------------------------------------
+	/**
+     *  @brief Called as a request to write a specific verbose debug message
+     *  @param  message Debug message. Never longer than
+     *    MAX_LOG_MESSAGE_LENGTH characters (excluding the '0').
+     *  @note  The message string is only valid until the scope of
+     *    the function is left.
+     */
+	virtual void OnVerboseDebug(const char *message) = 0;
 
     // ----------------------------------------------------------------------
     /**
@@ -256,6 +273,11 @@ void Logger::debug(const std::string &message) {
 }
 
 // ----------------------------------------------------------------------------------
+inline void Logger::verboseDebug(const std::string &message) {
+	return verboseDebug(message.c_str());
+}
+
+// ----------------------------------------------------------------------------------
 inline
 void Logger::error(const std::string &message) {
     return error(message.c_str());
@@ -285,6 +307,9 @@ void Logger::info(const std::string &message) {
 #define ASSIMP_LOG_DEBUG_F(string, ...) \
 	Assimp::DefaultLogger::get()->debug((Assimp::Formatter::format(string), __VA_ARGS__))
 
+#define ASSIMP_LOG_VERBOSE_DEBUG_F(string, ...) \
+	Assimp::DefaultLogger::get()->verboseDebug((Assimp::Formatter::format(string), __VA_ARGS__))
+
 #define ASSIMP_LOG_INFO_F(string, ...) \
 	Assimp::DefaultLogger::get()->info((Assimp::Formatter::format(string), __VA_ARGS__))
 
@@ -296,6 +321,9 @@ void Logger::info(const std::string &message) {
 
 #define ASSIMP_LOG_DEBUG(string) \
 	Assimp::DefaultLogger::get()->debug(string)
+
+#define ASSIMP_LOG_VERBOSE_DEBUG(string) \
+	Assimp::DefaultLogger::get()->verboseDebug(string)
 
 #define ASSIMP_LOG_INFO(string) \
 	Assimp::DefaultLogger::get()->info(string)

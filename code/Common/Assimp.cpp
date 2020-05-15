@@ -392,7 +392,7 @@ ASSIMP_API aiReturn aiDetachLogStream(const aiLogStream *stream) {
     if (it == gActiveLogStreams.end()) {
         return AI_FAILURE;
     }
-    DefaultLogger::get()->detatchStream(it->second);
+    DefaultLogger::get()->detachStream( it->second );
     delete it->second;
 
     gActiveLogStreams.erase(it);
@@ -416,7 +416,7 @@ ASSIMP_API void aiDetachAllLogStreams(void) {
     }
 
     for (LogStreamMap::iterator it = gActiveLogStreams.begin(); it != gActiveLogStreams.end(); ++it) {
-        logger->detatchStream(it->second);
+        logger->detachStream( it->second );
         delete it->second;
     }
     gActiveLogStreams.clear();

@@ -105,7 +105,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     // The idea here is to traverse all objects to find these Textures and convert them,
     // so later during material conversion it will find converted texture in the textures_converted array.
     if (doc.Settings().readTextures) {
-        ConvertOrphantEmbeddedTextures();
+        ConvertOrphanedEmbeddedTextures();
     }
     ConvertRootNode();
 
@@ -3467,7 +3467,7 @@ void FBXConverter::TransferDataToScene() {
     }
 }
 
-void FBXConverter::ConvertOrphantEmbeddedTextures() {
+void FBXConverter::ConvertOrphanedEmbeddedTextures() {
     // in C++14 it could be:
     // for (auto&& [id, object] : objects)
     for (auto &&id_and_object : doc.Objects()) {

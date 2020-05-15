@@ -1320,7 +1320,7 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
 
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
 
-    ASSIMP_LOG_DEBUG("Reading GLTF file");
+    ASSIMP_LOG_DEBUG("Reading GLTF2 file");
 
 	// clean all member arrays
 	meshOffsets.clear();

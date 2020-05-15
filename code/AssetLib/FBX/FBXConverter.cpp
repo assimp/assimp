@@ -1542,10 +1542,10 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
     aiBone *bone = nullptr;
 
     if (bone_map.count(deformer_name)) {
-        ASSIMP_LOG_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
         bone = bone_map[deformer_name];
     } else {
-        ASSIMP_LOG_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
         bone = new aiBone();
         bone->mName = bone_name;
 

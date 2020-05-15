@@ -107,7 +107,6 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Accessor& a, AssetWriter& w)
     {
-        //wangyi 0506
         if (a.bufferView) {
             obj.AddMember("bufferView", a.bufferView->index, w.mAl);
             obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
@@ -125,7 +124,6 @@ namespace glTF2 {
         obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
 
-		// wangyi 0506
         if (a.sparse) {
             Value sparseValue;
             sparseValue.SetObject();

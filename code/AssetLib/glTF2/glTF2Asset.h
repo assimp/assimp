@@ -367,7 +367,7 @@ struct Object {
 //! An accessor provides a typed view into a BufferView or a subset of a BufferView
 //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
 struct Accessor : public Object {
-    struct Sparse; //wangyi 0506
+    struct Sparse;
     Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
     size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
     ComponentType componentType; //!< The datatype of components in the attribute. (required)
@@ -375,7 +375,7 @@ struct Accessor : public Object {
     AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
     std::vector<double> max; //!< Maximum value of each component in this attribute.
     std::vector<double> min; //!< Minimum value of each component in this attribute.
-    std::unique_ptr<Sparse> sparse; //wangyi 0506
+    std::unique_ptr<Sparse> sparse;
 
     unsigned int GetNumComponents();
     unsigned int GetBytesPerComponent();
@@ -387,7 +387,6 @@ struct Accessor : public Object {
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
-    //wangyi 0506
     void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
     void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
 
@@ -430,7 +429,6 @@ struct Accessor : public Object {
     Accessor() {}
     void Read(Value &obj, Asset &r);
 
-    //wangyi 0506
     //sparse
     struct Sparse {
         size_t count;
@@ -577,7 +575,6 @@ struct BufferView : public Object {
     BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
     void Read(Value &obj, Asset &r);
-    //wangyi 0506
     uint8_t *GetPointer(size_t accOffset);
 };
 

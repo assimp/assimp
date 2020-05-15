@@ -207,7 +207,6 @@ inline void SetAccessorRange(ComponentType compType, Ref<Accessor> acc, void* da
 	}
 }
 
-// wangyi 0506
 // compute the (data-dataBase), store the non-zero data items
 template <typename T>
 size_t NZDiff(void *data, void *dataBase, size_t count, unsigned int numCompsIn, unsigned int numCompsOut, void *&outputNZDiff, void *&outputNZIdx) {
@@ -271,7 +270,7 @@ inline size_t NZDiff(ComponentType compType, void *data, void *dataBase, size_t 
     }
     return 0;
 }
-// wangyi 0506
+
 inline Ref<Accessor> ExportDataSparse(Asset &a, std::string &meshName, Ref<Buffer> &buffer,
         size_t count, void *data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE, void *dataBase = 0) {
     if (!count || !data) {
@@ -974,13 +973,13 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
                     }
-                    /*Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
-                            pAnimMesh->mNumVertices, pPositionDiff,
-                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
-                    //wangyi 0506
-                    Ref<Accessor> vec = ExportDataSparse(*mAsset, meshId, b,
+                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pPositionDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    /* sparse
+                    Ref<Accessor> vec = ExportDataSparse(*mAsset, meshId, b,
+                            pAnimMesh->mNumVertices, pPositionDiff,
+                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
                     if (vec) {
                         p.targets[am].position.push_back(vec);
                     }
@@ -993,13 +992,13 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
                     }
-                    /*Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
-                            pAnimMesh->mNumVertices, pNormalDiff,
-                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
-                    //wangyi 0506
                     Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pNormalDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    /* sparse
+                    Ref<Accessor> vec = ExportDataSparse(*mAsset, meshId, b,
+                            pAnimMesh->mNumVertices, pNormalDiff,
+                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
                     if (vec) {
                         p.targets[am].normal.push_back(vec);
                     }

@@ -83,6 +83,18 @@ static const aiImporterDesc desc = {
     "dae zae"
 };
 
+static const float kMillisecondsFromSeconds = 1000.f;
+
+// Add an item of metadata to a node
+// Assumes the key is not already in the list
+template <typename T>
+inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
+    if (nullptr == node->mMetaData) {
+        node->mMetaData = new aiMetadata();
+    }
+    node->mMetaData->Add(key, value);
+}
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader() :
@@ -230,41 +242,20 @@ void ColladaLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IO
         }
     }
 
-    // store all meshes
     StoreSceneMeshes(pScene);
-
-    // store all materials
     StoreSceneMaterials(pScene);
-
-    // store all textures
     StoreSceneTextures(pScene);
-
-    // store all lights
     StoreSceneLights(pScene);
-
-    // store all cameras
     StoreSceneCameras(pScene);
-
-    // store all animations
     StoreAnimations(pScene, parser);
 
     // If no meshes have been loaded, it's probably just an animated skeleton.
     if (0u == pScene->mNumMeshes) {
-
         if (!noSkeletonMesh) {
             SkeletonMeshBuilder hero(pScene);
         }
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     }
-}
-
-// Add an item of metadata to a node
-// Assumes the key is not already in the list
-template <typename T>
-inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
-    if (nullptr == node->mMetaData)
-        node->mMetaData = new aiMetadata();
-    node->mMetaData->Add(key, value);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -277,10 +268,12 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
     node->mName.Set(FindNameForNode(pNode));
     // if we're not using the unique IDs, hold onto them for reference and export
     if (useColladaName) {
-        if (!pNode->mID.empty())
+        if (!pNode->mID.empty()) {
             AddNodeMetaData(node, AI_METADATA_COLLADA_ID, aiString(pNode->mID));
-        if (!pNode->mSID.empty())
+        }
+        if (!pNode->mSID.empty()) {
             AddNodeMetaData(node, AI_METADATA_COLLADA_SID, aiString(pNode->mSID));
+        }
     }
 
     // calculate the transformation matrix for it
@@ -305,13 +298,8 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
         node->mChildren[pNode->mChildren.size() + a]->mParent = node;
     }
 
-    // construct meshes
     BuildMeshesForNode(pParser, pNode, node);
-
-    // construct cameras
     BuildCamerasForNode(pParser, pNode, node);
-
-    // construct lights
     BuildLightsForNode(pParser, pNode, node);
 
     return node;
@@ -347,9 +335,7 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Col
 
 // ------------------------------------------------------------------------------------------------
 // Resolve UV channels
-void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler &sampler,
-
-        const Collada::SemanticMappingTable &table) {
+void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler &sampler, const Collada::SemanticMappingTable &table) {
     std::map<std::string, Collada::InputSemanticMapEntry>::const_iterator it = table.mMap.find(sampler.mUVChannel);
     if (it != table.mMap.end()) {
         if (it->second.mType != Collada::IT_Texcoord) {
@@ -599,6 +585,10 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Colla
 // ------------------------------------------------------------------------------------------------
 // Find mesh from either meshes or morph target meshes
 aiMesh *ColladaLoader::findMesh(const std::string &meshid) {
+    if ( meshid.empty()) {
+        return nullptr;
+    }
+    
     for (unsigned int i = 0; i < mMeshes.size(); ++i) {
         if (std::string(mMeshes[i]->mName.data) == meshid) {
             return mMeshes[i];
@@ -1386,9 +1376,9 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 double time = double(mat.d4); // remember? time is stored in mat.d4
                 mat.d4 = 1.0f;
 
-                dstAnim->mPositionKeys[a].mTime = time;
-                dstAnim->mRotationKeys[a].mTime = time;
-                dstAnim->mScalingKeys[a].mTime = time;
+                dstAnim->mPositionKeys[a].mTime = time * kMillisecondsFromSeconds ;
+                dstAnim->mRotationKeys[a].mTime = time * kMillisecondsFromSeconds ;
+                dstAnim->mScalingKeys[a].mTime = time * kMillisecondsFromSeconds ;
                 mat.Decompose(dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
             }
 
@@ -1409,7 +1399,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 if (e.mTargetId.find("morph-weights") != std::string::npos)
                     morphChannels.push_back(e);
             }
-            if (morphChannels.size() > 0) {
+            if (!morphChannels.empty() ) {
                 // either 1) morph weight animation count should contain morph target count channels
                 // or     2) one channel with morph target count arrays
                 // assume first
@@ -1418,7 +1408,6 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 morphAnim->mName.Set(nodeName);
 
                 std::vector<MorphTimeValues> morphTimeValues;
-
                 int morphAnimChannelIndex = 0;
                 for (std::vector<Collada::ChannelEntry>::iterator it = morphChannels.begin(); it != morphChannels.end(); ++it) {
                     Collada::ChannelEntry &e = *it;
@@ -1430,8 +1419,9 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
 
                     // weight target can be in format Weight_M_N, Weight_N, WeightN, or some other way
                     // we ignore the name and just assume the channels are in the right order
-                    for (unsigned int i = 0; i < e.mTimeData->mValues.size(); i++)
-                        insertMorphTimeValue(morphTimeValues, e.mTimeData->mValues.at(i), e.mValueData->mValues.at(i), morphAnimChannelIndex);
+                    for (unsigned int i = 0; i < e.mTimeData->mValues.size(); i++) {
+                        insertMorphTimeValue(morphTimeValues, e.mTimeData->mValues[i], e.mValueData->mValues[i], morphAnimChannelIndex);
+                    }
 
                     ++morphAnimChannelIndex;
                 }
@@ -1443,8 +1433,8 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                     morphAnim->mKeys[key].mValues = new unsigned int[morphChannels.size()];
                     morphAnim->mKeys[key].mWeights = new double[morphChannels.size()];
 
-                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime;
-                    for (unsigned int valueIndex = 0; valueIndex < morphChannels.size(); valueIndex++) {
+                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime * kMillisecondsFromSeconds ;
+                    for (unsigned int valueIndex = 0; valueIndex < morphChannels.size(); ++valueIndex ) {
                         morphAnim->mKeys[key].mValues[valueIndex] = valueIndex;
                         morphAnim->mKeys[key].mWeights[valueIndex] = getWeightAtKey(morphTimeValues, key, valueIndex);
                     }
@@ -1494,18 +1484,22 @@ void ColladaLoader::AddTexture(aiMaterial &mat, const ColladaParser &pParser,
 
     // mapping mode
     int map = aiTextureMapMode_Clamp;
-    if (sampler.mWrapU)
+    if (sampler.mWrapU) {
         map = aiTextureMapMode_Wrap;
-    if (sampler.mWrapU && sampler.mMirrorU)
+    }
+    if (sampler.mWrapU && sampler.mMirrorU) {
         map = aiTextureMapMode_Mirror;
+    }
 
     mat.AddProperty(&map, 1, _AI_MATKEY_MAPPINGMODE_U_BASE, type, idx);
 
     map = aiTextureMapMode_Clamp;
-    if (sampler.mWrapV)
+    if (sampler.mWrapV) {
         map = aiTextureMapMode_Wrap;
-    if (sampler.mWrapV && sampler.mMirrorV)
+    }
+    if (sampler.mWrapV && sampler.mMirrorV) {
         map = aiTextureMapMode_Mirror;
+    }
 
     mat.AddProperty(&map, 1, _AI_MATKEY_MAPPINGMODE_V_BASE, type, idx);
 
@@ -1526,9 +1520,9 @@ void ColladaLoader::AddTexture(aiMaterial &mat, const ColladaParser &pParser,
     // number in the channel name. We assume it is the zero-based index into the
     // UV channel array of all corresponding meshes. It could also be one-based
     // for some exporters, but we won't care of it unless someone complains about.
-    if (sampler.mUVId != UINT_MAX)
+    if (sampler.mUVId != UINT_MAX) {
         map = sampler.mUVId;
-    else {
+    } else {
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
@@ -1553,27 +1547,27 @@ void ColladaLoader::FillMaterials(const ColladaParser &pParser, aiScene * /*pSce
 
         // resolve shading mode
         int shadeMode;
-        if (effect.mFaceted) /* fixme */
+        if (effect.mFaceted) {
             shadeMode = aiShadingMode_Flat;
-        else {
+        } else {
             switch (effect.mShadeType) {
-            case Collada::Shade_Constant:
-                shadeMode = aiShadingMode_NoShading;
-                break;
-            case Collada::Shade_Lambert:
-                shadeMode = aiShadingMode_Gouraud;
-                break;
-            case Collada::Shade_Blinn:
-                shadeMode = aiShadingMode_Blinn;
-                break;
-            case Collada::Shade_Phong:
-                shadeMode = aiShadingMode_Phong;
-                break;
+                case Collada::Shade_Constant:
+                    shadeMode = aiShadingMode_NoShading;
+                    break;
+                case Collada::Shade_Lambert:
+                    shadeMode = aiShadingMode_Gouraud;
+                    break;
+                case Collada::Shade_Blinn:
+                    shadeMode = aiShadingMode_Blinn;
+                    break;
+                case Collada::Shade_Phong:
+                    shadeMode = aiShadingMode_Phong;
+                    break;
 
-            default:
-                ASSIMP_LOG_WARN("Collada: Unrecognized shading mode, using gouraud shading");
-                shadeMode = aiShadingMode_Gouraud;
-                break;
+                default:
+                    ASSIMP_LOG_WARN("Collada: Unrecognized shading mode, using gouraud shading");
+                    shadeMode = aiShadingMode_Gouraud;
+                    break;
             }
         }
         mat.AddProperty<int>(&shadeMode, 1, AI_MATKEY_SHADING_MODEL);
@@ -1679,23 +1673,6 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
     // ScenePreprocessor generates a default material automatically if none is there.
     // All further code here in this loader works well without a valid material so
     // we can safely let it to ScenePreprocessor.
-#if 0
-    if (newMats.size() == 0)
-    {
-        aiMaterial* mat = new aiMaterial;
-        aiString name(AI_DEFAULT_MATERIAL_NAME);
-        mat->AddProperty(&name, AI_MATKEY_NAME);
-
-        const int shadeMode = aiShadingMode_Phong;
-        mat->AddProperty<int>(&shadeMode, 1, AI_MATKEY_SHADING_MODEL);
-        aiColor4D colAmbient(0.2, 0.2, 0.2, 1.0), colDiffuse(0.8, 0.8, 0.8, 1.0), colSpecular(0.5, 0.5, 0.5, 0.5);
-        mat->AddProperty(&colAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
-        mat->AddProperty(&colDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-        mat->AddProperty(&colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-        const ai_real specExp = 5.0;
-        mat->AddProperty(&specExp, 1, AI_MATKEY_SHININESS);
-}
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1755,20 +1732,21 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
 
         // and add this texture to the list
         mTextures.push_back(tex);
-    } else {
-        if (imIt->second.mFileName.empty()) {
-            throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");
-        }
+        return result;
+    } 
 
-        result.Set(imIt->second.mFileName);
+    if (imIt->second.mFileName.empty()) {
+        throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");
     }
+
+    result.Set(imIt->second.mFileName);
+
     return result;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads a float value from an accessor and its data array.
 ai_real ColladaLoader::ReadFloat(const Collada::Accessor &pAccessor, const Collada::Data &pData, size_t pIndex, size_t pOffset) const {
-    // FIXME: (thom) Test for data type here in every access? For the moment, I leave this to the caller
     size_t pos = pAccessor.mStride * pIndex + pAccessor.mOffset + pOffset;
     ai_assert(pos < pData.mValues.size());
     return pData.mValues[pos];

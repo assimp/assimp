@@ -289,7 +289,7 @@ evil_jump_outside:
         if (!mesh->mNumFaces) {
             //The whole mesh consists of degenerated faces
             //signal upward, that this mesh should be deleted.
-            ASSIMP_LOG_DEBUG("FindDegeneratesProcess removed a mesh full of degenerated primitives");
+            ASSIMP_LOG_VERBOSE_DEBUG("FindDegeneratesProcess removed a mesh full of degenerated primitives");
             return true;
         }
     }

@@ -141,7 +141,7 @@ private:
     /** @briefDestructor    */
     ~DefaultLogger();
 
-    /** @brief  Logs debug infos, only been written when severity level DEBUG is set */
+    /** @brief  Logs debug infos, only been written when severity level DEBUG or higher is set */
     void OnDebug(const char* message);
 
     /** @brief  Logs debug infos, only been written when severity level VERBOSE is set */

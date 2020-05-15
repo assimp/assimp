@@ -284,7 +284,7 @@ void ColladaParser::ReadContents() {
 
                 ReadStructure();
             } else {
-                ASSIMP_LOG_DEBUG_F("Ignoring global element <", mReader->getNodeName(), ">.");
+                ASSIMP_LOG_VERBOSE_DEBUG_F("Ignoring global element <", mReader->getNodeName(), ">.");
                 SkipElement();
             }
         } else {

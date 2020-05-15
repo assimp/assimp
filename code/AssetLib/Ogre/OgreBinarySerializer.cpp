@@ -168,7 +168,7 @@ void OgreBinarySerializer::RollbackHeader() {
 
 void OgreBinarySerializer::SkipBytes(size_t numBytes) {
 #if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
-    ASSIMP_LOG_DEBUG_F("Skipping ", numBytes, " bytes");
+    ASSIMP_LOG_VERBOSE_DEBUG_F("Skipping ", numBytes, " bytes");
 #endif
 
     m_reader->IncPtr(numBytes);
@@ -207,8 +207,8 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream) {
 void OgreBinarySerializer::ReadMesh(Mesh *mesh) {
     mesh->hasSkeletalAnimations = Read<bool>();
 
-    ASSIMP_LOG_DEBUG("Reading Mesh");
-    ASSIMP_LOG_DEBUG_F("  - Skeletal animations: ", mesh->hasSkeletalAnimations ? "true" : "false");
+    ASSIMP_LOG_VERBOSE_DEBUG("Reading Mesh");
+    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Skeletal animations: ", mesh->hasSkeletalAnimations ? "true" : "false");
 
     if (!AtEnd()) {
         uint16_t id = ReadHeader();
@@ -364,9 +364,9 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
     submesh->indexData->faceCount = static_cast<uint32_t>(submesh->indexData->count / 3);
     submesh->indexData->is32bit = Read<bool>();
 
-    ASSIMP_LOG_DEBUG_F("Reading SubMesh ", mesh->subMeshes.size());
-    ASSIMP_LOG_DEBUG_F("  - Material: '", submesh->materialRef, "'");
-    ASSIMP_LOG_DEBUG_F("  - Uses shared geometry: ", submesh->usesSharedVertexData ? "true" : "false");
+    ASSIMP_LOG_VERBOSE_DEBUG_F("Reading SubMesh ", mesh->subMeshes.size());
+    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Material: '", submesh->materialRef, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Uses shared geometry: ", submesh->usesSharedVertexData ? "true" : "false");
 
     // Index buffer
     if (submesh->indexData->count > 0) {
@@ -374,7 +374,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
         uint8_t *indexBuffer = ReadBytes(numBytes);
         submesh->indexData->buffer = MemoryStreamPtr(new Assimp::MemoryIOStream(indexBuffer, numBytes, true));
 
-        ASSIMP_LOG_DEBUG_F("  - ", submesh->indexData->faceCount,
+        ASSIMP_LOG_VERBOSE_DEBUG_F("  - ", submesh->indexData->faceCount,
                 " faces from ", submesh->indexData->count, (submesh->indexData->is32bit ? " 32bit" : " 16bit"),
                 " indexes of ", numBytes, " bytes");
     }

@@ -207,6 +207,152 @@ inline void SetAccessorRange(ComponentType compType, Ref<Accessor> acc, void* da
 	}
 }
 
+// wangyi 0506
+// compute the (data-dataBase), store the non-zero data items
+template <typename T>
+size_t NZDiff(void *data, void *dataBase, size_t count, unsigned int numCompsIn, unsigned int numCompsOut, void *&outputNZDiff, void *&outputNZIdx) {
+    std::vector<T> vNZDiff;
+    std::vector<unsigned short> vNZIdx;
+    size_t totalComps = count * numCompsIn;
+    T *bufferData_ptr = static_cast<T *>(data);
+    T *bufferData_end = bufferData_ptr + totalComps;
+    T *bufferBase_ptr = static_cast<T *>(dataBase);
+
+    // Search and set extreme values.
+    for (short idx = 0; bufferData_ptr < bufferData_end; idx += 1, bufferData_ptr += numCompsIn) {
+        bool bNonZero = false;
+
+        //for the data, check any component Non Zero
+        for (unsigned int j = 0; j < numCompsOut; j++) {
+            double valueData = bufferData_ptr[j];
+            double valueBase = bufferBase_ptr ? bufferBase_ptr[j] : 0;
+            if ((valueData - valueBase) != 0) {
+                bNonZero = true;
+                break;
+            }
+        }
+
+        //all zeros, continue
+        if (!bNonZero)
+            continue;
+
+        //non zero, store the data
+        for (unsigned int j = 0; j < numCompsOut; j++) {
+            T valueData = bufferData_ptr[j];
+            T valueBase = bufferBase_ptr ? bufferBase_ptr[j] : 0;
+            vNZDiff.push_back(valueData - valueBase);
+        }
+        vNZIdx.push_back(idx);
+    }
+
+    //process data
+    outputNZDiff = new T[vNZDiff.size()];
+    memcpy(outputNZDiff, vNZDiff.data(), vNZDiff.size() * sizeof(T));
+
+    outputNZIdx = new unsigned short[vNZIdx.size()];
+    memcpy(outputNZIdx, vNZIdx.data(), vNZIdx.size() * sizeof(unsigned short));
+    return vNZIdx.size();
+}
+
+inline size_t NZDiff(ComponentType compType, void *data, void *dataBase, size_t count, unsigned int numCompsIn, unsigned int numCompsOut, void *&nzDiff, void *&nzIdx) {
+    switch (compType) {
+    case ComponentType_SHORT:
+        return NZDiff<short>(data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+    case ComponentType_UNSIGNED_SHORT:
+        return NZDiff<unsigned short>(data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+    case ComponentType_UNSIGNED_INT:
+        return NZDiff<unsigned int>(data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+    case ComponentType_FLOAT:
+        return NZDiff<float>(data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+    case ComponentType_BYTE:
+        return NZDiff<int8_t>(data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+    case ComponentType_UNSIGNED_BYTE:
+        return NZDiff<uint8_t>(data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+    }
+    return 0;
+}
+// wangyi 0506
+inline Ref<Accessor> ExportDataSparse(Asset &a, std::string &meshName, Ref<Buffer> &buffer,
+        size_t count, void *data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE, void *dataBase = 0) {
+    if (!count || !data) {
+        return Ref<Accessor>();
+    }
+
+    unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
+    unsigned int numCompsOut = AttribType::GetNumComponents(typeOut);
+    unsigned int bytesPerComp = ComponentTypeSize(compType);
+
+    // accessor
+    Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
+
+    // if there is a basic data vector
+    if (dataBase) {
+        size_t base_offset = buffer->byteLength;
+        size_t base_padding = base_offset % bytesPerComp;
+        base_offset += base_padding;
+        size_t base_length = count * numCompsOut * bytesPerComp;
+        buffer->Grow(base_length + base_padding);
+
+        Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
+        bv->buffer = buffer;
+        bv->byteOffset = base_offset;
+        bv->byteLength = base_length; //! The target that the WebGL buffer should be bound to.
+        bv->byteStride = 0;
+        bv->target = target;
+        acc->bufferView = bv;
+        acc->WriteData(count, dataBase, numCompsIn * bytesPerComp);
+    }
+    acc->byteOffset = 0;
+    acc->componentType = compType;
+    acc->count = count;
+    acc->type = typeOut;
+
+    if (data) {
+        void *nzDiff = 0, *nzIdx = 0;
+        size_t nzCount = NZDiff(compType, data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
+        acc->sparse.reset(new Accessor::Sparse);
+        acc->sparse->count = nzCount;
+
+        //indices
+        unsigned int bytesPerIdx = sizeof(unsigned short);
+        size_t indices_offset = buffer->byteLength;
+        size_t indices_padding = indices_offset % bytesPerIdx;
+        indices_offset += indices_padding;
+        size_t indices_length = nzCount * 1 * bytesPerIdx;
+        buffer->Grow(indices_length + indices_padding);
+
+        Ref<BufferView> indicesBV = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
+        indicesBV->buffer = buffer;
+        indicesBV->byteOffset = indices_offset;
+        indicesBV->byteLength = indices_length;
+        indicesBV->byteStride = 0;
+        acc->sparse->indices = indicesBV;
+        acc->sparse->indicesType = ComponentType_UNSIGNED_SHORT;
+        acc->sparse->indicesByteOffset = 0;
+        acc->WriteSparseIndices(nzCount, nzIdx, 1 * bytesPerIdx);
+
+        //values
+        size_t values_offset = buffer->byteLength;
+        size_t values_padding = values_offset % bytesPerComp;
+        values_offset += values_padding;
+        size_t values_length = nzCount * numCompsOut * bytesPerComp;
+        buffer->Grow(values_length + values_padding);
+
+        Ref<BufferView> valuesBV = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
+        valuesBV->buffer = buffer;
+        valuesBV->byteOffset = values_offset;
+        valuesBV->byteLength = values_length;
+        valuesBV->byteStride = 0;
+        acc->sparse->values = valuesBV;
+        acc->sparse->valuesByteOffset = 0;
+        acc->WriteSparseValues(nzCount, nzDiff, numCompsIn * bytesPerComp);
+
+        //clear
+        delete[] nzDiff;
+        delete[] nzIdx;
+    }
+    return acc;
+}
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
     size_t count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE)
 {
@@ -828,7 +974,11 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
                     }
-                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
+                    /*Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
+                            pAnimMesh->mNumVertices, pPositionDiff,
+                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
+                    //wangyi 0506
+                    Ref<Accessor> vec = ExportDataSparse(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pPositionDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
                     if (vec) {
@@ -843,6 +993,10 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
                     }
+                    /*Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
+                            pAnimMesh->mNumVertices, pNormalDiff,
+                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
+                    //wangyi 0506
                     Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
                             pAnimMesh->mNumVertices, pNormalDiff,
                             AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);

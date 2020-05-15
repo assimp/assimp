@@ -550,10 +550,67 @@ inline void BufferView::Read(Value &obj, Asset &r) {
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
 }
 
+//wangyi 0506
+inline uint8_t *BufferView::GetPointer(size_t accOffset) {
+    if (!buffer) return 0;
+    uint8_t *basePtr = buffer->GetPointer();
+    if (!basePtr) return 0;
+
+    size_t offset = accOffset + byteOffset;
+    if (buffer->EncodedRegion_Current != nullptr) {
+        const size_t begin = buffer->EncodedRegion_Current->Offset;
+        const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
+        if ((offset >= begin) && (offset < end))
+            return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+    }
+
+    return basePtr + offset;
+}
+
 //
 // struct Accessor
 //
 
+//wangyi 0506
+inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
+    if (bytes) {
+        data.assign(bytes, bytes + numBytes);
+    } else {
+        data.resize(numBytes, 0x00);
+    }
+}
+
+inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
+    uint8_t *pIndices = indices->GetPointer(indicesByteOffset);
+    const unsigned int indexSize = int(ComponentTypeSize(indicesType));
+    uint8_t *indicesEnd = pIndices + count * indexSize;
+
+    uint8_t *pValues = values->GetPointer(valuesByteOffset);
+    while (pIndices != indicesEnd) {
+        size_t offset;
+        switch (indicesType) {
+        case ComponentType_UNSIGNED_BYTE:
+            offset = *pIndices;
+            break;
+        case ComponentType_UNSIGNED_SHORT:
+            offset = *reinterpret_cast<uint16_t *>(pIndices);
+            break;
+        case ComponentType_UNSIGNED_INT:
+            offset = *reinterpret_cast<uint32_t *>(pIndices);
+            break;
+        default:
+            // have fun with float and negative values from signed types as indices.
+            throw DeadlyImportError("Unsupported component type in index.");
+        }
+
+        offset *= elementSize;
+        std::memcpy(data.data() + offset, pValues, elementSize);
+
+        pValues += elementSize;
+        pIndices += indexSize;
+    }
+}
+// wangyi 0506
 inline void Accessor::Read(Value &obj, Asset &r) {
 
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
@@ -566,6 +623,43 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+
+    //wangyi 0506
+    if (Value *sparseValue = FindObject(obj, "sparse")) {
+        sparse.reset(new Sparse);
+        // count
+        ReadMember(*sparseValue, "count", sparse->count);
+
+        // indices
+        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
+            //indices bufferView
+            Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
+            sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
+            //indices byteOffset
+            sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
+            //indices componentType
+            sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
+            //sparse->indices->Read(*indicesValue, r);
+        }
+
+        // value
+        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
+            //value bufferView
+            Value *valueViewID = FindUInt(*valuesValue, "bufferView");
+            sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
+            //value byteOffset
+            sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
+            //sparse->values->Read(*valuesValue, r);
+        }
+
+        // indicesType
+        sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
+
+        const unsigned int elementSize = GetElementSize();
+        const size_t dataSize = count * elementSize;
+        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : 0);
+        sparse->PatchData(elementSize);
+    }
 }
 
 inline unsigned int Accessor::GetNumComponents() {
@@ -580,7 +674,11 @@ inline unsigned int Accessor::GetElementSize() {
     return GetNumComponents() * GetBytesPerComponent();
 }
 
+// wangyi 0506
 inline uint8_t *Accessor::GetPointer() {
+    if (sparse)
+        return sparse->data.data();
+
     if (!bufferView || !bufferView->buffer) return 0;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
     if (!basePtr) return 0;
@@ -635,7 +733,8 @@ void Accessor::ExtractData(T *&outData)
     const size_t targetElemSize = sizeof(T);
     ai_assert(elemSize <= targetElemSize);
 
-    ai_assert(count * stride <= bufferView->byteLength);
+    //wangyi 0506
+    ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {
@@ -660,6 +759,35 @@ inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t sr
     CopyData(_count, src, src_stride, dst, dst_stride);
 }
 
+//wangyi 0506
+inline void Accessor::WriteSparseValues(size_t _count, const void *src_data, size_t src_dataStride) {
+    if (!sparse)
+        return;
+
+    // values
+    uint8_t *value_buffer_ptr = sparse->values->buffer->GetPointer();
+    size_t value_offset = sparse->valuesByteOffset + sparse->values->byteOffset;
+    size_t value_dst_stride = GetNumComponents() * GetBytesPerComponent();
+    const uint8_t *value_src = reinterpret_cast<const uint8_t *>(src_data);
+    uint8_t *value_dst = reinterpret_cast<uint8_t *>(value_buffer_ptr + value_offset);
+    ai_assert(value_dst + _count * value_dst_stride <= value_buffer_ptr + sparse->values->buffer->byteLength);
+    CopyData(_count, value_src, src_dataStride, value_dst, value_dst_stride);
+}
+
+//wangyi 0506
+inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, size_t src_idxStride) {
+    if (!sparse)
+        return;
+
+    // indices
+    uint8_t *indices_buffer_ptr = sparse->indices->buffer->GetPointer();
+    size_t indices_offset = sparse->indicesByteOffset + sparse->indices->byteOffset;
+    size_t indices_dst_stride = 1 * sizeof(unsigned short);
+    const uint8_t *indices_src = reinterpret_cast<const uint8_t *>(src_idx);
+    uint8_t *indices_dst = reinterpret_cast<uint8_t *>(indices_buffer_ptr + indices_offset);
+    ai_assert(indices_dst + _count * indices_dst_stride <= indices_buffer_ptr + sparse->indices->buffer->byteLength);
+    CopyData(_count, indices_src, src_idxStride, indices_dst, indices_dst_stride);
+}
 inline Accessor::Indexer::Indexer(Accessor &acc) :
         accessor(acc), data(acc.GetPointer()), elemSize(acc.GetElementSize()), stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
 }

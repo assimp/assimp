@@ -3315,6 +3315,7 @@ void FBXConverter::InterpolateKeys(aiQuatKey *valOut, const KeyTimeList &keys, c
         // http://www.3dkingdoms.com/weekly/weekly.php?a=36
         if (quat.x * lastq.x + quat.y * lastq.y + quat.z * lastq.z + quat.w * lastq.w < 0) {
             quat.Conjugate();
+            quat.w = -quat.w;
         }
         lastq = quat;
 

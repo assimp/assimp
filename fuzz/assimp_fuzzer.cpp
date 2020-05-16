@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,30 +38,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-#pragma once
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
+	aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
+	aiAttachLogStream(&stream);
 
-#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
+    Importer importer;
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
+        aiProcessPreset_TargetRealtime_Quality, nullptr );
 
-#include <assimp/BaseImporter.h>
-
-namespace Assimp {
-namespace StepFile {
-
-class StepFileImporter : public BaseImporter {
-public:
-    StepFileImporter();
-    ~StepFileImporter();
-    bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
-    const aiImporterDesc* GetInfo() const override;
-
-protected:
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler ) override;
-
-private:
-};
-
-} // Namespace StepFile
-} // Namespace Assimp
-
-#endif // ASSIMP_BUILD_NO_STEP_IMPORTER
+    aiDetachLogStream(&stream);
+    
+    return 0;
+}

@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #include <assimp/TinyFormatter.h>
 #include <assimp/Exceptional.h>
+#include <set>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;
@@ -172,7 +173,15 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         const aiBone* bone = pMesh->mBones[a];
         for( unsigned int b = 0; b < bone->mNumWeights; ++b)
         {
-            vertexBones[ bone->mWeights[b].mVertexId ].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
+          if (bone->mWeights[b].mWeight > 0.0f)
+          {
+            int vertexId = bone->mWeights[b].mVertexId;
+            vertexBones[vertexId].push_back( BoneWeight( a, bone->mWeights[b].mWeight));
+            if (vertexBones[vertexId].size() > mMaxBoneCount)
+            {
+              throw DeadlyImportError("SplitByBoneCountProcess: Single face requires more bones than specified max bone count!");
+            }
+          }
         }
     }
 
@@ -188,9 +197,6 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         subMeshFaces.reserve( pMesh->mNumFaces);
         // accumulated vertex count of all the faces in this submesh
         unsigned int numSubMeshVertices = 0;
-        // a small local array of new bones for the current face. State of all used bones for that face
-        // can only be updated AFTER the face is completely analysed. Thanks to imre for the fix.
-        std::vector<unsigned int> newBonesAtCurrentFace;
 
         // add faces to the new submesh as long as all bones affecting the faces' vertices fit in the limit
         for( unsigned int a = 0; a < pMesh->mNumFaces; ++a)
@@ -200,33 +206,25 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             {
                 continue;
             }
-
+            // a small local set of new bones for the current face. State of all used bones for that face
+            // can only be updated AFTER the face is completely analysed. Thanks to imre for the fix.
+            std::set<unsigned int> newBonesAtCurrentFace;
+          
             const aiFace& face = pMesh->mFaces[a];
             // check every vertex if its bones would still fit into the current submesh
             for( unsigned int b = 0; b < face.mNumIndices; ++b )
             {
-                const std::vector<BoneWeight>& vb = vertexBones[face.mIndices[b]];
-                for( unsigned int c = 0; c < vb.size(); ++c)
+              const std::vector<BoneWeight>& vb = vertexBones[face.mIndices[b]];
+              for( unsigned int c = 0; c < vb.size(); ++c)
+              {
+                unsigned int boneIndex = vb[c].first;
+                if( !isBoneUsed[boneIndex] )
                 {
-                    unsigned int boneIndex = vb[c].first;
-                    // if the bone is already used in this submesh, it's ok
-                    if( isBoneUsed[boneIndex] )
-                    {
-                        continue;
-                    }
-
-                    // if it's not used, yet, we would need to add it. Store its bone index
-                    if( std::find( newBonesAtCurrentFace.begin(), newBonesAtCurrentFace.end(), boneIndex) == newBonesAtCurrentFace.end() )
-                    {
-                        newBonesAtCurrentFace.push_back( boneIndex);
-                    }
-                }
+                  newBonesAtCurrentFace.insert(boneIndex);
+                }   
+              }
             }
 
-            if (newBonesAtCurrentFace.size() > mMaxBoneCount)
-            {
-                throw DeadlyImportError("SplitByBoneCountProcess: Single face requires more bones than specified max bone count!");
-            }
             // leave out the face if the new bones required for this face don't fit the bone count limit anymore
             if( numBones + newBonesAtCurrentFace.size() > mMaxBoneCount )
             {
@@ -234,17 +232,13 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             }
 
             // mark all new bones as necessary
-            while( !newBonesAtCurrentFace.empty() )
+            for (std::set<unsigned int>::iterator it = newBonesAtCurrentFace.begin(); it != newBonesAtCurrentFace.end(); ++it)
             {
-                unsigned int newIndex = newBonesAtCurrentFace.back();
-                newBonesAtCurrentFace.pop_back(); // this also avoids the deallocation which comes with a clear()
-                if( isBoneUsed[newIndex] )
-                {
-                    continue;
-                }
-
-                isBoneUsed[newIndex] = true;
+              if (!isBoneUsed[*it])
+              {
+                isBoneUsed[*it] = true;
                 numBones++;
+              }
             }
 
             // store the face index and the vertex count

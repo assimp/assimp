@@ -118,8 +118,9 @@ CBackgroundPainter CBackgroundPainter::s_cInstance;
 
 //-------------------------------------------------------------------------------
 void CBackgroundPainter::SetColor(D3DCOLOR p_clrNew) {
-    if (TEXTURE_CUBE == eMode)
+    if (TEXTURE_CUBE == eMode) {
         RemoveSBDeps();
+    }
 
     clrColor = p_clrNew;
     eMode = SIMPLE_COLOR;

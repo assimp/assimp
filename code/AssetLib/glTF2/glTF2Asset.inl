@@ -551,36 +551,10 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 //
-// struct Accessor
+// struct BufferViewClient
 //
 
-inline void Accessor::Read(Value &obj, Asset &r) {
-
-    if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
-        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
-    }
-
-    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
-    componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
-    count = MemberOrDefault(obj, "count", size_t(0));
-
-    const char *typestr;
-    type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
-}
-
-inline unsigned int Accessor::GetNumComponents() {
-    return AttribType::GetNumComponents(type);
-}
-
-inline unsigned int Accessor::GetBytesPerComponent() {
-    return int(ComponentTypeSize(componentType));
-}
-
-inline unsigned int Accessor::GetElementSize() {
-    return GetNumComponents() * GetBytesPerComponent();
-}
-
-inline uint8_t *Accessor::GetPointer() {
+inline uint8_t *BufferViewClient::GetPointer() {
     if (!bufferView || !bufferView->buffer) return 0;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
     if (!basePtr) return 0;
@@ -597,6 +571,76 @@ inline uint8_t *Accessor::GetPointer() {
     }
 
     return basePtr + offset;
+}
+
+inline void BufferViewClient::Read(Value &obj, Asset &r) {
+
+    if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
+        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+    }
+
+    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
+}
+
+//
+// struct ComponentTypedBufferViewClient
+//
+
+inline unsigned int ComponentTypedBufferViewClient::GetBytesPerComponent() {
+    return int(ComponentTypeSize(componentType));
+}
+
+inline void ComponentTypedBufferViewClient::Read(Value &obj, Asset &r) {
+
+    BufferViewClient::Read(obj, r);
+
+    componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
+}
+
+//
+// struct Accessor
+//
+
+inline uint8_t *Accessor::GetPointer() {
+    if (!sparse) return BufferViewClient::GetPointer();
+
+    return sparse->data.data();
+}
+
+inline void Accessor::Read(Value &obj, Asset &r) {
+
+    ComponentTypedBufferViewClient::Read(obj, r);
+
+    count = MemberOrDefault(obj, "count", size_t(0));
+
+    const char *typestr;
+    type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+
+    if (Value *sparseValue = FindObject(obj, "sparse")) {
+        sparse.reset(new Sparse);
+        ReadMember(*sparseValue, "count", sparse->count);
+
+        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
+            sparse->indices.Read(*indicesValue, r);
+        }
+
+        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
+            sparse->values.Read(*valuesValue, r);
+        }
+
+        const unsigned int elementSize = GetElementSize();
+        const size_t dataSize = count * elementSize;
+        sparse->PopulateData(dataSize, BufferViewClient::GetPointer());
+        sparse->PatchData(elementSize);
+    }
+}
+
+inline unsigned int Accessor::GetNumComponents() {
+    return AttribType::GetNumComponents(type);
+}
+
+inline unsigned int Accessor::GetElementSize() {
+    return GetNumComponents() * GetBytesPerComponent();
 }
 
 namespace {
@@ -635,7 +679,7 @@ void Accessor::ExtractData(T *&outData)
     const size_t targetElemSize = sizeof(T);
     ai_assert(elemSize <= targetElemSize);
 
-    ai_assert(count * stride <= bufferView->byteLength);
+    ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {
@@ -1002,7 +1046,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                         // Valid attribute semantics include POSITION, NORMAL, TANGENT
                         int undPos = 0;
                         Mesh::AccessorList *vec = 0;
-                        if (GetAttribTargetVector(prim, i, attr, vec, undPos)) {
+                        if (GetAttribTargetVector(prim, j, attr, vec, undPos)) {
                             size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                             if ((*vec).size() <= idx) {
                                 (*vec).resize(idx + 1);
@@ -1067,10 +1111,10 @@ inline void Camera::Read(Value &obj, Asset & /*r*/) {
         cameraProperties.perspective.zfar = MemberOrDefault(*it, "zfar", 100.f);
         cameraProperties.perspective.znear = MemberOrDefault(*it, "znear", 0.01f);
     } else {
-        cameraProperties.ortographic.xmag = MemberOrDefault(obj, "xmag", 1.f);
-        cameraProperties.ortographic.ymag = MemberOrDefault(obj, "ymag", 1.f);
-        cameraProperties.ortographic.zfar = MemberOrDefault(obj, "zfar", 100.f);
-        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag = MemberOrDefault(*it, "xmag", 1.f);
+        cameraProperties.ortographic.ymag = MemberOrDefault(*it, "ymag", 1.f);
+        cameraProperties.ortographic.zfar = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 

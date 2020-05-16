@@ -1,4 +1,3 @@
-/** Calculates a pose for a given time of an animation */
 /*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
@@ -39,48 +38,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-#ifndef AV_ANIMEVALUATOR_H_INCLUDED
-#define AV_ANIMEVALUATOR_H_INCLUDED
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
+	aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
+	aiAttachLogStream(&stream);
 
-#include <tuple>
-#include <vector>
+    Importer importer;
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
+        aiProcessPreset_TargetRealtime_Quality, nullptr );
 
-namespace AssimpView {
-
-/** 
- *  @brief  Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
- *          better use the AnimPlayer class.
- */
-class AnimEvaluator {
-public:
-    /// @brief  Constructor on a given animation. The animation is fixed throughout the lifetime of
-    /// the object.
-    /// @param pAnim    The animation to calculate poses for. Ownership of the animation object stays
-    ///                 at the caller, the evaluator just keeps a reference to it as long as it persists.
-    AnimEvaluator(const aiAnimation *pAnim);
-
-    /// @brief  The class destructor.
-    ~AnimEvaluator();
-
-    /** Evaluates the animation tracks for a given time stamp. The calculated pose can be retrieved as a
-     * array of transformation matrices afterwards by calling GetTransformations().
-     * @param pTime The time for which you want to evaluate the animation, in seconds. Will be mapped into the animation cycle, so
-     *   it can be an arbitrary value. Best use with ever-increasing time stamps.
-     */
-    void Evaluate(double pTime);
-
-    /** Returns the transform matrices calculated at the last Evaluate() call. The array matches the mChannels array of
-     * the aiAnimation. */
-    const std::vector<aiMatrix4x4> &GetTransformations() const { return mTransforms; }
-
-protected:
-    const aiAnimation *mAnim;
-    double mLastTime;
-    std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> mLastPositions;
-    std::vector<aiMatrix4x4> mTransforms;
-};
-
-} // end of namespace AssimpView
-
-#endif // AV_ANIMEVALUATOR_H_INCLUDED
+    aiDetachLogStream(&stream);
+    
+    return 0;
+}

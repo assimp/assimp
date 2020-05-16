@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -530,10 +529,6 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light){
     mOutput << startstr << "<quadratic_attenuation>"
                             << light->mAttenuationQuadratic
                         <<"</quadratic_attenuation>" << endstr;
-    /*
-    out->mAngleOuterCone = AI_DEG_TO_RAD (std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
-                            srcLight->mFalloffAngle);
-    */
 
     const ai_real fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
     mOutput << startstr <<"<falloff_angle sid=\"fall_off_angle\">"
@@ -608,8 +603,6 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
   }
 }
 
-// ------------------------------------------------------------------------------------------------
-// Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
 static bool isalnum_C(char c) {
   return ( nullptr != strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c) );
 }
@@ -1314,10 +1307,13 @@ void ColladaExporter::WriteSceneLibrary()
 // ------------------------------------------------------------------------------------------------
 void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 {
-	const aiAnimation * anim = mScene->mAnimations[pIndex];
+    static const float kSecondsFromMilliseconds = .001f;
+
+    const aiAnimation * anim = mScene->mAnimations[pIndex];
 	
-	if ( anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels ==0 )
-		return;
+    if ( anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels ==0 ) {
+        return;
+    }
 	
 	const std::string animation_name_escaped = XMLEscape( anim->mName.C_Str() );
 	std::string idstr = anim->mName.C_Str();
@@ -1351,7 +1347,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex)
 
 			std::vector<ai_real> frames;
 			for( size_t i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
-				frames.push_back(static_cast<ai_real>(nodeAnim->mPositionKeys[i].mTime));
+				frames.push_back(static_cast<ai_real>(nodeAnim->mPositionKeys[i].mTime) * kSecondsFromMilliseconds);
 			}
 			
 			WriteFloatArray(cur_node_idstr, FloatType_Time, (const ai_real *)frames.data(), frames.size());

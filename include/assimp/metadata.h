@@ -86,6 +86,14 @@ typedef enum aiMetadataType {
 struct aiMetadataEntry {
     aiMetadataType mType;
     void *mData;
+
+#ifdef __cplusplus
+    aiMetadataEntry() :
+            mType(AI_META_MAX),
+            mData( nullptr ) {
+        // empty
+    }
+#endif
 };
 
 #ifdef __cplusplus
@@ -313,14 +321,19 @@ struct aiMetadata {
 
         // Set metadata type
         mValues[index].mType = GetAiType(value);
+
         // Copy the given value to the dynamic storage
-        mValues[index].mData = new T(value);
+        if (nullptr != mValues[index].mData) {
+            ::memcpy(mValues[index].mData, &value, sizeof(T));
+        } else {
+            mValues[index].mData = new T(value);
+        }
 
         return true;
     }
 
     template <typename T>
-    inline bool Set( const std::string &key, const T &value ) {
+    inline bool Set(const std::string &key, const T &value) {
         if (key.empty()) {
             return false;
         }

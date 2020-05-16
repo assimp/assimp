@@ -65,8 +65,7 @@ void TriangulateProcessTest::SetUp() {
     pcMesh->mFaces = new aiFace[1000];
     pcMesh->mVertices = new aiVector3D[10000];
 
-    pcMesh->mPrimitiveTypes = aiPrimitiveType_POINT | aiPrimitiveType_LINE |
-                              aiPrimitiveType_LINE | aiPrimitiveType_POLYGON;
+    pcMesh->mPrimitiveTypes = aiPrimitiveType_POINT | aiPrimitiveType_LINE | aiPrimitiveType_POLYGON;
 
     for (unsigned int m = 0, t = 0, q = 4; m < 1000; ++m) {
         ++t;

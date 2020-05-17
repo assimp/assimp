@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ColladaHelper.h"
 
-#include <assimp/commonMetaData.h>
 #include <assimp/ParsingUtils.h>
+#include <assimp/commonMetaData.h>
 
 namespace Assimp {
 namespace Collada {
@@ -63,42 +63,35 @@ const MetaKeyPairVector &GetColladaAssimpMetaKeys() {
 
 const MetaKeyPairVector MakeColladaAssimpMetaKeysCamelCase() {
     MetaKeyPairVector result = MakeColladaAssimpMetaKeys();
-    for (auto &val : result)
-    {
+    for (auto &val : result) {
         ToCamelCase(val.first);
     }
     return result;
 };
 
-const MetaKeyPairVector &GetColladaAssimpMetaKeysCamelCase()
-{
+const MetaKeyPairVector &GetColladaAssimpMetaKeysCamelCase() {
     static const MetaKeyPairVector result = MakeColladaAssimpMetaKeysCamelCase();
     return result;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Convert underscore_separated to CamelCase: "authoring_tool" becomes "AuthoringTool"
-void ToCamelCase(std::string &text)
-{
+void ToCamelCase(std::string &text) {
     if (text.empty())
         return;
     // Capitalise first character
     auto it = text.begin();
     (*it) = ToUpper(*it);
     ++it;
-    for (/*started above*/ ; it != text.end(); /*iterated below*/)
-    {
-        if ((*it) == '_')
-        {
+    for (/*started above*/; it != text.end(); /*iterated below*/) {
+        if ((*it) == '_') {
             it = text.erase(it);
             if (it != text.end())
                 (*it) = ToUpper(*it);
-        }
-        else
-        {
+        } else {
             // Make lower case
             (*it) = ToLower(*it);
-            ++it;               
+            ++it;
         }
     }
 }

@@ -2479,7 +2479,7 @@ void ColladaParser::ReadSceneLibrary() {
 
                 // read name if given.
                 int indexName = TestAttribute("name");
-                const char *attrName = "unnamed";
+                const char *attrName = "Scene";
                 if (indexName > -1)
                     attrName = mReader->getAttributeValue(indexName);
 

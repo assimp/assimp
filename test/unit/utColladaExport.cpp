@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-class ColladaExportLight : public ::testing::Test {
+class utColladaExport : public ::testing::Test {
 public:
     void SetUp() override {
         ex = new Assimp::Exporter();
@@ -58,7 +58,9 @@ public:
 
     void TearDown() override {
         delete ex;
+        ex = nullptr;
         delete im;
+        im = nullptr;
     }
 
 protected:
@@ -66,8 +68,53 @@ protected:
     Assimp::Importer *im;
 };
 
+TEST_F(utColladaExport, testExportCamera) {
+    const char *file = "cameraExp.dae";
+
+    const aiScene *pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cameras.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, pTest);
+    ASSERT_TRUE(pTest->HasCameras());
+
+    EXPECT_EQ(AI_SUCCESS, ex->Export(pTest, "collada", file));
+    const unsigned int origNumCams(pTest->mNumCameras);
+    std::unique_ptr<float[]> origFOV(new float[origNumCams]);
+    std::unique_ptr<float[]> orifClipPlaneNear(new float[origNumCams]);
+    std::unique_ptr<float[]> orifClipPlaneFar(new float[origNumCams]);
+    std::unique_ptr<aiString[]> names(new aiString[origNumCams]);
+    std::unique_ptr<aiVector3D[]> pos(new aiVector3D[origNumCams]);
+    for (size_t i = 0; i < origNumCams; i++) {
+        const aiCamera *orig = pTest->mCameras[i];
+        ASSERT_NE(nullptr, orig);
+
+        origFOV[i] = orig->mHorizontalFOV;
+        orifClipPlaneNear[i] = orig->mClipPlaneNear;
+        orifClipPlaneFar[i] = orig->mClipPlaneFar;
+        names[i] = orig->mName;
+        pos[i] = orig->mPosition;
+    }
+    const aiScene *imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, imported);
+
+    EXPECT_TRUE(imported->HasCameras());
+    EXPECT_EQ(origNumCams, imported->mNumCameras);
+
+    for (size_t i = 0; i < imported->mNumCameras; i++) {
+        const aiCamera *read = imported->mCameras[i];
+
+        EXPECT_TRUE(names[i] == read->mName);
+        EXPECT_NEAR(origFOV[i], read->mHorizontalFOV, 0.0001f);
+        EXPECT_FLOAT_EQ(orifClipPlaneNear[i], read->mClipPlaneNear);
+        EXPECT_FLOAT_EQ(orifClipPlaneFar[i], read->mClipPlaneFar);
+
+        EXPECT_FLOAT_EQ(pos[i].x, read->mPosition.x);
+        EXPECT_FLOAT_EQ(pos[i].y, read->mPosition.y);
+        EXPECT_FLOAT_EQ(pos[i].z, read->mPosition.z);
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
-TEST_F(ColladaExportLight, testExportLight) {
+TEST_F(utColladaExport, testExportLight) {
     const char *file = "lightsExp.dae";
 
     const aiScene *pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae", aiProcess_ValidateDataStructure);

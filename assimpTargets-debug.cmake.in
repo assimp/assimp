@@ -73,6 +73,9 @@ else()
     else()
       set(sharedLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@.@ASSIMP_VERSION_MAJOR@")
     endif()
+
+    # Import target "assimp::assimp" for configuration "Debug"
+    set_property(TARGET assimp::assimp APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
     set_target_properties(assimp::assimp PROPERTIES
       IMPORTED_SONAME_DEBUG "${sharedLibraryName}"
       IMPORTED_LOCATION_DEBUG "@CMAKE_INSTALL_FULL_LIBDIR@/${sharedLibraryName}"
@@ -81,6 +84,9 @@ else()
     list(APPEND _IMPORT_CHECK_FILES_FOR_assimp::assimp "@CMAKE_INSTALL_FULL_LIBDIR@/${sharedLibraryName}" )
   else()
     set(staticLibraryName "libassimp${ASSIMP_LIBRARY_SUFFIX}@CMAKE_DEBUG_POSTFIX@@CMAKE_STATIC_LIBRARY_SUFFIX@")
+
+    # Import target "assimp::assimp" for configuration "Debug"
+    set_property(TARGET assimp::assimp APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
     set_target_properties(assimp::assimp PROPERTIES
       IMPORTED_LOCATION_DEBUG "@CMAKE_INSTALL_FULL_LIBDIR@/${staticLibraryName}"
     )

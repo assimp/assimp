@@ -566,7 +566,7 @@ inline uint8_t *BufferView::GetPointer(size_t accOffset) {
     return basePtr + offset;
 }
 //
-// struct Accessor
+// struct BufferViewClient
 //
 inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
     if (bytes) {
@@ -607,7 +607,26 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     }
 }
 
-inline void Accessor::Read(Value &obj, Asset &r) {
+inline uint8_t *BufferViewClient::GetPointer() {
+    if (!bufferView || !bufferView->buffer) return 0;
+    uint8_t *basePtr = bufferView->buffer->GetPointer();
+    if (!basePtr) return 0;
+
+    size_t offset = byteOffset + bufferView->byteOffset;
+
+    // Check if region is encoded.
+    if (bufferView->buffer->EncodedRegion_Current != nullptr) {
+        const size_t begin = bufferView->buffer->EncodedRegion_Current->Offset;
+        const size_t end = begin + bufferView->buffer->EncodedRegion_Current->DecodedData_Length;
+
+        if ((offset >= begin) && (offset < end))
+            return &bufferView->buffer->EncodedRegion_Current->DecodedData[offset - begin];
+    }
+
+    return basePtr + offset;
+}
+
+inline void BufferViewClient::Read(Value &obj, Asset &r) {
 
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
         bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
@@ -655,17 +674,24 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     }
 }
 
-inline unsigned int Accessor::GetNumComponents() {
-    return AttribType::GetNumComponents(type);
-}
+//
+// struct ComponentTypedBufferViewClient
+//
 
-inline unsigned int Accessor::GetBytesPerComponent() {
+inline unsigned int ComponentTypedBufferViewClient::GetBytesPerComponent() {
     return int(ComponentTypeSize(componentType));
 }
 
-inline unsigned int Accessor::GetElementSize() {
-    return GetNumComponents() * GetBytesPerComponent();
+inline void ComponentTypedBufferViewClient::Read(Value &obj, Asset &r) {
+
+    BufferViewClient::Read(obj, r);
+
+    componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
 }
+
+//
+// struct Accessor
+//
 
 inline uint8_t *Accessor::GetPointer() {
     if (sparse)
@@ -675,18 +701,43 @@ inline uint8_t *Accessor::GetPointer() {
     uint8_t *basePtr = bufferView->buffer->GetPointer();
     if (!basePtr) return 0;
 
-    size_t offset = byteOffset + bufferView->byteOffset;
+    return sparse->data.data();
+}
 
-    // Check if region is encoded.
-    if (bufferView->buffer->EncodedRegion_Current != nullptr) {
-        const size_t begin = bufferView->buffer->EncodedRegion_Current->Offset;
-        const size_t end = begin + bufferView->buffer->EncodedRegion_Current->DecodedData_Length;
+inline void Accessor::Read(Value &obj, Asset &r) {
 
-        if ((offset >= begin) && (offset < end))
-            return &bufferView->buffer->EncodedRegion_Current->DecodedData[offset - begin];
+    ComponentTypedBufferViewClient::Read(obj, r);
+
+    count = MemberOrDefault(obj, "count", size_t(0));
+
+    const char *typestr;
+    type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+
+    if (Value *sparseValue = FindObject(obj, "sparse")) {
+        sparse.reset(new Sparse);
+        ReadMember(*sparseValue, "count", sparse->count);
+
+        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
+            sparse->indices.Read(*indicesValue, r);
+        }
+
+        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
+            sparse->values.Read(*valuesValue, r);
+        }
+
+        const unsigned int elementSize = GetElementSize();
+        const size_t dataSize = count * elementSize;
+        sparse->PopulateData(dataSize, BufferViewClient::GetPointer());
+        sparse->PatchData(elementSize);
     }
+}
 
-    return basePtr + offset;
+inline unsigned int Accessor::GetNumComponents() {
+    return AttribType::GetNumComponents(type);
+}
+
+inline unsigned int Accessor::GetElementSize() {
+    return GetNumComponents() * GetBytesPerComponent();
 }
 
 namespace {
@@ -1156,10 +1207,10 @@ inline void Camera::Read(Value &obj, Asset & /*r*/) {
         cameraProperties.perspective.zfar = MemberOrDefault(*it, "zfar", 100.f);
         cameraProperties.perspective.znear = MemberOrDefault(*it, "znear", 0.01f);
     } else {
-        cameraProperties.ortographic.xmag = MemberOrDefault(obj, "xmag", 1.f);
-        cameraProperties.ortographic.ymag = MemberOrDefault(obj, "ymag", 1.f);
-        cameraProperties.ortographic.zfar = MemberOrDefault(obj, "zfar", 100.f);
-        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag = MemberOrDefault(*it, "xmag", 1.f);
+        cameraProperties.ortographic.ymag = MemberOrDefault(*it, "ymag", 1.f);
+        cameraProperties.ortographic.zfar = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 

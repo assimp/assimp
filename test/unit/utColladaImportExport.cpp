@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/ColladaMetaData.h>
+#include <assimp/SceneCombiner.h>
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -52,6 +53,20 @@ using namespace Assimp;
 
 class utColladaImportExport : public AbstractImportExportBase {
 public:
+    // Clones the scene in an exception-safe way
+    struct SceneCloner {
+        SceneCloner(const aiScene *scene) {
+            sceneCopy = nullptr;
+            SceneCombiner::CopyScene(&sceneCopy, scene);
+        }
+
+        ~SceneCloner() {
+            delete sceneCopy;
+            sceneCopy = nullptr;
+        }
+        aiScene *sceneCopy;
+    };
+
     virtual bool importerTest() final {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
@@ -209,6 +224,60 @@ public:
 
 TEST_F(utColladaImportExport, importDaeFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+unsigned int GetMeshUseCount(const aiNode *rootNode) {
+    unsigned int result = rootNode->mNumMeshes;
+    for (unsigned int i = 0; i < rootNode->mNumChildren; ++i) {
+        result += GetMeshUseCount(rootNode->mChildren[i]);
+    }
+    return result;
+}
+
+TEST_F(utColladaImportExport, exportRootNodeMeshTest) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const char *outFile = "exportRootNodeMeshTest_out.dae";
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck.dae", aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(scene != nullptr) << "Fatal: could not import duck.dae!";
+
+    ASSERT_EQ(0u, scene->mRootNode->mNumMeshes) << "Collada import should not give the root node a mesh";
+
+    {
+        SceneCloner clone(scene);
+        ASSERT_TRUE(clone.sceneCopy != nullptr) << "Fatal: could not copy scene!";
+        // Do this by moving the meshes from the first child that has some
+        aiNode *rootNode = clone.sceneCopy->mRootNode;
+        ASSERT_TRUE(rootNode->mNumChildren > 0) << "Fatal: root has no children";
+        aiNode *meshNode = rootNode->mChildren[0];
+        ASSERT_EQ(1u, meshNode->mNumMeshes) << "Fatal: First child node has no duck mesh";
+
+        // Move the meshes to the parent
+        rootNode->mNumMeshes = meshNode->mNumMeshes;
+        rootNode->mMeshes = new unsigned int[rootNode->mNumMeshes];
+        for (unsigned int i = 0; i < rootNode->mNumMeshes; ++i) {
+            rootNode->mMeshes[i] = meshNode->mMeshes[i];
+        }
+
+        // Remove the meshes from the original node
+        meshNode->mNumMeshes = 0;
+        delete[] meshNode->mMeshes;
+        meshNode->mMeshes = nullptr;
+
+        ASSERT_EQ(AI_SUCCESS, exporter.Export(clone.sceneCopy, "collada", outFile)) << "Fatal: Could not export file";
+    }
+
+    // Reimport and look for meshes
+    scene = importer.ReadFile(outFile, aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(scene != nullptr) << "Fatal: could not reimport!";
+
+    // A Collada root node is not allowed to have a mesh
+    ASSERT_EQ(0u, scene->mRootNode->mNumMeshes) << "Collada reimport should not give the root node a mesh";
+
+    // Walk nodes and counts used meshes
+    // Should be exactly one
+    EXPECT_EQ(1u, GetMeshUseCount(scene->mRootNode)) << "Nodes had unexpected number of meshes in use";
 }
 
 TEST_F(utColladaImportExport, exporterUniqueIdsTest) {

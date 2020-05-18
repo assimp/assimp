@@ -2719,7 +2719,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
             if (doc.Settings().optimizeEmptyAnimationCurves &&
                     IsRedundantAnimationData(target, comp, (chain[i]->second))) {
 
-                FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
+                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node " + target.Name());
                 continue;
             }
 

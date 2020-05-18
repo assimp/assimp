@@ -72,7 +72,7 @@ for(LineSplitter splitter(stream);splitter;++splitter) {
        if (strtol(splitter[2]) > 5) { .. }
     }
 
-    ASSIMP_LOG_DEBUG_F("Current line is: ", splitter.get_index());
+    ASSIMP_LOG_VERBOSE_DEBUG_F("Current line is: ", splitter.get_index());
 }
 @endcode
 */

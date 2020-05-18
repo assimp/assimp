@@ -1188,9 +1188,11 @@ inline void Node::Read(Value &obj, Asset &r) {
         }
     }
 
+    // Do not retrieve a skin here, just take a reference, to avoid infinite recursion
+    // Skins will be properly loaded later
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
-        this->skin = r.skins.Retrieve(curSkin->GetUint());
+        this->skin = r.skins.Get(curSkin->GetUint());
     }
 
     Value *curCamera = FindUInt(obj, "camera");
@@ -1481,7 +1483,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         }
     }
 
-    // Force reading of skins since they're not always directly referenced
+    // Read skins after nodes have been loaded to avoid infinite recursion
     if (Value *skinsArray = FindArray(doc, "skins")) {
         for (unsigned int i = 0; i < skinsArray->Size(); ++i) {
             skins.Retrieve(i);

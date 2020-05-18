@@ -1,22 +1,30 @@
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
+
 Copyright (c) 2006-2020, assimp team
+
+
 All rights reserved.
+
 Redistribution and use of this software in source and binary forms,
 with or without modification, are permitted provided that the
 following conditions are met:
+
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
 following disclaimer.
+
 * Redistributions in binary form must reproduce the above
 copyright notice, this list of conditions and the
 following disclaimer in the documentation and/or other
 materials provided with the distribution.
+
 * Neither the name of the assimp team, nor the names of its
 contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -28,6 +36,7 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 ----------------------------------------------------------------------
 */
 
@@ -547,6 +556,7 @@ inline void BufferView::Read(Value &obj, Asset &r) {
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
 }
 
+//wangyi 0506
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
     if (!buffer) return 0;
     uint8_t *basePtr = buffer->GetPointer();
@@ -566,7 +576,7 @@ inline uint8_t *BufferView::GetPointer(size_t accOffset) {
 //
 // struct Accessor
 //
-
+//wangyi 0506
 inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
     if (bytes) {
         data.assign(bytes, bytes + numBytes);
@@ -605,7 +615,22 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
         pIndices += indexSize;
     }
 }
+/* old
+inline void Accessor::Read(Value &obj, Asset &r) {
 
+    if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
+        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+    }
+
+    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
+    componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
+    count = MemberOrDefault(obj, "count", size_t(0));
+
+    const char *typestr;
+    type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+}*/
+
+// wangyi 0506
 inline void Accessor::Read(Value &obj, Asset &r) {
 
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
@@ -619,6 +644,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
 
+    //wangyi 0506
     if (Value *sparseValue = FindObject(obj, "sparse")) {
         sparse.reset(new Sparse);
         // count
@@ -668,6 +694,27 @@ inline unsigned int Accessor::GetElementSize() {
     return GetNumComponents() * GetBytesPerComponent();
 }
 
+/* 
+inline uint8_t *Accessor::GetPointer() {
+    if (!bufferView || !bufferView->buffer) return 0;
+    uint8_t *basePtr = bufferView->buffer->GetPointer();
+    if (!basePtr) return 0;
+
+    size_t offset = byteOffset + bufferView->byteOffset;
+
+    // Check if region is encoded.
+    if (bufferView->buffer->EncodedRegion_Current != nullptr) {
+        const size_t begin = bufferView->buffer->EncodedRegion_Current->Offset;
+        const size_t end = begin + bufferView->buffer->EncodedRegion_Current->DecodedData_Length;
+
+        if ((offset >= begin) && (offset < end))
+            return &bufferView->buffer->EncodedRegion_Current->DecodedData[offset - begin];
+    }
+
+    return basePtr + offset;
+}*/
+
+// wangyi 0506
 inline uint8_t *Accessor::GetPointer() {
     if (sparse)
         return sparse->data.data();
@@ -724,6 +771,8 @@ void Accessor::ExtractData(T *&outData) {
 
     const size_t targetElemSize = sizeof(T);
     ai_assert(elemSize <= targetElemSize);
+
+    //wangyi 0506
     ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
 
     outData = new T[count];
@@ -749,6 +798,7 @@ inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t sr
     CopyData(_count, src, src_stride, dst, dst_stride);
 }
 
+//wangyi 0506
 inline void Accessor::WriteSparseValues(size_t _count, const void *src_data, size_t src_dataStride) {
     if (!sparse)
         return;
@@ -763,6 +813,7 @@ inline void Accessor::WriteSparseValues(size_t _count, const void *src_data, siz
     CopyData(_count, value_src, src_dataStride, value_dst, value_dst_stride);
 }
 
+//wangyi 0506
 inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, size_t src_idxStride) {
     if (!sparse)
         return;

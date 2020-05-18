@@ -1169,10 +1169,10 @@ inline void Camera::Read(Value &obj, Asset & /*r*/) {
         cameraProperties.perspective.zfar = MemberOrDefault(*it, "zfar", 100.f);
         cameraProperties.perspective.znear = MemberOrDefault(*it, "znear", 0.01f);
     } else {
-        cameraProperties.ortographic.xmag = MemberOrDefault(obj, "xmag", 1.f);
-        cameraProperties.ortographic.ymag = MemberOrDefault(obj, "ymag", 1.f);
-        cameraProperties.ortographic.zfar = MemberOrDefault(obj, "zfar", 100.f);
-        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag = MemberOrDefault(*it, "xmag", 1.f);
+        cameraProperties.ortographic.ymag = MemberOrDefault(*it, "ymag", 1.f);
+        cameraProperties.ortographic.zfar = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 
@@ -1248,7 +1248,7 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
-        this->skin = r.skins.Retrieve(curSkin->GetUint());
+        this->skin = r.skins.Get(curSkin->GetUint());
     }
 
     Value *curCamera = FindUInt(obj, "camera");
@@ -1539,7 +1539,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         }
     }
 
-    // Force reading of skins since they're not always directly referenced
+    // Read skins after nodes have been loaded to avoid infinite recursion
     if (Value *skinsArray = FindArray(doc, "skins")) {
         for (unsigned int i = 0; i < skinsArray->Size(); ++i) {
             skins.Retrieve(i);

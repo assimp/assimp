@@ -180,7 +180,10 @@ inline Value *FindObject(Value &val, const char *id) {
 
 template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
-        mDictId(dictId), mExtId(extId), mDict(0), mAsset(asset) {
+        mDictId(dictId),
+        mExtId(extId),
+        mDict(0),
+        mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
 
@@ -342,7 +345,10 @@ Ref<T> LazyDict<T>::Create(const char *id) {
 //
 
 inline Buffer::Buffer() :
-        byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false) {}
+        byteLength(0),
+        type(Type_arraybuffer),
+        EncodedRegion_Current(nullptr),
+        mIsSpecial(false) {}
 
 inline Buffer::~Buffer() {
     for (SEncodedRegion *reg : EncodedRegion_List)
@@ -517,7 +523,7 @@ inline void Buffer::Grow(size_t amount) {
     if (amount <= 0) {
         return;
     }
-    
+
     // Capacity is big enough
     if (capacity >= byteLength + amount) {
         byteLength += amount;
@@ -569,7 +575,6 @@ inline uint8_t *BufferView::GetPointer(size_t accOffset) {
 //
 // struct Accessor
 //
-
 inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
     if (bytes) {
         data.assign(bytes, bytes + numBytes);
@@ -713,10 +718,9 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
-template<class T>
-void Accessor::ExtractData(T *&outData)
-{
-    uint8_t* data = GetPointer();
+template <class T>
+void Accessor::ExtractData(T *&outData) {
+    uint8_t *data = GetPointer();
     if (!data) {
         throw DeadlyImportError("GLTF: data is NULL");
     }
@@ -781,7 +785,10 @@ inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, siz
     CopyData(_count, indices_src, src_idxStride, indices_dst, indices_dst_stride);
 }
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc), data(acc.GetPointer()), elemSize(acc.GetElementSize()), stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
+        accessor(acc),
+        data(acc.GetPointer()),
+        elemSize(acc.GetElementSize()),
+        stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
 }
 
 //! Accesses the i-th value as defined by the accessor
@@ -796,7 +803,9 @@ T Accessor::Indexer::GetValue(int i) {
 }
 
 inline Image::Image() :
-        width(0), height(0), mDataLength(0) {
+        width(0),
+        height(0),
+        mDataLength(0) {
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
@@ -1034,8 +1043,8 @@ inline int Compare(const char *attr, const char (&str)[N]) {
 }
 
 #ifdef _WIN32
-#    pragma warning(push)
-#    pragma warning(disable : 4706)
+#pragma warning(push)
+#pragma warning(disable : 4706)
 #endif // _WIN32
 
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
@@ -1155,11 +1164,11 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     }
 
     Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras ) {
-        if (Value* curTargetNames = FindArray(*extras, "targetNames")) {
+    if (nullptr != extras) {
+        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
-                Value& targetNameValue = (*curTargetNames)[i];
+                Value &targetNameValue = (*curTargetNames)[i];
                 if (targetNameValue.IsString()) {
                     this->targetNames[i] = targetNameValue.GetString();
                 }
@@ -1187,10 +1196,10 @@ inline void Camera::Read(Value &obj, Asset & /*r*/) {
         cameraProperties.perspective.zfar = MemberOrDefault(*it, "zfar", 100.f);
         cameraProperties.perspective.znear = MemberOrDefault(*it, "znear", 0.01f);
     } else {
-        cameraProperties.ortographic.xmag = MemberOrDefault(obj, "xmag", 1.f);
-        cameraProperties.ortographic.ymag = MemberOrDefault(obj, "ymag", 1.f);
-        cameraProperties.ortographic.zfar = MemberOrDefault(obj, "zfar", 100.f);
-        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag = MemberOrDefault(*it, "xmag", 1.f);
+        cameraProperties.ortographic.ymag = MemberOrDefault(*it, "ymag", 1.f);
+        cameraProperties.ortographic.zfar = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 
@@ -1264,9 +1273,11 @@ inline void Node::Read(Value &obj, Asset &r) {
         }
     }
 
+	// Do not retrieve a skin here, just take a reference, to avoid infinite recursion
+    // Skins will be properly loaded later
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
-        this->skin = r.skins.Retrieve(curSkin->GetUint());
+        this->skin = r.skins.Get(curSkin->GetUint());
     }
 
     Value *curCamera = FindUInt(obj, "camera");
@@ -1557,7 +1568,6 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         }
     }
 
-    // Force reading of skins since they're not always directly referenced
     if (Value *skinsArray = FindArray(doc, "skins")) {
         for (unsigned int i = 0; i < skinsArray->Size(); ++i) {
             skins.Retrieve(i);
@@ -1669,7 +1679,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #ifdef _WIN32
-#    pragma warning(pop)
+#pragma warning(pop)
 #endif // _WIN32
 
 } // namespace glTF2

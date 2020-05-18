@@ -1030,10 +1030,10 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
 // ---------------------------------------------------------------------------
-/** @brief Specifies whether the Collada loader should use Collada names as node names.
+/** @brief Specifies whether the Collada loader should use Collada names.
  *
- * If this property is set to true, the Collada names will be used as the
- * node name. The default is to use the id tag (resp. sid tag, if no id tag is present)
+ * If this property is set to true, the Collada names will be used as the node and
+ * mesh names. The default is to use the id tag (resp. sid tag, if no id tag is present)
  * instead.
  * Property type: Bool. Default value: false.
  */

@@ -639,7 +639,9 @@ namespace glTF2 {
         StringBuffer docBuffer;
 
         PrettyWriter<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        if (!mDoc.Accept(writer)) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
 
         if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");
@@ -690,7 +692,9 @@ namespace glTF2 {
 
         StringBuffer docBuffer;
         Writer<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        if (!mDoc.Accept(writer)) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
 
         uint32_t jsonChunkLength = (docBuffer.GetSize() + 3) & ~3; // Round up to next multiple of 4
         auto paddingLength = jsonChunkLength - docBuffer.GetSize();
@@ -842,5 +846,3 @@ namespace glTF2 {
     }
 
 }
-
-

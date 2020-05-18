@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -171,6 +171,13 @@ void SetAccessorRange(Ref<Accessor> acc, void* data, size_t count,
 	for (; buffer_ptr < buffer_end ; buffer_ptr += numCompsIn) {
 		for (unsigned int j = 0 ; j < numCompsOut ; j++) {
 			double valueTmp = buffer_ptr[j];
+
+			// Gracefully tolerate rogue NaN's in buffer data
+			// Any NaNs/Infs introduced in accessor bounds will end up in
+			// document and prevent rapidjson from writing out valid JSON
+			if (!std::isfinite(valueTmp)) {
+				continue;
+			}
 
 			if (valueTmp < acc->min[j]) {
 				acc->min[j] = valueTmp;
@@ -493,7 +500,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
 
                     if (path[0] == '*') { // embedded
                         aiTexture* curTex = mScene->mTextures[atoi(&path[1])];
-						
+
                         texture->source->name = curTex->mFilename.C_Str();
 
                         // The asset has its own buffer, see Image::SetData
@@ -896,7 +903,7 @@ void glTF2Exporter::ExportMeshes()
         // Normalize all normals as the validator can emit a warning otherwise
         if ( nullptr != aim->mNormals) {
             for ( auto i = 0u; i < aim->mNumVertices; ++i ) {
-                aim->mNormals[ i ].Normalize();
+                aim->mNormals[ i ].NormalizeSafe();
             }
         }
 
@@ -907,7 +914,7 @@ void glTF2Exporter::ExportMeshes()
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
 			if (!aim->HasTextureCoords(i))
 				continue;
-			
+
             // Flip UV y coords
             if (aim -> mNumUVComponents[i] > 1) {
                 for (unsigned int j = 0; j < aim->mNumVertices; ++j) {

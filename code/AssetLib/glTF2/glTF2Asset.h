@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -175,19 +175,19 @@ enum ComponentType {
 
 inline unsigned int ComponentTypeSize(ComponentType t) {
     switch (t) {
-        case ComponentType_SHORT:
-        case ComponentType_UNSIGNED_SHORT:
-            return 2;
+    case ComponentType_SHORT:
+    case ComponentType_UNSIGNED_SHORT:
+        return 2;
 
-        case ComponentType_UNSIGNED_INT:
-        case ComponentType_FLOAT:
-            return 4;
+    case ComponentType_UNSIGNED_INT:
+    case ComponentType_FLOAT:
+        return 4;
 
-        case ComponentType_BYTE:
-        case ComponentType_UNSIGNED_BYTE:
-            return 1;
-        default:
-            throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
+    case ComponentType_BYTE:
+    case ComponentType_UNSIGNED_BYTE:
+        return 1;
+    default:
+        throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
     }
 }
 
@@ -318,9 +318,11 @@ class Ref {
 
 public:
     Ref() :
-            vector(0), index(0) {}
+            vector(0),
+            index(0) {}
     Ref(std::vector<T *> &vec, unsigned int idx) :
-            vector(&vec), index(idx) {}
+            vector(&vec),
+            index(idx) {}
 
     inline unsigned int GetIndex() const { return index; }
 
@@ -340,7 +342,8 @@ struct Nullable {
     Nullable() :
             isPresent(false) {}
     Nullable(T &val) :
-            value(val), isPresent(true) {}
+            value(val),
+            isPresent(true) {}
 };
 
 //! Base class for all glTF top-level objects
@@ -383,17 +386,19 @@ struct Accessor : public Object {
 
     inline uint8_t *GetPointer();
 
-    template<class T>
+    template <class T>
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
+    void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
+    void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
 
     //! Helper class to iterate the data
     class Indexer {
         friend struct Accessor;
 
-    // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
-    // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
+        // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
+        // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
     protected:
         Accessor &accessor;
 
@@ -402,8 +407,7 @@ struct Accessor : public Object {
         size_t elemSize, stride;
 
         Indexer(Accessor &acc);
-    
-        
+
     public:
         //! Accesses the i-th value as defined by the accessor
         template <class T>
@@ -468,7 +472,11 @@ public:
         /// \param [in] pDecodedData_Length - size of encoded region, in bytes.
         /// \param [in] pID - ID of the region.
         SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string pID) :
-                Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID) {}
+                Offset(pOffset),
+                EncodedData_Length(pEncodedData_Length),
+                DecodedData(pDecodedData),
+                DecodedData_Length(pDecodedData_Length),
+                ID(pID) {}
 
         /// \fn ~SEncodedRegion()
         /// Destructor.
@@ -600,7 +608,8 @@ struct Camera : public Object {
     } cameraProperties;
 
     Camera() :
-            type(Perspective), cameraProperties() {
+            type(Perspective),
+            cameraProperties() {
         // empty
     }
     void Read(Value &obj, Asset &r);
@@ -905,7 +914,7 @@ class LazyDict : public LazyDictBase {
     Value *mDict; //! JSON dictionary object
     Asset &mAsset; //! The asset instance
 
-    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck;  //! Used by Retrieve to prevent recursive lookups
+    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck; //! Used by Retrieve to prevent recursive lookups
 
     void AttachToDocument(Document &doc);
     void DetachFromDocument();
@@ -1019,7 +1028,22 @@ public:
 
 public:
     Asset(IOSystem *io = 0) :
-            mIOSystem(io), asset(), accessors(*this, "accessors"), animations(*this, "animations"), buffers(*this, "buffers"), bufferViews(*this, "bufferViews"), cameras(*this, "cameras"), lights(*this, "lights", "KHR_lights_punctual"), images(*this, "images"), materials(*this, "materials"), meshes(*this, "meshes"), nodes(*this, "nodes"), samplers(*this, "samplers"), scenes(*this, "scenes"), skins(*this, "skins"), textures(*this, "textures") {
+            mIOSystem(io),
+            asset(),
+            accessors(*this, "accessors"),
+            animations(*this, "animations"),
+            buffers(*this, "buffers"),
+            bufferViews(*this, "bufferViews"),
+            cameras(*this, "cameras"),
+            lights(*this, "lights", "KHR_lights_punctual"),
+            images(*this, "images"),
+            materials(*this, "materials"),
+            meshes(*this, "meshes"),
+            nodes(*this, "nodes"),
+            samplers(*this, "samplers"),
+            scenes(*this, "scenes"),
+            skins(*this, "skins"),
+            textures(*this, "textures") {
         memset(&extensionsUsed, 0, sizeof(extensionsUsed));
         memset(&extensionsRequired, 0, sizeof(extensionsRequired));
     }

@@ -59,7 +59,7 @@ namespace glTF {
     namespace {
 
         template<typename T, size_t N>
-        inline 
+        inline
         Value& MakeValue(Value& val, T(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
@@ -70,7 +70,7 @@ namespace glTF {
         }
 
         template<typename T>
-        inline 
+        inline
         Value& MakeValue(Value& val, const std::vector<T> & r, MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
@@ -530,7 +530,9 @@ namespace glTF {
         StringBuffer docBuffer;
 
         PrettyWriter<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        if (!mDoc.Accept(writer)) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
 
         if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");
@@ -569,7 +571,9 @@ namespace glTF {
 
         StringBuffer docBuffer;
         Writer<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        if (!mDoc.Accept(writer)) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
 
         if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");

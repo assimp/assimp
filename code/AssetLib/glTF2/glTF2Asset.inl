@@ -1,30 +1,22 @@
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
-
 Copyright (c) 2006-2020, assimp team
-
-
 All rights reserved.
-
 Redistribution and use of this software in source and binary forms,
 with or without modification, are permitted provided that the
 following conditions are met:
-
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
 following disclaimer.
-
 * Redistributions in binary form must reproduce the above
 copyright notice, this list of conditions and the
 following disclaimer in the documentation and/or other
 materials provided with the distribution.
-
 * Neither the name of the assimp team, nor the names of its
 contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -36,7 +28,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
@@ -180,7 +171,10 @@ inline Value *FindObject(Value &val, const char *id) {
 
 template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
-        mDictId(dictId), mExtId(extId), mDict(0), mAsset(asset) {
+        mDictId(dictId),
+        mExtId(extId),
+        mDict(0),
+        mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
 
@@ -342,7 +336,10 @@ Ref<T> LazyDict<T>::Create(const char *id) {
 //
 
 inline Buffer::Buffer() :
-        byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false) {}
+        byteLength(0),
+        type(Type_arraybuffer),
+        EncodedRegion_Current(nullptr),
+        mIsSpecial(false) {}
 
 inline Buffer::~Buffer() {
     for (SEncodedRegion *reg : EncodedRegion_List)
@@ -517,7 +514,7 @@ inline void Buffer::Grow(size_t amount) {
     if (amount <= 0) {
         return;
     }
-    
+
     // Capacity is big enough
     if (capacity >= byteLength + amount) {
         byteLength += amount;
@@ -565,9 +562,11 @@ inline uint8_t *BufferView::GetPointer(size_t accOffset) {
 
     return basePtr + offset;
 }
+
 //
 // struct Accessor
 //
+
 inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
     if (bytes) {
         data.assign(bytes, bytes + numBytes);
@@ -634,6 +633,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
             //indices componentType
             sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
+            //sparse->indices->Read(*indicesValue, r);
         }
 
         // value
@@ -643,6 +643,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
             //value byteOffset
             sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
+            //sparse->values->Read(*valuesValue, r);
         }
 
         // indicesType
@@ -709,10 +710,9 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
-template<class T>
-void Accessor::ExtractData(T *&outData)
-{
-    uint8_t* data = GetPointer();
+template <class T>
+void Accessor::ExtractData(T *&outData) {
+    uint8_t *data = GetPointer();
     if (!data) {
         throw DeadlyImportError("GLTF: data is NULL");
     }
@@ -749,8 +749,38 @@ inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t sr
     CopyData(_count, src, src_stride, dst, dst_stride);
 }
 
+inline void Accessor::WriteSparseValues(size_t _count, const void *src_data, size_t src_dataStride) {
+    if (!sparse)
+        return;
+
+    // values
+    uint8_t *value_buffer_ptr = sparse->values->buffer->GetPointer();
+    size_t value_offset = sparse->valuesByteOffset + sparse->values->byteOffset;
+    size_t value_dst_stride = GetNumComponents() * GetBytesPerComponent();
+    const uint8_t *value_src = reinterpret_cast<const uint8_t *>(src_data);
+    uint8_t *value_dst = reinterpret_cast<uint8_t *>(value_buffer_ptr + value_offset);
+    ai_assert(value_dst + _count * value_dst_stride <= value_buffer_ptr + sparse->values->buffer->byteLength);
+    CopyData(_count, value_src, src_dataStride, value_dst, value_dst_stride);
+}
+
+inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, size_t src_idxStride) {
+    if (!sparse)
+        return;
+
+    // indices
+    uint8_t *indices_buffer_ptr = sparse->indices->buffer->GetPointer();
+    size_t indices_offset = sparse->indicesByteOffset + sparse->indices->byteOffset;
+    size_t indices_dst_stride = 1 * sizeof(unsigned short);
+    const uint8_t *indices_src = reinterpret_cast<const uint8_t *>(src_idx);
+    uint8_t *indices_dst = reinterpret_cast<uint8_t *>(indices_buffer_ptr + indices_offset);
+    ai_assert(indices_dst + _count * indices_dst_stride <= indices_buffer_ptr + sparse->indices->buffer->byteLength);
+    CopyData(_count, indices_src, src_idxStride, indices_dst, indices_dst_stride);
+}
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc), data(acc.GetPointer()), elemSize(acc.GetElementSize()), stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
+        accessor(acc),
+        data(acc.GetPointer()),
+        elemSize(acc.GetElementSize()),
+        stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
 }
 
 //! Accesses the i-th value as defined by the accessor
@@ -765,7 +795,9 @@ T Accessor::Indexer::GetValue(int i) {
 }
 
 inline Image::Image() :
-        width(0), height(0), mDataLength(0) {
+        width(0),
+        height(0),
+        mDataLength(0) {
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
@@ -1003,8 +1035,8 @@ inline int Compare(const char *attr, const char (&str)[N]) {
 }
 
 #ifdef _WIN32
-#    pragma warning(push)
-#    pragma warning(disable : 4706)
+#pragma warning(push)
+#pragma warning(disable : 4706)
 #endif // _WIN32
 
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
@@ -1124,11 +1156,11 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     }
 
     Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras ) {
-        if (Value* curTargetNames = FindArray(*extras, "targetNames")) {
+    if (nullptr != extras) {
+        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
-                Value& targetNameValue = (*curTargetNames)[i];
+                Value &targetNameValue = (*curTargetNames)[i];
                 if (targetNameValue.IsString()) {
                     this->targetNames[i] = targetNameValue.GetString();
                 }
@@ -1638,7 +1670,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #ifdef _WIN32
-#    pragma warning(pop)
+#pragma warning(pop)
 #endif // _WIN32
 
 } // namespace glTF2

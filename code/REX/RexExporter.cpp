@@ -295,6 +295,7 @@ void RexExporter::WriteObjects(rex_header *header, uint64_t startId, uint64_t st
 // ------------------------------------------------------------------------------------------------
 void RexExporter::WriteMeshes(rex_header *header, uint64_t startId, uint64_t startMaterials, std::vector<DataPtr> &meshPtrs)
 {
+    size_t newSize = m_Meshes.size();
     meshPtrs.resize(m_Meshes.size());
 
     // now write all mesh instances
@@ -309,9 +310,11 @@ void RexExporter::WriteMeshes(rex_header *header, uint64_t startId, uint64_t sta
         rexMesh.nr_triangles = uint32_t(m.triangles.size());
         if (rexMesh.nr_triangles == 0) {
             // no real mesh
-            printf("No meshes found.\n");
-            meshPtrs.resize(0);
-            return;
+            newSize--;
+            if (newSize >= 0) {
+                meshPtrs.resize(newSize);
+            }
+            continue;
         }
 
         rexMesh.nr_vertices = uint32_t(m.verticesWithColorsAndTextureCoords.size());
@@ -351,7 +354,7 @@ void RexExporter::WriteMeshes(rex_header *header, uint64_t startId, uint64_t sta
 
         i++;
     }
-    // printf("Found %d meshes\n", (int)m_Meshes.size());
+     printf("Found %d meshes\n", (int)newSize);
 }
 
 // ------------------------------------------------------------------------------------------------

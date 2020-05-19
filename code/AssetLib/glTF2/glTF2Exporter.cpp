@@ -969,10 +969,15 @@ void glTF2Exporter::ExportMeshes()
 
         /*************** Targets for blendshapes ****************/
         if (aim->mNumAnimMeshes > 0) {
+            //wangyi 0506
+            bool bUseSparse = this->mProperties->HasPropertyBool("GLTF2_SPARSE_ACCESSOR_EXP") &&
+                              this->mProperties->GetPropertyBool("GLTF2_SPARSE_ACCESSOR_EXP");
+            bool bIncludeNormal = this->mProperties->HasPropertyBool("GLTF2_TARGET_NORMAL_EXP") &&
+                                  this->mProperties->GetPropertyBool("GLTF2_TARGET_NORMAL_EXP");
+
             p.targets.resize(aim->mNumAnimMeshes);
             for (unsigned int am = 0; am < aim->mNumAnimMeshes; ++am) {
                 aiAnimMesh *pAnimMesh = aim->mAnimMeshes[am];
-
                 // position
                 if (pAnimMesh->HasPositions()) {
                     // NOTE: in gltf it is the diff stored
@@ -980,13 +985,17 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
                     }
-                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
-                            pAnimMesh->mNumVertices, pPositionDiff,
-                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-                    /* sparse
-                    Ref<Accessor> vec = ExportDataSparse(*mAsset, meshId, b,
-                            pAnimMesh->mNumVertices, pPositionDiff,
-                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
+                    //wangyi 0506
+                    Ref<Accessor> vec;
+                    if (bUseSparse) {
+                        vec = ExportDataSparse(*mAsset, meshId, b,
+                                pAnimMesh->mNumVertices, pPositionDiff,
+                                AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    } else {
+                        vec = ExportData(*mAsset, meshId, b,
+                                pAnimMesh->mNumVertices, pPositionDiff,
+                                AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    }
                     if (vec) {
                         p.targets[am].position.push_back(vec);
                     }
@@ -994,18 +1003,22 @@ void glTF2Exporter::ExportMeshes()
                 }
 
                 // normal
-                if (pAnimMesh->HasNormals()) {
+                if (pAnimMesh->HasNormals() && bIncludeNormal) {
                     aiVector3D *pNormalDiff = new aiVector3D[pAnimMesh->mNumVertices];
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
                     }
-                    Ref<Accessor> vec = ExportData(*mAsset, meshId, b,
-                            pAnimMesh->mNumVertices, pNormalDiff,
-                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-                    /* sparse
-                    Ref<Accessor> vec = ExportDataSparse(*mAsset, meshId, b,
-                            pAnimMesh->mNumVertices, pNormalDiff,
-                            AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);*/
+                    //wangyi 0506
+                    Ref<Accessor> vec;
+                    if (bUseSparse) {
+                        vec = ExportDataSparse(*mAsset, meshId, b,
+                                pAnimMesh->mNumVertices, pNormalDiff,
+                                AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    } else {
+                        vec = ExportData(*mAsset, meshId, b,
+                                pAnimMesh->mNumVertices, pNormalDiff,
+                                AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+                    }
                     if (vec) {
                         p.targets[am].normal.push_back(vec);
                     }

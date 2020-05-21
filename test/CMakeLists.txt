@@ -124,8 +124,7 @@ SET( IMPORTERS
   unit/utBlendImportMaterials.cpp
   unit/utBlenderWork.cpp
   unit/utBVHImportExport.cpp
-  unit/utColladaExportCamera.cpp
-  unit/utColladaExportLight.cpp
+  unit/utColladaExport.cpp
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp

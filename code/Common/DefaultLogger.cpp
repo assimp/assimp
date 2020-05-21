@@ -178,6 +178,18 @@ void Logger::debug(const char* message) {
 }
 
 // ----------------------------------------------------------------------------------
+void Logger::verboseDebug(const char *message) {
+
+	// SECURITY FIX: otherwise it's easy to produce overruns since
+	// sometimes importers will include data from the input file
+	// (i.e. node names) in their messages.
+	if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
+		return;
+	}
+	return OnVerboseDebug(message);
+}
+
+// ----------------------------------------------------------------------------------
 void Logger::info(const char* message)  {
 
     // SECURITY FIX: see above
@@ -251,7 +263,7 @@ void DefaultLogger::kill() {
 // ----------------------------------------------------------------------------------
 //  Debug message
 void DefaultLogger::OnDebug( const char* message ) {
-    if ( m_Severity == Logger::NORMAL ) {
+    if ( m_Severity < Logger::DEBUG ) {
         return;
     }
 
@@ -260,6 +272,19 @@ void DefaultLogger::OnDebug( const char* message ) {
 	ai_snprintf(msg, Size, "Debug, T%u: %s", GetThreadID(), message);
 
     WriteToStreams( msg, Logger::Debugging );
+}
+
+//  Verbose debug message
+void DefaultLogger::OnVerboseDebug(const char *message) {
+	if (m_Severity < Logger::VERBOSE) {
+		return;
+	}
+
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+	ai_snprintf(msg, Size, "Debug, T%u: %s", GetThreadID(), message);
+
+	WriteToStreams(msg, Logger::Debugging);
 }
 
 // ----------------------------------------------------------------------------------
@@ -320,7 +345,7 @@ bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity ) {
 
 // ----------------------------------------------------------------------------------
 //  Detach a stream
-bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity ) {
+bool DefaultLogger::detachStream( LogStream *pStream, unsigned int severity ) {
     if ( nullptr == pStream ) {
         return false;
     }

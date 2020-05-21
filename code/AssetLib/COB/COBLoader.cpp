@@ -290,7 +290,7 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
                     }
                     std::unique_ptr<const Material> defmat;
                     if (!min) {
-                        ASSIMP_LOG_DEBUG(format() << "Could not resolve material index "
+                        ASSIMP_LOG_VERBOSE_DEBUG(format() << "Could not resolve material index "
                                                   << reflist.first << " - creating default material for this slot");
 
                         defmat.reset(min = new Material());

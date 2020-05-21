@@ -286,6 +286,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
 void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
 	const unsigned int numImportedMaterials = unsigned(r.materials.Size());
+	ASSIMP_LOG_DEBUG_F("Importing ", numImportedMaterials, " materials");
 	Material defaultMaterial;
 
 	mScene->mNumMaterials = numImportedMaterials + 1;
@@ -333,6 +334,7 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 #endif // ASSIMP_BUILD_DEBUG
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
+	ASSIMP_LOG_DEBUG_F("Importing ", r.meshes.Size(), " meshes");
 	std::vector<aiMesh *> meshes;
 
 	unsigned int k = 0;
@@ -662,10 +664,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 void glTF2Importer::ImportCameras(glTF2::Asset &r) {
 	if (!r.cameras.Size()) return;
 
-	mScene->mNumCameras = r.cameras.Size();
-	mScene->mCameras = new aiCamera *[r.cameras.Size()];
+    const unsigned int numCameras = r.cameras.Size();
+	ASSIMP_LOG_DEBUG_F("Importing ", numCameras, " cameras");
+	mScene->mNumCameras = numCameras;
+	mScene->mCameras = new aiCamera *[numCameras];
 
-	for (size_t i = 0; i < r.cameras.Size(); ++i) {
+	for (size_t i = 0; i < numCameras; ++i) {
 		Camera &cam = r.cameras[i];
 
 		aiCamera *aicam = mScene->mCameras[i] = new aiCamera();
@@ -696,10 +700,12 @@ void glTF2Importer::ImportLights(glTF2::Asset &r) {
 	if (!r.lights.Size())
 		return;
 
-	mScene->mNumLights = r.lights.Size();
-	mScene->mLights = new aiLight *[r.lights.Size()];
+    const unsigned int numLights = r.lights.Size();
+	ASSIMP_LOG_DEBUG_F("Importing ", numLights, " lights");
+	mScene->mNumLights = numLights;
+	mScene->mLights = new aiLight *[numLights];
 
-	for (size_t i = 0; i < r.lights.Size(); ++i) {
+	for (size_t i = 0; i < numLights; ++i) {
 		Light &light = r.lights[i];
 
 		aiLight *ail = mScene->mLights[i] = new aiLight();
@@ -958,6 +964,7 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 	if (!r.scene) {
 		throw DeadlyImportError("GLTF: No scene");
 	}
+	ASSIMP_LOG_DEBUG("Importing nodes");
 
 	std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
@@ -1137,13 +1144,15 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
 void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
 	if (!r.scene) return;
 
-	mScene->mNumAnimations = r.animations.Size();
+    const unsigned numAnimations = r.animations.Size();
+	ASSIMP_LOG_DEBUG_F("Importing ", numAnimations, " animations");
+	mScene->mNumAnimations = numAnimations;
 	if (mScene->mNumAnimations == 0) {
 		return;
 	}
 
-	mScene->mAnimations = new aiAnimation *[mScene->mNumAnimations];
-	for (unsigned int i = 0; i < r.animations.Size(); ++i) {
+    mScene->mAnimations = new aiAnimation *[numAnimations];
+	for (unsigned int i = 0; i < numAnimations; ++i) {
 		Animation &anim = r.animations[i];
 
 		aiAnimation *ai_anim = new aiAnimation();
@@ -1249,6 +1258,8 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 	if (numEmbeddedTexs == 0)
 		return;
 
+  	ASSIMP_LOG_DEBUG_F("Importing ", numEmbeddedTexs, " embedded textures");
+
 	mScene->mTextures = new aiTexture *[numEmbeddedTexs];
 
 	// Add the embedded textures
@@ -1288,6 +1299,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 }
 
 void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
+	ASSIMP_LOG_DEBUG("Importing metadata");
     ai_assert(mScene->mMetaData == nullptr);
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
@@ -1307,6 +1319,9 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
 }
 
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+
+    ASSIMP_LOG_DEBUG("Reading GLTF2 file");
+
 	// clean all member arrays
 	meshOffsets.clear();
 	embeddedTexIdxs.clear();

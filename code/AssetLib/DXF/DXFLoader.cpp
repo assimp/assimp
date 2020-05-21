@@ -241,7 +241,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output) {
             }
         }
 
-        ASSIMP_LOG_DEBUG_F("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
     }
 
     if (! output.blocks.size()  ) {
@@ -473,7 +473,7 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output) {
         ++reader;
     }
 
-    ASSIMP_LOG_DEBUG_F("DXF: got ", output.blocks.size()," entries in BLOCKS" );
+    ASSIMP_LOG_VERBOSE_DEBUG_F("DXF: got ", output.blocks.size()," entries in BLOCKS" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -549,7 +549,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) 
         ++reader;
     }
 
-    ASSIMP_LOG_DEBUG_F( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(), 
+    ASSIMP_LOG_VERBOSE_DEBUG_F( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(), 
         " inserted blocks in ENTITIES" );
 }
 

@@ -147,7 +147,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
                 }
             }
 
-            ASSIMP_LOG_DEBUG(rootFile);
+            ASSIMP_LOG_VERBOSE_DEBUG(rootFile);
 
             mZipArchive->Close(fileStream);
 

@@ -888,7 +888,7 @@ void MD3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
         if (it != skins.textures.end()) {
             texture_name = &*( _texture_name = (*it).second).begin();
-            ASSIMP_LOG_DEBUG_F("MD3: Assigning skin texture ", (*it).second, " to surface ", pcSurfaces->NAME);
+            ASSIMP_LOG_VERBOSE_DEBUG_F("MD3: Assigning skin texture ", (*it).second, " to surface ", pcSurfaces->NAME);
             (*it).resolved = true; // mark entry as resolved
         }
 

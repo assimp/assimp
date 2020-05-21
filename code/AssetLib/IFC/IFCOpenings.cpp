@@ -1359,7 +1359,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
                     break;
                 }
                 else {
-                    IFCImporter::LogDebug("merging overlapping openings");
+                    IFCImporter::LogVerboseDebug("merging overlapping openings");
                     ExtractVerticesFromClipper(poly[0].outer, temp_contour, false);
 
                     // Generate the union of the bounding boxes

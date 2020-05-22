@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,10 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-
 using namespace Assimp;
-
-
 
 TEST(utMD2Importer, importFaerie) {
     Assimp::Importer importer;
@@ -58,13 +53,11 @@ TEST(utMD2Importer, importFaerie) {
     ASSERT_NE(nullptr, scene);
 }
 
-
 TEST(utMD2Importer, importSydney) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/sydney.md2", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utMD2Importer, importDolphin) {
     Assimp::Importer importer;
@@ -72,13 +65,11 @@ TEST(utMD2Importer, importDolphin) {
     ASSERT_NE(nullptr, scene);
 }
 
-
 TEST(utMD2Importer, importFlag) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD2/flag.md2", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utMD2Importer, importHorse) {
     Assimp::Importer importer;

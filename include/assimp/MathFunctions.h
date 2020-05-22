@@ -55,36 +55,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Math {
 
-// TODO: use binary GCD for unsigned integers ....
-template < typename IntegerType >
-inline
-IntegerType gcd( IntegerType a, IntegerType b ) {
+/// @brief  Will return the greatest common divisor.
+/// @param  a   [in] Value a.
+/// @param  b   [in] Value b.
+/// @return The greatest common divisor.
+template <typename IntegerType>
+inline IntegerType gcd( IntegerType a, IntegerType b ) {
 	const IntegerType zero = (IntegerType)0;
 	while ( true ) {
-		if ( a == zero )
+		if ( a == zero ) {
 			return b;
+        }
 		b %= a;
 
-		if ( b == zero )
+		if ( b == zero ) {
 			return a;
+        }
 		a %= b;
 	}
 }
 
+/// @brief  Will return the greatest common divisor.
+/// @param  a   [in] Value a.
+/// @param  b   [in] Value b.
+/// @return The greatest common divisor.
 template < typename IntegerType >
-inline
-IntegerType lcm( IntegerType a, IntegerType b ) {
+inline IntegerType lcm( IntegerType a, IntegerType b ) {
 	const IntegerType t = gcd (a,b);
-	if (!t)
+	if (!t) {
         return t;
+    }
 	return a / t * b;
 }
-
+/// @brief  Will return the smallest epsilon-value for the requested type. 
+/// @return The numercical limit epsilon depending on its type.
 template<class T>
-inline
-T getEpsilon() {
+inline T getEpsilon() {
     return std::numeric_limits<T>::epsilon();
 }
 
+/// @brief  Will return the constant PI for the requested type.
+/// @return Pi
+template<class T>
+inline T PI() {
+    return static_cast<T>(3.14159265358979323846);
 }
-}
+
+} // namespace Math
+} // namespace Assimp

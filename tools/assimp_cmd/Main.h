@@ -126,6 +126,7 @@ enum AssimpCmdError {
 	UnknownFileFormat,
 	NoFileExtensionSpecified,
 	UnknownFileExtension,
+	ExceptionWasRaised,
 
 	// Add new error codes here...
 
@@ -167,7 +168,7 @@ bool ExportModel(const aiScene* pOut,
 
 // ------------------------------------------------------------------------------
 /** assimp_dump utility
- *  @param params Command line parameters to 'assimp dumb'
+ *  @param params Command line parameters to 'assimp dump'
  *  @param Number of params
  *  @return An #AssimpCmdError value.*/
 int Assimp_Dump (

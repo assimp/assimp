@@ -179,7 +179,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode *nd, std::list<aiNode *> &n
 
 			// copy all mesh references in one array
 			if (out_meshes) {
-				unsigned int *meshes = new unsigned int[out_meshes + join_master->mNumMeshes], *tmp = meshes;
+				unsigned int *meshIdxs = new unsigned int[out_meshes + join_master->mNumMeshes], *tmp = meshIdxs;
 				for (unsigned int n = 0; n < join_master->mNumMeshes; ++n) {
 					*tmp++ = join_master->mMeshes[n];
 				}
@@ -217,7 +217,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode *nd, std::list<aiNode *> &n
 					delete join_node; // bye, node
 				}
 				delete[] join_master->mMeshes;
-				join_master->mMeshes = meshes;
+				join_master->mMeshes = meshIdxs;
 				join_master->mNumMeshes += out_meshes;
 			}
 		}

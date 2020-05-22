@@ -72,6 +72,7 @@ endif()
 check_include_file(unistd.h Z_HAVE_UNISTD_H)
 
 if(MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4131 /wd4127 /wd4244")
     set(CMAKE_DEBUG_POSTFIX "d")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
@@ -195,10 +196,7 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
-set_target_properties(zlib PROPERTIES SOVERSION 1)
 
 INSTALL( TARGETS zlibstatic
          LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}

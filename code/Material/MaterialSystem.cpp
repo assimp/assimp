@@ -332,8 +332,7 @@ unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
         aiMaterialProperty* prop = pMat->mProperties[i];
 
         if ( prop /* just a sanity check ... */
-            && 0 == strcmp( prop->mKey.data, _AI_MATKEY_TEXTURE_BASE )
-            && prop->mSemantic == type) {
+				&& 0 == strcmp(prop->mKey.data, _AI_MATKEY_TEXTURE_BASE) && static_cast < aiTextureType>(prop->mSemantic) == type) {
 
             max = std::max(max,prop->mIndex+1);
         }
@@ -504,7 +503,7 @@ aiReturn aiMaterial::AddBinaryProperty (const void* pInput,
     pcNew->mData = new char[pSizeInBytes];
     memcpy (pcNew->mData,pInput,pSizeInBytes);
 
-    pcNew->mKey.length = (ai_uint32)::strlen(pKey);
+    pcNew->mKey.length = static_cast<ai_uint32>( ::strlen(pKey) );
     ai_assert ( MAXLEN > pcNew->mKey.length);
     strcpy( pcNew->mKey.data, pKey );
 
@@ -562,7 +561,8 @@ uint32_t Assimp::ComputeMaterialHash(const aiMaterial* mat, bool includeMatName 
 
         // Exclude all properties whose first character is '?' from the hash
         // See doc for aiMaterialProperty.
-        if ((prop = mat->mProperties[i]) && (includeMatName || prop->mKey.data[0] != '?'))  {
+        prop = mat->mProperties[ i ];
+        if ( nullptr != prop && (includeMatName || prop->mKey.data[0] != '?'))  {
 
             hash = SuperFastHash(prop->mKey.data,(unsigned int)prop->mKey.length,hash);
             hash = SuperFastHash(prop->mData,prop->mDataLength,hash);

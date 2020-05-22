@@ -419,7 +419,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                     num = 0;
                     break;
 
-                    curOut -= (max-num); /* undo all previous work */
+                    /*curOut -= (max-num); // undo all previous work 
                     for (tmp = 0; tmp < max-2; ++tmp) {
                         aiFace& nface = *curOut++;
 
@@ -433,7 +433,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
                     }
                     num = 0;
-                    break;
+                    break;*/
                 }
 
                 aiFace& nface = *curOut++;
@@ -490,7 +490,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             //  drop dumb 0-area triangles - deactivated for now:
             //FindDegenerates post processing step can do the same thing
             //if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
-            //    ASSIMP_LOG_DEBUG("Dropping triangle with area 0");
+            //    ASSIMP_LOG_VERBOSE_DEBUG("Dropping triangle with area 0");
             //    --curOut;
 
             //    delete[] f->mIndices;

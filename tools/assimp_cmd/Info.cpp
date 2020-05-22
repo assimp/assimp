@@ -444,6 +444,12 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 			aiTextureType_DISPLACEMENT,
 			aiTextureType_LIGHTMAP,
 			aiTextureType_REFLECTION,
+			aiTextureType_BASE_COLOR,
+			aiTextureType_NORMAL_CAMERA,
+			aiTextureType_EMISSION_COLOR,
+			aiTextureType_METALNESS,
+			aiTextureType_DIFFUSE_ROUGHNESS,
+			aiTextureType_AMBIENT_OCCLUSION,
 			aiTextureType_UNKNOWN
 		};
 		for(unsigned int type = 0; type < sizeof(types)/sizeof(types[0]); ++type) {

@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -612,7 +612,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
     bool bNoSpecified = true;
     for (unsigned int i = 0; i < pMaterial->mNumProperties;++i) {
         aiMaterialProperty* prop = pMaterial->mProperties[i];
-		if (prop->mSemantic != type) {
+		if (static_cast<aiTextureType>(prop->mSemantic) != type) {
 			continue;
 		}
 
@@ -777,6 +777,12 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
     SearchForInvalidTextures(pMaterial,aiTextureType_DISPLACEMENT);
     SearchForInvalidTextures(pMaterial,aiTextureType_LIGHTMAP);
     SearchForInvalidTextures(pMaterial,aiTextureType_REFLECTION);
+    SearchForInvalidTextures(pMaterial,aiTextureType_BASE_COLOR);
+    SearchForInvalidTextures(pMaterial,aiTextureType_NORMAL_CAMERA);
+    SearchForInvalidTextures(pMaterial,aiTextureType_EMISSION_COLOR);
+    SearchForInvalidTextures(pMaterial,aiTextureType_METALNESS);
+    SearchForInvalidTextures(pMaterial,aiTextureType_DIFFUSE_ROUGHNESS);
+    SearchForInvalidTextures(pMaterial,aiTextureType_AMBIENT_OCCLUSION);
 }
 
 // ------------------------------------------------------------------------------------------------

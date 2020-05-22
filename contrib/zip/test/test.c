@@ -47,7 +47,7 @@ static void test_write(void) {
   assert(CRC32DATA1 == zip_entry_crc32(zip));
   ++total_entries;
   assert(0 == zip_entry_close(zip));
-
+  assert(0 == zip_is64(zip));
   zip_close(zip);
 }
 
@@ -92,6 +92,7 @@ static void test_read(void) {
   size_t buftmp;
   struct zip_t *zip = zip_open(ZIPNAME, 0, 'r');
   assert(zip != NULL);
+  assert(0 == zip_is64(zip));
 
   assert(0 == zip_entry_open(zip, "test\\test-1.txt"));
   assert(strlen(TESTDATA1) == zip_entry_size(zip));
@@ -310,6 +311,7 @@ static void test_fwrite(void) {
   assert(0 == zip_entry_open(zip, WFILE));
   assert(0 == zip_entry_fwrite(zip, WFILE));
   assert(0 == zip_entry_close(zip));
+  assert(0 == zip_is64(zip));
 
   zip_close(zip);
   remove(WFILE);

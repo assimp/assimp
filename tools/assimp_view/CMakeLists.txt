@@ -37,7 +37,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #----------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 3.0 )
 
 FIND_PACKAGE(DirectX REQUIRED)
 
@@ -65,6 +65,10 @@ ADD_EXECUTABLE(  assimp_viewer WIN32
   SceneAnimator.cpp
   Shaders.cpp
   assimp_view.h
+  AnimEvaluator.h
+  SceneAnimator.h
+  MaterialManager.h
+  AssetHelper.h
   assimp_view.cpp
   stdafx.cpp
   assimp_view.rc
@@ -84,20 +88,12 @@ ADD_EXECUTABLE(  assimp_viewer WIN32
 
 SET_PROPERTY(TARGET assimp_viewer PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-
 IF ( MSVC )
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
   # assimp_viewer is ANSI (MBCS) throughout
   REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
-ENDIF ( MSVC )
-
-
-#
-ADD_CUSTOM_COMMAND(TARGET assimp_viewer
-  PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:assimp_viewer>
-  MAIN_DEPENDENCY assimp)
+ENDIF ()
 
 # Link the executable to the assimp + dx libs.
 TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib winmm.lib )

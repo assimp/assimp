@@ -355,7 +355,7 @@ ai_real ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int me
 
         // very intense verbose logging ... prepare for much text if there are many meshes
         if ( DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE) {
-            ASSIMP_LOG_DEBUG_F("Mesh %u | ACMR in: ", meshNum, " out: ", fACMR, " | ~", fACMR2, ((fACMR - fACMR2) / fACMR) * 100.f);
+            ASSIMP_LOG_VERBOSE_DEBUG_F("Mesh %u | ACMR in: ", meshNum, " out: ", fACMR, " | ~", fACMR2, ((fACMR - fACMR2) / fACMR) * 100.f);
         }
 
         fACMR2 *= pMesh->mNumFaces;

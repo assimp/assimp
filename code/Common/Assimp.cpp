@@ -481,18 +481,17 @@ void aiGetExtensionList(aiString *szOut) {
 
 // ------------------------------------------------------------------------------------------------
 // Get the memory requirements for a particular import.
-void aiGetMemoryRequirements(const C_STRUCT aiScene *pIn,
-        C_STRUCT aiMemoryInfo *in) {
+size_t aiGetMemoryRequirements(const C_STRUCT aiScene *pIn, C_STRUCT aiMemoryInfo *in) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // find the importer associated with this data
     const ScenePrivateData *priv = ScenePriv(pIn);
     if (!priv || !priv->mOrigImporter) {
         ReportSceneNotFoundError();
-        return;
+        return 0;
     }
 
-    return priv->mOrigImporter->GetMemoryRequirements(*in);
+    return (size_t) priv->mOrigImporter->GetMemoryRequirements(*in);
     ASSIMP_END_EXCEPTION_REGION(void);
 }
 

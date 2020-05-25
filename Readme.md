@@ -1,5 +1,14 @@
 Open Asset Import Library (assimp)
 ==================================
+
+    > This is a modified version of the original assimp library which is tailored to export
+    > REXfiles.
+
+# Building with Docker
+
+In order to build the executable for an Alpine-based Docker image, just call `build.sh`. The output
+can be found under `build/assimp-<DATE>.tar.gz`.
+
 A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data.
 ### Current project status ###
 [![Financial Contributors on Open Collective](https://opencollective.com/assimp/all/badge.svg?label=financial+contributors)](https://opencollective.com/assimp) 

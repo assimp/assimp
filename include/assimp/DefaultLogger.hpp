@@ -80,7 +80,7 @@ public:
     /** @brief Creates a logging instance.
      *  @param name Name for log file. Only valid in combination
      *    with the aiDefaultLogStream_FILE flag.
-     *  @param severity Log severity, VERBOSE turns on debug messages
+     *  @param severity Log severity, DEBUG turns on debug messages and VERBOSE turns on all messages.
      *  @param defStreams  Default log streams to be attached. Any bitwise
      *    combination of the aiDefaultLogStream enumerated values.
      *    If #aiDefaultLogStream_FILE is specified but an empty string is
@@ -127,8 +127,8 @@ public:
         unsigned int severity);
 
     // ----------------------------------------------------------------------
-    /** @copydoc Logger::detatchStream */
-    bool detatchStream(LogStream *pStream,
+    /** @copydoc Logger::detachStream */
+    bool detachStream(LogStream *pStream,
         unsigned int severity);
 
 private:
@@ -141,8 +141,11 @@ private:
     /** @briefDestructor    */
     ~DefaultLogger();
 
-    /** @brief  Logs debug infos, only been written when severity level VERBOSE is set */
+    /** @brief  Logs debug infos, only been written when severity level DEBUG or higher is set */
     void OnDebug(const char* message);
+
+    /** @brief  Logs debug infos, only been written when severity level VERBOSE is set */
+	void OnVerboseDebug(const char *message);
 
     /** @brief  Logs an info message */
     void OnInfo(const char*  message);

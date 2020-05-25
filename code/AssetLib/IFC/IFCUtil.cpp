@@ -162,7 +162,7 @@ void TempMesh::RemoveDegenerates()
     }
 
     if(drop) {
-        IFCImporter::LogDebug("removing degenerate faces");
+        IFCImporter::LogVerboseDebug("removing degenerate faces");
     }
 }
 
@@ -437,7 +437,7 @@ void TempMesh::RemoveAdjacentDuplicates() {
         base += cnt;
     }
     if(drop) {
-        IFCImporter::LogDebug("removing duplicate vertices");
+        IFCImporter::LogVerboseDebug("removing duplicate vertices");
     }
 }
 

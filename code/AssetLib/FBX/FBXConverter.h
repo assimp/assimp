@@ -412,7 +412,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     // FBX file could have embedded textures not connected to anything
-    void ConvertOrphantEmbeddedTextures();
+    void ConvertOrphanedEmbeddedTextures();
 
 private:
     // 0: not assigned yet, others: index is value - 1

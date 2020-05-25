@@ -122,7 +122,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 
                         // Keep this material even if no mesh references it
                         abReferenced[i] = true;
-                        ASSIMP_LOG_DEBUG_F( "Found positive match in exclusion list: \'", name.data, "\'");
+                        ASSIMP_LOG_VERBOSE_DEBUG_F( "Found positive match in exclusion list: \'", name.data, "\'");
                     }
                 }
             }

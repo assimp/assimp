@@ -207,7 +207,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         light->mName.length = ::ai_snprintf(light->mName.data, MAXLEN, "ACLight_%i", static_cast<unsigned int>(mLights->size()) - 1);
         obj.name = std::string(light->mName.data);
 
-        ASSIMP_LOG_DEBUG("AC3D: Light source encountered");
+        ASSIMP_LOG_VERBOSE_DEBUG("AC3D: Light source encountered");
         obj.type = Object::Light;
     } else if (!ASSIMP_strincmp(buffer, "group", 5)) {
         obj.type = Object::Group;
@@ -294,7 +294,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                     // example writes no surf chunks
                     if (!Q3DWorkAround) {
                         ASSIMP_LOG_WARN("AC3D: SURF token was expected");
-                        ASSIMP_LOG_DEBUG("Continuing with Quick3D Workaround enabled");
+                        ASSIMP_LOG_VERBOSE_DEBUG("Continuing with Quick3D Workaround enabled");
                     }
                     --buffer; // make sure the line is processed a second time
                     // break; --- see fix notes above

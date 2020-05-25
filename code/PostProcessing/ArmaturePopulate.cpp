@@ -82,7 +82,7 @@ void ArmaturePopulate::Execute(aiScene *out) {
     for (std::pair<aiBone *, aiNode *> kvp : bone_stack) {
         aiBone *bone = kvp.first;
         aiNode *bone_node = kvp.second;
-        ASSIMP_LOG_DEBUG_F("active node lookup: ", bone->mName.C_Str());
+        ASSIMP_LOG_VERBOSE_DEBUG_F("active node lookup: ", bone->mName.C_Str());
         // lcl transform grab - done in generate_nodes :)
 
         // bone->mOffsetMatrix = bone_node->mTransformation;
@@ -178,7 +178,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
         if (node == nullptr) {
             node_stack.clear();
             BuildNodeList(root_node, node_stack);
-            ASSIMP_LOG_DEBUG_F("Resetting bone stack: nullptr element ", bone->mName.C_Str());
+            ASSIMP_LOG_VERBOSE_DEBUG_F("Resetting bone stack: nullptr element ", bone->mName.C_Str());
 
             node = GetNodeFromStack(bone->mName, node_stack);
 
@@ -188,7 +188,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
             }
         }
 
-        ASSIMP_LOG_DEBUG_F("Successfully added bone[", bone->mName.C_Str(), "] to stack and bone node is: ", node->mName.C_Str());
+        ASSIMP_LOG_VERBOSE_DEBUG_F("Successfully added bone[", bone->mName.C_Str(), "] to stack and bone node is: ", node->mName.C_Str());
 
         bone_stack.insert(std::pair<aiBone *, aiNode *>(bone, node));
     }
@@ -202,7 +202,7 @@ aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
                                           std::vector<aiBone *> &bone_list) {
     while (bone_node) {
         if (!IsBoneNode(bone_node->mName, bone_list)) {
-            ASSIMP_LOG_DEBUG_F("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());
+            ASSIMP_LOG_VERBOSE_DEBUG_F("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());
             return bone_node;
         }
 

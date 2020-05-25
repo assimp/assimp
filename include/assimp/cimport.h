@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -369,12 +367,11 @@ ASSIMP_API void aiGetExtensionList(
 /** Get the approximated storage required by an imported asset
  * @param pIn Input asset.
  * @param in Data structure to be filled.
+ * @return The required size.
  */
-ASSIMP_API void aiGetMemoryRequirements(
+ASSIMP_API size_t aiGetMemoryRequirements(
     const C_STRUCT aiScene* pIn,
     C_STRUCT aiMemoryInfo* in);
-
-
 
 // --------------------------------------------------------------------------------
 /** Create an empty property store. Property stores are used to collect import
@@ -1233,6 +1230,6 @@ ASSIMP_API void aiQuaternionInterpolate(
 
 #ifdef __cplusplus
 }
-#endif
+#endif // __cplusplus
 
 #endif // AI_ASSIMP_H_INC

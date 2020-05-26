@@ -146,6 +146,8 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		ThrowException("Could not open file for reading");
 	}
 
+    ASSIMP_LOG_DEBUG("Reading FBX file");
+
 	// read entire file into memory - no streaming for this, fbx
 	// files can grow large, but the assimp output data structure
 	// then becomes very large, too. Assimp doesn't support

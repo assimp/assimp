@@ -175,19 +175,19 @@ enum ComponentType {
 
 inline unsigned int ComponentTypeSize(ComponentType t) {
     switch (t) {
-        case ComponentType_SHORT:
-        case ComponentType_UNSIGNED_SHORT:
-            return 2;
+    case ComponentType_SHORT:
+    case ComponentType_UNSIGNED_SHORT:
+        return 2;
 
-        case ComponentType_UNSIGNED_INT:
-        case ComponentType_FLOAT:
-            return 4;
+    case ComponentType_UNSIGNED_INT:
+    case ComponentType_FLOAT:
+        return 4;
 
-        case ComponentType_BYTE:
-        case ComponentType_UNSIGNED_BYTE:
-            return 1;
-        default:
-            throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
+    case ComponentType_BYTE:
+    case ComponentType_UNSIGNED_BYTE:
+        return 1;
+    default:
+        throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
     }
 }
 
@@ -318,9 +318,11 @@ class Ref {
 
 public:
     Ref() :
-            vector(0), index(0) {}
+            vector(0),
+            index(0) {}
     Ref(std::vector<T *> &vec, unsigned int idx) :
-            vector(&vec), index(idx) {}
+            vector(&vec),
+            index(idx) {}
 
     inline unsigned int GetIndex() const { return index; }
 
@@ -340,7 +342,8 @@ struct Nullable {
     Nullable() :
             isPresent(false) {}
     Nullable(T &val) :
-            value(val), isPresent(true) {}
+            value(val),
+            isPresent(true) {}
 };
 
 //! Base class for all glTF top-level objects
@@ -363,49 +366,28 @@ struct Object {
 // Classes for each glTF top-level object type
 //
 
-//! Base class for types that access binary data from a BufferView, such as accessors
-//! or sparse accessors' indices.
-//! N.B. not a virtual class. All owned pointers to BufferViewClient instances should
-//! be to their most derived types (which may of course be just BufferViewClient).
-struct BufferViewClient : public Object {
-    Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
-    size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
-
-    inline uint8_t *GetPointer();
-
-    void Read(Value &obj, Asset &r);
-};
-
-//! BufferViewClient with component type information.
-//! N.B. not a virtual class. All owned pointers to ComponentTypedBufferViewClient
-//! instances should be to their most derived types (which may of course be just
-//! ComponentTypedBufferViewClient).
-struct ComponentTypedBufferViewClient : public BufferViewClient {
-    ComponentType componentType; //!< The datatype of components in the attribute. (required)
-
-    unsigned int GetBytesPerComponent();
-
-    void Read(Value &obj, Asset &r);
-};
-
 //! A typed view into a BufferView. A BufferView contains raw binary data.
 //! An accessor provides a typed view into a BufferView or a subset of a BufferView
 //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
-struct Accessor : public ComponentTypedBufferViewClient {
+struct Accessor : public Object {
     struct Sparse;
 
+    Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
+    size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
+    ComponentType componentType; //!< The datatype of components in the attribute. (required)
     size_t count; //!< The number of attributes referenced by this accessor. (required)
     AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
     std::vector<double> max; //!< Maximum value of each component in this attribute.
     std::vector<double> min; //!< Minimum value of each component in this attribute.
-    std::unique_ptr<Sparse> sparse; //!< Sparse accessor information
+    std::unique_ptr<Sparse> sparse;
 
     unsigned int GetNumComponents();
+    unsigned int GetBytesPerComponent();
     unsigned int GetElementSize();
 
     inline uint8_t *GetPointer();
 
-    template<class T>
+    template <class T>
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
@@ -414,8 +396,8 @@ struct Accessor : public ComponentTypedBufferViewClient {
     class Indexer {
         friend struct Accessor;
 
-    // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
-    // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
+        // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
+        // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
     protected:
         Accessor &accessor;
 
@@ -424,8 +406,7 @@ struct Accessor : public ComponentTypedBufferViewClient {
         size_t elemSize, stride;
 
         Indexer(Accessor &acc);
-    
-        
+
     public:
         //! Accesses the i-th value as defined by the accessor
         template <class T>
@@ -441,62 +422,27 @@ struct Accessor : public ComponentTypedBufferViewClient {
         }
     };
 
-    //! Sparse accessor information
-    struct Sparse {
-        size_t count;
-        ComponentTypedBufferViewClient indices;
-        BufferViewClient values;
-
-        std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
-
-        inline void PopulateData(size_t numBytes, uint8_t *bytes) {
-            if (bytes) {
-                data.assign(bytes, bytes + numBytes);
-            } else {
-                data.resize(numBytes, 0x00);
-            }
-        }
-
-        inline void PatchData(unsigned int elementSize)
-        {
-            uint8_t *pIndices = indices.GetPointer();
-            const unsigned int indexSize = indices.GetBytesPerComponent();
-            uint8_t *indicesEnd = pIndices + count * indexSize;
-
-            uint8_t *pValues = values.GetPointer();
-            while (pIndices != indicesEnd) {
-                size_t offset;
-                switch (indices.componentType) {
-                case ComponentType_UNSIGNED_BYTE:
-                    offset = *pIndices;
-                    break;
-                case ComponentType_UNSIGNED_SHORT:
-                    offset = *reinterpret_cast<uint16_t *>(pIndices);
-                    break;
-                case ComponentType_UNSIGNED_INT:
-                    offset = *reinterpret_cast<uint32_t *>(pIndices);
-                    break;
-                default:
-                    // have fun with float and negative values from signed types as indices.
-                    throw DeadlyImportError("Unsupported component type in index.");
-                }
-
-                offset *= elementSize;
-                std::memcpy(data.data() + offset, pValues, elementSize);
-
-                pValues += elementSize;
-                pIndices += indexSize;
-            }
-        }
-    };
-
     inline Indexer GetIndexer() {
         return Indexer(*this);
     }
 
     Accessor() {}
-
     void Read(Value &obj, Asset &r);
+
+    //sparse
+    struct Sparse {
+        size_t count;
+        ComponentType indicesType;
+        Ref<BufferView> indices;
+        size_t indicesByteOffset;
+        Ref<BufferView> values;
+        size_t valuesByteOffset;
+
+        std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
+
+        void PopulateData(size_t numBytes, uint8_t *bytes);
+        void PatchData(unsigned int elementSize);
+    };
 };
 
 //! A buffer points to binary geometry, animation, or skins.
@@ -525,7 +471,11 @@ public:
         /// \param [in] pDecodedData_Length - size of encoded region, in bytes.
         /// \param [in] pID - ID of the region.
         SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string pID) :
-                Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID) {}
+                Offset(pOffset),
+                EncodedData_Length(pEncodedData_Length),
+                DecodedData(pDecodedData),
+                DecodedData_Length(pDecodedData_Length),
+                ID(pID) {}
 
         /// \fn ~SEncodedRegion()
         /// Destructor.
@@ -629,6 +579,7 @@ struct BufferView : public Object {
     BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
     void Read(Value &obj, Asset &r);
+    uint8_t *GetPointer(size_t accOffset);
 };
 
 struct Camera : public Object {
@@ -656,7 +607,8 @@ struct Camera : public Object {
     } cameraProperties;
 
     Camera() :
-            type(Perspective), cameraProperties() {
+            type(Perspective),
+            cameraProperties() {
         // empty
     }
     void Read(Value &obj, Asset &r);
@@ -961,7 +913,7 @@ class LazyDict : public LazyDictBase {
     Value *mDict; //! JSON dictionary object
     Asset &mAsset; //! The asset instance
 
-    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck;  //! Used by Retrieve to prevent recursive lookups
+    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck; //! Used by Retrieve to prevent recursive lookups
 
     void AttachToDocument(Document &doc);
     void DetachFromDocument();
@@ -1075,7 +1027,22 @@ public:
 
 public:
     Asset(IOSystem *io = 0) :
-            mIOSystem(io), asset(), accessors(*this, "accessors"), animations(*this, "animations"), buffers(*this, "buffers"), bufferViews(*this, "bufferViews"), cameras(*this, "cameras"), lights(*this, "lights", "KHR_lights_punctual"), images(*this, "images"), materials(*this, "materials"), meshes(*this, "meshes"), nodes(*this, "nodes"), samplers(*this, "samplers"), scenes(*this, "scenes"), skins(*this, "skins"), textures(*this, "textures") {
+            mIOSystem(io),
+            asset(),
+            accessors(*this, "accessors"),
+            animations(*this, "animations"),
+            buffers(*this, "buffers"),
+            bufferViews(*this, "bufferViews"),
+            cameras(*this, "cameras"),
+            lights(*this, "lights", "KHR_lights_punctual"),
+            images(*this, "images"),
+            materials(*this, "materials"),
+            meshes(*this, "meshes"),
+            nodes(*this, "nodes"),
+            samplers(*this, "samplers"),
+            scenes(*this, "scenes"),
+            skins(*this, "skins"),
+            textures(*this, "textures") {
         memset(&extensionsUsed, 0, sizeof(extensionsUsed));
         memset(&extensionsRequired, 0, sizeof(extensionsRequired));
     }

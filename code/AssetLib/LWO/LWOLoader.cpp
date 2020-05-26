@@ -422,7 +422,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                     // So we use a separate implementation.
                     ComputeNormals(mesh, smoothingGroups, _mSurfaces[j]);
                 } else {
-                    ASSIMP_LOG_DEBUG("LWO2: No need to compute normals, they're already there");
+                    ASSIMP_LOG_VERBOSE_DEBUG("LWO2: No need to compute normals, they're already there");
                 }
                 ++p;
             }

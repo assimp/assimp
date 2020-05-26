@@ -154,7 +154,7 @@ bool LWOImporter::HandleTextures(aiMaterial *pcMat, const TextureList &in, aiTex
                 static_assert(sizeof(aiUVTransform) / sizeof(ai_real) == 5, "sizeof(aiUVTransform)/sizeof(ai_real) == 5");
                 pcMat->AddProperty(&trafo, 1, AI_MATKEY_UVTRANSFORM(type, cur));
             }
-            ASSIMP_LOG_DEBUG("LWO2: Setting up non-UV mapping");
+            ASSIMP_LOG_VERBOSE_DEBUG("LWO2: Setting up non-UV mapping");
         }
 
         // The older LWOB format does not use indirect references to clips.

@@ -641,14 +641,14 @@ aiNode *ProcessSpatialStructure(aiNode *parent, const Schema_2x3::IfcProduct &el
     bool skipGeometry = false;
     if (conv.settings.skipSpaceRepresentations) {
         if (el.ToPtr<Schema_2x3::IfcSpace>()) {
-            IFCImporter::LogDebug("skipping IfcSpace entity due to importer settings");
+            IFCImporter::LogVerboseDebug("skipping IfcSpace entity due to importer settings");
             skipGeometry = true;
         }
     }
 
     if (conv.settings.skipAnnotations) {
         if (el.ToPtr<Schema_2x3::IfcAnnotation>()) {
-            IFCImporter::LogDebug("skipping IfcAnnotation entity due to importer settings");
+            IFCImporter::LogVerboseDebug("skipping IfcAnnotation entity due to importer settings");
             return nullptr;
         }
     }
@@ -856,7 +856,7 @@ void ProcessSpatialStructures(ConversionData &conv) {
         if (!prod) {
             continue;
         }
-        IFCImporter::LogDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`" + (prod->ObjectType ? " which is of type " + prod->ObjectType.Get() : ""));
+        IFCImporter::LogVerboseDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`" + (prod->ObjectType ? " which is of type " + prod->ObjectType.Get() : ""));
 
         // the primary sites are referenced by an IFCRELAGGREGATES element which assigns them to the IFCPRODUCT
         const STEP::DB::RefMap &refs = conv.db.GetRefs();
@@ -868,7 +868,7 @@ void ProcessSpatialStructures(ConversionData &conv) {
                     // comparing pointer values is not sufficient, we would need to cast them to the same type first
                     // as there is multiple inheritance in the game.
                     if (def.GetID() == prod->GetID()) {
-                        IFCImporter::LogDebug("selecting this spatial structure as root structure");
+                        IFCImporter::LogVerboseDebug("selecting this spatial structure as root structure");
                         // got it, this is one primary site.
                         nodes.push_back(ProcessSpatialStructure(NULL, *prod, conv, NULL));
                     }

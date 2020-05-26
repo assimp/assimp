@@ -223,7 +223,7 @@ public:
             }
 
             if ( (std::string)curveSegment.Transition != "CONTINUOUS" ) {
-                IFCImporter::LogDebug("ignoring transition code on composite curve segment, only continuous transitions are supported");
+                IFCImporter::LogVerboseDebug("ignoring transition code on composite curve segment, only continuous transitions are supported");
             }
 
             curves.push_back( CurveEntry(bc,IsTrue(curveSegment.SameSense)) );

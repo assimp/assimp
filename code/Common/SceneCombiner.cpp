@@ -75,7 +75,7 @@ void PrefixString(aiString& string,const char* prefix, unsigned int len) {
         return;
 
     if (len+string.length>=MAXLEN-1) {
-        ASSIMP_LOG_DEBUG("Can't add an unique prefix because the string is too long");
+		ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
         ai_assert(false);
         return;
     }

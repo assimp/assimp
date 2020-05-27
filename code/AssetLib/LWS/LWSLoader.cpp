@@ -101,7 +101,7 @@ void LWS::Element::Parse(const char *&buffer) {
         SkipSpaces(&buffer);
 
         if (children.back().tokens[0] == "Plugin") {
-            ASSIMP_LOG_DEBUG("LWS: Skipping over plugin-specific data");
+            ASSIMP_LOG_VERBOSE_DEBUG("LWS: Skipping over plugin-specific data");
 
             // strange stuff inside Plugin/Endplugin blocks. Needn't
             // follow LWS syntax, so we skip over it

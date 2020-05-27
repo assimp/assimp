@@ -1424,6 +1424,7 @@ inline void AssetMetadata::Read(Document &doc) {
 //
 
 inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneData) {
+    ASSIMP_LOG_DEBUG("Reading GLTF2 binary");
     GLB_Header header;
     if (stream.Read(&header, sizeof(header), 1) != 1) {
         throw DeadlyImportError("GLTF: Unable to read the file header");
@@ -1487,6 +1488,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
 }
 
 inline void Asset::Load(const std::string &pFile, bool isBinary) {
+    ASSIMP_LOG_DEBUG("Loading GLTF2 asset");
     mCurrentAssetDir.clear();
     /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
     if (pos != int(std::string::npos)) */
@@ -1518,7 +1520,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     }
 
     // parse the JSON document
-
+    ASSIMP_LOG_DEBUG("Parsing GLTF2 JSON");
     Document doc;
     doc.ParseInsitu(&sceneData[0]);
 

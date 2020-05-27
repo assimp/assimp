@@ -105,7 +105,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     // The idea here is to traverse all objects to find these Textures and convert them,
     // so later during material conversion it will find converted texture in the textures_converted array.
     if (doc.Settings().readTextures) {
-        ConvertOrphantEmbeddedTextures();
+        ConvertOrphanedEmbeddedTextures();
     }
     ConvertRootNode();
 
@@ -1542,10 +1542,10 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
     aiBone *bone = nullptr;
 
     if (bone_map.count(deformer_name)) {
-        ASSIMP_LOG_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
         bone = bone_map[deformer_name];
     } else {
-        ASSIMP_LOG_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
         bone = new aiBone();
         bone->mName = bone_name;
 
@@ -2719,7 +2719,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
             if (doc.Settings().optimizeEmptyAnimationCurves &&
                     IsRedundantAnimationData(target, comp, (chain[i]->second))) {
 
-                FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
+                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node " + target.Name());
                 continue;
             }
 
@@ -3467,7 +3467,7 @@ void FBXConverter::TransferDataToScene() {
     }
 }
 
-void FBXConverter::ConvertOrphantEmbeddedTextures() {
+void FBXConverter::ConvertOrphanedEmbeddedTextures() {
     // in C++14 it could be:
     // for (auto&& [id, object] : objects)
     for (auto &&id_and_object : doc.Objects()) {

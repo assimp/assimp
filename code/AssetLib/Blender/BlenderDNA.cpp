@@ -353,7 +353,7 @@ void SectionParser ::Next() {
     }
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
-    ASSIMP_LOG_DEBUG(current.id);
+    ASSIMP_LOG_VERBOSE_DEBUG(current.id);
 #endif
 }
 

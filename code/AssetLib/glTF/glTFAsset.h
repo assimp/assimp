@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -62,10 +61,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 
 #define RAPIDJSON_HAS_STDSTRING 1
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
-
+#pragma GCC diagnostic pop
 #ifdef ASSIMP_API
 #   include <memory>
 #   include <assimp/DefaultIOSystem.h>

@@ -370,13 +370,23 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
             pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
             pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-            memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
+                pMesh->mVertices[i].x = positionBuffer[i].x;
+                pMesh->mVertices[i].y = positionBuffer[i].y;                
+                pMesh->mVertices[i].z = positionBuffer[i].z;
+            }
+            //memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
             positionBuffer.clear();
         }
         // also only process normalBuffer when filled, else exception when accessing with index operator
         if (!normalBuffer.empty()) {
             pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-            memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
+            for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
+                pMesh->mNormals[i].x = normalBuffer[i].x;
+                pMesh->mNormals[i].y = normalBuffer[i].y;                
+                pMesh->mNormals[i].z = normalBuffer[i].z;
+            }
+//            memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
             normalBuffer.clear();
         }
 

@@ -64,10 +64,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #define RAPIDJSON_HAS_STDSTRING 1
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
-
+#pragma GCC diagnostic pop
 #ifdef ASSIMP_API
 #include <assimp/ByteSwapper.h>
 #include <assimp/DefaultIOSystem.h>

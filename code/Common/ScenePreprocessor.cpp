@@ -225,7 +225,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
                     q.mTime  = 0.;
                     q.mValue = rotation;
 
-                    ASSIMP_LOG_DEBUG("ScenePreprocessor: Dummy rotation track has been generated");
+                    ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Dummy rotation track has been generated");
                 } else {
                     ai_assert(channel->mRotationKeys);
                 }
@@ -240,7 +240,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
                     q.mTime  = 0.;
                     q.mValue = scaling;
 
-                    ASSIMP_LOG_DEBUG("ScenePreprocessor: Dummy scaling track has been generated");
+                    ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Dummy scaling track has been generated");
                 } else {
                     ai_assert(channel->mScalingKeys);
                 }
@@ -255,7 +255,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
                     q.mTime  = 0.;
                     q.mValue = position;
 
-                    ASSIMP_LOG_DEBUG("ScenePreprocessor: Dummy position track has been generated");
+                    ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Dummy position track has been generated");
                 } else {
                     ai_assert(channel->mPositionKeys);
                 }
@@ -264,7 +264,7 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
     }
 
     if (anim->mDuration == -1.)     {
-        ASSIMP_LOG_DEBUG("ScenePreprocessor: Setting animation duration");
+        ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Setting animation duration");
         anim->mDuration = last - std::min( first, 0. );
     }
 }

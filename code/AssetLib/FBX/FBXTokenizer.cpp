@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
 #include <assimp/Exceptional.h>
+#include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -134,7 +135,8 @@ void ProcessDataToken( TokenList& output_tokens, const char*& start, const char*
 // ------------------------------------------------------------------------------------------------
 void Tokenize(TokenList& output_tokens, const char* input)
 {
-    ai_assert(input);
+	ai_assert(input);
+	ASSIMP_LOG_DEBUG("Tokenizing ASCII FBX file");
 
     // line and column numbers numbers are one-based
     unsigned int line = 1;

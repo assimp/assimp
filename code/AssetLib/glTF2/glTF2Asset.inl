@@ -180,7 +180,10 @@ inline Value *FindObject(Value &val, const char *id) {
 
 template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
-        mDictId(dictId), mExtId(extId), mDict(0), mAsset(asset) {
+        mDictId(dictId),
+        mExtId(extId),
+        mDict(0),
+        mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
 
@@ -342,7 +345,10 @@ Ref<T> LazyDict<T>::Create(const char *id) {
 //
 
 inline Buffer::Buffer() :
-        byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false) {}
+        byteLength(0),
+        type(Type_arraybuffer),
+        EncodedRegion_Current(nullptr),
+        mIsSpecial(false) {}
 
 inline Buffer::~Buffer() {
     for (SEncodedRegion *reg : EncodedRegion_List)
@@ -517,7 +523,7 @@ inline void Buffer::Grow(size_t amount) {
     if (amount <= 0) {
         return;
     }
-    
+
     // Capacity is big enough
     if (capacity >= byteLength + amount) {
         byteLength += amount;
@@ -550,11 +556,130 @@ inline void BufferView::Read(Value &obj, Asset &r) {
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
 }
 
-//
-// struct BufferViewClient
-//
+inline uint8_t *BufferView::GetPointer(size_t accOffset) {
+    if (!buffer) return 0;
+    uint8_t *basePtr = buffer->GetPointer();
+    if (!basePtr) return 0;
 
-inline uint8_t *BufferViewClient::GetPointer() {
+    size_t offset = accOffset + byteOffset;
+    if (buffer->EncodedRegion_Current != nullptr) {
+        const size_t begin = buffer->EncodedRegion_Current->Offset;
+        const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
+        if ((offset >= begin) && (offset < end))
+            return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+    }
+
+    return basePtr + offset;
+}
+
+//
+// struct Accessor
+//
+inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
+    if (bytes) {
+        data.assign(bytes, bytes + numBytes);
+    } else {
+        data.resize(numBytes, 0x00);
+    }
+}
+
+inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
+    uint8_t *pIndices = indices->GetPointer(indicesByteOffset);
+    const unsigned int indexSize = int(ComponentTypeSize(indicesType));
+    uint8_t *indicesEnd = pIndices + count * indexSize;
+
+    uint8_t *pValues = values->GetPointer(valuesByteOffset);
+    while (pIndices != indicesEnd) {
+        size_t offset;
+        switch (indicesType) {
+        case ComponentType_UNSIGNED_BYTE:
+            offset = *pIndices;
+            break;
+        case ComponentType_UNSIGNED_SHORT:
+            offset = *reinterpret_cast<uint16_t *>(pIndices);
+            break;
+        case ComponentType_UNSIGNED_INT:
+            offset = *reinterpret_cast<uint32_t *>(pIndices);
+            break;
+        default:
+            // have fun with float and negative values from signed types as indices.
+            throw DeadlyImportError("Unsupported component type in index.");
+        }
+
+        offset *= elementSize;
+        std::memcpy(data.data() + offset, pValues, elementSize);
+
+        pValues += elementSize;
+        pIndices += indexSize;
+    }
+}
+
+inline void Accessor::Read(Value &obj, Asset &r) {
+
+    if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
+        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+    }
+
+    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
+    componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
+    count = MemberOrDefault(obj, "count", size_t(0));
+
+    const char *typestr;
+    type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+
+    if (Value *sparseValue = FindObject(obj, "sparse")) {
+        sparse.reset(new Sparse);
+        // count
+        ReadMember(*sparseValue, "count", sparse->count);
+
+        // indices
+        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
+            //indices bufferView
+            Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
+            sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
+            //indices byteOffset
+            sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
+            //indices componentType
+            sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
+            //sparse->indices->Read(*indicesValue, r);
+        }
+
+        // value
+        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
+            //value bufferView
+            Value *valueViewID = FindUInt(*valuesValue, "bufferView");
+            sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
+            //value byteOffset
+            sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
+            //sparse->values->Read(*valuesValue, r);
+        }
+
+        // indicesType
+        sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
+
+        const unsigned int elementSize = GetElementSize();
+        const size_t dataSize = count * elementSize;
+        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : 0);
+        sparse->PatchData(elementSize);
+    }
+}
+
+inline unsigned int Accessor::GetNumComponents() {
+    return AttribType::GetNumComponents(type);
+}
+
+inline unsigned int Accessor::GetBytesPerComponent() {
+    return int(ComponentTypeSize(componentType));
+}
+
+inline unsigned int Accessor::GetElementSize() {
+    return GetNumComponents() * GetBytesPerComponent();
+}
+
+inline uint8_t *Accessor::GetPointer() {
+    if (sparse)
+        return sparse->data.data();
+
     if (!bufferView || !bufferView->buffer) return 0;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
     if (!basePtr) return 0;
@@ -571,76 +696,6 @@ inline uint8_t *BufferViewClient::GetPointer() {
     }
 
     return basePtr + offset;
-}
-
-inline void BufferViewClient::Read(Value &obj, Asset &r) {
-
-    if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
-        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
-    }
-
-    byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
-}
-
-//
-// struct ComponentTypedBufferViewClient
-//
-
-inline unsigned int ComponentTypedBufferViewClient::GetBytesPerComponent() {
-    return int(ComponentTypeSize(componentType));
-}
-
-inline void ComponentTypedBufferViewClient::Read(Value &obj, Asset &r) {
-
-    BufferViewClient::Read(obj, r);
-
-    componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
-}
-
-//
-// struct Accessor
-//
-
-inline uint8_t *Accessor::GetPointer() {
-    if (!sparse) return BufferViewClient::GetPointer();
-
-    return sparse->data.data();
-}
-
-inline void Accessor::Read(Value &obj, Asset &r) {
-
-    ComponentTypedBufferViewClient::Read(obj, r);
-
-    count = MemberOrDefault(obj, "count", size_t(0));
-
-    const char *typestr;
-    type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
-
-    if (Value *sparseValue = FindObject(obj, "sparse")) {
-        sparse.reset(new Sparse);
-        ReadMember(*sparseValue, "count", sparse->count);
-
-        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
-            sparse->indices.Read(*indicesValue, r);
-        }
-
-        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
-            sparse->values.Read(*valuesValue, r);
-        }
-
-        const unsigned int elementSize = GetElementSize();
-        const size_t dataSize = count * elementSize;
-        sparse->PopulateData(dataSize, BufferViewClient::GetPointer());
-        sparse->PatchData(elementSize);
-    }
-}
-
-inline unsigned int Accessor::GetNumComponents() {
-    return AttribType::GetNumComponents(type);
-}
-
-inline unsigned int Accessor::GetElementSize() {
-    return GetNumComponents() * GetBytesPerComponent();
 }
 
 namespace {
@@ -663,10 +718,9 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
-template<class T>
-void Accessor::ExtractData(T *&outData)
-{
-    uint8_t* data = GetPointer();
+template <class T>
+void Accessor::ExtractData(T *&outData) {
+    uint8_t *data = GetPointer();
     if (!data) {
         throw DeadlyImportError("GLTF: data is NULL");
     }
@@ -678,7 +732,6 @@ void Accessor::ExtractData(T *&outData)
 
     const size_t targetElemSize = sizeof(T);
     ai_assert(elemSize <= targetElemSize);
-
     ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
 
     outData = new T[count];
@@ -705,7 +758,10 @@ inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t sr
 }
 
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc), data(acc.GetPointer()), elemSize(acc.GetElementSize()), stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
+        accessor(acc),
+        data(acc.GetPointer()),
+        elemSize(acc.GetElementSize()),
+        stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
 }
 
 //! Accesses the i-th value as defined by the accessor
@@ -720,7 +776,9 @@ T Accessor::Indexer::GetValue(int i) {
 }
 
 inline Image::Image() :
-        width(0), height(0), mDataLength(0) {
+        width(0),
+        height(0),
+        mDataLength(0) {
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
@@ -958,8 +1016,8 @@ inline int Compare(const char *attr, const char (&str)[N]) {
 }
 
 #ifdef _WIN32
-#    pragma warning(push)
-#    pragma warning(disable : 4706)
+#pragma warning(push)
+#pragma warning(disable : 4706)
 #endif // _WIN32
 
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
@@ -1079,11 +1137,11 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     }
 
     Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras ) {
-        if (Value* curTargetNames = FindArray(*extras, "targetNames")) {
+    if (nullptr != extras) {
+        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
-                Value& targetNameValue = (*curTargetNames)[i];
+                Value &targetNameValue = (*curTargetNames)[i];
                 if (targetNameValue.IsString()) {
                     this->targetNames[i] = targetNameValue.GetString();
                 }
@@ -1190,7 +1248,7 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
-        this->skin = r.skins.Retrieve(curSkin->GetUint());
+        this->skin = r.skins.Get(curSkin->GetUint());
     }
 
     Value *curCamera = FindUInt(obj, "camera");
@@ -1337,6 +1395,7 @@ inline void AssetMetadata::Read(Document &doc) {
 //
 
 inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneData) {
+    ASSIMP_LOG_DEBUG("Reading GLTF2 binary");
     GLB_Header header;
     if (stream.Read(&header, sizeof(header), 1) != 1) {
         throw DeadlyImportError("GLTF: Unable to read the file header");
@@ -1400,6 +1459,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
 }
 
 inline void Asset::Load(const std::string &pFile, bool isBinary) {
+    ASSIMP_LOG_DEBUG("Loading GLTF2 asset");
     mCurrentAssetDir.clear();
     /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
     if (pos != int(std::string::npos)) */
@@ -1431,7 +1491,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     }
 
     // parse the JSON document
-
+    ASSIMP_LOG_DEBUG("Parsing GLTF2 JSON");
     Document doc;
     doc.ParseInsitu(&sceneData[0]);
 
@@ -1481,7 +1541,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         }
     }
 
-    // Force reading of skins since they're not always directly referenced
+    // Read skins after nodes have been loaded to avoid infinite recursion
     if (Value *skinsArray = FindArray(doc, "skins")) {
         for (unsigned int i = 0; i < skinsArray->Size(); ++i) {
             skins.Retrieve(i);
@@ -1593,7 +1653,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #ifdef _WIN32
-#    pragma warning(pop)
+#pragma warning(pop)
 #endif // _WIN32
 
 } // namespace glTF2

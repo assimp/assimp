@@ -221,7 +221,7 @@ void ProcessBooleanHalfSpaceDifference(const Schema_2x3::IfcHalfSpaceSolid *hs, 
                 result.mVerts.pop_back();
             }
     }
-    IFCImporter::LogDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
+    IFCImporter::LogVerboseDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -658,7 +658,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
             }
         }
     }
-    IFCImporter::LogDebug("generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)");
+    IFCImporter::LogVerboseDebug("generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -706,7 +706,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
         vit += pcount;
     }
 
-    IFCImporter::LogDebug("generating CSG geometry by geometric difference to a solid (IfcExtrudedAreaSolid)");
+    IFCImporter::LogVerboseDebug("generating CSG geometry by geometric difference to a solid (IfcExtrudedAreaSolid)");
 }
 
 // ------------------------------------------------------------------------------------------------

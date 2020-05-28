@@ -156,9 +156,9 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile,
     mScene = &_scene;
 
     // Initialize members
-    D3DS::Node _rootNode("UNNAMED");
+    D3DS::Node *_rootNode = new D3DS::Node("UNNAMED");
     mLastNodeIndex = -1;
-    mCurrentNode = &_rootNode;
+    mCurrentNode = _rootNode;
     mRootNode = mCurrentNode;
     mRootNode->mHierarchyPos = -1;
     mRootNode->mHierarchyIndex = -1;

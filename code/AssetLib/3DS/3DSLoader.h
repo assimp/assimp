@@ -110,7 +110,7 @@ protected:
      *
      *  @param pcOut Receives the current chunk
      */
-    void ReadChunk(Discreet3DS::Chunk* pcOut);
+    void ReadChunk(Discreet3DS::Chunk& pcOut);
 
     // -------------------------------------------------------------------
     /** Parse a percentage chunk. mCurrent will point to the next

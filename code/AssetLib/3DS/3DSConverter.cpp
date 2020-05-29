@@ -412,8 +412,8 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
 
 // ------------------------------------------------------------------------------------------------
 // Add a node to the scenegraph and setup its final transformation
-void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
-        D3DS::Node *pcIn, aiMatrix4x4 & /*absTrafo*/) {
+void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pcOut,
+        D3DS::Node *const pcIn, aiMatrix4x4 & /*absTrafo*/) {
     std::vector<unsigned int> iArray;
     iArray.reserve(3);
 
@@ -661,7 +661,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
 
 // ------------------------------------------------------------------------------------------------
 // Find out how many node animation channels we'll have finally
-void CountTracks(D3DS::Node *node, unsigned int &cnt) {
+void CountTracks(const D3DS::Node *const node, unsigned int &cnt) {
     //////////////////////////////////////////////////////////////////////////////
     // We will never generate more than one channel for a node, so
     // this is rather easy here.
@@ -686,8 +686,8 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
     pcOut->mRootNode = new aiNode();
     if (0 == mRootNode->mChildren.size()) {
         //////////////////////////////////////////////////////////////////////////////
-        // It seems the file is so messed up that it has not even a hierarchy.
-        // generate a flat hiearachy which looks like this:
+        // It seems the file is so messed up that it does not even have a hierarchy.
+        // Generate a flat hiearachy which looks like this:
         //
         //                ROOT_NODE
         //                   |

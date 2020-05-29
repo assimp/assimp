@@ -79,7 +79,7 @@ static const aiImporterDesc desc = {
             return;                                                           \
         }                                                                     \
         Discreet3DS::Chunk chunk;                                             \
-        ReadChunk(&chunk);                                                    \
+        ReadChunk(chunk);                                                     \
         int chunkSize = chunk.Size - sizeof(Discreet3DS::Chunk);              \
         if (chunkSize <= 0)                                                   \
             continue;                                                         \
@@ -156,9 +156,9 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile,
     mScene = &_scene;
 
     // Initialize members
-    D3DS::Node *_rootNode = new D3DS::Node("UNNAMED");
+    D3DS::Node _rootNode("UNNAMED");
     mLastNodeIndex = -1;
-    mCurrentNode = _rootNode;
+    mCurrentNode = &_rootNode;
     mRootNode = mCurrentNode;
     mRootNode->mHierarchyPos = -1;
     mRootNode->mHierarchyIndex = -1;
@@ -205,6 +205,7 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile,
     // Our internal scene representation and the root
     // node will be automatically deleted, so the whole hierarchy will follow
 
+    ai_assert(mCurrentNode != &_rootNode);
     AI_DEBUG_INVALIDATE_PTR(mRootNode);
     AI_DEBUG_INVALIDATE_PTR(mScene);
     AI_DEBUG_INVALIDATE_PTR(this->stream);
@@ -231,17 +232,16 @@ void Discreet3DSImporter::ApplyMasterScale(aiScene *pScene) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a new chunk from the file
-void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk *pcOut) {
-    ai_assert(pcOut != nullptr);
+void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk &pcOut) {
 
-    pcOut->Flag = stream->GetI2();
-    pcOut->Size = stream->GetI4();
+    pcOut.Flag = stream->GetI2();
+    pcOut.Size = stream->GetI4();
 
-    if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize()) {
+    if (pcOut.Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize()) {
         throw DeadlyImportError("Chunk is too large");
     }
 
-    if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit()) {
+    if (pcOut.Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit()) {
         ASSIMP_LOG_ERROR("3DS: Chunk overflow");
     }
 }
@@ -250,7 +250,7 @@ void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk *pcOut) {
 // Skip a chunk
 void Discreet3DSImporter::SkipChunk() {
     Discreet3DS::Chunk psChunk;
-    ReadChunk(&psChunk);
+    ReadChunk(psChunk);
 
     stream->IncPtr(psChunk.Size - sizeof(Discreet3DS::Chunk));
     return;
@@ -563,7 +563,7 @@ D3DS::Node *FindNode(D3DS::Node *root, const std::string &name) {
         return root;
     }
 
-    for (std::vector<D3DS::Node *>::iterator it = root->mChildren.begin(); it != root->mChildren.end(); ++it) {
+    for (auto it = root->mChildren.cbegin(); it != root->mChildren.cend(); ++it) {
         D3DS::Node *nd = FindNode(*it, name);
         if (nullptr != nd) {
             return nd;
@@ -1258,7 +1258,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture *pcOut) {
 // Read a percentage chunk
 ai_real Discreet3DSImporter::ParsePercentageChunk() {
     Discreet3DS::Chunk chunk;
-    ReadChunk(&chunk);
+    ReadChunk(chunk);
 
     if (Discreet3DS::CHUNK_PERCENTF == chunk.Flag) {
         return stream->GetF4() * ai_real(100) / ai_real(0xFFFF);
@@ -1279,7 +1279,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
     static const aiColor3D clrError = aiColor3D(qnan, qnan, qnan);
 
     Discreet3DS::Chunk chunk;
-    ReadChunk(&chunk);
+    ReadChunk(chunk);
     const unsigned int diff = chunk.Size - sizeof(Discreet3DS::Chunk);
 
     bool bGamma = false;

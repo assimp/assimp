@@ -74,7 +74,7 @@ TEST_F(utMatrix3x3Test, FromToMatrixTest) {
     aiVector3D from, to;
 
     auto random_ratio = []() -> float {
-        return static_cast<float>(rand() / RAND_MAX);
+        return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     };
 
     for (int i = 0; i < NUM_SAMPLES; ++i) {

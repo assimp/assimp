@@ -202,60 +202,60 @@ void CopyTexture(aiMaterial &mat, D3DS::Texture &texture, aiTextureType type) {
 
 // ------------------------------------------------------------------------------------------------
 // Convert a 3DS material to an aiMaterial
-void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
-        aiMaterial &mat) {
+void Discreet3DSImporter::ConvertMaterial(D3DS::Material &p_cMat,
+        aiMaterial &p_pcOut) {
     // NOTE: Pass the background image to the viewer by bypassing the
     // material system. This is an evil hack, never do it again!
     if (0 != mBackgroundImage.length() && bHasBG) {
         aiString tex;
         tex.Set(mBackgroundImage);
-        mat.AddProperty(&tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
+        p_pcOut.AddProperty(&tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
         // Be sure this is only done for the first material
         mBackgroundImage = std::string("");
     }
 
     // At first add the base ambient color of the scene to the material
-    oldMat.mAmbient.r += mClrAmbient.r;
-    oldMat.mAmbient.g += mClrAmbient.g;
-    oldMat.mAmbient.b += mClrAmbient.b;
+    p_cMat.mAmbient.r += mClrAmbient.r;
+    p_cMat.mAmbient.g += mClrAmbient.g;
+    p_cMat.mAmbient.b += mClrAmbient.b;
 
     aiString name;
-    name.Set(oldMat.mName);
-    mat.AddProperty(&name, AI_MATKEY_NAME);
+    name.Set(p_cMat.mName);
+    p_pcOut.AddProperty(&name, AI_MATKEY_NAME);
 
     // Material colors
-    mat.AddProperty(&oldMat.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
-    mat.AddProperty(&oldMat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-    mat.AddProperty(&oldMat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-    mat.AddProperty(&oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+    p_pcOut.AddProperty(&p_cMat.mAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
+    p_pcOut.AddProperty(&p_cMat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+    p_pcOut.AddProperty(&p_cMat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
+    p_pcOut.AddProperty(&p_cMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 
     // Phong shininess and shininess strength
-    if (D3DS::Discreet3DS::Phong == oldMat.mShading ||
-            D3DS::Discreet3DS::Metal == oldMat.mShading) {
-        if (!oldMat.mSpecularExponent || !oldMat.mShininessStrength) {
-            oldMat.mShading = D3DS::Discreet3DS::Gouraud;
+    if (D3DS::Discreet3DS::Phong == p_cMat.mShading ||
+            D3DS::Discreet3DS::Metal == p_cMat.mShading) {
+        if (!p_cMat.mSpecularExponent || !p_cMat.mShininessStrength) {
+            p_cMat.mShading = D3DS::Discreet3DS::Gouraud;
         } else {
-            mat.AddProperty(&oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
-            mat.AddProperty(&oldMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
+            p_pcOut.AddProperty(&p_cMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
+            p_pcOut.AddProperty(&p_cMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
         }
     }
 
     // Opacity
-    mat.AddProperty<ai_real>(&oldMat.mTransparency, 1, AI_MATKEY_OPACITY);
+    p_pcOut.AddProperty<ai_real>(&p_cMat.mTransparency, 1, AI_MATKEY_OPACITY);
 
     // Bump height scaling
-    mat.AddProperty<ai_real>(&oldMat.mBumpHeight, 1, AI_MATKEY_BUMPSCALING);
+    p_pcOut.AddProperty<ai_real>(&p_cMat.mBumpHeight, 1, AI_MATKEY_BUMPSCALING);
 
     // Two sided rendering?
-    if (oldMat.mTwoSided) {
+    if (p_cMat.mTwoSided) {
         int i = 1;
-        mat.AddProperty<int>(&i, 1, AI_MATKEY_TWOSIDED);
+        p_pcOut.AddProperty<int>(&i, 1, AI_MATKEY_TWOSIDED);
     }
 
     // Shading mode
     aiShadingMode eShading = aiShadingMode_NoShading;
-    switch (oldMat.mShading) {
+    switch (p_cMat.mShading) {
     case D3DS::Discreet3DS::Flat:
         eShading = aiShadingMode_Flat;
         break;
@@ -265,7 +265,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
     case D3DS::Discreet3DS::Wire: {
         // Set the wireframe flag
         unsigned int iWire = 1;
-        mat.AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
+        p_pcOut.AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
 
     case D3DS::Discreet3DS::Gouraud:
@@ -289,47 +289,47 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
         break;
     }
     int eShading_ = static_cast<int>(eShading);
-    mat.AddProperty<int>(&eShading_, 1, AI_MATKEY_SHADING_MODEL);
+    p_pcOut.AddProperty<int>(&eShading_, 1, AI_MATKEY_SHADING_MODEL);
 
     // DIFFUSE texture
-    if (oldMat.sTexDiffuse.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexDiffuse, aiTextureType_DIFFUSE);
+    if (p_cMat.sTexDiffuse.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexDiffuse, aiTextureType_DIFFUSE);
 
     // SPECULAR texture
-    if (oldMat.sTexSpecular.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexSpecular, aiTextureType_SPECULAR);
+    if (p_cMat.sTexSpecular.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexSpecular, aiTextureType_SPECULAR);
 
     // OPACITY texture
-    if (oldMat.sTexOpacity.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexOpacity, aiTextureType_OPACITY);
+    if (p_cMat.sTexOpacity.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexOpacity, aiTextureType_OPACITY);
 
     // EMISSIVE texture
-    if (oldMat.sTexEmissive.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexEmissive, aiTextureType_EMISSIVE);
+    if (p_cMat.sTexEmissive.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexEmissive, aiTextureType_EMISSIVE);
 
     // BUMP texture
-    if (oldMat.sTexBump.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexBump, aiTextureType_HEIGHT);
+    if (p_cMat.sTexBump.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexBump, aiTextureType_HEIGHT);
 
     // SHININESS texture
-    if (oldMat.sTexShininess.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexShininess, aiTextureType_SHININESS);
+    if (p_cMat.sTexShininess.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexShininess, aiTextureType_SHININESS);
 
     // REFLECTION texture
-    if (oldMat.sTexReflective.mMapName.length() > 0)
-        CopyTexture(mat, oldMat.sTexReflective, aiTextureType_REFLECTION);
+    if (p_cMat.sTexReflective.mMapName.length() > 0)
+        CopyTexture(p_pcOut, p_cMat.sTexReflective, aiTextureType_REFLECTION);
 
     // Store the name of the material itself, too
-    if (oldMat.mName.length()) {
+    if (p_cMat.mName.length()) {
         aiString tex;
-        tex.Set(oldMat.mName);
-        mat.AddProperty(&tex, AI_MATKEY_NAME);
+        tex.Set(p_cMat.mName);
+        p_pcOut.AddProperty(&tex, AI_MATKEY_NAME);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Split meshes by their materials and generate output aiMesh'es
-void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
+void Discreet3DSImporter::ConvertMeshes(aiScene *p_cOut) {
     std::vector<aiMesh *> avOutMeshes;
     avOutMeshes.reserve(mScene->mMeshes.size() * 2);
 
@@ -398,10 +398,10 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
     }
 
     // Copy them to the output array
-    pcOut->mNumMeshes = (unsigned int)avOutMeshes.size();
-    pcOut->mMeshes = new aiMesh *[pcOut->mNumMeshes]();
-    for (unsigned int a = 0; a < pcOut->mNumMeshes; ++a) {
-        pcOut->mMeshes[a] = avOutMeshes[a];
+    p_cOut->mNumMeshes = (unsigned int)avOutMeshes.size();
+    p_cOut->mMeshes = new aiMesh *[p_cOut->mNumMeshes]();
+    for (unsigned int a = 0; a < p_cOut->mNumMeshes; ++a) {
+        p_cOut->mMeshes[a] = avOutMeshes[a];
     }
 
     // We should have at least one face here
@@ -412,7 +412,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
 
 // ------------------------------------------------------------------------------------------------
 // Add a node to the scenegraph and setup its final transformation
-void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pcOut,
+void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const p_cOut,
         D3DS::Node *const pcIn, aiMatrix4x4 & /*absTrafo*/) {
     std::vector<unsigned int> iArray;
     iArray.reserve(3);
@@ -427,6 +427,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
         if (pcIn->mName == pcMesh->mName)
             iArray.push_back(a);
     }
+
     if (!iArray.empty()) {
         // The matrix should be identical for all meshes with the
         // same name. It HAS to be identical for all meshes .....
@@ -439,8 +440,8 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
         mInvTransposed.Transpose();
         aiVector3D pivot = pcIn->vPivot;
 
-        pcOut->mNumMeshes = (unsigned int)iArray.size();
-        pcOut->mMeshes = new unsigned int[iArray.size()];
+        p_cOut->mNumMeshes = (unsigned int)iArray.size();
+        p_cOut->mMeshes = new unsigned int[iArray.size()];
         for (unsigned int i = 0; i < iArray.size(); ++i) {
             const unsigned int iIndex = iArray[i];
             aiMesh *const mesh = pcSOut->mMeshes[iIndex];
@@ -478,7 +479,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
                 mesh->mColors[1] = (aiColor4D *)1;
 
             // Setup the mesh index
-            pcOut->mMeshes[i] = iIndex;
+            p_cOut->mMeshes[i] = iIndex;
         }
     }
 
@@ -489,9 +490,9 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
         ASSIMP_itoa10(tmp, pcIn->mInstanceNumber);
         std::string tempStr = pcIn->mName + "_inst_";
         tempStr += tmp;
-        pcOut->mName.Set(tempStr);
+        p_cOut->mName.Set(tempStr);
     } else
-        pcOut->mName.Set(pcIn->mName);
+        p_cOut->mName.Set(pcIn->mName);
 
     // Now build the transformation matrix of the node
     // ROTATION
@@ -502,14 +503,14 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
             (*it).mValue.w *= -1.f;
         }
 
-        pcOut->mTransformation = aiMatrix4x4(pcIn->aRotationKeys[0].mValue.GetMatrix());
+        p_cOut->mTransformation = aiMatrix4x4(pcIn->aRotationKeys[0].mValue.GetMatrix());
     } else if (pcIn->aCameraRollKeys.size()) {
         aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(-pcIn->aCameraRollKeys[0].mValue),
-                pcOut->mTransformation);
+                p_cOut->mTransformation);
     }
 
     // SCALING
-    aiMatrix4x4 &m = pcOut->mTransformation;
+    aiMatrix4x4 &m = p_cOut->mTransformation;
     if (pcIn->aScalingKeys.size()) {
         const aiVector3D &v = pcIn->aScalingKeys[0].mValue;
         m.a1 *= v.x;
@@ -599,12 +600,12 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
         // corresponding light or camera chunks. However, we read and process the latter
         // to to be able to return valid cameras/lights even if no scenegraph is given.
         for (unsigned int n = 0; n < pcSOut->mNumCameras; ++n) {
-            if (pcSOut->mCameras[n]->mName == pcOut->mName) {
+            if (pcSOut->mCameras[n]->mName == p_cOut->mName) {
                 pcSOut->mCameras[n]->mLookAt = aiVector3D(0.f, 0.f, 1.f);
             }
         }
         for (unsigned int n = 0; n < pcSOut->mNumLights; ++n) {
-            if (pcSOut->mLights[n]->mName == pcOut->mName) {
+            if (pcSOut->mLights[n]->mName == p_cOut->mName) {
                 pcSOut->mLights[n]->mDirection = aiVector3D(0.f, 0.f, 1.f);
             }
         }
@@ -647,15 +648,15 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *const pcSOut, aiNode *const pc
     }
 
     // Allocate storage for children
-    pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
-    pcOut->mChildren = new aiNode *[pcIn->mChildren.size()];
+    p_cOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
+    p_cOut->mChildren = new aiNode *[pcIn->mChildren.size()];
 
     // Recursively process all children
     const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
     for (unsigned int i = 0; i < size; ++i) {
-        pcOut->mChildren[i] = new aiNode();
-        pcOut->mChildren[i]->mParent = pcOut;
-        AddNodeToGraph(pcSOut, pcOut->mChildren[i], pcIn->mChildren[i], abs);
+        p_cOut->mChildren[i] = new aiNode();
+        p_cOut->mChildren[i]->mParent = p_cOut;
+        AddNodeToGraph(pcSOut, p_cOut->mChildren[i], pcIn->mChildren[i], abs);
     }
 }
 
@@ -682,9 +683,10 @@ void CountTracks(const D3DS::Node *const node, unsigned int &cnt) {
 
 // ------------------------------------------------------------------------------------------------
 // Generate the output node graph
-void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
-    pcOut->mRootNode = new aiNode();
-    if (0 == mRootNode->mChildren.size()) {
+void Discreet3DSImporter::GenerateNodeGraph(aiScene *p_cOut,
+        D3DS::Node *p_rootNode) {
+    p_cOut->mRootNode = new aiNode();
+    if (0 == p_rootNode->mChildren.size()) {
         //////////////////////////////////////////////////////////////////////////////
         // It seems the file is so messed up that it does not even have a hierarchy.
         // Generate a flat hiearachy which looks like this:
@@ -697,17 +699,17 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
         //
         ASSIMP_LOG_WARN("No hierarchy information has been found in the file. ");
 
-        pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes +
-                                         static_cast<unsigned int>(mScene->mCameras.size() + mScene->mLights.size());
+        p_cOut->mRootNode->mNumChildren = p_cOut->mNumMeshes +
+                                          static_cast<unsigned int>(mScene->mCameras.size() + mScene->mLights.size());
 
-        pcOut->mRootNode->mChildren = new aiNode *[pcOut->mRootNode->mNumChildren];
-        pcOut->mRootNode->mName.Set("<3DSDummyRoot>");
+        p_cOut->mRootNode->mChildren = new aiNode *[p_cOut->mRootNode->mNumChildren];
+        p_cOut->mRootNode->mName.Set("<3DSDummyRoot>");
 
         // Build dummy nodes for all meshes
         unsigned int a = 0;
-        for (unsigned int i = 0; i < pcOut->mNumMeshes; ++i, ++a) {
-            aiNode *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
-            pcNode->mParent = pcOut->mRootNode;
+        for (unsigned int i = 0; i < p_cOut->mNumMeshes; ++i, ++a) {
+            aiNode *pcNode = p_cOut->mRootNode->mChildren[a] = new aiNode();
+            pcNode->mParent = p_cOut->mRootNode;
             pcNode->mMeshes = new unsigned int[1];
             pcNode->mMeshes[0] = i;
             pcNode->mNumMeshes = 1;
@@ -718,8 +720,8 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
 
         // Build dummy nodes for all cameras
         for (unsigned int i = 0; i < (unsigned int)mScene->mCameras.size(); ++i, ++a) {
-            aiNode *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
-            pcNode->mParent = pcOut->mRootNode;
+            aiNode *pcNode = p_cOut->mRootNode->mChildren[a] = new aiNode();
+            pcNode->mParent = p_cOut->mRootNode;
 
             // Build a name for the node
             pcNode->mName = mScene->mCameras[i]->mName;
@@ -727,8 +729,8 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
 
         // Build dummy nodes for all lights
         for (unsigned int i = 0; i < (unsigned int)mScene->mLights.size(); ++i, ++a) {
-            aiNode *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
-            pcNode->mParent = pcOut->mRootNode;
+            aiNode *pcNode = p_cOut->mRootNode->mChildren[a] = new aiNode();
+            pcNode->mParent = p_cOut->mRootNode;
 
             // Build a name for the node
             pcNode->mName = mScene->mLights[i]->mName;
@@ -737,13 +739,13 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
         // First of all: find out how many scaling, rotation and translation
         // animation tracks we'll have afterwards
         unsigned int numChannel = 0;
-        CountTracks(mRootNode, numChannel);
+        CountTracks(p_rootNode, numChannel);
 
         if (numChannel) {
             // Allocate a primary animation channel
-            pcOut->mNumAnimations = 1;
-            pcOut->mAnimations = new aiAnimation *[1];
-            aiAnimation *anim = pcOut->mAnimations[0] = new aiAnimation();
+            p_cOut->mNumAnimations = 1;
+            p_cOut->mAnimations = new aiAnimation *[1];
+            aiAnimation *anim = p_cOut->mAnimations[0] = new aiAnimation();
 
             anim->mName.Set("3DSMasterAnim");
 
@@ -754,58 +756,58 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
         }
 
         aiMatrix4x4 m;
-        AddNodeToGraph(pcOut, pcOut->mRootNode, mRootNode, m);
+        AddNodeToGraph(p_cOut, p_cOut->mRootNode, p_rootNode, m);
     }
 
     // We used the first and second vertex color set to store some temporary values so we need to cleanup here
-    for (unsigned int a = 0; a < pcOut->mNumMeshes; ++a) {
-        pcOut->mMeshes[a]->mColors[0] = nullptr;
-        pcOut->mMeshes[a]->mColors[1] = nullptr;
+    for (unsigned int a = 0; a < p_cOut->mNumMeshes; ++a) {
+        p_cOut->mMeshes[a]->mColors[0] = nullptr;
+        p_cOut->mMeshes[a]->mColors[1] = nullptr;
     }
 
-    pcOut->mRootNode->mTransformation = aiMatrix4x4(
-                                                1.f, 0.f, 0.f, 0.f,
-                                                0.f, 0.f, 1.f, 0.f,
-                                                0.f, -1.f, 0.f, 0.f,
-                                                0.f, 0.f, 0.f, 1.f) *
-                                        pcOut->mRootNode->mTransformation;
+    p_cOut->mRootNode->mTransformation = aiMatrix4x4(
+                                                 1.f, 0.f, 0.f, 0.f,
+                                                 0.f, 0.f, 1.f, 0.f,
+                                                 0.f, -1.f, 0.f, 0.f,
+                                                 0.f, 0.f, 0.f, 1.f) *
+                                         p_cOut->mRootNode->mTransformation;
 
     // If the root node is unnamed name it "<3DSRoot>"
-    if (::strstr(pcOut->mRootNode->mName.data, "UNNAMED") ||
-            (pcOut->mRootNode->mName.data[0] == '$' && pcOut->mRootNode->mName.data[1] == '$')) {
-        pcOut->mRootNode->mName.Set("<3DSRoot>");
+    if (::strstr(p_cOut->mRootNode->mName.data, "UNNAMED") ||
+            (p_cOut->mRootNode->mName.data[0] == '$' && p_cOut->mRootNode->mName.data[1] == '$')) {
+        p_cOut->mRootNode->mName.Set("<3DSRoot>");
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Convert all meshes in the scene and generate the final output scene.
-void Discreet3DSImporter::ConvertScene(aiScene *pcOut) {
+void Discreet3DSImporter::ConvertScene(aiScene *p_cOut) {
     // Allocate enough storage for all output materials
-    pcOut->mNumMaterials = (unsigned int)mScene->mMaterials.size();
-    pcOut->mMaterials = new aiMaterial *[pcOut->mNumMaterials];
+    p_cOut->mNumMaterials = (unsigned int)mScene->mMaterials.size();
+    p_cOut->mMaterials = new aiMaterial *[p_cOut->mNumMaterials];
 
     //  ... and convert the 3DS materials to aiMaterial's
-    for (unsigned int i = 0; i < pcOut->mNumMaterials; ++i) {
+    for (unsigned int i = 0; i < p_cOut->mNumMaterials; ++i) {
         aiMaterial *pcNew = new aiMaterial();
         ConvertMaterial(mScene->mMaterials[i], *pcNew);
-        pcOut->mMaterials[i] = pcNew;
+        p_cOut->mMaterials[i] = pcNew;
     }
 
     // Generate the output mesh list
-    ConvertMeshes(pcOut);
+    ConvertMeshes(p_cOut);
 
     // Now copy all light sources to the output scene
-    pcOut->mNumLights = (unsigned int)mScene->mLights.size();
-    if (pcOut->mNumLights) {
-        pcOut->mLights = new aiLight *[pcOut->mNumLights];
-        ::memcpy(pcOut->mLights, &mScene->mLights[0], sizeof(void *) * pcOut->mNumLights);
+    p_cOut->mNumLights = (unsigned int)mScene->mLights.size();
+    if (p_cOut->mNumLights) {
+        p_cOut->mLights = new aiLight *[p_cOut->mNumLights];
+        ::memcpy(p_cOut->mLights, &mScene->mLights[0], sizeof(void *) * p_cOut->mNumLights);
     }
 
     // Now copy all cameras to the output scene
-    pcOut->mNumCameras = (unsigned int)mScene->mCameras.size();
-    if (pcOut->mNumCameras) {
-        pcOut->mCameras = new aiCamera *[pcOut->mNumCameras];
-        ::memcpy(pcOut->mCameras, &mScene->mCameras[0], sizeof(void *) * pcOut->mNumCameras);
+    p_cOut->mNumCameras = (unsigned int)mScene->mCameras.size();
+    if (p_cOut->mNumCameras) {
+        p_cOut->mCameras = new aiCamera *[p_cOut->mNumCameras];
+        ::memcpy(p_cOut->mCameras, &mScene->mCameras[0], sizeof(void *) * p_cOut->mNumCameras);
     }
 }
 

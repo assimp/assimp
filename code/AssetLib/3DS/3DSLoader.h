@@ -57,8 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
-namespace Assimp    {
-
+namespace Assimp {
 
 using namespace D3DS;
 
@@ -70,138 +69,142 @@ public:
     Discreet3DSImporter();
     ~Discreet3DSImporter();
 
+public:
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &p_File, IOSystem *p_IOHandler,
+            bool p_checkSig) const;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
      * The function is a request to the importer to update its configuration
      * basing on the Importer's configuration property list.
      */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *p_Importer);
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &p_File, aiScene *p_Scene,
+            IOSystem *p_IOHandler);
 
     // -------------------------------------------------------------------
     /** Converts a temporary material to the outer representation
      */
-    void ConvertMaterial(D3DS::Material& p_cMat,
-        aiMaterial& p_pcOut);
+    void ConvertMaterial(D3DS::Material &p_cMat,
+            aiMaterial &p_pcOut);
 
     // -------------------------------------------------------------------
     /** Read a chunk
      *
-     *  @param pcOut Receives the current chunk
+     *  @param p_cOut Receives the current chunk
      */
-    void ReadChunk(Discreet3DS::Chunk& pcOut);
+    void ReadChunk(Discreet3DS::Chunk &p_cOut, StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a percentage chunk. mCurrent will point to the next
     * chunk behind afterwards. If no percentage chunk is found
     * QNAN is returned.
     */
-    ai_real ParsePercentageChunk();
+    ai_real ParsePercentageChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a color chunk. mCurrent will point to the next
     * chunk behind afterwards. If no color chunk is found
     * QNAN is returned in all members.
     */
-    void ParseColorChunk(aiColor3D* p_pcOut,
-        bool p_bAcceptPercent = true);
-
+    void ParseColorChunk(aiColor3D *p_cOut,
+            StreamReaderLE *p_stream,
+            bool p_acceptPercent = true);
 
     // -------------------------------------------------------------------
     /** Skip a chunk in the file
     */
-    void SkipChunk();
+    void SkipChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Generate the nodegraph
     */
-    void GenerateNodeGraph(aiScene* pcOut);
+    void GenerateNodeGraph(aiScene *p_cOut, D3DS::Node *p_rootNode);
 
     // -------------------------------------------------------------------
     /** Parse a main top-level chunk in the file
     */
-    void ParseMainChunk();
+    void ParseMainChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
+            StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a top-level chunk in the file
     */
-    void ParseChunk(const char* name, unsigned int num);
+    void ParseChunk(const char *name, unsigned int num, StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a top-level editor chunk in the file
     */
-    void ParseEditorChunk();
+    void ParseEditorChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
+            StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a top-level object chunk in the file
     */
-    void ParseObjectChunk();
+    void ParseObjectChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a material chunk in the file
     */
-    void ParseMaterialChunk();
+    void ParseMaterialChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a mesh chunk in the file
     */
-    void ParseMeshChunk();
+    void ParseMeshChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a light chunk in the file
     */
-    void ParseLightChunk();
+    void ParseLightChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a camera chunk in the file
     */
-    void ParseCameraChunk();
+    void ParseCameraChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a face list chunk in the file
     */
-    void ParseFaceChunk();
+    void ParseFaceChunk(StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a keyframe chunk in the file
     */
-    void ParseKeyframeChunk();
+    void ParseKeyframeChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
+            StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a hierarchy chunk in the file
     */
-    void ParseHierarchyChunk(uint16_t parent);
+    void ParseHierarchyChunk(uint16_t parent, D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
+            StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a texture chunk in the file
     */
-    void ParseTextureChunk(D3DS::Texture* pcOut);
+    void ParseTextureChunk(D3DS::Texture *p_cOut, StreamReaderLE *p_stream);
 
     // -------------------------------------------------------------------
     /** Convert the meshes in the file
     */
-    void ConvertMeshes(aiScene* pcOut);
+    void ConvertMeshes(aiScene *p_cOut);
 
     // -------------------------------------------------------------------
     /** Replace the default material in the scene
@@ -211,53 +214,49 @@ protected:
     // -------------------------------------------------------------------
     /** Convert the whole scene
     */
-    void ConvertScene(aiScene* pcOut);
+    void ConvertScene(aiScene *p_cOut);
 
     // -------------------------------------------------------------------
     /** generate unique vertices for a mesh
     */
-    void MakeUnique(D3DS::Mesh& sMesh);
+    void MakeUnique(D3DS::Mesh &sMesh);
 
     // -------------------------------------------------------------------
     /** Add a node to the node graph
     */
-    void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn,
-        aiMatrix4x4& absTrafo);
+    void AddNodeToGraph(aiScene *pcSOut, aiNode *p_cOut, D3DS::Node *pcIn,
+            aiMatrix4x4 &absTrafo);
 
     // -------------------------------------------------------------------
     /** Search for a node in the graph.
     * Called recursively
     */
-    void InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCurrent);
+    void InverseNodeSearch(D3DS::Node *pcNode, D3DS::Node *p_rootNode, D3DS::Node *pcCurrent);
 
     // -------------------------------------------------------------------
     /** Apply the master scaling factor to the mesh
     */
-    void ApplyMasterScale(aiScene* pScene);
+    void ApplyMasterScale(aiScene *p_Scene);
 
     // -------------------------------------------------------------------
     /** Clamp all indices in the file to a valid range
     */
-    void CheckIndices(D3DS::Mesh& sMesh);
+    void CheckIndices(D3DS::Mesh &sMesh);
 
     // -------------------------------------------------------------------
     /** Skip the TCB info in a track key
     */
-    void SkipTCBInfo();
+    void SkipTCBInfo(StreamReaderLE *p_stream);
 
 protected:
-
     /** Stream to read from */
-    StreamReaderLE* stream;
+    // StreamReaderLE *stream;
 
     /** Last touched node index */
     short mLastNodeIndex;
 
-    /** Current node, root node */
-    D3DS::Node* mCurrentNode, *mRootNode;
-
     /** Scene under construction */
-    D3DS::Scene* mScene;
+    D3DS::Scene *mScene;
 
     /** Ambient base color of the scene */
     aiColor3D mClrAmbient;

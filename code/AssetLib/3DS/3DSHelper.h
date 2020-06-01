@@ -416,17 +416,7 @@ struct Texture {
 /** Helper structure representing a 3ds material */
 struct Material {
     //! Default constructor has been deleted
-    Material() :
-            mName(),
-            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
-            mSpecularExponent(ai_real(0.0)),
-            mShininessStrength(ai_real(1.0)),
-            mShading(Discreet3DS::Gouraud),
-            mTransparency(ai_real(1.0)),
-            mBumpHeight(ai_real(1.0)),
-            mTwoSided(false) {
-        // empty
-    }
+    Material() = delete;
 
     //! Constructor with explicit name
     explicit Material(const std::string &name) :
@@ -434,9 +424,20 @@ struct Material {
             mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
             mSpecularExponent(ai_real(0.0)),
             mShininessStrength(ai_real(1.0)),
+            mSpecular(),
+            mAmbient(),
             mShading(Discreet3DS::Gouraud),
             mTransparency(ai_real(1.0)),
+            sTexDiffuse(),
+            sTexOpacity(),
+            sTexSpecular(),
+            sTexReflective(),
+            sTexBump(),
+            sTexEmissive(),
+            sTexShininess(),
             mBumpHeight(ai_real(1.0)),
+            mEmissive(),
+            sTexAmbient(),
             mTwoSided(false) {
         // empty
     }
@@ -613,7 +614,7 @@ struct Node {
     Node() = delete;
 
     explicit Node(const std::string &name) :
-            mParent(NULL), mName(name), mInstanceNumber(0), mHierarchyPos(0), mHierarchyIndex(0), mInstanceCount(1) {
+            mParent(nullptr), mName(name), mInstanceNumber(0), mHierarchyPos(0), mHierarchyIndex(0), mInstanceCount(1) {
         aRotationKeys.reserve(20);
         aPositionKeys.reserve(20);
         aScalingKeys.reserve(20);

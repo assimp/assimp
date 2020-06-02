@@ -306,6 +306,7 @@ ADD_ASSIMP_IMPORTER( AMF
 
 ADD_ASSIMP_IMPORTER( 3DS
   AssetLib/3DS/3DSConverter.cpp
+  AssetLib/3DS/3DSHelper.cpp
   AssetLib/3DS/3DSHelper.h
   AssetLib/3DS/3DSLoader.cpp
   AssetLib/3DS/3DSLoader.h

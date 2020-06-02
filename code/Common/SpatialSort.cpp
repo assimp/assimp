@@ -212,7 +212,9 @@ BinFloat ToBinary(const ai_real &pValue) {
     // Two's complement?
     bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & 0x80000000));
     bool OneComplement = ((-42 == ~42) && (binValue & 0x80000000));
-    bool SignedMagnitude = ((-42 == (42 | (-0))) && (binValue & 0x80000000));
+    // bool SignedMagnitude = ((-42 == (42 | (-0))) && (binValue & 0x80000000));
+    
+    bool SignedMagnitude  = false;
 
     if (DefaultValue)
         return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;

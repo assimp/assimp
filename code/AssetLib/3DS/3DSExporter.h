@@ -52,13 +52,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StreamWriter.h>
 #include <assimp/material.h>
 
+#include "3DSHelper.h"
+
 struct aiScene;
 struct aiNode;
 struct aiMaterial;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /**
@@ -67,30 +68,29 @@ namespace Assimp
 // ------------------------------------------------------------------------------------------------
 class Discreet3DSExporter {
 public:
-    Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, const aiScene* pScene);
+    Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, const aiScene *pScene);
     ~Discreet3DSExporter();
 
 private:
     void WriteMeshes();
     void WriteMaterials();
-    void WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags);
-    void WriteFaceMaterialChunk(const aiMesh& mesh);
-    int WriteHierarchy(const aiNode& node, int level, int sibling_level);
-    void WriteString(const std::string& s);
-    void WriteString(const aiString& s);
-    void WriteColor(const aiColor3D& color);
+    void WriteTexture(const aiMaterial &mat, const aiTextureType type, const D3DS::Discreet3DS::ChunkEnum chunk_flags);
+    void WriteFaceMaterialChunk(const aiMesh &mesh);
+    int WriteHierarchy(const aiNode &node, int level, int sibling_level);
+    void WriteString(const std::string &s);
+    void WriteString(const aiString &s);
+    void WriteColor(const aiColor3D &color);
     void WritePercentChunk(float f);
     void WritePercentChunk(double f);
 
 private:
-    const aiScene* const scene;
+    const aiScene *const scene;
     StreamWriterLE writer;
 
-    std::map<const aiNode*, aiMatrix4x4> trafos;
+    std::map<const aiNode *, aiMatrix4x4> trafos;
 
-    typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
+    typedef std::multimap<const aiNode *, unsigned int> MeshesByNodeMap;
     MeshesByNodeMap meshes;
-
 };
 
 } // Namespace Assimp

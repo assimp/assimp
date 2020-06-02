@@ -75,15 +75,9 @@ private:
     }
 
 public:
-    //! data structure for a single chunk in a .3ds file
-    struct Chunk {
-        uint16_t Flag = 0;
-        uint32_t Size = 0;
-    } PACK_STRUCT;
-
     //! Used for shading field in material3ds structure
     //! From AutoDesk 3ds SDK
-    typedef enum {
+    enum class ShadeType3DS : uint16_t {
         // translated to gouraud shading with wireframe active
         Wire = 0x0,
 
@@ -104,10 +98,10 @@ public:
 
         // required by the ASE loader
         Blinn = 0x5
-    } shadetype3ds;
+    };
 
     // Flags for animated keys
-    enum {
+    enum class AnimatedKey : uint16_t {
         KEY_USE_TENS = 0x1,
         KEY_USE_CONT = 0x2,
         KEY_USE_BIAS = 0x4,
@@ -115,7 +109,7 @@ public:
         KEY_USE_EASE_FROM = 0x10
     };
 
-    enum {
+    enum class ChunkEnum : uint16_t {
 
         // ********************************************************************
         // Basic chunks which can be found everywhere in the file
@@ -314,7 +308,17 @@ public:
         // camera sub-chunks
         CHUNK_CAM_RANGES = 0x4720
     };
+
+    //! data structure for a single chunk in a .3ds file
+    struct Chunk {
+        //  TODO: If we have support for C++17, we can use std::optional to denote the initialization of this value.
+        // Although I am not sure how assimp deals with failure?
+        ChunkEnum Flag;
+        uint32_t Size = 0;
+    } PACK_STRUCT;
 };
+
+bool operator&(Discreet3DS::AnimatedKey lhs, Discreet3DS::AnimatedKey rhs);
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
@@ -426,7 +430,7 @@ struct Material {
             mShininessStrength(ai_real(1.0)),
             mSpecular(),
             mAmbient(),
-            mShading(Discreet3DS::Gouraud),
+            mShading(Discreet3DS::ShadeType3DS::Gouraud),
             mTransparency(ai_real(1.0)),
             sTexDiffuse(),
             sTexOpacity(),
@@ -533,7 +537,7 @@ struct Material {
     //! Ambient color of the material
     aiColor3D mAmbient;
     //! Shading type to be used
-    Discreet3DS::shadetype3ds mShading;
+    Discreet3DS::ShadeType3DS mShading;
     //! Opacity of the material
     ai_real mTransparency;
     //! Diffuse texture channel

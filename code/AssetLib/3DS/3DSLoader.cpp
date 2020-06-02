@@ -111,7 +111,7 @@ Discreet3DSImporter::~Discreet3DSImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool Discreet3DSImporter::CanRead(const std::string &p_File, IOSystem *p_IOHandler, bool p_checkSig) const {
+bool Discreet3DSImporter::CanRead(const std::string &p_File, IOSystem *const p_IOHandler, const bool p_checkSig) const {
     std::string extension = GetExtension(p_File);
     if (extension == "3ds" || extension == "prj") {
         return true;
@@ -135,7 +135,7 @@ const aiImporterDesc *Discreet3DSImporter::GetInfo() const {
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
-void Discreet3DSImporter::SetupProperties(const Importer * /*pImp*/) {
+void Discreet3DSImporter::SetupProperties(const Importer *const /*pImp*/) {
     // nothing to be done for the moment
 }
 
@@ -210,7 +210,7 @@ void Discreet3DSImporter::InternReadFile(const std::string &p_File,
 
 // ------------------------------------------------------------------------------------------------
 // Applies a master-scaling factor to the imported scene
-void Discreet3DSImporter::ApplyMasterScale(aiScene *p_Scene) {
+void Discreet3DSImporter::ApplyMasterScale(aiScene *const p_Scene) {
     // There are some 3DS files with a zero scaling factor
     if (!mMasterScale)
         mMasterScale = 1.0f;
@@ -230,9 +230,9 @@ void Discreet3DSImporter::ApplyMasterScale(aiScene *p_Scene) {
 // ------------------------------------------------------------------------------------------------
 // Reads a new chunk from the file
 void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk &p_cOut,
-        StreamReaderLE *p_stream) {
+        StreamReaderLE *const p_stream) const {
 
-    p_cOut.Flag = p_stream->GetI2();
+    p_cOut.Flag = static_cast<Discreet3DS::ChunkEnum>(p_stream->GetI2());
     p_cOut.Size = p_stream->GetI4();
 
     if (p_cOut.Size - sizeof(Discreet3DS::Chunk) > p_stream->GetRemainingSize()) {
@@ -246,19 +246,19 @@ void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk &p_cOut,
 
 // ------------------------------------------------------------------------------------------------
 // Process the primary chunk of the file
-void Discreet3DSImporter::ParseMainChunk(D3DS::Node *p_rootNode,
+void Discreet3DSImporter::ParseMainChunk(D3DS::Node *const p_rootNode,
         D3DS::Node *p_currentNode,
         StreamReaderLE *p_stream) {
     ASSIMP_3DS_BEGIN_CHUNK(p_stream);
 
     // get chunk type
     switch (chunk.Flag) {
-
-    case Discreet3DS::CHUNK_PRJ:
+    case Discreet3DS::ChunkEnum::CHUNK_PRJ:
         bIsPrj = true;
-    case Discreet3DS::CHUNK_MAIN:
+    case Discreet3DS::ChunkEnum::CHUNK_MAIN:
         ParseEditorChunk(p_rootNode, p_currentNode, p_stream);
         break;
+    default: break;
     };
 
     ASSIMP_3DS_END_CHUNK(p_stream);
@@ -267,30 +267,29 @@ void Discreet3DSImporter::ParseMainChunk(D3DS::Node *p_rootNode,
 }
 
 // ------------------------------------------------------------------------------------------------
-void Discreet3DSImporter::ParseEditorChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
-        StreamReaderLE *p_stream) {
+void Discreet3DSImporter::ParseEditorChunk(D3DS::Node *const p_rootNode, D3DS::Node *const p_currentNode,
+        StreamReaderLE *const p_stream) {
     ASSIMP_3DS_BEGIN_CHUNK(p_stream);
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_OBJMESH:
-
+    case Discreet3DS::ChunkEnum::CHUNK_OBJMESH:
         ParseObjectChunk(p_stream);
         break;
 
     // NOTE: In several documentations in the internet this
     // chunk appears at different locations
-    case Discreet3DS::CHUNK_KEYFRAMER:
-
+    case Discreet3DS::ChunkEnum::CHUNK_KEYFRAMER:
         ParseKeyframeChunk(p_rootNode, p_currentNode, p_stream);
         break;
 
-    case Discreet3DS::CHUNK_VERSION: {
+    case Discreet3DS::ChunkEnum::CHUNK_VERSION: {
         // print the version number
         char buff[10];
         ASSIMP_itoa10(buff, p_stream->GetI2());
         ASSIMP_LOG_INFO_F(std::string("3DS file format version: "), buff);
     } break;
+    default: break;
     };
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
@@ -301,7 +300,7 @@ void Discreet3DSImporter::ParseObjectChunk(StreamReaderLE *p_stream) {
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_OBJBLOCK: {
+    case Discreet3DS::ChunkEnum::CHUNK_OBJBLOCK: {
         unsigned int cnt = 0;
         const char *sz = (const char *)p_stream->GetPtr();
 
@@ -311,14 +310,14 @@ void Discreet3DSImporter::ParseObjectChunk(StreamReaderLE *p_stream) {
         ParseChunk(sz, cnt, p_stream);
     } break;
 
-    case Discreet3DS::CHUNK_MAT_MATERIAL:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MATERIAL:
 
         // Add a new material to the list
         mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + to_string(mScene->mMaterials.size()))));
         ParseMaterialChunk(p_stream);
         break;
 
-    case Discreet3DS::CHUNK_AMBCOLOR:
+    case Discreet3DS::ChunkEnum::CHUNK_AMBCOLOR:
 
         // This is the ambient base color of the scene.
         // We add it to the ambient color of all materials
@@ -330,7 +329,7 @@ void Discreet3DSImporter::ParseObjectChunk(StreamReaderLE *p_stream) {
         }
         break;
 
-    case Discreet3DS::CHUNK_BIT_MAP: {
+    case Discreet3DS::ChunkEnum::CHUNK_BIT_MAP: {
         // Specifies the background image. The string should already be
         // properly 0 terminated but we need to be sure
         unsigned int cnt = 0;
@@ -340,15 +339,17 @@ void Discreet3DSImporter::ParseObjectChunk(StreamReaderLE *p_stream) {
         mBackgroundImage = std::string(sz, cnt);
     } break;
 
-    case Discreet3DS::CHUNK_BIT_MAP_EXISTS:
+    case Discreet3DS::ChunkEnum::CHUNK_BIT_MAP_EXISTS:
         bHasBG = true;
         break;
 
-    case Discreet3DS::CHUNK_MASTER_SCALE:
+    case Discreet3DS::ChunkEnum::CHUNK_MASTER_SCALE:
         // Scene master scaling factor
         mMasterScale = p_stream->GetF4();
         break;
+    default: break;
     };
+
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
 
@@ -364,7 +365,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num,
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_TRIMESH: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRIMESH: {
         // this starts a new triangle mesh
         mScene->mMeshes.push_back(D3DS::Mesh(std::string(name, num)));
 
@@ -372,7 +373,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num,
         ParseMeshChunk(p_stream);
     } break;
 
-    case Discreet3DS::CHUNK_LIGHT: {
+    case Discreet3DS::ChunkEnum::CHUNK_LIGHT: {
         // This starts a new light
         aiLight *light = new aiLight();
         mScene->mLights.push_back(light);
@@ -401,7 +402,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num,
         }
     } break;
 
-    case Discreet3DS::CHUNK_CAMERA: {
+    case Discreet3DS::ChunkEnum::CHUNK_CAMERA: {
         // This starts a new camera
         aiCamera *camera = new aiCamera();
         mScene->mCameras.push_back(camera);
@@ -442,6 +443,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num,
             ParseCameraChunk(p_stream);
         }
     } break;
+    default: break;
     };
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
@@ -453,7 +455,7 @@ void Discreet3DSImporter::ParseLightChunk(StreamReaderLE *p_stream) {
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_DL_SPOTLIGHT:
+    case Discreet3DS::ChunkEnum::CHUNK_DL_SPOTLIGHT:
         // Now we can be sure that the light is a spot light
         light->mType = aiLightSource_SPOT;
 
@@ -471,22 +473,23 @@ void Discreet3DSImporter::ParseLightChunk(StreamReaderLE *p_stream) {
         break;
 
         // intensity multiplier
-    case Discreet3DS::CHUNK_DL_MULTIPLIER:
+    case Discreet3DS::ChunkEnum::CHUNK_DL_MULTIPLIER:
         light->mColorDiffuse = light->mColorDiffuse * p_stream->GetF4();
         break;
 
         // light color
-    case Discreet3DS::CHUNK_RGBF:
-    case Discreet3DS::CHUNK_LINRGBF:
+    case Discreet3DS::ChunkEnum::CHUNK_RGBF:
+    case Discreet3DS::ChunkEnum::CHUNK_LINRGBF:
         light->mColorDiffuse.r *= p_stream->GetF4();
         light->mColorDiffuse.g *= p_stream->GetF4();
         light->mColorDiffuse.b *= p_stream->GetF4();
         break;
 
         // light attenuation
-    case Discreet3DS::CHUNK_DL_ATTENUATE:
+    case Discreet3DS::ChunkEnum::CHUNK_DL_ATTENUATE:
         light->mAttenuationLinear = p_stream->GetF4();
         break;
+    default: break;
     };
 
     ASSIMP_3DS_END_CHUNK(p_stream);
@@ -498,34 +501,32 @@ void Discreet3DSImporter::ParseCameraChunk(StreamReaderLE *p_stream) {
     aiCamera *camera = mScene->mCameras.back();
 
     // get chunk type
-    switch (chunk.Flag) {
-        // near and far clip plane
-    case Discreet3DS::CHUNK_CAM_RANGES:
+    // if chunk flag related to camera range, obtain near and far clip planes.
+    if (chunk.Flag == Discreet3DS::ChunkEnum::CHUNK_CAM_RANGES) {
         camera->mClipPlaneNear = p_stream->GetF4();
         camera->mClipPlaneFar = p_stream->GetF4();
-        break;
     }
 
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
 
 // ------------------------------------------------------------------------------------------------
-void Discreet3DSImporter::ParseKeyframeChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
-        StreamReaderLE *p_stream) {
+void Discreet3DSImporter::ParseKeyframeChunk(D3DS::Node *const p_rootNode, D3DS::Node *const p_currentNode,
+        StreamReaderLE *const p_stream) {
     ASSIMP_3DS_BEGIN_CHUNK(p_stream);
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_TRACKCAMTGT:
-    case Discreet3DS::CHUNK_TRACKSPOTL:
-    case Discreet3DS::CHUNK_TRACKCAMERA:
-    case Discreet3DS::CHUNK_TRACKINFO:
-    case Discreet3DS::CHUNK_TRACKLIGHT:
-    case Discreet3DS::CHUNK_TRACKLIGTGT:
-
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKCAMTGT:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKSPOTL:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKCAMERA:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKINFO:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKLIGHT:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKLIGTGT:
         // this starts a new mesh hierarchy chunk
         ParseHierarchyChunk(chunk.Flag, p_rootNode, p_currentNode, p_stream);
         break;
+    default: break;
     };
 
     ASSIMP_3DS_END_CHUNK(p_stream);
@@ -533,7 +534,7 @@ void Discreet3DSImporter::ParseKeyframeChunk(D3DS::Node *p_rootNode, D3DS::Node 
 
 // ------------------------------------------------------------------------------------------------
 // Little helper function for ParseHierarchyChunk
-void Discreet3DSImporter::InverseNodeSearch(D3DS::Node *pcNode, D3DS::Node *p_rootNode, D3DS::Node *pcCurrent) {
+void Discreet3DSImporter::InverseNodeSearch(D3DS::Node *const pcNode, D3DS::Node *const p_rootNode, D3DS::Node *const pcCurrent) {
     if (!pcCurrent) {
         p_rootNode->push_back(pcNode);
         return;
@@ -551,13 +552,13 @@ void Discreet3DSImporter::InverseNodeSearch(D3DS::Node *pcNode, D3DS::Node *p_ro
 
 // ------------------------------------------------------------------------------------------------
 // Find a node with a specific name in the import hierarchy
-D3DS::Node *FindNode(D3DS::Node *root, const std::string &name) {
+D3DS::Node *FindNode(D3DS::Node *const root, const std::string &name) {
     if (root->mName == name) {
         return root;
     }
 
-    for (auto it = root->mChildren.cbegin(); it != root->mChildren.cend(); ++it) {
-        D3DS::Node *nd = FindNode(*it, name);
+    for (Assimp::D3DS::Node *const it : root->mChildren) {
+        D3DS::Node *nd = FindNode(it, name);
         if (nullptr != nd) {
             return nd;
         }
@@ -576,9 +577,9 @@ bool KeyUniqueCompare(const T &first, const T &second) {
 // ------------------------------------------------------------------------------------------------
 // Skip some additional import data.
 void Discreet3DSImporter::SkipTCBInfo(StreamReaderLE *p_stream) {
-    unsigned int flags = p_stream->GetI2();
+    Discreet3DS::AnimatedKey flags = static_cast<Discreet3DS::AnimatedKey>(p_stream->GetI2());
 
-    if (!flags) {
+    if (static_cast<uint16_t>(flags) == 0) {
         // Currently we can't do anything with these values. They occur
         // quite rare, so it wouldn't be worth the effort implementing
         // them. 3DS is not really suitable for complex animations,
@@ -586,34 +587,34 @@ void Discreet3DSImporter::SkipTCBInfo(StreamReaderLE *p_stream) {
         ASSIMP_LOG_WARN("3DS: Skipping TCB animation info");
     }
 
-    if (flags & Discreet3DS::KEY_USE_TENS) {
+    if (flags & Discreet3DS::AnimatedKey::KEY_USE_TENS) {
         p_stream->IncPtr(4);
     }
-    if (flags & Discreet3DS::KEY_USE_BIAS) {
+    if (flags & Discreet3DS::AnimatedKey::KEY_USE_BIAS) {
         p_stream->IncPtr(4);
     }
-    if (flags & Discreet3DS::KEY_USE_CONT) {
+    if (flags & Discreet3DS::AnimatedKey::KEY_USE_CONT) {
         p_stream->IncPtr(4);
     }
-    if (flags & Discreet3DS::KEY_USE_EASE_FROM) {
+    if (flags & Discreet3DS::AnimatedKey::KEY_USE_EASE_FROM) {
         p_stream->IncPtr(4);
     }
-    if (flags & Discreet3DS::KEY_USE_EASE_TO) {
+    if (flags & Discreet3DS::AnimatedKey::KEY_USE_EASE_TO) {
         p_stream->IncPtr(4);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Read hierarchy and keyframe info
-void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
-        D3DS::Node *p_rootNode,
+void Discreet3DSImporter::ParseHierarchyChunk(const Discreet3DS::ChunkEnum parent,
+        D3DS::Node *const p_rootNode,
         D3DS::Node *p_currentNode,
-        StreamReaderLE *p_stream) {
+        StreamReaderLE *const p_stream) {
     ASSIMP_3DS_BEGIN_CHUNK(p_stream);
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_TRACKOBJNAME:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKOBJNAME:
 
         // This is the name of the object to which the track applies. The chunk also
         // defines the position of this object in the hierarchy.
@@ -634,7 +635,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
 
             if (pcNode) {
                 // if the source is not a CHUNK_TRACKINFO block it won't be an object instance
-                if (parent != Discreet3DS::CHUNK_TRACKINFO) {
+                if (parent != Discreet3DS::ChunkEnum::CHUNK_TRACKINFO) {
                     p_currentNode = pcNode;
                     break;
                 }
@@ -673,7 +674,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
         }
         break;
 
-    case Discreet3DS::CHUNK_TRACKDUMMYOBJNAME:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKDUMMYOBJNAME:
 
         // This is the "real" name of a $$$DUMMY object
         {
@@ -689,9 +690,9 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
         }
         break;
 
-    case Discreet3DS::CHUNK_TRACKPIVOT:
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKPIVOT:
 
-        if (Discreet3DS::CHUNK_TRACKINFO != parent) {
+        if (Discreet3DS::ChunkEnum::CHUNK_TRACKINFO != parent) {
             ASSIMP_LOG_WARN("3DS: Skipping pivot subchunk for non usual object");
             break;
         }
@@ -704,7 +705,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
 
         // ////////////////////////////////////////////////////////////////////
         // POSITION KEYFRAME
-    case Discreet3DS::CHUNK_TRACKPOS: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKPOS: {
         p_stream->IncPtr(10);
         const unsigned int numFrames = p_stream->GetI4();
         bool sortKeys = false;
@@ -712,7 +713,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
         // This could also be meant as the target position for
         // (targeted) lights and cameras
         std::vector<aiVectorKey> *l;
-        if (Discreet3DS::CHUNK_TRACKCAMTGT == parent || Discreet3DS::CHUNK_TRACKLIGTGT == parent) {
+        if (Discreet3DS::ChunkEnum::CHUNK_TRACKCAMTGT == parent || Discreet3DS::ChunkEnum::CHUNK_TRACKLIGTGT == parent) {
             l = &p_currentNode->aTargetPositionKeys;
         } else
             l = &p_currentNode->aPositionKeys;
@@ -749,9 +750,9 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
 
         // ////////////////////////////////////////////////////////////////////
         // CAMERA ROLL KEYFRAME
-    case Discreet3DS::CHUNK_TRACKROLL: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKROLL: {
         // roll keys are accepted for cameras only
-        if (parent != Discreet3DS::CHUNK_TRACKCAMERA) {
+        if (parent != Discreet3DS::ChunkEnum::CHUNK_TRACKCAMERA) {
             ASSIMP_LOG_WARN("3DS: Ignoring roll track for non-camera object");
             break;
         }
@@ -789,14 +790,14 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
 
         // ////////////////////////////////////////////////////////////////////
         // CAMERA FOV KEYFRAME
-    case Discreet3DS::CHUNK_TRACKFOV: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKFOV: {
         ASSIMP_LOG_ERROR("3DS: Skipping FOV animation track. "
                          "This is not supported");
     } break;
 
         // ////////////////////////////////////////////////////////////////////
         // ROTATION KEYFRAME
-    case Discreet3DS::CHUNK_TRACKROTATE: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKROTATE: {
         p_stream->IncPtr(10);
         const unsigned int numFrames = p_stream->GetI4();
 
@@ -840,7 +841,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
 
         // ////////////////////////////////////////////////////////////////////
         // SCALING KEYFRAME
-    case Discreet3DS::CHUNK_TRACKSCALE: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRACKSCALE: {
         p_stream->IncPtr(10);
         const unsigned int numFrames = p_stream->GetI2();
         p_stream->IncPtr(2);
@@ -879,6 +880,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent,
             l->erase(std::unique(l->begin(), l->end(), &KeyUniqueCompare<aiVectorKey>), l->end());
         }
     } break;
+    default: break;
     };
 
     ASSIMP_3DS_END_CHUNK(p_stream);
@@ -894,7 +896,7 @@ void Discreet3DSImporter::ParseFaceChunk(StreamReaderLE *p_stream) {
 
     // Get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_SMOOLIST: {
+    case Discreet3DS::ChunkEnum::CHUNK_SMOOLIST: {
         // This is the list of smoothing groups - a bitfield for every face.
         // Up to 32 smoothing groups assigned to a single face.
         unsigned int num = chunkSize / 4, m = 0;
@@ -907,7 +909,7 @@ void Discreet3DSImporter::ParseFaceChunk(StreamReaderLE *p_stream) {
         }
     } break;
 
-    case Discreet3DS::CHUNK_FACEMAT: {
+    case Discreet3DS::ChunkEnum::CHUNK_FACEMAT: {
         // at fist an asciiz with the material name
         const char *sz = (const char *)p_stream->GetPtr();
         while (p_stream->GetI1())
@@ -938,6 +940,7 @@ void Discreet3DSImporter::ParseFaceChunk(StreamReaderLE *p_stream) {
                 mMesh.mFaceMaterials[fidx] = idx;
         }
     } break;
+    default: break;
     };
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
@@ -952,7 +955,7 @@ void Discreet3DSImporter::ParseMeshChunk(StreamReaderLE *p_stream) {
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_VERTLIST: {
+    case Discreet3DS::ChunkEnum::CHUNK_VERTLIST: {
         // This is the list of all vertices in the current mesh
         int num = (int)(uint16_t)p_stream->GetI2();
         mMesh.mPositions.reserve(num);
@@ -964,7 +967,7 @@ void Discreet3DSImporter::ParseMeshChunk(StreamReaderLE *p_stream) {
             mMesh.mPositions.push_back(v);
         }
     } break;
-    case Discreet3DS::CHUNK_TRMATRIX: {
+    case Discreet3DS::ChunkEnum::CHUNK_TRMATRIX: {
         // This is the RLEATIVE transformation matrix of the current mesh. Vertices are
         // pretransformed by this matrix wonder.
         mMesh.mMat.a1 = p_stream->GetF4();
@@ -981,7 +984,7 @@ void Discreet3DSImporter::ParseMeshChunk(StreamReaderLE *p_stream) {
         mMesh.mMat.c4 = p_stream->GetF4();
     } break;
 
-    case Discreet3DS::CHUNK_MAPLIST: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAPLIST: {
         // This is the list of all UV coords in the current mesh
         int num = (int)(uint16_t)p_stream->GetI2();
         mMesh.mTexCoords.reserve(num);
@@ -993,7 +996,7 @@ void Discreet3DSImporter::ParseMeshChunk(StreamReaderLE *p_stream) {
         }
     } break;
 
-    case Discreet3DS::CHUNK_FACELIST: {
+    case Discreet3DS::ChunkEnum::CHUNK_FACELIST: {
         // This is the list of all faces in the current mesh
         int num = (int)(uint16_t)p_stream->GetI2();
         mMesh.mFaces.reserve(num);
@@ -1018,6 +1021,7 @@ void Discreet3DSImporter::ParseMeshChunk(StreamReaderLE *p_stream) {
         if (chunkSize > (int)sizeof(Discreet3DS::Chunk))
             ParseFaceChunk(p_stream);
     } break;
+    default: break;
     };
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
@@ -1027,7 +1031,7 @@ void Discreet3DSImporter::ParseMeshChunk(StreamReaderLE *p_stream) {
 void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
     ASSIMP_3DS_BEGIN_CHUNK(p_stream);
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_MAT_MATNAME:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MATNAME:
 
     {
         // The material name string is already zero-terminated, but we need to be sure ...
@@ -1043,7 +1047,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
             mScene->mMaterials.back().mName = std::string(sz, cnt);
     } break;
 
-    case Discreet3DS::CHUNK_MAT_DIFFUSE: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_DIFFUSE: {
         // This is the diffuse material color
         aiColor3D *pc = &mScene->mMaterials.back().mDiffuse;
         ParseColorChunk(pc, p_stream);
@@ -1054,7 +1058,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
         }
     } break;
 
-    case Discreet3DS::CHUNK_MAT_SPECULAR: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SPECULAR: {
         // This is the specular material color
         aiColor3D *pc = &mScene->mMaterials.back().mSpecular;
         ParseColorChunk(pc, p_stream);
@@ -1065,7 +1069,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
         }
     } break;
 
-    case Discreet3DS::CHUNK_MAT_AMBIENT: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_AMBIENT: {
         // This is the ambient material color
         aiColor3D *pc = &mScene->mMaterials.back().mAmbient;
         ParseColorChunk(pc, p_stream);
@@ -1076,7 +1080,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
         }
     } break;
 
-    case Discreet3DS::CHUNK_MAT_SELF_ILLUM: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SELF_ILLUM: {
         // This is the emissive material color
         aiColor3D *pc = &mScene->mMaterials.back().mEmissive;
         ParseColorChunk(pc, p_stream);
@@ -1087,7 +1091,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
         }
     } break;
 
-    case Discreet3DS::CHUNK_MAT_TRANSPARENCY: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_TRANSPARENCY: {
         // This is the material's transparency
         ai_real *pcf = &mScene->mMaterials.back().mTransparency;
         *pcf = ParsePercentageChunk(p_stream);
@@ -1099,17 +1103,17 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
             *pcf = ai_real(1.0) - *pcf * (ai_real)0xFFFF / ai_real(100.0);
     } break;
 
-    case Discreet3DS::CHUNK_MAT_SHADING:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SHADING:
         // This is the material shading mode
-        mScene->mMaterials.back().mShading = (D3DS::Discreet3DS::shadetype3ds)p_stream->GetI2();
+        mScene->mMaterials.back().mShading = static_cast<D3DS::Discreet3DS::ShadeType3DS>(p_stream->GetI2());
         break;
 
-    case Discreet3DS::CHUNK_MAT_TWO_SIDE:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_TWO_SIDE:
         // This is the two-sided flag
         mScene->mMaterials.back().mTwoSided = true;
         break;
 
-    case Discreet3DS::CHUNK_MAT_SHININESS: { // This is the shininess of the material
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SHININESS: { // This is the shininess of the material
         ai_real *pcf = &mScene->mMaterials.back().mSpecularExponent;
         *pcf = ParsePercentageChunk(p_stream);
         if (is_qnan(*pcf))
@@ -1118,7 +1122,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
             *pcf *= (ai_real)0xFFFF;
     } break;
 
-    case Discreet3DS::CHUNK_MAT_SHININESS_PERCENT: { // This is the shininess strength of the material
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SHININESS_PERCENT: { // This is the shininess strength of the material
         ai_real *pcf = &mScene->mMaterials.back().mShininessStrength;
         *pcf = ParsePercentageChunk(p_stream);
         if (is_qnan(*pcf))
@@ -1127,7 +1131,7 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
             *pcf *= (ai_real)0xffff / ai_real(100.0);
     } break;
 
-    case Discreet3DS::CHUNK_MAT_SELF_ILPCT: { // This is the self illumination strength of the material
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SELF_ILPCT: { // This is the self illumination strength of the material
         ai_real f = ParsePercentageChunk(p_stream);
         if (is_qnan(f))
             f = ai_real(0.0);
@@ -1137,34 +1141,35 @@ void Discreet3DSImporter::ParseMaterialChunk(StreamReaderLE *p_stream) {
     } break;
 
     // Parse texture chunks
-    case Discreet3DS::CHUNK_MAT_TEXTURE:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_TEXTURE:
         // Diffuse texture
         ParseTextureChunk(&mScene->mMaterials.back().sTexDiffuse, p_stream);
         break;
-    case Discreet3DS::CHUNK_MAT_BUMPMAP:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_BUMPMAP:
         // Height map
         ParseTextureChunk(&mScene->mMaterials.back().sTexBump, p_stream);
         break;
-    case Discreet3DS::CHUNK_MAT_OPACMAP:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_OPACMAP:
         // Opacity texture
         ParseTextureChunk(&mScene->mMaterials.back().sTexOpacity, p_stream);
         break;
-    case Discreet3DS::CHUNK_MAT_MAT_SHINMAP:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAT_SHINMAP:
         // Shininess map
         ParseTextureChunk(&mScene->mMaterials.back().sTexShininess, p_stream);
         break;
-    case Discreet3DS::CHUNK_MAT_SPECMAP:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SPECMAP:
         // Specular map
         ParseTextureChunk(&mScene->mMaterials.back().sTexSpecular, p_stream);
         break;
-    case Discreet3DS::CHUNK_MAT_SELFIMAP:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_SELFIMAP:
         // Self-illumination (emissive) map
         ParseTextureChunk(&mScene->mMaterials.back().sTexEmissive, p_stream);
         break;
-    case Discreet3DS::CHUNK_MAT_REFLMAP:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_REFLMAP:
         // Reflection map
         ParseTextureChunk(&mScene->mMaterials.back().sTexReflective, p_stream);
         break;
+    default: break;
     };
     ASSIMP_3DS_END_CHUNK(p_stream);
 }
@@ -1176,7 +1181,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture *p_cOut,
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_MAPFILE: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAPFILE: {
         // The material name string is already zero-terminated, but we need to be sure ...
         const char *sz = (const char *)p_stream->GetPtr();
         unsigned int cnt = 0;
@@ -1185,22 +1190,22 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture *p_cOut,
         p_cOut->mMapName = std::string(sz, cnt);
     } break;
 
-    case Discreet3DS::CHUNK_PERCENTD:
+    case Discreet3DS::ChunkEnum::CHUNK_PERCENTD:
         // Manually parse the blend factor
         p_cOut->mTextureBlend = ai_real(p_stream->GetF8());
         break;
 
-    case Discreet3DS::CHUNK_PERCENTF:
+    case Discreet3DS::ChunkEnum::CHUNK_PERCENTF:
         // Manually parse the blend factor
         p_cOut->mTextureBlend = p_stream->GetF4();
         break;
 
-    case Discreet3DS::CHUNK_PERCENTW:
+    case Discreet3DS::ChunkEnum::CHUNK_PERCENTW:
         // Manually parse the blend factor
         p_cOut->mTextureBlend = (ai_real)((uint16_t)p_stream->GetI2()) / ai_real(100.0);
         break;
 
-    case Discreet3DS::CHUNK_MAT_MAP_USCALE:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAP_USCALE:
         // Texture coordinate scaling in the U direction
         p_cOut->mScaleU = p_stream->GetF4();
         if (0.0f == p_cOut->mScaleU) {
@@ -1208,7 +1213,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture *p_cOut,
             p_cOut->mScaleU = 1.0f;
         }
         break;
-    case Discreet3DS::CHUNK_MAT_MAP_VSCALE:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAP_VSCALE:
         // Texture coordinate scaling in the V direction
         p_cOut->mScaleV = p_stream->GetF4();
         if (0.0f == p_cOut->mScaleV) {
@@ -1217,22 +1222,22 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture *p_cOut,
         }
         break;
 
-    case Discreet3DS::CHUNK_MAT_MAP_UOFFSET:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAP_UOFFSET:
         // Texture coordinate offset in the U direction
         p_cOut->mOffsetU = -p_stream->GetF4();
         break;
 
-    case Discreet3DS::CHUNK_MAT_MAP_VOFFSET:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAP_VOFFSET:
         // Texture coordinate offset in the V direction
         p_cOut->mOffsetV = p_stream->GetF4();
         break;
 
-    case Discreet3DS::CHUNK_MAT_MAP_ANG:
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAP_ANG:
         // Texture coordinate rotation, CCW in DEGREES
         p_cOut->mRotation = -AI_DEG_TO_RAD(p_stream->GetF4());
         break;
 
-    case Discreet3DS::CHUNK_MAT_MAP_TILING: {
+    case Discreet3DS::ChunkEnum::CHUNK_MAT_MAP_TILING: {
         const uint16_t iFlags = p_stream->GetI2();
 
         // Get the mapping mode (for both axes)
@@ -1246,6 +1251,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture *p_cOut,
         else
             p_cOut->mMapMode = aiTextureMapMode_Wrap;
     } break;
+    default: break;
     };
 
     ASSIMP_3DS_END_CHUNK(p_stream);
@@ -1257,9 +1263,9 @@ ai_real Discreet3DSImporter::ParsePercentageChunk(StreamReaderLE *p_stream) {
     Discreet3DS::Chunk chunk;
     ReadChunk(chunk, p_stream);
 
-    if (Discreet3DS::CHUNK_PERCENTF == chunk.Flag) {
+    if (Discreet3DS::ChunkEnum::CHUNK_PERCENTF == chunk.Flag) {
         return p_stream->GetF4() * ai_real(100) / ai_real(0xFFFF);
-    } else if (Discreet3DS::CHUNK_PERCENTW == chunk.Flag) {
+    } else if (Discreet3DS::ChunkEnum::CHUNK_PERCENTW == chunk.Flag) {
         return (ai_real)((uint16_t)p_stream->GetI2()) / (ai_real)0xFFFF;
     }
 
@@ -1283,10 +1289,10 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *p_cOut, StreamReaderLE *p_s
 
     // Get the type of the chunk
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_LINRGBF:
+    case Discreet3DS::ChunkEnum::CHUNK_LINRGBF:
         bGamma = true;
 
-    case Discreet3DS::CHUNK_RGBF:
+    case Discreet3DS::ChunkEnum::CHUNK_RGBF:
         if (sizeof(float) * 3 > diff) {
             *p_cOut = clrError;
             return;
@@ -1296,9 +1302,9 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *p_cOut, StreamReaderLE *p_s
         p_cOut->b = p_stream->GetF4();
         break;
 
-    case Discreet3DS::CHUNK_LINRGBB:
+    case Discreet3DS::ChunkEnum::CHUNK_LINRGBB:
         bGamma = true;
-    case Discreet3DS::CHUNK_RGBB: {
+    case Discreet3DS::ChunkEnum::CHUNK_RGBB: {
         if (sizeof(char) * 3 > diff) {
             *p_cOut = clrError;
             return;
@@ -1310,7 +1316,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *p_cOut, StreamReaderLE *p_s
     } break;
 
     // Percentage chunks are accepted, too.
-    case Discreet3DS::CHUNK_PERCENTF:
+    case Discreet3DS::ChunkEnum::CHUNK_PERCENTF:
         if (p_acceptPercent && 4 <= diff) {
             p_cOut->g = p_cOut->b = p_cOut->r = p_stream->GetF4();
             break;
@@ -1318,7 +1324,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *p_cOut, StreamReaderLE *p_s
         *p_cOut = clrError;
         return;
 
-    case Discreet3DS::CHUNK_PERCENTW:
+    case Discreet3DS::ChunkEnum::CHUNK_PERCENTW:
         if (p_acceptPercent && 1 <= diff) {
             p_cOut->g = p_cOut->b = p_cOut->r = (ai_real)(uint8_t)p_stream->GetI1() / ai_real(255.0);
             break;

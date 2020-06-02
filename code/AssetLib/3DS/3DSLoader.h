@@ -74,15 +74,15 @@ public:
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
-    bool CanRead(const std::string &p_File, IOSystem *p_IOHandler,
-            bool p_checkSig) const;
+    bool CanRead(const std::string &p_File, IOSystem *const p_IOHandler,
+            const bool p_checkSig) const;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
      * The function is a request to the importer to update its configuration
      * basing on the Importer's configuration property list.
      */
-    void SetupProperties(const Importer *p_Importer);
+    void SetupProperties(const Importer *const p_Importer);
 
 protected:
     // -------------------------------------------------------------------
@@ -95,8 +95,8 @@ protected:
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile(const std::string &p_File, aiScene *p_Scene,
-            IOSystem *p_IOHandler);
+    void InternReadFile(const std::string &p_File, aiScene *const p_Scene,
+            IOSystem *const p_IOHandler);
 
     // -------------------------------------------------------------------
     /** Converts a temporary material to the outer representation
@@ -109,92 +109,92 @@ protected:
      *
      *  @param p_cOut Receives the current chunk
      */
-    void ReadChunk(Discreet3DS::Chunk &p_cOut, StreamReaderLE *p_stream);
+    void ReadChunk(Discreet3DS::Chunk &p_cOut, StreamReaderLE *const p_stream) const;
 
     // -------------------------------------------------------------------
     /** Parse a percentage chunk. mCurrent will point to the next
     * chunk behind afterwards. If no percentage chunk is found
     * QNAN is returned.
     */
-    ai_real ParsePercentageChunk(StreamReaderLE *p_stream);
+    ai_real ParsePercentageChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a color chunk. mCurrent will point to the next
     * chunk behind afterwards. If no color chunk is found
     * QNAN is returned in all members.
     */
-    void ParseColorChunk(aiColor3D *p_cOut,
-            StreamReaderLE *p_stream,
-            bool p_acceptPercent = true);
+    void ParseColorChunk(aiColor3D *const p_cOut,
+            StreamReaderLE *const p_stream,
+            const bool p_acceptPercent = true);
 
     // -------------------------------------------------------------------
     /** Skip a chunk in the file
     */
-    void SkipChunk(StreamReaderLE *p_stream);
+    void SkipChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Generate the nodegraph
     */
-    void GenerateNodeGraph(aiScene *p_cOut, D3DS::Node *p_rootNode);
+    void GenerateNodeGraph(aiScene *const p_cOut, D3DS::Node *const p_rootNode);
 
     // -------------------------------------------------------------------
     /** Parse a main top-level chunk in the file
     */
-    void ParseMainChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
-            StreamReaderLE *p_stream);
+    void ParseMainChunk(D3DS::Node *const p_rootNode, D3DS::Node *const p_currentNode,
+            StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a top-level chunk in the file
     */
-    void ParseChunk(const char *name, unsigned int num, StreamReaderLE *p_stream);
+    void ParseChunk(const char *const name, const unsigned int num, StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a top-level editor chunk in the file
     */
-    void ParseEditorChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
-            StreamReaderLE *p_stream);
+    void ParseEditorChunk(D3DS::Node *const p_rootNode, D3DS::Node *const p_currentNode,
+            StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a top-level object chunk in the file
     */
-    void ParseObjectChunk(StreamReaderLE *p_stream);
+    void ParseObjectChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a material chunk in the file
     */
-    void ParseMaterialChunk(StreamReaderLE *p_stream);
+    void ParseMaterialChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a mesh chunk in the file
     */
-    void ParseMeshChunk(StreamReaderLE *p_stream);
+    void ParseMeshChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a light chunk in the file
     */
-    void ParseLightChunk(StreamReaderLE *p_stream);
+    void ParseLightChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a camera chunk in the file
     */
-    void ParseCameraChunk(StreamReaderLE *p_stream);
+    void ParseCameraChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a face list chunk in the file
     */
-    void ParseFaceChunk(StreamReaderLE *p_stream);
+    void ParseFaceChunk(StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a keyframe chunk in the file
     */
-    void ParseKeyframeChunk(D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
-            StreamReaderLE *p_stream);
+    void ParseKeyframeChunk(D3DS::Node *const p_rootNode, D3DS::Node *const p_currentNode,
+            StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a hierarchy chunk in the file
     */
-    void ParseHierarchyChunk(uint16_t parent, D3DS::Node *p_rootNode, D3DS::Node *p_currentNode,
-            StreamReaderLE *p_stream);
+    void ParseHierarchyChunk(const Discreet3DS::ChunkEnum parent, D3DS::Node *const p_rootNode, D3DS::Node *const p_currentNode,
+            StreamReaderLE *const p_stream);
 
     // -------------------------------------------------------------------
     /** Parse a texture chunk in the file
@@ -231,7 +231,7 @@ protected:
     /** Search for a node in the graph.
     * Called recursively
     */
-    void InverseNodeSearch(D3DS::Node *pcNode, D3DS::Node *p_rootNode, D3DS::Node *pcCurrent);
+    void InverseNodeSearch(D3DS::Node *const pcNode, D3DS::Node *const p_rootNode, D3DS::Node *const pcCurrent);
 
     // -------------------------------------------------------------------
     /** Apply the master scaling factor to the mesh

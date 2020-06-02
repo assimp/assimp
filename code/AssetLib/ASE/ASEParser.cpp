@@ -534,16 +534,16 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
             // material shading type
             if (TokenMatch(filePtr, "MATERIAL_SHADING", 16)) {
                 if (TokenMatch(filePtr, "Blinn", 5)) {
-                    mat.mShading = Discreet3DS::Blinn;
+                    mat.mShading = Discreet3DS::ShadeType3DS::Blinn;
                 } else if (TokenMatch(filePtr, "Phong", 5)) {
-                    mat.mShading = Discreet3DS::Phong;
+                    mat.mShading = Discreet3DS::ShadeType3DS::Phong;
                 } else if (TokenMatch(filePtr, "Flat", 4)) {
-                    mat.mShading = Discreet3DS::Flat;
+                    mat.mShading = Discreet3DS::ShadeType3DS::Flat;
                 } else if (TokenMatch(filePtr, "Wire", 4)) {
-                    mat.mShading = Discreet3DS::Wire;
+                    mat.mShading = Discreet3DS::ShadeType3DS::Wire;
                 } else {
                     // assume gouraud shading
-                    mat.mShading = Discreet3DS::Gouraud;
+                    mat.mShading = Discreet3DS::ShadeType3DS::Gouraud;
                     SkipToNextToken();
                 }
                 continue;

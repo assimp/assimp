@@ -283,7 +283,7 @@ void ASEImporter::GenerateDefaultMaterial() {
         mat.mDiffuse = aiColor3D(0.6f, 0.6f, 0.6f);
         mat.mSpecular = aiColor3D(1.0f, 1.0f, 1.0f);
         mat.mAmbient = aiColor3D(0.05f, 0.05f, 0.05f);
-        mat.mShading = Discreet3DS::Gouraud;
+        mat.mShading = Discreet3DS::ShadeType3DS::Gouraud;
     }
 }
 
@@ -847,10 +847,10 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
         mat.pcInstance->AddProperty(&mat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
     }
     // If there is no shininess, we can disable phong lighting
-    else if (D3DS::Discreet3DS::Metal == mat.mShading ||
-             D3DS::Discreet3DS::Phong == mat.mShading ||
-             D3DS::Discreet3DS::Blinn == mat.mShading) {
-        mat.mShading = D3DS::Discreet3DS::Gouraud;
+    else if (D3DS::Discreet3DS::ShadeType3DS::Metal == mat.mShading ||
+             D3DS::Discreet3DS::ShadeType3DS::Phong == mat.mShading ||
+             D3DS::Discreet3DS::ShadeType3DS::Blinn == mat.mShading) {
+        mat.mShading = D3DS::Discreet3DS::ShadeType3DS::Gouraud;
     }
 
     // opacity
@@ -865,27 +865,27 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
     // shading mode
     aiShadingMode eShading = aiShadingMode_NoShading;
     switch (mat.mShading) {
-    case D3DS::Discreet3DS::Flat:
+    case D3DS::Discreet3DS::ShadeType3DS::Flat:
         eShading = aiShadingMode_Flat;
         break;
-    case D3DS::Discreet3DS::Phong:
+    case D3DS::Discreet3DS::ShadeType3DS::Phong:
         eShading = aiShadingMode_Phong;
         break;
-    case D3DS::Discreet3DS::Blinn:
+    case D3DS::Discreet3DS::ShadeType3DS::Blinn:
         eShading = aiShadingMode_Blinn;
         break;
 
         // I don't know what "Wire" shading should be,
         // assume it is simple lambertian diffuse (L dot N) shading
-    case D3DS::Discreet3DS::Wire: {
+    case D3DS::Discreet3DS::ShadeType3DS::Wire: {
         // set the wireframe flag
         unsigned int iWire = 1;
         mat.pcInstance->AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
-    case D3DS::Discreet3DS::Gouraud:
+    case D3DS::Discreet3DS::ShadeType3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
         break;
-    case D3DS::Discreet3DS::Metal:
+    case D3DS::Discreet3DS::ShadeType3DS::Metal:
         eShading = aiShadingMode_CookTorrance;
         break;
     }

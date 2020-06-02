@@ -231,10 +231,10 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &p_cMat,
     p_pcOut.AddProperty(&p_cMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 
     // Phong shininess and shininess strength
-    if (D3DS::Discreet3DS::Phong == p_cMat.mShading ||
-            D3DS::Discreet3DS::Metal == p_cMat.mShading) {
+    if (D3DS::Discreet3DS::ShadeType3DS::Phong == p_cMat.mShading ||
+            D3DS::Discreet3DS::ShadeType3DS::Metal == p_cMat.mShading) {
         if (!p_cMat.mSpecularExponent || !p_cMat.mShininessStrength) {
-            p_cMat.mShading = D3DS::Discreet3DS::Gouraud;
+            p_cMat.mShading = D3DS::Discreet3DS::ShadeType3DS::Gouraud;
         } else {
             p_pcOut.AddProperty(&p_cMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
             p_pcOut.AddProperty(&p_cMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
@@ -256,35 +256,35 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &p_cMat,
     // Shading mode
     aiShadingMode eShading = aiShadingMode_NoShading;
     switch (p_cMat.mShading) {
-    case D3DS::Discreet3DS::Flat:
+    case D3DS::Discreet3DS::ShadeType3DS::Flat:
         eShading = aiShadingMode_Flat;
         break;
 
     // I don't know what "Wire" shading should be,
     // assume it is simple lambertian diffuse shading
-    case D3DS::Discreet3DS::Wire: {
+    case D3DS::Discreet3DS::ShadeType3DS::Wire: {
         // Set the wireframe flag
         unsigned int iWire = 1;
         p_pcOut.AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
 
-    case D3DS::Discreet3DS::Gouraud:
+    case D3DS::Discreet3DS::ShadeType3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
         break;
 
     // assume cook-torrance shading for metals.
-    case D3DS::Discreet3DS::Phong:
+    case D3DS::Discreet3DS::ShadeType3DS::Phong:
         eShading = aiShadingMode_Phong;
         break;
 
-    case D3DS::Discreet3DS::Metal:
+    case D3DS::Discreet3DS::ShadeType3DS::Metal:
         eShading = aiShadingMode_CookTorrance;
         break;
 
         // FIX to workaround a warning with GCC 4 who complained
         // about a missing case Blinn: here - Blinn isn't a valid
         // value in the 3DS Loader, it is just needed for ASE
-    case D3DS::Discreet3DS::Blinn:
+    case D3DS::Discreet3DS::ShadeType3DS::Blinn:
         eShading = aiShadingMode_Blinn;
         break;
     }

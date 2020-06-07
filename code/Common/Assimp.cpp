@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -69,7 +67,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace Assimp {
-// underlying structure for aiPropertyStore
+
+    // underlying structure for aiPropertyStore
 typedef BatchLoader::PropertyMap PropertyMap;
 
 /** Stores the LogStream objects for all active C log streams */
@@ -78,7 +77,8 @@ struct mpred {
         return s0.callback < s1.callback && s0.user < s1.user;
     }
 };
-typedef std::map<aiLogStream, Assimp::LogStream *, mpred> LogStreamMap;
+
+    typedef std::map<aiLogStream, Assimp::LogStream *, mpred> LogStreamMap;
 
 /** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
 typedef std::list<Assimp::LogStream *> PredefLogStreamMap;
@@ -492,7 +492,7 @@ size_t aiGetMemoryRequirements(const C_STRUCT aiScene *pIn, C_STRUCT aiMemoryInf
     }
 
     return (size_t) priv->mOrigImporter->GetMemoryRequirements(*in);
-    ASSIMP_END_EXCEPTION_REGION(0);
+    ASSIMP_END_EXCEPTION_REGION(size_t);
 }
 
 // ------------------------------------------------------------------------------------------------

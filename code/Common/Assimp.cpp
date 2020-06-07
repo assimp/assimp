@@ -492,7 +492,7 @@ size_t aiGetMemoryRequirements(const C_STRUCT aiScene *pIn, C_STRUCT aiMemoryInf
     }
 
     return (size_t) priv->mOrigImporter->GetMemoryRequirements(*in);
-    ASSIMP_END_EXCEPTION_REGION(void);
+    ASSIMP_END_EXCEPTION_REGION(0);
 }
 
 // ------------------------------------------------------------------------------------------------

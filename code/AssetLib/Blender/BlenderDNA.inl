@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -239,11 +238,13 @@ bool Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
     try {
         f = &(*this)[name];
 
+#ifdef _DEBUG
         // sanity check, should never happen if the genblenddna script is right
         if ((FieldFlag_Pointer|FieldFlag_Pointer) != (f->flags & (FieldFlag_Pointer|FieldFlag_Pointer))) {
             throw Error((Formatter::format(),"Field `",name,"` of structure `",
                 this->name,"` ought to be a pointer AND an array"));
         }
+#endif // _DEBUG
 
         db.reader->IncPtr(f->offset);
 

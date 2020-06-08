@@ -251,6 +251,13 @@ size_t NZDiff(void *data, void *dataBase, size_t count, unsigned int numCompsIn,
         vNZIdx.push_back(idx);
     }
 
+    //avoid all-0, put 1 item
+    if (vNZDiff.size() == 0) {
+        for (unsigned int j = 0; j < numCompsOut; j++)
+            vNZDiff.push_back(0);
+        vNZIdx.push_back(0);
+    }
+
     //process data
     outputNZDiff = new T[vNZDiff.size()];
     memcpy(outputNZDiff, vNZDiff.data(), vNZDiff.size() * sizeof(T));

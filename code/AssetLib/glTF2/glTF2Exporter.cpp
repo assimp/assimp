@@ -969,7 +969,6 @@ void glTF2Exporter::ExportMeshes()
 
         /*************** Targets for blendshapes ****************/
         if (aim->mNumAnimMeshes > 0) {
-            //wangyi 0506
             bool bUseSparse = this->mProperties->HasPropertyBool("GLTF2_SPARSE_ACCESSOR_EXP") &&
                               this->mProperties->GetPropertyBool("GLTF2_SPARSE_ACCESSOR_EXP");
             bool bIncludeNormal = this->mProperties->HasPropertyBool("GLTF2_TARGET_NORMAL_EXP") &&
@@ -985,7 +984,6 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pPositionDiff[vt] = pAnimMesh->mVertices[vt] - aim->mVertices[vt];
                     }
-                    //wangyi 0506
                     Ref<Accessor> vec;
                     if (bUseSparse) {
                         vec = ExportDataSparse(*mAsset, meshId, b,
@@ -1008,7 +1006,6 @@ void glTF2Exporter::ExportMeshes()
                     for (unsigned int vt = 0; vt < pAnimMesh->mNumVertices; ++vt) {
                         pNormalDiff[vt] = pAnimMesh->mNormals[vt] - aim->mNormals[vt];
                     }
-                    //wangyi 0506
                     Ref<Accessor> vec;
                     if (bUseSparse) {
                         vec = ExportDataSparse(*mAsset, meshId, b,

@@ -354,8 +354,8 @@ inline Ref<Accessor> ExportDataSparse(Asset &a, std::string &meshName, Ref<Buffe
         acc->WriteSparseValues(nzCount, nzDiff, numCompsIn * bytesPerComp);
 
         //clear
-        delete[] nzDiff;
-        delete[] nzIdx;
+        delete[] (char*)nzDiff;
+        delete[] (char*)nzIdx;
     }
     return acc;
 }

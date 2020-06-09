@@ -42,17 +42,14 @@ substituted by assertions ...):
 
 ```python
 
-from pyassimp import *
-scene = load('hello.3ds')
+from pyassimp import load
+with load('hello.3ds') as scene:
 
-assert len(scene.meshes)
-mesh = scene.meshes[0]
+  assert len(scene.meshes)
+  mesh = scene.meshes[0]
 
-assert len(mesh.vertices)
-print(mesh.vertices[0])
-
-# don't forget this one, or you will leak!
-release(scene)
+  assert len(mesh.vertices)
+  print(mesh.vertices[0])
 
 ```
 
@@ -61,13 +58,11 @@ scene:
 
 ```python
 
-from pyassimp import *
-scene = load('hello.3ds')
+from pyassimp import load
+with load('hello.3ds') as scene:
 
-for c in scene.rootnode.children:
-    print(str(c))
-
-release(scene)
+  for c in scene.rootnode.children:
+      print(str(c))
 
 ```
 

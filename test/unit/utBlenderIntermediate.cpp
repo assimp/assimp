@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "Blender/BlenderIntermediate.h"
+#include "AssetLib/Blender/BlenderIntermediate.h"
 #include <assimp/camera.h>
 #include <assimp/light.h>
 #include <assimp/mesh.h>

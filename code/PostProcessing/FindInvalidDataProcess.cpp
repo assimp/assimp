@@ -124,7 +124,7 @@ void FindInvalidDataProcess::Execute(aiScene *pScene) {
         if (2 == result) {
             // remove this mesh
             delete pScene->mMeshes[a];
-            AI_DEBUG_INVALIDATE_PTR(pScene->mMeshes[a]);
+            pScene->mMeshes[a] = NULL;
 
             meshMapping[a] = UINT_MAX;
             continue;

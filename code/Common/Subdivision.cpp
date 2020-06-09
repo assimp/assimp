@@ -181,7 +181,7 @@ void CatmullClarkSubdivider::Subdivide (
         aiMesh* i = smesh[s];
         // FIX - mPrimitiveTypes might not yet be initialized
         if (i->mPrimitiveTypes && (i->mPrimitiveTypes & (aiPrimitiveType_LINE|aiPrimitiveType_POINT))==i->mPrimitiveTypes) {
-            ASSIMP_LOG_DEBUG("Catmull-Clark Subdivider: Skipping pure line/point mesh");
+            ASSIMP_LOG_VERBOSE_DEBUG("Catmull-Clark Subdivider: Skipping pure line/point mesh");
 
             if (discard_input) {
                 out[s] = i;
@@ -346,7 +346,7 @@ void CatmullClarkSubdivider::InternSubdivide (
         // Report the number of bad edges. bad edges are referenced by less than two
         // faces in the mesh. They occur at outer model boundaries in non-closed
         // shapes.
-        ASSIMP_LOG_DEBUG_F("Catmull-Clark Subdivider: got ", bad_cnt, " bad edges touching only one face (totally ", 
+        ASSIMP_LOG_VERBOSE_DEBUG_F("Catmull-Clark Subdivider: got ", bad_cnt, " bad edges touching only one face (totally ", 
             static_cast<unsigned int>(edges.size()), " edges). ");
     }}
 
@@ -405,7 +405,7 @@ void CatmullClarkSubdivider::InternSubdivide (
                     }
                     ai_assert(haveit);
                     if (!haveit) {
-                        ASSIMP_LOG_DEBUG("Catmull-Clark Subdivider: Index not used");
+                        ASSIMP_LOG_VERBOSE_DEBUG("Catmull-Clark Subdivider: Index not used");
                     }
                     break;
                 }

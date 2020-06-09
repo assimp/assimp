@@ -635,9 +635,6 @@ private:
 		s32 amount = used < new_size ? used : new_size;
 		for (s32 i=0; i<amount; ++i)
 			array[i] = old_array[i];
-
-		if (allocated < used)
-			used = allocated;
 		
 		delete [] old_array;
 	}

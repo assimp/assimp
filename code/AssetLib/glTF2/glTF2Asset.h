@@ -71,6 +71,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
 
+#ifndef RAPIDJSON_NOMEMBERITERATORCLASS
+#define RAPIDJSON_NOMEMBERITERATORCLASS
+#endif 
+
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>

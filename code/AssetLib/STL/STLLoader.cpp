@@ -375,7 +375,6 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                 pMesh->mVertices[i].y = positionBuffer[i].y;                
                 pMesh->mVertices[i].z = positionBuffer[i].z;
             }
-            //memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
             positionBuffer.clear();
         }
         // also only process normalBuffer when filled, else exception when accessing with index operator

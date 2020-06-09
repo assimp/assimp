@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -101,11 +99,13 @@ static bool IsAsciiSTL(const char *buffer, unsigned int fileSize) {
 
     const char *bufferEnd = buffer + fileSize;
 
-    if (!SkipSpaces(&buffer))
+    if (!SkipSpaces(&buffer)) {
         return false;
+    }
 
-    if (buffer + 5 >= bufferEnd)
+    if (buffer + 5 >= bufferEnd) {
         return false;
+    }
 
     bool isASCII(strncmp(buffer, "solid", 5) == 0);
     if (isASCII) {
@@ -386,7 +386,6 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                 pMesh->mNormals[i].y = normalBuffer[i].y;                
                 pMesh->mNormals[i].z = normalBuffer[i].z;
             }
-//            memcpy(pMesh->mNormals, &normalBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
             normalBuffer.clear();
         }
 

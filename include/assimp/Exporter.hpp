@@ -394,7 +394,7 @@ public:
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
 
     //wangyi 0608
-    bool SetPropertyCallback(const char *szName, std::function<void *(void *)> &f);
+    bool SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f);
 
     // -------------------------------------------------------------------
     /** Get a configuration property.

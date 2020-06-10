@@ -587,7 +587,7 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 }
 
 //wangyi 0608
-bool ExportProperties::SetPropertyCallback(const char *szName, std::function<void *(void *)> &f) {
+bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
     return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);
 }
 std::function<void *(void *)> ExportProperties::GetPropertyCallback(const char *szName) const {

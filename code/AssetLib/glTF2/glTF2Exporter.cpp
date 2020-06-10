@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -115,7 +115,20 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     ExportScene();
 
     ExportAnimations();
-
+    
+    //wangyi 0608
+    if(mProperties->HasPropertyCallback("extras"))
+    {
+        std::function<void*(void*)> ExportExtras = mProperties->GetPropertyCallback("extras");
+        char* ret = (char*)ExportExtras((void*)mAsset.get());
+        
+        Document extrasD;
+        extrasD.Parse(ret);
+        std::string strHello = extrasD["hello"].GetString();
+        
+        printf("wangyi 0608 ret: %s\r\n", ret);
+    }
+    
     AssetWriter writer(*mAsset);
 
     if (isBinary) {

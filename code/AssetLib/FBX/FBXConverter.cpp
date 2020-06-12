@@ -1163,7 +1163,8 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
                 const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
                 const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
-                animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
+                //losing channel name if using shapeGeometry->Name()
+                animMesh->mName.Set(FixAnimMeshName(blendShapeChannel->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);

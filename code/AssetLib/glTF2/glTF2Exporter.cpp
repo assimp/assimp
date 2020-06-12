@@ -116,17 +116,11 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     ExportAnimations();
     
-    //wangyi 0608
+    // export extras
     if(mProperties->HasPropertyCallback("extras"))
     {
         std::function<void*(void*)> ExportExtras = mProperties->GetPropertyCallback("extras");
-        char* ret = (char*)ExportExtras((void*)mAsset.get());
-        
-        Document extrasD;
-        extrasD.Parse(ret);
-        std::string strHello = extrasD["hello"].GetString();
-        
-        printf("wangyi 0608 ret: %s\r\n", ret);
+        mAsset->extras = (rapidjson::Value*)ExportExtras(0);
     }
     
     AssetWriter writer(*mAsset);

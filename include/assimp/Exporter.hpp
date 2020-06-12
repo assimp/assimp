@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "cexport.h"
 #include <map>
-//wangyi 0608
 #include <functional>
 
 namespace Assimp {
@@ -332,7 +331,6 @@ public:
     typedef std::map<KeyType, ai_real> FloatPropertyMap;
     typedef std::map<KeyType, std::string> StringPropertyMap;
     typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
-    //wangyi 0608
     typedef std::map<KeyType, std::function<void *(void *)>> CallbackPropertyMap;
 
 public:
@@ -392,8 +390,7 @@ public:
      * @see SetPropertyInteger()
      */
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
-
-    //wangyi 0608
+    
     bool SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f);
 
     // -------------------------------------------------------------------
@@ -448,7 +445,6 @@ public:
     const aiMatrix4x4 GetPropertyMatrix(const char *szName,
             const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
 
-    //wangyi 0608
     std::function<void *(void *)> GetPropertyCallback(const char* szName) const;
 
             // -------------------------------------------------------------------
@@ -476,8 +472,7 @@ public:
     * @see HasPropertyMatrix()
      */
     bool HasPropertyMatrix(const char *szName) const;
-
-    //wangyi 0608
+    
     bool HasPropertyCallback(const char *szName) const;
 
 protected:
@@ -492,8 +487,7 @@ protected:
 
     /** List of Matrix properties */
     MatrixPropertyMap mMatrixProperties;
-
-    //wangyi 0608
+    
     CallbackPropertyMap mCallbackProperties;
 };
 

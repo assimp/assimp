@@ -581,19 +581,18 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 , mFloatProperties(other.mFloatProperties)
 , mStringProperties(other.mStringProperties)
 , mMatrixProperties(other.mMatrixProperties)
-//wangyi 0608
 , mCallbackProperties(other.mCallbackProperties){
     // empty
 }
 
-//wangyi 0608
 bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
     return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);
 }
+
 std::function<void *(void *)> ExportProperties::GetPropertyCallback(const char *szName) const {
     return GetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, 0);
 }
-//wangyi 0608
+
 bool ExportProperties::HasPropertyCallback(const char *szName) const {
     return HasGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName);
 }

@@ -824,9 +824,14 @@ void glTF2Exporter::ExportMeshes()
 
         /*************** Targets for blendshapes ****************/
         if (aim->mNumAnimMeshes > 0) {
+            bool bExportTargetNames = this->mProperties->HasPropertyBool("GLTF2_TARGETNAMES_EXP") &&
+                              this->mProperties->GetPropertyBool("GLTF2_TARGETNAMES_EXP");
+
             p.targets.resize(aim->mNumAnimMeshes);
             for (unsigned int am = 0; am < aim->mNumAnimMeshes; ++am) {
                 aiAnimMesh *pAnimMesh = aim->mAnimMeshes[am];
+                if (bExportTargetNames)
+                    m->targetNames.push_back(pAnimMesh->mName.data);
 
                 // position
                 if (pAnimMesh->HasPositions()) {

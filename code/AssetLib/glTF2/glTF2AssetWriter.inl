@@ -468,6 +468,22 @@ namespace glTF2 {
         }
 
         obj.AddMember("primitives", primitives, w.mAl);
+        // targetNames
+        if (m.targetNames.size() > 0) {
+            Value extras;
+            extras.SetObject();
+            Value targetNames;
+            targetNames.SetArray();
+            targetNames.Reserve(unsigned(m.targetNames.size()), w.mAl);
+            for (unsigned int n = 0; n < m.targetNames.size(); ++n) {
+                std::string name = m.targetNames[n];
+                Value tname;
+                tname.SetString(name.c_str(), w.mAl);
+                targetNames.PushBack(tname, w.mAl);
+            }
+            extras.AddMember("targetNames", targetNames, w.mAl);
+            obj.AddMember("extras", extras, w.mAl);
+        }
     }
 
     inline void Write(Value& obj, Node& n, AssetWriter& w)

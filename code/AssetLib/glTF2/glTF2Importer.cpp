@@ -416,6 +416,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				attr.color[c]->ExtractData(aim->mColors[c]);
 			}
 			for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
+                if (!attr.texcoord[tc]) {
+                    DefaultLogger::get()->warn("Texture coordinate accessor not found or non-contiguous texture coordinate sets.");
+                    continue;
+                }
+
 				if (attr.texcoord[tc]->count != aim->mNumVertices) {
 					DefaultLogger::get()->warn("Texcoord stream size in mesh \"" + mesh.name +
 											   "\" does not match the vertex count");

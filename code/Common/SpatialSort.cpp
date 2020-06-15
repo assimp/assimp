@@ -210,20 +210,16 @@ BinFloat ToBinary(const ai_real &pValue) {
     // See http://en.wikipedia.org/wiki/Signed_number_representations.
 
     // Two's complement?
-    bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & 0x80000000));
-    bool OneComplement = ((-42 == ~42) && (binValue & 0x80000000));
-    bool SignedMagnitude = ((-42 == (42 | (-0))) && (binValue & 0x80000000));
+    const bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & 0x80000000));
+    const bool OneComplement = ((-42 == ~42) && (binValue & 0x80000000));
 
     if (DefaultValue)
         return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
     // One's complement?
     else if (OneComplement)
         return BinFloat(-0) - binValue;
-    // Sign-magnitude?
-    else if (SignedMagnitude) // -0 = 1000... binary
-        return binValue;
-    else
-        return binValue;
+    // Sign-magnitude? -0 = 1000... binary
+    return binValue;
 }
 
 } // namespace

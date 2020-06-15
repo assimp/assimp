@@ -66,6 +66,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+#if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Add a prefix to a string
 inline
@@ -75,7 +80,7 @@ void PrefixString(aiString& string,const char* prefix, unsigned int len) {
         return;
 
     if (len+string.length>=MAXLEN-1) {
-		ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
+        ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
         ai_assert(false);
         return;
     }
@@ -98,8 +103,9 @@ void SceneCombiner::AddNodeHashes(aiNode* node, std::set<unsigned int>& hashes) 
     }
 
     // Process all children recursively
-    for (unsigned int i = 0; i < node->mNumChildren;++i)
+    for (unsigned int i = 0; i < node->mNumChildren;++i) {
         AddNodeHashes(node->mChildren[i],hashes);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1074,12 +1080,14 @@ void SceneCombiner::Copy( aiMesh** _dest, const aiMesh* src ) {
     GetArrayCopy( dest->mBitangents, dest->mNumVertices );
 
     unsigned int n = 0;
-    while (dest->HasTextureCoords(n))
-        GetArrayCopy( dest->mTextureCoords[n++],   dest->mNumVertices );
+    while (dest->HasTextureCoords(n)) {
+        GetArrayCopy( dest->mTextureCoords[n++], dest->mNumVertices );
+    }
 
     n = 0;
-    while (dest->HasVertexColors(n))
-        GetArrayCopy( dest->mColors[n++],   dest->mNumVertices );
+    while (dest->HasVertexColors(n)) {
+        GetArrayCopy( dest->mColors[n++], dest->mNumVertices );
+    }
 
     // make a deep copy of all bones
     CopyPtrArray(dest->mBones,dest->mBones,dest->mNumBones);
@@ -1340,6 +1348,10 @@ void SceneCombiner::Copy(aiMetadata** _dest, const aiMetadata* src) {
         }
     }
 }
+
+#if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)
+#   pragma GCC diagnostic pop
+#endif
 
 } // Namespace Assimp
 

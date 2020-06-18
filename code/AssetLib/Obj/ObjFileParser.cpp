@@ -253,7 +253,6 @@ static bool isDataDefinitionEnd(const char *tmp) {
     if (*tmp == '\\') {
         tmp++;
         if (IsLineEnd(*tmp)) {
-            tmp++;
             return true;
         }
     }

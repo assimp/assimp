@@ -114,6 +114,10 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
         for (unsigned int w = 0; w < bone->mNumWeights; ++w)
         {
             const aiVertexWeight& vw = bone->mWeights[w];
+
+            if (vertexWeights.size() <= vw.mVertexId)
+                continue;
+
             vertexWeights[vw.mVertexId].push_back(Weight(b, vw.mWeight));
             maxVertexWeights = std::max(maxVertexWeights, vertexWeights[vw.mVertexId].size());
         }

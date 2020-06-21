@@ -332,13 +332,12 @@ void MD5Importer::AttachChilds_Anim(int iParentID, aiNode *piParent, AnimBoneLis
 // ------------------------------------------------------------------------------------------------
 // Load a MD5MESH file
 void MD5Importer::LoadMD5MeshFile() {
-    std::string pFile = mFile + "md5mesh";
-    std::unique_ptr<IOStream> file(mIOHandler->Open(pFile, "rb"));
+    std::string filename = mFile + "md5mesh";
+    std::unique_ptr<IOStream> file(mIOHandler->Open(filename, "rb"));
 
     // Check whether we can read from the file
     if (file.get() == nullptr || !file->FileSize()) {
-        ASSIMP_LOG_WARN("Failed to access MD5MESH file: " + pFile);
-        return;
+        throw DeadlyImportError("Failed to open MD5 file " + filename + ".");
     }
     bHadMD5Mesh = true;
     LoadFileIntoMemory(file.get());
@@ -552,9 +551,9 @@ void MD5Importer::LoadMD5AnimFile() {
 
     // Check whether we can read from the file
     if (!file.get() || !file->FileSize()) {
-        ASSIMP_LOG_WARN("Failed to read MD5ANIM file: " + pFile);
-        return;
+        throw DeadlyImportError("Failed to open MD3 file " + file + ".");
     }
+
     LoadFileIntoMemory(file.get());
 
     // parse the basic file structure

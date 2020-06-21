@@ -124,12 +124,14 @@ void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSys
 
     // read file into memory
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
-    if( file.get() == NULL)
-        throw DeadlyImportError( "Failed to open file " + pFile + ".");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open file " + pFile + ".");
+    }
 
     size_t fileSize = file->FileSize();
-    if( fileSize == 0)
-        throw DeadlyImportError( "File is too small.");
+    if (fileSize == 0) {
+        throw DeadlyImportError("File is too small.");
+    }
 
     mBuffer.resize( fileSize);
     file->Read( &mBuffer.front(), 1, fileSize);

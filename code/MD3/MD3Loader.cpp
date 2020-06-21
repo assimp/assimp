@@ -747,8 +747,9 @@ void MD3Importer::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
-    if( file.get() == NULL)
-        throw DeadlyImportError( "Failed to open MD3 file " + pFile + ".");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open MD3 file " + pFile + ".");
+    }
 
     // Check whether the md3 file is large enough to contain the header
     fileSize = (unsigned int)file->FileSize();

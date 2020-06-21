@@ -122,8 +122,9 @@ void HMPImporter::InternReadFile( const std::string& pFile,
     std::unique_ptr<IOStream> file(mIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if( file.get() == nullptr)
-        throw DeadlyImportError( "Failed to open HMP file " + pFile + ".");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open HMP file " + pFile + ".");
+    }
 
     // Check whether the HMP file is large enough to contain
     // at least the file header

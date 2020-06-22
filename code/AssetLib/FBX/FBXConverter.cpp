@@ -2000,19 +2000,19 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
 
     // Maya PBR
-    TrySetTextureProperties(out_mat, _textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|baseColor", aiTextureType_BASE_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|normalCamera", aiTextureType_NORMAL_CAMERA, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|emissionColor", aiTextureType_EMISSION_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|metalness", aiTextureType_METALNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|diffuseRoughness", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
 
     // Maya stingray
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_color_map|file", aiTextureType_BASE_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_normal_map|file", aiTextureType_NORMAL_CAMERA, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_color_map", aiTextureType_BASE_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_normal_map", aiTextureType_NORMAL_CAMERA, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_emissive_map", aiTextureType_EMISSION_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_metallic_map", aiTextureType_METALNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_ao_map", aiTextureType_AMBIENT_OCCLUSION, mesh);
 
     // 3DSMax PBR
     TrySetTextureProperties(out_mat, _textures, "3dsMax|Parameters|base_color_map", aiTextureType_BASE_COLOR, mesh);

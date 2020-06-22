@@ -445,7 +445,7 @@ void WritePropColor(const aiScene* scene, FBX::Node& p, const std::string& key, 
         // ai_real can be float or double, cast to avoid warnings
         p.AddP70color(key, (double)value.x, (double)value.y, (double)value.z);
     } else {
-        p.AddP70color(key, 0.0, 0.0, 0.0);
+        p.AddP70color(key, (double)defaultValue.x, (double)defaultValue.y, (double)defaultValue.z);
     }
 }
 

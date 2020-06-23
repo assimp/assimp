@@ -83,32 +83,61 @@ namespace Assimp {
 void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 
 // ------------------------------------------------------------------------------------------------
-// Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
-// do not use const, because some exporter need to convert the scene temporary
+// Exporter worker function prototypes. Do not use const, because some exporter need to convert 
+// the scene temporary
+#ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_X_EXPORTER
 void ExportSceneXFile(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_STEP_EXPORTER
 void ExportSceneStep(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
 void ExportSceneObj(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneObjNoMtl(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_STL_EXPORTER
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_PLY_EXPORTER
 void ExportScenePly(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
 void ExportScene3DS(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLTF2(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLB2(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
 void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
 void ExportSceneFBX(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneFBXA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
 void ExportScene3MF( const char*, IOSystem*, const aiScene*, const ExportProperties* );
+#endif
+#ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
 void ExportSceneM3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneM3DA(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
+#ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
 void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::ExportProperties*);
-
+#endif
 
 static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporters) {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
@@ -446,7 +475,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                     proc.Execute(scenecopy.get());
                 }
 
-                ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
+                ExportProperties emptyProperties;  // Never pass nullptr ExportProperties so Exporters don't have to worry.
                 ExportProperties* pProp = pProperties ? (ExportProperties*)pProperties : &emptyProperties;
         		pProp->SetPropertyBool("bJoinIdenticalVertices", pp & aiProcess_JoinIdenticalVertices);
                 exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProp);

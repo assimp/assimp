@@ -122,7 +122,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 
                         // Keep this material even if no mesh references it
                         abReferenced[i] = true;
-                        ASSIMP_LOG_DEBUG_F( "Found positive match in exclusion list: \'", name.data, "\'");
+                        ASSIMP_LOG_VERBOSE_DEBUG_F( "Found positive match in exclusion list: \'", name.data, "\'");
                     }
                 }
             }
@@ -197,7 +197,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
             // update all material indices
             for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
                 aiMesh* mesh = pScene->mMeshes[p];
-                ai_assert( NULL!=mesh );
+                ai_assert(nullptr != mesh);
                 mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
             }
             // delete the old material list

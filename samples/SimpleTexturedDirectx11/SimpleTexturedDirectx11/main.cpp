@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // Simple Assimp Directx11 Sample
 // This is a very basic sample and only reads diffuse texture
 // but this can load both embedded textures in fbx and non-embedded textures
@@ -126,7 +126,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	int argc;
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	if (!argv) {
-		MessageBox(NULL, 
+		MessageBox(nullptr, 
 			TEXT("An error occured while reading command line arguments."),
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
@@ -143,7 +143,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 
 	// Ensure that a model file has been specified.
 	if (argc < 2) {
-		MessageBox(NULL, 
+		MessageBox(nullptr, 
 			TEXT("No model file specified. The program will now close."), 
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
@@ -165,16 +165,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
+	wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hbrBackground = nullptr;
+	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = g_szClassName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
 
 	if (!RegisterClassEx(&wc))
 	{
-		MessageBox(NULL, "Window Registration Failed!", "Error!",
+		MessageBox(nullptr, "Window Registration Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
@@ -188,12 +188,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 		" Simple Textured Directx11 Sample ",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top,
-		NULL, NULL, hInstance, NULL
+		nullptr, nullptr, hInstance, nullptr
 	);
 
-	if (g_hwnd == NULL)
+	if (g_hwnd == nullptr)
 	{
-		MessageBox(NULL, "Window Creation Failed!", "Error!",
+		MessageBox(nullptr, "Window Creation Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
@@ -210,7 +210,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 		while (true)
 		{
 
-			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -372,7 +372,7 @@ void InitD3D(HINSTANCE /*hinstance*/, HWND hWnd)
 	ID3D11Texture2D *pBackBuffer;
 	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	dev->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
+	dev->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
 	pBackBuffer->Release();
 
 	D3D11_TEXTURE2D_DESC descDepth;
@@ -440,7 +440,7 @@ void InitD3D(HINSTANCE /*hinstance*/, HWND hWnd)
 void CleanD3D(void)
 {
 	if (swapchain)
-		swapchain->SetFullscreenState(FALSE, NULL);
+		swapchain->SetFullscreenState(FALSE, nullptr);
 
 	if (ourModel) {
 		ourModel->Close();
@@ -513,8 +513,8 @@ void InitPipeline()
 	if(FAILED(CompileShaderFromFile(SHADER_PATH PIXEL_SHADER_FILE, 0, "main", "ps_4_0", &PS)))
 		Throwanerror(UTFConverter(L"Failed to compile shader from file " PIXEL_SHADER_FILE).c_str());
 
-	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
-	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
+	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), nullptr, &pVS);
+	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &pPS);
 
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
@@ -576,16 +576,16 @@ HRESULT	CompileShaderFromFile(LPCWSTR pFileName, const D3D_SHADER_MACRO* pDefine
 	compileFlags |= D3DCOMPILE_DEBUG;
 #endif
 
-	ID3DBlob* pErrorBlob = NULL;
+	ID3DBlob* pErrorBlob = nullptr;
 
 	HRESULT result = D3DCompileFromFile(pFileName, pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, pEntryPoint, pShaderModel, compileFlags, 0, ppBytecodeBlob, &pErrorBlob);
 	if (FAILED(result))
 	{
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 			OutputDebugStringA((LPCSTR)pErrorBlob->GetBufferPointer());
 	}
 
-	if (pErrorBlob != NULL)
+	if (pErrorBlob != nullptr)
 		pErrorBlob->Release();
 
 	return result;

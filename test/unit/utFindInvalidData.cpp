@@ -106,8 +106,10 @@ void utFindInvalidDataProcess::TearDown() {
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(utFindInvalidDataProcess, testStepNegativeResult) {
-    ::memset(mMesh->mNormals, 0, mMesh->mNumVertices * sizeof(aiVector3D));
-    ::memset(mMesh->mBitangents, 0, mMesh->mNumVertices * sizeof(aiVector3D));
+    for ( size_t i=0; i<mMesh->mNumVertices; ++i ) {
+        mMesh->mNormals[i].x = mMesh->mNormals[i].y = mMesh->mNormals[i].z =0;
+        mMesh->mBitangents[i].x = mMesh->mBitangents[i].y = mMesh->mBitangents[i].z = 0;
+    }
 
     mMesh->mTextureCoords[2][455] = aiVector3D(std::numeric_limits<float>::quiet_NaN());
 

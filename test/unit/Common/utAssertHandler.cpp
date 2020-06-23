@@ -52,11 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace
 {
     /// An exception which is thrown by the testAssertHandler
-    struct TestAssertException : std::exception
+    struct TestAssertException
     {
         TestAssertException(const char* failedExpression, const char* file, int line)
-            : std::exception("Test Assert Exception")
-            , m_failedExpression(failedExpression)
+            : m_failedExpression(failedExpression)
             , m_file(file)
             , m_line(line)
         {

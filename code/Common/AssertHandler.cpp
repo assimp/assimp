@@ -5,6 +5,8 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
+
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,24 +40,33 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
-#ifndef AI_ASSERT_H_INC
-#define AI_ASSERT_H_INC
 
-#if defined(ASSIMP_BUILD_DEBUG) || defined(ASSIMP_BUILD_WITH_ASSERTS)
+/** @file  AssertHandler.cpp
+ *  @brief Implementation of assert handling logic.
+ */
 
-namespace Assimp
+#include "AssertHandler.h"
+
+#include <iostream>
+#include <cstdlib>
+
+void Assimp::defaultAiAssertHandler(const char* failedExpression, const char* file, int line)
 {
-    void aiAssertViolation(const char* failedExpression, const char* file, int line);
+    std::cerr << "ai_assert failure in " << file << "(" << line << "): " << failedExpression << std::endl;
+    std::abort();
 }
 
-#    define ai_assert(expression) (void)((!!(expression)) || (Assimp::aiAssertViolation(#expression, __FILE__, __LINE__), 0))
-#    define ai_assert_entry() ai_assert(false)
+namespace
+{
+    Assimp::AiAssertHandler s_handler = Assimp::defaultAiAssertHandler;
+}
 
-#else
-#   define  ai_assert(expression)
-#   define  ai_assert_entry() 
-#endif // ASSIMP_BUILD_DEBUG
+void Assimp::setAiAssertHandler(AiAssertHandler handler)
+{
+    s_handler = handler;
+}
 
-#endif // AI_ASSERT_H_INC
-
+void Assimp::aiAssertViolation(const char* failedExpression, const char* file, int line)
+{
+    s_handler(failedExpression, file, line);
+}

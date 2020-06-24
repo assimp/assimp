@@ -64,8 +64,8 @@ namespace Assimp
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model."
 // </Shape>
 // A Shape node is unlit if either of the following is true:
-//     The shape's appearance field is NULL (default).
-//     The material field in the Appearance node is NULL (default).
+//     The shape's appearance field is nullptr (default).
+//     The material field in the Appearance node is nullptr (default).
 // NOTE Geometry nodes that represent lines or points do not support lighting.
 void X3DImporter::ParseNode_Shape_Shape()
 {

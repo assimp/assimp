@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -156,25 +155,25 @@ protected:
     char *mBuffer;
 
     /** Size of the file */
-    unsigned int fileSize;
+    unsigned int mFileSize;
 
     /** Current line number. For debugging purposes */
-    unsigned int iLineNumber;
+    unsigned int mLineNumber;
 
     /** Scene to be filled */
-    aiScene *pScene;
+    aiScene *mScene;
 
     /** true if a MD5MESH file has already been parsed */
-    bool bHadMD5Mesh;
+    bool mHadMD5Mesh;
 
     /** true if a MD5ANIM file has already been parsed */
-    bool bHadMD5Anim;
+    bool mHadMD5Anim;
 
     /** true if a MD5CAMERA file has already been parsed */
-    bool bHadMD5Camera;
+    bool mHadMD5Camera;
 
     /** configuration option: prevent anim autoload */
-    bool configNoAutoLoad;
+    bool mCconfigNoAutoLoad;
 };
 
 } // end of namespace Assimp

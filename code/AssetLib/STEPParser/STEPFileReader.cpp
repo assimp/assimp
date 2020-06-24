@@ -299,7 +299,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 }
 
 // ------------------------------------------------------------------------------------------------
-std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
+std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= nullptr*/)
 {
     const char* cur = inout;
     SkipSpaces(&cur);
@@ -422,7 +422,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
 }
 
 // ------------------------------------------------------------------------------------------------
-std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/) {
+std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= nullptr*/) {
     const std::shared_ptr<EXPRESS::LIST> list = std::make_shared<EXPRESS::LIST>();
     EXPRESS::LIST::MemberList& members = list->members;
 
@@ -540,9 +540,9 @@ void STEP::LazyObject::LazyInit() const {
     const char* acopy = args;
     std::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy,(uint64_t)STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
     delete[] args;
-    args = NULL;
+    args = nullptr;
 
-    // if the converter fails, it should throw an exception, but it should never return NULL
+    // if the converter fails, it should throw an exception, but it should never return nullptr
     try {
         obj = proc(db,*conv_args);
     }

@@ -89,7 +89,7 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
 {
     // validate io-handler instance
     if (nullptr == pIOHandler) {
-        throw DeadlyImportError("IOSystem is NULL.");
+        throw DeadlyImportError("IOSystem is nullptr.");
     }
 
     std::unique_ptr<IOStream> daefile;
@@ -322,7 +322,7 @@ void ColladaParser::ReadStructure() {
             else if (IsElement("library_cameras"))
                 ReadCameraLibrary();
             else if (IsElement("library_nodes"))
-                ReadSceneNode(NULL); /* some hacking to reuse this piece of code */
+                ReadSceneNode(nullptr); /* some hacking to reuse this piece of code */
             else if (IsElement("scene"))
                 ReadScene();
             else
@@ -588,7 +588,7 @@ void ColladaParser::ReadAnimation(Collada::Animation *pParent) {
     typedef std::map<std::string, AnimationChannel> ChannelMap;
     ChannelMap channels;
     // this is the anim container in case we're a container
-    Animation *anim = NULL;
+    Animation *anim = nullptr;
 
     // optional name given as an attribute
     std::string animName;
@@ -1713,9 +1713,6 @@ void ColladaParser::ReadGeometryLibrary() {
                 int indexID = GetAttribute("id");
                 std::string id = mReader->getAttributeValue(indexID);
 
-                // TODO: (thom) support SIDs
-                // ai_assert( TestAttribute( "sid") == -1);
-
                 // create a mesh and store it in the library under its (resolved) ID
                 // Skip and warn if ID is not unique
                 if (mMeshLibrary.find(id) == mMeshLibrary.cend()) {
@@ -2329,7 +2326,7 @@ size_t ColladaParser::ReadPrimitives(Mesh &pMesh, std::vector<InputChannel> &pPe
     return numPrimitives;
 }
 
-///@note This function willn't work correctly if both PerIndex and PerVertex channels have same channels.
+///@note This function won't work correctly if both PerIndex and PerVertex channels have same channels.
 ///For example if TEXCOORD present in both <vertices> and <polylist> tags this function will create wrong uv coordinates.
 ///It's not clear from COLLADA documentation is this allowed or not. For now only exporter fixed to avoid such behavior
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh &pMesh, std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
@@ -2525,8 +2522,6 @@ void ColladaParser::ReadSceneNode(Node *pNode) {
                 if (attrName > -1)
                     child->mName = mReader->getAttributeValue(attrName);
 
-                // TODO: (thom) support SIDs
-                // ai_assert( TestAttribute( "sid") == -1);
 
                 if (pNode) {
                     pNode->mChildren.push_back(child);
@@ -2557,7 +2552,7 @@ void ColladaParser::ReadSceneNode(Node *pNode) {
                 ReadNodeTransformation(pNode, TF_SKEW);
             else if (IsElement("translate"))
                 ReadNodeTransformation(pNode, TF_TRANSLATE);
-            else if (IsElement("render") && pNode->mParent == NULL && 0 == pNode->mPrimaryCamera.length()) {
+            else if (IsElement("render") && pNode->mParent == nullptr && 0 == pNode->mPrimaryCamera.length()) {
                 // ... scene evaluation or, in other words, postprocessing pipeline,
                 // or, again in other words, a turing-complete description how to
                 // render a Collada scene. The only thing that is interesting for
@@ -2915,17 +2910,19 @@ const char *ColladaParser::GetTextContent() {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads the text contents of an element, returns NULL if not given. Skips leading whitespace.
+// Reads the text contents of an element, returns nullptr if not given. Skips leading whitespace.
 const char *ColladaParser::TestTextContent() {
     // present node should be the beginning of an element
     if (mReader->getNodeType() != irr::io::EXN_ELEMENT || mReader->isEmptyElement())
-        return NULL;
+        return nullptr;
 
     // read contents of the element
-    if (!mReader->read())
-        return NULL;
-    if (mReader->getNodeType() != irr::io::EXN_TEXT && mReader->getNodeType() != irr::io::EXN_CDATA)
-        return NULL;
+    if (!mReader->read()) {
+        return nullptr;
+    }
+    if (mReader->getNodeType() != irr::io::EXN_TEXT && mReader->getNodeType() != irr::io::EXN_CDATA) {
+        return nullptr;
+    }
 
     // skip leading whitespace
     const char *text = mReader->getNodeData();

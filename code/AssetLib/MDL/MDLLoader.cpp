@@ -278,7 +278,7 @@ void MDLImporter::SizeCheck(const void *szPos) {
 // ------------------------------------------------------------------------------------------------
 // Just for debugging purposes
 void MDLImporter::SizeCheck(const void *szPos, const char *szFile, unsigned int iLine) {
-    ai_assert(NULL != szFile);
+    ai_assert(nullptr != szFile);
     if (!szPos || (const unsigned char *)szPos > mBuffer + iFileSize) {
         // remove a directory if there is one
         const char *szFilePtr = ::strrchr(szFile, '\\');
@@ -304,7 +304,7 @@ void MDLImporter::SizeCheck(const void *szPos, const char *szFile, unsigned int 
 // ------------------------------------------------------------------------------------------------
 // Validate a quake file header
 void MDLImporter::ValidateHeader_Quake1(const MDL::Header *pcHeader) {
-    // some values may not be NULL
+    // some values may not be nullptr
     if (!pcHeader->num_frames)
         throw DeadlyImportError("[Quake 1 MDL] There are no frames in the file");
 
@@ -359,7 +359,7 @@ void FlipQuakeHeader(BE_NCONST MDL::Header *pcHeader) {
 // ------------------------------------------------------------------------------------------------
 // Read a Quake 1 file
 void MDLImporter::InternReadFile_Quake1() {
-    ai_assert(NULL != pScene);
+    ai_assert(nullptr != pScene);
 
     BE_NCONST MDL::Header *pcHeader = (BE_NCONST MDL::Header *)this->mBuffer;
 
@@ -548,7 +548,7 @@ void MDLImporter::SetupMaterialProperties_3DGS_MDL5_Quake1() {
             delete pScene->mTextures[0];
             delete[] pScene->mTextures;
 
-            pScene->mTextures = NULL;
+            pScene->mTextures = nullptr;
             pScene->mNumTextures = 0;
         } else {
             clr.b = clr.a = clr.g = clr.r = 1.0f;
@@ -572,7 +572,7 @@ void MDLImporter::SetupMaterialProperties_3DGS_MDL5_Quake1() {
 // ------------------------------------------------------------------------------------------------
 // Read a MDL 3,4,5 file
 void MDLImporter::InternReadFile_3DGS_MDL345() {
-    ai_assert(NULL != pScene);
+    ai_assert(nullptr != pScene);
 
     // the header of MDL 3/4/5 is nearly identical to the original Quake1 header
     BE_NCONST MDL::Header *pcHeader = (BE_NCONST MDL::Header *)this->mBuffer;
@@ -791,7 +791,7 @@ void MDLImporter::ImportUVCoordinate_3DGS_MDL345(
         aiVector3D &vOut,
         const MDL::TexCoord_MDL3 *pcSrc,
         unsigned int iIndex) {
-    ai_assert(NULL != pcSrc);
+    ai_assert(nullptr != pcSrc);
     const MDL::Header *const pcHeader = (const MDL::Header *)this->mBuffer;
 
     // validate UV indices
@@ -860,7 +860,7 @@ void MDLImporter::CalculateUVCoordinates_MDL5() {
 // ------------------------------------------------------------------------------------------------
 // Validate the header of a MDL7 file
 void MDLImporter::ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7 *pcHeader) {
-    ai_assert(NULL != pcHeader);
+    ai_assert(nullptr != pcHeader);
 
     // There are some fixed sizes ...
     if (sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size) {
@@ -887,7 +887,7 @@ void MDLImporter::ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7 *pcHeader) {
 void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones) {
     const MDL::Header_MDL7 *pcHeader = (const MDL::Header_MDL7 *)this->mBuffer;
     const MDL::Bone_MDL7 *pcBones = (const MDL::Bone_MDL7 *)(pcHeader + 1);
-    ai_assert(NULL != apcOutBones);
+    ai_assert(nullptr != apcOutBones);
 
     // first find the bone that has NO parent, calculate the
     // animation matrix for it, then go on and search for the next parent
@@ -979,7 +979,7 @@ MDL::IntBone_MDL7 **MDLImporter::LoadBones_3DGS_MDL7() {
                 AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_32_CHARS != pcHeader->bone_stc_size &&
                 AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE != pcHeader->bone_stc_size) {
             ASSIMP_LOG_WARN("Unknown size of bone data structure");
-            return NULL;
+            return nullptr;
         }
 
         MDL::IntBone_MDL7 **apcBonesOut = new MDL::IntBone_MDL7 *[pcHeader->bones_num];
@@ -990,7 +990,7 @@ MDL::IntBone_MDL7 **MDLImporter::LoadBones_3DGS_MDL7() {
         CalcAbsBoneMatrices_3DGS_MDL7(apcBonesOut);
         return apcBonesOut;
     }
-    return NULL;
+    return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1014,7 +1014,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInfo,
             unsigned int iIndex = pcGroupTris->v_index[c];
             if (iIndex > (unsigned int)groupInfo.pcGroup->numverts) {
                 // (we might need to read this section a second time - to process frame vertices correctly)
-                pcGroupTris->v_index[c] = (uint16_t) (iIndex = groupInfo.pcGroup->numverts - 1 );
+                pcGroupTris->v_index[c] = (uint16_t)(iIndex = groupInfo.pcGroup->numverts - 1);
                 ASSIMP_LOG_WARN("Index overflow in MDL7 vertex list");
             }
 
@@ -1337,7 +1337,7 @@ void MDLImporter::SortByMaterials_3DGS_MDL7(
 // ------------------------------------------------------------------------------------------------
 // Read a MDL7 file
 void MDLImporter::InternReadFile_3DGS_MDL7() {
-    ai_assert(NULL != pScene);
+    ai_assert(nullptr != pScene);
 
     MDL::IntSharedData_MDL7 sharedData;
 
@@ -1368,7 +1368,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
 
     // load all bones (they are shared by all groups, so
     // we'll need to add them to all groups/meshes later)
-    // apcBonesOut is a list of all bones or NULL if they could not been loaded
+    // apcBonesOut is a list of all bones or nullptr if they could not been loaded
     szCurrent += pcHeader->bones_num * pcHeader->bone_stc_size;
     sharedData.apcOutBones = this->LoadBones_3DGS_MDL7();
 
@@ -1558,9 +1558,9 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     if (1 == pScene->mRootNode->mNumChildren && !sharedData.apcOutBones) {
         aiNode *pcOldRoot = this->pScene->mRootNode;
         pScene->mRootNode = pcOldRoot->mChildren[0];
-        pcOldRoot->mChildren[0] = NULL;
+        pcOldRoot->mChildren[0] = nullptr;
         delete pcOldRoot;
-        pScene->mRootNode->mParent = NULL;
+        pScene->mRootNode->mParent = nullptr;
     } else
         pScene->mRootNode->mName.Set("<mesh_root>");
 
@@ -1665,7 +1665,8 @@ void MDLImporter::ParseBoneTrafoKeys_3DGS_MDL7(
 // Attach bones to the output nodegraph
 void MDLImporter::AddBonesToNodeGraph_3DGS_MDL7(const MDL::IntBone_MDL7 **apcBones,
         aiNode *pcParent, uint16_t iParentIndex) {
-    ai_assert(NULL != apcBones && NULL != pcParent);
+    ai_assert(nullptr != apcBones);
+    ai_assert(nullptr != pcParent);
 
     // get a pointer to the header ...
     const MDL::Header_MDL7 *const pcHeader = (const MDL::Header_MDL7 *)this->mBuffer;
@@ -1696,7 +1697,7 @@ void MDLImporter::AddBonesToNodeGraph_3DGS_MDL7(const MDL::IntBone_MDL7 **apcBon
 // Build output animations
 void MDLImporter::BuildOutputAnims_3DGS_MDL7(
         const MDL::IntBone_MDL7 **apcBonesOut) {
-    ai_assert(NULL != apcBonesOut);
+    ai_assert(nullptr != apcBonesOut);
     const MDL::Header_MDL7 *const pcHeader = (const MDL::Header_MDL7 *)mBuffer;
 
     // one animation ...
@@ -1755,8 +1756,8 @@ void MDLImporter::BuildOutputAnims_3DGS_MDL7(
 void MDLImporter::AddAnimationBoneTrafoKey_3DGS_MDL7(unsigned int iTrafo,
         const MDL::BoneTransform_MDL7 *pcBoneTransforms,
         MDL::IntBone_MDL7 **apcBonesOut) {
-    ai_assert(NULL != pcBoneTransforms);
-    ai_assert(NULL != apcBonesOut);
+    ai_assert(nullptr != pcBoneTransforms);
+    ai_assert(nullptr != apcBonesOut);
 
     // first .. get the transformation matrix
     aiMatrix4x4 mTransform;
@@ -1920,7 +1921,9 @@ void MDLImporter::JoinSkins_3DGS_MDL7(
         aiMaterial *pcMat1,
         aiMaterial *pcMat2,
         aiMaterial *pcMatOut) {
-    ai_assert(NULL != pcMat1 && NULL != pcMat2 && NULL != pcMatOut);
+    ai_assert(nullptr != pcMat1);
+    ai_assert(nullptr != pcMat2);
+    ai_assert(nullptr != pcMatOut);
 
     // first create a full copy of the first skin property set
     // and assign it to the output material

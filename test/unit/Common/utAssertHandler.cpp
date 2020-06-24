@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 /// Ensure this test has asserts on, even if the build type doesn't have asserts by default.
-#if !defined(ASSIMP_BUILD_WITH_ASSERTS)
-#define ASSIMP_BUILD_WITH_ASSERTS
+#if !defined(ASSIMP_BUILD_DEBUG)
+#define ASSIMP_BUILD_DEBUG
 #endif
 
 #include <assimp/ai_assert.h>

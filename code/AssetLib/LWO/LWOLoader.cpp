@@ -917,7 +917,7 @@ inline void CreateNewEntry(std::vector<T> &list, unsigned int srcIdx) {
 // ------------------------------------------------------------------------------------------------
 inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry *base, unsigned int numRead,
         unsigned int idx, float *data) {
-    ai_assert(NULL != data);
+    ai_assert(nullptr != data);
     LWO::ReferrerList &refList = mCurLayer->mPointReferrers;
     unsigned int i;
 

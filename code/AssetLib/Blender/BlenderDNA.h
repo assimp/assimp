@@ -230,7 +230,7 @@ public:
 
     // --------------------------------------------------------
     /** Access a field of the structure by its canonical name. The pointer version
-     *  returns NULL on failure while the reference version raises an import error. */
+     *  returns nullptr on failure while the reference version raises an import error. */
     inline const Field &operator[](const std::string &ss) const;
     inline const Field *Get(const std::string &ss) const;
 
@@ -359,7 +359,7 @@ private:
     template <typename T>
     T *_allocate(vector<T> &out, size_t &s) const {
         out.resize(s);
-        return s ? &out.front() : NULL;
+        return s ? &out.front() : nullptr;
     }
 
     // --------------------------------------------------------
@@ -367,14 +367,14 @@ private:
     struct _defaultInitializer {
 
         template <typename T, unsigned int N>
-        void operator()(T (&out)[N], const char * = NULL) {
+        void operator()(T (&out)[N], const char * = nullptr) {
             for (unsigned int i = 0; i < N; ++i) {
                 out[i] = T();
             }
         }
 
         template <typename T, unsigned int N, unsigned int M>
-        void operator()(T (&out)[N][M], const char * = NULL) {
+        void operator()(T (&out)[N][M], const char * = nullptr) {
             for (unsigned int i = 0; i < N; ++i) {
                 for (unsigned int j = 0; j < M; ++j) {
                     out[i][j] = T();
@@ -383,7 +383,7 @@ private:
         }
 
         template <typename T>
-        void operator()(T &out, const char * = NULL) {
+        void operator()(T &out, const char * = nullptr) {
             out = T();
         }
     };
@@ -448,7 +448,7 @@ public:
 
 public:
     // --------------------------------------------------------
-    /** Access a structure by its canonical name, the pointer version returns NULL on failure
+    /** Access a structure by its canonical name, the pointer version returns nullptr on failure
       * while the reference version raises an error. */
     inline const Structure &operator[](const std::string &ss) const;
     inline const Structure *Get(const std::string &ss) const;

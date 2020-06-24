@@ -221,7 +221,7 @@ const Object* LazyObject::Get(bool dieOnError)
         if(!DefaultLogger::isNullLogger()) {
             ASSIMP_LOG_ERROR(ex.what());
         }
-        return NULL;
+        return nullptr;
     }
 
     if (!object.get()) {
@@ -467,7 +467,7 @@ void Document::ReadPropertyTemplates()
             const Element *Properties70 = (*innerSc)["Properties70"];
             if(Properties70) {
                 std::shared_ptr<const PropertyTable> props = std::make_shared<const PropertyTable>(
-                    *Properties70,std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
+                        *Properties70, std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable *>(nullptr))
                 );
 
                 templates[oname+"."+pname] = props;

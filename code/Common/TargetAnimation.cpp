@@ -41,58 +41,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "TargetAnimation.h"
-#include <algorithm>
 #include <assimp/ai_assert.h>
+#include <algorithm>
 
 using namespace Assimp;
 
-
 // ------------------------------------------------------------------------------------------------
-KeyIterator::KeyIterator(const std::vector<aiVectorKey>* _objPos,
-    const std::vector<aiVectorKey>* _targetObjPos,
-    const aiVector3D*  defaultObjectPos /*= NULL*/,
-    const aiVector3D*  defaultTargetPos /*= NULL*/)
-
-        :   reachedEnd      (false)
-        ,   curTime         (-1.)
-        ,   objPos          (_objPos)
-        ,   targetObjPos    (_targetObjPos)
-        ,   nextObjPos      (0)
-        ,   nextTargetObjPos(0)
-{
+KeyIterator::KeyIterator(const std::vector<aiVectorKey> *_objPos,
+    const std::vector<aiVectorKey> *_targetObjPos,
+    const aiVector3D *defaultObjectPos /*= nullptr*/,
+    const aiVector3D *defaultTargetPos /*= nullptr*/) :
+        reachedEnd(false),
+        curTime(-1.),
+        objPos(_objPos),
+        targetObjPos(_targetObjPos),
+        nextObjPos(0),
+        nextTargetObjPos(0) {
     // Generate default transformation tracks if necessary
-    if (!objPos || objPos->empty())
-    {
+    if (!objPos || objPos->empty()) {
         defaultObjPos.resize(1);
-        defaultObjPos.front().mTime  = 10e10;
+        defaultObjPos.front().mTime = 10e10;
 
         if (defaultObjectPos)
             defaultObjPos.front().mValue = *defaultObjectPos;
 
-        objPos = & defaultObjPos;
+        objPos = &defaultObjPos;
     }
-    if (!targetObjPos || targetObjPos->empty())
-    {
+    if (!targetObjPos || targetObjPos->empty()) {
         defaultTargetObjPos.resize(1);
-        defaultTargetObjPos.front().mTime  = 10e10;
+        defaultTargetObjPos.front().mTime = 10e10;
 
         if (defaultTargetPos)
             defaultTargetObjPos.front().mValue = *defaultTargetPos;
 
-        targetObjPos = & defaultTargetObjPos;
+        targetObjPos = &defaultTargetObjPos;
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-inline T Interpolate(const T& one, const T& two, ai_real val)
-{
-    return one + (two-one)*val;
+inline T Interpolate(const T &one, const T &two, ai_real val) {
+    return one + (two - one) * val;
 }
 
 // ------------------------------------------------------------------------------------------------
-void KeyIterator::operator ++()
-{
+void KeyIterator::operator++() {
     // If we are already at the end of all keyframes, return
     if (reachedEnd) {
         return;
@@ -100,113 +93,102 @@ void KeyIterator::operator ++()
 
     // Now search in all arrays for the time value closest
     // to our current position on the time line
-    double d0,d1;
+    double d0, d1;
 
-    d0 = objPos->at      ( std::min ( nextObjPos, static_cast<unsigned int>(objPos->size()-1))             ).mTime;
-    d1 = targetObjPos->at( std::min ( nextTargetObjPos, static_cast<unsigned int>(targetObjPos->size()-1)) ).mTime;
+    d0 = objPos->at(std::min(nextObjPos, static_cast<unsigned int>(objPos->size() - 1))).mTime;
+    d1 = targetObjPos->at(std::min(nextTargetObjPos, static_cast<unsigned int>(targetObjPos->size() - 1))).mTime;
 
     // Easiest case - all are identical. In this
     // case we don't need to interpolate so we can
     // return earlier
-    if ( d0 == d1 )
-    {
+    if (d0 == d1) {
         curTime = d0;
         curPosition = objPos->at(nextObjPos).mValue;
         curTargetPosition = targetObjPos->at(nextTargetObjPos).mValue;
 
         // increment counters
-        if (objPos->size() != nextObjPos-1)
+        if (objPos->size() != nextObjPos - 1)
             ++nextObjPos;
 
-        if (targetObjPos->size() != nextTargetObjPos-1)
+        if (targetObjPos->size() != nextTargetObjPos - 1)
             ++nextTargetObjPos;
     }
 
     // An object position key is closest to us
-    else if (d0 < d1)
-    {
+    else if (d0 < d1) {
         curTime = d0;
 
         // interpolate the other
         if (1 == targetObjPos->size() || !nextTargetObjPos) {
             curTargetPosition = targetObjPos->at(0).mValue;
-        }
-        else
-        {
-            const aiVectorKey& last  = targetObjPos->at(nextTargetObjPos);
-            const aiVectorKey& first = targetObjPos->at(nextTargetObjPos-1);
+        } else {
+            const aiVectorKey &last = targetObjPos->at(nextTargetObjPos);
+            const aiVectorKey &first = targetObjPos->at(nextTargetObjPos - 1);
 
-            curTargetPosition = Interpolate(first.mValue, last.mValue, (ai_real) (
-                (curTime-first.mTime) / (last.mTime-first.mTime) ));
+            curTargetPosition = Interpolate(first.mValue, last.mValue, (ai_real)((curTime - first.mTime) / (last.mTime - first.mTime)));
         }
 
-        if (objPos->size() != nextObjPos-1)
+        if (objPos->size() != nextObjPos - 1)
             ++nextObjPos;
     }
     // A target position key is closest to us
-    else
-    {
+    else {
         curTime = d1;
 
         // interpolate the other
         if (1 == objPos->size() || !nextObjPos) {
             curPosition = objPos->at(0).mValue;
-        }
-        else
-        {
-            const aiVectorKey& last  = objPos->at(nextObjPos);
-            const aiVectorKey& first = objPos->at(nextObjPos-1);
+        } else {
+            const aiVectorKey &last = objPos->at(nextObjPos);
+            const aiVectorKey &first = objPos->at(nextObjPos - 1);
 
-            curPosition = Interpolate(first.mValue, last.mValue, (ai_real) (
-                (curTime-first.mTime) / (last.mTime-first.mTime)));
+            curPosition = Interpolate(first.mValue, last.mValue, (ai_real)((curTime - first.mTime) / (last.mTime - first.mTime)));
         }
 
-        if (targetObjPos->size() != nextTargetObjPos-1)
+        if (targetObjPos->size() != nextTargetObjPos - 1)
             ++nextTargetObjPos;
     }
 
-    if (nextObjPos >= objPos->size()-1 &&
-        nextTargetObjPos >= targetObjPos->size()-1)
-    {
+    if (nextObjPos >= objPos->size() - 1 &&
+            nextTargetObjPos >= targetObjPos->size() - 1) {
         // We reached the very last keyframe
         reachedEnd = true;
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void TargetAnimationHelper::SetTargetAnimationChannel (
-    const std::vector<aiVectorKey>* _targetPositions)
-{
-    ai_assert(NULL != _targetPositions);
+void TargetAnimationHelper::SetTargetAnimationChannel(
+        const std::vector<aiVectorKey> *_targetPositions) {
+    ai_assert(nullptr != _targetPositions);
+
     targetPositions = _targetPositions;
 }
 
 // ------------------------------------------------------------------------------------------------
-void TargetAnimationHelper::SetMainAnimationChannel (
-    const std::vector<aiVectorKey>* _objectPositions)
-{
-    ai_assert(NULL != _objectPositions);
+void TargetAnimationHelper::SetMainAnimationChannel(
+        const std::vector<aiVectorKey> *_objectPositions) {
+    ai_assert(nullptr != _objectPositions);
+
     objectPositions = _objectPositions;
 }
 
 // ------------------------------------------------------------------------------------------------
 void TargetAnimationHelper::SetFixedMainAnimationChannel(
-    const aiVector3D& fixed)
-{
-    objectPositions = NULL; // just to avoid confusion
+        const aiVector3D &fixed) {
+    objectPositions = nullptr; // just to avoid confusion
     fixedMain = fixed;
 }
 
 // ------------------------------------------------------------------------------------------------
-void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
-{
-    ai_assert(NULL != targetPositions && NULL != distanceTrack);
+void TargetAnimationHelper::Process(std::vector<aiVectorKey> *distanceTrack) {
+    ai_assert(nullptr != targetPositions);
+    ai_assert(nullptr != distanceTrack);
 
     // TODO: in most cases we won't need the extra array
-    std::vector<aiVectorKey>  real;
+    std::vector<aiVectorKey> real;
 
-    std::vector<aiVectorKey>* fill = (distanceTrack == objectPositions ? &real : distanceTrack);
-    fill->reserve(std::max( objectPositions->size(), targetPositions->size() ));
+    std::vector<aiVectorKey> *fill = (distanceTrack == objectPositions ? &real : distanceTrack);
+    fill->reserve(std::max(objectPositions->size(), targetPositions->size()));
 
     // Iterate through all object keys and interpolate their values if necessary.
     // Then get the corresponding target position, compute the difference
@@ -214,28 +196,24 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
     // that rotates the base vector of the object coordinate system at that time
     // to match the diff vector.
 
-    KeyIterator iter(objectPositions,targetPositions,&fixedMain);
-    for (;!iter.Finished();++iter)
-    {
-        const aiVector3D&  position  = iter.GetCurPosition();
-        const aiVector3D&  tposition = iter.GetCurTargetPosition();
+    KeyIterator iter(objectPositions, targetPositions, &fixedMain);
+    for (; !iter.Finished(); ++iter) {
+        const aiVector3D &position = iter.GetCurPosition();
+        const aiVector3D &tposition = iter.GetCurTargetPosition();
 
         // diff vector
         aiVector3D diff = tposition - position;
         ai_real f = diff.Length();
 
         // output distance vector
-        if (f)
-        {
+        if (f) {
             fill->push_back(aiVectorKey());
-            aiVectorKey& v = fill->back();
-            v.mTime  = iter.GetCurTime();
+            aiVectorKey &v = fill->back();
+            v.mTime = iter.GetCurTime();
             v.mValue = diff;
 
             diff /= f;
-        }
-        else
-        {
+        } else {
             // FIXME: handle this
         }
 

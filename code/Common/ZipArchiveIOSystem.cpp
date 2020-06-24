@@ -248,15 +248,18 @@ ZipFile::~ZipFile() {
 size_t ZipFile::Read(void *pvBuffer, size_t pSize, size_t pCount) {
     // Should be impossible
     ai_assert(m_Buffer != nullptr);
-    ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
+    ai_assert(nullptr != pvBuffer);
+    ai_assert(0 != pSize);
+    ai_assert(0 != pCount);
 
     // Clip down to file size
     size_t byteSize = pSize * pCount;
     if ((byteSize + m_SeekPtr) > m_Size) {
         pCount = (m_Size - m_SeekPtr) / pSize;
         byteSize = pSize * pCount;
-        if (byteSize == 0)
+        if (byteSize == 0) {
             return 0;
+        }
     }
 
     std::memcpy(pvBuffer, m_Buffer.get() + m_SeekPtr, byteSize);

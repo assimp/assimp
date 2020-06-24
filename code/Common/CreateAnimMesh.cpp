@@ -70,7 +70,7 @@ aiAnimMesh *aiCreateAnimMesh(const aiMesh *mesh)
             animesh->mColors[i] = new aiColor4D[animesh->mNumVertices];
             std::memcpy(animesh->mColors[i], mesh->mColors[i], mesh->mNumVertices * sizeof(aiColor4D));
         } else {
-            animesh->mColors[i] = NULL;
+            animesh->mColors[i] = nullptr;
         }
     }
 
@@ -79,7 +79,7 @@ aiAnimMesh *aiCreateAnimMesh(const aiMesh *mesh)
             animesh->mTextureCoords[i] = new aiVector3D[animesh->mNumVertices];
             std::memcpy(animesh->mTextureCoords[i], mesh->mTextureCoords[i], mesh->mNumVertices * sizeof(aiVector3D));
         } else {
-            animesh->mTextureCoords[i] = NULL;
+            animesh->mTextureCoords[i] = nullptr;
         }
     }
     return animesh;

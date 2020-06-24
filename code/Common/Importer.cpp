@@ -249,7 +249,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp) {
 // Unregister a custom loader plugin
 aiReturn Importer::UnregisterLoader(BaseImporter* pImp) {
     if(!pImp) {
-        // unregistering a NULL importer is no problem for us ... really!
+        // unregistering a nullptr importer is no problem for us ... really!
         return AI_SUCCESS;
     }
 
@@ -272,7 +272,7 @@ aiReturn Importer::UnregisterLoader(BaseImporter* pImp) {
 // Unregister a custom loader plugin
 aiReturn Importer::UnregisterPPStep(BaseProcess* pImp) {
     if(!pImp) {
-        // unregistering a NULL ppstep is no problem for us ... really!
+        // unregistering a nullptr ppstep is no problem for us ... really!
         return AI_SUCCESS;
     }
 
@@ -593,7 +593,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
             return nullptr;
         }
 
-        std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+        std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME, 0) ? new Profiler() : nullptr);
         if (profiler) {
             profiler->BeginRegion("total");
         }
@@ -775,7 +775,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags) {
     }
 #endif // ! DEBUG
 
-    std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+    std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME, 0) ? new Profiler() : nullptr);
     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)   {
         BaseProcess* process = pimpl->mPostProcessingSteps[a];
         pimpl->mProgressHandler->UpdatePostProcess(static_cast<int>(a), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
@@ -841,7 +841,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     }
 
     // If no flags are given, return the current scene with no further action
-    if ( NULL == rootProcess ) {
+    if (nullptr == rootProcess) {
         return pimpl->mScene;
     }
 
@@ -873,7 +873,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     }
 #endif // ! DEBUG
 
-    std::unique_ptr<Profiler> profiler( GetPropertyInteger( AI_CONFIG_GLOB_MEASURE_TIME, 0 ) ? new Profiler() : NULL );
+    std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME, 0) ? new Profiler() : nullptr);
 
     if ( profiler ) {
         profiler->BeginRegion( "postprocess" );

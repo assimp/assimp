@@ -348,7 +348,7 @@ struct aiMeshAnim {
     /** Size of the #mKeys array. Must be 1, at least. */
     unsigned int mNumKeys;
 
-    /** Key frames of the animation. May not be NULL. */
+    /** Key frames of the animation. May not be nullptr. */
     C_STRUCT aiMeshKey *mKeys;
 
 #ifdef __cplusplus
@@ -376,7 +376,7 @@ struct aiMeshMorphAnim {
     /** Size of the #mKeys array. Must be 1, at least. */
     unsigned int mNumKeys;
 
-    /** Key frames of the animation. May not be NULL. */
+    /** Key frames of the animation. May not be nullptr. */
     C_STRUCT aiMeshMorphKey *mKeys;
 
 #ifdef __cplusplus

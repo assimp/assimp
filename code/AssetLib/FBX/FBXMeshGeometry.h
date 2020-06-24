@@ -61,10 +61,10 @@ public:
     Geometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
     virtual ~Geometry();
 
-    /** Get the Skin attached to this geometry or NULL */
+    /** Get the Skin attached to this geometry or nullptr */
     const Skin* DeformerSkin() const;
 
-    /** Get the BlendShape attached to this geometry or NULL */
+    /** Get the BlendShape attached to this geometry or nullptr */
     const std::vector<const BlendShape*>& GetBlendShapes() const;
 
 private:
@@ -123,7 +123,7 @@ public:
     /** Get per-face-vertex material assignments */
     const MatIndexArray& GetMaterialIndices() const;
 
-    /** Convert from a fbx file vertex index (for example from a #Cluster weight) or NULL
+    /** Convert from a fbx file vertex index (for example from a #Cluster weight) or nullptr
     * if the vertex index is not valid. */
     const unsigned int* ToOutputVertexIndex( unsigned int in_index, unsigned int& count ) const;
 

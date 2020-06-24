@@ -657,7 +657,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         }
         // fixup to pass the validation if not a single animation channel is non-trivial
         if (!anim->mNumChannels) {
-            anim->mChannels = NULL;
+            anim->mChannels = nullptr;
         }
     }
 }

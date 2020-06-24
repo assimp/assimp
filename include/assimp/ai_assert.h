@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp
 {
+    // Assert violation behavior can be customized: see AssertHandler.h.
     void aiAssertViolation(const char* failedExpression, const char* file, int line);
 }
 

@@ -127,6 +127,7 @@ void FindInvalidDataProcess::Execute(aiScene *pScene) {
             pScene->mMeshes[a] = nullptr;
 
             meshMapping[a] = UINT_MAX;
+            out = true;
             continue;
         }
 

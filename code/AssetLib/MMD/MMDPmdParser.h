@@ -131,7 +131,7 @@ namespace pmd
 			stream->read((char*) &index_count, sizeof(uint32_t));
 			stream->read((char*) &buffer, sizeof(char) * 20);
 			char* pstar = strchr(buffer, '*');
-			if (NULL == pstar)
+            if (nullptr == pstar)
 			{
 				texture_filename = std::string(buffer);
 				sphere_filename.clear();

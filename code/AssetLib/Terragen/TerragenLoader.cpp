@@ -87,12 +87,16 @@ bool TerragenImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, b
     if (!extension.length() || checkSig) {
         /*  If CanRead() is called in order to check whether we
          *  support a specific file extension in general pIOHandler
-         *  might be NULL and it's our duty to return true here.
+         *  might be nullptr and it's our duty to return true here.
          */
-        if (!pIOHandler) return true;
+        if (!pIOHandler) {
+            return true;
+        }
+
         const char *tokens[] = { "terragen" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
+
     return false;
 }
 
@@ -116,7 +120,7 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
     IOStream *file = pIOHandler->Open(pFile, "rb");
 
     // Check whether we can read from the file
-    if (file == NULL)
+    if (file == nullptr)
         throw DeadlyImportError("Failed to open TERRAGEN TERRAIN file " + pFile + ".");
 
     // Construct a stream reader to read all data in the correct endianness
@@ -199,7 +203,7 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
             aiFace *f = m->mFaces = new aiFace[m->mNumFaces = (x - 1) * (y - 1)];
             aiVector3D *pv = m->mVertices = new aiVector3D[m->mNumVertices = m->mNumFaces * 4];
 
-            aiVector3D *uv(NULL);
+            aiVector3D *uv(nullptr);
             float step_y(0.0f), step_x(0.0f);
             if (configComputeUVs) {
                 uv = m->mTextureCoords[0] = new aiVector3D[m->mNumVertices];

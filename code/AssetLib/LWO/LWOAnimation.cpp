@@ -538,11 +538,11 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey> &out,
 // ------------------------------------------------------------------------------------------------
 // Extract animation channel
 void AnimResolver::ExtractAnimChannel(aiNodeAnim **out, unsigned int /*= 0*/) {
-    *out = NULL;
+    *out = nullptr;
 
     //FIXME: crashes if more than one component is animated at different timings, to be resolved.
 
-    // If we have no envelopes, return NULL
+    // If we have no envelopes, return nullptr
     if (envelopes.empty()) {
         return;
     }

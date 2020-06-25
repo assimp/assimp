@@ -804,11 +804,6 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
         aiMatrix4x4::Translation(-GeometricTranslation, chain[TransformationComp_GeometricTranslationInverse]);
     }
 
-    // is_complex needs to be consistent with NeedsComplexTransformationChain()
-    // or the interplay between this code and the animation converter would
-    // not be guaranteed.
-    //ai_assert(NeedsComplexTransformationChain(model) == ((chainBits & chainMaskComplex) != 0));
-
     // now, if we have more than just Translation, Scaling and Rotation,
     // we need to generate a full node chain to accommodate for assimp's
     // lack to express pivots and offsets.
@@ -1290,7 +1285,8 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
         }
 
         if (binormals) {
-            ai_assert(tangents.size() == vertices.size() && binormals->size() == vertices.size());
+            ai_assert(tangents.size() == vertices.size());
+            ai_assert(binormals->size() == vertices.size());
 
             out_mesh->mTangents = new aiVector3D[vertices.size()];
             out_mesh->mBitangents = new aiVector3D[vertices.size()];
@@ -3165,7 +3161,8 @@ FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList(const std::vector<c
             }
 
             const AnimationCurve *const curve = kv.second;
-            ai_assert(curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size());
+            ai_assert(curve->GetKeys().size() == curve->GetValues().size());
+            ai_assert(curve->GetKeys().size());
 
             //get values within the start/stop time window
             std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());

@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step "MakeVerboseFormat"
 */
 
-
 #include "MakeVerboseFormat.h"
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
@@ -51,26 +50,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::MakeVerboseFormatProcess()
-{
+MakeVerboseFormatProcess::MakeVerboseFormatProcess() {
     // nothing to do here
 }
 // ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::~MakeVerboseFormatProcess()
-{
+MakeVerboseFormatProcess::~MakeVerboseFormatProcess() {
     // nothing to do here
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void MakeVerboseFormatProcess::Execute( aiScene* pScene)
-{
-    ai_assert(NULL != pScene);
+void MakeVerboseFormatProcess::Execute(aiScene *pScene) {
+    ai_assert(nullptr != pScene);
     ASSIMP_LOG_DEBUG("MakeVerboseFormatProcess begin");
 
     bool bHas = false;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-    {
-        if( MakeVerboseFormat( pScene->mMeshes[a]))
+    for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
+        if (MakeVerboseFormat(pScene->mMeshes[a]))
             bHas = true;
     }
     if (bHas) {
@@ -84,29 +79,26 @@ void MakeVerboseFormatProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
-{
-    ai_assert(NULL != pcMesh);
+bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
+    ai_assert(nullptr != pcMesh);
 
     unsigned int iOldNumVertices = pcMesh->mNumVertices;
-    const unsigned int iNumVerts = pcMesh->mNumFaces*3;
+    const unsigned int iNumVerts = pcMesh->mNumFaces * 3;
 
-    aiVector3D* pvPositions = new aiVector3D[ iNumVerts ];
+    aiVector3D *pvPositions = new aiVector3D[iNumVerts];
 
-    aiVector3D* pvNormals = NULL;
-    if (pcMesh->HasNormals())
-    {
+    aiVector3D *pvNormals = nullptr;
+    if (pcMesh->HasNormals()) {
         pvNormals = new aiVector3D[iNumVerts];
     }
-    aiVector3D* pvTangents = NULL, *pvBitangents = NULL;
-    if (pcMesh->HasTangentsAndBitangents())
-    {
+    aiVector3D *pvTangents = nullptr, *pvBitangents = nullptr;
+    if (pcMesh->HasTangentsAndBitangents()) {
         pvTangents = new aiVector3D[iNumVerts];
         pvBitangents = new aiVector3D[iNumVerts];
     }
 
-    aiVector3D* apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {0};
-    aiColor4D* apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = {0};
+    aiVector3D *apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = { 0 };
+    aiColor4D *apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = { 0 };
 
     unsigned int p = 0;
     while (pcMesh->HasTextureCoords(p))
@@ -117,24 +109,21 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
         apvColorSets[p++] = new aiColor4D[iNumVerts];
 
     // allocate enough memory to hold output bones and vertex weights ...
-    std::vector<aiVertexWeight>* newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
-    for (unsigned int i = 0;i < pcMesh->mNumBones;++i) {
-        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights*3);
+    std::vector<aiVertexWeight> *newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
+    for (unsigned int i = 0; i < pcMesh->mNumBones; ++i) {
+        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights * 3);
     }
 
     // iterate through all faces and build a clean list
     unsigned int iIndex = 0;
-    for (unsigned int a = 0; a< pcMesh->mNumFaces;++a)
-    {
-        aiFace* pcFace = &pcMesh->mFaces[a];
-        for (unsigned int q = 0; q < pcFace->mNumIndices;++q,++iIndex)
-        {
+    for (unsigned int a = 0; a < pcMesh->mNumFaces; ++a) {
+        aiFace *pcFace = &pcMesh->mFaces[a];
+        for (unsigned int q = 0; q < pcFace->mNumIndices; ++q, ++iIndex) {
             // need to build a clean list of bones, too
-            for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
-            {
-				for (unsigned int boneIdx = 0; boneIdx < pcMesh->mBones[i]->mNumWeights; ++boneIdx) {
-					const aiVertexWeight &w = pcMesh->mBones[i]->mWeights[boneIdx];
-                    if(pcFace->mIndices[q] == w.mVertexId) {
+            for (unsigned int i = 0; i < pcMesh->mNumBones; ++i) {
+                for (unsigned int boneIdx = 0; boneIdx < pcMesh->mBones[i]->mNumWeights; ++boneIdx) {
+                    const aiVertexWeight &w = pcMesh->mBones[i]->mWeights[boneIdx];
+                    if (pcFace->mIndices[q] == w.mVertexId) {
                         aiVertexWeight wNew;
                         wNew.mVertexId = iIndex;
                         wNew.mWeight = w.mWeight;
@@ -145,45 +134,38 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
 
             pvPositions[iIndex] = pcMesh->mVertices[pcFace->mIndices[q]];
 
-            if (pcMesh->HasNormals())
-            {
+            if (pcMesh->HasNormals()) {
                 pvNormals[iIndex] = pcMesh->mNormals[pcFace->mIndices[q]];
             }
-            if (pcMesh->HasTangentsAndBitangents())
-            {
+            if (pcMesh->HasTangentsAndBitangents()) {
                 pvTangents[iIndex] = pcMesh->mTangents[pcFace->mIndices[q]];
                 pvBitangents[iIndex] = pcMesh->mBitangents[pcFace->mIndices[q]];
             }
 
             unsigned int pp = 0;
-			while (pcMesh->HasTextureCoords(pp))
-            {
-				apvTextureCoords[pp][iIndex] = pcMesh->mTextureCoords[pp][pcFace->mIndices[q]];
-				++pp;
+            while (pcMesh->HasTextureCoords(pp)) {
+                apvTextureCoords[pp][iIndex] = pcMesh->mTextureCoords[pp][pcFace->mIndices[q]];
+                ++pp;
             }
-			pp = 0;
-			while (pcMesh->HasVertexColors(pp))
-            {
-				apvColorSets[pp][iIndex] = pcMesh->mColors[pp][pcFace->mIndices[q]];
-				++pp;
+            pp = 0;
+            while (pcMesh->HasVertexColors(pp)) {
+                apvColorSets[pp][iIndex] = pcMesh->mColors[pp][pcFace->mIndices[q]];
+                ++pp;
             }
             pcFace->mIndices[q] = iIndex;
         }
     }
 
-
-
     // build output vertex weights
-    for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
-    {
-        delete [] pcMesh->mBones[i]->mWeights;
+    for (unsigned int i = 0; i < pcMesh->mNumBones; ++i) {
+        delete[] pcMesh->mBones[i]->mWeights;
         if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
-            aiVertexWeight *weightToCopy = &( newWeights[i][0] );
+            aiVertexWeight *weightToCopy = &(newWeights[i][0]);
             memcpy(pcMesh->mBones[i]->mWeights, weightToCopy,
-                sizeof(aiVertexWeight) * newWeights[i].size());
+                    sizeof(aiVertexWeight) * newWeights[i].size());
         } else {
-            pcMesh->mBones[i]->mWeights = NULL;
+            pcMesh->mBones[i]->mWeights = nullptr;
         }
     }
     delete[] newWeights;
@@ -193,28 +175,24 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
     pcMesh->mVertices = pvPositions;
 
     p = 0;
-    while (pcMesh->HasTextureCoords(p))
-    {
+    while (pcMesh->HasTextureCoords(p)) {
         delete[] pcMesh->mTextureCoords[p];
         pcMesh->mTextureCoords[p] = apvTextureCoords[p];
         ++p;
     }
     p = 0;
-    while (pcMesh->HasVertexColors(p))
-    {
+    while (pcMesh->HasVertexColors(p)) {
         delete[] pcMesh->mColors[p];
         pcMesh->mColors[p] = apvColorSets[p];
         ++p;
     }
     pcMesh->mNumVertices = iNumVerts;
 
-    if (pcMesh->HasNormals())
-    {
+    if (pcMesh->HasNormals()) {
         delete[] pcMesh->mNormals;
         pcMesh->mNormals = pvNormals;
     }
-    if (pcMesh->HasTangentsAndBitangents())
-    {
+    if (pcMesh->HasTangentsAndBitangents()) {
         delete[] pcMesh->mTangents;
         pcMesh->mTangents = pvTangents;
         delete[] pcMesh->mBitangents;
@@ -223,15 +201,14 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
     return (pcMesh->mNumVertices != iOldNumVertices);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-bool IsMeshInVerboseFormat(const aiMesh* mesh) {
+bool IsMeshInVerboseFormat(const aiMesh *mesh) {
     // avoid slow vector<bool> specialization
-    std::vector<unsigned int> seen(mesh->mNumVertices,0);
-    for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-        const aiFace& f = mesh->mFaces[i];
-        for(unsigned int j = 0; j < f.mNumIndices; ++j) {
-            if(++seen[f.mIndices[j]] == 2) {
+    std::vector<unsigned int> seen(mesh->mNumVertices, 0);
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+        const aiFace &f = mesh->mFaces[i];
+        for (unsigned int j = 0; j < f.mNumIndices; ++j) {
+            if (++seen[f.mIndices[j]] == 2) {
                 // found a duplicate index
                 return false;
             }
@@ -242,9 +219,9 @@ bool IsMeshInVerboseFormat(const aiMesh* mesh) {
 }
 
 // ------------------------------------------------------------------------------------------------
-bool MakeVerboseFormatProcess::IsVerboseFormat(const aiScene* pScene) {
-    for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-        if(!IsMeshInVerboseFormat(pScene->mMeshes[i])) {
+bool MakeVerboseFormatProcess::IsVerboseFormat(const aiScene *pScene) {
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        if (!IsMeshInVerboseFormat(pScene->mMeshes[i])) {
             return false;
         }
     }

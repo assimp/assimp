@@ -96,7 +96,7 @@ public:
     template <typename T>
     const T* Get(bool dieOnError = false) {
         const Object* const ob = Get(dieOnError);
-        return ob ? dynamic_cast<const T*>(ob) : NULL;
+        return ob ? dynamic_cast<const T *>(ob) : nullptr;
     }
 
     uint64_t ID() const {
@@ -213,7 +213,8 @@ private:
     type name() const { \
         const int ival = PropertyGet<int>(Props(), fbx_stringize(name), static_cast<int>(default_value)); \
         if (ival < 0 || ival >= AI_CONCAT(type, _MAX)) { \
-            ai_assert(static_cast<int>(default_value) >= 0 && static_cast<int>(default_value) < AI_CONCAT(type, _MAX)); \
+            ai_assert(static_cast<int>(default_value) >= 0); \
+            ai_assert(static_cast<int>(default_value) < AI_CONCAT(type, _MAX)); \
             return static_cast<type>(default_value); \
         } \
         return static_cast<type>(ival); \
@@ -744,7 +745,7 @@ public:
     wants animations for. If the curve node does not match one of these, std::range_error
     will be thrown. */
     AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
-        const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0);
+            const char *const *target_prop_whitelist = nullptr, size_t whitelist_size = 0);
 
     virtual ~AnimationCurveNode();
 
@@ -756,7 +757,7 @@ public:
 
     const AnimationCurveMap& Curves() const;
 
-    /** Object the curve is assigned to, this can be NULL if the
+    /** Object the curve is assigned to, this can be nullptr if the
      *  target object has no DOM representation or could not
      *  be read for other reasons.*/
     const Object* Target() const {
@@ -968,7 +969,7 @@ public:
 
     // note: a connection ensures that the source and dest objects exist, but
     // not that they have DOM representations, so the return value of one of
-    // these functions can still be NULL.
+    // these functions can still be nullptr.
     const Object* SourceObject() const;
     const Object* DestinationObject() const;
 

@@ -604,7 +604,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read node graph
     //scene->mRootNode = new aiNode[1];
-    ReadBinaryNode(stream, &scene->mRootNode, (aiNode *)NULL);
+    ReadBinaryNode(stream, &scene->mRootNode, (aiNode *)nullptr);
 
     // Read all meshes
     if (scene->mNumMeshes) {

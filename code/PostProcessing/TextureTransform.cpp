@@ -508,7 +508,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
             aiVector3D* dest, *end;
             dest = mesh->mTextureCoords[n];
 
-            ai_assert(NULL != src);
+            ai_assert(nullptr != src);
 
             // Copy the data to the destination array
             if (dest != src)

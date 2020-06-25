@@ -422,9 +422,9 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
     anim->mNumChannels = static_cast<unsigned int>(mNodes.size());
     anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
 
-    // FIX: set the array elements to NULL to ensure proper deletion if an exception is thrown
+    // FIX: set the array elements to nullptr to ensure proper deletion if an exception is thrown
     for (unsigned int i = 0; i < anim->mNumChannels; ++i)
-        anim->mChannels[i] = NULL;
+        anim->mChannels[i] = nullptr;
 
     for (unsigned int a = 0; a < anim->mNumChannels; a++) {
         const Node &node = mNodes[a];

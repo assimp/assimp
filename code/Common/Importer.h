@@ -94,7 +94,7 @@ public:
     /** Post processing steps we can apply at the imported data. */
     std::vector< BaseProcess* > mPostProcessingSteps;
 
-    /** The imported data, if ReadFile() was successful, NULL otherwise. */
+    /** The imported data, if ReadFile() was successful, nullptr otherwise. */
     aiScene* mScene;
 
     /** The error description, if there was one. */
@@ -216,7 +216,7 @@ public:
     unsigned int AddLoadRequest (
         const std::string& file,
         unsigned int steps = 0,
-        const PropertyMap* map = NULL
+            const PropertyMap *map = nullptr
         );
 
     // -------------------------------------------------------------------
@@ -226,7 +226,7 @@ public:
      *  can be called several times, too.
      *
      *  @param which LRWC returned by AddLoadRequest().
-     *  @return NULL if there is no scene with this file name
+     *  @return nullptr if there is no scene with this file name
      *  in the queue of the scene hasn't been loaded yet. */
     aiScene* GetImport(
         unsigned int which

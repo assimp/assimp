@@ -322,7 +322,9 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
                             break;
 
                         default:
+                            ASSIMP_LOG_ERROR("Unknown option.");
                             ai_assert(false); // shouldn't be here
+                            break;
                         }
                         mat->AddProperty(&shader, 1, AI_MATKEY_SHADING_MODEL);
                         if (shader != aiShadingMode_Gouraud) {

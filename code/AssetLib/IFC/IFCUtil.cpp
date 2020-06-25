@@ -71,7 +71,7 @@ aiMesh* TempMesh::ToMesh()
     ai_assert(mVerts.size() == std::accumulate(mVertcnt.begin(),mVertcnt.end(),size_t(0)));
 
     if (mVerts.empty()) {
-        return NULL;
+        return nullptr;
     }
 
     std::unique_ptr<aiMesh> mesh(new aiMesh());

@@ -77,7 +77,7 @@ namespace {
     }
 
     // ------------------------------------------------------------------------------------------------
-    AI_WONT_RETURN void ParseError(const std::string& message, const Element* element = NULL) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void ParseError(const std::string &message, const Element *element = nullptr) AI_WONT_RETURN_SUFFIX;
     AI_WONT_RETURN void ParseError(const std::string& message, const Element* element)
     {
         if(element) {
@@ -181,7 +181,7 @@ Scope::Scope(Parser& parser,bool topLevel)
     }
 
     TokenPtr n = parser.AdvanceToNextToken();
-    if(n == NULL) {
+    if (n == nullptr) {
         ParseError("unexpected end of file");
     }
 
@@ -196,7 +196,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 
         // Element() should stop at the next Key token (or right after a Close token)
         n = parser.CurrentToken();
-        if(n == NULL) {
+        if (n == nullptr) {
             if (topLevel) {
                 return;
             }
@@ -236,7 +236,7 @@ TokenPtr Parser::AdvanceToNextToken()
 {
     last = current;
     if (cursor == tokens.end()) {
-        current = NULL;
+        current = nullptr;
     } else {
         current = *cursor++;
     }
@@ -258,7 +258,7 @@ TokenPtr Parser::LastToken() const
 // ------------------------------------------------------------------------------------------------
 uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 {
-    err_out = NULL;
+    err_out = nullptr;
 
     if (t.Type() != TokenType_DATA) {
         err_out = "expected TOK_DATA token";
@@ -296,7 +296,7 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 size_t ParseTokenAsDim(const Token& t, const char*& err_out)
 {
     // same as ID parsing, except there is a trailing asterisk
-    err_out = NULL;
+    err_out = nullptr;
 
     if (t.Type() != TokenType_DATA) {
         err_out = "expected TOK_DATA token";
@@ -342,7 +342,7 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out)
 // ------------------------------------------------------------------------------------------------
 float ParseTokenAsFloat(const Token& t, const char*& err_out)
 {
-    err_out = NULL;
+    err_out = nullptr;
 
     if (t.Type() != TokenType_DATA) {
         err_out = "expected TOK_DATA token";
@@ -385,7 +385,7 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 // ------------------------------------------------------------------------------------------------
 int ParseTokenAsInt(const Token& t, const char*& err_out)
 {
-    err_out = NULL;
+    err_out = nullptr;
 
     if (t.Type() != TokenType_DATA) {
         err_out = "expected TOK_DATA token";
@@ -421,7 +421,7 @@ int ParseTokenAsInt(const Token& t, const char*& err_out)
 // ------------------------------------------------------------------------------------------------
 int64_t ParseTokenAsInt64(const Token& t, const char*& err_out)
 {
-    err_out = NULL;
+    err_out = nullptr;
 
     if (t.Type() != TokenType_DATA) {
         err_out = "expected TOK_DATA token";
@@ -458,7 +458,7 @@ int64_t ParseTokenAsInt64(const Token& t, const char*& err_out)
 // ------------------------------------------------------------------------------------------------
 std::string ParseTokenAsString(const Token& t, const char*& err_out)
 {
-    err_out = NULL;
+    err_out = nullptr;
 
     if (t.Type() != TokenType_DATA) {
         err_out = "expected TOK_DATA token";
@@ -1211,7 +1211,7 @@ bool HasElement( const Scope& sc, const std::string& index ) {
 
 // ------------------------------------------------------------------------------------------------
 // extract a required element from a scope, abort if the element cannot be found
-const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element /*= NULL*/)
+const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element /*= nullptr*/)
 {
     const Element* el = sc[index];
     if(!el) {

@@ -63,7 +63,7 @@ namespace Assimp    {
  *  @code
  * // open the file
  * std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
- * if( file.get() == NULL) {
+ * if( file.get() == nullptr ) {
  *    throw DeadlyImportError( "Failed to open file " + pFile + ".");
  * }
  *

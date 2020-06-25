@@ -91,7 +91,7 @@ public:
      *   occasion (loaders and Assimp are generally allowed to perform
      *   all needed cleanup tasks prior to returning control to the
      *   caller). If the loading is aborted, #Importer::ReadFile()
-     *   returns always NULL.
+     *   returns always nullptr.
      *   */
     virtual bool Update(float percentage = -1.f) = 0;
 

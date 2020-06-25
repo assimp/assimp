@@ -161,7 +161,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     // Just another check whether aiMesh::mPrimitiveTypes is correct
     ai_assert(numOut != pMesh->mNumFaces);
 
-    aiVector3D* nor_out = NULL;
+    aiVector3D *nor_out = nullptr;
 
     // if we don't have normals yet, but expect them to be a cheap side
     // product of triangulation anyway, allocate storage for them.
@@ -220,7 +220,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
 
-            face.mIndices = NULL;
+            face.mIndices = nullptr;
             continue;
         }
         // optimized code for quadrilaterals
@@ -272,7 +272,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             sface.mIndices[2] = temp[(start_vertex + 3) % 4];
 
             // prevent double deletion of the indices field
-            face.mIndices = NULL;
+            face.mIndices = nullptr;
             continue;
         }
         else
@@ -511,7 +511,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         }
 
         delete[] face.mIndices;
-        face.mIndices = NULL;
+        face.mIndices = nullptr;
     }
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS

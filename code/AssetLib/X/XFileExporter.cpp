@@ -89,7 +89,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
     
     // we're still here - export successfully completed. Write result to the given IOSYstem
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
-    if(outfile == NULL) {
+    if (outfile == nullptr) {
         throw DeadlyExportError("could not open output .x file: " + std::string(pFile));
     }
 

@@ -442,6 +442,89 @@ struct aiMetadata {
         return false;
     }
 
+    friend bool CompareKeys(const aiMetadata &lhs, const aiMetadata &rhs) {
+        if (lhs.mNumProperties != rhs.mNumProperties) {
+            return false;
+        }
+
+        for (unsigned int i = 0; i < lhs.mNumProperties; ++i) {
+            if (lhs.mKeys[i] != rhs.mKeys[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    friend bool CompareValues(const aiMetadata &lhs, const aiMetadata &rhs) {
+        if (lhs.mNumProperties != rhs.mNumProperties) {
+            return false;
+        }
+
+        for (unsigned int i = 0; i < lhs.mNumProperties; ++i) {
+            if (lhs.mValues[i].mType != rhs.mValues[i].mType) {
+                return false;
+            }
+
+            switch (lhs.mValues[i].mType) {
+            case AI_BOOL: {
+                if (*static_cast<bool *>(lhs.mValues[i].mData) != *static_cast<bool *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_INT32: {
+                if (*static_cast<int32_t *>(lhs.mValues[i].mData) != *static_cast<int32_t *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_UINT64: {
+                if (*static_cast<uint64_t *>(lhs.mValues[i].mData) != *static_cast<uint64_t *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_FLOAT: {
+                if (*static_cast<float *>(lhs.mValues[i].mData) != *static_cast<float *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_DOUBLE: {
+                if (*static_cast<double *>(lhs.mValues[i].mData) != *static_cast<double *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_AISTRING: {
+                if (*static_cast<aiString *>(lhs.mValues[i].mData) != *static_cast<aiString *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_AIVECTOR3D: {
+                if (*static_cast<aiVector3D *>(lhs.mValues[i].mData) != *static_cast<aiVector3D *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_AIMETADATA: {
+                if (*static_cast<aiMetadata *>(lhs.mValues[i].mData) != *static_cast<aiMetadata *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+#ifndef SWIG
+            case FORCE_32BIT:
+#endif
+            default:
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    friend bool operator==(const aiMetadata &lhs, const aiMetadata &rhs) {
+        return CompareKeys(lhs, rhs) && CompareValues(lhs, rhs);
+    }
+
+    friend bool operator!=(const aiMetadata &lhs, const aiMetadata &rhs) {
+        return !(lhs == rhs);
+    }
+
 #endif // __cplusplus
 };
 

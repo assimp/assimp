@@ -69,7 +69,8 @@ typedef enum aiMetadataType {
     AI_DOUBLE = 4,
     AI_AISTRING = 5,
     AI_AIVECTOR3D = 6,
-    AI_META_MAX = 7,
+    AI_AIMETADATA = 7,
+    AI_META_MAX = 8,
 
 #ifndef SWIG
     FORCE_32BIT = INT_MAX
@@ -100,6 +101,8 @@ struct aiMetadataEntry {
 
 #include <string>
 
+struct aiMetadata;
+
 // -------------------------------------------------------------------------------
 /**
   * Helper functions to get the aiType enum entry for a type
@@ -126,6 +129,9 @@ inline aiMetadataType GetAiType(const aiString &) {
 }
 inline aiMetadataType GetAiType(const aiVector3D &) {
     return AI_AIVECTOR3D;
+}
+inline aiMetadataType GetAiType(const aiMetadata &) {
+    return AI_AIMETADATA;
 }
 
 #endif // __cplusplus
@@ -204,6 +210,11 @@ struct aiMetadata {
                 rhs.Get<aiVector3D>(mKeys[i], v);
                 mValues[i].mData = new aiVector3D(v);
             } break;
+            case AI_AIMETADATA: {
+                aiMetadata v;
+                rhs.Get<aiMetadata>(mKeys[i], v);
+                mValues[i].mData = new aiMetadata(v);
+            } break;
 #ifndef SWIG
             case FORCE_32BIT:
 #endif
@@ -213,7 +224,15 @@ struct aiMetadata {
         }
     }
 
-    /** 
+    aiMetadata &operator=(aiMetadata rhs) {
+        using std::swap;
+        swap(mNumProperties, rhs.mNumProperties);
+        swap(mKeys, rhs.mKeys);
+        swap(mValues, rhs.mValues);
+        return *this;
+    }
+
+    /**
      *  @brief The destructor.
      */
     ~aiMetadata() {
@@ -244,6 +263,9 @@ struct aiMetadata {
                     break;
                 case AI_AIVECTOR3D:
                     delete static_cast<aiVector3D *>(data);
+                    break;
+                case AI_AIMETADATA:
+                    delete static_cast<aiMetadata *>(data);
                     break;
 #ifndef SWIG
                 case FORCE_32BIT:
@@ -323,8 +345,10 @@ struct aiMetadata {
         mValues[index].mType = GetAiType(value);
 
         // Copy the given value to the dynamic storage
-        if (nullptr != mValues[index].mData) {
+        if (nullptr != mValues[index].mData && AI_AIMETADATA != mValues[index].mType) {
             ::memcpy(mValues[index].mData, &value, sizeof(T));
+        } else if (nullptr != mValues[index].mData && AI_AIMETADATA == mValues[index].mType) {
+            *static_cast<T *>(mValues[index].mData) = value;
         } else {
             mValues[index].mData = new T(value);
         }

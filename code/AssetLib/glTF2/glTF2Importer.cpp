@@ -847,6 +847,24 @@ static std::string GetNodeName(const Node &node) {
 	return node.name.empty() ? node.id : node.name;
 }
 
+void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension, unsigned int depth = 0) {
+	if (extension.mStringValue.isPresent) {
+		metadata->Add(extension.name.c_str(), aiString(extension.mStringValue.value));
+	} else if (extension.mDoubleValue.isPresent) {
+		metadata->Add(extension.name.c_str(), extension.mDoubleValue.value);
+	} else if (extension.mUint64Value.isPresent) {
+		metadata->Add(extension.name.c_str(), extension.mUint64Value.value);
+	} else if (extension.mInt64Value.isPresent) {
+		metadata->Add(extension.name.c_str(), static_cast<int32_t>(extension.mInt64Value.value));
+	} else if (extension.mValues.isPresent) {
+		aiMetadata val;
+		for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
+			ParseExtensions(&val, extension.mValues.value[i], depth + 2);
+		}
+		metadata->Add(extension.name.c_str(), val);
+	}
+}
+
 aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &meshOffsets, glTF2::Ref<glTF2::Node> &ptr) {
 	Node &node = *ptr;
 
@@ -861,6 +879,11 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 			child->mParent = ainode;
 			ainode->mChildren[i] = child;
 		}
+	}
+
+	if (node.extensions) {
+		ainode->mMetaData = new aiMetadata;
+		ParseExtensions(ainode->mMetaData, node.extensions);
 	}
 
 	GetNodeTransform(ainode->mTransformation, node);
@@ -957,8 +980,13 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 		//range is optional - see https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
 		//it is added to meta data of parent node, because there is no other place to put it
 		if (node.light->range.isPresent) {
-			ainode->mMetaData = aiMetadata::Alloc(1);
-			ainode->mMetaData->Set(0, "PBR_LightRange", node.light->range.value);
+			if (!ainode->mMetaData) {
+				ainode->mMetaData = aiMetadata::Alloc(1);
+				ainode->mMetaData->Set(0, "PBR_LightRange", node.light->range.value);
+			}
+			else {
+				ainode->mMetaData->Add("PBR_LightRange", node.light->range.value);
+			}
 		}
 	}
 

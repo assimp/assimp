@@ -1241,6 +1241,10 @@ inline CustomExtension ReadExtensions(const char *name, Value& obj) {
         ReadValue(obj, ret.mStringValue);
         ret.mStringValue.isPresent = true;
     }
+    else if (obj.IsBool()) {
+        ret.mBoolValue.value = obj.GetBool();
+        ret.mBoolValue.isPresent = true;
+    }
     return ret;
 }
 

@@ -796,6 +796,7 @@ struct CustomExtension : public Object {
     Nullable<double> mDoubleValue;
     Nullable<uint64_t> mUint64Value;
     Nullable<int64_t> mInt64Value;
+    Nullable<bool> mBoolValue;
 
     // std::vector<CustomExtension> handles both Object and Array
     Nullable<std::vector<CustomExtension>> mValues;
@@ -807,7 +808,7 @@ struct CustomExtension : public Object {
     size_t Size() const {
         if (mValues.isPresent) {
             return mValues.value.size();
-        } else if (mStringValue.isPresent || mDoubleValue.isPresent || mUint64Value.isPresent || mInt64Value.isPresent) {
+        } else if (mStringValue.isPresent || mDoubleValue.isPresent || mUint64Value.isPresent || mInt64Value.isPresent || mBoolValue.isPresent) {
             return 1;
         }
         return 0;
@@ -821,6 +822,7 @@ struct CustomExtension : public Object {
         , mDoubleValue(other.mDoubleValue)
         , mUint64Value(other.mUint64Value)
         , mInt64Value(other.mInt64Value)
+        , mBoolValue(other.mBoolValue)
         , mValues(other.mValues)
     {
     }

@@ -847,7 +847,7 @@ static std::string GetNodeName(const Node &node) {
 	return node.name.empty() ? node.id : node.name;
 }
 
-void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension, unsigned int depth = 0) {
+void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
 	if (extension.mStringValue.isPresent) {
 		metadata->Add(extension.name.c_str(), aiString(extension.mStringValue.value));
 	} else if (extension.mDoubleValue.isPresent) {
@@ -856,10 +856,12 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension, uns
 		metadata->Add(extension.name.c_str(), extension.mUint64Value.value);
 	} else if (extension.mInt64Value.isPresent) {
 		metadata->Add(extension.name.c_str(), static_cast<int32_t>(extension.mInt64Value.value));
+	} else if (extension.mBoolValue.isPresent) {
+		metadata->Add(extension.name.c_str(), extension.mBoolValue.value);
 	} else if (extension.mValues.isPresent) {
 		aiMetadata val;
 		for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
-			ParseExtensions(&val, extension.mValues.value[i], depth + 2);
+			ParseExtensions(&val, extension.mValues.value[i]);
 		}
 		metadata->Add(extension.name.c_str(), val);
 	}

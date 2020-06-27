@@ -51,8 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter.hpp"
 //#include "AMFImporter_Macro.hpp"
 
-namespace Assimp
-{
+namespace Assimp {
 
 // <color
 // profile="" - The ICC color space used to interpret the three color channels <r>, <g> and <b>.
@@ -79,18 +78,19 @@ void AMFImporter::ParseNode_Color(XmlNode &node) {
 	if (!node.empty()) {
 		bool read_flag[4] = { false, false, false, false };
 		for (pugi::xml_node &child : node.children()) {
-			if (child.name() == "r") {
+            std::string name = child.name();
+            if ( name == "r") {
 				read_flag[0] = true;
-				als.Color.r = atof(child.value());
-			} else if (child.name() == "g") {
+                als.Color.r = (ai_real)::atof(child.value());
+            } else if (name == "g") {
 				read_flag[1] = true;
-				als.Color.g = atof(child.value());
-			} else if (child.name() == "b") {
+                als.Color.g = (ai_real)::atof(child.value());
+            } else if (name == "b") {
 				read_flag[2] = true;
-				als.Color.b = atof(child.value());
-			} else if (child.name() == "g") {
+                als.Color.b = (ai_real)::atof(child.value());
+            } else if (name == "g") {
 			    read_flag[3] = true;
-		    	als.Color.a = atof(child.value());
+                als.Color.a = (ai_real) ::atof(child.value());
 		    }
         }
 		// check that all components was defined
@@ -127,10 +127,11 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
 	if (!node.empty()) {
 		bool col_read = false;
         for (pugi::xml_node &child : node.children()) {
-			if (child.name() == "color") {
+            const std::string name = child.name();
+            if (name == "color") {
 				col_read = true;
 				ParseNode_Color(child);
-			} else if (child.name() == "metadata") {
+            } else if (name == "metadata") {
 				ParseNode_Metadata(child);
 			}
 		}
@@ -256,44 +257,46 @@ void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 
 	if (!pUseOldName) {
 		for (pugi::xml_attribute &attr : node.attributes()) {
-			if (attr.name() == "utex1") {
+            const std::string name = attr.name();
+            if (name == "utex1") {
 				read_flag[0] = true;
 				als.TextureCoordinate[0].x = attr.as_float();
-			} else if (attr.name() == "utex2") {
+            } else if (name == "utex2") {
 				read_flag[1] = true;
 				als.TextureCoordinate[1].x = attr.as_float();
-			} else if (attr.name() == "utex3") {
+            } else if (name == "utex3") {
 				read_flag[2] = true;
 				als.TextureCoordinate[2].x = attr.as_float();
-			} else if (attr.name() == "vtex1") {
+            } else if (name == "vtex1") {
 				read_flag[3] = true;
 				als.TextureCoordinate[0].y = attr.as_float();
-			} else if (attr.name() == "vtex2") {
+            } else if (name == "vtex2") {
 				read_flag[4] = true;
 				als.TextureCoordinate[1].y = attr.as_float();
-			} else if (attr.name() == "vtex3") {
+            } else if (name == "vtex3") {
 				read_flag[5] = true;
 				als.TextureCoordinate[0].y = attr.as_float();
 			}
 		}
 	} else {
 		for (pugi::xml_attribute &attr : node.attributes()) {
-			if (attr.name() == "u") {
+            const std::string name = attr.name();
+            if (name == "u") {
 				read_flag[0] = true;
 				als.TextureCoordinate[0].x = attr.as_float();
-			} else if (attr.name() == "u2") {
+            } else if (name == "u2") {
 				read_flag[1] = true;
 				als.TextureCoordinate[1].x = attr.as_float();
-			} else if (attr.name() == "u3") {
+            } else if (name == "u3") {
 				read_flag[2] = true;
 				als.TextureCoordinate[2].x = attr.as_float();
-			} else if (attr.name() == "v1") {
+            } else if (name == "v1") {
 				read_flag[3] = true;
 				als.TextureCoordinate[0].y = attr.as_float();
-			} else if (attr.name() == "v2") {
+            } else if (name == "v2") {
 				read_flag[4] = true;
 				als.TextureCoordinate[1].y = attr.as_float();
-			} else if (attr.name() == "v3") {
+            } else if (name == "v3") {
 				read_flag[5] = true;
 				als.TextureCoordinate[0].y = attr.as_float();
 			}

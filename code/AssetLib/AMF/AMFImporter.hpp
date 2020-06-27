@@ -52,11 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter_Node.hpp"
 
 // Header files, Assimp.
-#include <assimp/DefaultLogger.hpp>
-#include <assimp/importerdesc.h>
 #include "assimp/types.h"
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
+#include <assimp/importerdesc.h>
+#include <assimp/DefaultLogger.hpp>
 
 // Header files, stdlib.
 #include <set>
@@ -99,22 +99,22 @@ namespace Assimp {
 ///
 class AMFImporter : public BaseImporter {
 private:
-    struct SPP_Material;// forward declaration
+    struct SPP_Material; // forward declaration
 
-                        /// \struct SPP_Composite
-                        /// Data type for post-processing step. More suitable container for part of material's composition.
+    /// \struct SPP_Composite
+    /// Data type for post-processing step. More suitable container for part of material's composition.
     struct SPP_Composite {
-        SPP_Material* Material;///< Pointer to material - part of composition.
-        std::string Formula;///< Formula for calculating ratio of \ref Material.
+        SPP_Material *Material; ///< Pointer to material - part of composition.
+        std::string Formula; ///< Formula for calculating ratio of \ref Material.
     };
 
     /// \struct SPP_Material
     /// Data type for post-processing step. More suitable container for material.
     struct SPP_Material {
-        std::string ID;///< Material ID.
-        std::list<AMFMetadata*> Metadata;///< Metadata of material.
-        AMFColor* Color;///< Color of material.
-        std::list<SPP_Composite> Composition;///< List of child materials if current material is composition of few another.
+        std::string ID; ///< Material ID.
+        std::list<AMFMetadata *> Metadata; ///< Metadata of material.
+        AMFColor *Color; ///< Color of material.
+        std::list<SPP_Composite> Composition; ///< List of child materials if current material is composition of few another.
 
         /// Return color calculated for specified coordinate.
         /// \param [in] pX - "x" coordinate.
@@ -127,176 +127,179 @@ private:
     /// Data type for post-processing step. More suitable container for texture.
     struct SPP_Texture {
         std::string ID;
-        size_t      Width, Height, Depth;
-        bool        Tiled;
-        char        FormatHint[9];// 8 for string + 1 for terminator.
-        uint8_t    *Data;
+        size_t Width, Height, Depth;
+        bool Tiled;
+        char FormatHint[9]; // 8 for string + 1 for terminator.
+        uint8_t *Data;
     };
 
     /// Data type for post-processing step. Contain face data.
     struct SComplexFace {
-        aiFace Face;///< Face vertices.
-        const AMFColor* Color;///< Face color. Equal to nullptr if color is not set for the face.
-        const AMFTexMap* TexMap;///< Face texture mapping data. Equal to nullptr if texture mapping is not set for the face.
+        aiFace Face; ///< Face vertices.
+        const AMFColor *Color; ///< Face color. Equal to nullptr if color is not set for the face.
+        const AMFTexMap *TexMap; ///< Face texture mapping data. Equal to nullptr if texture mapping is not set for the face.
     };
 
-	/// Clear all temporary data.
-	void Clear();
+    /// Clear all temporary data.
+    void Clear();
 
-	/// Get data stored in <vertices> and place it to arrays.
-	/// \param [in] pNodeElement - reference to node element which kept <object> data.
-	/// \param [in] pVertexCoordinateArray - reference to vertices coordinates kept in <vertices>.
-	/// \param [in] pVertexColorArray - reference to vertices colors for all <vertex's. If color for vertex is not set then corresponding member of array
-	/// contain nullptr.
-	void PostprocessHelper_CreateMeshDataArray(const AMFMesh& pNodeElement, std::vector<aiVector3D>& pVertexCoordinateArray,
-												std::vector<AMFColor*>& pVertexColorArray) const;
+    /// Get data stored in <vertices> and place it to arrays.
+    /// \param [in] pNodeElement - reference to node element which kept <object> data.
+    /// \param [in] pVertexCoordinateArray - reference to vertices coordinates kept in <vertices>.
+    /// \param [in] pVertexColorArray - reference to vertices colors for all <vertex's. If color for vertex is not set then corresponding member of array
+    /// contain nullptr.
+    void PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElement, std::vector<aiVector3D> &pVertexCoordinateArray,
+            std::vector<AMFColor *> &pVertexColorArray) const;
 
-	/// Return converted texture ID which related to specified source textures ID's. If converted texture does not exist then it will be created and ID on new
-	/// converted texture will be returned. Conversion: set of textures from \ref CAMFImporter_NodeElement_Texture to one \ref SPP_Texture and place it
-	/// to converted textures list.
-	/// Any of source ID's can be absent(empty string) or even one ID only specified. But at least one ID must be specified.
-	/// \param [in] pID_R - ID of source "red" texture.
-	/// \param [in] pID_G - ID of source "green" texture.
-	/// \param [in] pID_B - ID of source "blue" texture.
-	/// \param [in] pID_A - ID of source "alpha" texture.
-	/// \return index of the texture in array of the converted textures.
-	size_t PostprocessHelper_GetTextureID_Or_Create(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B, const std::string& pID_A);
+    /// Return converted texture ID which related to specified source textures ID's. If converted texture does not exist then it will be created and ID on new
+    /// converted texture will be returned. Conversion: set of textures from \ref CAMFImporter_NodeElement_Texture to one \ref SPP_Texture and place it
+    /// to converted textures list.
+    /// Any of source ID's can be absent(empty string) or even one ID only specified. But at least one ID must be specified.
+    /// \param [in] pID_R - ID of source "red" texture.
+    /// \param [in] pID_G - ID of source "green" texture.
+    /// \param [in] pID_B - ID of source "blue" texture.
+    /// \param [in] pID_A - ID of source "alpha" texture.
+    /// \return index of the texture in array of the converted textures.
+    size_t PostprocessHelper_GetTextureID_Or_Create(const std::string &pID_R, const std::string &pID_G, const std::string &pID_B, const std::string &pID_A);
 
-	/// Separate input list by texture IDs. This step is needed because aiMesh can contain mesh which is use only one texture (or set: diffuse, bump etc).
-	/// \param [in] pInputList - input list with faces. Some of them can contain color or texture mapping, or both of them, or nothing. Will be cleared after
-	/// processing.
-	/// \param [out] pOutputList_Separated - output list of the faces lists. Separated faces list by used texture IDs. Will be cleared before processing.
-	void PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace>& pInputList, std::list<std::list<SComplexFace> >& pOutputList_Separated);
+    /// Separate input list by texture IDs. This step is needed because aiMesh can contain mesh which is use only one texture (or set: diffuse, bump etc).
+    /// \param [in] pInputList - input list with faces. Some of them can contain color or texture mapping, or both of them, or nothing. Will be cleared after
+    /// processing.
+    /// \param [out] pOutputList_Separated - output list of the faces lists. Separated faces list by used texture IDs. Will be cleared before processing.
+    void PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace> &pInputList, std::list<std::list<SComplexFace>> &pOutputList_Separated);
 
-	/// Check if child elements of node element is metadata and add it to scene node.
-	/// \param [in] pMetadataList - reference to list with collected metadata.
-	/// \param [out] pSceneNode - scene node in which metadata will be added.
-	void Postprocess_AddMetadata(const std::list<AMFMetadata*>& pMetadataList, aiNode& pSceneNode) const;
+    /// Check if child elements of node element is metadata and add it to scene node.
+    /// \param [in] pMetadataList - reference to list with collected metadata.
+    /// \param [out] pSceneNode - scene node in which metadata will be added.
+    void Postprocess_AddMetadata(const std::list<AMFMetadata *> &pMetadataList, aiNode &pSceneNode) const;
 
-	/// To create aiMesh and aiNode for it from <object>.
-	/// \param [in] pNodeElement - reference to node element which kept <object> data.
-	/// \param [out] pMeshList - reference to a list with all aiMesh of the scene.
-	/// \param [out] pSceneNode - pointer to place where new aiNode will be created.
-	void Postprocess_BuildNodeAndObject(const AMFObject& pNodeElement, std::list<aiMesh*>& pMeshList, aiNode** pSceneNode);
+    /// To create aiMesh and aiNode for it from <object>.
+    /// \param [in] pNodeElement - reference to node element which kept <object> data.
+    /// \param [out] pMeshList - reference to a list with all aiMesh of the scene.
+    /// \param [out] pSceneNode - pointer to place where new aiNode will be created.
+    void Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, std::list<aiMesh *> &pMeshList, aiNode **pSceneNode);
 
-	/// Create mesh for every <volume> in <mesh>.
-	/// \param [in] pNodeElement - reference to node element which kept <mesh> data.
-	/// \param [in] pVertexCoordinateArray - reference to vertices coordinates for all <volume>'s.
-	/// \param [in] pVertexColorArray - reference to vertices colors for all <volume>'s. If color for vertex is not set then corresponding member of array
-	/// contain nullptr.
-	/// \param [in] pObjectColor - pointer to colors for <object>. If color is not set then argument contain nullptr.
-	/// \param [in] pMaterialList - reference to a list with defined materials.
-	/// \param [out] pMeshList - reference to a list with all aiMesh of the scene.
-	/// \param [out] pSceneNode - reference to aiNode which will own new aiMesh's.
-	void Postprocess_BuildMeshSet(const AMFMesh& pNodeElement, const std::vector<aiVector3D>& pVertexCoordinateArray,
-									const std::vector<AMFColor*>& pVertexColorArray, const AMFColor* pObjectColor,
-									std::list<aiMesh*>& pMeshList, aiNode& pSceneNode);
+    /// Create mesh for every <volume> in <mesh>.
+    /// \param [in] pNodeElement - reference to node element which kept <mesh> data.
+    /// \param [in] pVertexCoordinateArray - reference to vertices coordinates for all <volume>'s.
+    /// \param [in] pVertexColorArray - reference to vertices colors for all <volume>'s. If color for vertex is not set then corresponding member of array
+    /// contain nullptr.
+    /// \param [in] pObjectColor - pointer to colors for <object>. If color is not set then argument contain nullptr.
+    /// \param [in] pMaterialList - reference to a list with defined materials.
+    /// \param [out] pMeshList - reference to a list with all aiMesh of the scene.
+    /// \param [out] pSceneNode - reference to aiNode which will own new aiMesh's.
+    void Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const std::vector<aiVector3D> &pVertexCoordinateArray,
+            const std::vector<AMFColor *> &pVertexColorArray, const AMFColor *pObjectColor,
+            std::list<aiMesh *> &pMeshList, aiNode &pSceneNode);
 
-	/// Convert material from \ref CAMFImporter_NodeElement_Material to \ref SPP_Material.
-	/// \param [in] pMaterial - source CAMFImporter_NodeElement_Material.
-	void Postprocess_BuildMaterial(const AMFMaterial& pMaterial);
+    /// Convert material from \ref CAMFImporter_NodeElement_Material to \ref SPP_Material.
+    /// \param [in] pMaterial - source CAMFImporter_NodeElement_Material.
+    void Postprocess_BuildMaterial(const AMFMaterial &pMaterial);
 
-	/// Create and add to aiNode's list new part of scene graph defined by <constellation>.
-	/// \param [in] pConstellation - reference to <constellation> node.
-	/// \param [out] pNodeList - reference to aiNode's list.
-	void Postprocess_BuildConstellation(AMFConstellation& pConstellation, std::list<aiNode*>& pNodeList) const;
+    /// Create and add to aiNode's list new part of scene graph defined by <constellation>.
+    /// \param [in] pConstellation - reference to <constellation> node.
+    /// \param [out] pNodeList - reference to aiNode's list.
+    void Postprocess_BuildConstellation(AMFConstellation &pConstellation, std::list<aiNode *> &pNodeList) const;
 
-	/// Build Assimp scene graph in aiScene from collected data.
-	/// \param [out] pScene - pointer to aiScene where tree will be built.
-	void Postprocess_BuildScene(aiScene* pScene);
+    /// Build Assimp scene graph in aiScene from collected data.
+    /// \param [out] pScene - pointer to aiScene where tree will be built.
+    void Postprocess_BuildScene(aiScene *pScene);
 
-	/// Decode Base64-encoded data.
-	/// \param [in] pInputBase64 - reference to input Base64-encoded string.
-	/// \param [out] pOutputData - reference to output array for decoded data.
-	void ParseHelper_Decode_Base64(const std::string& pInputBase64, std::vector<uint8_t>& pOutputData) const;
+    /// Decode Base64-encoded data.
+    /// \param [in] pInputBase64 - reference to input Base64-encoded string.
+    /// \param [out] pOutputData - reference to output array for decoded data.
+    void ParseHelper_Decode_Base64(const std::string &pInputBase64, std::vector<uint8_t> &pOutputData) const;
 
-	/// Parse <AMF> node of the file.
-	void ParseNode_Root(XmlNode &root);
+    /// Parse <AMF> node of the file.
+    void ParseNode_Root(XmlNode &root);
 
-	/// Parse <constellation> node of the file.
-	void ParseNode_Constellation(XmlNode &node);
+    /// Parse <constellation> node of the file.
+    void ParseNode_Constellation(XmlNode &node);
 
-	/// Parse <instance> node of the file.
-	void ParseNode_Instance(XmlNode &node);
+    /// Parse <instance> node of the file.
+    void ParseNode_Instance(XmlNode &node);
 
-	/// Parse <material> node of the file.
-	void ParseNode_Material(XmlNode &node);
+    /// Parse <material> node of the file.
+    void ParseNode_Material(XmlNode &node);
 
-	/// Parse <metadata> node.
-	void ParseNode_Metadata(XmlNode &node);
+    /// Parse <metadata> node.
+    void ParseNode_Metadata(XmlNode &node);
 
-	/// Parse <object> node of the file.
-	void ParseNode_Object(XmlNode &node);
+    /// Parse <object> node of the file.
+    void ParseNode_Object(XmlNode &node);
 
-	/// Parse <texture> node of the file.
-	void ParseNode_Texture(XmlNode &node);
+    /// Parse <texture> node of the file.
+    void ParseNode_Texture(XmlNode &node);
 
-	/// Parse <coordinates> node of the file.
-	void ParseNode_Coordinates(XmlNode &node);
+    /// Parse <coordinates> node of the file.
+    void ParseNode_Coordinates(XmlNode &node);
 
-	/// Parse <edge> node of the file.
-	void ParseNode_Edge(XmlNode &node);
+    /// Parse <edge> node of the file.
+    void ParseNode_Edge(XmlNode &node);
 
-	/// Parse <mesh> node of the file.
-	void ParseNode_Mesh(XmlNode &node);
+    /// Parse <mesh> node of the file.
+    void ParseNode_Mesh(XmlNode &node);
 
-	/// Parse <triangle> node of the file.
-	void ParseNode_Triangle(XmlNode &node);
+    /// Parse <triangle> node of the file.
+    void ParseNode_Triangle(XmlNode &node);
 
-	/// Parse <vertex> node of the file.
-	void ParseNode_Vertex(XmlNode &node);
+    /// Parse <vertex> node of the file.
+    void ParseNode_Vertex(XmlNode &node);
 
-	/// Parse <vertices> node of the file.
-	void ParseNode_Vertices(XmlNode &node);
+    /// Parse <vertices> node of the file.
+    void ParseNode_Vertices(XmlNode &node);
 
-	/// Parse <volume> node of the file.
-	void ParseNode_Volume(XmlNode &node);
+    /// Parse <volume> node of the file.
+    void ParseNode_Volume(XmlNode &node);
 
-	/// Parse <color> node of the file.
-	void ParseNode_Color(XmlNode &node);
+    /// Parse <color> node of the file.
+    void ParseNode_Color(XmlNode &node);
 
-	/// Parse <texmap> of <map> node of the file.
-	/// \param [in] pUseOldName - if true then use old name of node(and children) - <map>, instead of new name - <texmap>.
-	void ParseNode_TexMap(XmlNode &node, const bool pUseOldName = false);
+    /// Parse <texmap> of <map> node of the file.
+    /// \param [in] pUseOldName - if true then use old name of node(and children) - <map>, instead of new name - <texmap>.
+    void ParseNode_TexMap(XmlNode &node, const bool pUseOldName = false);
 
 public:
-	/// Default constructor.
-	AMFImporter() AI_NO_EXCEPT
-    : mNodeElement_Cur(nullptr)
-    , mXmlParser(nullptr) {
-        // empty
-    }
+    /// Default constructor.
+    AMFImporter() AI_NO_EXCEPT;
 
-	/// Default destructor.
-	~AMFImporter();
+    /// Default destructor.
+    ~AMFImporter();
 
-	/// Parse AMF file and fill scene graph. The function has no return value. Result can be found by analyzing the generated graph.
-	/// Also exception can be thrown if trouble will found.
-	/// \param [in] pFile - name of file to be parsed.
-	/// \param [in] pIOHandler - pointer to IO helper object.
-	void ParseFile(const std::string& pFile, IOSystem* pIOHandler);
+    /// Parse AMF file and fill scene graph. The function has no return value. Result can be found by analyzing the generated graph.
+    /// Also exception can be thrown if trouble will found.
+    /// \param [in] pFile - name of file to be parsed.
+    /// \param [in] pIOHandler - pointer to IO helper object.
+    void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
 
-	bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig) const;
-	void GetExtensionList(std::set<std::string>& pExtensionList);
-	void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
-	const aiImporterDesc* GetInfo ()const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
+    void GetExtensionList(std::set<std::string> &pExtensionList);
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    const aiImporterDesc *GetInfo() const;
+    bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;
+    bool Find_ConvertedNode(const std::string &pID, std::list<aiNode *> &pNodeList, aiNode **pNode) const;
+    bool Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const;
+    void Throw_CloseNotFound(const std::string &nodeName);
+    void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName);
+    void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName);
+    void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription);
+    void Throw_ID_NotFound(const std::string &pID) const;
+    void XML_CheckNode_MustHaveChildren(pugi::xml_node &node);
 
-    AMFImporter(const AMFImporter& pScene) = delete;
-    AMFImporter& operator=(const AMFImporter& pScene) = delete;
+    AMFImporter(const AMFImporter &pScene) = delete;
+    AMFImporter &operator=(const AMFImporter &pScene) = delete;
 
 private:
     static const aiImporterDesc Description;
 
-    AMFNodeElementBase* mNodeElement_Cur;///< Current element.
-    std::list<AMFNodeElementBase*> mNodeElement_List;///< All elements of scene graph.
-	XmlParser *mXmlParser;
-    //irr::io::IrrXMLReader* mReader;///< Pointer to XML-reader object
+    AMFNodeElementBase *mNodeElement_Cur; ///< Current element.
+    std::list<AMFNodeElementBase *> mNodeElement_List; ///< All elements of scene graph.
+    XmlParser *mXmlParser;
     std::string mUnit;
-    std::list<SPP_Material> mMaterial_Converted;///< List of converted materials for postprocessing step.
-    std::list<SPP_Texture> mTexture_Converted;///< List of converted textures for postprocessing step.
-
+    std::list<SPP_Material> mMaterial_Converted; ///< List of converted materials for postprocessing step.
+    std::list<SPP_Texture> mTexture_Converted; ///< List of converted textures for postprocessing step.
 };
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // INCLUDED_AI_AMF_IMPORTER_H

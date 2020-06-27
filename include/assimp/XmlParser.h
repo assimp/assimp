@@ -109,6 +109,10 @@ public:
         return &node;
     }
 
+    bool hasNode( const std::string &name ) const {
+        return nullptr != findNode(name);
+    }
+
     TNodeType *parse(IOStream *stream) {
 		if (nullptr == stream) {
 			return nullptr;

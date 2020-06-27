@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -82,7 +80,7 @@ void AMFImporter::Clear() {
     mTexture_Converted.clear();
     // Delete all elements
     if (!mNodeElement_List.empty()) {
-        for (CAMFImporter_NodeElement *ne : mNodeElement_List) {
+        for (AMFNodeElementBase *ne : mNodeElement_List) {
             delete ne;
         }
 
@@ -90,8 +88,14 @@ void AMFImporter::Clear() {
     }
 }
 
+AMFImporter::AMFImporter() :
+        mNodeElement_Cur(nullptr),
+        mXmlParser(nullptr) {
+    // empty
+}
+
 AMFImporter::~AMFImporter() {
-    if (mReader != nullptr) delete mReader;
+    delete mXmlParser;
     // Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
     Clear();
 }
@@ -100,10 +104,12 @@ AMFImporter::~AMFImporter() {
 /************************************************************ Functions: find set ************************************************************/
 /*********************************************************************************************************************************************/
 
-bool AMFImporter::Find_NodeElement(const std::string &pID, const CAMFImporter_NodeElement::EType pType, CAMFImporter_NodeElement **pNodeElement) const {
-    for (CAMFImporter_NodeElement *ne : mNodeElement_List) {
+bool AMFImporter::Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const {
+    for (AMFNodeElementBase *ne : mNodeElement_List) {
         if ((ne->ID == pID) && (ne->Type == pType)) {
-            if (pNodeElement != nullptr) *pNodeElement = ne;
+            if (pNodeElement != nullptr) {
+                *pNodeElement = ne;
+            }
 
             return true;
         }
@@ -117,7 +123,9 @@ bool AMFImporter::Find_ConvertedNode(const std::string &pID, std::list<aiNode *>
 
     for (aiNode *node : pNodeList) {
         if (node->mName == node_name) {
-            if (pNode != nullptr) *pNode = node;
+            if (pNode != nullptr) {
+                *pNode = node;
+            }
 
             return true;
         }
@@ -129,7 +137,9 @@ bool AMFImporter::Find_ConvertedNode(const std::string &pID, std::list<aiNode *>
 bool AMFImporter::Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const {
     for (const SPP_Material &mat : mMaterial_Converted) {
         if (mat.ID == pID) {
-            if (pConvertedMaterial != nullptr) *pConvertedMaterial = &mat;
+            if (pConvertedMaterial != nullptr) {
+                *pConvertedMaterial = &mat;
+            }
 
             return true;
         }
@@ -142,20 +152,20 @@ bool AMFImporter::Find_ConvertedMaterial(const std::string &pID, const SPP_Mater
 /************************************************************ Functions: throw set ***********************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::Throw_CloseNotFound(const std::string &pNode) {
-    throw DeadlyImportError("Close tag for node <" + pNode + "> not found. Seems file is corrupt.");
+void AMFImporter::Throw_CloseNotFound(const std::string &nodeName) {
+    throw DeadlyImportError("Close tag for node <" + nodeName + "> not found. Seems file is corrupt.");
 }
 
-void AMFImporter::Throw_IncorrectAttr(const std::string &pAttrName) {
-    throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
+void AMFImporter::Throw_IncorrectAttr(const std::string &nodeName, const std::string &attrName) {
+    throw DeadlyImportError("Node <" + nodeName + "> has incorrect attribute \"" + attrName + "\".");
 }
 
-void AMFImporter::Throw_IncorrectAttrValue(const std::string &pAttrName) {
-    throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
+void AMFImporter::Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &attrName) {
+    throw DeadlyImportError("Attribute \"" + attrName + "\" in node <" + nodeName + "> has incorrect value.");
 }
 
-void AMFImporter::Throw_MoreThanOnceDefined(const std::string &pNodeType, const std::string &pDescription) {
-    throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + mReader->getNodeName() + ". Description: " + pDescription);
+void AMFImporter::Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription) {
+    throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + nodeName + ". Description: " + pDescription);
 }
 
 void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
@@ -166,8 +176,10 @@ void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
 /************************************************************* Functions: XML set ************************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::XML_CheckNode_MustHaveChildren() {
-    if (mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
+void AMFImporter::XML_CheckNode_MustHaveChildren(pugi::xml_node &node) {
+    if (node.children().begin() == node.children().end()) {
+        throw DeadlyImportError(std::string("Node <") + node.name() + "> must have children.");
+    }
 }
 
 void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
@@ -211,9 +223,10 @@ casu_cres:
     }
 }
 
-bool AMFImporter::XML_SearchNode(const std::string &pNodeName) {
+bool AMFImporter::XML_SearchNode(const std::string &nodeName) {
+    mXmlParser->h(nodeName);
     while (mReader->read()) {
-        if ((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
+        if ((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(nodeName)) return true;
     }
 
     return false;
@@ -366,23 +379,24 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == NULL) throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+    }
 
-    // generate a XML reader for it
-    std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
-    mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
-    if (!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
-    //
-    // start reading
-    // search for root tag <amf>
-    if (XML_SearchNode("amf"))
-        ParseNode_Root();
-    else
+    mXmlParser = new XmlParser();
+    if (!mXmlParser->parse( file.get() ) {
+        delete mXmlParser;
+        throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+    }
+
+    // Start reading, search for root tag <amf>
+    if (!mXmlParser->hasNode("amf")) {
         throw DeadlyImportError("Root node \"amf\" not found.");
+    }
+
+    ParseNode_Root();
 
     delete mReader;
-    // restore old XMLreader
-    mReader = OldReader;
 }
 
 // <amf

@@ -50,9 +50,10 @@
 #include "ColladaHelper.h"
 #include <assimp/TinyFormatter.h>
 #include <assimp/ai_assert.h>
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 
 namespace Assimp {
+
 class ZipArchiveIOSystem;
 
 // ------------------------------------------------------------------------------------------
@@ -81,25 +82,25 @@ protected:
     static std::string ReadZaeManifest(ZipArchiveIOSystem &zip_archive);
 
     /** Reads the contents of the file */
-    void ReadContents();
+    void ReadContents(XmlNode &node);
 
     /** Reads the structure of the file */
-    void ReadStructure();
+    void ReadStructure(XmlNode &node);
 
     /** Reads asset information such as coordinate system information and legal blah */
-    void ReadAssetInfo();
+    void ReadAssetInfo(XmlNode &node);
 
     /** Reads contributor information such as author and legal blah */
-    void ReadContributorInfo();
+    void ReadContributorInfo(XmlNode &node);
 
     /** Reads generic metadata into provided map and renames keys for Assimp */
-    void ReadMetaDataItem(StringMetaData &metadata);
+    void ReadMetaDataItem(XmlNode &node, StringMetaData &metadata);
 
     /** Reads the animation library */
-    void ReadAnimationLibrary();
+    void ReadAnimationLibrary(XmlNode &node);
 
     /** Reads the animation clip library */
-    void ReadAnimationClipLibrary();
+    void ReadAnimationClipLibrary(XmlNode &node);
 
     /** Unwrap controllers dependency hierarchy */
     void PostProcessControllers();
@@ -108,103 +109,103 @@ protected:
     void PostProcessRootAnimations();
 
     /** Reads an animation into the given parent structure */
-    void ReadAnimation(Collada::Animation *pParent);
+    void ReadAnimation(XmlNode &node, Collada::Animation *pParent);
 
     /** Reads an animation sampler into the given anim channel */
-    void ReadAnimationSampler(Collada::AnimationChannel &pChannel);
+    void ReadAnimationSampler(XmlNode &node, Collada::AnimationChannel &pChannel);
 
     /** Reads the skeleton controller library */
-    void ReadControllerLibrary();
+    void ReadControllerLibrary(XmlNode &node);
 
     /** Reads a controller into the given mesh structure */
-    void ReadController(Collada::Controller &pController);
+    void ReadController(XmlNode &node, Collada::Controller &pController);
 
     /** Reads the joint definitions for the given controller */
-    void ReadControllerJoints(Collada::Controller &pController);
+    void ReadControllerJoints(XmlNode &node, Collada::Controller &pController);
 
     /** Reads the joint weights for the given controller */
-    void ReadControllerWeights(Collada::Controller &pController);
+    void ReadControllerWeights(XmlNode &node, Collada::Controller &pController);
 
     /** Reads the image library contents */
-    void ReadImageLibrary();
+    void ReadImageLibrary(XmlNode &node);
 
     /** Reads an image entry into the given image */
-    void ReadImage(Collada::Image &pImage);
+    void ReadImage(XmlNode &node, Collada::Image &pImage);
 
     /** Reads the material library */
-    void ReadMaterialLibrary();
+    void ReadMaterialLibrary(XmlNode &node);
 
     /** Reads a material entry into the given material */
-    void ReadMaterial(Collada::Material &pMaterial);
+    void ReadMaterial(XmlNode &node, Collada::Material &pMaterial);
 
     /** Reads the camera library */
-    void ReadCameraLibrary();
+    void ReadCameraLibrary(XmlNode &node);
 
     /** Reads a camera entry into the given camera */
-    void ReadCamera(Collada::Camera &pCamera);
+    void ReadCamera(XmlNode &node, Collada::Camera &pCamera);
 
     /** Reads the light library */
-    void ReadLightLibrary();
+    void ReadLightLibrary(XmlNode &node);
 
     /** Reads a light entry into the given light */
-    void ReadLight(Collada::Light &pLight);
+    void ReadLight(XmlNode &node, Collada::Light &pLight);
 
     /** Reads the effect library */
-    void ReadEffectLibrary();
+    void ReadEffectLibrary(XmlNode &node);
 
     /** Reads an effect entry into the given effect*/
-    void ReadEffect(Collada::Effect &pEffect);
+    void ReadEffect(XmlNode &node, Collada::Effect &pEffect);
 
     /** Reads an COMMON effect profile */
-    void ReadEffectProfileCommon(Collada::Effect &pEffect);
+    void ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEffect);
 
     /** Read sampler properties */
-    void ReadSamplerProperties(Collada::Sampler &pSampler);
+    void ReadSamplerProperties(XmlNode &node, Collada::Sampler &pSampler);
 
     /** Reads an effect entry containing a color or a texture defining that color */
-    void ReadEffectColor(aiColor4D &pColor, Collada::Sampler &pSampler);
+    void ReadEffectColor(XmlNode &node, aiColor4D &pColor, Collada::Sampler &pSampler);
 
     /** Reads an effect entry containing a float */
-    void ReadEffectFloat(ai_real &pFloat);
+    void ReadEffectFloat(XmlNode &node, ai_real &pFloat);
 
     /** Reads an effect parameter specification of any kind */
-    void ReadEffectParam(Collada::EffectParam &pParam);
+    void ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam);
 
     /** Reads the geometry library contents */
-    void ReadGeometryLibrary();
+    void ReadGeometryLibrary(XmlNode &node);
 
     /** Reads a geometry from the geometry library. */
-    void ReadGeometry(Collada::Mesh &pMesh);
+    void ReadGeometry(XmlNode &node, Collada::Mesh &pMesh);
 
     /** Reads a mesh from the geometry library */
-    void ReadMesh(Collada::Mesh &pMesh);
+    void ReadMesh(XmlNode &node, Collada::Mesh &pMesh);
 
     /** Reads a source element - a combination of raw data and an accessor defining
          * things that should not be redefinable. Yes, that's another rant.
          */
-    void ReadSource();
+    void ReadSource(XmlNode &node);
 
     /** Reads a data array holding a number of elements, and stores it in the global library.
          * Currently supported are array of floats and arrays of strings.
          */
-    void ReadDataArray();
+    void ReadDataArray(XmlNode &node);
 
     /** Reads an accessor and stores it in the global library under the given ID -
          * accessors use the ID of the parent <source> element
          */
-    void ReadAccessor(const std::string &pID);
+    void ReadAccessor(XmlNode &node, const std::string &pID);
 
     /** Reads input declarations of per-vertex mesh data into the given mesh */
-    void ReadVertexData(Collada::Mesh &pMesh);
+    void ReadVertexData(XmlNode &node, Collada::Mesh &pMesh);
 
     /** Reads input declarations of per-index mesh data into the given mesh */
-    void ReadIndexData(Collada::Mesh &pMesh);
+    void ReadIndexData(XmlNode &node, Collada::Mesh &pMesh);
 
     /** Reads a single input channel element and stores it in the given array, if valid */
-    void ReadInputChannel(std::vector<Collada::InputChannel> &poChannels);
+    void ReadInputChannel(XmlNode &node, std::vector<Collada::InputChannel> &poChannels);
 
     /** Reads a <p> primitive index list and assembles the mesh data into the given mesh */
-    size_t ReadPrimitives(Collada::Mesh &pMesh, std::vector<Collada::InputChannel> &pPerIndexChannels,
+    size_t ReadPrimitives(XmlNode &node, Collada::Mesh &pMesh, std::vector<Collada::InputChannel> &pPerIndexChannels,
             size_t pNumPrimitives, const std::vector<size_t> &pVCount, Collada::PrimitiveType pPrimType);
 
     /** Copies the data for a single primitive into the mesh, based on the InputChannels */
@@ -220,22 +221,22 @@ protected:
     void ExtractDataObjectFromChannel(const Collada::InputChannel &pInput, size_t pLocalIndex, Collada::Mesh &pMesh);
 
     /** Reads the library of node hierarchies and scene parts */
-    void ReadSceneLibrary();
+    void ReadSceneLibrary(XmlNode &node);
 
     /** Reads a scene node's contents including children and stores it in the given node */
-    void ReadSceneNode(Collada::Node *pNode);
+    void ReadSceneNode(XmlNode &node, Collada::Node *pNode);
 
     /** Reads a node transformation entry of the given type and adds it to the given node's transformation list. */
-    void ReadNodeTransformation(Collada::Node *pNode, Collada::TransformType pType);
+    void ReadNodeTransformation(XmlNode &node, Collada::Node *pNode, Collada::TransformType pType);
 
     /** Reads a mesh reference in a node and adds it to the node's mesh list */
-    void ReadNodeGeometry(Collada::Node *pNode);
+    void ReadNodeGeometry(XmlNode &node, Collada::Node *pNode);
 
     /** Reads the collada scene */
-    void ReadScene();
+    void ReadScene(XmlNode &node);
 
     // Processes bind_vertex_input and bind elements
-    void ReadMaterialVertexInputBinding(Collada::SemanticMappingTable &tbl);
+    void ReadMaterialVertexInputBinding(XmlNode &node, Collada::SemanticMappingTable &tbl);
 
     /** Reads embedded textures from a ZAE archive*/
     void ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive);
@@ -246,19 +247,19 @@ protected:
     void ReportWarning(const char *msg, ...);
 
     /** Skips all data until the end node of the current element */
-    void SkipElement();
+    //void SkipElement();
 
     /** Skips all data until the end node of the given element */
-    void SkipElement(const char *pElement);
+    //void SkipElement(const char *pElement);
 
     /** Compares the current xml element name to the given string and returns true if equal */
     bool IsElement(const char *pName) const;
 
     /** Tests for the opening tag of the given element, throws an exception if not found */
-    void TestOpening(const char *pName);
+    //void TestOpening(const char *pName);
 
     /** Tests for the closing tag of the given element, throws an exception if not found */
-    void TestClosing(const char *pName);
+    //void TestClosing(const char *pName);
 
     /** Checks the present element for the presence of the attribute, returns its index
          or throws an exception if not found */
@@ -293,11 +294,12 @@ protected:
     const Type &ResolveLibraryReference(const std::map<std::string, Type> &pLibrary, const std::string &pURL) const;
 
 protected:
-    /** Filename, for a verbose error message */
+    // Filename, for a verbose error message
     std::string mFileName;
 
-    /** XML reader, member for everyday use */
-    irr::io::IrrXMLReader *mReader;
+    // XML reader, member for everyday use
+    //irr::io::IrrXMLReader *mReader;
+    XmlParser mXmlParser;
 
     /** All data arrays found in the file by ID. Might be referred to by actually
          everyone. Collada, you are a steaming pile of indirection. */

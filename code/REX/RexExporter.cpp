@@ -565,9 +565,10 @@ void RexExporter::AddPoints(const aiMesh *m, const aiMatrix4x4 &mat)
         point.vertex = mat * m->mVertices[i];
 
         point.hasColor = false;
-        if (i < AI_MAX_NUMBER_OF_COLOR_SETS &&  m->mColors[i]) {
+
+        if (m->mColors[0]) {
             point.hasColor = true;
-            aiColor4D col4 = m->mColors[i][0];
+            aiColor4D col4 = m->mColors[0][i];
             point.color = aiColor3D(col4.r, col4.g, col4.b);
         }
     }

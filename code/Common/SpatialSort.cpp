@@ -214,7 +214,7 @@ BinFloat ToBinary(const ai_real &pValue) {
     const bool OneComplement = ((-42 == ~42) && (binValue & 0x80000000));
 
     if (DefaultValue)
-        return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
+        return BinFloat(BinFloat(1) << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
     // One's complement?
     else if (OneComplement)
         return BinFloat(-0) - binValue;

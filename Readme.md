@@ -25,16 +25,6 @@ Additionally, assimp features various __mesh post processing tools__: normals an
 
 This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
 
-Monthly donations via Patreon:
-<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
-
-<br>
-
-One-off donations via PayPal:
-<br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
-
-<br>
-
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
@@ -195,6 +185,16 @@ Become a financial contributor and help us sustain our community. [[Contribute](
 #### Individuals
 
 <a href="https://opencollective.com/assimp"><img src="https://opencollective.com/assimp/individuals.svg?width=890"></a>
+
+Monthly donations via Patreon:
+<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
+
+<br>
+
+One-off donations via PayPal:
+<br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
+
+<br>
 
 #### Organizations
 

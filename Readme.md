@@ -25,107 +25,12 @@ Additionally, assimp features various __mesh post processing tools__: normals an
 
 This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
 
-Monthly donations via Patreon:
-<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
-
-<br>
-
-One-off donations via PayPal:
-<br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
-
-<br>
-
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
 
 #### Supported file formats ####
-
-__Importers__:
-
-- 3D
-- [3DS](https://en.wikipedia.org/wiki/.3ds)
-- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format)
-- AC
-- [AC3D](https://en.wikipedia.org/wiki/AC3D)
-- ACC
-- AMJ
-- ASE
-- ASK
-- B3D
-- [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format))
-- [BVH](https://en.wikipedia.org/wiki/Biovision_Hierarchy)
-- CMS
-- COB
-- [DAE/Collada](https://en.wikipedia.org/wiki/COLLADA)
-- [DXF](https://en.wikipedia.org/wiki/AutoCAD_DXF)
-- ENFF
-- [FBX](https://en.wikipedia.org/wiki/FBX)
-- [glTF 1.0](https://en.wikipedia.org/wiki/GlTF#glTF_1.0) + GLB
-- [glTF 2.0](https://en.wikipedia.org/wiki/GlTF#glTF_2.0):
-  At the moment for glTF2.0 the following extensions are supported:
-  + KHR_lights_punctual ( 5.0 )
-  + KHR_materials_pbrSpecularGlossiness ( 5.0 )
-  + KHR_materials_unlit ( 5.0 )
-  + KHR_texture_transform ( 5.1 under test )
-- HMB
-- IFC-STEP
-- IRR / IRRMESH
-- [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
-- LWS
-- LXO
-- [M3D](https://bztsrc.gitlab.io/model3d)
-- MD2
-- MD3
-- MD5
-- MDC
-- MDL
-- MESH / MESH.XML
-- MOT
-- MS3D
-- NDO
-- NFF
-- [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
-- [OFF](https://en.wikipedia.org/wiki/OFF_(file_format))
-- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange)
-- [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
-- PMX
-- PRJ
-- Q3O
-- Q3S
-- RAW
-- SCN
-- SIB
-- SMD
-- [STP](https://en.wikipedia.org/wiki/ISO_10303-21)
-- [STL](https://en.wikipedia.org/wiki/STL_(file_format))
-- TER
-- UC
-- VTA
-- X
-- [X3D](https://en.wikipedia.org/wiki/X3D)
-- XGL
-- ZGL
-
-Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
-
-- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) IMporting geometry + node hierarchy are currently supported
-
-__Exporters__:
-
-- DAE (Collada)
-- STL
-- OBJ
-- PLY
-- X
-- 3DS
-- JSON (for WebGl, via https://github.com/acgessler/assimp2json)
-- ASSBIN
-- STEP
-- glTF 1.0 (partial)
-- glTF 2.0 (partial)
-- 3MF ( experimental )
-- FBX ( experimental )
+You can find the complete list of supported file-formats [here](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md)
 
 ### Building ###
 Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
@@ -195,6 +100,16 @@ Become a financial contributor and help us sustain our community. [[Contribute](
 #### Individuals
 
 <a href="https://opencollective.com/assimp"><img src="https://opencollective.com/assimp/individuals.svg?width=890"></a>
+
+Monthly donations via Patreon:
+<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
+
+<br>
+
+One-off donations via PayPal:
+<br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
+
+<br>
 
 #### Organizations
 

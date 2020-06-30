@@ -41,12 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 #ifndef OBJ_FILEDATA_H_INC
-#    define OBJ_FILEDATA_H_INC
+#define OBJ_FILEDATA_H_INC
 
-#    include <assimp/mesh.h>
-#    include <assimp/types.h>
-#    include <map>
-#    include <vector>
+#include <assimp/mesh.h>
+#include <assimp/types.h>
+#include <map>
+#include <vector>
 
 namespace Assimp {
 namespace ObjFile {
@@ -215,7 +215,11 @@ struct Mesh {
 
     /// Constructor
     explicit Mesh(const std::string &name) :
-            m_name(name), m_pMaterial(NULL), m_uiNumIndices(0), m_uiMaterialIndex(NoMaterial), m_hasNormals(false) {
+            m_name(name),
+            m_pMaterial(nullptr),
+            m_uiNumIndices(0),
+            m_uiMaterialIndex(NoMaterial),
+            m_hasNormals(false) {
         memset(m_uiUVCoordinates, 0, sizeof(unsigned int) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
     }
 
@@ -275,13 +279,13 @@ struct Model {
     //! \brief  The default class constructor
     Model() :
             m_ModelName(""),
-            m_pCurrent(NULL),
-            m_pCurrentMaterial(NULL),
-            m_pDefaultMaterial(NULL),
-            m_pGroupFaceIDs(NULL),
+            m_pCurrent(nullptr),
+            m_pCurrentMaterial(nullptr),
+            m_pDefaultMaterial(nullptr),
+            m_pGroupFaceIDs(nullptr),
             m_strActiveGroup(""),
             m_TextureCoordDim(0),
-            m_pCurrentMesh(NULL) {
+            m_pCurrentMesh(nullptr) {
         // empty
     }
 

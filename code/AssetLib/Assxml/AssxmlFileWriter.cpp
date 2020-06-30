@@ -189,7 +189,7 @@ static std::string encodeXML(const std::string &data) {
 // -----------------------------------------------------------------------------------
 // Write a text model dump
 static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, IOStream *io, bool shortened) {
-    time_t tt = ::time(NULL);
+    time_t tt = ::time(nullptr);
 #if _WIN32
     tm *p = gmtime(&tt);
 #else

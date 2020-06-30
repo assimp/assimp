@@ -69,7 +69,7 @@ const Field& Structure :: operator [] (const std::string& ss) const
 const Field* Structure :: Get (const std::string& ss) const
 {
     std::map<std::string, size_t>::const_iterator it = indices.find(ss);
-    return it == indices.end() ? NULL : &fields[(*it).second];
+    return it == indices.end() ? nullptr : &fields[(*it).second];
 }
 
 //--------------------------------------------------------------------------------

@@ -980,10 +980,14 @@ void glTF2Exporter::ExportMeshes()
                               this->mProperties->GetPropertyBool("GLTF2_SPARSE_ACCESSOR_EXP");
             bool bIncludeNormal = this->mProperties->HasPropertyBool("GLTF2_TARGET_NORMAL_EXP") &&
                                   this->mProperties->GetPropertyBool("GLTF2_TARGET_NORMAL_EXP");
+            bool bExportTargetNames = this->mProperties->HasPropertyBool("GLTF2_TARGETNAMES_EXP") &&
+                              this->mProperties->GetPropertyBool("GLTF2_TARGETNAMES_EXP");
 
             p.targets.resize(aim->mNumAnimMeshes);
             for (unsigned int am = 0; am < aim->mNumAnimMeshes; ++am) {
                 aiAnimMesh *pAnimMesh = aim->mAnimMeshes[am];
+                if (bExportTargetNames)
+                    m->targetNames.push_back(pAnimMesh->mName.data);
                 // position
                 if (pAnimMesh->HasPositions()) {
                     // NOTE: in gltf it is the diff stored

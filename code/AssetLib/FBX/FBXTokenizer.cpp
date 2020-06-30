@@ -127,7 +127,7 @@ void ProcessDataToken( TokenList& output_tokens, const char*& start, const char*
         TokenizeError("unexpected character, expected data token", line, column);
     }
 
-    start = end = NULL;
+    start = end = nullptr;
 }
 
 }
@@ -146,7 +146,7 @@ void Tokenize(TokenList& output_tokens, const char* input)
     bool in_double_quotes = false;
     bool pending_data_token = false;
 
-    const char* token_begin = NULL, *token_end = NULL;
+    const char *token_begin = nullptr, *token_end = nullptr;
     for (const char* cur = input;*cur;column += (*cur == '\t' ? ASSIMP_FBX_TAB_WIDTH : 1), ++cur) {
         const char c = *cur;
 

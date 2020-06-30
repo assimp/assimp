@@ -87,6 +87,7 @@ SET( COMMON
   unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp
+  unit/Common/utAssertHandler.cpp
 )
 
 SET( IMPORTERS

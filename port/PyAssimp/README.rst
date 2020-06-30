@@ -49,30 +49,27 @@ substituted by assertions ...):
 .. code:: python
 
 
-    from pyassimp import *
-    scene = load('hello.3ds')
+    from pyassimp import load
+    with load('hello.3ds') as scene:
 
-    assert len(scene.meshes)
-    mesh = scene.meshes[0]
+        assert len(scene.meshes)
+        mesh = scene.meshes[0]
 
-    assert len(mesh.vertices)
-    print(mesh.vertices[0])
+        assert len(mesh.vertices)
+        print(mesh.vertices[0])
 
-    # don't forget this one, or you will leak!
-    release(scene)
 
 Another example to list the 'top nodes' in a scene:
 
 .. code:: python
 
 
-    from pyassimp import *
-    scene = load('hello.3ds')
+    from pyassimp import load
+    with load('hello.3ds') as scene:
 
-    for c in scene.rootnode.children:
-        print(str(c))
+        for c in scene.rootnode.children:
+            print(str(c))
 
-    release(scene)
 
 INSTALL
 -------

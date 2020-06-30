@@ -253,7 +253,6 @@ static bool isDataDefinitionEnd(const char *tmp) {
     if (*tmp == '\\') {
         tmp++;
         if (IsLineEnd(*tmp)) {
-            tmp++;
             return true;
         }
     }
@@ -495,19 +494,19 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     }
 
     // Set active material, if one set
-    if (NULL != m_pModel->m_pCurrentMaterial) {
+    if (nullptr != m_pModel->m_pCurrentMaterial) {
         face->m_pMaterial = m_pModel->m_pCurrentMaterial;
     } else {
         face->m_pMaterial = m_pModel->m_pDefaultMaterial;
     }
 
     // Create a default object, if nothing is there
-    if (NULL == m_pModel->m_pCurrent) {
+    if (nullptr == m_pModel->m_pCurrent) {
         createObject(DefaultObjName);
     }
 
     // Assign face to mesh
-    if (NULL == m_pModel->m_pCurrentMesh) {
+    if (nullptr == m_pModel->m_pCurrentMesh) {
         createMesh(DefaultObjName);
     }
 
@@ -754,7 +753,7 @@ void ObjFileParser::getObjectName() {
     std::string strObjectName(pStart, &(*m_DataIt));
     if (!strObjectName.empty()) {
         // Reset current object
-        m_pModel->m_pCurrent = NULL;
+        m_pModel->m_pCurrent = nullptr;
 
         // Search for actual object
         for (std::vector<ObjFile::Object *>::const_iterator it = m_pModel->m_Objects.begin();
@@ -767,7 +766,7 @@ void ObjFileParser::getObjectName() {
         }
 
         // Allocate a new object, if current one was not found before
-        if (NULL == m_pModel->m_pCurrent) {
+        if (nullptr == m_pModel->m_pCurrent) {
             createObject(strObjectName);
         }
     }
@@ -776,7 +775,7 @@ void ObjFileParser::getObjectName() {
 // -------------------------------------------------------------------
 //  Creates a new object instance
 void ObjFileParser::createObject(const std::string &objName) {
-    ai_assert(NULL != m_pModel);
+    ai_assert(nullptr != m_pModel);
 
     m_pModel->m_pCurrent = new ObjFile::Object;
     m_pModel->m_pCurrent->m_strObjName = objName;
@@ -793,11 +792,12 @@ void ObjFileParser::createObject(const std::string &objName) {
 // -------------------------------------------------------------------
 //  Creates a new mesh
 void ObjFileParser::createMesh(const std::string &meshName) {
-    ai_assert(NULL != m_pModel);
+    ai_assert(nullptr != m_pModel);
+
     m_pModel->m_pCurrentMesh = new ObjFile::Mesh(meshName);
     m_pModel->m_Meshes.push_back(m_pModel->m_pCurrentMesh);
     unsigned int meshId = static_cast<unsigned int>(m_pModel->m_Meshes.size() - 1);
-    if (NULL != m_pModel->m_pCurrent) {
+    if (nullptr != m_pModel->m_pCurrent) {
         m_pModel->m_pCurrent->m_Meshes.push_back(meshId);
     } else {
         ASSIMP_LOG_ERROR("OBJ: No object detected to attach a new mesh instance.");

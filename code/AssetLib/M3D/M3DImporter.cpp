@@ -618,8 +618,10 @@ aiColor4D M3DImporter::mkColor(uint32_t c) {
 void M3DImporter::convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned int posid, unsigned int orientid) {
     ai_assert(m != nullptr);
     ai_assert(m3d);
-    ai_assert(posid != M3D_UNDEF && posid < m3d->numvertex);
-    ai_assert(orientid != M3D_UNDEF && orientid < m3d->numvertex);
+    ai_assert(posid != M3D_UNDEF);
+    ai_assert(posid < m3d->numvertex);
+    ai_assert(orientid != M3D_UNDEF);
+    ai_assert(orientid < m3d->numvertex);
     if (!m3d->numvertex || !m3d->vertex)
         return;
     m3dv_t *p = &m3d->vertex[posid];

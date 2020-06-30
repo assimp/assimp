@@ -43,22 +43,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// @file ProcessHelper.cpp
 /** Implement shared utility functions for postprocessing steps */
 
-
 #include "ProcessHelper.h"
-
 
 #include <limits>
 
 namespace Assimp {
 
 // -------------------------------------------------------------------------------
-void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
-{
-    const char* s = in.c_str();
+void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
+    const char *s = in.c_str();
     while (*s) {
         SkipSpacesAndLineEnd(&s);
         if (*s == '\'') {
-            const char* base = ++s;
+            const char *base = ++s;
             while (*s != '\'') {
                 ++s;
                 if (*s == '\0') {
@@ -66,43 +63,39 @@ void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
                     return;
                 }
             }
-            out.push_back(std::string(base,(size_t)(s-base)));
+            out.push_back(std::string(base, (size_t)(s - base)));
             ++s;
-        }
-        else {
+        } else {
             out.push_back(GetNextToken(s));
         }
     }
 }
 
 // -------------------------------------------------------------------------------
-void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max,
-    const aiMatrix4x4& m)
-{
-    min = aiVector3D ( ai_real( 10e10 ), ai_real( 10e10 ), ai_real( 10e10 ) );
-    max = aiVector3D ( ai_real( -10e10 ), ai_real( -10e10 ), ai_real( -10e10 ) );
-    for (unsigned int i = 0;i < mesh->mNumVertices;++i)
-    {
+void FindAABBTransformed(const aiMesh *mesh, aiVector3D &min, aiVector3D &max,
+        const aiMatrix4x4 &m) {
+    min = aiVector3D(ai_real(10e10), ai_real(10e10), ai_real(10e10));
+    max = aiVector3D(ai_real(-10e10), ai_real(-10e10), ai_real(-10e10));
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         const aiVector3D v = m * mesh->mVertices[i];
-        min = std::min(v,min);
-        max = std::max(v,max);
+        min = std::min(v, min);
+        max = std::max(v, max);
     }
 }
 
 // -------------------------------------------------------------------------------
-void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max)
-{
-    ArrayBounds(mesh->mVertices,mesh->mNumVertices, min,max);
-    out = min + (max-min)*(ai_real)0.5;
+void FindMeshCenter(aiMesh *mesh, aiVector3D &out, aiVector3D &min, aiVector3D &max) {
+    ArrayBounds(mesh->mVertices, mesh->mNumVertices, min, max);
+    out = min + (max - min) * (ai_real)0.5;
 }
 
 // -------------------------------------------------------------------------------
-void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector3D& max) {
-    if ( NULL == scene ) {
+void FindSceneCenter(aiScene *scene, aiVector3D &out, aiVector3D &min, aiVector3D &max) {
+    if (nullptr == scene) {
         return;
     }
 
-    if ( 0 == scene->mNumMeshes ) {
+    if (0 == scene->mNumMeshes) {
         return;
     }
     FindMeshCenter(scene->mMeshes[0], out, min, max);
@@ -116,79 +109,71 @@ void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector
         if (max[1] < tmax[1]) max[1] = tmax[1];
         if (max[2] < tmax[2]) max[2] = tmax[2];
     }
-    out = min + (max-min)*(ai_real)0.5;
-}
-
-
-// -------------------------------------------------------------------------------
-void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out, aiVector3D& min,
-    aiVector3D& max, const aiMatrix4x4& m)
-{
-    FindAABBTransformed(mesh,min,max,m);
-    out = min + (max-min)*(ai_real)0.5;
+    out = min + (max - min) * (ai_real)0.5;
 }
 
 // -------------------------------------------------------------------------------
-void FindMeshCenter (aiMesh* mesh, aiVector3D& out)
-{
-    aiVector3D min,max;
-    FindMeshCenter(mesh,out,min,max);
+void FindMeshCenterTransformed(aiMesh *mesh, aiVector3D &out, aiVector3D &min,
+        aiVector3D &max, const aiMatrix4x4 &m) {
+    FindAABBTransformed(mesh, min, max, m);
+    out = min + (max - min) * (ai_real)0.5;
 }
 
 // -------------------------------------------------------------------------------
-void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,
-    const aiMatrix4x4& m)
-{
-    aiVector3D min,max;
-    FindMeshCenterTransformed(mesh,out,min,max,m);
+void FindMeshCenter(aiMesh *mesh, aiVector3D &out) {
+    aiVector3D min, max;
+    FindMeshCenter(mesh, out, min, max);
 }
 
 // -------------------------------------------------------------------------------
-ai_real ComputePositionEpsilon(const aiMesh* pMesh)
-{
-    const ai_real epsilon = ai_real( 1e-4 );
+void FindMeshCenterTransformed(aiMesh *mesh, aiVector3D &out,
+        const aiMatrix4x4 &m) {
+    aiVector3D min, max;
+    FindMeshCenterTransformed(mesh, out, min, max, m);
+}
+
+// -------------------------------------------------------------------------------
+ai_real ComputePositionEpsilon(const aiMesh *pMesh) {
+    const ai_real epsilon = ai_real(1e-4);
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec;
-    ArrayBounds(pMesh->mVertices,pMesh->mNumVertices,minVec,maxVec);
+    ArrayBounds(pMesh->mVertices, pMesh->mNumVertices, minVec, maxVec);
     return (maxVec - minVec).Length() * epsilon;
 }
 
 // -------------------------------------------------------------------------------
-ai_real ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
-{
-    ai_assert( NULL != pMeshes );
+ai_real ComputePositionEpsilon(const aiMesh *const *pMeshes, size_t num) {
+    ai_assert(nullptr != pMeshes);
 
-    const ai_real epsilon = ai_real( 1e-4 );
+    const ai_real epsilon = ai_real(1e-4);
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec, mi, ma;
-    MinMaxChooser<aiVector3D>()(minVec,maxVec);
+    MinMaxChooser<aiVector3D>()(minVec, maxVec);
 
     for (size_t a = 0; a < num; ++a) {
-        const aiMesh* pMesh = pMeshes[a];
-        ArrayBounds(pMesh->mVertices,pMesh->mNumVertices,mi,ma);
+        const aiMesh *pMesh = pMeshes[a];
+        ArrayBounds(pMesh->mVertices, pMesh->mNumVertices, mi, ma);
 
-        minVec = std::min(minVec,mi);
-        maxVec = std::max(maxVec,ma);
+        minVec = std::min(minVec, mi);
+        maxVec = std::max(maxVec, ma);
     }
     return (maxVec - minVec).Length() * epsilon;
 }
 
-
 // -------------------------------------------------------------------------------
-unsigned int GetMeshVFormatUnique(const aiMesh* pcMesh)
-{
-    ai_assert(NULL != pcMesh);
+unsigned int GetMeshVFormatUnique(const aiMesh *pcMesh) {
+    ai_assert(nullptr != pcMesh);
 
     // FIX: the hash may never be 0. Otherwise a comparison against
     // nullptr could be successful
     unsigned int iRet = 1;
 
     // normals
-    if (pcMesh->HasNormals())iRet |= 0x2;
+    if (pcMesh->HasNormals()) iRet |= 0x2;
     // tangents and bitangents
-    if (pcMesh->HasTangentsAndBitangents())iRet |= 0x4;
+    if (pcMesh->HasTangentsAndBitangents()) iRet |= 0x4;
 
 #ifdef BOOST_STATIC_ASSERT
     BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
@@ -197,8 +182,7 @@ unsigned int GetMeshVFormatUnique(const aiMesh* pcMesh)
 
     // texture coordinates
     unsigned int p = 0;
-    while (pcMesh->HasTextureCoords(p))
-    {
+    while (pcMesh->HasTextureCoords(p)) {
         iRet |= (0x100 << p);
         if (3 == pcMesh->mNumUVComponents[p])
             iRet |= (0x10000 << p);
@@ -207,34 +191,32 @@ unsigned int GetMeshVFormatUnique(const aiMesh* pcMesh)
     }
     // vertex colors
     p = 0;
-    while (pcMesh->HasVertexColors(p))iRet |= (0x1000000 << p++);
+    while (pcMesh->HasVertexColors(p))
+        iRet |= (0x1000000 << p++);
     return iRet;
 }
 
 // -------------------------------------------------------------------------------
-VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh)
-{
+VertexWeightTable *ComputeVertexBoneWeightTable(const aiMesh *pMesh) {
     if (!pMesh || !pMesh->mNumVertices || !pMesh->mNumBones) {
-        return NULL;
+        return nullptr;
     }
 
-    VertexWeightTable* avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
-    for (unsigned int i = 0; i < pMesh->mNumBones;++i)  {
+    VertexWeightTable *avPerVertexWeights = new VertexWeightTable[pMesh->mNumVertices];
+    for (unsigned int i = 0; i < pMesh->mNumBones; ++i) {
 
-        aiBone* bone = pMesh->mBones[i];
-        for (unsigned int a = 0; a < bone->mNumWeights;++a) {
-            const aiVertexWeight& weight = bone->mWeights[a];
-            avPerVertexWeights[weight.mVertexId].push_back( std::pair<unsigned int,float>(i,weight.mWeight) );
+        aiBone *bone = pMesh->mBones[i];
+        for (unsigned int a = 0; a < bone->mNumWeights; ++a) {
+            const aiVertexWeight &weight = bone->mWeights[a];
+            avPerVertexWeights[weight.mVertexId].push_back(std::pair<unsigned int, float>(i, weight.mWeight));
         }
     }
     return avPerVertexWeights;
 }
 
 // -------------------------------------------------------------------------------
-const char* MappingTypeToString(aiTextureMapping in)
-{
-    switch (in)
-    {
+const char *MappingTypeToString(aiTextureMapping in) {
+    switch (in) {
     case aiTextureMapping_UV:
         return "UV";
     case aiTextureMapping_BOX:
@@ -252,24 +234,22 @@ const char* MappingTypeToString(aiTextureMapping in)
     }
 
     ai_assert(false);
-    return  "BUG";
+    return "BUG";
 }
 
-
 // -------------------------------------------------------------------------------
-aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMeshFaces, unsigned int subFlags)
-{
+aiMesh *MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMeshFaces, unsigned int subFlags) {
     aiMesh *oMesh = new aiMesh();
-    std::vector<unsigned int> vMap(pMesh->mNumVertices,UINT_MAX);
+    std::vector<unsigned int> vMap(pMesh->mNumVertices, UINT_MAX);
 
     size_t numSubVerts = 0;
     size_t numSubFaces = subMeshFaces.size();
 
-    for(unsigned int i=0;i<numSubFaces;i++) {
+    for (unsigned int i = 0; i < numSubFaces; i++) {
         const aiFace &f = pMesh->mFaces[subMeshFaces[i]];
 
-        for(unsigned int j=0;j<f.mNumIndices;j++)   {
-            if(vMap[f.mIndices[j]]==UINT_MAX)   {
+        for (unsigned int j = 0; j < f.mNumIndices; j++) {
+            if (vMap[f.mIndices[j]] == UINT_MAX) {
                 vMap[f.mIndices[j]] = static_cast<unsigned int>(numSubVerts++);
             }
         }
@@ -285,114 +265,114 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
     oMesh->mNumFaces = static_cast<unsigned int>(subMeshFaces.size());
     oMesh->mNumVertices = static_cast<unsigned int>(numSubVerts);
     oMesh->mVertices = new aiVector3D[numSubVerts];
-    if( pMesh->HasNormals() ) {
+    if (pMesh->HasNormals()) {
         oMesh->mNormals = new aiVector3D[numSubVerts];
     }
 
-    if( pMesh->HasTangentsAndBitangents() ) {
+    if (pMesh->HasTangentsAndBitangents()) {
         oMesh->mTangents = new aiVector3D[numSubVerts];
         oMesh->mBitangents = new aiVector3D[numSubVerts];
     }
 
-    for( size_t a = 0;  pMesh->HasTextureCoords(static_cast<unsigned int>(a)) ; ++a ) {
+    for (size_t a = 0; pMesh->HasTextureCoords(static_cast<unsigned int>(a)); ++a) {
         oMesh->mTextureCoords[a] = new aiVector3D[numSubVerts];
         oMesh->mNumUVComponents[a] = pMesh->mNumUVComponents[a];
     }
 
-    for( size_t a = 0; pMesh->HasVertexColors( static_cast<unsigned int>(a)); ++a )    {
+    for (size_t a = 0; pMesh->HasVertexColors(static_cast<unsigned int>(a)); ++a) {
         oMesh->mColors[a] = new aiColor4D[numSubVerts];
     }
 
     // and copy over the data, generating faces with linear indices along the way
     oMesh->mFaces = new aiFace[numSubFaces];
 
-    for(unsigned int a = 0; a < numSubFaces; ++a )  {
+    for (unsigned int a = 0; a < numSubFaces; ++a) {
 
-        const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
-        aiFace& dstFace = oMesh->mFaces[a];
+        const aiFace &srcFace = pMesh->mFaces[subMeshFaces[a]];
+        aiFace &dstFace = oMesh->mFaces[a];
         dstFace.mNumIndices = srcFace.mNumIndices;
         dstFace.mIndices = new unsigned int[dstFace.mNumIndices];
 
         // accumulate linearly all the vertices of the source face
-        for( size_t b = 0; b < dstFace.mNumIndices; ++b )   {
+        for (size_t b = 0; b < dstFace.mNumIndices; ++b) {
             dstFace.mIndices[b] = vMap[srcFace.mIndices[b]];
         }
     }
 
-    for(unsigned int srcIndex = 0; srcIndex < pMesh->mNumVertices; ++srcIndex ) {
+    for (unsigned int srcIndex = 0; srcIndex < pMesh->mNumVertices; ++srcIndex) {
         unsigned int nvi = vMap[srcIndex];
-        if(nvi==UINT_MAX) {
+        if (nvi == UINT_MAX) {
             continue;
         }
 
         oMesh->mVertices[nvi] = pMesh->mVertices[srcIndex];
-        if( pMesh->HasNormals() ) {
+        if (pMesh->HasNormals()) {
             oMesh->mNormals[nvi] = pMesh->mNormals[srcIndex];
         }
 
-        if( pMesh->HasTangentsAndBitangents() ) {
+        if (pMesh->HasTangentsAndBitangents()) {
             oMesh->mTangents[nvi] = pMesh->mTangents[srcIndex];
             oMesh->mBitangents[nvi] = pMesh->mBitangents[srcIndex];
         }
-        for( size_t c = 0, cc = pMesh->GetNumUVChannels(); c < cc; ++c )    {
-                oMesh->mTextureCoords[c][nvi] = pMesh->mTextureCoords[c][srcIndex];
+        for (size_t c = 0, cc = pMesh->GetNumUVChannels(); c < cc; ++c) {
+            oMesh->mTextureCoords[c][nvi] = pMesh->mTextureCoords[c][srcIndex];
         }
-        for( size_t c = 0, cc = pMesh->GetNumColorChannels(); c < cc; ++c ) {
+        for (size_t c = 0, cc = pMesh->GetNumColorChannels(); c < cc; ++c) {
             oMesh->mColors[c][nvi] = pMesh->mColors[c][srcIndex];
         }
     }
 
-    if(~subFlags&AI_SUBMESH_FLAGS_SANS_BONES)   {
-        std::vector<unsigned int> subBones(pMesh->mNumBones,0);
+    if (~subFlags & AI_SUBMESH_FLAGS_SANS_BONES) {
+        std::vector<unsigned int> subBones(pMesh->mNumBones, 0);
 
-        for(unsigned int a=0;a<pMesh->mNumBones;++a)    {
-            const aiBone* bone = pMesh->mBones[a];
+        for (unsigned int a = 0; a < pMesh->mNumBones; ++a) {
+            const aiBone *bone = pMesh->mBones[a];
 
-            for(unsigned int b=0;b<bone->mNumWeights;b++)   {
+            for (unsigned int b = 0; b < bone->mNumWeights; b++) {
                 unsigned int v = vMap[bone->mWeights[b].mVertexId];
 
-                if(v!=UINT_MAX) {
+                if (v != UINT_MAX) {
                     subBones[a]++;
                 }
             }
         }
 
-        for(unsigned int a=0;a<pMesh->mNumBones;++a)    {
-            if(subBones[a]>0) {
+        for (unsigned int a = 0; a < pMesh->mNumBones; ++a) {
+            if (subBones[a] > 0) {
                 oMesh->mNumBones++;
             }
         }
 
-        if(oMesh->mNumBones) {
-            oMesh->mBones = new aiBone*[oMesh->mNumBones]();
+        if (oMesh->mNumBones) {
+            oMesh->mBones = new aiBone *[oMesh->mNumBones]();
             unsigned int nbParanoia = oMesh->mNumBones;
 
             oMesh->mNumBones = 0; //rewind
 
-            for(unsigned int a=0;a<pMesh->mNumBones;++a)    {
-                if(subBones[a]==0) {
+            for (unsigned int a = 0; a < pMesh->mNumBones; ++a) {
+                if (subBones[a] == 0) {
                     continue;
                 }
                 aiBone *newBone = new aiBone;
                 oMesh->mBones[oMesh->mNumBones++] = newBone;
 
-                const aiBone* bone = pMesh->mBones[a];
+                const aiBone *bone = pMesh->mBones[a];
 
                 newBone->mName = bone->mName;
                 newBone->mOffsetMatrix = bone->mOffsetMatrix;
                 newBone->mWeights = new aiVertexWeight[subBones[a]];
 
-                for(unsigned int b=0;b<bone->mNumWeights;b++)   {
+                for (unsigned int b = 0; b < bone->mNumWeights; b++) {
                     const unsigned int v = vMap[bone->mWeights[b].mVertexId];
 
-                    if(v!=UINT_MAX) {
-                        aiVertexWeight w(v,bone->mWeights[b].mWeight);
+                    if (v != UINT_MAX) {
+                        aiVertexWeight w(v, bone->mWeights[b].mWeight);
                         newBone->mWeights[newBone->mNumWeights++] = w;
                     }
                 }
             }
 
-            ai_assert(nbParanoia==oMesh->mNumBones);
+            ai_assert(nbParanoia == oMesh->mNumBones);
             (void)nbParanoia; // remove compiler warning on release build
         }
     }

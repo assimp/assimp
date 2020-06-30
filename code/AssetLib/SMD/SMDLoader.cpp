@@ -577,7 +577,7 @@ void SMDImporter::GetAnimationFileList(const std::string &pFile, IOSystem* pIOHa
     char *context1, *context2;
 
     tok1 = strtok_s(&buf[0], "\r\n", &context1);
-    while (tok1 != NULL) {
+    while (tok1 != nullptr) {
         tok2 = strtok_s(tok1, " \t", &context2);
         if (tok2) {
             char *p = tok2;

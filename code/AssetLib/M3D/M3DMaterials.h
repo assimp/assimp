@@ -71,14 +71,14 @@ static const aiMatProp aiProps[] = {
     { AI_MATKEY_OPACITY },                                      /* m3dp_d */
     { AI_MATKEY_SHADING_MODEL },                                /* m3dp_il */
 
-    { NULL, 0, 0 },                                             /* m3dp_Pr */
+    { nullptr, 0, 0 },                                          /* m3dp_Pr */
     { AI_MATKEY_REFLECTIVITY },                                 /* m3dp_Pm */
-    { NULL, 0, 0 },                                             /* m3dp_Ps */
+    { nullptr, 0, 0 },                                          /* m3dp_Ps */
     { AI_MATKEY_REFRACTI },                                     /* m3dp_Ni */
-    { NULL, 0, 0 },                                             /* m3dp_Nt */
-    { NULL, 0, 0 },
-    { NULL, 0, 0 },
-    { NULL, 0, 0 }
+    { nullptr, 0, 0 },                                          /* m3dp_Nt */
+    { nullptr, 0, 0 },
+    { nullptr, 0, 0 },
+    { nullptr, 0, 0 }
 };
 
 /* --- Texture Map Properties ---   !!!!! must match m3d_propertytypes !!!!! */
@@ -88,19 +88,19 @@ static const aiMatProp aiTxProps[] = {
     { AI_MATKEY_TEXTURE_SPECULAR(0) },                       /* m3dp_map_Ks */
     { AI_MATKEY_TEXTURE_SHININESS(0) },                      /* m3dp_map_Ns */
     { AI_MATKEY_TEXTURE_EMISSIVE(0) },                       /* m3dp_map_Ke */
-    { NULL, 0, 0 },                                          /* m3dp_map_Tf */
+    { nullptr, 0, 0 },                                       /* m3dp_map_Tf */
     { AI_MATKEY_TEXTURE_HEIGHT(0) },                         /* m3dp_bump */
     { AI_MATKEY_TEXTURE_OPACITY(0) },                        /* m3dp_map_d */
     { AI_MATKEY_TEXTURE_NORMALS(0) },                        /* m3dp_map_N */
 
     { AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE_ROUGHNESS,0) },/* m3dp_map_Pr */
     { AI_MATKEY_TEXTURE(aiTextureType_METALNESS,0) },        /* m3dp_map_Pm */
-    { NULL, 0, 0 },                                          /* m3dp_map_Ps */
+    { nullptr, 0, 0 },                                       /* m3dp_map_Ps */
     { AI_MATKEY_TEXTURE(aiTextureType_REFLECTION,0) },       /* m3dp_map_Ni */
-    { NULL, 0, 0 },                                          /* m3dp_map_Nt */
-    { NULL, 0, 0 },
-    { NULL, 0, 0 },
-    { NULL, 0, 0 }
+    { nullptr, 0, 0 },                                       /* m3dp_map_Nt */
+    { nullptr, 0, 0 },
+    { nullptr, 0, 0 },
+    { nullptr, 0, 0 }
 };
 
 #endif // AI_M3DMATERIALS_H_INC

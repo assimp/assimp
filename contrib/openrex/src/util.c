@@ -82,7 +82,9 @@ char *read_file_ascii (const char *filename)
     fseek (f, 0, SEEK_SET);
     char *buffer = (char *) malloc (length + 1);
     buffer[length] = '\0';
-    fread (buffer, 1, length, f);
+    size_t ret = fread (buffer, 1, length, f);
+    if (ret == 0)
+        printf("Could not read content from file %s", filename);
     fclose (f);
     return buffer;
 }

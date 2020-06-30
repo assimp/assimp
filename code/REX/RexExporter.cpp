@@ -267,9 +267,9 @@ void RexExporter::WritePoints(uint64_t startId, rex_header *header, DataPtr &poi
     std::vector<float> colorArray;
     GetColorArray(colors, colorArray);
 
-    rexPointList.nr_vertices = m_Points.size();
+    rexPointList.nr_vertices = (uint32_t)m_Points.size();
     if (m_Points.size() > 0 && m_Points[0].hasColor) {
-        rexPointList.nr_colors = m_Points.size();
+        rexPointList.nr_colors = (uint32_t)m_Points.size();
         rexPointList.colors = &colorArray[0];
     } else {
         rexPointList.nr_colors = 0;

@@ -722,7 +722,7 @@ template <class T>
 void Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
     if (!data) {
-        throw DeadlyImportError("GLTF: data is NULL");
+        throw DeadlyImportError("GLTF2: data is nullptr.");
     }
 
     const size_t elemSize = GetElementSize();
@@ -1207,6 +1207,47 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
+inline CustomExtension ReadExtensions(const char *name, Value& obj) {
+    CustomExtension ret;
+    ret.name = name;
+    if (obj.IsObject()) {
+        ret.mValues.isPresent = true;
+        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+            auto& val = it->value;
+            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
+        }
+    }
+    else if (obj.IsArray()) {
+        ret.mValues.value.reserve(obj.Size());
+        ret.mValues.isPresent = true;
+        for (unsigned int i = 0; i < obj.Size(); ++i)
+        {
+            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
+        }
+    }
+    else if (obj.IsNumber()) {
+        if (obj.IsUint64()) {
+            ret.mUint64Value.value = obj.GetUint64();
+            ret.mUint64Value.isPresent = true;
+        } else if (obj.IsInt64()) {
+            ret.mInt64Value.value = obj.GetInt64();
+            ret.mInt64Value.isPresent = true;
+        } else if (obj.IsDouble()) {
+            ret.mDoubleValue.value = obj.GetDouble();
+            ret.mDoubleValue.isPresent = true;
+        }
+    }
+    else if (obj.IsString()) {
+        ReadValue(obj, ret.mStringValue);
+        ret.mStringValue.isPresent = true;
+    }
+    else if (obj.IsBool()) {
+        ret.mBoolValue.value = obj.GetBool();
+        ret.mBoolValue.isPresent = true;
+    }
+    return ret;
+}
+
 inline void Node::Read(Value &obj, Asset &r) {
     if (name.empty()) {
         name = id;
@@ -1261,6 +1302,8 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curExtensions = FindObject(obj, "extensions");
     if (nullptr != curExtensions) {
+        this->extensions = ReadExtensions("extensions", *curExtensions);
+
         if (r.extensionsUsed.KHR_lights_punctual) {
             if (Value *ext = FindObject(*curExtensions, "KHR_lights_punctual")) {
                 Value *curLight = FindUInt(*ext, "light");

@@ -201,7 +201,7 @@ struct ConversionData
 
     struct MeshCacheIndex {
         const IFC::Schema_2x3::IfcRepresentationItem* item; unsigned int matindex;
-        MeshCacheIndex() : item(NULL), matindex(0) { }
+        MeshCacheIndex() : item(nullptr), matindex(0) { }
         MeshCacheIndex(const IFC::Schema_2x3::IfcRepresentationItem* i, unsigned int mi) : item(i), matindex(mi) { }
         bool operator == (const MeshCacheIndex& o) const { return item == o.item && matindex == o.matindex; }
         bool operator < (const MeshCacheIndex& o) const { return item < o.item || (item == o.item && matindex < o.matindex); }

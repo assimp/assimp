@@ -45,43 +45,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Blender3D importer class.
  */
 
-
 //#define ASSIMP_BUILD_NO_COMPRESSED_BLEND
 // Uncomment this to disable support for (gzip)compressed .BLEND files
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 
-#include "BlenderIntermediate.h"
-#include "BlenderModifier.h"
 #include "BlenderBMesh.h"
 #include "BlenderCustomData.h"
+#include "BlenderIntermediate.h"
+#include "BlenderModifier.h"
 #include <assimp/StringUtils.h>
-#include <assimp/scene.h>
 #include <assimp/importerdesc.h>
+#include <assimp/scene.h>
 
-#include <assimp/StringComparison.h>
-#include <assimp/StreamReader.h>
 #include <assimp/MemoryIOWrapper.h>
+#include <assimp/StreamReader.h>
+#include <assimp/StringComparison.h>
 
 #include <cctype>
 
-
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-#   ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#       include <zlib.h>
-#   else
-#       include "../contrib/zlib/zlib.h"
-#   endif
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include <zlib.h>
+#else
+#include "../contrib/zlib/zlib.h"
+#endif
 #endif
 
 namespace Assimp {
-    template<> const char* LogFunctions<BlenderImporter>::Prefix()
-    {
-        static auto prefix = "BLEND: ";
-        return prefix;
-    }
+template <>
+const char *LogFunctions<BlenderImporter>::Prefix() {
+    static auto prefix = "BLEND: ";
+    return prefix;
 }
+} // namespace Assimp
 
 using namespace Assimp;
 using namespace Assimp::Blender;
@@ -100,81 +98,72 @@ static const aiImporterDesc blenderDesc = {
     "blend"
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-BlenderImporter::BlenderImporter()
-: modifier_cache(new BlenderModifierShowcase()) {
+BlenderImporter::BlenderImporter() :
+        modifier_cache(new BlenderModifierShowcase()) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-BlenderImporter::~BlenderImporter()
-{
+BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char* Tokens[] = { "BLENDER" };
-static const char* TokensForSearch[] = { "blender" };
+static const char *Tokens[] = { "BLENDER" };
+static const char *TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
-{
-    const std::string& extension = GetExtension(pFile);
+bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
+    const std::string &extension = GetExtension(pFile);
     if (extension == "blend") {
         return true;
     }
 
-    else if ((!extension.length() || checkSig) && pIOHandler)   {
+    else if ((!extension.length() || checkSig) && pIOHandler) {
         // note: this won't catch compressed files
-        return SearchFileHeaderForToken(pIOHandler,pFile, TokensForSearch,1);
+        return SearchFileHeaderForToken(pIOHandler, pFile, TokensForSearch, 1);
     }
     return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 // List all extensions handled by this loader
-void BlenderImporter::GetExtensionList(std::set<std::string>& app)
-{
+void BlenderImporter::GetExtensionList(std::set<std::string> &app) {
     app.insert("blend");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Loader registry entry
-const aiImporterDesc* BlenderImporter::GetInfo () const
-{
+const aiImporterDesc *BlenderImporter::GetInfo() const {
     return &blenderDesc;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties for the loader
-void BlenderImporter::SetupProperties(const Importer* /*pImp*/)
-{
+void BlenderImporter::SetupProperties(const Importer * /*pImp*/) {
     // nothing to be done for the moment
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void BlenderImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
-{
+void BlenderImporter::InternReadFile(const std::string &pFile,
+        aiScene *pScene, IOSystem *pIOHandler) {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
     std::vector<Bytef> uncompressed;
 #endif
 
-
     FileDatabase file;
-    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
+    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
     if (!stream) {
         ThrowException("Could not open file for reading");
     }
 
-    char magic[8] = {0};
-    stream->Read(magic,7,1);
-    if (strcmp(magic, Tokens[0] )) {
+    char magic[8] = { 0 };
+    stream->Read(magic, 7, 1);
+    if (strcmp(magic, Tokens[0])) {
         // Check for presence of the gzip header. If yes, assume it is a
         // compressed blend file and try uncompressing it, else fail. This is to
         // avoid uncompressing random files which our loader might end up with.
@@ -192,21 +181,21 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
         }
 
         // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
-        stream->Seek(0L,aiOrigin_SET);
+        stream->Seek(0L, aiOrigin_SET);
         std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
 
         // build a zlib stream
         z_stream zstream;
         zstream.opaque = Z_NULL;
         zstream.zalloc = Z_NULL;
-        zstream.zfree  = Z_NULL;
+        zstream.zfree = Z_NULL;
         zstream.data_type = Z_BINARY;
 
         // http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-        inflateInit2(&zstream, 16+MAX_WBITS);
+        inflateInit2(&zstream, 16 + MAX_WBITS);
 
-        zstream.next_in   = reinterpret_cast<Bytef*>( reader->GetPtr() );
-        zstream.avail_in  = (uInt) reader->GetRemainingSize();
+        zstream.next_in = reinterpret_cast<Bytef *>(reader->GetPtr());
+        zstream.avail_in = (uInt)reader->GetRemainingSize();
 
         size_t total = 0l;
 
@@ -226,62 +215,59 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
             const size_t have = MYBLOCK - zstream.avail_out;
             total += have;
             uncompressed.resize(total);
-            memcpy(uncompressed.data() + total - have,block,have);
-        }
-        while (ret != Z_STREAM_END);
+            memcpy(uncompressed.data() + total - have, block, have);
+        } while (ret != Z_STREAM_END);
 
         // terminate zlib
         inflateEnd(&zstream);
 
         // replace the input stream with a memory stream
-        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()),total));
+        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));
 
         // .. and retry
-        stream->Read(magic,7,1);
-        if (strcmp(magic,"BLENDER")) {
+        stream->Read(magic, 7, 1);
+        if (strcmp(magic, "BLENDER")) {
             ThrowException("Found no BLENDER magic word in decompressed GZIP file");
         }
 #endif
     }
 
-    file.i64bit = (stream->Read(magic,1,1),magic[0]=='-');
-    file.little = (stream->Read(magic,1,1),magic[0]=='v');
+    file.i64bit = (stream->Read(magic, 1, 1), magic[0] == '-');
+    file.little = (stream->Read(magic, 1, 1), magic[0] == 'v');
 
-    stream->Read(magic,3,1);
+    stream->Read(magic, 3, 1);
     magic[3] = '\0';
 
-    LogInfo((format(),"Blender version is ",magic[0],".",magic+1,
-        " (64bit: ",file.i64bit?"true":"false",
-        ", little endian: ",file.little?"true":"false",")"
-    ));
+    LogInfo((format(), "Blender version is ", magic[0], ".", magic + 1,
+            " (64bit: ", file.i64bit ? "true" : "false",
+            ", little endian: ", file.little ? "true" : "false", ")"));
 
-    ParseBlendFile(file,stream);
+    ParseBlendFile(file, stream);
 
     Scene scene;
-    ExtractScene(scene,file);
+    ExtractScene(scene, file);
 
-    ConvertBlendFile(pScene,scene,file);
+    ConvertBlendFile(pScene, scene, file);
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ParseBlendFile(FileDatabase& out, std::shared_ptr<IOStream> stream)
-{
-    out.reader = std::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream,out.little));
+void BlenderImporter::ParseBlendFile(FileDatabase &out, std::shared_ptr<IOStream> stream) {
+    out.reader = std::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream, out.little));
 
     DNAParser dna_reader(out);
-    const DNA* dna = NULL;
+    const DNA *dna = nullptr;
 
-    out.entries.reserve(128); { // even small BLEND files tend to consist of many file blocks
-        SectionParser parser(*out.reader.get(),out.i64bit);
+    out.entries.reserve(128);
+    { // even small BLEND files tend to consist of many file blocks
+        SectionParser parser(*out.reader.get(), out.i64bit);
 
         // first parse the file in search for the DNA and insert all other sections into the database
-        while ((parser.Next(),1)) {
-            const FileBlockHead& head = parser.GetCurrent();
+        while ((parser.Next(), 1)) {
+            const FileBlockHead &head = parser.GetCurrent();
 
             if (head.id == "ENDB") {
                 break; // only valid end of the file
-            }
-            else if (head.id == "DNA1") {
+            } else if (head.id == "DNA1") {
                 dna_reader.Parse();
                 dna = &dna_reader.GetDNA();
                 continue;
@@ -294,22 +280,21 @@ void BlenderImporter::ParseBlendFile(FileDatabase& out, std::shared_ptr<IOStream
         ThrowException("SDNA not found");
     }
 
-    std::sort(out.entries.begin(),out.entries.end());
+    std::sort(out.entries.begin(), out.entries.end());
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
-{
-    const FileBlockHead* block = NULL;
-    std::map<std::string,size_t>::const_iterator it = file.dna.indices.find("Scene");
+void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
+    const FileBlockHead *block = nullptr;
+    std::map<std::string, size_t>::const_iterator it = file.dna.indices.find("Scene");
     if (it == file.dna.indices.end()) {
         ThrowException("There is no `Scene` structure record");
     }
 
-    const Structure& ss = file.dna.structures[(*it).second];
+    const Structure &ss = file.dna.structures[(*it).second];
 
     // we need a scene somewhere to start with.
-    for(const FileBlockHead& bl :file.entries) {
+    for (const FileBlockHead &bl : file.entries) {
 
         // Fix: using the DNA index is more reliable to locate scenes
         //if (bl.id == "SC") {
@@ -325,39 +310,37 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
     }
 
     file.reader->SetCurrentPos(block->start);
-    ss.Convert(out,file);
+    ss.Convert(out, file);
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
     ASSIMP_LOG_INFO_F(
-        "(Stats) Fields read: " ,file.stats().fields_read,
-        ", pointers resolved: " ,file.stats().pointers_resolved,
-        ", cache hits: "        ,file.stats().cache_hits,
-        ", cached objects: "    ,file.stats().cached_objects
-    );
+            "(Stats) Fields read: ", file.stats().fields_read,
+            ", pointers resolved: ", file.stats().pointers_resolved,
+            ", cache hits: ", file.stats().cache_hits,
+            ", cached objects: ", file.stats().cached_objects);
 #endif
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileDatabase& file)
-{
+void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file) {
     ConversionData conv(file);
 
     // FIXME it must be possible to take the hierarchy directly from
     // the file. This is terrible. Here, we're first looking for
     // all objects which don't have parent objects at all -
-    std::deque<const Object*> no_parents;
-    for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base> ( in.base.first ); cur; cur = cur->next) {
+    std::deque<const Object *> no_parents;
+    for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
         if (cur->object) {
-            if(!cur->object->parent) {
+            if (!cur->object->parent) {
                 no_parents.push_back(cur->object.get());
             } else {
-                conv.objects.insert( cur->object.get() );
+                conv.objects.insert(cur->object.get());
             }
         }
     }
     for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
         if (cur->object) {
-            if(cur->object->parent) {
+            if (cur->object->parent) {
                 conv.objects.insert(cur->object.get());
             }
         }
@@ -367,10 +350,10 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
         ThrowException("Expected at least one object with no parent");
     }
 
-    aiNode* root = out->mRootNode = new aiNode("<BlenderRoot>");
+    aiNode *root = out->mRootNode = new aiNode("<BlenderRoot>");
 
     root->mNumChildren = static_cast<unsigned int>(no_parents.size());
-    root->mChildren = new aiNode*[root->mNumChildren]();
+    root->mChildren = new aiNode *[root->mNumChildren]();
     for (unsigned int i = 0; i < root->mNumChildren; ++i) {
         root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
         root->mChildren[i]->mParent = root;
@@ -379,32 +362,32 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
     BuildMaterials(conv);
 
     if (conv.meshes->size()) {
-        out->mMeshes = new aiMesh*[out->mNumMeshes = static_cast<unsigned int>( conv.meshes->size() )];
-        std::copy(conv.meshes->begin(),conv.meshes->end(),out->mMeshes);
+        out->mMeshes = new aiMesh *[out->mNumMeshes = static_cast<unsigned int>(conv.meshes->size())];
+        std::copy(conv.meshes->begin(), conv.meshes->end(), out->mMeshes);
         conv.meshes.dismiss();
     }
 
     if (conv.lights->size()) {
-        out->mLights = new aiLight*[out->mNumLights = static_cast<unsigned int>( conv.lights->size() )];
-        std::copy(conv.lights->begin(),conv.lights->end(),out->mLights);
+        out->mLights = new aiLight *[out->mNumLights = static_cast<unsigned int>(conv.lights->size())];
+        std::copy(conv.lights->begin(), conv.lights->end(), out->mLights);
         conv.lights.dismiss();
     }
 
     if (conv.cameras->size()) {
-        out->mCameras = new aiCamera*[out->mNumCameras = static_cast<unsigned int>( conv.cameras->size() )];
-        std::copy(conv.cameras->begin(),conv.cameras->end(),out->mCameras);
+        out->mCameras = new aiCamera *[out->mNumCameras = static_cast<unsigned int>(conv.cameras->size())];
+        std::copy(conv.cameras->begin(), conv.cameras->end(), out->mCameras);
         conv.cameras.dismiss();
     }
 
     if (conv.materials->size()) {
-        out->mMaterials = new aiMaterial*[out->mNumMaterials = static_cast<unsigned int>( conv.materials->size() )];
-        std::copy(conv.materials->begin(),conv.materials->end(),out->mMaterials);
+        out->mMaterials = new aiMaterial *[out->mNumMaterials = static_cast<unsigned int>(conv.materials->size())];
+        std::copy(conv.materials->begin(), conv.materials->end(), out->mMaterials);
         conv.materials.dismiss();
     }
 
     if (conv.textures->size()) {
-        out->mTextures = new aiTexture*[out->mNumTextures = static_cast<unsigned int>( conv.textures->size() )];
-        std::copy(conv.textures->begin(),conv.textures->end(),out->mTextures);
+        out->mTextures = new aiTexture *[out->mNumTextures = static_cast<unsigned int>(conv.textures->size())];
+        std::copy(conv.textures->begin(), conv.textures->end(), out->mTextures);
         conv.textures.dismiss();
     }
 
@@ -418,24 +401,25 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const MTex* tex, const Image* img, ConversionData& conv_data)
-{
-    (void)mat; (void)tex; (void)conv_data;
+void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const MTex *tex, const Image *img, ConversionData &conv_data) {
+    (void)mat;
+    (void)tex;
+    (void)conv_data;
     aiString name;
 
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
         name.data[0] = '*';
-        name.length = 1+ ASSIMP_itoa10(name.data+1,static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(conv_data.textures->size()));
+        name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
-        aiTexture* curTex = conv_data.textures->back();
+        aiTexture *curTex = conv_data.textures->back();
 
         // usually 'img->name' will be the original file name of the embedded textures,
         // so we can extract the file extension from it.
-        const size_t nlen = strlen( img->name );
-        const char* s = img->name+nlen, *e = s;
-        while ( s >= img->name && *s != '.' ) {
+        const size_t nlen = strlen(img->name);
+        const char *s = img->name + nlen, *e = s;
+        while (s >= img->name && *s != '.') {
             --s;
         }
 
@@ -448,14 +432,14 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         curTex->mWidth = img->packedfile->size;
         uint8_t *ch = new uint8_t[curTex->mWidth];
 
-        conv_data.db.reader->SetCurrentPos(static_cast<size_t>( img->packedfile->data->val));
+        conv_data.db.reader->SetCurrentPos(static_cast<size_t>(img->packedfile->data->val));
         conv_data.db.reader->CopyAndAdvance(ch, curTex->mWidth);
 
         curTex->pcData = reinterpret_cast<aiTexel *>(ch);
 
-        LogInfo("Reading embedded texture, original file was "+std::string(img->name));
+        LogInfo("Reading embedded texture, original file was " + std::string(img->name));
     } else {
-        name = aiString( img->name );
+        name = aiString(img->name);
     }
 
     aiTextureType texture_type = aiTextureType_UNKNOWN;
@@ -466,13 +450,11 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
     else if (map_type & MTex::MapType_NORM) {
         if (tex->tex->imaflag & Tex::ImageFlags_NORMALMAP) {
             texture_type = aiTextureType_NORMALS;
-        }
-        else {
+        } else {
             texture_type = aiTextureType_HEIGHT;
         }
-        out->AddProperty(&tex->norfac,1,AI_MATKEY_BUMPSCALING);
-    }
-    else if (map_type & MTex::MapType_COLSPEC)
+        out->AddProperty(&tex->norfac, 1, AI_MATKEY_BUMPSCALING);
+    } else if (map_type & MTex::MapType_COLSPEC)
         texture_type = aiTextureType_SPECULAR;
     else if (map_type & MTex::MapType_COLMIR)
         texture_type = aiTextureType_REFLECTION;
@@ -491,86 +473,81 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         texture_type = aiTextureType_DISPLACEMENT;
     //else if (map_type & MTex::MapType_WARP)
 
-    out->AddProperty(&name,AI_MATKEY_TEXTURE(texture_type,
-        conv_data.next_texture[texture_type]++));
-
+    out->AddProperty(&name, AI_MATKEY_TEXTURE(texture_type,
+                                    conv_data.next_texture[texture_type]++));
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::AddSentinelTexture(aiMaterial* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
-{
-    (void)mat; (void)tex; (void)conv_data;
+void BlenderImporter::AddSentinelTexture(aiMaterial *out, const Material *mat, const MTex *tex, ConversionData &conv_data) {
+    (void)mat;
+    (void)tex;
+    (void)conv_data;
 
     aiString name;
-    name.length = ai_snprintf(name.data, MAXLEN, "Procedural,num=%i,type=%s",conv_data.sentinel_cnt++,
-        GetTextureTypeDisplayString(tex->tex->type)
-    );
-    out->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(
-        conv_data.next_texture[aiTextureType_DIFFUSE]++)
-    );
+    name.length = ai_snprintf(name.data, MAXLEN, "Procedural,num=%i,type=%s", conv_data.sentinel_cnt++,
+            GetTextureTypeDisplayString(tex->tex->type));
+    out->AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(
+                                    conv_data.next_texture[aiTextureType_DIFFUSE]++));
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const MTex* tex, ConversionData& conv_data)
-{
-    const Tex* rtex = tex->tex.get();
-    if(!rtex || !rtex->type) {
+void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const MTex *tex, ConversionData &conv_data) {
+    const Tex *rtex = tex->tex.get();
+    if (!rtex || !rtex->type) {
         return;
     }
 
     // We can't support most of the texture types because they're mostly procedural.
     // These are substituted by a dummy texture.
-    const char* dispnam = "";
-    switch( rtex->type )
-    {
-            // these are listed in blender's UI
-        case Tex::Type_CLOUDS       :
-        case Tex::Type_WOOD         :
-        case Tex::Type_MARBLE       :
-        case Tex::Type_MAGIC        :
-        case Tex::Type_BLEND        :
-        case Tex::Type_STUCCI       :
-        case Tex::Type_NOISE        :
-        case Tex::Type_PLUGIN       :
-        case Tex::Type_MUSGRAVE     :
-        case Tex::Type_VORONOI      :
-        case Tex::Type_DISTNOISE    :
-        case Tex::Type_ENVMAP       :
+    const char *dispnam = "";
+    switch (rtex->type) {
+        // these are listed in blender's UI
+    case Tex::Type_CLOUDS:
+    case Tex::Type_WOOD:
+    case Tex::Type_MARBLE:
+    case Tex::Type_MAGIC:
+    case Tex::Type_BLEND:
+    case Tex::Type_STUCCI:
+    case Tex::Type_NOISE:
+    case Tex::Type_PLUGIN:
+    case Tex::Type_MUSGRAVE:
+    case Tex::Type_VORONOI:
+    case Tex::Type_DISTNOISE:
+    case Tex::Type_ENVMAP:
 
-            // these do no appear in the UI, why?
-        case Tex::Type_POINTDENSITY :
-        case Tex::Type_VOXELDATA    :
+        // these do no appear in the UI, why?
+    case Tex::Type_POINTDENSITY:
+    case Tex::Type_VOXELDATA:
 
-            LogWarn(std::string("Encountered a texture with an unsupported type: ")+dispnam);
-            AddSentinelTexture(out, mat, tex, conv_data);
+        LogWarn(std::string("Encountered a texture with an unsupported type: ") + dispnam);
+        AddSentinelTexture(out, mat, tex, conv_data);
+        break;
+
+    case Tex::Type_IMAGE:
+        if (!rtex->ima) {
+            LogError("A texture claims to be an Image, but no image reference is given");
             break;
+        }
+        ResolveImage(out, mat, tex, rtex->ima.get(), conv_data);
+        break;
 
-        case Tex::Type_IMAGE        :
-            if (!rtex->ima) {
-                LogError("A texture claims to be an Image, but no image reference is given");
-                break;
-            }
-            ResolveImage(out, mat, tex, rtex->ima.get(),conv_data);
-            break;
-
-        default:
-            ai_assert(false);
+    default:
+        ai_assert(false);
     };
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData& conv_data)
-{
+void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData &conv_data) {
     // add a default material if necessary
-    unsigned int index = static_cast<unsigned int>( -1 );
-    for( aiMesh* mesh : conv_data.meshes.get() ) {
-        if (mesh->mMaterialIndex == static_cast<unsigned int>( -1 )) {
+    unsigned int index = static_cast<unsigned int>(-1);
+    for (aiMesh *mesh : conv_data.meshes.get()) {
+        if (mesh->mMaterialIndex == static_cast<unsigned int>(-1)) {
 
-            if (index == static_cast<unsigned int>( -1 )) {
+            if (index == static_cast<unsigned int>(-1)) {
                 // Setup a default material.
                 std::shared_ptr<Material> p(new Material());
-                ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name)-2);
-                strcpy( p->id.name+2, AI_DEFAULT_MATERIAL_NAME );
+                ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name) - 2);
+                strcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME);
 
                 // Note: MSVC11 does not zero-initialize Material here, although it should.
                 // Thus all relevant fields should be explicitly initialized. We cannot add
@@ -584,7 +561,7 @@ void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData& conv_data)
                 p->alpha = 0.f;
                 p->har = 0;
 
-                index = static_cast<unsigned int>( conv_data.materials_raw.size() );
+                index = static_cast<unsigned int>(conv_data.materials_raw.size());
                 conv_data.materials_raw.push_back(p);
                 LogInfo("Adding default material");
             }
@@ -593,8 +570,7 @@ void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData& conv_data)
     }
 }
 
-void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
-{
+void BlenderImporter::AddBlendParams(aiMaterial *result, const Material *source) {
     aiColor3D diffuseColor(source->r, source->g, source->b);
     result->AddProperty(&diffuseColor, 1, "$mat.blend.diffuse.color", 0, 0);
 
@@ -606,7 +582,6 @@ void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
 
     int diffuseRamp = 0;
     result->AddProperty(&diffuseRamp, 1, "$mat.blend.diffuse.ramp", 0, 0);
-
 
     aiColor3D specularColor(source->specr, source->specg, source->specb);
     result->AddProperty(&specularColor, 1, "$mat.blend.specular.color", 0, 0);
@@ -622,7 +597,6 @@ void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
 
     int specularHardness = source->har;
     result->AddProperty(&specularHardness, 1, "$mat.blend.specular.hardness", 0, 0);
-
 
     int transparencyUse = source->mode & MA_TRANSPARENCY ? 1 : 0;
     result->AddProperty(&transparencyUse, 1, "$mat.blend.transparency.use", 0, 0);
@@ -666,7 +640,6 @@ void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
     int transparencyGlossSamples = source->samp_gloss_tra;
     result->AddProperty(&transparencyGlossSamples, 1, "$mat.blend.transparency.glossSamples", 0, 0);
 
-
     int mirrorUse = source->mode & MA_RAYMIRROR ? 1 : 0;
     result->AddProperty(&mirrorUse, 1, "$mat.blend.mirror.use", 0, 0);
 
@@ -704,68 +677,67 @@ void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
     result->AddProperty(&mirrorGlossAnisotropic, 1, "$mat.blend.mirror.glossAnisotropic", 0, 0);
 }
 
-void BlenderImporter::BuildMaterials(ConversionData& conv_data)
-{
+void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
     conv_data.materials->reserve(conv_data.materials_raw.size());
 
     BuildDefaultMaterial(conv_data);
 
-    for(std::shared_ptr<Material> mat : conv_data.materials_raw) {
+    for (std::shared_ptr<Material> mat : conv_data.materials_raw) {
 
         // reset per material global counters
-        for (size_t i = 0; i < sizeof(conv_data.next_texture)/sizeof(conv_data.next_texture[0]);++i) {
-            conv_data.next_texture[i] = 0 ;
+        for (size_t i = 0; i < sizeof(conv_data.next_texture) / sizeof(conv_data.next_texture[0]); ++i) {
+            conv_data.next_texture[i] = 0;
         }
 
-        aiMaterial* mout = new aiMaterial();
+        aiMaterial *mout = new aiMaterial();
         conv_data.materials->push_back(mout);
         // For any new material field handled here, the default material above must be updated with an appropriate default value.
 
         // set material name
-        aiString name = aiString(mat->id.name+2); // skip over the name prefix 'MA'
-        mout->AddProperty(&name,AI_MATKEY_NAME);
+        aiString name = aiString(mat->id.name + 2); // skip over the name prefix 'MA'
+        mout->AddProperty(&name, AI_MATKEY_NAME);
 
         // basic material colors
-        aiColor3D col(mat->r,mat->g,mat->b);
-        if (mat->r || mat->g || mat->b ) {
+        aiColor3D col(mat->r, mat->g, mat->b);
+        if (mat->r || mat->g || mat->b) {
 
             // Usually, zero diffuse color means no diffuse color at all in the equation.
             // So we omit this member to express this intent.
-            mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
+            mout->AddProperty(&col, 1, AI_MATKEY_COLOR_DIFFUSE);
 
             if (mat->emit) {
-                aiColor3D emit_col(mat->emit * mat->r, mat->emit * mat->g, mat->emit * mat->b) ;
-                mout->AddProperty(&emit_col, 1, AI_MATKEY_COLOR_EMISSIVE) ;
+                aiColor3D emit_col(mat->emit * mat->r, mat->emit * mat->g, mat->emit * mat->b);
+                mout->AddProperty(&emit_col, 1, AI_MATKEY_COLOR_EMISSIVE);
             }
         }
 
-        col = aiColor3D(mat->specr,mat->specg,mat->specb);
-        mout->AddProperty(&col,1,AI_MATKEY_COLOR_SPECULAR);
+        col = aiColor3D(mat->specr, mat->specg, mat->specb);
+        mout->AddProperty(&col, 1, AI_MATKEY_COLOR_SPECULAR);
 
         // is hardness/shininess set?
-        if( mat->har ) {
+        if (mat->har) {
             const float har = mat->har;
-            mout->AddProperty(&har,1,AI_MATKEY_SHININESS);
+            mout->AddProperty(&har, 1, AI_MATKEY_SHININESS);
         }
 
-        col = aiColor3D(mat->ambr,mat->ambg,mat->ambb);
-        mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);
+        col = aiColor3D(mat->ambr, mat->ambg, mat->ambb);
+        mout->AddProperty(&col, 1, AI_MATKEY_COLOR_AMBIENT);
 
         // is mirror enabled?
-        if( mat->mode & MA_RAYMIRROR ) {
+        if (mat->mode & MA_RAYMIRROR) {
             const float ray_mirror = mat->ray_mirror;
-            mout->AddProperty(&ray_mirror,1,AI_MATKEY_REFLECTIVITY);
+            mout->AddProperty(&ray_mirror, 1, AI_MATKEY_REFLECTIVITY);
         }
 
-        col = aiColor3D(mat->mirr,mat->mirg,mat->mirb);
-        mout->AddProperty(&col,1,AI_MATKEY_COLOR_REFLECTIVE);
+        col = aiColor3D(mat->mirr, mat->mirg, mat->mirb);
+        mout->AddProperty(&col, 1, AI_MATKEY_COLOR_REFLECTIVE);
 
-        for(size_t i = 0; i < sizeof(mat->mtex) / sizeof(mat->mtex[0]); ++i) {
+        for (size_t i = 0; i < sizeof(mat->mtex) / sizeof(mat->mtex[0]); ++i) {
             if (!mat->mtex[i]) {
                 continue;
             }
 
-            ResolveTexture(mout,mat.get(),mat->mtex[i].get(),conv_data);
+            ResolveTexture(mout, mat.get(), mat->mtex[i].get(), conv_data);
         }
 
         AddBlendParams(mout, mat.get());
@@ -773,85 +745,79 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::CheckActualType(const ElemBase* dt, const char* check)
-{
+void BlenderImporter::CheckActualType(const ElemBase *dt, const char *check) {
     ai_assert(dt);
-    if (strcmp(dt->dna_type,check)) {
+    if (strcmp(dt->dna_type, check)) {
         ThrowException((format(),
-            "Expected object at ",std::hex,dt," to be of type `",check,
-            "`, but it claims to be a `",dt->dna_type,"`instead"
-        ));
+                "Expected object at ", std::hex, dt, " to be of type `", check,
+                "`, but it claims to be a `", dt->dna_type, "`instead"));
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::NotSupportedObjectType(const Object* obj, const char* type)
-{
-    LogWarn((format(), "Object `",obj->id.name,"` - type is unsupported: `",type, "`, skipping" ));
+void BlenderImporter::NotSupportedObjectType(const Object *obj, const char *type) {
+    LogWarn((format(), "Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping"));
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, const Mesh* mesh,
-    ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
-    )
-{
+void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, const Mesh *mesh,
+        ConversionData &conv_data, TempArray<std::vector, aiMesh> &temp) {
     // TODO: Resolve various problems with BMesh triangulation before re-enabling.
     //       See issues #400, #373, #318  #315 and #132.
 #if defined(TODO_FIX_BMESH_CONVERSION)
-    BlenderBMeshConverter BMeshConverter( mesh );
-    if ( BMeshConverter.ContainsBMesh( ) )
-    {
-        mesh = BMeshConverter.TriangulateBMesh( );
+    BlenderBMeshConverter BMeshConverter(mesh);
+    if (BMeshConverter.ContainsBMesh()) {
+        mesh = BMeshConverter.TriangulateBMesh();
     }
 #endif
 
-    typedef std::pair<const int,size_t> MyPair;
+    typedef std::pair<const int, size_t> MyPair;
     if ((!mesh->totface && !mesh->totloop) || !mesh->totvert) {
         return;
     }
 
     // some sanity checks
-    if (static_cast<size_t> ( mesh->totface ) > mesh->mface.size() ){
+    if (static_cast<size_t>(mesh->totface) > mesh->mface.size()) {
         ThrowException("Number of faces is larger than the corresponding array");
     }
 
-    if (static_cast<size_t> ( mesh->totvert ) > mesh->mvert.size()) {
+    if (static_cast<size_t>(mesh->totvert) > mesh->mvert.size()) {
         ThrowException("Number of vertices is larger than the corresponding array");
     }
 
-    if (static_cast<size_t> ( mesh->totloop ) > mesh->mloop.size()) {
+    if (static_cast<size_t>(mesh->totloop) > mesh->mloop.size()) {
         ThrowException("Number of vertices is larger than the corresponding array");
     }
 
     // collect per-submesh numbers
-    std::map<int,size_t> per_mat;
-    std::map<int,size_t> per_mat_verts;
+    std::map<int, size_t> per_mat;
+    std::map<int, size_t> per_mat_verts;
     for (int i = 0; i < mesh->totface; ++i) {
 
-        const MFace& mf = mesh->mface[i];
-        per_mat[ mf.mat_nr ]++;
-        per_mat_verts[ mf.mat_nr ] += mf.v4?4:3;
+        const MFace &mf = mesh->mface[i];
+        per_mat[mf.mat_nr]++;
+        per_mat_verts[mf.mat_nr] += mf.v4 ? 4 : 3;
     }
 
     for (int i = 0; i < mesh->totpoly; ++i) {
-        const MPoly& mp = mesh->mpoly[i];
-        per_mat[ mp.mat_nr ]++;
-        per_mat_verts[ mp.mat_nr ] += mp.totloop;
+        const MPoly &mp = mesh->mpoly[i];
+        per_mat[mp.mat_nr]++;
+        per_mat_verts[mp.mat_nr] += mp.totloop;
     }
 
     // ... and allocate the corresponding meshes
     const size_t old = temp->size();
     temp->reserve(temp->size() + per_mat.size());
 
-    std::map<size_t,size_t> mat_num_to_mesh_idx;
-    for(MyPair& it : per_mat) {
+    std::map<size_t, size_t> mat_num_to_mesh_idx;
+    for (MyPair &it : per_mat) {
 
         mat_num_to_mesh_idx[it.first] = temp->size();
         temp->push_back(new aiMesh());
 
-        aiMesh* out = temp->back();
+        aiMesh *out = temp->back();
         out->mVertices = new aiVector3D[per_mat_verts[it.first]];
-        out->mNormals  = new aiVector3D[per_mat_verts[it.first]];
+        out->mNormals = new aiVector3D[per_mat_verts[it.first]];
 
         //out->mNumFaces = 0
         //out->mNumVertices = 0
@@ -859,45 +825,43 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
         // all sub-meshes created from this mesh are named equally. this allows
         // curious users to recover the original adjacency.
-        out->mName = aiString(mesh->id.name+2);
-            // skip over the name prefix 'ME'
+        out->mName = aiString(mesh->id.name + 2);
+        // skip over the name prefix 'ME'
 
         // resolve the material reference and add this material to the set of
         // output materials. The (temporary) material index is the index
         // of the material entry within the list of resolved materials.
         if (mesh->mat) {
 
-            if (static_cast<size_t> ( it.first ) >= mesh->mat.size() ) {
+            if (static_cast<size_t>(it.first) >= mesh->mat.size()) {
                 ThrowException("Material index is out of range");
             }
 
             std::shared_ptr<Material> mat = mesh->mat[it.first];
-            const std::deque< std::shared_ptr<Material> >::iterator has = std::find(
+            const std::deque<std::shared_ptr<Material>>::iterator has = std::find(
                     conv_data.materials_raw.begin(),
-                    conv_data.materials_raw.end(),mat
-            );
+                    conv_data.materials_raw.end(), mat);
 
             if (has != conv_data.materials_raw.end()) {
-                out->mMaterialIndex = static_cast<unsigned int>( std::distance(conv_data.materials_raw.begin(),has));
-            }
-            else {
-                out->mMaterialIndex = static_cast<unsigned int>( conv_data.materials_raw.size() );
+                out->mMaterialIndex = static_cast<unsigned int>(std::distance(conv_data.materials_raw.begin(), has));
+            } else {
+                out->mMaterialIndex = static_cast<unsigned int>(conv_data.materials_raw.size());
                 conv_data.materials_raw.push_back(mat);
             }
-        }
-        else out->mMaterialIndex = static_cast<unsigned int>( -1 );
+        } else
+            out->mMaterialIndex = static_cast<unsigned int>(-1);
     }
 
     for (int i = 0; i < mesh->totface; ++i) {
 
-        const MFace& mf = mesh->mface[i];
+        const MFace &mf = mesh->mface[i];
 
-        aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
-        aiFace& f = out->mFaces[out->mNumFaces++];
+        aiMesh *const out = temp[mat_num_to_mesh_idx[mf.mat_nr]];
+        aiFace &f = out->mFaces[out->mNumFaces++];
 
-        f.mIndices = new unsigned int[ f.mNumIndices = mf.v4?4:3 ];
-        aiVector3D* vo = out->mVertices + out->mNumVertices;
-        aiVector3D* vn = out->mNormals + out->mNumVertices;
+        f.mIndices = new unsigned int[f.mNumIndices = mf.v4 ? 4 : 3];
+        aiVector3D *vo = out->mVertices + out->mNumVertices;
+        aiVector3D *vn = out->mNormals + out->mNumVertices;
 
         // XXX we can't fold this easily, because we are restricted
         // to the member names from the BLEND file (v1,v2,v3,v4)
@@ -908,7 +872,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         if (mf.v1 >= mesh->totvert) {
             ThrowException("Vertex index v1 out of range");
         }
-        const MVert* v = &mesh->mvert[mf.v1];
+        const MVert *v = &mesh->mvert[mf.v1];
         vo->x = v->co[0];
         vo->y = v->co[1];
         vo->z = v->co[2];
@@ -966,8 +930,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             ++vn;
 
             out->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
-        }
-        else out->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+        } else
+            out->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
 
         //  }
         //  }
@@ -976,29 +940,28 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
     for (int i = 0; i < mesh->totpoly; ++i) {
 
-        const MPoly& mf = mesh->mpoly[i];
+        const MPoly &mf = mesh->mpoly[i];
 
-        aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
-        aiFace& f = out->mFaces[out->mNumFaces++];
+        aiMesh *const out = temp[mat_num_to_mesh_idx[mf.mat_nr]];
+        aiFace &f = out->mFaces[out->mNumFaces++];
 
-        f.mIndices = new unsigned int[ f.mNumIndices = mf.totloop ];
-        aiVector3D* vo = out->mVertices + out->mNumVertices;
-        aiVector3D* vn = out->mNormals + out->mNumVertices;
+        f.mIndices = new unsigned int[f.mNumIndices = mf.totloop];
+        aiVector3D *vo = out->mVertices + out->mNumVertices;
+        aiVector3D *vn = out->mNormals + out->mNumVertices;
 
         // XXX we can't fold this easily, because we are restricted
         // to the member names from the BLEND file (v1,v2,v3,v4)
         // which are assigned by the genblenddna.py script and
         // cannot be changed without breaking the entire
         // import process.
-        for (int j = 0;j < mf.totloop; ++j)
-        {
-            const MLoop& loop = mesh->mloop[mf.loopstart + j];
+        for (int j = 0; j < mf.totloop; ++j) {
+            const MLoop &loop = mesh->mloop[mf.loopstart + j];
 
             if (loop.v >= mesh->totvert) {
                 ThrowException("Vertex index out of range");
             }
 
-            const MVert& v = mesh->mvert[loop.v];
+            const MVert &v = mesh->mvert[loop.v];
 
             vo->x = v.co[0];
             vo->y = v.co[1];
@@ -1010,14 +973,10 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
             ++vo;
             ++vn;
-
         }
-        if (mf.totloop == 3)
-        {
+        if (mf.totloop == 3) {
             out->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
-        }
-        else
-        {
+        } else {
             out->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
         }
     }
@@ -1052,17 +1011,17 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
     // collect texture coordinates, they're stored in a separate per-face buffer
     if (mesh->mtface || mesh->mloopuv) {
-        if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
+        if (mesh->totface > static_cast<int>(mesh->mtface.size())) {
             ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
         }
-        for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
-            ai_assert((*it)->mNumVertices && (*it)->mNumFaces);
+        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+            ai_assert(0 != (*it)->mNumVertices);
+            ai_assert(0 != (*it)->mNumFaces);
             const auto itMatTexUvMapping = matTexUvMappings.find((*it)->mMaterialIndex);
             if (itMatTexUvMapping == matTexUvMappings.end()) {
                 // default behaviour like before
                 (*it)->mTextureCoords[0] = new aiVector3D[(*it)->mNumVertices];
-            }
-            else {
+            } else {
                 // create texture coords for every mapped tex
                 for (uint32_t i = 0; i < itMatTexUvMapping->second.size(); ++i) {
                     (*it)->mTextureCoords[i] = new aiVector3D[(*it)->mNumVertices];
@@ -1072,29 +1031,29 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         }
 
         for (int i = 0; i < mesh->totface; ++i) {
-            const MTFace* v = &mesh->mtface[i];
+            const MTFace *v = &mesh->mtface[i];
 
-            aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
-            const aiFace& f = out->mFaces[out->mNumFaces++];
+            aiMesh *const out = temp[mat_num_to_mesh_idx[mesh->mface[i].mat_nr]];
+            const aiFace &f = out->mFaces[out->mNumFaces++];
 
-            aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
-            for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+            aiVector3D *vo = &out->mTextureCoords[0][out->mNumVertices];
+            for (unsigned int j = 0; j < f.mNumIndices; ++j, ++vo, ++out->mNumVertices) {
                 vo->x = v->uv[j][0];
                 vo->y = v->uv[j][1];
             }
         }
 
         for (int i = 0; i < mesh->totpoly; ++i) {
-            const MPoly& v = mesh->mpoly[i];
-            aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
-            const aiFace& f = out->mFaces[out->mNumFaces++];
+            const MPoly &v = mesh->mpoly[i];
+            aiMesh *const out = temp[mat_num_to_mesh_idx[v.mat_nr]];
+            const aiFace &f = out->mFaces[out->mNumFaces++];
 
             const auto itMatTexUvMapping = matTexUvMappings.find(v.mat_nr);
             if (itMatTexUvMapping == matTexUvMappings.end()) {
                 // old behavior
-                aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
+                aiVector3D *vo = &out->mTextureCoords[0][out->mNumVertices];
                 for (unsigned int j = 0; j < f.mNumIndices; ++j, ++vo, ++out->mNumVertices) {
-                    const MLoopUV& uv = mesh->mloopuv[v.loopstart + j];
+                    const MLoopUV &uv = mesh->mloopuv[v.loopstart + j];
                     vo->x = uv.uv[0];
                     vo->y = uv.uv[1];
                 }
@@ -1102,10 +1061,10 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
                 // create textureCoords for every mapped tex
                 for (uint32_t m = 0; m < itMatTexUvMapping->second.size(); ++m) {
                     const MLoopUV *tm = itMatTexUvMapping->second[m];
-                    aiVector3D* vo = &out->mTextureCoords[m][out->mNumVertices];
+                    aiVector3D *vo = &out->mTextureCoords[m][out->mNumVertices];
                     uint32_t j = 0;
                     for (; j < f.mNumIndices; ++j, ++vo) {
-                        const MLoopUV& uv = tm[v.loopstart + j];
+                        const MLoopUV &uv = tm[v.loopstart + j];
                         vo->x = uv.uv[0];
                         vo->y = uv.uv[1];
                     }
@@ -1121,24 +1080,25 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
     // collect texture coordinates, old-style (marked as deprecated in current blender sources)
     if (mesh->tface) {
-        if (mesh->totface > static_cast<int> ( mesh->tface.size())) {
+        if (mesh->totface > static_cast<int>(mesh->tface.size())) {
             ThrowException("Number of faces is larger than the corresponding UV face array (#2)");
         }
-        for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
-            ai_assert((*it)->mNumVertices && (*it)->mNumFaces);
+        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+            ai_assert(0 != (*it)->mNumVertices);
+            ai_assert(0 != (*it)->mNumFaces);
 
             (*it)->mTextureCoords[0] = new aiVector3D[(*it)->mNumVertices];
             (*it)->mNumFaces = (*it)->mNumVertices = 0;
         }
 
         for (int i = 0; i < mesh->totface; ++i) {
-            const TFace* v = &mesh->tface[i];
+            const TFace *v = &mesh->tface[i];
 
-            aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
-            const aiFace& f = out->mFaces[out->mNumFaces++];
+            aiMesh *const out = temp[mat_num_to_mesh_idx[mesh->mface[i].mat_nr]];
+            const aiFace &f = out->mFaces[out->mNumFaces++];
 
-            aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
-            for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+            aiVector3D *vo = &out->mTextureCoords[0][out->mNumVertices];
+            for (unsigned int j = 0; j < f.mNumIndices; ++j, ++vo, ++out->mNumVertices) {
                 vo->x = v->uv[j][0];
                 vo->y = v->uv[j][1];
             }
@@ -1147,11 +1107,12 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
     // collect vertex colors, stored separately as well
     if (mesh->mcol || mesh->mloopcol) {
-        if (mesh->totface > static_cast<int> ( (mesh->mcol.size()/4)) ) {
+        if (mesh->totface > static_cast<int>((mesh->mcol.size() / 4))) {
             ThrowException("Number of faces is larger than the corresponding color face array");
         }
-        for (std::vector<aiMesh*>::iterator it = temp->begin()+old; it != temp->end(); ++it) {
-            ai_assert((*it)->mNumVertices && (*it)->mNumFaces);
+        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+            ai_assert(0 != (*it)->mNumVertices);
+            ai_assert(0 != (*it)->mNumFaces);
 
             (*it)->mColors[0] = new aiColor4D[(*it)->mNumVertices];
             (*it)->mNumFaces = (*it)->mNumVertices = 0;
@@ -1159,53 +1120,51 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
         for (int i = 0; i < mesh->totface; ++i) {
 
-            aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
-            const aiFace& f = out->mFaces[out->mNumFaces++];
+            aiMesh *const out = temp[mat_num_to_mesh_idx[mesh->mface[i].mat_nr]];
+            const aiFace &f = out->mFaces[out->mNumFaces++];
 
-            aiColor4D* vo = &out->mColors[0][out->mNumVertices];
-            for (unsigned int n = 0; n < f.mNumIndices; ++n, ++vo,++out->mNumVertices) {
-                const MCol* col = &mesh->mcol[(i<<2)+n];
+            aiColor4D *vo = &out->mColors[0][out->mNumVertices];
+            for (unsigned int n = 0; n < f.mNumIndices; ++n, ++vo, ++out->mNumVertices) {
+                const MCol *col = &mesh->mcol[(i << 2) + n];
 
                 vo->r = col->r;
                 vo->g = col->g;
                 vo->b = col->b;
                 vo->a = col->a;
             }
-            for (unsigned int n = f.mNumIndices; n < 4; ++n);
+            for (unsigned int n = f.mNumIndices; n < 4; ++n)
+                ;
         }
 
         for (int i = 0; i < mesh->totpoly; ++i) {
-            const MPoly& v = mesh->mpoly[i];
-            aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
-            const aiFace& f = out->mFaces[out->mNumFaces++];
+            const MPoly &v = mesh->mpoly[i];
+            aiMesh *const out = temp[mat_num_to_mesh_idx[v.mat_nr]];
+            const aiFace &f = out->mFaces[out->mNumFaces++];
 
-            aiColor4D* vo = &out->mColors[0][out->mNumVertices];
-			const ai_real scaleZeroToOne = 1.f/255.f;
-            for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
-                const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
+            aiColor4D *vo = &out->mColors[0][out->mNumVertices];
+            const ai_real scaleZeroToOne = 1.f / 255.f;
+            for (unsigned int j = 0; j < f.mNumIndices; ++j, ++vo, ++out->mNumVertices) {
+                const MLoopCol &col = mesh->mloopcol[v.loopstart + j];
                 vo->r = ai_real(col.r) * scaleZeroToOne;
                 vo->g = ai_real(col.g) * scaleZeroToOne;
                 vo->b = ai_real(col.b) * scaleZeroToOne;
                 vo->a = ai_real(col.a) * scaleZeroToOne;
             }
-
         }
-
     }
 
     return;
 }
 
 // ------------------------------------------------------------------------------------------------
-aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj, const Camera* cam, ConversionData& /*conv_data*/)
-{
+aiCamera *BlenderImporter::ConvertCamera(const Scene & /*in*/, const Object *obj, const Camera *cam, ConversionData & /*conv_data*/) {
     std::unique_ptr<aiCamera> out(new aiCamera());
-    out->mName = obj->id.name+2;
+    out->mName = obj->id.name + 2;
     out->mPosition = aiVector3D(0.f, 0.f, 0.f);
     out->mUp = aiVector3D(0.f, 1.f, 0.f);
     out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
     if (cam->sensor_x && cam->lens) {
-        out->mHorizontalFOV = 2.f * std::atan2(cam->sensor_x,  2.f * cam->lens);
+        out->mHorizontalFOV = 2.f * std::atan2(cam->sensor_x, 2.f * cam->lens);
     }
     out->mClipPlaneNear = cam->clipsta;
     out->mClipPlaneFar = cam->clipend;
@@ -1214,51 +1173,48 @@ aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj,
 }
 
 // ------------------------------------------------------------------------------------------------
-aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, const Lamp* lamp, ConversionData& /*conv_data*/)
-{
+aiLight *BlenderImporter::ConvertLight(const Scene & /*in*/, const Object *obj, const Lamp *lamp, ConversionData & /*conv_data*/) {
     std::unique_ptr<aiLight> out(new aiLight());
-    out->mName = obj->id.name+2;
+    out->mName = obj->id.name + 2;
 
-    switch (lamp->type)
-    {
-        case Lamp::Type_Local:
-            out->mType = aiLightSource_POINT;
-            break;
-        case Lamp::Type_Spot:
-            out->mType = aiLightSource_SPOT;
+    switch (lamp->type) {
+    case Lamp::Type_Local:
+        out->mType = aiLightSource_POINT;
+        break;
+    case Lamp::Type_Spot:
+        out->mType = aiLightSource_SPOT;
 
-            // blender orients directional lights as facing toward -z
-            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
-            out->mUp = aiVector3D(0.f, 1.f, 0.f);
+        // blender orients directional lights as facing toward -z
+        out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+        out->mUp = aiVector3D(0.f, 1.f, 0.f);
 
-            out->mAngleInnerCone = lamp->spotsize * (1.0f - lamp->spotblend);
-            out->mAngleOuterCone = lamp->spotsize;
-            break;
-        case Lamp::Type_Sun:
-            out->mType = aiLightSource_DIRECTIONAL;
+        out->mAngleInnerCone = lamp->spotsize * (1.0f - lamp->spotblend);
+        out->mAngleOuterCone = lamp->spotsize;
+        break;
+    case Lamp::Type_Sun:
+        out->mType = aiLightSource_DIRECTIONAL;
 
-            // blender orients directional lights as facing toward -z
-            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
-            out->mUp = aiVector3D(0.f, 1.f, 0.f);
-            break;
+        // blender orients directional lights as facing toward -z
+        out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+        out->mUp = aiVector3D(0.f, 1.f, 0.f);
+        break;
 
-        case Lamp::Type_Area:
-            out->mType = aiLightSource_AREA;
+    case Lamp::Type_Area:
+        out->mType = aiLightSource_AREA;
 
-            if (lamp->area_shape == 0) {
-                out->mSize = aiVector2D(lamp->area_size, lamp->area_size);
-            }
-            else {
-                out->mSize = aiVector2D(lamp->area_size, lamp->area_sizey);
-            }
+        if (lamp->area_shape == 0) {
+            out->mSize = aiVector2D(lamp->area_size, lamp->area_size);
+        } else {
+            out->mSize = aiVector2D(lamp->area_size, lamp->area_sizey);
+        }
 
-            // blender orients directional lights as facing toward -z
-            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
-            out->mUp = aiVector3D(0.f, 1.f, 0.f);
-            break;
+        // blender orients directional lights as facing toward -z
+        out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+        out->mUp = aiVector3D(0.f, 1.f, 0.f);
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     out->mColorAmbient = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
@@ -1268,14 +1224,11 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
     // If default values are supplied, compute the coefficients from light's max distance
     // Read this: https://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/
     //
-    if (lamp->constant_coefficient == 1.0f && lamp->linear_coefficient == 0.0f && lamp->quadratic_coefficient == 0.0f && lamp->dist > 0.0f)
-    {
+    if (lamp->constant_coefficient == 1.0f && lamp->linear_coefficient == 0.0f && lamp->quadratic_coefficient == 0.0f && lamp->dist > 0.0f) {
         out->mAttenuationConstant = 1.0f;
         out->mAttenuationLinear = 2.0f / lamp->dist;
         out->mAttenuationQuadratic = 1.0f / (lamp->dist * lamp->dist);
-    }
-    else
-    {
+    } else {
         out->mAttenuationConstant = lamp->constant_coefficient;
         out->mAttenuationLinear = lamp->linear_coefficient;
         out->mAttenuationQuadratic = lamp->quadratic_coefficient;
@@ -1285,11 +1238,10 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, ConversionData& conv_data, const aiMatrix4x4& parentTransform)
-{
-    std::deque<const Object*> children;
-    for(ObjectSet::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;) {
-        const Object* object = *it;
+aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, ConversionData &conv_data, const aiMatrix4x4 &parentTransform) {
+    std::deque<const Object *> children;
+    for (ObjectSet::iterator it = conv_data.objects.begin(); it != conv_data.objects.end();) {
+        const Object *object = *it;
         if (object->parent == obj) {
             children.push_back(object);
 
@@ -1299,66 +1251,61 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
         ++it;
     }
 
-    std::unique_ptr<aiNode> node(new aiNode(obj->id.name+2)); // skip over the name prefix 'OB'
+    std::unique_ptr<aiNode> node(new aiNode(obj->id.name + 2)); // skip over the name prefix 'OB'
     if (obj->data) {
-        switch (obj->type)
-        {
-        case Object :: Type_EMPTY:
+        switch (obj->type) {
+        case Object ::Type_EMPTY:
             break; // do nothing
 
-
             // supported object types
-        case Object :: Type_MESH: {
+        case Object ::Type_MESH: {
             const size_t old = conv_data.meshes->size();
 
-            CheckActualType(obj->data.get(),"Mesh");
-            ConvertMesh(in,obj,static_cast<const Mesh*>(obj->data.get()),conv_data,conv_data.meshes);
+            CheckActualType(obj->data.get(), "Mesh");
+            ConvertMesh(in, obj, static_cast<const Mesh *>(obj->data.get()), conv_data, conv_data.meshes);
 
             if (conv_data.meshes->size() > old) {
-                node->mMeshes = new unsigned int[node->mNumMeshes = static_cast<unsigned int>(conv_data.meshes->size()-old)];
+                node->mMeshes = new unsigned int[node->mNumMeshes = static_cast<unsigned int>(conv_data.meshes->size() - old)];
                 for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                     node->mMeshes[i] = static_cast<unsigned int>(i + old);
                 }
-            }}
-            break;
-        case Object :: Type_LAMP: {
-            CheckActualType(obj->data.get(),"Lamp");
-            aiLight* mesh = ConvertLight(in,obj,static_cast<const Lamp*>(
-                obj->data.get()),conv_data);
+            }
+        } break;
+        case Object ::Type_LAMP: {
+            CheckActualType(obj->data.get(), "Lamp");
+            aiLight *mesh = ConvertLight(in, obj, static_cast<const Lamp *>(obj->data.get()), conv_data);
 
             if (mesh) {
                 conv_data.lights->push_back(mesh);
-            }}
-            break;
-        case Object :: Type_CAMERA: {
-            CheckActualType(obj->data.get(),"Camera");
-            aiCamera* mesh = ConvertCamera(in,obj,static_cast<const Camera*>(
-                obj->data.get()),conv_data);
+            }
+        } break;
+        case Object ::Type_CAMERA: {
+            CheckActualType(obj->data.get(), "Camera");
+            aiCamera *mesh = ConvertCamera(in, obj, static_cast<const Camera *>(obj->data.get()), conv_data);
 
             if (mesh) {
                 conv_data.cameras->push_back(mesh);
-            }}
-            break;
-
+            }
+        } break;
 
             // unsupported object types / log, but do not break
-        case Object :: Type_CURVE:
-            NotSupportedObjectType(obj,"Curve");
+        case Object ::Type_CURVE:
+            NotSupportedObjectType(obj, "Curve");
             break;
-        case Object :: Type_SURF:
-            NotSupportedObjectType(obj,"Surface");
+        case Object ::Type_SURF:
+            NotSupportedObjectType(obj, "Surface");
             break;
-        case Object :: Type_FONT:
-            NotSupportedObjectType(obj,"Font");
+        case Object ::Type_FONT:
+            NotSupportedObjectType(obj, "Font");
             break;
-        case Object :: Type_MBALL:
-            NotSupportedObjectType(obj,"MetaBall");
+        case Object ::Type_MBALL:
+            NotSupportedObjectType(obj, "MetaBall");
             break;
-        case Object :: Type_WAVE:
-            NotSupportedObjectType(obj,"Wave");
+        case Object ::Type_WAVE:
+            NotSupportedObjectType(obj, "Wave");
             break;
-        case Object :: Type_LATTICE:
-            NotSupportedObjectType(obj,"Lattice");
+        case Object ::Type_LATTICE:
+            NotSupportedObjectType(obj, "Lattice");
             break;
 
             // invalid or unknown type
@@ -1367,8 +1314,8 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
         }
     }
 
-    for(unsigned int x = 0; x < 4; ++x) {
-        for(unsigned int y = 0; y < 4; ++y) {
+    for (unsigned int x = 0; x < 4; ++x) {
+        for (unsigned int y = 0; y < 4; ++y) {
             node->mTransformation[y][x] = obj->obmat[x][y];
         }
     }
@@ -1376,19 +1323,19 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
     aiMatrix4x4 m = parentTransform;
     m = m.Inverse();
 
-    node->mTransformation = m*node->mTransformation;
+    node->mTransformation = m * node->mTransformation;
 
     if (children.size()) {
         node->mNumChildren = static_cast<unsigned int>(children.size());
-        aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();
-        for (const Object* nobj :children) {
-            *nd = ConvertNode(in,nobj,conv_data,node->mTransformation * parentTransform);
+        aiNode **nd = node->mChildren = new aiNode *[node->mNumChildren]();
+        for (const Object *nobj : children) {
+            *nd = ConvertNode(in, nobj, conv_data, node->mTransformation * parentTransform);
             (*nd++)->mParent = node.get();
         }
     }
 
     // apply modifiers
-    modifier_cache->ApplyModifiers(*node,conv_data,in,*obj);
+    modifier_cache->ApplyModifiers(*node, conv_data, in, *obj);
 
     return node.release();
 }

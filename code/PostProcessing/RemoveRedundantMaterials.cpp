@@ -197,7 +197,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
             // update all material indices
             for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
                 aiMesh* mesh = pScene->mMeshes[p];
-                ai_assert( NULL!=mesh );
+                ai_assert(nullptr != mesh);
                 mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
             }
             // delete the old material list

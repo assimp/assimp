@@ -84,7 +84,19 @@ public:
  */
 struct NodeDesc {
     NodeDesc() :
-            type(), id(), number(0), parent(0), name(""), isPivotSet(false), lightColor(1.f, 1.f, 1.f), lightIntensity(1.f), lightType(0), lightFalloffType(0), lightConeAngle(45.f), lightEdgeAngle(), parent_resolved(NULL) {}
+            type(),
+            id(),
+            number(0),
+            parent(0),
+            name(""),
+            isPivotSet(false),
+            lightColor(1.f, 1.f, 1.f),
+            lightIntensity(1.f),
+            lightType(0),
+            lightFalloffType(0),
+            lightConeAngle(45.f),
+            lightEdgeAngle(),
+            parent_resolved(nullptr) {}
 
     enum {
 

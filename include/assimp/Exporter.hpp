@@ -185,7 +185,7 @@ public:
     * #GetExportFormatCount / #GetExportFormatDescription to learn which
     *   export formats are available.
     * @param pPreprocessing See the documentation for #Export
-    * @return the exported data or NULL in case of error.
+    * @return the exported data or nullptr in case of error.
     * @note If the Exporter instance did already hold a blob from
     *   a previous call to #ExportToBlob, it will be disposed.
     *   Any IO handlers set via #SetIOHandler are ignored here.
@@ -200,7 +200,7 @@ public:
     /** Convenience function to export directly to a file. Use
      *  #SetIOSystem to supply a custom IOSystem to gain fine-grained control
      *  about the output data flow of the export process.
-     * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
+     * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be nullptr.
      * @param pPath Full target file name. Target must be accessible.
      * @param pPreprocessing Accepts any choice of the #aiPostProcessSteps enumerated
      *   flags, but in reality only a subset of them makes sense here. Specifying
@@ -240,7 +240,7 @@ public:
      *
      * Returns an empty string if no error occurred.
      * @return A description of the last error, an empty string if no
-     *   error occurred. The string is never NULL.
+     *   error occurred. The string is never nullptr.
      *
      * @note The returned function remains valid until one of the
      * following methods is called: #Export, #ExportToBlob, #FreeBlob */
@@ -393,7 +393,6 @@ public:
      */
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
 
-    //wangyi 0608
     bool SetPropertyCallback(const char *szName, std::function<void *(void *)> &f);
 
     // -------------------------------------------------------------------
@@ -448,14 +447,13 @@ public:
     const aiMatrix4x4 GetPropertyMatrix(const char *szName,
             const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
 
-    //wangyi 0608
     std::function<void *(void *)> GetPropertyCallback(const char* szName) const;
 
-            // -------------------------------------------------------------------
-            /** Determine a integer configuration property has been set.
+    // -------------------------------------------------------------------
+    /** Determine a integer configuration property has been set.
     * @see HasPropertyInteger()
      */
-            bool HasPropertyInteger(const char *szName) const;
+    bool HasPropertyInteger(const char *szName) const;
 
     /** Determine a boolean configuration property has been set.
     * @see HasPropertyBool()
@@ -477,9 +475,7 @@ public:
      */
     bool HasPropertyMatrix(const char *szName) const;
 
-    //wangyi 0608
     bool HasPropertyCallback(const char *szName) const;
-
 protected:
     /** List of integer properties */
     IntPropertyMap mIntProperties;
@@ -493,7 +489,6 @@ protected:
     /** List of Matrix properties */
     MatrixPropertyMap mMatrixProperties;
 
-    //wangyi 0608
     CallbackPropertyMap mCallbackProperties;
 };
 

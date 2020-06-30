@@ -534,3 +534,10 @@ TEST_F(utglTF2ImportExport, norootnode_scenewithoutnodes) {
     ASSERT_NE(scene, nullptr);
     ASSERT_NE(scene->mRootNode, nullptr);
 }
+
+// Shall not crash!
+TEST_F(utglTF2ImportExport, norootnode_issue_3269) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/issue_3269/texcoord_crash.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+}

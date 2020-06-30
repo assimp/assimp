@@ -925,7 +925,7 @@ void Parser::ParseLV2AnimationBlock(ASE::BaseNode &mesh) {
 
                         ASSIMP_LOG_ERROR("ASE: Found target animation channel "
                                          "but the node is neither a camera nor a spot light");
-                        anim = NULL;
+                        anim = nullptr;
                     } else
                         anim = &mesh.mTargetAnim;
                 }
@@ -1797,14 +1797,14 @@ void Parser::ParseLV4MeshFace(ASE::Face &out) {
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLongTriple(unsigned int *apOut) {
-    ai_assert(NULL != apOut);
+    ai_assert(nullptr != apOut);
 
     for (unsigned int i = 0; i < 3; ++i)
         ParseLV4MeshLong(apOut[i]);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLongTriple(unsigned int *apOut, unsigned int &rIndexOut) {
-    ai_assert(NULL != apOut);
+    ai_assert(nullptr != apOut);
 
     // parse the index
     ParseLV4MeshLong(rIndexOut);
@@ -1814,7 +1814,7 @@ void Parser::ParseLV4MeshLongTriple(unsigned int *apOut, unsigned int &rIndexOut
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut) {
-    ai_assert(NULL != apOut);
+    ai_assert(nullptr != apOut);
 
     // parse the index
     ParseLV4MeshLong(rIndexOut);
@@ -1824,7 +1824,7 @@ void Parser::ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut) {
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloatTriple(ai_real *apOut) {
-    ai_assert(NULL != apOut);
+    ai_assert(nullptr != apOut);
 
     for (unsigned int i = 0; i < 3; ++i)
         ParseLV4MeshFloat(apOut[i]);

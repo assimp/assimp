@@ -174,7 +174,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
         TempOpening& opening = fake_openings.back();
 
         opening.extrusionDir = master_normal;
-        opening.solid = NULL;
+        opening.solid = nullptr;
 
         opening.profileMesh = std::make_shared<TempMesh>();
         opening.profileMesh->mVerts.reserve(*iit);
@@ -319,7 +319,7 @@ void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, Tem
     ConvertAxisPlacement(trafo, solid.Position);
 
     result.Transform(trafo);
-    IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
+    IFCImporter::LogVerboseDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -457,7 +457,7 @@ void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh&
         }
     }
 
-    IFCImporter::LogDebug("generate mesh procedurally by sweeping a disk along a curve (IfcSweptDiskSolid)");
+    IFCImporter::LogVerboseDebug("generate mesh procedurally by sweeping a disk along a curve (IfcSweptDiskSolid)");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -660,7 +660,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
     }
 
-    IFCImporter::LogDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
+    IFCImporter::LogVerboseDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
 
     // If this is an opening element, store both the extruded mesh and the 2D profile mesh
     // it was created from. Return an empty mesh to the caller.

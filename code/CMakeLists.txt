@@ -66,6 +66,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/color4.h
   ${HEADER_PATH}/color4.inl
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
+  ${HEADER_PATH}/ColladaMetaData.h
   ${HEADER_PATH}/commonMetaData.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/Defines.h
@@ -198,6 +199,7 @@ SET( Common_SRCS
   Common/simd.h
   Common/simd.cpp
   Common/material.cpp
+  Common/AssertHandler.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -1232,7 +1234,7 @@ if (APPLE)
     # add ./Compiler/*.h to assimp.framework via copy command
     ADD_CUSTOM_COMMAND(TARGET assimp POST_BUILD
       COMMAND "${CMAKE_COMMAND}" -E copy_directory
-         "../${HEADER_PATH}/Compiler"
+         "${HEADER_PATH}/Compiler"
          assimp.framework/Headers/Compiler
       COMMENT "Copying public ./Compiler/ header files to framework bundle's Headers/Compiler/")
   ENDIF()

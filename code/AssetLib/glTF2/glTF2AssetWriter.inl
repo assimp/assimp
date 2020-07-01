@@ -468,6 +468,22 @@ namespace glTF2 {
         }
 
         obj.AddMember("primitives", primitives, w.mAl);
+        // targetNames
+        if (m.targetNames.size() > 0) {
+            Value extras;
+            extras.SetObject();
+            Value targetNames;
+            targetNames.SetArray();
+            targetNames.Reserve(unsigned(m.targetNames.size()), w.mAl);
+            for (unsigned int n = 0; n < m.targetNames.size(); ++n) {
+                std::string name = m.targetNames[n];
+                Value tname;
+                tname.SetString(name.c_str(), w.mAl);
+                targetNames.PushBack(tname, w.mAl);
+            }
+            extras.AddMember("targetNames", targetNames, w.mAl);
+            obj.AddMember("extras", extras, w.mAl);
+        }
     }
 
     inline void Write(Value& obj, Node& n, AssetWriter& w)
@@ -613,7 +629,9 @@ namespace glTF2 {
         StringBuffer docBuffer;
 
         PrettyWriter<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        if (!mDoc.Accept(writer)) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
 
         if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");
@@ -664,7 +682,9 @@ namespace glTF2 {
 
         StringBuffer docBuffer;
         Writer<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        if (!mDoc.Accept(writer)) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
 
         uint32_t jsonChunkLength = (docBuffer.GetSize() + 3) & ~3; // Round up to next multiple of 4
         auto paddingLength = jsonChunkLength - docBuffer.GetSize();
@@ -816,5 +836,3 @@ namespace glTF2 {
     }
 
 }
-
-

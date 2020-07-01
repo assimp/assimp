@@ -98,12 +98,14 @@ void DropFaceNormalsProcess::Execute( aiScene* pScene) {
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* pMesh) {
-    if (NULL == pMesh->mNormals) {
+bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* mesh) {
+    ai_assert(nullptr != mesh);
+
+    if (nullptr == mesh->mNormals) {
         return false;
     }
     
-    delete[] pMesh->mNormals;
-    pMesh->mNormals = nullptr;
+    delete[] mesh->mNormals;
+    mesh->mNormals = nullptr;
     return true;
 }

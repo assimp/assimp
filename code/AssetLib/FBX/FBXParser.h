@@ -137,7 +137,7 @@ public:
 				return element->second;
 			}
 		}
-		return NULL;
+        return nullptr;
 	}
 
     ElementCollection GetCollection(const std::string& index) const {
@@ -219,7 +219,7 @@ void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el);
 bool HasElement( const Scope& sc, const std::string& index );
 
 // extract a required element from a scope, abort if the element cannot be found
-const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL);
+const Element &GetRequiredElement(const Scope &sc, const std::string &index, const Element *element = nullptr);
 
 // extract required compound scope
 const Scope& GetRequiredScope(const Element& el);

@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
 #include <assimp/Exceptional.h>
+#include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -126,7 +127,7 @@ void ProcessDataToken( TokenList& output_tokens, const char*& start, const char*
         TokenizeError("unexpected character, expected data token", line, column);
     }
 
-    start = end = NULL;
+    start = end = nullptr;
 }
 
 }
@@ -134,7 +135,8 @@ void ProcessDataToken( TokenList& output_tokens, const char*& start, const char*
 // ------------------------------------------------------------------------------------------------
 void Tokenize(TokenList& output_tokens, const char* input)
 {
-    ai_assert(input);
+	ai_assert(input);
+	ASSIMP_LOG_DEBUG("Tokenizing ASCII FBX file");
 
     // line and column numbers numbers are one-based
     unsigned int line = 1;
@@ -144,7 +146,7 @@ void Tokenize(TokenList& output_tokens, const char* input)
     bool in_double_quotes = false;
     bool pending_data_token = false;
 
-    const char* token_begin = NULL, *token_end = NULL;
+    const char *token_begin = nullptr, *token_end = nullptr;
     for (const char* cur = input;*cur;column += (*cur == '\t' ? ASSIMP_FBX_TAB_WIDTH : 1), ++cur) {
         const char c = *cur;
 

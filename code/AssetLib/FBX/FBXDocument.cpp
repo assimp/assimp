@@ -55,6 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 
+#include <assimp/DefaultLogger.hpp>
+
 #include <memory>
 #include <functional>
 #include <map>
@@ -219,7 +221,7 @@ const Object* LazyObject::Get(bool dieOnError)
         if(!DefaultLogger::isNullLogger()) {
             ASSIMP_LOG_ERROR(ex.what());
         }
-        return NULL;
+        return nullptr;
     }
 
     if (!object.get()) {
@@ -264,6 +266,8 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 : settings(settings)
 , parser(parser)
 {
+	ASSIMP_LOG_DEBUG("Creating FBX Document");
+
     // Cannot use array default initialization syntax because vc8 fails on it
     for (auto &timeStamp : creationTimeStamp) {
         timeStamp = 0;
@@ -308,6 +312,7 @@ void Document::ReadHeader() {
 
     const Scope& shead = *ehead->Compound();
     fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
+	ASSIMP_LOG_DEBUG_F("FBX Version: ", fbxVersion);
 
     // While we may have some success with newer files, we don't support
     // the older 6.n fbx format
@@ -462,7 +467,7 @@ void Document::ReadPropertyTemplates()
             const Element *Properties70 = (*innerSc)["Properties70"];
             if(Properties70) {
                 std::shared_ptr<const PropertyTable> props = std::make_shared<const PropertyTable>(
-                    *Properties70,std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
+                        *Properties70, std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable *>(nullptr))
                 );
 
                 templates[oname+"."+pname] = props;

@@ -42,14 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASSERT_H_INC
 #define AI_ASSERT_H_INC
 
-#ifdef __GNUC__
-#   pragma GCC system_header
-#endif
+#if defined(ASSIMP_BUILD_DEBUG)
 
-#ifdef ASSIMP_BUILD_DEBUG
-#   include <assert.h>
-#   define ai_assert(expression) assert( expression )
-#   define ai_assert_entry()     assert( false )
+namespace Assimp
+{
+    // Assert violation behavior can be customized: see AssertHandler.h.
+    void aiAssertViolation(const char* failedExpression, const char* file, int line);
+}
+
+#    define ai_assert(expression) (void)((!!(expression)) || (Assimp::aiAssertViolation(#expression, __FILE__, __LINE__), 0))
+#    define ai_assert_entry() ai_assert(false)
+
 #else
 #   define  ai_assert(expression)
 #   define  ai_assert_entry() 

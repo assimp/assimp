@@ -65,7 +65,7 @@ void DOMError(const std::string& message, const Token& token)
 }
 
 // ------------------------------------------------------------------------------------------------
-void DOMError(const std::string& message, const Element* element /*= NULL*/)
+void DOMError(const std::string& message, const Element* element /*= nullptr*/)
 {
     if(element) {
         DOMError(message,element->KeyToken());
@@ -84,7 +84,7 @@ void DOMWarning(const std::string& message, const Token& token)
 }
 
 // ------------------------------------------------------------------------------------------------
-void DOMWarning(const std::string& message, const Element* element /*= NULL*/)
+void DOMWarning(const std::string& message, const Element* element /*= nullptr*/)
 {
     if(element) {
         DOMWarning(message,element->KeyToken());
@@ -106,7 +106,7 @@ std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
 {
     const Element* const Properties70 = sc["Properties70"];
     std::shared_ptr<const PropertyTable> templateProps = std::shared_ptr<const PropertyTable>(
-        static_cast<const PropertyTable*>(NULL));
+            static_cast<const PropertyTable *>(nullptr));
 
     if(templateName.length()) {
         PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName);

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -63,10 +62,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
+#if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+
+#ifndef RAPIDJSON_NOMEMBERITERATORCLASS
+#define RAPIDJSON_NOMEMBERITERATORCLASS
+#endif 
+
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
+
+#if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef ASSIMP_API
 #include <assimp/ByteSwapper.h>
@@ -175,19 +190,19 @@ enum ComponentType {
 
 inline unsigned int ComponentTypeSize(ComponentType t) {
     switch (t) {
-        case ComponentType_SHORT:
-        case ComponentType_UNSIGNED_SHORT:
-            return 2;
+    case ComponentType_SHORT:
+    case ComponentType_UNSIGNED_SHORT:
+        return 2;
 
-        case ComponentType_UNSIGNED_INT:
-        case ComponentType_FLOAT:
-            return 4;
+    case ComponentType_UNSIGNED_INT:
+    case ComponentType_FLOAT:
+        return 4;
 
-        case ComponentType_BYTE:
-        case ComponentType_UNSIGNED_BYTE:
-            return 1;
-        default:
-            throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
+    case ComponentType_BYTE:
+    case ComponentType_UNSIGNED_BYTE:
+        return 1;
+    default:
+        throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
     }
 }
 
@@ -318,9 +333,11 @@ class Ref {
 
 public:
     Ref() :
-            vector(0), index(0) {}
+            vector(0),
+            index(0) {}
     Ref(std::vector<T *> &vec, unsigned int idx) :
-            vector(&vec), index(idx) {}
+            vector(&vec),
+            index(idx) {}
 
     inline unsigned int GetIndex() const { return index; }
 
@@ -340,7 +357,8 @@ struct Nullable {
     Nullable() :
             isPresent(false) {}
     Nullable(T &val) :
-            value(val), isPresent(true) {}
+            value(val),
+            isPresent(true) {}
 };
 
 //! Base class for all glTF top-level objects
@@ -367,6 +385,8 @@ struct Object {
 //! An accessor provides a typed view into a BufferView or a subset of a BufferView
 //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
 struct Accessor : public Object {
+    struct Sparse;
+
     Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
     size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
     ComponentType componentType; //!< The datatype of components in the attribute. (required)
@@ -374,6 +394,7 @@ struct Accessor : public Object {
     AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
     std::vector<double> max; //!< Maximum value of each component in this attribute.
     std::vector<double> min; //!< Minimum value of each component in this attribute.
+    std::unique_ptr<Sparse> sparse;
 
     unsigned int GetNumComponents();
     unsigned int GetBytesPerComponent();
@@ -381,7 +402,7 @@ struct Accessor : public Object {
 
     inline uint8_t *GetPointer();
 
-    template<class T>
+    template <class T>
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
@@ -390,8 +411,8 @@ struct Accessor : public Object {
     class Indexer {
         friend struct Accessor;
 
-    // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
-    // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
+        // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
+        // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
     protected:
         Accessor &accessor;
 
@@ -400,8 +421,7 @@ struct Accessor : public Object {
         size_t elemSize, stride;
 
         Indexer(Accessor &acc);
-    
-        
+
     public:
         //! Accesses the i-th value as defined by the accessor
         template <class T>
@@ -423,6 +443,21 @@ struct Accessor : public Object {
 
     Accessor() {}
     void Read(Value &obj, Asset &r);
+
+    //sparse
+    struct Sparse {
+        size_t count;
+        ComponentType indicesType;
+        Ref<BufferView> indices;
+        size_t indicesByteOffset;
+        Ref<BufferView> values;
+        size_t valuesByteOffset;
+
+        std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
+
+        void PopulateData(size_t numBytes, uint8_t *bytes);
+        void PatchData(unsigned int elementSize);
+    };
 };
 
 //! A buffer points to binary geometry, animation, or skins.
@@ -451,7 +486,11 @@ public:
         /// \param [in] pDecodedData_Length - size of encoded region, in bytes.
         /// \param [in] pID - ID of the region.
         SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string pID) :
-                Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID) {}
+                Offset(pOffset),
+                EncodedData_Length(pEncodedData_Length),
+                DecodedData(pDecodedData),
+                DecodedData_Length(pDecodedData_Length),
+                ID(pID) {}
 
         /// \fn ~SEncodedRegion()
         /// Destructor.
@@ -555,6 +594,7 @@ struct BufferView : public Object {
     BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
     void Read(Value &obj, Asset &r);
+    uint8_t *GetPointer(size_t accOffset);
 };
 
 struct Camera : public Object {
@@ -582,7 +622,8 @@ struct Camera : public Object {
     } cameraProperties;
 
     Camera() :
-            type(Perspective), cameraProperties() {
+            type(Perspective),
+            cameraProperties() {
         // empty
     }
     void Read(Value &obj, Asset &r);
@@ -743,6 +784,50 @@ struct Mesh : public Object {
     void Read(Value &pJSON_Object, Asset &pAsset_Root);
 };
 
+struct CustomExtension : public Object {
+    //
+    // A struct containing custom extension data added to a glTF2 file
+    // Has to contain Object, Array, String, Double, Uint64, and Int64 at a minimum
+    // String, Double, Uint64, and Int64 are stored in the Nullables
+    // Object and Array are stored in the std::vector
+    //
+
+    Nullable<std::string> mStringValue;
+    Nullable<double> mDoubleValue;
+    Nullable<uint64_t> mUint64Value;
+    Nullable<int64_t> mInt64Value;
+    Nullable<bool> mBoolValue;
+
+    // std::vector<CustomExtension> handles both Object and Array
+    Nullable<std::vector<CustomExtension>> mValues;
+
+    operator bool() const {
+        return Size();
+    }
+
+    size_t Size() const {
+        if (mValues.isPresent) {
+            return mValues.value.size();
+        } else if (mStringValue.isPresent || mDoubleValue.isPresent || mUint64Value.isPresent || mInt64Value.isPresent || mBoolValue.isPresent) {
+            return 1;
+        }
+        return 0;
+    }
+
+    CustomExtension() = default;
+
+    CustomExtension(const CustomExtension& other)
+        : Object(other)
+        , mStringValue(other.mStringValue)
+        , mDoubleValue(other.mDoubleValue)
+        , mUint64Value(other.mUint64Value)
+        , mInt64Value(other.mInt64Value)
+        , mBoolValue(other.mBoolValue)
+        , mValues(other.mValues)
+    {
+    }
+};
+
 struct Node : public Object {
     std::vector<Ref<Node>> children;
     std::vector<Ref<Mesh>> meshes;
@@ -760,6 +845,8 @@ struct Node : public Object {
     std::string jointName; //!< Name used when this node is a joint in a skin.
 
     Ref<Node> parent; //!< This is not part of the glTF specification. Used as a helper.
+
+    CustomExtension extensions;
 
     Node() {}
     void Read(Value &obj, Asset &r);
@@ -887,7 +974,7 @@ class LazyDict : public LazyDictBase {
     Value *mDict; //! JSON dictionary object
     Asset &mAsset; //! The asset instance
 
-    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck;  //! Used by Retrieve to prevent recursive lookups
+    std::gltf_unordered_set<unsigned int> mRecursiveReferenceCheck; //! Used by Retrieve to prevent recursive lookups
 
     void AttachToDocument(Document &doc);
     void DetachFromDocument();
@@ -1001,7 +1088,22 @@ public:
 
 public:
     Asset(IOSystem *io = 0) :
-            mIOSystem(io), asset(), accessors(*this, "accessors"), animations(*this, "animations"), buffers(*this, "buffers"), bufferViews(*this, "bufferViews"), cameras(*this, "cameras"), lights(*this, "lights", "KHR_lights_punctual"), images(*this, "images"), materials(*this, "materials"), meshes(*this, "meshes"), nodes(*this, "nodes"), samplers(*this, "samplers"), scenes(*this, "scenes"), skins(*this, "skins"), textures(*this, "textures") {
+            mIOSystem(io),
+            asset(),
+            accessors(*this, "accessors"),
+            animations(*this, "animations"),
+            buffers(*this, "buffers"),
+            bufferViews(*this, "bufferViews"),
+            cameras(*this, "cameras"),
+            lights(*this, "lights", "KHR_lights_punctual"),
+            images(*this, "images"),
+            materials(*this, "materials"),
+            meshes(*this, "meshes"),
+            nodes(*this, "nodes"),
+            samplers(*this, "samplers"),
+            scenes(*this, "scenes"),
+            skins(*this, "skins"),
+            textures(*this, "textures") {
         memset(&extensionsUsed, 0, sizeof(extensionsUsed));
         memset(&extensionsRequired, 0, sizeof(extensionsRequired));
     }

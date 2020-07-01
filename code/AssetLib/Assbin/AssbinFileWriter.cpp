@@ -336,7 +336,7 @@ protected:
     void WriteBinaryNode(IOStream *container, const aiNode *node) {
         AssbinChunkWriter chunk(container, ASSBIN_CHUNK_AINODE);
 
-        unsigned int nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
+        unsigned int nb_metadata = (node->mMetaData != nullptr ? node->mMetaData->mNumProperties : 0);
 
         Write<aiString>(&chunk, node->mName);
         Write<aiMatrix4x4>(&chunk, node->mTransformation);
@@ -744,7 +744,7 @@ public:
         };
 
         try {
-            time_t tt = time(NULL);
+            time_t tt = time(nullptr);
 #if _WIN32
             tm *p = gmtime(&tt);
 #else
@@ -790,7 +790,7 @@ public:
             // Up to here the data is uncompressed. For compressed files, the rest
             // is compressed using standard DEFLATE from zlib.
             if (compressed) {
-                AssbinChunkWriter uncompressedStream(NULL, 0);
+                AssbinChunkWriter uncompressedStream(nullptr, 0);
                 WriteBinaryScene(&uncompressedStream, pScene);
 
                 uLongf uncompressedSize = static_cast<uLongf>(uncompressedStream.Tell());

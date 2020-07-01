@@ -94,6 +94,12 @@ public:
         }
     }
 
+    static void LogVerboseDebug(const Formatter::format& message)  {
+        if (!DefaultLogger::isNullLogger()) {
+            ASSIMP_LOG_VERBOSE_DEBUG(Prefix()+(std::string)message);
+        }
+    }
+
     // https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462
 #if !defined(__GNUC__) || !defined(__APPLE__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 
@@ -125,6 +131,12 @@ public:
         }
     }
 
+    // ------------------------------------------------------------------------------------------------
+    static void LogVerboseDebug  (const char* message) {
+        if (!DefaultLogger::isNullLogger()) {
+            LogVerboseDebug(Formatter::format(message));
+        }
+    }
 #endif
 
 private:

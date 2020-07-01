@@ -72,7 +72,7 @@ unsigned char *m3dimporter_readfile(char *fn, unsigned int *size) {
     std::unique_ptr<Assimp::IOStream> pStream(
             (reinterpret_cast<Assimp::IOSystem *>(m3dimporter_pIOHandler))->Open(file, "rb"));
     size_t fileSize = 0;
-    unsigned char *data = NULL;
+    unsigned char *data = nullptr;
     // sometimes pStream is nullptr in a single-threaded scenario too for some reason
     // (should be an empty object returning nothing I guess)
     if (pStream) {

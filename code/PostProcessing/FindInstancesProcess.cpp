@@ -243,7 +243,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 
                     // Delete the instanced mesh, we don't need it anymore
                     delete inst;
-                    pScene->mMeshes[i] = NULL;
+                    pScene->mMeshes[i] = nullptr;
                     break;
                 }
             }
@@ -256,7 +256,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
         ai_assert(0 != numMeshesOut);
         if (numMeshesOut != pScene->mNumMeshes) {
 
-            // Collapse the meshes array by removing all NULL entries
+            // Collapse the meshes array by removing all nullptr entries
             for (unsigned int real = 0, i = 0; real < numMeshesOut; ++i) {
                 if (pScene->mMeshes[i])
                     pScene->mMeshes[real++] = pScene->mMeshes[i];

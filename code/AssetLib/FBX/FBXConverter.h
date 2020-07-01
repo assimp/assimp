@@ -220,8 +220,8 @@ private:
     *    each output vertex the DOM index it maps to.
     */
     void ConvertWeights(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
-                        aiNode *parent = NULL, unsigned int materialIndex = NO_MATERIAL_SEPARATION,
-                        std::vector<unsigned int> *outputVertStartIndices = NULL);
+            aiNode *parent = nullptr, unsigned int materialIndex = NO_MATERIAL_SEPARATION,
+            std::vector<unsigned int> *outputVertStartIndices = nullptr);
 
     // ------------------------------------------------------------------------------------------------
     void ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
@@ -412,7 +412,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     // FBX file could have embedded textures not connected to anything
-    void ConvertOrphantEmbeddedTextures();
+    void ConvertOrphanedEmbeddedTextures();
 
 private:
     // 0: not assigned yet, others: index is value - 1

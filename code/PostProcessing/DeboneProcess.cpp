@@ -414,7 +414,8 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
     }
 
     if( pNode->mNumMeshes > 0 ) {
-        delete [] pNode->mMeshes; pNode->mMeshes = NULL;
+        delete[] pNode->mMeshes;
+        pNode->mMeshes = nullptr;
     }
 
     pNode->mNumMeshes = static_cast<unsigned int>(newMeshList.size());

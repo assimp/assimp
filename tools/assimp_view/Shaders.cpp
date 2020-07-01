@@ -1394,4 +1394,4 @@ std::string g_szCheckerBackgroundShader = std::string(
         "VertexShader = compile vs_3_0 DefaultVShader();\n"
         "}\n"
         "};\n");
-}; // namespace AssimpView
+} // namespace AssimpView

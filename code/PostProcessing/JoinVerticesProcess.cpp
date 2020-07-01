@@ -266,7 +266,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
 
     // float posEpsilonSqr;
-    SpatialSort* vertexFinder = NULL;
+    SpatialSort *vertexFinder = nullptr;
     SpatialSort _vertexFinder;
 
     typedef std::pair<SpatialSort,float> SpatPair;
@@ -373,7 +373,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)    {
-        ASSIMP_LOG_DEBUG_F(
+        ASSIMP_LOG_VERBOSE_DEBUG_F(
             "Mesh ",meshIndex,
             " (",
             (pMesh->mName.length ? pMesh->mName.data : "unnamed"),
@@ -408,7 +408,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         std::vector<aiVertexWeight> newWeights;
         newWeights.reserve( bone->mNumWeights);
 
-        if ( NULL != bone->mWeights ) {
+        if (nullptr != bone->mWeights) {
             for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
                 const aiVertexWeight& ow = bone->mWeights[ b ];
                 // if the vertex is a unique one, translate it
@@ -420,7 +420,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
                 }
             }
         } else {
-            ASSIMP_LOG_ERROR( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
+            ASSIMP_LOG_ERROR( "X-Export: aiBone shall contain weights, but pointer to them is nullptr." );
         }
 
         if (newWeights.size() > 0) {

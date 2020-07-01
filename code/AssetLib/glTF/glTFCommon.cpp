@@ -145,13 +145,13 @@ bool ParseDataURI(const char *const_uri, size_t uriLen, DataURI &out) {
         size_t i = 5, j;
         if (uri[i] != ';' && uri[i] != ',') { // has media type?
             uri[1] = char(i);
-            for (; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
+            for (;i < uriLen && uri[i] != ';' && uri[i] != ','; ++i) {
                 // nothing to do!
             }
         }
-        while (uri[i] == ';' && i < uriLen) {
+        while (i < uriLen && uri[i] == ';') {
             uri[i++] = '\0';
-            for (j = i; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
+            for (j = i; i < uriLen && uri[i] != ';' && uri[i] != ','; ++i) {
                 // nothing to do!
             }
 

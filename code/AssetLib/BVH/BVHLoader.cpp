@@ -422,9 +422,9 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
     anim->mNumChannels = static_cast<unsigned int>(mNodes.size());
     anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
 
-    // FIX: set the array elements to NULL to ensure proper deletion if an exception is thrown
+    // FIX: set the array elements to nullptr to ensure proper deletion if an exception is thrown
     for (unsigned int i = 0; i < anim->mNumChannels; ++i)
-        anim->mChannels[i] = NULL;
+        anim->mChannels[i] = nullptr;
 
     for (unsigned int a = 0; a < anim->mNumChannels; a++) {
         const Node &node = mNodes[a];
@@ -493,37 +493,30 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
             for (unsigned int fr = 0; fr < mAnimNumFrames; ++fr) {
                 aiMatrix4x4 temp;
                 aiMatrix3x3 rotMatrix;
-                for (BVHLoader::ChannelType channel = Channel_RotationX; channel <= Channel_RotationZ; channel = (BVHLoader::ChannelType)(channel + 1)) {
-                    //Find channel in node
-                    std::map<BVHLoader::ChannelType, int>::iterator mapIter = channelMap.find(channel);
-
-                    if (mapIter == channelMap.end())
-                        throw DeadlyImportError("Missing rotation channel in node " + nodeName);
-                    else {
-                        int channelIdx = mapIter->second;
-                        // translate ZXY euler angels into a quaternion
+				for (unsigned int channelIdx = 0; channelIdx < node.mChannels.size(); ++ channelIdx) {
+					switch (node.mChannels[channelIdx]) {
+                    case Channel_RotationX:
+                        {
                         const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-
-                        // Compute rotation transformations in the right order
-                        switch (channel) {
-                        case Channel_RotationX:
-                            aiMatrix4x4::RotationX(angle, temp);
-                            rotMatrix *= aiMatrix3x3(temp);
-                            break;
-                        case Channel_RotationY:
-                            aiMatrix4x4::RotationY(angle, temp);
-                            rotMatrix *= aiMatrix3x3(temp);
-                            break;
-                        case Channel_RotationZ:
-                            aiMatrix4x4::RotationZ(angle, temp);
-                            rotMatrix *= aiMatrix3x3(temp);
-                            break;
-                        default:
-                            break;
+                        aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp);
                         }
-                    }
-                }
-
+                        break;
+                    case Channel_RotationY:
+                        {
+                        const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
+                        aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);
+                        }
+                        break;
+                    case Channel_RotationZ:
+                        {
+                        const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
+                        aiMatrix4x4::RotationZ( angle, temp); rotMatrix *= aiMatrix3x3( temp);
+                        }
+                        break;
+                    default:
+                        break;
+					}
+				}
                 rotkey->mTime = double(fr);
                 rotkey->mValue = aiQuaternion(rotMatrix);
                 ++rotkey;

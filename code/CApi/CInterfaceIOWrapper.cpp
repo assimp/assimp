@@ -116,7 +116,7 @@ char CIOSystemWrapper::getOsSeparator() const {
 IOStream *CIOSystemWrapper::Open(const char *pFile, const char *pMode) {
     aiFile *p = mFileSystem->OpenProc(mFileSystem, pFile, pMode);
     if (!p) {
-        return NULL;
+        return nullptr;
     }
     return new CIOStreamWrapper(p, this);
 }

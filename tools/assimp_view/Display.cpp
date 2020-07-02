@@ -462,7 +462,7 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
     TVINSERTSTRUCT sNew;
     tvi.pszText = chTemp;
     tvi.cchTextMax = (int)strlen(chTemp);
-    tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_HANDLE;
+    tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE;
     tvi.lParam = (LPARAM)20;
 
     // find out whether this is the default texture or not

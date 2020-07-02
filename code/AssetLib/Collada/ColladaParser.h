@@ -273,7 +273,7 @@ protected:
          Skips leading whitespace. */
     const char *GetTextContent();
 
-    /** Reads the text contents of an element, returns NULL if not given.
+    /** Reads the text contents of an element, returns nullptr if not given.
          Skips leading whitespace. */
     const char *TestTextContent();
 

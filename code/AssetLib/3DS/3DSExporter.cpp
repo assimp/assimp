@@ -367,7 +367,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial &mat, aiTextureType type
         aiTextureMapMode_Wrap, aiTextureMapMode_Wrap
     };
     ai_real blend = 1.0;
-    if (mat.GetTexture(type, 0, &path, NULL, NULL, &blend, NULL, map_mode) != AI_SUCCESS || !path.length) {
+    if (mat.GetTexture(type, 0, &path, nullptr, nullptr, &blend, nullptr, map_mode) != AI_SUCCESS || !path.length) {
         return;
     }
 

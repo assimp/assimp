@@ -88,7 +88,7 @@ void AMFImporter::Clear() {
     }
 }
 
-AMFImporter::AMFImporter() :
+AMFImporter::AMFImporter() AI_NO_EXCEPT :
         mNodeElement_Cur(nullptr),
         mXmlParser(nullptr) {
     // empty
@@ -182,7 +182,7 @@ void AMFImporter::XML_CheckNode_MustHaveChildren(pugi::xml_node &node) {
     }
 }
 
-void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
+/*void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
     static const size_t Uns_Skip_Len = 3;
     const char *Uns_Skip[Uns_Skip_Len] = { "composite", "edge", "normal" };
 
@@ -221,7 +221,7 @@ casu_cres:
         skipped_before[sk_idx] = true;
         ASSIMP_LOG_WARN_F("Skipping node \"", nn, "\" in ", pParentNodeName, ".");
     }
-}
+}*/
 
 bool AMFImporter::XML_SearchNode(const std::string &nodeName) {
     mXmlParser->h(nodeName);
@@ -383,6 +383,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
         throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
     }
 
+<<<<<<< HEAD
     mXmlParser = new XmlParser();
     if (!mXmlParser->parse( file.get() ) {
         delete mXmlParser;
@@ -391,6 +392,18 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 
     // Start reading, search for root tag <amf>
     if (!mXmlParser->hasNode("amf")) {
+=======
+    // generate a XML reader for it
+    std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
+    mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
+    if (!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+    //
+    // start reading
+    // search for root tag <amf>
+    if (XML_SearchNode("amf"))
+        ParseNode_Root();
+    else
+>>>>>>> master
         throw DeadlyImportError("Root node \"amf\" not found.");
     }
 

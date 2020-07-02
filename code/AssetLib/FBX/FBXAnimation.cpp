@@ -47,10 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-#include "FBXParser.h"
 #include "FBXDocument.h"
-#include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
+#include "FBXImporter.h"
+#include "FBXParser.h"
 
 namespace Assimp {
 namespace FBX {
@@ -58,65 +58,60 @@ namespace FBX {
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& /*doc*/)
-: Object(id, element, name)
-{
-    const Scope& sc = GetRequiredScope(element);
-    const Element& KeyTime = GetRequiredElement(sc,"KeyTime");
-    const Element& KeyValueFloat = GetRequiredElement(sc,"KeyValueFloat");
+AnimationCurve::AnimationCurve(uint64_t id, const Element &element, const std::string &name, const Document & /*doc*/) :
+        Object(id, element, name) {
+    const Scope &sc = GetRequiredScope(element);
+    const Element &KeyTime = GetRequiredElement(sc, "KeyTime");
+    const Element &KeyValueFloat = GetRequiredElement(sc, "KeyValueFloat");
 
     ParseVectorDataArray(keys, KeyTime);
     ParseVectorDataArray(values, KeyValueFloat);
 
-    if(keys.size() != values.size()) {
-        DOMError("the number of key times does not match the number of keyframe values",&KeyTime);
+    if (keys.size() != values.size()) {
+        DOMError("the number of key times does not match the number of keyframe values", &KeyTime);
     }
 
     // check if the key times are well-ordered
-    if(!std::equal(keys.begin(), keys.end() - 1, keys.begin() + 1, std::less<KeyTimeList::value_type>())) {
-        DOMError("the keyframes are not in ascending order",&KeyTime);
+    if (!std::equal(keys.begin(), keys.end() - 1, keys.begin() + 1, std::less<KeyTimeList::value_type>())) {
+        DOMError("the keyframes are not in ascending order", &KeyTime);
     }
 
-    const Element* KeyAttrDataFloat = sc["KeyAttrDataFloat"];
-    if(KeyAttrDataFloat) {
+    const Element *KeyAttrDataFloat = sc["KeyAttrDataFloat"];
+    if (KeyAttrDataFloat) {
         ParseVectorDataArray(attributes, *KeyAttrDataFloat);
     }
 
-    const Element* KeyAttrFlags = sc["KeyAttrFlags"];
-    if(KeyAttrFlags) {
+    const Element *KeyAttrFlags = sc["KeyAttrFlags"];
+    if (KeyAttrFlags) {
         ParseVectorDataArray(flags, *KeyAttrFlags);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurve::~AnimationCurve()
-{
+AnimationCurve::~AnimationCurve() {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, 
-        const Document& doc, const char* const * target_prop_whitelist /*= NULL*/, 
-        size_t whitelist_size /*= 0*/)
-: Object(id, element, name)
-, target()
-, doc(doc)
-{
-    const Scope& sc = GetRequiredScope(element);
+AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element &element, const std::string &name,
+        const Document &doc, const char *const *target_prop_whitelist /*= nullptr*/,
+        size_t whitelist_size /*= 0*/) :
+        Object(id, element, name), target(), doc(doc) {
+    const Scope &sc = GetRequiredScope(element);
 
     // find target node
-    const char* whitelist[] = {"Model","NodeAttribute","Deformer"};
-    const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,3);
+    const char *whitelist[] = { "Model", "NodeAttribute", "Deformer" };
+    const std::vector<const Connection *> &conns = doc.GetConnectionsBySourceSequenced(ID(), whitelist, 3);
 
-    for(const Connection* con : conns) {
+    for (const Connection *con : conns) {
 
         // link should go for a property
         if (!con->PropertyName().length()) {
             continue;
         }
 
-        if(target_prop_whitelist) {
-            const char* const s = con->PropertyName().c_str();
+        if (target_prop_whitelist) {
+            const char *const s = con->PropertyName().c_str();
             bool ok = false;
             for (size_t i = 0; i < whitelist_size; ++i) {
                 if (!strcmp(s, target_prop_whitelist[i])) {
@@ -130,16 +125,14 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
             }
         }
 
-        const Object* const ob = con->DestinationObject();
-        if(!ob) {
-            DOMWarning("failed to read destination object for AnimationCurveNode->Model link, ignoring",&element);
+        const Object *const ob = con->DestinationObject();
+        if (!ob) {
+            DOMWarning("failed to read destination object for AnimationCurveNode->Model link, ignoring", &element);
             continue;
         }
 
-        // XXX support constraints as DOM class
-        //ai_assert(dynamic_cast<const Model*>(ob) || dynamic_cast<const NodeAttribute*>(ob));
         target = ob;
-        if(!target) {
+        if (!target) {
             continue;
         }
 
@@ -147,42 +140,40 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
         break;
     }
 
-    if(!target) {
-        DOMWarning("failed to resolve target Model/NodeAttribute/Constraint for AnimationCurveNode",&element);
+    if (!target) {
+        DOMWarning("failed to resolve target Model/NodeAttribute/Constraint for AnimationCurveNode", &element);
     }
 
-    props = GetPropertyTable(doc,"AnimationCurveNode.FbxAnimCurveNode",element,sc,false);
+    props = GetPropertyTable(doc, "AnimationCurveNode.FbxAnimCurveNode", element, sc, false);
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurveNode::~AnimationCurveNode()
-{
+AnimationCurveNode::~AnimationCurveNode() {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-const AnimationCurveMap& AnimationCurveNode::Curves() const
-{
-    if ( curves.empty() ) {
+const AnimationCurveMap &AnimationCurveNode::Curves() const {
+    if (curves.empty()) {
         // resolve attached animation curves
-        const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurve");
+        const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(ID(), "AnimationCurve");
 
-        for(const Connection* con : conns) {
+        for (const Connection *con : conns) {
 
             // link should go for a property
             if (!con->PropertyName().length()) {
                 continue;
             }
 
-            const Object* const ob = con->SourceObject();
-            if(!ob) {
-                DOMWarning("failed to read source object for AnimationCurve->AnimationCurveNode link, ignoring",&element);
+            const Object *const ob = con->SourceObject();
+            if (nullptr == ob) {
+                DOMWarning("failed to read source object for AnimationCurve->AnimationCurveNode link, ignoring", &element);
                 continue;
             }
 
-            const AnimationCurve* const anim = dynamic_cast<const AnimationCurve*>(ob);
-            if(!anim) {
-                DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve",&element);
+            const AnimationCurve *const anim = dynamic_cast<const AnimationCurve *>(ob);
+            if (nullptr == anim) {
+                DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve", &element);
                 continue;
             }
 
@@ -194,53 +185,49 @@ const AnimationCurveMap& AnimationCurveNode::Curves() const
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationLayer::AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc)
-: Object(id, element, name)
-, doc(doc)
-{
-    const Scope& sc = GetRequiredScope(element);
+AnimationLayer::AnimationLayer(uint64_t id, const Element &element, const std::string &name, const Document &doc) :
+        Object(id, element, name), doc(doc) {
+    const Scope &sc = GetRequiredScope(element);
 
     // note: the props table here bears little importance and is usually absent
-    props = GetPropertyTable(doc,"AnimationLayer.FbxAnimLayer",element,sc, true);
+    props = GetPropertyTable(doc, "AnimationLayer.FbxAnimLayer", element, sc, true);
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationLayer::~AnimationLayer()
-{
+AnimationLayer::~AnimationLayer() {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whitelist /*= NULL*/,
-    size_t whitelist_size /*= 0*/) const
-{
+AnimationCurveNodeList AnimationLayer::Nodes(const char *const *target_prop_whitelist /*= nullptr*/,
+        size_t whitelist_size /*= 0*/) const {
     AnimationCurveNodeList nodes;
 
     // resolve attached animation nodes
-    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurveNode");
+    const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(ID(), "AnimationCurveNode");
     nodes.reserve(conns.size());
 
-    for(const Connection* con : conns) {
+    for (const Connection *con : conns) {
 
         // link should not go to a property
         if (con->PropertyName().length()) {
             continue;
         }
 
-        const Object* const ob = con->SourceObject();
-        if(!ob) {
-            DOMWarning("failed to read source object for AnimationCurveNode->AnimationLayer link, ignoring",&element);
+        const Object *const ob = con->SourceObject();
+        if (!ob) {
+            DOMWarning("failed to read source object for AnimationCurveNode->AnimationLayer link, ignoring", &element);
             continue;
         }
 
-        const AnimationCurveNode* const anim = dynamic_cast<const AnimationCurveNode*>(ob);
-        if(!anim) {
-            DOMWarning("source object for ->AnimationLayer link is not an AnimationCurveNode",&element);
+        const AnimationCurveNode *const anim = dynamic_cast<const AnimationCurveNode *>(ob);
+        if (!anim) {
+            DOMWarning("source object for ->AnimationLayer link is not an AnimationCurveNode", &element);
             continue;
         }
 
-        if(target_prop_whitelist) {
-            const char* s = anim->TargetProperty().c_str();
+        if (target_prop_whitelist) {
+            const char *s = anim->TargetProperty().c_str();
             bool ok = false;
             for (size_t i = 0; i < whitelist_size; ++i) {
                 if (!strcmp(s, target_prop_whitelist[i])) {
@@ -248,7 +235,7 @@ AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whi
                     break;
                 }
             }
-            if(!ok) {
+            if (!ok) {
                 continue;
             }
         }
@@ -259,34 +246,33 @@ AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whi
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationStack::AnimationStack(uint64_t id, const Element& element, const std::string& name, const Document& doc)
-: Object(id, element, name)
-{
-    const Scope& sc = GetRequiredScope(element);
+AnimationStack::AnimationStack(uint64_t id, const Element &element, const std::string &name, const Document &doc) :
+        Object(id, element, name) {
+    const Scope &sc = GetRequiredScope(element);
 
     // note: we don't currently use any of these properties so we shouldn't bother if it is missing
-    props = GetPropertyTable(doc,"AnimationStack.FbxAnimStack",element,sc, true);
+    props = GetPropertyTable(doc, "AnimationStack.FbxAnimStack", element, sc, true);
 
     // resolve attached animation layers
-    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationLayer");
+    const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(ID(), "AnimationLayer");
     layers.reserve(conns.size());
 
-    for(const Connection* con : conns) {
+    for (const Connection *con : conns) {
 
         // link should not go to a property
         if (con->PropertyName().length()) {
             continue;
         }
 
-        const Object* const ob = con->SourceObject();
-        if(!ob) {
-            DOMWarning("failed to read source object for AnimationLayer->AnimationStack link, ignoring",&element);
+        const Object *const ob = con->SourceObject();
+        if (!ob) {
+            DOMWarning("failed to read source object for AnimationLayer->AnimationStack link, ignoring", &element);
             continue;
         }
 
-        const AnimationLayer* const anim = dynamic_cast<const AnimationLayer*>(ob);
-        if(!anim) {
-            DOMWarning("source object for ->AnimationStack link is not an AnimationLayer",&element);
+        const AnimationLayer *const anim = dynamic_cast<const AnimationLayer *>(ob);
+        if (!anim) {
+            DOMWarning("source object for ->AnimationStack link is not an AnimationLayer", &element);
             continue;
         }
         layers.push_back(anim);
@@ -294,12 +280,11 @@ AnimationStack::AnimationStack(uint64_t id, const Element& element, const std::s
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationStack::~AnimationStack()
-{
+AnimationStack::~AnimationStack() {
     // empty
 }
 
-} //!FBX
-} //!Assimp
+} // namespace FBX
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_FBX_IMPORTER

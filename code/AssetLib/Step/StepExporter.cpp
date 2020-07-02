@@ -108,7 +108,7 @@ void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScen
 
     // we're still here - export successfully completed. Write result to the given IOSYstem
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
-    if(outfile == NULL) {
+    if (outfile == nullptr) {
         throw DeadlyExportError("could not open output .stp file: " + std::string(pFile));
     }
 
@@ -204,7 +204,7 @@ void StepExporter::WriteFile()
 
     static const unsigned int date_nb_chars = 20;
     char date_str[date_nb_chars];
-    std::time_t date = std::time(NULL);
+    std::time_t date = std::time(nullptr);
     std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
 
     // write the header

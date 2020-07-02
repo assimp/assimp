@@ -199,6 +199,7 @@ SET( Common_SRCS
   Common/simd.h
   Common/simd.cpp
   Common/material.cpp
+  Common/AssertHandler.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

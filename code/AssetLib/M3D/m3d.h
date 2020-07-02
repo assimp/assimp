@@ -5071,7 +5071,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             ptr += sprintf(ptr, "\r\n");
         }
         /* mathematical shapes face */
-        if (model->numshape && model->numshape && !(flags & M3D_EXP_NOFACE)) {
+        if (model->numshape !(flags & M3D_EXP_NOFACE)) {
             for (j = 0; j < model->numshape; j++) {
                 sn = _m3d_safestr(model->shape[j].name, 0);
                 if (!sn) {

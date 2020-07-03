@@ -829,7 +829,7 @@ void HL1MDLLoader::read_meshes() {
                         }
                     } else {
                         for (int faceIdx = 0; faceIdx < num_faces; ++faceIdx) {
-                            if (i & 1) {
+                            if (faceIdx & 1) {
                                 // Preserve winding order.
                                 mesh_faces.push_back(HL1MeshFace{
                                         tricmds[faceIdx + 1],

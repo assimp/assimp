@@ -211,7 +211,7 @@ private:
     void ParseHelper_Decode_Base64(const std::string &pInputBase64, std::vector<uint8_t> &pOutputData) const;
 
     /// Parse <AMF> node of the file.
-    void ParseNode_Root(XmlNode &root);
+    void ParseNode_Root();
 
     /// Parse <constellation> node of the file.
     void ParseNode_Constellation(XmlNode &node);
@@ -285,7 +285,8 @@ public:
     void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription);
     void Throw_ID_NotFound(const std::string &pID) const;
     void XML_CheckNode_MustHaveChildren(pugi::xml_node &node);
-
+    bool XML_SearchNode(const std::string &nodeName);
+    void ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString);
     AMFImporter(const AMFImporter &pScene) = delete;
     AMFImporter &operator=(const AMFImporter &pScene) = delete;
 

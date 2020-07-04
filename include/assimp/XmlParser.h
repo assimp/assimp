@@ -101,15 +101,15 @@ public:
         }
 
         find_node_by_name_predicate predicate(name);
-		pugi::xml_node node = mDoc->find_node(predicate);
-		if (node.empty()) {
+        mCurrent = mDoc->find_node(predicate);
+        if (mCurrent.empty()) {
 			return nullptr;
         }
 
-        return &node;
+        return &mCurrent;
     }
 
-    bool hasNode( const std::string &name ) const {
+    bool hasNode( const std::string &name ) {
         return nullptr != findNode(name);
     }
 
@@ -123,7 +123,10 @@ public:
 		mDoc = new pugi::xml_document();
 		pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
         if (result.status == pugi::status_ok) {
-			mRoot = &mDoc->root();
+            pugi::xml_node root = *(mDoc->children().begin());
+            
+            mRoot = &root;
+			//mRoot = &mDoc->root();
         }
 
         return mRoot;
@@ -133,13 +136,14 @@ public:
 		return mDoc;
     }
 
-    TNodeType *getRootNode() const {
+    const TNodeType *getRootNode() const {
 		return mRoot;
     }
 
 private:
 	pugi::xml_document *mDoc;
 	TNodeType *mRoot;
+    TNodeType mCurrent;
 	std::vector<char> mData;
 };
 

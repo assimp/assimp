@@ -288,7 +288,27 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
      
     ((AMFVolume *)ne)->Type = type;
     // Check for child nodes
-    if (!mReader->isEmptyElement()) {
+    if (node.empty()) {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    }
+
+    bool col_read = false;
+    for (pugi::xml_node currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "color") {
+            if (col_read) Throw_MoreThanOnceDefined(currentName ,"color", "Only one color can be defined for <volume>.");
+            ParseNode_Color(currentNode);
+            col_read = true;
+        } else if (currentName == "triangle") {
+            ParseNode_Triangle(currentNode);
+        } else if (currentName == "metadata") {
+            ParseNode_Metadata(currentNode);
+        } else if (currentName == "volume") {
+            ParseNode_Metadata(currentNode);
+        }
+    }
+
+    /*if (!mReader->isEmptyElement()) {
         bool col_read = false;
 
         ParseHelper_Node_Enter(ne);
@@ -316,7 +336,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
     } // if(!mReader->isEmptyElement())
     else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
-    } // if(!mReader->isEmptyElement()) else
+    } // if(!mReader->isEmptyElement()) else*/
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
@@ -331,16 +351,47 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
 //   <v1>, <v2>, <v3>
 //   Multi elements - No.
 //   Index of the desired vertices in a triangle or edge.
-void AMFImporter::ParseNode_Triangle() {
-    CAMFImporter_NodeElement *ne;
+void AMFImporter::ParseNode_Triangle(XmlNode &node) {
+    AMFNodeElementBase *ne = new AMFTriangle(mNodeElement_Cur);
 
     // create new color object.
-    ne = new CAMFImporter_NodeElement_Triangle(mNodeElement_Cur);
+    //ne = new CAMFImporter_NodeElement_Triangle(mNodeElement_Cur);
 
-    CAMFImporter_NodeElement_Triangle &als = *((CAMFImporter_NodeElement_Triangle *)ne); // alias for convenience
+    AMFTriangle &als = *((AMFTriangle *)ne); // alias for convenience
+
+    if (node.empty()) {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    }
+    bool col_read = false, tex_read = false;
+    bool read_flag[3] = { false, false, false };
+    for (pugi::xml_node currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "color") {
+            if (col_read) Throw_MoreThanOnceDefined(currentName , "color", "Only one color can be defined for <triangle>.");
+            ParseNode_Color(currentNode);
+            col_read = true;
+        } else if (currentName == "texmap") {
+            ParseNode_TexMap(currentNode);
+            tex_read = true;
+        } else if (currentName == "map") {
+            ParseNode_TexMap(currentNode, true);
+            tex_read = true;
+        } else if (currentName == "v1") {
+            als.V[0] = std::atoi(currentNode.value());
+            read_flag[0] = true;
+        } else if (currentName == "v2") {
+            als.V[1] = std::atoi(currentNode.value());
+            read_flag[1] = true;
+        } else if (currentName == "v3") {
+            als.V[2] = std::atoi(currentNode.value());
+            read_flag[2] = true;
+        }
+    }
+    if ((read_flag[0] && read_flag[1] && read_flag[2]) == 0) throw DeadlyImportError("Not all vertices of the triangle are defined.");
+
 
     // Check for child nodes
-    if (!mReader->isEmptyElement()) {
+    /*if (!mReader->isEmptyElement()) {
         bool col_read = false, tex_read = false;
         bool read_flag[3] = { false, false, false };
 
@@ -388,7 +439,7 @@ void AMFImporter::ParseNode_Triangle() {
     else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     } // if(!mReader->isEmptyElement()) else
-
+    */
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 

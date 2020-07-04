@@ -88,9 +88,8 @@ void AMFImporter::Clear() {
     }
 }
 
-AMFImporter::AMFImporter() AI_NO_EXCEPT :
-        mNodeElement_Cur(nullptr),
-        mXmlParser(nullptr) {
+AMFImporter::AMFImporter() AI_NO_EXCEPT : mNodeElement_Cur(nullptr),
+                                          mXmlParser(nullptr) {
     // empty
 }
 
@@ -224,15 +223,10 @@ casu_cres:
 }*/
 
 bool AMFImporter::XML_SearchNode(const std::string &nodeName) {
-    mXmlParser->h(nodeName);
-    while (mReader->read()) {
-        if ((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(nodeName)) return true;
-    }
-
-    return false;
+    return nullptr != mXmlParser->findNode(nodeName);
 }
 
-bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx) {
+/*bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx) {
     std::string val(mReader->getAttributeValue(pAttrIdx));
 
     if ((val == "false") || (val == "0"))
@@ -283,13 +277,13 @@ void AMFImporter::XML_ReadNode_GetVal_AsString(std::string &pValue) {
         throw DeadlyImportError("XML_ReadNode_GetVal_AsString. Invalid type of XML element, seems file is corrupt.");
 
     pValue = mReader->getNodeData();
-}
+}*/
 
 /*********************************************************************************************************************************************/
 /************************************************************ Functions: parse set ***********************************************************/
 /*********************************************************************************************************************************************/
 
-void AMFImporter::ParseHelper_Node_Enter(CAMFImporter_NodeElement *pNode) {
+/*void AMFImporter::ParseHelper_Node_Enter(CAMFImporter_NodeElement *pNode) {
     mNodeElement_Cur->Child.push_back(pNode); // add new element to current element child list.
     mNodeElement_Cur = pNode; // switch current element to new one.
 }
@@ -298,7 +292,7 @@ void AMFImporter::ParseHelper_Node_Exit() {
     // check if we can walk up.
     if (mNodeElement_Cur != nullptr) mNodeElement_Cur = mNodeElement_Cur->Parent;
 }
-
+*/
 void AMFImporter::ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString) {
     size_t instr_len;
 
@@ -375,7 +369,7 @@ void AMFImporter::ParseHelper_Decode_Base64(const std::string &pInputBase64, std
 }
 
 void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
-    irr::io::IrrXMLReader *OldReader = mReader; // store current XMLreader.
+//    irr::io::IrrXMLReader *OldReader = mReader; // store current XMLreader.
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
@@ -383,34 +377,20 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
         throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
     }
 
-<<<<<<< HEAD
     mXmlParser = new XmlParser();
-    if (!mXmlParser->parse( file.get() ) {
+    if (!mXmlParser->parse( file.get() )) {
         delete mXmlParser;
         throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
     }
 
     // Start reading, search for root tag <amf>
     if (!mXmlParser->hasNode("amf")) {
-=======
-    // generate a XML reader for it
-    std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
-    mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
-    if (!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
-    //
-    // start reading
-    // search for root tag <amf>
-    if (XML_SearchNode("amf"))
-        ParseNode_Root();
-    else
->>>>>>> master
         throw DeadlyImportError("Root node \"amf\" not found.");
     }
-
     ParseNode_Root();
 
-    delete mReader;
-}
+    //delete mReader;
+} // namespace Assimp
 
 // <amf
 // unit="" - The units to be used. May be "inch", "millimeter", "meter", "feet", or "micron".
@@ -421,28 +401,50 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 // Multi elements - No.
 void AMFImporter::ParseNode_Root() {
     std::string unit, version;
-    CAMFImporter_NodeElement *ne(nullptr);
+    AMFNodeElementBase *ne(nullptr);
+    pugi::xml_node *root = mXmlParser->findNode("amf");
+    
+    unit = root->attribute("unit").as_string();
+    version = root->attribute("version").as_string();
 
     // Read attributes for node <amf>.
-    MACRO_ATTRREAD_LOOPBEG;
+    /*MACRO_ATTRREAD_LOOPBEG;
     MACRO_ATTRREAD_CHECK_RET("unit", unit, mReader->getAttributeValue);
     MACRO_ATTRREAD_CHECK_RET("version", version, mReader->getAttributeValue);
-    MACRO_ATTRREAD_LOOPEND_WSKIP;
+    MACRO_ATTRREAD_LOOPEND_WSKIP;*/
 
     // Check attributes
     if (!mUnit.empty()) {
-        if ((mUnit != "inch") && (mUnit != "millimeter") && (mUnit != "meter") && (mUnit != "feet") && (mUnit != "micron")) Throw_IncorrectAttrValue("unit");
+        if ((mUnit != "inch") && (mUnit != "millimeter") && (mUnit != "meter") && (mUnit != "feet") && (mUnit != "micron")) {
+            Throw_IncorrectAttrValue("unit", mUnit);
+        }
     }
 
     // create root node element.
-    ne = new CAMFImporter_NodeElement_Root(nullptr);
+    ne = new AMFRoot(nullptr);
+
     mNodeElement_Cur = ne; // set first "current" element
     // and assign attribute's values
-    ((CAMFImporter_NodeElement_Root *)ne)->Unit = unit;
-    ((CAMFImporter_NodeElement_Root *)ne)->Version = version;
+    ((AMFRoot *)ne)->Unit = unit;
+    ((AMFRoot *)ne)->Version = version;
 
+    for (pugi::xml_node &currentNode : root->children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "object") {
+            ParseNode_Object(currentNode);
+        } else if (currentName == "material") {
+            ParseNode_Material(currentNode);
+        } else if (currentName == "texture") {
+            ParseNode_Texture(currentNode);
+        } else if (currentName == "constellation") {
+            ParseNode_Constellation(currentNode);
+        } else if (currentName == "metadata") {
+            ParseNode_Metadata(currentNode);
+        }
+        mNodeElement_Cur = ne; // force restore "current" element
+    }
     // Check for child nodes
-    if (!mReader->isEmptyElement()) {
+    /*if (!mReader->isEmptyElement()) {
         MACRO_NODECHECK_LOOPBEGIN("amf");
         if (XML_CheckNode_NameEqual("object")) {
             ParseNode_Object();
@@ -466,7 +468,7 @@ void AMFImporter::ParseNode_Root() {
         }
         MACRO_NODECHECK_LOOPEND("amf");
         mNodeElement_Cur = ne; // force restore "current" element
-    } // if(!mReader->isEmptyElement())
+    } // if(!mReader->isEmptyElement())*/
 
     mNodeElement_List.push_back(ne); // add to node element list because its a new object in graph.
 }
@@ -478,23 +480,37 @@ void AMFImporter::ParseNode_Root() {
 // A collection of objects or constellations with specific relative locations.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Constellation() {
+void AMFImporter::ParseNode_Constellation(XmlNode &node) {
     std::string id;
-    CAMFImporter_NodeElement *ne(nullptr);
-
+    id = node.attribute("id").as_string();
     // Read attributes for node <constellation>.
-    MACRO_ATTRREAD_LOOPBEG;
+    /*MACRO_ATTRREAD_LOOPBEG;
     MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
-    MACRO_ATTRREAD_LOOPEND;
+    MACRO_ATTRREAD_LOOPEND;*/
 
     // create and if needed - define new grouping object.
-    ne = new CAMFImporter_NodeElement_Constellation(mNodeElement_Cur);
+    AMFNodeElementBase *ne = new AMFConstellation(mNodeElement_Cur);
 
-    CAMFImporter_NodeElement_Constellation &als = *((CAMFImporter_NodeElement_Constellation *)ne); // alias for convenience
+    AMFConstellation &als = *((AMFConstellation *)ne); // alias for convenience
 
-    if (!id.empty()) als.ID = id;
+    if (!id.empty()) {
+        als.ID = id;
+    }
+
+    for (pugi::xml_node &currentNode : node.children()) {
+        std::string name = currentNode.name();
+        if (name == "instance") {
+            ParseNode_Instance(currentNode);
+        } else if (name == "metadata") {
+            ParseNode_Metadata(currentNode);
+        }
+    }
+    if (node.empty()) {
+        mNodeElement_Cur->Child.push_back(ne);
+    }
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
     // Check for child nodes
-    if (!mReader->isEmptyElement()) {
+    /*if (!mReader->isEmptyElement()) {
         ParseHelper_Node_Enter(ne);
         MACRO_NODECHECK_LOOPBEGIN("constellation");
         if (XML_CheckNode_NameEqual("instance")) {
@@ -512,7 +528,7 @@ void AMFImporter::ParseNode_Constellation() {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     } // if(!mReader->isEmptyElement()) else
 
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.*/
 }
 
 // <instance
@@ -522,26 +538,54 @@ void AMFImporter::ParseNode_Constellation() {
 // A collection of objects or constellations with specific relative locations.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Instance() {
-    std::string objectid;
-    CAMFImporter_NodeElement *ne(nullptr);
+void AMFImporter::ParseNode_Instance(XmlNode &node) {
+    AMFNodeElementBase *ne(nullptr);
 
     // Read attributes for node <constellation>.
-    MACRO_ATTRREAD_LOOPBEG;
+/*    MACRO_ATTRREAD_LOOPBEG;
     MACRO_ATTRREAD_CHECK_RET("objectid", objectid, mReader->getAttributeValue);
-    MACRO_ATTRREAD_LOOPEND;
+    MACRO_ATTRREAD_LOOPEND;*/
+    std::string objectid = node.attribute("objectid").as_string();
 
     // used object id must be defined, check that.
-    if (objectid.empty()) throw DeadlyImportError("\"objectid\" in <instance> must be defined.");
+    if (objectid.empty()) {
+        throw DeadlyImportError("\"objectid\" in <instance> must be defined.");
+    }
     // create and define new grouping object.
-    ne = new CAMFImporter_NodeElement_Instance(mNodeElement_Cur);
-
-    CAMFImporter_NodeElement_Instance &als = *((CAMFImporter_NodeElement_Instance *)ne); // alias for convenience
-
+    //ne = new CAMFImporter_NodeElement_Instance(mNodeElement_Cur);
+    ne = new AMFInstance(mNodeElement_Cur);
+    //CAMFImporter_NodeElement_Instance &als = *((CAMFImporter_NodeElement_Instance *)ne); // alias for convenience
+    AMFInstance &als = *((AMFInstance *)ne);
     als.ObjectID = objectid;
-    // Check for child nodes
-    if (!mReader->isEmptyElement()) {
+
+    if (node.empty()) {
+        mNodeElement_Cur->Child.push_back(ne);
+    }
+    for (pugi::xml_node currentNode : node.children()) {
         bool read_flag[6] = { false, false, false, false, false, false };
+        std::string currentName = currentNode.name();
+        if (currentName == "deltax") {
+            read_flag[0] = true;
+            als.Delta.x = (ai_real) std::atof(currentNode.value());
+        } else if (currentName == "deltay") {
+            read_flag[1] = true;
+            als.Delta.y = (ai_real)std::atof(currentNode.value());
+        } else if (currentName == "deltaz") {
+            read_flag[2] = true;
+            als.Delta.z = (ai_real)std::atof(currentNode.value());
+        } else if (currentName == "rx") {
+            read_flag[3] = true;
+            als.Delta.x = (ai_real)std::atof(currentNode.value());
+        } else if (currentName == "ry") {
+            read_flag[4] = true;
+            als.Delta.y = (ai_real)std::atof(currentNode.value());
+        } else if (currentName == "rz") {
+            read_flag[5] = true;
+            als.Delta.z = (ai_real)std::atof(currentNode.value());
+        }
+    }
+    // Check for child nodes
+    /*if (!mReader->isEmptyElement()) {
 
         als.Delta.Set(0, 0, 0);
         als.Rotation.Set(0, 0, 0);
@@ -562,7 +606,7 @@ void AMFImporter::ParseNode_Instance() {
     } // if(!mReader->isEmptyElement())
     else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
-    } // if(!mReader->isEmptyElement()) else
+    } // if(!mReader->isEmptyElement()) else*/
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
@@ -574,23 +618,41 @@ void AMFImporter::ParseNode_Instance() {
 // An object definition.
 // Multi elements - Yes.
 // Parent element - <amf>.
-void AMFImporter::ParseNode_Object() {
-    std::string id;
-    CAMFImporter_NodeElement *ne(nullptr);
+void AMFImporter::ParseNode_Object(XmlNode &node) {
+    
+    AMFNodeElementBase *ne(nullptr);
 
     // Read attributes for node <object>.
-    MACRO_ATTRREAD_LOOPBEG;
+    /*MACRO_ATTRREAD_LOOPBEG;
     MACRO_ATTRREAD_CHECK_RET("id", id, mReader->getAttributeValue);
-    MACRO_ATTRREAD_LOOPEND;
-
+    MACRO_ATTRREAD_LOOPEND;*/
+    std::string id = node.attribute("id").as_string();
     // create and if needed - define new geometry object.
-    ne = new CAMFImporter_NodeElement_Object(mNodeElement_Cur);
+    ne = new AMFObject(mNodeElement_Cur);
 
-    CAMFImporter_NodeElement_Object &als = *((CAMFImporter_NodeElement_Object *)ne); // alias for convenience
+    AMFObject &als = *((AMFObject *)ne); // alias for convenience
 
-    if (!id.empty()) als.ID = id;
+    if (!id.empty()) {
+        als.ID = id;
+    }
+
     // Check for child nodes
-    if (!mReader->isEmptyElement()) {
+    bool col_read = false;
+    if (node.empty()) {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    }
+    for (pugi::xml_node &currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "color") {
+            ParseNode_Color(currentNode);
+            col_read = true;
+        } else if (currentName == "mesh") {
+            ParseNode_Mesh(currentNode);
+        } else if (currentName == "metadata") {
+            ParseNode_Metadata(currentNode);
+        }
+    }
+    /*if (!mReader->isEmptyElement()) {
         bool col_read = false;
 
         ParseHelper_Node_Enter(ne);
@@ -616,9 +678,9 @@ void AMFImporter::ParseNode_Object() {
         MACRO_NODECHECK_LOOPEND("object");
         ParseHelper_Node_Exit();
     } // if(!mReader->isEmptyElement())
-    else {
-        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
-    } // if(!mReader->isEmptyElement()) else
+    else {*/
+        //mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    //} // if(!mReader->isEmptyElement()) else
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
@@ -641,20 +703,23 @@ void AMFImporter::ParseNode_Object() {
 // "Revision" - specifies the revision of the entity
 // "Tolerance" - specifies the desired manufacturing tolerance of the entity in entity's unit system
 // "Volume" - specifies the total volume of the entity, in the entity's unit system, to be used for verification (object and volume only)
-void AMFImporter::ParseNode_Metadata() {
+void AMFImporter::ParseNode_Metadata(XmlNode &node) {
     std::string type, value;
-    CAMFImporter_NodeElement *ne(nullptr);
+    AMFNodeElementBase *ne(nullptr);
+
+    type = node.attribute("type").as_string();
+    value = node.value();
 
     // read attribute
-    MACRO_ATTRREAD_LOOPBEG;
+    /*MACRO_ATTRREAD_LOOPBEG;
     MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
-    MACRO_ATTRREAD_LOOPEND;
+    MACRO_ATTRREAD_LOOPEND;*/
     // and value of node.
-    value = mReader->getNodeData();
+    //value = mReader->getNodeData();
     // Create node element and assign read data.
-    ne = new CAMFImporter_NodeElement_Metadata(mNodeElement_Cur);
-    ((CAMFImporter_NodeElement_Metadata *)ne)->Type = type;
-    ((CAMFImporter_NodeElement_Metadata *)ne)->Value = value;
+    ne = new AMFMetadata(mNodeElement_Cur);
+    ((AMFMetadata *)ne)->Type = type;
+    ((AMFMetadata *)ne)->Value = value;
     mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }

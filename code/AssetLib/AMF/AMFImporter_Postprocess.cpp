@@ -146,23 +146,19 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
     }
 
+    //
     // Converted texture not found, create it.
-    AMFTexture *src_texture[4] {
-        nullptr
-    };
+    //
+    AMFTexture *src_texture[4]{ nullptr };
     std::vector<AMFTexture *> src_texture_4check;
     SPP_Texture converted_texture;
 
     { // find all specified source textures
-        AMFNodeElementBase *t_tex;
-        
+        AMFNodeElementBase *t_tex = nullptr;
+
         // R
         if (!pID_R.empty()) {
-            pugi::xml_node *node = mXmlParser->findNode(pID_R);
-            if (nullptr == node) {
-                throw DeadlyImportError("Id not found " + pID_R + ".");
-            }
-            //if (!Find_NodeElement(pID_R, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_R);
+            if (!Find_NodeElement(pID_R, AMFNodeElementBase::EType::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_R);
 
             src_texture[0] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -172,12 +168,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // G
         if (!pID_G.empty()) {
-            pugi::xml_node *node = mXmlParser->findNode(pID_G);
-            if (nullptr == node) {
-                throw DeadlyImportError("Id not found " + pID_G + ".");
-            }
-
-            //if (!Find_NodeElement(pID_G, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_G);
+            if (!Find_NodeElement(pID_G, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_G);
 
             src_texture[1] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -187,11 +178,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // B
         if (!pID_B.empty()) {
-            //if (!Find_NodeElement(pID_B, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_B);
-            pugi::xml_node *node = mXmlParser->findNode(pID_B);
-            if (nullptr == node) {
-                throw DeadlyImportError("Id not found " + pID_B + ".");
-            }
+            if (!Find_NodeElement(pID_B, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_B);
 
             src_texture[2] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -201,12 +188,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // A
         if (!pID_A.empty()) {
-            pugi::xml_node *node = mXmlParser->findNode(pID_A);
-            if (nullptr == node) {
-                throw DeadlyImportError("Id not found " + pID_A + ".");
-            }
-
-            //if (!Find_NodeElement(pID_A, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_A);
+            if (!Find_NodeElement(pID_A, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_A);
 
             src_texture[3] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -216,7 +198,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     } // END: find all specified source textures
 
     // check that all textures has same size
-    if (!src_texture_4check.empty() ) {
+    if (src_texture_4check.size() > 1) {
         for (size_t i = 0, i_e = (src_texture_4check.size() - 1); i < i_e; i++) {
             if ((src_texture_4check[i]->Width != src_texture_4check[i + 1]->Width) || (src_texture_4check[i]->Height != src_texture_4check[i + 1]->Height) ||
                     (src_texture_4check[i]->Depth != src_texture_4check[i + 1]->Depth)) {
@@ -241,9 +223,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     if (!pID_B.empty()) converted_texture.FormatHint[6] = '8';
     if (!pID_A.empty()) converted_texture.FormatHint[7] = '8';
 
-    //
     // Сopy data of textures.
-    //
     size_t tex_size = 0;
     size_t step = 0;
     size_t off_g = 0;
@@ -693,7 +673,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
     con_node = new aiNode;
     con_node->mName = pConstellation.ID;
     // Walk through children and search for instances of another objects, constellations.
-    for (const CAMFImporter_NodeElement *ne : pConstellation.Child) {
+    for (const AMFNodeElementBase *ne : pConstellation.Child) {
         aiMatrix4x4 tmat;
         aiNode *t_node;
         aiNode *found_node;
@@ -702,7 +682,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         if (ne->Type != AMFNodeElementBase::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
 
         // create alias for conveniance
-        CAMFImporter_NodeElement_Instance &als = *((CAMFImporter_NodeElement_Instance *)ne);
+        AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
         if (!Find_ConvertedNode(als.ObjectID, pNodeList, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
@@ -739,7 +719,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
 void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     std::list<aiNode *> node_list;
     std::list<aiMesh *> mesh_list;
-    std::list<CAMFImporter_NodeElement_Metadata *> meta_list;
+    std::list<AMFMetadata *> meta_list;
 
     //
     // Because for AMF "material" is just complex colors mixing so aiMaterial will not be used.
@@ -752,10 +732,11 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     AMFNodeElementBase *root_el = nullptr;
 
     for (AMFNodeElementBase *ne : mNodeElement_List) {
-        if (ne->Type != AMFNodeElementBase::ENET_Root) continue;
+        if (ne->Type != AMFNodeElementBase::ENET_Root) {
+            continue;
+        }
 
         root_el = ne;
-
         break;
     } // for(const CAMFImporter_NodeElement* ne: mNodeElement_List)
 
@@ -769,7 +750,7 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     // 1. <material>
     // 2. <texture> will be converted later when processing triangles list. \sa Postprocess_BuildMeshSet
     for (const AMFNodeElementBase *root_child : root_el->Child) {
-        if (root_child->Type == AMFNodeElementBase::ENET_Material) Postprocess_BuildMaterial(*((CAMFImporter_NodeElement_Material *)root_child));
+        if (root_child->Type == AMFNodeElementBase::ENET_Material) Postprocess_BuildMaterial(*((AMFMaterial *)root_child));
     }
 
     // After "appearance" nodes we must read <object> because it will be used in <constellation> -> <instance>.
@@ -780,7 +761,7 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
             aiNode *tnode = nullptr;
 
             // for <object> mesh and node must be built: object ID assigned to aiNode name and will be used in future for <instance>
-            Postprocess_BuildNodeAndObject(*((CAMFImporter_NodeElement_Object *)root_child), mesh_list, &tnode);
+            Postprocess_BuildNodeAndObject(*((AMFObject *)root_child), mesh_list, &tnode);
             if (tnode != nullptr) node_list.push_back(tnode);
         }
     } // for(const CAMFImporter_NodeElement* root_child: root_el->Child)
@@ -795,7 +776,7 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
         }
 
         // 5, <metadata>
-        if (root_child->Type == AMFNodeElementBase::ENET_Metadata) meta_list.push_back((CAMFImporter_NodeElement_Metadata *)root_child);
+        if (root_child->Type == AMFNodeElementBase::ENET_Metadata) meta_list.push_back((AMFMetadata *)root_child);
     } // for(const CAMFImporter_NodeElement* root_child: root_el->Child)
 
     // at now we can add collected metadata to root node

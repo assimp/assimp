@@ -52,6 +52,8 @@
 #include <assimp/ai_assert.h>
 #include <assimp/XmlParser.h>
 
+#include <map>
+
 namespace Assimp {
 
 class ZipArchiveIOSystem;
@@ -374,10 +376,10 @@ protected:
 
 // ------------------------------------------------------------------------------------------------
 // Check for element match
-inline bool ColladaParser::IsElement(const char *pName) const {
+/*inline bool ColladaParser::IsElement(const char *pName) const {
     ai_assert(mReader->getNodeType() == irr::io::EXN_ELEMENT);
     return ::strcmp(mReader->getNodeName(), pName) == 0;
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Finds the item in the given library by its reference, throws if not found

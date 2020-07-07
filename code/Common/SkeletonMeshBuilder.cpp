@@ -253,6 +253,8 @@ aiMaterial *SkeletonMeshBuilder::CreateMaterial() {
     // Name
     aiString matName(std::string("SkeletonMaterial"));
     matHelper->AddProperty(&matName, AI_MATKEY_NAME);
+    aiString matName("SkeletonMaterial");
+    matHelper->AddProperty( &matName, AI_MATKEY_NAME);
 
     // Prevent backface culling
     const int no_cull = 1;

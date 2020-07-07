@@ -66,10 +66,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+// clang-format off
 #if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
+// clang-format on
 
 // ------------------------------------------------------------------------------------------------
 // Add a prefix to a string
@@ -495,7 +497,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
             OffsetNodeMeshIndices(node, offset[n]);
         }
         if (n) // src[0] is the master node
-            nodes.push_back(NodeAttachmentInfo(node, srcList[n - 1].attachToNode, n));
+            nodes.emplace_back( node,srcList[n-1].attachToNode,n );
 
         // add name prefixes?
         if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
@@ -1331,8 +1333,10 @@ void SceneCombiner::Copy(aiMetadata **_dest, const aiMetadata *src) {
     }
 }
 
+// clang-format off
 #if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)
-#pragma GCC diagnostic pop
+#   pragma GCC diagnostic pop
 #endif
+// clang-format on
 
 } // Namespace Assimp

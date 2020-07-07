@@ -101,7 +101,7 @@ void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPosition
 
         // store position by index and distance
         ai_real distance = *vec * mPlaneNormal;
-        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec, distance));
+        mPositions.emplace_back(Entry(static_cast<unsigned int>(a + initial), *vec, distance));
     }
 
     if (pFinalize) {
@@ -121,7 +121,7 @@ void SpatialSort::FindPositions(const aiVector3D &pPosition,
     poResults.clear();
 
     // quick check for positions outside the range
-    if (mPositions.size() == 0)
+    if( mPositions.empty())
         return;
     if (maxDist < mPositions.front().mDistance)
         return;

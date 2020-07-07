@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -63,7 +62,7 @@ void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
                     return;
                 }
             }
-            out.push_back(std::string(base, (size_t)(s - base)));
+            out.emplace_back(base,(size_t)(s-base));
             ++s;
         } else {
             out.push_back(GetNextToken(s));

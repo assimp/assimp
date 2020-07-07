@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -269,7 +267,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                         VertexWeightTable &tbl = avw[idx];
                         for (VertexWeightTable::const_iterator it = tbl.begin(), end = tbl.end();
                                 it != end; ++it) {
-                            tempBones[(*it).first].push_back(aiVertexWeight(outIdx, (*it).second));
+                            tempBones[(*it).first].emplace_back(aiVertexWeight(outIdx, (*it).second));
                         }
                     }
 

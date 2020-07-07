@@ -55,22 +55,19 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-LimitBoneWeightsProcess::LimitBoneWeightsProcess()
-{
+LimitBoneWeightsProcess::LimitBoneWeightsProcess() {
     mMaxWeights = AI_LMW_MAX_WEIGHTS;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-LimitBoneWeightsProcess::~LimitBoneWeightsProcess()
-{
+LimitBoneWeightsProcess::~LimitBoneWeightsProcess() {
     // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool LimitBoneWeightsProcess::IsActive( unsigned int pFlags) const
-{
+bool LimitBoneWeightsProcess::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_LimitBoneWeights) != 0;
 }
 
@@ -89,10 +86,9 @@ void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp)
-{
+void LimitBoneWeightsProcess::SetupProperties(const Importer *pImp) {
     // get the current value of the property
-    this->mMaxWeights = pImp->GetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS,AI_LMW_MAX_WEIGHTS);
+    this->mMaxWeights = pImp->GetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, AI_LMW_MAX_WEIGHTS);
 }
 
 // ------------------------------------------------------------------------------------------------

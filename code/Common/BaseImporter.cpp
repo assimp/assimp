@@ -60,6 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <memory>
 #include <sstream>
+#include <cctype>
+#include <utility>
 
 using namespace Assimp;
 

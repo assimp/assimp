@@ -624,6 +624,9 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                         ++uv;
                                     }
                                 }
+                                if (static_cast<unsigned>(vertices - mesh->mVertices) >= mesh->mNumVertices) {
+                                    throw DeadlyImportError("AC3D: Invalid number of vertices");
+                                }
                                 *vertices++ = object.vertices[entry3.first] + object.translation;
                                 if (uv) {
                                     uv->x = entry3.second.x;

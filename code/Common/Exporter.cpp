@@ -74,8 +74,8 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 namespace Assimp {
 
-#ifdef _WIN32
-#    pragma warning( disable : 4800 ) 
+#if _MSC_VER > 1920
+#    pragma warning( disable : 4800 )
 #endif // _WIN32
 
 

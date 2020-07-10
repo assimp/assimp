@@ -177,9 +177,6 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 
     std::string enc64_data = node.value();
 	// Check for child nodes
-    //if (!mXmlParser->isEmptyElement()) {
-    //    XML_ReadNode_GetVal_AsString(enc64_data);
-    //}
 
 	// check that all components was defined
     if (id.empty()) {

@@ -101,7 +101,6 @@ class AMFImporter : public BaseImporter {
 private:
     struct SPP_Material; // forward declaration
 
-    /// \struct SPP_Composite
     /// Data type for post-processing step. More suitable container for part of material's composition.
     struct SPP_Composite {
         SPP_Material *Material; ///< Pointer to material - part of composition.

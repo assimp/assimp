@@ -160,11 +160,26 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
 
         return file_list.front();
     }
+    XmlParser manifestParser;
+    XmlNode *root = manifestParser.parse(manifestfile.get());
+    if (nullptr == root) {
+        return std::string();
+    }
+    const std::string name = root->name();
+    if (name != "dae_root") {
+        root = manifestParser.findNode("dae_root");
+        if (nullptr == root) {
+            return std::string();
+        }
+        const char *filepath = root->value();
+        aiString ai_str(filepath);
+        UriDecodePath(ai_str);
+        return std::string(ai_str.C_Str());
+    }
+    /*std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(manifestfile.get()));
+    std::unique_ptr<irr::io::IrrXMLReader> manifest_reader(irr::io::createIrrXMLReader(mIOWrapper.get()));*/
 
-    std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(manifestfile.get()));
-    std::unique_ptr<irr::io::IrrXMLReader> manifest_reader(irr::io::createIrrXMLReader(mIOWrapper.get()));
-
-    while (manifest_reader->read()) {
+    /*while (manifest_reader->read()) {
         // find the manifest "dae_root" element
         if (manifest_reader->getNodeType() == irr::io::EXN_ELEMENT) {
             if (::strcmp(manifest_reader->getNodeName(), "dae_root") == 0) {
@@ -183,7 +198,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
                 return std::string(ai_str.C_Str());
             }
         }
-    }
+    }*/
     return std::string();
 }
 
@@ -314,7 +329,6 @@ void ColladaParser::ReadContents(XmlNode &node) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads the structure of the file
-<<<<<<< HEAD
 void ColladaParser::ReadStructure(XmlNode &node) {
     for (pugi::xml_node curNode : node.children()) {
         const std::string name = std::string(curNode.name());
@@ -341,7 +355,7 @@ void ColladaParser::ReadStructure(XmlNode &node) {
         else if (name == "library_cameras")
             ReadCameraLibrary(curNode);
         else if (name == "library_nodes")
-            ReadSceneNode(NULL); /* some hacking to reuse this piece of code */
+            ReadSceneNode(curNode, nullptr); /* some hacking to reuse this piece of code */
         else if (name == "scene")
             ReadScene(curNode);
         //else
@@ -381,44 +395,6 @@ void ColladaParser::ReadStructure(XmlNode &node) {
             } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
                 break;
             }*/
-=======
-void ColladaParser::ReadStructure() {
-    while (mReader->read()) {
-        // beginning of elements
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("asset"))
-                ReadAssetInfo();
-            else if (IsElement("library_animations"))
-                ReadAnimationLibrary();
-            else if (IsElement("library_animation_clips"))
-                ReadAnimationClipLibrary();
-            else if (IsElement("library_controllers"))
-                ReadControllerLibrary();
-            else if (IsElement("library_images"))
-                ReadImageLibrary();
-            else if (IsElement("library_materials"))
-                ReadMaterialLibrary();
-            else if (IsElement("library_effects"))
-                ReadEffectLibrary();
-            else if (IsElement("library_geometries"))
-                ReadGeometryLibrary();
-            else if (IsElement("library_visual_scenes"))
-                ReadSceneLibrary();
-            else if (IsElement("library_lights"))
-                ReadLightLibrary();
-            else if (IsElement("library_cameras"))
-                ReadCameraLibrary();
-            else if (IsElement("library_nodes"))
-                ReadSceneNode(nullptr); /* some hacking to reuse this piece of code */
-            else if (IsElement("scene"))
-                ReadScene();
-            else
-                SkipElement();
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            break;
-        }
-    }
->>>>>>> master
 
     PostProcessRootAnimations();
     PostProcessControllers();
@@ -436,7 +412,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
             pugi::xml_attribute attr = curNode.attribute("meter");
             mUnitSize = 1.f;
             if (attr) {
-                mUnitSize = attr.as_double();
+                mUnitSize = static_cast<ai_real>(attr.as_double());
             }
         } else if (name == "up_axis") {
             const char *content = curNode.value();
@@ -602,7 +578,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
                 if (urlName[0] != '#') {
                     ThrowException("Unknown reference format");
                 }
-                clip.second.push_back(url);
+                clip.second.push_back(url.as_string());
             }
         }
 
@@ -919,8 +895,27 @@ void ColladaParser::ReadAnimationSampler(XmlNode &node, Collada::AnimationChanne
     for (pugi::xml_node &curNode : node.children()) {
         const std::string currentName = curNode.name();
         if (currentName == "input") {
-            pugi::xml_attribute semantic = curNode.attribute("semantic");
-            if (semantic) {
+            pugi::xml_attribute semanticAttr = curNode.attribute("semantic");
+            if (!semanticAttr.empty()) {
+                const char *semantic = semanticAttr.as_string();
+                pugi::xml_attribute sourceAttr = curNode.attribute("source");
+                if (!sourceAttr.empty()) {
+                    const char *source = sourceAttr.as_string();
+                    if (source[0] != '#')
+                        ThrowException("Unsupported URL format");
+                    source++;
+
+                    if (strcmp(semantic, "INPUT") == 0)
+                        pChannel.mSourceTimes = source;
+                    else if (strcmp(semantic, "OUTPUT") == 0)
+                        pChannel.mSourceValues = source;
+                    else if (strcmp(semantic, "IN_TANGENT") == 0)
+                        pChannel.mInTanValues = source;
+                    else if (strcmp(semantic, "OUT_TANGENT") == 0)
+                        pChannel.mOutTanValues = source;
+                    else if (strcmp(semantic, "INTERPOLATION") == 0)
+                        pChannel.mInterpolationValues = source;
+                }
             }
         }
     }
@@ -970,7 +965,23 @@ void ColladaParser::ReadControllerLibrary(XmlNode &node) {
     /*if (mReader->isEmptyElement())
         return;*/
 
-    while (mReader->read()) {
+    const std::string name = node.name();
+    if (name != "controller") {
+        return;
+    }
+    int attrId = node.attribute("id").as_int();
+    std::string id = node.value();
+    mControllerLibrary[id] = Controller();
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "controller") {
+            int attrID = currentNode.attribute("id").as_int();
+            std::string controllerId = currentNode.attribute(itoa(attrID, NULL, 10)).value();
+            ReadController(node, mControllerLibrary[controllerId]);
+        }
+    }
+
+    /*while (mReader->read()) {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if (IsElement("controller")) {
                 // read ID. Ask the spec if it's necessary or optional... you might be surprised.
@@ -992,7 +1003,7 @@ void ColladaParser::ReadControllerLibrary(XmlNode &node) {
 
             break;
         }
-    }
+    }*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1001,7 +1012,54 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
     // initial values
     pController.mType = Skin;
     pController.mMethod = Normalized;
-    while (mReader->read()) {
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "morph") {
+            pController.mType = Morph;
+            int baseIndex = currentNode.attribute("source").as_int();
+            pController.mMeshId = currentNode.attribute.begin() + baseIndex + 1;
+            int methodIndex = currentNode.attribute("method").as_int();
+            if (methodIndex > 0) {
+                const char *method = currentNode.attribute("method").value();
+                if (strcmp(method, "RELATIVE") == 0) {
+                    pController.mMethod = Relative;
+                }
+            }
+        } else if (currentName == "skin") {
+            int sourceIndex = currentNode.attribute("source").as_int();
+            pController.mMeshId = currentNode.attribute.begin() + sourceIndex + 1;
+        } else if (currentName == "bind_shape_matrix") {
+            const char *content = currentNode.value();
+            for (unsigned int a = 0; a < 16; a++) {
+                // read a number
+                content = fast_atoreal_move<ai_real>(content, pController.mBindShapeMatrix[a]);
+                // skip whitespace after it
+                SkipSpacesAndLineEnd(&content);
+            }
+        } else if (currentName == "source") {
+            ReadSource(currentNode);
+        } else if (IsElement("joints")) {
+            ReadControllerJoints(currentNode, pController);
+        } else if (IsElement("vertex_weights")) {
+            ReadControllerWeights(currentNode, pController);
+        } else if (IsElement("targets")) {
+            for (XmlNode currendChildNode : currentNode.children()) {
+                const std::string currentChildName = currendChildNode.name();
+                if (currentChildName == "input") {
+                    int semanticsIndex = currendChildNode.attribute("semantic").as_int();
+                    int sourceIndex = currendChildNode.attribute("source").as_int();
+                    const char *semantics = currendChildNode.attributes.begin() + semanticsIndex;
+                    const char *source = currendChildNode.attributes.begin() + sourceIndex;
+                    if (strcmp(semantics, "MORPH_TARGET") == 0) {
+                        pController.mMorphTarget = source + 1;
+                    } else if (strcmp(semantics, "MORPH_WEIGHT") == 0) {
+                        pController.mMorphWeight = source + 1;
+                    }
+                }
+            }
+        }
+    }
+    /*while (mReader->read()) {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             // two types of controllers: "skin" and "morph". Only the first one is relevant, we skip the other
             if (IsElement("morph")) {
@@ -1071,59 +1129,141 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
             else if (strcmp(mReader->getNodeName(), "skin") != 0 && strcmp(mReader->getNodeName(), "morph") != 0)
                 ThrowException("Expected end of <controller> element.");
         }
-    }
+    }*/
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads the joint definitions for the given controller
 void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pController) {
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            // Input channels for joint data. Two possible semantics: "JOINT" and "INV_BIND_MATRIX"
-            if (IsElement("input")) {
-                int indexSemantic = GetAttribute("semantic");
-                const char *attrSemantic = mReader->getAttributeValue(indexSemantic);
-                int indexSource = GetAttribute("source");
-                const char *attrSource = mReader->getAttributeValue(indexSource);
-
-                // local URLS always start with a '#'. We don't support global URLs
-                if (attrSource[0] != '#')
-                    ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element");
-                attrSource++;
-
-                // parse source URL to corresponding source
-                if (strcmp(attrSemantic, "JOINT") == 0)
-                    pController.mJointNameSource = attrSource;
-                else if (strcmp(attrSemantic, "INV_BIND_MATRIX") == 0)
-                    pController.mJointOffsetMatrixSource = attrSource;
-                else
-                    ThrowException(format() << "Unknown semantic \"" << attrSemantic << "\" in <joints> data <input> element");
-
-                // skip inner data, if present
-                if (!mReader->isEmptyElement())
-                    SkipElement();
-            } else {
-                // ignore the rest
-                SkipElement();
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "input") {
+            int indexSemantic = currentNode.attribute("semantic").as_int();
+            const char *attrSemantic = currentNode.attributes.begin() + indexSemantic;
+            int indexSource = currentNode.attribute("source").as_int();
+            const char *attrSource = currentNode.attributes.begin() + indexSource;
+            if (attrSource[0] != '#') {
+                ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element");
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "joints") != 0)
-                ThrowException("Expected end of <joints> element.");
-
-            break;
+            attrSource++;
+            // parse source URL to corresponding source
+            if (strcmp(attrSemantic, "JOINT") == 0) {
+                pController.mJointNameSource = attrSource;
+            } else if (strcmp(attrSemantic, "INV_BIND_MATRIX") == 0) {
+                pController.mJointOffsetMatrixSource = attrSource;
+            } else {
+                ThrowException(format() << "Unknown semantic \"" << attrSemantic << "\" in <joints> data <input> element");
+            }
         }
     }
+    /*while (mReader->read()) {
+            if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+                // Input channels for joint data. Two possible semantics: "JOINT" and "INV_BIND_MATRIX"
+                if (IsElement("input")) {
+                    int indexSemantic = GetAttribute("semantic");
+                    const char *attrSemantic = mReader->getAttributeValue(indexSemantic);
+                    int indexSource = GetAttribute("source");
+                    const char *attrSource = mReader->getAttributeValue(indexSource);
+
+                    // local URLS always start with a '#'. We don't support global URLs
+                    if (attrSource[0] != '#')
+                        ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element");
+                    attrSource++;
+
+                    // parse source URL to corresponding source
+                    if (strcmp(attrSemantic, "JOINT") == 0)
+                        pController.mJointNameSource = attrSource;
+                    else if (strcmp(attrSemantic, "INV_BIND_MATRIX") == 0)
+                        pController.mJointOffsetMatrixSource = attrSource;
+                    else
+                        ThrowException(format() << "Unknown semantic \"" << attrSemantic << "\" in <joints> data <input> element");
+
+                    // skip inner data, if present
+                    if (!mReader->isEmptyElement())
+                        SkipElement();
+                } else {
+                    // ignore the rest
+                    SkipElement();
+                }
+            } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+                if (strcmp(mReader->getNodeName(), "joints") != 0)
+                    ThrowException("Expected end of <joints> element.");
+
+                break;
+            }
+        }*/
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads the joint weights for the given controller
 void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
-    // read vertex count from attributes and resize the array accordingly
-    int indexCount = GetAttribute("count");
-    size_t vertexCount = (size_t)mReader->getAttributeValueAsInt(indexCount);
+    // Read vertex count from attributes and resize the array accordingly
+    int indexCount = node.attribute("count").as_int();
+    size_t vertexCount = node.attributes.begin() + indexCount;
     pController.mWeightCounts.resize(vertexCount);
 
-    while (mReader->read()) {
+    /*// read vertex count from attributes and resize the array accordingly
+    int indexCount = GetAttribute("count");
+    size_t vertexCount = (size_t)mReader->getAttributeValueAsInt(indexCount);
+    pController.mWeightCounts.resize(vertexCount);*/
+
+    for (XmlNode currentNode : node.children()) {
+        std::string currentName = currentNode.name();
+        if (currentName == "input") {
+            InputChannel channel;
+
+            int indexSemantic = currentNode.attribute("semantic").as_int();
+            const char *attrSemantic = currentNode.attributes.begin() + indexSemantic;
+            int indexSource = currentNode.attribute("source").as_int();
+            const char *attrSource = currentNode.attributes.begin() + indexSource;
+            int indexOffset = currentNode.attribute("offset").as_int();
+            if (indexOffset >= 0)
+                channel.mOffset = currentNode.attributes.begin + indexOffset;
+
+            // local URLS always start with a '#'. We don't support global URLs
+            if (attrSource[0] != '#')
+                ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <vertex_weights> data <input> element");
+            channel.mAccessor = attrSource + 1;
+
+            // parse source URL to corresponding source
+            if (strcmp(attrSemantic, "JOINT") == 0) {
+                pController.mWeightInputJoints = channel;
+            } else if (strcmp(attrSemantic, "WEIGHT") == 0) {
+                pController.mWeightInputWeights = channel;
+            } else {
+                ThrowException(format() << "Unknown semantic \"" << attrSemantic << "\" in <vertex_weights> data <input> element");
+            }
+        } else if (currentName == "vcount" && vertexCount > 0) {
+            const char *text = currentNode.value();
+            size_t numWeights = 0;
+            for (std::vector<size_t>::iterator it = pController.mWeightCounts.begin(); it != pController.mWeightCounts.end(); ++it) {
+                if (*text == 0) {
+                    ThrowException("Out of data while reading <vcount>");
+                }
+
+                *it = strtoul10(text, &text);
+                numWeights += *it;
+                SkipSpacesAndLineEnd(&text);
+            }
+            // reserve weight count
+            pController.mWeights.resize(numWeights);
+        } else if (currentName == "v" && vertexCount > 0) {
+            // read JointIndex - WeightIndex pairs
+            const char *text = currentNode.value();
+            for (std::vector<std::pair<size_t, size_t>>::iterator it = pController.mWeights.begin(); it != pController.mWeights.end(); ++it) {
+                if (*text == 0) {
+                    ThrowException("Out of data while reading <vertex_weights>");
+                }
+                it->first = strtoul10(text, &text);
+                SkipSpacesAndLineEnd(&text);
+                if (*text == 0)
+                    ThrowException("Out of data while reading <vertex_weights>");
+                it->second = strtoul10(text, &text);
+                SkipSpacesAndLineEnd(&text);
+            }
+        }
+    }
+    /*while (mReader->read()) {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             // Input channels for weight data. Two possible semantics: "JOINT" and "WEIGHT"
             if (IsElement("input") && vertexCount > 0) {
@@ -1196,7 +1336,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
 
             break;
         }
-    }
+    }*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1208,75 +1348,54 @@ void ColladaParser::ReadImageLibrary(XmlNode &node) {
     /*if (mReader->isEmptyElement())
         return;*/
 
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("image")) {
-                // read ID. Another entry which is "optional" by design but obligatory in reality
-                int attrID = GetAttribute("id");
-                std::string id = mReader->getAttributeValue(attrID);
+    for (XmlNode currentNode : node.children()) {
+        const std::string name = currentNode.name();
+        if (name == "image") {
+            int attrID = currentNode.attribute("id").as_int();
+            std::string id = currentNode.attributes.begin() + attrID;
+            mImageLibrary[id] = Image();
 
-                // create an entry and store it in the library under its ID
-                mImageLibrary[id] = Image();
-
-                // read on from there
-                ReadImage(mImageLibrary[id]);
-            } else {
-                // ignore the rest
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "library_images") != 0)
-                ThrowException("Expected end of <library_images> element.");
-
-            break;
+            // read on from there
+            ReadImage(currentNode, mImageLibrary[id]);
         }
     }
+    /*while (mReader->read()) {
+            if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+                if (IsElement("image")) {
+                    // read ID. Another entry which is "optional" by design but obligatory in reality
+                    int attrID = GetAttribute("id");
+                    std::string id = mReader->getAttributeValue(attrID);
+
+                    // create an entry and store it in the library under its ID
+                    mImageLibrary[id] = Image();
+
+                    // read on from there
+                    ReadImage(mImageLibrary[id]);
+                } else {
+                    // ignore the rest
+                    SkipElement();
+                }
+            } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+                if (strcmp(mReader->getNodeName(), "library_images") != 0)
+                    ThrowException("Expected end of <library_images> element.");
+
+                break;
+            }
+        }*/
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads an image entry into the given image
 void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            // Need to run different code paths here, depending on the Collada XSD version
-            if (IsElement("image")) {
-                SkipElement();
-            } else if (IsElement("init_from")) {
-                if (mFormat == FV_1_4_n) {
-                    // FIX: C4D exporter writes empty <init_from/> tags
-                    if (!mReader->isEmptyElement()) {
-                        // element content is filename - hopefully
-                        const char *sz = TestTextContent();
-                        if (sz) {
-                            aiString filepath(sz);
-                            UriDecodePath(filepath);
-                            pImage.mFileName = filepath.C_Str();
-                        }
-                        TestClosing("init_from");
-                    }
-                    if (!pImage.mFileName.length()) {
-                        pImage.mFileName = "unknown_texture";
-                    }
-                } else if (mFormat == FV_1_5_n) {
-                    // make sure we skip over mip and array initializations, which
-                    // we don't support, but which could confuse the loader if
-                    // they're not skipped.
-                    int attrib = TestAttribute("array_index");
-                    if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
-                        ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
-                        continue;
-                    }
-
-                    attrib = TestAttribute("mip_index");
-                    if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
-                        ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
-                        continue;
-                    }
-
-                    // TODO: correctly jump over cube and volume maps?
-                }
-            } else if (mFormat == FV_1_5_n) {
-                if (IsElement("ref")) {
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "image") {
+            // Ignore
+            continue;
+        } else if (currentName == "init_from") {
+            if (mFormat == FV_1_4_n) {
+                // FIX: C4D exporter writes empty <init_from/> tags
+                if (!currentNode.empty()) {
                     // element content is filename - hopefully
                     const char *sz = TestTextContent();
                     if (sz) {
@@ -1284,39 +1403,150 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                         UriDecodePath(filepath);
                         pImage.mFileName = filepath.C_Str();
                     }
-                    TestClosing("ref");
-                } else if (IsElement("hex") && !pImage.mFileName.length()) {
-                    // embedded image. get format
-                    const int attrib = TestAttribute("format");
-                    if (-1 == attrib)
-                        ASSIMP_LOG_WARN("Collada: Unknown image file format");
-                    else
-                        pImage.mEmbeddedFormat = mReader->getAttributeValue(attrib);
-
-                    const char *data = GetTextContent();
-
-                    // hexadecimal-encoded binary octets. First of all, find the
-                    // required buffer size to reserve enough storage.
-                    const char *cur = data;
-                    while (!IsSpaceOrNewLine(*cur))
-                        cur++;
-
-                    const unsigned int size = (unsigned int)(cur - data) * 2;
-                    pImage.mImageData.resize(size);
-                    for (unsigned int i = 0; i < size; ++i)
-                        pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
-
-                    TestClosing("hex");
+                    TestClosing("init_from");
                 }
-            } else {
-                // ignore the rest
-                SkipElement();
+                if (!pImage.mFileName.length()) {
+                    pImage.mFileName = "unknown_texture";
+                }
+            } else if (mFormat == FV_1_5_n) {
+                // make sure we skip over mip and array initializations, which
+                // we don't support, but which could confuse the loader if
+                // they're not skipped.
+                int attrib = currentNode.attribute("ref").as_int();
+                int v = currentNode.attributes.begin + attrib;
+                if (attrib != -1 && v > 0) {
+                    ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
+                    continue;
+                }
+
+                attrib = currentNode.attribute("mip_index").as_int();
+                v = currentNode.attributes.begin + attrib;
+                if (attrib != -1 && v > 0) {
+                    ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
+                    continue;
+                }
+
+                // TODO: correctly jump over cube and volume maps?
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "image") == 0)
-                break;
-        }
+        } else if (mFormat == FV_1_5_n) {
+            XmlNode refChild = currentNode.child("ref");
+            XmlNode hexChild = currentNode.child("hex");
+            if (refChild) {
+                // element content is filename - hopefully
+                const char *sz = refChild.value();
+                if (sz) {
+                    aiString filepath(sz);
+                    UriDecodePath(filepath);
+                    pImage.mFileName = filepath.C_Str();
+                }
+            } else if (hexChild && !pImage.mFileName.length()) {
+                // embedded image. get format
+                const int attrib = hexChild.attribute("format").as_int();
+                if (-1 == attrib) {
+                    ASSIMP_LOG_WARN("Collada: Unknown image file format");
+                } else {
+                    pImage.mEmbeddedFormat = hexChild.attributes.begin() + attrib;
+                }
+
+                const char *data = hexChild.value();
+
+                // hexadecimal-encoded binary octets. First of all, find the
+                // required buffer size to reserve enough storage.
+                const char *cur = data;
+                while (!IsSpaceOrNewLine(*cur)) {
+                    ++cur;
+                }
+
+                const unsigned int size = (unsigned int)(cur - data) * 2;
+                pImage.mImageData.resize(size);
+                for (unsigned int i = 0; i < size; ++i) {
+                    pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
+                }
+            }
+        } 
     }
+        
+        /*while (mReader->read()) {
+            if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+                // Need to run different code paths here, depending on the Collada XSD version
+                if (IsElement("image")) {
+                    SkipElement();
+                } else if (IsElement("init_from")) {
+                    if (mFormat == FV_1_4_n) {
+                        // FIX: C4D exporter writes empty <init_from/> tags
+                        if (!mReader->isEmptyElement()) {
+                            // element content is filename - hopefully
+                            const char *sz = TestTextContent();
+                            if (sz) {
+                                aiString filepath(sz);
+                                UriDecodePath(filepath);
+                                pImage.mFileName = filepath.C_Str();
+                            }
+                            TestClosing("init_from");
+                        }
+                        if (!pImage.mFileName.length()) {
+                            pImage.mFileName = "unknown_texture";
+                        }
+                    } else if (mFormat == FV_1_5_n) {
+                        // make sure we skip over mip and array initializations, which
+                        // we don't support, but which could confuse the loader if
+                        // they're not skipped.
+                        int attrib = TestAttribute("array_index");
+                        if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
+                            ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
+                            continue;
+                        }
+
+                        attrib = TestAttribute("mip_index");
+                        if (attrib != -1 && mReader->getAttributeValueAsInt(attrib) > 0) {
+                            ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
+                            continue;
+                        }
+
+                        // TODO: correctly jump over cube and volume maps?
+                    }
+                } else if (mFormat == FV_1_5_n) {
+                    if (IsElement("ref")) {
+                        // element content is filename - hopefully
+                        const char *sz = TestTextContent();
+                        if (sz) {
+                            aiString filepath(sz);
+                            UriDecodePath(filepath);
+                            pImage.mFileName = filepath.C_Str();
+                        }
+                        TestClosing("ref");
+                    } else if (IsElement("hex") && !pImage.mFileName.length()) {
+                        // embedded image. get format
+                        const int attrib = TestAttribute("format");
+                        if (-1 == attrib)
+                            ASSIMP_LOG_WARN("Collada: Unknown image file format");
+                        else
+                            pImage.mEmbeddedFormat = mReader->getAttributeValue(attrib);
+
+                        const char *data = GetTextContent();
+
+                        // hexadecimal-encoded binary octets. First of all, find the
+                        // required buffer size to reserve enough storage.
+                        const char *cur = data;
+                        while (!IsSpaceOrNewLine(*cur))
+                            cur++;
+
+                        const unsigned int size = (unsigned int)(cur - data) * 2;
+                        pImage.mImageData.resize(size);
+                        for (unsigned int i = 0; i < size; ++i)
+                            pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
+
+                        TestClosing("hex");
+                    }
+                } else {
+                    // ignore the rest
+                    SkipElement();
+                }
+            } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+                if (strcmp(mReader->getNodeName(), "image") == 0)
+                    break;
+            }
+        }*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1329,7 +1559,36 @@ void ColladaParser::ReadMaterialLibrary(XmlNode &node) {
         return;*/
 
     std::map<std::string, int> names;
-    while (mReader->read()) {
+
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        int attrID = currentNode.attribute("id").as_int();
+        std::string id = currentNode.attributes.begin() + attrID;
+        std::string name;
+        int attrName = currentNode.attribute("name").as_int();
+        if (attrName >= 0) {
+            name = currentNode.attributes.begin() + attrName;
+        }
+        mMaterialLibrary[id] = Material();
+
+        if (!name.empty()) {
+            std::map<std::string, int>::iterator it = names.find(name);
+            if (it != names.end()) {
+                std::ostringstream strStream;
+                strStream << ++it->second;
+                name.append(" " + strStream.str());
+            } else {
+                names[name] = 0;
+            }
+
+            mMaterialLibrary[id].mName = name;
+        }
+
+        ReadMaterial(currentNode, mMaterialLibrary[id]);
+        
+    }
+
+    /*while (mReader->read()) {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if (IsElement("material")) {
                 // read ID. By now you probably know my opinion about this "specification"
@@ -1368,7 +1627,7 @@ void ColladaParser::ReadMaterialLibrary(XmlNode &node) {
 
             break;
         }
-    }
+    }*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2778,7 +3037,7 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
         return;
     }
 
-/*    if (mReader->isEmptyElement())
+    /*    if (mReader->isEmptyElement())
         return;*/
 
     while (mReader->read()) {
@@ -2795,7 +3054,6 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
                 int attrName = TestAttribute("name");
                 if (attrName > -1)
                     child->mName = mReader->getAttributeValue(attrName);
-
 
                 if (pNode) {
                     pNode->mChildren.push_back(child);
@@ -3034,7 +3292,30 @@ void ColladaParser::ReadScene(XmlNode &node) {
     /*if (mReader->isEmptyElement())
         return;*/
 
-    while (mReader->read()) {
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == "instance_visual_scene") {
+            // should be the first and only occurrence
+            if (mRootNode)
+                ThrowException("Invalid scene containing multiple root nodes in <instance_visual_scene> element");
+
+            // read the url of the scene to instance. Should be of format "#some_name"
+            int urlIndex = currentNode.attribute("url").as_int();
+            const char *url = currentNode.attributes.begin() + urlIndex;
+            if (url[0] != '#') {
+                ThrowException("Unknown reference format in <instance_visual_scene> element");
+            }
+
+            // find the referred scene, skip the leading #
+            NodeLibrary::const_iterator sit = mNodeLibrary.find(url + 1);
+            if (sit == mNodeLibrary.end()) {
+                ThrowException("Unable to resolve visual_scene reference \"" + std::string(url) + "\" in <instance_visual_scene> element.");
+            }
+            mRootNode = sit->second;
+        }
+    }
+
+    /*while (mReader->read()) {
         if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if (IsElement("instance_visual_scene")) {
                 // should be the first and only occurrence
@@ -3058,7 +3339,7 @@ void ColladaParser::ReadScene(XmlNode &node) {
         } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
             break;
         }
-    }
+    }*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3159,7 +3440,7 @@ void ColladaParser::ReportWarning(const char *msg, ...) {
 
 // ------------------------------------------------------------------------------------------------
 // Returns the index of the named attribute or -1 if not found. Does not throw, therefore useful for optional attributes
-int ColladaParser::GetAttribute(const char *pAttr) const {
+/*int ColladaParser::GetAttribute(const char *pAttr) const {
     int index = TestAttribute(pAttr);
     if (index == -1) {
         ThrowException(format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.");
@@ -3167,31 +3448,31 @@ int ColladaParser::GetAttribute(const char *pAttr) const {
 
     // attribute not found -> throw an exception
     return index;
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Tests the present element for the presence of one attribute, returns its index or throws an exception if not found
-int ColladaParser::TestAttribute(const char *pAttr) const {
+/*int ColladaParser::TestAttribute(const char *pAttr) const {
     for (int a = 0; a < mReader->getAttributeCount(); a++)
         if (strcmp(mReader->getAttributeName(a), pAttr) == 0)
             return a;
 
     return -1;
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Reads the text contents of an element, throws an exception if not given. Skips leading whitespace.
-const char *ColladaParser::GetTextContent() {
+/*const char *ColladaParser::GetTextContent() {
     const char *sz = TestTextContent();
     if (!sz) {
         ThrowException("Invalid contents in element \"n\".");
     }
     return sz;
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Reads the text contents of an element, returns nullptr if not given. Skips leading whitespace.
-const char *ColladaParser::TestTextContent() {
+/*const char *ColladaParser::TestTextContent() {
     // present node should be the beginning of an element
     if (mReader->getNodeType() != irr::io::EXN_ELEMENT || mReader->isEmptyElement())
         return nullptr;
@@ -3209,7 +3490,7 @@ const char *ColladaParser::TestTextContent() {
     SkipSpacesAndLineEnd(&text);
 
     return text;
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Calculates the resulting transformation from all the given transform steps

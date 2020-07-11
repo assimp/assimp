@@ -1079,7 +1079,7 @@ ASSIMP_API void aiMatrix4DecomposeIntoScalingAxisAnglePosition(
         const C_STRUCT aiMatrix4x4 *mat,
         C_STRUCT aiVector3D *scaling,
         C_STRUCT aiVector3D *axis,
-        float *angle,
+        ai_real *angle,
         C_STRUCT aiVector3D *position) {
     ai_assert(nullptr != mat);
     ai_assert(nullptr != scaling);

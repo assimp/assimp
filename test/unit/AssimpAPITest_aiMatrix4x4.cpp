@@ -176,7 +176,7 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4DecomposeIntoScalingAxisAnglePosition
     aiVector3D scaling_c, scaling_cpp,
         axis_c, axis_cpp,
         position_c, position_cpp;
-    float angle_c, angle_cpp;
+    ai_real angle_c, angle_cpp;
 
     result_c = result_cpp = get_predetermined_transformation_matrix_for_decomposition();
     result_cpp.Decompose(scaling_cpp, axis_cpp, angle_cpp, position_cpp);

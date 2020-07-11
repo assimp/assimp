@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/Step/STEPFile.h"
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #    pragma warning( disable : 4512 )
 #endif // _WIN32
 

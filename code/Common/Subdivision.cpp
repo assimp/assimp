@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 void mydummy() {}
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #pragma warning(disable : 4709)
 #endif // _WIN32
 // ------------------------------------------------------------------------------------------------

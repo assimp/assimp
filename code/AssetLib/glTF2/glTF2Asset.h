@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -1068,6 +1068,7 @@ public:
     } extensionsRequired;
 
     AssetMetadata asset;
+    Value* extras = nullptr;
 
     // Dictionaries for each type of object
 

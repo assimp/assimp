@@ -42,12 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASSERT_H_INC
 #define AI_ASSERT_H_INC
 
+#include <assimp/defs.h>
+
 #if defined(ASSIMP_BUILD_DEBUG)
 
 namespace Assimp
 {
     // Assert violation behavior can be customized: see AssertHandler.h.
-    void aiAssertViolation(const char* failedExpression, const char* file, int line);
+    ASSIMP_API void aiAssertViolation(const char* failedExpression, const char* file, int line);
 }
 
 #    define ai_assert(expression) (void)((!!(expression)) || (Assimp::aiAssertViolation(#expression, __FILE__, __LINE__), 0))

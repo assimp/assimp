@@ -110,9 +110,9 @@ public:
         ExportFormatEntry() :
                 mExportFunction(),
                 mEnforcePP() {
-            mDescription.id = NULL;
-            mDescription.description = NULL;
-            mDescription.fileExtension = NULL;
+            mDescription.id = nullptr;
+            mDescription.description = nullptr;
+            mDescription.fileExtension = nullptr;
         }
     };
 

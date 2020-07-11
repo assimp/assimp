@@ -580,8 +580,21 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 : mIntProperties(other.mIntProperties)
 , mFloatProperties(other.mFloatProperties)
 , mStringProperties(other.mStringProperties)
-, mMatrixProperties(other.mMatrixProperties) {
+, mMatrixProperties(other.mMatrixProperties)
+, mCallbackProperties(other.mCallbackProperties){
     // empty
+}
+
+bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
+    return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);
+}
+
+std::function<void *(void *)> ExportProperties::GetPropertyCallback(const char *szName) const {
+    return GetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, 0);
+}
+
+bool ExportProperties::HasPropertyCallback(const char *szName) const {
+    return HasGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName);
 }
 
 // ------------------------------------------------------------------------------------------------

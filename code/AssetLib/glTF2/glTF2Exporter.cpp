@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -115,7 +115,14 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     ExportScene();
 
     ExportAnimations();
-
+    
+    // export extras
+    if(mProperties->HasPropertyCallback("extras"))
+    {
+        std::function<void*(void*)> ExportExtras = mProperties->GetPropertyCallback("extras");
+        mAsset->extras = (rapidjson::Value*)ExportExtras(0);
+    }
+    
     AssetWriter writer(*mAsset);
 
     if (isBinary) {

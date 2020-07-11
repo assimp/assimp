@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -615,6 +615,10 @@ namespace glTF2 {
         // Add the target scene field
         if (mAsset.scene) {
             mDoc.AddMember("scene", mAsset.scene->index, mAl);
+        }
+        
+        if(mAsset.extras) {
+            mDoc.AddMember("extras", *mAsset.extras, mAl);
         }
     }
 

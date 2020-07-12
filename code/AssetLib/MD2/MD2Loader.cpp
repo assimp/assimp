@@ -221,19 +221,20 @@ void MD2Importer::InternReadFile( const std::string& pFile,
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
-    if( file.get() == NULL)
-        throw DeadlyImportError( "Failed to open MD2 file " + pFile + "");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open MD2 file " + pFile + "");
+    }
 
     // check whether the md3 file is large enough to contain
     // at least the file header
     fileSize = (unsigned int)file->FileSize();
-    if( fileSize < sizeof(MD2::Header))
-        throw DeadlyImportError( "MD2 File is too small");
+    if (fileSize < sizeof(MD2::Header)) {
+        throw DeadlyImportError("MD2 File is too small");
+    }
 
     std::vector<uint8_t> mBuffer2(fileSize);
     file->Read(&mBuffer2[0], 1, fileSize);
     mBuffer = &mBuffer2[0];
-
 
     m_pcHeader = (BE_NCONST MD2::Header*)mBuffer;
 

@@ -1,15 +1,14 @@
 /*
----------------------------------------------------------------------------
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -36,29 +35,41 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
+
+----------------------------------------------------------------------
 */
-#pragma once
-#ifndef AI_ASSERT_H_INC
-#define AI_ASSERT_H_INC
 
+/** @file Provides facilities to replace the default assert handler. */
+
+#ifndef INCLUDED_AI_ASSERTHANDLER_H
+#define INCLUDED_AI_ASSERTHANDLER_H
+
+#include <assimp/ai_assert.h>
 #include <assimp/defs.h>
-
-#if defined(ASSIMP_BUILD_DEBUG)
 
 namespace Assimp
 {
-    // Assert violation behavior can be customized: see AssertHandler.h.
+    // ---------------------------------------------------------------------------
+    /** Signature of functions which handle assert violations.
+     */
+    using AiAssertHandler = void (*)(const char* failedExpression, const char* file, int line);
+
+    // ---------------------------------------------------------------------------
+    /** Set the assert handler.
+     */
+    ASSIMP_API void setAiAssertHandler(AiAssertHandler handler);
+
+    // ---------------------------------------------------------------------------
+    /** The assert handler which is set by default.
+     *
+     * This issues a message to stderr and calls abort.
+     */
+    ASSIMP_API void defaultAiAssertHandler(const char* failedExpression, const char* file, int line);
+
+    // ---------------------------------------------------------------------------
+    /** Dispatches an assert violation to the assert handler.
+     */
     ASSIMP_API void aiAssertViolation(const char* failedExpression, const char* file, int line);
-}
+} // end of namespace Assimp
 
-#    define ai_assert(expression) (void)((!!(expression)) || (Assimp::aiAssertViolation(#expression, __FILE__, __LINE__), 0))
-#    define ai_assert_entry() ai_assert(false)
-
-#else
-#   define  ai_assert(expression)
-#   define  ai_assert_entry() 
-#endif // ASSIMP_BUILD_DEBUG
-
-#endif // AI_ASSERT_H_INC
-
+#endif // INCLUDED_AI_ASSERTHANDLER_H

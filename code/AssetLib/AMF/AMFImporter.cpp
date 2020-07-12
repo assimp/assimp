@@ -366,7 +366,9 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == NULL) throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+    }
 
     // generate a XML reader for it
     std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));

@@ -74,8 +74,8 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 namespace Assimp {
 
-#ifdef _WIN32
-#    pragma warning( disable : 4800 ) 
+#if _MSC_VER > 1920
+#    pragma warning( disable : 4800 )
 #endif // _WIN32
 
 
@@ -475,7 +475,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                     proc.Execute(scenecopy.get());
                 }
 
-                ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
+                ExportProperties emptyProperties;  // Never pass nullptr ExportProperties so Exporters don't have to worry.
                 ExportProperties* pProp = pProperties ? (ExportProperties*)pProperties : &emptyProperties;
         		pProp->SetPropertyBool("bJoinIdenticalVertices", pp & aiProcess_JoinIdenticalVertices);
                 exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProp);
@@ -580,8 +580,21 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 : mIntProperties(other.mIntProperties)
 , mFloatProperties(other.mFloatProperties)
 , mStringProperties(other.mStringProperties)
-, mMatrixProperties(other.mMatrixProperties) {
+, mMatrixProperties(other.mMatrixProperties)
+, mCallbackProperties(other.mCallbackProperties){
     // empty
+}
+
+bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
+    return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);
+}
+
+std::function<void *(void *)> ExportProperties::GetPropertyCallback(const char *szName) const {
+    return GetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, 0);
+}
+
+bool ExportProperties::HasPropertyCallback(const char *szName) const {
+    return HasGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName);
 }
 
 // ------------------------------------------------------------------------------------------------

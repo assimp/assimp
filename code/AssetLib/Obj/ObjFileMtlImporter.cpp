@@ -200,7 +200,7 @@ void ObjFileMtlImporter::load() {
 // -------------------------------------------------------------------
 //  Loads a color definition
 void ObjFileMtlImporter::getColorRGBA(aiColor3D *pColor) {
-    ai_assert(NULL != pColor);
+    ai_assert(nullptr != pColor);
 
     ai_real r(0.0), g(0.0), b(0.0);
     m_DataIt = getFloat<DataArrayIt>(m_DataIt, m_DataItEnd, r);
@@ -274,7 +274,7 @@ void ObjFileMtlImporter::createMaterial() {
 // -------------------------------------------------------------------
 //  Gets a texture name from data.
 void ObjFileMtlImporter::getTexture() {
-    aiString *out(NULL);
+    aiString *out(nullptr);
     int clampIndex = -1;
 
     const char *pPtr(&(*m_DataIt));
@@ -332,7 +332,7 @@ void ObjFileMtlImporter::getTexture() {
 
     std::string texture;
     m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, texture);
-    if (NULL != out) {
+    if (nullptr != out) {
         out->Set(texture);
     }
 }

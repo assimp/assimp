@@ -739,10 +739,13 @@ namespace glTF2 {
         // Binary chunk
         //
 
+        int GLB_Chunk_count = 1;
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
             binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
-            //auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
+            
+            auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
+            ++GLB_Chunk_count;
 
             GLB_Chunk binaryChunk;
             binaryChunk.chunkLength = binaryChunkLength;
@@ -757,7 +760,7 @@ namespace glTF2 {
             if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
                 throw DeadlyExportError("Failed to write body data!");
             }
-            if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+            if (curPaddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
                 throw DeadlyExportError("Failed to write body data padding!");
             }
         }
@@ -772,7 +775,7 @@ namespace glTF2 {
         header.version = 2;
         AI_SWAP4(header.version);
 
-        header.length = uint32_t(sizeof(GLB_Header) + 2 * sizeof(GLB_Chunk) + jsonChunkLength + binaryChunkLength);
+        header.length = uint32_t(sizeof(GLB_Header) + GLB_Chunk_count * sizeof(GLB_Chunk) + jsonChunkLength + binaryChunkLength);
         AI_SWAP4(header.length);
 
         outfile->Seek(0, aiOrigin_SET);

@@ -1,9 +1,8 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2020, assimp team
-
 
 All rights reserved.
 
@@ -63,10 +62,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
+#if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+
+#ifndef RAPIDJSON_NOMEMBERITERATORCLASS
+#define RAPIDJSON_NOMEMBERITERATORCLASS
+#endif 
+
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
+
+#if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef ASSIMP_API
 #include <assimp/ByteSwapper.h>
@@ -391,6 +406,8 @@ struct Accessor : public Object {
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
+    void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
+    void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
 
     //! Helper class to iterate the data
     class Indexer {
@@ -769,6 +786,50 @@ struct Mesh : public Object {
     void Read(Value &pJSON_Object, Asset &pAsset_Root);
 };
 
+struct CustomExtension : public Object {
+    //
+    // A struct containing custom extension data added to a glTF2 file
+    // Has to contain Object, Array, String, Double, Uint64, and Int64 at a minimum
+    // String, Double, Uint64, and Int64 are stored in the Nullables
+    // Object and Array are stored in the std::vector
+    //
+
+    Nullable<std::string> mStringValue;
+    Nullable<double> mDoubleValue;
+    Nullable<uint64_t> mUint64Value;
+    Nullable<int64_t> mInt64Value;
+    Nullable<bool> mBoolValue;
+
+    // std::vector<CustomExtension> handles both Object and Array
+    Nullable<std::vector<CustomExtension>> mValues;
+
+    operator bool() const {
+        return Size();
+    }
+
+    size_t Size() const {
+        if (mValues.isPresent) {
+            return mValues.value.size();
+        } else if (mStringValue.isPresent || mDoubleValue.isPresent || mUint64Value.isPresent || mInt64Value.isPresent || mBoolValue.isPresent) {
+            return 1;
+        }
+        return 0;
+    }
+
+    CustomExtension() = default;
+
+    CustomExtension(const CustomExtension& other)
+        : Object(other)
+        , mStringValue(other.mStringValue)
+        , mDoubleValue(other.mDoubleValue)
+        , mUint64Value(other.mUint64Value)
+        , mInt64Value(other.mInt64Value)
+        , mBoolValue(other.mBoolValue)
+        , mValues(other.mValues)
+    {
+    }
+};
+
 struct Node : public Object {
     std::vector<Ref<Node>> children;
     std::vector<Ref<Mesh>> meshes;
@@ -786,6 +847,8 @@ struct Node : public Object {
     std::string jointName; //!< Name used when this node is a joint in a skin.
 
     Ref<Node> parent; //!< This is not part of the glTF specification. Used as a helper.
+
+    CustomExtension extensions;
 
     Node() {}
     void Read(Value &obj, Asset &r);
@@ -1005,6 +1068,7 @@ public:
     } extensionsRequired;
 
     AssetMetadata asset;
+    Value* extras = nullptr;
 
     // Dictionaries for each type of object
 

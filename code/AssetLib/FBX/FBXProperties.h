@@ -110,7 +110,7 @@ public:
 
     const Property* Get(const std::string& name) const;
 
-    // PropertyTable's need not be coupled with FBX elements so this can be NULL
+    // PropertyTable's need not be coupled with FBX elements so this can be nullptr
     const Element* GetElement() const {
         return element;
     }

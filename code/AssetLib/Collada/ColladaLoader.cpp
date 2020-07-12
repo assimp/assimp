@@ -145,7 +145,7 @@ bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
     if (extension == "xml" || !extension.length() || checkSig) {
         /*  If CanRead() is called in order to check whether we
          *  support a specific file extension in general pIOHandler
-         *  might be NULL and it's our duty to return true here.
+         *  might be nullptr and it's our duty to return true here.
          */
         if (!pIOHandler) {
             return true;
@@ -316,7 +316,7 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Col
     for (const auto &nodeInst : pNode->mNodeInstances) {
         // find the corresponding node in the library
         const ColladaParser::NodeLibrary::const_iterator itt = pParser.mNodeLibrary.find(nodeInst.mNode);
-        const Collada::Node *nd = itt == pParser.mNodeLibrary.end() ? NULL : (*itt).second;
+        const Collada::Node *nd = itt == pParser.mNodeLibrary.end() ? nullptr : (*itt).second;
 
         // FIX for http://sourceforge.net/tracker/?func=detail&aid=3054873&group_id=226462&atid=1067632
         // need to check for both name and ID to catch all. To avoid breaking valid files,
@@ -716,7 +716,7 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Collada::M
                     if (targetMesh->mSubMeshes.size() > 1) {
                         throw DeadlyImportError("Morphing target mesh must be a single");
                     }
-                    aimesh = CreateMesh(pParser, targetMesh, targetMesh->mSubMeshes.at(0), NULL, 0, 0);
+                    aimesh = CreateMesh(pParser, targetMesh, targetMesh->mSubMeshes.at(0), nullptr, 0, 0);
                     mTargetMeshes.push_back(aimesh);
                 }
                 targetMeshes.push_back(aimesh);
@@ -1000,7 +1000,7 @@ void ColladaLoader::StoreAnimations(aiScene *pScene, const ColladaParser &pParse
                 combinedAnim->mChannels = new aiNodeAnim *[combinedAnim->mNumChannels];
                 // add the template anim as first channel by moving its aiNodeAnim to the combined animation
                 combinedAnim->mChannels[0] = templateAnim->mChannels[0];
-                templateAnim->mChannels[0] = NULL;
+                templateAnim->mChannels[0] = nullptr;
                 delete templateAnim;
                 // combined animation replaces template animation in the anim array
                 mAnims[a] = combinedAnim;
@@ -1009,7 +1009,7 @@ void ColladaLoader::StoreAnimations(aiScene *pScene, const ColladaParser &pParse
                 for (size_t b = 0; b < collectedAnimIndices.size(); ++b) {
                     aiAnimation *srcAnimation = mAnims[collectedAnimIndices[b]];
                     combinedAnim->mChannels[1 + b] = srcAnimation->mChannels[0];
-                    srcAnimation->mChannels[0] = NULL;
+                    srcAnimation->mChannels[0] = nullptr;
                     delete srcAnimation;
                 }
 
@@ -1116,9 +1116,9 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
 
         // find the collada node corresponding to the aiNode
         const Collada::Node *srcNode = FindNode(pParser.mRootNode, nodeName);
-        //      ai_assert( srcNode != NULL);
-        if (!srcNode)
+        if (!srcNode) {
             continue;
+        }
 
         // now check all channels if they affect the current node
         std::string targetID, subElement;
@@ -1132,8 +1132,9 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
             std::string::size_type slashPos = srcChannel.mTarget.find('/');
             if (slashPos == std::string::npos) {
                 std::string::size_type targetPos = srcChannel.mTarget.find(srcNode->mID);
-                if (targetPos == std::string::npos)
+                if (targetPos == std::string::npos) {
                     continue;
+                }
 
                 // not node transform, but something else. store as unknown animation channel for now
                 entry.mChannel = &(*cit);
@@ -1777,11 +1778,12 @@ const Collada::Node *ColladaLoader::FindNode(const Collada::Node *pNode, const s
 
     for (size_t a = 0; a < pNode->mChildren.size(); ++a) {
         const Collada::Node *node = FindNode(pNode->mChildren[a], pName);
-        if (node)
+        if (node) {
             return node;
+        }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

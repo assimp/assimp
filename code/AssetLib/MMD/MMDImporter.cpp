@@ -134,7 +134,7 @@ void MMDImporter::InternReadFile(const std::string &file, aiScene *pScene,
 // ------------------------------------------------------------------------------------------------
 void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
         aiScene *pScene) {
-    if (pModel == NULL) {
+    if (pModel == nullptr) {
         return;
     }
 

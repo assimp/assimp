@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #    pragma warning(push)
 #    pragma warning(disable : 4127 4456 4245 4512 )
 #endif // _WIN32 
@@ -727,7 +727,7 @@ struct InternGenericConvert<Maybe<T>> {
     }
 };
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #pragma warning(push)
 #pragma warning(disable : 4127)
 #endif // _WIN32
@@ -960,7 +960,7 @@ private:
     const EXPRESS::ConversionSchema *schema;
 };
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #pragma warning(pop)
 #endif // _WIN32
 

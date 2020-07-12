@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <assimp/vector3.h>
+#include <stddef.h>
 #include <vector>
 
 struct aiMesh;

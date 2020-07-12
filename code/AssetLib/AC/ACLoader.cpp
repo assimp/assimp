@@ -627,7 +627,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     std::unique_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
                     ASSIMP_LOG_INFO("AC3D: Evaluating subdivision surface: " + object.name);
 
-                    std::vector<aiMesh *> cpy(meshes.size() - oldm, NULL);
+                    std::vector<aiMesh *> cpy(meshes.size() - oldm, nullptr);
                     div->Subdivide(&meshes[oldm], cpy.size(), &cpy.front(), object.subDiv, true);
                     std::copy(cpy.begin(), cpy.end(), meshes.begin() + oldm);
 

@@ -40,15 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
 /** @file Defines the helper data structures for importing ASE files  */
 #ifndef AI_ASEFILEHELPER_H_INC
 #define AI_ASEFILEHELPER_H_INC
 
 // public ASSIMP headers
-#include <assimp/types.h>
-#include <assimp/mesh.h>
 #include <assimp/anim.h>
+#include <assimp/mesh.h>
+#include <assimp/types.h>
 
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
@@ -59,27 +58,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "AssetLib/3DS/3DSLoader.h"
 
-namespace Assimp    {
-namespace ASE   {
+namespace Assimp {
+namespace ASE {
 
 using namespace D3DS;
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing an ASE material */
-struct Material : public D3DS::Material
-{
+struct Material : public D3DS::Material {
     //! Default constructor has been deleted
     Material() = delete;
 
     //! Constructor with explicit name
-    explicit Material(const std::string &name)
-    : D3DS::Material(name)
-    , pcInstance(NULL)
-    , bNeed (false) {
+    explicit Material(const std::string &name) :
+            D3DS::Material(name),
+            pcInstance(nullptr),
+            bNeed(false) {
         // empty
     }
 
-    Material(const Material &other)            = default;
+    Material(const Material &other) = default;
 
     Material &operator=(const Material &other) {
         if (this == &other) {
@@ -93,19 +91,16 @@ struct Material : public D3DS::Material
         return *this;
     }
 
-
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
     Material(Material &&other) AI_NO_EXCEPT
-    : D3DS::Material(std::move(other))
-    , avSubMaterials(std::move(other.avSubMaterials))
-    , pcInstance(std::move(other.pcInstance))
-    , bNeed(std::move(other.bNeed))
-    {
+            : D3DS::Material(std::move(other)),
+              avSubMaterials(std::move(other.avSubMaterials)),
+              pcInstance(std::move(other.pcInstance)),
+              bNeed(std::move(other.bNeed)) {
         other.pcInstance = nullptr;
     }
 
-
-    Material &operator=( Material &&other) AI_NO_EXCEPT {
+    Material &operator=(Material &&other) AI_NO_EXCEPT {
         if (this == &other) {
             return *this;
         }
@@ -121,15 +116,13 @@ struct Material : public D3DS::Material
         return *this;
     }
 
-
     ~Material() {}
-
 
     //! Contains all sub materials of this material
     std::vector<Material> avSubMaterials;
 
     //! aiMaterial object
-    aiMaterial* pcInstance;
+    aiMaterial *pcInstance;
 
     //! Can we remove this material?
     bool bNeed;
@@ -140,8 +133,8 @@ struct Material : public D3DS::Material
 struct Face : public FaceWithSmoothingGroup {
     //! Default constructor. Initializes everything with 0
     Face() AI_NO_EXCEPT
-    : iMaterial(DEFAULT_MATINDEX)
-    , iFace(0) {
+            : iMaterial(DEFAULT_MATINDEX),
+              iFace(0) {
         // empty
     }
 
@@ -172,8 +165,8 @@ struct Bone {
     Bone() = delete;
 
     //! Construction from an existing name
-    explicit Bone( const std::string& name)
-    : mName(name) {
+    explicit Bone(const std::string &name) :
+            mName(name) {
         // empty
     }
 
@@ -186,33 +179,34 @@ struct Bone {
 struct BoneVertex {
     //! Bone and corresponding vertex weight.
     //! -1 for unrequired bones ....
-    std::vector<std::pair<int,float> > mBoneWeights;
+    std::vector<std::pair<int, float>> mBoneWeights;
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE file animation */
 struct Animation {
     enum Type {
-        TRACK   = 0x0,
-        BEZIER  = 0x1,
-        TCB     = 0x2
-    } mRotationType, mScalingType, mPositionType;
+        TRACK = 0x0,
+        BEZIER = 0x1,
+        TCB = 0x2
+    } mRotationType,
+            mScalingType, mPositionType;
 
     Animation() AI_NO_EXCEPT
-    :   mRotationType   (TRACK)
-    ,   mScalingType    (TRACK)
-    ,   mPositionType   (TRACK) {
+            : mRotationType(TRACK),
+              mScalingType(TRACK),
+              mPositionType(TRACK) {
         // empty
     }
 
     //! List of track rotation keyframes
-    std::vector< aiQuatKey > akeyRotations;
+    std::vector<aiQuatKey> akeyRotations;
 
     //! List of track position keyframes
-    std::vector< aiVectorKey > akeyPositions;
+    std::vector<aiVectorKey> akeyPositions;
 
     //! List of track scaling keyframes
-    std::vector< aiVectorKey > akeyScaling;
+    std::vector<aiVectorKey> akeyScaling;
 };
 
 // ---------------------------------------------------------------------------
@@ -220,7 +214,7 @@ struct Animation {
 struct InheritanceInfo {
     //! Default constructor
     InheritanceInfo() AI_NO_EXCEPT {
-        for ( size_t i=0; i<3; ++i ) {
+        for (size_t i = 0; i < 3; ++i) {
             abInheritPosition[i] = abInheritRotation[i] = abInheritScaling[i] = true;
         }
     }
@@ -239,17 +233,15 @@ struct InheritanceInfo {
 /** Represents an ASE file node. Base class for mesh, light and cameras */
 struct BaseNode {
     enum Type {
-        Light, 
-        Camera, 
-        Mesh, 
+        Light,
+        Camera,
+        Mesh,
         Dummy
     } mType;
 
     //! Construction from an existing name
-    BaseNode(Type _mType, const std::string &name)
-    : mType         (_mType)
-    , mName         (name)
-    , mProcessed    (false) {
+    BaseNode(Type _mType, const std::string &name) :
+            mType(_mType), mName(name), mProcessed(false) {
         // Set mTargetPosition to qnan
         const ai_real qnan = get_qnan();
         mTargetPosition.x = qnan;
@@ -289,14 +281,9 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode {
     Mesh() = delete;
 
     //! Construction from an existing name
-    explicit Mesh(const std::string &name)
-    : BaseNode( BaseNode::Mesh, name )
-    , mVertexColors()
-    , mBoneVertices()
-    , mBones()
-    , iMaterialIndex(Face::DEFAULT_MATINDEX)
-    , bSkip     (false) {
-        for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS;++c) {
+    explicit Mesh(const std::string &name) :
+            BaseNode(BaseNode::Mesh, name), mVertexColors(), mBoneVertices(), mBones(), iMaterialIndex(Face::DEFAULT_MATINDEX), bSkip(false) {
+        for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++c) {
             this->mNumUVComponents[c] = 2;
         }
     }
@@ -325,10 +312,8 @@ struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode {
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE light source */
-struct Light : public BaseNode
-{
-    enum LightType
-    {
+struct Light : public BaseNode {
+    enum LightType {
         OMNI,
         TARGET,
         FREE,
@@ -339,16 +324,12 @@ struct Light : public BaseNode
     Light() = delete;
 
     //! Construction from an existing name
-    explicit Light(const std::string &name)
-    : BaseNode   (BaseNode::Light, name)
-    , mLightType (OMNI)
-    , mColor     (1.f,1.f,1.f)
-    , mIntensity (1.f) // light is white by default
-    , mAngle     (45.f)
-    , mFalloff   (0.f)
-    {
+    explicit Light(const std::string &name) :
+            BaseNode(BaseNode::Light, name), mLightType(OMNI), mColor(1.f, 1.f, 1.f), mIntensity(1.f) // light is white by default
+            ,
+            mAngle(45.f),
+            mFalloff(0.f) {
     }
-
 
     LightType mLightType;
     aiColor3D mColor;
@@ -359,10 +340,8 @@ struct Light : public BaseNode
 
 // ---------------------------------------------------------------------------
 /** Helper structure to represent an ASE camera */
-struct Camera : public BaseNode
-{
-    enum CameraType
-    {
+struct Camera : public BaseNode {
+    enum CameraType {
         FREE,
         TARGET
     };
@@ -370,17 +349,15 @@ struct Camera : public BaseNode
     //! Default constructor has been deleted
     Camera() = delete;
 
-
     //! Construction from an existing name
-    explicit Camera(const std::string &name)
-    : BaseNode    (BaseNode::Camera, name)
-    , mFOV        (0.75f)   // in radians
-    , mNear       (0.1f)
-    , mFar        (1000.f)  // could be zero
-    , mCameraType (FREE)
-    {
+    explicit Camera(const std::string &name) :
+            BaseNode(BaseNode::Camera, name), mFOV(0.75f) // in radians
+            ,
+            mNear(0.1f),
+            mFar(1000.f) // could be zero
+            ,
+            mCameraType(FREE) {
     }
-
 
     ai_real mFOV, mNear, mFar;
     CameraType mCameraType;
@@ -391,7 +368,7 @@ struct Camera : public BaseNode
 struct Dummy : public BaseNode {
     //! Constructor
     Dummy() AI_NO_EXCEPT
-    : BaseNode  (BaseNode::Dummy, "DUMMY") {
+            : BaseNode(BaseNode::Dummy, "DUMMY") {
         // empty
     }
 };
@@ -414,7 +391,6 @@ private:
     }
 
 public:
-
     // -------------------------------------------------------------------
     //! Construct a parser from a given input file which is
     //! guaranteed to be terminated with zero.
@@ -422,15 +398,13 @@ public:
     //! @param fileFormatDefault Assumed file format version. If the
     //!   file format is specified in the file the new value replaces
     //!   the default value.
-    Parser (const char* szFile, unsigned int fileFormatDefault);
+    Parser(const char *szFile, unsigned int fileFormatDefault);
 
     // -------------------------------------------------------------------
     //! Parses the file into the parsers internal representation
     void Parse();
 
-
 private:
-
     // -------------------------------------------------------------------
     //! Parse the *SCENE block in a file
     void ParseLV1SceneBlock();
@@ -446,45 +420,45 @@ private:
     // -------------------------------------------------------------------
     //! Parse a *<xxx>OBJECT block in a file
     //! \param mesh Node to be filled
-    void ParseLV1ObjectBlock(BaseNode& mesh);
+    void ParseLV1ObjectBlock(BaseNode &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MATERIAL blocks in a material list
     //! \param mat Material structure to be filled
-    void ParseLV2MaterialBlock(Material& mat);
+    void ParseLV2MaterialBlock(Material &mat);
 
     // -------------------------------------------------------------------
     //! Parse a *NODE_TM block in a file
     //! \param mesh Node (!) object to be filled
-    void ParseLV2NodeTransformBlock(BaseNode& mesh);
+    void ParseLV2NodeTransformBlock(BaseNode &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *TM_ANIMATION block in a file
     //! \param mesh Mesh object to be filled
-    void ParseLV2AnimationBlock(BaseNode& mesh);
-    void ParseLV3PosAnimationBlock(ASE::Animation& anim);
-    void ParseLV3ScaleAnimationBlock(ASE::Animation& anim);
-    void ParseLV3RotAnimationBlock(ASE::Animation& anim);
+    void ParseLV2AnimationBlock(BaseNode &mesh);
+    void ParseLV3PosAnimationBlock(ASE::Animation &anim);
+    void ParseLV3ScaleAnimationBlock(ASE::Animation &anim);
+    void ParseLV3RotAnimationBlock(ASE::Animation &anim);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH block in a file
     //! \param mesh Mesh object to be filled
-    void ParseLV2MeshBlock(Mesh& mesh);
+    void ParseLV2MeshBlock(Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *LIGHT_SETTINGS block in a file
     //! \param light Light object to be filled
-    void ParseLV2LightSettingsBlock(Light& light);
+    void ParseLV2LightSettingsBlock(Light &light);
 
     // -------------------------------------------------------------------
     //! Parse a *CAMERA_SETTINGS block in a file
     //! \param cam Camera object to be filled
-    void ParseLV2CameraSettingsBlock(Camera& cam);
+    void ParseLV2CameraSettingsBlock(Camera &cam);
 
     // -------------------------------------------------------------------
     //! Parse the *MAP_XXXXXX blocks in a material
     //! \param map Texture structure to be filled
-    void ParseLV3MapBlock(Texture& map);
+    void ParseLV3MapBlock(Texture &map);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_VERTEX_LIST block in a file
@@ -493,7 +467,7 @@ private:
     //! A warning is sent to the logger if the validations fails.
     //! \param mesh Mesh object to be filled
     void ParseLV3MeshVertexListBlock(
-        unsigned int iNumVertices,Mesh& mesh);
+            unsigned int iNumVertices, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_FACE_LIST block in a file
@@ -502,7 +476,7 @@ private:
     //! A warning is sent to the logger if the validations fails.
     //! \param mesh Mesh object to be filled
     void ParseLV3MeshFaceListBlock(
-        unsigned int iNumFaces,Mesh& mesh);
+            unsigned int iNumFaces, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_TVERT_LIST block in a file
@@ -512,7 +486,7 @@ private:
     //! \param mesh Mesh object to be filled
     //! \param iChannel Output UVW channel
     void ParseLV3MeshTListBlock(
-        unsigned int iNumVertices,Mesh& mesh, unsigned int iChannel = 0);
+            unsigned int iNumVertices, Mesh &mesh, unsigned int iChannel = 0);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_TFACELIST block in a file
@@ -522,7 +496,7 @@ private:
     //! \param mesh Mesh object to be filled
     //! \param iChannel Output UVW channel
     void ParseLV3MeshTFaceListBlock(
-        unsigned int iNumFaces,Mesh& mesh, unsigned int iChannel = 0);
+            unsigned int iNumFaces, Mesh &mesh, unsigned int iChannel = 0);
 
     // -------------------------------------------------------------------
     //! Parse an additional mapping channel
@@ -530,7 +504,7 @@ private:
     //! \param iChannel Channel index to be filled
     //! \param mesh Mesh object to be filled
     void ParseLV3MappingChannel(
-        unsigned int iChannel, Mesh& mesh);
+            unsigned int iChannel, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_CVERTLIST block in a file
@@ -539,7 +513,7 @@ private:
     //! A warning is sent to the logger if the validations fails.
     //! \param mesh Mesh object to be filled
     void ParseLV3MeshCListBlock(
-        unsigned int iNumVertices, Mesh& mesh);
+            unsigned int iNumVertices, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_CFACELIST block in a file
@@ -548,70 +522,70 @@ private:
     //! A warning is sent to the logger if the validations fails.
     //! \param mesh Mesh object to be filled
     void ParseLV3MeshCFaceListBlock(
-        unsigned int iNumFaces, Mesh& mesh);
+            unsigned int iNumFaces, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_NORMALS block in a file
     //! \param mesh Mesh object to be filled
-    void ParseLV3MeshNormalListBlock(Mesh& mesh);
+    void ParseLV3MeshNormalListBlock(Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_WEIGHTSblock in a file
     //! \param mesh Mesh object to be filled
-    void ParseLV3MeshWeightsBlock(Mesh& mesh);
+    void ParseLV3MeshWeightsBlock(Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse the bone list of a file
     //! \param mesh Mesh object to be filled
     //! \param iNumBones Number of bones in the mesh
-    void ParseLV4MeshBones(unsigned int iNumBones,Mesh& mesh);
+    void ParseLV4MeshBones(unsigned int iNumBones, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse the bone vertices list of a file
     //! \param mesh Mesh object to be filled
     //! \param iNumVertices Number of vertices to be parsed
-    void ParseLV4MeshBonesVertices(unsigned int iNumVertices,Mesh& mesh);
+    void ParseLV4MeshBonesVertices(unsigned int iNumVertices, Mesh &mesh);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_FACE block in a file
     //! \param out receive the face data
-    void ParseLV4MeshFace(ASE::Face& out);
+    void ParseLV4MeshFace(ASE::Face &out);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_VERT block in a file
     //! (also works for MESH_TVERT, MESH_CFACE, MESH_VERTCOL  ...)
     //! \param apOut Output buffer (3 floats)
     //! \param rIndexOut Output index
-    void ParseLV4MeshFloatTriple(ai_real* apOut, unsigned int& rIndexOut);
+    void ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_VERT block in a file
     //! (also works for MESH_TVERT, MESH_CFACE, MESH_VERTCOL  ...)
     //! \param apOut Output buffer (3 floats)
-    void ParseLV4MeshFloatTriple(ai_real* apOut);
+    void ParseLV4MeshFloatTriple(ai_real *apOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_TFACE block in a file
     //! (also works for MESH_CFACE)
     //! \param apOut Output buffer (3 ints)
     //! \param rIndexOut Output index
-    void ParseLV4MeshLongTriple(unsigned int* apOut, unsigned int& rIndexOut);
+    void ParseLV4MeshLongTriple(unsigned int *apOut, unsigned int &rIndexOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_TFACE block in a file
     //! (also works for MESH_CFACE)
     //! \param apOut Output buffer (3 ints)
-    void ParseLV4MeshLongTriple(unsigned int* apOut);
+    void ParseLV4MeshLongTriple(unsigned int *apOut);
 
     // -------------------------------------------------------------------
     //! Parse a single float element
     //! \param fOut Output float
-    void ParseLV4MeshFloat(ai_real& fOut);
+    void ParseLV4MeshFloat(ai_real &fOut);
 
     // -------------------------------------------------------------------
     //! Parse a single int element
     //! \param iOut Output integer
-    void ParseLV4MeshLong(unsigned int& iOut);
+    void ParseLV4MeshLong(unsigned int &iOut);
 
     // -------------------------------------------------------------------
     //! Skip everything to the next: '*' or '\0'
@@ -625,17 +599,17 @@ private:
     // -------------------------------------------------------------------
     //! Output a warning to the logger
     //! \param szWarn Warn message
-    void LogWarning(const char* szWarn);
+    void LogWarning(const char *szWarn);
 
     // -------------------------------------------------------------------
     //! Output a message to the logger
     //! \param szWarn Message
-    void LogInfo(const char* szWarn);
+    void LogInfo(const char *szWarn);
 
     // -------------------------------------------------------------------
     //! Output an error to the logger
     //! \param szWarn Error message
-    AI_WONT_RETURN void LogError(const char* szWarn) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void LogError(const char *szWarn) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     //! Parse a string, enclosed in double quotation marks
@@ -643,12 +617,11 @@ private:
     //! \param szName Name of the enclosing element -> used in error
     //! messages.
     //! \return false if an error occurred
-    bool ParseString(std::string& out,const char* szName);
+    bool ParseString(std::string &out, const char *szName);
 
 public:
-
     //! Pointer to current data
-    const char* filePtr;
+    const char *filePtr;
 
     //! background color to be passed to the viewer
     //! QNAN if none was found
@@ -695,9 +668,8 @@ public:
     unsigned int iFileFormat;
 };
 
-
 } // Namespace ASE
-} // Namespace ASSIMP
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 

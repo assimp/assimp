@@ -220,8 +220,8 @@ private:
     *    each output vertex the DOM index it maps to.
     */
     void ConvertWeights(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
-                        aiNode *parent = NULL, unsigned int materialIndex = NO_MATERIAL_SEPARATION,
-                        std::vector<unsigned int> *outputVertStartIndices = NULL);
+            aiNode *parent = nullptr, unsigned int materialIndex = NO_MATERIAL_SEPARATION,
+            std::vector<unsigned int> *outputVertStartIndices = nullptr);
 
     // ------------------------------------------------------------------------------------------------
     void ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,

@@ -139,8 +139,9 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
-    if( file.get() == NULL)
-        throw DeadlyImportError( "Failed to open IRRMESH file " + pFile + "");
+    if (file.get() == nullptr) {
+        throw DeadlyImportError("Failed to open IRRMESH file " + pFile + ".");
+    }
 
     // Construct the irrXML parser
     CIrrXML_IOStreamReader st(file.get());

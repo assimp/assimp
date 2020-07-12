@@ -364,7 +364,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
 void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
         unsigned int iType,
         unsigned int *piSkip) {
-    ai_assert(NULL != piSkip);
+    ai_assert(nullptr != piSkip);
     bool bNoRead = *piSkip == UINT_MAX;
 
     // allocate a new texture object
@@ -428,7 +428,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
             delete[] pc;
         }
     } else {
-        pcNew->pcData = NULL;
+        pcNew->pcData = nullptr;
         delete pcNew;
     }
     return;

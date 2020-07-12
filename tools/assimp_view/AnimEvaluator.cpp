@@ -47,10 +47,11 @@ using namespace AssimpView;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor on a given animation.
-AnimEvaluator::AnimEvaluator( const aiAnimation *pAnim )
-: mAnim(pAnim)
-, mLastTime(0.0) {
-    mLastPositions.resize( pAnim->mNumChannels, std::make_tuple( 0, 0, 0));
+AnimEvaluator::AnimEvaluator(const aiAnimation *pAnim) :
+        mAnim(pAnim),
+        mLastTime(0.0) {
+    ai_assert(nullptr != pAnim);
+    mLastPositions.resize(pAnim->mNumChannels, std::make_tuple(0, 0, 0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ AnimEvaluator::~AnimEvaluator() {
 
 // ------------------------------------------------------------------------------------------------
 // Evaluates the animation tracks for a given time stamp.
-void AnimEvaluator::Evaluate( double pTime ) {
+void AnimEvaluator::Evaluate(double pTime) {
     // extract ticks per second. Assume default value if not given
     double ticksPerSecond = mAnim->mTicksPerSecond != 0.0 ? mAnim->mTicksPerSecond : 25.0;
     // every following time calculation happens in ticks
@@ -78,16 +79,16 @@ void AnimEvaluator::Evaluate( double pTime ) {
     }
 
     // calculate the transformations for each animation channel
-    for( unsigned int a = 0; a < mAnim->mNumChannels; ++a ) {
-        const aiNodeAnim* channel = mAnim->mChannels[a];
+    for (unsigned int a = 0; a < mAnim->mNumChannels; ++a) {
+        const aiNodeAnim *channel = mAnim->mChannels[a];
 
         // ******** Position *****
-        aiVector3D presentPosition( 0, 0, 0);
-        if( channel->mNumPositionKeys > 0) {
+        aiVector3D presentPosition(0, 0, 0);
+        if (channel->mNumPositionKeys > 0) {
             // Look for present frame number. Search from last position if time is after the last time, else from beginning
             // Should be much quicker than always looking from start for the average use case.
             unsigned int frame = (time >= mLastTime) ? std::get<0>(mLastPositions[a]) : 0;
-            while( frame < channel->mNumPositionKeys - 1) {
+            while (frame < channel->mNumPositionKeys - 1) {
                 if (time < channel->mPositionKeys[frame + 1].mTime) {
                     break;
                 }
@@ -96,14 +97,14 @@ void AnimEvaluator::Evaluate( double pTime ) {
 
             // interpolate between this frame's value and next frame's value
             unsigned int nextFrame = (frame + 1) % channel->mNumPositionKeys;
-            const aiVectorKey& key = channel->mPositionKeys[frame];
-            const aiVectorKey& nextKey = channel->mPositionKeys[nextFrame];
+            const aiVectorKey &key = channel->mPositionKeys[frame];
+            const aiVectorKey &nextKey = channel->mPositionKeys[nextFrame];
             double diffTime = nextKey.mTime - key.mTime;
             if (diffTime < 0.0) {
                 diffTime += mAnim->mDuration;
             }
-            if( diffTime > 0) {
-                float factor = float( (time - key.mTime) / diffTime);
+            if (diffTime > 0) {
+                float factor = float((time - key.mTime) / diffTime);
                 presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
             } else {
                 presentPosition = key.mValue;
@@ -113,10 +114,10 @@ void AnimEvaluator::Evaluate( double pTime ) {
         }
 
         // ******** Rotation *********
-        aiQuaternion presentRotation( 1, 0, 0, 0);
-        if( channel->mNumRotationKeys > 0) {
+        aiQuaternion presentRotation(1, 0, 0, 0);
+        if (channel->mNumRotationKeys > 0) {
             unsigned int frame = (time >= mLastTime) ? std::get<1>(mLastPositions[a]) : 0;
-            while( frame < channel->mNumRotationKeys - 1) {
+            while (frame < channel->mNumRotationKeys - 1) {
                 if (time < channel->mRotationKeys[frame + 1].mTime) {
                     break;
                 }
@@ -125,15 +126,15 @@ void AnimEvaluator::Evaluate( double pTime ) {
 
             // interpolate between this frame's value and next frame's value
             unsigned int nextFrame = (frame + 1) % channel->mNumRotationKeys;
-            const aiQuatKey& key = channel->mRotationKeys[frame];
-            const aiQuatKey& nextKey = channel->mRotationKeys[nextFrame];
+            const aiQuatKey &key = channel->mRotationKeys[frame];
+            const aiQuatKey &nextKey = channel->mRotationKeys[nextFrame];
             double diffTime = nextKey.mTime - key.mTime;
             if (diffTime < 0.0) {
                 diffTime += mAnim->mDuration;
             }
-            if( diffTime > 0) {
-                float factor = float( (time - key.mTime) / diffTime);
-                aiQuaternion::Interpolate( presentRotation, key.mValue, nextKey.mValue, factor);
+            if (diffTime > 0) {
+                float factor = float((time - key.mTime) / diffTime);
+                aiQuaternion::Interpolate(presentRotation, key.mValue, nextKey.mValue, factor);
             } else {
                 presentRotation = key.mValue;
             }
@@ -142,10 +143,10 @@ void AnimEvaluator::Evaluate( double pTime ) {
         }
 
         // ******** Scaling **********
-        aiVector3D presentScaling( 1, 1, 1);
-        if( channel->mNumScalingKeys > 0) {
+        aiVector3D presentScaling(1, 1, 1);
+        if (channel->mNumScalingKeys > 0) {
             unsigned int frame = (time >= mLastTime) ? std::get<2>(mLastPositions[a]) : 0;
-            while( frame < channel->mNumScalingKeys - 1) {
+            while (frame < channel->mNumScalingKeys - 1) {
                 if (time < channel->mScalingKeys[frame + 1].mTime) {
                     break;
                 }
@@ -158,12 +159,20 @@ void AnimEvaluator::Evaluate( double pTime ) {
         }
 
         // build a transformation matrix from it
-        aiMatrix4x4& mat = mTransforms[a];
-        mat = aiMatrix4x4( presentRotation.GetMatrix());
-        mat.a1 *= presentScaling.x; mat.b1 *= presentScaling.x; mat.c1 *= presentScaling.x;
-        mat.a2 *= presentScaling.y; mat.b2 *= presentScaling.y; mat.c2 *= presentScaling.y;
-        mat.a3 *= presentScaling.z; mat.b3 *= presentScaling.z; mat.c3 *= presentScaling.z;
-        mat.a4 = presentPosition.x; mat.b4 = presentPosition.y; mat.c4 = presentPosition.z;
+        aiMatrix4x4 &mat = mTransforms[a];
+        mat = aiMatrix4x4(presentRotation.GetMatrix());
+        mat.a1 *= presentScaling.x;
+        mat.b1 *= presentScaling.x;
+        mat.c1 *= presentScaling.x;
+        mat.a2 *= presentScaling.y;
+        mat.b2 *= presentScaling.y;
+        mat.c2 *= presentScaling.y;
+        mat.a3 *= presentScaling.z;
+        mat.b3 *= presentScaling.z;
+        mat.c3 *= presentScaling.z;
+        mat.a4 = presentPosition.x;
+        mat.b4 = presentPosition.y;
+        mat.c4 = presentPosition.z;
     }
 
     mLastTime = time;

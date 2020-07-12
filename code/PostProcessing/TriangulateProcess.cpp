@@ -161,7 +161,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     // Just another check whether aiMesh::mPrimitiveTypes is correct
     ai_assert(numOut != pMesh->mNumFaces);
 
-    aiVector3D* nor_out = NULL;
+    aiVector3D *nor_out = nullptr;
 
     // if we don't have normals yet, but expect them to be a cheap side
     // product of triangulation anyway, allocate storage for them.
@@ -220,7 +220,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
 
-            face.mIndices = NULL;
+            face.mIndices = nullptr;
             continue;
         }
         // optimized code for quadrilaterals
@@ -272,7 +272,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             sface.mIndices[2] = temp[(start_vertex + 3) % 4];
 
             // prevent double deletion of the indices field
-            face.mIndices = NULL;
+            face.mIndices = nullptr;
             continue;
         }
         else
@@ -490,7 +490,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             //  drop dumb 0-area triangles - deactivated for now:
             //FindDegenerates post processing step can do the same thing
             //if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
-            //    ASSIMP_LOG_DEBUG("Dropping triangle with area 0");
+            //    ASSIMP_LOG_VERBOSE_DEBUG("Dropping triangle with area 0");
             //    --curOut;
 
             //    delete[] f->mIndices;
@@ -511,7 +511,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         }
 
         delete[] face.mIndices;
-        face.mIndices = NULL;
+        face.mIndices = nullptr;
     }
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS

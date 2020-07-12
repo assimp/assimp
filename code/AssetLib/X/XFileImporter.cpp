@@ -113,7 +113,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const {
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
     // read file into memory
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
-    if ( file.get() == NULL ) {
+    if ( file.get() == nullptr ) {
         throw DeadlyImportError( "Failed to open file " + pFile + "." );
     }
 

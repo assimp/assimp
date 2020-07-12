@@ -126,7 +126,7 @@ public:
     bool GetProperty(const char *name, T *&out) const {
         THeapData<T> *t = (THeapData<T> *)GetPropertyInternal(name);
         if (!t) {
-            out = NULL;
+            out = nullptr;
             return false;
         }
         out = t->data;
@@ -202,7 +202,7 @@ public:
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * The function deletes the scene if the postprocess step fails (
-    * the object pointer will be set to NULL).
+    * the object pointer will be set to nullptr).
     * @param pImp Importer instance (pImp->mScene must be valid)
     */
     void ExecuteOnScene(Importer *pImp);
@@ -225,7 +225,7 @@ public:
     // -------------------------------------------------------------------
     /** Assign a new SharedPostProcessInfo to the step. This object
      *  allows multiple postprocess steps to share data.
-     * @param sh May be NULL
+     * @param sh May be nullptr
     */
     inline void SetSharedData(SharedPostProcessInfo *sh) {
         shared = sh;

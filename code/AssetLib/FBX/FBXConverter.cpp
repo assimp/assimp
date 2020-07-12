@@ -105,7 +105,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     // The idea here is to traverse all objects to find these Textures and convert them,
     // so later during material conversion it will find converted texture in the textures_converted array.
     if (doc.Settings().readTextures) {
-        ConvertOrphantEmbeddedTextures();
+        ConvertOrphanedEmbeddedTextures();
     }
     ConvertRootNode();
 
@@ -804,11 +804,6 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
         aiMatrix4x4::Translation(-GeometricTranslation, chain[TransformationComp_GeometricTranslationInverse]);
     }
 
-    // is_complex needs to be consistent with NeedsComplexTransformationChain()
-    // or the interplay between this code and the animation converter would
-    // not be guaranteed.
-    //ai_assert(NeedsComplexTransformationChain(model) == ((chainBits & chainMaskComplex) != 0));
-
     // now, if we have more than just Translation, Scaling and Rotation,
     // we need to generate a full node chain to accommodate for assimp's
     // lack to express pivots and offsets.
@@ -1163,7 +1158,8 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
                 const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
                 const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
-                animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
+                //losing channel name if using shapeGeometry->Name()
+                animMesh->mName.Set(FixAnimMeshName(blendShapeChannel->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
@@ -1289,7 +1285,8 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
         }
 
         if (binormals) {
-            ai_assert(tangents.size() == vertices.size() && binormals->size() == vertices.size());
+            ai_assert(tangents.size() == vertices.size());
+            ai_assert(binormals->size() == vertices.size());
 
             out_mesh->mTangents = new aiVector3D[vertices.size()];
             out_mesh->mBitangents = new aiVector3D[vertices.size()];
@@ -1542,10 +1539,10 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
     aiBone *bone = nullptr;
 
     if (bone_map.count(deformer_name)) {
-        ASSIMP_LOG_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("retrieved bone from lookup ", bone_name.C_Str(), ". Deformer:", deformer_name);
         bone = bone_map[deformer_name];
     } else {
-        ASSIMP_LOG_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
+        ASSIMP_LOG_VERBOSE_DEBUG_F("created new bone ", bone_name.C_Str(), ". Deformer: ", deformer_name);
         bone = new aiBone();
         bone->mName = bone_name;
 
@@ -1991,6 +1988,7 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "ShininessExponent", aiTextureType_SHININESS, mesh);
     TrySetTextureProperties(out_mat, _textures, "TransparencyFactor", aiTextureType_OPACITY, mesh);
     TrySetTextureProperties(out_mat, _textures, "EmissiveFactor", aiTextureType_EMISSIVE, mesh);
+    TrySetTextureProperties(out_mat, _textures, "ReflectionFactor", aiTextureType_METALNESS, mesh);
     //Maya counterparts
     TrySetTextureProperties(out_mat, _textures, "Maya|DiffuseTexture", aiTextureType_DIFFUSE, mesh);
     TrySetTextureProperties(out_mat, _textures, "Maya|NormalTexture", aiTextureType_NORMALS, mesh);
@@ -1999,19 +1997,19 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "Maya|ReflectionMapTexture", aiTextureType_REFLECTION, mesh);
 
     // Maya PBR
-    TrySetTextureProperties(out_mat, _textures, "Maya|baseColor|file", aiTextureType_BASE_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|normalCamera|file", aiTextureType_NORMAL_CAMERA, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|emissionColor|file", aiTextureType_EMISSION_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|metalness|file", aiTextureType_METALNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|diffuseRoughness|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|baseColor", aiTextureType_BASE_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|normalCamera", aiTextureType_NORMAL_CAMERA, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|emissionColor", aiTextureType_EMISSION_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|metalness", aiTextureType_METALNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|diffuseRoughness", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
 
     // Maya stingray
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_color_map|file", aiTextureType_BASE_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_normal_map|file", aiTextureType_NORMAL_CAMERA, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_emissive_map|file", aiTextureType_EMISSION_COLOR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_metallic_map|file", aiTextureType_METALNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_roughness_map|file", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_ao_map|file", aiTextureType_AMBIENT_OCCLUSION, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_color_map", aiTextureType_BASE_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_normal_map", aiTextureType_NORMAL_CAMERA, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_emissive_map", aiTextureType_EMISSION_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_metallic_map", aiTextureType_METALNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|TEX_ao_map", aiTextureType_AMBIENT_OCCLUSION, mesh);
 
     // 3DSMax PBR
     TrySetTextureProperties(out_mat, _textures, "3dsMax|Parameters|base_color_map", aiTextureType_BASE_COLOR, mesh);
@@ -2719,7 +2717,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
             if (doc.Settings().optimizeEmptyAnimationCurves &&
                     IsRedundantAnimationData(target, comp, (chain[i]->second))) {
 
-                FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
+                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node " + target.Name());
                 continue;
             }
 
@@ -3164,7 +3162,8 @@ FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList(const std::vector<c
             }
 
             const AnimationCurve *const curve = kv.second;
-            ai_assert(curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size());
+            ai_assert(curve->GetKeys().size() == curve->GetValues().size());
+            ai_assert(curve->GetKeys().size());
 
             //get values within the start/stop time window
             std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
@@ -3315,6 +3314,7 @@ void FBXConverter::InterpolateKeys(aiQuatKey *valOut, const KeyTimeList &keys, c
         // http://www.3dkingdoms.com/weekly/weekly.php?a=36
         if (quat.x * lastq.x + quat.y * lastq.y + quat.z * lastq.z + quat.w * lastq.w < 0) {
             quat.Conjugate();
+            quat.w = -quat.w;
         }
         lastq = quat;
 
@@ -3466,7 +3466,7 @@ void FBXConverter::TransferDataToScene() {
     }
 }
 
-void FBXConverter::ConvertOrphantEmbeddedTextures() {
+void FBXConverter::ConvertOrphanedEmbeddedTextures() {
     // in C++14 it could be:
     // for (auto&& [id, object] : objects)
     for (auto &&id_and_object : doc.Objects()) {

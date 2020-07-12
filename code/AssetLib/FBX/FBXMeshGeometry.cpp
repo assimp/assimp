@@ -241,7 +241,7 @@ const MatIndexArray& MeshGeometry::GetMaterialIndices() const {
 // ------------------------------------------------------------------------------------------------
 const unsigned int* MeshGeometry::ToOutputVertexIndex( unsigned int in_index, unsigned int& count ) const {
     if ( in_index >= m_mapping_counts.size() ) {
-        return NULL;
+        return nullptr;
     }
 
     ai_assert( m_mapping_counts.size() == m_mapping_offsets.size() );

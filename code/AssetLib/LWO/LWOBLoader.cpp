@@ -255,7 +255,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 
     mSurfaces->push_back( LWO::Surface () );
     LWO::Surface& surf = mSurfaces->back();
-    LWO::Texture* pTex = NULL;
+    LWO::Texture *pTex = nullptr;
 
     GetS0(surf.mName,size);
     bool running = true;

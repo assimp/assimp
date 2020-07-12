@@ -223,7 +223,7 @@ public:
             }
 
             if ( (std::string)curveSegment.Transition != "CONTINUOUS" ) {
-                IFCImporter::LogDebug("ignoring transition code on composite curve segment, only continuous transitions are supported");
+                IFCImporter::LogVerboseDebug("ignoring transition code on composite curve segment, only continuous transitions are supported");
             }
 
             curves.push_back( CurveEntry(bc,IsTrue(curveSegment.SameSense)) );
@@ -389,7 +389,8 @@ public:
 
     // --------------------------------------------------
     void SampleDiscrete(TempMesh& out,IfcFloat a,IfcFloat b) const {
-        ai_assert(InRange(a) && InRange(b));
+        ai_assert(InRange(a));
+        ai_assert(InRange(b));
         return base->SampleDiscrete(out,TrimParam(a),TrimParam(b));
     }
 
@@ -446,7 +447,8 @@ public:
 
     // --------------------------------------------------
     size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
-        ai_assert(InRange(a) && InRange(b));
+        ai_assert(InRange(a));
+        ai_assert(InRange(b));
         return static_cast<size_t>( std::ceil(b) - std::floor(a) );
     }
 
@@ -489,7 +491,7 @@ Curve* Curve::Convert(const IFC::Schema_2x3::IfcCurve& curve,ConversionData& con
     }
 
     // XXX OffsetCurve2D, OffsetCurve3D not currently supported
-    return NULL;
+    return nullptr;
 }
 
 #ifdef ASSIMP_BUILD_DEBUG

@@ -79,7 +79,7 @@ inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in) {
 
 // ------------------------------------------------------------------------------------------------
 bool LWOImporter::HandleTextures(aiMaterial *pcMat, const TextureList &in, aiTextureType type) {
-    ai_assert(NULL != pcMat);
+    ai_assert(nullptr != pcMat);
 
     unsigned int cur = 0, temp = 0;
     aiString s;
@@ -154,7 +154,7 @@ bool LWOImporter::HandleTextures(aiMaterial *pcMat, const TextureList &in, aiTex
                 static_assert(sizeof(aiUVTransform) / sizeof(ai_real) == 5, "sizeof(aiUVTransform)/sizeof(ai_real) == 5");
                 pcMat->AddProperty(&trafo, 1, AI_MATKEY_UVTRANSFORM(type, cur));
             }
-            ASSIMP_LOG_DEBUG("LWO2: Setting up non-UV mapping");
+            ASSIMP_LOG_VERBOSE_DEBUG("LWO2: Setting up non-UV mapping");
         }
 
         // The older LWOB format does not use indirect references to clips.
@@ -603,7 +603,7 @@ void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader *head, unsi
     }
 
     // get the destination channel
-    TextureList *listRef = NULL;
+    TextureList *listRef = nullptr;
     switch (tex.type) {
         case AI_LWO_COLR:
             listRef = &surf.mColorTextures;

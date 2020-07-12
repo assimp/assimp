@@ -208,22 +208,19 @@ BinFloat ToBinary(const ai_real &pValue) {
     // floating-point numbers are of sign-magnitude format, so find out what signed number
     //  representation we must convert negative values to.
     // See http://en.wikipedia.org/wiki/Signed_number_representations.
+    const BinFloat mask = BinFloat(1) << (CHAR_BIT * sizeof(BinFloat) - 1);
 
     // Two's complement?
-    bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & 0x80000000));
-    bool OneComplement = ((-42 == ~42) && (binValue & 0x80000000));
-    bool SignedMagnitude = ((-42 == (42 | (-0))) && (binValue & 0x80000000));
+    const bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & mask));
+    const bool OneComplement = ((-42 == ~42) && (binValue & mask));
 
     if (DefaultValue)
-        return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
+        return mask - binValue;
     // One's complement?
     else if (OneComplement)
         return BinFloat(-0) - binValue;
-    // Sign-magnitude?
-    else if (SignedMagnitude) // -0 = 1000... binary
-        return binValue;
-    else
-        return binValue;
+    // Sign-magnitude? -0 = 1000... binary
+    return binValue;
 }
 
 } // namespace

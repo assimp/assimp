@@ -101,7 +101,7 @@ void LWS::Element::Parse(const char *&buffer) {
         SkipSpaces(&buffer);
 
         if (children.back().tokens[0] == "Plugin") {
-            ASSIMP_LOG_DEBUG("LWS: Skipping over plugin-specific data");
+            ASSIMP_LOG_VERBOSE_DEBUG("LWS: Skipping over plugin-specific data");
 
             // strange stuff inside Plugin/Endplugin blocks. Needn't
             // follow LWS syntax, so we skip over it
@@ -342,7 +342,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
     if (src.type == LWS::NodeDesc::OBJECT) {
 
         // If the object is from an external file, get it
-        aiScene *obj = NULL;
+        aiScene *obj = nullptr;
         if (src.path.length()) {
             obj = batch.GetImport(src.id);
             if (!obj) {
@@ -359,7 +359,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
 
                     //Remove first node from obj (the old pivot), reset transform of second node (the mesh node)
                     aiNode *newRootNode = obj->mRootNode->mChildren[0];
-                    obj->mRootNode->mChildren[0] = NULL;
+                    obj->mRootNode->mChildren[0] = nullptr;
                     delete obj->mRootNode;
 
                     obj->mRootNode = newRootNode;
@@ -600,7 +600,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 d.number = cur_object++;
             }
             std::string path = FindLWOFile(c);
-            d.id = batch.AddLoadRequest(path, 0, NULL);
+            d.id = batch.AddLoadRequest(path, 0, nullptr);
 
             d.path = path;
             nodes.push_back(d);

@@ -45,16 +45,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 
-
 using namespace Assimp;
 
 // ---------------------------------------------------------------------------------------------
-void ScenePreprocessor::ProcessScene ()
-{
-    ai_assert(scene != NULL);
+void ScenePreprocessor::ProcessScene() {
+    ai_assert(scene != nullptr);
 
     // Process all meshes
-    for (unsigned int i = 0; i < scene->mNumMeshes;++i)
+    for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
         ProcessMesh(scene->mMeshes[i]);
 
     // - nothing to do for nodes for the moment
@@ -63,27 +61,27 @@ void ScenePreprocessor::ProcessScene ()
     // - nothing to do for cameras for the moment
 
     // Process all animations
-    for (unsigned int i = 0; i < scene->mNumAnimations;++i)
+    for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
         ProcessAnimation(scene->mAnimations[i]);
 
     // Generate a default material if none was specified
     if (!scene->mNumMaterials && scene->mNumMeshes) {
-        scene->mMaterials      = new aiMaterial*[2];
-        aiMaterial* helper;
+        scene->mMaterials = new aiMaterial *[2];
+        aiMaterial *helper;
 
         aiString name;
 
         scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
-        aiColor3D clr(0.6f,0.6f,0.6f);
-        helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
+        aiColor3D clr(0.6f, 0.6f, 0.6f);
+        helper->AddProperty(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
 
         // setup the default name to make this material identifiable
         name.Set(AI_DEFAULT_MATERIAL_NAME);
-        helper->AddProperty(&name,AI_MATKEY_NAME);
+        helper->AddProperty(&name, AI_MATKEY_NAME);
 
-        ASSIMP_LOG_DEBUG("ScenePreprocessor: Adding default material \'" AI_DEFAULT_MATERIAL_NAME  "\'");
+        ASSIMP_LOG_DEBUG("ScenePreprocessor: Adding default material \'" AI_DEFAULT_MATERIAL_NAME "\'");
 
-        for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
+        for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
             scene->mMeshes[i]->mMaterialIndex = scene->mNumMaterials;
         }
 
@@ -92,17 +90,16 @@ void ScenePreprocessor::ProcessScene ()
 }
 
 // ---------------------------------------------------------------------------------------------
-void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
-{
+void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
     // If aiMesh::mNumUVComponents is *not* set assign the default value of 2
-    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)   {
+    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
         if (!mesh->mTextureCoords[i]) {
             mesh->mNumUVComponents[i] = 0;
         } else {
             if (!mesh->mNumUVComponents[i])
                 mesh->mNumUVComponents[i] = 2;
 
-            aiVector3D* p = mesh->mTextureCoords[i], *end = p+mesh->mNumVertices;
+            aiVector3D *p = mesh->mTextureCoords[i], *end = p + mesh->mNumVertices;
 
             // Ensure unused components are zeroed. This will make 1D texture channels work
             // as if they were 2D channels .. just in case an application doesn't handle
@@ -110,12 +107,10 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
             if (2 == mesh->mNumUVComponents[i]) {
                 for (; p != end; ++p)
                     p->z = 0.f;
-            }
-            else if (1 == mesh->mNumUVComponents[i]) {
+            } else if (1 == mesh->mNumUVComponents[i]) {
                 for (; p != end; ++p)
                     p->z = p->y = 0.f;
-            }
-            else if (3 == mesh->mNumUVComponents[i]) {
+            } else if (3 == mesh->mNumUVComponents[i]) {
                 // Really 3D coordinates? Check whether the third coordinate is != 0 for at least one element
                 for (; p != end; ++p) {
                     if (p->z != 0)
@@ -132,10 +127,9 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
     // If the information which primitive types are there in the
     // mesh is currently not available, compute it.
     if (!mesh->mPrimitiveTypes) {
-        for (unsigned int a = 0; a < mesh->mNumFaces; ++a)  {
-            aiFace& face = mesh->mFaces[a];
-            switch (face.mNumIndices)
-            {
+        for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
+            aiFace &face = mesh->mFaces[a];
+            switch (face.mNumIndices) {
             case 3u:
                 mesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
                 break;
@@ -156,21 +150,20 @@ void ScenePreprocessor::ProcessMesh (aiMesh* mesh)
     }
 
     // If tangents and normals are given but no bitangents compute them
-    if (mesh->mTangents && mesh->mNormals && !mesh->mBitangents)    {
+    if (mesh->mTangents && mesh->mNormals && !mesh->mBitangents) {
 
         mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
-        for (unsigned int i = 0; i < mesh->mNumVertices;++i)    {
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             mesh->mBitangents[i] = mesh->mNormals[i] ^ mesh->mTangents[i];
         }
     }
 }
 
 // ---------------------------------------------------------------------------------------------
-void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
-{
+void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
     double first = 10e10, last = -10e10;
-    for (unsigned int i = 0; i < anim->mNumChannels;++i)    {
-        aiNodeAnim* channel = anim->mChannels[i];
+    for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
+        aiNodeAnim *channel = anim->mChannels[i];
 
         /*  If the exact duration of the animation is not given
          *  compute it now.
@@ -178,24 +171,24 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
         if (anim->mDuration == -1.) {
 
             // Position keys
-            for (unsigned int j = 0; j < channel->mNumPositionKeys;++j) {
-                aiVectorKey& key = channel->mPositionKeys[j];
-                first = std::min (first, key.mTime);
-                last  = std::max (last,  key.mTime);
+            for (unsigned int j = 0; j < channel->mNumPositionKeys; ++j) {
+                aiVectorKey &key = channel->mPositionKeys[j];
+                first = std::min(first, key.mTime);
+                last = std::max(last, key.mTime);
             }
 
             // Scaling keys
-            for (unsigned int j = 0; j < channel->mNumScalingKeys;++j )  {
-                aiVectorKey& key = channel->mScalingKeys[j];
-                first = std::min (first, key.mTime);
-                last  = std::max (last,  key.mTime);
+            for (unsigned int j = 0; j < channel->mNumScalingKeys; ++j) {
+                aiVectorKey &key = channel->mScalingKeys[j];
+                first = std::min(first, key.mTime);
+                last = std::max(last, key.mTime);
             }
 
             // Rotation keys
-            for (unsigned int j = 0; j < channel->mNumRotationKeys;++j ) {
-                aiQuatKey& key = channel->mRotationKeys[ j ];
-                first = std::min (first, key.mTime);
-                last  = std::max (last,  key.mTime);
+            for (unsigned int j = 0; j < channel->mNumRotationKeys; ++j) {
+                aiQuatKey &key = channel->mRotationKeys[j];
+                first = std::min(first, key.mTime);
+                last = std::max(last, key.mTime);
             }
         }
 
@@ -204,43 +197,43 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
          *  track from the information we have in the transformation
          *  matrix of the corresponding node.
          */
-        if (!channel->mNumRotationKeys || !channel->mNumPositionKeys || !channel->mNumScalingKeys)  {
+        if (!channel->mNumRotationKeys || !channel->mNumPositionKeys || !channel->mNumScalingKeys) {
             // Find the node that belongs to this animation
-            aiNode* node = scene->mRootNode->FindNode(channel->mNodeName);
-            if (node) // ValidateDS will complain later if 'node' is NULL
+            aiNode *node = scene->mRootNode->FindNode(channel->mNodeName);
+            if (node) // ValidateDS will complain later if 'node' is nullptr
             {
                 // Decompose the transformation matrix of the node
                 aiVector3D scaling, position;
                 aiQuaternion rotation;
 
-                node->mTransformation.Decompose(scaling, rotation,position);
+                node->mTransformation.Decompose(scaling, rotation, position);
 
                 // No rotation keys? Generate a dummy track
                 if (!channel->mNumRotationKeys) {
                     ai_assert(!channel->mRotationKeys);
                     channel->mNumRotationKeys = 1;
                     channel->mRotationKeys = new aiQuatKey[1];
-                    aiQuatKey& q = channel->mRotationKeys[0];
+                    aiQuatKey &q = channel->mRotationKeys[0];
 
-                    q.mTime  = 0.;
+                    q.mTime = 0.;
                     q.mValue = rotation;
 
-                    ASSIMP_LOG_DEBUG("ScenePreprocessor: Dummy rotation track has been generated");
+                    ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Dummy rotation track has been generated");
                 } else {
                     ai_assert(channel->mRotationKeys);
                 }
 
                 // No scaling keys? Generate a dummy track
-                if (!channel->mNumScalingKeys)  {
+                if (!channel->mNumScalingKeys) {
                     ai_assert(!channel->mScalingKeys);
                     channel->mNumScalingKeys = 1;
                     channel->mScalingKeys = new aiVectorKey[1];
-                    aiVectorKey& q = channel->mScalingKeys[0];
+                    aiVectorKey &q = channel->mScalingKeys[0];
 
-                    q.mTime  = 0.;
+                    q.mTime = 0.;
                     q.mValue = scaling;
 
-                    ASSIMP_LOG_DEBUG("ScenePreprocessor: Dummy scaling track has been generated");
+                    ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Dummy scaling track has been generated");
                 } else {
                     ai_assert(channel->mScalingKeys);
                 }
@@ -250,12 +243,12 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
                     ai_assert(!channel->mPositionKeys);
                     channel->mNumPositionKeys = 1;
                     channel->mPositionKeys = new aiVectorKey[1];
-                    aiVectorKey& q = channel->mPositionKeys[0];
+                    aiVectorKey &q = channel->mPositionKeys[0];
 
-                    q.mTime  = 0.;
+                    q.mTime = 0.;
                     q.mValue = position;
 
-                    ASSIMP_LOG_DEBUG("ScenePreprocessor: Dummy position track has been generated");
+                    ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Dummy position track has been generated");
                 } else {
                     ai_assert(channel->mPositionKeys);
                 }
@@ -263,8 +256,8 @@ void ScenePreprocessor::ProcessAnimation (aiAnimation* anim)
         }
     }
 
-    if (anim->mDuration == -1.)     {
-        ASSIMP_LOG_DEBUG("ScenePreprocessor: Setting animation duration");
-        anim->mDuration = last - std::min( first, 0. );
+    if (anim->mDuration == -1.) {
+        ASSIMP_LOG_VERBOSE_DEBUG("ScenePreprocessor: Setting animation duration");
+        anim->mDuration = last - std::min(first, 0.);
     }
 }

@@ -71,7 +71,7 @@ aiMesh* TempMesh::ToMesh()
     ai_assert(mVerts.size() == std::accumulate(mVertcnt.begin(),mVertcnt.end(),size_t(0)));
 
     if (mVerts.empty()) {
-        return NULL;
+        return nullptr;
     }
 
     std::unique_ptr<aiMesh> mesh(new aiMesh());
@@ -162,7 +162,7 @@ void TempMesh::RemoveDegenerates()
     }
 
     if(drop) {
-        IFCImporter::LogDebug("removing degenerate faces");
+        IFCImporter::LogVerboseDebug("removing degenerate faces");
     }
 }
 
@@ -437,7 +437,7 @@ void TempMesh::RemoveAdjacentDuplicates() {
         base += cnt;
     }
     if(drop) {
-        IFCImporter::LogDebug("removing duplicate vertices");
+        IFCImporter::LogVerboseDebug("removing duplicate vertices");
     }
 }
 

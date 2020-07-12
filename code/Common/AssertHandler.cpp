@@ -41,29 +41,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#pragma once
+/** @file  AssertHandler.cpp
+ *  @brief Implementation of assert handling logic.
+ */
 
-#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
+#include "AssertHandler.h"
 
-#include <assimp/BaseImporter.h>
+#include <iostream>
+#include <cstdlib>
 
-namespace Assimp {
-namespace StepFile {
+void Assimp::defaultAiAssertHandler(const char* failedExpression, const char* file, int line)
+{
+    std::cerr << "ai_assert failure in " << file << "(" << line << "): " << failedExpression << std::endl;
+    std::abort();
+}
 
-class StepFileImporter : public BaseImporter {
-public:
-    StepFileImporter();
-    ~StepFileImporter();
-    bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
-    const aiImporterDesc* GetInfo() const override;
+namespace
+{
+    Assimp::AiAssertHandler s_handler = Assimp::defaultAiAssertHandler;
+}
 
-protected:
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler ) override;
+void Assimp::setAiAssertHandler(AiAssertHandler handler)
+{
+    s_handler = handler;
+}
 
-private:
-};
-
-} // Namespace StepFile
-} // Namespace Assimp
-
-#endif // ASSIMP_BUILD_NO_STEP_IMPORTER
+void Assimp::aiAssertViolation(const char* failedExpression, const char* file, int line)
+{
+    s_handler(failedExpression, file, line);
+}

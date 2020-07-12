@@ -286,6 +286,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
 void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
 	const unsigned int numImportedMaterials = unsigned(r.materials.Size());
+	ASSIMP_LOG_DEBUG_F("Importing ", numImportedMaterials, " materials");
 	Material defaultMaterial;
 
 	mScene->mNumMaterials = numImportedMaterials + 1;
@@ -333,6 +334,7 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 #endif // ASSIMP_BUILD_DEBUG
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
+	ASSIMP_LOG_DEBUG_F("Importing ", r.meshes.Size(), " meshes");
 	std::vector<aiMesh *> meshes;
 
 	unsigned int k = 0;
@@ -414,6 +416,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				attr.color[c]->ExtractData(aim->mColors[c]);
 			}
 			for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
+                if (!attr.texcoord[tc]) {
+                    DefaultLogger::get()->warn("Texture coordinate accessor not found or non-contiguous texture coordinate sets.");
+                    continue;
+                }
+
 				if (attr.texcoord[tc]->count != aim->mNumVertices) {
 					DefaultLogger::get()->warn("Texcoord stream size in mesh \"" + mesh.name +
 											   "\" does not match the vertex count");
@@ -662,10 +669,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 void glTF2Importer::ImportCameras(glTF2::Asset &r) {
 	if (!r.cameras.Size()) return;
 
-	mScene->mNumCameras = r.cameras.Size();
-	mScene->mCameras = new aiCamera *[r.cameras.Size()];
+    const unsigned int numCameras = r.cameras.Size();
+	ASSIMP_LOG_DEBUG_F("Importing ", numCameras, " cameras");
+	mScene->mNumCameras = numCameras;
+	mScene->mCameras = new aiCamera *[numCameras];
 
-	for (size_t i = 0; i < r.cameras.Size(); ++i) {
+	for (size_t i = 0; i < numCameras; ++i) {
 		Camera &cam = r.cameras[i];
 
 		aiCamera *aicam = mScene->mCameras[i] = new aiCamera();
@@ -696,10 +705,12 @@ void glTF2Importer::ImportLights(glTF2::Asset &r) {
 	if (!r.lights.Size())
 		return;
 
-	mScene->mNumLights = r.lights.Size();
-	mScene->mLights = new aiLight *[r.lights.Size()];
+    const unsigned int numLights = r.lights.Size();
+	ASSIMP_LOG_DEBUG_F("Importing ", numLights, " lights");
+	mScene->mNumLights = numLights;
+	mScene->mLights = new aiLight *[numLights];
 
-	for (size_t i = 0; i < r.lights.Size(); ++i) {
+	for (size_t i = 0; i < numLights; ++i) {
 		Light &light = r.lights[i];
 
 		aiLight *ail = mScene->mLights[i] = new aiLight();
@@ -836,6 +847,26 @@ static std::string GetNodeName(const Node &node) {
 	return node.name.empty() ? node.id : node.name;
 }
 
+void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
+	if (extension.mStringValue.isPresent) {
+		metadata->Add(extension.name.c_str(), aiString(extension.mStringValue.value));
+	} else if (extension.mDoubleValue.isPresent) {
+		metadata->Add(extension.name.c_str(), extension.mDoubleValue.value);
+	} else if (extension.mUint64Value.isPresent) {
+		metadata->Add(extension.name.c_str(), extension.mUint64Value.value);
+	} else if (extension.mInt64Value.isPresent) {
+		metadata->Add(extension.name.c_str(), static_cast<int32_t>(extension.mInt64Value.value));
+	} else if (extension.mBoolValue.isPresent) {
+		metadata->Add(extension.name.c_str(), extension.mBoolValue.value);
+	} else if (extension.mValues.isPresent) {
+		aiMetadata val;
+		for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
+			ParseExtensions(&val, extension.mValues.value[i]);
+		}
+		metadata->Add(extension.name.c_str(), val);
+	}
+}
+
 aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &meshOffsets, glTF2::Ref<glTF2::Node> &ptr) {
 	Node &node = *ptr;
 
@@ -850,6 +881,11 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 			child->mParent = ainode;
 			ainode->mChildren[i] = child;
 		}
+	}
+
+	if (node.extensions) {
+		ainode->mMetaData = new aiMetadata;
+		ParseExtensions(ainode->mMetaData, node.extensions);
 	}
 
 	GetNodeTransform(ainode->mTransformation, node);
@@ -946,8 +982,13 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 		//range is optional - see https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
 		//it is added to meta data of parent node, because there is no other place to put it
 		if (node.light->range.isPresent) {
-			ainode->mMetaData = aiMetadata::Alloc(1);
-			ainode->mMetaData->Set(0, "PBR_LightRange", node.light->range.value);
+			if (!ainode->mMetaData) {
+				ainode->mMetaData = aiMetadata::Alloc(1);
+				ainode->mMetaData->Set(0, "PBR_LightRange", node.light->range.value);
+			}
+			else {
+				ainode->mMetaData->Add("PBR_LightRange", node.light->range.value);
+			}
 		}
 	}
 
@@ -958,6 +999,7 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 	if (!r.scene) {
 		throw DeadlyImportError("GLTF: No scene");
 	}
+	ASSIMP_LOG_DEBUG("Importing nodes");
 
 	std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
@@ -1137,13 +1179,15 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
 void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
 	if (!r.scene) return;
 
-	mScene->mNumAnimations = r.animations.Size();
+    const unsigned numAnimations = r.animations.Size();
+	ASSIMP_LOG_DEBUG_F("Importing ", numAnimations, " animations");
+	mScene->mNumAnimations = numAnimations;
 	if (mScene->mNumAnimations == 0) {
 		return;
 	}
 
-	mScene->mAnimations = new aiAnimation *[mScene->mNumAnimations];
-	for (unsigned int i = 0; i < r.animations.Size(); ++i) {
+    mScene->mAnimations = new aiAnimation *[numAnimations];
+	for (unsigned int i = 0; i < numAnimations; ++i) {
 		Animation &anim = r.animations[i];
 
 		aiAnimation *ai_anim = new aiAnimation();
@@ -1249,6 +1293,8 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 	if (numEmbeddedTexs == 0)
 		return;
 
+  	ASSIMP_LOG_DEBUG_F("Importing ", numEmbeddedTexs, " embedded textures");
+
 	mScene->mTextures = new aiTexture *[numEmbeddedTexs];
 
 	// Add the embedded textures
@@ -1288,6 +1334,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 }
 
 void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
+	ASSIMP_LOG_DEBUG("Importing metadata");
     ai_assert(mScene->mMetaData == nullptr);
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
@@ -1307,6 +1354,9 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
 }
 
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+
+    ASSIMP_LOG_DEBUG("Reading GLTF2 file");
+
 	// clean all member arrays
 	meshOffsets.clear();
 	embeddedTexIdxs.clear();

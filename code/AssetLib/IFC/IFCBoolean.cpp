@@ -131,7 +131,7 @@ void WritePolygon(std::vector<IfcVector3> &resultpoly, TempMesh &result) {
 void ProcessBooleanHalfSpaceDifference(const Schema_2x3::IfcHalfSpaceSolid *hs, TempMesh &result,
         const TempMesh &first_operand,
         ConversionData & /*conv*/) {
-    ai_assert(hs != NULL);
+    ai_assert(hs != nullptr);
 
     const Schema_2x3::IfcPlane *const plane = hs->BaseSurface->ToPtr<Schema_2x3::IfcPlane>();
     if (!plane) {
@@ -221,7 +221,7 @@ void ProcessBooleanHalfSpaceDifference(const Schema_2x3::IfcHalfSpaceSolid *hs, 
                 result.mVerts.pop_back();
             }
     }
-    IFCImporter::LogDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
+    IFCImporter::LogVerboseDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -366,7 +366,7 @@ bool PointInPoly(const IfcVector3 &p, const std::vector<IfcVector3> &boundary) {
 void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPolygonalBoundedHalfSpace *hs, TempMesh &result,
         const TempMesh &first_operand,
         ConversionData &conv) {
-    ai_assert(hs != NULL);
+    ai_assert(hs != nullptr);
 
     const Schema_2x3::IfcPlane *const plane = hs->BaseSurface->ToPtr<Schema_2x3::IfcPlane>();
     if (!plane) {
@@ -658,14 +658,14 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
             }
         }
     }
-    IFCImporter::LogDebug("generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)");
+    IFCImporter::LogVerboseDebug("generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)");
 }
 
 // ------------------------------------------------------------------------------------------------
 void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as, TempMesh &result,
         const TempMesh &first_operand,
         ConversionData &conv) {
-    ai_assert(as != NULL);
+    ai_assert(as != nullptr);
 
     // This case is handled by reduction to an instance of the quadrify() algorithm.
     // Obviously, this won't work for arbitrarily complex cases. In fact, the first
@@ -706,7 +706,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
         vit += pcount;
     }
 
-    IFCImporter::LogDebug("generating CSG geometry by geometric difference to a solid (IfcExtrudedAreaSolid)");
+    IFCImporter::LogVerboseDebug("generating CSG geometry by geometric difference to a solid (IfcExtrudedAreaSolid)");
 }
 
 // ------------------------------------------------------------------------------------------------

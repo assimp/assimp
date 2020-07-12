@@ -72,7 +72,7 @@ void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
-    if(outfile == NULL) {
+    if (outfile == nullptr) {
         throw DeadlyExportError("could not open output .stl file: " + std::string(pFile));
     }
 
@@ -91,7 +91,7 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
     
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wb"));
-    if(outfile == NULL) {
+    if (outfile == nullptr) {
         throw DeadlyExportError("could not open output .stl file: " + std::string(pFile));
     }
 

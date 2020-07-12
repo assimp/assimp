@@ -85,7 +85,9 @@ typedef uint16_t M3D_INDEX;
 #define M3D_BONEMAXLEVEL 8
 #endif
 #ifndef _MSC_VER
+#ifndef _inline
 #define _inline __inline__
+#endif
 #define _pack __attribute__((packed))
 #define _unused __attribute__((unused))
 #else
@@ -99,7 +101,7 @@ typedef uint16_t M3D_INDEX;
 #define _register
 #endif
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #    pragma warning(push)
 #    pragma warning(disable : 4100 4127 4189 4505 4244 4403  4701 4703)
 #    if (_MSC_VER > 1800 )
@@ -5071,7 +5073,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             ptr += sprintf(ptr, "\r\n");
         }
         /* mathematical shapes face */
-        if (model->numshape && model->numshape && !(flags & M3D_EXP_NOFACE)) {
+        if (model->numshape !(flags & M3D_EXP_NOFACE)) {
             for (j = 0; j < model->numshape; j++) {
                 sn = _m3d_safestr(model->shape[j].name, 0);
                 if (!sn) {

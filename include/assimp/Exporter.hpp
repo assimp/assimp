@@ -47,16 +47,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_EXPORT_HPP_INC
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 #include "cexport.h"
 #include <map>
+#include <functional>
 
 namespace Assimp {
-    
+
 class ExporterPimpl;
 class IOSystem;
 class ProgressHandler;
@@ -84,7 +85,7 @@ class ASSIMP_API ExportProperties;
 class ASSIMP_API Exporter {
 public:
     /** Function pointer type of a Export worker function */
-    typedef void (*fpExportFunc)(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+    typedef void (*fpExportFunc)(const char *, IOSystem *, const aiScene *, const ExportProperties *);
 
     /** Internal description of an Assimp export format option */
     struct ExportFormatEntry {
@@ -98,8 +99,7 @@ public:
         unsigned int mEnforcePP;
 
         // Constructor to fill all entries
-        ExportFormatEntry( const char* pId, const char* pDesc, const char* pExtension, fpExportFunc pFunction, unsigned int pEnforcePP = 0u)
-        {
+        ExportFormatEntry(const char *pId, const char *pDesc, const char *pExtension, fpExportFunc pFunction, unsigned int pEnforcePP = 0u) {
             mDescription.id = pId;
             mDescription.description = pDesc;
             mDescription.fileExtension = pExtension;
@@ -108,12 +108,11 @@ public:
         }
 
         ExportFormatEntry() :
-            mExportFunction()
-          , mEnforcePP()
-        {
-            mDescription.id = NULL;
-            mDescription.description = NULL;
-            mDescription.fileExtension = NULL;
+                mExportFunction(),
+                mEnforcePP() {
+            mDescription.id = nullptr;
+            mDescription.description = nullptr;
+            mDescription.fileExtension = nullptr;
         }
     };
 
@@ -142,7 +141,7 @@ public:
      *
      * @param pIOHandler The IO handler to be used in all file accesses
      *   of the Importer. */
-    void SetIOHandler( IOSystem* pIOHandler);
+    void SetIOHandler(IOSystem *pIOHandler);
 
     // -------------------------------------------------------------------
     /** Retrieves the IO handler that is currently set.
@@ -151,7 +150,7 @@ public:
      * handler is active as long the application doesn't supply its own
      * custom IO handler via #SetIOHandler().
      * @return A valid IOSystem interface, never NULL. */
-    IOSystem* GetIOHandler() const;
+    IOSystem *GetIOHandler() const;
 
     // -------------------------------------------------------------------
     /** Checks whether a default IO handler is active
@@ -171,7 +170,7 @@ public:
      *    disable progress reporting.
      *  @note Progress handlers can be used to abort the loading
      *    at almost any time.*/
-    void SetProgressHandler(ProgressHandler* pHandler);
+    void SetProgressHandler(ProgressHandler *pHandler);
 
     // -------------------------------------------------------------------
     /** Exports the given scene to a chosen file format. Returns the exported
@@ -185,22 +184,22 @@ public:
     * #GetExportFormatCount / #GetExportFormatDescription to learn which
     *   export formats are available.
     * @param pPreprocessing See the documentation for #Export
-    * @return the exported data or NULL in case of error.
+    * @return the exported data or nullptr in case of error.
     * @note If the Exporter instance did already hold a blob from
     *   a previous call to #ExportToBlob, it will be disposed.
     *   Any IO handlers set via #SetIOHandler are ignored here.
     * @note Use aiCopyScene() to get a modifiable copy of a previously
     *   imported scene. */
-    const aiExportDataBlob* ExportToBlob(const aiScene* pScene, const char* pFormatId,
-        unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
-    const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,
-        unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
+    const aiExportDataBlob *ExportToBlob(const aiScene *pScene, const char *pFormatId,
+            unsigned int pPreprocessing = 0u, const ExportProperties *pProperties = nullptr);
+    const aiExportDataBlob *ExportToBlob(const aiScene *pScene, const std::string &pFormatId,
+            unsigned int pPreprocessing = 0u, const ExportProperties *pProperties = nullptr);
 
     // -------------------------------------------------------------------
     /** Convenience function to export directly to a file. Use
      *  #SetIOSystem to supply a custom IOSystem to gain fine-grained control
      *  about the output data flow of the export process.
-     * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
+     * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be nullptr.
      * @param pPath Full target file name. Target must be accessible.
      * @param pPreprocessing Accepts any choice of the #aiPostProcessSteps enumerated
      *   flags, but in reality only a subset of them makes sense here. Specifying
@@ -229,10 +228,10 @@ public:
      * @return AI_SUCCESS if everything was fine.
      * @note Use aiCopyScene() to get a modifiable copy of a previously
      *   imported scene.*/
-    aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath,
-        unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
-    aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,
-        unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = nullptr);
+    aiReturn Export(const aiScene *pScene, const char *pFormatId, const char *pPath,
+            unsigned int pPreprocessing = 0u, const ExportProperties *pProperties = nullptr);
+    aiReturn Export(const aiScene *pScene, const std::string &pFormatId, const std::string &pPath,
+            unsigned int pPreprocessing = 0u, const ExportProperties *pProperties = nullptr);
 
     // -------------------------------------------------------------------
     /** Returns an error description of an error that occurred in #Export
@@ -240,21 +239,21 @@ public:
      *
      * Returns an empty string if no error occurred.
      * @return A description of the last error, an empty string if no
-     *   error occurred. The string is never NULL.
+     *   error occurred. The string is never nullptr.
      *
      * @note The returned function remains valid until one of the
      * following methods is called: #Export, #ExportToBlob, #FreeBlob */
-    const char* GetErrorString() const;
+    const char *GetErrorString() const;
 
     // -------------------------------------------------------------------
     /** Return the blob obtained from the last call to #ExportToBlob */
-    const aiExportDataBlob* GetBlob() const;
+    const aiExportDataBlob *GetBlob() const;
 
     // -------------------------------------------------------------------
     /** Orphan the blob from the last call to #ExportToBlob. This means
      *  the caller takes ownership and is thus responsible for calling
      *  the C API function #aiReleaseExportBlob to release it. */
-    const aiExportDataBlob* GetOrphanedBlob() const;
+    const aiExportDataBlob *GetOrphanedBlob() const;
 
     // -------------------------------------------------------------------
     /** Frees the current blob.
@@ -264,7 +263,7 @@ public:
      *  automatically by the destructor. The only reason to call
      *  it manually would be to reclaim as much storage as possible
      *  without giving up the #Exporter instance yet. */
-    void FreeBlob( );
+    void FreeBlob();
 
     // -------------------------------------------------------------------
     /** Returns the number of export file formats available in the current
@@ -290,7 +289,7 @@ public:
      *  for. Valid range is 0 to #Exporter::GetExportFormatCount
      * @return A description of that specific export format.
      *  NULL if pIndex is out of range. */
-    const aiExportFormatDesc* GetExportFormatDescription( size_t pIndex ) const;
+    const aiExportFormatDesc *GetExportFormatDescription(size_t pIndex) const;
 
     // -------------------------------------------------------------------
     /** Register a custom exporter. Custom export formats are limited to
@@ -303,7 +302,7 @@ public:
      *    registered. A common cause that would prevent an exporter
      *    from being registered is that its format id is already
      *    occupied by another format. */
-    aiReturn RegisterExporter(const ExportFormatEntry& desc);
+    aiReturn RegisterExporter(const ExportFormatEntry &desc);
 
     // -------------------------------------------------------------------
     /** Remove an export format previously registered with #RegisterExporter
@@ -314,11 +313,11 @@ public:
      *    'id' field of #aiExportFormatDesc.
      *  @note Calling this method on a format description not yet registered
      *    has no effect.*/
-    void UnregisterExporter(const char* id);
+    void UnregisterExporter(const char *id);
 
 protected:
     // Just because we don't want you to know how we're hacking around.
-    ExporterPimpl* pimpl;
+    ExporterPimpl *pimpl;
 };
 
 class ASSIMP_API ExportProperties {
@@ -332,6 +331,7 @@ public:
     typedef std::map<KeyType, ai_real> FloatPropertyMap;
     typedef std::map<KeyType, std::string> StringPropertyMap;
     typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
+    typedef std::map<KeyType, std::function<void *(void *)>> CallbackPropertyMap;
 
 public:
     /** Standard constructor
@@ -345,7 +345,7 @@ public:
      * This copies the configuration properties of another ExportProperties.
      * @see ExportProperties(const ExportProperties& other)
      */
-    ExportProperties(const ExportProperties& other);
+    ExportProperties(const ExportProperties &other);
 
     // -------------------------------------------------------------------
     /** Set an integer configuration property.
@@ -360,7 +360,7 @@ public:
      *   floating-point property has no effect - the loader will call
      *   GetPropertyFloat() to read the property, but it won't be there.
      */
-    bool SetPropertyInteger(const char* szName, int iValue);
+    bool SetPropertyInteger(const char *szName, int iValue);
 
     // -------------------------------------------------------------------
     /** Set a boolean configuration property. Boolean properties
@@ -369,27 +369,29 @@ public:
      *  #GetPropertyBool and vice versa.
      * @see SetPropertyInteger()
      */
-    bool SetPropertyBool(const char* szName, bool value)    {
-        return SetPropertyInteger(szName,value);
+    bool SetPropertyBool(const char *szName, bool value) {
+        return SetPropertyInteger(szName, value);
     }
 
     // -------------------------------------------------------------------
     /** Set a floating-point configuration property.
      * @see SetPropertyInteger()
      */
-    bool SetPropertyFloat(const char* szName, ai_real fValue);
+    bool SetPropertyFloat(const char *szName, ai_real fValue);
 
     // -------------------------------------------------------------------
     /** Set a string configuration property.
      * @see SetPropertyInteger()
      */
-    bool SetPropertyString(const char* szName, const std::string& sValue);
+    bool SetPropertyString(const char *szName, const std::string &sValue);
 
     // -------------------------------------------------------------------
     /** Set a matrix configuration property.
      * @see SetPropertyInteger()
      */
-    bool SetPropertyMatrix(const char* szName, const aiMatrix4x4& sValue);
+    bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
+    
+    bool SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f);
 
     // -------------------------------------------------------------------
     /** Get a configuration property.
@@ -404,8 +406,8 @@ public:
      *   floating-point property has no effect - the loader will call
      *   GetPropertyFloat() to read the property, but it won't be there.
      */
-    int GetPropertyInteger(const char* szName,
-        int iErrorReturn = 0xffffffff) const;
+    int GetPropertyInteger(const char *szName,
+            int iErrorReturn = 0xffffffff) const;
 
     // -------------------------------------------------------------------
     /** Get a boolean configuration property. Boolean properties
@@ -414,16 +416,16 @@ public:
      *  #GetPropertyBool and vice versa.
      * @see GetPropertyInteger()
      */
-    bool GetPropertyBool(const char* szName, bool bErrorReturn = false) const {
-        return GetPropertyInteger(szName,bErrorReturn)!=0;
+    bool GetPropertyBool(const char *szName, bool bErrorReturn = false) const {
+        return GetPropertyInteger(szName, bErrorReturn) != 0;
     }
 
     // -------------------------------------------------------------------
     /** Get a floating-point configuration property
      * @see GetPropertyInteger()
      */
-    ai_real GetPropertyFloat(const char* szName,
-        ai_real fErrorReturn = 10e10f) const;
+    ai_real GetPropertyFloat(const char *szName,
+            ai_real fErrorReturn = 10e10f) const;
 
     // -------------------------------------------------------------------
     /** Get a string configuration property
@@ -431,8 +433,8 @@ public:
      *  The return value remains valid until the property is modified.
      * @see GetPropertyInteger()
      */
-    const std::string GetPropertyString(const char* szName,
-        const std::string& sErrorReturn = "") const;
+    const std::string GetPropertyString(const char *szName,
+            const std::string &sErrorReturn = "") const;
 
     // -------------------------------------------------------------------
     /** Get a matrix configuration property
@@ -440,36 +442,38 @@ public:
      *  The return value remains valid until the property is modified.
      * @see GetPropertyInteger()
      */
-    const aiMatrix4x4 GetPropertyMatrix(const char* szName,
-        const aiMatrix4x4& sErrorReturn = aiMatrix4x4()) const;
+    const aiMatrix4x4 GetPropertyMatrix(const char *szName,
+            const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
+
+    std::function<void *(void *)> GetPropertyCallback(const char* szName) const;
 
     // -------------------------------------------------------------------
     /** Determine a integer configuration property has been set.
     * @see HasPropertyInteger()
      */
-    bool HasPropertyInteger(const char* szName) const;
+    bool HasPropertyInteger(const char *szName) const;
 
     /** Determine a boolean configuration property has been set.
     * @see HasPropertyBool()
      */
-    bool HasPropertyBool(const char* szName) const;
+    bool HasPropertyBool(const char *szName) const;
 
     /** Determine a boolean configuration property has been set.
     * @see HasPropertyFloat()
      */
-    bool HasPropertyFloat(const char* szName) const;
+    bool HasPropertyFloat(const char *szName) const;
 
     /** Determine a String configuration property has been set.
     * @see HasPropertyString()
      */
-    bool HasPropertyString(const char* szName) const;
+    bool HasPropertyString(const char *szName) const;
 
     /** Determine a Matrix configuration property has been set.
     * @see HasPropertyMatrix()
      */
-    bool HasPropertyMatrix(const char* szName) const;
+    bool HasPropertyMatrix(const char *szName) const;
 
-protected:
+    bool HasPropertyCallback(const char *szName) const;
 
     /** List of integer properties */
     IntPropertyMap mIntProperties;
@@ -482,23 +486,21 @@ protected:
 
     /** List of Matrix properties */
     MatrixPropertyMap mMatrixProperties;
+
+    CallbackPropertyMap mCallbackProperties;
 };
 
 // ----------------------------------------------------------------------------------
-inline 
-const aiExportDataBlob* Exporter::ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,
-                                                 unsigned int pPreprocessing, const ExportProperties* pProperties)
-{
-    return ExportToBlob(pScene,pFormatId.c_str(),pPreprocessing, pProperties);
+inline const aiExportDataBlob *Exporter::ExportToBlob(const aiScene *pScene, const std::string &pFormatId,
+        unsigned int pPreprocessing, const ExportProperties *pProperties) {
+    return ExportToBlob(pScene, pFormatId.c_str(), pPreprocessing, pProperties);
 }
 
 // ----------------------------------------------------------------------------------
-inline
-aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, 
-                                    const std::string& pPath, unsigned int pPreprocessing, 
-                                    const ExportProperties* pProperties)
-{
-    return Export(pScene,pFormatId.c_str(),pPath.c_str(),pPreprocessing, pProperties);
+inline aiReturn Exporter ::Export(const aiScene *pScene, const std::string &pFormatId,
+        const std::string &pPath, unsigned int pPreprocessing,
+        const ExportProperties *pProperties) {
+    return Export(pScene, pFormatId.c_str(), pPath.c_str(), pPreprocessing, pProperties);
 }
 
 } // namespace Assimp

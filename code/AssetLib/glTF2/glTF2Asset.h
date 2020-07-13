@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -406,6 +406,8 @@ struct Accessor : public Object {
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
+    void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
+    void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
 
     //! Helper class to iterate the data
     class Indexer {
@@ -1066,6 +1068,7 @@ public:
     } extensionsRequired;
 
     AssetMetadata asset;
+    Value* extras = nullptr;
 
     // Dictionaries for each type of object
 

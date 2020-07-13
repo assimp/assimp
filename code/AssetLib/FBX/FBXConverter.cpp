@@ -1988,6 +1988,7 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "ShininessExponent", aiTextureType_SHININESS, mesh);
     TrySetTextureProperties(out_mat, _textures, "TransparencyFactor", aiTextureType_OPACITY, mesh);
     TrySetTextureProperties(out_mat, _textures, "EmissiveFactor", aiTextureType_EMISSIVE, mesh);
+    TrySetTextureProperties(out_mat, _textures, "ReflectionFactor", aiTextureType_METALNESS, mesh);
     //Maya counterparts
     TrySetTextureProperties(out_mat, _textures, "Maya|DiffuseTexture", aiTextureType_DIFFUSE, mesh);
     TrySetTextureProperties(out_mat, _textures, "Maya|NormalTexture", aiTextureType_NORMALS, mesh);

@@ -73,10 +73,6 @@ public:
     XGLImporter();
     ~XGLImporter();
 
-<<<<<<< HEAD
-=======
-public:
->>>>>>> master
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      *  See BaseImporter::CanRead() for details.    */
@@ -96,24 +92,12 @@ protected:
             IOSystem *pIOHandler);
 
 private:
-<<<<<<< HEAD
-    struct TempScope
-    {
-        TempScope()
-            : light()
-        {}
-
-        ~TempScope()
-        {
-            for(aiMesh* m : meshes_linear) {
-=======
     struct TempScope {
         TempScope() :
                 light() {}
 
         ~TempScope() {
             for (aiMesh *m : meshes_linear) {
->>>>>>> master
                 delete m;
             }
 
@@ -183,31 +167,6 @@ private:
 private:
     void Cleanup();
 
-<<<<<<< HEAD
-	unsigned int ReadIDAttr(XmlNode &node);
-
-    void ReadWorld(TempScope& scope);
-	void ReadLighting(XmlNode &node, TempScope &scope);
-	aiLight *ReadDirectionalLight(XmlNode &node);
-	aiNode *ReadObject(XmlNode &node, TempScope &scope, bool skipFirst = false, const char *closetag = "object");
-	bool ReadMesh(XmlNode &node, TempScope &scope);
-	void ReadMaterial(XmlNode &node, TempScope &scope);
-	aiVector2D ReadVec2(XmlNode &node );
-	aiVector3D ReadVec3(XmlNode &node );
-	aiColor3D ReadCol3(XmlNode &node );
-	aiMatrix4x4 ReadTrafo(XmlNode &node );
-	unsigned int ReadIndexFromText(XmlNode &node);
-	float ReadFloat(XmlNode &node );
-
-    aiMesh* ToOutputMesh(const TempMaterialMesh& m);
-	void ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out);
-	unsigned int ResolveMaterialRef(XmlNode &node, TempScope &scope);
-
-private:
-    //std::shared_ptr<irr::io::IrrXMLReader> m_reader;
-	XmlParser *m_xmlParser;
-    aiScene* m_scene;
-=======
     std::string GetElementName();
     bool ReadElement();
     bool ReadElementUpToClosing(const char *closetag);
@@ -234,7 +193,6 @@ private:
 private:
     std::shared_ptr<irr::io::IrrXMLReader> m_reader;
     aiScene *m_scene;
->>>>>>> master
 };
 
 } // end of namespace Assimp

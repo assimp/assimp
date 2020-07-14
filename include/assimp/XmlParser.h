@@ -140,6 +140,10 @@ public:
 		return mRoot;
     }
 
+    TNodeType *getRootNode() {
+        return mRoot;
+    }
+
 private:
 	pugi::xml_document *mDoc;
 	TNodeType *mRoot;

@@ -365,9 +365,9 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *d
         }
     }
 
-    bool warnBinormal = true;
+    /*bool warnBinormal = true;
     bool warnColorDiffuse = true;
-    bool warnColorSpecular = true;
+    bool warnColorSpecular = true;*/
 
     //NextNode();
     for (XmlNode currentNode : node.children()) {
@@ -511,7 +511,7 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
         submesh->materialRef = ReadAttribute<std::string>(node, anMaterial);
     }
     if (hasAttribute(node, anUseSharedVertices)) {
-        submesh->usesSharedVertexData = ReadAttribute<bool>(anUseSharedVertices);
+        submesh->usesSharedVertexData = ReadAttribute<bool>(node, anUseSharedVertices);
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG_F("Reading SubMesh ", mesh->subMeshes.size());
@@ -550,7 +550,6 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
             } else {
                 throw DeadlyImportError(Formatter::format() << "Read only " << submesh->indexData->faces.size() << " faces when should have read " << submesh->indexData->faceCount);
             }
-
         } else if (currentName == nnGeometry) {
             if (submesh->usesSharedVertexData) {
                 throw DeadlyImportError("Found <geometry> in <submesh> when use shared geometry is true. Invalid mesh file.");
@@ -700,7 +699,8 @@ bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *me
 
     Skeleton *skeleton = new Skeleton();
     OgreXmlSerializer serializer(xmlParser.get());
-    serializer.ReadSkeleton(skeleton);
+    XmlNode *root = xmlParser->getRootNode();
+    serializer.ReadSkeleton(*root, skeleton);
     mesh->skeleton = skeleton;
     return true;
 }
@@ -717,8 +717,14 @@ bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh)
 
     Skeleton *skeleton = new Skeleton();
     OgreXmlSerializer serializer(xmlParser.get());
-    serializer.ReadSkeleton(skeleton);
+    XmlNode *root = xmlParser->getRootNode();
+    if (nullptr == root) {
+        return false;
+    }
+
+    serializer.ReadSkeleton(*root, skeleton);
     mesh->skeleton = skeleton;
+
     return true;
 }
 
@@ -747,7 +753,7 @@ XmlParserPtr OgreXmlSerializer::OpenXmlParser(Assimp::IOSystem *pIOHandler, cons
 
 void OgreXmlSerializer::ReadSkeleton(XmlNode &node, Skeleton *skeleton) {
     if (node.name() != nnSkeleton) {
-        throw DeadlyImportError("Root node is <" + node.name() + "> expecting <skeleton>");
+        throw DeadlyImportError("Root node is <" + std::string(node.name()) + "> expecting <skeleton>");
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Skeleton");
@@ -865,9 +871,9 @@ void OgreXmlSerializer::ReadAnimationTracks(XmlNode &node, Animation *dest) {
 void OgreXmlSerializer::ReadAnimationKeyFrames(XmlNode &node, Animation *anim, VertexAnimationTrack *dest) {
     const aiVector3D zeroVec(0.f, 0.f, 0.f);
     for (XmlNode &currentNode : node.children()) {
+        TransformKeyFrame keyframe;
         const std::string currentName = currentNode.name();
         if (currentName == nnKeyFrame) {
-            TransformKeyFrame keyframe;
             keyframe.timePos = ReadAttribute<float>(currentNode, "time");
             for (XmlNode &currentChildNode : currentNode.children()) {
                 const std::string currentChildName = currentNode.name();
@@ -1008,18 +1014,44 @@ void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
             bone->name = ReadAttribute<std::string>(currentNode, "name");
             for (XmlNode &currentChildNode : currentNode.children()) {
                 const std::string currentChildName = currentNode.name();
-                if (currentChildName == nnPosition) {
+                if (currentChildName == nnRotation) {
                     bone->position.x = ReadAttribute<float>(currentChildNode, anX);
                     bone->position.y = ReadAttribute<float>(currentChildNode, anY);
                     bone->position.z = ReadAttribute<float>(currentChildNode, anZ);
                 } else if (currentChildName == nnScale) {
+                    float angle = ReadAttribute<float>(currentChildNode, "angle");
+                    for (XmlNode currentChildChildNode : currentChildNode.children()) {
+                        const std::string &currentChildChildName = currentChildChildNode.name();
+                        if (currentChildChildName == nnAxis) {
+                            aiVector3D axis;
+                            axis.x = ReadAttribute<float>(currentChildChildNode, anX);
+                            axis.y = ReadAttribute<float>(currentChildChildNode, anY);
+                            axis.z = ReadAttribute<float>(currentChildChildNode, anZ);
+
+                            bone->rotation = aiQuaternion(axis, angle);
+                        } else {
+                            throw DeadlyImportError(Formatter::format() << "No axis specified for bone rotation in bone " << bone->id);
+                        }
+                    }
                 } else if (currentChildName == nnScale) {
+                    if (hasAttribute(currentChildNode, "factor")) {
+                        float factor = ReadAttribute<float>(currentChildNode, "factor");
+                        bone->scale.Set(factor, factor, factor);
+                    } else {
+                        if (hasAttribute(currentChildNode, anX))
+                            bone->scale.x = ReadAttribute<float>(currentChildNode, anX);
+                        if (hasAttribute(currentChildNode, anY))
+                            bone->scale.y = ReadAttribute<float>(currentChildNode, anY);
+                        if (hasAttribute(currentChildNode, anZ))
+                            bone->scale.z = ReadAttribute<float>(currentChildNode, anZ);
+                    }
                 }
             }
+            skeleton->bones.push_back(bone);
         }
     }
 
-    NextNode();
+    /*NextNode();
     while (m_currentNodeName == nnBone) {
         Bone *bone = new Bone();
         bone->id = ReadAttribute<uint16_t>("id");
@@ -1065,7 +1097,7 @@ void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
         }
 
         skeleton->bones.push_back(bone);
-    }
+    }*/
 
     // Order bones by Id
     std::sort(skeleton->bones.begin(), skeleton->bones.end(), BoneCompare);

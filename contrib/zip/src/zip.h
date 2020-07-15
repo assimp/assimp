@@ -16,6 +16,7 @@
 #include <sys/types.h>
 
 #ifdef _MSC_VER
+#pragma warning(push)
 #pragma warning(disable : 4127 )
 #endif //_MSC_VER
 

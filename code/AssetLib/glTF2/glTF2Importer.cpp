@@ -536,10 +536,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						facePtr = faces = new aiFace[nFaces];
 						SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
 						for (unsigned int i = 2; i < count; ++i) {
-							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[i - 2].mIndices[1], data.GetUInt(i));
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i - 1), data.GetUInt(i));
 						}
 						if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(static_cast<int>(count) - 1), faces[0].mIndices[0]);
 						}
 						break;
 					}
@@ -576,7 +576,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						facePtr = faces = new aiFace[nFaces];
 						SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
 						for (unsigned int i = 1; i < nFaces; ++i) {
-							SetFaceAndAdvance3(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i + 2));
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(i + 1), data.GetUInt(i + 2));
 						}
 						break;
 				}
@@ -614,10 +614,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						facePtr = faces = new aiFace[nFaces];
 						SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
 						for (unsigned int i = 2; i < count; ++i) {
-							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[i - 2].mIndices[1], i);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, i - 1, i);
 						}
 						if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, count - 1, 0);
 						}
 						break;
 					}
@@ -654,7 +654,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						facePtr = faces = new aiFace[nFaces];
 						SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
 						for (unsigned int i = 1; i < nFaces; ++i) {
-							SetFaceAndAdvance3(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], i + 2);
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, i + 1, i + 2);
 						}
 						break;
 				}

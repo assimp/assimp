@@ -541,3 +541,31 @@ TEST_F(utglTF2ImportExport, norootnode_issue_3269) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/issue_3269/texcoord_crash.gltf", aiProcess_ValidateDataStructure);
     ASSERT_EQ(scene, nullptr);
 }
+
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+
+TEST_F(utglTF2ImportExport, indexOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+
+    struct WarningObserver : Assimp::LogStream
+    {
+        bool m_observedWarning = false;
+        void write(const char *message) override
+        {
+            m_observedWarning = m_observedWarning || std::strstr(message, "faces were dropped");
+        }
+    };
+    WarningObserver warningObserver;
+    
+    DefaultLogger::get()->attachStream(&warningObserver);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+    ASSERT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 11);
+    DefaultLogger::get()->detachStream(&warningObserver);
+    EXPECT_TRUE(warningObserver.m_observedWarning);
+}
+

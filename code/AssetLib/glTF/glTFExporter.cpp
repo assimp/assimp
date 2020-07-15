@@ -525,9 +525,9 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     delete[] vertexJointData;
 }
 
-#if __GNUC__
+#if !defined(__has_warning) || __has_warning("-Wunused-but-set-variable")
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif // __GNUC__
+#endif
 
 void glTFExporter::ExportMeshes()
 {
@@ -797,9 +797,9 @@ void glTFExporter::ExportMeshes()
     }
 }
 
-#if __GNUC__
+#if !defined(__has_warning) || __has_warning("-Wunused-but-set-variable")
 #pragma GCC diagnostic pop
-#endif // __GNUC__
+#endif
 
 /*
  * Export the root node of the node hierarchy.

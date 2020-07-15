@@ -525,6 +525,10 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     delete[] vertexJointData;
 }
 
+#if __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif // __GNUC__
+
 void glTFExporter::ExportMeshes()
 {
     // Not for
@@ -677,7 +681,7 @@ void glTFExporter::ExportMeshes()
 		{
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 			// Only one type of compression supported at now - Open3DGC.
-			//
+		//
 			o3dgc::BinaryStream bs;
 			o3dgc::SC3DMCEncoder<IndicesType> encoder;
 			o3dgc::IndexedFaceSet<IndicesType> comp_o3dgc_ifs;
@@ -792,6 +796,10 @@ void glTFExporter::ExportMeshes()
         meshNode->skin = skinRef;
     }
 }
+
+#if __GNUC__
+#pragma GCC diagnostic pop
+#endif // __GNUC__
 
 /*
  * Export the root node of the node hierarchy.

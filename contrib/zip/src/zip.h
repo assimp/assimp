@@ -15,9 +15,9 @@
 #include <string.h>
 #include <sys/types.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable : 4127 )
-#endif //_WIN32
+#endif //_MSC_VER
 
 #ifdef __cplusplus
 extern "C" {
@@ -318,6 +318,10 @@ extern int zip_extract(const char *zipname, const char *dir,
                        void *arg);
 
 /** @} */
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif //_MSC_VER
 
 #ifdef __cplusplus
 }

@@ -436,7 +436,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu", (long long)pOffset);
+        ai_snprintf(val, val_size, AI_SIZEFMT, pOffset);
         throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
     }
 
@@ -446,7 +446,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
+        ai_snprintf(val, val_size, AI_SIZEFMT, AI_SIZEFMT, pOffset, pEncodedData_Length);
         throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
     }
 
@@ -1042,10 +1042,10 @@ inline int Compare(const char *attr, const char (&str)[N]) {
     return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
 }
 
-#ifdef _WIN32
+#if _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
     if ((pos = Compare(attr, "POSITION"))) {
@@ -1723,8 +1723,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#ifdef _WIN32
-#pragma warning(pop)
-#endif // _WIN32
+#if _MSC_VER
+#   pragma warning(pop)
+#endif // _MSC_VER
 
 } // namespace glTF2

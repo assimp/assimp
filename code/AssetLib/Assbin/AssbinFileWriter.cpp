@@ -60,10 +60,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <time.h>
 
-#ifdef _WIN32
+#if _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 namespace Assimp {
 
@@ -825,8 +825,8 @@ void DumpSceneToAssbin(
     AssbinFileWriter fileWriter(shortened, compressed);
     fileWriter.WriteBinaryDump(pFile, cmd, pIOSystem, pScene);
 }
-#ifdef _WIN32
+#if _MSC_VER
 #pragma warning(pop)
-#endif // _WIN32
+#endif // _MSC_VER
 
 } // end of namespace Assimp

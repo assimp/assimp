@@ -574,7 +574,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_TRIANGLE_FAN:
 						nFaces = count - 2;
 						facePtr = faces = new aiFace[nFaces];
-						SetFaceAndAdvance(facePtr, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+						SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
 						for (unsigned int i = 1; i < nFaces; ++i) {
 							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i + 2));
 						}
@@ -664,7 +664,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				aim->mFaces = faces;
                 const unsigned int actualNumFaces = static_cast<unsigned int>(facePtr - faces);
 				if (actualNumFaces < nFaces) {
-					ASSIMP_LOG_WARN("Some faces had out-of-range indices. Those faces were dropped.");
+					ASSIMP_LOG_WARN("Some faces in mesh had out-of-range indices. Those faces were dropped.");
+				}
+				if (actualNumFaces == 0)
+				{
+					throw DeadlyImportError(std::string("Mesh \"") + aim->mName.C_Str() + "\" has no faces");
 				}
 				aim->mNumFaces = actualNumFaces;
 				ai_assert(CheckValidFacesIndices(faces, actualNumFaces, aim->mNumVertices));

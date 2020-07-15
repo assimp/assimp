@@ -382,7 +382,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, AI_SIZEFMT " " AI_SIZEFMT, pOffset, pEncodedData_Length);
+        ai_snprintf(val, val_size, AI_SIZEFMT "/" AI_SIZEFMT, pOffset, pEncodedData_Length);
         throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
     }
 

@@ -299,9 +299,9 @@ void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
 }
 
 static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, unsigned int a) {
-    if (a >= numVertices) {
-        return;
-    }
+	if (a >= numVertices) {
+		return;
+	}
 	face->mNumIndices = 1;
 	face->mIndices = new unsigned int[1];
 	face->mIndices[0] = a;
@@ -309,14 +309,14 @@ static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, u
 }
 
 static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b) {
-    if ((a >= numVertices) || (b >= numVertices)) {
-        return;
-    }
+	if ((a >= numVertices) || (b >= numVertices)) {
+		return;
+	}
 	face->mNumIndices = 2;
 	face->mIndices = new unsigned int[2];
 	face->mIndices[0] = a;
 	face->mIndices[1] = b;
-    ++face;
+	++face;
 }
 
 static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b, unsigned int c) {
@@ -328,7 +328,7 @@ static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, u
 	face->mIndices[0] = a;
 	face->mIndices[1] = b;
 	face->mIndices[2] = c;
-    ++face;
+	++face;
 }
 
 #ifdef ASSIMP_BUILD_DEBUG
@@ -498,7 +498,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 			}
 
 			aiFace *faces = nullptr;
-            aiFace *facePtr = nullptr;
+			aiFace *facePtr = nullptr;
 			size_t nFaces = 0;
 
 			if (prim.indices) {
@@ -664,7 +664,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				aim->mFaces = faces;
                 const unsigned int actualNumFaces = static_cast<unsigned int>(facePtr - faces);
 				if (actualNumFaces < nFaces) {
-					ASSIMP_LOG_WARN("Some faces in mesh had out-of-range indices. Those faces were dropped.");
+					ASSIMP_LOG_WARN("Some faces had out-of-range indices. Those faces were dropped.");
 				}
 				if (actualNumFaces == 0)
 				{

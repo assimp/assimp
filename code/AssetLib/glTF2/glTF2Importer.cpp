@@ -361,8 +361,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 		for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
 			Mesh::Primitive &prim = mesh.primitives[p];
 
-			meshes.emplace_back(std::make_unique<aiMesh>());
-			aiMesh *aim = meshes.back().get();
+			aiMesh *aim = new aiMesh();
+			meshes.push_back(std::unique_ptr<aiMesh>(aim));
 
 			aim->mName = mesh.name.empty() ? mesh.id : mesh.name;
 

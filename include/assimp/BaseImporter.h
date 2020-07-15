@@ -406,7 +406,7 @@ public: // static utilities
         if (outLength) {
             out = new T*[outLength];
             T** outPtr = out;
-            std::for_each(vec.begin(), vec.end(), [&outPtr](auto& uPtr){*outPtr = uPtr.release(); ++outPtr; });
+            std::for_each(vec.begin(), vec.end(), [&outPtr](std::unique_ptr<T>& uPtr){*outPtr = uPtr.release(); ++outPtr; });
         }
     }
 

@@ -347,7 +347,7 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 	ASSIMP_LOG_DEBUG_F("Importing ", r.meshes.Size(), " meshes");
-	std::vector<aiMesh *> meshes;
+	std::vector<std::unique_ptr<aiMesh>> meshes;
 
 	unsigned int k = 0;
     meshOffsets.clear();
@@ -361,8 +361,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 		for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
 			Mesh::Primitive &prim = mesh.primitives[p];
 
-			aiMesh *aim = new aiMesh();
-			meshes.push_back(aim);
+			meshes.emplace_back(std::make_unique<aiMesh>());
+			aiMesh *aim = meshes.back().get();
 
 			aim->mName = mesh.name.empty() ? mesh.id : mesh.name;
 

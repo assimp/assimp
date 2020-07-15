@@ -298,7 +298,7 @@ void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
 	}
 }
 
-static inline void SetFaceAndAdvance(aiFace*& face, unsigned int numVertices, unsigned int a) {
+static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, unsigned int a) {
     if (a >= numVertices) {
         return;
     }
@@ -308,7 +308,7 @@ static inline void SetFaceAndAdvance(aiFace*& face, unsigned int numVertices, un
 	++face;
 }
 
-static inline void SetFaceAndAdvance(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b) {
+static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b) {
     if ((a >= numVertices) || (b >= numVertices)) {
         return;
     }
@@ -319,7 +319,7 @@ static inline void SetFaceAndAdvance(aiFace*& face, unsigned int numVertices, un
     ++face;
 }
 
-static inline void SetFaceAndAdvance(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b, unsigned int c) {
+static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b, unsigned int c) {
 	if ((a >= numVertices) || (b >= numVertices) || (c >= numVertices)) {
 		return;
 	}
@@ -512,7 +512,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						nFaces = count;
 						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; ++i) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(i));
+							SetFaceAndAdvance1(facePtr, aim->mNumVertices, data.GetUInt(i));
 						}
 						break;
 					}
@@ -525,7 +525,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						}
 						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 2) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1));
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1));
 						}
 						break;
 					}
@@ -534,12 +534,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_LINE_STRIP: {
 						nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
 						facePtr = faces = new aiFace[nFaces];
-						SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
+						SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
 						for (unsigned int i = 2; i < count; ++i) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[i - 2].mIndices[1], data.GetUInt(i));
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[i - 2].mIndices[1], data.GetUInt(i));
 						}
 						if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[count - 2].mIndices[1], faces[0].mIndices[0]);
 						}
 						break;
 					}
@@ -552,7 +552,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						}
 						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 3) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
 						}
 						break;
 					}
@@ -563,10 +563,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 							//The ordering is to ensure that the triangles are all drawn with the same orientation
 							if ((i + 1) % 2 == 0) {
 								//For even n, vertices n + 1, n, and n + 2 define triangle n
-								SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
 							} else {
 								//For odd n, vertices n, n+1, and n+2 define triangle n
-								SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
 							}
 						}
 						break;
@@ -574,9 +574,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_TRIANGLE_FAN:
 						nFaces = count - 2;
 						facePtr = faces = new aiFace[nFaces];
-						SetFaceAndAdvance(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+						SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
 						for (unsigned int i = 1; i < nFaces; ++i) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i + 2));
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i + 2));
 						}
 						break;
 				}
@@ -590,7 +590,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						nFaces = count;
 						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; ++i) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, i);
+							SetFaceAndAdvance1(facePtr, aim->mNumVertices, i);
 						}
 						break;
 					}
@@ -603,7 +603,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						}
 						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 2) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, i, i + 1);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, i, i + 1);
 						}
 						break;
 					}
@@ -612,12 +612,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_LINE_STRIP: {
 						nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
 						facePtr = faces = new aiFace[nFaces];
-						SetFaceAndAdvance(facePtr, aim->mNumVertices, 0, 1);
+						SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
 						for (unsigned int i = 2; i < count; ++i) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[i - 2].mIndices[1], i);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[i - 2].mIndices[1], i);
 						}
 						if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, faces[count - 2].mIndices[1], faces[0].mIndices[0]);
 						}
 						break;
 					}
@@ -630,7 +630,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 						}
 						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 3) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, i, i + 1, i + 2);
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
 						}
 						break;
 					}
@@ -641,10 +641,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 							//The ordering is to ensure that the triangles are all drawn with the same orientation
 							if ((i + 1) % 2 == 0) {
 								//For even n, vertices n + 1, n, and n + 2 define triangle n
-								SetFaceAndAdvance(facePtr, aim->mNumVertices, i + 1, i, i + 2);
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, i + 1, i, i + 2);
 							} else {
 								//For odd n, vertices n, n+1, and n+2 define triangle n
-								SetFaceAndAdvance(facePtr, aim->mNumVertices, i, i + 1, i + 2);
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
 							}
 						}
 						break;
@@ -652,9 +652,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_TRIANGLE_FAN:
 						nFaces = count - 2;
 						facePtr = faces = new aiFace[nFaces];
-						SetFaceAndAdvance(facePtr, aim->mNumVertices, 0, 1, 2);
+						SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
 						for (unsigned int i = 1; i < nFaces; ++i) {
-							SetFaceAndAdvance(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], i + 2);
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, faces[0].mIndices[0], faces[i - 1].mIndices[2], i + 2);
 						}
 						break;
 				}

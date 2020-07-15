@@ -662,7 +662,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
 			if (faces) {
 				aim->mFaces = faces;
-                const unsigned int actualNumFaces = facePtr - faces;
+                const unsigned int actualNumFaces = static_cast<unsigned int>(facePtr - faces);
 				if (actualNumFaces < nFaces) {
 					ASSIMP_LOG_WARN("Some faces had out-of-range indices. Those faces were dropped.");
 				}

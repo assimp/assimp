@@ -525,7 +525,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     delete[] vertexJointData;
 }
 
-#if !defined(__has_warning) || __has_warning("-Wunused-but-set-variable")
+#if defined(__has_warning) || __has_warning("-Wunused-but-set-variable")
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
@@ -797,7 +797,7 @@ void glTFExporter::ExportMeshes()
     }
 }
 
-#if !defined(__has_warning) || __has_warning("-Wunused-but-set-variable")
+#if defined(__has_warning) || __has_warning("-Wunused-but-set-variable")
 #pragma GCC diagnostic pop
 #endif
 

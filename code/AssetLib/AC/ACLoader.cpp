@@ -484,6 +484,12 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     needMat[idx].second += ((unsigned int)(*it).entries.size() - 1) << 1u;
                     break;
 
+                    // triangle strip
+                case 0x4:
+                    needMat[idx].first += (unsigned int)(*it).entries.size() - 2;
+                    needMat[idx].second += ((unsigned int)(*it).entries.size() - 2) * 3;
+                    break;
+
                     // 0 == polygon, else unknown
                 default:
                     if ((*it).flags & 0xf) {
@@ -568,6 +574,64 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                         uv->y = entry.second.y;
                                         ++uv;
                                     }
+                                }
+                            }
+                        } else if (type == 0x4) {
+                            for (unsigned int i = 0; i < (unsigned int)src.entries.size() - 2; ++i) {
+                                const Surface::SurfaceEntry &entry1 = src.entries[i];
+                                const Surface::SurfaceEntry &entry2 = src.entries[i + 1];
+                                const Surface::SurfaceEntry &entry3 = src.entries[i + 2];
+
+                                // skip degenerate triangles
+                                if (object.vertices[entry1.first] == object.vertices[entry2.first] ||
+                                    object.vertices[entry1.first] == object.vertices[entry3.first] ||
+                                    object.vertices[entry2.first] == object.vertices[entry3.first]) {
+                                    mesh->mNumFaces--;
+                                    mesh->mNumVertices -= 3;
+                                    continue;
+                                }
+
+                                aiFace &face = *faces++;
+                                face.mNumIndices = 3;
+                                face.mIndices = new unsigned int[face.mNumIndices];
+                                face.mIndices[0] = cur++;
+                                face.mIndices[1] = cur++;
+                                face.mIndices[2] = cur++;
+                                if (!(i & 1)) {
+                                    *vertices++ = object.vertices[entry1.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry1.second.x;
+                                        uv->y = entry1.second.y;
+                                        ++uv;
+                                    }
+                                    *vertices++ = object.vertices[entry2.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry2.second.x;
+                                        uv->y = entry2.second.y;
+                                        ++uv;
+                                    }
+                                } else {
+                                    *vertices++ = object.vertices[entry2.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry2.second.x;
+                                        uv->y = entry2.second.y;
+                                        ++uv;
+                                    }
+                                    *vertices++ = object.vertices[entry1.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry1.second.x;
+                                        uv->y = entry1.second.y;
+                                        ++uv;
+                                    }
+                                }
+                                if (static_cast<unsigned>(vertices - mesh->mVertices) >= mesh->mNumVertices) {
+                                    throw DeadlyImportError("AC3D: Invalid number of vertices");
+                                }
+                                *vertices++ = object.vertices[entry3.first] + object.translation;
+                                if (uv) {
+                                    uv->x = entry3.second.x;
+                                    uv->y = entry3.second.y;
+                                    ++uv;
                                 }
                             }
                         } else {

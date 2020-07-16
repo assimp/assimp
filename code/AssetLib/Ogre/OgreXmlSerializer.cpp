@@ -42,8 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreXmlSerializer.h"
 #include "OgreBinarySerializer.h"
 #include "OgreParsingUtils.h"
+
 #include <assimp/TinyFormatter.h>
 #include <assimp/DefaultLogger.hpp>
+
 #include <memory>
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
@@ -62,10 +64,6 @@ AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::s
     } else {
         throw DeadlyImportError("Attribute '" + name + "' does not exist in node '" + nodeName + "'");
     }
-}
-static inline bool hasAttribute( XmlNode &xmlNode, const char *name ) {
-    pugi::xml_attribute attr = xmlNode.attribute(name);
-    return !attr.empty();
 }
 
 template <>
@@ -133,51 +131,7 @@ bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) 
     return false;
 }
 
-/*std::string &OgreXmlSerializer::NextNode() {
-    do {
-        if (!m_reader->read()) {
-            m_currentNodeName = "";
-            return m_currentNodeName;
-        }
-    } while (m_reader->getNodeType() != irr::io::EXN_ELEMENT);
 
-    CurrentNodeName(true);
-#if (OGRE_XML_SERIALIZER_DEBUG == 1)
-    ASSIMP_LOG_DEBUG"<" + m_currentNodeName + ">");
-#endif
-    return m_currentNodeName;
-}
-
-bool OgreXmlSerializer::CurrentNodeNameEquals(const std::string &name) const {
-    return (ASSIMP_stricmp(m_currentNodeName, name) == 0);
-}
-
-std::string OgreXmlSerializer::CurrentNodeName(bool forceRead) {
-    if (forceRead)
-        m_currentNodeName = std::string(m_reader->getNodeName());
-    return m_currentNodeName;
-}
-
-std::string &OgreXmlSerializer::SkipCurrentNode() {
-#if (OGRE_XML_SERIALIZER_DEBUG == 1)
-    ASSIMP_LOG_DEBUG("Skipping node <" + m_currentNodeName + ">");
-#endif
-
-    for (;;) {
-        if (!m_reader->read()) {
-            m_currentNodeName = "";
-            return m_currentNodeName;
-        }
-        if (m_reader->getNodeType() != irr::io::EXN_ELEMENT_END) {
-            continue;
-        } else if (std::string(m_reader->getNodeName()) == m_currentNodeName) {
-            break;
-        }
-    }
-
-    return NextNode();
-}
-*/
 // Mesh XML constants
 
 // <mesh>
@@ -252,8 +206,17 @@ static const char *anZ = "z";
 
 // Mesh
 
-MeshXml *OgreXmlSerializer::ImportMesh(XmlParser *xmlParser) {
-    OgreXmlSerializer serializer(xmlParser);
+OgreXmlSerializer::OgreXmlSerializer(XmlParser *parser) :
+        mParser(parser) {
+    // empty
+}
+
+MeshXml *OgreXmlSerializer::ImportMesh(XmlParser *parser) {
+    if (nullptr == parser) {
+        return nullptr;
+    }
+
+    OgreXmlSerializer serializer(parser);
 
     MeshXml *mesh = new MeshXml();
     serializer.ReadMesh(mesh);
@@ -262,9 +225,9 @@ MeshXml *OgreXmlSerializer::ImportMesh(XmlParser *xmlParser) {
 }
 
 void OgreXmlSerializer::ReadMesh(MeshXml *mesh) {
-    const XmlNode *root = mParser->getRootNode();
+    XmlNode *root = mParser->getRootNode();
     if (nullptr == root || std::string(nnMesh)!=root->name()) {
-        throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <mesh>");
+        throw DeadlyImportError("Root node is <" + std::string(root->name()) + "> expecting <mesh>");
     }
 
     for (XmlNode currentNode : root->children()) {
@@ -557,7 +520,7 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
 
             submesh->vertexData = new VertexDataXml();
             ReadGeometry(currentNode, submesh->vertexData);
-        } else if (m_currentNodeName == nnBoneAssignments) {
+        } else if (currentName == nnBoneAssignments) {
             ReadBoneAssignments(currentNode, submesh->vertexData);
         }
     }

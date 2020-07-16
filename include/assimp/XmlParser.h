@@ -152,7 +152,12 @@ private:
 };
 
 using XmlParser = TXmlParser<pugi::xml_node>;
-using XmlNode   = pugi::xml_node;
+using XmlNode = pugi::xml_node;
+
+static inline bool hasAttribute(XmlNode &xmlNode, const char *name) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    return !attr.empty();
+}
 
 } // namespace Assimp
 

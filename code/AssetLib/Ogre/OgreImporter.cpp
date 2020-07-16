@@ -126,11 +126,13 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
     {
         /// @note XmlReader does not take ownership of f, hence the scoped ptr.
         std::unique_ptr<IOStream> scopedFile(f);
-        std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
-        std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
-
+        XmlParser xmlParser;
+        
+        //std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
+        //std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+        xmlParser.parse(scopedFile.get());
         // Import mesh
-        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(reader.get()));
+        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(xmlParser));
 
         // Import skeleton
         OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh.get());

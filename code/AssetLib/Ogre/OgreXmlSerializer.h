@@ -49,21 +49,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/XmlParser.h>
 
 namespace Assimp {
+
 namespace Ogre {
 
-//typedef irr::io::IrrXMLReader XmlReader;
-using XmlParserPtr = std::shared_ptr<XmlParser> ;
+using XmlParserPtr = std::shared_ptr<::Assimp::XmlParser> ;
 
 class OgreXmlSerializer {
 public:
     /// Imports mesh and returns the result.
-    /** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
+    /// @note Fatal unrecoverable errors will throw a DeadlyImportError.
     static MeshXml *ImportMesh(XmlParser *parser);
 
     /// Imports skeleton to @c mesh.
-    /** If mesh does not have a skeleton reference or the skeleton file
-        cannot be found it is not a fatal DeadlyImportError.
-        @return If skeleton import was successful. */
+    /// If mesh does not have a skeleton reference or the skeleton file
+    /// cannot be found it is not a fatal DeadlyImportError.
+    /// @return If skeleton import was successful.
     static bool ImportSkeleton(IOSystem *pIOHandler, MeshXml *mesh);
     static bool ImportSkeleton(IOSystem *pIOHandler, Mesh *mesh);
 
@@ -75,40 +75,25 @@ private:
     // Mesh
     void ReadMesh(MeshXml *mesh);
     void ReadSubMesh(XmlNode &node, MeshXml *mesh);
-
     void ReadGeometry(XmlNode &node, VertexDataXml *dest);
     void ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *dest);
-
     void ReadBoneAssignments(XmlNode &node, VertexDataXml *dest);
 
     // Skeleton
     void ReadSkeleton(XmlNode &node, Skeleton *skeleton);
-
     void ReadBones(XmlNode &node, Skeleton *skeleton);
     void ReadBoneHierarchy(XmlNode &node, Skeleton *skeleton);
-
     void ReadAnimations(XmlNode &node, Skeleton *skeleton);
     void ReadAnimationTracks(XmlNode &node, Animation *dest);
     void ReadAnimationKeyFrames(XmlNode &node, Animation *anim, VertexAnimationTrack *dest);
 
     template <typename T>
     T ReadAttribute(XmlNode &xmlNode, const char *name) const;
-    //bool HasAttribute(const char *name) const;
 
-    //std::string &NextNode();
-    //std::string &SkipCurrentNode();
-
-    //bool CurrentNodeNameEquals(const std::string &name) const;
-    //std::string CurrentNodeName(bool forceRead = false);
-
+private:
     XmlParser *mParser;
-    std::string m_currentNodeName;
 };
 
-inline OgreXmlSerializer::OgreXmlSerializer(XmlParser *xmlParser) :
-        mParser(xmlParser) {
-    // empty
-}
 
 } // namespace Ogre
 } // namespace Assimp

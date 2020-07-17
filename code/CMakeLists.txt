@@ -899,7 +899,7 @@ ENDIF()
 # utf8
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
-  find_package(utf8 CONFIG REQUIRED)
+  find_package(utf8cpp CONFIG REQUIRED)
 ELSE()
   # utf8 is header-only, so Assimp doesn't need to do anything.
 ENDIF()
@@ -1159,7 +1159,7 @@ IF(ASSIMP_HUNTER_ENABLED)
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
-      utf8::utf8
+      utf8cpp
       zip::zip
   )
 ELSE()

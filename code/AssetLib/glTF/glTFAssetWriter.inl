@@ -305,11 +305,11 @@ namespace glTF {
 			Value json_extensions;
 
 			json_extensions.SetObject();
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 			for(Mesh::SExtension* ptr_ext : m.Extension)
 			{
 				switch(ptr_ext->Type)
 				{
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 					case Mesh::SExtension::EType::Compression_Open3DGC:
 						{
 							Value json_comp_data;
@@ -339,11 +339,11 @@ namespace glTF {
 						}
 
 						break;
-#endif
 					default:
 						throw DeadlyImportError("GLTF: Can not write mesh: unknown mesh extension, only Open3DGC is supported.");
 				}// switch(ptr_ext->Type)
 			}// for(Mesh::SExtension* ptr_ext : m.Extension)
+#endif
 
 			// Add extensions to mesh
 			obj.AddMember("extensions", json_extensions, w.mAl);

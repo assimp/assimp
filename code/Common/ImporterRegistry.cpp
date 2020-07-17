@@ -1,4 +1,4 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -179,8 +179,10 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 #include "AssetLib/Assbin/AssbinLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
 #include "AssetLib/glTF/glTFImporter.h"
+#endif
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 #include "AssetLib/glTF2/glTF2Importer.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
@@ -339,8 +341,10 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #if (!defined ASSIMP_BUILD_NO_ASSBIN_IMPORTER)
     out.push_back(new AssbinImporter());
 #endif
-#if (!defined ASSIMP_BUILD_NO_GLTF_IMPORTER)
+#if (!defined ASSIMP_BUILD_NO_GLTF_IMPORTER && !defined ASSIMP_BUILD_NO_GLTF1_IMPORTER)
     out.push_back(new glTFImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_GLTF_IMPORTER && !defined ASSIMP_BUILD_NO_GLTF2_IMPORTER)
     out.push_back(new glTF2Importer());
 #endif
 #if (!defined ASSIMP_BUILD_NO_C4D_IMPORTER)

@@ -100,7 +100,6 @@ size_t DefaultIOStream::Write(const void *pvBuffer,
         size_t pCount) {
     ai_assert(nullptr != pvBuffer);
     ai_assert(0 != pSize);
-    ai_assert(0 != pCount);
 
     return (mFile ? ::fwrite(pvBuffer, pSize, pCount, mFile) : 0);
 }

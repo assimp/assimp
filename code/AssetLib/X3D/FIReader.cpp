@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/irrXMLWrapper.h>
 #ifdef ASSIMP_USE_HUNTER
-#  include <utf8/utf8.h>
+#  include <utf8.h>
 #else
 #  include "../contrib/utf8cpp/source/utf8.h"
 #endif

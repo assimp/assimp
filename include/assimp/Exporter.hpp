@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "cexport.h"
 #include <map>
+#include <functional>
 
 namespace Assimp {
 
@@ -107,7 +108,8 @@ public:
         }
 
         ExportFormatEntry() :
-                mExportFunction(), mEnforcePP() {
+                mExportFunction(),
+                mEnforcePP() {
             mDescription.id = nullptr;
             mDescription.description = nullptr;
             mDescription.fileExtension = nullptr;
@@ -147,7 +149,7 @@ public:
      * interface is the default IO handler provided by ASSIMP. The default
      * handler is active as long the application doesn't supply its own
      * custom IO handler via #SetIOHandler().
-     * @return A valid IOSystem interface, never nullptr. */
+     * @return A valid IOSystem interface, never NULL. */
     IOSystem *GetIOHandler() const;
 
     // -------------------------------------------------------------------
@@ -286,7 +288,7 @@ public:
      * @param pIndex Index of the export format to retrieve information
      *  for. Valid range is 0 to #Exporter::GetExportFormatCount
      * @return A description of that specific export format.
-     *  nullptr if pIndex is out of range. */
+     *  NULL if pIndex is out of range. */
     const aiExportFormatDesc *GetExportFormatDescription(size_t pIndex) const;
 
     // -------------------------------------------------------------------
@@ -329,6 +331,7 @@ public:
     typedef std::map<KeyType, ai_real> FloatPropertyMap;
     typedef std::map<KeyType, std::string> StringPropertyMap;
     typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
+    typedef std::map<KeyType, std::function<void *(void *)>> CallbackPropertyMap;
 
 public:
     /** Standard constructor
@@ -387,6 +390,8 @@ public:
      * @see SetPropertyInteger()
      */
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
+    
+    bool SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f);
 
     // -------------------------------------------------------------------
     /** Get a configuration property.
@@ -440,6 +445,8 @@ public:
     const aiMatrix4x4 GetPropertyMatrix(const char *szName,
             const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
 
+    std::function<void *(void *)> GetPropertyCallback(const char* szName) const;
+
     // -------------------------------------------------------------------
     /** Determine a integer configuration property has been set.
     * @see HasPropertyInteger()
@@ -466,7 +473,8 @@ public:
      */
     bool HasPropertyMatrix(const char *szName) const;
 
-protected:
+    bool HasPropertyCallback(const char *szName) const;
+
     /** List of integer properties */
     IntPropertyMap mIntProperties;
 
@@ -478,6 +486,8 @@ protected:
 
     /** List of Matrix properties */
     MatrixPropertyMap mMatrixProperties;
+
+    CallbackPropertyMap mCallbackProperties;
 };
 
 // ----------------------------------------------------------------------------------

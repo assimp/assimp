@@ -68,8 +68,8 @@ namespace Assimp {
 namespace MDL {
 namespace HalfLife {
 
-#ifdef _WIN32
-#    pragma warning(disable : 4706) 
+#if _MSC_VER > 1920
+#    pragma warning(disable : 4706)
 #endif // _WIN32
 
 // ------------------------------------------------------------------------------------------------

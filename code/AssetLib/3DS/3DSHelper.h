@@ -321,7 +321,7 @@ public:
 struct Face : public FaceWithSmoothingGroup {
 };
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #pragma warning(disable : 4315)
 #endif
 

@@ -106,6 +106,18 @@ public:
 
         typedef std::pair<unsigned int, aiVector2D> SurfaceEntry;
         std::vector<SurfaceEntry> entries;
+
+        // Type is low nibble of flags
+        enum Type : uint8_t {
+            Polygon = 0x0,
+            ClosedLine = 0x1,
+            OpenLine = 0x2,
+            TriangleStrip = 0x4, // ACC extension (TORCS and Speed Dreams)
+
+            Mask = 0xf,
+        };
+
+        inline constexpr uint8_t GetType() const { return (flags & Mask); }
     };
 
     // Represents an AC3D object

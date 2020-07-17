@@ -68,9 +68,9 @@ namespace Assimp {
 namespace MDL {
 namespace HalfLife {
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
 #    pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 // ------------------------------------------------------------------------------------------------
 HL1MDLLoader::HL1MDLLoader(

@@ -84,7 +84,7 @@ typedef uint16_t M3D_INDEX;
 #ifndef M3D_BONEMAXLEVEL
 #define M3D_BONEMAXLEVEL 8
 #endif
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) || defined(__clang__)
 #ifndef _inline
 #define _inline __inline__
 #endif
@@ -101,7 +101,7 @@ typedef uint16_t M3D_INDEX;
 #define _register
 #endif
 
-#ifdef _MSC_VER
+#if _MSC_VER > 1920 && !defined(__clang__)
 #    pragma warning(push)
 #    pragma warning(disable : 4100 4127 4189 4505 4244 4403  4701 4703)
 #    if (_MSC_VER > 1800 )

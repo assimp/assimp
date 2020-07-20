@@ -257,7 +257,11 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
-  ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX ) 
+  IF( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) # clang-cl
+    ADD_COMPILE_OPTIONS(/bigobj /W4 /WX )
+  ELSE() # msvc
+    ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX)
+  ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)

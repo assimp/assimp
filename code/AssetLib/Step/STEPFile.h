@@ -54,10 +54,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
 #    pragma warning(push)
 #    pragma warning(disable : 4127 4456 4245 4512 )
-#endif // _WIN32 
+#endif // _MSC_VER 
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)
@@ -960,9 +960,9 @@ private:
     const EXPRESS::ConversionSchema *schema;
 };
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // _WIN32
+#endif // _MSC_VER
 
 } // namespace STEP
 

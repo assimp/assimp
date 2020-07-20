@@ -926,7 +926,7 @@ GTestLog::~GTestLog() {
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
-
+GTEST_DISABLE_CLANG_DEPRECATED_WARNINGS_PUSH_()
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Object that captures an output stream (stdout/stderr).
@@ -1010,6 +1010,7 @@ class CapturedStream {
 };
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()
+GTEST_DISABLE_CLANG_WARNINGS_POP_()
 
 static CapturedStream* g_captured_stderr = NULL;
 static CapturedStream* g_captured_stdout = NULL;

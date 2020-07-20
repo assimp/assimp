@@ -1,11 +1,3 @@
-/* ioapi.c -- IO base function header for compress/uncompress .zip
-   files using zlib + zip or unzip API
-
-   Version 1.01e, February 12th, 2005
-
-   Copyright (C) 1998-2005 Gilles Vollant
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +8,10 @@
 #ifdef _WIN32
 #    pragma warning(push)
 #    pragma warning(disable : 4131 4100)
+#    ifdef __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wunused-parameter"
+#    endif
 #endif // _WIN32
 
 /* I've found an old Unix (a SunOS 4.1.3_U1) without all SEEK_* defined.... */
@@ -181,4 +177,7 @@ void fill_fopen_filefunc (pzlib_filefunc_def)
 
 #ifdef _WIN32
 #    pragma warning(pop)
+#    ifdef __clang__
+#        pragma clang diagnostic pop
+#    endif
 #endif // _WIN32

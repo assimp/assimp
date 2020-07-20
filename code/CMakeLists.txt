@@ -45,7 +45,6 @@
 #
 cmake_minimum_required( VERSION 3.0 )
 SET( HEADER_PATH ../include/assimp )
-
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
     message(WARNING "Requesting Android JNI I/O-System in non-Android toolchain. Resetting ASSIMP_ANDROID_JNIIOSYSTEM to OFF.")
     set(ASSIMP_ANDROID_JNIIOSYSTEM OFF)

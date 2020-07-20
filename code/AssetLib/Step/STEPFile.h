@@ -130,8 +130,8 @@ namespace STEP {
      *  coupled with a line number. */
 // -------------------------------------------------------------------------------
 struct SyntaxError : DeadlyImportError {
-    enum {
-        LINE_NOT_SPECIFIED = 0xffffffffffffffffLL
+    enum : uint64_t {
+        LINE_NOT_SPECIFIED = 0xfffffffffffffffLL
     };
 
     SyntaxError(const std::string &s, uint64_t line = LINE_NOT_SPECIFIED);
@@ -143,8 +143,8 @@ struct SyntaxError : DeadlyImportError {
      *  It is typically coupled with both an entity id and a line number.*/
 // -------------------------------------------------------------------------------
 struct TypeError : DeadlyImportError {
-    enum {
-        ENTITY_NOT_SPECIFIED = 0xffffffffffffffffLL,
+    enum : uint64_t {
+        ENTITY_NOT_SPECIFIED = 0xffffffffffffffffUL,
         ENTITY_NOT_SPECIFIED_32 = 0x00000000ffffffff
     };
 

@@ -686,7 +686,11 @@ typedef struct
 } _m3dstbi__result_info;
 
 #define STBI_ASSERT(v)
-#define STBI_NOTUSED(v) (void)sizeof(v)
+#ifdef _MSC_VER
+#define STBI_NOTUSED(v)  (void)(v)
+#else
+#define STBI_NOTUSED(v)  (void)sizeof(v)
+#endif
 #define STBI__BYTECAST(x) ((unsigned char)((x)&255))
 #define STBI_MALLOC(sz) M3D_MALLOC(sz)
 #define STBI_REALLOC(p, newsz) M3D_REALLOC(p, newsz)
@@ -697,10 +701,6 @@ _inline static unsigned char _m3dstbi__get8(_m3dstbi__context *s) {
     if (s->img_buffer < s->img_buffer_end)
         return *s->img_buffer++;
     return 0;
-}
-
-_inline static int _m3dstbi__at_eof(_m3dstbi__context *s) {
-    return s->img_buffer >= s->img_buffer_end;
 }
 
 static void _m3dstbi__skip(_m3dstbi__context *s, int n) {
@@ -4347,7 +4347,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s, fi_s;
     char *sn = NULL, *sl = NULL, *sa = NULL, *sd = NULL;
     unsigned char *out = NULL, *z = NULL, weights[M3D_NUMBONE], *norm = NULL;
-    unsigned int i, j, k, l, n, len, chunklen, *length;
+    unsigned int i = 0, j = 0, k = 0, l = 0, n = 0, len = 0, chunklen = 0, *length = NULL;
     M3D_FLOAT scale = (M3D_FLOAT)0.0, min_x, max_x, min_y, max_y, min_z, max_z;
     M3D_INDEX last, *vrtxidx = NULL, *mtrlidx = NULL, *tmapidx = NULL, *skinidx = NULL;
     uint32_t idx, numcmap = 0, *cmap = NULL, numvrtx = 0, maxvrtx = 0, numtmap = 0, maxtmap = 0, numproc = 0;
@@ -5578,9 +5578,9 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         } else
                             out--;
                         break;
-                    case m3dpf_uint8: *out++ = m->prop[i].value.num; break;
+                    case m3dpf_uint8: *out++ = (uint8_t)m->prop[i].value.num; break;
                     case m3dpf_uint16:
-                        *((uint16_t *)out) = m->prop[i].value.num;
+                        *((uint16_t *)out) = (uint16_t)m->prop[i].value.num;
                         out += 2;
                         break;
                     case m3dpf_uint32:
@@ -5655,7 +5655,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                              face[i].data.normal[1] == M3D_UNDEF || face[i].data.normal[2] == M3D_UNDEF) ?
                                     0 :
                                     2);
-                *out++ = k;
+                *out++ = (uint8_t)k;
                 for (j = 0; j < 3; j++) {
                     out = _m3d_addidx(out, vi_s, vrtxidx[face[i].data.vertex[j]]);
                     if (k & 1)
@@ -6149,7 +6149,7 @@ public:
 
 #endif /* M3D_CPPWRAPPER */
 
-#ifdef _MSC_VER
+#if _MSC_VER > 1920 && !defined(__clang__)
 #    pragma warning(pop)
 #endif /* _MSC_VER */
 

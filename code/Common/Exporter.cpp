@@ -74,9 +74,9 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 namespace Assimp {
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
 #    pragma warning( disable : 4800 )
-#endif // _WIN32
+#endif // _MSC_VER
 
 
 // PostStepRegistry.cpp

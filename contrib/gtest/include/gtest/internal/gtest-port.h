@@ -312,10 +312,22 @@
     __pragma(warning(disable: warnings))
 # define GTEST_DISABLE_MSC_WARNINGS_POP_()          \
     __pragma(warning(pop))
+# if defined(__clang__)
+#  define GTEST_DISABLE_CLANG_DEPRECATED_WARNINGS_PUSH_() \
+      _Pragma("clang diagnostic push") \
+      _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#  define GTEST_DISABLE_CLANG_WARNINGS_POP_() \
+      _Pragma("clang diagnostic pop")
+# else
+#  define GTEST_DISABLE_CLANG_DEPRECATED_WARNINGS_PUSH_()
+#  define GTEST_DISABLE_CLANG_WARNINGS_POP_()
+# endif
 #else
 // Older versions of MSVC don't have __pragma.
 # define GTEST_DISABLE_MSC_WARNINGS_PUSH_(warnings)
 # define GTEST_DISABLE_MSC_WARNINGS_POP_()
+# define GTEST_DISABLE_CLANG_DEPRECATED_WARNINGS_PUSH_()
+# define GTEST_DISABLE_CLANG_WARNINGS_POP_()
 #endif
 
 #ifndef GTEST_LANG_CXX11
@@ -2352,6 +2364,7 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 // Functions deprecated by MSVC 8.0.
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* deprecated function */)
+GTEST_DISABLE_CLANG_DEPRECATED_WARNINGS_PUSH_()
 
 inline const char* StrNCpy(char* dest, const char* src, size_t n) {
   return strncpy(dest, src, n);
@@ -2399,6 +2412,7 @@ inline const char* GetEnv(const char* name) {
 #endif
 }
 
+GTEST_DISABLE_CLANG_WARNINGS_POP_()
 GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 #if GTEST_OS_WINDOWS_MOBILE

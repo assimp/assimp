@@ -321,9 +321,10 @@ public:
 struct Face : public FaceWithSmoothingGroup {
 };
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
+#pragma warning(push)
 #pragma warning(disable : 4315)
-#endif
+#endif // _MSC_VER
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a texture */
@@ -411,6 +412,10 @@ struct Texture {
 };
 
 #include <assimp/Compiler/poppack1.h>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */

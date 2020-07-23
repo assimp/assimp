@@ -298,25 +298,37 @@ void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
 	}
 }
 
-static inline void SetFace(aiFace &face, int a) {
-	face.mNumIndices = 1;
-	face.mIndices = new unsigned int[1];
-	face.mIndices[0] = a;
+static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, unsigned int a) {
+	if (a >= numVertices) {
+		return;
+	}
+	face->mNumIndices = 1;
+	face->mIndices = new unsigned int[1];
+	face->mIndices[0] = a;
+	++face;
 }
 
-static inline void SetFace(aiFace &face, int a, int b) {
-	face.mNumIndices = 2;
-	face.mIndices = new unsigned int[2];
-	face.mIndices[0] = a;
-	face.mIndices[1] = b;
+static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b) {
+	if ((a >= numVertices) || (b >= numVertices)) {
+		return;
+	}
+	face->mNumIndices = 2;
+	face->mIndices = new unsigned int[2];
+	face->mIndices[0] = a;
+	face->mIndices[1] = b;
+	++face;
 }
 
-static inline void SetFace(aiFace &face, int a, int b, int c) {
-	face.mNumIndices = 3;
-	face.mIndices = new unsigned int[3];
-	face.mIndices[0] = a;
-	face.mIndices[1] = b;
-	face.mIndices[2] = c;
+static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b, unsigned int c) {
+	if ((a >= numVertices) || (b >= numVertices) || (c >= numVertices)) {
+		return;
+	}
+	face->mNumIndices = 3;
+	face->mIndices = new unsigned int[3];
+	face->mIndices[0] = a;
+	face->mIndices[1] = b;
+	face->mIndices[2] = c;
+	++face;
 }
 
 #ifdef ASSIMP_BUILD_DEBUG
@@ -335,7 +347,7 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 	ASSIMP_LOG_DEBUG_F("Importing ", r.meshes.Size(), " meshes");
-	std::vector<aiMesh *> meshes;
+	std::vector<std::unique_ptr<aiMesh>> meshes;
 
 	unsigned int k = 0;
     meshOffsets.clear();
@@ -350,7 +362,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 			Mesh::Primitive &prim = mesh.primitives[p];
 
 			aiMesh *aim = new aiMesh();
-			meshes.push_back(aim);
+			meshes.push_back(std::unique_ptr<aiMesh>(aim));
 
 			aim->mName = mesh.name.empty() ? mesh.id : mesh.name;
 
@@ -486,6 +498,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 			}
 
 			aiFace *faces = nullptr;
+			aiFace *facePtr = nullptr;
 			size_t nFaces = 0;
 
 			if (prim.indices) {
@@ -497,9 +510,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				switch (prim.mode) {
 					case PrimitiveMode_POINTS: {
 						nFaces = count;
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; ++i) {
-							SetFace(faces[i], data.GetUInt(i));
+							SetFaceAndAdvance1(facePtr, aim->mNumVertices, data.GetUInt(i));
 						}
 						break;
 					}
@@ -510,9 +523,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 							ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
 							count = nFaces * 2;
 						}
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 2) {
-							SetFace(faces[i / 2], data.GetUInt(i), data.GetUInt(i + 1));
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1));
 						}
 						break;
 					}
@@ -520,13 +533,13 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_LINE_LOOP:
 					case PrimitiveMode_LINE_STRIP: {
 						nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
-						faces = new aiFace[nFaces];
-						SetFace(faces[0], data.GetUInt(0), data.GetUInt(1));
+						facePtr = faces = new aiFace[nFaces];
+						SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
 						for (unsigned int i = 2; i < count; ++i) {
-							SetFace(faces[i - 1], faces[i - 2].mIndices[1], data.GetUInt(i));
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i - 1), data.GetUInt(i));
 						}
 						if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-							SetFace(faces[count - 1], faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(static_cast<int>(count) - 1), faces[0].mIndices[0]);
 						}
 						break;
 					}
@@ -537,33 +550,33 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 							ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
 							count = nFaces * 3;
 						}
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 3) {
-							SetFace(faces[i / 3], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
 						}
 						break;
 					}
 					case PrimitiveMode_TRIANGLE_STRIP: {
 						nFaces = count - 2;
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < nFaces; ++i) {
 							//The ordering is to ensure that the triangles are all drawn with the same orientation
 							if ((i + 1) % 2 == 0) {
 								//For even n, vertices n + 1, n, and n + 2 define triangle n
-								SetFace(faces[i], data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
 							} else {
 								//For odd n, vertices n, n+1, and n+2 define triangle n
-								SetFace(faces[i], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
 							}
 						}
 						break;
 					}
 					case PrimitiveMode_TRIANGLE_FAN:
 						nFaces = count - 2;
-						faces = new aiFace[nFaces];
-						SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+						facePtr = faces = new aiFace[nFaces];
+						SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
 						for (unsigned int i = 1; i < nFaces; ++i) {
-							SetFace(faces[i], faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i + 2));
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(i + 1), data.GetUInt(i + 2));
 						}
 						break;
 				}
@@ -575,9 +588,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				switch (prim.mode) {
 					case PrimitiveMode_POINTS: {
 						nFaces = count;
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; ++i) {
-							SetFace(faces[i], i);
+							SetFaceAndAdvance1(facePtr, aim->mNumVertices, i);
 						}
 						break;
 					}
@@ -588,9 +601,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 							ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
 							count = (unsigned int)nFaces * 2;
 						}
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 2) {
-							SetFace(faces[i / 2], i, i + 1);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, i, i + 1);
 						}
 						break;
 					}
@@ -598,13 +611,13 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 					case PrimitiveMode_LINE_LOOP:
 					case PrimitiveMode_LINE_STRIP: {
 						nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
-						faces = new aiFace[nFaces];
-						SetFace(faces[0], 0, 1);
+						facePtr = faces = new aiFace[nFaces];
+						SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
 						for (unsigned int i = 2; i < count; ++i) {
-							SetFace(faces[i - 1], faces[i - 2].mIndices[1], i);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, i - 1, i);
 						}
 						if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-							SetFace(faces[count - 1], faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+							SetFaceAndAdvance2(facePtr, aim->mNumVertices, count - 1, 0);
 						}
 						break;
 					}
@@ -615,42 +628,50 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 							ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
 							count = (unsigned int)nFaces * 3;
 						}
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < count; i += 3) {
-							SetFace(faces[i / 3], i, i + 1, i + 2);
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
 						}
 						break;
 					}
 					case PrimitiveMode_TRIANGLE_STRIP: {
 						nFaces = count - 2;
-						faces = new aiFace[nFaces];
+						facePtr = faces = new aiFace[nFaces];
 						for (unsigned int i = 0; i < nFaces; ++i) {
 							//The ordering is to ensure that the triangles are all drawn with the same orientation
 							if ((i + 1) % 2 == 0) {
 								//For even n, vertices n + 1, n, and n + 2 define triangle n
-								SetFace(faces[i], i + 1, i, i + 2);
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, i + 1, i, i + 2);
 							} else {
 								//For odd n, vertices n, n+1, and n+2 define triangle n
-								SetFace(faces[i], i, i + 1, i + 2);
+								SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
 							}
 						}
 						break;
 					}
 					case PrimitiveMode_TRIANGLE_FAN:
 						nFaces = count - 2;
-						faces = new aiFace[nFaces];
-						SetFace(faces[0], 0, 1, 2);
+						facePtr = faces = new aiFace[nFaces];
+						SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
 						for (unsigned int i = 1; i < nFaces; ++i) {
-							SetFace(faces[i], faces[0].mIndices[0], faces[i - 1].mIndices[2], i + 2);
+							SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, i + 1, i + 2);
 						}
 						break;
 				}
 			}
 
-			if (nullptr != faces) {
+			if (faces) {
 				aim->mFaces = faces;
-				aim->mNumFaces = static_cast<unsigned int>(nFaces);
-				ai_assert(CheckValidFacesIndices(faces, static_cast<unsigned>(nFaces), aim->mNumVertices));
+                const unsigned int actualNumFaces = static_cast<unsigned int>(facePtr - faces);
+				if (actualNumFaces < nFaces) {
+					ASSIMP_LOG_WARN("Some faces had out-of-range indices. Those faces were dropped.");
+				}
+				if (actualNumFaces == 0)
+				{
+					throw DeadlyImportError(std::string("Mesh \"") + aim->mName.C_Str() + "\" has no faces");
+				}
+				aim->mNumFaces = actualNumFaces;
+				ai_assert(CheckValidFacesIndices(faces, actualNumFaces, aim->mNumVertices));
 			}
 
 			if (prim.material) {

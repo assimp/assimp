@@ -133,7 +133,7 @@ aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSyst
     } catch( const DeadlyImportError& err )    {
         // extract error description
         m_ErrorText = err.what();
-        ASSIMP_LOG_ERROR(m_ErrorText);
+        ASSIMP_LOG_ERROR(m_ErrorText.c_str());
         return nullptr;
     } catch( const std::exception& err )    {
         // extract error description

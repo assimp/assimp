@@ -317,7 +317,7 @@ namespace
             }
             else if (pFile == "stdException.fail")
             {
-                throw std::exception("std::exception test");
+                throw std::runtime_error("std::exception test");
             }
             else if (pFile == "unexpectedException.fail")
             {

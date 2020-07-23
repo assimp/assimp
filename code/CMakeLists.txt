@@ -899,7 +899,7 @@ ENDIF()
 # utf8
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
-  find_package(utf8 CONFIG REQUIRED)
+  find_package(utf8cpp CONFIG REQUIRED)
 ELSE()
   # utf8 is header-only, so Assimp doesn't need to do anything.
 ENDIF()
@@ -1066,7 +1066,7 @@ endif()
 
 ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
 
-if ( MSVC )
+IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
@@ -1159,7 +1159,7 @@ IF(ASSIMP_HUNTER_ENABLED)
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
-      utf8::utf8
+      utf8cpp
       zip::zip
   )
 ELSE()

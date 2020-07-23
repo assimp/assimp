@@ -2,7 +2,7 @@
 
 find_package(RapidJSON CONFIG REQUIRED)
 find_package(ZLIB CONFIG REQUIRED)
-find_package(utf8 CONFIG REQUIRED)
+find_package(utf8cpp CONFIG REQUIRED)
 find_package(irrXML CONFIG REQUIRED)
 find_package(minizip CONFIG REQUIRED)
 find_package(openddlparser CONFIG REQUIRED)

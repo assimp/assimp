@@ -35,6 +35,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #----------------------------------------------------------------------
 SET(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
+SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 
@@ -44,8 +45,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.23.176.tar.gz"
-    SHA1 "2e9ae973d028660b735ac4c6142725ca36a0048a"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.261.tar.gz"
+    SHA1 "1540dad7b97c849784a09e8c452ba811c9f71ba2"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
@@ -257,7 +258,11 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
-  ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX ) 
+  IF( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) # clang-cl
+    ADD_COMPILE_OPTIONS(/bigobj /W4 /WX )
+  ELSE() # msvc
+    ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX)
+  ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)
@@ -357,6 +362,34 @@ IF (NOT TARGET uninstall)
   ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 ENDIF()
 
+# cmake configuration files
+if(${BUILD_SHARED_LIBS})
+  set(BUILD_LIB_TYPE SHARED)
+else()
+  set(BUILD_LIB_TYPE STATIC)
+endif()
+
+IF( UNIX )
+  # Use GNUInstallDirs for Unix predefined directories
+  INCLUDE(GNUInstallDirs)
+
+  SET( ASSIMP_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+  SET( ASSIMP_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+  SET( ASSIMP_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+ELSE()
+  # Cache these to allow the user to override them on non-Unix platforms
+  SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
+    "Path the built library files are installed to." )
+  SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
+    "Path the header files are installed to." )
+  SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
+    "Path the tool executables are installed to." )
+
+  SET(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_INCLUDE_INSTALL_DIR})
+  SET(CMAKE_INSTALL_FULL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR})
+  SET(CMAKE_INSTALL_FULL_BINDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_BIN_INSTALL_DIR})
+ENDIF()
+
 IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
   set(INCLUDE_INSTALL_DIR "include")
@@ -395,34 +428,6 @@ IF(ASSIMP_HUNTER_ENABLED)
       DESTINATION "${CONFIG_INSTALL_DIR}"
   )
 ELSE()
-  # cmake configuration files
-  if(${BUILD_SHARED_LIBS})
-    set(BUILD_LIB_TYPE SHARED)
-  else()
-    set(BUILD_LIB_TYPE STATIC)
-  endif()
-
-  IF( UNIX )
-    # Use GNUInstallDirs for Unix predefined directories
-    INCLUDE(GNUInstallDirs)
-
-    SET( ASSIMP_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
-    SET( ASSIMP_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
-    SET( ASSIMP_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
-  ELSE()
-    # Cache these to allow the user to override them on non-Unix platforms
-    SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
-      "Path the built library files are installed to." )
-    SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
-      "Path the header files are installed to." )
-    SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
-      "Path the tool executables are installed to." )
-
-    SET(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_INCLUDE_INSTALL_DIR})
-    SET(CMAKE_INSTALL_FULL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_LIB_INSTALL_DIR})
-    SET(CMAKE_INSTALL_FULL_BINDIR ${CMAKE_INSTALL_PREFIX}/${ASSIMP_BIN_INSTALL_DIR})
-  ENDIF()
-
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/assimpTargets.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimpTargets.cmake" @ONLY IMMEDIATE)
   IF (is_multi_config)

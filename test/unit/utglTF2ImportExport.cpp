@@ -46,11 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+
 
 #include <array>
 
 #include <assimp/pbrmaterial.h>
-
 using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
@@ -540,4 +542,37 @@ TEST_F(utglTF2ImportExport, norootnode_issue_3269) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/issue_3269/texcoord_crash.gltf", aiProcess_ValidateDataStructure);
     ASSERT_EQ(scene, nullptr);
+}
+
+TEST_F(utglTF2ImportExport, indexOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+
+    struct LogObserver : Assimp::LogStream
+    {
+        bool m_observedWarning = false;
+        void write(const char *message) override
+        {
+            m_observedWarning = m_observedWarning || std::strstr(message, "faces were dropped");
+        }
+    };
+    LogObserver logObserver;
+    
+    DefaultLogger::get()->attachStream(&logObserver);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+    ASSERT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 11);
+    DefaultLogger::get()->detachStream(&logObserver);
+    EXPECT_TRUE(logObserver.m_observedWarning);
+}
+
+TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/AllIndicesOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("Mesh \"Mesh\" has no faces"), std::string::npos);
 }

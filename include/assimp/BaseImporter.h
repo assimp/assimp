@@ -151,6 +151,15 @@ public:
     }
 
     // -------------------------------------------------------------------
+    /** Returns the exception of the last non-DeadlyImportError that occurred.
+     * @return A description of the last error that occurred. An empty
+     * string if there was no error.
+     */
+    const std::exception_ptr& GetInternalException() const {
+        return m_internalException;
+    }
+
+    // -------------------------------------------------------------------
     /** Called prior to ReadFile().
      * The function is a request to the importer to update its configuration
      * basing on the Importer's configuration property list.
@@ -410,9 +419,12 @@ private:
     /* Pushes state into importer for the importer scale */
     virtual void UpdateImporterScale(Importer *pImp);
 
-    protected:
-    /// Error description in case there was one.
+protected:
+    /// Error description when a DeadlyImportError occurred during import.
+    /// In case of other errors, this will just be "Internal error"
     std::string m_ErrorText;
+    /// Any exception which wasn't due to the asset being incorrect.
+    std::exception_ptr m_internalException;
     /// Currently set progress handler.
     ProgressHandler *m_progress;
 };

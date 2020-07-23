@@ -123,17 +123,18 @@ struct ExceptionSwallower<void> {
     {                                   \
         try {
 
-#define ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(type, ASSIMP_END_EXCEPTION_REGION_errorString) \
-    }                                                                                                \
-    catch (const DeadlyImportError &e) {                                                             \
-        ASSIMP_END_EXCEPTION_REGION_errorString = e.what();                                          \
-        return ExceptionSwallower<type>()();                                                         \
-    }                                                                                                \
-    catch (...) {                                                                                    \
-        ASSIMP_END_EXCEPTION_REGION_errorString = "Unknown exception";                               \
-        return ExceptionSwallower<type>()();                                                         \
-    }                                                                                                \
-    }
+#define ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(type, ASSIMP_END_EXCEPTION_REGION_errorString, ASSIMP_END_EXCEPTION_REGION_internalError) \
+    }                                                                                                                                           \
+    catch (const DeadlyImportError &e) {                                                                                                        \
+        ASSIMP_END_EXCEPTION_REGION_errorString = e.what();                                                                                     \
+        return ExceptionSwallower<type>()();                                                                                                    \
+    }                                                                                                                                           \
+    catch (...) {                                                                                                                               \
+        ASSIMP_END_EXCEPTION_REGION_errorString = "Internal error";                                                                             \
+        ASSIMP_END_EXCEPTION_REGION_internalError = std::current_exception();                                                                   \
+        return ExceptionSwallower<type>()();                                                                                                    \
+    }                                                                                                                                           \
+}
 
 #define ASSIMP_END_EXCEPTION_REGION(type)    \
     }                                        \

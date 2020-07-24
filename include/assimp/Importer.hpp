@@ -496,7 +496,7 @@ public:
     const char *GetErrorString() const;
 
     // -------------------------------------------------------------------
-    /** Returns Returns an internal exception if one occurred during import.
+    /** Returns an internal exception if one occurred during import.
      *
      * Returns the last non-DeadlyImportError exception which occurred.
      * @return The last exception which occurred which wasn't a

@@ -53,9 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 void mydummy() {}
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
 #pragma warning(disable : 4709)
-#endif // _WIN32
+#endif // _MSC_VER
 // ------------------------------------------------------------------------------------------------
 /** Subdivider stub class to implement the Catmull-Clarke subdivision algorithm. The
  *  implementation is basing on recursive refinement. Directly evaluating the result is also

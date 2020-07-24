@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <set>
 #include <vector>
+#include <memory>
 
 struct aiScene;
 struct aiImporterDesc;
@@ -388,6 +389,24 @@ public: // static utilities
         if (outLength) {
             out = new T[outLength];
             std::swap_ranges(vec.begin(), vec.end(), out);
+        }
+    }
+
+    // -------------------------------------------------------------------
+    /** Utility function to move a std::vector of unique_ptrs into a aiScene array
+    *  @param vec The vector of unique_ptrs to be moved
+    *  @param out The output pointer to the allocated array.
+    *  @param numOut The output count of elements copied. */
+    template <typename T>
+    AI_FORCE_INLINE static void CopyVector(
+            std::vector<std::unique_ptr<T>> &vec,
+            T **&out,
+            unsigned int &outLength) {
+        outLength = unsigned(vec.size());
+        if (outLength) {
+            out = new T*[outLength];
+            T** outPtr = out;
+            std::for_each(vec.begin(), vec.end(), [&outPtr](std::unique_ptr<T>& uPtr){*outPtr = uPtr.release(); ++outPtr; });
         }
     }
 

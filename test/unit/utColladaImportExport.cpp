@@ -157,7 +157,6 @@ public:
 
     static inline void CheckNodeIdNames(IdNameMap &nodeIdMap, IdNameMap &nodeNameMap, const aiNode *parent, size_t index) {
         IdNameString namePair = GetItemIdName(parent, index);
-        const auto result = nodeNameMap.insert(namePair);
         IdNameString idPair = GetColladaIdName(parent, index);
         ReportDuplicate(nodeIdMap, idPair, typeid(aiNode).name());
 

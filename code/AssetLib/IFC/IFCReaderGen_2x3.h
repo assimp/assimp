@@ -45,9 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/Step/STEPFile.h"
 
-#ifdef _WIN32
+#ifdef _MSC_VER
+#    pragma warning(push)
 #    pragma warning( disable : 4512 )
-#endif // _WIN32
+#endif // _MSC_VER
 
 namespace Assimp {
 namespace IFC {
@@ -4371,5 +4372,9 @@ namespace STEP {
 
 } //! STEP
 } //! Assimp
+
+#ifdef _MSC_VER
+#    pragma warning(pop)
+#endif // _MSC_VER
 
 #endif // INCLUDED_IFC_READER_GEN_H

@@ -307,7 +307,7 @@ namespace
         }
 
     protected:
-        virtual const aiImporterDesc* GetInfo() const { return &s_failingImporterDescription; }
+        virtual const aiImporterDesc* GetInfo() const override { return &s_failingImporterDescription; }
 
         virtual void InternReadFile( const std::string& pFile, aiScene*, Assimp::IOSystem* ) override
         {

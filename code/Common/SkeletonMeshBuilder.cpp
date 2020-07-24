@@ -57,7 +57,7 @@ SkeletonMeshBuilder::SkeletonMeshBuilder(aiScene *pScene, aiNode *root, bool bKn
         return;
     }
 
-    if (!root) {
+    if (nullptr != root) {
         root = pScene->mRootNode;
     }
 
@@ -251,7 +251,8 @@ aiMaterial *SkeletonMeshBuilder::CreateMaterial() {
     aiMaterial *matHelper = new aiMaterial;
 
     // Name
-    aiString matName(std::string("SkeletonMaterial"));
+    aiString matName;
+    matName.Set(std::string("SkeletonMaterial"));
     matHelper->AddProperty(&matName, AI_MATKEY_NAME);
     aiString matName("SkeletonMaterial");
     matHelper->AddProperty( &matName, AI_MATKEY_NAME);

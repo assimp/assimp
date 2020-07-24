@@ -548,11 +548,9 @@ TEST_F(utglTF2ImportExport, indexOutOfRange) {
     // The contents of an asset should not lead to an assert.
     Assimp::Importer importer;
 
-    struct LogObserver : Assimp::LogStream
-    {
+    struct LogObserver : Assimp::LogStream {
         bool m_observedWarning = false;
-        void write(const char *message) override
-        {
+        void write(const char *message) override {
             m_observedWarning = m_observedWarning || std::strstr(message, "faces were dropped");
         }
     };
@@ -562,8 +560,8 @@ TEST_F(utglTF2ImportExport, indexOutOfRange) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
     ASSERT_NE(scene->mRootNode, nullptr);
-    ASSERT_EQ(scene->mNumMeshes, 1);
-    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 11);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 11u);
     DefaultLogger::get()->detachStream(&logObserver);
     EXPECT_TRUE(logObserver.m_observedWarning);
 }

@@ -251,9 +251,6 @@ aiMaterial *SkeletonMeshBuilder::CreateMaterial() {
     aiMaterial *matHelper = new aiMaterial;
 
     // Name
-    aiString matName;
-    matName.Set(std::string("SkeletonMaterial"));
-    matHelper->AddProperty(&matName, AI_MATKEY_NAME);
     aiString matName("SkeletonMaterial");
     matHelper->AddProperty( &matName, AI_MATKEY_NAME);
 

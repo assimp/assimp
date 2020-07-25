@@ -804,7 +804,7 @@ struct CustomExtension : public Object {
     Nullable<std::vector<CustomExtension>> mValues;
 
     operator bool() const {
-        return Size();
+        return Size() != 0;
     }
 
     size_t Size() const {

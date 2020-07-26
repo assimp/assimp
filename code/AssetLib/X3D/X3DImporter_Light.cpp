@@ -71,7 +71,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight()
     bool global = false;
     float intensity = 1;
     bool on = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -93,27 +93,27 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight()
 		if(on)
 		{
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(CX3DImporter_NodeElement::ENET_DirectionalLight, NodeElement_Cur);
+			ne = new X3DLight(X3DNodeElementBase::ENET_DirectionalLight, mNodeElementCur);
 			if(!def.empty())
 				ne->ID = def;
 			else
 				ne->ID = "DirectionalLight_" + to_string((size_t)ne);// make random name
 
-			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
-			((CX3DImporter_NodeElement_Light*)ne)->Direction = direction;
-			((CX3DImporter_NodeElement_Light*)ne)->Global = global;
-			((CX3DImporter_NodeElement_Light*)ne)->Intensity = intensity;
+			((X3DLight*)ne)->AmbientIntensity = ambientIntensity;
+			((X3DLight*)ne)->Color = color;
+			((X3DLight*)ne)->Direction = direction;
+			((X3DLight*)ne)->Global = global;
+			((X3DLight*)ne)->Intensity = intensity;
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 
-			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
+			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "DirectionalLight");
 			else
-				NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)
@@ -143,7 +143,7 @@ void X3DImporter::ParseNode_Lighting_PointLight()
     aiVector3D location( 0, 0, 0 );
     bool on = true;
     float radius = 100;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -167,28 +167,28 @@ void X3DImporter::ParseNode_Lighting_PointLight()
 		if(on)
 		{
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(CX3DImporter_NodeElement::ENET_PointLight, NodeElement_Cur);
+			ne = new X3DLight(X3DNodeElementBase::ENET_PointLight, mNodeElementCur);
 			if(!def.empty()) ne->ID = def;
 
-			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Attenuation = attenuation;
-			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
-			((CX3DImporter_NodeElement_Light*)ne)->Global = global;
-			((CX3DImporter_NodeElement_Light*)ne)->Intensity = intensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Location = location;
-			((CX3DImporter_NodeElement_Light*)ne)->Radius = radius;
+			((X3DLight*)ne)->AmbientIntensity = ambientIntensity;
+			((X3DLight*)ne)->Attenuation = attenuation;
+			((X3DLight*)ne)->Color = color;
+			((X3DLight*)ne)->Global = global;
+			((X3DLight*)ne)->Intensity = intensity;
+			((X3DLight*)ne)->Location = location;
+			((X3DLight*)ne)->Radius = radius;
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
 			if(ne->ID.empty()) ne->ID = "PointLight_" + to_string((size_t)ne);
 
-			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
+			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "PointLight");
 			else
-				NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)
@@ -224,7 +224,7 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
     aiVector3D location( 0, 0, 0 );
     bool on = true;
     float radius = 100;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -251,34 +251,34 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 		if(on)
 		{
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(CX3DImporter_NodeElement::ENET_SpotLight, NodeElement_Cur);
+			ne = new X3DLight(X3DNodeElementBase::ENET_SpotLight, mNodeElementCur);
 			if(!def.empty()) ne->ID = def;
 
 			if(beamWidth > cutOffAngle) beamWidth = cutOffAngle;
 
-			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Attenuation = attenuation;
-			((CX3DImporter_NodeElement_Light*)ne)->BeamWidth = beamWidth;
-			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
-			((CX3DImporter_NodeElement_Light*)ne)->CutOffAngle = cutOffAngle;
-			((CX3DImporter_NodeElement_Light*)ne)->Direction = direction;
-			((CX3DImporter_NodeElement_Light*)ne)->Global = global;
-			((CX3DImporter_NodeElement_Light*)ne)->Intensity = intensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Location = location;
-			((CX3DImporter_NodeElement_Light*)ne)->Radius = radius;
+			((X3DLight*)ne)->AmbientIntensity = ambientIntensity;
+			((X3DLight*)ne)->Attenuation = attenuation;
+			((X3DLight*)ne)->BeamWidth = beamWidth;
+			((X3DLight*)ne)->Color = color;
+			((X3DLight*)ne)->CutOffAngle = cutOffAngle;
+			((X3DLight*)ne)->Direction = direction;
+			((X3DLight*)ne)->Global = global;
+			((X3DLight*)ne)->Intensity = intensity;
+			((X3DLight*)ne)->Location = location;
+			((X3DLight*)ne)->Radius = radius;
 
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
 			if(ne->ID.empty()) ne->ID = "SpotLight_" + to_string((size_t)ne);
 
-			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
+			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "SpotLight");
 			else
-				NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)

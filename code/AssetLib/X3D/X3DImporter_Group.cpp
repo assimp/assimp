@@ -76,7 +76,7 @@ void X3DImporter::ParseNode_Grouping_Group()
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
@@ -84,7 +84,7 @@ void X3DImporter::ParseNode_Grouping_Group()
 	{
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -122,7 +122,7 @@ void X3DImporter::ParseNode_Grouping_StaticGroup()
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
@@ -130,7 +130,7 @@ void X3DImporter::ParseNode_Grouping_StaticGroup()
 	{
 		ParseHelper_Group_Begin(true);// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -172,7 +172,7 @@ void X3DImporter::ParseNode_Grouping_Switch()
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
@@ -180,11 +180,11 @@ void X3DImporter::ParseNode_Grouping_Switch()
 	{
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 
 		// also set values specific to this type of group
-		((CX3DImporter_NodeElement_Group*)NodeElement_Cur)->UseChoice = true;
-		((CX3DImporter_NodeElement_Group*)NodeElement_Cur)->Choice = whichChoice;
+		((X3DGroup*)mNodeElementCur)->UseChoice = true;
+		((X3DGroup*)mNodeElementCur)->Choice = whichChoice;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -266,7 +266,7 @@ void X3DImporter::ParseNode_Grouping_Transform()
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		CX3DImporter_NodeElement* ne( nullptr );
+		X3DNodeElementBase* ne( nullptr );
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
@@ -276,7 +276,7 @@ void X3DImporter::ParseNode_Grouping_Transform()
 		// at this place new group mode created and made current, so we can name it.
         if ( !def.empty() )
         {
-            NodeElement_Cur->ID = def;
+            mNodeElementCur->ID = def;
         }
 
 		//
@@ -297,7 +297,7 @@ void X3DImporter::ParseNode_Grouping_Transform()
 		aiMatrix4x4::Translation(-center, tmatr);// -C
 		matr *= tmatr;
 		// and assign it
-		((CX3DImporter_NodeElement_Group*)NodeElement_Cur)->Transformation = matr;
+		((X3DGroup*)mNodeElementCur)->Transformation = matr;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place

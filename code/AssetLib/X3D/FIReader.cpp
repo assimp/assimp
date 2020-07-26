@@ -51,28 +51,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Workaround for issue #1361
 // https://github.com/assimp/assimp/issues/1361
 #ifdef __ANDROID__
-#  define _GLIBCXX_USE_C99 1
+#define _GLIBCXX_USE_C99 1
 #endif
 
 #include <assimp/Exceptional.h>
-#include <assimp/IOStream.hpp>
-#include <assimp/types.h>
 #include <assimp/MemoryIOWrapper.h>
+#include <assimp/types.h>
+#include <assimp/IOStream.hpp>
 #ifdef ASSIMP_USE_HUNTER
-#  include <utf8/utf8.h>
+#include <utf8/utf8.h>
 #else
-#  include "../contrib/utf8cpp/source/utf8.h"
+#include "../contrib/utf8cpp/source/utf8.h"
 #endif
 #include <assimp/fast_atof.h>
-#include <stack>
-#include <map>
-#include <iostream>
-#include <sstream>
 #include <iomanip>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stack>
 
 namespace Assimp {
 
-static const std::string parseErrorMessage = "Fast Infoset parse error";
+static const char *parseErrorMessage = "Fast Infoset parse error";
 
 static const char *xmlDeclarations[] = {
     "<?xml encoding='finf'?>",
@@ -87,37 +87,41 @@ static const char *xmlDeclarations[] = {
 };
 
 static size_t parseMagic(const uint8_t *data, const uint8_t *dataEnd) {
+    ai_assert(nullptr != data);
+    ai_assert(nullptr != dataEnd);
+
     if (dataEnd - data < 4) {
         return 0;
     }
+
     uint32_t magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
     switch (magic) {
     case 0xe0000001:
         return 4;
     case 0x3c3f786d: // "<?xm"
-        {
-            size_t xmlDeclarationsLength = sizeof(xmlDeclarations) / sizeof(xmlDeclarations[0]);
-            for (size_t i = 0; i < xmlDeclarationsLength; ++i) {
-                auto xmlDeclaration = xmlDeclarations[i];
-                ptrdiff_t xmlDeclarationLength = strlen(xmlDeclaration);
-                if ((dataEnd - data >= xmlDeclarationLength) && (memcmp(xmlDeclaration, data, xmlDeclarationLength) == 0)) {
-                    data += xmlDeclarationLength;
-                    if (dataEnd - data < 4) {
-                        return 0;
-                    }
-                    magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
-                    return magic == 0xe0000001 ? xmlDeclarationLength + 4 : 0;
+    {
+        size_t xmlDeclarationsLength = sizeof(xmlDeclarations) / sizeof(xmlDeclarations[0]);
+        for (size_t i = 0; i < xmlDeclarationsLength; ++i) {
+            auto xmlDeclaration = xmlDeclarations[i];
+            ptrdiff_t xmlDeclarationLength = strlen(xmlDeclaration);
+            if ((dataEnd - data >= xmlDeclarationLength) && (memcmp(xmlDeclaration, data, xmlDeclarationLength) == 0)) {
+                data += xmlDeclarationLength;
+                if (dataEnd - data < 4) {
+                    return 0;
                 }
+                magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+                return magic == 0xe0000001 ? xmlDeclarationLength + 4 : 0;
             }
-            return 0;
         }
+        return 0;
+    }
     default:
         return 0;
     }
 }
 
 static std::string parseUTF8String(const uint8_t *data, size_t len) {
-    return std::string((char*)data, len);
+    return std::string((char *)data, len);
 }
 
 static std::string parseUTF16String(const uint8_t *data, size_t len) {
@@ -137,7 +141,7 @@ static std::string parseUTF16String(const uint8_t *data, size_t len) {
     return result;
 }
 
-struct FIStringValueImpl: public FIStringValue {
+struct FIStringValueImpl : public FIStringValue {
     FIStringValueImpl(std::string &&value_) {
         value = std::move(value_);
     }
@@ -151,12 +155,12 @@ std::shared_ptr<FIStringValue> FIStringValue::create(std::string &&value) {
     return std::make_shared<FIStringValueImpl>(std::move(value));
 }
 
-struct FIHexValueImpl: public FIHexValue {
+struct FIHexValueImpl : public FIHexValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIHexValueImpl(std::vector<uint8_t> &&value_)
-    : strValueValid( false ) {
+    FIHexValueImpl(std::vector<uint8_t> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -177,12 +181,12 @@ std::shared_ptr<FIHexValue> FIHexValue::create(std::vector<uint8_t> &&value) {
     return std::make_shared<FIHexValueImpl>(std::move(value));
 }
 
-struct FIBase64ValueImpl: public FIBase64Value {
+struct FIBase64ValueImpl : public FIBase64Value {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIBase64ValueImpl(std::vector<uint8_t> &&value_)
-            : strValueValid(false) {
+    FIBase64ValueImpl(std::vector<uint8_t> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -196,28 +200,28 @@ struct FIBase64ValueImpl: public FIBase64Value {
             for (std::vector<uint8_t>::size_type i = 0; i < valueSize; ++i) {
                 c2 = value[i];
                 switch (imod3) {
-                    case 0:
-                        os << basis_64[c2 >> 2];
-                        imod3 = 1;
-                        break;
-                    case 1:
-                        os << basis_64[((c1 & 0x03) << 4) | ((c2 & 0xf0) >> 4)];
-                        imod3 = 2;
-                        break;
-                    case 2:
-                        os << basis_64[((c1 & 0x0f) << 2) | ((c2 & 0xc0) >> 6)] << basis_64[c2 & 0x3f];
-                        imod3 = 0;
-                        break;
-                    }
-                    c1 = c2;
-            }
-            switch (imod3) {
+                case 0:
+                    os << basis_64[c2 >> 2];
+                    imod3 = 1;
+                    break;
                 case 1:
-                    os << basis_64[(c1 & 0x03) << 4] << "==";
+                    os << basis_64[((c1 & 0x03) << 4) | ((c2 & 0xf0) >> 4)];
+                    imod3 = 2;
                     break;
                 case 2:
-                    os << basis_64[(c1 & 0x0f) << 2] << '=';
+                    os << basis_64[((c1 & 0x0f) << 2) | ((c2 & 0xc0) >> 6)] << basis_64[c2 & 0x3f];
+                    imod3 = 0;
                     break;
+                }
+                c1 = c2;
+            }
+            switch (imod3) {
+            case 1:
+                os << basis_64[(c1 & 0x03) << 4] << "==";
+                break;
+            case 2:
+                os << basis_64[(c1 & 0x0f) << 2] << '=';
+                break;
             }
             strValue = os.str();
         }
@@ -234,12 +238,12 @@ std::shared_ptr<FIBase64Value> FIBase64Value::create(std::vector<uint8_t> &&valu
     return std::make_shared<FIBase64ValueImpl>(std::move(value));
 }
 
-struct FIShortValueImpl: public FIShortValue {
+struct FIShortValueImpl : public FIShortValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIShortValueImpl(std::vector<int16_t> &&value_)
-            : strValueValid(false) {
+    FIShortValueImpl(std::vector<int16_t> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -260,12 +264,12 @@ std::shared_ptr<FIShortValue> FIShortValue::create(std::vector<int16_t> &&value)
     return std::make_shared<FIShortValueImpl>(std::move(value));
 }
 
-struct FIIntValueImpl: public FIIntValue {
+struct FIIntValueImpl : public FIIntValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIIntValueImpl(std::vector<int32_t> &&value_)
-            : strValueValid(false) {
+    FIIntValueImpl(std::vector<int32_t> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -286,12 +290,12 @@ std::shared_ptr<FIIntValue> FIIntValue::create(std::vector<int32_t> &&value) {
     return std::make_shared<FIIntValueImpl>(std::move(value));
 }
 
-struct FILongValueImpl: public FILongValue {
+struct FILongValueImpl : public FILongValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FILongValueImpl(std::vector<int64_t> &&value_)
-            : strValueValid(false) {
+    FILongValueImpl(std::vector<int64_t> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -312,12 +316,12 @@ std::shared_ptr<FILongValue> FILongValue::create(std::vector<int64_t> &&value) {
     return std::make_shared<FILongValueImpl>(std::move(value));
 }
 
-struct FIBoolValueImpl: public FIBoolValue {
+struct FIBoolValueImpl : public FIBoolValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIBoolValueImpl(std::vector<bool> &&value_)
-            : strValueValid(false) {
+    FIBoolValueImpl(std::vector<bool> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -328,7 +332,8 @@ struct FIBoolValueImpl: public FIBoolValue {
             os << std::boolalpha;
             int n = 0;
             std::for_each(value.begin(), value.end(), [&](bool b) {
-                if (++n > 1) os << ' '; os << b;
+                if (++n > 1) os << ' ';
+                os << b;
             });
             strValue = os.str();
         }
@@ -341,12 +346,12 @@ std::shared_ptr<FIBoolValue> FIBoolValue::create(std::vector<bool> &&value) {
     return std::make_shared<FIBoolValueImpl>(std::move(value));
 }
 
-struct FIFloatValueImpl: public FIFloatValue {
+struct FIFloatValueImpl : public FIFloatValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIFloatValueImpl(std::vector<float> &&value_)
-            : strValueValid(false) {
+    FIFloatValueImpl(std::vector<float> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -367,12 +372,12 @@ std::shared_ptr<FIFloatValue> FIFloatValue::create(std::vector<float> &&value) {
     return std::make_shared<FIFloatValueImpl>(std::move(value));
 }
 
-struct FIDoubleValueImpl: public FIDoubleValue {
+struct FIDoubleValueImpl : public FIDoubleValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIDoubleValueImpl(std::vector<double> &&value_)
-            : strValueValid(false) {
+    FIDoubleValueImpl(std::vector<double> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -392,12 +397,12 @@ std::shared_ptr<FIDoubleValue> FIDoubleValue::create(std::vector<double> &&value
     return std::make_shared<FIDoubleValueImpl>(std::move(value));
 }
 
-struct FIUUIDValueImpl: public FIUUIDValue {
+struct FIUUIDValueImpl : public FIUUIDValue {
     mutable std::string strValue;
     mutable bool strValueValid;
 
-    FIUUIDValueImpl(std::vector<uint8_t> &&value_)
-                : strValueValid(false) {
+    FIUUIDValueImpl(std::vector<uint8_t> &&value_) :
+            strValueValid(false) {
         value = std::move(value_);
     }
 
@@ -446,8 +451,8 @@ std::shared_ptr<FIUUIDValue> FIUUIDValue::create(std::vector<uint8_t> &&value) {
     return std::make_shared<FIUUIDValueImpl>(std::move(value));
 }
 
-struct FICDATAValueImpl: public FICDATAValue {
-    FICDATAValueImpl(std::string &&value_){
+struct FICDATAValueImpl : public FICDATAValue {
+    FICDATAValueImpl(std::string &&value_) {
         value = std::move(value_);
     }
 
@@ -460,19 +465,19 @@ std::shared_ptr<FICDATAValue> FICDATAValue::create(std::string &&value) {
     return std::make_shared<FICDATAValueImpl>(std::move(value));
 }
 
-struct FIHexDecoder: public FIDecoder {
+struct FIHexDecoder : public FIDecoder {
     std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         return FIHexValue::create(std::vector<uint8_t>(data, data + len));
     }
 };
 
-struct FIBase64Decoder: public FIDecoder {
+struct FIBase64Decoder : public FIDecoder {
     std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         return FIBase64Value::create(std::vector<uint8_t>(data, data + len));
     }
 };
 
-struct FIShortDecoder: public FIDecoder {
+struct FIShortDecoder : public FIDecoder {
     std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         if (len & 1) {
             throw DeadlyImportError(parseErrorMessage);
@@ -489,7 +494,7 @@ struct FIShortDecoder: public FIDecoder {
     }
 };
 
-struct FIIntDecoder: public FIDecoder {
+struct FIIntDecoder : public FIDecoder {
     std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         if (len & 3) {
             throw DeadlyImportError(parseErrorMessage);
@@ -506,7 +511,7 @@ struct FIIntDecoder: public FIDecoder {
     }
 };
 
-struct FILongDecoder: public FIDecoder {
+struct FILongDecoder : public FIDecoder {
     std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
         if (len & 7) {
             throw DeadlyImportError(parseErrorMessage);
@@ -524,7 +529,7 @@ struct FILongDecoder: public FIDecoder {
     }
 };
 
-struct FIBoolDecoder: public FIDecoder {
+struct FIBoolDecoder : public FIDecoder {
     virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len < 1) {
             throw DeadlyImportError(parseErrorMessage);
@@ -546,7 +551,7 @@ struct FIBoolDecoder: public FIDecoder {
     }
 };
 
-struct FIFloatDecoder: public FIDecoder {
+struct FIFloatDecoder : public FIDecoder {
     virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 3) {
             throw DeadlyImportError(parseErrorMessage);
@@ -565,7 +570,7 @@ struct FIFloatDecoder: public FIDecoder {
     }
 };
 
-struct FIDoubleDecoder: public FIDecoder {
+struct FIDoubleDecoder : public FIDecoder {
     virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 7) {
             throw DeadlyImportError(parseErrorMessage);
@@ -585,7 +590,7 @@ struct FIDoubleDecoder: public FIDecoder {
     }
 };
 
-struct FIUUIDDecoder: public FIDecoder {
+struct FIUUIDDecoder : public FIDecoder {
     virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 15) {
             throw DeadlyImportError(parseErrorMessage);
@@ -594,23 +599,30 @@ struct FIUUIDDecoder: public FIDecoder {
     }
 };
 
-struct FICDATADecoder: public FIDecoder {
+struct FICDATADecoder : public FIDecoder {
     virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         return FICDATAValue::create(parseUTF8String(data, len));
     }
 };
 
-class CFIReaderImpl: public FIReader {
+class CFIReaderImpl : public FIReader {
 public:
+    CFIReaderImpl(std::unique_ptr<uint8_t[]> data_, size_t size) :
+            data(std::move(data_)),
+            dataP(data.get()),
+            dataEnd(data.get() + size),
+            currentNodeType(irr::io::EXN_NONE),
+            emptyElement(false),
+            headerPending(true),
+            terminatorPending(false) {
+        // empty
+    }
 
-    CFIReaderImpl(std::unique_ptr<uint8_t[]> data_, size_t size):
-    data(std::move(data_)), dataP(data.get()), dataEnd(data.get() + size), currentNodeType(irr::io::EXN_NONE),
-    emptyElement(false), headerPending(true), terminatorPending(false)
-    {}
+    ~CFIReaderImpl() override {
+        // override
+    }
 
-    virtual ~CFIReaderImpl() {}
-
-    virtual bool read() /*override*/ {
+    virtual bool read() {
         if (headerPending) {
             headerPending = false;
             parseHeader();
@@ -620,13 +632,12 @@ public:
             if (elementStack.empty()) {
                 return false;
             }
-            else {
-                nodeName = elementStack.top();
-                elementStack.pop();
-                currentNodeType = nodeName.empty() ? irr::io::EXN_UNKNOWN : irr::io::EXN_ELEMENT_END;
-                return true;
-            }
+            nodeName = elementStack.top();
+            elementStack.pop();
+            currentNodeType = nodeName.empty() ? irr::io::EXN_UNKNOWN : irr::io::EXN_ELEMENT_END;
+            return true;
         }
+
         if (dataP >= dataEnd) {
             return false;
         }
@@ -635,55 +646,50 @@ public:
             // C.3
             parseElement();
             return true;
-        }
-        else if (b < 0xc0) { // Characters (C.3.7.5)
+        } else if (b < 0xc0) { // Characters (C.3.7.5)
             // C.7
             auto chars = parseNonIdentifyingStringOrIndex3(vocabulary.charactersTable);
             nodeName = chars->toString();
             currentNodeType = irr::io::EXN_TEXT;
             return true;
-        }
-        else if (b < 0xe0) {
+        } else if (b < 0xe0) {
             if ((b & 0xfc) == 0xc4) { // DTD (C.2.11.5)
                 // C.9
                 ++dataP;
                 if (b & 0x02) {
-                    /*const std::string &systemID =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &systemID =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
                 if (b & 0x01) {
-                    /*const std::string &publicID =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &publicID =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
                 elementStack.push(EmptyString);
                 currentNodeType = irr::io::EXN_UNKNOWN;
                 return true;
-            }
-            else if ((b & 0xfc) == 0xc8) { // Unexpanded entity reference (C.3.7.4)
+            } else if ((b & 0xfc) == 0xc8) { // Unexpanded entity reference (C.3.7.4)
                 // C.6
                 ++dataP;
-                /*const std::string &name =*/ parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
+                /*const std::string &name =*/parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
                 if (b & 0x02) {
-                    /*const std::string &systemID =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &systemID =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
                 if (b & 0x01) {
-                    /*const std::string &publicID =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &publicID =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
                 currentNodeType = irr::io::EXN_UNKNOWN;
                 return true;
             }
-        }
-        else if (b < 0xf0) {
+        } else if (b < 0xf0) {
             if (b == 0xe1) { // Processing instruction (C.2.11.3, C.3.7.3)
                 // C.5
                 ++dataP;
-                /*const std::string &target =*/ parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
+                /*const std::string &target =*/parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
                 if (dataEnd - dataP < 1) {
                     throw DeadlyImportError(parseErrorMessage);
                 }
-                /*std::shared_ptr<const FIValue> data =*/ parseNonIdentifyingStringOrIndex1(vocabulary.otherStringTable);
+                /*std::shared_ptr<const FIValue> data =*/parseNonIdentifyingStringOrIndex1(vocabulary.otherStringTable);
                 currentNodeType = irr::io::EXN_UNKNOWN;
                 return true;
-            }
-            else if (b == 0xe2) { // Comment (C.2.11.4, C.3.7.6)
+            } else if (b == 0xe2) { // Comment (C.2.11.4, C.3.7.6)
                 // C.8
                 ++dataP;
                 if (dataEnd - dataP < 1) {
@@ -694,16 +700,14 @@ public:
                 currentNodeType = irr::io::EXN_COMMENT;
                 return true;
             }
-        }
-        else { // Terminator (C.2.12, C.3.8)
+        } else { // Terminator (C.2.12, C.3.8)
             ++dataP;
             if (b == 0xff) {
                 terminatorPending = true;
             }
             if (elementStack.empty()) {
                 return false;
-            }
-            else {
+            } else {
                 nodeName = elementStack.top();
                 elementStack.pop();
                 currentNodeType = nodeName.empty() ? irr::io::EXN_UNKNOWN : irr::io::EXN_ELEMENT_END;
@@ -721,38 +725,38 @@ public:
         return static_cast<int>(attributes.size());
     }
 
-    virtual const char* getAttributeName(int idx) const /*override*/ {
+    virtual const char *getAttributeName(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return nullptr;
         }
         return attributes[idx].name.c_str();
     }
 
-    virtual const char* getAttributeValue(int idx) const /*override*/ {
+    virtual const char *getAttributeValue(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return nullptr;
         }
         return attributes[idx].value->toString().c_str();
     }
 
-    virtual const char* getAttributeValue(const char* name) const /*override*/ {
-        const Attribute* attr = getAttributeByName(name);
+    virtual const char *getAttributeValue(const char *name) const /*override*/ {
+        const Attribute *attr = getAttributeByName(name);
         if (!attr) {
             return nullptr;
         }
         return attr->value->toString().c_str();
     }
 
-    virtual const char* getAttributeValueSafe(const char* name) const /*override*/ {
-        const Attribute* attr = getAttributeByName(name);
+    virtual const char *getAttributeValueSafe(const char *name) const /*override*/ {
+        const Attribute *attr = getAttributeByName(name);
         if (!attr) {
             return EmptyString.c_str();
         }
         return attr->value->toString().c_str();
     }
 
-    virtual int getAttributeValueAsInt(const char* name) const /*override*/ {
-        const Attribute* attr = getAttributeByName(name);
+    virtual int getAttributeValueAsInt(const char *name) const /*override*/ {
+        const Attribute *attr = getAttributeByName(name);
         if (!attr) {
             return 0;
         }
@@ -774,8 +778,8 @@ public:
         return atoi(attributes[idx].value->toString().c_str());
     }
 
-    virtual float getAttributeValueAsFloat(const char* name) const /*override*/ {
-        const Attribute* attr = getAttributeByName(name);
+    virtual float getAttributeValueAsFloat(const char *name) const /*override*/ {
+        const Attribute *attr = getAttributeByName(name);
         if (!attr) {
             return 0;
         }
@@ -798,11 +802,11 @@ public:
         return fast_atof(attributes[idx].value->toString().c_str());
     }
 
-    virtual const char* getNodeName() const /*override*/ {
+    virtual const char *getNodeName() const /*override*/ {
         return nodeName.c_str();
     }
 
-    virtual const char* getNodeData() const /*override*/ {
+    virtual const char *getNodeData() const /*override*/ {
         return nodeName.c_str();
     }
 
@@ -825,8 +829,8 @@ public:
         return attributes[idx].value;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const /*override*/ {
-        const Attribute* attr = getAttributeByName(name);
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char *name) const /*override*/ {
+        const Attribute *attr = getAttributeByName(name);
         if (!attr) {
             return nullptr;
         }
@@ -842,13 +846,13 @@ public:
     }
 
 private:
-
     struct QName {
         std::string prefix;
         std::string uri;
         std::string name;
         inline QName() {}
-        inline QName(const FIQName &qname): prefix(qname.prefix ? qname.prefix : ""), uri(qname.uri ? qname.uri : ""), name(qname.name) {}
+        inline QName(const FIQName &qname) :
+                prefix(qname.prefix ? qname.prefix : ""), uri(qname.uri ? qname.uri : ""), name(qname.name) {}
     };
 
     struct Attribute {
@@ -876,12 +880,12 @@ private:
         }
     };
 
-    const Attribute* getAttributeByName(const char* name) const {
+    const Attribute *getAttributeByName(const char *name) const {
         if (!name) {
             return 0;
         }
         std::string n = name;
-        for (int i=0; i<(int)attributes.size(); ++i) {
+        for (int i = 0; i < (int)attributes.size(); ++i) {
             if (attributes[i].name == n) {
                 return &attributes[i];
             }
@@ -893,13 +897,11 @@ private:
         uint8_t b = *dataP++;
         if (!(b & 0x40)) { // x0...... (C.25.2)
             return b & 0x3f;
-        }
-        else if ((b & 0x60) == 0x40) { // x10..... ........ (C.25.3)
+        } else if ((b & 0x60) == 0x40) { // x10..... ........ (C.25.3)
             if (dataEnd - dataP > 0) {
                 return (((b & 0x1f) << 8) | *dataP++) + 0x40;
             }
-        }
-        else if ((b & 0x70) == 0x60) { // x110.... ........ ........ (C.25.4)
+        } else if ((b & 0x70) == 0x60) { // x110.... ........ ........ (C.25.4)
             if (dataEnd - dataP > 1) {
                 size_t result = (((b & 0x0f) << 16) | (dataP[0] << 8) | dataP[1]) + 0x2040;
                 dataP += 2;
@@ -913,20 +915,17 @@ private:
         uint8_t b = *dataP++;
         if (!(b & 0x20)) { // xx0..... (C.27.2)
             return b & 0x1f;
-        }
-        else if ((b & 0x38) == 0x20) { // xx100... ........ (C.27.3)
+        } else if ((b & 0x38) == 0x20) { // xx100... ........ (C.27.3)
             if (dataEnd - dataP > 0) {
                 return (((b & 0x07) << 8) | *dataP++) + 0x20;
             }
-        }
-        else if ((b & 0x38) == 0x28) { // xx101... ........ ........ (C.27.4)
+        } else if ((b & 0x38) == 0x28) { // xx101... ........ ........ (C.27.4)
             if (dataEnd - dataP > 1) {
                 size_t result = (((b & 0x07) << 16) | (dataP[0] << 8) | dataP[1]) + 0x820;
                 dataP += 2;
                 return result;
             }
-        }
-        else if ((b & 0x3f) == 0x30) { // xx110000 0000.... ........ ........ (C.27.5)
+        } else if ((b & 0x3f) == 0x30) { // xx110000 0000.... ........ ........ (C.27.5)
             if ((dataEnd - dataP > 2) && !(dataP[0] & 0xf0)) {
                 size_t result = (((dataP[0] & 0x0f) << 16) | (dataP[1] << 8) | dataP[2]) + 0x80820;
                 dataP += 3;
@@ -940,20 +939,17 @@ private:
         uint8_t b = *dataP++;
         if (!(b & 0x10)) { // xxx0.... (C.28.2)
             return b & 0x0f;
-        }
-        else if ((b & 0x1c) == 0x10) { // xxx100.. ........ (C.28.3)
+        } else if ((b & 0x1c) == 0x10) { // xxx100.. ........ (C.28.3)
             if (dataEnd - dataP > 0) {
                 return (((b & 0x03) << 8) | *dataP++) + 0x10;
             }
-        }
-        else if ((b & 0x1c) == 0x14) { // xxx101.. ........ ........ (C.28.4)
+        } else if ((b & 0x1c) == 0x14) { // xxx101.. ........ ........ (C.28.4)
             if (dataEnd - dataP > 1) {
                 size_t result = (((b & 0x03) << 16) | (dataP[0] << 8) | dataP[1]) + 0x410;
                 dataP += 2;
                 return result;
             }
-        }
-        else if ((b & 0x1f) == 0x18) { // xxx11000 0000.... ........ ........ (C.28.5)
+        } else if ((b & 0x1f) == 0x18) { // xxx11000 0000.... ........ ........ (C.28.5)
             if ((dataEnd - dataP > 2) && !(dataP[0] & 0xf0)) {
                 size_t result = (((dataP[0] & 0x0f) << 16) | (dataP[1] << 8) | dataP[2]) + 0x40410;
                 dataP += 3;
@@ -968,8 +964,7 @@ private:
             uint8_t b = *dataP++;
             if (b < 0x80) { // 0....... (C.21.2)
                 return b;
-            }
-            else if ((b & 0xf0) == 0x80) { // 1000.... ........ ........ (C.21.3)
+            } else if ((b & 0xf0) == 0x80) { // 1000.... ........ ........ (C.21.3)
                 if (dataEnd - dataP > 1) {
                     size_t result = (((b & 0x0f) << 16) | (dataP[0] << 8) | dataP[1]) + 0x80;
                     dataP += 2;
@@ -986,21 +981,18 @@ private:
         size_t len;
         if (!(b & 0x40)) { // x0...... (C.22.3.1)
             len = b + 1;
-        }
-        else if (b == 0x40) { // x1000000 ........ (C.22.3.2)
+        } else if (b == 0x40) { // x1000000 ........ (C.22.3.2)
             if (dataEnd - dataP < 1) {
                 throw DeadlyImportError(parseErrorMessage);
             }
             len = *dataP++ + 0x41;
-        }
-        else if (b == 0x60) { // x1100000 ........ ........ ........ ........ (C.22.3.3)
+        } else if (b == 0x60) { // x1100000 ........ ........ ........ ........ (C.22.3.3)
             if (dataEnd - dataP < 4) {
                 throw DeadlyImportError(parseErrorMessage);
             }
             len = ((dataP[0] << 24) | (dataP[1] << 16) | (dataP[2] << 8) | dataP[3]) + 0x141;
             dataP += 4;
-        }
-        else {
+        } else {
             throw DeadlyImportError(parseErrorMessage);
         }
 
@@ -1019,13 +1011,11 @@ private:
         size_t b = *dataP++ & 0x0f;
         if (!(b & 0x08)) { // xxxx0... (C.23.3.1)
             return b + 1;
-        }
-        else if (b == 0x08) { // xxxx1000 ........ (C.23.3.2)
+        } else if (b == 0x08) { // xxxx1000 ........ (C.23.3.2)
             if (dataEnd - dataP > 0) {
                 return *dataP++ + 0x09;
             }
-        }
-        else if (b == 0x0c) { // xxxx1100 ........ ........ ........ ........ (C.23.3.3)
+        } else if (b == 0x0c) { // xxxx1100 ........ ........ ........ ........ (C.23.3.3)
             if (dataEnd - dataP > 3) {
                 size_t result = ((dataP[0] << 24) | (dataP[1] << 16) | (dataP[2] << 8) | dataP[3]) + 0x109;
                 dataP += 4;
@@ -1040,13 +1030,11 @@ private:
         size_t b = *dataP++ & 0x03;
         if (!(b & 0x02)) { // xxxxxx0. (C.24.3.1)
             return b + 1;
-        }
-        else if (b == 0x02) { // xxxxxx10 ........ (C.24.3.2)
+        } else if (b == 0x02) { // xxxxxx10 ........ (C.24.3.2)
             if (dataEnd - dataP > 0) {
                 return *dataP++ + 0x3;
             }
-        }
-        else if (b == 0x03) { // xxxxxx11 ........ ........ ........ ........ (C.24.3.3)
+        } else if (b == 0x03) { // xxxxxx11 ........ ........ ........ ........ (C.24.3.3)
             if (dataEnd - dataP > 3) {
                 size_t result = ((dataP[0] << 24) | (dataP[1] << 16) | (dataP[2] << 8) | dataP[3]) + 0x103;
                 dataP += 4;
@@ -1063,8 +1051,7 @@ private:
                 throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
             }
             return decoder->decode(dataP, len);
-        }
-        else {
+        } else {
             if (index - 32 >= vocabulary.encodingAlgorithmTable.size()) {
                 throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
             }
@@ -1072,8 +1059,7 @@ private:
             auto it = decoderMap.find(uri);
             if (it == decoderMap.end()) {
                 throw DeadlyImportError("Unsupported encoding algorithm " + uri);
-            }
-            else {
+            } else {
                 return it->second->decode(dataP, len);
             }
         }
@@ -1092,8 +1078,7 @@ private:
             default:
                 throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
             }
-        }
-        else {
+        } else {
             if (index - 16 >= vocabulary.restrictedAlphabetTable.size()) {
                 throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
             }
@@ -1120,7 +1105,7 @@ private:
                 bitsAvail -= bitsPerCharacter;
                 const size_t charIndex = (bits >> bitsAvail) & mask;
                 if (charIndex < alphabetLength) {
-                    s += (char) alphabetUTF32[charIndex];
+                    s += (char)alphabetUTF32[charIndex];
                 } else if (charIndex != mask) {
                     throw DeadlyImportError(parseErrorMessage);
                 }
@@ -1146,13 +1131,11 @@ private:
             if (b & 0x10) {
                 // encoding algorithm (C.19.3.4)
                 result = parseEncodedData(index, len);
-            }
-            else {
+            } else {
                 // Restricted alphabet (C.19.3.3)
                 result = parseRestrictedAlphabet(index, len);
             }
-        }
-        else {
+        } else {
             len = parseNonEmptyOctetString5Length();
             if (dataEnd - dataP < static_cast<ptrdiff_t>(len)) {
                 throw DeadlyImportError(parseErrorMessage);
@@ -1163,8 +1146,7 @@ private:
                     throw DeadlyImportError(parseErrorMessage);
                 }
                 result = FIStringValue::create(parseUTF16String(dataP, len));
-            }
-            else {
+            } else {
                 // UTF-8 (C.19.3.1)
                 result = FIStringValue::create(parseUTF8String(dataP, len));
             }
@@ -1190,13 +1172,11 @@ private:
             if (b & 0x04) {
                 // encoding algorithm (C.20.3.4)
                 result = parseEncodedData(index, len);
-            }
-            else {
+            } else {
                 // Restricted alphabet (C.20.3.3)
                 result = parseRestrictedAlphabet(index, len);
             }
-        }
-        else {
+        } else {
             len = parseNonEmptyOctetString7Length();
             if (dataEnd - dataP < static_cast<ptrdiff_t>(len)) {
                 throw DeadlyImportError(parseErrorMessage);
@@ -1207,8 +1187,7 @@ private:
                     throw DeadlyImportError(parseErrorMessage);
                 }
                 result = FIStringValue::create(parseUTF16String(dataP, len));
-            }
-            else {
+            } else {
                 // UTF-8 (C.20.3.1)
                 result = FIStringValue::create(parseUTF8String(dataP, len));
             }
@@ -1229,8 +1208,7 @@ private:
                 throw DeadlyImportError(parseErrorMessage);
             }
             return stringTable[index];
-        }
-        else {
+        } else {
             // We have a string (C.13.3)
             stringTable.push_back(parseNonEmptyOctetString2());
             return stringTable.back();
@@ -1293,8 +1271,7 @@ private:
             result.name = parseIdentifyingStringOrIndex(vocabulary.localNameTable);
             qNameTable.push_back(result);
             return qNameTable.back();
-        }
-        else {
+        } else {
             // We have an index (C.17.4)
             size_t index = parseInt2();
             if (index >= qNameTable.size()) {
@@ -1318,8 +1295,7 @@ private:
             result.name = parseIdentifyingStringOrIndex(vocabulary.localNameTable);
             qNameTable.push_back(result);
             return qNameTable.back();
-        }
-        else {
+        } else {
             // We have an index (C.18.4)
             size_t index = parseInt3();
             if (index >= qNameTable.size()) {
@@ -1335,16 +1311,14 @@ private:
             // empty string
             ++dataP;
             return EmptyFIString;
-        }
-        else if (b & 0x80) { // C.14.4
+        } else if (b & 0x80) { // C.14.4
             // We have an index
             size_t index = parseInt2();
             if (index >= valueTable.size()) {
                 throw DeadlyImportError(parseErrorMessage);
             }
             return valueTable[index];
-        }
-        else { // C.14.3
+        } else { // C.14.3
             // We have a literal
             std::shared_ptr<const FIValue> result = parseEncodedCharacterString3();
             if (b & 0x40) { // C.14.3.1
@@ -1363,8 +1337,7 @@ private:
                 throw DeadlyImportError(parseErrorMessage);
             }
             return valueTable[index];
-        }
-        else { // C.15.3
+        } else { // C.15.3
             // We have a literal
             std::shared_ptr<const FIValue> result = parseEncodedCharacterString5();
             if (b & 0x10) { // C.15.3.1
@@ -1429,8 +1402,7 @@ private:
                     }
                     attr.value = parseNonIdentifyingStringOrIndex1(vocabulary.attributeValueTable);
                     attributes.push_back(attr);
-                }
-                else {
+                } else {
                     if ((b & 0xf0) != 0xf0) { // C.3.6.2
                         throw DeadlyImportError(parseErrorMessage);
                     }
@@ -1439,8 +1411,7 @@ private:
                     break;
                 }
             }
-        }
-        else {
+        } else {
             if (dataEnd - dataP < 1) {
                 throw DeadlyImportError(parseErrorMessage);
             }
@@ -1483,11 +1454,11 @@ private:
                 if (dataEnd - dataP < 1) {
                     throw DeadlyImportError(parseErrorMessage);
                 }
-                /*std::string id =*/ parseNonEmptyOctetString2();
+                /*std::string id =*/parseNonEmptyOctetString2();
                 if (dataEnd - dataP < 1) {
                     throw DeadlyImportError(parseErrorMessage);
                 }
-                /*std::string data =*/ parseNonEmptyOctetString2();
+                /*std::string data =*/parseNonEmptyOctetString2();
             }
         }
         if (b & 0x20) {
@@ -1662,12 +1633,12 @@ private:
                     throw DeadlyImportError(parseErrorMessage);
                 }
                 /* C.11 */
-                /*const std::string &name =*/ parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
+                /*const std::string &name =*/parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
                 if (b1 & 0x02) {
-                    /*const std::string &systemId =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &systemId =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
                 if (b1 & 0x01) {
-                    /*const std::string &publicId =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &publicId =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
             }
         }
@@ -1685,12 +1656,12 @@ private:
                     throw DeadlyImportError(parseErrorMessage);
                 }
                 /* C.10 */
-                /*const std::string &name =*/ parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
-                /*const std::string &systemId =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                /*const std::string &name =*/parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
+                /*const std::string &systemId =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 if (b1 & 0x01) {
-                    /*const std::string &publicId =*/ parseIdentifyingStringOrIndex(vocabulary.otherURITable);
+                    /*const std::string &publicId =*/parseIdentifyingStringOrIndex(vocabulary.otherURITable);
                 }
-                /*const std::string &notationName =*/ parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
+                /*const std::string &notationName =*/parseIdentifyingStringOrIndex(vocabulary.otherNCNameTable);
             }
         }
         if (b & 0x04) {
@@ -1698,7 +1669,7 @@ private:
             if (dataEnd - dataP < 1) {
                 throw DeadlyImportError(parseErrorMessage);
             }
-            /*std::string characterEncodingScheme =*/ parseNonEmptyOctetString2();
+            /*std::string characterEncodingScheme =*/parseNonEmptyOctetString2();
         }
         if (b & 0x02) {
             // Parse standalone flag (C.2.9)
@@ -1716,7 +1687,7 @@ private:
             if (dataEnd - dataP < 1) {
                 throw DeadlyImportError(parseErrorMessage);
             }
-            /*std::shared_ptr<const FIValue> version =*/ parseNonIdentifyingStringOrIndex1(vocabulary.otherStringTable);
+            /*std::shared_ptr<const FIValue> version =*/parseNonIdentifyingStringOrIndex1(vocabulary.otherStringTable);
         }
     }
 
@@ -1731,7 +1702,7 @@ private:
     std::stack<std::string> elementStack;
     std::string nodeName;
     std::map<std::string, std::unique_ptr<FIDecoder>> decoderMap;
-    std::map<std::string, const FIVocabulary*> vocabularyMap;
+    std::map<std::string, const FIVocabulary *> vocabularyMap;
 
     static const std::string EmptyString;
     static std::shared_ptr<const FIValue> EmptyFIString;
@@ -1776,14 +1747,11 @@ FIDecoder *CFIReaderImpl::defaultDecoder[32] = {
     &cdataDecoder
 };
 
-class CXMLReaderImpl : public FIReader
-{
+class CXMLReaderImpl : public FIReader {
 public:
-
     //! Constructor
-    CXMLReaderImpl(std::unique_ptr<irr::io::IIrrXMLReader<char, irr::io::IXMLBase>> reader_)
-    : reader(std::move(reader_))
-    {}
+    CXMLReaderImpl(std::unique_ptr<irr::io::IIrrXMLReader<char, irr::io::IXMLBase>> reader_) :
+            reader(std::move(reader_)) {}
 
     virtual ~CXMLReaderImpl() {}
 
@@ -1799,23 +1767,23 @@ public:
         return reader->getAttributeCount();
     }
 
-    virtual const char* getAttributeName(int idx) const /*override*/ {
+    virtual const char *getAttributeName(int idx) const /*override*/ {
         return reader->getAttributeName(idx);
     }
 
-    virtual const char* getAttributeValue(int idx) const /*override*/ {
+    virtual const char *getAttributeValue(int idx) const /*override*/ {
         return reader->getAttributeValue(idx);
     }
 
-    virtual const char* getAttributeValue(const char* name) const /*override*/ {
+    virtual const char *getAttributeValue(const char *name) const /*override*/ {
         return reader->getAttributeValue(name);
     }
 
-    virtual const char* getAttributeValueSafe(const char* name) const /*override*/ {
+    virtual const char *getAttributeValueSafe(const char *name) const /*override*/ {
         return reader->getAttributeValueSafe(name);
     }
 
-    virtual int getAttributeValueAsInt(const char* name) const /*override*/ {
+    virtual int getAttributeValueAsInt(const char *name) const /*override*/ {
         return reader->getAttributeValueAsInt(name);
     }
 
@@ -1823,7 +1791,7 @@ public:
         return reader->getAttributeValueAsInt(idx);
     }
 
-    virtual float getAttributeValueAsFloat(const char* name) const /*override*/ {
+    virtual float getAttributeValueAsFloat(const char *name) const /*override*/ {
         return reader->getAttributeValueAsFloat(name);
     }
 
@@ -1831,11 +1799,11 @@ public:
         return reader->getAttributeValueAsFloat(idx);
     }
 
-    virtual const char* getNodeName() const /*override*/ {
+    virtual const char *getNodeName() const /*override*/ {
         return reader->getNodeName();
     }
 
-    virtual const char* getNodeData() const /*override*/ {
+    virtual const char *getNodeData() const /*override*/ {
         return reader->getNodeData();
     }
 
@@ -1855,17 +1823,15 @@ public:
         return nullptr;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* /*name*/) const /*override*/ {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char * /*name*/) const /*override*/ {
         return nullptr;
     }
 
     virtual void registerDecoder(const std::string & /*algorithmUri*/, std::unique_ptr<FIDecoder> /*decoder*/) /*override*/ {}
 
-
-    virtual void registerVocabulary(const std::string &/*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
+    virtual void registerVocabulary(const std::string & /*vocabularyUri*/, const FIVocabulary * /*vocabulary*/) /*override*/ {}
 
 private:
-
     std::unique_ptr<irr::io::IIrrXMLReader<char, irr::io::IXMLBase>> reader;
 };
 
@@ -1880,21 +1846,19 @@ static std::unique_ptr<uint8_t[]> readFile(IOStream *stream, size_t &size, bool 
     return data;
 }
 
-std::unique_ptr<FIReader> FIReader::create(IOStream *stream)
-{
+std::unique_ptr<FIReader> FIReader::create(IOStream *stream) {
     size_t size;
     bool isFI;
     auto data = readFile(stream, size, isFI);
     if (isFI) {
         return std::unique_ptr<FIReader>(new CFIReaderImpl(std::move(data), size));
-    }
-    else {
+    } else {
         auto memios = std::unique_ptr<MemoryIOStream>(new MemoryIOStream(data.release(), size, true));
         auto callback = std::unique_ptr<CIrrXML_IOStreamReader>(new CIrrXML_IOStreamReader(memios.get()));
         return std::unique_ptr<FIReader>(new CXMLReaderImpl(std::unique_ptr<irr::io::IIrrXMLReader<char, irr::io::IXMLBase>>(createIrrXMLReader(callback.get()))));
     }
 }
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // !ASSIMP_BUILD_NO_X3D_IMPORTER

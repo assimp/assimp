@@ -64,20 +64,19 @@ namespace Assimp
 // towards the positive y-axis. The radius field specifies the radius of the circle of which the arc is a portion. The arc extends from the startAngle
 // counterclockwise to the endAngle. The values of startAngle and endAngle shall be in the range [-2pi, 2pi] radians (or the equivalent if a different
 // angle base unit has been specified). If startAngle and endAngle have the same value, a circle is specified.
-void X3DImporter::ParseNode_Geometry2D_Arc2D()
-{
+void X3DImporter::ParseNode_Geometry2D_Arc2D() {
     std::string def, use;
     float endAngle = AI_MATH_HALF_PI_F;
     float radius = 1;
     float startAngle = 0;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne = nullptr;
 
-	MACRO_ATTRREAD_LOOPBEG;
+	/*MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("endAngle", endAngle, XML_ReadNode_GetAttrVal_AsFloat);
 		MACRO_ATTRREAD_CHECK_RET("radius", radius, XML_ReadNode_GetAttrVal_AsFloat);
 		MACRO_ATTRREAD_CHECK_RET("startAngle", startAngle, XML_ReadNode_GetAttrVal_AsFloat);
-	MACRO_ATTRREAD_LOOPEND;
+	MACRO_ATTRREAD_LOOPEND;*/
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
@@ -87,20 +86,20 @@ void X3DImporter::ParseNode_Geometry2D_Arc2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_Arc2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_Arc2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// create point list of geometry object and convert it to line set.
 		std::list<aiVector3D> tlist;
 
 		GeometryHelper_Make_Arc2D(startAngle, endAngle, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
-		GeometryHelper_Extend_PointToLine(tlist, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 2;
+		GeometryHelper_Extend_PointToLine(tlist, ((X3DGeometry2D*)ne)->Vertices);
+		((X3DGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Arc2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -133,7 +132,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
     float radius = 1;
     bool solid = false;
     float startAngle = 0;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -152,16 +151,16 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_ArcClose2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_ArcClose2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->Solid = solid;
+		((X3DGeometry2D*)ne)->Solid = solid;
 		// create point list of geometry object.
-		GeometryHelper_Make_Arc2D(startAngle, endAngle, radius, 10, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);///TODO: IME - AI_CONFIG for NumSeg
+		GeometryHelper_Make_Arc2D(startAngle, endAngle, radius, 10, ((X3DGeometry2D*)ne)->Vertices);///TODO: IME - AI_CONFIG for NumSeg
 		// add chord or two radiuses only if not a circle was defined
 		if(!((std::fabs(endAngle - startAngle) >= AI_MATH_TWO_PI_F) || (endAngle == startAngle)))
 		{
-			std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices;// just short alias.
+			std::list<aiVector3D>& vlist = ((X3DGeometry2D*)ne)->Vertices;// just short alias.
 
 			if((closureType == "PIE") || (closureType == "\"PIE\""))
 				vlist.push_back(aiVector3D(0, 0, 0));// center point - first radial line
@@ -171,12 +170,12 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 			vlist.push_back(*vlist.begin());// arc first point - chord from first to last point of arc(if CHORD) or second radial line(if PIE).
 		}
 
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices.size();
+		((X3DGeometry2D*)ne)->NumIndices = ((X3DGeometry2D*)ne)->Vertices.size();
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ArcClose2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -191,7 +190,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 {
     std::string def, use;
     float radius = 1;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -206,20 +205,20 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_Circle2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_Circle2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// create point list of geometry object and convert it to line set.
 		std::list<aiVector3D> tlist;
 
 		GeometryHelper_Make_Arc2D(0, 0, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
-		GeometryHelper_Extend_PointToLine(tlist, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 2;
+		GeometryHelper_Extend_PointToLine(tlist, ((X3DGeometry2D*)ne)->Vertices);
+		((X3DGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Circle2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -244,7 +243,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
     float innerRadius = 0;
     float outerRadius = 1;
     bool solid = false;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -265,7 +264,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
 		if(innerRadius > outerRadius) Throw_IncorrectAttrValue("innerRadius");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_Disk2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_Disk2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// create point list of geometry object.
@@ -274,18 +273,18 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
 		if(innerRadius == 0.0f)
 		{// make filled disk
 			// in tlist_o we already have points of circle. just copy it and sign as polygon.
-			((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices = tlist_o;
-			((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = tlist_o.size();
+			((X3DGeometry2D*)ne)->Vertices = tlist_o;
+			((X3DGeometry2D*)ne)->NumIndices = tlist_o.size();
 		}
 		else if(innerRadius == outerRadius)
 		{// make circle
 			// in tlist_o we already have points of circle. convert it to line set.
-			GeometryHelper_Extend_PointToLine(tlist_o, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);
-			((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 2;
+			GeometryHelper_Extend_PointToLine(tlist_o, ((X3DGeometry2D*)ne)->Vertices);
+			((X3DGeometry2D*)ne)->NumIndices = 2;
 		}
 		else
 		{// make disk
-			std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices;// just short alias.
+			std::list<aiVector3D>& vlist = ((X3DGeometry2D*)ne)->Vertices;// just short alias.
 
 			GeometryHelper_Make_Arc2D(0, 0, innerRadius, 10, tlist_i);// inner circle
 			//
@@ -309,15 +308,15 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
 			vlist.push_back(*tlist_o.begin());// 3rd point
 			vlist.push_back(*tlist_o.begin());// 4th point
 
-			((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 4;
+			((X3DGeometry2D*)ne)->NumIndices = 4;
 		}
 
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->Solid = solid;
+		((X3DGeometry2D*)ne)->Solid = solid;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Disk2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -332,7 +331,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 {
     std::string def, use;
     std::list<aiVector2D> lineSegments;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -347,7 +346,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_Polyline2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_Polyline2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		//
@@ -359,13 +358,13 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 		for(std::list<aiVector2D>::iterator it2 = lineSegments.begin(); it2 != lineSegments.end(); ++it2) tlist.push_back(aiVector3D(it2->x, it2->y, 0));
 
 		// convert point set to line set
-		GeometryHelper_Extend_PointToLine(tlist, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 2;
+		GeometryHelper_Extend_PointToLine(tlist, ((X3DGeometry2D*)ne)->Vertices);
+		((X3DGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Polyline2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -380,7 +379,7 @@ void X3DImporter::ParseNode_Geometry2D_Polypoint2D()
 {
     std::string def, use;
     std::list<aiVector2D> point;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -395,21 +394,21 @@ void X3DImporter::ParseNode_Geometry2D_Polypoint2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_Polypoint2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_Polypoint2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// convert vec2 to vec3
 		for(std::list<aiVector2D>::iterator it2 = point.begin(); it2 != point.end(); ++it2)
 		{
-			((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices.push_back(aiVector3D(it2->x, it2->y, 0));
+			((X3DGeometry2D*)ne)->Vertices.push_back(aiVector3D(it2->x, it2->y, 0));
 		}
 
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 1;
+		((X3DGeometry2D*)ne)->NumIndices = 1;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Polypoint2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -426,7 +425,7 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D()
     std::string def, use;
     aiVector2D size(2, 2);
     bool solid = false;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -442,26 +441,26 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_Rectangle2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_Rectangle2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		float x1 = -size.x / 2.0f;
 		float x2 = size.x / 2.0f;
 		float y1 = -size.y / 2.0f;
 		float y2 = size.y / 2.0f;
-		std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices;// just short alias.
+		std::list<aiVector3D>& vlist = ((X3DGeometry2D*)ne)->Vertices;// just short alias.
 
 		vlist.push_back(aiVector3D(x2, y1, 0));// 1st point
 		vlist.push_back(aiVector3D(x2, y2, 0));// 2nd point
 		vlist.push_back(aiVector3D(x1, y2, 0));// 3rd point
 		vlist.push_back(aiVector3D(x1, y1, 0));// 4th point
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->Solid = solid;
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 4;
+		((X3DGeometry2D*)ne)->Solid = solid;
+		((X3DGeometry2D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Rectangle2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -478,7 +477,7 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D()
     std::string def, use;
     bool solid = false;
     std::list<aiVector2D> vertices;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -496,22 +495,22 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D()
 		if(vertices.size() % 3) throw DeadlyImportError("TriangleSet2D. Not enough points for defining triangle.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(CX3DImporter_NodeElement::ENET_TriangleSet2D, NodeElement_Cur);
+		ne = new X3DGeometry2D(X3DNodeElementBase::ENET_TriangleSet2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// convert vec2 to vec3
 		for(std::list<aiVector2D>::iterator it2 = vertices.begin(); it2 != vertices.end(); ++it2)
 		{
-			((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices.push_back(aiVector3D(it2->x, it2->y, 0));
+			((X3DGeometry2D*)ne)->Vertices.push_back(aiVector3D(it2->x, it2->y, 0));
 		}
 
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->Solid = solid;
-		((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 3;
+		((X3DGeometry2D*)ne)->Solid = solid;
+		((X3DGeometry2D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TriangleSet2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

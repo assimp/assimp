@@ -812,9 +812,9 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter_Rendering.cpp
   AssetLib/X3D/X3DImporter_Shape.cpp
   AssetLib/X3D/X3DImporter_Texturing.cpp
-  AssetLib/X3D/FIReader.hpp
-  AssetLib/X3D/FIReader.cpp
-  AssetLib/X3D/X3DVocabulary.cpp
+  #AssetLib/X3D/FIReader.hpp
+  #AssetLib/X3D/FIReader.cpp
+  #AssetLib/X3D/X3DVocabulary.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF

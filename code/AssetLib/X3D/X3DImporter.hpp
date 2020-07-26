@@ -194,7 +194,7 @@ namespace Assimp {
 class X3DImporter : public BaseImporter
 {
 public:
-    std::list<CX3DImporter_NodeElement*> NodeElement_List;///< All elements of scene graph.
+    std::list<X3DNodeElementBase*> NodeElement_List;///< All elements of scene graph.
 
 public:
     /***********************************************/
@@ -246,7 +246,7 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement_FromRoot(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement_FromRoot(const std::string& pID, const X3DNodeElementBase::EType pType, X3DNodeElementBase** pElement);
 
 	/// Find requested node element. Search will be made from pointed node down to childs.
 	/// \param [in] pStartNode - pointer to start node.
@@ -254,15 +254,15 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID, const CX3DImporter_NodeElement::EType pType,
-									CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement_FromNode(X3DNodeElementBase* pStartNode, const std::string& pID, const X3DNodeElementBase::EType pType,
+									X3DNodeElementBase** pElement);
 
 	/// Find requested node element. For "Node"'s accounting flag "Static".
 	/// \param [in] pName - name of requested element.
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement(const std::string& pName, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement(const std::string& pName, const X3DNodeElementBase::EType pType, X3DNodeElementBase** pElement);
 
 	/***********************************************/
 	/********* Functions: postprocess set **********/
@@ -274,34 +274,34 @@ private:
 	/// Check if child elements of node element is metadata and add it to temporary list.
 	/// \param [in] pNodeElement - node element where metadata is searching.
 	/// \param [out] pList - temporary list for collected metadata.
-	void PostprocessHelper_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, std::list<CX3DImporter_NodeElement*>& pList) const;
+	void PostprocessHelper_CollectMetadata(const X3DNodeElementBase& pNodeElement, std::list<X3DNodeElementBase*>& pList) const;
 
 	/// Check if type of node element is metadata. E.g. <MetadataSet>, <MetadataString>.
 	/// \param [in] pType - checked type.
 	/// \return true - if the type corresponds to the metadata.
-	bool PostprocessHelper_ElementIsMetadata(const CX3DImporter_NodeElement::EType pType) const;
+	bool PostprocessHelper_ElementIsMetadata(const X3DNodeElementBase::EType pType) const;
 
 	/// Check if type of node element is geometry object and can be used to build mesh. E.g. <Box>, <Arc2D>.
 	/// \param [in] pType - checked type.
 	/// \return true - if the type corresponds to the mesh.
-	bool PostprocessHelper_ElementIsMesh(const CX3DImporter_NodeElement::EType pType) const;
+	bool PostprocessHelper_ElementIsMesh(const X3DNodeElementBase::EType pType) const;
 
 	/// Read CX3DImporter_NodeElement_Light, create aiLight and add it to list of the lights.
 	/// \param [in] pNodeElement - reference to lisght element(<DirectionalLight>, <PointLight>, <SpotLight>).
 	/// \param [out] pSceneLightList - reference to list of the lights.
-	void Postprocess_BuildLight(const CX3DImporter_NodeElement& pNodeElement, std::list<aiLight*>& pSceneLightList) const;
+	void Postprocess_BuildLight(const X3DNodeElementBase& pNodeElement, std::list<aiLight*>& pSceneLightList) const;
 
 	/// Create filled structure with type \ref aiMaterial from \ref CX3DImporter_NodeElement. This function itseld extract
 	/// all needed data from scene graph.
 	/// \param [in] pNodeElement - reference to material element(<Appearance>).
 	/// \param [out] pMaterial - pointer to pointer to created material. *pMaterial must be nullptr.
-	void Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNodeElement, aiMaterial** pMaterial) const;
+	void Postprocess_BuildMaterial(const X3DNodeElementBase& pNodeElement, aiMaterial** pMaterial) const;
 
 	/// Create filled structure with type \ref aiMaterial from \ref CX3DImporter_NodeElement. This function itseld extract
 	/// all needed data from scene graph.
 	/// \param [in] pNodeElement - reference to geometry object.
 	/// \param [out] pMesh - pointer to pointer to created mesh. *pMesh must be nullptr.
-	void Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeElement, aiMesh** pMesh) const;
+	void Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, aiMesh** pMesh) const;
 
 	/// Create aiNode from CX3DImporter_NodeElement. Also function check children and make recursive call.
 	/// \param [out] pNode - pointer to pointer to created node. *pNode must be nullptr.
@@ -310,7 +310,7 @@ private:
 	/// \param [out] pSceneMeshList - list with aiMesh which belong to scene.
 	/// \param [out] pSceneMaterialList - list with aiMaterial which belong to scene.
 	/// \param [out] pSceneLightList - list with aiLight which belong to scene.
-	void Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
+	void Postprocess_BuildNode(const X3DNodeElementBase& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
 								std::list<aiMaterial*>& pSceneMaterialList, std::list<aiLight*>& pSceneLightList) const;
 
 	/// To create mesh and material kept in <Schape>.
@@ -318,85 +318,13 @@ private:
 	/// \param pNodeMeshInd - reference to list with mesh indices. When pShapeNodeElement will read new mesh index will be added to this list.
 	/// \param pSceneMeshList - reference to list with meshes. When pShapeNodeElement will read new mesh will be added to this list.
 	/// \param pSceneMaterialList - reference to list with materials. When pShapeNodeElement will read new material will be added to this list.
-	void Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
+	void Postprocess_BuildShape(const X3DShape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
 								std::list<aiMesh*>& pSceneMeshList, std::list<aiMaterial*>& pSceneMaterialList) const;
 
 	/// Check if child elements of node element is metadata and add it to scene node.
 	/// \param [in] pNodeElement - node element where metadata is searching.
 	/// \param [out] pSceneNode - scene node in which metadata will be added.
-	void Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode) const;
-
-	/***********************************************/
-	/************* Functions: throw set ************/
-	/***********************************************/
-
-	/// Call that function when argument is out of range and exception must be raised.
-	/// \throw DeadlyImportError.
-	/// \param [in] pArgument - argument name.
-	void Throw_ArgOutOfRange(const std::string& pArgument);
-
-	/// Call that function when close tag of node not found and exception must be raised.
-	/// E.g.:
-	/// <Scene>
-	///     <Shape>
-	/// </Scene> <!--- shape not closed --->
-	/// \throw DeadlyImportError.
-	/// \param [in] pNode - node name in which exception happened.
-	void Throw_CloseNotFound(const std::string& pNode);
-
-	/// Call that function when string value can not be converted to floating point value and exception must be raised.
-	/// \param [in] pAttrValue - attribute value.
-	/// \throw DeadlyImportError.
-	void Throw_ConvertFail_Str2ArrF(const std::string& pAttrValue);
-
-	/// Call that function when in node defined attributes "DEF" and "USE" and exception must be raised.
-	/// E.g.: <Box DEF="BigBox" USE="MegaBox">
-	/// \throw DeadlyImportError.
-	void Throw_DEF_And_USE();
-
-	/// Call that function when attribute name is incorrect and exception must be raised.
-	/// \param [in] pAttrName - attribute name.
-	/// \throw DeadlyImportError.
-	void Throw_IncorrectAttr(const std::string& pAttrName);
-
-	/// Call that function when attribute value is incorrect and exception must be raised.
-	/// \param [in] pAttrName - attribute name.
-	/// \throw DeadlyImportError.
-	void Throw_IncorrectAttrValue(const std::string& pAttrName);
-
-	/// Call that function when some type of nodes are defined twice or more when must be used only once and exception must be raised.
-	/// E.g.:
-	/// <Shape>
-	///     <Box/>    <!--- first geometry node --->
-	///     <Sphere/> <!--- second geometry node. raise exception --->
-	/// </Shape>
-	/// \throw DeadlyImportError.
-	/// \param [in] pNodeType - type of node which defined one more time.
-	/// \param [in] pDescription - message about error. E.g. what the node defined while exception raised.
-	void Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription);
-
-	/// Call that function when count of opening and closing tags which create group(e.g. <Group>) are not equal and exception must be raised.
-	/// E.g.:
-	/// <Scene>
-	///     <Transform>  <!--- first grouping node begin --->
-	///         <Group>  <!--- second grouping node begin --->
-	///     </Transform> <!--- first grouping node end --->
-	/// </Scene> <!--- one grouping node still not closed --->
-	/// \throw DeadlyImportError.
-	/// \param [in] pNode - node name in which exception happened.
-	void Throw_TagCountIncorrect(const std::string& pNode);
-
-	/// Call that function when defined in "USE" element are not found in graph and exception must be raised.
-	/// \param [in] pAttrValue - "USE" attribute value.
-	/// \throw DeadlyImportError.
-	void Throw_USE_NotFound(const std::string& pAttrValue);
-
-	/***********************************************/
-	/************** Functions: LOG set *************/
-	/***********************************************/
-
-	/// Short variant for calling \ref DefaultLogger::get()->info()
-	void LogInfo(const std::string& pMessage) { DefaultLogger::get()->info(pMessage); }
+	void Postprocess_CollectMetadata(const X3DNodeElementBase& pNodeElement, aiNode& pSceneNode) const;
 
 	/***********************************************/
 	/************** Functions: XML set *************/
@@ -408,7 +336,7 @@ private:
 	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
 	/// return true if current node name is equal to pNodeName, else - false.
-	bool XML_CheckNode_NameEqual(const std::string& pNodeName) { return mReader->getNodeName() == pNodeName; }
+	//bool XML_CheckNode_NameEqual(const std::string& pNodeName) { return mReader->getNodeName() == pNodeName; }
 
 	/// Skip unsupported node and report about that. Depend on node name can be skipped begin tag of node all whole node.
 	/// \param [in] pParentNodeName - parent node name. Used for reporting.
@@ -612,7 +540,7 @@ private:
 
 	/// Make pNode as current and enter deeper for parsing child nodes. At end \ref ParseHelper_Node_Exit must be called.
 	/// \param [in] pNode - new current node.
-	void ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode);
+	void ParseHelper_Node_Enter(X3DNodeElementBase* pNode);
 
 	/// This function must be called when exiting from X3D group node(e.g. </Group>). \ref ParseHelper_Group_Begin.
 	void ParseHelper_Node_Exit();
@@ -649,7 +577,7 @@ private:
 	/// \param [in] pNodeName - parsed node name. Must be set because that function is general and name needed for checking the end
 	/// and error reporing.
 	/// \param [in] pParentElement - parent metadata element.
-	void ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& pNodeName);
+	void ParseNode_Metadata(X3DNodeElementBase* pParentElement, const std::string& pNodeName);
 
 	/// Parse <MetadataBoolean> node of the file.
 	void ParseNode_MetadataBoolean();
@@ -671,52 +599,52 @@ private:
 	void ParseNode_MetadataString();
 
 	/// Parse <Arc2D> node of the file.
-	void ParseNode_Geometry2D_Arc2D();
+	void ParseNode_Geometry2D_Arc2D(XmlNode &node);
 
 	/// Parse <ArcClose2D> node of the file.
-	void ParseNode_Geometry2D_ArcClose2D();
+    void ParseNode_Geometry2D_ArcClose2D(XmlNode &node);
 
 	/// Parse <Circle2D> node of the file.
-	void ParseNode_Geometry2D_Circle2D();
+    void ParseNode_Geometry2D_Circle2D(XmlNode &node);
 
 	/// Parse <Disk2D> node of the file.
-	void ParseNode_Geometry2D_Disk2D();
+    void ParseNode_Geometry2D_Disk2D(XmlNode &node);
 
 	/// Parse <Polyline2D> node of the file.
-	void ParseNode_Geometry2D_Polyline2D();
+    void ParseNode_Geometry2D_Polyline2D(XmlNode &node);
 
 	/// Parse <Polypoint2D> node of the file.
-	void ParseNode_Geometry2D_Polypoint2D();
+    void ParseNode_Geometry2D_Polypoint2D(XmlNode &node);
 
 	/// Parse <Rectangle2D> node of the file.
-	void ParseNode_Geometry2D_Rectangle2D();
+    void ParseNode_Geometry2D_Rectangle2D(XmlNode &node);
 
 	/// Parse <TriangleSet2D> node of the file.
-	void ParseNode_Geometry2D_TriangleSet2D();
+    void ParseNode_Geometry2D_TriangleSet2D(XmlNode &node);
 
 	/// Parse <Box> node of the file.
-	void ParseNode_Geometry3D_Box();
+    void ParseNode_Geometry3D_Box(XmlNode &node);
 
 	/// Parse <Cone> node of the file.
-	void ParseNode_Geometry3D_Cone();
+    void ParseNode_Geometry3D_Cone(XmlNode &node);
 
 	/// Parse <Cylinder> node of the file.
-	void ParseNode_Geometry3D_Cylinder();
+    void ParseNode_Geometry3D_Cylinder(XmlNode &node);
 
 	/// Parse <ElevationGrid> node of the file.
-	void ParseNode_Geometry3D_ElevationGrid();
+    void ParseNode_Geometry3D_ElevationGrid(XmlNode &node);
 
 	/// Parse <Extrusion> node of the file.
-	void ParseNode_Geometry3D_Extrusion();
+    void ParseNode_Geometry3D_Extrusion(XmlNode &node);
 
 	/// Parse <IndexedFaceSet> node of the file.
-	void ParseNode_Geometry3D_IndexedFaceSet();
+    void ParseNode_Geometry3D_IndexedFaceSet(XmlNode &node);
 
 	/// Parse <Sphere> node of the file.
-	void ParseNode_Geometry3D_Sphere();
+    void ParseNode_Geometry3D_Sphere(XmlNode &node);
 
 	/// Parse <Group> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_Group();
+    void ParseNode_Grouping_Group(XmlNode &node);
 
 	/// Doing actions at an exit from <Group>. Walk up in scene graph.
 	void ParseNode_Grouping_GroupEnd();
@@ -824,7 +752,7 @@ private:
     /***********************************************/
     /****************** Variables ******************/
     /***********************************************/
-    CX3DImporter_NodeElement* NodeElement_Cur;///< Current element.
+    X3DNodeElementBase* mNodeElementCur;///< Current element.
     std::unique_ptr<FIReader> mReader;///< Pointer to XML-reader object
     IOSystem *mpIOHandler;
 };// class X3DImporter

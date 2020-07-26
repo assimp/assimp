@@ -83,7 +83,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
@@ -91,7 +91,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 	{
 		ParseHelper_Group_Begin(true);// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 
 		if(load && !url.empty())
 		{
@@ -122,7 +122,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 		}
 
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement()) ParseNode_Metadata(NodeElement_Cur, "Inline");
+		if(!mReader->isEmptyElement()) ParseNode_Metadata(mNodeElementCur, "Inline");
 
 		// exit from node in that place
 		ParseHelper_Node_Exit();

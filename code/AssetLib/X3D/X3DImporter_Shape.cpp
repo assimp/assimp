@@ -70,7 +70,7 @@ namespace Assimp
 void X3DImporter::ParseNode_Shape_Shape()
 {
     std::string use, def;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -84,7 +84,7 @@ void X3DImporter::ParseNode_Shape_Shape()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Shape(NodeElement_Cur);
+		ne = new X3DShape(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes
@@ -127,7 +127,7 @@ void X3DImporter::ParseNode_Shape_Shape()
 		}// if(!mReader->isEmptyElement())
 		else
 		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -147,7 +147,7 @@ void X3DImporter::ParseNode_Shape_Shape()
 void X3DImporter::ParseNode_Shape_Appearance()
 {
     std::string use, def;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -161,7 +161,7 @@ void X3DImporter::ParseNode_Shape_Appearance()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Appearance(NodeElement_Cur);
+		ne = new X3DAppearance(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes
@@ -180,7 +180,7 @@ void X3DImporter::ParseNode_Shape_Appearance()
 		}// if(!mReader->isEmptyElement())
 		else
 		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -206,7 +206,7 @@ void X3DImporter::ParseNode_Shape_Material()
     aiColor3D diffuseColor(0.8f, 0.8f, 0.8f);
     aiColor3D emissiveColor(0, 0, 0);
     aiColor3D specularColor(0, 0, 0);
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -226,20 +226,20 @@ void X3DImporter::ParseNode_Shape_Material()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Material(NodeElement_Cur);
+		ne = new X3DMaterial(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_Material*)ne)->AmbientIntensity = ambientIntensity;
-		((CX3DImporter_NodeElement_Material*)ne)->Shininess = shininess;
-		((CX3DImporter_NodeElement_Material*)ne)->Transparency = transparency;
-		((CX3DImporter_NodeElement_Material*)ne)->DiffuseColor = diffuseColor;
-		((CX3DImporter_NodeElement_Material*)ne)->EmissiveColor = emissiveColor;
-		((CX3DImporter_NodeElement_Material*)ne)->SpecularColor = specularColor;
+		((X3DMaterial*)ne)->AmbientIntensity = ambientIntensity;
+		((X3DMaterial*)ne)->Shininess = shininess;
+		((X3DMaterial*)ne)->Transparency = transparency;
+		((X3DMaterial*)ne)->DiffuseColor = diffuseColor;
+		((X3DMaterial*)ne)->EmissiveColor = emissiveColor;
+		((X3DMaterial*)ne)->SpecularColor = specularColor;
         // check for child nodes
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Material");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

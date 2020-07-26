@@ -3,8 +3,6 @@ Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2020, assimp team
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,10 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
-#include <string>
-#include <memory>
 #include <cerrno>
 #include <cwchar>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include <assimp/XmlParser.h>
@@ -64,58 +62,58 @@ struct FIValue {
     virtual ~FIValue() {}
 };
 
-struct FIStringValue: public FIValue {
+struct FIStringValue : public FIValue {
     std::string value;
     static std::shared_ptr<FIStringValue> create(std::string &&value);
 };
 
-struct FIByteValue: public FIValue {
+struct FIByteValue : public FIValue {
     std::vector<uint8_t> value;
 };
 
-struct FIHexValue: public FIByteValue {
+struct FIHexValue : public FIByteValue {
     static std::shared_ptr<FIHexValue> create(std::vector<uint8_t> &&value);
 };
 
-struct FIBase64Value: public FIByteValue {
+struct FIBase64Value : public FIByteValue {
     static std::shared_ptr<FIBase64Value> create(std::vector<uint8_t> &&value);
 };
 
-struct FIShortValue: public FIValue {
+struct FIShortValue : public FIValue {
     std::vector<int16_t> value;
     static std::shared_ptr<FIShortValue> create(std::vector<int16_t> &&value);
 };
 
-struct FIIntValue: public FIValue {
+struct FIIntValue : public FIValue {
     std::vector<int32_t> value;
     static std::shared_ptr<FIIntValue> create(std::vector<int32_t> &&value);
 };
 
-struct FILongValue: public FIValue {
+struct FILongValue : public FIValue {
     std::vector<int64_t> value;
     static std::shared_ptr<FILongValue> create(std::vector<int64_t> &&value);
 };
 
-struct FIBoolValue: public FIValue {
+struct FIBoolValue : public FIValue {
     std::vector<bool> value;
     static std::shared_ptr<FIBoolValue> create(std::vector<bool> &&value);
 };
 
-struct FIFloatValue: public FIValue {
+struct FIFloatValue : public FIValue {
     std::vector<float> value;
     static std::shared_ptr<FIFloatValue> create(std::vector<float> &&value);
 };
 
-struct FIDoubleValue: public FIValue {
+struct FIDoubleValue : public FIValue {
     std::vector<double> value;
     static std::shared_ptr<FIDoubleValue> create(std::vector<double> &&value);
 };
 
-struct FIUUIDValue: public FIByteValue {
+struct FIUUIDValue : public FIByteValue {
     static std::shared_ptr<FIUUIDValue> create(std::vector<uint8_t> &&value);
 };
 
-struct FICDATAValue: public FIStringValue {
+struct FICDATAValue : public FIStringValue {
     static std::shared_ptr<FICDATAValue> create(std::string &&value);
 };
 
@@ -161,7 +159,7 @@ class IOStream;
 
 class FIReader {
 public:
-	virtual ~FIReader();
+    virtual ~FIReader();
 
     virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const = 0;
 
@@ -171,16 +169,17 @@ public:
 
     virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) = 0;
 
+    virtual bool read() = 0;
+
     static std::unique_ptr<FIReader> create(IOStream *stream);
 
-};// class IFIReader
+}; // class IFIReader
 
-inline
-FIReader::~FIReader() {
-	// empty
+inline FIReader::~FIReader() {
+    // empty
 }
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 

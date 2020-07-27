@@ -467,7 +467,6 @@ void StandardShapes::MakeCircle(ai_real radius, unsigned int tess,
     ai_real s = 1.0; // std::cos(angle == 0);
     ai_real t = 0.0; // std::sin(angle == 0);
 
-<<<<<<< HEAD
     for (ai_real angle = 0.0; angle < angle_max;) {
         positions.emplace_back(aiVector3D(s * radius, 0.0, t * radius));
         angle += angle_delta;

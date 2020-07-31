@@ -405,7 +405,7 @@ void FBXExporter::WriteHeaderExtension ()
 void WritePropInt(const aiScene* scene, FBX::Node& p, const std::string& key, int defaultValue)
 {
     int value;
-    if (scene->mMetaData->Get(key, value)) {
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
         p.AddP70int(key, value);
     } else {
         p.AddP70int(key, defaultValue);
@@ -415,12 +415,12 @@ void WritePropInt(const aiScene* scene, FBX::Node& p, const std::string& key, in
 void WritePropDouble(const aiScene* scene, FBX::Node& p, const std::string& key, double defaultValue)
 {
     double value;
-    if (scene->mMetaData->Get(key, value)) {
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
         p.AddP70double(key, value);
     } else {
         // fallback lookup float instead
         float floatValue;
-        if (scene->mMetaData->Get(key, floatValue)) {
+        if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, floatValue)) {
             p.AddP70double(key, (double)floatValue);
         } else {
             p.AddP70double(key, defaultValue);
@@ -431,7 +431,7 @@ void WritePropDouble(const aiScene* scene, FBX::Node& p, const std::string& key,
 void WritePropEnum(const aiScene* scene, FBX::Node& p, const std::string& key, int defaultValue)
 {
     int value;
-    if (scene->mMetaData->Get(key, value)) {
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
         p.AddP70enum(key, value);
     } else {
         p.AddP70enum(key, defaultValue);
@@ -441,7 +441,7 @@ void WritePropEnum(const aiScene* scene, FBX::Node& p, const std::string& key, i
 void WritePropColor(const aiScene* scene, FBX::Node& p, const std::string& key, const aiVector3D& defaultValue)
 {
     aiVector3D value;
-    if (scene->mMetaData->Get(key, value)) {
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
         // ai_real can be float or double, cast to avoid warnings
         p.AddP70color(key, (double)value.x, (double)value.y, (double)value.z);
     } else {
@@ -452,7 +452,7 @@ void WritePropColor(const aiScene* scene, FBX::Node& p, const std::string& key, 
 void WritePropString(const aiScene* scene, FBX::Node& p, const std::string& key, const std::string& defaultValue)
 {
     aiString value; // MetaData doesn't hold std::string
-    if (scene->mMetaData->Get(key, value)) {
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
         p.AddP70string(key, value.C_Str());
     } else {
         p.AddP70string(key, defaultValue);

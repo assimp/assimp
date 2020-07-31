@@ -2,8 +2,7 @@
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 2006-2020, assimp team
-
-
+#
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -189,8 +188,13 @@ SET( POST_PROCESSES
   unit/utGenBoundingBoxesProcess.cpp
 )
 
+SET( FUZZER
+  unit/Fuzzer/utFuzzerTestCases.cpp
+)
+
 SOURCE_GROUP( UnitTests\\Compiler     FILES  unit/CCompilerTest.c )
 SOURCE_GROUP( UnitTests\\Common       FILES  ${COMMON} )
+SOURCE_GROUP( UnitTests\\Fuzzer       FILES  ${FUZZER} )
 SOURCE_GROUP( UnitTests\\ImportExport FILES  ${IMPORTERS} )
 SOURCE_GROUP( UnitTests\\Material     FILES  ${MATERIAL} )
 SOURCE_GROUP( UnitTests\\Math         FILES  ${MATH} )
@@ -202,6 +206,7 @@ add_executable( unit
     unit/Main.cpp
     ../code/Common/Version.cpp
 	${COMMON}
+    ${FUZZER}
 	${IMPORTERS}
 	${MATERIAL}
 	${MATH}

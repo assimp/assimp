@@ -1,4 +1,4 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -38,42 +38,30 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+
 #include "UnitTestPCH.h"
-#include "Common/Importer.h"
-#include "TestIOSystem.h"
 
-using namespace ::Assimp;
+#include <assimp/cimport.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-class BatchLoaderTest : public ::testing::Test {
-public:
-    virtual void SetUp() {
-        m_io = new TestIOSystem();
-    }
+using namespace Assimp;
 
-    virtual void TearDown() {
-        delete m_io;
-    }
-
-protected:
-    TestIOSystem* m_io;
+class utFuzzerTestCases : public ::testing::Test {
+    // empty
 };
 
-TEST_F( BatchLoaderTest, createTest ) {
-    bool ok( true );
-    try {
-        BatchLoader loader( m_io );
-    } catch ( ... ) {
-        ok = false;
-    }
-    EXPECT_TRUE( ok );
-}
+wchar_t *data = L"vn xx� > �������";
 
-TEST_F( BatchLoaderTest, validateAccessTest ) {
-    BatchLoader loader1( m_io );
-    EXPECT_FALSE( loader1.getValidation() );
-    loader1.setValidation( true );
-    EXPECT_TRUE( loader1.getValidation() );
+TEST_F(utFuzzerTestCases, testFuzzerData) {
+    aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
+    aiAttachLogStream(&stream);
 
-    BatchLoader loader2( m_io, true );
-    EXPECT_TRUE( loader2.getValidation() );
+    Importer importer;
+    const aiScene *sc = importer.ReadFileFromMemory(data, 19 * sizeof(wchar_t),
+            aiProcessPreset_TargetRealtime_Quality, nullptr);
+
+    aiDetachLogStream(&stream);
+    EXPECT_EQ(nullptr, sc);
 }

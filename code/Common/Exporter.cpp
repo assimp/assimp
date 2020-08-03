@@ -74,9 +74,9 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 namespace Assimp {
 
-#ifdef _WIN32
-#    pragma warning( disable : 4800 ) 
-#endif // _WIN32
+#ifdef _MSC_VER
+#    pragma warning( disable : 4800 )
+#endif // _MSC_VER
 
 
 // PostStepRegistry.cpp
@@ -179,11 +179,14 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 			aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices));
 #endif
 
-#ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
+#if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_EXPORTER)
 	exporters.push_back(Exporter::ExportFormatEntry("gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
 			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
 	exporters.push_back(Exporter::ExportFormatEntry("glb2", "GL Transmission Format v. 2 (binary)", "glb", &ExportSceneGLB2,
 			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
+#endif
+
+#if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_EXPORTER)
 	exporters.push_back(Exporter::ExportFormatEntry("gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
 			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
 	exporters.push_back(Exporter::ExportFormatEntry("glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
@@ -580,8 +583,21 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 : mIntProperties(other.mIntProperties)
 , mFloatProperties(other.mFloatProperties)
 , mStringProperties(other.mStringProperties)
-, mMatrixProperties(other.mMatrixProperties) {
+, mMatrixProperties(other.mMatrixProperties)
+, mCallbackProperties(other.mCallbackProperties){
     // empty
+}
+
+bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
+    return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);
+}
+
+std::function<void *(void *)> ExportProperties::GetPropertyCallback(const char *szName) const {
+    return GetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, 0);
+}
+
+bool ExportProperties::HasPropertyCallback(const char *szName) const {
+    return HasGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -168,7 +168,6 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
                                       const std::vector<aiBone *> &bones,
                                       std::map<aiBone *, aiNode *> &bone_stack,
                                   std::vector<aiNode *> &node_stack) {
-    ai_assert(scene);
     ai_assert(root_node);
     ai_assert(!node_stack.empty());
 

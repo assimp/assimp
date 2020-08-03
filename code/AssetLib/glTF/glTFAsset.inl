@@ -57,10 +57,10 @@ namespace glTF {
 
 namespace {
 
-#ifdef _WIN32
+#if _MSC_VER
 #    pragma warning(push)
 #    pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 //
 // JSON Value reading helpers
@@ -372,7 +372,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu", (long long)pOffset);
+        ai_snprintf(val, val_size, AI_SIZEFMT, pOffset);
         throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
     }
 
@@ -382,7 +382,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
+        ai_snprintf(val, val_size, AI_SIZEFMT "/" AI_SIZEFMT, pOffset, pEncodedData_Length);
         throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
     }
 
@@ -836,8 +836,8 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
 
     if (json_extensions == nullptr) goto mr_skip_extensions;
 
-    for (Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++) {
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+    for (Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++) {
         if (it_memb->name.GetString() == std::string("Open3DGC-compression")) {
             // Search for compressed data.
             // Compressed data contain description of part of "buffer" which is encoded. This part must be decoded and
@@ -887,11 +887,11 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             Extension.push_back(ext_o3dgc); // store info in mesh extensions list.
         } // if(it_memb->name.GetString() == "Open3DGC-compression")
         else
-#endif
         {
             throw DeadlyImportError(std::string("GLTF: Unknown mesh extension: \"") + it_memb->name.GetString() + "\".");
         }
     } // for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); json_extensions++)
+#endif
 
 mr_skip_extensions:
 
@@ -1412,8 +1412,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#ifdef _WIN32
+#if _MSC_VER
 #    pragma warning(pop)
-#endif // WIN32
+#endif // _MSC_VER
 
 } // namespace glTF

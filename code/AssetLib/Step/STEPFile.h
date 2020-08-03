@@ -54,10 +54,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #    pragma warning(push)
 #    pragma warning(disable : 4127 4456 4245 4512 )
-#endif // _WIN32 
+#endif // _MSC_VER 
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)
@@ -130,8 +130,8 @@ namespace STEP {
      *  coupled with a line number. */
 // -------------------------------------------------------------------------------
 struct SyntaxError : DeadlyImportError {
-    enum {
-        LINE_NOT_SPECIFIED = 0xffffffffffffffffLL
+    enum : uint64_t {
+        LINE_NOT_SPECIFIED = 0xfffffffffffffffLL
     };
 
     SyntaxError(const std::string &s, uint64_t line = LINE_NOT_SPECIFIED);
@@ -143,8 +143,8 @@ struct SyntaxError : DeadlyImportError {
      *  It is typically coupled with both an entity id and a line number.*/
 // -------------------------------------------------------------------------------
 struct TypeError : DeadlyImportError {
-    enum {
-        ENTITY_NOT_SPECIFIED = 0xffffffffffffffffLL,
+    enum : uint64_t {
+        ENTITY_NOT_SPECIFIED = 0xffffffffffffffffUL,
         ENTITY_NOT_SPECIFIED_32 = 0x00000000ffffffff
     };
 
@@ -727,7 +727,7 @@ struct InternGenericConvert<Maybe<T>> {
     }
 };
 
-#ifdef _WIN32
+#if _MSC_VER > 1920
 #pragma warning(push)
 #pragma warning(disable : 4127)
 #endif // _WIN32
@@ -960,9 +960,9 @@ private:
     const EXPRESS::ConversionSchema *schema;
 };
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(pop)
-#endif // _WIN32
+#endif // _MSC_VER
 
 } // namespace STEP
 

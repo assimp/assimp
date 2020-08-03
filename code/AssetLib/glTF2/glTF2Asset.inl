@@ -436,7 +436,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu", (long long)pOffset);
+        ai_snprintf(val, val_size, AI_SIZEFMT, pOffset);
         throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
     }
 
@@ -446,7 +446,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
+        ai_snprintf(val, val_size, AI_SIZEFMT "/" AI_SIZEFMT, pOffset, pEncodedData_Length);
         throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
     }
 
@@ -757,6 +757,33 @@ inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t sr
     CopyData(_count, src, src_stride, dst, dst_stride);
 }
 
+inline void Accessor::WriteSparseValues(size_t _count, const void *src_data, size_t src_dataStride) {
+    if (!sparse)
+        return;
+
+    // values
+    uint8_t *value_buffer_ptr = sparse->values->buffer->GetPointer();
+    size_t value_offset = sparse->valuesByteOffset + sparse->values->byteOffset;
+    size_t value_dst_stride = GetNumComponents() * GetBytesPerComponent();
+    const uint8_t *value_src = reinterpret_cast<const uint8_t *>(src_data);
+    uint8_t *value_dst = reinterpret_cast<uint8_t *>(value_buffer_ptr + value_offset);
+    ai_assert(value_dst + _count * value_dst_stride <= value_buffer_ptr + sparse->values->buffer->byteLength);
+    CopyData(_count, value_src, src_dataStride, value_dst, value_dst_stride);
+}
+
+inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, size_t src_idxStride) {
+    if (!sparse)
+        return;
+
+    // indices
+    uint8_t *indices_buffer_ptr = sparse->indices->buffer->GetPointer();
+    size_t indices_offset = sparse->indicesByteOffset + sparse->indices->byteOffset;
+    size_t indices_dst_stride = 1 * sizeof(unsigned short);
+    const uint8_t *indices_src = reinterpret_cast<const uint8_t *>(src_idx);
+    uint8_t *indices_dst = reinterpret_cast<uint8_t *>(indices_buffer_ptr + indices_offset);
+    ai_assert(indices_dst + _count * indices_dst_stride <= indices_buffer_ptr + sparse->indices->buffer->byteLength);
+    CopyData(_count, indices_src, src_idxStride, indices_dst, indices_dst_stride);
+}
 inline Accessor::Indexer::Indexer(Accessor &acc) :
         accessor(acc),
         data(acc.GetPointer()),
@@ -1015,10 +1042,10 @@ inline int Compare(const char *attr, const char (&str)[N]) {
     return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
 }
 
-#ifdef _WIN32
+#if _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
     if ((pos = Compare(attr, "POSITION"))) {
@@ -1287,6 +1314,8 @@ inline void Node::Read(Value &obj, Asset &r) {
         }
     }
 
+	// Do not retrieve a skin here, just take a reference, to avoid infinite recursion
+    // Skins will be properly loaded later
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
         this->skin = r.skins.Get(curSkin->GetUint());
@@ -1584,7 +1613,6 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         }
     }
 
-    // Read skins after nodes have been loaded to avoid infinite recursion
     if (Value *skinsArray = FindArray(doc, "skins")) {
         for (unsigned int i = 0; i < skinsArray->Size(); ++i) {
             skins.Retrieve(i);
@@ -1695,8 +1723,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#ifdef _WIN32
-#pragma warning(pop)
-#endif // _WIN32
+#if _MSC_VER
+#   pragma warning(pop)
+#endif // _MSC_VER
 
 } // namespace glTF2

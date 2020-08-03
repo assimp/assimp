@@ -5361,7 +5361,7 @@ mz_bool mz_zip_reader_extract_to_mem_no_alloc(mz_zip_archive *pZip,
   } else {
     // Temporarily allocate a read buffer.
     read_buf_size = MZ_MIN(file_stat.m_comp_size, MZ_ZIP_MAX_IO_BUF_SIZE);
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
     if (((0, sizeof(size_t) == sizeof(mz_uint32))) &&
         (read_buf_size > 0x7FFFFFFF))
 #else
@@ -5454,7 +5454,7 @@ void *mz_zip_reader_extract_to_heap(mz_zip_archive *pZip, mz_uint file_index,
   uncomp_size = MZ_READ_LE32(p + MZ_ZIP_CDH_DECOMPRESSED_SIZE_OFS);
 
   alloc_size = (flags & MZ_ZIP_FLAG_COMPRESSED_DATA) ? comp_size : uncomp_size;
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
   if (((0, sizeof(size_t) == sizeof(mz_uint32))) && (alloc_size > 0x7FFFFFFF))
 #else
   if (((sizeof(size_t) == sizeof(mz_uint32))) && (alloc_size > 0x7FFFFFFF))
@@ -5560,7 +5560,7 @@ mz_bool mz_zip_reader_extract_to_callback(mz_zip_archive *pZip,
   if ((flags & MZ_ZIP_FLAG_COMPRESSED_DATA) || (!file_stat.m_method)) {
     // The file is stored or the caller has requested the compressed data.
     if (pZip->m_pState->m_pMem) {
-#ifdef _MSC_VER
+#if defined (_MSC_VER) && !defined(__clang__)
       if (((0, sizeof(size_t) == sizeof(mz_uint32))) &&
           (file_stat.m_comp_size > 0xFFFFFFFF))
 #else

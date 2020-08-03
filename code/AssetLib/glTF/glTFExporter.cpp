@@ -525,6 +525,12 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     delete[] vertexJointData;
 }
 
+#if defined(__has_warning)
+#if __has_warning("-Wunused-but-set-variable")
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
+#endif
+
 void glTFExporter::ExportMeshes()
 {
     // Not for
@@ -536,10 +542,12 @@ void glTFExporter::ExportMeshes()
 
     // Variables needed for compression. BEGIN.
     // Indices, not pointers - because pointer to buffer is changing while writing to it.
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
     size_t idx_srcdata_begin = 0; // Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
     size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
-    std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
     size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
+#endif
+    std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
     bool comp_allow;// Point that data of current mesh can be compressed.
     // Variables needed for compression. END.
 
@@ -609,13 +617,17 @@ void glTFExporter::ExportMeshes()
 
 		/******************* Vertices ********************/
 		// If compression is used then you need parameters of uncompressed region: begin and size. At this step "begin" is stored.
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 		if(comp_allow) idx_srcdata_begin = b->byteLength;
+#endif
 
         Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 		if (v) p.attributes.position.push_back(v);
 
 		/******************** Normals ********************/
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 		if(comp_allow && (aim->mNormals != 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
+#endif
 
 		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
 		if (n) p.attributes.normal.push_back(n);
@@ -640,7 +652,9 @@ void glTFExporter::ExportMeshes()
 		}
 
 		/*************** Vertices indices ****************/
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 		idx_srcdata_ind = b->byteLength;// Store index of indices array.
+#endif
 
 		if (aim->mNumFaces > 0) {
 			std::vector<IndicesType> indices;
@@ -677,7 +691,7 @@ void glTFExporter::ExportMeshes()
 		{
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 			// Only one type of compression supported at now - Open3DGC.
-			//
+		//
 			o3dgc::BinaryStream bs;
 			o3dgc::SC3DMCEncoder<IndicesType> encoder;
 			o3dgc::IndexedFaceSet<IndicesType> comp_o3dgc_ifs;
@@ -792,6 +806,12 @@ void glTFExporter::ExportMeshes()
         meshNode->skin = skinRef;
     }
 }
+
+#if defined(__has_warning)
+#if __has_warning("-Wunused-but-set-variable")
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 /*
  * Export the root node of the node hierarchy.

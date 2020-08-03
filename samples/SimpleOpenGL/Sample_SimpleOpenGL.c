@@ -278,7 +278,7 @@ void do_motion (void)
 	static int frames = 0;
 
 	int time = glutGet(GLUT_ELAPSED_TIME);
-	angle += static_cast<float>((time-prev_time)*0.01);
+	angle += (float)((time-prev_time)*0.01);
 	prev_time = time;
 
 	frames += 1;
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
 
 	// Check and validate the specified model file extension.
 	model_file = argv[1];
-	const char* extension = strchr(model_file, '.');
+	const char* extension = strrchr(model_file, '.');
 	if (!extension) {
 		print_error("Please provide a file with a valid extension.");
 		return EXIT_FAILURE;

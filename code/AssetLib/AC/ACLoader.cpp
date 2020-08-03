@@ -471,26 +471,33 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     ++node->mNumMeshes;
                 }
 
-                switch ((*it).flags & 0xf) {
+                switch ((*it).GetType()) {
                     // closed line
-                case 0x1:
+                case Surface::ClosedLine:
                     needMat[idx].first += (unsigned int)(*it).entries.size();
                     needMat[idx].second += (unsigned int)(*it).entries.size() << 1u;
                     break;
 
                     // unclosed line
-                case 0x2:
+                case Surface::OpenLine:
                     needMat[idx].first += (unsigned int)(*it).entries.size() - 1;
                     needMat[idx].second += ((unsigned int)(*it).entries.size() - 1) << 1u;
                     break;
 
-                    // 0 == polygon, else unknown
-                default:
-                    if ((*it).flags & 0xf) {
-                        ASSIMP_LOG_WARN("AC3D: The type flag of a surface is unknown");
-                        (*it).flags &= ~(0xf);
-                    }
+                    // triangle strip
+                case Surface::TriangleStrip:
+                    needMat[idx].first += (unsigned int)(*it).entries.size() - 2;
+                    needMat[idx].second += ((unsigned int)(*it).entries.size() - 2) * 3;
+                    break;
 
+                default:
+                    // Coerce unknowns to a polygon and warn
+                    ASSIMP_LOG_WARN_F("AC3D: The type flag of a surface is unknown: ", (*it).flags);
+                    (*it).flags &= ~(Surface::Mask);
+                    // fallthrough
+
+                    // polygon
+                case Surface::Polygon:
                     // the number of faces increments by one, the number
                     // of vertices by surface.numref.
                     needMat[idx].first++;
@@ -546,8 +553,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                         const Surface &src = *it;
 
                         // closed polygon
-                        unsigned int type = (*it).flags & 0xf;
-                        if (!type) {
+                        uint8_t type = (*it).GetType();
+                        if (type == Surface::Polygon) {
                             aiFace &face = *faces++;
                             face.mNumIndices = (unsigned int)src.entries.size();
                             if (0 != face.mNumIndices) {
@@ -570,13 +577,71 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                     }
                                 }
                             }
+                        } else if (type == Surface::TriangleStrip) {
+                            for (unsigned int i = 0; i < (unsigned int)src.entries.size() - 2; ++i) {
+                                const Surface::SurfaceEntry &entry1 = src.entries[i];
+                                const Surface::SurfaceEntry &entry2 = src.entries[i + 1];
+                                const Surface::SurfaceEntry &entry3 = src.entries[i + 2];
+
+                                // skip degenerate triangles
+                                if (object.vertices[entry1.first] == object.vertices[entry2.first] ||
+                                        object.vertices[entry1.first] == object.vertices[entry3.first] ||
+                                        object.vertices[entry2.first] == object.vertices[entry3.first]) {
+                                    mesh->mNumFaces--;
+                                    mesh->mNumVertices -= 3;
+                                    continue;
+                                }
+
+                                aiFace &face = *faces++;
+                                face.mNumIndices = 3;
+                                face.mIndices = new unsigned int[face.mNumIndices];
+                                face.mIndices[0] = cur++;
+                                face.mIndices[1] = cur++;
+                                face.mIndices[2] = cur++;
+                                if (!(i & 1)) {
+                                    *vertices++ = object.vertices[entry1.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry1.second.x;
+                                        uv->y = entry1.second.y;
+                                        ++uv;
+                                    }
+                                    *vertices++ = object.vertices[entry2.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry2.second.x;
+                                        uv->y = entry2.second.y;
+                                        ++uv;
+                                    }
+                                } else {
+                                    *vertices++ = object.vertices[entry2.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry2.second.x;
+                                        uv->y = entry2.second.y;
+                                        ++uv;
+                                    }
+                                    *vertices++ = object.vertices[entry1.first] + object.translation;
+                                    if (uv) {
+                                        uv->x = entry1.second.x;
+                                        uv->y = entry1.second.y;
+                                        ++uv;
+                                    }
+                                }
+                                if (static_cast<unsigned>(vertices - mesh->mVertices) >= mesh->mNumVertices) {
+                                    throw DeadlyImportError("AC3D: Invalid number of vertices");
+                                }
+                                *vertices++ = object.vertices[entry3.first] + object.translation;
+                                if (uv) {
+                                    uv->x = entry3.second.x;
+                                    uv->y = entry3.second.y;
+                                    ++uv;
+                                }
+                            }
                         } else {
 
                             it2 = (*it).entries.begin();
 
                             // either a closed or an unclosed line
                             unsigned int tmp = (unsigned int)(*it).entries.size();
-                            if (0x2 == type) --tmp;
+                            if (Surface::OpenLine == type) --tmp;
                             for (unsigned int m = 0; m < tmp; ++m) {
                                 aiFace &face = *faces++;
 
@@ -599,7 +664,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                     ++uv;
                                 }
 
-                                if (0x1 == type && tmp - 1 == m) {
+                                if (Surface::ClosedLine == type && tmp - 1 == m) {
                                     // if this is a closed line repeat its beginning now
                                     it2 = (*it).entries.begin();
                                 } else

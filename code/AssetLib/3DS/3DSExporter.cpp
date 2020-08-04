@@ -339,7 +339,6 @@ void Discreet3DSExporter::WriteMaterials() {
             writer.PutU2(static_cast<uint16_t>(shading_mode_out));
         }
 
-        float f;
         if (mat.Get(AI_MATKEY_SHININESS, f) == AI_SUCCESS) {
             ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_SHININESS);
             WritePercentChunk(f);

@@ -296,6 +296,7 @@ void Discreet3DSExporter::WriteMaterials() {
             WriteColor(color);
         }
 
+        float f;
         if (mat.Get(AI_MATKEY_OPACITY, f) == AI_SUCCESS) {
             ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_TRANSPARENCY);
             WritePercentChunk(1.0f - f);

@@ -64,6 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/PolyTools.h"
 
 #include <memory>
+#include <cstdint>
 
 //#define AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
 //#define AI_BUILD_TRIANGULATE_DEBUG_POLYS
@@ -141,7 +142,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     }
 
     // Find out how many output faces we'll get
-    unsigned int numOut = 0, max_out = 0;
+    uint32_t numOut = 0, max_out = 0;
     bool get_normals = true;
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];

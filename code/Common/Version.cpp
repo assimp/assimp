@@ -104,6 +104,9 @@ ASSIMP_API unsigned int aiGetCompileFlags() {
 #ifdef _STLPORT_VERSION
     flags |= ASSIMP_CFLAGS_STLPORT;
 #endif
+#ifdef ASSIMP_DOUBLE_PRECISION
+    flags |= ASSIMP_CFLAGS_DOUBLE_SUPPORT;
+#endif
 
     return flags;
 }
@@ -113,13 +116,29 @@ ASSIMP_API unsigned int aiGetVersionRevision() {
     return GitVersion;
 }
 
+// ------------------------------------------------------------------------------------------------
 ASSIMP_API const char *aiGetBranchName() {
     return GitBranch;
 }
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiScene::aiScene() :
-        mFlags(0), mRootNode(nullptr), mNumMeshes(0), mMeshes(nullptr), mNumMaterials(0), mMaterials(nullptr), mNumAnimations(0), mAnimations(nullptr), mNumTextures(0), mTextures(nullptr), mNumLights(0), mLights(nullptr), mNumCameras(0), mCameras(nullptr), mMetaData(nullptr), mPrivate(new Assimp::ScenePrivateData()) {
+        mFlags(0),
+        mRootNode(nullptr),
+        mNumMeshes(0),
+        mMeshes(nullptr),
+        mNumMaterials(0),
+        mMaterials(nullptr),
+        mNumAnimations(0),
+        mAnimations(nullptr),
+        mNumTextures(0),
+        mTextures(nullptr),
+        mNumLights(0),
+        mLights(nullptr),
+        mNumCameras(0),
+        mCameras(nullptr),
+        mMetaData(nullptr),
+        mPrivate(new Assimp::ScenePrivateData()) {
     // empty
 }
 

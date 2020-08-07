@@ -37,6 +37,8 @@ ADD_EXECUTABLE( assimp_simpletextureddirectx11 WIN32
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h
 )
 
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_simpletextureddirectx11)
+
 SET_PROPERTY(TARGET assimp_simpletextureddirectx11 PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES( assimp_simpletextureddirectx11 assimp comctl32.lib winmm.lib )

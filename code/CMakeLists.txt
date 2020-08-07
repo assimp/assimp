@@ -1136,6 +1136,8 @@ ENDIF ()
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+
 # enable warnings as errors ########################################
 IF (MSVC)
   TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)

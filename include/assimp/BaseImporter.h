@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the base class for all importer worker classes. */
+/// @file Definition of the base class for all importer worker classes.
+
 #pragma once
 #ifndef INCLUDED_AI_BASEIMPORTER_H
 #define INCLUDED_AI_BASEIMPORTER_H
@@ -86,10 +86,6 @@ class IOStream;
  */
 class ASSIMP_API BaseImporter {
     friend class Importer;
-
-private:
-    /* Pushes state into importer for the importer scale */
-    virtual void UpdateImporterScale(Importer *pImp);
 
 public:
     /** Constructor to be privately used by #Importer */
@@ -399,7 +395,7 @@ public: // static utilities
     *  @param numOut The output count of elements copied. */
     template <typename T>
     AI_FORCE_INLINE static void CopyVector(
-            std::vector<std::unique_ptr<T>> &vec,
+            std::vector<std::unique_ptr<T> > &vec,
             T **&out,
             unsigned int &outLength) {
         outLength = unsigned(vec.size());
@@ -410,7 +406,11 @@ public: // static utilities
         }
     }
 
-protected:
+private:
+    /* Pushes state into importer for the importer scale */
+    virtual void UpdateImporterScale(Importer *pImp);
+
+    protected:
     /// Error description in case there was one.
     std::string m_ErrorText;
     /// Currently set progress handler.

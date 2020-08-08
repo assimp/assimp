@@ -208,6 +208,8 @@ add_executable( unit
     ${POST_PROCESSES}
 )
 
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
+
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
 add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
 

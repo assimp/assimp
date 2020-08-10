@@ -257,6 +257,37 @@ std::string GetNextToken(const char*& in) {
 }
 
 // ---------------------------------------------------------------------------------
+/** @brief  Will perform a simple tokenize.
+ *  @param  str         String to tokenize.
+ *  @param  tokens      Array with tokens, will be empty if no token was found.
+ *  @param  delimiters  Delimiter for tokenize.
+ *  @return Number of found token.
+ */
+template <class string_type>
+AI_FORCE_INLINE unsigned int tokenize(const string_type &str, std::vector<string_type> &tokens,
+        const string_type &delimiters) {
+    // Skip delimiters at beginning.
+    typename string_type::size_type lastPos = str.find_first_not_of(delimiters, 0);
+
+    // Find first "non-delimiter".
+    typename string_type::size_type pos = str.find_first_of(delimiters, lastPos);
+    while (string_type::npos != pos || string_type::npos != lastPos) {
+        // Found a token, add it to the vector.
+        string_type tmp = str.substr(lastPos, pos - lastPos);
+        if (!tmp.empty() && ' ' != tmp[0])
+            tokens.push_back(tmp);
+
+        // Skip delimiters.  Note the "not_of"
+        lastPos = str.find_first_not_of(delimiters, pos);
+
+        // Find next "non-delimiter"
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+
+    return static_cast<unsigned int>(tokens.size());
+}
+
+// ---------------------------------------------------------------------------------
 
 } // ! namespace Assimp
 

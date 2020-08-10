@@ -62,6 +62,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+inline void Throw_ArgOutOfRange(const std::string &argument) {
+    throw DeadlyImportError("Argument value is out of range for: \"" + argument + "\".");
+}
+
+inline void Throw_CloseNotFound(const std::string &node) {
+    throw DeadlyImportError("Close tag for node <" + node + "> not found. Seems file is corrupt.");
+}
+
+inline void Throw_ConvertFail_Str2ArrF(const std::string &nodeName, const std::string &pAttrValue) {
+    throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
+                            "\" from string to array of floats.");
+}
+
+inline void Throw_DEF_And_USE(const std::string &nodeName) {
+    throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <" + nodeName + ">.");
+}
+
+inline void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName) {
+    throw DeadlyImportError("Node <" + nodeName + "> has incorrect attribute \"" + pAttrName + "\".");
+}
+
+inline void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) {
+    throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + nodeName + "> has incorrect value.");
+}
+
+inline void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription) {
+    throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + nodeName + ". Description: " + pDescription);
+}
+
+inline void Throw_TagCountIncorrect(const std::string &pNode) {
+    throw DeadlyImportError("Count of open and close tags for node <" + pNode + "> are not equivalent. Seems file is corrupt.");
+}
+
+inline void Throw_USE_NotFound(const std::string &nodeName, const std::string &pAttrValue) {
+    throw DeadlyImportError("Not found node with name \"" + pAttrValue + "\" in <" + nodeName + ">.");
+}
+
+inline void LogInfo(const std::string &message) {
+    DefaultLogger::get()->info(message);
+}
+
+
+
 /// \class X3DImporter
 /// Class that holding scene graph which include: groups, geometry, metadata etc.
 ///
@@ -650,19 +693,19 @@ private:
 	void ParseNode_Grouping_GroupEnd();
 
 	/// Parse <StaticGroup> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_StaticGroup();
+    void ParseNode_Grouping_StaticGroup(XmlNode &node);
 
 	/// Doing actions at an exit from <StaticGroup>. Walk up in scene graph.
 	void ParseNode_Grouping_StaticGroupEnd();
 
 	/// Parse <Switch> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_Switch();
+    void ParseNode_Grouping_Switch(XmlNode &node);
 
 	/// Doing actions at an exit from <Switch>. Walk up in scene graph.
 	void ParseNode_Grouping_SwitchEnd();
 
 	/// Parse <Transform> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_Transform();
+    void ParseNode_Grouping_Transform(XmlNode &node);
 
 	/// Doing actions at an exit from <Transform>. Walk up in scene graph.
 	void ParseNode_Grouping_TransformEnd();

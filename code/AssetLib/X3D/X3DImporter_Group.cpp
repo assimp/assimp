@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
+#include <assimp/ParsingUtils.h>
+
 namespace Assimp
 {
 
@@ -65,30 +66,41 @@ namespace Assimp
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </Group>
 // A Group node contains children nodes without introducing a new transformation. It is equivalent to a Transform node containing an identity transform.
-void X3DImporter::ParseNode_Grouping_Group()
-{
-    std::string def, use;
+void X3DImporter::ParseNode_Grouping_Group(XmlNode &node) {
+    //std::string def, use;
 
-	MACRO_ATTRREAD_LOOPBEG;
+    std::string def = node.attribute("DEF").as_string();
+    std::string use = node.attribute("USE").as_string();
+	/*MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-	MACRO_ATTRREAD_LOOPEND;
+	MACRO_ATTRREAD_LOOPEND;*/
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		X3DNodeElementBase* ne;
-
-		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
-	}
-	else
-	{
+		X3DNodeElementBase *ne = nullptr;
+        if (def.empty()) {
+            Throw_DEF_And_USE(node.name());
+        }
+        if (!FindNodeElement(use, X3DNodeElementBase::ENET_Group, &ne)) {
+            Throw_USE_NotFound(node.name(), use);
+        }
+        mNodeElementCur->Child.push_back(ne);
+       //MACRO_USE_CHECKANDAPPLY(def, use, X3DNodeElementBase::ENET_Group, ne);
+	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
-		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) mNodeElementCur->ID = def;
+
+                                  // at this place new group mode created and made current, so we can name it.
+        if (!def.empty()) {
+            mNodeElementCur->ID = def;
+        }
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+		//if(mReader->isEmptyElement())
+        if (node.empty()) {
+            ParseHelper_Node_Exit();
+        }
 	}// if(!use.empty()) else
 }
 
@@ -111,20 +123,25 @@ void X3DImporter::ParseNode_Grouping_GroupEnd()
 // </StaticGroup>
 // The StaticGroup node contains children nodes which cannot be modified. StaticGroup children are guaranteed to not change, send events, receive events or
 // contain any USE references outside the StaticGroup.
-void X3DImporter::ParseNode_Grouping_StaticGroup()
-{
-    std::string def, use;
+void X3DImporter::ParseNode_Grouping_StaticGroup(XmlNode &node) {
+//    std::string def, use;
+    std::string def = node.attribute("DEF").as_string();
+    std::string use = node.attribute("USE").as_string();
 
-	MACRO_ATTRREAD_LOOPBEG;
+/*	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-	MACRO_ATTRREAD_LOOPEND;
+	MACRO_ATTRREAD_LOOPEND;*/
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		X3DNodeElementBase* ne;
+		X3DNodeElementBase* ne = nullptr;
+        if (!FindNodeElement(use, X3DNodeElementBase::ENET_Group, &ne)) {
+            Throw_USE_NotFound(node.name(), use);
+        }
+        mNodeElementCur->Child.push_back(ne);
 
-		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
+//		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
 	else
 	{
@@ -134,7 +151,11 @@ void X3DImporter::ParseNode_Grouping_StaticGroup()
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+        if (node.empty()) {
+            ParseHelper_Node_Exit();
+        }
+
+//		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
 	}// if(!use.empty()) else
 }
 
@@ -159,22 +180,29 @@ void X3DImporter::ParseNode_Grouping_StaticGroupEnd()
 // The Switch grouping node traverses zero or one of the nodes specified in the children field. The whichChoice field specifies the index of the child
 // to traverse, with the first child having index 0. If whichChoice is less than zero or greater than the number of nodes in the children field, nothing
 // is chosen.
-void X3DImporter::ParseNode_Grouping_Switch()
-{
-    std::string def, use;
+void X3DImporter::ParseNode_Grouping_Switch(XmlNode &node) {
+//    std::string def, use;
     int32_t whichChoice = -1;
-
-	MACRO_ATTRREAD_LOOPBEG;
+    std::string def = node.attribute("DEF").as_string();
+    std::string use = node.attribute("USE").as_string();
+    pugi::xml_attribute attr = node.attribute("whichChoise");
+    whichChoice = attr.as_int();
+    /*MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("whichChoice", whichChoice, XML_ReadNode_GetAttrVal_AsI32);
-	MACRO_ATTRREAD_LOOPEND;
+	MACRO_ATTRREAD_LOOPEND;*/
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		X3DNodeElementBase* ne;
+		X3DNodeElementBase* ne = nullptr;
+        if (!FindNodeElement(use, X3DNodeElementBase::ENET_Group, &ne)) {
+            Throw_USE_NotFound(node.name(), use);
+        }
+        mNodeElementCur->Child.push_back(ne);
 
-		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
+
+//		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
 	else
 	{
@@ -188,14 +216,44 @@ void X3DImporter::ParseNode_Grouping_Switch()
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+//		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+        if (node.empty()) {
+            ParseHelper_Node_Exit();
+        }
+
 	}// if(!use.empty()) else
 }
 
 void X3DImporter::ParseNode_Grouping_SwitchEnd()
 {
-	// just exit from node. Defined choice will be accepted at postprocessing stage.
+	// just exit from node. Defined choice will be accepted at post-processing stage.
 	ParseHelper_Node_Exit();// go up in scene graph
+}
+
+void ReadAttrAsVec3f(pugi::xml_node &node, const std::string &attrName, aiVector3D &vec) {
+    const pugi::xml_attribute &attr = node.attribute(attrName.c_str());
+    if (attr.empty()) {
+        return;
+    }
+
+    std::string data = attr.as_string();
+    std::vector<std::string> token;
+    tokenize<std::string>(data, token, " ");
+    vec.x = (ai_real)std::atof(token[0].c_str());
+    vec.y = (ai_real)std::atof(token[1].c_str());
+    vec.z = (ai_real)std::atof(token[2].c_str());
+}
+
+
+void ReadAttrAsFloatArray(pugi::xml_node &node, const std::string &attrName, size_t numComponents, std::vector<float> &tvec) {
+    pugi::xml_attribute attr = node.attribute(attrName.c_str());
+    std::string data = attr.as_string();
+    std::vector<std::string> token;
+    tokenize<std::string>(data, token, " ");
+    if (token.size() != numComponents) throw DeadlyImportError("<Transform>: rotation vector must have 4 elements.");
+    for (size_t i = 0; i < numComponents; ++i) {
+        tvec.push_back((ai_real)std::atof(token[i].c_str()));
+    }
 }
 
 // <Transform
@@ -220,22 +278,37 @@ void X3DImporter::ParseNode_Grouping_SwitchEnd()
 // transformations. In matrix transformation notation, where C (center), SR (scaleOrientation), T (translation), R (rotation), and S (scale) are the
 // equivalent transformation matrices,
 //   P' = T * C * R * SR * S * -SR * -C * P
-void X3DImporter::ParseNode_Grouping_Transform()
-{
+void X3DImporter::ParseNode_Grouping_Transform(XmlNode &node) {
     aiVector3D center(0, 0, 0);
-    float rotation[4] = {0, 0, 1, 0};
-    aiVector3D scale(1, 1, 1);// A value of zero indicates that any child geometry shall not be displayed
-    float scale_orientation[4] = {0, 0, 1, 0};
+    float rotation[4] = { 0, 0, 1, 0 };
+    aiVector3D scale(1, 1, 1); // A value of zero indicates that any child geometry shall not be displayed
+    float scale_orientation[4] = { 0, 0, 1, 0 };
     aiVector3D translation(0, 0, 0);
     aiMatrix4x4 matr, tmatr;
-    std::string use, def;
+    //std::string use, def;
 
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-		MACRO_ATTRREAD_CHECK_REF("center", center, XML_ReadNode_GetAttrVal_AsVec3f);
+    //MACRO_ATTRREAD_LOOPBEG;
+    std::string def = node.attribute("DEF").as_string();
+    std::string use = node.attribute("USE").as_string();
+
+    //MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
+    ReadAttrAsVec3f(node, "center", center);
+    ReadAttrAsVec3f(node, "scale", scale);
+    ReadAttrAsVec3f(node, "translation", translation);
+    /*MACRO_ATTRREAD_CHECK_REF("center", center, XML_ReadNode_GetAttrVal_AsVec3f);
 		MACRO_ATTRREAD_CHECK_REF("scale", scale, XML_ReadNode_GetAttrVal_AsVec3f);
-		MACRO_ATTRREAD_CHECK_REF("translation", translation, XML_ReadNode_GetAttrVal_AsVec3f);
-		if(an == "rotation")
+		MACRO_ATTRREAD_CHECK_REF("translation", translation, XML_ReadNode_GetAttrVal_AsVec3f);*/
+    if (hasAttribute(node, "rotation")) {
+        std::vector<float> tvec;
+        ReadAttrAsFloatArray(node, "rotation", 4, tvec);
+        memcpy(rotation, tvec.data(), sizeof(rotation));
+    }
+    if (hasAttribute(node, "scaleOrientation")) {
+        std::vector<float> tvec;
+        ReadAttrAsFloatArray(node, "rotation", 4, tvec);
+        ::memcpy(scale_orientation, tvec.data(), sizeof(scale_orientation));
+    }
+    /*if(an == "rotation")
 		{
 			std::vector<float> tvec;
 
@@ -247,8 +320,8 @@ void X3DImporter::ParseNode_Grouping_Transform()
 			continue;
 		}
 
-		if(an == "scaleOrientation")
-		{
+		if(an == "scaleOrientation"){
+
 			std::vector<float> tvec;
 			XML_ReadNode_GetAttrVal_AsArrF(idx, tvec);
             if ( tvec.size() != 4 )
@@ -261,14 +334,17 @@ void X3DImporter::ParseNode_Grouping_Transform()
 			continue;
 		}
 
-	MACRO_ATTRREAD_LOOPEND;
+	MACRO_ATTRREAD_LOOPEND;*/
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
-		X3DNodeElementBase* ne( nullptr );
+	if(!use.empty()) {
+		X3DNodeElementBase* ne = nullptr;
+        if (!FindNodeElement(use, X3DNodeElementBase::ENET_Group, &ne)) {
+            Throw_USE_NotFound(node.name(), use);
+        }
+        mNodeElementCur->Child.push_back(ne);
 
-		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
+		//MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
 	else
 	{
@@ -301,8 +377,7 @@ void X3DImporter::ParseNode_Grouping_Transform()
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-        if ( mReader->isEmptyElement() )
-        {
+        if ( node.empty() ) {
             ParseHelper_Node_Exit();
         }
 	}// if(!use.empty()) else

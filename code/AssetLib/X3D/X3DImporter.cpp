@@ -79,46 +79,7 @@ const aiImporterDesc X3DImporter::Description = {
 //const std::regex X3DImporter::pattern_true(R"(^\s*(?:true|1)\s*$)", std::regex::icase);
 
 namespace {
-static void Throw_ArgOutOfRange(const std::string &argument) {
-    throw DeadlyImportError("Argument value is out of range for: \"" + argument + "\".");
-}
 
-static void Throw_CloseNotFound(const std::string &node) {
-    throw DeadlyImportError("Close tag for node <" + node + "> not found. Seems file is corrupt.");
-}
-
-static void Throw_ConvertFail_Str2ArrF(const std::string &nodeName, const std::string &pAttrValue) {
-    throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
-                            "\" from string to array of floats.");
-}
-
-static void Throw_DEF_And_USE(const std::string &nodeName) {
-    throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <" + nodeName + ">.");
-}
-
-static void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName) {
-    throw DeadlyImportError("Node <" + nodeName + "> has incorrect attribute \"" + pAttrName + "\".");
-}
-
-static void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) {
-    throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + nodeName + "> has incorrect value.");
-}
-
-static void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription) {
-    throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + nodeName + ". Description: " + pDescription);
-}
-
-static void Throw_TagCountIncorrect(const std::string &pNode) {
-    throw DeadlyImportError("Count of open and close tags for node <" + pNode + "> are not equivalent. Seems file is corrupt.");
-}
-
-static void Throw_USE_NotFound(const std::string &nodeName, const std::string &pAttrValue) {
-    throw DeadlyImportError("Not found node with name \"" + pAttrValue + "\" in <" + nodeName + ">.");
-}
-
-static void LogInfo(const std::string &message) {
-    DefaultLogger::get()->info(message);
-}
 
 } // namespace
 

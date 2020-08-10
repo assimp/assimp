@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -55,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/light.h>
 #include <assimp/Importer.hpp>
+#include <assimp/XmlParser.h>
 
 #include <map>
 #include <memory>
@@ -191,7 +191,8 @@ private:
     unsigned int ResolveMaterialRef(TempScope &scope);
 
 private:
-    std::shared_ptr<irr::io::IrrXMLReader> m_reader;
+    //std::shared_ptr<irr::io::IrrXMLReader> m_reader;
+    XmlParser *mXmlParser;
     aiScene *m_scene;
 };
 

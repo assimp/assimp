@@ -127,6 +127,7 @@ void M3DWrapper::reset() {
     m3d_ = nullptr;
 }
 
+#if !_MSC_VER || !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)
 unsigned char *M3DWrapper::Save(int quality, int flags, unsigned int &size) {
 #if (!(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER))
     ClearSave();
@@ -136,6 +137,7 @@ unsigned char *M3DWrapper::Save(int quality, int flags, unsigned int &size) {
     return nullptr;
 #endif
 }
+#endif
 
 void M3DWrapper::ClearSave() {
     if (saved_output_)

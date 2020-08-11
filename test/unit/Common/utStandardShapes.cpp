@@ -47,10 +47,11 @@ TEST_F( utStandardShapes, testMakeMesh ) {
 
     // Make mesh
     const auto numIndicesPerPrimitive = 3;
-    auto aiMeshPtr = Assimp::StandardShapes::MakeMesh(positions, numIndicesPerPrimitive);
+    aiMesh *aiMeshPtr = Assimp::StandardShapes::MakeMesh(positions, numIndicesPerPrimitive);
 
     // The mNumIndices member of the second face is now incorrect
     const auto& face = aiMeshPtr->mFaces[0];
     EXPECT_EQ(face.mNumIndices, numIndicesPerPrimitive); 
+    delete aiMeshPtr;
 }
 

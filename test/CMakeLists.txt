@@ -2,8 +2,7 @@
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 2006-2020, assimp team
-
-
+#
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -40,8 +39,8 @@
 cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
-	${Assimp_SOURCE_DIR}/contrib/gtest/include
-	${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/contrib/gtest/include
+    ${Assimp_SOURCE_DIR}/contrib/gtest/
     ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
@@ -84,6 +83,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utStandardShapes.cpp
   unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp

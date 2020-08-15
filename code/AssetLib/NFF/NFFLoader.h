@@ -113,14 +113,14 @@ private:
         {}
 
         aiColor3D color,diffuse,specular,ambient,emissive;
-        float refracti;
+        ai_real refracti;
 
         std::string texFile;
 
         // For NFF2
         bool twoSided;
         bool shaded;
-        float opacity, shininess;
+        ai_real opacity, shininess;
 
         std::string name;
 
@@ -155,7 +155,7 @@ private:
         {}
 
         aiVector3D position;
-        float intensity;
+        ai_real intensity;
         aiColor3D color;
     };
 

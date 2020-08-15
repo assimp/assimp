@@ -96,7 +96,7 @@ const aiImporterDesc *NFFImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
     SkipSpaces(&sz);          \
-    if (!::IsLineEnd(*sz)) sz = fast_atoreal_move<float>(sz, (float &)f);
+    if (!::IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
@@ -233,7 +233,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
     // camera parameters
     aiVector3D camPos, camUp(0.f, 1.f, 0.f), camLookAt(0.f, 0.f, 1.f);
-    float angle = 45.f;
+    ai_real angle = 45.f;
     aiVector2D resolution;
 
     bool hasCam = false;
@@ -262,7 +262,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
     // check whether this is the NFF2 file format
     if (TokenMatch(buffer, "nff", 3)) {
-        const float qnan = get_qnan();
+        const ai_real qnan = get_qnan();
         const aiColor4D cQNAN = aiColor4D(qnan, 0.f, 0.f, 1.f);
         const aiVector3D vQNAN = aiVector3D(qnan, 0.f, 0.f);
 
@@ -706,7 +706,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             }
             // 'f' - shading information block
             else if (TokenMatch(sz, "f", 1)) {
-                float d;
+                ai_real d;
 
                 // read the RGB colors
                 AI_NFF_PARSE_TRIPLE(s.color);
@@ -856,7 +856,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
                 // read the two center points and the respective radii
                 aiVector3D center1, center2;
-                float radius1 = 0.f, radius2 = 0.f;
+                ai_real radius1 = 0.f, radius2 = 0.f;
                 AI_NFF_PARSE_TRIPLE(center1);
                 AI_NFF_PARSE_FLOAT(radius1);
 
@@ -874,7 +874,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                 curMesh.dir = center2 - center1;
                 curMesh.center = center1 + curMesh.dir / (ai_real)2.0;
 
-                float f;
+                ai_real f;
                 if ((f = curMesh.dir.Length()) < 10e-3f) {
                     ASSIMP_LOG_ERROR("NFF: Cone height is close to zero");
                     continue;

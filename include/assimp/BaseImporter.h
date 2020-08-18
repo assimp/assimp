@@ -151,12 +151,11 @@ public:
     }
 
     // -------------------------------------------------------------------
-    /** Returns the exception of the last non-DeadlyImportError that occurred.
-     * @return A description of the last error that occurred. An empty
-     * string if there was no error.
+    /** Returns the exception of the last exception that occurred.
+     * @return The last exception that occurred. 
      */
-    const std::exception_ptr& GetInternalException() const {
-        return m_internalException;
+    const std::exception_ptr& GetException() const {
+        return m_exception;
     }
 
     // -------------------------------------------------------------------
@@ -423,8 +422,8 @@ protected:
     /// Error description when a DeadlyImportError occurred during import.
     /// In case of other errors, this will just be "Internal error"
     std::string m_ErrorText;
-    /// Any exception which wasn't due to the asset being incorrect.
-    std::exception_ptr m_internalException;
+    /// An exception which occurred.
+    std::exception_ptr m_exception;
     /// Currently set progress handler.
     ProgressHandler *m_progress;
 };

@@ -99,11 +99,11 @@ public:
 
     /** The error description, if there was one. In the case of a
      *  failure not caused by a DeadlyImportError, mInternalException will
-     *  carry the exception and this will be just "Internal error". */
+     *  carry the full details and this will be just "Internal error". */
     std::string mErrorString;
 
-    /** Any exception which wasn't a DeadlyImportError */
-    std::exception_ptr mInternalException;
+    /** Any exception which occurred */
+    std::exception_ptr mException;
 
     /** List of integer properties */
     IntPropertyMap mIntProperties;
@@ -138,7 +138,7 @@ ImporterPimpl::ImporterPimpl() AI_NO_EXCEPT
 , mPostProcessingSteps()
 , mScene( nullptr )
 , mErrorString()
-, mInternalException()
+, mException()
 , mIntProperties()
 , mFloatProperties()
 , mStringProperties()

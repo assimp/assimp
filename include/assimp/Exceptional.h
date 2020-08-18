@@ -140,15 +140,16 @@ struct ExceptionSwallower<void> {
     {                                   \
         try {
 
-#define ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(type, ASSIMP_END_EXCEPTION_REGION_errorString, ASSIMP_END_EXCEPTION_REGION_internalError) \
+#define ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(type, ASSIMP_END_EXCEPTION_REGION_errorString, ASSIMP_END_EXCEPTION_REGION_exception)     \
     }                                                                                                                                           \
     catch (const DeadlyImportError &e) {                                                                                                        \
         ASSIMP_END_EXCEPTION_REGION_errorString = e.what();                                                                                     \
+        ASSIMP_END_EXCEPTION_REGION_exception = std::current_exception();                                                                       \
         return ExceptionSwallower<type>()();                                                                                                    \
     }                                                                                                                                           \
     catch (...) {                                                                                                                               \
         ASSIMP_END_EXCEPTION_REGION_errorString = "Internal error";                                                                             \
-        ASSIMP_END_EXCEPTION_REGION_internalError = std::current_exception();                                                                   \
+        ASSIMP_END_EXCEPTION_REGION_exception = std::current_exception();                                                                       \
         return ExceptionSwallower<type>()();                                                                                                    \
     }                                                                                                                                           \
 }

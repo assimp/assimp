@@ -334,7 +334,7 @@ TEST_F(ImporterTest, deadlyImportError)
     const aiScene* scene = pImp->ReadFile("deadlyImportError.fail", 0);
     EXPECT_EQ(scene, nullptr);
     EXPECT_STREQ(pImp->GetErrorString(), "Deadly import error test");
-    EXPECT_EQ(pImp->GetInternalException(), std::exception_ptr());
+    EXPECT_NE(pImp->GetException(), std::exception_ptr());
 }
 
 TEST_F(ImporterTest, stdException)
@@ -344,10 +344,10 @@ TEST_F(ImporterTest, stdException)
     const aiScene* scene = pImp->ReadFile("stdException.fail", 0);
     EXPECT_EQ(scene, nullptr);
     EXPECT_STREQ(pImp->GetErrorString(), "Internal error");
-    EXPECT_NE(pImp->GetInternalException(), std::exception_ptr());
+    EXPECT_NE(pImp->GetException(), std::exception_ptr());
     try
     {
-        std::rethrow_exception(pImp->GetInternalException());
+        std::rethrow_exception(pImp->GetException());
     }
     catch(const std::exception& e)
     {
@@ -367,10 +367,10 @@ TEST_F(ImporterTest, unexpectedException)
 
     EXPECT_EQ(scene, nullptr);
     EXPECT_STREQ(pImp->GetErrorString(), "Internal error");
-    ASSERT_NE(pImp->GetInternalException(), std::exception_ptr());
+    ASSERT_NE(pImp->GetException(), std::exception_ptr());
     try
     {
-        std::rethrow_exception(pImp->GetInternalException());
+        std::rethrow_exception(pImp->GetException());
     }
     catch(int x)
     {

@@ -387,7 +387,7 @@ void Importer::FreeScene( ) {
     pimpl->mScene = nullptr;
 
     pimpl->mErrorString = "";
-    pimpl->mInternalException = std::exception_ptr();
+    pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -400,11 +400,11 @@ const char* Importer::GetErrorString() const {
     return pimpl->mErrorString.c_str();
 }
 
-const std::exception_ptr& Importer::GetInternalException() const {
+const std::exception_ptr& Importer::GetException() const {
     ai_assert(nullptr != pimpl);
     
     // Must remain valid as long as ReadFile() or FreeFile() are not called
-    return pimpl->mInternalException;
+    return pimpl->mException;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ aiScene* Importer::GetOrphanedScene() {
     pimpl->mScene = nullptr;
 
     pimpl->mErrorString = ""; // reset error string
-    pimpl->mInternalException = std::exception_ptr();
+    pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(aiScene*);
     
     return s;
@@ -511,7 +511,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
     ReadFile(fbuff,pFlags);
     SetIOHandler(io);
 
-    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString, pimpl->mInternalException);
+    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString, pimpl->mException);
     return pimpl->mScene;
 }
 
@@ -718,7 +718,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
         // if failed, extract the error string
         else if( !pimpl->mScene) {
             pimpl->mErrorString = imp->GetErrorText();
-            pimpl->mInternalException = imp->GetInternalException();
+            pimpl->mException = imp->GetException();
         }
 
         // clear any data allocated by post-process steps
@@ -743,7 +743,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 
     // either successful or failure - the pointer expresses it anyways
-    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString, pimpl->mInternalException);
+    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString, pimpl->mException);
     
     return pimpl->mScene;
 }

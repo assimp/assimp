@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <assimp/DefaultIOStream.h>
+#include <assimp/TinyFormatter.h>
 #include <stdexcept>
 
 using std::runtime_error;
@@ -55,25 +56,41 @@ using std::runtime_error;
 #pragma warning(disable : 4275)
 #endif
 
+class ASSIMP_API DeadlyErrorBase : public runtime_error {
+protected:
+    /** Constructor with arguments */
+    explicit DeadlyErrorBase(const std::string& errorText);
+
+    explicit DeadlyErrorBase(Assimp::Formatter::format f);
+    
+    template<typename... T, typename U>
+    explicit DeadlyErrorBase(Assimp::Formatter::format f, U&& u, T&&... args)
+        : DeadlyErrorBase(std::move(f << u), args...)
+    {
+    }
+};
+
 // ---------------------------------------------------------------------------
 /** FOR IMPORTER PLUGINS ONLY: Simple exception class to be thrown if an
  *  unrecoverable error occurs while importing. Loading APIs return
  *  nullptr instead of a valid aiScene then.  */
-class DeadlyImportError : public runtime_error {
+class ASSIMP_API DeadlyImportError : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */
-    explicit DeadlyImportError(const std::string &errorText) :
-            runtime_error(errorText) {
-        // empty
+    template<typename... T>
+    explicit DeadlyImportError(T&&... args)
+        : DeadlyErrorBase(Assimp::Formatter::format(), args...)
+    {
     }
 };
 
-class DeadlyExportError : public runtime_error {
+class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */
-    explicit DeadlyExportError(const std::string &errorText) :
-            runtime_error(errorText) {
-        // empty
+    template<typename... T>
+    explicit DeadlyExportError(T&&... args)
+        : DeadlyErrorBase(Assimp::Formatter::format(), args...)
+    {
     }
 };
 

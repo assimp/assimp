@@ -59,9 +59,9 @@ namespace Ogre {
 AI_WONT_RETURN void ThrowAttibuteError(const XmlReader *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
 AI_WONT_RETURN void ThrowAttibuteError(const XmlReader *reader, const std::string &name, const std::string &error) {
     if (!error.empty()) {
-        throw DeadlyImportError(error + " in node '" + std::string(reader->getNodeName()) + "' and attribute '" + name + "'");
+        throw DeadlyImportError(error, " in node '", std::string(reader->getNodeName()), "' and attribute '", name, "'");
     } else {
-        throw DeadlyImportError("Attribute '" + name + "' does not exist in node '" + std::string(reader->getNodeName()) + "'");
+        throw DeadlyImportError("Attribute '", name, "' does not exist in node '", std::string(reader->getNodeName()), "'");
     }
 }
 
@@ -265,7 +265,7 @@ MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader) {
 
 void OgreXmlSerializer::ReadMesh(MeshXml *mesh) {
     if (NextNode() != nnMesh) {
-        throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <mesh>");
+        throw DeadlyImportError("Root node is <", m_currentNodeName, "> expecting <mesh>");
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Mesh");
@@ -430,18 +430,18 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest) {
 
     // Sanity checks
     if (dest->positions.size() != dest->count) {
-        throw DeadlyImportError(Formatter::format() << "Read only " << dest->positions.size() << " positions when should have read " << dest->count);
+        throw DeadlyImportError("Read only ", dest->positions.size(), " positions when should have read ", dest->count);
     }
     if (normals && dest->normals.size() != dest->count) {
-        throw DeadlyImportError(Formatter::format() << "Read only " << dest->normals.size() << " normals when should have read " << dest->count);
+        throw DeadlyImportError("Read only ", dest->normals.size(), " normals when should have read ", dest->count);
     }
     if (tangents && dest->tangents.size() != dest->count) {
-        throw DeadlyImportError(Formatter::format() << "Read only " << dest->tangents.size() << " tangents when should have read " << dest->count);
+        throw DeadlyImportError("Read only ", dest->tangents.size(), " tangents when should have read ", dest->count);
     }
     for (unsigned int i = 0; i < dest->uvs.size(); ++i) {
         if (dest->uvs[i].size() != dest->count) {
-            throw DeadlyImportError(Formatter::format() << "Read only " << dest->uvs[i].size()
-                                                        << " uvs for uv index " << i << " when should have read " << dest->count);
+            throw DeadlyImportError("Read only ", dest->uvs[i].size(),
+                                                        " uvs for uv index ", i, " when should have read ", dest->count);
         }
     }
 }
@@ -507,7 +507,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh) {
             if (submesh->indexData->faces.size() == submesh->indexData->faceCount) {
                 ASSIMP_LOG_VERBOSE_DEBUG_F("  - Faces ", submesh->indexData->faceCount);
             } else {
-                throw DeadlyImportError(Formatter::format() << "Read only " << submesh->indexData->faces.size() << " faces when should have read " << submesh->indexData->faceCount);
+                throw DeadlyImportError("Read only ", submesh->indexData->faces.size(), " faces when should have read ", submesh->indexData->faceCount);
             }
         } else if (m_currentNodeName == nnGeometry) {
             if (submesh->usesSharedVertexData) {
@@ -632,20 +632,20 @@ XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const s
 
     std::unique_ptr<IOStream> file(pIOHandler->Open(filename));
     if (!file.get()) {
-        throw DeadlyImportError("Failed to open skeleton file " + filename);
+        throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 
     std::unique_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
     XmlReaderPtr reader = XmlReaderPtr(irr::io::createIrrXMLReader(stream.get()));
     if (!reader.get()) {
-        throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
+        throw DeadlyImportError("Failed to create XML reader for skeleton file ", filename);
     }
     return reader;
 }
 
 void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton) {
     if (NextNode() != nnSkeleton) {
-        throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <skeleton>");
+        throw DeadlyImportError("Root node is <", m_currentNodeName, "> expecting <skeleton>");
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Skeleton");
@@ -687,7 +687,7 @@ void OgreXmlSerializer::ReadAnimations(Skeleton *skeleton) {
         anim->length = ReadAttribute<float>("length");
 
         if (NextNode() != nnTracks) {
-            throw DeadlyImportError(Formatter::format() << "No <tracks> found in <animation> " << anim->name);
+            throw DeadlyImportError("No <tracks> found in <animation> ", anim->name);
         }
 
         ReadAnimationTracks(anim);
@@ -705,7 +705,7 @@ void OgreXmlSerializer::ReadAnimationTracks(Animation *dest) {
         track.boneName = ReadAttribute<std::string>("bone");
 
         if (NextNode() != nnKeyFrames) {
-            throw DeadlyImportError(Formatter::format() << "No <keyframes> found in <track> " << dest->name);
+            throw DeadlyImportError("No <keyframes> found in <track> ", dest->name);
         }
 
         ReadAnimationKeyFrames(dest, &track);
@@ -732,7 +732,7 @@ void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationT
                 float angle = ReadAttribute<float>("angle");
 
                 if (NextNode() != nnAxis) {
-                    throw DeadlyImportError("No axis specified for keyframe rotation in animation " + anim->name);
+                    throw DeadlyImportError("No axis specified for keyframe rotation in animation ", anim->name);
                 }
 
                 aiVector3D axis;
@@ -774,7 +774,7 @@ void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton) {
         if (bone && parent)
             parent->AddChild(bone);
         else
-            throw DeadlyImportError("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
+            throw DeadlyImportError("Failed to find bones for parenting: Child ", name, " for parent ", parentName);
     }
 
     // Calculate bone matrices for root bones. Recursively calculates their children.
@@ -813,7 +813,7 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton) {
                 float angle = ReadAttribute<float>("angle");
 
                 if (NextNode() != nnAxis) {
-                    throw DeadlyImportError(Formatter::format() << "No axis specified for bone rotation in bone " << bone->id);
+                    throw DeadlyImportError("No axis specified for bone rotation in bone ", bone->id);
                 }
 
                 aiVector3D axis;
@@ -854,7 +854,7 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton) {
         ASSIMP_LOG_VERBOSE_DEBUG_F("    ", b->id, " ", b->name);
 
         if (b->id != static_cast<uint16_t>(i)) {
-            throw DeadlyImportError(Formatter::format() << "Bone ids are not in sequence starting from 0. Missing index " << i);
+            throw DeadlyImportError("Bone ids are not in sequence starting from 0. Missing index ", i);
         }
     }
 }

@@ -476,7 +476,7 @@ void SubMesh::Reset(){
 
 aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent) {
     if (operationType != OT_TRIANGLE_LIST) {
-        throw DeadlyImportError(Formatter::format() << "Only mesh operation type OT_TRIANGLE_LIST is supported. Found " << operationType);
+        throw DeadlyImportError("Only mesh operation type OT_TRIANGLE_LIST is supported. Found ", operationType);
     }
 
     aiMesh *dest = new aiMesh();
@@ -944,7 +944,7 @@ void Bone::AddChild(Bone *bone) {
     if (!bone)
         return;
     if (bone->IsParented())
-        throw DeadlyImportError("Attaching child Bone that is already parented: " + bone->name);
+        throw DeadlyImportError("Attaching child Bone that is already parented: ", bone->name);
 
     bone->parent = this;
     bone->parentId = id;
@@ -963,7 +963,7 @@ void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton) {
     for (auto boneId : children) {
         Bone *child = skeleton->BoneById(boneId);
         if (!child) {
-            throw DeadlyImportError(Formatter::format() << "CalculateWorldMatrixAndDefaultPose: Failed to find child bone " << boneId << " for parent " << id << " " << name);
+            throw DeadlyImportError("CalculateWorldMatrixAndDefaultPose: Failed to find child bone ", boneId, " for parent ", id, " ", name);
         }
         child->CalculateWorldMatrixAndDefaultPose(skeleton);
     }
@@ -983,7 +983,7 @@ aiNode *Bone::ConvertToAssimpNode(Skeleton *skeleton, aiNode *parentNode) {
         for (size_t i = 0, len = children.size(); i < len; ++i) {
             Bone *child = skeleton->BoneById(children[i]);
             if (!child) {
-                throw DeadlyImportError(Formatter::format() << "ConvertToAssimpNode: Failed to find child bone " << children[i] << " for parent " << id << " " << name);
+                throw DeadlyImportError("ConvertToAssimpNode: Failed to find child bone ", children[i], " for parent ", id, " ", name);
             }
             node->mChildren[i] = child->ConvertToAssimpNode(skeleton, node);
         }
@@ -1022,7 +1022,7 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 
     Bone *bone = skeleton->BoneByName(boneName);
     if (!bone) {
-        throw DeadlyImportError("VertexAnimationTrack::ConvertToAssimpAnimationNode: Failed to find bone " + boneName + " from parent Skeleton");
+        throw DeadlyImportError("VertexAnimationTrack::ConvertToAssimpAnimationNode: Failed to find bone ", boneName, " from parent Skeleton");
     }
 
     // Keyframes

@@ -249,7 +249,7 @@ void XGLImporter::InternReadFile(const std::string &pFile,
 
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadWorld(TempScope &scope) {
-	XmlNode *root = m_xmlParser->getRootNode();
+    XmlNode *root = mXmlParser->getRootNode();
 	for (XmlNode &node : root->children()) {
 		const std::string &s = node.name();
 		// XXX right now we'd skip <lighting> if it comes after
@@ -261,7 +261,7 @@ void XGLImporter::ReadWorld(TempScope &scope) {
 		}
 	}
 
-	aiNode *const nd = ReadObject(*root, scope, true, "world");
+	aiNode *const nd = ReadObject( *root, scope, true);
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}
@@ -307,7 +307,7 @@ aiLight *XGLImporter::ReadDirectionalLight(XmlNode &node) {
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope, bool skipFirst, const char *closetag) {
+aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope, bool skipFirst/*, const char *closetag */) {
 	aiNode *nd = new aiNode;
 	std::vector<aiNode *> children;
 	std::vector<unsigned int> meshes;
@@ -508,7 +508,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 	TempMesh t;
 
 	std::map<unsigned int, TempMaterialMesh> bymat;
-	const unsigned int mesh_id = ReadIDAttr(node);
+    const unsigned int mesh_id = ReadIDAttr(node);
 
 	for (XmlNode &child : node.children()) {
 		const std::string &s = child.name();
@@ -546,22 +546,22 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 			TempFace tf[3];
 			bool has[3] = { false };
 			for (XmlNode &sub_child : child.children()) {
-				const std::string &s = sub_child.name();
-				if (s == "fv1" || s == "lv1" || s == "pv1") {
+				const std::string &scn = sub_child.name();
+                if (scn == "fv1" || scn == "lv1" || scn == "pv1") {
 					ReadFaceVertex(sub_child, t, tf[0]);
 					has[0] = true;
-				} else if (s == "fv2" || s == "lv2") {
+                } else if (scn == "fv2" || scn == "lv2") {
 					ReadFaceVertex(sub_child, t, tf[1]);
 					has[1] = true;
-				} else if (s == "fv3") {
+                } else if (scn == "fv3") {
 					ReadFaceVertex(sub_child, t, tf[2]);
 					has[2] = true;
-				} else if (s == "mat") {
+                } else if (scn == "mat") {
 					if (mid != ~0u) {
 						LogWarn("only one material tag allowed per <f>");
 					}
 					mid = ResolveMaterialRef(sub_child, scope);
-				} else if (s == "matref") {
+                } else if (scn == "matref") {
 					if (mid != ~0u) {
 						LogWarn("only one material tag allowed per <f>");
 					}
@@ -656,7 +656,7 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
-	const unsigned int mat_id = ReadIDAttr(node);
+    const unsigned int mat_id = ReadIDAttr(node);
 
 	aiMaterial *mat(new aiMaterial);
 	for (XmlNode &child : node.children()) {
@@ -688,10 +688,7 @@ void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
 
 // ----------------------------------------------------------------------------------------------
 void XGLImporter::ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out) {
-	const std::string &end = node.name();
-
 	bool havep = false;
-	//while (ReadElementUpToClosing(end.c_str()))  {
 	for (XmlNode &child : node.children()) {
 		const std::string &s = child.name();
 		if (s == "pref") {

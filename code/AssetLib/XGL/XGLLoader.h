@@ -170,27 +170,26 @@ private:
     bool ReadElement();
     bool ReadElementUpToClosing(const char *closetag);
     bool SkipToText();
-    unsigned int ReadIDAttr();
+    unsigned int ReadIDAttr(XmlNode &node);
 
     void ReadWorld(TempScope &scope);
-    void ReadLighting(TempScope &scope);
-    aiLight *ReadDirectionalLight();
-    aiNode *ReadObject(TempScope &scope, bool skipFirst = false, const char *closetag = "object");
-    bool ReadMesh(TempScope &scope);
-    void ReadMaterial(TempScope &scope);
-    aiVector2D ReadVec2();
-    aiVector3D ReadVec3();
-    aiColor3D ReadCol3();
-    aiMatrix4x4 ReadTrafo();
-    unsigned int ReadIndexFromText();
-    float ReadFloat();
+    void ReadLighting(XmlNode &node, TempScope &scope);
+    aiLight *ReadDirectionalLight(XmlNode &node);
+    aiNode *ReadObject(XmlNode &node, TempScope &scope, bool skipFirst = false/*, const char *closetag = "object"*/);
+    bool ReadMesh(XmlNode &node, TempScope &scope);
+    void ReadMaterial(XmlNode &node, TempScope &scope);
+    aiVector2D ReadVec2(XmlNode &node);
+    aiVector3D ReadVec3(XmlNode &node);
+    aiColor3D ReadCol3(XmlNode &node);
+    aiMatrix4x4 ReadTrafo(XmlNode &node);
+    unsigned int ReadIndexFromText(XmlNode &node);
+    float ReadFloat(XmlNode &node);
 
     aiMesh *ToOutputMesh(const TempMaterialMesh &m);
-    void ReadFaceVertex(const TempMesh &t, TempFace &out);
-    unsigned int ResolveMaterialRef(TempScope &scope);
+    void ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out);
+    unsigned int ResolveMaterialRef(XmlNode &node, TempScope &scope);
 
 private:
-    //std::shared_ptr<irr::io::IrrXMLReader> m_reader;
     XmlParser *mXmlParser;
     aiScene *m_scene;
 };

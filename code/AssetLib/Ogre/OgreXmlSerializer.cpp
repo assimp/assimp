@@ -68,7 +68,7 @@ AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::s
 
 template <>
 int32_t OgreXmlSerializer::ReadAttribute<int32_t>(XmlNode &xmlNode, const char *name) const {
-    if (!hasAttribute(xmlNode, name )) {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
         ThrowAttibuteError(mParser, name);
     }
     pugi::xml_attribute attr = xmlNode.attribute(name);
@@ -77,7 +77,7 @@ int32_t OgreXmlSerializer::ReadAttribute<int32_t>(XmlNode &xmlNode, const char *
 
 template <>
 uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(XmlNode &xmlNode, const char *name) const {
-    if (!hasAttribute(xmlNode, name)) {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
         ThrowAttibuteError(mParser, name);
     }
 
@@ -93,7 +93,7 @@ uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(XmlNode &xmlNode, const char
 
 template <>
 uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(XmlNode &xmlNode, const char *name) const {
-    if (!hasAttribute(xmlNode, name)) {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
         ThrowAttibuteError(mParser, name);
     }
 
@@ -102,7 +102,7 @@ uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(XmlNode &xmlNode, const char
 
 template <>
 float OgreXmlSerializer::ReadAttribute<float>(XmlNode &xmlNode, const char *name) const {
-    if (!hasAttribute(xmlNode, name)) {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
         ThrowAttibuteError(mParser, name);
     }
     
@@ -111,7 +111,7 @@ float OgreXmlSerializer::ReadAttribute<float>(XmlNode &xmlNode, const char *name
 
 template <>
 std::string OgreXmlSerializer::ReadAttribute<std::string>(XmlNode &xmlNode, const char *name) const {
-    if (!hasAttribute(xmlNode, name)) {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
         ThrowAttibuteError(mParser, name);
     }
 
@@ -298,10 +298,10 @@ void OgreXmlSerializer::ReadGeometry(XmlNode &node, VertexDataXml *dest) {
 }
 
 void OgreXmlSerializer::ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *dest) {
-    bool positions = (hasAttribute(node, "positions") && ReadAttribute<bool>(node, "positions"));
-    bool normals = (hasAttribute(node, "normals") && ReadAttribute<bool>(node, "normals"));
-    bool tangents = (hasAttribute(node, "tangents") && ReadAttribute<bool>(node, "tangents"));
-    uint32_t uvs = (hasAttribute(node, "texture_coords") ? ReadAttribute<uint32_t>(node, "texture_coords") : 0);
+    bool positions = (XmlParser::hasAttribute(node, "positions") && ReadAttribute<bool>(node, "positions"));
+    bool normals = (XmlParser::hasAttribute(node, "normals") && ReadAttribute<bool>(node, "normals"));
+    bool tangents = (XmlParser::hasAttribute(node, "tangents") && ReadAttribute<bool>(node, "tangents"));
+    uint32_t uvs = (XmlParser::hasAttribute(node, "texture_coords") ? ReadAttribute<uint32_t>(node, "texture_coords") : 0);
 
     // Not having positions is a error only if a previous vertex buffer did not have them.
     if (!positions && !dest->HasPositions()) {
@@ -470,10 +470,10 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
 
     SubMeshXml *submesh = new SubMeshXml();
 
-    if (hasAttribute(node, anMaterial)) {
+    if (XmlParser::hasAttribute(node, anMaterial)) {
         submesh->materialRef = ReadAttribute<std::string>(node, anMaterial);
     }
-    if (hasAttribute(node, anUseSharedVertices)) {
+    if (XmlParser::hasAttribute(node, anUseSharedVertices)) {
         submesh->usesSharedVertexData = ReadAttribute<bool>(node, anUseSharedVertices);
     }
 
@@ -502,7 +502,7 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
                     face.mIndices[1] = ReadAttribute<uint32_t>(currentChildNode, anV2);
                     face.mIndices[2] = ReadAttribute<uint32_t>(currentChildNode, anV3);
                     /// @todo Support quads if Ogre even supports them in XML (I'm not sure but I doubt it)
-                    if (!quadWarned && hasAttribute(currentChildNode, anV4)) {
+                    if (!quadWarned && XmlParser::hasAttribute(currentChildNode, anV4)) {
                         ASSIMP_LOG_WARN("Submesh <face> has quads with <v4>, only triangles are supported at the moment!");
                         quadWarned = true;
                     }
@@ -722,7 +722,7 @@ void OgreXmlSerializer::ReadSkeleton(XmlNode &node, Skeleton *skeleton) {
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Skeleton");
 
     // Optional blend mode from root node
-    if (hasAttribute(node, "blendmode")) {
+    if (XmlParser::hasAttribute(node, "blendmode")) {
         skeleton->blendMode = (ToLower(ReadAttribute<std::string>(node, "blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
     }
 
@@ -997,15 +997,15 @@ void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
                         }
                     }
                 } else if (currentChildName == nnScale) {
-                    if (hasAttribute(currentChildNode, "factor")) {
+                    if (XmlParser::hasAttribute(currentChildNode, "factor")) {
                         float factor = ReadAttribute<float>(currentChildNode, "factor");
                         bone->scale.Set(factor, factor, factor);
                     } else {
-                        if (hasAttribute(currentChildNode, anX))
+                        if (XmlParser::hasAttribute(currentChildNode, anX))
                             bone->scale.x = ReadAttribute<float>(currentChildNode, anX);
-                        if (hasAttribute(currentChildNode, anY))
+                        if (XmlParser::hasAttribute(currentChildNode, anY))
                             bone->scale.y = ReadAttribute<float>(currentChildNode, anY);
-                        if (hasAttribute(currentChildNode, anZ))
+                        if (XmlParser::hasAttribute(currentChildNode, anZ))
                             bone->scale.z = ReadAttribute<float>(currentChildNode, anZ);
                     }
                 }

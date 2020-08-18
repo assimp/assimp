@@ -374,7 +374,7 @@ private:
 	/***********************************************/
 
 	/// Check if current node is empty: <node />. If not then exception will throwed.
-	void XML_CheckNode_MustBeEmpty();
+    void XML_CheckNode_MustBeEmpty(XmlNode &node);
 
 	/// Check if current node name is equal to pNodeName.
 	/// \param [in] pNodeName - name for checking.
@@ -383,12 +383,12 @@ private:
 
 	/// Skip unsupported node and report about that. Depend on node name can be skipped begin tag of node all whole node.
 	/// \param [in] pParentNodeName - parent node name. Used for reporting.
-	void XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName);
+    void XML_CheckNode_SkipUnsupported(XmlNode &node, const std::string &pParentNodeName);
 
 	/// Search for specified node in file. XML file read pointer(mReader) will point to found node or file end after search is end.
 	/// \param [in] pNodeName - requested node name.
 	/// return true - if node is found, else - false.
-	bool XML_SearchNode(const std::string& pNodeName);
+    bool XML_SearchNode(XmlNode &node, const std::string &pNodeName);
 
 	/// Read attribute value.
 	/// \param [in] pAttrIdx - attribute index (\ref mReader->getAttribute* set).

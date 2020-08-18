@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
 #include <assimp/LogAux.h>
-#include <assimp/irrXMLWrapper.h>
 #include <assimp/light.h>
 #include <assimp/material.h>
 #include <assimp/mesh.h>

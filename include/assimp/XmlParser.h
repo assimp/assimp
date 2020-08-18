@@ -72,6 +72,9 @@ public:
     }
 };
 
+using XmlNode = pugi::xml_node;
+using XmlAttribute = pugi::xml_attribute;
+
 template<class TNodeType>
 class TXmlParser {
 public:
@@ -144,7 +147,17 @@ public:
         return mRoot;
     }
 
-private:
+    static inline bool hasNode(XmlNode &node, const char *name) {
+        pugi::xml_node child = node.find_child(find_node_by_name_predicate(name));
+        return !child.empty();
+    }
+
+    static inline bool hasAttribute(XmlNode &xmlNode, const char *name) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        return !attr.empty();
+    }
+
+    private:
 	pugi::xml_document *mDoc;
 	TNodeType *mRoot;
     TNodeType mCurrent;
@@ -152,12 +165,7 @@ private:
 };
 
 using XmlParser = TXmlParser<pugi::xml_node>;
-using XmlNode = pugi::xml_node;
 
-static inline bool hasAttribute(XmlNode &xmlNode, const char *name) {
-    pugi::xml_attribute attr = xmlNode.attribute(name);
-    return !attr.empty();
-}
 
 } // namespace Assimp
 

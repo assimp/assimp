@@ -39,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
 /** @file ParsingUtils.h
  *  @brief Defines helper functions for text parsing
  */
@@ -54,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
 #include <assimp/defs.h>
+
+#include <vector>
 
 namespace Assimp {
 

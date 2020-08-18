@@ -133,7 +133,7 @@ struct WordIterator {
     const char *operator*() const { return mStart; }
 };
 
-static const char *WordIterator::whitespace = ", \t\r\n";
+const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter() :
         mNodeElementCur(nullptr), mReader(nullptr) {
@@ -231,11 +231,14 @@ bool X3DImporter::FindNodeElement(const std::string &pID, const X3DNodeElementBa
 /************************************************************* Functions: XML set ************************************************************/
 /*********************************************************************************************************************************************/
 
-void X3DImporter::XML_CheckNode_MustBeEmpty() {
-    if (!mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must be empty.");
+void X3DImporter::XML_CheckNode_MustBeEmpty(XmlNode &node) {
+    if (!node.empty()) {
+        throw DeadlyImportError(std::string("Node <") + node.name() + "> must be empty.");
+    }
+    //if (!mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must be empty.");
 }
 
-void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
+void X3DImporter::XML_CheckNode_SkipUnsupported(XmlNode &node, const std::string &pParentNodeName) {
     static const size_t Uns_Skip_Len = 192;
     const char *Uns_Skip[Uns_Skip_Len] = {
         // CAD geometry component
@@ -313,26 +316,26 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeNa
         "VolumeData"
     };
 
-    const std::string nn(mReader->getNodeName());
+    const std::string nn = node.name();
     bool found = false;
     bool close_found = false;
 
     for (size_t i = 0; i < Uns_Skip_Len; i++) {
         if (nn == Uns_Skip[i]) {
             found = true;
-            if (mReader->isEmptyElement()) {
+            if (node.empty()) {
                 close_found = true;
 
                 goto casu_cres;
             }
 
-            while (mReader->read()) {
+            /*while (mReader->read()) {
                 if ((mReader->getNodeType() == irr::io::EXN_ELEMENT_END) && (nn == mReader->getNodeName())) {
                     close_found = true;
 
                     goto casu_cres;
                 }
-            }
+            }*/
         }
     }
 
@@ -346,12 +349,13 @@ casu_cres:
         Throw_CloseNotFound(nn);
 }
 
-bool X3DImporter::XML_SearchNode(const std::string &pNodeName) {
-    while (mReader->read()) {
+bool X3DImporter::XML_SearchNode(XmlNode &node, const std::string &pNodeName) {
+    return XmlParser::hasNode(node, pNodeName.c_str());
+    /*while (mReader->read()) {
         if ((mReader->getNodeType() == irr::io::EXN_ELEMENT) && XML_CheckNode_NameEqual(pNodeName)) return true;
     }
 
-    return false;
+    return false;*/
 }
 
 bool X3DImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx) {

@@ -147,11 +147,11 @@ void AMFImporter::Throw_CloseNotFound(const std::string &pNode) {
 }
 
 void AMFImporter::Throw_IncorrectAttr(const std::string &pAttrName) {
-    throw DeadlyImportError("Node <", std::string(mReader->getNodeName()), "> has incorrect attribute \"", pAttrName, "\".");
+    throw DeadlyImportError("Node <", mReader->getNodeName(), "> has incorrect attribute \"", pAttrName, "\".");
 }
 
 void AMFImporter::Throw_IncorrectAttrValue(const std::string &pAttrName) {
-    throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", std::string(mReader->getNodeName()), "> has incorrect value.");
+    throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", mReader->getNodeName(), "> has incorrect value.");
 }
 
 void AMFImporter::Throw_MoreThanOnceDefined(const std::string &pNodeType, const std::string &pDescription) {

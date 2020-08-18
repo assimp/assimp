@@ -269,11 +269,11 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
 
     // read it from the JSON object
     if (!mDict) {
-        throw DeadlyImportError("GLTF: Missing section \"", std::string(mDictId), "\"");
+        throw DeadlyImportError("GLTF: Missing section \"", mDictId, "\"");
     }
 
     if (!mDict->IsArray()) {
-        throw DeadlyImportError("GLTF: Field is not an array \"", std::string(mDictId), "\"");
+        throw DeadlyImportError("GLTF: Field is not an array \"", mDictId, "\"");
     }
 
     Value &obj = (*mDict)[i];
@@ -403,9 +403,9 @@ inline void Buffer::Read(Value &obj, Asset &r) {
                 delete file;
 
                 if (!ok)
-                    throw DeadlyImportError("GLTF: error while reading referenced file \"", std::string(uri), "\"");
+                    throw DeadlyImportError("GLTF: error while reading referenced file \"", uri, "\"");
             } else {
-                throw DeadlyImportError("GLTF: could not open referenced file \"", std::string(uri), "\"");
+                throw DeadlyImportError("GLTF: could not open referenced file \"", uri, "\"");
             }
         }
     }

@@ -243,23 +243,23 @@ void X3DImporter::Throw_CloseNotFound(const std::string& pNode)
 
 void X3DImporter::Throw_ConvertFail_Str2ArrF(const std::string& pAttrValue)
 {
-	throw DeadlyImportError("In <", std::string(mReader->getNodeName()), "> failed to convert attribute value \"", pAttrValue,
+	throw DeadlyImportError("In <", mReader->getNodeName(), "> failed to convert attribute value \"", pAttrValue,
 							"\" from string to array of floats.");
 }
 
 void X3DImporter::Throw_DEF_And_USE()
 {
-	throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <", std::string(mReader->getNodeName()), ">.");
+	throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <", mReader->getNodeName(), ">.");
 }
 
 void X3DImporter::Throw_IncorrectAttr(const std::string& pAttrName)
 {
-	throw DeadlyImportError("Node <", std::string(mReader->getNodeName()), "> has incorrect attribute \"", pAttrName, "\".");
+	throw DeadlyImportError("Node <", mReader->getNodeName(), "> has incorrect attribute \"", pAttrName, "\".");
 }
 
 void X3DImporter::Throw_IncorrectAttrValue(const std::string& pAttrName)
 {
-	throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", std::string(mReader->getNodeName()), "> has incorrect value.");
+	throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", mReader->getNodeName(), "> has incorrect value.");
 }
 
 void X3DImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription)
@@ -274,7 +274,7 @@ void X3DImporter::Throw_TagCountIncorrect(const std::string& pNode)
 
 void X3DImporter::Throw_USE_NotFound(const std::string& pAttrValue)
 {
-	throw DeadlyImportError("Not found node with name \"", pAttrValue, "\" in <", std::string(mReader->getNodeName()), ">.");
+	throw DeadlyImportError("Not found node with name \"", pAttrValue, "\" in <", mReader->getNodeName(), ">.");
 }
 
 /*********************************************************************************************************************************************/
@@ -1519,7 +1519,7 @@ void X3DImporter::ParseNode_Scene()
     auto GroupCounter_Increase = [](size_t& pCounter, const char* pGroupName) -> void
     {
 	    pCounter++;
-	    if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: ", std::string(pGroupName), ".");
+	    if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: ", pGroupName, ".");
 };
 
 auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> void

@@ -59,9 +59,9 @@ namespace Ogre {
 AI_WONT_RETURN void ThrowAttibuteError(const XmlReader *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
 AI_WONT_RETURN void ThrowAttibuteError(const XmlReader *reader, const std::string &name, const std::string &error) {
     if (!error.empty()) {
-        throw DeadlyImportError(error, " in node '", std::string(reader->getNodeName()), "' and attribute '", name, "'");
+        throw DeadlyImportError(error, " in node '", reader->getNodeName(), "' and attribute '", name, "'");
     } else {
-        throw DeadlyImportError("Attribute '", name, "' does not exist in node '", std::string(reader->getNodeName()), "'");
+        throw DeadlyImportError("Attribute '", name, "' does not exist in node '", reader->getNodeName(), "'");
     }
 }
 

@@ -235,15 +235,15 @@ Ref<T> LazyDict<T>::Get(const char *id) {
 
     // read it from the JSON object
     if (!mDict) {
-        throw DeadlyImportError("GLTF: Missing section \"", std::string(mDictId), "\"");
+        throw DeadlyImportError("GLTF: Missing section \"", mDictId, "\"");
     }
 
     Value::MemberIterator obj = mDict->FindMember(id);
     if (obj == mDict->MemberEnd()) {
-        throw DeadlyImportError("GLTF: Missing object with id \"", std::string(id), "\" in \"", mDictId, "\"");
+        throw DeadlyImportError("GLTF: Missing object with id \"", id, "\" in \"", mDictId, "\"");
     }
     if (!obj->value.IsObject()) {
-        throw DeadlyImportError("GLTF: Object with id \"", std::string(id), "\" is not a JSON object");
+        throw DeadlyImportError("GLTF: Object with id \"", id, "\" is not a JSON object");
     }
 
     // create an instance of the given type
@@ -339,9 +339,9 @@ inline void Buffer::Read(Value &obj, Asset &r) {
                 delete file;
 
                 if (!ok)
-                    throw DeadlyImportError("GLTF: error while reading referenced file \"", std::string(uri), "\"");
+                    throw DeadlyImportError("GLTF: error while reading referenced file \"", uri, "\"");
             } else {
-                throw DeadlyImportError("GLTF: could not open referenced file \"", std::string(uri), "\"");
+                throw DeadlyImportError("GLTF: could not open referenced file \"", uri, "\"");
             }
         }
     }

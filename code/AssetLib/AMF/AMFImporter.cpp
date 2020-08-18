@@ -143,23 +143,23 @@ bool AMFImporter::Find_ConvertedMaterial(const std::string &pID, const SPP_Mater
 /*********************************************************************************************************************************************/
 
 void AMFImporter::Throw_CloseNotFound(const std::string &pNode) {
-    throw DeadlyImportError("Close tag for node <" + pNode + "> not found. Seems file is corrupt.");
+    throw DeadlyImportError("Close tag for node <", pNode, "> not found. Seems file is corrupt.");
 }
 
 void AMFImporter::Throw_IncorrectAttr(const std::string &pAttrName) {
-    throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
+    throw DeadlyImportError("Node <", std::string(mReader->getNodeName()), "> has incorrect attribute \"", pAttrName, "\".");
 }
 
 void AMFImporter::Throw_IncorrectAttrValue(const std::string &pAttrName) {
-    throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
+    throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", std::string(mReader->getNodeName()), "> has incorrect value.");
 }
 
 void AMFImporter::Throw_MoreThanOnceDefined(const std::string &pNodeType, const std::string &pDescription) {
-    throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + mReader->getNodeName() + ". Description: " + pDescription);
+    throw DeadlyImportError("\"", pNodeType, "\" node can be used only once in ", mReader->getNodeName(), ". Description: ", pDescription);
 }
 
 void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
-    throw DeadlyImportError("Not found node with name \"" + pID + "\".");
+    throw DeadlyImportError("Not found node with name \"", pID, "\".");
 }
 
 /*********************************************************************************************************************************************/
@@ -167,7 +167,7 @@ void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
 /*********************************************************************************************************************************************/
 
 void AMFImporter::XML_CheckNode_MustHaveChildren() {
-    if (mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must have children.");
+    if (mReader->isEmptyElement()) throw DeadlyImportError("Node <", mReader->getNodeName(), "> must have children.");
 }
 
 void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeName) {
@@ -202,7 +202,7 @@ void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string &pParentNodeNa
 
 casu_cres:
 
-    if (!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
+    if (!found) throw DeadlyImportError("Unknown node \"", nn, "\" in ", pParentNodeName, ".");
     if (!close_found) Throw_CloseNotFound(nn);
 
     if (!skipped_before[sk_idx]) {
@@ -227,7 +227,7 @@ bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx) {
     else if ((val == "true") || (val == "1"))
         return true;
     else
-        throw DeadlyImportError("Bool attribute value can contain \"false\"/\"0\" or \"true\"/\"1\" not the \"" + val + "\"");
+        throw DeadlyImportError("Bool attribute value can contain \"false\"/\"0\" or \"true\"/\"1\" not the \"", val, "\"");
 }
 
 float AMFImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx) {
@@ -367,13 +367,13 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+        throw DeadlyImportError("Failed to open AMF file ", pFile, ".");
     }
 
     // generate a XML reader for it
     std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
     mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
-    if (!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+    if (!mReader) throw DeadlyImportError("Failed to create XML reader for file", pFile, ".");
     //
     // start reading
     // search for root tag <amf>

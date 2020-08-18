@@ -214,7 +214,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
     // Check whether we can read from the file
     if (!file.get())
-        throw DeadlyImportError("Failed to open NFF file " + pFile + ".");
+        throw DeadlyImportError("Failed to open NFF file ", pFile, ".");
 
     // allocate storage and copy the contents of the file to a memory buffer
     // (terminate it with zero)

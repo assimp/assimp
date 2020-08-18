@@ -83,7 +83,7 @@ namespace {
         if(element) {
             ParseError(message,element->KeyToken());
         }
-        throw DeadlyImportError("FBX-Parser " + message);
+        throw DeadlyImportError("FBX-Parser ", message);
     }
 
 

@@ -144,7 +144,7 @@ void XGLImporter::InternReadFile(const std::string &pFile,
 
     // check whether we can read from the file
     if (stream.get() == nullptr) {
-        throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile + "");
+        throw DeadlyImportError("Failed to open XGL/ZGL file ", pFile, "");
     }
 
     // see if its compressed, if so uncompress it

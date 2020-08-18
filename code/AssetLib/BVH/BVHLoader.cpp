@@ -125,7 +125,7 @@ void BVHLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IOSyst
     // read file into memory
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open file " + pFile + ".");
+        throw DeadlyImportError("Failed to open file ", pFile, ".");
     }
 
     size_t fileSize = file->FileSize();
@@ -454,7 +454,7 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
                     std::map<BVHLoader::ChannelType, int>::iterator mapIter = channelMap.find(channel);
 
                     if (mapIter == channelMap.end())
-                        throw DeadlyImportError("Missing position channel in node " + nodeName);
+                        throw DeadlyImportError("Missing position channel in node ", nodeName);
                     else {
                         int channelIdx = mapIter->second;
                         switch (channel) {

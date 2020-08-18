@@ -668,7 +668,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 				}
 				if (actualNumFaces == 0)
 				{
-					throw DeadlyImportError(std::string("Mesh \"") + aim->mName.C_Str() + "\" has no faces");
+					throw DeadlyImportError("Mesh \"", aim->mName.C_Str(), "\" has no faces");
 				}
 				aim->mNumFaces = actualNumFaces;
 				ai_assert(CheckValidFacesIndices(faces, actualNumFaces, aim->mNumVertices));

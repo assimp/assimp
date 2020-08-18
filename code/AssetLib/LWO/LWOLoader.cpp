@@ -145,7 +145,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open LWO file " + pFile + ".");
+        throw DeadlyImportError("Failed to open LWO file ", pFile, ".");
     }
 
     if ((this->fileSize = (unsigned int)file->FileSize()) < 12) {
@@ -212,7 +212,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         szBuff[2] = (char)(fileType >> 8u);
         szBuff[3] = (char)(fileType);
         szBuff[4] = '\0';
-        throw DeadlyImportError(std::string("Unknown LWO sub format: ") + szBuff);
+        throw DeadlyImportError("Unknown LWO sub format: ", szBuff);
     }
 
     if (AI_LWO_FOURCC_LWOB != fileType) {
@@ -232,7 +232,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         }
 
         if (configLayerName.length() && !hasNamedLayer) {
-            throw DeadlyImportError("LWO2: Unable to find the requested layer: " + configLayerName);
+            throw DeadlyImportError("LWO2: Unable to find the requested layer: ", configLayerName);
         }
     }
 

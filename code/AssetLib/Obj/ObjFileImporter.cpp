@@ -109,7 +109,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
     static const std::string mode = "rb";
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, mode));
     if (!fileStream.get()) {
-        throw DeadlyImportError("Failed to open file " + file + ".");
+        throw DeadlyImportError("Failed to open file ", file, ".");
     }
 
     // Get the file-size and validate it, throwing an exception when fails

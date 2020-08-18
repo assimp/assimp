@@ -468,7 +468,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
     catch (const DeadlyImportError& e)
     {
         if (!is64bits && (length > std::numeric_limits<std::uint32_t>::max())) {
-            throw DeadlyImportError("The FBX file is invalid. This may be because the content is too big for this older version (" + to_string(version) + ") of the FBX format. (" + e.what() + ")");
+            throw DeadlyImportError("The FBX file is invalid. This may be because the content is too big for this older version (", to_string(version), ") of the FBX format. (", e.what(), ")");
         }
         throw;
     }

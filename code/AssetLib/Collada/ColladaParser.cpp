@@ -123,7 +123,7 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
         // attempt to open the file directly
         daefile.reset(pIOHandler->Open(pFile));
         if (daefile.get() == nullptr) {
-            throw DeadlyImportError("Failed to open file '" + pFile + "'.");
+            throw DeadlyImportError("Failed to open file '", pFile, "'.");
         }
     }
 

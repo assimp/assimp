@@ -70,7 +70,7 @@ void DOMError(const std::string& message, const Element* element /*= nullptr*/)
     if(element) {
         DOMError(message,element->KeyToken());
     }
-    throw DeadlyImportError("FBX-DOM " + message);
+    throw DeadlyImportError("FBX-DOM ", message);
 }
 
 

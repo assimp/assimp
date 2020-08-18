@@ -788,7 +788,7 @@ MemoryStreamReaderPtr OgreBinarySerializer::OpenReader(Assimp::IOSystem *pIOHand
 
     IOStream *f = pIOHandler->Open(filename, "rb");
     if (!f) {
-        throw DeadlyImportError("Failed to open skeleton file " + filename);
+        throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 
     return MemoryStreamReaderPtr(new MemoryStreamReader(f));

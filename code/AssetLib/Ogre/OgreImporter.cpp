@@ -132,7 +132,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
         //std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
         xmlParser.parse(scopedFile.get());
         // Import mesh
-        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(xmlParser));
+        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(&xmlParser));
 
         // Import skeleton
         OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh.get());

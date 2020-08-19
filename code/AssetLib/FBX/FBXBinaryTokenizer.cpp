@@ -127,7 +127,7 @@ namespace {
 AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset) AI_WONT_RETURN_SUFFIX;
 AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset)
 {
-    throw DeadlyImportError(Util::AddOffset("FBX-Tokenize",message,offset));
+    throw DeadlyImportError("FBX-Tokenize", Util::GetOffsetText(offset), message);
 }
 
 

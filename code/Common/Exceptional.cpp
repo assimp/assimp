@@ -48,11 +48,7 @@ Implementations of the exception classes.
 #include <assimp/Exceptional.h>
 #include <assimp/TinyFormatter.h>
 
-DeadlyErrorBase::DeadlyErrorBase(const std::string& errorText)
-    : runtime_error(errorText)
-{}
-
 DeadlyErrorBase::DeadlyErrorBase(Assimp::Formatter::format f)
-    : DeadlyErrorBase(std::string(f))
+    : runtime_error(std::string(f))
 {
 }

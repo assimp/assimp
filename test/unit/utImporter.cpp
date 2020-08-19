@@ -313,7 +313,7 @@ namespace
         {
             if (pFile == "deadlyImportError.fail")
             {
-                throw DeadlyImportError("Deadly import error test");
+                throw DeadlyImportError("Deadly import error test. Details: ", 42, " More Details: ", "Failure");
             }
             else if (pFile == "stdException.fail")
             {
@@ -333,7 +333,7 @@ TEST_F(ImporterTest, deadlyImportError)
     pImp->SetIOHandler(new TestIOSystem);
     const aiScene* scene = pImp->ReadFile("deadlyImportError.fail", 0);
     EXPECT_EQ(scene, nullptr);
-    EXPECT_STREQ(pImp->GetErrorString(), "Deadly import error test");
+    EXPECT_STREQ(pImp->GetErrorString(), "Deadly import error test. Details: 42 More Details: Failure");
     EXPECT_NE(pImp->GetException(), std::exception_ptr());
 }
 

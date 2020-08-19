@@ -65,7 +65,7 @@ protected:
     
     template<typename... T, typename U>
     explicit DeadlyErrorBase(Assimp::Formatter::format f, U&& u, T&&... args)
-        : DeadlyErrorBase(std::move(f << u), args...)
+        : DeadlyErrorBase(std::move(f << std::forward<U>(u)), std::forward<T>(args)...)
     {
     }
 };
@@ -79,7 +79,7 @@ public:
     /** Constructor with arguments */
     template<typename... T>
     explicit DeadlyImportError(T&&... args)
-        : DeadlyErrorBase(Assimp::Formatter::format(), args...)
+        : DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...)
     {
     }
 };
@@ -89,7 +89,7 @@ public:
     /** Constructor with arguments */
     template<typename... T>
     explicit DeadlyExportError(T&&... args)
-        : DeadlyErrorBase(Assimp::Formatter::format(), args...)
+        : DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...)
     {
     }
 };

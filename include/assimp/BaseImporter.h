@@ -155,7 +155,7 @@ public:
      * @return The last exception that occurred. 
      */
     const std::exception_ptr& GetException() const {
-        return m_exception;
+        return m_Exception;
     }
 
     // -------------------------------------------------------------------
@@ -423,7 +423,7 @@ protected:
     /// In case of other errors, this will just be "Internal error"
     std::string m_ErrorText;
     /// An exception which occurred.
-    std::exception_ptr m_exception;
+    std::exception_ptr m_Exception;
     /// Currently set progress handler.
     ProgressHandler *m_progress;
 };

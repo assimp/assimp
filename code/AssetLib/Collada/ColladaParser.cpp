@@ -642,11 +642,10 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
     pController.mType = Skin;
     pController.mMethod = Normalized;
     for (XmlNode currentNode : node.children()) {
-        const std::string currentName = currentNode.name();
+        const std::string &currentName = currentNode.name();
         if (currentName == "morph") {
             pController.mType = Morph;
-            int baseIndex = currentNode.attribute("source").as_int();
-            pController.mMeshId = currentNode.attribute.begin() + baseIndex + 1;
+            pController.mMeshId = currentNode.attribute("source").as_string();
             int methodIndex = currentNode.attribute("method").as_int();
             if (methodIndex > 0) {
                 const char *method = currentNode.attribute("method").value();
@@ -655,8 +654,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
                 }
             }
         } else if (currentName == "skin") {
-            int sourceIndex = currentNode.attribute("source").as_int();
-            pController.mMeshId = currentNode.attribute.begin() + sourceIndex + 1;
+            pController.mMeshId = currentNode.attribute("source").as_string();
         } else if (currentName == "bind_shape_matrix") {
             const char *content = currentNode.value();
             for (unsigned int a = 0; a < 16; a++) {
@@ -675,10 +673,8 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
             for (XmlNode currendChildNode : currentNode.children()) {
                 const std::string currentChildName = currendChildNode.name();
                 if (currentChildName == "input") {
-                    int semanticsIndex = currendChildNode.attribute("semantic").as_int();
-                    int sourceIndex = currendChildNode.attribute("source").as_int();
-                    const char *semantics = currendChildNode.attributes.begin() + semanticsIndex;
-                    const char *source = currendChildNode.attributes.begin() + sourceIndex;
+                    const char *semantics = currendChildNode.attribute("semantic").as_string();
+                    const char *source = currendChildNode.attribute("source").as_string();
                     if (strcmp(semantics, "MORPH_TARGET") == 0) {
                         pController.mMorphTarget = source + 1;
                     } else if (strcmp(semantics, "MORPH_WEIGHT") == 0) {
@@ -696,14 +692,12 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
     for (XmlNode currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == "input") {
-            int indexSemantic = currentNode.attribute("semantic").as_int();
-            const char *attrSemantic = currentNode.attributes.begin() + indexSemantic;
-            int indexSource = currentNode.attribute("source").as_int();
-            const char *attrSource = currentNode.attributes.begin() + indexSource;
+            const char *attrSemantic = currentNode.attribute("semantic").as_string();
+            const char *attrSource = currentNode.attribute("source").as_string();
             if (attrSource[0] != '#') {
                 ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element");
             }
-            attrSource++;
+            ++attrSource;
             // parse source URL to corresponding source
             if (strcmp(attrSemantic, "JOINT") == 0) {
                 pController.mJointNameSource = attrSource;
@@ -720,8 +714,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
 // Reads the joint weights for the given controller
 void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
-    int indexCount = node.attribute("count").as_int();
-    size_t vertexCount = node.attributes.begin() + indexCount;
+    int vertexCount = node.attribute("count").as_int();
     pController.mWeightCounts.resize(vertexCount);
 
     /*// read vertex count from attributes and resize the array accordingly
@@ -734,17 +727,14 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
         if (currentName == "input") {
             InputChannel channel;
 
-            int indexSemantic = currentNode.attribute("semantic").as_int();
-            const char *attrSemantic = currentNode.attributes.begin() + indexSemantic;
-            int indexSource = currentNode.attribute("source").as_int();
-            const char *attrSource = currentNode.attributes.begin() + indexSource;
-            int indexOffset = currentNode.attribute("offset").as_int();
-            if (indexOffset >= 0)
-                channel.mOffset = currentNode.attributes.begin + indexOffset;
+            const char *attrSemantic = currentNode.attribute("semantic").as_string();
+            const char *attrSource = currentNode.attribute("source").as_string();
+            channel.mOffset = currentNode.attribute("offset").as_int();
 
             // local URLS always start with a '#'. We don't support global URLs
-            if (attrSource[0] != '#')
+            if (attrSource[0] != '#') {
                 ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <vertex_weights> data <input> element");
+            }
             channel.mAccessor = attrSource + 1;
 
             // parse source URL to corresponding source
@@ -799,8 +789,7 @@ void ColladaParser::ReadImageLibrary(XmlNode &node) {
     for (XmlNode currentNode : node.children()) {
         const std::string name = currentNode.name();
         if (name == "image") {
-            int attrID = currentNode.attribute("id").as_int();
-            std::string id = currentNode.attributes.begin() + attrID;
+            std::string id = currentNode.attribute("id").as_string();
             mImageLibrary[id] = Image();
 
             // read on from there
@@ -837,19 +826,17 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 // make sure we skip over mip and array initializations, which
                 // we don't support, but which could confuse the loader if
                 // they're not skipped.
-                int attrib = currentNode.attribute("ref").as_int();
-                int v = currentNode.attributes.begin + attrib;
-                if (attrib != -1 && v > 0) {
+                int v = currentNode.attribute("ref").as_int();
+/*                if (v y) {
                     ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
                     continue;
-                }
+                }*/
 
-                attrib = currentNode.attribute("mip_index").as_int();
-                v = currentNode.attributes.begin + attrib;
-                if (attrib != -1 && v > 0) {
+                v  = currentNode.attribute("mip_index").as_int();
+                /*if (attrib != -1 && v > 0) {
                     ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
                     continue;
-                }
+                }*/
 
                 // TODO: correctly jump over cube and volume maps?
             }
@@ -866,11 +853,9 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 }
             } else if (hexChild && !pImage.mFileName.length()) {
                 // embedded image. get format
-                const int attrib = hexChild.attribute("format").as_int();
-                if (-1 == attrib) {
+                pImage.mEmbeddedFormat = hexChild.attribute("format").as_string();
+                if (pImage.mEmbeddedFormat.empty()) {
                     ASSIMP_LOG_WARN("Collada: Unknown image file format");
-                } else {
-                    pImage.mEmbeddedFormat = hexChild.attributes.begin() + attrib;
                 }
 
                 const char *data = hexChild.value();
@@ -905,13 +890,8 @@ void ColladaParser::ReadMaterialLibrary(XmlNode &node) {
 
     for (XmlNode currentNode : node.children()) {
         const std::string currentName = currentNode.name();
-        int attrID = currentNode.attribute("id").as_int();
-        std::string id = currentNode.attributes.begin() + attrID;
-        std::string name;
-        int attrName = currentNode.attribute("name").as_int();
-        if (attrName >= 0) {
-            name = currentNode.attributes.begin() + attrName;
-        }
+        std::string id = currentNode.attribute("id").as_string();
+        std::string name = currentNode.attribute("name").as_string();
         mMaterialLibrary[id] = Material();
 
         if (!name.empty()) {
@@ -1108,105 +1088,93 @@ void ColladaParser::ReadEffect(XmlNode &node, Collada::Effect &pEffect) {
 // ------------------------------------------------------------------------------------------------
 // Reads an COMMON effect profile
 void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEffect) {
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("newparam")) {
-                // save ID
-                int attrSID = GetAttribute("sid");
-                std::string sid = mReader->getAttributeValue(attrSID);
-                pEffect.mParams[sid] = EffectParam();
-                ReadEffectParam(pEffect.mParams[sid]);
-            } else if (IsElement("technique") || IsElement("extra")) {
-                // just syntactic sugar
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "newparam") {
+            // save ID
+            std::string sid = currentNode.attribute("sid").as_string();
+            //std::string sid = GetAttribute("sid");
+             //= mReader->getAttributeValue(attrSID);
+            pEffect.mParams[sid] = EffectParam();
+            ReadEffectParam(currentNode, pEffect.mParams[sid]);
+        } else if (currentName == "technique" || currentName == "extra" ) {
+            // just syntactic sugar
+        } else if (mFormat == FV_1_4_n && currentName == "image") {
+            // read ID. Another entry which is "optional" by design but obligatory in reality
+            std::string id = currentNode.attribute("id").as_string();
+
+            //int attrID = GetAttribute("id");
+            //std::string id = mReader->getAttributeValue(attrID);
+
+            // create an entry and store it in the library under its ID
+            mImageLibrary[id] = Image();
+
+            // read on from there
+            ReadImage(currentNode, mImageLibrary[id]);
+        } else if (currentName == "phong")
+            pEffect.mShadeType = Shade_Phong;
+        else if (currentName == "constant")
+            pEffect.mShadeType = Shade_Constant;
+        else if (currentName == "lambert")
+            pEffect.mShadeType = Shade_Lambert;
+        else if (currentName == "blinn")
+            pEffect.mShadeType = Shade_Blinn;
+
+        /* Color + texture properties */
+        else if (currentName == "emission")
+            ReadEffectColor(currentNode, pEffect.mEmissive, pEffect.mTexEmissive);
+        else if (currentName == "ambient")
+            ReadEffectColor(currentNode, pEffect.mAmbient, pEffect.mTexAmbient);
+        else if (currentName == "diffuse")
+            ReadEffectColor(currentNode, pEffect.mDiffuse, pEffect.mTexDiffuse);
+        else if (currentName == "specular")
+            ReadEffectColor(currentNode, pEffect.mSpecular, pEffect.mTexSpecular);
+        else if (currentName == "reflective") {
+            ReadEffectColor(currentNode, pEffect.mReflective, pEffect.mTexReflective);
+        } else if (currentName == "transparent") {
+            pEffect.mHasTransparency = true;
+            const char *opaque = currentNode.attribute("opaque").as_string();
+            //const char *opaque = mReader->getAttributeValueSafe("opaque");
+
+            if (::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "RGB_ONE") == 0) {
+                pEffect.mRGBTransparency = true;
             }
 
-            else if (mFormat == FV_1_4_n && IsElement("image")) {
-                // read ID. Another entry which is "optional" by design but obligatory in reality
-                int attrID = GetAttribute("id");
-                std::string id = mReader->getAttributeValue(attrID);
-
-                // create an entry and store it in the library under its ID
-                mImageLibrary[id] = Image();
-
-                // read on from there
-                ReadImage(mImageLibrary[id]);
+            // In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
+            if (::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "A_ZERO") == 0) {
+                pEffect.mInvertTransparency = true;
             }
 
-            /* Shading modes */
-            else if (IsElement("phong"))
-                pEffect.mShadeType = Shade_Phong;
-            else if (IsElement("constant"))
-                pEffect.mShadeType = Shade_Constant;
-            else if (IsElement("lambert"))
-                pEffect.mShadeType = Shade_Lambert;
-            else if (IsElement("blinn"))
-                pEffect.mShadeType = Shade_Blinn;
+            ReadEffectColor(currentNode, pEffect.mTransparent, pEffect.mTexTransparent);
+        } else if (currentName == "shininess")
+            ReadEffectFloat(currentNode, pEffect.mShininess);
+        else if (currentName == "reflectivity")
+            ReadEffectFloat(currentNode, pEffect.mReflectivity);
 
-            /* Color + texture properties */
-            else if (IsElement("emission"))
-                ReadEffectColor(pEffect.mEmissive, pEffect.mTexEmissive);
-            else if (IsElement("ambient"))
-                ReadEffectColor(pEffect.mAmbient, pEffect.mTexAmbient);
-            else if (IsElement("diffuse"))
-                ReadEffectColor(pEffect.mDiffuse, pEffect.mTexDiffuse);
-            else if (IsElement("specular"))
-                ReadEffectColor(pEffect.mSpecular, pEffect.mTexSpecular);
-            else if (IsElement("reflective")) {
-                ReadEffectColor(pEffect.mReflective, pEffect.mTexReflective);
-            } else if (IsElement("transparent")) {
-                pEffect.mHasTransparency = true;
+        /* Single scalar properties */
+        else if (currentName == "transparency")
+            ReadEffectFloat(currentNode, pEffect.mTransparency);
+        else if (currentName == "index_of_refraction")
+            ReadEffectFloat(currentNode, pEffect.mRefractIndex);
 
-                const char *opaque = mReader->getAttributeValueSafe("opaque");
+        // GOOGLEEARTH/OKINO extensions
+        // -------------------------------------------------------
+        else if (currentName == "double_sided")
+            pEffect.mDoubleSided = ReadBoolFromTextContent();
 
-                if (::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "RGB_ONE") == 0) {
-                    pEffect.mRGBTransparency = true;
-                }
+        // FCOLLADA extensions
+        // -------------------------------------------------------
+        else if (currentName == "bump") {
+            aiColor4D dummy;
+            ReadEffectColor(currentNode, dummy, pEffect.mTexBump);
+        }
 
-                // In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
-                if (::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "A_ZERO") == 0) {
-                    pEffect.mInvertTransparency = true;
-                }
-
-                ReadEffectColor(pEffect.mTransparent, pEffect.mTexTransparent);
-            } else if (IsElement("shininess"))
-                ReadEffectFloat(pEffect.mShininess);
-            else if (IsElement("reflectivity"))
-                ReadEffectFloat(pEffect.mReflectivity);
-
-            /* Single scalar properties */
-            else if (IsElement("transparency"))
-                ReadEffectFloat(pEffect.mTransparency);
-            else if (IsElement("index_of_refraction"))
-                ReadEffectFloat(pEffect.mRefractIndex);
-
-            // GOOGLEEARTH/OKINO extensions
-            // -------------------------------------------------------
-            else if (IsElement("double_sided"))
-                pEffect.mDoubleSided = ReadBoolFromTextContent();
-
-            // FCOLLADA extensions
-            // -------------------------------------------------------
-            else if (IsElement("bump")) {
-                aiColor4D dummy;
-                ReadEffectColor(dummy, pEffect.mTexBump);
-            }
-
-            // MAX3D extensions
-            // -------------------------------------------------------
-            else if (IsElement("wireframe")) {
-                pEffect.mWireframe = ReadBoolFromTextContent();
-                TestClosing("wireframe");
-            } else if (IsElement("faceted")) {
-                pEffect.mFaceted = ReadBoolFromTextContent();
-                TestClosing("faceted");
-            } else {
-                // ignore the rest
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "profile_COMMON") == 0) {
-                break;
-            }
+        // MAX3D extensions
+        // -------------------------------------------------------
+        else if (currentName == "wireframe") {
+            pEffect.mWireframe = ReadBoolFromTextContent();
+        } else if (currentName == "faceted") {
+            pEffect.mFaceted = ReadBoolFromTextContent();
         }
     }
 }
@@ -1217,76 +1185,54 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
     if (node.empty()) {
         return;
     }
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        // MAYA extensions
+        // -------------------------------------------------------
+        if (currentName == "wrapU") {
+            out.mWrapU = ReadBoolFromTextContent();
+        } else if (currentName == "wrapV") {
+            out.mWrapV = ReadBoolFromTextContent();
+        } else if (currentName == "mirrorU") {
+            out.mMirrorU = ReadBoolFromTextContent();
+        } else if (currentName == "mirrorV") {
+            out.mMirrorV = ReadBoolFromTextContent();
+        } else if (currentName  == "repeatU") {
+            out.mTransform.mScaling.x = ReadFloatFromTextContent();
+        } else if (currentName == "repeatV") {
+            out.mTransform.mScaling.y = ReadFloatFromTextContent();
+        } else if (currentName  == "offsetU") {
+            out.mTransform.mTranslation.x = ReadFloatFromTextContent();
+        } else if (currentName  == "offsetV") {
+            out.mTransform.mTranslation.y = ReadFloatFromTextContent();
+        } else if (currentName  == "rotateUV") {
+            out.mTransform.mRotation = ReadFloatFromTextContent();
+        } else if (currentName == "blend_mode") {
 
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-
-            // MAYA extensions
-            // -------------------------------------------------------
-            if (IsElement("wrapU")) {
-                out.mWrapU = ReadBoolFromTextContent();
-                TestClosing("wrapU");
-            } else if (IsElement("wrapV")) {
-                out.mWrapV = ReadBoolFromTextContent();
-                TestClosing("wrapV");
-            } else if (IsElement("mirrorU")) {
-                out.mMirrorU = ReadBoolFromTextContent();
-                TestClosing("mirrorU");
-            } else if (IsElement("mirrorV")) {
-                out.mMirrorV = ReadBoolFromTextContent();
-                TestClosing("mirrorV");
-            } else if (IsElement("repeatU")) {
-                out.mTransform.mScaling.x = ReadFloatFromTextContent();
-                TestClosing("repeatU");
-            } else if (IsElement("repeatV")) {
-                out.mTransform.mScaling.y = ReadFloatFromTextContent();
-                TestClosing("repeatV");
-            } else if (IsElement("offsetU")) {
-                out.mTransform.mTranslation.x = ReadFloatFromTextContent();
-                TestClosing("offsetU");
-            } else if (IsElement("offsetV")) {
-                out.mTransform.mTranslation.y = ReadFloatFromTextContent();
-                TestClosing("offsetV");
-            } else if (IsElement("rotateUV")) {
-                out.mTransform.mRotation = ReadFloatFromTextContent();
-                TestClosing("rotateUV");
-            } else if (IsElement("blend_mode")) {
-
-                const char *sz = GetTextContent();
-                // http://www.feelingsoftware.com/content/view/55/72/lang,en/
-                // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
-                if (0 == ASSIMP_strincmp(sz, "ADD", 3))
-                    out.mOp = aiTextureOp_Add;
-
-                else if (0 == ASSIMP_strincmp(sz, "SUBTRACT", 8))
-                    out.mOp = aiTextureOp_Subtract;
-
-                else if (0 == ASSIMP_strincmp(sz, "MULTIPLY", 8))
-                    out.mOp = aiTextureOp_Multiply;
-
-                else {
-                    ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
-                }
-                TestClosing("blend_mode");
+            const char *sz = GetTextContent();
+            // http://www.feelingsoftware.com/content/view/55/72/lang,en/
+            // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
+            if (0 == ASSIMP_strincmp(sz, "ADD", 3))
+                out.mOp = aiTextureOp_Add;
+            else if (0 == ASSIMP_strincmp(sz, "SUBTRACT", 8))
+                out.mOp = aiTextureOp_Subtract;
+            else if (0 == ASSIMP_strincmp(sz, "MULTIPLY", 8))
+                out.mOp = aiTextureOp_Multiply;
+            else {
+                ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
             }
-            // OKINO extensions
-            // -------------------------------------------------------
-            else if (IsElement("weighting")) {
-                out.mWeighting = ReadFloatFromTextContent();
-                TestClosing("weighting");
-            } else if (IsElement("mix_with_previous_layer")) {
-                out.mMixWithPrevious = ReadFloatFromTextContent();
-                TestClosing("mix_with_previous_layer");
-            }
-            // MAX3D extensions
-            // -------------------------------------------------------
-            else if (IsElement("amount")) {
-                out.mWeighting = ReadFloatFromTextContent();
-                TestClosing("amount");
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "technique") == 0)
-                break;
+        }
+        // OKINO extensions
+        // -------------------------------------------------------
+        else if (currentName == "weighting") {
+            out.mWeighting = ReadFloatFromTextContent();
+        } else if (currentName  == "mix_with_previous_layer") {
+            out.mMixWithPrevious = ReadFloatFromTextContent();
+        }
+        // MAX3D extensions
+        // -------------------------------------------------------
+        else if (currentName  == "amount") {
+            out.mWeighting = ReadFloatFromTextContent();
         }
     }
 }
@@ -1297,8 +1243,6 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
 
     // Save current element name
     const std::string curElem = mReader->getNodeName();

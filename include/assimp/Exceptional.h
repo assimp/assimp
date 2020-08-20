@@ -56,7 +56,7 @@ using std::runtime_error;
 #pragma warning(disable : 4275)
 #endif
 
-class ASSIMP_API DeadlyErrorBase : public runtime_error {
+class DeadlyErrorBase : public runtime_error {
 protected:
     DeadlyErrorBase(Assimp::Formatter::format f);
     
@@ -145,7 +145,7 @@ struct ExceptionSwallower<void> {
         return ExceptionSwallower<type>()();                                                                                                    \
     }                                                                                                                                           \
     catch (...) {                                                                                                                               \
-        ASSIMP_END_EXCEPTION_REGION_errorString = "Internal error";                                                                             \
+        ASSIMP_END_EXCEPTION_REGION_errorString = "Unknown exception";                                                                             \
         ASSIMP_END_EXCEPTION_REGION_exception = std::current_exception();                                                                       \
         return ExceptionSwallower<type>()();                                                                                                    \
     }                                                                                                                                           \

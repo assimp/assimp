@@ -366,7 +366,7 @@ TEST_F(ImporterTest, unexpectedException)
     const aiScene* scene = pImp->ReadFile("unexpectedException.fail", 0);
 
     EXPECT_EQ(scene, nullptr);
-    EXPECT_STREQ(pImp->GetErrorString(), "Internal error");
+    EXPECT_STREQ(pImp->GetErrorString(), "Unknown exception");
     ASSERT_NE(pImp->GetException(), std::exception_ptr());
     try
     {

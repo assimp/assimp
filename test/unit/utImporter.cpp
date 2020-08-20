@@ -343,7 +343,7 @@ TEST_F(ImporterTest, stdException)
     pImp->SetIOHandler(new TestIOSystem);
     const aiScene* scene = pImp->ReadFile("stdException.fail", 0);
     EXPECT_EQ(scene, nullptr);
-    EXPECT_STREQ(pImp->GetErrorString(), "Internal error");
+    EXPECT_STREQ(pImp->GetErrorString(), "std::exception test");
     EXPECT_NE(pImp->GetException(), std::exception_ptr());
     try
     {

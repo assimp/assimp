@@ -97,9 +97,8 @@ public:
     /** The imported data, if ReadFile() was successful, nullptr otherwise. */
     aiScene* mScene;
 
-    /** The error description, if there was one. In the case of a
-     *  failure not caused by a DeadlyImportError, mInternalException will
-     *  carry the full details and this will be just "Internal error". */
+    /** The error description, if there was one. In the case of an exception,
+     *  mException will carry the full details. */
     std::string mErrorString;
 
     /** Any exception which occurred */

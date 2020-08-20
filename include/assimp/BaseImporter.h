@@ -143,6 +143,8 @@ public:
 
     // -------------------------------------------------------------------
     /** Returns the error description of the last error that occurred.
+     * If the error is due to a std::exception, this will return the message.
+     * Exceptions can also be accessed with GetException().
      * @return A description of the last error that occurred. An empty
      * string if there was no error.
      */
@@ -152,6 +154,8 @@ public:
 
     // -------------------------------------------------------------------
     /** Returns the exception of the last exception that occurred.
+     * Note: Exceptions are not the only source of error details, so GetErrorText
+     * should be consulted too.
      * @return The last exception that occurred. 
      */
     const std::exception_ptr& GetException() const {
@@ -419,10 +423,9 @@ private:
     virtual void UpdateImporterScale(Importer *pImp);
 
 protected:
-    /// Error description when a DeadlyImportError occurred during import.
-    /// In case of other errors, this will just be "Internal error"
+    /// Error description in case there was one.
     std::string m_ErrorText;
-    /// An exception which occurred.
+    /// The exception, in case there was one.
     std::exception_ptr m_Exception;
     /// Currently set progress handler.
     ProgressHandler *m_progress;

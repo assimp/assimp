@@ -130,14 +130,9 @@ aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSyst
         // passes scale into ScaleProcess
         UpdateImporterScale(pImp);
 
-    } catch( const DeadlyImportError& err )    {
+    } catch( const std::exception &err ) {
         // extract error description
         m_ErrorText = err.what();
-        ASSIMP_LOG_ERROR(m_ErrorText.c_str());
-        m_Exception = std::current_exception();
-        return nullptr;
-    } catch( const std::exception& err )    {
-        m_ErrorText = "Internal error";
         ASSIMP_LOG_ERROR(err.what());
         m_Exception = std::current_exception();
         return nullptr;

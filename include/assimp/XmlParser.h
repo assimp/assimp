@@ -52,22 +52,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 struct find_node_by_name_predicate {
-	std::string mName;
-	find_node_by_name_predicate(const std::string &name) :
-			mName(name) {
+    std::string mName;
+    find_node_by_name_predicate(const std::string &name) :
+            mName(name) {
         // empty
-	}
+    }
 
-	bool operator()(pugi::xml_node node) const {
-		return node.name() == mName;
-	}
+    bool operator()(pugi::xml_node node) const {
+        return node.name() == mName;
+    }
 };
 
-template<class TNodeType>
+template <class TNodeType>
 struct NodeConverter {
 public:
-    static int to_int(TNodeType &node, const char *attribName ) {
-		ai_assert(nullptr != attribName);
+    static int to_int(TNodeType &node, const char *attribName) {
+        ai_assert(nullptr != attribName);
         return node.attribute(attribName).to_int();
     }
 };
@@ -75,72 +75,73 @@ public:
 using XmlNode = pugi::xml_node;
 using XmlAttribute = pugi::xml_attribute;
 
-template<class TNodeType>
+template <class TNodeType>
 class TXmlParser {
 public:
-	TXmlParser() :
-			mDoc(nullptr), mRoot(nullptr), mData() {
+    TXmlParser() :
+            mDoc(nullptr),
+            mRoot(nullptr),
+            mData() {
         // empty
-	}
+    }
 
     ~TXmlParser() {
-		clear();
+        clear();
     }
 
     void clear() {
-		mData.resize(0);
-		mRoot = nullptr;
-		delete mDoc;
-		mDoc = nullptr;
+        mData.resize(0);
+        mRoot = nullptr;
+        delete mDoc;
+        mDoc = nullptr;
     }
 
     TNodeType *findNode(const std::string &name) {
-		if (name.empty()) {
-			return nullptr;
-		}
+        if (name.empty()) {
+            return nullptr;
+        }
 
-		if (nullptr == mDoc) {
-			return nullptr;
+        if (nullptr == mDoc) {
+            return nullptr;
         }
 
         find_node_by_name_predicate predicate(name);
         mCurrent = mDoc->find_node(predicate);
         if (mCurrent.empty()) {
-			return nullptr;
+            return nullptr;
         }
 
         return &mCurrent;
     }
 
-    bool hasNode( const std::string &name ) {
+    bool hasNode(const std::string &name) {
         return nullptr != findNode(name);
     }
 
     TNodeType *parse(IOStream *stream) {
-		if (nullptr == stream) {
-			return nullptr;
-		}
+        if (nullptr == stream) {
+            return nullptr;
+        }
 
         mData.resize(stream->FileSize());
-		stream->Read(&mData[0], mData.size(), 1);
-		mDoc = new pugi::xml_document();
-		pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
+        stream->Read(&mData[0], mData.size(), 1);
+        mDoc = new pugi::xml_document();
+        pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
         if (result.status == pugi::status_ok) {
             pugi::xml_node root = *(mDoc->children().begin());
-            
+
             mRoot = &root;
-			//mRoot = &mDoc->root();
         }
 
         return mRoot;
     }
 
     pugi::xml_document *getDocument() const {
-		return mDoc;
+        return mDoc;
     }
 
     const TNodeType *getRootNode() const {
-		return mRoot;
+        return mRoot;
     }
 
     TNodeType *getRootNode() {
@@ -157,15 +158,34 @@ public:
         return !attr.empty();
     }
 
-    private:
-	pugi::xml_document *mDoc;
-	TNodeType *mRoot;
+    static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+
+        val = attr.as_int();
+        return true;
+    }
+
+    static inline bool getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+
+        val = attr.as_string();
+        return true;
+    }
+
+private:
+    pugi::xml_document *mDoc;
+    TNodeType *mRoot;
     TNodeType mCurrent;
-	std::vector<char> mData;
+    std::vector<char> mData;
 };
 
 using XmlParser = TXmlParser<pugi::xml_node>;
-
 
 } // namespace Assimp
 

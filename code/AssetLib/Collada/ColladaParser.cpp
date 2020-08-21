@@ -246,19 +246,18 @@ ai_real ColladaParser::ReadFloatFromTextContent() {
 // Reads the contents of the file
 void ColladaParser::ReadContents(XmlNode &node) {
     for (pugi::xml_node &curNode : node.children()) {
-        pugi::xml_attribute attr = curNode.attribute("version");
-        if (attr) {
-            const char *version = attr.as_string();
+        std::string version;
+        if (XmlParser::getStdStrAttribute(curNode, "version", version)) {
             aiString v;
-            v.Set(version);
+            v.Set(version.c_str());
             mAssetMetaData.emplace(AI_METADATA_SOURCE_FORMAT_VERSION, v);
-            if (!::strncmp(version, "1.5", 3)) {
+            if (!::strncmp(version.c_str(), "1.5", 3)) {
                 mFormat = FV_1_5_n;
                 ASSIMP_LOG_DEBUG("Collada schema version is 1.5.n");
-            } else if (!::strncmp(version, "1.4", 3)) {
+            } else if (!::strncmp(version.c_str(), "1.4", 3)) {
                 mFormat = FV_1_4_n;
                 ASSIMP_LOG_DEBUG("Collada schema version is 1.4.n");
-            } else if (!::strncmp(version, "1.3", 3)) {
+            } else if (!::strncmp(version.c_str(), "1.3", 3)) {
                 mFormat = FV_1_3_n;
                 ASSIMP_LOG_DEBUG("Collada schema version is 1.3.n");
             }
@@ -1242,6 +1241,50 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
 void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &pSampler) {
     if (node.empty()) {
         return;
+    }
+
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "color") {
+            // text content contains 4 floats
+            const char *content = currentNode.value();
+
+            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.r);
+            SkipSpacesAndLineEnd(&content);
+
+            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.g);
+            SkipSpacesAndLineEnd(&content);
+
+            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.b);
+            SkipSpacesAndLineEnd(&content);
+
+            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.a);
+            SkipSpacesAndLineEnd(&content);
+        } else if (currentName == "texture") {
+            // get name of source texture/sampler
+            int attrTex = GetAttribute("texture");
+            pSampler.mName = mReader->getAttributeValue(attrTex);
+
+            // get name of UV source channel. Specification demands it to be there, but some exporters
+            // don't write it. It will be the default UV channel in case it's missing.
+            attrTex = TestAttribute("texcoord");
+            if (attrTex >= 0)
+                pSampler.mUVChannel = mReader->getAttributeValue(attrTex);
+            //SkipElement();
+
+            // as we've read texture, the color needs to be 1,1,1,1
+            pColor = aiColor4D(1.f, 1.f, 1.f, 1.f);
+        } else if (currentName == "technique" ) {
+            const int _profile = GetAttribute("profile");
+            const char *profile = mReader->getAttributeValue(_profile);
+
+            // Some extensions are quite useful ... ReadSamplerProperties processes
+            // several extensions in MAYA, OKINO and MAX3D profiles.
+            if (!::strcmp(profile, "MAYA") || !::strcmp(profile, "MAX3D") || !::strcmp(profile, "OKINO")) {
+                // get more information on this sampler
+                ReadSamplerProperties(pSampler);
+            }
+        } 
     }
 
     // Save current element name

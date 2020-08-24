@@ -826,12 +826,12 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 // we don't support, but which could confuse the loader if
                 // they're not skipped.
                 int v = currentNode.attribute("ref").as_int();
-/*                if (v y) {
+                /*                if (v y) {
                     ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
                     continue;
                 }*/
 
-                v  = currentNode.attribute("mip_index").as_int();
+                v = currentNode.attribute("mip_index").as_int();
                 /*if (attrib != -1 && v > 0) {
                     ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
                     continue;
@@ -1023,7 +1023,6 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
             pLight.mOuterAngle = ReadFloatFromTextContent();
         }
     }
-
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1093,10 +1092,10 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
             // save ID
             std::string sid = currentNode.attribute("sid").as_string();
             //std::string sid = GetAttribute("sid");
-             //= mReader->getAttributeValue(attrSID);
+            //= mReader->getAttributeValue(attrSID);
             pEffect.mParams[sid] = EffectParam();
             ReadEffectParam(currentNode, pEffect.mParams[sid]);
-        } else if (currentName == "technique" || currentName == "extra" ) {
+        } else if (currentName == "technique" || currentName == "extra") {
             // just syntactic sugar
         } else if (mFormat == FV_1_4_n && currentName == "image") {
             // read ID. Another entry which is "optional" by design but obligatory in reality
@@ -1196,15 +1195,15 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
             out.mMirrorU = ReadBoolFromTextContent();
         } else if (currentName == "mirrorV") {
             out.mMirrorV = ReadBoolFromTextContent();
-        } else if (currentName  == "repeatU") {
+        } else if (currentName == "repeatU") {
             out.mTransform.mScaling.x = ReadFloatFromTextContent();
         } else if (currentName == "repeatV") {
             out.mTransform.mScaling.y = ReadFloatFromTextContent();
-        } else if (currentName  == "offsetU") {
+        } else if (currentName == "offsetU") {
             out.mTransform.mTranslation.x = ReadFloatFromTextContent();
-        } else if (currentName  == "offsetV") {
+        } else if (currentName == "offsetV") {
             out.mTransform.mTranslation.y = ReadFloatFromTextContent();
-        } else if (currentName  == "rotateUV") {
+        } else if (currentName == "rotateUV") {
             out.mTransform.mRotation = ReadFloatFromTextContent();
         } else if (currentName == "blend_mode") {
 
@@ -1225,12 +1224,12 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         // -------------------------------------------------------
         else if (currentName == "weighting") {
             out.mWeighting = ReadFloatFromTextContent();
-        } else if (currentName  == "mix_with_previous_layer") {
+        } else if (currentName == "mix_with_previous_layer") {
             out.mMixWithPrevious = ReadFloatFromTextContent();
         }
         // MAX3D extensions
         // -------------------------------------------------------
-        else if (currentName  == "amount") {
+        else if (currentName == "amount") {
             out.mWeighting = ReadFloatFromTextContent();
         }
     }
@@ -1262,84 +1261,26 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
             SkipSpacesAndLineEnd(&content);
         } else if (currentName == "texture") {
             // get name of source texture/sampler
-            int attrTex = GetAttribute("texture");
-            pSampler.mName = mReader->getAttributeValue(attrTex);
+            XmlParser::getStdStrAttribute(currentNode, "texture", pSampler.mName);
 
             // get name of UV source channel. Specification demands it to be there, but some exporters
             // don't write it. It will be the default UV channel in case it's missing.
-            attrTex = TestAttribute("texcoord");
-            if (attrTex >= 0)
-                pSampler.mUVChannel = mReader->getAttributeValue(attrTex);
-            //SkipElement();
+            XmlParser::getStdStrAttribute(currentNode, "texcoord", pSampler.mUVChannel);
 
             // as we've read texture, the color needs to be 1,1,1,1
             pColor = aiColor4D(1.f, 1.f, 1.f, 1.f);
-        } else if (currentName == "technique" ) {
-            const int _profile = GetAttribute("profile");
-            const char *profile = mReader->getAttributeValue(_profile);
+        } else if (currentName == "technique") {
+            std::string profile;
+            XmlParser::getStdStrAttribute(currentNode, "profile", profile);
+            //const int _profile = GetAttribute("profile");
+            //const char *profile = mReader->getAttributeValue(_profile);
 
             // Some extensions are quite useful ... ReadSamplerProperties processes
             // several extensions in MAYA, OKINO and MAX3D profiles.
-            if (!::strcmp(profile, "MAYA") || !::strcmp(profile, "MAX3D") || !::strcmp(profile, "OKINO")) {
+            if (!::strcmp(profile.c_str(), "MAYA") || !::strcmp(profile.c_str(), "MAX3D") || !::strcmp(profile.c_str(), "OKINO")) {
                 // get more information on this sampler
-                ReadSamplerProperties(pSampler);
+                ReadSamplerProperties(currentNode, pSampler);
             }
-        } 
-    }
-
-    // Save current element name
-    const std::string curElem = mReader->getNodeName();
-
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("color")) {
-                // text content contains 4 floats
-                const char *content = GetTextContent();
-
-                content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.r);
-                SkipSpacesAndLineEnd(&content);
-
-                content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.g);
-                SkipSpacesAndLineEnd(&content);
-
-                content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.b);
-                SkipSpacesAndLineEnd(&content);
-
-                content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.a);
-                SkipSpacesAndLineEnd(&content);
-                TestClosing("color");
-            } else if (IsElement("texture")) {
-                // get name of source texture/sampler
-                int attrTex = GetAttribute("texture");
-                pSampler.mName = mReader->getAttributeValue(attrTex);
-
-                // get name of UV source channel. Specification demands it to be there, but some exporters
-                // don't write it. It will be the default UV channel in case it's missing.
-                attrTex = TestAttribute("texcoord");
-                if (attrTex >= 0)
-                    pSampler.mUVChannel = mReader->getAttributeValue(attrTex);
-                //SkipElement();
-
-                // as we've read texture, the color needs to be 1,1,1,1
-                pColor = aiColor4D(1.f, 1.f, 1.f, 1.f);
-            } else if (IsElement("technique")) {
-                const int _profile = GetAttribute("profile");
-                const char *profile = mReader->getAttributeValue(_profile);
-
-                // Some extensions are quite useful ... ReadSamplerProperties processes
-                // several extensions in MAYA, OKINO and MAX3D profiles.
-                if (!::strcmp(profile, "MAYA") || !::strcmp(profile, "MAX3D") || !::strcmp(profile, "OKINO")) {
-                    // get more information on this sampler
-                    ReadSamplerProperties(pSampler);
-                } else
-                    SkipElement();
-            } else if (!IsElement("extra")) {
-                // ignore the rest
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (mReader->getNodeName() == curElem)
-                break;
         }
     }
 }
@@ -1347,67 +1288,41 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
 // ------------------------------------------------------------------------------------------------
 // Reads an effect entry containing a float
 void ColladaParser::ReadEffectFloat(XmlNode &node, ai_real &pFloat) {
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("float")) {
-                // text content contains a single floats
-                const char *content = GetTextContent();
-                content = fast_atoreal_move<ai_real>(content, pFloat);
-                SkipSpacesAndLineEnd(&content);
-
-                TestClosing("float");
-            } else {
-                // ignore the rest
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            break;
-        }
+    pFloat = 0.f;
+    if (node.name() == "float") {
+        XmlParser::getFloatAttribute(node, "float", pFloat);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads an effect parameter specification of any kind
 void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam) {
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("surface")) {
-                // image ID given inside <init_from> tags
-                TestOpening("init_from");
-                const char *content = GetTextContent();
-                pParam.mType = Param_Surface;
-                pParam.mReference = content;
-                TestClosing("init_from");
+    if (node.empty()) {
+        return;
+    }
 
-                // don't care for remaining stuff
-                SkipElement("surface");
-            } else if (IsElement("sampler2D") && (FV_1_4_n == mFormat || FV_1_3_n == mFormat)) {
-                // surface ID is given inside <source> tags
-                TestOpening("source");
-                const char *content = GetTextContent();
-                pParam.mType = Param_Sampler;
-                pParam.mReference = content;
-                TestClosing("source");
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "surface") {
+            // image ID given inside <init_from> tags
+            const char *content = currentNode.value();
+            pParam.mType = Param_Surface;
+            pParam.mReference = content;
 
-                // don't care for remaining stuff
-                SkipElement("sampler2D");
-            } else if (IsElement("sampler2D")) {
-                // surface ID is given inside <instance_image> tags
-                TestOpening("instance_image");
-                int attrURL = GetAttribute("url");
-                const char *url = mReader->getAttributeValue(attrURL);
-                if (url[0] != '#')
-                    ThrowException("Unsupported URL format in instance_image");
-                url++;
-                pParam.mType = Param_Sampler;
-                pParam.mReference = url;
-                SkipElement("sampler2D");
-            } else {
-                // ignore unknown element
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            break;
+            // don't care for remaining stuff
+        } else if (currentName == "sampler2D" && (FV_1_4_n == mFormat || FV_1_3_n == mFormat)) {
+            // surface ID is given inside <source> tags
+            const char *content = currentNode.value();
+            pParam.mType = Param_Sampler;
+            pParam.mReference = content;
+        } else if (currentName == "sampler2D") {
+            // surface ID is given inside <instance_image> tags
+            std::string url;
+            XmlParser::getStdStrAttribute(currentNode, "url", url);
+            if (url[0] != '#')
+                ThrowException("Unsupported URL format in instance_image");
+            pParam.mType = Param_Sampler;
+            pParam.mReference = url.c_str() + 1;
         }
     }
 }
@@ -1418,44 +1333,25 @@ void ColladaParser::ReadGeometryLibrary(XmlNode &node) {
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "geometry") {
+            // read ID. Another entry which is "optional" by design but obligatory in reality
 
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("geometry")) {
-                // read ID. Another entry which is "optional" by design but obligatory in reality
-                int indexID = GetAttribute("id");
-                std::string id = mReader->getAttributeValue(indexID);
+            std::string id;
+            XmlParser::getStdStrAttribute(currentNode, "id", id);
+            // create a mesh and store it in the library under its (resolved) ID
+            // Skip and warn if ID is not unique
+            if (mMeshLibrary.find(id) == mMeshLibrary.cend()) {
+                std::unique_ptr<Mesh> mesh(new Mesh(id));
 
-                // create a mesh and store it in the library under its (resolved) ID
-                // Skip and warn if ID is not unique
-                if (mMeshLibrary.find(id) == mMeshLibrary.cend()) {
-                    std::unique_ptr<Mesh> mesh(new Mesh(id));
+                XmlParser::getStdStrAttribute(currentNode, "name", mesh->mName);
 
-                    // read the mesh name if it exists
-                    const int nameIndex = TestAttribute("name");
-                    if (nameIndex != -1) {
-                        mesh->mName = mReader->getAttributeValue(nameIndex);
-                    }
-
-                    // read on from there
-                    ReadGeometry(*mesh);
-                    // Read successfully, add to library
-                    mMeshLibrary.insert({ id, mesh.release() });
-                } else {
-                    ASSIMP_LOG_ERROR_F("Collada: Skipped duplicate geometry id: \"", id, "\"");
-                    SkipElement();
-                }
-            } else {
-                // ignore the rest
-                SkipElement();
+                // read on from there
+                ReadGeometry(currentNode, *mesh);
+                // Read successfully, add to library
+                mMeshLibrary.insert({ id, mesh.release() });
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "library_geometries") != 0)
-                ThrowException("Expected end of <library_geometries> element.");
-
-            break;
         }
     }
 }
@@ -1466,23 +1362,10 @@ void ColladaParser::ReadGeometry(XmlNode &node, Collada::Mesh &pMesh) {
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
-
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("mesh")) {
-                // read on from there
-                ReadMesh(pMesh);
-            } else {
-                // ignore the rest
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "geometry") != 0)
-                ThrowException("Expected end of <geometry> element.");
-
-            break;
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "mesh") {
+            ReadMesh(currentNode, pMesh);
         }
     }
 }
@@ -1493,34 +1376,15 @@ void ColladaParser::ReadMesh(XmlNode &node, Mesh &pMesh) {
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
 
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("source")) {
-                // we have professionals dealing with this
-                ReadSource();
-            } else if (IsElement("vertices")) {
-                // read per-vertex mesh data
-                ReadVertexData(pMesh);
-            } else if (IsElement("triangles") || IsElement("lines") || IsElement("linestrips") || IsElement("polygons") || IsElement("polylist") || IsElement("trifans") || IsElement("tristrips")) {
-                // read per-index mesh data and faces setup
-                ReadIndexData(pMesh);
-            } else {
-                // ignore the restf
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "technique_common") == 0) {
-                // end of another meaningless element - read over it
-            } else if (strcmp(mReader->getNodeName(), "mesh") == 0) {
-                // end of <mesh> element - we're done here
-                break;
-            } else {
-                // everything else should be punished
-                ThrowException("Expected end of <mesh> element.");
-            }
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "source") {
+            ReadSource(currentNode);
+        } else if (currentName == "vertices") {
+            ReadVertexData(currentNode, pMesh);
+        } else if (currentName == "triangles" || currentName == "lines" || currentName == "linestrips" || currentName == "polygons" || currentName == "polylist" || currentName == "trifans" || currentName == "tristrips") {
+            ReadIndexData(currentNode, pMesh);
         }
     }
 }
@@ -1528,31 +1392,20 @@ void ColladaParser::ReadMesh(XmlNode &node, Mesh &pMesh) {
 // ------------------------------------------------------------------------------------------------
 // Reads a source element
 void ColladaParser::ReadSource(XmlNode &node) {
-    int indexID = GetAttribute("id");
-    std::string sourceID = mReader->getAttributeValue(indexID);
+    if (node.empty()) {
+        return;
+    }
 
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("float_array") || IsElement("IDREF_array") || IsElement("Name_array")) {
-                ReadDataArray();
-            } else if (IsElement("technique_common")) {
-                // I don't care for your profiles
-            } else if (IsElement("accessor")) {
-                ReadAccessor(sourceID);
-            } else {
-                // ignore the rest
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "source") == 0) {
-                // end of <source> - we're done
-                break;
-            } else if (strcmp(mReader->getNodeName(), "technique_common") == 0) {
-                // end of another meaningless element - read over it
-            } else {
-                // everything else should be punished
-                ThrowException("Expected end of <source> element.");
-            }
+    std::string sourceID;
+    XmlParser::getStdStrAttribute(node, "id", sourceID);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "float_array" || currentName == "IDREF_array" || currentName == "Name_array") {
+            ReadDataArray(currentNode);
+        } else if (currentName == "technique_common") {
+            // I don't care for your profiles
+        } else if (currentName == "accessor") {
+            ReadAccessor(currentNode, sourceID);
         }
     }
 }
@@ -1560,16 +1413,16 @@ void ColladaParser::ReadSource(XmlNode &node) {
 // ------------------------------------------------------------------------------------------------
 // Reads a data array holding a number of floats, and stores it in the global library
 void ColladaParser::ReadDataArray(XmlNode &node) {
-    std::string elmName = mReader->getNodeName();
-    bool isStringArray = (elmName == "IDREF_array" || elmName == "Name_array");
-    bool isEmptyElement = mReader->isEmptyElement();
+    std::string name = node.name();
+    bool isStringArray = (name == "IDREF_array" || name == "Name_array");
+    bool isEmptyElement = node.empty();
 
     // read attributes
-    int indexID = GetAttribute("id");
-    std::string id = mReader->getAttributeValue(indexID);
-    int indexCount = GetAttribute("count");
-    unsigned int count = (unsigned int)mReader->getAttributeValueAsInt(indexCount);
-    const char *content = TestTextContent();
+    std::string id;
+    XmlParser::getStdStrAttribute(node, "id", id);
+    int count;
+    XmlParser::getIntAttribute(node, "count", count);
+    const char *content = node.value();
 
     // read values and store inside an array in the data library
     mDataLibrary[id] = Data();
@@ -1609,113 +1462,98 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
             }
         }
     }
-
-    // test for closing tag
-    if (!isEmptyElement)
-        TestClosing(elmName.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads an accessor and stores it in the global library
 void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
     // read accessor attributes
-    int attrSource = GetAttribute("source");
-    const char *source = mReader->getAttributeValue(attrSource);
+    std::string source;
+    XmlParser::getStdStrAttribute(node, "source", source);
     if (source[0] != '#')
         ThrowException(format() << "Unknown reference format in url \"" << source << "\" in source attribute of <accessor> element.");
-    int attrCount = GetAttribute("count");
-    unsigned int count = (unsigned int)mReader->getAttributeValueAsInt(attrCount);
-    int attrOffset = TestAttribute("offset");
-    unsigned int offset = 0;
-    if (attrOffset > -1)
-        offset = (unsigned int)mReader->getAttributeValueAsInt(attrOffset);
-    int attrStride = TestAttribute("stride");
-    unsigned int stride = 1;
-    if (attrStride > -1)
-        stride = (unsigned int)mReader->getAttributeValueAsInt(attrStride);
+    int count;
+    XmlParser::getIntAttribute(node, "count", count);
 
+    unsigned int offset = 0;
+    if (XmlParser::hasAttribute(node, "offset")) {
+        XmlParser::getUIntAttribute(node, "offset", offset);
+    }
+    unsigned int stride = 1;
+    if (XmlParser::hasAttribute(node, "stride")) {
+        XmlParser::getUIntAttribute(node, "stride", stride);
+    }
     // store in the library under the given ID
     mAccessorLibrary[pID] = Accessor();
     Accessor &acc = mAccessorLibrary[pID];
     acc.mCount = count;
     acc.mOffset = offset;
     acc.mStride = stride;
-    acc.mSource = source + 1; // ignore the leading '#'
+    acc.mSource = source.c_str() + 1; // ignore the leading '#'
     acc.mSize = 0; // gets incremented with every param
 
-    // and read the components
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("param")) {
-                // read data param
-                int attrName = TestAttribute("name");
-                std::string name;
-                if (attrName > -1) {
-                    name = mReader->getAttributeValue(attrName);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "param") {
+            // read data param
+            //int attrName = TestAttribute("name");
+            std::string name;
+            if (XmlParser::hasAttribute(currentNode, "name")) {
+                XmlParser::getStdStrAttribute(currentNode, "name", name);
+                //name = mReader->getAttributeValue(attrName);
 
-                    // analyse for common type components and store it's sub-offset in the corresponding field
+                // analyse for common type components and store it's sub-offset in the corresponding field
 
-                    /* Cartesian coordinates */
-                    if (name == "X")
-                        acc.mSubOffset[0] = acc.mParams.size();
-                    else if (name == "Y")
-                        acc.mSubOffset[1] = acc.mParams.size();
-                    else if (name == "Z")
-                        acc.mSubOffset[2] = acc.mParams.size();
+                /* Cartesian coordinates */
+                if (name == "X")
+                    acc.mSubOffset[0] = acc.mParams.size();
+                else if (name == "Y")
+                    acc.mSubOffset[1] = acc.mParams.size();
+                else if (name == "Z")
+                    acc.mSubOffset[2] = acc.mParams.size();
 
-                    /* RGBA colors */
-                    else if (name == "R")
-                        acc.mSubOffset[0] = acc.mParams.size();
-                    else if (name == "G")
-                        acc.mSubOffset[1] = acc.mParams.size();
-                    else if (name == "B")
-                        acc.mSubOffset[2] = acc.mParams.size();
-                    else if (name == "A")
-                        acc.mSubOffset[3] = acc.mParams.size();
+                /* RGBA colors */
+                else if (name == "R")
+                    acc.mSubOffset[0] = acc.mParams.size();
+                else if (name == "G")
+                    acc.mSubOffset[1] = acc.mParams.size();
+                else if (name == "B")
+                    acc.mSubOffset[2] = acc.mParams.size();
+                else if (name == "A")
+                    acc.mSubOffset[3] = acc.mParams.size();
 
-                    /* UVWQ (STPQ) texture coordinates */
-                    else if (name == "S")
-                        acc.mSubOffset[0] = acc.mParams.size();
-                    else if (name == "T")
-                        acc.mSubOffset[1] = acc.mParams.size();
-                    else if (name == "P")
-                        acc.mSubOffset[2] = acc.mParams.size();
-                    //  else if( name == "Q") acc.mSubOffset[3] = acc.mParams.size();
-                    /* 4D uv coordinates are not supported in Assimp */
+                /* UVWQ (STPQ) texture coordinates */
+                else if (name == "S")
+                    acc.mSubOffset[0] = acc.mParams.size();
+                else if (name == "T")
+                    acc.mSubOffset[1] = acc.mParams.size();
+                else if (name == "P")
+                    acc.mSubOffset[2] = acc.mParams.size();
+                //  else if( name == "Q") acc.mSubOffset[3] = acc.mParams.size();
+                /* 4D uv coordinates are not supported in Assimp */
 
-                    /* Generic extra data, interpreted as UV data, too*/
-                    else if (name == "U")
-                        acc.mSubOffset[0] = acc.mParams.size();
-                    else if (name == "V")
-                        acc.mSubOffset[1] = acc.mParams.size();
-                    //else
-                    //  DefaultLogger::get()->warn( format() << "Unknown accessor parameter \"" << name << "\". Ignoring data channel." );
-                }
-
-                // read data type
-                int attrType = TestAttribute("type");
-                if (attrType > -1) {
-                    // for the moment we only distinguish between a 4x4 matrix and anything else.
-                    // TODO: (thom) I don't have a spec here at work. Check if there are other multi-value types
-                    // which should be tested for here.
-                    std::string type = mReader->getAttributeValue(attrType);
-                    if (type == "float4x4")
-                        acc.mSize += 16;
-                    else
-                        acc.mSize += 1;
-                }
-
-                acc.mParams.push_back(name);
-
-                // skip remaining stuff of this element, if any
-                SkipElement();
-            } else {
-                ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <accessor>");
+                /* Generic extra data, interpreted as UV data, too*/
+                else if (name == "U")
+                    acc.mSubOffset[0] = acc.mParams.size();
+                else if (name == "V")
+                    acc.mSubOffset[1] = acc.mParams.size();
+                //else
+                //  DefaultLogger::get()->warn( format() << "Unknown accessor parameter \"" << name << "\". Ignoring data channel." );
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "accessor") != 0)
-                ThrowException("Expected end of <accessor> element.");
-            break;
+            if (XmlParser::hasAttribute(currentNode, "type")) {
+                // read data type
+                // TODO: (thom) I don't have a spec here at work. Check if there are other multi-value types
+                // which should be tested for here.
+                std::string type;
+                
+                XmlParser::getStdStrAttribute(currentNode, "type", type);
+                if (type == "float4x4")
+                    acc.mSize += 16;
+                else
+                    acc.mSize += 1;
+            }
+
+            acc.mParams.push_back(name);
         }
     }
 }
@@ -1724,22 +1562,13 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
 // Reads input declarations of per-vertex mesh data into the given mesh
 void ColladaParser::ReadVertexData(XmlNode &node, Mesh &pMesh) {
     // extract the ID of the <vertices> element. Not that we care, but to catch strange referencing schemes we should warn about
-    int attrID = GetAttribute("id");
-    pMesh.mVertexID = mReader->getAttributeValue(attrID);
-
-    // a number of <input> elements
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("input")) {
-                ReadInputChannel(pMesh.mPerVertexData);
-            } else {
-                ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <vertices>");
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "vertices") != 0)
-                ThrowException("Expected end of <vertices> element.");
-
-            break;
+    XmlParser::getStdStrAttribute(node, "id", pMesh.mVertexID);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "input" ) {
+            ReadInputChannel(currentNode, pMesh.mPerVertexData);
+        } else {
+            ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <vertices>");
         }
     }
 }
@@ -1750,80 +1579,76 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     std::vector<size_t> vcount;
     std::vector<InputChannel> perIndexData;
 
+    XmlParser::getIntAttribute(node, "count", (int) numPrimitives);
     // read primitive count from the attribute
-    int attrCount = GetAttribute("count");
-    size_t numPrimitives = (size_t)mReader->getAttributeValueAsInt(attrCount);
+    //int attrCount = GetAttribute("count");
+    //size_t numPrimitives = (size_t)mReader->getAttributeValueAsInt(attrCount);
     // some mesh types (e.g. tristrips) don't specify primitive count upfront,
     // so we need to sum up the actual number of primitives while we read the <p>-tags
     size_t actualPrimitives = 0;
-
-    // material subgroup
-    int attrMaterial = TestAttribute("material");
     SubMesh subgroup;
-    if (attrMaterial > -1)
-        subgroup.mMaterial = mReader->getAttributeValue(attrMaterial);
+    if (XmlParser::hasAttribute("material")) {
+        XmlParser::getStdStrAttribute(node, "material", subgroup.mMaterial);
+    }
+    // material subgroup
+//    int attrMaterial = TestAttribute("material");
+    
+    //if (attrMaterial > -1)
+      //  subgroup.mMaterial = mReader->getAttributeValue(attrMaterial);
 
     // distinguish between polys and triangles
-    std::string elementName = mReader->getNodeName();
+    std::string elementName = node.name();
     PrimitiveType primType = Prim_Invalid;
-    if (IsElement("lines"))
+    if (elementName == "lines")
         primType = Prim_Lines;
-    else if (IsElement("linestrips"))
+    else if (elementName == "linestrips")
         primType = Prim_LineStrip;
-    else if (IsElement("polygons"))
+    else if (elementName == "polygons")
         primType = Prim_Polygon;
-    else if (IsElement("polylist"))
+    else if (elementName == "polylist")
         primType = Prim_Polylist;
-    else if (IsElement("triangles"))
+    else if (elementName == "triangles")
         primType = Prim_Triangles;
-    else if (IsElement("trifans"))
+    else if (elementName == "trifans")
         primType = Prim_TriFans;
-    else if (IsElement("tristrips"))
+    else if (elementName == "tristrips")
         primType = Prim_TriStrips;
 
     ai_assert(primType != Prim_Invalid);
 
     // also a number of <input> elements, but in addition a <p> primitive collection and probably index counts for all primitives
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("input")) {
-                ReadInputChannel(perIndexData);
-            } else if (IsElement("vcount")) {
-                if (!mReader->isEmptyElement()) {
-                    if (numPrimitives) // It is possible to define a mesh without any primitives
-                    {
-                        // case <polylist> - specifies the number of indices for each polygon
-                        const char *content = GetTextContent();
-                        vcount.reserve(numPrimitives);
-                        for (unsigned int a = 0; a < numPrimitives; a++) {
-                            if (*content == 0)
-                                ThrowException("Expected more values while reading <vcount> contents.");
-                            // read a number
-                            vcount.push_back((size_t)strtoul10(content, &content));
-                            // skip whitespace after it
-                            SkipSpacesAndLineEnd(&content);
-                        }
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "input") {
+            ReadInputChannel(currentNode, perIndexData);
+        } else if (currentName == "vcount") {
+            if (!currentNode.empty()) {
+                if (numPrimitives) // It is possible to define a mesh without any primitives
+                {
+                    // case <polylist> - specifies the number of indices for each polygon
+                    const char *content = GetTextContent();
+                    vcount.reserve(numPrimitives);
+                    for (unsigned int a = 0; a < numPrimitives; a++) {
+                        if (*content == 0)
+                            ThrowException("Expected more values while reading <vcount> contents.");
+                        // read a number
+                        vcount.push_back((size_t)strtoul10(content, &content));
+                        // skip whitespace after it
+                        SkipSpacesAndLineEnd(&content);
                     }
-
-                    TestClosing("vcount");
                 }
-            } else if (IsElement("p")) {
-                if (!mReader->isEmptyElement()) {
-                    // now here the actual fun starts - these are the indices to construct the mesh data from
-                    actualPrimitives += ReadPrimitives(pMesh, perIndexData, numPrimitives, vcount, primType);
-                }
-            } else if (IsElement("extra")) {
-                SkipElement("extra");
-            } else if (IsElement("ph")) {
-                SkipElement("ph");
-            } else {
-                ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">");
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (mReader->getNodeName() != elementName)
-                ThrowException(format() << "Expected end of <" << elementName << "> element.");
-
-            break;
+        } else if (currentName == "p") {
+            if (!currentNode.empty()) {
+                // now here the actual fun starts - these are the indices to construct the mesh data from
+                actualPrimitives += ReadPrimitives(currentNode, pMesh, perIndexData, numPrimitives, vcount, primType);
+            }
+        } else if (currentName == "extra") {
+            // skip
+        } else if (currentName ==  "ph") {
+            // skip
+        } else {
+            ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">");
         }
     }
 
@@ -1845,21 +1670,28 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
     InputChannel channel;
 
     // read semantic
-    int attrSemantic = GetAttribute("semantic");
-    std::string semantic = mReader->getAttributeValue(attrSemantic);
+    std::string semantic;
+    XmlParser::getStdStrAttribute(node, "semantic", semantic);
+    //int attrSemantic = GetAttribute("semantic");
+    //std::string semantic = mReader->getAttributeValue(attrSemantic);
     channel.mType = GetTypeForSemantic(semantic);
 
     // read source
-    int attrSource = GetAttribute("source");
-    const char *source = mReader->getAttributeValue(attrSource);
+    std::string source;
+    XmlParser::getStdStrAttribute(node, "source", source);
+    //int attrSource = GetAttribute("source");
+    //const char *source = mReader->getAttributeValue(attrSource);
     if (source[0] != '#')
         ThrowException(format() << "Unknown reference format in url \"" << source << "\" in source attribute of <input> element.");
-    channel.mAccessor = source + 1; // skipping the leading #, hopefully the remaining text is the accessor ID only
+    channel.mAccessor = source.c_str() + 1; // skipping the leading #, hopefully the remaining text is the accessor ID only
 
     // read index offset, if per-index <input>
-    int attrOffset = TestAttribute("offset");
-    if (attrOffset > -1)
-        channel.mOffset = mReader->getAttributeValueAsInt(attrOffset);
+    if (XmlParser::hasAttribute("offset")) {
+        XmlParser::getStdStrAttribute(node, "offset", channel.mOffset);
+    } 
+    //int attrOffset = TestAttribute("offset");
+    //if (attrOffset > -1)
+//        channel.mOffset = mReader->getAttributeValueAsInt(attrOffset);
 
     // read set if texture coordinates
     if (channel.mType == IT_Texcoord || channel.mType == IT_Color) {

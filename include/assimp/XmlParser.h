@@ -158,6 +158,16 @@ public:
         return !attr.empty();
     }
 
+    static inline bool getUIntAttribute(XmlNode &xmlNode, const char *name, unsigned int &val) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+
+        val = attr.as_uint();
+        return true;
+    }
+
     static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val ) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {
@@ -166,6 +176,17 @@ public:
 
         val = attr.as_int();
         return true;
+    }
+
+    static inline bool getFloatAttribute( XmlNode &xmlNode, const char *name, float &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+
+        val = attr.as_float();
+        return true;
+
     }
 
     static inline bool getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val) {

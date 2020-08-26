@@ -199,6 +199,17 @@ public:
         return true;
     }
 
+    static inline bool getBoolAttribute( XmlNode &xmlNode, const char *name, bool &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+
+        val = attr.as_bool();
+        return true;
+
+    }
+
 private:
     pugi::xml_document *mDoc;
     TNodeType *mRoot;

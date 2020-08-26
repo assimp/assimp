@@ -224,7 +224,7 @@ void ColladaParser::UriDecodePath(aiString &ss) {
 
 // ------------------------------------------------------------------------------------------------
 // Read bool from text contents of current element
-bool ColladaParser::ReadBoolFromTextContent() {
+/*bool ColladaParser::ReadBoolFromTextContent() {
     const char *cur = GetTextContent();
     if (nullptr == cur) {
         return false;
@@ -240,7 +240,7 @@ ai_real ColladaParser::ReadFloatFromTextContent() {
         return 0.0;
     }
     return fast_atof(cur);
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Reads the contents of the file
@@ -664,11 +664,11 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
             }
         } else if (currentName == "source") {
             ReadSource(currentNode);
-        } else if (IsElement("joints")) {
+        } else if (currentName == "joints" ) {
             ReadControllerJoints(currentNode, pController);
-        } else if (IsElement("vertex_weights")) {
+        } else if (currentName == "vertex_weights") {
             ReadControllerWeights(currentNode, pController);
-        } else if (IsElement("targets")) {
+        } else if (currentName == "targets") {
             for (XmlNode currendChildNode : currentNode.children()) {
                 const std::string currentChildName = currendChildNode.name();
                 if (currentChildName == "input") {
@@ -713,13 +713,8 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
 // Reads the joint weights for the given controller
 void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
-    int vertexCount = node.attribute("count").as_int();
-    pController.mWeightCounts.resize(vertexCount);
-
-    /*// read vertex count from attributes and resize the array accordingly
-    int indexCount = GetAttribute("count");
-    size_t vertexCount = (size_t)mReader->getAttributeValueAsInt(indexCount);
-    pController.mWeightCounts.resize(vertexCount);*/
+    int vertexCount;
+    XmlParser::getIntAttribute(node, "count", vertexCount);
 
     for (XmlNode currentNode : node.children()) {
         std::string currentName = currentNode.name();
@@ -810,7 +805,7 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 // FIX: C4D exporter writes empty <init_from/> tags
                 if (!currentNode.empty()) {
                     // element content is filename - hopefully
-                    const char *sz = TestTextContent();
+                    const char *sz = currentNode.value();
                     if (sz) {
                         aiString filepath(sz);
                         UriDecodePath(filepath);
@@ -981,7 +976,7 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
             pLight.mType = aiLightSource_POINT;
         } else if (currentName == "color") {
             // text content contains 3 floats
-            const char *content = GetTextContent();
+            const char *content = currentNode.value();
 
             content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
             SkipSpacesAndLineEnd(&content);
@@ -992,35 +987,33 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
             content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
             SkipSpacesAndLineEnd(&content);
         } else if (currentName == "constant_attenuation") {
-            pLight.mAttConstant = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "constant_attenuation", pLight.mAttConstant);
         } else if (currentName == "linear_attenuation") {
-            pLight.mAttLinear = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "linear_attenuation", pLight.mAttLinear);
         } else if (currentName == "quadratic_attenuation") {
-            pLight.mAttQuadratic = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "quadratic_attenuation", pLight.mAttQuadratic);
         } else if (currentName == "falloff_angle") {
-            pLight.mFalloffAngle = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "falloff_angle", pLight.mFalloffAngle);
         } else if (currentName == "falloff_exponent") {
-            pLight.mFalloffExponent = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "falloff_exponent", pLight.mFalloffExponent);
         }
         // FCOLLADA extensions
         // -------------------------------------------------------
         else if (currentName == "outer_cone") {
-            pLight.mOuterAngle = ReadFloatFromTextContent();
-        }
-        // ... and this one is even deprecated
-        else if (currentName == "penumbra_angle") {
-            pLight.mPenumbraAngle = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "outer_cone", pLight.mOuterAngle);
+        } else if (currentName == "penumbra_angle") { // ... and this one is even deprecated
+            XmlParser::getFloatAttribute(currentNode, "penumbra_angle", pLight.mPenumbraAngle);
         } else if (currentName == "intensity") {
-            pLight.mIntensity = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "intensity", pLight.mIntensity);
         } else if (currentName == "falloff") {
-            pLight.mOuterAngle = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "falloff", pLight.mOuterAngle);
         } else if (currentName == "hotspot_beam") {
-            pLight.mFalloffAngle = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "hotspot_beam", pLight.mFalloffAngle);
         }
         // OpenCOLLADA extensions
         // -------------------------------------------------------
         else if (currentName == "decay_falloff") {
-            pLight.mOuterAngle = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, "decay_falloff", pLight.mOuterAngle);
         }
     }
 }
@@ -1033,15 +1026,15 @@ void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
         if (currentName == "orthographic") {
             camera.mOrtho = true;
         } else if (currentName == "xfov" || currentName == "xmag") {
-            camera.mHorFov = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mHorFov);
         } else if (currentName == "yfov" || currentName == "ymag") {
-            camera.mVerFov = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mVerFov);
         } else if (currentName == "aspect_ratio") {
-            camera.mAspect = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mAspect);
         } else if (currentName == "znear") {
-            camera.mZNear = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mZNear);
         } else if (currentName == "zfar") {
-            camera.mZFar = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mZFar);
         }
     }
 }
@@ -1158,7 +1151,7 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
         // GOOGLEEARTH/OKINO extensions
         // -------------------------------------------------------
         else if (currentName == "double_sided")
-            pEffect.mDoubleSided = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), pEffect.mDoubleSided);
 
         // FCOLLADA extensions
         // -------------------------------------------------------
@@ -1170,9 +1163,9 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
         // MAX3D extensions
         // -------------------------------------------------------
         else if (currentName == "wireframe") {
-            pEffect.mWireframe = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), pEffect.mWireframe);
         } else if (currentName == "faceted") {
-            pEffect.mFaceted = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), pEffect.mFaceted);
         }
     }
 }
@@ -1188,26 +1181,26 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         // MAYA extensions
         // -------------------------------------------------------
         if (currentName == "wrapU") {
-            out.mWrapU = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mWrapU);
         } else if (currentName == "wrapV") {
-            out.mWrapV = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mWrapV);
         } else if (currentName == "mirrorU") {
-            out.mMirrorU = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mMirrorU);
         } else if (currentName == "mirrorV") {
-            out.mMirrorV = ReadBoolFromTextContent();
+            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mMirrorV);
         } else if (currentName == "repeatU") {
-            out.mTransform.mScaling.x = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mTransform.mScaling.x);
         } else if (currentName == "repeatV") {
-            out.mTransform.mScaling.y = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mTransform.mScaling.y);
         } else if (currentName == "offsetU") {
-            out.mTransform.mTranslation.x = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mTransform.mTranslation.x);
         } else if (currentName == "offsetV") {
-            out.mTransform.mTranslation.y = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mTransform.mTranslation.y);
         } else if (currentName == "rotateUV") {
-            out.mTransform.mRotation = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mTransform.mRotation);
         } else if (currentName == "blend_mode") {
 
-            const char *sz = GetTextContent();
+            const char *sz = currentNode.value();
             // http://www.feelingsoftware.com/content/view/55/72/lang,en/
             // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
             if (0 == ASSIMP_strincmp(sz, "ADD", 3))
@@ -1223,14 +1216,14 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         // OKINO extensions
         // -------------------------------------------------------
         else if (currentName == "weighting") {
-            out.mWeighting = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mWeighting);
         } else if (currentName == "mix_with_previous_layer") {
-            out.mMixWithPrevious = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mMixWithPrevious);
         }
         // MAX3D extensions
         // -------------------------------------------------------
         else if (currentName == "amount") {
-            out.mWeighting = ReadFloatFromTextContent();
+            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), out.mWeighting);
         }
     }
 }
@@ -1289,7 +1282,7 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
 // Reads an effect entry containing a float
 void ColladaParser::ReadEffectFloat(XmlNode &node, ai_real &pFloat) {
     pFloat = 0.f;
-    if (node.name() == "float") {
+    if (node.name() == std::string("float")) {
         XmlParser::getFloatAttribute(node, "float", pFloat);
     }
 }
@@ -1415,13 +1408,13 @@ void ColladaParser::ReadSource(XmlNode &node) {
 void ColladaParser::ReadDataArray(XmlNode &node) {
     std::string name = node.name();
     bool isStringArray = (name == "IDREF_array" || name == "Name_array");
-    bool isEmptyElement = node.empty();
+    //bool isEmptyElement = node.empty();
 
     // read attributes
     std::string id;
     XmlParser::getStdStrAttribute(node, "id", id);
-    int count;
-    XmlParser::getIntAttribute(node, "count", count);
+    unsigned int count;
+    XmlParser::getUIntAttribute(node, "count", count);
     const char *content = node.value();
 
     // read values and store inside an array in the data library
@@ -1545,7 +1538,7 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
                 // TODO: (thom) I don't have a spec here at work. Check if there are other multi-value types
                 // which should be tested for here.
                 std::string type;
-                
+
                 XmlParser::getStdStrAttribute(currentNode, "type", type);
                 if (type == "float4x4")
                     acc.mSize += 16;
@@ -1565,10 +1558,10 @@ void ColladaParser::ReadVertexData(XmlNode &node, Mesh &pMesh) {
     XmlParser::getStdStrAttribute(node, "id", pMesh.mVertexID);
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "input" ) {
+        if (currentName == "input") {
             ReadInputChannel(currentNode, pMesh.mPerVertexData);
         } else {
-            ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <vertices>");
+            ThrowException(format() << "Unexpected sub element <" << currentName << "> in tag <vertices>");
         }
     }
 }
@@ -1579,7 +1572,8 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     std::vector<size_t> vcount;
     std::vector<InputChannel> perIndexData;
 
-    XmlParser::getIntAttribute(node, "count", (int) numPrimitives);
+    unsigned int numPrimitives;
+    XmlParser::getUIntAttribute(node, "count", (unsigned int)numPrimitives);
     // read primitive count from the attribute
     //int attrCount = GetAttribute("count");
     //size_t numPrimitives = (size_t)mReader->getAttributeValueAsInt(attrCount);
@@ -1587,14 +1581,14 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     // so we need to sum up the actual number of primitives while we read the <p>-tags
     size_t actualPrimitives = 0;
     SubMesh subgroup;
-    if (XmlParser::hasAttribute("material")) {
+    if (XmlParser::hasAttribute(node, "material")) {
         XmlParser::getStdStrAttribute(node, "material", subgroup.mMaterial);
     }
     // material subgroup
-//    int attrMaterial = TestAttribute("material");
-    
+    //    int attrMaterial = TestAttribute("material");
+
     //if (attrMaterial > -1)
-      //  subgroup.mMaterial = mReader->getAttributeValue(attrMaterial);
+    //  subgroup.mMaterial = mReader->getAttributeValue(attrMaterial);
 
     // distinguish between polys and triangles
     std::string elementName = node.name();
@@ -1626,7 +1620,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
                 if (numPrimitives) // It is possible to define a mesh without any primitives
                 {
                     // case <polylist> - specifies the number of indices for each polygon
-                    const char *content = GetTextContent();
+                    const char *content = currentNode.value();
                     vcount.reserve(numPrimitives);
                     for (unsigned int a = 0; a < numPrimitives; a++) {
                         if (*content == 0)
@@ -1645,10 +1639,10 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
             }
         } else if (currentName == "extra") {
             // skip
-        } else if (currentName ==  "ph") {
+        } else if (currentName == "ph") {
             // skip
         } else {
-            ThrowException(format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">");
+            ThrowException(format() << "Unexpected sub element <" << currentName << "> in tag <" << elementName << ">");
         }
     }
 
@@ -1686,31 +1680,26 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
     channel.mAccessor = source.c_str() + 1; // skipping the leading #, hopefully the remaining text is the accessor ID only
 
     // read index offset, if per-index <input>
-    if (XmlParser::hasAttribute("offset")) {
-        XmlParser::getStdStrAttribute(node, "offset", channel.mOffset);
-    } 
+    if (XmlParser::hasAttribute(node, "offset")) {
+        XmlParser::getUIntAttribute(node, "offset", (unsigned int &)channel.mOffset);
+    }
     //int attrOffset = TestAttribute("offset");
     //if (attrOffset > -1)
-//        channel.mOffset = mReader->getAttributeValueAsInt(attrOffset);
+    //        channel.mOffset = mReader->getAttributeValueAsInt(attrOffset);
 
     // read set if texture coordinates
     if (channel.mType == IT_Texcoord || channel.mType == IT_Color) {
-        int attrSet = TestAttribute("set");
-        if (attrSet > -1) {
-            attrSet = mReader->getAttributeValueAsInt(attrSet);
-            if (attrSet < 0)
-                ThrowException(format() << "Invalid index \"" << (attrSet) << "\" in set attribute of <input> element");
-
-            channel.mIndex = attrSet;
+        int attrSet = -1;
+        if (XmlParser::hasAttribute(node, "set")) {
+            XmlParser::getIntAttribute(node, "set", attrSet);
         }
+
+        channel.mIndex = attrSet;
     }
 
     // store, if valid type
     if (channel.mType != IT_Invalid)
         poChannels.push_back(channel);
-
-    // skip remaining stuff of this element, if any
-    SkipElement();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1753,7 +1742,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
 
     if (pNumPrimitives > 0) // It is possible to not contain any indices
     {
-        const char *content = GetTextContent();
+        const char *content = node.value();
         while (*content != 0) {
             // read a value.
             // Hack: (thom) Some exporters put negative indices sometimes. We just try to carry on anyways.
@@ -1875,7 +1864,6 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
     }
 
     // if I ever get my hands on that guy who invented this steaming pile of indirection...
-    TestClosing("p");
     return numPrimitives;
 }
 
@@ -2024,36 +2012,32 @@ void ColladaParser::ReadSceneLibrary(XmlNode &node) {
     /*if (mReader->isEmptyElement())
         return;*/
 
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            // a visual scene - generate root node under its ID and let ReadNode() do the recursive work
-            if (IsElement("visual_scene")) {
-                // read ID. Is optional according to the spec, but how on earth should a scene_instance refer to it then?
-                int indexID = GetAttribute("id");
-                const char *attrID = mReader->getAttributeValue(indexID);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "visual_scene") {
+            // read ID. Is optional according to the spec, but how on earth should a scene_instance refer to it then?
+            std::string id;
+            XmlParser::getStdStrAttribute(currentNode, "id", id);
+            //int indexID = GetAttribute("id");
+            //const char *attrID = mReader->getAttributeValue(indexID);
 
-                // read name if given.
-                int indexName = TestAttribute("name");
-                const char *attrName = "Scene";
-                if (indexName > -1)
-                    attrName = mReader->getAttributeValue(indexName);
-
-                // create a node and store it in the library under its ID
-                Node *node = new Node;
-                node->mID = attrID;
-                node->mName = attrName;
-                mNodeLibrary[node->mID] = node;
-
-                ReadSceneNode(node);
-            } else {
-                // ignore the rest
-                SkipElement();
+            std::string attrName = "Scene";
+            if (XmlParser::hasAttribute(currentNode, "name")) {
+                XmlParser::getStdStrAttribute(currentNode, "name", attrName);
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "library_visual_scenes") == 0)
-                //ThrowException( "Expected end of \"library_visual_scenes\" element.");
+            // read name if given.
+            //int indexName = TestAttribute("name");
+            //const char *attrName = "Scene";
+            //if (indexName > -1)
+            //attrName = mReader->getAttributeValue(indexName);
 
-                break;
+            // create a node and store it in the library under its ID
+            Node *sceneNode = new Node;
+            sceneNode->mID = id;
+            sceneNode->mName = attrName;
+            mNodeLibrary[sceneNode->mID] = sceneNode;
+
+            ReadSceneNode(node, sceneNode);
         }
     }
 }
@@ -2066,113 +2050,98 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
         return;
     }
 
-    /*    if (mReader->isEmptyElement())
-        return;*/
-
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("node")) {
-                Node *child = new Node;
-                int attrID = TestAttribute("id");
-                if (attrID > -1)
-                    child->mID = mReader->getAttributeValue(attrID);
-                int attrSID = TestAttribute("sid");
-                if (attrSID > -1)
-                    child->mSID = mReader->getAttributeValue(attrSID);
-
-                int attrName = TestAttribute("name");
-                if (attrName > -1)
-                    child->mName = mReader->getAttributeValue(attrName);
-
-                if (pNode) {
-                    pNode->mChildren.push_back(child);
-                    child->mParent = pNode;
-                } else {
-                    // no parent node given, probably called from <library_nodes> element.
-                    // create new node in node library
-                    mNodeLibrary[child->mID] = child;
-                }
-
-                // read on recursively from there
-                ReadSceneNode(child);
-                continue;
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "node") {
+            Node *child = new Node;
+            if (XmlParser::hasAttribute(currentNode, "id")) {
+                XmlParser::getStdStrAttribute(currentNode, "id", child->mID);
             }
-            // For any further stuff we need a valid node to work on
-            else if (!pNode)
-                continue;
-
-            if (IsElement("lookat"))
-                ReadNodeTransformation(pNode, TF_LOOKAT);
-            else if (IsElement("matrix"))
-                ReadNodeTransformation(pNode, TF_MATRIX);
-            else if (IsElement("rotate"))
-                ReadNodeTransformation(pNode, TF_ROTATE);
-            else if (IsElement("scale"))
-                ReadNodeTransformation(pNode, TF_SCALE);
-            else if (IsElement("skew"))
-                ReadNodeTransformation(pNode, TF_SKEW);
-            else if (IsElement("translate"))
-                ReadNodeTransformation(pNode, TF_TRANSLATE);
-            else if (IsElement("render") && pNode->mParent == nullptr && 0 == pNode->mPrimaryCamera.length()) {
-                // ... scene evaluation or, in other words, postprocessing pipeline,
-                // or, again in other words, a turing-complete description how to
-                // render a Collada scene. The only thing that is interesting for
-                // us is the primary camera.
-                int attrId = TestAttribute("camera_node");
-                if (-1 != attrId) {
-                    const char *s = mReader->getAttributeValue(attrId);
-                    if (s[0] != '#')
-                        ASSIMP_LOG_ERROR("Collada: Unresolved reference format of camera");
-                    else
-                        pNode->mPrimaryCamera = s + 1;
-                }
-            } else if (IsElement("instance_node")) {
-                // find the node in the library
-                int attrID = TestAttribute("url");
-                if (attrID != -1) {
-                    const char *s = mReader->getAttributeValue(attrID);
-                    if (s[0] != '#')
-                        ASSIMP_LOG_ERROR("Collada: Unresolved reference format of node");
-                    else {
-                        pNode->mNodeInstances.push_back(NodeInstance());
-                        pNode->mNodeInstances.back().mNode = s + 1;
-                    }
-                }
-            } else if (IsElement("instance_geometry") || IsElement("instance_controller")) {
-                // Reference to a mesh or controller, with possible material associations
-                ReadNodeGeometry(pNode);
-            } else if (IsElement("instance_light")) {
-                // Reference to a light, name given in 'url' attribute
-                int attrID = TestAttribute("url");
-                if (-1 == attrID)
-                    ASSIMP_LOG_WARN("Collada: Expected url attribute in <instance_light> element");
-                else {
-                    const char *url = mReader->getAttributeValue(attrID);
-                    if (url[0] != '#')
-                        ThrowException("Unknown reference format in <instance_light> element");
-
-                    pNode->mLights.push_back(LightInstance());
-                    pNode->mLights.back().mLight = url + 1;
-                }
-            } else if (IsElement("instance_camera")) {
-                // Reference to a camera, name given in 'url' attribute
-                int attrID = TestAttribute("url");
-                if (-1 == attrID)
-                    ASSIMP_LOG_WARN("Collada: Expected url attribute in <instance_camera> element");
-                else {
-                    const char *url = mReader->getAttributeValue(attrID);
-                    if (url[0] != '#')
-                        ThrowException("Unknown reference format in <instance_camera> element");
-
-                    pNode->mCameras.push_back(CameraInstance());
-                    pNode->mCameras.back().mCamera = url + 1;
-                }
+            if (XmlParser::hasAttribute(currentNode, "sid")) {
+                XmlParser::getStdStrAttribute(currentNode, "id", child->mSID);
+            }
+            if (XmlParser::hasAttribute(currentNode, "name")) {
+                XmlParser::getStdStrAttribute(currentNode, "name", child->mName);
+            }
+            if (pNode) {
+                pNode->mChildren.push_back(child);
+                child->mParent = pNode;
             } else {
-                // skip everything else for the moment
-                SkipElement();
+                // no parent node given, probably called from <library_nodes> element.
+                // create new node in node library
+                mNodeLibrary[child->mID] = child;
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            break;
+
+            // read on recursively from there
+            ReadSceneNode(currentNode, child);
+            continue;
+        } else if (!pNode) {
+            // For any further stuff we need a valid node to work on
+            continue;
+        }
+        if (currentName == "lookat") {
+            ReadNodeTransformation(currentNode, pNode, TF_LOOKAT);
+        } else if (currentName == "matrix") {
+            ReadNodeTransformation(currentNode, pNode, TF_MATRIX);
+        } else if (currentName == "rotate") {
+            ReadNodeTransformation(currentNode, pNode, TF_ROTATE);
+        } else if (currentName == "scale") {
+            ReadNodeTransformation(currentNode, pNode, TF_SCALE);
+        } else if (currentName == "skew") {
+            ReadNodeTransformation(currentNode, pNode, TF_SKEW);
+        } else if (currentName == "translate") {
+            ReadNodeTransformation(currentNode, pNode, TF_TRANSLATE);
+        } else if (currentName == "render" && pNode->mParent == nullptr && 0 == pNode->mPrimaryCamera.length()) {
+            // ... scene evaluation or, in other words, postprocessing pipeline,
+            // or, again in other words, a turing-complete description how to
+            // render a Collada scene. The only thing that is interesting for
+            // us is the primary camera.
+            if (XmlParser::hasAttribute(currentNode, "camera_node")) {
+                std::string s;
+                XmlParser::getStdStrAttribute(currentNode, "camera_node", s);
+                if (s[0] != '#') {
+                    ASSIMP_LOG_ERROR("Collada: Unresolved reference format of camera");
+                } else {
+                    pNode->mPrimaryCamera = s.c_str() + 1;
+                }
+            }
+        } else if (currentName == "instance_node") {
+            // find the node in the library
+            if (XmlParser::hasAttribute(currentNode, "url")) {
+                std::string s;
+                XmlParser::getStdStrAttribute(currentNode, "url", s);
+                if (s[0] != '#') {
+                    ASSIMP_LOG_ERROR("Collada: Unresolved reference format of node");
+                } else {
+                    pNode->mNodeInstances.push_back(NodeInstance());
+                    pNode->mNodeInstances.back().mNode = s.c_str() + 1;
+                }
+            }
+        } else if (currentName == "instance_geometry" || currentName == "instance_controller") {
+            // Reference to a mesh or controller, with possible material associations
+            ReadNodeGeometry(currentNode, pNode);
+        } else if (currentName == "instance_light") {
+            // Reference to a light, name given in 'url' attribute
+            if (XmlParser::hasAttribute(currentNode, "url")) {
+                std::string url;
+                XmlParser::getStdStrAttribute(currentNode, "url", url);
+                if (url[0] != '#')
+                    ThrowException("Unknown reference format in <instance_light> element");
+
+                pNode->mLights.push_back(LightInstance());
+                pNode->mLights.back().mLight = url.c_str() + 1;
+            }
+        } else if (currentName == "instance_camera") {
+            // Reference to a camera, name given in 'url' attribute
+            if (XmlParser::hasAttribute(currentNode, "url")) {
+                std::string url;
+                XmlParser::getStdStrAttribute(currentNode, "url", url);
+                if (url[0] != '#') {
+                    ThrowException("Unknown reference format in <instance_camera> element");
+                }
+                pNode->mCameras.push_back(CameraInstance());
+                pNode->mCameras.back().mCamera = url.c_str() + 1;
+            }
         }
     }
 }
@@ -2183,22 +2152,20 @@ void ColladaParser::ReadNodeTransformation(XmlNode &node, Node *pNode, Transform
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
 
-    std::string tagName = mReader->getNodeName();
+    std::string tagName = node.name();
 
     Transform tf;
     tf.mType = pType;
 
     // read SID
-    int indexSID = TestAttribute("sid");
-    if (indexSID >= 0)
-        tf.mID = mReader->getAttributeValue(indexSID);
+    if (XmlParser::hasAttribute(node, "sid")) {
+        XmlParser::getStdStrAttribute(node, "sid", tf.mID);
+    }
 
     // how many parameters to read per transformation type
     static const unsigned int sNumParameters[] = { 9, 4, 3, 3, 7, 16 };
-    const char *content = GetTextContent();
+    const char *content = node.value();
 
     // read as many parameters and store in the transformation
     for (unsigned int a = 0; a < sNumParameters[pType]; a++) {
@@ -2210,39 +2177,36 @@ void ColladaParser::ReadNodeTransformation(XmlNode &node, Node *pNode, Transform
 
     // place the transformation at the queue of the node
     pNode->mTransforms.push_back(tf);
-
-    // and consume the closing tag
-    TestClosing(tagName.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------
 // Processes bind_vertex_input and bind elements
 void ColladaParser::ReadMaterialVertexInputBinding(XmlNode &node, Collada::SemanticMappingTable &tbl) {
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("bind_vertex_input")) {
-                Collada::InputSemanticMapEntry vn;
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "bind_vertex_input") {
+            Collada::InputSemanticMapEntry vn;
 
-                // effect semantic
-                int n = GetAttribute("semantic");
-                std::string s = mReader->getAttributeValue(n);
-
-                // input semantic
-                n = GetAttribute("input_semantic");
-                vn.mType = GetTypeForSemantic(mReader->getAttributeValue(n));
-
-                // index of input set
-                n = TestAttribute("input_set");
-                if (-1 != n)
-                    vn.mSet = mReader->getAttributeValueAsInt(n);
-
-                tbl.mMap[s] = vn;
-            } else if (IsElement("bind")) {
-                ASSIMP_LOG_WARN("Collada: Found unsupported <bind> element");
+            // effect semantic
+            if (XmlParser::hasAttribute(currentNode, "semantic")) {
+                std::string s;
+                XmlParser::getStdStrAttribute(currentNode, "semantic", s);
+                XmlParser::getUIntAttribute(currentNode, "input_semantic", (unsigned int &)vn.mType);
             }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (strcmp(mReader->getNodeName(), "instance_material") == 0)
-                break;
+            std::string s;
+            XmlParser::getStdStrAttribute(currentNode, "semantic", s);
+
+            // input semantic
+            XmlParser::getUIntAttribute(currentNode, "input_semantic", (unsigned int &)vn.mType);
+
+            // index of input set
+            if (XmlParser::hasAttribute(currentNode, "input_set")) {
+                XmlParser::getUIntAttribute(currentNode, "input_set", vn.mSet);
+            }
+
+            tbl.mMap[s] = vn;
+        } else if (currentName == "bind") {
+            ASSIMP_LOG_WARN("Collada: Found unsupported <bind> element");
         }
     }
 }
@@ -2270,41 +2234,31 @@ void ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive) {
 // Reads a mesh reference in a node and adds it to the node's mesh list
 void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
     // referred mesh is given as an attribute of the <instance_geometry> element
-    int attrUrl = GetAttribute("url");
-    const char *url = mReader->getAttributeValue(attrUrl);
+    std::string url;
+    XmlParser::getStdStrAttribute(node, "url", url);
     if (url[0] != '#')
         ThrowException("Unknown reference format");
 
     Collada::MeshInstance instance;
-    instance.mMeshOrController = url + 1; // skipping the leading #
+    instance.mMeshOrController = url.c_str() + 1; // skipping the leading #
 
-    if (!mReader->isEmptyElement()) {
-        // read material associations. Ignore additional elements in between
-        while (mReader->read()) {
-            if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-                if (IsElement("instance_material")) {
-                    // read ID of the geometry subgroup and the target material
-                    int attrGroup = GetAttribute("symbol");
-                    std::string group = mReader->getAttributeValue(attrGroup);
-                    int attrMaterial = GetAttribute("target");
-                    const char *urlMat = mReader->getAttributeValue(attrMaterial);
-                    Collada::SemanticMappingTable s;
-                    if (urlMat[0] == '#')
-                        urlMat++;
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName=="instance_material") {
+            // read ID of the geometry subgroup and the target material
+            std::string group;
+            XmlParser::getStdStrAttribute(currentNode, "symbol", group);
+            XmlParser::getStdStrAttribute(currentNode, "symbol", url);
+            const char *urlMat = url.c_str();
+            Collada::SemanticMappingTable s;
+            if (urlMat[0] == '#')
+                urlMat++;
 
-                    s.mMatName = urlMat;
+            s.mMatName = urlMat;
 
-                    // resolve further material details + THIS UGLY AND NASTY semantic mapping stuff
-                    if (!mReader->isEmptyElement())
-                        ReadMaterialVertexInputBinding(s);
 
-                    // store the association
-                    instance.mMaterials[group] = s;
-                }
-            } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-                if (strcmp(mReader->getNodeName(), "instance_geometry") == 0 || strcmp(mReader->getNodeName(), "instance_controller") == 0)
-                    break;
-            }
+            // store the association
+            instance.mMaterials[group] = s;
         }
     }
 
@@ -2318,8 +2272,6 @@ void ColladaParser::ReadScene(XmlNode &node) {
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
 
     for (XmlNode currentNode : node.children()) {
         const std::string currentName = currentNode.name();
@@ -2329,46 +2281,20 @@ void ColladaParser::ReadScene(XmlNode &node) {
                 ThrowException("Invalid scene containing multiple root nodes in <instance_visual_scene> element");
 
             // read the url of the scene to instance. Should be of format "#some_name"
-            int urlIndex = currentNode.attribute("url").as_int();
-            const char *url = currentNode.attributes.begin() + urlIndex;
+            std::string url;
+            XmlParser::getStdStrAttribute(currentNode, "url", url);
             if (url[0] != '#') {
                 ThrowException("Unknown reference format in <instance_visual_scene> element");
             }
 
             // find the referred scene, skip the leading #
-            NodeLibrary::const_iterator sit = mNodeLibrary.find(url + 1);
+            NodeLibrary::const_iterator sit = mNodeLibrary.find(url.c_str() + 1);
             if (sit == mNodeLibrary.end()) {
                 ThrowException("Unable to resolve visual_scene reference \"" + std::string(url) + "\" in <instance_visual_scene> element.");
             }
             mRootNode = sit->second;
         }
     }
-
-    /*while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT) {
-            if (IsElement("instance_visual_scene")) {
-                // should be the first and only occurrence
-                if (mRootNode)
-                    ThrowException("Invalid scene containing multiple root nodes in <instance_visual_scene> element");
-
-                // read the url of the scene to instance. Should be of format "#some_name"
-                int urlIndex = GetAttribute("url");
-                const char *url = mReader->getAttributeValue(urlIndex);
-                if (url[0] != '#')
-                    ThrowException("Unknown reference format in <instance_visual_scene> element");
-
-                // find the referred scene, skip the leading #
-                NodeLibrary::const_iterator sit = mNodeLibrary.find(url + 1);
-                if (sit == mNodeLibrary.end())
-                    ThrowException("Unable to resolve visual_scene reference \"" + std::string(url) + "\" in <instance_visual_scene> element.");
-                mRootNode = sit->second;
-            } else {
-                SkipElement();
-            }
-        } else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            break;
-        }
-    }*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2390,136 +2316,6 @@ void ColladaParser::ReportWarning(const char *msg, ...) {
     va_end(args);
     ASSIMP_LOG_WARN_F("Validation warning: ", std::string(szBuffer, iLen));
 }
-
-// ------------------------------------------------------------------------------------------------
-// Skips all data until the end node of the current element
-/*void ColladaParser::SkipElement() {
-    // nothing to skip if it's an <element />
-    if (mReader->isEmptyElement()) {
-        return;
-    }
-
-    // reroute
-    SkipElement(mReader->getNodeName());
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Skips all data until the end node of the given element
-/*void ColladaParser::SkipElement(const char *pElement) {
-    // copy the current node's name because it'a pointer to the reader's internal buffer,
-    // which is going to change with the upcoming parsing
-    std::string element = pElement;
-    while (mReader->read()) {
-        if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
-            if (mReader->getNodeName() == element) {
-                break;
-            }
-        }
-    }
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Tests for an opening element of the given name, throws an exception if not found
-/*void ColladaParser::TestOpening(const char *pName) {
-    // read element start
-    if (!mReader->read()) {
-        ThrowException(format() << "Unexpected end of file while beginning of <" << pName << "> element.");
-    }
-    // whitespace in front is ok, just read again if found
-    if (mReader->getNodeType() == irr::io::EXN_TEXT) {
-        if (!mReader->read()) {
-            ThrowException(format() << "Unexpected end of file while reading beginning of <" << pName << "> element.");
-        }
-    }
-
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp(mReader->getNodeName(), pName) != 0) {
-        ThrowException(format() << "Expected start of <" << pName << "> element.");
-    }
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Tests for the closing tag of the given element, throws an exception if not found
-/*void ColladaParser::TestClosing(const char *pName) {
-    // check if we have an empty (self-closing) element
-    if (mReader->isEmptyElement()) {
-        return;
-    }
-
-    // check if we're already on the closing tag and return right away
-    if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END && strcmp(mReader->getNodeName(), pName) == 0) {
-        return;
-    }
-
-    // if not, read some more
-    if (!mReader->read()) {
-        ThrowException(format() << "Unexpected end of file while reading end of <" << pName << "> element.");
-    }
-    // whitespace in front is ok, just read again if found
-    if (mReader->getNodeType() == irr::io::EXN_TEXT) {
-        if (!mReader->read()) {
-            ThrowException(format() << "Unexpected end of file while reading end of <" << pName << "> element.");
-        }
-    }
-
-    // but this has the be the closing tag, or we're lost
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp(mReader->getNodeName(), pName) != 0) {
-        ThrowException(format() << "Expected end of <" << pName << "> element.");
-    }
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Returns the index of the named attribute or -1 if not found. Does not throw, therefore useful for optional attributes
-/*int ColladaParser::GetAttribute(const char *pAttr) const {
-    int index = TestAttribute(pAttr);
-    if (index == -1) {
-        ThrowException(format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.");
-    }
-
-    // attribute not found -> throw an exception
-    return index;
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Tests the present element for the presence of one attribute, returns its index or throws an exception if not found
-/*int ColladaParser::TestAttribute(const char *pAttr) const {
-    for (int a = 0; a < mReader->getAttributeCount(); a++)
-        if (strcmp(mReader->getAttributeName(a), pAttr) == 0)
-            return a;
-
-    return -1;
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Reads the text contents of an element, throws an exception if not given. Skips leading whitespace.
-/*const char *ColladaParser::GetTextContent() {
-    const char *sz = TestTextContent();
-    if (!sz) {
-        ThrowException("Invalid contents in element \"n\".");
-    }
-    return sz;
-}*/
-
-// ------------------------------------------------------------------------------------------------
-// Reads the text contents of an element, returns nullptr if not given. Skips leading whitespace.
-/*const char *ColladaParser::TestTextContent() {
-    // present node should be the beginning of an element
-    if (mReader->getNodeType() != irr::io::EXN_ELEMENT || mReader->isEmptyElement())
-        return nullptr;
-
-    // read contents of the element
-    if (!mReader->read()) {
-        return nullptr;
-    }
-    if (mReader->getNodeType() != irr::io::EXN_TEXT && mReader->getNodeType() != irr::io::EXN_CDATA) {
-        return nullptr;
-    }
-
-    // skip leading whitespace
-    const char *text = mReader->getNodeData();
-    SkipSpacesAndLineEnd(&text);
-
-    return text;
-}*/
 
 // ------------------------------------------------------------------------------------------------
 // Calculates the resulting transformation from all the given transform steps

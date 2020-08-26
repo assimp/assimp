@@ -247,43 +247,6 @@ protected:
     AI_WONT_RETURN void ThrowException(const std::string &pError) const AI_WONT_RETURN_SUFFIX;
     void ReportWarning(const char *msg, ...);
 
-    /** Skips all data until the end node of the current element */
-    //void SkipElement();
-
-    /** Skips all data until the end node of the given element */
-    //void SkipElement(const char *pElement);
-
-    /** Compares the current xml element name to the given string and returns true if equal */
-    bool IsElement(const char *pName) const;
-
-    /** Tests for the opening tag of the given element, throws an exception if not found */
-    //void TestOpening(const char *pName);
-
-    /** Tests for the closing tag of the given element, throws an exception if not found */
-    //void TestClosing(const char *pName);
-
-    /** Checks the present element for the presence of the attribute, returns its index
-         or throws an exception if not found */
-    int GetAttribute(const char *pAttr) const;
-
-    /** Returns the index of the named attribute or -1 if not found. Does not throw,
-         therefore useful for optional attributes */
-    int TestAttribute(const char *pAttr) const;
-
-    /** Reads the text contents of an element, throws an exception if not given.
-         Skips leading whitespace. */
-    const char *GetTextContent();
-
-    /** Reads the text contents of an element, returns nullptr if not given.
-         Skips leading whitespace. */
-    const char *TestTextContent();
-
-    /** Reads a single bool from current text content */
-    bool ReadBoolFromTextContent();
-
-    /** Reads a single float from current text content */
-    ai_real ReadFloatFromTextContent();
-
     /** Calculates the resulting transformation from all the given transform steps */
     aiMatrix4x4 CalculateResultTransform(const std::vector<Collada::Transform> &pTransforms) const;
 

@@ -43,10 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // We need to be sure to have the same STL settings as Assimp
 
 #include <assimp/cimport.h>
-#pragma warning(push)
-#pragma warning(disable:4389)
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable : 4389)
+#endif
 #include <gtest/gtest.h>
-#pragma warning(pop)
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 #include <memory>
 #include <math.h>
 #include "UTLogStream.h"

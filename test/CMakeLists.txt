@@ -2,8 +2,7 @@
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 2006-2020, assimp team
-
-
+#
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -88,6 +87,7 @@ SET( COMMON
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp
   unit/Common/utAssertHandler.cpp
+  unit/Common/utXmlParser.cpp
 )
 
 SET( IMPORTERS

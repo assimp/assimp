@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Ogre {
 
-AI_WONT_RETURN void ThrowAttibuteError(const XmlParser *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
+//AI_WONT_RETURN void ThrowAttibuteError(const XmlParser *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
 
 AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) {
     if (!error.empty()) {
@@ -69,7 +69,7 @@ AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::s
 template <>
 int32_t OgreXmlSerializer::ReadAttribute<int32_t>(XmlNode &xmlNode, const char *name) const {
     if (!XmlParser::hasAttribute(xmlNode, name)) {
-        ThrowAttibuteError(mParser, name);
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
     pugi::xml_attribute attr = xmlNode.attribute(name);
     return static_cast<int32_t>(attr.as_int());
@@ -78,14 +78,14 @@ int32_t OgreXmlSerializer::ReadAttribute<int32_t>(XmlNode &xmlNode, const char *
 template <>
 uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(XmlNode &xmlNode, const char *name) const {
     if (!XmlParser::hasAttribute(xmlNode, name)) {
-        ThrowAttibuteError(mParser, name);
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
 
     // @note This is hackish. But we are never expecting unsigned values that go outside the
     //       int32_t range. Just monitor for negative numbers and kill the import.
     int32_t temp = ReadAttribute<int32_t>(xmlNode, name);
     if (temp < 0) {
-        ThrowAttibuteError(mParser, name, "Found a negative number value where expecting a uint32_t value");
+        ThrowAttibuteError(xmlNode.name(), name, "Found a negative number value where expecting a uint32_t value");
     }
 
     return static_cast<uint32_t>(temp);
@@ -94,7 +94,7 @@ uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(XmlNode &xmlNode, const char
 template <>
 uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(XmlNode &xmlNode, const char *name) const {
     if (!XmlParser::hasAttribute(xmlNode, name)) {
-        ThrowAttibuteError(mParser, name);
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
 
     return static_cast<uint16_t>(xmlNode.attribute(name).as_int());
@@ -103,7 +103,7 @@ uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(XmlNode &xmlNode, const char
 template <>
 float OgreXmlSerializer::ReadAttribute<float>(XmlNode &xmlNode, const char *name) const {
     if (!XmlParser::hasAttribute(xmlNode, name)) {
-        ThrowAttibuteError(mParser, name);
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
     
     return xmlNode.attribute(name).as_float();
@@ -112,7 +112,7 @@ float OgreXmlSerializer::ReadAttribute<float>(XmlNode &xmlNode, const char *name
 template <>
 std::string OgreXmlSerializer::ReadAttribute<std::string>(XmlNode &xmlNode, const char *name) const {
     if (!XmlParser::hasAttribute(xmlNode, name)) {
-        ThrowAttibuteError(mParser, name);
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
 
     return xmlNode.attribute(name).as_string();
@@ -127,7 +127,7 @@ bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) 
         return false;
     } 
 
-    ThrowAttibuteError(mParser, name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
+    ThrowAttibuteError(xmlNode.name(), name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
     return false;
 }
 

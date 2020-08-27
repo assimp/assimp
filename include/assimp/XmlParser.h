@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -119,6 +118,7 @@ public:
     }
 
     TNodeType *parse(IOStream *stream) {
+        mRoot = nullptr;
         if (nullptr == stream) {
             return nullptr;
         }
@@ -126,10 +126,9 @@ public:
         mData.resize(stream->FileSize());
         stream->Read(&mData[0], mData.size(), 1);
         mDoc = new pugi::xml_document();
-        pugi::xml_parse_result result = mDoc->load_string(&mData[0]);
+        pugi::xml_parse_result result = mDoc->load_string(&mData[0], pugi::parse_default | pugi::parse_declaration);
         if (result.status == pugi::status_ok) {
-            pugi::xml_node root = *(mDoc->children().begin());
-
+            pugi::xml_node root = mDoc->document_element();
             mRoot = &root;
         }
 

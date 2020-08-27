@@ -121,6 +121,14 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
     if (nullptr == root) {
         ThrowException("Unable to read file, malformed XML");
     }
+    bool res = root->empty();
+    if (!res) {
+        for (XmlNode &n : root->children()) {
+            const std::string nm = n.name();
+        }
+        XmlNode node = root->first_child();
+        std::string name = node.name();
+    }
 
     // start reading
     ReadContents(*root);
@@ -664,7 +672,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
             }
         } else if (currentName == "source") {
             ReadSource(currentNode);
-        } else if (currentName == "joints" ) {
+        } else if (currentName == "joints") {
             ReadControllerJoints(currentNode, pController);
         } else if (currentName == "vertex_weights") {
             ReadControllerWeights(currentNode, pController);
@@ -2244,7 +2252,7 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
 
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
-        if (currentName=="instance_material") {
+        if (currentName == "instance_material") {
             // read ID of the geometry subgroup and the target material
             std::string group;
             XmlParser::getStdStrAttribute(currentNode, "symbol", group);
@@ -2255,7 +2263,6 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
                 urlMat++;
 
             s.mMatName = urlMat;
-
 
             // store the association
             instance.mMaterials[group] = s;

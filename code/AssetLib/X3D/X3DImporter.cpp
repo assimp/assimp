@@ -147,6 +147,16 @@ void X3DImporter::Clear() {
     }
 }
 
+void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
+    ai_assert(nullptr != pIOHandler);
+
+    static const std::string mode = "rb";
+    std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, mode));
+    if (!fileStream.get()) {
+        throw DeadlyImportError("Failed to open file " + file + ".");
+    }
+}
+
 /*********************************************************************************************************************************************/
 /************************************************************ Functions: find set ************************************************************/
 /*********************************************************************************************************************************************/
@@ -154,7 +164,9 @@ void X3DImporter::Clear() {
 bool X3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const {
     const std::string extension = GetExtension(pFile);
 
-    if ((extension == "x3d") || (extension == "x3db")) return true;
+    if ((extension == "x3d") || (extension == "x3db")) {
+        return true;
+    }
 
     if (!extension.length() || pCheckSig) {
         const char *tokens[] = { "DOCTYPE X3D PUBLIC", "http://www.web3d.org/specifications/x3d" };

@@ -126,7 +126,7 @@ public:
         mData.resize(stream->FileSize());
         stream->Read(&mData[0], mData.size(), 1);
         mDoc = new pugi::xml_document();
-        pugi::xml_parse_result result = mDoc->load_string(&mData[0], pugi::parse_default | pugi::parse_declaration);
+        pugi::xml_parse_result result = mDoc->load_string(&mData[0], pugi::parse_full);
         if (result.status == pugi::status_ok) {
             pugi::xml_node root = mDoc->document_element();
             mRoot = &root;

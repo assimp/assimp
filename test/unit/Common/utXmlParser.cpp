@@ -54,5 +54,6 @@ TEST_F(utXmlParser, parse_xml_test) {
     std::string filename = ASSIMP_TEST_MODELS_DIR "/3D/box_a.3d";
     IOStream *stream = ioSystem.Open(filename.c_str(), "rb");
     bool result = parser.parse(stream);
+    EXPECT_TRUE(result);
 }
 

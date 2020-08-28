@@ -121,18 +121,20 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
     if (nullptr == rootPtr) {
         ThrowException("Unable to read file, malformed XML");
     }
-    bool res = rootPtr->empty();
-    if (!res) {
-        XmlNode node = *rootPtr;
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+//    bool res = rootPtr->empty();
+    //if (!res) {
+        //XmlNode node = *rootPtr;
+        /*for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string nm = currentNode.name();
-        }
+        }*/
         //XmlNode node = root->first_child();
         //std::string name = node.name();
-    }
+    //}
 
     // start reading
-    ReadContents(*rootPtr);
+    XmlNode node = *rootPtr;
+    std::string name = rootPtr->name();
+    ReadContents(node);
 
     // read embedded textures
     if (zip_archive && zip_archive->isOpen()) {
@@ -234,9 +236,10 @@ void ColladaParser::UriDecodePath(aiString &ss) {
 // ------------------------------------------------------------------------------------------------
 // Reads the contents of the file
 void ColladaParser::ReadContents(XmlNode &node) {
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    const std::string name = node.name();
+    if (name == "COLLADA") {
         std::string version;
-        if (XmlParser::getStdStrAttribute(currentNode, "version", version)) {
+        if (XmlParser::getStdStrAttribute(node, "version", version)) {
             aiString v;
             v.Set(version.c_str());
             mAssetMetaData.emplace(AI_METADATA_SOURCE_FORMAT_VERSION, v);
@@ -251,7 +254,7 @@ void ColladaParser::ReadContents(XmlNode &node) {
                 ASSIMP_LOG_DEBUG("Collada schema version is 1.3.n");
             }
         }
-        ReadStructure(currentNode);
+        ReadStructure(node);
     }
 }
 
@@ -496,8 +499,8 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
         animID = idAttr.as_string();
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        const std::string currentName = curNode.name();
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        const std::string currentName = currentNode.name();
         if (currentName == "animation") {
             if (!anim) {
                 anim = new Animation;
@@ -506,20 +509,20 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             }
 
             // recurse into the sub-element
-            ReadAnimation(curNode, anim);
+            ReadAnimation(currentNode, anim);
         } else if (currentName == "source") {
-            ReadSource(curNode);
+            ReadSource(currentNode);
         } else if (currentName == "sampler") {
-            pugi::xml_attribute sampler_id = curNode.attribute("id");
+            pugi::xml_attribute sampler_id = currentNode.attribute("id");
             if (sampler_id) {
                 std::string id = sampler_id.as_string();
                 ChannelMap::iterator newChannel = channels.insert(std::make_pair(id, AnimationChannel())).first;
 
                 // have it read into a channel
-                ReadAnimationSampler(curNode, newChannel->second);
+                ReadAnimationSampler(currentNode, newChannel->second);
             } else if (currentName == "channel") {
-                pugi::xml_attribute target = curNode.attribute("target");
-                pugi::xml_attribute source = curNode.attribute("source");
+                pugi::xml_attribute target = currentNode.attribute("target");
+                pugi::xml_attribute source = currentNode.attribute("source");
                 std::string source_name = source.as_string();
                 if (source_name[0] == '#') {
                     source_name = source_name.substr(1, source_name.size() - 1);
@@ -567,13 +570,13 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
 // ------------------------------------------------------------------------------------------------
 // Reads an animation sampler into the given anim channel
 void ColladaParser::ReadAnimationSampler(XmlNode &node, Collada::AnimationChannel &pChannel) {
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        const std::string currentName = curNode.name();
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        const std::string currentName = currentNode.name();
         if (currentName == "input") {
-            pugi::xml_attribute semanticAttr = curNode.attribute("semantic");
+            pugi::xml_attribute semanticAttr = currentNode.attribute("semantic");
             if (!semanticAttr.empty()) {
                 const char *semantic = semanticAttr.as_string();
-                pugi::xml_attribute sourceAttr = curNode.attribute("source");
+                pugi::xml_attribute sourceAttr = currentNode.attribute("source");
                 if (!sourceAttr.empty()) {
                     const char *source = sourceAttr.as_string();
                     if (source[0] != '#')
@@ -611,7 +614,7 @@ void ColladaParser::ReadControllerLibrary(XmlNode &node) {
     int attrId = node.attribute("id").as_int();
     std::string id = node.value();
     mControllerLibrary[id] = Controller();
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "controller") {
             attrId = currentNode.attribute("id").as_int();
@@ -627,7 +630,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
     // initial values
     pController.mType = Skin;
     pController.mMethod = Normalized;
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "morph") {
             pController.mType = Morph;
@@ -656,7 +659,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
         } else if (currentName == "vertex_weights") {
             ReadControllerWeights(currentNode, pController);
         } else if (currentName == "targets") {
-            for (XmlNode &currentChildNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            for (XmlNode currentChildNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
                 const std::string &currentChildName = currentChildNode.name();
                 if (currentChildName == "input") {
                     const char *semantics = currentChildNode.attribute("semantic").as_string();
@@ -675,7 +678,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
 // ------------------------------------------------------------------------------------------------
 // Reads the joint definitions for the given controller
 void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pController) {
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "input") {
             const char *attrSemantic = currentNode.attribute("semantic").as_string();
@@ -703,7 +706,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
     int vertexCount;
     XmlParser::getIntAttribute(node, "count", vertexCount);
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         std::string currentName = currentNode.name();
         if (currentName == "input") {
             InputChannel channel;
@@ -765,7 +768,7 @@ void ColladaParser::ReadImageLibrary(XmlNode &node) {
         return;
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string name = currentNode.name();
         if (name == "image") {
             std::string id = currentNode.attribute("id").as_string();
@@ -780,7 +783,7 @@ void ColladaParser::ReadImageLibrary(XmlNode &node) {
 // ------------------------------------------------------------------------------------------------
 // Reads an image entry into the given image
 void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "image") {
             // Ignore
@@ -864,7 +867,7 @@ void ColladaParser::ReadMaterialLibrary(XmlNode &node) {
     }
 
     std::map<std::string, int> names;
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         std::string id = currentNode.attribute("id").as_string();
         std::string name = currentNode.attribute("name").as_string();
@@ -894,7 +897,7 @@ void ColladaParser::ReadLightLibrary(XmlNode &node) {
         return;
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "light") {
             std::string id = currentNode.attribute("id").as_string();
@@ -910,7 +913,7 @@ void ColladaParser::ReadCameraLibrary(XmlNode &node) {
         return;
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "camera") {
             std::string id = currentNode.attribute("id").as_string();
@@ -929,7 +932,7 @@ void ColladaParser::ReadCameraLibrary(XmlNode &node) {
 // ------------------------------------------------------------------------------------------------
 // Reads a material entry into the given material
 void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "material") {
             const char *url = currentNode.attribute("url").as_string();
@@ -944,7 +947,7 @@ void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
 // ------------------------------------------------------------------------------------------------
 // Reads a light entry into the given light
 void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "spot") {
             pLight.mType = aiLightSource_SPOT;
@@ -1001,7 +1004,7 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
 // ------------------------------------------------------------------------------------------------
 // Reads a camera entry into the given light
 void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "orthographic") {
             camera.mOrtho = true;
@@ -1026,12 +1029,12 @@ void ColladaParser::ReadEffectLibrary(XmlNode &node) {
         return;
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "effect") {
+            // read ID. Do I have to repeat my ranting about "optional" attributes?
             std::string id;
             XmlParser::getStdStrAttribute(currentNode, "id", id);
-            // read ID. Do I have to repeat my ranting about "optional" attributes?
 
             // create an entry and store it in the library under its ID
             mEffectLibrary[id] = Effect();
@@ -1153,7 +1156,7 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
     if (node.empty()) {
         return;
     }
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         // MAYA extensions
         // -------------------------------------------------------
@@ -1212,7 +1215,7 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
         return;
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "color") {
             // text content contains 4 floats
@@ -1332,7 +1335,7 @@ void ColladaParser::ReadGeometry(XmlNode &node, Collada::Mesh &pMesh) {
     if (node.empty()) {
         return;
     }
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "mesh") {
             ReadMesh(currentNode, pMesh);
@@ -1531,7 +1534,7 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
 void ColladaParser::ReadVertexData(XmlNode &node, Mesh &pMesh) {
     // extract the ID of the <vertices> element. Not that we care, but to catch strange referencing schemes we should warn about
     XmlParser::getStdStrAttribute(node, "id", pMesh.mVertexID);
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "input") {
             ReadInputChannel(currentNode, pMesh.mPerVertexData);
@@ -1981,21 +1984,19 @@ void ColladaParser::ReadSceneLibrary(XmlNode &node) {
     if (node.empty()) {
         return;
     }
-    /*if (mReader->isEmptyElement())
-        return;*/
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "visual_scene") {
             // read ID. Is optional according to the spec, but how on earth should a scene_instance refer to it then?
             std::string id;
             XmlParser::getStdStrAttribute(currentNode, "id", id);
 
+            // read name if given.
             std::string attrName = "Scene";
             if (XmlParser::hasAttribute(currentNode, "name")) {
                 XmlParser::getStdStrAttribute(currentNode, "name", attrName);
             }
-            // read name if given.
 
             // create a node and store it in the library under its ID
             Node *sceneNode = new Node;
@@ -2016,7 +2017,7 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
         return;
     }
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "node") {
             Node *child = new Node;
@@ -2208,7 +2209,7 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
     Collada::MeshInstance instance;
     instance.mMeshOrController = url.c_str() + 1; // skipping the leading #
 
-    for (XmlNode &currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "instance_material") {
             // read ID of the geometry subgroup and the target material

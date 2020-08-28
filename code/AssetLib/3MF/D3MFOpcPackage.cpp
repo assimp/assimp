@@ -71,16 +71,15 @@ public:
     OpcPackageRelationshipReader(XmlParser &parser) {
         XmlNode *root = parser.getRootNode();
         if (nullptr != root) {
-            ParseRootNode(*root);
+            XmlNode node = * root;
+            ParseRootNode(node);
         }
     }
 
     void ParseRootNode(XmlNode &node) {
         ParseAttributes(node);
-
-        for (XmlNode currentNode : node.children()) {
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             ParseChildNode(currentNode);
-
         }
     }
 
@@ -97,7 +96,7 @@ public:
 
     void ParseChildNode(XmlNode &node) {
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
-
+        std::string name = node.name();
         relPtr->id = node.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
         relPtr->type = node.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
         relPtr->target = node.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();

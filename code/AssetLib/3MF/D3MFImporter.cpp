@@ -93,8 +93,9 @@ public:
         std::vector<aiNode *> children;
 
         std::string nodeName;
-        XmlNode *root = mXmlParser->getRootNode();
-        for (XmlNode &currentNode : root->children()) {
+        XmlNode node = *mXmlParser->getRootNode();
+
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentNodeName = currentNode.name();
             if (currentNodeName == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(currentNode, scene));
@@ -160,7 +161,7 @@ private:
 
         size_t meshIdx = mMeshes.size();
 
-        for (pugi::xml_node &currentNode : node.children()) {
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentName = currentNode.name();
             if (currentName == D3MF::XmlTag::mesh) {
                 auto mesh = ReadMesh(currentNode);
@@ -182,7 +183,7 @@ private:
 
     aiMesh *ReadMesh(XmlNode &node) {
         aiMesh *mesh = new aiMesh();
-        for (pugi::xml_node &currentNode : node.children()) {
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentName = currentNode.name();
             if (currentName == D3MF::XmlTag::vertices) {
                 ImportVertices(currentNode, mesh);
@@ -211,7 +212,7 @@ private:
 
     void ImportVertices(XmlNode &node, aiMesh *mesh) {
         std::vector<aiVector3D> vertices;
-        for (pugi::xml_node &currentNode : node.children()) {
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentName = currentNode.name();
             if (currentName == D3MF::XmlTag::vertex) {
                 vertices.push_back(ReadVertex(currentNode));
@@ -234,7 +235,7 @@ private:
 
     void ImportTriangles(XmlNode &node, aiMesh *mesh) {
         std::vector<aiFace> faces;
-        for (pugi::xml_node &currentNode : node.children()) {
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentName = currentNode.name();
             if (currentName == D3MF::XmlTag::triangle) {
                 faces.push_back(ReadTriangle(currentNode));
@@ -337,7 +338,6 @@ private:
 
     void assignDiffuseColor(XmlNode &node, aiMaterial *mat) {
         const char *color = node.attribute(D3MF::XmlTag::basematerials_displaycolor.c_str()).as_string();
-        //const char *color = xmlReader->getAttributeValue(D3MF::XmlTag::basematerials_displaycolor.c_str());
         aiColor4D diffuse;
         if (parseColor(color, diffuse)) {
             mat->AddProperty<aiColor4D>(&diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -348,10 +348,8 @@ private:
         aiMaterial *mat(nullptr);
         const char *name(nullptr);
         const std::string nodeName = node.name();
-        //const std::string nodeName(xmlReader->getNodeName());
         if (nodeName == D3MF::XmlTag::basematerials_base) {
             name = node.attribute(D3MF::XmlTag::basematerials_name.c_str()).as_string();
-            //name = xmlReader->getAttributeValue(D3MF::XmlTag::basematerials_name.c_str());
             std::string stdMatName;
             aiString matName;
             std::string strId(to_string(mActiveMatGroup));
@@ -439,9 +437,6 @@ const aiImporterDesc *D3MFImporter::GetInfo() const {
 
 void D3MFImporter::InternReadFile(const std::string &filename, aiScene *pScene, IOSystem *pIOHandler) {
     D3MF::D3MFOpcPackage opcPackage(pIOHandler, filename);
-
-    //std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(opcPackage.RootStream()));
-    //std::unique_ptr<D3MF::XmlReader> xmlReader(irr::io::createIrrXMLReader(xmlStream.get()));
 
     XmlParser xmlParser;
     if (xmlParser.parse(opcPackage.RootStream())) {

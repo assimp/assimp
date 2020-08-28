@@ -66,10 +66,11 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     std::string path = "dae";
     const aiExportFormatDesc *desc( exporter.GetExportFormatDescription( 0 ) );
     EXPECT_NE( desc, nullptr );
+    path.append(".");
     path.append( desc->fileExtension );
     EXPECT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
     const aiScene *newScene( importer.ReadFile( path, aiProcess_ValidateDataStructure ) );
-    EXPECT_TRUE( NULL != newScene );
+    ASSERT_NE( nullptr, newScene );
     float newOpacity;
     if ( newScene->mNumMaterials > 0 ) {
         std::cout << "Desc = " << desc->description << "\n";

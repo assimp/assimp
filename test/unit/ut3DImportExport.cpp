@@ -44,9 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-
 using namespace Assimp;
-
 
 TEST(ut3DImportExport, importBoxA) {
     Assimp::Importer importer;

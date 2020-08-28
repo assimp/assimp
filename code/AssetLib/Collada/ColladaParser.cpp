@@ -116,21 +116,12 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
             throw DeadlyImportError("Failed to open file '" + pFile + "'.");
         }
     }
-    pugi::xml_node *rootPtr = mXmlParser.parse(daefile.get());
+
     // generate a XML reader for it
+    pugi::xml_node *rootPtr = mXmlParser.parse(daefile.get());
     if (nullptr == rootPtr) {
         ThrowException("Unable to read file, malformed XML");
     }
-//    bool res = rootPtr->empty();
-    //if (!res) {
-        //XmlNode node = *rootPtr;
-        /*for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-            const std::string nm = currentNode.name();
-        }*/
-        //XmlNode node = root->first_child();
-        //std::string name = node.name();
-    //}
-
     // start reading
     XmlNode node = *rootPtr;
     std::string name = rootPtr->name();
@@ -537,32 +528,18 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
 
     // it turned out to have channels - add them
     if (!channels.empty()) {
-        // FIXME: Is this essentially doing the same as "single-anim-node" codepath in
-        //        ColladaLoader::StoreAnimations? For now, this has been deferred to after
-        //        all animations and all clips have been read. Due to handling of
-        //        <library_animation_clips> this cannot be done here, as the channel owner
-        //        is lost, and some exporters make up animations by referring to multiple
-        //        single-channel animations from an <instance_animation>.
-        /*
-        // special filtering for stupid exporters packing each channel into a separate animation
-        if( channels.size() == 1)
-        {
-            pParent->mChannels.push_back( channels.begin()->second);
-        } else
-*/
-        {
-            // else create the animation, if not done yet, and store the channels
-            if (!anim) {
-                anim = new Animation;
-                anim->mName = animName;
-                pParent->mSubAnims.push_back(anim);
-            }
-            for (ChannelMap::const_iterator it = channels.begin(); it != channels.end(); ++it)
-                anim->mChannels.push_back(it->second);
+        if (nullptr == anim) {
+            anim = new Animation;
+            anim->mName = animName;
+            pParent->mSubAnims.push_back(anim);
+        }
 
-            if (idAttr >= 0) {
-                mAnimationLibrary[animID] = anim;
-            }
+        for (ChannelMap::const_iterator it = channels.begin(); it != channels.end(); ++it) {
+            anim->mChannels.push_back(it->second);
+        }
+
+        if (idAttr >= 0) {
+            mAnimationLibrary[animID] = anim;
         }
     }
 }
@@ -573,25 +550,25 @@ void ColladaParser::ReadAnimationSampler(XmlNode &node, Collada::AnimationChanne
     for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "input") {
-            pugi::xml_attribute semanticAttr = currentNode.attribute("semantic");
-            if (!semanticAttr.empty()) {
-                const char *semantic = semanticAttr.as_string();
-                pugi::xml_attribute sourceAttr = currentNode.attribute("source");
-                if (!sourceAttr.empty()) {
-                    const char *source = sourceAttr.as_string();
+            if (XmlParser::hasAttribute(currentNode, "semantic")) {
+                std::string semantic, sourceAttr;
+                XmlParser::getStdStrAttribute(currentNode, "semantic", semantic);
+                if (XmlParser::hasAttribute(currentNode, "source")) {
+                    XmlParser::getStdStrAttribute(currentNode, "source", sourceAttr);
+                    const char *source = sourceAttr.c_str();
                     if (source[0] != '#')
                         ThrowException("Unsupported URL format");
                     source++;
 
-                    if (strcmp(semantic, "INPUT") == 0)
+                    if (semantic == "INPUT")
                         pChannel.mSourceTimes = source;
-                    else if (strcmp(semantic, "OUTPUT") == 0)
+                    else if (semantic == "OUTPUT" )
                         pChannel.mSourceValues = source;
-                    else if (strcmp(semantic, "IN_TANGENT") == 0)
+                    else if (semantic == "IN_TANGENT" )
                         pChannel.mInTanValues = source;
-                    else if (strcmp(semantic, "OUT_TANGENT") == 0)
+                    else if ( semantic == "OUT_TANGENT" )
                         pChannel.mOutTanValues = source;
-                    else if (strcmp(semantic, "INTERPOLATION") == 0)
+                    else if ( semantic == "INTERPOLATION" )
                         pChannel.mInterpolationValues = source;
                 }
             }

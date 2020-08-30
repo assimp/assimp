@@ -98,9 +98,13 @@ void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElem
         return;
     }
 
-    pVertexCoordinateArray.reserve(vn->Child.size()); // all coordinates stored as child and we need to reserve space for future push_back's.
-    pVertexColorArray.resize(vn->Child.size()); // colors count equal vertices count.
+    // all coordinates stored as child and we need to reserve space for future push_back's.
+    pVertexCoordinateArray.reserve(vn->Child.size()); 
+
+    // colors count equal vertices count.
+    pVertexColorArray.resize(vn->Child.size()); 
     col_idx = 0;
+
     // Inside vertices collect all data and place to arrays
     for (AMFNodeElementBase *vn_child : vn->Child) {
         // vertices, colors
@@ -118,26 +122,20 @@ void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElem
                     pVertexColorArray[col_idx] = (AMFColor *)vtx;
                     continue;
                 }
-            } // for(CAMFImporter_NodeElement* vtx: vn_child->Child)
+            }
 
             col_idx++;
-        } // if(vn_child->Type == CAMFImporter_NodeElement::ENET_Vertex)
-    } // for(CAMFImporter_NodeElement* vn_child: vn->Child)
+        }
+    }
 }
 
-size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &pID_R, const std::string &pID_G, const std::string &pID_B,
-        const std::string &pID_A) {
-    size_t TextureConverted_Index;
-    std::string TextureConverted_ID;
-
-    // check input data
-    if (pID_R.empty() && pID_G.empty() && pID_B.empty() && pID_A.empty())
+size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &r, const std::string &g, const std::string &b, const std::string &a) {
+    if (r.empty() && g.empty() && b.empty() && a.empty()) {
         throw DeadlyImportError("PostprocessHelper_GetTextureID_Or_Create. At least one texture ID must be defined.");
+    }
 
-    // Create ID
-    TextureConverted_ID = pID_R + "_" + pID_G + "_" + pID_B + "_" + pID_A;
-    // Check if texture specified by set of IDs is converted already.
-    TextureConverted_Index = 0;
+    std::string TextureConverted_ID = r + "_" + g + "_" + b + "_" + a;
+    size_t TextureConverted_Index = 0;
     for (const SPP_Texture &tex_convd : mTexture_Converted) {
         if (tex_convd.ID == TextureConverted_ID) {
             return TextureConverted_Index;
@@ -146,10 +144,10 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
     }
 
-    //
     // Converted texture not found, create it.
-    //
-    AMFTexture *src_texture[4]{ nullptr };
+    AMFTexture *src_texture[4] {
+        nullptr
+    };
     std::vector<AMFTexture *> src_texture_4check;
     SPP_Texture converted_texture;
 
@@ -157,8 +155,8 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         AMFNodeElementBase *t_tex = nullptr;
 
         // R
-        if (!pID_R.empty()) {
-            if (!Find_NodeElement(pID_R, AMFNodeElementBase::EType::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_R);
+        if (!r.empty()) {
+            if (!Find_NodeElement(r, AMFNodeElementBase::EType::ENET_Texture, &t_tex)) Throw_ID_NotFound(r);
 
             src_texture[0] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -167,8 +165,8 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
 
         // G
-        if (!pID_G.empty()) {
-            if (!Find_NodeElement(pID_G, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_G);
+        if (!g.empty()) {
+            if (!Find_NodeElement(g, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(g);
 
             src_texture[1] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -177,8 +175,8 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
 
         // B
-        if (!pID_B.empty()) {
-            if (!Find_NodeElement(pID_B, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_B);
+        if (!b.empty()) {
+            if (!Find_NodeElement(b, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(b);
 
             src_texture[2] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -187,8 +185,8 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
 
         // A
-        if (!pID_A.empty()) {
-            if (!Find_NodeElement(pID_A, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_A);
+        if (!a.empty()) {
+            if (!Find_NodeElement(a, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(a);
 
             src_texture[3] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -218,10 +216,10 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
     // Create format hint.
     strcpy(converted_texture.FormatHint, "rgba0000"); // copy initial string.
-    if (!pID_R.empty()) converted_texture.FormatHint[4] = '8';
-    if (!pID_G.empty()) converted_texture.FormatHint[5] = '8';
-    if (!pID_B.empty()) converted_texture.FormatHint[6] = '8';
-    if (!pID_A.empty()) converted_texture.FormatHint[7] = '8';
+    if (!r.empty()) converted_texture.FormatHint[4] = '8';
+    if (!g.empty()) converted_texture.FormatHint[5] = '8';
+    if (!b.empty()) converted_texture.FormatHint[6] = '8';
+    if (!a.empty()) converted_texture.FormatHint[7] = '8';
 
     // Сopy data of textures.
     size_t tex_size = 0;
@@ -230,19 +228,19 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     size_t off_b = 0;
 
     // Calculate size of the target array and rule how data will be copied.
-    if (!pID_R.empty() && nullptr != src_texture[0]) {
+    if (!r.empty() && nullptr != src_texture[0]) {
         tex_size += src_texture[0]->Data.size();
         step++, off_g++, off_b++;
     }
-    if (!pID_G.empty() && nullptr != src_texture[1]) {
+    if (!g.empty() && nullptr != src_texture[1]) {
         tex_size += src_texture[1]->Data.size();
         step++, off_b++;
     }
-    if (!pID_B.empty() && nullptr != src_texture[2]) {
+    if (!b.empty() && nullptr != src_texture[2]) {
         tex_size += src_texture[2]->Data.size();
         step++;
     }
-    if (!pID_A.empty() && nullptr != src_texture[3]) {
+    if (!a.empty() && nullptr != src_texture[3]) {
         tex_size += src_texture[3]->Data.size();
         step++;
     }
@@ -260,10 +258,10 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
     }; // auto CopyTextureData = [&](const size_t pOffset, const size_t pStep, const uint8_t pSrcTexNum) -> void
 
-    CopyTextureData(pID_R, 0, step, 0);
-    CopyTextureData(pID_G, off_g, step, 1);
-    CopyTextureData(pID_B, off_b, step, 2);
-    CopyTextureData(pID_A, step - 1, step, 3);
+    CopyTextureData(r, 0, step, 0);
+    CopyTextureData(g, off_g, step, 1);
+    CopyTextureData(b, off_b, step, 2);
+    CopyTextureData(a, step - 1, step, 3);
 
     // Store new converted texture ID
     converted_texture.ID = TextureConverted_ID;

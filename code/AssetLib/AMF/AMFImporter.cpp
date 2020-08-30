@@ -291,10 +291,13 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 void AMFImporter::ParseNode_Root() {
     std::string unit, version;
     AMFNodeElementBase *ne(nullptr);
-    pugi::xml_node *root = mXmlParser->findNode("amf");
-    
-    unit = root->attribute("unit").as_string();
-    version = root->attribute("version").as_string();
+    XmlNode *root = mXmlParser->findNode("amf");
+    if (nullptr == root) {
+        throw DeadlyImportError("Root node \"amf\" not found.");
+    }
+    XmlNode node = *root;
+    unit = node.attribute("unit").as_string();
+    version = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.
     // Check attributes
@@ -313,7 +316,7 @@ void AMFImporter::ParseNode_Root() {
     ((AMFRoot *)ne)->Version = version;
 
     // Check for child nodes
-    for (pugi::xml_node &currentNode : root->children()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "object") {
             ParseNode_Object(currentNode);
@@ -353,7 +356,7 @@ void AMFImporter::ParseNode_Constellation(XmlNode &node) {
     }
 
     // Check for child nodes
-    for (pugi::xml_node &currentNode : node.children()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         std::string name = currentNode.name();
         if (name == "instance") {
             ParseNode_Instance(currentNode);
@@ -392,7 +395,7 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
     if (node.empty()) {
         mNodeElement_Cur->Child.push_back(ne);
     }
-    for (pugi::xml_node currentNode : node.children()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         bool read_flag[6] = { false, false, false, false, false, false };
         std::string currentName = currentNode.name();
         if (currentName == "deltax") {
@@ -447,7 +450,7 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
     if (node.empty()) {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
-    for (pugi::xml_node &currentNode : node.children()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "color") {
             ParseNode_Color(currentNode);

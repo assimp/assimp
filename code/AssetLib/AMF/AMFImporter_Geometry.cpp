@@ -196,7 +196,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
     }
 
     bool col_read = false;
-    for (pugi::xml_node currentNode : node.children()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "color") {
             if (col_read) Throw_MoreThanOnceDefined(currentName ,"color", "Only one color can be defined for <volume>.");
@@ -238,7 +238,7 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
     // Check for child nodes
     bool col_read = false, tex_read = false;
     bool read_flag[3] = { false, false, false };
-    for (pugi::xml_node currentNode : node.children()) {
+    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string currentName = currentNode.name();
         if (currentName == "color") {
             if (col_read) Throw_MoreThanOnceDefined(currentName , "color", "Only one color can be defined for <triangle>.");

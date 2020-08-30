@@ -209,7 +209,18 @@ public:
 
     }
 
-private:
+    static inline bool getValueAsString( XmlNode &node, std::string &text ) {
+        text = "";
+        if (node.empty()) {
+            return false;
+        }
+
+        text = node.text().as_string();
+
+        return true;
+    }
+
+ private:
     pugi::xml_document *mDoc;
     TNodeType *mRoot;
     TNodeType mCurrent;
@@ -218,6 +229,52 @@ private:
 
 using XmlParser = TXmlParser<pugi::xml_node>;
 
+class XmlNodeIterator {
+public:
+    XmlNodeIterator() :
+            mNodes(),
+            mIndex(9999999) {
+        // empty
+    }
+
+    void collectChildrenPreOrder( XmlNode &node ) {
+        mNodes.push_back(&node);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            collectChildrenPreOrder(currentNode);
+        }
+    }
+
+    void collectChildrenPostOrder(XmlNode &node) {
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            collectChildrenPostOrder(currentNode);
+        }
+        mNodes.push_back(&node);
+    }
+
+    bool getNext(XmlNode &next) {
+        if (mIndex == mNodes.size()) {
+            return false;
+        }
+
+        mNodes[mIndex];
+        ++mIndex;
+
+        return true;
+    }
+
+    void clear() {
+        if (mNodes.empty()) {
+            return;
+        }
+
+        mNodes.clear();
+    }
+
+private:
+    std::vector<XmlNode *> mNodes;
+    size_t mIndex;
+    TraverseOrder mTraverseOrder;
+};
 } // namespace Assimp
 
 #endif // !! INCLUDED_AI_IRRXML_WRAPPER

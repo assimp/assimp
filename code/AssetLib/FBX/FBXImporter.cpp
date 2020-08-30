@@ -159,6 +159,8 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	contents[contents.size() - 1] = 0;
 	const char *const begin = &*contents.begin();
 
+	pIOHandler->Close(stream);
+
 	// broadphase tokenizing pass in which we identify the core
 	// syntax elements of FBX (brackets, commas, key:value mappings)
 	TokenList tokens;

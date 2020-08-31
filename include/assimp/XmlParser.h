@@ -251,12 +251,12 @@ public:
         mNodes.push_back(&node);
     }
 
-    bool getNext(XmlNode &next) {
+    bool getNext(XmlNode *next) {
         if (mIndex == mNodes.size()) {
             return false;
         }
 
-        mNodes[mIndex];
+        next = mNodes[mIndex];
         ++mIndex;
 
         return true;
@@ -273,8 +273,8 @@ public:
 private:
     std::vector<XmlNode *> mNodes;
     size_t mIndex;
-    TraverseOrder mTraverseOrder;
 };
+
 } // namespace Assimp
 
 #endif // !! INCLUDED_AI_IRRXML_WRAPPER

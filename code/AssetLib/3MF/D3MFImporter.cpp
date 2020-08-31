@@ -134,7 +134,7 @@ public:
             std::copy(mMatArray.begin(), mMatArray.end(), scene->mMaterials);
         }
 
-        // create the scenegraph
+        // create the scene-graph
         scene->mRootNode->mNumChildren = static_cast<unsigned int>(children.size());
         scene->mRootNode->mChildren = new aiNode *[scene->mRootNode->mNumChildren]();
         std::copy(children.begin(), children.end(), scene->mRootNode->mChildren);

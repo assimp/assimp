@@ -926,7 +926,7 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
     XmlNodeIterator xmlIt;
     xmlIt.collectChildrenPreOrder(node);
     XmlNode currentNode;
-    while (xmlIt.getNext(currentNode)) {
+    while (xmlIt.getNext(&currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "spot") {
             pLight.mType = aiLightSource_SPOT;

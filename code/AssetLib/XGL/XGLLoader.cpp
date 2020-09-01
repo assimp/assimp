@@ -199,26 +199,17 @@ void XGLImporter::InternReadFile(const std::string &pFile,
 #endif
 	}
 
-	// construct the irrXML parser
-	/*CIrrXML_IOStreamReader st(stream.get());
-    m_reader.reset( createIrrXMLReader( ( IFileReadCallBack* ) &st ) );*/
-	mXmlParser = new XmlParser;
-	XmlNode *root = mXmlParser->parse(stream.get());
-	if (nullptr == root) {
+	// parse the XML file
+    mXmlParser = new XmlParser;
+    if (!mXmlParser->parse(stream.get())) {
 		return;
 	}
 
-	// parse the XML file
+    XmlNode root = mXmlParser->getRootNode();
 	TempScope scope;
-	if (!ASSIMP_stricmp(root->name(), "world")) {
+	if (!ASSIMP_stricmp(root.name(), "world")) {
 		ReadWorld(scope);
 	}
-
-	/*    while (ReadElement())   {
-        if (!ASSIMP_stricmp(m_reader->getNodeName(),"world")) {
-            ReadWorld(scope);
-        }
-    }*/
 
 	std::vector<aiMesh *> &meshes = scope.meshes_linear;
 	std::vector<aiMaterial *> &materials = scope.materials_linear;
@@ -249,8 +240,8 @@ void XGLImporter::InternReadFile(const std::string &pFile,
 
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadWorld(TempScope &scope) {
-    XmlNode *root = mXmlParser->getRootNode();
-	for (XmlNode &node : root->children()) {
+    XmlNode root = mXmlParser->getRootNode();
+	for (XmlNode &node : root.children()) {
 		const std::string &s = node.name();
 		// XXX right now we'd skip <lighting> if it comes after
 		// <object> or <mesh>
@@ -261,7 +252,7 @@ void XGLImporter::ReadWorld(TempScope &scope) {
 		}
 	}
 
-	aiNode *const nd = ReadObject( *root, scope, true);
+	aiNode *const nd = ReadObject(root, scope, true);
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}

@@ -139,9 +139,10 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 
 	// Construct the irrXML parser
 	XmlParser parser;
-	pugi::xml_node *root = parser.parse(file.get());
-	/*CIrrXML_IOStreamReader st(file.get());
-    reader = createIrrXMLReader((IFileReadCallBack*) &st);*/
+    if (!parser.parse( file.get() )) {
+        return;
+    }
+    XmlNode root = parser.getRootNode();
 
 	// final data
 	std::vector<aiMaterial *> materials;
@@ -164,7 +165,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 	bool useColors = false;
 
 	// Parse the XML file
-	for (pugi::xml_node child : root->children()) {
+	for (pugi::xml_node child : root.children()) {
 		if (child.type() == pugi::node_element) {
 			if (!ASSIMP_stricmp(child.name(), "buffer") && (curMat || curMesh)) {
 				// end of previous buffer. A material and a mesh should be there

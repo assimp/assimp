@@ -118,13 +118,13 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
     }
 
     // generate a XML reader for it
-    pugi::xml_node *rootPtr = mXmlParser.parse(daefile.get());
-    if (nullptr == rootPtr) {
+    ;
+    if (!mXmlParser.parse(daefile.get())) {
         ThrowException("Unable to read file, malformed XML");
     }
     // start reading
-    XmlNode node = *rootPtr;
-    std::string name = rootPtr->name();
+    XmlNode node = mXmlParser.getRootNode();
+    std::string name = node.name();
     ReadContents(node);
 
     // read embedded textures
@@ -159,19 +159,18 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
         return file_list.front();
     }
     XmlParser manifestParser;
-    XmlNode *root = manifestParser.parse(manifestfile.get());
-    if (nullptr == root) {
+    if (!manifestParser.parse(manifestfile.get())) {
         return std::string();
     }
-
-    const std::string &name = root->name();
+    XmlNode root = manifestParser.getRootNode();
+    const std::string &name = root.name();
     if (name != "dae_root") {
-        root = manifestParser.findNode("dae_root");
+        root = *manifestParser.findNode("dae_root");
         if (nullptr == root) {
             return std::string();
         }
         std::string v;
-        XmlParser::getValueAsString(*root, v);
+        XmlParser::getValueAsString(root, v);
         aiString ai_str(v);
         UriDecodePath(ai_str);
         return std::string(ai_str.C_Str());

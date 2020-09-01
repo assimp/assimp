@@ -79,7 +79,6 @@ class TXmlParser {
 public:
     TXmlParser() :
             mDoc(nullptr),
-            mRoot(nullptr),
             mData() {
         // empty
     }
@@ -90,7 +89,6 @@ public:
 
     void clear() {
         mData.resize(0);
-        mRoot = nullptr;
         delete mDoc;
         mDoc = nullptr;
     }
@@ -117,34 +115,33 @@ public:
         return nullptr != findNode(name);
     }
 
-    TNodeType *parse(IOStream *stream) {
-        mRoot = nullptr;
+    bool parse(IOStream *stream) {
         if (nullptr == stream) {
-            return nullptr;
+            return false;
         }
 
+        bool result = false;
         mData.resize(stream->FileSize());
         stream->Read(&mData[0], mData.size(), 1);
         mDoc = new pugi::xml_document();
-        pugi::xml_parse_result result = mDoc->load_string(&mData[0], pugi::parse_full);
-        if (result.status == pugi::status_ok) {
-            pugi::xml_node root = mDoc->document_element();
-            mRoot = &root;
+        pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
+        if (parse_result.status == pugi::status_ok) {
+            result = true;
         }
 
-        return mRoot;
+        return result;
     }
 
     pugi::xml_document *getDocument() const {
         return mDoc;
     }
 
-    const TNodeType *getRootNode() const {
-        return mRoot;
+    const TNodeType getRootNode() const {
+        return mDoc->root();
     }
 
-    TNodeType *getRootNode() {
-        return mRoot;
+    TNodeType getRootNode() {
+        return mDoc->root();
     }
 
     static inline bool hasNode(XmlNode &node, const char *name) {
@@ -222,7 +219,6 @@ public:
 
  private:
     pugi::xml_document *mDoc;
-    TNodeType *mRoot;
     TNodeType mCurrent;
     std::vector<char> mData;
 };
@@ -266,6 +262,14 @@ public:
         ++mIndex;
 
         return true;
+    }
+
+    size_t size() const {
+        return mNodes.size();
+    }
+
+    bool isEmpty() const {
+        return mNodes.empty();
     }
 
     void clear() {

@@ -69,11 +69,8 @@ typedef std::shared_ptr<OpcPackageRelationship> OpcPackageRelationshipPtr;
 class OpcPackageRelationshipReader {
 public:
     OpcPackageRelationshipReader(XmlParser &parser) {
-        XmlNode *root = parser.getRootNode();
-        if (nullptr != root) {
-            XmlNode node = *root;
-            ParseRootNode(node);
-        }
+        XmlNode root = parser.getRootNode();
+        ParseRootNode(root);
     }
 
     void ParseRootNode(XmlNode &node) {

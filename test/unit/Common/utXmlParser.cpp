@@ -56,14 +56,33 @@ protected:
 };
 
 TEST_F(utXmlParser, parse_xml_test) {
-    DefaultIOSystem ioSystem;
-
     XmlParser parser;
-    std::string filename = ASSIMP_TEST_MODELS_DIR "/3D/box_a.3d";
-    IOStream *stream = ioSystem.Open(filename.c_str(), "rb");
+    std::string filename = ASSIMP_TEST_MODELS_DIR "/x3d/ComputerKeyboard.x3d";
+    IOStream *stream = mIoSystem.Open(filename.c_str(), "rb");
     bool result = parser.parse(stream);
     EXPECT_TRUE(result);
+    mIoSystem.Close(stream);
 }
 
 TEST_F(utXmlParser, parse_xml_and_traverse_test) {
+    XmlParser parser;
+    std::string filename = ASSIMP_TEST_MODELS_DIR "/x3d/ComputerKeyboard.x3d";
+
+    IOStream *stream = mIoSystem.Open(filename.c_str(), "rb");
+    bool result = parser.parse(stream);
+    EXPECT_TRUE(result);
+    XmlNode root = parser.getRootNode();
+    std::string name = root.name();
+    std::string name1 = root.name();
+    EXPECT_NE(nullptr, root);
+    mIoSystem.Close(stream);
+    std::string name2 = root.name();
+
+    XmlNodeIterator nodeIt(root);
+    EXPECT_TRUE(nodeIt.isEmpty());
+    nodeIt.collectChildrenPreOrder(root);
+    const size_t numNodes = nodeIt.size();
+    bool empty = nodeIt.isEmpty();
+    EXPECT_FALSE(empty);
+    EXPECT_NE(numNodes, 0U);
 }

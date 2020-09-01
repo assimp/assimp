@@ -864,8 +864,10 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// Construct the irrXML parser
 	XmlParser st;
-	pugi::xml_node *rootElement = st.parse(file.get());
-	//    reader = createIrrXMLReader((IFileReadCallBack*) &st);
+    if (!st.parse( file.get() )) {
+        return;
+    }
+    pugi::xml_node rootElement = st.getRootNode();
 
 	// The root node of the scene
 	Node *root = new Node(Node::DUMMY);
@@ -897,7 +899,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// Parse the XML file
 
 	//while (reader->read())  {
-	for (pugi::xml_node child : rootElement->children())
+	for (pugi::xml_node child : rootElement.children())
 		switch (child.type()) {
 			case pugi::node_element:
 				if (!ASSIMP_stricmp(child.name(), "node")) {

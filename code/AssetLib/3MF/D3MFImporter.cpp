@@ -93,7 +93,7 @@ public:
         std::vector<aiNode *> children;
 
         std::string nodeName;
-        XmlNode node = *mXmlParser->getRootNode();
+        XmlNode node = mXmlParser->getRootNode();
 
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentNodeName = currentNode.name();

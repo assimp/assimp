@@ -44,7 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 class utXmlParser : public ::testing::Test {
-    // empty
+public:
+    utXmlParser() :
+            Test(),
+            mIoSystem() {
+        // empty
+    }
+
+protected:
+    DefaultIOSystem mIoSystem;
 };
 
 TEST_F(utXmlParser, parse_xml_test) {
@@ -57,3 +65,5 @@ TEST_F(utXmlParser, parse_xml_test) {
     EXPECT_TRUE(result);
 }
 
+TEST_F(utXmlParser, parse_xml_and_traverse_test) {
+}

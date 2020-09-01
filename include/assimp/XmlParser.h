@@ -231,14 +231,18 @@ using XmlParser = TXmlParser<pugi::xml_node>;
 
 class XmlNodeIterator {
 public:
-    XmlNodeIterator() :
+    XmlNodeIterator(XmlNode &parent) :
+            mParent(parent),
             mNodes(),
-            mIndex(9999999) {
+            mIndex(0) {
         // empty
     }
 
     void collectChildrenPreOrder( XmlNode &node ) {
-        mNodes.push_back(&node);
+        if (node != mParent) {
+            std::string name = node.name();
+            mNodes.push_back(node);
+        }
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             collectChildrenPreOrder(currentNode);
         }
@@ -248,10 +252,12 @@ public:
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             collectChildrenPostOrder(currentNode);
         }
-        mNodes.push_back(&node);
+        if (node != mParent) {
+            mNodes.push_back(node);
+        }
     }
 
-    bool getNext(XmlNode *next) {
+    bool getNext(XmlNode &next) {
         if (mIndex == mNodes.size()) {
             return false;
         }
@@ -268,10 +274,12 @@ public:
         }
 
         mNodes.clear();
+        mIndex = 0;
     }
 
 private:
-    std::vector<XmlNode *> mNodes;
+    XmlNode &mParent; 
+    std::vector<XmlNode> mNodes;
     size_t mIndex;
 };
 

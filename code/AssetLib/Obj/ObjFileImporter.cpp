@@ -107,22 +107,25 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
     // Read file into memory
     static const std::string mode = "rb";
-    IOStream *pFileStream = pIOHandler->Open(file, mode);
-    if (!pFileStream) {
+    auto streamCloser = [&](IOStream *pStream) {
+        pIOHandler->Close(pStream);
+    };
+    std::unique_ptr<IOStream, decltype(streamCloser)> fileStream(pIOHandler->Open(file, mode), streamCloser);
+    if (!fileStream.get()) {
         throw DeadlyImportError("Failed to open file " + file + ".");
     }
 
     // Get the file-size and validate it, throwing an exception when fails
-    size_t fileSize = pFileStream->FileSize();
+    size_t fileSize = fileStream->FileSize();
     if (fileSize < ObjMinSize) {
         throw DeadlyImportError("OBJ-file is too small.");
     }
 
     IOStreamBuffer<char> streamedBuffer;
-    streamedBuffer.open(pFileStream);
+    streamedBuffer.open(fileStream.get());
 
     // Allocate buffer and read file into it
-    //TextFileToBuffer( pFileStream,m_Buffer);
+    //TextFileToBuffer( fileStream.get(),m_Buffer);
 
     // Get the model name
     std::string modelName, folderName;
@@ -144,8 +147,6 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
     CreateDataFromImport(parser.GetModel(), pScene);
 
     streamedBuffer.close();
-
-    pIOHandler->Close(pFileStream);
 
     // Clean up allocated storage for the next import
     m_Buffer.clear();

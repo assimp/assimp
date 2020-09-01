@@ -141,8 +141,11 @@ void FBXImporter::SetupProperties(const Importer *pImp) {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-	IOStream* pStream = pIOHandler->Open(pFile, "rb");
-	if (!pStream) {
+	auto streamCloser = [&](IOStream *pStream) {
+		pIOHandler->Close(pStream);
+	};
+	std::unique_ptr<IOStream, decltype(streamCloser)> stream(pIOHandler->Open(pFile, "rb"), streamCloser);
+	if (!stream) {
 		ThrowException("Could not open file for reading");
 	}
 
@@ -154,12 +157,10 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// streaming for its output data structures so the net win with
 	// streaming input data would be very low.
 	std::vector<char> contents;
-	contents.resize(pStream->FileSize() + 1);
-	pStream->Read(&*contents.begin(), 1, contents.size() - 1);
+	contents.resize(stream->FileSize() + 1);
+	stream->Read(&*contents.begin(), 1, contents.size() - 1);
 	contents[contents.size() - 1] = 0;
 	const char *const begin = &*contents.begin();
-
-	pIOHandler->Close(pStream);
 
 	// broadphase tokenizing pass in which we identify the core
 	// syntax elements of FBX (brackets, commas, key:value mappings)

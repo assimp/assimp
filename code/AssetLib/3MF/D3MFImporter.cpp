@@ -93,9 +93,12 @@ public:
         std::vector<aiNode *> children;
 
         std::string nodeName;
-        XmlNode node = mXmlParser->getRootNode();
-
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        XmlNode node = mXmlParser->getRootNode().child("model");
+        if (node.empty()) {
+            return;
+        }
+        XmlNode resNode = node.child("resources");
+        for (XmlNode currentNode = resNode.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentNodeName = currentNode.name();
             if (currentNodeName == D3MF::XmlTag::object) {
                 children.push_back(ReadObject(currentNode, scene));
@@ -151,7 +154,7 @@ private:
         if (!attr.empty()) {
             name = attr.as_string();
         }
-        attr = node.attribute(D3MF::XmlTag::id.c_str());
+        attr = node.attribute(D3MF::XmlTag::type.c_str());
         if (!attr.empty()) {
             type = attr.as_string();
         }
@@ -227,7 +230,7 @@ private:
     aiVector3D ReadVertex(XmlNode &node) {
         aiVector3D vertex;
         vertex.x = ai_strtof(node.attribute(D3MF::XmlTag::x.c_str()).as_string(), nullptr);
-        vertex.x = ai_strtof(node.attribute(D3MF::XmlTag::y.c_str()).as_string(), nullptr);
+        vertex.y = ai_strtof(node.attribute(D3MF::XmlTag::y.c_str()).as_string(), nullptr);
         vertex.z = ai_strtof(node.attribute(D3MF::XmlTag::z.c_str()).as_string(), nullptr);
 
         return vertex;

@@ -990,20 +990,23 @@ void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
     xmlIt.collectChildrenPreOrder(node);
     XmlNode currentNode;
 
+    std::string out;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "orthographic") {
             camera.mOrtho = true;
         } else if (currentName == "xfov" || currentName == "xmag") {
-            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mHorFov);
+            XmlParser::getValueAsFloat(currentNode, camera.mHorFov);
         } else if (currentName == "yfov" || currentName == "ymag") {
-            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mVerFov);
+            XmlParser::getValueAsFloat(currentNode, camera.mVerFov);
+            camera.mVerFov = (ai_real)std::atof(out.c_str());
         } else if (currentName == "aspect_ratio") {
-            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mAspect);
+            XmlParser::getValueAsFloat(currentNode, camera.mAspect);
+            camera.mAspect = (ai_real)std::atof(out.c_str());
         } else if (currentName == "znear") {
-            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mZNear);
+            XmlParser::getValueAsFloat(currentNode, camera.mZNear);
         } else if (currentName == "zfar") {
-            XmlParser::getFloatAttribute(currentNode, currentName.c_str(), (ai_real &)camera.mZFar);
+            XmlParser::getValueAsFloat(currentNode, camera.mZFar);
         }
     }
 }

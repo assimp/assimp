@@ -217,6 +217,17 @@ public:
         return true;
     }
 
+    static inline bool getValueAsFloat( XmlNode &node, ai_real &v ) {
+        if (node.empty()) {
+            return false;
+        }
+
+        v = node.text().as_float();
+
+        return true;
+
+    }
+
  private:
     pugi::xml_document *mDoc;
     TNodeType mCurrent;

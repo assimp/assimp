@@ -76,11 +76,14 @@ public:
     void ParseRootNode(XmlNode &node) {
         ParseAttributes(node);
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-            ParseChildNode(currentNode);
+            std::string name = currentNode.name();
+            if (name == "Relationships") {
+                ParseRelationsNode(currentNode);
+            }
         }
     }
 
-    void ParseAttributes(XmlNode &/*node*/) {
+    void ParseAttributes(XmlNode & /*node*/) {
         // empty
     }
 
@@ -91,18 +94,22 @@ public:
         return true;
     }
 
-    void ParseChildNode(XmlNode &node) {
+    void ParseRelationsNode(XmlNode &node) {
         if (node.empty()) {
             return;
         }
 
-        OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
-        std::string name = node.name();
-        relPtr->id = node.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
-        relPtr->type = node.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
-        relPtr->target = node.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();
-        if (validateRels(relPtr)) {
-            m_relationShips.push_back(relPtr);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            std::string name = currentNode.name();
+            if (name == "Relationship") {
+                OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
+                relPtr->id = node.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
+                relPtr->type = node.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
+                relPtr->target = node.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();
+                if (validateRels(relPtr)) {
+                    m_relationShips.push_back(relPtr);
+                }
+            }
         }
     }
 

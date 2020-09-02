@@ -118,14 +118,16 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
     }
 
     // generate a XML reader for it
-    ;
     if (!mXmlParser.parse(daefile.get())) {
         ThrowException("Unable to read file, malformed XML");
     }
     // start reading
     XmlNode node = mXmlParser.getRootNode();
-    std::string name = node.name();
-    ReadContents(node);
+    XmlNode colladaNode = node.child("COLLADA");
+    if (colladaNode.empty()) {
+        return;
+    }
+    ReadContents(colladaNode);
 
     // read embedded textures
     if (zip_archive && zip_archive->isOpen()) {

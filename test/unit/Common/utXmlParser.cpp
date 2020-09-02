@@ -85,4 +85,9 @@ TEST_F(utXmlParser, parse_xml_and_traverse_test) {
     bool empty = nodeIt.isEmpty();
     EXPECT_FALSE(empty);
     EXPECT_NE(numNodes, 0U);
+    XmlNode node;
+    while (nodeIt.getNext(node)) {
+        const std::string nodeName = node.name();
+        EXPECT_FALSE(nodeName.empty());
+    }
 }

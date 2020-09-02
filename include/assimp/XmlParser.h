@@ -235,11 +235,11 @@ public:
     }
 
     void collectChildrenPreOrder( XmlNode &node ) {
-        if (node != mParent) {
-            std::string name = node.name();
+        
+        if (node != mParent && node.type() == pugi::node_element) {
             mNodes.push_back(node);
         }
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        for (XmlNode currentNode : node.children()) {
             collectChildrenPreOrder(currentNode);
         }
     }

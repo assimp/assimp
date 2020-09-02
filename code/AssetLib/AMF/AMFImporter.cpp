@@ -58,8 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-/// \var aiImporterDesc AMFImporter::Description
-/// Conastant which hold importer description
 const aiImporterDesc AMFImporter::Description = {
     "Additive manufacturing file format(AMF) Importer",
     "smalcom",

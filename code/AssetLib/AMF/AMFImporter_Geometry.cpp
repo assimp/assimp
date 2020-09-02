@@ -159,13 +159,10 @@ void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
 
     AMFCoordinates &als = *((AMFCoordinates *)ne); // alias for convenience
 
-    if (node.attributes().begin() != node.attributes().end()) {
-        als.Coordinate.x = (ai_real)node.attribute("x").as_float();
-        als.Coordinate.y = (ai_real)node.attribute("y").as_float();
-        als.Coordinate.z = (ai_real)node.attribute("z").as_float();
-    } else {
-        mNodeElement_Cur->Child.push_back(ne);
-    }
+    als.Coordinate.x = (ai_real)node.attribute("x").as_float();
+    als.Coordinate.y = (ai_real)node.attribute("y").as_float();
+    als.Coordinate.z = (ai_real)node.attribute("z").as_float();
+    mNodeElement_Cur->Child.push_back(ne);
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }

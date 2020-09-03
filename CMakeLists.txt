@@ -116,10 +116,6 @@ OPTION ( ASSIMP_UBSAN
   "Enable Undefined Behavior sanitizer."
   OFF
 )
-OPTION ( ASSIMP_SYSTEM_IRRXML
-  "Use system installed Irrlicht/IrrXML library."
-  OFF
-)
 OPTION ( ASSIMP_BUILD_DOCS
   "Build documentation using Doxygen."
   OFF
@@ -449,11 +445,6 @@ ENDIF()
 
 IF( ASSIMP_BUILD_DOCS )
   ADD_SUBDIRECTORY(doc)
-ENDIF()
-
-# Look for system installed irrXML
-IF ( ASSIMP_SYSTEM_IRRXML )
-  FIND_PACKAGE( IrrXML REQUIRED )
 ENDIF()
 
 # Search for external dependencies, and build them from source if not found

@@ -739,7 +739,9 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     } // for(const CAMFImporter_NodeElement* ne: mNodeElement_List)
 
     // Check if root element are found.
-    if (root_el == nullptr) throw DeadlyImportError("Root(<amf>) element not found.");
+    if (root_el == nullptr) {
+        throw DeadlyImportError("Root(<amf>) element not found.");
+    }
 
     // after that walk through children of root and collect data. Five types of nodes can be placed at top level - in <amf>: <object>, <material>, <texture>,
     // <constellation> and <metadata>. But at first we must read <material> and <texture> because they will be used in <object>. <metadata> can be read
@@ -748,7 +750,9 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     // 1. <material>
     // 2. <texture> will be converted later when processing triangles list. \sa Postprocess_BuildMeshSet
     for (const AMFNodeElementBase *root_child : root_el->Child) {
-        if (root_child->Type == AMFNodeElementBase::ENET_Material) Postprocess_BuildMaterial(*((AMFMaterial *)root_child));
+        if (root_child->Type == AMFNodeElementBase::ENET_Material) {
+            Postprocess_BuildMaterial(*((AMFMaterial *)root_child));
+        }
     }
 
     // After "appearance" nodes we must read <object> because it will be used in <constellation> -> <instance>.

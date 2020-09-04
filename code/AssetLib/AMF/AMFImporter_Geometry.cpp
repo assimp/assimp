@@ -134,7 +134,7 @@ void AMFImporter::ParseNode_Vertex(XmlNode &node) {
         ParseNode_Coordinates(coordNode);
         coord_read = true;
     }
-    if (!coord_read && !coord_read) {
+    if (!coord_read && !col_read) {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
 

@@ -621,7 +621,9 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
         } else if (currentName == "skin") {
             pController.mMeshId = currentNode.attribute("source").as_string();
         } else if (currentName == "bind_shape_matrix") {
-            const char *content = currentNode.value();
+            std::string v;
+            XmlParser::getValueAsString(currentNode, v);
+            const char *content = v.c_str();
             for (unsigned int a = 0; a < 16; a++) {
                 // read a number
                 content = fast_atoreal_move<ai_real>(content, pController.mBindShapeMatrix[a]);
@@ -2163,7 +2165,9 @@ void ColladaParser::ReadNodeTransformation(XmlNode &node, Node *pNode, Transform
 
     // how many parameters to read per transformation type
     static const unsigned int sNumParameters[] = { 9, 4, 3, 3, 7, 16 };
-    const char *content = node.value();
+    std::string value;
+    XmlParser::getValueAsString(node, value);
+    const char *content = value.c_str();
 
     // read as many parameters and store in the transformation
     for (unsigned int a = 0; a < sNumParameters[pType]; a++) {

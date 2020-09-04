@@ -327,9 +327,8 @@ void AMFImporter::ParseNode_Root() {
         } else if (currentName == "metadata") {
             ParseNode_Metadata(currentNode);
         }
-        mNodeElement_Cur = ne; // force restore "current" element
     }
-
+    mNodeElement_Cur = ne; // force restore "current" element
     mNodeElement_List.push_back(ne); // add to node element list because its a new object in graph.
 }
 

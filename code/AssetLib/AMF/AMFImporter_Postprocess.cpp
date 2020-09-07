@@ -124,7 +124,7 @@ void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElem
                 }
             }
 
-            col_idx++;
+            ++col_idx;
         }
     }
 }
@@ -156,7 +156,9 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // R
         if (!r.empty()) {
-            if (!Find_NodeElement(r, AMFNodeElementBase::EType::ENET_Texture, &t_tex)) Throw_ID_NotFound(r);
+            if (!Find_NodeElement(r, AMFNodeElementBase::EType::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(r);
+            }
 
             src_texture[0] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -166,7 +168,9 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // G
         if (!g.empty()) {
-            if (!Find_NodeElement(g, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(g);
+            if (!Find_NodeElement(g, AMFNodeElementBase::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(g);
+            }
 
             src_texture[1] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -176,7 +180,9 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // B
         if (!b.empty()) {
-            if (!Find_NodeElement(b, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(b);
+            if (!Find_NodeElement(b, AMFNodeElementBase::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(b);
+            }
 
             src_texture[2] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -186,7 +192,9 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
         // A
         if (!a.empty()) {
-            if (!Find_NodeElement(a, AMFNodeElementBase::ENET_Texture, &t_tex)) Throw_ID_NotFound(a);
+            if (!Find_NodeElement(a, AMFNodeElementBase::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(a);
+            }
 
             src_texture[3] = (AMFTexture *)t_tex;
             src_texture_4check.push_back((AMFTexture *)t_tex);
@@ -211,8 +219,9 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     converted_texture.Depth = src_texture_4check[0]->Depth;
     // if one of source texture is tiled then converted texture is tiled too.
     converted_texture.Tiled = false;
-    for (uint8_t i = 0; i < src_texture_4check.size(); i++)
+    for (uint8_t i = 0; i < src_texture_4check.size(); ++i) {
         converted_texture.Tiled |= src_texture_4check[i]->Tiled;
+    }
 
     // Create format hint.
     strcpy(converted_texture.FormatHint, "rgba0000"); // copy initial string.
@@ -309,10 +318,11 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
     } while (!pInputList.empty());
 }
 
-void AMFImporter::Postprocess_AddMetadata(const std::list<AMFMetadata *> &metadataList, aiNode &sceneNode) const {
+void AMFImporter::Postprocess_AddMetadata(const AMFMetaDataArray &metadataList, aiNode &sceneNode) const {
     if (metadataList.empty()) {
         return;
     }
+
     if (sceneNode.mMetaData != nullptr) {
         throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
     }
@@ -326,7 +336,7 @@ void AMFImporter::Postprocess_AddMetadata(const std::list<AMFMetadata *> &metada
     }
 }
 
-void AMFImporter::Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, std::list<aiMesh *> &pMeshList, aiNode **pSceneNode) {
+void AMFImporter::Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, MeshArray &meshList, aiNode **pSceneNode) {
     AMFColor *object_color = nullptr;
 
     // create new aiNode and set name as <object> has.
@@ -346,14 +356,13 @@ void AMFImporter::Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, 
             // Create arrays from children of mesh: vertices.
             PostprocessHelper_CreateMeshDataArray(*((AMFMesh *)ne_child), vertex_arr, color_arr);
             // Use this arrays as a source when creating every aiMesh
-            Postprocess_BuildMeshSet(*((AMFMesh *)ne_child), vertex_arr, color_arr, object_color, pMeshList, **pSceneNode);
+            Postprocess_BuildMeshSet(*((AMFMesh *)ne_child), vertex_arr, color_arr, object_color, meshList, **pSceneNode);
         }
     } // for(const CAMFImporter_NodeElement* ne_child: pNodeElement)
 }
 
 void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const std::vector<aiVector3D> &pVertexCoordinateArray,
-        const std::vector<AMFColor *> &pVertexColorArray,
-        const AMFColor *pObjectColor, std::list<aiMesh *> &pMeshList, aiNode &pSceneNode) {
+        const std::vector<AMFColor *> &pVertexColorArray, const AMFColor *pObjectColor, MeshArray &pMeshList, aiNode &pSceneNode) {
     std::list<unsigned int> mesh_idx;
 
     // all data stored in "volume", search for it.
@@ -659,7 +668,7 @@ void AMFImporter::Postprocess_BuildMaterial(const AMFMaterial &pMaterial) {
     mMaterial_Converted.push_back(new_mat);
 }
 
-void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellation, std::list<aiNode *> &pNodeList) const {
+void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellation, NodeArray &nodeArray) const {
     aiNode *con_node;
     std::list<aiNode *> ch_node;
 
@@ -682,7 +691,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         // create alias for conveniance
         AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
-        if (!Find_ConvertedNode(als.ObjectID, pNodeList, &found_node)) Throw_ID_NotFound(als.ObjectID);
+        if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
         // create node for applying transformation
         t_node = new aiNode;
@@ -711,13 +720,13 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         con_node->mChildren[ch_idx++] = node;
 
     // and place "root" of <constellation> node to node list
-    pNodeList.push_back(con_node);
+    nodeArray.push_back(con_node);
 }
 
 void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
-    std::list<aiNode *> node_list;
-    std::list<aiMesh *> mesh_list;
-    std::list<AMFMetadata *> meta_list;
+    NodeArray nodeArray;
+    MeshArray mesh_list;
+    AMFMetaDataArray meta_list;
 
     //
     // Because for AMF "material" is just complex colors mixing so aiMaterial will not be used.
@@ -764,7 +773,9 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
 
             // for <object> mesh and node must be built: object ID assigned to aiNode name and will be used in future for <instance>
             Postprocess_BuildNodeAndObject(*((AMFObject *)root_child), mesh_list, &tnode);
-            if (tnode != nullptr) node_list.push_back(tnode);
+            if (tnode != nullptr) {
+                nodeArray.push_back(tnode);
+            }
         }
     } // for(const CAMFImporter_NodeElement* root_child: root_el->Child)
 
@@ -774,7 +785,7 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
         // 4. <constellation>
         if (root_child->Type == AMFNodeElementBase::ENET_Constellation) {
             // <object> and <constellation> at top of self abstraction use aiNode. So we can use only aiNode list for creating new aiNode's.
-            Postprocess_BuildConstellation(*((AMFConstellation *)root_child), node_list);
+            Postprocess_BuildConstellation(*((AMFConstellation *)root_child), nodeArray);
         }
 
         // 5, <metadata>
@@ -792,17 +803,17 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     // And at this step we are checking that relations.
 nl_clean_loop:
 
-    if (node_list.size() > 1) {
+    if (nodeArray.size() > 1) {
         // walk through all nodes
-        for (std::list<aiNode *>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); ++nl_it) {
+        for (NodeArray::iterator nl_it = nodeArray.begin(); nl_it != nodeArray.end(); ++nl_it) {
             // and try to find them in another top nodes.
-            std::list<aiNode *>::const_iterator next_it = nl_it;
+            NodeArray::const_iterator next_it = nl_it;
 
             ++next_it;
-            for (; next_it != node_list.end(); ++next_it) {
+            for (; next_it != nodeArray.end(); ++next_it) {
                 if ((*next_it)->FindNode((*nl_it)->mName) != nullptr) {
                     // if current top node(nl_it) found in another top node then erase it from node_list and restart search loop.
-                    node_list.erase(nl_it);
+                    nodeArray.erase(nl_it);
 
                     goto nl_clean_loop;
                 }
@@ -815,10 +826,10 @@ nl_clean_loop:
     //
     //
     // Nodes
-    if (!node_list.empty()) {
-        std::list<aiNode *>::const_iterator nl_it = node_list.begin();
+    if (!nodeArray.empty()) {
+        NodeArray::const_iterator nl_it = nodeArray.begin();
 
-        pScene->mRootNode->mNumChildren = static_cast<unsigned int>(node_list.size());
+        pScene->mRootNode->mNumChildren = static_cast<unsigned int>(nodeArray.size());
         pScene->mRootNode->mChildren = new aiNode *[pScene->mRootNode->mNumChildren];
         for (size_t i = 0; i < pScene->mRootNode->mNumChildren; i++) {
             // Objects and constellation that must be showed placed at top of hierarchy in <amf> node. So all aiNode's in node_list must have
@@ -831,7 +842,7 @@ nl_clean_loop:
     //
     // Meshes
     if (!mesh_list.empty()) {
-        std::list<aiMesh *>::const_iterator ml_it = mesh_list.begin();
+        MeshArray::const_iterator ml_it = mesh_list.begin();
 
         pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];

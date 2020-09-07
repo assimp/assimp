@@ -139,6 +139,10 @@ private:
         const AMFTexMap *TexMap; ///< Face texture mapping data. Equal to nullptr if texture mapping is not set for the face.
     };
 
+    using AMFMetaDataArray = std::vector<AMFMetadata*>;
+    using MeshArray = std::vector<aiMesh*>;
+    using NodeArray = std::vector<aiNode*>;
+
     /// Clear all temporary data.
     void Clear();
 
@@ -170,13 +174,13 @@ private:
     /// Check if child elements of node element is metadata and add it to scene node.
     /// \param [in] pMetadataList - reference to list with collected metadata.
     /// \param [out] pSceneNode - scene node in which metadata will be added.
-    void Postprocess_AddMetadata(const std::list<AMFMetadata *> &pMetadataList, aiNode &pSceneNode) const;
+    void Postprocess_AddMetadata(const AMFMetaDataArray &pMetadataList, aiNode &pSceneNode) const;
 
     /// To create aiMesh and aiNode for it from <object>.
     /// \param [in] pNodeElement - reference to node element which kept <object> data.
-    /// \param [out] pMeshList - reference to a list with all aiMesh of the scene.
-    /// \param [out] pSceneNode - pointer to place where new aiNode will be created.
-    void Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, std::list<aiMesh *> &pMeshList, aiNode **pSceneNode);
+    /// \param [out] meshList    - reference to a list with all aiMesh of the scene.
+    /// \param [out] pSceneNode  - pointer to place where new aiNode will be created.
+    void Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, MeshArray &meshList, aiNode **pSceneNode);
 
     /// Create mesh for every <volume> in <mesh>.
     /// \param [in] pNodeElement - reference to node element which kept <mesh> data.
@@ -189,7 +193,7 @@ private:
     /// \param [out] pSceneNode - reference to aiNode which will own new aiMesh's.
     void Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const std::vector<aiVector3D> &pVertexCoordinateArray,
             const std::vector<AMFColor *> &pVertexColorArray, const AMFColor *pObjectColor,
-            std::list<aiMesh *> &pMeshList, aiNode &pSceneNode);
+            MeshArray &pMeshList, aiNode &pSceneNode);
 
     /// Convert material from \ref CAMFImporter_NodeElement_Material to \ref SPP_Material.
     /// \param [in] pMaterial - source CAMFImporter_NodeElement_Material.
@@ -197,8 +201,8 @@ private:
 
     /// Create and add to aiNode's list new part of scene graph defined by <constellation>.
     /// \param [in] pConstellation - reference to <constellation> node.
-    /// \param [out] pNodeList - reference to aiNode's list.
-    void Postprocess_BuildConstellation(AMFConstellation &pConstellation, std::list<aiNode *> &pNodeList) const;
+    /// \param [out] nodeArray     - reference to aiNode's list.
+    void Postprocess_BuildConstellation(AMFConstellation &pConstellation, NodeArray &nodeArray) const;
 
     /// Build Assimp scene graph in aiScene from collected data.
     /// \param [out] pScene - pointer to aiScene where tree will be built.
@@ -276,7 +280,7 @@ public:
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
     const aiImporterDesc *GetInfo() const;
     bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;
-    bool Find_ConvertedNode(const std::string &pID, std::list<aiNode *> &pNodeList, aiNode **pNode) const;
+    bool Find_ConvertedNode(const std::string &pID, NodeArray &nodeArray, aiNode **pNode) const;
     bool Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const;
     void Throw_CloseNotFound(const std::string &nodeName);
     void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName);

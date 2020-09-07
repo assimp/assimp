@@ -115,10 +115,9 @@ bool AMFImporter::Find_NodeElement(const std::string &pID, const AMFNodeElementB
     return false;
 }
 
-bool AMFImporter::Find_ConvertedNode(const std::string &pID, std::list<aiNode *> &pNodeList, aiNode **pNode) const {
+bool AMFImporter::Find_ConvertedNode(const std::string &pID, NodeArray &nodeArray, aiNode **pNode) const {
     aiString node_name(pID.c_str());
-
-    for (aiNode *node : pNodeList) {
+    for (aiNode *node : nodeArray) {
         if (node->mName == node_name) {
             if (pNode != nullptr) {
                 *pNode = node;

@@ -67,19 +67,22 @@ void AMFImporter::ParseNode_Mesh(XmlNode &node) {
     if (0 != ASSIMP_stricmp(node.name(), "mesh")) {
         return;
     }
-
     bool found_verts = false, found_volumes = false;
-    pugi::xml_node vertNode = node.child("vertices");
-    if (!vertNode.empty()) {
-        ParseNode_Vertices(vertNode);
-        found_verts = true;
-    }
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        pugi::xml_node vertNode = node.child("vertices");
+        if (!vertNode.empty()) {
+            ParseNode_Vertices(vertNode);
+            found_verts = true;
+        }
 
-    pugi::xml_node volumeNode = node.child("volume");
-    if (!volumeNode.empty()) {
-        ParseNode_Volume(volumeNode);
-        found_volumes = true;
-    }
+        pugi::xml_node volumeNode = node.child("volume");
+        if (!volumeNode.empty()) {
+            ParseNode_Volume(volumeNode);
+            found_volumes = true;
+        }
+        ParseHelper_Node_Exit();
+    } 
 
     if (!found_verts && !found_volumes) {
         mNodeElement_Cur->Child.push_back(ne);
@@ -102,7 +105,12 @@ void AMFImporter::ParseNode_Vertices(XmlNode &node) {
     // Check for child nodes
     pugi::xml_node vertexNode = node.child("vertex");
     if (!vertexNode.empty()) {
+        ParseHelper_Node_Enter(ne);
+
         ParseNode_Vertex(vertexNode);
+
+        ParseHelper_Node_Exit();
+
     } else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     } // if(!mReader->isEmptyElement()) else
@@ -125,15 +133,20 @@ void AMFImporter::ParseNode_Vertex(XmlNode &node) {
     pugi::xml_node colorNode = node.child("color");
     bool col_read = false;
     bool coord_read = false;
-    if (!colorNode.empty()) {
-        ParseNode_Color(colorNode);
-        col_read = true;
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        if (!colorNode.empty()) {
+            ParseNode_Color(colorNode);
+            col_read = true;
+        }
+        pugi::xml_node coordNode = node.child("coordinates");
+        if (!coordNode.empty()) {
+            ParseNode_Coordinates(coordNode);
+            coord_read = true;
+        }
+        ParseHelper_Node_Exit();
     }
-    pugi::xml_node coordNode = node.child("coordinates");
-    if (!coordNode.empty()) {
-        ParseNode_Coordinates(coordNode);
-        coord_read = true;
-    }
+
     if (!coord_read && !col_read) {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
@@ -158,11 +171,23 @@ void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
     ne = new AMFCoordinates(mNodeElement_Cur);
 
     AMFCoordinates &als = *((AMFCoordinates *)ne); // alias for convenience
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode &currentNode : node.children()) {
+            const std::string &currentName = currentNode.name();
+            if (currentName == "X") {
+                XmlParser::getValueAsFloat(currentNode, als.Coordinate.x);
+            } else if (currentName == "Y") {
+                XmlParser::getValueAsFloat(currentNode, als.Coordinate.y);
+            } else if (currentName == "Z") {
+                XmlParser::getValueAsFloat(currentNode, als.Coordinate.z);
+            }
+        }
 
-    als.Coordinate.x = (ai_real)node.attribute("x").as_float();
-    als.Coordinate.y = (ai_real)node.attribute("y").as_float();
-    als.Coordinate.z = (ai_real)node.attribute("z").as_float();
-    mNodeElement_Cur->Child.push_back(ne);
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne);
+    }
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
@@ -188,24 +213,26 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
      
     ((AMFVolume *)ne)->Type = type;
     // Check for child nodes
-    if (node.empty()) {
-        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
-    }
-
     bool col_read = false;
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        const std::string currentName = currentNode.name();
-        if (currentName == "color") {
-            if (col_read) Throw_MoreThanOnceDefined(currentName ,"color", "Only one color can be defined for <volume>.");
-            ParseNode_Color(currentNode);
-            col_read = true;
-        } else if (currentName == "triangle") {
-            ParseNode_Triangle(currentNode);
-        } else if (currentName == "metadata") {
-            ParseNode_Metadata(currentNode);
-        } else if (currentName == "volume") {
-            ParseNode_Metadata(currentNode);
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            const std::string currentName = currentNode.name();
+            if (currentName == "color") {
+                if (col_read) Throw_MoreThanOnceDefined(currentName, "color", "Only one color can be defined for <volume>.");
+                ParseNode_Color(currentNode);
+                col_read = true;
+            } else if (currentName == "triangle") {
+                ParseNode_Triangle(currentNode);
+            } else if (currentName == "metadata") {
+                ParseNode_Metadata(currentNode);
+            } else if (currentName == "volume") {
+                ParseNode_Metadata(currentNode);
+            }
         }
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
@@ -228,36 +255,39 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
 
     AMFTriangle &als = *((AMFTriangle *)ne); // alias for convenience
 
-    if (node.empty()) {
+    bool col_read = false, tex_read = false;
+    bool read_flag[3] = { false, false, false };
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            const std::string currentName = currentNode.name();
+            if (currentName == "color") {
+                if (col_read) Throw_MoreThanOnceDefined(currentName, "color", "Only one color can be defined for <triangle>.");
+                ParseNode_Color(currentNode);
+                col_read = true;
+            } else if (currentName == "texmap") {
+                ParseNode_TexMap(currentNode);
+                tex_read = true;
+            } else if (currentName == "map") {
+                ParseNode_TexMap(currentNode, true);
+                tex_read = true;
+            } else if (currentName == "v1") {
+                als.V[0] = std::atoi(currentNode.value());
+                read_flag[0] = true;
+            } else if (currentName == "v2") {
+                als.V[1] = std::atoi(currentNode.value());
+                read_flag[1] = true;
+            } else if (currentName == "v3") {
+                als.V[2] = std::atoi(currentNode.value());
+                read_flag[2] = true;
+            }
+        }
+        ParseHelper_Node_Exit();
+    } else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
 
     // Check for child nodes
-    bool col_read = false, tex_read = false;
-    bool read_flag[3] = { false, false, false };
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        const std::string currentName = currentNode.name();
-        if (currentName == "color") {
-            if (col_read) Throw_MoreThanOnceDefined(currentName , "color", "Only one color can be defined for <triangle>.");
-            ParseNode_Color(currentNode);
-            col_read = true;
-        } else if (currentName == "texmap") {
-            ParseNode_TexMap(currentNode);
-            tex_read = true;
-        } else if (currentName == "map") {
-            ParseNode_TexMap(currentNode, true);
-            tex_read = true;
-        } else if (currentName == "v1") {
-            als.V[0] = std::atoi(currentNode.value());
-            read_flag[0] = true;
-        } else if (currentName == "v2") {
-            als.V[1] = std::atoi(currentNode.value());
-            read_flag[1] = true;
-        } else if (currentName == "v3") {
-            als.V[2] = std::atoi(currentNode.value());
-            read_flag[2] = true;
-        }
-    }
     if ((read_flag[0] && read_flag[1] && read_flag[2]) == 0) {
         throw DeadlyImportError("Not all vertices of the triangle are defined.");
     }

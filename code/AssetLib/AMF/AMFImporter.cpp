@@ -266,7 +266,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     }
 
     mXmlParser = new XmlParser();
-    if (!mXmlParser->parse( file.get() )) {
+    if (!mXmlParser->parse(file.get())) {
         delete mXmlParser;
         throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
     }
@@ -277,6 +277,15 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     }
     ParseNode_Root();
 } // namespace Assimp
+
+void AMFImporter::ParseHelper_Node_Enter(AMFNodeElementBase *node) {
+    mNodeElement_Cur->Child.push_back(node); // add new element to current element child list.
+    mNodeElement_Cur = node;
+}
+
+void AMFImporter::ParseHelper_Node_Exit() {
+    if (mNodeElement_Cur != nullptr) mNodeElement_Cur = mNodeElement_Cur->Parent;
+}
 
 // <amf
 // unit="" - The units to be used. May be "inch", "millimeter", "meter", "feet", or "micron".
@@ -352,15 +361,18 @@ void AMFImporter::ParseNode_Constellation(XmlNode &node) {
     }
 
     // Check for child nodes
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        std::string name = currentNode.name();
-        if (name == "instance") {
-            ParseNode_Instance(currentNode);
-        } else if (name == "metadata") {
-            ParseNode_Metadata(currentNode);
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            std::string name = currentNode.name();
+            if (name == "instance") {
+                ParseNode_Instance(currentNode);
+            } else if (name == "metadata") {
+                ParseNode_Metadata(currentNode);
+            }
         }
-    }
-    if (node.empty()) {
+        ParseHelper_Node_Exit();
+    } else {
         mNodeElement_Cur->Child.push_back(ne);
     }
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
@@ -388,31 +400,34 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
     AMFInstance &als = *((AMFInstance *)ne);
     als.ObjectID = objectid;
 
-    if (node.empty()) {
-        mNodeElement_Cur->Child.push_back(ne);
-    }
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        bool read_flag[6] = { false, false, false, false, false, false };
-        std::string currentName = currentNode.name();
-        if (currentName == "deltax") {
-            read_flag[0] = true;
-            als.Delta.x = (ai_real) std::atof(currentNode.value());
-        } else if (currentName == "deltay") {
-            read_flag[1] = true;
-            als.Delta.y = (ai_real)std::atof(currentNode.value());
-        } else if (currentName == "deltaz") {
-            read_flag[2] = true;
-            als.Delta.z = (ai_real)std::atof(currentNode.value());
-        } else if (currentName == "rx") {
-            read_flag[3] = true;
-            als.Delta.x = (ai_real)std::atof(currentNode.value());
-        } else if (currentName == "ry") {
-            read_flag[4] = true;
-            als.Delta.y = (ai_real)std::atof(currentNode.value());
-        } else if (currentName == "rz") {
-            read_flag[5] = true;
-            als.Delta.z = (ai_real)std::atof(currentNode.value());
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            bool read_flag[6] = { false, false, false, false, false, false };
+            std::string currentName = currentNode.name();
+            if (currentName == "deltax") {
+                read_flag[0] = true;
+                als.Delta.x = (ai_real)std::atof(currentNode.value());
+            } else if (currentName == "deltay") {
+                read_flag[1] = true;
+                als.Delta.y = (ai_real)std::atof(currentNode.value());
+            } else if (currentName == "deltaz") {
+                read_flag[2] = true;
+                als.Delta.z = (ai_real)std::atof(currentNode.value());
+            } else if (currentName == "rx") {
+                read_flag[3] = true;
+                als.Delta.x = (ai_real)std::atof(currentNode.value());
+            } else if (currentName == "ry") {
+                read_flag[4] = true;
+                als.Delta.y = (ai_real)std::atof(currentNode.value());
+            } else if (currentName == "rz") {
+                read_flag[5] = true;
+                als.Delta.z = (ai_real)std::atof(currentNode.value());
+            }
         }
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne);
     }
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
@@ -426,7 +441,7 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
 // Multi elements - Yes.
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Object(XmlNode &node) {
-    
+
     AMFNodeElementBase *ne(nullptr);
 
     // Read attributes for node <object>.
@@ -443,19 +458,22 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
 
     // Check for child nodes
     bool col_read = false;
-    if (node.empty()) {
-        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
-    }
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-        const std::string currentName = currentNode.name();
-        if (currentName == "color") {
-            ParseNode_Color(currentNode);
-            col_read = true;
-        } else if (currentName == "mesh") {
-            ParseNode_Mesh(currentNode);
-        } else if (currentName == "metadata") {
-            ParseNode_Metadata(currentNode);
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            const std::string currentName = currentNode.name();
+            if (currentName == "color") {
+                ParseNode_Color(currentNode);
+                col_read = true;
+            } else if (currentName == "mesh") {
+                ParseNode_Mesh(currentNode);
+            } else if (currentName == "metadata") {
+                ParseNode_Metadata(currentNode);
+            }
         }
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.

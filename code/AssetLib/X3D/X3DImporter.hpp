@@ -321,21 +321,7 @@ public:
     void Clear();
 
 private:
-    /***********************************************/
-    /******************** Types ********************/
-    /***********************************************/
-
-    /***********************************************/
-    /****************** Constants ******************/
-    /***********************************************/
     static const aiImporterDesc Description;
-    //static const std::regex pattern_nws;
-    //static const std::regex pattern_true;
-
-
-    /***********************************************/
-    /****************** Variables ******************/
-    /***********************************************/
     X3DNodeElementBase* mNodeElementCur;///< Current element.
     XmlParser *mXmlParser;
     IOSystem *mpIOHandler;

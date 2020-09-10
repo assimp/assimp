@@ -53,12 +53,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/commonMetaData.h>
 #include <assimp/fast_atof.h>
 #include <assimp/light.h>
-#include <stdarg.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
-#include <sstream>
 
+#include <stdarg.h>
 #include <memory>
+#include <sstream>
 
 using namespace Assimp;
 using namespace Assimp::Collada;
@@ -306,9 +306,9 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
         } else if (name == "up_axis") {
             std::string v;
             XmlParser::getValueAsString(currentNode, v);
-            if (v == "X_UP" ) {
+            if (v == "X_UP") {
                 mUpDirection = UP_X;
-            } else if (v == "Z_UP" ) {
+            } else if (v == "Z_UP") {
                 mUpDirection = UP_Z;
             } else {
                 mUpDirection = UP_Y;
@@ -567,13 +567,13 @@ void ColladaParser::ReadAnimationSampler(XmlNode &node, Collada::AnimationChanne
 
                     if (semantic == "INPUT")
                         pChannel.mSourceTimes = source;
-                    else if (semantic == "OUTPUT" )
+                    else if (semantic == "OUTPUT")
                         pChannel.mSourceValues = source;
-                    else if (semantic == "IN_TANGENT" )
+                    else if (semantic == "IN_TANGENT")
                         pChannel.mInTanValues = source;
-                    else if ( semantic == "OUT_TANGENT" )
+                    else if (semantic == "OUT_TANGENT")
                         pChannel.mOutTanValues = source;
-                    else if ( semantic == "INTERPOLATION" )
+                    else if (semantic == "INTERPOLATION")
                         pChannel.mInterpolationValues = source;
                 }
             }
@@ -588,14 +588,16 @@ void ColladaParser::ReadControllerLibrary(XmlNode &node) {
         return;
     }
 
-    const std::string name = node.name();
-    if (name != "controller") {
-        return;
-    }
 
-    std::string id = node.attribute("id").as_string();
-    mControllerLibrary[id] = Controller();
-    ReadController(node, mControllerLibrary[id]);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName != "controller") {
+            continue;;
+        }
+        std::string id = node.attribute("id").as_string();
+        mControllerLibrary[id] = Controller();
+        ReadController(node, mControllerLibrary[id]);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -613,8 +615,8 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &pControll
             if (methodIndex > 0) {
                 std::string method;
                 XmlParser::getValueAsString(currentNode, method);
-                
-                if (method == "RELATIVE" ) {
+
+                if (method == "RELATIVE") {
                     pController.mMethod = Relative;
                 }
             }
@@ -992,7 +994,6 @@ void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
     xmlIt.collectChildrenPreOrder(node);
     XmlNode currentNode;
 
-    std::string out;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "orthographic") {
@@ -1001,10 +1002,8 @@ void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
             XmlParser::getValueAsFloat(currentNode, camera.mHorFov);
         } else if (currentName == "yfov" || currentName == "ymag") {
             XmlParser::getValueAsFloat(currentNode, camera.mVerFov);
-            camera.mVerFov = (ai_real)std::atof(out.c_str());
         } else if (currentName == "aspect_ratio") {
             XmlParser::getValueAsFloat(currentNode, camera.mAspect);
-            camera.mAspect = (ai_real)std::atof(out.c_str());
         } else if (currentName == "znear") {
             XmlParser::getValueAsFloat(currentNode, camera.mZNear);
         } else if (currentName == "zfar") {
@@ -1280,7 +1279,6 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
     XmlNodeIterator xmlIt(node);
     xmlIt.collectChildrenPreOrder(node);
     XmlNode currentNode;
-
 
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();

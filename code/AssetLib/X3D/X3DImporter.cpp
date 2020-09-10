@@ -127,7 +127,8 @@ const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter() :
         mNodeElementCur(nullptr),
-        mXmlParser(nullptr) {
+        mXmlParser(nullptr),
+        mpIOHandler(nullptr) {
     // empty
 }
 

@@ -86,8 +86,13 @@ void AMFImporter::Clear() {
     }
 }
 
-AMFImporter::AMFImporter() AI_NO_EXCEPT : mNodeElement_Cur(nullptr),
-                                          mXmlParser(nullptr) {
+AMFImporter::AMFImporter() AI_NO_EXCEPT :
+        mNodeElement_Cur(nullptr),
+        mXmlParser(nullptr),
+        mUnit(),
+        mVersion(),
+        mMaterial_Converted(),
+        mTexture_Converted() {
     // empty
 }
 
@@ -295,15 +300,14 @@ void AMFImporter::ParseHelper_Node_Exit() {
 // Root XML element.
 // Multi elements - No.
 void AMFImporter::ParseNode_Root() {
-    std::string unit, version;
-    AMFNodeElementBase *ne(nullptr);
+    AMFNodeElementBase *ne = nullptr;
     XmlNode *root = mXmlParser->findNode("amf");
     if (nullptr == root) {
         throw DeadlyImportError("Root node \"amf\" not found.");
     }
     XmlNode node = *root;
-    unit = node.attribute("unit").as_string();
-    version = node.attribute("version").as_string();
+    mUnit = node.attribute("unit").as_string();
+    mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.
     // Check attributes
@@ -318,11 +322,11 @@ void AMFImporter::ParseNode_Root() {
 
     mNodeElement_Cur = ne; // set first "current" element
     // and assign attribute's values
-    ((AMFRoot *)ne)->Unit = unit;
-    ((AMFRoot *)ne)->Version = version;
+    ((AMFRoot *)ne)->Unit = mUnit;
+    ((AMFRoot *)ne)->Version = mVersion;
 
     // Check for child nodes
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode &currentNode : node.children() ) {
         const std::string currentName = currentNode.name();
         if (currentName == "object") {
             ParseNode_Object(currentNode);
@@ -335,6 +339,7 @@ void AMFImporter::ParseNode_Root() {
         } else if (currentName == "metadata") {
             ParseNode_Metadata(currentNode);
         }
+        mNodeElement_Cur = ne;
     }
     mNodeElement_Cur = ne; // force restore "current" element
     mNodeElement_List.push_back(ne); // add to node element list because its a new object in graph.

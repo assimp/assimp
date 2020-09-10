@@ -301,6 +301,7 @@ private:
     std::list<AMFNodeElementBase *> mNodeElement_List; ///< All elements of scene graph.
     XmlParser *mXmlParser;
     std::string mUnit;
+    std::string mVersion;
     std::list<SPP_Material> mMaterial_Converted; ///< List of converted materials for postprocessing step.
     std::list<SPP_Texture> mTexture_Converted; ///< List of converted textures for postprocessing step.
 };

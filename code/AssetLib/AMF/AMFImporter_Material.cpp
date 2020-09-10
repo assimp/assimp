@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
 
 #include "AMFImporter.hpp"
-//#include "AMFImporter_Macro.hpp"
 
 namespace Assimp {
 
@@ -76,22 +75,24 @@ void AMFImporter::ParseNode_Color(XmlNode &node) {
 
 	als.Profile = profile;
 	if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
 		bool read_flag[4] = { false, false, false, false };
 		for (pugi::xml_node &child : node.children()) {
             std::string name = child.name();
             if ( name == "r") {
 				read_flag[0] = true;
-                als.Color.r = (ai_real)::atof(child.value());
+                XmlParser::getValueAsFloat(child, als.Color.r);
             } else if (name == "g") {
 				read_flag[1] = true;
-                als.Color.g = (ai_real)::atof(child.value());
+                XmlParser::getValueAsFloat(child, als.Color.g);
             } else if (name == "b") {
 				read_flag[2] = true;
-                als.Color.b = (ai_real)::atof(child.value());
-            } else if (name == "g") {
+                XmlParser::getValueAsFloat(child, als.Color.b);
+            } else if (name == "a") {
 			    read_flag[3] = true;
-                als.Color.a = (ai_real) ::atof(child.value());
-		    }
+                XmlParser::getValueAsFloat(child, als.Color.a);
+            }
+            ParseHelper_Node_Exit();
         }
 		// check that all components was defined
 		if (!(read_flag[0] && read_flag[1] && read_flag[2])) {
@@ -126,6 +127,7 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
     // Check for child nodes
 	if (!node.empty()) {
 		bool col_read = false;
+        ParseHelper_Node_Enter(ne);
         for (pugi::xml_node &child : node.children()) {
             const std::string name = child.name();
             if (name == "color") {
@@ -135,6 +137,7 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
 				ParseNode_Metadata(child);
 			}
 		}
+        ParseHelper_Node_Exit();
 	} else {
 		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
 	}
@@ -230,15 +233,27 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 //   Texture coordinates for every vertex of triangle.
 void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 	// Read attributes for node <color>.
-	std::string rtexid = node.attribute("rtexid").as_string();
-	std::string gtexid = node.attribute("gtexid").as_string();
-	std::string btexid = node.attribute("btexid").as_string();
-	std::string atexid = node.attribute("atexid").as_string();
-
+    AMFNodeElementBase *ne = new AMFTexMap(mNodeElement_Cur);
+    AMFTexMap &als = *((AMFTexMap *)ne); //
+    std::string rtexid, gtexid, btexid, atexid;
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode &currentNode : node.children()) {
+            const std::string &currentName = currentNode.name();
+            if (currentName == "rtexid") {
+                XmlParser::getValueAsString(node, rtexid);
+            } else if (currentName == "gtexid") {
+                XmlParser::getValueAsString(node, gtexid);
+            } else if (currentName == "btexid") {
+                XmlParser::getValueAsString(node, btexid);
+            } else if (currentName == "atexid") {
+                XmlParser::getValueAsString(node, atexid);
+            }
+        }
+        ParseHelper_Node_Exit();
+    }
 
 	// create new texture coordinates object, alias for convenience
-    AMFNodeElementBase *ne = new AMFTexMap(mNodeElement_Cur);
-	AMFTexMap& als = *((AMFTexMap*)ne);// 
 	// check data
 	if (rtexid.empty() && gtexid.empty() && btexid.empty()) {
 		throw DeadlyImportError("ParseNode_TexMap. At least one texture ID must be defined.");

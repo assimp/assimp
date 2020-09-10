@@ -734,7 +734,9 @@ unsigned int XGLImporter::ReadIDAttr(XmlNode &node) {
 
 // ------------------------------------------------------------------------------------------------
 float XGLImporter::ReadFloat(XmlNode &node) {
-	const char *s = node.value(), *se;
+    std::string v;
+    XmlParser::getValueAsString(node, v);
+    const char *s = v.c_str(), *se;
 	if (!SkipSpaces(&s)) {
 		LogError("unexpected EOL, failed to parse index element");
 		return 0.f;
@@ -751,7 +753,9 @@ float XGLImporter::ReadFloat(XmlNode &node) {
 
 // ------------------------------------------------------------------------------------------------
 unsigned int XGLImporter::ReadIndexFromText(XmlNode &node) {
-	const char *s = node.value();
+    std::string v;
+    XmlParser::getValueAsString(node, v);
+    const char *s = v.c_str();
 	if (!SkipSpaces(&s)) {
 		LogError("unexpected EOL, failed to parse index element");
 		return ~0u;
@@ -770,7 +774,9 @@ unsigned int XGLImporter::ReadIndexFromText(XmlNode &node) {
 // ------------------------------------------------------------------------------------------------
 aiVector2D XGLImporter::ReadVec2(XmlNode &node) {
 	aiVector2D vec;
-	const char *s = node.value();
+    std::string val;
+    XmlParser::getValueAsString(node, val);
+    const char *s = val.c_str();
 	ai_real v[2];
 	for (int i = 0; i < 2; ++i) {
 		if (!SkipSpaces(&s)) {
@@ -796,7 +802,9 @@ aiVector2D XGLImporter::ReadVec2(XmlNode &node) {
 // ------------------------------------------------------------------------------------------------
 aiVector3D XGLImporter::ReadVec3(XmlNode &node) {
 	aiVector3D vec;
-	const char *s = node.value();
+    std::string v;
+    XmlParser::getValueAsString(node, v);
+	const char *s = v.c_str();
 	for (int i = 0; i < 3; ++i) {
 		if (!SkipSpaces(&s)) {
 			LogError("unexpected EOL, failed to parse vec3");

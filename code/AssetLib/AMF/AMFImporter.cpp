@@ -503,11 +503,10 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
 // "Tolerance" - specifies the desired manufacturing tolerance of the entity in entity's unit system
 // "Volume" - specifies the total volume of the entity, in the entity's unit system, to be used for verification (object and volume only)
 void AMFImporter::ParseNode_Metadata(XmlNode &node) {
-    std::string type, value;
-    AMFNodeElementBase *ne(nullptr);
+    AMFNodeElementBase *ne = nullptr;
 
-    type = node.attribute("type").as_string();
-    value = node.value();
+    std::string type = node.attribute("type").as_string(), value;
+    XmlParser::getValueAsString(node, value);
 
     // read attribute
     ne = new AMFMetadata(mNodeElement_Cur);

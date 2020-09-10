@@ -55,8 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/defs.h>
 #include <vector>
 
-#include <vector>
-
 namespace Assimp {
 
 // NOTE: the functions below are mostly intended as replacement for
@@ -72,17 +70,13 @@ static const unsigned int BufferSize = 4096;
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE
-        char_t
-        ToLower(char_t in) {
+AI_FORCE_INLINE char_t ToLower(char_t in) {
     return (in >= (char_t)'A' && in <= (char_t)'Z') ? (char_t)(in + 0x20) : in;
 }
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE
-        char_t
-        ToUpper(char_t in) {
+AI_FORCE_INLINE char_t ToUpper(char_t in) {
     return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in - 0x20) : in;
 }
 
@@ -217,8 +211,7 @@ AI_FORCE_INLINE bool TokenMatch(char_t *&in, const char *token, unsigned int len
  *  @param token Token to check for
  *  @param len Number of characters to check
  */
-AI_FORCE_INLINE
-bool TokenMatchI(const char *&in, const char *token, unsigned int len) {
+AI_FORCE_INLINE bool TokenMatchI(const char *&in, const char *token, unsigned int len) {
     if (!ASSIMP_strincmp(token, in, len) && IsSpaceOrNewLine(in[len])) {
         in += len + 1;
         return true;
@@ -227,8 +220,7 @@ bool TokenMatchI(const char *&in, const char *token, unsigned int len) {
 }
 
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE
-void SkipToken(const char *&in) {
+AI_FORCE_INLINE void SkipToken(const char *&in) {
     SkipSpaces(&in);
     while (!IsSpaceOrNewLine(*in)) {
         ++in;
@@ -236,8 +228,7 @@ void SkipToken(const char *&in) {
 }
 
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE
-std::string GetNextToken(const char *&in) {
+AI_FORCE_INLINE std::string GetNextToken(const char *&in) {
     SkipSpacesAndLineEnd(&in);
     const char *cur = in;
     while (!IsSpaceOrNewLine(*in)) {
@@ -277,7 +268,13 @@ AI_FORCE_INLINE unsigned int tokenize(const string_type &str, std::vector<string
     return static_cast<unsigned int>(tokens.size());
 }
 
-// ---------------------------------------------------------------------------------
+inline std::string ai_stdStrToLower(const std::string &str) {
+    std::string out(str);
+    for (size_t i = 0; i < str.size(); ++i) {
+        out[i] =(char) tolower(out[i]);
+    }
+    return out;
+}
 
 } // namespace Assimp
 

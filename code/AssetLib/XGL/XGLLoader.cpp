@@ -56,16 +56,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 using namespace Assimp;
-//using namespace irr;
-//using namespace irr::io;
 
 // zlib is needed for compressed XGL files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include <contrib/zlib/zlib.h>
-#endif
+#  ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#    include <zlib.h>
+#  else
+#    include <contrib/zlib/zlib.h>
+#  endif
 #endif
 
 namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
@@ -133,8 +131,7 @@ const aiImporterDesc *XGLImporter::GetInfo() const {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void XGLImporter::InternReadFile(const std::string &pFile,
-		aiScene *pScene, IOSystem *pIOHandler) {
+void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
 	std::vector<Bytef> uncompressed;
 #endif
@@ -207,8 +204,9 @@ void XGLImporter::InternReadFile(const std::string &pFile,
 
     XmlNode root = mXmlParser->getRootNode();
 	TempScope scope;
-	if (!ASSIMP_stricmp(root.name(), "world")) {
-		ReadWorld(scope);
+    XmlNode *worldNode = mXmlParser->findNode("WORLD");
+    if (nullptr != worldNode) {
+		ReadWorld(*worldNode, scope);
 	}
 
 	std::vector<aiMesh *> &meshes = scope.meshes_linear;
@@ -239,20 +237,20 @@ void XGLImporter::InternReadFile(const std::string &pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
-void XGLImporter::ReadWorld(TempScope &scope) {
-    XmlNode root = mXmlParser->getRootNode();
-	for (XmlNode &node : root.children()) {
-		const std::string &s = node.name();
+void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &s = ai_stdStrToLower(currentNode.name());
+        
 		// XXX right now we'd skip <lighting> if it comes after
 		// <object> or <mesh>
 		if (s == "lighting") {
-			ReadLighting(node, scope);
+            ReadLighting(currentNode, scope);
 		} else if (s == "object" || s == "mesh" || s == "mat") {
 			break;
 		}
 	}
 
-	aiNode *const nd = ReadObject(root, scope, true);
+	aiNode *const nd = ReadObject(node, scope, true);
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}
@@ -265,7 +263,7 @@ void XGLImporter::ReadWorld(TempScope &scope) {
 
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadLighting(XmlNode &node, TempScope &scope) {
-	const std::string &s = node.name();
+    const std::string &s = ai_stdStrToLower(node.name());
 	if (s == "directionallight") {
 		scope.light = ReadDirectionalLight(node);
 	} else if (s == "ambient") {
@@ -285,7 +283,7 @@ aiLight *XGLImporter::ReadDirectionalLight(XmlNode &node) {
 		return nullptr;
 	}
 
-	const std::string &s = child.name();
+	const std::string &s = ai_stdStrToLower(child.name());
 	if (s == "direction") {
 		l->mDirection = ReadVec3(child);
 	} else if (s == "diffuse") {
@@ -308,7 +306,7 @@ aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope, bool skipFirst/
 
 			skipFirst = false;
 
-			const std::string &s = child.name();
+			const std::string &s = ai_stdStrToLower(child.name());
 			if (s == "mesh") {
 				const size_t prev = scope.meshes_linear.size();
 				if (ReadMesh(child, scope)) {
@@ -389,13 +387,13 @@ aiMatrix4x4 XGLImporter::ReadTrafo(XmlNode &node) {
 	float scale = 1.0f;
 
 	aiMatrix4x4 m;
-	XmlNode child = node.child("transform");
+	XmlNode child = node.child("TRANSFORM");
 	if (child.empty()) {
 		return m;
 	}
 
 	for (XmlNode &sub_child : child.children()) {
-		const std::string &s = sub_child.name();
+        const std::string &s = ai_stdStrToLower(sub_child.name());
 		if (s == "forward") {
 			forward = ReadVec3(sub_child);
 		} else if (s == "up") {
@@ -502,7 +500,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
     const unsigned int mesh_id = ReadIDAttr(node);
 
 	for (XmlNode &child : node.children()) {
-		const std::string &s = child.name();
+        const std::string &s = ai_stdStrToLower(child.name());
 
 		if (s == "mat") {
 			ReadMaterial(child, scope);
@@ -537,7 +535,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 			TempFace tf[3];
 			bool has[3] = { false };
 			for (XmlNode &sub_child : child.children()) {
-				const std::string &scn = sub_child.name();
+                const std::string &scn = ai_stdStrToLower(sub_child.name());
                 if (scn == "fv1" || scn == "lv1" || scn == "pv1") {
 					ReadFaceVertex(sub_child, t, tf[0]);
 					has[0] = true;
@@ -631,7 +629,7 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 	}
 
 	// ok, this is n^2 and should get optimized one day
-	aiMaterial *const m = (*it).second;
+	aiMaterial *const m = it->second;
 
 	unsigned int i = 0, mcount = static_cast<unsigned int>(scope.materials_linear.size());
 	for (; i < mcount; ++i) {
@@ -651,7 +649,7 @@ void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
 
 	aiMaterial *mat(new aiMaterial);
 	for (XmlNode &child : node.children()) {
-		const std::string &s = child.name();
+        const std::string &s = ai_stdStrToLower(child.name());
 		if (s == "amb") {
 			const aiColor3D c = ReadCol3(child);
 			mat->AddProperty(&c, 1, AI_MATKEY_COLOR_AMBIENT);
@@ -681,7 +679,7 @@ void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
 void XGLImporter::ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out) {
 	bool havep = false;
 	for (XmlNode &child : node.children()) {
-		const std::string &s = child.name();
+        const std::string &s = ai_stdStrToLower(child.name());
 		if (s == "pref") {
 			const unsigned int id = ReadIndexFromText(child);
 			std::map<unsigned int, aiVector3D>::const_iterator it = t.points.find(id);

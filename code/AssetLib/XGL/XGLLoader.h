@@ -93,7 +93,9 @@ protected:
 private:
     struct TempScope {
         TempScope() :
-                light() {}
+                light() {
+            // empty
+        }
 
         ~TempScope() {
             for (aiMesh *m : meshes_linear) {
@@ -126,7 +128,9 @@ private:
 
     struct SortMeshByMaterialId {
         SortMeshByMaterialId(const TempScope &scope) :
-                scope(scope) {}
+                scope(scope) {
+            // empty
+        }
         bool operator()(unsigned int a, unsigned int b) const {
             return scope.meshes_linear[a]->mMaterialIndex < scope.meshes_linear[b]->mMaterialIndex;
         };
@@ -142,7 +146,10 @@ private:
 
     struct TempMaterialMesh {
         TempMaterialMesh() :
-                pflags(), matid() {}
+                pflags(),
+                matid() {
+            // empty
+        }
 
         std::vector<aiVector3D> positions, normals;
         std::vector<aiVector2D> uvs;
@@ -154,7 +161,10 @@ private:
 
     struct TempFace {
         TempFace() :
-                has_uv(), has_normal() {}
+                has_uv(),
+                has_normal() {
+            // empty
+        }
 
         aiVector3D pos;
         aiVector3D normal;
@@ -172,7 +182,7 @@ private:
     bool SkipToText();
     unsigned int ReadIDAttr(XmlNode &node);
 
-    void ReadWorld(TempScope &scope);
+    void ReadWorld(XmlNode &node, TempScope &scope);
     void ReadLighting(XmlNode &node, TempScope &scope);
     aiLight *ReadDirectionalLight(XmlNode &node);
     aiNode *ReadObject(XmlNode &node, TempScope &scope, bool skipFirst = false/*, const char *closetag = "object"*/);

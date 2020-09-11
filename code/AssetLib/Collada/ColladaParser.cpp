@@ -84,7 +84,6 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
         mUnitSize(1.0f),
         mUpDirection(UP_Y),
         mFormat(FV_1_5_n) {
-    // validate io-handler instance
     if (nullptr == pIOHandler) {
         throw DeadlyImportError("IOSystem is nullptr.");
     }
@@ -588,11 +587,11 @@ void ColladaParser::ReadControllerLibrary(XmlNode &node) {
         return;
     }
 
-
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName != "controller") {
-            continue;;
+            continue;
+            ;
         }
         std::string id = node.attribute("id").as_string();
         mControllerLibrary[id] = Controller();
@@ -1057,8 +1056,6 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
         if (currentName == "newparam") {
             // save ID
             std::string sid = currentNode.attribute("sid").as_string();
-            //std::string sid = GetAttribute("sid");
-            //= mReader->getAttributeValue(attrSID);
             pEffect.mParams[sid] = EffectParam();
             ReadEffectParam(currentNode, pEffect.mParams[sid]);
         } else if (currentName == "technique" || currentName == "extra") {
@@ -1066,9 +1063,6 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
         } else if (mFormat == FV_1_4_n && currentName == "image") {
             // read ID. Another entry which is "optional" by design but obligatory in reality
             std::string id = currentNode.attribute("id").as_string();
-
-            //int attrID = GetAttribute("id");
-            //std::string id = mReader->getAttributeValue(attrID);
 
             // create an entry and store it in the library under its ID
             mImageLibrary[id] = Image();
@@ -2010,10 +2004,7 @@ void ColladaParser::ReadSceneLibrary(XmlNode &node) {
         return;
     }
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
-    while (xmlIt.getNext(currentNode)) {
+    for (XmlNode currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "visual_scene") {
             // read ID. Is optional according to the spec, but how on earth should a scene_instance refer to it then?
@@ -2032,7 +2023,7 @@ void ColladaParser::ReadSceneLibrary(XmlNode &node) {
             sceneNode->mName = attrName;
             mNodeLibrary[sceneNode->mID] = sceneNode;
 
-            ReadSceneNode(node, sceneNode);
+            ReadSceneNode(currentNode, sceneNode);
         }
     }
 }

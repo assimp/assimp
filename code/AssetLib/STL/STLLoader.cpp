@@ -181,7 +181,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open STL file " + pFile + ".");
+        throw DeadlyImportError("Failed to open STL file ", pFile, ".");
     }
 
     mFileSize = (unsigned int)file->FileSize();
@@ -207,7 +207,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     } else if (IsAsciiSTL(mBuffer, mFileSize)) {
         LoadASCIIFile(mScene->mRootNode);
     } else {
-        throw DeadlyImportError("Failed to determine STL storage representation for " + pFile + ".");
+        throw DeadlyImportError("Failed to determine STL storage representation for ", pFile, ".");
     }
 
     // create a single default material, using a white diffuse color for consistency with

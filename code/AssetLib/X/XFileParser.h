@@ -133,7 +133,8 @@ protected:
     aiColor4D ReadRGBA();
 
     /** Throws an exception with a line number and the given text. */
-    AI_WONT_RETURN void ThrowException( const std::string& pText) AI_WONT_RETURN_SUFFIX;
+    template<typename... T>
+    AI_WONT_RETURN void ThrowException(T&&... args) AI_WONT_RETURN_SUFFIX;
 
     /**
       * @brief  Filters the imported hierarchy for some degenerated cases that some exporters produce.

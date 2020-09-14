@@ -73,31 +73,24 @@ const char* TokenTypeString(TokenType t);
 
 /** Format log/error messages using a given offset in the source binary file
  *
- *  @param prefix Message prefix to be preprended to the location info.
- *  @param text Message text
- *  @param line Line index, 1-based
- *  @param column Column index, 1-based
- *  @return A string of the following format: {prefix} (offset 0x{offset}) {text}*/
-std::string AddOffset(const std::string& prefix, const std::string& text, size_t offset);
+ *  @param offset offset within the file
+ *  @return A string of the following format: " (offset 0x{offset}) "*/
+std::string GetOffsetText(size_t offset);
 
 
 /** Format log/error messages using a given line location in the source file.
  *
- *  @param prefix Message prefix to be preprended to the location info.
- *  @param text Message text
  *  @param line Line index, 1-based
  *  @param column Column index, 1-based
- *  @return A string of the following format: {prefix} (line {line}, col {column}) {text}*/
-std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column);
+ *  @return A string of the following format: " (line {line}, col {column}) "*/
+std::string GetLineAndColumnText(unsigned int line, unsigned int column);
 
 
 /** Format log/error messages using a given cursor token.
  *
- *  @param prefix Message prefix to be preprended to the location info.
- *  @param text Message text
  *  @param tok Token where parsing/processing stopped
- *  @return A string of the following format: {prefix} ({token-type}, line {line}, col {column}) {text}*/
-std::string AddTokenText(const std::string& prefix, const std::string& text, const Token* tok);
+ *  @return A string of the following format: " ({token-type}, line {line}, col {column}) "*/
+std::string GetTokenText(const Token* tok);
 
 /** Decode a single Base64-encoded character.
 *

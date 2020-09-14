@@ -202,7 +202,7 @@ inline unsigned int ComponentTypeSize(ComponentType t) {
     case ComponentType_UNSIGNED_BYTE:
         return 1;
     default:
-        throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
+        throw DeadlyImportError("GLTF: Unsupported Component Type ", to_string(t));
     }
 }
 

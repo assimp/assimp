@@ -128,7 +128,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
     // Check whether we can read from the file
     if( file.get() == nullptr) {
-        throw DeadlyImportError( "Failed to open CSM file " + pFile + ".");
+        throw DeadlyImportError( "Failed to open CSM file ", pFile, ".");
     }
 
     // allocate storage and copy the contents of the file to a memory buffer

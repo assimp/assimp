@@ -118,7 +118,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
         mRootStream(nullptr), mZipArchive() {
     mZipArchive.reset(new ZipArchiveIOSystem(pIOHandler, rFile));
     if (!mZipArchive->isOpen()) {
-        throw DeadlyImportError("Failed to open file " + rFile + ".");
+        throw DeadlyImportError("Failed to open file ", rFile, ".");
     }
 
     std::vector<std::string> fileList;
@@ -192,7 +192,7 @@ std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
     });
 
     if (itr == reader.m_relationShips.end()) {
-        throw DeadlyImportError("Cannot find " + XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
+        throw DeadlyImportError("Cannot find ", XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
     }
 
     return (*itr)->target;

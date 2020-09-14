@@ -1251,7 +1251,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
 
             // time count and value count must match
             if (e.mTimeAccessor->mCount != e.mValueAccessor->mCount)
-                throw DeadlyImportError(format() << "Time count / value count mismatch in animation channel \"" << e.mChannel->mTarget << "\".");
+                throw DeadlyImportError("Time count / value count mismatch in animation channel \"", e.mChannel->mTarget, "\".");
 
             if (e.mTimeAccessor->mCount > 0) {
                 // find bounding times

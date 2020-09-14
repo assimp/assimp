@@ -219,7 +219,7 @@ void MDCImporter::InternReadFile(
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open MDC file " + pFile + ".");
+        throw DeadlyImportError("Failed to open MDC file ", pFile, ".");
     }
 
     // check whether the mdc file is large enough to contain the file header

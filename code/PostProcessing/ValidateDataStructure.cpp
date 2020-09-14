@@ -85,7 +85,7 @@ AI_WONT_RETURN void ValidateDSProcess::ReportError(const char *msg, ...) {
 
     va_end(args);
 
-    throw DeadlyImportError("Validation failed: " + std::string(szBuffer, iLen));
+    throw DeadlyImportError("Validation failed: ", std::string(szBuffer, iLen));
 }
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::ReportWarning(const char *msg, ...) {

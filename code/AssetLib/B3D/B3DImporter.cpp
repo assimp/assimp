@@ -119,7 +119,7 @@ void B3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open B3D file " + pFile + ".");
+        throw DeadlyImportError("Failed to open B3D file ", pFile, ".");
     }
 
     // check whether the .b3d file is large enough to contain
@@ -147,7 +147,7 @@ AI_WONT_RETURN void B3DImporter::Fail(string str) {
 #ifdef DEBUG_B3D
     ASSIMP_LOG_ERROR_F("Error in B3D file data: ", str);
 #endif
-    throw DeadlyImportError("B3D Importer - error in B3D file data: " + str);
+    throw DeadlyImportError("B3D Importer - error in B3D file data: ", str);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -160,21 +160,21 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     // Read file into memory
     std::unique_ptr<IOStream> pStream(pIOHandler->Open(file, "rb"));
     if (!pStream.get()) {
-        throw DeadlyImportError("Failed to open file " + file + ".");
+        throw DeadlyImportError("Failed to open file ", file, ".");
     }
 
     // Get the file-size and validate it, throwing an exception when fails
     size_t fileSize = pStream->FileSize();
     if (fileSize < 8) {
-        throw DeadlyImportError("M3D-file " + file + " is too small.");
+        throw DeadlyImportError("M3D-file ", file, " is too small.");
     }
     std::vector<unsigned char> buffer(fileSize);
     if (fileSize != pStream->Read(buffer.data(), 1, fileSize)) {
-        throw DeadlyImportError("Failed to read the file " + file + ".");
+        throw DeadlyImportError("Failed to read the file ", file, ".");
     }
     // extra check for binary format's first 8 bytes. Not done for the ASCII variant
     if (!memcmp(buffer.data(), "3DMO", 4) && memcmp(buffer.data() + 4, &fileSize, 4)) {
-        throw DeadlyImportError("Bad binary header in file " + file + ".");
+        throw DeadlyImportError("Bad binary header in file ", file, ".");
     }
 #ifdef M3D_ASCII
     // make sure there's a terminator zero character, as input must be ASCIIZ
@@ -200,7 +200,7 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     M3DWrapper m3d(pIOHandler, buffer);
 
     if (!m3d) {
-        throw DeadlyImportError("Unable to parse " + file + " as M3D.");
+        throw DeadlyImportError("Unable to parse ", file, " as M3D.");
     }
 
     // create the root node

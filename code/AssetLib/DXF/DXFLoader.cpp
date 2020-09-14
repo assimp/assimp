@@ -152,7 +152,7 @@ void DXFImporter::InternReadFile( const std::string& filename, aiScene* pScene, 
 
     // Check whether we can read the file
     if( file.get() == nullptr ) {
-        throw DeadlyImportError( "Failed to open DXF file " + filename + "");
+        throw DeadlyImportError( "Failed to open DXF file ", filename, "");
     }
 
     // Check whether this is a binary DXF file - we can't read binary DXF files :-(

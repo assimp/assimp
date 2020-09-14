@@ -163,6 +163,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
     if (!manifestParser.parse(manifestfile.get())) {
         return std::string();
     }
+
     XmlNode root = manifestParser.getRootNode();
     const std::string &name = root.name();
     if (name != "dae_root") {
@@ -2036,11 +2037,8 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
         return;
     }
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
-    while (xmlIt.getNext(currentNode)) {
-        const std::string &currentName = currentNode.name();
+    for (XmlNode &currentNode : node.children()) {
+            const std::string &currentName = currentNode.name();
         if (currentName == "node") {
             Node *child = new Node;
             if (XmlParser::hasAttribute(currentNode, "id")) {

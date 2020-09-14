@@ -61,10 +61,8 @@ protected:
     DeadlyErrorBase(Assimp::Formatter::format f);
     
     template<typename... T, typename U>
-    DeadlyErrorBase(Assimp::Formatter::format f, U&& u, T&&... args)
-        : DeadlyErrorBase(std::move(f << std::forward<U>(u)), std::forward<T>(args)...)
-    {
-    }
+    DeadlyErrorBase(Assimp::Formatter::format f, U&& u, T&&... args) :
+            DeadlyErrorBase(std::move(f << std::forward<U>(u)), std::forward<T>(args)...) {}
 };
 
 // ---------------------------------------------------------------------------
@@ -75,20 +73,16 @@ class ASSIMP_API DeadlyImportError : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */
     template<typename... T>
-    explicit DeadlyImportError(T&&... args)
-        : DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...)
-    {
-    }
+    explicit DeadlyImportError(T&&... args) :
+            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
 };
 
 class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */
     template<typename... T>
-    explicit DeadlyExportError(T&&... args)
-        : DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...)
-    {
-    }
+    explicit DeadlyExportError(T&&... args) :
+            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
 };
 
 #ifdef _MSC_VER

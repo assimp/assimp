@@ -73,7 +73,7 @@ namespace {
     AI_WONT_RETURN void ParseError(const std::string& message, const Token& token) AI_WONT_RETURN_SUFFIX;
     AI_WONT_RETURN void ParseError(const std::string& message, const Token& token)
     {
-        throw DeadlyImportError(Util::AddTokenText("FBX-Parser",message,&token));
+        throw DeadlyImportError("FBX-Parser", Util::GetTokenText(&token), message);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ namespace {
         if(element) {
             ParseError(message,element->KeyToken());
         }
-        throw DeadlyImportError("FBX-Parser " + message);
+        throw DeadlyImportError("FBX-Parser ", message);
     }
 
 

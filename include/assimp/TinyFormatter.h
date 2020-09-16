@@ -88,6 +88,9 @@ public:
         underlying << sin;
     }
 
+    basic_formatter(basic_formatter&& other)
+        : underlying(std::move(other.underlying)) {
+    }
 
     // The problem described here:
     // https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462

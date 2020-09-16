@@ -151,13 +151,13 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     const std::string mode = "rb";
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
     if (!fileStream.get()) {
-        throw DeadlyImportError("Failed to open file " + pFile + ".");
+        throw DeadlyImportError("Failed to open file ", pFile, ".");
     }
 
     // Get the file-size
     const size_t fileSize(fileStream->FileSize());
     if (0 == fileSize) {
-        throw DeadlyImportError("File " + pFile + " is empty.");
+        throw DeadlyImportError("File ", pFile, " is empty.");
     }
 
     IOStreamBuffer<char> streamedBuffer(1024 * 1024);

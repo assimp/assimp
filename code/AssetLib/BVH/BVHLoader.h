@@ -134,7 +134,8 @@ protected:
     float GetNextTokenAsFloat();
 
     /** Aborts the file reading with an exception */
-    AI_WONT_RETURN void ThrowException(const std::string &pError) AI_WONT_RETURN_SUFFIX;
+    template<typename... T>
+    AI_WONT_RETURN void ThrowException(T&&... args) AI_WONT_RETURN_SUFFIX;
 
     /** Constructs an animation for the motion data and stores it in the given scene */
     void CreateAnimation(aiScene *pScene);

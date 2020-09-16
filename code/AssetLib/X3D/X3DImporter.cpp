@@ -233,48 +233,48 @@ bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_Nod
 
 void X3DImporter::Throw_ArgOutOfRange(const std::string& pArgument)
 {
-	throw DeadlyImportError("Argument value is out of range for: \"" + pArgument + "\".");
+	throw DeadlyImportError("Argument value is out of range for: \"", pArgument, "\".");
 }
 
 void X3DImporter::Throw_CloseNotFound(const std::string& pNode)
 {
-	throw DeadlyImportError("Close tag for node <" + pNode + "> not found. Seems file is corrupt.");
+	throw DeadlyImportError("Close tag for node <", pNode, "> not found. Seems file is corrupt.");
 }
 
 void X3DImporter::Throw_ConvertFail_Str2ArrF(const std::string& pAttrValue)
 {
-	throw DeadlyImportError("In <" + std::string(mReader->getNodeName()) + "> failed to convert attribute value \"" + pAttrValue +
+	throw DeadlyImportError("In <", mReader->getNodeName(), "> failed to convert attribute value \"", pAttrValue,
 							"\" from string to array of floats.");
 }
 
 void X3DImporter::Throw_DEF_And_USE()
 {
-	throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <" + std::string(mReader->getNodeName()) + ">.");
+	throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <", mReader->getNodeName(), ">.");
 }
 
 void X3DImporter::Throw_IncorrectAttr(const std::string& pAttrName)
 {
-	throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
+	throw DeadlyImportError("Node <", mReader->getNodeName(), "> has incorrect attribute \"", pAttrName, "\".");
 }
 
 void X3DImporter::Throw_IncorrectAttrValue(const std::string& pAttrName)
 {
-	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
+	throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", mReader->getNodeName(), "> has incorrect value.");
 }
 
 void X3DImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription)
 {
-	throw DeadlyImportError("\"" + pNodeType + "\" node can be used only once in " + mReader->getNodeName() + ". Description: " + pDescription);
+	throw DeadlyImportError("\"", pNodeType, "\" node can be used only once in ", mReader->getNodeName(), ". Description: ", pDescription);
 }
 
 void X3DImporter::Throw_TagCountIncorrect(const std::string& pNode)
 {
-	throw DeadlyImportError("Count of open and close tags for node <" + pNode + "> are not equivalent. Seems file is corrupt.");
+	throw DeadlyImportError("Count of open and close tags for node <", pNode, "> are not equivalent. Seems file is corrupt.");
 }
 
 void X3DImporter::Throw_USE_NotFound(const std::string& pAttrValue)
 {
-	throw DeadlyImportError("Not found node with name \"" + pAttrValue + "\" in <" + std::string(mReader->getNodeName()) + ">.");
+	throw DeadlyImportError("Not found node with name \"", pAttrValue, "\" in <", mReader->getNodeName(), ">.");
 }
 
 /*********************************************************************************************************************************************/
@@ -283,7 +283,7 @@ void X3DImporter::Throw_USE_NotFound(const std::string& pAttrValue)
 
 void X3DImporter::XML_CheckNode_MustBeEmpty()
 {
-	if(!mReader->isEmptyElement()) throw DeadlyImportError(std::string("Node <") + mReader->getNodeName() + "> must be empty.");
+	if(!mReader->isEmptyElement()) throw DeadlyImportError("Node <", mReader->getNodeName(), "> must be empty.");
 }
 
 void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
@@ -395,7 +395,7 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeNa
 
 casu_cres:
 
-	if(!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
+	if(!found) throw DeadlyImportError("Unknown node \"", nn, "\" in ", pParentNodeName, ".");
 
 	if(close_found)
 		LogInfo("Skipping node \"" + nn + "\" in " + pParentNodeName + ".");
@@ -430,7 +430,7 @@ bool X3DImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx)
         else if(val == "true")
             return true;
         else
-            throw DeadlyImportError("Bool attribute value can contain \"false\" or \"true\" not the \"" + val + "\"");
+            throw DeadlyImportError("Bool attribute value can contain \"false\" or \"true\" not the \"", val, "\"");
     }
 }
 
@@ -971,8 +971,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
 	{
 		if(pColors.size() < pMesh.mNumVertices)
 		{
-			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + to_string(pColors.size()) + ") can not be less than Vertices count(" +
-									to_string(pMesh.mNumVertices) +  ").");
+			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(", to_string(pColors.size()), ") can not be less than Vertices count(",
+									to_string(pMesh.mNumVertices), ").");
 		}
 
 		// copy colors to mesh
@@ -983,8 +983,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
 	{
 		if(pColors.size() < pMesh.mNumFaces)
 		{
-			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + to_string(pColors.size()) + ") can not be less than Faces count(" +
-									to_string(pMesh.mNumFaces) +  ").");
+			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(", to_string(pColors.size()), ") can not be less than Faces count(",
+									to_string(pMesh.mNumFaces), ").");
 		}
 
 		// copy colors to mesh
@@ -1043,8 +1043,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 			// check indices array count.
 			if(pColorIdx.size() < pCoordIdx.size())
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + to_string(pColorIdx.size()) +
-										") can not be less than Coords inidces count(" + to_string(pCoordIdx.size()) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(", to_string(pColorIdx.size()),
+										") can not be less than Coords inidces count(", to_string(pCoordIdx.size()),  ").");
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
@@ -1072,8 +1072,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 			// check indices array count.
 			if(pColors.size() < pMesh.mNumVertices)
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + to_string(pColors.size()) + ") can not be less than Vertices count(" +
-										to_string(pMesh.mNumVertices) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(", to_string(pColors.size()), ") can not be less than Vertices count(",
+										to_string(pMesh.mNumVertices),  ").");
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
@@ -1090,8 +1090,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 			// check indices array count.
 			if(pColorIdx.size() < pMesh.mNumFaces)
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + to_string(pColorIdx.size()) +
-										") can not be less than Faces count(" + to_string(pMesh.mNumFaces) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(", to_string(pColorIdx.size()),
+										") can not be less than Faces count(", to_string(pMesh.mNumFaces),  ").");
 			}
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
@@ -1110,8 +1110,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t
 			// check indices array count.
 			if(pColors.size() < pMesh.mNumFaces)
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + to_string(pColors.size()) + ") can not be less than Faces count(" +
-										to_string(pMesh.mNumFaces) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(", to_string(pColors.size()), ") can not be less than Faces count(",
+										to_string(pMesh.mNumFaces),  ").");
 			}
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
@@ -1157,8 +1157,8 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_
 			for(size_t i = 0; (i < pMesh.mNumVertices) && (i < tind.size()); i++)
 			{
 				if(tind[i] >= norm_arr_copy.size())
-					throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + to_string(tind[i]) +
-											") is out of range. Normals count: " + to_string(norm_arr_copy.size()) + ".");
+					throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(", to_string(tind[i]),
+											") is out of range. Normals count: ", to_string(norm_arr_copy.size()), ".");
 
 				pMesh.mNormals[i] = norm_arr_copy[tind[i]];
 			}
@@ -1268,7 +1268,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int3
 	for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)
 	{
 		if(pMesh.mFaces[fi].mNumIndices != faces.at(fi).mNumIndices)
-			throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + to_string(fi) + ".");
+			throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: ", to_string(fi), ".");
 
 		for(size_t ii = 0; ii < pMesh.mFaces[fi].mNumIndices; ii++)
 		{
@@ -1419,12 +1419,12 @@ void X3DImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 	// Check whether we can read from the file
     if ( file.get() == nullptr )
     {
-        throw DeadlyImportError( "Failed to open X3D file " + pFile + "." );
+        throw DeadlyImportError( "Failed to open X3D file ", pFile, "." );
     }
 	mReader = FIReader::create(file.get());
     if ( !mReader )
     {
-        throw DeadlyImportError( "Failed to create XML reader for file" + pFile + "." );
+        throw DeadlyImportError( "Failed to create XML reader for file", pFile, "." );
     }
     mReader->registerVocabulary("urn:web3d:x3d:fi-vocabulary-3.2", &X3D_vocabulary_3_2);
     mReader->registerVocabulary("urn:web3d:x3d:fi-vocabulary-3.3", &X3D_vocabulary_3_3);
@@ -1519,7 +1519,7 @@ void X3DImporter::ParseNode_Scene()
     auto GroupCounter_Increase = [](size_t& pCounter, const char* pGroupName) -> void
     {
 	    pCounter++;
-	    if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: " + std::string(pGroupName) + ".");
+	    if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: ", pGroupName, ".");
 };
 
 auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> void

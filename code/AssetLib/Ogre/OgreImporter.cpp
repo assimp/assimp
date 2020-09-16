@@ -100,7 +100,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
     // Open source file
     IOStream *f = pIOHandler->Open(pFile, "rb");
     if (!f) {
-        throw DeadlyImportError("Failed to open file " + pFile);
+        throw DeadlyImportError("Failed to open file ", pFile);
     }
 
     // Binary .mesh import

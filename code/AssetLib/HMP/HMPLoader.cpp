@@ -115,7 +115,7 @@ void HMPImporter::InternReadFile(const std::string &pFile,
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open HMP file " + pFile + ".");
+        throw DeadlyImportError("Failed to open HMP file ", pFile, ".");
     }
 
     // Check whether the HMP file is large enough to contain
@@ -159,8 +159,8 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         szBuffer[4] = '\0';
 
         // We're definitely unable to load this file
-        throw DeadlyImportError("Unknown HMP subformat " + pFile +
-                                ". Magic word (" + szBuffer + ") is not known");
+        throw DeadlyImportError("Unknown HMP subformat ", pFile,
+                                ". Magic word (", szBuffer, ") is not known");
     }
 
     // Set the AI_SCENE_FLAGS_TERRAIN bit

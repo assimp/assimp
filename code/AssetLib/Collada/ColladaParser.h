@@ -242,7 +242,9 @@ protected:
 
 protected:
     /** Aborts the file reading with an exception */
-    AI_WONT_RETURN void ThrowException(const std::string &pError) const AI_WONT_RETURN_SUFFIX;
+    template<typename... T>
+    AI_WONT_RETURN void ThrowException(T&&... args) const AI_WONT_RETURN_SUFFIX;
+
     void ReportWarning(const char *msg, ...);
 
     /** Skips all data until the end node of the current element */
@@ -383,7 +385,7 @@ template <typename Type>
 const Type &ColladaParser::ResolveLibraryReference(const std::map<std::string, Type> &pLibrary, const std::string &pURL) const {
     typename std::map<std::string, Type>::const_iterator it = pLibrary.find(pURL);
     if (it == pLibrary.end())
-        ThrowException(Formatter::format() << "Unable to resolve library reference \"" << pURL << "\".");
+        ThrowException("Unable to resolve library reference \"", pURL, "\".");
     return it->second;
 }
 

@@ -997,18 +997,18 @@ private:
         if (index < 32) {
             FIDecoder *decoder = defaultDecoder[index];
             if (!decoder) {
-                throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
+                throw DeadlyImportError("Invalid encoding algorithm index ", to_string(index));
             }
             return decoder->decode(dataP, len);
         }
         else {
             if (index - 32 >= vocabulary.encodingAlgorithmTable.size()) {
-                throw DeadlyImportError("Invalid encoding algorithm index " + to_string(index));
+                throw DeadlyImportError("Invalid encoding algorithm index ", to_string(index));
             }
             std::string uri = vocabulary.encodingAlgorithmTable[index - 32];
             auto it = decoderMap.find(uri);
             if (it == decoderMap.end()) {
-                throw DeadlyImportError("Unsupported encoding algorithm " + uri);
+                throw DeadlyImportError("Unsupported encoding algorithm ", uri);
             }
             else {
                 return it->second->decode(dataP, len);
@@ -1027,12 +1027,12 @@ private:
                 alphabet = "0123456789-:TZ ";
                 break;
             default:
-                throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
+                throw DeadlyImportError("Invalid restricted alphabet index ", to_string(index));
             }
         }
         else {
             if (index - 16 >= vocabulary.restrictedAlphabetTable.size()) {
-                throw DeadlyImportError("Invalid restricted alphabet index " + to_string(index));
+                throw DeadlyImportError("Invalid restricted alphabet index ", to_string(index));
             }
             alphabet = vocabulary.restrictedAlphabetTable[index - 16];
         }
@@ -1040,7 +1040,7 @@ private:
         utf8::utf8to32(alphabet.begin(), alphabet.end(), back_inserter(alphabetUTF32));
         std::string::size_type alphabetLength = alphabetUTF32.size();
         if (alphabetLength < 2) {
-            throw DeadlyImportError("Invalid restricted alphabet length " + to_string(alphabetLength));
+            throw DeadlyImportError("Invalid restricted alphabet length ", to_string(alphabetLength));
         }
         std::string::size_type bitsPerCharacter = 1;
         while ((1ull << bitsPerCharacter) <= alphabetLength) {
@@ -1442,7 +1442,7 @@ private:
                 std::string uri = parseNonEmptyOctetString2();
                 auto it = vocabularyMap.find(uri);
                 if (it == vocabularyMap.end()) {
-                    throw DeadlyImportError("Unknown vocabulary " + uri);
+                    throw DeadlyImportError("Unknown vocabulary ", uri);
                 }
                 const FIVocabulary *externalVocabulary = it->second;
                 if (externalVocabulary->restrictedAlphabetTable) {

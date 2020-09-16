@@ -675,7 +675,7 @@ void MD5Importer::LoadMD5CameraFile() {
 
     // Check whether we can read from the file
     if (!file.get() || !file->FileSize()) {
-        throw DeadlyImportError("Failed to read MD5CAMERA file: " + pFile);
+        throw DeadlyImportError("Failed to read MD5CAMERA file: ", pFile);
     }
     mHadMD5Camera = true;
     LoadFileIntoMemory(file.get());

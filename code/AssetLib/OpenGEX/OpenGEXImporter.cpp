@@ -302,7 +302,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     // open source file
     IOStream *file = pIOHandler->Open( filename, "rb" );
     if( !file ) {
-        throw DeadlyImportError( "Failed to open file " + filename );
+        throw DeadlyImportError( "Failed to open file ", filename );
     }
 
     std::vector<char> buffer;

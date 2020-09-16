@@ -64,7 +64,7 @@ namespace Assimp    {
  * // open the file
  * std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
  * if( file.get() == nullptr ) {
- *    throw DeadlyImportError( "Failed to open file " + pFile + ".");
+ *    throw DeadlyImportError( "Failed to open file ", pFile, ".");
  * }
  *
  * // generate a XML reader for it

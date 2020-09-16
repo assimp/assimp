@@ -187,8 +187,8 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream) {
     /// @todo Check what we can actually support.
     std::string version = serializer.ReadLine();
     if (version != MESH_VERSION_1_8) {
-        throw DeadlyExportError(Formatter::format() << "Mesh version " << version << " not supported by this importer. Run OgreMeshUpgrader tool on the file and try again."
-                                                    << " Supported versions: " << MESH_VERSION_1_8);
+        throw DeadlyExportError("Mesh version ", version, " not supported by this importer. Run OgreMeshUpgrader tool on the file and try again.",
+                                                    " Supported versions: ", MESH_VERSION_1_8);
     }
 
     Mesh *mesh = new Mesh();
@@ -471,7 +471,7 @@ void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh) {
             uint16_t submeshIndex = Read<uint16_t>();
             SubMesh *submesh = mesh->GetSubMesh(submeshIndex);
             if (!submesh) {
-                throw DeadlyImportError(Formatter::format() << "Ogre Mesh does not include submesh " << submeshIndex << " referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
+                throw DeadlyImportError("Ogre Mesh does not include submesh ", submeshIndex, " referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
             }
 
             submesh->name = ReadLine();
@@ -788,7 +788,7 @@ MemoryStreamReaderPtr OgreBinarySerializer::OpenReader(Assimp::IOSystem *pIOHand
 
     IOStream *f = pIOHandler->Open(filename, "rb");
     if (!f) {
-        throw DeadlyImportError("Failed to open skeleton file " + filename);
+        throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 
     return MemoryStreamReaderPtr(new MemoryStreamReader(f));
@@ -803,8 +803,8 @@ void OgreBinarySerializer::ReadSkeleton(Skeleton *skeleton) {
     // This deserialization supports both versions of the skeleton spec
     std::string version = ReadLine();
     if (version != SKELETON_VERSION_1_8 && version != SKELETON_VERSION_1_1) {
-        throw DeadlyExportError(Formatter::format() << "Skeleton version " << version << " not supported by this importer."
-                                                    << " Supported versions: " << SKELETON_VERSION_1_8 << " and " << SKELETON_VERSION_1_1);
+        throw DeadlyExportError("Skeleton version ", version, " not supported by this importer.",
+                                                    " Supported versions: ", SKELETON_VERSION_1_8, " and ", SKELETON_VERSION_1_1);
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Skeleton");
@@ -871,7 +871,7 @@ void OgreBinarySerializer::ReadBone(Skeleton *skeleton) {
 
     // Bone indexes need to start from 0 and be contiguous
     if (bone->id != skeleton->bones.size()) {
-        throw DeadlyImportError(Formatter::format() << "Ogre Skeleton bone indexes not contiguous. Error at bone index " << bone->id);
+        throw DeadlyImportError("Ogre Skeleton bone indexes not contiguous. Error at bone index ", bone->id);
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG_F("    ", bone->id, " ", bone->name);
@@ -889,7 +889,7 @@ void OgreBinarySerializer::ReadBoneParent(Skeleton *skeleton) {
     if (child && parent)
         parent->AddChild(child);
     else
-        throw DeadlyImportError(Formatter::format() << "Failed to find bones for parenting: Child id " << childId << " for parent id " << parentId);
+        throw DeadlyImportError("Failed to find bones for parenting: Child id ", childId, " for parent id ", parentId);
 }
 
 void OgreBinarySerializer::ReadSkeletonAnimation(Skeleton *skeleton) {
@@ -926,7 +926,7 @@ void OgreBinarySerializer::ReadSkeletonAnimationTrack(Skeleton * /*skeleton*/, A
     uint16_t boneId = Read<uint16_t>();
     Bone *bone = dest->parentSkeleton->BoneById(boneId);
     if (!bone) {
-        throw DeadlyImportError(Formatter::format() << "Cannot read animation track, target bone " << boneId << " not in target Skeleton");
+        throw DeadlyImportError("Cannot read animation track, target bone ", boneId, " not in target Skeleton");
     }
 
     VertexAnimationTrack track;

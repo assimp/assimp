@@ -114,7 +114,7 @@ void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, I
     // read file into memory
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
     if ( file.get() == nullptr ) {
-        throw DeadlyImportError( "Failed to open file " + pFile + "." );
+        throw DeadlyImportError( "Failed to open file ", pFile, "." );
     }
 
     static const size_t MinSize = 16;

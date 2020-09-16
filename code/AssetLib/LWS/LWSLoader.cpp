@@ -502,7 +502,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open LWS file " + pFile + ".");
+        throw DeadlyImportError("Failed to open LWS file ", pFile, ".");
     }
 
     // Allocate storage and copy the contents of the file to a memory buffer

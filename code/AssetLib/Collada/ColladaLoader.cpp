@@ -1468,7 +1468,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
         for (size_t a = 0; a < morphAnims.size(); ++a) {
             anim->mDuration = std::max(anim->mDuration, morphAnims[a]->mKeys[morphAnims[a]->mNumKeys - 1].mTime);
         }
-        anim->mTicksPerSecond = 1;
+        anim->mTicksPerSecond = 1000.0;
         mAnims.push_back(anim);
     }
 }

@@ -404,6 +404,10 @@ void ColladaParser::PostProcessControllers() {
     std::string meshId;
     for (ControllerLibrary::iterator it = mControllerLibrary.begin(); it != mControllerLibrary.end(); ++it) {
         meshId = it->second.mMeshId;
+        if (meshId.empty()) {
+            break;
+        }
+
         ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);
         while (findItr != mControllerLibrary.end()) {
             meshId = findItr->second.mMeshId;
@@ -1404,6 +1408,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
     XmlParser::getUIntAttribute(node, "count", count);
     std::string v;
     XmlParser::getValueAsString(node, v);
+    trim(v);
     const char *content = v.c_str();
 
     // read values and store inside an array in the data library
@@ -1437,6 +1442,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
 
                 ai_real value;
                 // read a number
+                //SkipSpacesAndLineEnd(&content);
                 content = fast_atoreal_move<ai_real>(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it

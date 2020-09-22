@@ -64,7 +64,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     Assimp::Exporter exporter;
                 
     std::string path = "dae";
-    const aiExportFormatDesc *desc( exporter.GetExportFormatDescription( 0 ) );
+    const aiExportFormatDesc *desc = exporter.GetExportFormatDescription( 0 );
     EXPECT_NE( desc, nullptr );
     path.append(".");
     path.append( desc->fileExtension );

@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 class utIssues : public ::testing::Test {
-
+    // empty
 };
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

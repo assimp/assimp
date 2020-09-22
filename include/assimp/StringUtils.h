@@ -52,6 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdarg.h>
 #include <cstdlib>
+#include <algorithm> 
+#include <cctype>
+#include <locale>
 
 ///	@fn		ai_snprintf
 ///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.
@@ -173,7 +176,7 @@ inline void ltrim(std::string &s) {
 inline void rtrim(std::string &s) {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
         return !std::isspace(ch);
-    }).base(),s.end());
+    }).base(), s.end());
 }
 
 // trim from both ends (in place)

@@ -316,6 +316,8 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
             }
         } else if (name == "contributor") {
             ReadMetaDataItem(currentNode, mAssetMetaData);
+        } else {
+            ReadMetaDataItem(currentNode, mAssetMetaData);
         }
     }
 }
@@ -408,6 +410,7 @@ void ColladaParser::PostProcessControllers() {
         if (meshId.empty()) {
             continue;
         }
+
         ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);
         while (findItr != mControllerLibrary.end()) {
             meshId = findItr->second.mMeshId;
@@ -1442,6 +1445,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
 
                 ai_real value;
                 // read a number
+                //SkipSpacesAndLineEnd(&content);
                 content = fast_atoreal_move<ai_real>(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it

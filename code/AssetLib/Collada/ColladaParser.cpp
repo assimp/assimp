@@ -256,6 +256,7 @@ void ColladaParser::ReadContents(XmlNode &node) {
 void ColladaParser::ReadStructure(XmlNode &node) {
     for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string name = std::string(currentNode.name());
+        ASSIMP_LOG_DEBUG("last name" + name);
         if (name == "asset")
             ReadAssetInfo(currentNode);
         else if (name == "library_animations")
@@ -405,7 +406,7 @@ void ColladaParser::PostProcessControllers() {
     for (ControllerLibrary::iterator it = mControllerLibrary.begin(); it != mControllerLibrary.end(); ++it) {
         meshId = it->second.mMeshId;
         if (meshId.empty()) {
-            break;
+            continue;
         }
 
         ControllerLibrary::iterator findItr = mControllerLibrary.find(meshId);

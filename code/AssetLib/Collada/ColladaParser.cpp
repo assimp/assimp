@@ -165,7 +165,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
     }
 
     XmlNode root = manifestParser.getRootNode();
-    const std::string &name = root.name();
+    const std::string &name = root.child("dae_root");
     if (name != "dae_root") {
         root = *manifestParser.findNode("dae_root");
         if (nullptr == root) {
@@ -920,9 +920,9 @@ void ColladaParser::ReadCameraLibrary(XmlNode &node) {
 // ------------------------------------------------------------------------------------------------
 // Reads a material entry into the given material
 void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
-    for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+    for (XmlNode currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "material") {
+        if (currentName == "instance_effect") {
             const char *url = currentNode.attribute("url").as_string();
             if (url[0] != '#') {
                 ThrowException("Unknown reference format");
@@ -2047,7 +2047,7 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
     }
 
     for (XmlNode &currentNode : node.children()) {
-            const std::string &currentName = currentNode.name();
+        const std::string &currentName = currentNode.name();
         if (currentName == "node") {
             Node *child = new Node;
             if (XmlParser::hasAttribute(currentNode, "id")) {

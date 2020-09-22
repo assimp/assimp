@@ -1652,7 +1652,7 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
         const Collada::Material &material = matIt->second;
         // a material is only a reference to an effect
         ColladaParser::EffectLibrary::iterator effIt = pParser.mEffectLibrary.find(material.mEffect);
-        if (effIt == pParser.mEffectLibrary.end())
+        if (effIt == pParser.mEffectLibrary.end())  
             continue;
         Collada::Effect &effect = effIt->second;
 

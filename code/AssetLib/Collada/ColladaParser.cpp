@@ -316,6 +316,8 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
             }
         } else if (name == "contributor") {
             ReadMetaDataItem(currentNode, mAssetMetaData);
+        } else {
+            ReadMetaDataItem(currentNode, mAssetMetaData);
         }
     }
 }

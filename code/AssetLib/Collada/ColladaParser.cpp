@@ -165,7 +165,7 @@ std::string ColladaParser::ReadZaeManifest(ZipArchiveIOSystem &zip_archive) {
     }
 
     XmlNode root = manifestParser.getRootNode();
-    const std::string &name = root.child("dae_root");
+    const std::string &name = root.name();
     if (name != "dae_root") {
         root = *manifestParser.findNode("dae_root");
         if (nullptr == root) {

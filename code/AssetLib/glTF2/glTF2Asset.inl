@@ -731,8 +731,14 @@ void Accessor::ExtractData(T *&outData) {
     const size_t stride = bufferView && bufferView->byteStride ? bufferView->byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
-    ai_assert(elemSize <= targetElemSize);
-    ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
+
+    if (elemSize > targetElemSize) {
+        throw DeadlyImportError("GLTF: elemSize > targetElemSize");
+    }
+
+    if (count*stride > (bufferView ? bufferView->byteLength : sparse->data.size())) {
+        throw DeadlyImportError("GLTF: count*stride out of range");
+    }
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {

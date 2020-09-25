@@ -60,9 +60,9 @@ namespace Ogre {
 
 AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) {
     if (!error.empty()) {
-        throw DeadlyImportError(error + " in node '" + nodeName + "' and attribute '" + name + "'");
+        throw DeadlyImportError(error, " in node '", nodeName, "' and attribute '", name, "'");
     } else {
-        throw DeadlyImportError("Attribute '" + name + "' does not exist in node '" + nodeName + "'");
+        throw DeadlyImportError("Attribute '", name, "' does not exist in node '", nodeName, "'");
     }
 }
 
@@ -321,18 +321,18 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *d
 
     // Sanity checks
     if (dest->positions.size() != dest->count) {
-        throw DeadlyImportError(Formatter::format() << "Read only " << dest->positions.size() << " positions when should have read " << dest->count);
+        throw DeadlyImportError("Read only ", dest->positions.size(), " positions when should have read ", dest->count);
     }
     if (normals && dest->normals.size() != dest->count) {
-        throw DeadlyImportError(Formatter::format() << "Read only " << dest->normals.size() << " normals when should have read " << dest->count);
+        throw DeadlyImportError("Read only ", dest->normals.size(), " normals when should have read ", dest->count);
     }
     if (tangents && dest->tangents.size() != dest->count) {
-        throw DeadlyImportError(Formatter::format() << "Read only " << dest->tangents.size() << " tangents when should have read " << dest->count);
+        throw DeadlyImportError("Read only ", dest->tangents.size(), " tangents when should have read ", dest->count);
     }
     for (unsigned int i = 0; i < dest->uvs.size(); ++i) {
         if (dest->uvs[i].size() != dest->count) {
-            throw DeadlyImportError(Formatter::format() << "Read only " << dest->uvs[i].size()
-                                                        << " uvs for uv index " << i << " when should have read " << dest->count);
+            throw DeadlyImportError("Read only ", dest->uvs[i].size(),
+                                                        " uvs for uv index ", i, " when should have read ", dest->count);
         }
     }
 }
@@ -389,7 +389,7 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
             if (submesh->indexData->faces.size() == submesh->indexData->faceCount) {
                 ASSIMP_LOG_VERBOSE_DEBUG_F("  - Faces ", submesh->indexData->faceCount);
             } else {
-                throw DeadlyImportError(Formatter::format() << "Read only " << submesh->indexData->faces.size() << " faces when should have read " << submesh->indexData->faceCount);
+                throw DeadlyImportError("Read only ", submesh->indexData->faces.size(), " faces when should have read ", submesh->indexData->faceCount);
             }
         } else if (currentName == nnGeometry) {
             if (submesh->usesSharedVertexData) {
@@ -515,7 +515,7 @@ XmlParserPtr OgreXmlSerializer::OpenXmlParser(Assimp::IOSystem *pIOHandler, cons
 
     std::unique_ptr<IOStream> file(pIOHandler->Open(filename));
     if (!file.get()) {
-        throw DeadlyImportError("Failed to open skeleton file " + filename);
+        throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 
     XmlParserPtr xmlParser = XmlParserPtr(new XmlParser);
@@ -568,7 +568,7 @@ void OgreXmlSerializer::ReadAnimations(XmlNode &node, Skeleton *skeleton) {
                     ReadAnimationTracks(currentChildNode, anim);
                     skeleton->animations.push_back(anim);
                 } else {
-                    throw DeadlyImportError(Formatter::format() << "No <tracks> found in <animation> " << anim->name);
+                    throw DeadlyImportError( "No <tracks> found in <animation> ", anim->name);
                 }
             }
         }
@@ -588,7 +588,7 @@ void OgreXmlSerializer::ReadAnimationTracks(XmlNode &node, Animation *dest) {
                     ReadAnimationKeyFrames(currentChildNode, dest, &track);
                     dest->tracks.push_back(track);
                 } else {
-                    throw DeadlyImportError(Formatter::format() << "No <keyframes> found in <track> " << dest->name);
+                    throw DeadlyImportError( "No <keyframes> found in <track> ", dest->name);
                 }
             }
 
@@ -657,7 +657,7 @@ void OgreXmlSerializer::ReadBoneHierarchy(XmlNode &node, Skeleton *skeleton) {
             if (bone && parent) {
                 parent->AddChild(bone);
             } else {
-                throw DeadlyImportError("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
+                throw DeadlyImportError("Failed to find bones for parenting: Child ", name, " for parent ", parentName);
             }
         }
     }
@@ -704,7 +704,7 @@ void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
 
                             bone->rotation = aiQuaternion(axis, angle);
                         } else {
-                            throw DeadlyImportError(Formatter::format() << "No axis specified for bone rotation in bone " << bone->id);
+                            throw DeadlyImportError( "No axis specified for bone rotation in bone ", bone->id);
                         }
                     }
                 } else if (currentChildName == nnScale) {
@@ -736,7 +736,7 @@ void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
         ASSIMP_LOG_VERBOSE_DEBUG_F("    ", b->id, " ", b->name);
 
         if (b->id != static_cast<uint16_t>(i)) {
-            throw DeadlyImportError(Formatter::format() << "Bone ids are not in sequence starting from 0. Missing index " << i);
+            throw DeadlyImportError("Bone ids are not in sequence starting from 0. Missing index ", i);
         }
     }
 }

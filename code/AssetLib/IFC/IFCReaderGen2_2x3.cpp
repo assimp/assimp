@@ -43,6 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCReaderGen_2x3.h"
 
+#if _MSC_VER
+#    pragma warning(push)
+#    pragma warning(disable : 4702)
+#endif // _MSC_VER
+
 namespace Assimp {
 using namespace IFC;
 using namespace ::Assimp::IFC::Schema_2x3;
@@ -1914,5 +1919,9 @@ template <> size_t GenericFill<IfcConditionCriterion>(const DB& db, const LIST& 
 
 } // ! STEP
 } // ! Assimp
+
+#if _MSC_VER
+#    pragma warning(pop)
+#endif // _MSC_VER
 
 #endif

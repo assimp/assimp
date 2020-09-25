@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -52,27 +50,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace {
+
 template <size_t sizeOfPointer>
-size_t select_ftell(FILE *file) {
+inline size_t select_ftell(FILE *file) {
     return ::ftell(file);
 }
 
 template <size_t sizeOfPointer>
-int select_fseek(FILE *file, int64_t offset, int origin) {
+inline int select_fseek(FILE *file, int64_t offset, int origin) {
     return ::fseek(file, static_cast<long>(offset), origin);
 }
 
+
+    
 #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
 template <>
-size_t select_ftell<8>(FILE *file) {
+inline size_t select_ftell<8>(FILE *file) {
     return (size_t)::_ftelli64(file);
 }
 
 template <>
-int select_fseek<8>(FILE *file, int64_t offset, int origin) {
+inline int select_fseek<8>(FILE *file, int64_t offset, int origin) {
     return ::_fseeki64(file, offset, origin);
 }
-#endif
+
+#endif // #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
+    
 } // namespace
 
 // ----------------------------------------------------------------------------------
@@ -100,7 +103,6 @@ size_t DefaultIOStream::Write(const void *pvBuffer,
         size_t pCount) {
     ai_assert(nullptr != pvBuffer);
     ai_assert(0 != pSize);
-    ai_assert(0 != pCount);
 
     return (mFile ? ::fwrite(pvBuffer, pSize, pCount, mFile) : 0);
 }

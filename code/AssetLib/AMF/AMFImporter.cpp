@@ -170,7 +170,7 @@ void AMFImporter::Throw_MoreThanOnceDefined(const std::string &nodeName, const s
 }
 
 void AMFImporter::Throw_ID_NotFound(const std::string &pID) const {
-    throw DeadlyImportError("Not found node with name \"" + pID + "\".");
+    throw DeadlyImportError("Not found node with name \"", pID, "\".");
 }
 
 /*********************************************************************************************************************************************/
@@ -267,7 +267,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
+        throw DeadlyImportError("Failed to open AMF file ", pFile, ".");
     }
 
     mXmlParser = new XmlParser();
@@ -409,7 +409,7 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
         ParseHelper_Node_Enter(ne);
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             bool read_flag[6] = { false, false, false, false, false, false };
-            std::string currentName = currentNode.name();
+            const std::string &currentName = currentNode.name();
             if (currentName == "deltax") {
                 read_flag[0] = true;
                 als.Delta.x = (ai_real)std::atof(currentNode.value());
@@ -446,8 +446,7 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
 // Multi elements - Yes.
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Object(XmlNode &node) {
-
-    AMFNodeElementBase *ne(nullptr);
+    AMFNodeElementBase *ne = nullptr;
 
     // Read attributes for node <object>.
     std::string id = node.attribute("id").as_string();
@@ -466,7 +465,7 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-            const std::string currentName = currentNode.name();
+            const std::string &currentName = currentNode.name();
             if (currentName == "color") {
                 ParseNode_Color(currentNode);
                 col_read = true;
@@ -523,9 +522,8 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
         return true;
     }
 
-    if (!extension.length() || pCheckSig) {
+    if (extension.empty() || pCheckSig) {
         const char *tokens[] = { "<amf" };
-
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

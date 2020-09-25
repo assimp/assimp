@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MMDPmxParser.h"
 #include <assimp/StringUtils.h>
 #ifdef ASSIMP_USE_HUNTER
-#  include <utf8/utf8.h>
+#  include <utf8.h>
 #else
 #  include "../contrib/utf8cpp/source/utf8.h"
 #endif
@@ -524,7 +524,7 @@ namespace pmx
 		if (version != 2.0f && version != 2.1f)
 		{
 			std::cerr << "this is not ver2.0 or ver2.1 but " << version << "." << std::endl;
-            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but " + to_string(version));
+            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but ", to_string(version));
     }
 		this->setting.Read(stream);
 

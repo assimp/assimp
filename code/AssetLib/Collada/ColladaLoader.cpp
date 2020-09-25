@@ -1245,7 +1245,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
 
             // time count and value count must match
             if (e.mTimeAccessor->mCount != e.mValueAccessor->mCount)
-                throw DeadlyImportError(format() << "Time count / value count mismatch in animation channel \"" << e.mChannel->mTarget << "\".");
+                throw DeadlyImportError("Time count / value count mismatch in animation channel \"", e.mChannel->mTarget, "\".");
 
             if (e.mTimeAccessor->mCount > 0) {
                 // find bounding times
@@ -1462,7 +1462,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
         for (size_t a = 0; a < morphAnims.size(); ++a) {
             anim->mDuration = std::max(anim->mDuration, morphAnims[a]->mKeys[morphAnims[a]->mNumKeys - 1].mTime);
         }
-        anim->mTicksPerSecond = 1;
+        anim->mTicksPerSecond = 1000.0;
         mAnims.push_back(anim);
     }
 }

@@ -155,99 +155,37 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, mode));
     if (!fileStream.get()) {
         throw DeadlyImportError("Failed to open file " + file + ".");
-    }
+	}
 }
 
-/*********************************************************************************************************************************************/
-/************************************************************ Functions: find set ************************************************************/
-/*********************************************************************************************************************************************/
-
-bool X3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if ((extension == "x3d") || (extension == "x3db")) {
-        return true;
-    }
-
-    if (!extension.length() || pCheckSig) {
-        const char *tokens[] = { "DOCTYPE X3D PUBLIC", "http://www.web3d.org/specifications/x3d" };
-
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
+bool X3DImporter::CanRead( const std::string &pFile, IOSystem * /*pIOHandler*/, bool checkSig ) const {
+    if (checkSig) {
+        std::string::size_type pos = pFile.find_last_of(".x3d");
+        if (pos != std::string::npos) {
+            return true;
+        }
     }
 
     return false;
 }
 
-void X3DImporter::GetExtensionList(std::set<std::string> &pExtensionList) {
-    pExtensionList.insert("x3d");
-    pExtensionList.insert("x3db");
+void X3DImporter::GetExtensionList( std::set<std::string> &extensionList ) {
+    extensionList.insert("x3d");
+}
+
+void X3DImporter::InternReadFile( const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler ) {
+    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
+    if (!stream) {
+        throw DeadlyImportError("Could not open file for reading");
+    }
+
+    pScene->mRootNode = new aiNode(pFile);
 }
 
 const aiImporterDesc *X3DImporter::GetInfo() const {
     return &Description;
 }
 
-void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-    mpIOHandler = pIOHandler;
-
-    Clear(); // delete old graph.
-    std::string::size_type slashPos = pFile.find_last_of("\\/");
-    pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
-    ParseFile(pFile, pIOHandler);
-    pIOHandler->PopDirectory();
-    if (NodeElement_List.empty())
-        return;
-    //
-    // Assimp use static arrays of objects for fast speed of rendering. That's good, but need some additional operations/
-    // We know that geometry objects(meshes) are stored in <Shape>, also in <Shape>-><Appearance> materials(in Assimp logical view)
-    // are stored. So at first we need to count how meshes and materials are stored in scene graph.
-    //
-    // at first creating root node for aiScene.
-    pScene->mRootNode = new aiNode;
-    pScene->mRootNode->mParent = nullptr;
-    pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
-    //search for root node element
-    mNodeElementCur = NodeElement_List.front();
-    while (mNodeElementCur->Parent != nullptr)
-        mNodeElementCur = mNodeElementCur->Parent;
-
-    { // fill aiScene with objects.
-        std::list<aiMesh *> mesh_list;
-        std::list<aiMaterial *> mat_list;
-        std::list<aiLight *> light_list;
-
-        // create nodes tree
-//        Postprocess_BuildNode(*mNodeElementCur, *pScene->mRootNode, mesh_list, mat_list, light_list);
-        // copy needed data to scene
-        if (!mesh_list.empty()) {
-            std::list<aiMesh *>::const_iterator it = mesh_list.begin();
-
-            pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
-            pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-            for (size_t i = 0; i < pScene->mNumMeshes; i++)
-                pScene->mMeshes[i] = *it++;
-        }
-
-        if (!mat_list.empty()) {
-            std::list<aiMaterial *>::const_iterator it = mat_list.begin();
-
-            pScene->mNumMaterials = static_cast<unsigned int>(mat_list.size());
-            pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
-            for (size_t i = 0; i < pScene->mNumMaterials; i++)
-                pScene->mMaterials[i] = *it++;
-        }
-
-        if (!light_list.empty()) {
-            std::list<aiLight *>::const_iterator it = light_list.begin();
-
-            pScene->mNumLights = static_cast<unsigned int>(light_list.size());
-            pScene->mLights = new aiLight *[pScene->mNumLights];
-            for (size_t i = 0; i < pScene->mNumLights; i++)
-                pScene->mLights[i] = *it++;
-        }
-    }
-}
-
-} // namespace Assimp
+} 
 
 #endif // !ASSIMP_BUILD_NO_X3D_IMPORTER

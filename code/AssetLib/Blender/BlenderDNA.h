@@ -83,9 +83,10 @@ class ObjectCache;
  *  ancestry. */
 // -------------------------------------------------------------------------------
 struct Error : DeadlyImportError {
-    Error(const std::string &s) :
-            DeadlyImportError(s) {
-        // empty
+    template<typename... T>
+    explicit Error(T&&... args)
+        : DeadlyImportError(args...)
+    {
     }
 };
 

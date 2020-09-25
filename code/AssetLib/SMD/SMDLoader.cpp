@@ -695,7 +695,7 @@ void SMDImporter::ReadSmd(const std::string &pFile, IOSystem* pIOHandler) {
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open SMD/VTA file " + pFile + ".");
+        throw DeadlyImportError("Failed to open SMD/VTA file ", pFile, ".");
     }
 
     iFileSize = (unsigned int)file->FileSize();

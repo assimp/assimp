@@ -200,6 +200,7 @@ SET( Common_SRCS
   Common/simd.cpp
   Common/material.cpp
   Common/AssertHandler.cpp
+  Common/Exceptional.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -884,7 +885,7 @@ ENDIF()
 # utf8
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
-  find_package(utf8 CONFIG REQUIRED)
+  find_package(utf8cpp CONFIG REQUIRED)
 ELSE()
   # utf8 is header-only, so Assimp doesn't need to do anything.
 ENDIF()
@@ -1039,6 +1040,8 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
   INCLUDE_DIRECTORIES( "../contrib" )
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
+  ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
 ENDIF()
 
 # VC2010 fixes
@@ -1051,7 +1054,7 @@ endif()
 
 ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
 
-if ( MSVC )
+IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
@@ -1121,6 +1124,8 @@ ENDIF ()
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+
 # enable warnings as errors ########################################
 IF (MSVC)
   TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
@@ -1144,7 +1149,7 @@ IF(ASSIMP_HUNTER_ENABLED)
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
-      utf8::utf8
+      utf8cpp
       zip::zip
       pugixml::pugixml
   )

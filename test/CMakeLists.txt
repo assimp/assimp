@@ -39,12 +39,18 @@
 cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
-	${Assimp_SOURCE_DIR}/contrib/gtest/include
-	${Assimp_SOURCE_DIR}/contrib/gtest/
     ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
 )
+
+if(NOT ASSIMP_HUNTER_ENABLED)
+  INCLUDE_DIRECTORIES(
+    ${Assimp_SOURCE_DIR}/contrib/gtest/include
+    ${Assimp_SOURCE_DIR}/contrib/gtest/
+  )
+endif()
+
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
 endif()
@@ -83,6 +89,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utStandardShapes.cpp
   unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp
@@ -197,7 +204,6 @@ SOURCE_GROUP( UnitTests\\Math         FILES  ${MATH} )
 SOURCE_GROUP( UnitTests\\PostProcess  FILES  ${POST_PROCESSES})
 
 add_executable( unit
-    ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Common/Version.cpp
@@ -207,6 +213,16 @@ add_executable( unit
 	${MATH}
     ${POST_PROCESSES}
 )
+
+if(ASSIMP_HUNTER_ENABLED)
+    hunter_add_package(GTest)
+    find_package(GTest CONFIG REQUIRED)
+    target_link_libraries(unit GTest::gtest_main GTest::gmock)
+else()
+    target_sources(unit PUBLIC ../contrib/gtest/src/gtest-all.cc)
+endif()
+
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
 add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
@@ -220,7 +236,7 @@ ELSE()
 ENDIF()
 
 IF(MSVC)
-		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
 target_link_libraries( unit assimp ${platform_libs} )
@@ -228,4 +244,3 @@ target_link_libraries( unit assimp ${platform_libs} )
 add_subdirectory(headercheck)
 
 add_test( unittests unit )
-

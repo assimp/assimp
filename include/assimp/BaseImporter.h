@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Definition of the base class for all importer worker classes. */
+/// @file Definition of the base class for all importer worker classes.
+
 #pragma once
 #ifndef INCLUDED_AI_BASEIMPORTER_H
 #define INCLUDED_AI_BASEIMPORTER_H
@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <set>
 #include <vector>
+#include <memory>
 
 struct aiScene;
 struct aiImporterDesc;
@@ -85,10 +86,6 @@ class IOStream;
  */
 class ASSIMP_API BaseImporter {
     friend class Importer;
-
-private:
-    /* Pushes state into importer for the importer scale */
-    virtual void UpdateImporterScale(Importer *pImp);
 
 public:
     /** Constructor to be privately used by #Importer */
@@ -146,11 +143,23 @@ public:
 
     // -------------------------------------------------------------------
     /** Returns the error description of the last error that occurred.
+     * If the error is due to a std::exception, this will return the message.
+     * Exceptions can also be accessed with GetException().
      * @return A description of the last error that occurred. An empty
      * string if there was no error.
      */
     const std::string &GetErrorText() const {
         return m_ErrorText;
+    }
+
+    // -------------------------------------------------------------------
+    /** Returns the exception of the last exception that occurred.
+     * Note: Exceptions are not the only source of error details, so GetErrorText
+     * should be consulted too.
+     * @return The last exception that occurred. 
+     */
+    const std::exception_ptr& GetException() const {
+        return m_Exception;
     }
 
     // -------------------------------------------------------------------
@@ -391,9 +400,33 @@ public: // static utilities
         }
     }
 
+    // -------------------------------------------------------------------
+    /** Utility function to move a std::vector of unique_ptrs into a aiScene array
+    *  @param vec The vector of unique_ptrs to be moved
+    *  @param out The output pointer to the allocated array.
+    *  @param numOut The output count of elements copied. */
+    template <typename T>
+    AI_FORCE_INLINE static void CopyVector(
+            std::vector<std::unique_ptr<T> > &vec,
+            T **&out,
+            unsigned int &outLength) {
+        outLength = unsigned(vec.size());
+        if (outLength) {
+            out = new T*[outLength];
+            T** outPtr = out;
+            std::for_each(vec.begin(), vec.end(), [&outPtr](std::unique_ptr<T>& uPtr){*outPtr = uPtr.release(); ++outPtr; });
+        }
+    }
+
+private:
+    /* Pushes state into importer for the importer scale */
+    virtual void UpdateImporterScale(Importer *pImp);
+
 protected:
     /// Error description in case there was one.
     std::string m_ErrorText;
+    /// The exception, in case there was one.
+    std::exception_ptr m_Exception;
     /// Currently set progress handler.
     ProgressHandler *m_progress;
 };

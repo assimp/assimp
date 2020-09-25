@@ -101,24 +101,24 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
         std::string dae_filename = ReadZaeManifest(*zip_archive);
 
         if (dae_filename.empty()) {
-            ThrowException(std::string("Invalid ZAE"));
+            throw DeadlyImportError("Invalid ZAE");
         }
 
         daefile.reset(zip_archive->Open(dae_filename.c_str()));
         if (daefile == nullptr) {
-            ThrowException(std::string("Invalid ZAE manifest: '") + std::string(dae_filename) + std::string("' is missing"));
+            throw DeadlyImportError("Invalid ZAE manifest: '", dae_filename, "' is missing");
         }
     } else {
         // attempt to open the file directly
         daefile.reset(pIOHandler->Open(pFile));
         if (daefile.get() == nullptr) {
-            throw DeadlyImportError("Failed to open file '" + pFile + "'.");
+            throw DeadlyImportError("Failed to open file '", pFile, "'.");
         }
     }
 
     // generate a XML reader for it
     if (!mXmlParser.parse(daefile.get())) {
-        ThrowException("Unable to read file, malformed XML");
+        throw DeadlyImportError("Unable to read file, malformed XML");
     }
     // start reading
     XmlNode node = mXmlParser.getRootNode();
@@ -391,7 +391,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
             if (url) {
                 const std::string urlName = url.as_string();
                 if (urlName[0] != '#') {
-                    ThrowException("Unknown reference format");
+                    throw DeadlyImportError("Unknown reference format");
                 }
                 clip.second.push_back(url.as_string());
             }
@@ -430,7 +430,6 @@ void ColladaParser::PostProcessRootAnimations() {
     }
 
     Animation temp;
-
     for (AnimationClipLibrary::iterator it = mAnimationClipLibrary.begin(); it != mAnimationClipLibrary.end(); ++it) {
         std::string clipName = it->first;
 
@@ -568,8 +567,9 @@ void ColladaParser::ReadAnimationSampler(XmlNode &node, Collada::AnimationChanne
                 if (XmlParser::hasAttribute(currentNode, "source")) {
                     XmlParser::getStdStrAttribute(currentNode, "source", sourceAttr);
                     const char *source = sourceAttr.c_str();
-                    if (source[0] != '#')
-                        ThrowException("Unsupported URL format");
+                    if (source[0] != '#') {
+                        throw DeadlyImportError("Unsupported URL format");
+                    }
                     source++;
 
                     if (semantic == "INPUT")
@@ -671,7 +671,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
             const char *attrSemantic = currentNode.attribute("semantic").as_string();
             const char *attrSource = currentNode.attribute("source").as_string();
             if (attrSource[0] != '#') {
-                ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element");
+                throw DeadlyImportError("Unsupported URL format in \"", attrSource, "\" in source attribute of <joints> data <input> element");
             }
             ++attrSource;
             // parse source URL to corresponding source
@@ -680,7 +680,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
             } else if (strcmp(attrSemantic, "INV_BIND_MATRIX") == 0) {
                 pController.mJointOffsetMatrixSource = attrSource;
             } else {
-                ThrowException(format() << "Unknown semantic \"" << attrSemantic << "\" in <joints> data <input> element");
+                throw DeadlyImportError("Unknown semantic \"" , attrSemantic , "\" in <joints> data <input> element");
             }
         }
     }
@@ -704,7 +704,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
 
             // local URLS always start with a '#'. We don't support global URLs
             if (attrSource[0] != '#') {
-                ThrowException(format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <vertex_weights> data <input> element");
+                throw DeadlyImportError( "Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
             }
             channel.mAccessor = attrSource + 1;
 
@@ -714,14 +714,14 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
             } else if (strcmp(attrSemantic, "WEIGHT") == 0) {
                 pController.mWeightInputWeights = channel;
             } else {
-                ThrowException(format() << "Unknown semantic \"" << attrSemantic << "\" in <vertex_weights> data <input> element");
+                throw DeadlyImportError("Unknown semantic \"", attrSemantic, "\" in <vertex_weights> data <input> element");
             }
         } else if (currentName == "vcount" && vertexCount > 0) {
             const char *text = currentNode.value();
             size_t numWeights = 0;
             for (std::vector<size_t>::iterator it = pController.mWeightCounts.begin(); it != pController.mWeightCounts.end(); ++it) {
                 if (*text == 0) {
-                    ThrowException("Out of data while reading <vcount>");
+                    throw DeadlyImportError("Out of data while reading <vcount>");
                 }
 
                 *it = strtoul10(text, &text);
@@ -737,12 +737,13 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
             const char *text = stdText.c_str();
             for (std::vector<std::pair<size_t, size_t>>::iterator it = pController.mWeights.begin(); it != pController.mWeights.end(); ++it) {
                 if (text == 0) {
-                    ThrowException("Out of data while reading <vertex_weights>");
+                    throw DeadlyImportError("Out of data while reading <vertex_weights>");
                 }
                 it->first = strtoul10(text, &text);
                 SkipSpacesAndLineEnd(&text);
-                if (*text == 0)
-                    ThrowException("Out of data while reading <vertex_weights>");
+                if (*text == 0) {
+                    throw DeadlyImportError("Out of data while reading <vertex_weights>");
+                }
                 it->second = strtoul10(text, &text);
                 SkipSpacesAndLineEnd(&text);
             }
@@ -925,7 +926,7 @@ void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
         if (currentName == "instance_effect") {
             const char *url = currentNode.attribute("url").as_string();
             if (url[0] != '#') {
-                ThrowException("Unknown reference format");
+                throw DeadlyImportError("Unknown reference format");
             }
             pMaterial.mEffect = url + 1;
         }
@@ -1300,8 +1301,9 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
             // surface ID is given inside <instance_image> tags
             std::string url;
             XmlParser::getStdStrAttribute(currentNode, "url", url);
-            if (url[0] != '#')
-                ThrowException("Unsupported URL format in instance_image");
+            if (url[0] != '#') {
+                throw DeadlyImportError("Unsupported URL format in instance_image");
+            }
             pParam.mType = Param_Sampler;
             pParam.mReference = url.c_str() + 1;
         }
@@ -1426,8 +1428,9 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
             std::string s;
 
             for (unsigned int a = 0; a < count; a++) {
-                if (*content == 0)
-                    ThrowException("Expected more values while reading IDREF_array contents.");
+                if (*content == 0) {
+                    throw DeadlyImportError("Expected more values while reading IDREF_array contents.");
+                }
 
                 s.clear();
                 while (!IsSpaceOrNewLine(*content))
@@ -1440,8 +1443,9 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
             data.mValues.reserve(count);
 
             for (unsigned int a = 0; a < count; a++) {
-                if (*content == 0)
-                    ThrowException("Expected more values while reading float_array contents.");
+                if (*content == 0) {
+                    throw DeadlyImportError("Expected more values while reading float_array contents.");
+                }
 
                 ai_real value;
                 // read a number
@@ -1461,9 +1465,10 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
     // read accessor attributes
     std::string source;
     XmlParser::getStdStrAttribute(node, "source", source);
-    if (source[0] != '#')
-        ThrowException(format() << "Unknown reference format in url \"" << source << "\" in source attribute of <accessor> element.");
-    int count;
+    if (source[0] != '#') {
+        throw DeadlyImportError("Unknown reference format in url \"", source, "\" in source attribute of <accessor> element.");
+    }
+    int count = 0;
     XmlParser::getIntAttribute(node, "count", count);
 
     unsigned int offset = 0;
@@ -1561,7 +1566,7 @@ void ColladaParser::ReadVertexData(XmlNode &node, Mesh &pMesh) {
         if (currentName == "input") {
             ReadInputChannel(currentNode, pMesh.mPerVertexData);
         } else {
-            ThrowException(format() << "Unexpected sub element <" << currentName << "> in tag <vertices>");
+            throw DeadlyImportError("Unexpected sub element <", currentName, "> in tag <vertices>");
         }
     }
 }
@@ -1628,8 +1633,9 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
                     const char *content = v.c_str();
                     vcount.reserve(numPrimitives);
                     for (unsigned int a = 0; a < numPrimitives; a++) {
-                        if (*content == 0)
-                            ThrowException("Expected more values while reading <vcount> contents.");
+                        if (*content == 0) {
+                            throw DeadlyImportError("Expected more values while reading <vcount> contents.");
+                        }
                         // read a number
                         vcount.push_back((size_t)strtoul10(content, &content));
                         // skip whitespace after it
@@ -1647,7 +1653,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
         } else if (currentName == "ph") {
             // skip
         } else {
-            ThrowException(format() << "Unexpected sub element <" << currentName << "> in tag <" << elementName << ">");
+            throw DeadlyImportError("Unexpected sub element <", currentName, "> in tag <", elementName, ">");
         }
     }
 
@@ -1671,17 +1677,14 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
     // read semantic
     std::string semantic;
     XmlParser::getStdStrAttribute(node, "semantic", semantic);
-    //int attrSemantic = GetAttribute("semantic");
-    //std::string semantic = mReader->getAttributeValue(attrSemantic);
     channel.mType = GetTypeForSemantic(semantic);
 
     // read source
     std::string source;
     XmlParser::getStdStrAttribute(node, "source", source);
-    //int attrSource = GetAttribute("source");
-    //const char *source = mReader->getAttributeValue(attrSource);
-    if (source[0] != '#')
-        ThrowException(format() << "Unknown reference format in url \"" << source << "\" in source attribute of <input> element.");
+    if (source[0] != '#') {
+        throw DeadlyImportError("Unknown reference format in url \"", source, "\" in source attribute of <input> element.");
+    }
     channel.mAccessor = source.c_str() + 1; // skipping the leading #, hopefully the remaining text is the accessor ID only
 
     // read index offset, if per-index <input>
@@ -1763,11 +1766,13 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
             // HACK: We just fix this number since SketchUp 15.3.331 writes the wrong 'count' for 'lines'
             ReportWarning("Expected different index count in <p> element, %zu instead of %zu.", indices.size(), expectedPointCount * numOffsets);
             pNumPrimitives = (indices.size() / numOffsets) / 2;
-        } else
-            ThrowException("Expected different index count in <p> element.");
+        } else {
+            throw DeadlyImportError("Expected different index count in <p> element.");
+        }
 
-    } else if (expectedPointCount == 0 && (indices.size() % numOffsets) != 0)
-        ThrowException("Expected different index count in <p> element.");
+    } else if (expectedPointCount == 0 && (indices.size() % numOffsets) != 0) {
+        throw DeadlyImportError("Expected different index count in <p> element.");
+    }
 
     // find the data for all sources
     for (std::vector<InputChannel>::iterator it = pMesh.mPerVertexData.begin(); it != pMesh.mPerVertexData.end(); ++it) {
@@ -1791,8 +1796,9 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         // ignore vertex pointer, it doesn't refer to an accessor
         if (input.mType == IT_Vertex) {
             // warn if the vertex channel does not refer to the <vertices> element in the same mesh
-            if (input.mAccessor != pMesh.mVertexID)
-                ThrowException("Unsupported vertex referencing scheme.");
+            if (input.mAccessor != pMesh.mVertexID) {
+                throw DeadlyImportError("Unsupported vertex referencing scheme.");
+            }
             continue;
         }
 
@@ -1859,7 +1865,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
             break;
         default:
             // LineStrip is not supported due to expected index unmangling
-            ThrowException("Unsupported primitive type.");
+            throw DeadlyImportError("Unsupported primitive type.");
             break;
         }
 
@@ -1915,8 +1921,9 @@ void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, siz
         return;
 
     const Accessor &acc = *pInput.mResolved;
-    if (pLocalIndex >= acc.mCount)
-        ThrowException(format() << "Invalid data index (" << pLocalIndex << "/" << acc.mCount << ") in primitive specification");
+    if (pLocalIndex >= acc.mCount) {
+        throw DeadlyImportError("Invalid data index (", pLocalIndex, "/", acc.mCount, ") in primitive specification");
+    }
 
     // get a pointer to the start of the data object referred to by the accessor and the local index
     const ai_real *dataObject = &(acc.mData->mValues[0]) + acc.mOffset + pLocalIndex * acc.mStride;
@@ -2121,8 +2128,9 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
             if (XmlParser::hasAttribute(currentNode, "url")) {
                 std::string url;
                 XmlParser::getStdStrAttribute(currentNode, "url", url);
-                if (url[0] != '#')
-                    ThrowException("Unknown reference format in <instance_light> element");
+                if (url[0] != '#') {
+                    throw DeadlyImportError("Unknown reference format in <instance_light> element");
+                }
 
                 pNode->mLights.push_back(LightInstance());
                 pNode->mLights.back().mLight = url.c_str() + 1;
@@ -2133,7 +2141,7 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
                 std::string url;
                 XmlParser::getStdStrAttribute(currentNode, "url", url);
                 if (url[0] != '#') {
-                    ThrowException("Unknown reference format in <instance_camera> element");
+                    throw DeadlyImportError("Unknown reference format in <instance_camera> element");
                 }
                 pNode->mCameras.push_back(CameraInstance());
                 pNode->mCameras.back().mCamera = url.c_str() + 1;
@@ -2237,8 +2245,9 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
     // referred mesh is given as an attribute of the <instance_geometry> element
     std::string url;
     XmlParser::getStdStrAttribute(node, "url", url);
-    if (url[0] != '#')
-        ThrowException("Unknown reference format");
+    if (url[0] != '#') {
+        throw DeadlyImportError("Unknown reference format");
+    }
 
     Collada::MeshInstance instance;
     instance.mMeshOrController = url.c_str() + 1; // skipping the leading #
@@ -2277,30 +2286,25 @@ void ColladaParser::ReadScene(XmlNode &node) {
         const std::string currentName = currentNode.name();
         if (currentName == "instance_visual_scene") {
             // should be the first and only occurrence
-            if (mRootNode)
-                ThrowException("Invalid scene containing multiple root nodes in <instance_visual_scene> element");
+            if (mRootNode) {
+                throw DeadlyImportError("Invalid scene containing multiple root nodes in <instance_visual_scene> element");
+            }
 
             // read the url of the scene to instance. Should be of format "#some_name"
             std::string url;
             XmlParser::getStdStrAttribute(currentNode, "url", url);
             if (url[0] != '#') {
-                ThrowException("Unknown reference format in <instance_visual_scene> element");
+                throw DeadlyImportError("Unknown reference format in <instance_visual_scene> element");
             }
 
             // find the referred scene, skip the leading #
             NodeLibrary::const_iterator sit = mNodeLibrary.find(url.c_str() + 1);
             if (sit == mNodeLibrary.end()) {
-                ThrowException("Unable to resolve visual_scene reference \"" + std::string(url) + "\" in <instance_visual_scene> element.");
+                throw DeadlyImportError("Unable to resolve visual_scene reference \"", std::string(url), "\" in <instance_visual_scene> element.");
             }
             mRootNode = sit->second;
         }
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Aborts the file reading with an exception
-AI_WONT_RETURN void ColladaParser::ThrowException(const std::string &pError) const {
-    throw DeadlyImportError(format() << "Collada: " << mFileName << " - " << pError);
 }
 
 void ColladaParser::ReportWarning(const char *msg, ...) {

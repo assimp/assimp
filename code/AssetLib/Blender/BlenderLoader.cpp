@@ -683,7 +683,9 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
     BuildDefaultMaterial(conv_data);
 
     for (std::shared_ptr<Material> mat : conv_data.materials_raw) {
-
+        if (!mat) {
+          continue;
+        }
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture) / sizeof(conv_data.next_texture[0]); ++i) {
             conv_data.next_texture[i] = 0;
@@ -992,6 +994,11 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
     for (uint32_t m = 0; m < maxMat; ++m) {
         // get material by index
         const std::shared_ptr<Material> pMat = mesh->mat[m];
+        if (!pMat) {
+          ASSIMP_LOG_WARN_F("Failed to read material of a mesh '", mesh->id.name + 2, "'");
+          continue;
+        }
+        
         TextureUVMapping texuv;
         const uint32_t maxTex = sizeof(pMat->mtex) / sizeof(pMat->mtex[0]);
         for (uint32_t t = 0; t < maxTex; ++t) {

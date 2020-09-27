@@ -1584,7 +1584,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     std::vector<size_t> vcount;
     std::vector<InputChannel> perIndexData;
 
-    unsigned int numPrimitives;
+    unsigned int numPrimitives = 0;
     XmlParser::getUIntAttribute(node, "count", numPrimitives);
     // read primitive count from the attribute
     //int attrCount = GetAttribute("count");
@@ -1596,11 +1596,6 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     if (XmlParser::hasAttribute(node, "material")) {
         XmlParser::getStdStrAttribute(node, "material", subgroup.mMaterial);
     }
-    // material subgroup
-    //    int attrMaterial = TestAttribute("material");
-
-    //if (attrMaterial > -1)
-    //  subgroup.mMaterial = mReader->getAttributeValue(attrMaterial);
 
     // distinguish between polys and triangles
     std::string elementName = node.name();

@@ -408,25 +408,18 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-            bool read_flag[6] = { false, false, false, false, false, false };
             const std::string &currentName = currentNode.name();
             if (currentName == "deltax") {
-                read_flag[0] = true;
                 als.Delta.x = (ai_real)std::atof(currentNode.value());
             } else if (currentName == "deltay") {
-                read_flag[1] = true;
                 als.Delta.y = (ai_real)std::atof(currentNode.value());
             } else if (currentName == "deltaz") {
-                read_flag[2] = true;
                 als.Delta.z = (ai_real)std::atof(currentNode.value());
             } else if (currentName == "rx") {
-                read_flag[3] = true;
                 als.Delta.x = (ai_real)std::atof(currentNode.value());
             } else if (currentName == "ry") {
-                read_flag[4] = true;
                 als.Delta.y = (ai_real)std::atof(currentNode.value());
             } else if (currentName == "rz") {
-                read_flag[5] = true;
                 als.Delta.z = (ai_real)std::atof(currentNode.value());
             }
         }

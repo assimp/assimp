@@ -133,6 +133,9 @@ unsigned char *M3DWrapper::Save(int quality, int flags, unsigned int &size) {
     saved_output_ = m3d_save(m3d_, quality, flags, &size);
     return saved_output_;
 #else
+    (void)quality;
+    (void)flags;
+    (void)size;
     return nullptr;
 #endif
 }

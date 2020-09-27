@@ -800,13 +800,13 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 // make sure we skip over mip and array initializations, which
                 // we don't support, but which could confuse the loader if
                 // they're not skipped.
-                int v = currentNode.attribute("ref").as_int();
+                //int v = currentNode.attribute("ref").as_int();
                 /*                if (v y) {
                     ASSIMP_LOG_WARN("Collada: Ignoring texture array index");
                     continue;
                 }*/
 
-                v = currentNode.attribute("mip_index").as_int();
+                //v = currentNode.attribute("mip_index").as_int();
                 /*if (attrib != -1 && v > 0) {
                     ASSIMP_LOG_WARN("Collada: Ignoring MIP map layer");
                     continue;

@@ -1416,7 +1416,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
     // read attributes
     std::string id;
     XmlParser::getStdStrAttribute(node, "id", id);
-    unsigned int count;
+    unsigned int count = 0;
     XmlParser::getUIntAttribute(node, "count", count);
     std::string v;
     XmlParser::getValueAsString(node, v);

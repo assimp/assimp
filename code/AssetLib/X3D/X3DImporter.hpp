@@ -47,15 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_X3D_IMPORTER_H
 #define INCLUDED_AI_X3D_IMPORTER_H
 
-
 // Header files, Assimp.
-#include <assimp/DefaultLogger.hpp>
-#include <assimp/importerdesc.h>
-#include <assimp/ProgressHandler.hpp>
-#include <assimp/types.h>
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
+#include <assimp/importerdesc.h>
 #include <assimp/scene.h>
+#include <assimp/types.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/ProgressHandler.hpp>
 
 #include <list>
 
@@ -101,8 +100,6 @@ inline void Throw_USE_NotFound(const std::string &nodeName, const std::string &p
 inline void LogInfo(const std::string &message) {
     DefaultLogger::get()->info(message);
 }
-
-
 
 /// \class X3DImporter
 /// Class that holding scene graph which include: groups, geometry, metadata etc.
@@ -289,16 +286,11 @@ struct X3DNodeElementBase {
     X3DElemType Type;
 };
 
-class X3DImporter : public BaseImporter
-{
+class X3DImporter : public BaseImporter {
 public:
-    std::list<X3DNodeElementBase*> NodeElement_List;///< All elements of scene graph.
+    std::list<X3DNodeElementBase *> NodeElement_List; ///< All elements of scene graph.
 
 public:
-    /***********************************************/
-    /****************** Functions ******************/
-    /***********************************************/
-
     /// Default constructor.
     X3DImporter();
 
@@ -313,20 +305,20 @@ public:
     /// Also exception can be thrown if trouble will found.
     /// \param [in] pFile - name of file to be parsed.
     /// \param [in] pIOHandler - pointer to IO helper object.
-    void ParseFile( const std::string& pFile, IOSystem* pIOHandler );
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig ) const;
-    void GetExtensionList( std::set<std::string>& pExtensionList );
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
-    const aiImporterDesc* GetInfo()const;
+    void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
+    void GetExtensionList(std::set<std::string> &pExtensionList);
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    const aiImporterDesc *GetInfo() const;
     void Clear();
 
 private:
     static const aiImporterDesc Description;
-    X3DNodeElementBase* mNodeElementCur;///< Current element.
+    X3DNodeElementBase *mNodeElementCur; ///< Current element.
     XmlParser *mXmlParser;
     IOSystem *mpIOHandler;
-};// class X3DImporter
+}; // class X3DImporter
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // INCLUDED_AI_X3D_IMPORTER_H

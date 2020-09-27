@@ -693,7 +693,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
 // Reads the joint weights for the given controller
 void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
-    int vertexCount;
+    int vertexCount=0;
     XmlParser::getIntAttribute(node, "count", vertexCount);
 
     for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {

@@ -1585,7 +1585,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     std::vector<InputChannel> perIndexData;
 
     unsigned int numPrimitives;
-    XmlParser::getUIntAttribute(node, "count", (unsigned int)numPrimitives);
+    XmlParser::getUIntAttribute(node, "count", numPrimitives);
     // read primitive count from the attribute
     //int attrCount = GetAttribute("count");
     //size_t numPrimitives = (size_t)mReader->getAttributeValueAsInt(attrCount);

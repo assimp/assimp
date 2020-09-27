@@ -1251,8 +1251,11 @@ namespace pugi
 	};
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
-#pragma warning(push)
-#pragma warning( disable: 4275 )
+
+#ifdef _MSC_VER
+#   pragma warning(push)
+#   pragma warning( disable: 4275 )
+#endif
 	// XPath exception class
 	class PUGIXML_CLASS xpath_exception: public std::exception
 	{
@@ -1270,7 +1273,9 @@ namespace pugi
 		const xpath_parse_result& result() const;
 	};
 	#endif
-#pragma warning(pop)
+#ifdef _MSC_VER
+#   pragma warning(pop)
+#endif
 	// XPath node class (either xml_node or xml_attribute)
 	class PUGIXML_CLASS xpath_node
 	{

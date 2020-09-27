@@ -552,7 +552,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             anim->mChannels.push_back(it->second);
         }
 
-        if (idAttr >= 0) {
+        if (idAttr) {
             mAnimationLibrary[animID] = anim;
         }
     }

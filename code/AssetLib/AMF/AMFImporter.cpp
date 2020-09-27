@@ -454,14 +454,12 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
     }
 
     // Check for child nodes
-    bool col_read = false;
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
             const std::string &currentName = currentNode.name();
             if (currentName == "color") {
                 ParseNode_Color(currentNode);
-                col_read = true;
             } else if (currentName == "mesh") {
                 ParseNode_Mesh(currentNode);
             } else if (currentName == "metadata") {

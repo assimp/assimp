@@ -138,18 +138,18 @@ static const char *nnMesh = "mesh";
 static const char *nnSharedGeometry = "sharedgeometry";
 static const char *nnSubMeshes = "submeshes";
 static const char *nnSubMesh = "submesh";
-static const char *nnSubMeshNames = "submeshnames";
+//static const char *nnSubMeshNames = "submeshnames";
 static const char *nnSkeletonLink = "skeletonlink";
-static const char *nnLOD = "levelofdetail";
-static const char *nnExtremes = "extremes";
-static const char *nnPoses = "poses";
+//static const char *nnLOD = "levelofdetail";
+//static const char *nnExtremes = "extremes";
+//static const char *nnPoses = "poses";
 static const char *nnAnimations = "animations";
 
 // <submesh>
 static const char *nnFaces = "faces";
 static const char *nnFace = "face";
 static const char *nnGeometry = "geometry";
-static const char *nnTextures = "textures";
+//static const char *nnTextures = "textures";
 
 // <mesh/submesh>
 static const char *nnBoneAssignments = "boneassignments";
@@ -158,14 +158,14 @@ static const char *nnBoneAssignments = "boneassignments";
 static const char *nnVertexBuffer = "vertexbuffer";
 
 // <vertexbuffer>
-static const char *nnVertex = "vertex";
+//static const char *nnVertex = "vertex";
 static const char *nnPosition = "position";
 static const char *nnNormal = "normal";
 static const char *nnTangent = "tangent";
-static const char *nnBinormal = "binormal";
+//static const char *nnBinormal = "binormal";
 static const char *nnTexCoord = "texcoord";
-static const char *nnColorDiffuse = "colour_diffuse";
-static const char *nnColorSpecular = "colour_specular";
+//static const char *nnColorDiffuse = "colour_diffuse";
+//static const char *nnColorSpecular = "colour_specular";
 
 // <boneassignments>
 static const char *nnVertexBoneAssignment = "vertexboneassignment";
@@ -176,7 +176,7 @@ static const char *nnVertexBoneAssignment = "vertexboneassignment";
 static const char *nnSkeleton = "skeleton";
 static const char *nnBones = "bones";
 static const char *nnBoneHierarchy = "bonehierarchy";
-static const char *nnAnimationLinks = "animationlinks";
+//static const char *nnAnimationLinks = "animationlinks";
 
 // <bones>
 static const char *nnBone = "bone";

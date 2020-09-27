@@ -315,7 +315,9 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
                 mUpDirection = UP_Y;
             }
         } else if (name == "contributor") {
-            ReadMetaDataItem(currentNode, mAssetMetaData);
+            for (XmlNode currentChldNode : currentNode.children()) {
+                ReadMetaDataItem(currentChldNode, mAssetMetaData);
+            }
         } else {
             ReadMetaDataItem(currentNode, mAssetMetaData);
         }
@@ -346,6 +348,7 @@ void ColladaParser::ReadMetaDataItem(XmlNode &node, StringMetaData &metadata) {
 
     std::string v;
     if (XmlParser::getValueAsString(node, v)) {
+        trim(v);
         aiString aistr;
         aistr.Set(v);
 
@@ -1268,9 +1271,11 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
 // Reads an effect entry containing a float
 void ColladaParser::ReadEffectFloat(XmlNode &node, ai_real &pFloat) {
     pFloat = 0.f;
-    if (node.name() == std::string("float")) {
-        XmlParser::getFloatAttribute(node, "float", pFloat);
+    XmlNode floatNode = node.child("float");
+    if (floatNode.empty()) {
+        return;
     }
+    XmlParser::getValueAsFloat(floatNode, pFloat);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1287,11 +1292,13 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
         const std::string &currentName = currentNode.name();
         if (currentName == "surface") {
             // image ID given inside <init_from> tags
-            const char *content = currentNode.value();
-            pParam.mType = Param_Surface;
-            pParam.mReference = content;
-
-            // don't care for remaining stuff
+            XmlNode initNode = currentNode.child("init_from");
+            if (initNode) {
+                std::string v;
+                XmlParser::getValueAsString(initNode, v);
+                pParam.mType = Param_Surface;
+                pParam.mReference = v.c_str();
+            }
         } else if (currentName == "sampler2D" && (FV_1_4_n == mFormat || FV_1_3_n == mFormat)) {
             // surface ID is given inside <source> tags
             const char *content = currentNode.value();
@@ -2188,10 +2195,11 @@ void ColladaParser::ReadNodeTransformation(XmlNode &node, Node *pNode, Transform
 // ------------------------------------------------------------------------------------------------
 // Processes bind_vertex_input and bind elements
 void ColladaParser::ReadMaterialVertexInputBinding(XmlNode &node, Collada::SemanticMappingTable &tbl) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
-    while (xmlIt.getNext(currentNode)) {
+    //XmlNodeIterator xmlIt(node);
+    //xmlIt.collectChildrenPreOrder(node);
+    //XmlNode currentNode;
+    std::string name = node.name();
+    for (XmlNode currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "bind_vertex_input") {
             Collada::InputSemanticMapEntry vn;
@@ -2254,20 +2262,24 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
 
     for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "instance_material") {
-            // read ID of the geometry subgroup and the target material
-            std::string group;
-            XmlParser::getStdStrAttribute(currentNode, "symbol", group);
-            XmlParser::getStdStrAttribute(currentNode, "symbol", url);
-            const char *urlMat = url.c_str();
-            Collada::SemanticMappingTable s;
-            if (urlMat[0] == '#')
-                urlMat++;
+        if (currentName == "bind_material") {
+            XmlNode techNode = currentNode.child("technique_common");
+            if (techNode) {
+                XmlNode instanceMatNode = techNode.child("instance_material");
+                // read ID of the geometry subgroup and the target material
+                std::string group;
+                XmlParser::getStdStrAttribute(instanceMatNode, "symbol", group);
+                XmlParser::getStdStrAttribute(instanceMatNode, "target", url);
+                const char *urlMat = url.c_str();
+                Collada::SemanticMappingTable s;
+                if (urlMat[0] == '#')
+                    urlMat++;
 
-            s.mMatName = urlMat;
-
-            // store the association
-            instance.mMaterials[group] = s;
+                s.mMatName = urlMat;
+                // store the association
+                instance.mMaterials[group] = s;
+                ReadMaterialVertexInputBinding(instanceMatNode, s);
+            }
         }
     }
 

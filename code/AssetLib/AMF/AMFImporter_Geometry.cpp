@@ -255,8 +255,7 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
 
     AMFTriangle &als = *((AMFTriangle *)ne); // alias for convenience
 
-    bool col_read = false, tex_read = false;
-    bool read_flag[3] = { false, false, false };
+    bool col_read = false;
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
         for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
@@ -267,31 +266,20 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
                 col_read = true;
             } else if (currentName == "texmap") {
                 ParseNode_TexMap(currentNode);
-                tex_read = true;
             } else if (currentName == "map") {
                 ParseNode_TexMap(currentNode, true);
-                tex_read = true;
             } else if (currentName == "v1") {
                 als.V[0] = std::atoi(currentNode.value());
-                read_flag[0] = true;
             } else if (currentName == "v2") {
                 als.V[1] = std::atoi(currentNode.value());
-                read_flag[1] = true;
             } else if (currentName == "v3") {
                 als.V[2] = std::atoi(currentNode.value());
-                read_flag[2] = true;
             }
         }
         ParseHelper_Node_Exit();
     } else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
-
-    // Check for child nodes
-    if ((read_flag[0] && read_flag[1] && read_flag[2]) == 0) {
-        throw DeadlyImportError("Not all vertices of the triangle are defined.");
-    }
-
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }

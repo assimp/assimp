@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -126,12 +124,10 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
 
     // Check for child nodes
 	if (!node.empty()) {
-		bool col_read = false;
         ParseHelper_Node_Enter(ne);
         for (pugi::xml_node &child : node.children()) {
             const std::string name = child.name();
             if (name == "color") {
-				col_read = true;
 				ParseNode_Color(child);
             } else if (name == "metadata") {
 				ParseNode_Metadata(child);

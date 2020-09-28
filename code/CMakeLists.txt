@@ -744,9 +744,6 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-#SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-#SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
-
 ADD_ASSIMP_IMPORTER( Q3D
   AssetLib/Q3D/Q3DLoader.cpp
   AssetLib/Q3D/Q3DLoader.h
@@ -849,16 +846,6 @@ if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES LINK_FLAGS -Os )
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
 endif()
-
-#ADD_ASSIMP_IMPORTER( STEP
-#    Step/STEPFile.h
-#    Importer/StepFile/StepFileImporter.h
-#    Importer/StepFile/StepFileImporter.cpp
-#    Importer/StepFile/StepFileGen1.cpp
-#    Importer/StepFile/StepFileGen2.cpp
-#    Importer/StepFile/StepFileGen3.cpp
-#    Importer/StepFile/StepReaderGen.h
-#)
 
 if ((NOT ASSIMP_NO_EXPORT) OR (NOT ASSIMP_EXPORTERS_ENABLED STREQUAL ""))
 	SET( Exporter_SRCS

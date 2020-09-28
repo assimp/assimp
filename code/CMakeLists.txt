@@ -1095,7 +1095,6 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  #${IrrXML_SRCS}
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
@@ -1151,7 +1150,6 @@ IF(ASSIMP_HUNTER_ENABLED)
       RapidJSON::rapidjson
       utf8cpp
       zip::zip
-      pugixml::pugixml
   )
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} pugixml )

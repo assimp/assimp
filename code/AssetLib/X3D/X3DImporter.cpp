@@ -126,9 +126,7 @@ struct WordIterator {
 const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter() :
-        mNodeElementCur(nullptr),
-        mXmlParser(nullptr),
-        mpIOHandler(nullptr) {
+        mNodeElementCur(nullptr) {
     // empty
 }
 

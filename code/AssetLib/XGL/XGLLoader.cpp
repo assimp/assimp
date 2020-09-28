@@ -202,7 +202,6 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		return;
 	}
 
-    XmlNode root = mXmlParser->getRootNode();
 	TempScope scope;
     XmlNode *worldNode = mXmlParser->findNode("WORLD");
     if (nullptr != worldNode) {

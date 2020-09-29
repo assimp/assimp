@@ -58,25 +58,20 @@ protected:
 TEST_F(utXmlParser, parse_xml_test) {
     XmlParser parser;
     std::string filename = ASSIMP_TEST_MODELS_DIR "/x3d/ComputerKeyboard.x3d";
-    IOStream *stream = mIoSystem.Open(filename.c_str(), "rb");
-    bool result = parser.parse(stream);
+    std::unique_ptr<IOStream> stream(mIoSystem.Open(filename.c_str(), "rb"));
+    EXPECT_NE(stream.get(), nullptr);
+    bool result = parser.parse(stream.get());
     EXPECT_TRUE(result);
-    mIoSystem.Close(stream);
 }
 
 TEST_F(utXmlParser, parse_xml_and_traverse_test) {
     XmlParser parser;
     std::string filename = ASSIMP_TEST_MODELS_DIR "/x3d/ComputerKeyboard.x3d";
-
-    IOStream *stream = mIoSystem.Open(filename.c_str(), "rb");
-    bool result = parser.parse(stream);
+    std::unique_ptr<IOStream> stream(mIoSystem.Open(filename.c_str(), "rb"));
+    EXPECT_NE(stream.get(), nullptr);
+    bool result = parser.parse(stream.get());
     EXPECT_TRUE(result);
     XmlNode root = parser.getRootNode();
-    std::string name = root.name();
-    std::string name1 = root.name();
-    EXPECT_NE(nullptr, root);
-    mIoSystem.Close(stream);
-    std::string name2 = root.name();
 
     XmlNodeIterator nodeIt(root);
     EXPECT_TRUE(nodeIt.isEmpty());

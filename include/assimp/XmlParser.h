@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_IRRXML_WRAPPER
 #define INCLUDED_AI_IRRXML_WRAPPER
 
-// some long includes ....
+#include <assimp/DefaultLogger.hpp>
 #include "BaseImporter.h"
 #include "IOStream.hpp"
 #include <pugixml.hpp>
@@ -117,6 +117,7 @@ public:
 
     bool parse(IOStream *stream) {
         if (nullptr == stream) {
+            ASSIMP_LOG_DEBUG("Stream is nullptr.");
             return false;
         }
 
@@ -126,6 +127,7 @@ public:
         mDoc = new pugi::xml_document();
         pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
         if (parse_result.status == pugi::status_ok) {
+            ASSIMP_LOG_DEBUG("Error while parse xml.");
             result = true;
         }
 

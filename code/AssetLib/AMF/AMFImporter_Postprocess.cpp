@@ -48,12 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AMFImporter.hpp"
 
-// Header files, Assimp.
 #include <assimp/SceneCombiner.h>
 #include <assimp/StandardShapes.h>
 #include <assimp/StringUtils.h>
 
-// Header files, stdlib.
 #include <iterator>
 
 namespace Assimp {
@@ -379,7 +377,9 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
 
             // check if volume use material
             if (!ne_volume->MaterialID.empty()) {
-                if (!Find_ConvertedMaterial(ne_volume->MaterialID, &cur_mat)) Throw_ID_NotFound(ne_volume->MaterialID);
+                if (!Find_ConvertedMaterial(ne_volume->MaterialID, &cur_mat)) {
+                    Throw_ID_NotFound(ne_volume->MaterialID);
+                }
             }
 
             // inside "volume" collect all data and place to arrays or create new objects

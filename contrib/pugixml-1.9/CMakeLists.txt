@@ -35,12 +35,12 @@ if(DEFINED BUILD_DEFINES)
 		add_definitions("-D" ${DEFINE})
 	endforeach()
 endif()
-
-if(BUILD_SHARED_LIBS)
-	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
-else()
+#message(pugixml"   "${BUILD_SHARED_LIBS})
+#if(BUILD_SHARED_LIBS)
+#	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
+#else()
 	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
-endif()
+#endif()
 
 # Export symbols for shared library builds
 if(BUILD_SHARED_LIBS AND MSVC)

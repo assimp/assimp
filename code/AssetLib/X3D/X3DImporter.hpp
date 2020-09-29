@@ -315,8 +315,6 @@ public:
 private:
     static const aiImporterDesc Description;
     X3DNodeElementBase *mNodeElementCur; ///< Current element.
-    XmlParser *mXmlParser;
-    IOSystem *mpIOHandler;
 }; // class X3DImporter
 
 } // namespace Assimp

@@ -81,13 +81,13 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
 
 void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElement, std::vector<aiVector3D> &pVertexCoordinateArray,
         std::vector<AMFColor *> &pVertexColorArray) const {
-    AMFVertex *vn = nullptr;
+    AMFVertices  *vn = nullptr;
     size_t col_idx;
 
     // All data stored in "vertices", search for it.
     for (AMFNodeElementBase *ne_child : pNodeElement.Child) {
         if (ne_child->Type == AMFNodeElementBase::ENET_Vertices) {
-            vn = (AMFVertex *)ne_child;
+            vn = (AMFVertices*)ne_child;
         }
     }
 

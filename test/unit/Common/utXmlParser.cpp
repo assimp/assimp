@@ -57,7 +57,7 @@ protected:
 
 TEST_F(utXmlParser, parse_xml_test) {
     XmlParser parser;
-    std::string filename = ASSIMP_TEST_MODELS_DIR "/x3d/ComputerKeyboard.x3d";
+    std::string filename = ASSIMP_TEST_MODELS_DIR "/X3D/ComputerKeyboard.x3d";
     std::unique_ptr<IOStream> stream(mIoSystem.Open(filename.c_str(), "rb"));
     EXPECT_NE(stream.get(), nullptr);
     bool result = parser.parse(stream.get());
@@ -66,7 +66,7 @@ TEST_F(utXmlParser, parse_xml_test) {
 
 TEST_F(utXmlParser, parse_xml_and_traverse_test) {
     XmlParser parser;
-    std::string filename = ASSIMP_TEST_MODELS_DIR "/x3d/ComputerKeyboard.x3d";
+    std::string filename = ASSIMP_TEST_MODELS_DIR "/X3D/ComputerKeyboard.x3d";
     std::unique_ptr<IOStream> stream(mIoSystem.Open(filename.c_str(), "rb"));
     EXPECT_NE(stream.get(), nullptr);
     bool result = parser.parse(stream.get());

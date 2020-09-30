@@ -99,7 +99,8 @@ XGLImporter::XGLImporter() :
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 XGLImporter::~XGLImporter() {
-	// empty
+	delete mXmlParser;
+    mXmlParser = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

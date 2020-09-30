@@ -384,6 +384,9 @@ void ColladaLoader::BuildLightsForNode(const ColladaParser &pParser, const Colla
                 if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
                     // Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
                     // epsilon chosen to be 0.1
+                    if ( 0.0f == srcLight->mFalloffExponent ) {
+                        srcLight->mFalloffExponent = 1.0f;
+                    }
                     out->mAngleOuterCone = std::acos(std::pow(0.1f, 1.f / srcLight->mFalloffExponent)) +
                                            out->mAngleInnerCone;
                 } else {

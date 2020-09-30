@@ -122,8 +122,11 @@ public:
         }
 
         bool result = false;
-        mData.resize(stream->FileSize());
-        stream->Read(&mData[0], mData.size(), 1);
+        const size_t len = stream->FileSize();
+        mData.resize(len + 1);
+        memset(&mData[0], '\0', len + 1);
+        stream->Read(&mData[0], 1, len);
+        
         mDoc = new pugi::xml_document();
         pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
         if (parse_result.status == pugi::status_ok) {

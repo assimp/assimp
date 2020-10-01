@@ -229,7 +229,7 @@ INCLUDE_DIRECTORIES( BEFORE
   include
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/include
-  contrib/pugixml-1.9/src
+  contrib/pugixml/src
 )
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules" )

@@ -211,13 +211,15 @@ add_executable( unit
 	${IMPORTERS}
 	${MATERIAL}
 	${MATH}
-    ${POST_PROCESSES}
+  ${POST_PROCESSES}
 )
 
 if(ASSIMP_HUNTER_ENABLED)
     hunter_add_package(GTest)
     find_package(GTest CONFIG REQUIRED)
-    target_link_libraries(unit GTest::gtest_main GTest::gmock)
+    hunter_add_package(pugixml)
+    find_package(pugixml CONFIG REQUIRED)
+    target_link_libraries(unit GTest::gtest_main GTest::gmock pugixml::pugixml)
 else()
     target_sources(unit PUBLIC ../contrib/gtest/src/gtest-all.cc)
 endif()

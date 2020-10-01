@@ -866,7 +866,12 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
 ELSE()
-  add_subdirectory(../contrib/pugixml-1.9 )
+  SET( Pugixml_SRCS
+    ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.hpp
+    ../contrib/pugixml/src/pugixml.cpp
+  )
+  SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
 # utf8
@@ -1088,6 +1093,7 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Pugixml_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1139,7 +1145,7 @@ IF(ASSIMP_HUNTER_ENABLED)
       zip::zip
   )
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} pugixml )
+  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)

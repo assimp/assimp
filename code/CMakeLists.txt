@@ -861,12 +861,12 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-# irrXML
+# pugixml
 IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(irrXML)
-  find_package(irrXML CONFIG REQUIRED)
+  hunter_add_package(pugixml)
+  find_package(pugixml CONFIG REQUIRED)
 ELSE()
-  # irrXML already included in contrib directory by parent CMakeLists.txt.
+  add_subdirectory( pugixml-1.9 )
 ENDIF()
 
 # utf8
@@ -1129,7 +1129,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
       polyclipping::polyclipping
-      irrXML::irrXML
+      pugixml::pugixml
       openddlparser::openddl_parser
       poly2tri::poly2tri
       minizip::minizip

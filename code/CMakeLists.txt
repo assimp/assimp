@@ -866,7 +866,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
 ELSE()
-  add_subdirectory( pugixml-1.9 )
+  add_subdirectory(../contrib/pugixml-1.9 )
 ENDIF()
 
 # utf8

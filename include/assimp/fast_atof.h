@@ -24,7 +24,6 @@
 #include <cmath>
 #include <limits>
 #include <stdint.h>
-#include <stdexcept>
 #include <assimp/defs.h>
 
 #include "StringComparison.h"
@@ -194,7 +193,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
 
     if ( *in < '0' || *in > '9' ) {
         // The string is known to be bad, so don't risk printing the whole thing.
-        throw ExceptionType("The string \"", std::substr(in, 0, 100), "\" cannot be converted into a value." );
+        throw ExceptionType("The string \"", std::string(in).substr(0, 100), "\" cannot be converted into a value." );
     }
 
     for ( ;; ) {
@@ -294,7 +293,7 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
     if (!(c[0] >= '0' && c[0] <= '9') &&
             !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')) {
         // The string is known to be bad, so don't risk printing the whole thing.
-        throw ExceptionType("Cannot parse string \"", std::substr(c, 0, 100), 
+        throw ExceptionType("Cannot parse string \"", std::string(c).substr(0, 100), 
                                     "\" as a real number: does not start with digit "
                                     "or decimal point followed by digit.");
     }

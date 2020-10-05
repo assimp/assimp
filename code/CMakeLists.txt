@@ -869,7 +869,7 @@ ELSE()
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
-    ../contrib/pugixml/src/pugixml.cpp
+    #../contrib/pugixml/src/pugixml.cpp
   )
   SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()

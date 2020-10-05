@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,8 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_IMPORTER_DESC_H_INC
 
 #ifdef __GNUC__
-#pragma GCC system_header
+#   pragma GCC system_header
 #endif
+
+#include <assimp/types.h>
 
 /** Mixed set of flags for #aiImporterDesc, indicating some features
   *  common to many importers*/

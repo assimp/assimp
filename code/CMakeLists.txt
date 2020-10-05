@@ -862,17 +862,11 @@ SET( Extra_SRCS
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
 # pugixml
-IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(pugixml)
-  find_package(pugixml CONFIG REQUIRED)
-ELSE()
-  SET( Pugixml_SRCS
-    ../contrib/pugixml/src/pugiconfig.hpp
-    ../contrib/pugixml/src/pugixml.hpp
-    #../contrib/pugixml/src/pugixml.cpp
-  )
-  SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
-ENDIF()
+SET( Pugixml_SRCS
+  ../contrib/pugixml/src/pugiconfig.hpp
+  ../contrib/pugixml/src/pugixml.hpp
+)
+SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 
 # utf8
 IF(ASSIMP_HUNTER_ENABLED)
@@ -1135,7 +1129,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
       polyclipping::polyclipping
-      pugixml::pugixml
       openddlparser::openddl_parser
       poly2tri::poly2tri
       minizip::minizip

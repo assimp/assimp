@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,48 +49,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AMFImporter.hpp"
 #include "AMFImporter_Macro.hpp"
 
-namespace Assimp
-{
+#include <assimp/ParsingUtils.h>
+
+namespace Assimp {
 
 // <mesh>
 // </mesh>
 // A 3D mesh hull.
 // Multi elements - Yes.
 // Parent element - <object>.
-void AMFImporter::ParseNode_Mesh()
-{
-CAMFImporter_NodeElement* ne;
+void AMFImporter::ParseNode_Mesh(XmlNode &node) {
+    AMFNodeElementBase *ne = nullptr;
 
-	// create new mesh object.
-	ne = new CAMFImporter_NodeElement_Mesh(mNodeElement_Cur);
-	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		bool vert_read = false;
+    // create new mesh object.
+    ne = new AMFMesh(mNodeElement_Cur);
+    // Check for child nodes
+    if (0 != ASSIMP_stricmp(node.name(), "mesh")) {
+        return;
+    }
+    bool found_verts = false, found_volumes = false;
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        pugi::xml_node vertNode = node.child("vertices");
+        if (!vertNode.empty()) {
+            ParseNode_Vertices(vertNode);
+            found_verts = true;
+        }
 
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("mesh");
-			if(XML_CheckNode_NameEqual("vertices"))
-			{
-				// Check if data already defined.
-				if(vert_read) Throw_MoreThanOnceDefined("vertices", "Only one vertices set can be defined for <mesh>.");
-				// read data and set flag about it
-				ParseNode_Vertices();
-				vert_read = true;
+        pugi::xml_node volumeNode = node.child("volume");
+        if (!volumeNode.empty()) {
+            ParseNode_Volume(volumeNode);
+            found_volumes = true;
+        }
+        ParseHelper_Node_Exit();
+    } 
 
-				continue;
-			}
+    if (!found_verts && !found_volumes) {
+        mNodeElement_Cur->Child.push_back(ne);
+    } // if(!mReader->isEmptyElement()) else
 
-			if(XML_CheckNode_NameEqual("volume")) { ParseNode_Volume(); continue; }
-		MACRO_NODECHECK_LOOPEND("mesh");
-		ParseHelper_Node_Exit();
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
-
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+    // and to node element list because its a new object in graph.
+    mNodeElement_List.push_back(ne);
 }
 
 // <vertices>
@@ -100,27 +97,25 @@ CAMFImporter_NodeElement* ne;
 // The list of vertices to be used in defining triangles.
 // Multi elements - No.
 // Parent element - <mesh>.
-void AMFImporter::ParseNode_Vertices()
-{
-CAMFImporter_NodeElement* ne;
+void AMFImporter::ParseNode_Vertices(XmlNode &node) {
+    AMFNodeElementBase *ne = nullptr;
 
-	// create new mesh object.
-	ne = new CAMFImporter_NodeElement_Vertices(mNodeElement_Cur);
-	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("vertices");
-			if(XML_CheckNode_NameEqual("vertex")) { ParseNode_Vertex(); continue; }
-		MACRO_NODECHECK_LOOPEND("vertices");
-		ParseHelper_Node_Exit();
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
+    // create new mesh object.
+    ne = new AMFVertices(mNodeElement_Cur);
+    // Check for child nodes
+    pugi::xml_node vertexNode = node.child("vertex");
+    if (!vertexNode.empty()) {
+        ParseHelper_Node_Enter(ne);
 
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+        ParseNode_Vertex(vertexNode);
+
+        ParseHelper_Node_Exit();
+
+    } else {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    } // if(!mReader->isEmptyElement()) else
+
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <vertex>
@@ -128,52 +123,35 @@ CAMFImporter_NodeElement* ne;
 // A vertex to be referenced in triangles.
 // Multi elements - Yes.
 // Parent element - <vertices>.
-void AMFImporter::ParseNode_Vertex()
-{
-CAMFImporter_NodeElement* ne;
+void AMFImporter::ParseNode_Vertex(XmlNode &node) {
+    AMFNodeElementBase *ne = nullptr;
 
-	// create new mesh object.
-	ne = new CAMFImporter_NodeElement_Vertex(mNodeElement_Cur);
-	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		bool col_read = false;
-		bool coord_read = false;
+    // create new mesh object.
+    ne = new AMFVertex(mNodeElement_Cur);
 
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("vertex");
-			if(XML_CheckNode_NameEqual("color"))
-			{
-				// Check if data already defined.
-				if(col_read) Throw_MoreThanOnceDefined("color", "Only one color can be defined for <vertex>.");
-				// read data and set flag about it
-				ParseNode_Color();
-				col_read = true;
+    // Check for child nodes
+    pugi::xml_node colorNode = node.child("color");
+    bool col_read = false;
+    bool coord_read = false;
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        if (!colorNode.empty()) {
+            ParseNode_Color(colorNode);
+            col_read = true;
+        }
+        pugi::xml_node coordNode = node.child("coordinates");
+        if (!coordNode.empty()) {
+            ParseNode_Coordinates(coordNode);
+            coord_read = true;
+        }
+        ParseHelper_Node_Exit();
+    }
 
-				continue;
-			}
+    if (!coord_read && !col_read) {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    }
 
-			if(XML_CheckNode_NameEqual("coordinates"))
-			{
-				// Check if data already defined.
-				if(coord_read) Throw_MoreThanOnceDefined("coordinates", "Only one coordinates set can be defined for <vertex>.");
-				// read data and set flag about it
-				ParseNode_Coordinates();
-				coord_read = true;
-
-				continue;
-			}
-
-			if(XML_CheckNode_NameEqual("metadata")) { ParseNode_Metadata(); continue; }
-		MACRO_NODECHECK_LOOPEND("vertex");
-		ParseHelper_Node_Exit();
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
-
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <coordinates>
@@ -186,37 +164,32 @@ CAMFImporter_NodeElement* ne;
 //   <x>, <y>, <z>
 //   Multi elements - No.
 //   X, Y, or Z coordinate, respectively, of a vertex position in space.
-void AMFImporter::ParseNode_Coordinates()
-{
-CAMFImporter_NodeElement* ne;
+void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
+    AMFNodeElementBase *ne = nullptr;
 
-	// create new color object.
-	ne = new CAMFImporter_NodeElement_Coordinates(mNodeElement_Cur);
+    // create new color object.
+    ne = new AMFCoordinates(mNodeElement_Cur);
 
-	CAMFImporter_NodeElement_Coordinates& als = *((CAMFImporter_NodeElement_Coordinates*)ne);// alias for convenience
+    AMFCoordinates &als = *((AMFCoordinates *)ne); // alias for convenience
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode &currentNode : node.children()) {
+            const std::string &currentName = currentNode.name();
+            if (currentName == "X") {
+                XmlParser::getValueAsFloat(currentNode, als.Coordinate.x);
+            } else if (currentName == "Y") {
+                XmlParser::getValueAsFloat(currentNode, als.Coordinate.y);
+            } else if (currentName == "Z") {
+                XmlParser::getValueAsFloat(currentNode, als.Coordinate.z);
+            }
+        }
 
-	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		bool read_flag[3] = { false, false, false };
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne);
+    }
 
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("coordinates");
-			MACRO_NODECHECK_READCOMP_F("x", read_flag[0], als.Coordinate.x);
-			MACRO_NODECHECK_READCOMP_F("y", read_flag[1], als.Coordinate.y);
-			MACRO_NODECHECK_READCOMP_F("z", read_flag[2], als.Coordinate.z);
-		MACRO_NODECHECK_LOOPEND("coordinates");
-		ParseHelper_Node_Exit();
-		// check that all components was defined
-		if((read_flag[0] && read_flag[1] && read_flag[2]) == 0) throw DeadlyImportError("Not all coordinate's components are defined.");
-
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
-
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <volume
@@ -228,52 +201,41 @@ CAMFImporter_NodeElement* ne;
 // Defines a volume from the established vertex list.
 // Multi elements - Yes.
 // Parent element - <mesh>.
-void AMFImporter::ParseNode_Volume()
-{
-std::string materialid;
-std::string type;
-CAMFImporter_NodeElement* ne;
+void AMFImporter::ParseNode_Volume(XmlNode &node) {
+    std::string materialid;
+    std::string type;
+    AMFNodeElementBase *ne = new AMFVolume(mNodeElement_Cur);
 
-	// Read attributes for node <color>.
-	MACRO_ATTRREAD_LOOPBEG;
-		MACRO_ATTRREAD_CHECK_RET("materialid", materialid, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_RET("type", type, mReader->getAttributeValue);
-	MACRO_ATTRREAD_LOOPEND;
+    // Read attributes for node <color>.
+    // and assign read data
+   
+    ((AMFVolume *)ne)->MaterialID = node.attribute("materialid").as_string();
+     
+    ((AMFVolume *)ne)->Type = type;
+    // Check for child nodes
+    bool col_read = false;
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            const std::string currentName = currentNode.name();
+            if (currentName == "color") {
+                if (col_read) Throw_MoreThanOnceDefined(currentName, "color", "Only one color can be defined for <volume>.");
+                ParseNode_Color(currentNode);
+                col_read = true;
+            } else if (currentName == "triangle") {
+                ParseNode_Triangle(currentNode);
+            } else if (currentName == "metadata") {
+                ParseNode_Metadata(currentNode);
+            } else if (currentName == "volume") {
+                ParseNode_Metadata(currentNode);
+            }
+        }
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    }
 
-	// create new object.
-	ne = new CAMFImporter_NodeElement_Volume(mNodeElement_Cur);
-	// and assign read data
-	((CAMFImporter_NodeElement_Volume*)ne)->MaterialID = materialid;
-	((CAMFImporter_NodeElement_Volume*)ne)->Type = type;
-	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		bool col_read = false;
-
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("volume");
-			if(XML_CheckNode_NameEqual("color"))
-			{
-				// Check if data already defined.
-				if(col_read) Throw_MoreThanOnceDefined("color", "Only one color can be defined for <volume>.");
-				// read data and set flag about it
-				ParseNode_Color();
-				col_read = true;
-
-				continue;
-			}
-
-			if(XML_CheckNode_NameEqual("triangle")) { ParseNode_Triangle(); continue; }
-			if(XML_CheckNode_NameEqual("metadata")) { ParseNode_Metadata(); continue; }
-		MACRO_NODECHECK_LOOPEND("volume");
-		ParseHelper_Node_Exit();
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
-
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <triangle>
@@ -286,72 +248,42 @@ CAMFImporter_NodeElement* ne;
 //   <v1>, <v2>, <v3>
 //   Multi elements - No.
 //   Index of the desired vertices in a triangle or edge.
-void AMFImporter::ParseNode_Triangle()
-{
-CAMFImporter_NodeElement* ne;
+void AMFImporter::ParseNode_Triangle(XmlNode &node) {
+    AMFNodeElementBase *ne = new AMFTriangle(mNodeElement_Cur);
 
-	// create new color object.
-	ne = new CAMFImporter_NodeElement_Triangle(mNodeElement_Cur);
+    // create new triangle object.
 
-	CAMFImporter_NodeElement_Triangle& als = *((CAMFImporter_NodeElement_Triangle*)ne);// alias for convenience
+    AMFTriangle &als = *((AMFTriangle *)ne); // alias for convenience
 
-	// Check for child nodes
-	if(!mReader->isEmptyElement())
-	{
-		bool col_read = false, tex_read = false;
-		bool read_flag[3] = { false, false, false };
+    bool col_read = false;
+    if (!node.empty()) {
+        ParseHelper_Node_Enter(ne);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            const std::string currentName = currentNode.name();
+            if (currentName == "color") {
+                if (col_read) Throw_MoreThanOnceDefined(currentName, "color", "Only one color can be defined for <triangle>.");
+                ParseNode_Color(currentNode);
+                col_read = true;
+            } else if (currentName == "texmap") {
+                ParseNode_TexMap(currentNode);
+            } else if (currentName == "map") {
+                ParseNode_TexMap(currentNode, true);
+            } else if (currentName == "v1") {
+                als.V[0] = std::atoi(currentNode.value());
+            } else if (currentName == "v2") {
+                als.V[1] = std::atoi(currentNode.value());
+            } else if (currentName == "v3") {
+                als.V[2] = std::atoi(currentNode.value());
+            }
+        }
+        ParseHelper_Node_Exit();
+    } else {
+        mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
+    }
 
-		ParseHelper_Node_Enter(ne);
-		MACRO_NODECHECK_LOOPBEGIN("triangle");
-			if(XML_CheckNode_NameEqual("color"))
-			{
-				// Check if data already defined.
-				if(col_read) Throw_MoreThanOnceDefined("color", "Only one color can be defined for <triangle>.");
-				// read data and set flag about it
-				ParseNode_Color();
-				col_read = true;
-
-				continue;
-			}
-
-			if(XML_CheckNode_NameEqual("texmap"))// new name of node: "texmap".
-			{
-				// Check if data already defined.
-				if(tex_read) Throw_MoreThanOnceDefined("texmap", "Only one texture coordinate can be defined for <triangle>.");
-				// read data and set flag about it
-				ParseNode_TexMap();
-				tex_read = true;
-
-				continue;
-			}
-			else if(XML_CheckNode_NameEqual("map"))// old name of node: "map".
-			{
-				// Check if data already defined.
-				if(tex_read) Throw_MoreThanOnceDefined("map", "Only one texture coordinate can be defined for <triangle>.");
-				// read data and set flag about it
-				ParseNode_TexMap(true);
-				tex_read = true;
-
-				continue;
-			}
-
-			MACRO_NODECHECK_READCOMP_U32("v1", read_flag[0], als.V[0]);
-			MACRO_NODECHECK_READCOMP_U32("v2", read_flag[1], als.V[1]);
-			MACRO_NODECHECK_READCOMP_U32("v3", read_flag[2], als.V[2]);
-		MACRO_NODECHECK_LOOPEND("triangle");
-		ParseHelper_Node_Exit();
-		// check that all components was defined
-		if((read_flag[0] && read_flag[1] && read_flag[2]) == 0) throw DeadlyImportError("Not all vertices of the triangle are defined.");
-
-	}// if(!mReader->isEmptyElement())
-	else
-	{
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	}// if(!mReader->isEmptyElement()) else
-
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // !ASSIMP_BUILD_NO_AMF_IMPORTER

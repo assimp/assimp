@@ -75,7 +75,9 @@ using namespace std;
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
 ObjFileImporter::ObjFileImporter() :
-        m_Buffer(), m_pRootObject(nullptr), m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
+        m_Buffer(),
+        m_pRootObject(nullptr),
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
@@ -592,18 +594,18 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         // convert illumination model
         int sm = 0;
         switch (pCurrentMaterial->illumination_model) {
-            case 0:
-                sm = aiShadingMode_NoShading;
-                break;
-            case 1:
-                sm = aiShadingMode_Gouraud;
-                break;
-            case 2:
-                sm = aiShadingMode_Phong;
-                break;
-            default:
-                sm = aiShadingMode_Gouraud;
-                ASSIMP_LOG_ERROR("OBJ: unexpected illumination model (0-2 recognized)");
+        case 0:
+            sm = aiShadingMode_NoShading;
+            break;
+        case 1:
+            sm = aiShadingMode_Gouraud;
+            break;
+        case 2:
+            sm = aiShadingMode_Phong;
+            break;
+        default:
+            sm = aiShadingMode_Gouraud;
+            ASSIMP_LOG_ERROR("OBJ: unexpected illumination model (0-2 recognized)");
         }
 
         mat->AddProperty<int>(&sm, 1, AI_MATKEY_SHADING_MODEL);

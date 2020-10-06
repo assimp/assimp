@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,12 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AMFImporter.hpp"
 
-// Header files, Assimp.
 #include <assimp/SceneCombiner.h>
 #include <assimp/StandardShapes.h>
 #include <assimp/StringUtils.h>
 
-// Header files, stdlib.
 #include <iterator>
 
 namespace Assimp {
@@ -83,61 +79,61 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
     return tcol;
 }
 
-void AMFImporter::PostprocessHelper_CreateMeshDataArray(const CAMFImporter_NodeElement_Mesh &pNodeElement, std::vector<aiVector3D> &pVertexCoordinateArray,
-        std::vector<CAMFImporter_NodeElement_Color *> &pVertexColorArray) const {
-    CAMFImporter_NodeElement_Vertices *vn = nullptr;
+void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElement, std::vector<aiVector3D> &pVertexCoordinateArray,
+        std::vector<AMFColor *> &pVertexColorArray) const {
+    AMFVertices  *vn = nullptr;
     size_t col_idx;
 
     // All data stored in "vertices", search for it.
-    for (CAMFImporter_NodeElement *ne_child : pNodeElement.Child) {
-        if (ne_child->Type == CAMFImporter_NodeElement::ENET_Vertices) vn = (CAMFImporter_NodeElement_Vertices *)ne_child;
+    for (AMFNodeElementBase *ne_child : pNodeElement.Child) {
+        if (ne_child->Type == AMFNodeElementBase::ENET_Vertices) {
+            vn = (AMFVertices*)ne_child;
+        }
     }
 
     // If "vertices" not found then no work for us.
-    if (vn == nullptr) return;
+    if (vn == nullptr) {
+        return;
+    }
 
-    pVertexCoordinateArray.reserve(vn->Child.size()); // all coordinates stored as child and we need to reserve space for future push_back's.
-    pVertexColorArray.resize(vn->Child.size()); // colors count equal vertices count.
+    // all coordinates stored as child and we need to reserve space for future push_back's.
+    pVertexCoordinateArray.reserve(vn->Child.size()); 
+
+    // colors count equal vertices count.
+    pVertexColorArray.resize(vn->Child.size()); 
     col_idx = 0;
+
     // Inside vertices collect all data and place to arrays
-    for (CAMFImporter_NodeElement *vn_child : vn->Child) {
+    for (AMFNodeElementBase *vn_child : vn->Child) {
         // vertices, colors
-        if (vn_child->Type == CAMFImporter_NodeElement::ENET_Vertex) {
+        if (vn_child->Type == AMFNodeElementBase::ENET_Vertex) {
             // by default clear color for current vertex
             pVertexColorArray[col_idx] = nullptr;
 
-            for (CAMFImporter_NodeElement *vtx : vn_child->Child) {
-                if (vtx->Type == CAMFImporter_NodeElement::ENET_Coordinates) {
-                    pVertexCoordinateArray.push_back(((CAMFImporter_NodeElement_Coordinates *)vtx)->Coordinate);
-
+            for (AMFNodeElementBase *vtx : vn_child->Child) {
+                if (vtx->Type == AMFNodeElementBase::ENET_Coordinates) {
+                    pVertexCoordinateArray.push_back(((AMFCoordinates *)vtx)->Coordinate);
                     continue;
                 }
 
-                if (vtx->Type == CAMFImporter_NodeElement::ENET_Color) {
-                    pVertexColorArray[col_idx] = (CAMFImporter_NodeElement_Color *)vtx;
-
+                if (vtx->Type == AMFNodeElementBase::ENET_Color) {
+                    pVertexColorArray[col_idx] = (AMFColor *)vtx;
                     continue;
                 }
-            } // for(CAMFImporter_NodeElement* vtx: vn_child->Child)
+            }
 
-            col_idx++;
-        } // if(vn_child->Type == CAMFImporter_NodeElement::ENET_Vertex)
-    } // for(CAMFImporter_NodeElement* vn_child: vn->Child)
+            ++col_idx;
+        }
+    }
 }
 
-size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &pID_R, const std::string &pID_G, const std::string &pID_B,
-        const std::string &pID_A) {
-    size_t TextureConverted_Index;
-    std::string TextureConverted_ID;
-
-    // check input data
-    if (pID_R.empty() && pID_G.empty() && pID_B.empty() && pID_A.empty())
+size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &r, const std::string &g, const std::string &b, const std::string &a) {
+    if (r.empty() && g.empty() && b.empty() && a.empty()) {
         throw DeadlyImportError("PostprocessHelper_GetTextureID_Or_Create. At least one texture ID must be defined.");
+    }
 
-    // Create ID
-    TextureConverted_ID = pID_R + "_" + pID_G + "_" + pID_B + "_" + pID_A;
-    // Check if texture specified by set of IDs is converted already.
-    TextureConverted_Index = 0;
+    std::string TextureConverted_ID = r + "_" + g + "_" + b + "_" + a;
+    size_t TextureConverted_Index = 0;
     for (const SPP_Texture &tex_convd : mTexture_Converted) {
         if (tex_convd.ID == TextureConverted_ID) {
             return TextureConverted_Index;
@@ -146,52 +142,60 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
         }
     }
 
-    //
     // Converted texture not found, create it.
-    //
-    CAMFImporter_NodeElement_Texture *src_texture[4]{ nullptr };
-    std::vector<CAMFImporter_NodeElement_Texture *> src_texture_4check;
+    AMFTexture *src_texture[4] {
+        nullptr
+    };
+    std::vector<AMFTexture *> src_texture_4check;
     SPP_Texture converted_texture;
 
     { // find all specified source textures
-        CAMFImporter_NodeElement *t_tex;
+        AMFNodeElementBase *t_tex = nullptr;
 
         // R
-        if (!pID_R.empty()) {
-            if (!Find_NodeElement(pID_R, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_R);
+        if (!r.empty()) {
+            if (!Find_NodeElement(r, AMFNodeElementBase::EType::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(r);
+            }
 
-            src_texture[0] = (CAMFImporter_NodeElement_Texture *)t_tex;
-            src_texture_4check.push_back((CAMFImporter_NodeElement_Texture *)t_tex);
+            src_texture[0] = (AMFTexture *)t_tex;
+            src_texture_4check.push_back((AMFTexture *)t_tex);
         } else {
             src_texture[0] = nullptr;
         }
 
         // G
-        if (!pID_G.empty()) {
-            if (!Find_NodeElement(pID_G, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_G);
+        if (!g.empty()) {
+            if (!Find_NodeElement(g, AMFNodeElementBase::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(g);
+            }
 
-            src_texture[1] = (CAMFImporter_NodeElement_Texture *)t_tex;
-            src_texture_4check.push_back((CAMFImporter_NodeElement_Texture *)t_tex);
+            src_texture[1] = (AMFTexture *)t_tex;
+            src_texture_4check.push_back((AMFTexture *)t_tex);
         } else {
             src_texture[1] = nullptr;
         }
 
         // B
-        if (!pID_B.empty()) {
-            if (!Find_NodeElement(pID_B, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_B);
+        if (!b.empty()) {
+            if (!Find_NodeElement(b, AMFNodeElementBase::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(b);
+            }
 
-            src_texture[2] = (CAMFImporter_NodeElement_Texture *)t_tex;
-            src_texture_4check.push_back((CAMFImporter_NodeElement_Texture *)t_tex);
+            src_texture[2] = (AMFTexture *)t_tex;
+            src_texture_4check.push_back((AMFTexture *)t_tex);
         } else {
             src_texture[2] = nullptr;
         }
 
         // A
-        if (!pID_A.empty()) {
-            if (!Find_NodeElement(pID_A, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_A);
+        if (!a.empty()) {
+            if (!Find_NodeElement(a, AMFNodeElementBase::ENET_Texture, &t_tex)) {
+                Throw_ID_NotFound(a);
+            }
 
-            src_texture[3] = (CAMFImporter_NodeElement_Texture *)t_tex;
-            src_texture_4check.push_back((CAMFImporter_NodeElement_Texture *)t_tex);
+            src_texture[3] = (AMFTexture *)t_tex;
+            src_texture_4check.push_back((AMFTexture *)t_tex);
         } else {
             src_texture[3] = nullptr;
         }
@@ -213,38 +217,37 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     converted_texture.Depth = src_texture_4check[0]->Depth;
     // if one of source texture is tiled then converted texture is tiled too.
     converted_texture.Tiled = false;
-    for (uint8_t i = 0; i < src_texture_4check.size(); i++)
+    for (uint8_t i = 0; i < src_texture_4check.size(); ++i) {
         converted_texture.Tiled |= src_texture_4check[i]->Tiled;
+    }
 
     // Create format hint.
     strcpy(converted_texture.FormatHint, "rgba0000"); // copy initial string.
-    if (!pID_R.empty()) converted_texture.FormatHint[4] = '8';
-    if (!pID_G.empty()) converted_texture.FormatHint[5] = '8';
-    if (!pID_B.empty()) converted_texture.FormatHint[6] = '8';
-    if (!pID_A.empty()) converted_texture.FormatHint[7] = '8';
+    if (!r.empty()) converted_texture.FormatHint[4] = '8';
+    if (!g.empty()) converted_texture.FormatHint[5] = '8';
+    if (!b.empty()) converted_texture.FormatHint[6] = '8';
+    if (!a.empty()) converted_texture.FormatHint[7] = '8';
 
-    //
     // Сopy data of textures.
-    //
     size_t tex_size = 0;
     size_t step = 0;
     size_t off_g = 0;
     size_t off_b = 0;
 
     // Calculate size of the target array and rule how data will be copied.
-    if (!pID_R.empty() && nullptr != src_texture[0]) {
+    if (!r.empty() && nullptr != src_texture[0]) {
         tex_size += src_texture[0]->Data.size();
         step++, off_g++, off_b++;
     }
-    if (!pID_G.empty() && nullptr != src_texture[1]) {
+    if (!g.empty() && nullptr != src_texture[1]) {
         tex_size += src_texture[1]->Data.size();
         step++, off_b++;
     }
-    if (!pID_B.empty() && nullptr != src_texture[2]) {
+    if (!b.empty() && nullptr != src_texture[2]) {
         tex_size += src_texture[2]->Data.size();
         step++;
     }
-    if (!pID_A.empty() && nullptr != src_texture[3]) {
+    if (!a.empty() && nullptr != src_texture[3]) {
         tex_size += src_texture[3]->Data.size();
         step++;
     }
@@ -255,17 +258,17 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     auto CopyTextureData = [&](const std::string &pID, const size_t pOffset, const size_t pStep, const uint8_t pSrcTexNum) -> void {
         if (!pID.empty()) {
             for (size_t idx_target = pOffset, idx_src = 0; idx_target < tex_size; idx_target += pStep, idx_src++) {
-                CAMFImporter_NodeElement_Texture *tex = src_texture[pSrcTexNum];
+                AMFTexture *tex = src_texture[pSrcTexNum];
                 ai_assert(tex);
                 converted_texture.Data[idx_target] = tex->Data.at(idx_src);
             }
         }
     }; // auto CopyTextureData = [&](const size_t pOffset, const size_t pStep, const uint8_t pSrcTexNum) -> void
 
-    CopyTextureData(pID_R, 0, step, 0);
-    CopyTextureData(pID_G, off_g, step, 1);
-    CopyTextureData(pID_B, off_b, step, 2);
-    CopyTextureData(pID_A, step - 1, step, 3);
+    CopyTextureData(r, 0, step, 0);
+    CopyTextureData(g, off_g, step, 1);
+    CopyTextureData(b, off_b, step, 2);
+    CopyTextureData(a, step - 1, step, 3);
 
     // Store new converted texture ID
     converted_texture.ID = TextureConverted_ID;
@@ -276,7 +279,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 }
 
 void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace> &pInputList, std::list<std::list<SComplexFace>> &pOutputList_Separated) {
-    auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap *pTexMap1, const CAMFImporter_NodeElement_TexMap *pTexMap2) -> bool {
+    auto texmap_is_equal = [](const AMFTexMap *pTexMap1, const AMFTexMap *pTexMap2) -> bool {
         if ((pTexMap1 == nullptr) && (pTexMap2 == nullptr)) return true;
         if (pTexMap1 == nullptr) return false;
         if (pTexMap2 == nullptr) return false;
@@ -313,73 +316,80 @@ void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace
     } while (!pInputList.empty());
 }
 
-void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeElement_Metadata *> &metadataList, aiNode &sceneNode) const {
-    if (!metadataList.empty()) {
-        if (sceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
+void AMFImporter::Postprocess_AddMetadata(const AMFMetaDataArray &metadataList, aiNode &sceneNode) const {
+    if (metadataList.empty()) {
+        return;
+    }
 
-        // copy collected metadata to output node.
-        sceneNode.mMetaData = aiMetadata::Alloc(static_cast<unsigned int>(metadataList.size()));
-        size_t meta_idx(0);
+    if (sceneNode.mMetaData != nullptr) {
+        throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
+    }
 
-        for (const CAMFImporter_NodeElement_Metadata &metadata : metadataList) {
-            sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata.Type, aiString(metadata.Value));
-        }
-    } // if(!metadataList.empty())
+    // copy collected metadata to output node.
+    sceneNode.mMetaData = aiMetadata::Alloc(static_cast<unsigned int>(metadataList.size()));
+    size_t meta_idx(0);
+
+    for (const AMFMetadata &metadata : metadataList) {
+        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata.Type, aiString(metadata.Value));
+    }
 }
 
-void AMFImporter::Postprocess_BuildNodeAndObject(const CAMFImporter_NodeElement_Object &pNodeElement, std::list<aiMesh *> &pMeshList, aiNode **pSceneNode) {
-    CAMFImporter_NodeElement_Color *object_color = nullptr;
+void AMFImporter::Postprocess_BuildNodeAndObject(const AMFObject &pNodeElement, MeshArray &meshList, aiNode **pSceneNode) {
+    AMFColor *object_color = nullptr;
 
     // create new aiNode and set name as <object> has.
     *pSceneNode = new aiNode;
     (*pSceneNode)->mName = pNodeElement.ID;
     // read mesh and color
-    for (const CAMFImporter_NodeElement *ne_child : pNodeElement.Child) {
+    for (const AMFNodeElementBase *ne_child : pNodeElement.Child) {
         std::vector<aiVector3D> vertex_arr;
-        std::vector<CAMFImporter_NodeElement_Color *> color_arr;
+        std::vector<AMFColor *> color_arr;
 
         // color for object
-        if (ne_child->Type == CAMFImporter_NodeElement::ENET_Color) object_color = (CAMFImporter_NodeElement_Color *)ne_child;
+        if (ne_child->Type == AMFNodeElementBase::ENET_Color) {
+            object_color = (AMFColor *) ne_child;
+        }
 
-        if (ne_child->Type == CAMFImporter_NodeElement::ENET_Mesh) {
+        if (ne_child->Type == AMFNodeElementBase::ENET_Mesh) {
             // Create arrays from children of mesh: vertices.
-            PostprocessHelper_CreateMeshDataArray(*((CAMFImporter_NodeElement_Mesh *)ne_child), vertex_arr, color_arr);
+            PostprocessHelper_CreateMeshDataArray(*((AMFMesh *)ne_child), vertex_arr, color_arr);
             // Use this arrays as a source when creating every aiMesh
-            Postprocess_BuildMeshSet(*((CAMFImporter_NodeElement_Mesh *)ne_child), vertex_arr, color_arr, object_color, pMeshList, **pSceneNode);
+            Postprocess_BuildMeshSet(*((AMFMesh *)ne_child), vertex_arr, color_arr, object_color, meshList, **pSceneNode);
         }
     } // for(const CAMFImporter_NodeElement* ne_child: pNodeElement)
 }
 
-void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh &pNodeElement, const std::vector<aiVector3D> &pVertexCoordinateArray,
-        const std::vector<CAMFImporter_NodeElement_Color *> &pVertexColorArray,
-        const CAMFImporter_NodeElement_Color *pObjectColor, std::list<aiMesh *> &pMeshList, aiNode &pSceneNode) {
+void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const std::vector<aiVector3D> &pVertexCoordinateArray,
+        const std::vector<AMFColor *> &pVertexColorArray, const AMFColor *pObjectColor, MeshArray &pMeshList, aiNode &pSceneNode) {
     std::list<unsigned int> mesh_idx;
 
     // all data stored in "volume", search for it.
-    for (const CAMFImporter_NodeElement *ne_child : pNodeElement.Child) {
-        const CAMFImporter_NodeElement_Color *ne_volume_color = nullptr;
+    for (const AMFNodeElementBase *ne_child : pNodeElement.Child) {
+        const AMFColor *ne_volume_color = nullptr;
         const SPP_Material *cur_mat = nullptr;
 
-        if (ne_child->Type == CAMFImporter_NodeElement::ENET_Volume) {
+        if (ne_child->Type == AMFNodeElementBase::ENET_Volume) {
             /******************* Get faces *******************/
-            const CAMFImporter_NodeElement_Volume *ne_volume = reinterpret_cast<const CAMFImporter_NodeElement_Volume *>(ne_child);
+            const AMFVolume *ne_volume = reinterpret_cast<const AMFVolume *>(ne_child);
 
             std::list<SComplexFace> complex_faces_list; // List of the faces of the volume.
             std::list<std::list<SComplexFace>> complex_faces_toplist; // List of the face list for every mesh.
 
             // check if volume use material
             if (!ne_volume->MaterialID.empty()) {
-                if (!Find_ConvertedMaterial(ne_volume->MaterialID, &cur_mat)) Throw_ID_NotFound(ne_volume->MaterialID);
+                if (!Find_ConvertedMaterial(ne_volume->MaterialID, &cur_mat)) {
+                    Throw_ID_NotFound(ne_volume->MaterialID);
+                }
             }
 
             // inside "volume" collect all data and place to arrays or create new objects
-            for (const CAMFImporter_NodeElement *ne_volume_child : ne_volume->Child) {
+            for (const AMFNodeElementBase *ne_volume_child : ne_volume->Child) {
                 // color for volume
-                if (ne_volume_child->Type == CAMFImporter_NodeElement::ENET_Color) {
-                    ne_volume_color = reinterpret_cast<const CAMFImporter_NodeElement_Color *>(ne_volume_child);
-                } else if (ne_volume_child->Type == CAMFImporter_NodeElement::ENET_Triangle) // triangles, triangles colors
+                if (ne_volume_child->Type == AMFNodeElementBase::ENET_Color) {
+                    ne_volume_color = reinterpret_cast<const AMFColor *>(ne_volume_child);
+                } else if (ne_volume_child->Type == AMFNodeElementBase::ENET_Triangle) // triangles, triangles colors
                 {
-                    const CAMFImporter_NodeElement_Triangle &tri_al = *reinterpret_cast<const CAMFImporter_NodeElement_Triangle *>(ne_volume_child);
+                    const AMFTriangle &tri_al = *reinterpret_cast<const AMFTriangle *>(ne_volume_child);
 
                     SComplexFace complex_face;
 
@@ -388,11 +398,11 @@ void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh &
                     complex_face.TexMap = nullptr;
                     // get data from triangle children: color, texture coordinates.
                     if (tri_al.Child.size()) {
-                        for (const CAMFImporter_NodeElement *ne_triangle_child : tri_al.Child) {
-                            if (ne_triangle_child->Type == CAMFImporter_NodeElement::ENET_Color)
-                                complex_face.Color = reinterpret_cast<const CAMFImporter_NodeElement_Color *>(ne_triangle_child);
-                            else if (ne_triangle_child->Type == CAMFImporter_NodeElement::ENET_TexMap)
-                                complex_face.TexMap = reinterpret_cast<const CAMFImporter_NodeElement_TexMap *>(ne_triangle_child);
+                        for (const AMFNodeElementBase *ne_triangle_child : tri_al.Child) {
+                            if (ne_triangle_child->Type == AMFNodeElementBase::ENET_Color)
+                                complex_face.Color = reinterpret_cast<const AMFColor *>(ne_triangle_child);
+                            else if (ne_triangle_child->Type == AMFNodeElementBase::ENET_TexMap)
+                                complex_face.TexMap = reinterpret_cast<const AMFTexMap *>(ne_triangle_child);
                         }
                     } // if(tri_al.Child.size())
 
@@ -422,15 +432,18 @@ void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh &
                                 if (face.Face.mIndices[idx_vert] > *pBiggerThan) {
                                     rv = face.Face.mIndices[idx_vert];
                                     found = true;
-
                                     break;
                                 }
                             }
 
-                            if (found) break;
+                            if (found) {
+                                break;
+                            }
                         }
 
-                        if (!found) return *pBiggerThan;
+                        if (!found) {
+                            return *pBiggerThan;
+                        }
                     } else {
                         rv = pFaceList.front().Face.mIndices[0];
                     } // if(pBiggerThan != nullptr) else
@@ -505,9 +518,9 @@ void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh &
                 tmesh->mNumFaces = static_cast<unsigned int>(face_list_cur.size());
                 tmesh->mFaces = new aiFace[tmesh->mNumFaces];
 
-                // Create vertices list and optimize indices. Optimisation mean following.In AMF all volumes use one big list of vertices. And one volume
+                // Create vertices list and optimize indices. Optimization mean following.In AMF all volumes use one big list of vertices. And one volume
                 // can use only part of vertices list, for example: vertices list contain few thousands of vertices and volume use vertices 1, 3, 10.
-                // Do you need all this thousands of garbage? Of course no. So, optimisation step transformate sparse indices set to continuous.
+                // Do you need all this thousands of garbage? Of course no. So, optimization step transform sparse indices set to continuous.
                 size_t VertexCount_Max = tmesh->mNumFaces * 3; // 3 - triangles.
                 std::vector<aiVector3D> vert_arr, texcoord_arr;
                 std::vector<aiColor4D> col_arr;
@@ -566,7 +579,7 @@ void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh &
                     size_t idx_vert_new = vert_arr.size();
                     ///TODO: clean unused vertices. "* 2": in certain cases - mesh full of triangle colors - vert_arr will contain duplicated vertices for
                     /// colored triangles and initial vertices (for colored vertices) which in real became unused. This part need more thinking about
-                    /// optimisation.
+                    /// optimization.
                     bool *idx_vert_used;
 
                     idx_vert_used = new bool[VertexCount_Max * 2];
@@ -639,15 +652,15 @@ void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh &
     } // if(mesh_idx.size() > 0)
 }
 
-void AMFImporter::Postprocess_BuildMaterial(const CAMFImporter_NodeElement_Material &pMaterial) {
+void AMFImporter::Postprocess_BuildMaterial(const AMFMaterial &pMaterial) {
     SPP_Material new_mat;
 
     new_mat.ID = pMaterial.ID;
-    for (const CAMFImporter_NodeElement *mat_child : pMaterial.Child) {
-        if (mat_child->Type == CAMFImporter_NodeElement::ENET_Color) {
-            new_mat.Color = (CAMFImporter_NodeElement_Color *)mat_child;
-        } else if (mat_child->Type == CAMFImporter_NodeElement::ENET_Metadata) {
-            new_mat.Metadata.push_back((CAMFImporter_NodeElement_Metadata *)mat_child);
+    for (const AMFNodeElementBase *mat_child : pMaterial.Child) {
+        if (mat_child->Type == AMFNodeElementBase::ENET_Color) {
+            new_mat.Color = (AMFColor*)mat_child;
+        } else if (mat_child->Type == AMFNodeElementBase::ENET_Metadata) {
+            new_mat.Metadata.push_back((AMFMetadata *)mat_child);
         }
     } // for(const CAMFImporter_NodeElement* mat_child; pMaterial.Child)
 
@@ -655,7 +668,7 @@ void AMFImporter::Postprocess_BuildMaterial(const CAMFImporter_NodeElement_Mater
     mMaterial_Converted.push_back(new_mat);
 }
 
-void AMFImporter::Postprocess_BuildConstellation(CAMFImporter_NodeElement_Constellation &pConstellation, std::list<aiNode *> &pNodeList) const {
+void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellation, NodeArray &nodeArray) const {
     aiNode *con_node;
     std::list<aiNode *> ch_node;
 
@@ -667,18 +680,18 @@ void AMFImporter::Postprocess_BuildConstellation(CAMFImporter_NodeElement_Conste
     con_node = new aiNode;
     con_node->mName = pConstellation.ID;
     // Walk through children and search for instances of another objects, constellations.
-    for (const CAMFImporter_NodeElement *ne : pConstellation.Child) {
+    for (const AMFNodeElementBase *ne : pConstellation.Child) {
         aiMatrix4x4 tmat;
         aiNode *t_node;
         aiNode *found_node;
 
-        if (ne->Type == CAMFImporter_NodeElement::ENET_Metadata) continue;
-        if (ne->Type != CAMFImporter_NodeElement::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
+        if (ne->Type == AMFNodeElementBase::ENET_Metadata) continue;
+        if (ne->Type != AMFNodeElementBase::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
 
         // create alias for conveniance
-        CAMFImporter_NodeElement_Instance &als = *((CAMFImporter_NodeElement_Instance *)ne);
+        AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
-        if (!Find_ConvertedNode(als.ObjectID, pNodeList, &found_node)) Throw_ID_NotFound(als.ObjectID);
+        if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
         // create node for applying transformation
         t_node = new aiNode;
@@ -707,13 +720,13 @@ void AMFImporter::Postprocess_BuildConstellation(CAMFImporter_NodeElement_Conste
         con_node->mChildren[ch_idx++] = node;
 
     // and place "root" of <constellation> node to node list
-    pNodeList.push_back(con_node);
+    nodeArray.push_back(con_node);
 }
 
 void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
-    std::list<aiNode *> node_list;
-    std::list<aiMesh *> mesh_list;
-    std::list<CAMFImporter_NodeElement_Metadata *> meta_list;
+    NodeArray nodeArray;
+    MeshArray mesh_list;
+    AMFMetaDataArray meta_list;
 
     //
     // Because for AMF "material" is just complex colors mixing so aiMaterial will not be used.
@@ -723,18 +736,21 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     pScene->mRootNode->mParent = nullptr;
     pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
     // search for root(<amf>) element
-    CAMFImporter_NodeElement *root_el = nullptr;
+    AMFNodeElementBase *root_el = nullptr;
 
-    for (CAMFImporter_NodeElement *ne : mNodeElement_List) {
-        if (ne->Type != CAMFImporter_NodeElement::ENET_Root) continue;
+    for (AMFNodeElementBase *ne : mNodeElement_List) {
+        if (ne->Type != AMFNodeElementBase::ENET_Root) {
+            continue;
+        }
 
         root_el = ne;
-
         break;
     } // for(const CAMFImporter_NodeElement* ne: mNodeElement_List)
 
     // Check if root element are found.
-    if (root_el == nullptr) throw DeadlyImportError("Root(<amf>) element not found.");
+    if (root_el == nullptr) {
+        throw DeadlyImportError("Root(<amf>) element not found.");
+    }
 
     // after that walk through children of root and collect data. Five types of nodes can be placed at top level - in <amf>: <object>, <material>, <texture>,
     // <constellation> and <metadata>. But at first we must read <material> and <texture> because they will be used in <object>. <metadata> can be read
@@ -742,34 +758,38 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     //
     // 1. <material>
     // 2. <texture> will be converted later when processing triangles list. \sa Postprocess_BuildMeshSet
-    for (const CAMFImporter_NodeElement *root_child : root_el->Child) {
-        if (root_child->Type == CAMFImporter_NodeElement::ENET_Material) Postprocess_BuildMaterial(*((CAMFImporter_NodeElement_Material *)root_child));
+    for (const AMFNodeElementBase *root_child : root_el->Child) {
+        if (root_child->Type == AMFNodeElementBase::ENET_Material) {
+            Postprocess_BuildMaterial(*((AMFMaterial *)root_child));
+        }
     }
 
     // After "appearance" nodes we must read <object> because it will be used in <constellation> -> <instance>.
     //
     // 3. <object>
-    for (const CAMFImporter_NodeElement *root_child : root_el->Child) {
-        if (root_child->Type == CAMFImporter_NodeElement::ENET_Object) {
+    for (const AMFNodeElementBase *root_child : root_el->Child) {
+        if (root_child->Type == AMFNodeElementBase::ENET_Object) {
             aiNode *tnode = nullptr;
 
             // for <object> mesh and node must be built: object ID assigned to aiNode name and will be used in future for <instance>
-            Postprocess_BuildNodeAndObject(*((CAMFImporter_NodeElement_Object *)root_child), mesh_list, &tnode);
-            if (tnode != nullptr) node_list.push_back(tnode);
+            Postprocess_BuildNodeAndObject(*((AMFObject *)root_child), mesh_list, &tnode);
+            if (tnode != nullptr) {
+                nodeArray.push_back(tnode);
+            }
         }
     } // for(const CAMFImporter_NodeElement* root_child: root_el->Child)
 
     // And finally read rest of nodes.
     //
-    for (const CAMFImporter_NodeElement *root_child : root_el->Child) {
+    for (const AMFNodeElementBase *root_child : root_el->Child) {
         // 4. <constellation>
-        if (root_child->Type == CAMFImporter_NodeElement::ENET_Constellation) {
+        if (root_child->Type == AMFNodeElementBase::ENET_Constellation) {
             // <object> and <constellation> at top of self abstraction use aiNode. So we can use only aiNode list for creating new aiNode's.
-            Postprocess_BuildConstellation(*((CAMFImporter_NodeElement_Constellation *)root_child), node_list);
+            Postprocess_BuildConstellation(*((AMFConstellation *)root_child), nodeArray);
         }
 
         // 5, <metadata>
-        if (root_child->Type == CAMFImporter_NodeElement::ENET_Metadata) meta_list.push_back((CAMFImporter_NodeElement_Metadata *)root_child);
+        if (root_child->Type == AMFNodeElementBase::ENET_Metadata) meta_list.push_back((AMFMetadata *)root_child);
     } // for(const CAMFImporter_NodeElement* root_child: root_el->Child)
 
     // at now we can add collected metadata to root node
@@ -783,17 +803,17 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
     // And at this step we are checking that relations.
 nl_clean_loop:
 
-    if (node_list.size() > 1) {
+    if (nodeArray.size() > 1) {
         // walk through all nodes
-        for (std::list<aiNode *>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); ++nl_it) {
+        for (NodeArray::iterator nl_it = nodeArray.begin(); nl_it != nodeArray.end(); ++nl_it) {
             // and try to find them in another top nodes.
-            std::list<aiNode *>::const_iterator next_it = nl_it;
+            NodeArray::const_iterator next_it = nl_it;
 
             ++next_it;
-            for (; next_it != node_list.end(); ++next_it) {
+            for (; next_it != nodeArray.end(); ++next_it) {
                 if ((*next_it)->FindNode((*nl_it)->mName) != nullptr) {
                     // if current top node(nl_it) found in another top node then erase it from node_list and restart search loop.
-                    node_list.erase(nl_it);
+                    nodeArray.erase(nl_it);
 
                     goto nl_clean_loop;
                 }
@@ -806,10 +826,10 @@ nl_clean_loop:
     //
     //
     // Nodes
-    if (!node_list.empty()) {
-        std::list<aiNode *>::const_iterator nl_it = node_list.begin();
+    if (!nodeArray.empty()) {
+        NodeArray::const_iterator nl_it = nodeArray.begin();
 
-        pScene->mRootNode->mNumChildren = static_cast<unsigned int>(node_list.size());
+        pScene->mRootNode->mNumChildren = static_cast<unsigned int>(nodeArray.size());
         pScene->mRootNode->mChildren = new aiNode *[pScene->mRootNode->mNumChildren];
         for (size_t i = 0; i < pScene->mRootNode->mNumChildren; i++) {
             // Objects and constellation that must be showed placed at top of hierarchy in <amf> node. So all aiNode's in node_list must have
@@ -822,7 +842,7 @@ nl_clean_loop:
     //
     // Meshes
     if (!mesh_list.empty()) {
-        std::list<aiMesh *>::const_iterator ml_it = mesh_list.begin();
+        MeshArray::const_iterator ml_it = mesh_list.begin();
 
         pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];

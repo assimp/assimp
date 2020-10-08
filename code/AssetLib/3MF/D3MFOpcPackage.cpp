@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "D3MFOpcPackage.h"
 #include <assimp/Exceptional.h>
 
+#include <assimp/XmlParser.h>
 #include <assimp/ZipArchiveIOSystem.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
@@ -68,27 +68,22 @@ typedef std::shared_ptr<OpcPackageRelationship> OpcPackageRelationshipPtr;
 
 class OpcPackageRelationshipReader {
 public:
-    OpcPackageRelationshipReader(XmlReader *xmlReader) {
-        while (xmlReader->read()) {
-            if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT &&
-                    xmlReader->getNodeName() == XmlTag::RELS_RELATIONSHIP_CONTAINER) {
-                ParseRootNode(xmlReader);
+    OpcPackageRelationshipReader(XmlParser &parser) {
+        XmlNode root = parser.getRootNode();
+        ParseRootNode(root);
+    }
+
+    void ParseRootNode(XmlNode &node) {
+        ParseAttributes(node);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            std::string name = currentNode.name();
+            if (name == "Relationships") {
+                ParseRelationsNode(currentNode);
             }
         }
     }
 
-    void ParseRootNode(XmlReader *xmlReader) {
-        ParseAttributes(xmlReader);
-
-        while (xmlReader->read()) {
-            if (xmlReader->getNodeType() == irr::io::EXN_ELEMENT &&
-                    xmlReader->getNodeName() == XmlTag::RELS_RELATIONSHIP_NODE) {
-                ParseChildNode(xmlReader);
-            }
-        }
-    }
-
-    void ParseAttributes(XmlReader *) {
+    void ParseAttributes(XmlNode & /*node*/) {
         // empty
     }
 
@@ -99,14 +94,22 @@ public:
         return true;
     }
 
-    void ParseChildNode(XmlReader *xmlReader) {
-        OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
+    void ParseRelationsNode(XmlNode &node) {
+        if (node.empty()) {
+            return;
+        }
 
-        relPtr->id = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_ID.c_str());
-        relPtr->type = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TYPE.c_str());
-        relPtr->target = xmlReader->getAttributeValueSafe(XmlTag::RELS_ATTRIB_TARGET.c_str());
-        if (validateRels(relPtr)) {
-            m_relationShips.push_back(relPtr);
+        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+            std::string name = currentNode.name();
+            if (name == "Relationship") {
+                OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
+                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
+                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
+                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();
+                if (validateRels(relPtr)) {
+                    m_relationShips.push_back(relPtr);
+                }
+            }
         }
     }
 
@@ -115,7 +118,8 @@ public:
 
 // ------------------------------------------------------------------------------------------------
 D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
-        mRootStream(nullptr), mZipArchive() {
+        mRootStream(nullptr),
+        mZipArchive() {
     mZipArchive.reset(new ZipArchiveIOSystem(pIOHandler, rFile));
     if (!mZipArchive->isOpen()) {
         throw DeadlyImportError("Failed to open file ", rFile, ".");
@@ -182,10 +186,12 @@ bool D3MFOpcPackage::validate() {
 }
 
 std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
-    std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(stream));
-    std::unique_ptr<XmlReader> xml(irr::io::createIrrXMLReader(xmlStream.get()));
+    XmlParser xmlParser;
+    if (!xmlParser.parse(stream)) {
+        return "";
+    }
 
-    OpcPackageRelationshipReader reader(xml.get());
+    OpcPackageRelationshipReader reader(xmlParser);
 
     auto itr = std::find_if(reader.m_relationShips.begin(), reader.m_relationShips.end(), [](const OpcPackageRelationshipPtr &rel) {
         return rel->type == XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;

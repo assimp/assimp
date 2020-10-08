@@ -94,6 +94,7 @@ SET( COMMON
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp
   unit/Common/utAssertHandler.cpp
+  unit/Common/utXmlParser.cpp
 )
 
 SET( IMPORTERS
@@ -210,7 +211,7 @@ add_executable( unit
 	${IMPORTERS}
 	${MATERIAL}
 	${MATH}
-    ${POST_PROCESSES}
+  ${POST_PROCESSES}
 )
 
 if(ASSIMP_HUNTER_ENABLED)

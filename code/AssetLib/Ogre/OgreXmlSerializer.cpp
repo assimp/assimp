@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/TinyFormatter.h>
 #include <assimp/DefaultLogger.hpp>
+
 #include <memory>
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
@@ -56,127 +56,79 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Ogre {
 
-AI_WONT_RETURN void ThrowAttibuteError(const XmlReader *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
-AI_WONT_RETURN void ThrowAttibuteError(const XmlReader *reader, const std::string &name, const std::string &error) {
+//AI_WONT_RETURN void ThrowAttibuteError(const XmlParser *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
+
+AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) {
     if (!error.empty()) {
-        throw DeadlyImportError(error, " in node '", reader->getNodeName(), "' and attribute '", name, "'");
+        throw DeadlyImportError(error, " in node '", nodeName, "' and attribute '", name, "'");
     } else {
-        throw DeadlyImportError("Attribute '", name, "' does not exist in node '", reader->getNodeName(), "'");
+        throw DeadlyImportError("Attribute '", name, "' does not exist in node '", nodeName, "'");
     }
 }
 
 template <>
-int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const char *name) const {
-    if (!HasAttribute(name)) {
-        ThrowAttibuteError(m_reader, name);
+int32_t OgreXmlSerializer::ReadAttribute<int32_t>(XmlNode &xmlNode, const char *name) const {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
-
-    return static_cast<int32_t>(m_reader->getAttributeValueAsInt(name));
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    return static_cast<int32_t>(attr.as_int());
 }
 
 template <>
-uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const char *name) const {
-    if (!HasAttribute(name)) {
-        ThrowAttibuteError(m_reader, name);
+uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(XmlNode &xmlNode, const char *name) const {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
+
     // @note This is hackish. But we are never expecting unsigned values that go outside the
     //       int32_t range. Just monitor for negative numbers and kill the import.
-    int32_t temp = ReadAttribute<int32_t>(name);
+    int32_t temp = ReadAttribute<int32_t>(xmlNode, name);
     if (temp < 0) {
-        ThrowAttibuteError(m_reader, name, "Found a negative number value where expecting a uint32_t value");
+        ThrowAttibuteError(xmlNode.name(), name, "Found a negative number value where expecting a uint32_t value");
     }
 
     return static_cast<uint32_t>(temp);
 }
 
 template <>
-uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const char *name) const {
-    if (!HasAttribute(name)) {
-        ThrowAttibuteError(m_reader, name);
+uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(XmlNode &xmlNode, const char *name) const {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
 
-    return static_cast<uint16_t>(ReadAttribute<uint32_t>(name));
+    return static_cast<uint16_t>(xmlNode.attribute(name).as_int());
 }
 
 template <>
-float OgreXmlSerializer::ReadAttribute<float>(const char *name) const {
-    if (!HasAttribute(name)) {
-        ThrowAttibuteError(m_reader, name);
+float OgreXmlSerializer::ReadAttribute<float>(XmlNode &xmlNode, const char *name) const {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
 
-    return m_reader->getAttributeValueAsFloat(name);
+    return xmlNode.attribute(name).as_float();
 }
 
 template <>
-std::string OgreXmlSerializer::ReadAttribute<std::string>(const char *name) const {
-    const char *value = m_reader->getAttributeValue(name);
-    if (nullptr == value) {
-        ThrowAttibuteError(m_reader, name);
+std::string OgreXmlSerializer::ReadAttribute<std::string>(XmlNode &xmlNode, const char *name) const {
+    if (!XmlParser::hasAttribute(xmlNode, name)) {
+        ThrowAttibuteError(xmlNode.name(), name, "Not found");
     }
 
-    return std::string(value);
+    return xmlNode.attribute(name).as_string();
 }
 
 template <>
-bool OgreXmlSerializer::ReadAttribute<bool>(const char *name) const {
-    std::string value = Ogre::ToLower(ReadAttribute<std::string>(name));
+bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) const {
+    std::string value = Ogre::ToLower(ReadAttribute<std::string>(xmlNode, name));
     if (ASSIMP_stricmp(value, "true") == 0) {
         return true;
     } else if (ASSIMP_stricmp(value, "false") == 0) {
         return false;
-    } else {
-        ThrowAttibuteError(m_reader, name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
-        return false;
-    }
-}
-
-bool OgreXmlSerializer::HasAttribute(const char *name) const {
-    return (m_reader->getAttributeValue(name) != 0);
-}
-
-std::string &OgreXmlSerializer::NextNode() {
-    do {
-        if (!m_reader->read()) {
-            m_currentNodeName = "";
-            return m_currentNodeName;
-        }
-    } while (m_reader->getNodeType() != irr::io::EXN_ELEMENT);
-
-    CurrentNodeName(true);
-#if (OGRE_XML_SERIALIZER_DEBUG == 1)
-    ASSIMP_LOG_DEBUG"<" + m_currentNodeName + ">");
-#endif
-    return m_currentNodeName;
-}
-
-bool OgreXmlSerializer::CurrentNodeNameEquals(const std::string &name) const {
-    return (ASSIMP_stricmp(m_currentNodeName, name) == 0);
-}
-
-std::string OgreXmlSerializer::CurrentNodeName(bool forceRead) {
-    if (forceRead)
-        m_currentNodeName = std::string(m_reader->getNodeName());
-    return m_currentNodeName;
-}
-
-std::string &OgreXmlSerializer::SkipCurrentNode() {
-#if (OGRE_XML_SERIALIZER_DEBUG == 1)
-    ASSIMP_LOG_DEBUG("Skipping node <" + m_currentNodeName + ">");
-#endif
-
-    for (;;) {
-        if (!m_reader->read()) {
-            m_currentNodeName = "";
-            return m_currentNodeName;
-        }
-        if (m_reader->getNodeType() != irr::io::EXN_ELEMENT_END) {
-            continue;
-        } else if (std::string(m_reader->getNodeName()) == m_currentNodeName) {
-            break;
-        }
     }
 
-    return NextNode();
+    ThrowAttibuteError(xmlNode.name(), name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
+    return false;
 }
 
 // Mesh XML constants
@@ -186,18 +138,18 @@ static const char *nnMesh = "mesh";
 static const char *nnSharedGeometry = "sharedgeometry";
 static const char *nnSubMeshes = "submeshes";
 static const char *nnSubMesh = "submesh";
-static const char *nnSubMeshNames = "submeshnames";
+//static const char *nnSubMeshNames = "submeshnames";
 static const char *nnSkeletonLink = "skeletonlink";
-static const char *nnLOD = "levelofdetail";
-static const char *nnExtremes = "extremes";
-static const char *nnPoses = "poses";
+//static const char *nnLOD = "levelofdetail";
+//static const char *nnExtremes = "extremes";
+//static const char *nnPoses = "poses";
 static const char *nnAnimations = "animations";
 
 // <submesh>
 static const char *nnFaces = "faces";
 static const char *nnFace = "face";
 static const char *nnGeometry = "geometry";
-static const char *nnTextures = "textures";
+//static const char *nnTextures = "textures";
 
 // <mesh/submesh>
 static const char *nnBoneAssignments = "boneassignments";
@@ -206,14 +158,14 @@ static const char *nnBoneAssignments = "boneassignments";
 static const char *nnVertexBuffer = "vertexbuffer";
 
 // <vertexbuffer>
-static const char *nnVertex = "vertex";
+//static const char *nnVertex = "vertex";
 static const char *nnPosition = "position";
 static const char *nnNormal = "normal";
 static const char *nnTangent = "tangent";
-static const char *nnBinormal = "binormal";
+//static const char *nnBinormal = "binormal";
 static const char *nnTexCoord = "texcoord";
-static const char *nnColorDiffuse = "colour_diffuse";
-static const char *nnColorSpecular = "colour_specular";
+//static const char *nnColorDiffuse = "colour_diffuse";
+//static const char *nnColorSpecular = "colour_specular";
 
 // <boneassignments>
 static const char *nnVertexBoneAssignment = "vertexboneassignment";
@@ -224,7 +176,7 @@ static const char *nnVertexBoneAssignment = "vertexboneassignment";
 static const char *nnSkeleton = "skeleton";
 static const char *nnBones = "bones";
 static const char *nnBoneHierarchy = "bonehierarchy";
-static const char *nnAnimationLinks = "animationlinks";
+//static const char *nnAnimationLinks = "animationlinks";
 
 // <bones>
 static const char *nnBone = "bone";
@@ -247,15 +199,23 @@ static const char *nnTranslate = "translate";
 static const char *nnRotate = "rotate";
 
 // Common XML constants
-
 static const char *anX = "x";
 static const char *anY = "y";
 static const char *anZ = "z";
 
 // Mesh
 
-MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader) {
-    OgreXmlSerializer serializer(reader);
+OgreXmlSerializer::OgreXmlSerializer(XmlParser *parser) :
+        mParser(parser) {
+    // empty
+}
+
+MeshXml *OgreXmlSerializer::ImportMesh(XmlParser *parser) {
+    if (nullptr == parser) {
+        return nullptr;
+    }
+
+    OgreXmlSerializer serializer(parser);
 
     MeshXml *mesh = new MeshXml();
     serializer.ReadMesh(mesh);
@@ -264,60 +224,53 @@ MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader) {
 }
 
 void OgreXmlSerializer::ReadMesh(MeshXml *mesh) {
-    if (NextNode() != nnMesh) {
-        throw DeadlyImportError("Root node is <", m_currentNodeName, "> expecting <mesh>");
+    XmlNode root = mParser->getRootNode();
+    if (nullptr == root) {
+        throw DeadlyImportError("Root node is <" + std::string(root.name()) + "> expecting <mesh>");
+    }
+
+    XmlNode startNode = root.child(nnMesh);
+    if (startNode.empty()) {
+        throw DeadlyImportError("Root node is <" + std::string(root.name()) + "> expecting <mesh>");
+    }
+    for (XmlNode currentNode : startNode.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == nnSharedGeometry) {
+            mesh->sharedVertexData = new VertexDataXml();
+            ReadGeometry(currentNode, mesh->sharedVertexData);
+        } else if (currentName == nnSubMeshes) {
+            for (XmlNode &subMeshesNode : currentNode.children()) {
+                const std::string &currentSMName = subMeshesNode.name();
+                if (currentSMName == nnSubMesh) {
+                    ReadSubMesh(subMeshesNode, mesh);
+                }
+            }
+        } else if (currentName == nnBoneAssignments) {
+            ReadBoneAssignments(currentNode, mesh->sharedVertexData);
+        } else if (currentName == nnSkeletonLink) {
+        }
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Mesh");
-
-    NextNode();
-
-    // Root level nodes
-    while (m_currentNodeName == nnSharedGeometry ||
-            m_currentNodeName == nnSubMeshes ||
-            m_currentNodeName == nnSkeletonLink ||
-            m_currentNodeName == nnBoneAssignments ||
-            m_currentNodeName == nnLOD ||
-            m_currentNodeName == nnSubMeshNames ||
-            m_currentNodeName == nnExtremes ||
-            m_currentNodeName == nnPoses ||
-            m_currentNodeName == nnAnimations) {
-        if (m_currentNodeName == nnSharedGeometry) {
-            mesh->sharedVertexData = new VertexDataXml();
-            ReadGeometry(mesh->sharedVertexData);
-        } else if (m_currentNodeName == nnSubMeshes) {
-            NextNode();
-            while (m_currentNodeName == nnSubMesh) {
-                ReadSubMesh(mesh);
-            }
-        } else if (m_currentNodeName == nnBoneAssignments) {
-            ReadBoneAssignments(mesh->sharedVertexData);
-        } else if (m_currentNodeName == nnSkeletonLink) {
-            mesh->skeletonRef = ReadAttribute<std::string>("name");
-            ASSIMP_LOG_VERBOSE_DEBUG_F("Read skeleton link ", mesh->skeletonRef);
-            NextNode();
-        }
-        // Assimp incompatible/ignored nodes
-        else
-            SkipCurrentNode();
-    }
 }
 
-void OgreXmlSerializer::ReadGeometry(VertexDataXml *dest) {
-    dest->count = ReadAttribute<uint32_t>("vertexcount");
+void OgreXmlSerializer::ReadGeometry(XmlNode &node, VertexDataXml *dest) {
+    dest->count = ReadAttribute<uint32_t>(node, "vertexcount");
     ASSIMP_LOG_VERBOSE_DEBUG_F("  - Reading geometry of ", dest->count, " vertices");
 
-    NextNode();
-    while (m_currentNodeName == nnVertexBuffer) {
-        ReadGeometryVertexBuffer(dest);
+    for (XmlNode currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == nnVertexBuffer) {
+            ReadGeometryVertexBuffer(currentNode, dest);
+        }
     }
 }
 
-void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest) {
-    bool positions = (HasAttribute("positions") && ReadAttribute<bool>("positions"));
-    bool normals = (HasAttribute("normals") && ReadAttribute<bool>("normals"));
-    bool tangents = (HasAttribute("tangents") && ReadAttribute<bool>("tangents"));
-    uint32_t uvs = (HasAttribute("texture_coords") ? ReadAttribute<uint32_t>("texture_coords") : 0);
+void OgreXmlSerializer::ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *dest) {
+    bool positions = (XmlParser::hasAttribute(node, "positions") && ReadAttribute<bool>(node, "positions"));
+    bool normals = (XmlParser::hasAttribute(node, "normals") && ReadAttribute<bool>(node, "normals"));
+    bool tangents = (XmlParser::hasAttribute(node, "tangents") && ReadAttribute<bool>(node, "tangents"));
+    uint32_t uvs = (XmlParser::hasAttribute(node, "texture_coords") ? ReadAttribute<uint32_t>(node, "texture_coords") : 0);
 
     // Not having positions is a error only if a previous vertex buffer did not have them.
     if (!positions && !dest->HasPositions()) {
@@ -344,88 +297,36 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest) {
         }
     }
 
-    bool warnBinormal = true;
-    bool warnColorDiffuse = true;
-    bool warnColorSpecular = true;
-
-    NextNode();
-
-    while (m_currentNodeName == nnVertex ||
-            m_currentNodeName == nnPosition ||
-            m_currentNodeName == nnNormal ||
-            m_currentNodeName == nnTangent ||
-            m_currentNodeName == nnBinormal ||
-            m_currentNodeName == nnTexCoord ||
-            m_currentNodeName == nnColorDiffuse ||
-            m_currentNodeName == nnColorSpecular) {
-        if (m_currentNodeName == nnVertex) {
-            NextNode();
-        }
-
-        /// @todo Implement nnBinormal, nnColorDiffuse and nnColorSpecular
-
-        if (positions && m_currentNodeName == nnPosition) {
-            aiVector3D pos;
-            pos.x = ReadAttribute<float>(anX);
-            pos.y = ReadAttribute<float>(anY);
-            pos.z = ReadAttribute<float>(anZ);
-            dest->positions.push_back(pos);
-        } else if (normals && m_currentNodeName == nnNormal) {
-            aiVector3D normal;
-            normal.x = ReadAttribute<float>(anX);
-            normal.y = ReadAttribute<float>(anY);
-            normal.z = ReadAttribute<float>(anZ);
-            dest->normals.push_back(normal);
-        } else if (tangents && m_currentNodeName == nnTangent) {
-            aiVector3D tangent;
-            tangent.x = ReadAttribute<float>(anX);
-            tangent.y = ReadAttribute<float>(anY);
-            tangent.z = ReadAttribute<float>(anZ);
-            dest->tangents.push_back(tangent);
-        } else if (uvs > 0 && m_currentNodeName == nnTexCoord) {
-            for (auto &curUvs : dest->uvs) {
-                if (m_currentNodeName != nnTexCoord) {
-                    throw DeadlyImportError("Vertex buffer declared more UVs than can be found in a vertex");
+    for (XmlNode currentNode : node.children("vertex")) {
+        for (XmlNode vertexNode : currentNode.children()) {
+            const std::string &currentName = vertexNode.name();
+            if (positions && currentName == nnPosition) {
+                aiVector3D pos;
+                pos.x = ReadAttribute<float>(vertexNode, anX);
+                pos.y = ReadAttribute<float>(vertexNode, anY);
+                pos.z = ReadAttribute<float>(vertexNode, anZ);
+                dest->positions.push_back(pos);
+            } else if (normals && currentName == nnNormal) {
+                aiVector3D normal;
+                normal.x = ReadAttribute<float>(vertexNode, anX);
+                normal.y = ReadAttribute<float>(vertexNode, anY);
+                normal.z = ReadAttribute<float>(vertexNode, anZ);
+                dest->normals.push_back(normal);
+            } else if (tangents && currentName == nnTangent) {
+                aiVector3D tangent;
+                tangent.x = ReadAttribute<float>(vertexNode, anX);
+                tangent.y = ReadAttribute<float>(vertexNode, anY);
+                tangent.z = ReadAttribute<float>(vertexNode, anZ);
+                dest->tangents.push_back(tangent);
+            } else if (uvs > 0 && currentName == nnTexCoord) {
+                for (auto &curUvs : dest->uvs) {
+                    aiVector3D uv;
+                    uv.x = ReadAttribute<float>(vertexNode, "u");
+                    uv.y = (ReadAttribute<float>(vertexNode, "v") * -1) + 1; // Flip UV from Ogre to Assimp form
+                    curUvs.push_back(uv);
                 }
-
-                aiVector3D uv;
-                uv.x = ReadAttribute<float>("u");
-                uv.y = (ReadAttribute<float>("v") * -1) + 1; // Flip UV from Ogre to Assimp form
-                curUvs.push_back(uv);
-
-                NextNode();
-            }
-            // Continue main loop as above already read next node
-            continue;
-        } else {
-            /// @todo Remove this stuff once implemented. We only want to log warnings once per element.
-            bool warn = true;
-            if (m_currentNodeName == nnBinormal) {
-                if (warnBinormal) {
-                    warnBinormal = false;
-                } else {
-                    warn = false;
-                }
-            } else if (m_currentNodeName == nnColorDiffuse) {
-                if (warnColorDiffuse) {
-                    warnColorDiffuse = false;
-                } else {
-                    warn = false;
-                }
-            } else if (m_currentNodeName == nnColorSpecular) {
-                if (warnColorSpecular) {
-                    warnColorSpecular = false;
-                } else {
-                    warn = false;
-                }
-            }
-            if (warn) {
-                ASSIMP_LOG_WARN_F("Vertex buffer attribute read not implemented for element: ", m_currentNodeName);
             }
         }
-
-        // Advance
-        NextNode();
     }
 
     // Sanity checks
@@ -441,12 +342,12 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest) {
     for (unsigned int i = 0; i < dest->uvs.size(); ++i) {
         if (dest->uvs[i].size() != dest->count) {
             throw DeadlyImportError("Read only ", dest->uvs[i].size(),
-                                                        " uvs for uv index ", i, " when should have read ", dest->count);
+                    " uvs for uv index ", i, " when should have read ", dest->count);
         }
     }
 }
 
-void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh) {
+void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
     static const char *anMaterial = "material";
     static const char *anUseSharedVertices = "usesharedvertices";
     static const char *anCount = "count";
@@ -457,11 +358,11 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh) {
 
     SubMeshXml *submesh = new SubMeshXml();
 
-    if (HasAttribute(anMaterial)) {
-        submesh->materialRef = ReadAttribute<std::string>(anMaterial);
+    if (XmlParser::hasAttribute(node, anMaterial)) {
+        submesh->materialRef = ReadAttribute<std::string>(node, anMaterial);
     }
-    if (HasAttribute(anUseSharedVertices)) {
-        submesh->usesSharedVertexData = ReadAttribute<bool>(anUseSharedVertices);
+    if (XmlParser::hasAttribute(node, anUseSharedVertices)) {
+        submesh->usesSharedVertexData = ReadAttribute<bool>(node, anUseSharedVertices);
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG_F("Reading SubMesh ", mesh->subMeshes.size());
@@ -474,54 +375,42 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh) {
 
     bool quadWarned = false;
 
-    NextNode();
-    while (m_currentNodeName == nnFaces ||
-            m_currentNodeName == nnGeometry ||
-            m_currentNodeName == nnTextures ||
-            m_currentNodeName == nnBoneAssignments) {
-        if (m_currentNodeName == nnFaces) {
-            submesh->indexData->faceCount = ReadAttribute<uint32_t>(anCount);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == nnFaces) {
+            submesh->indexData->faceCount = ReadAttribute<uint32_t>(currentNode, anCount);
             submesh->indexData->faces.reserve(submesh->indexData->faceCount);
-
-            NextNode();
-            while (m_currentNodeName == nnFace) {
-                aiFace face;
-                face.mNumIndices = 3;
-                face.mIndices = new unsigned int[3];
-                face.mIndices[0] = ReadAttribute<uint32_t>(anV1);
-                face.mIndices[1] = ReadAttribute<uint32_t>(anV2);
-                face.mIndices[2] = ReadAttribute<uint32_t>(anV3);
-
-                /// @todo Support quads if Ogre even supports them in XML (I'm not sure but I doubt it)
-                if (!quadWarned && HasAttribute(anV4)) {
-                    ASSIMP_LOG_WARN("Submesh <face> has quads with <v4>, only triangles are supported at the moment!");
-                    quadWarned = true;
+            for (XmlNode currentChildNode : currentNode.children()) {
+                const std::string &currentChildName = currentChildNode.name();
+                if (currentChildName == nnFace) {
+                    aiFace face;
+                    face.mNumIndices = 3;
+                    face.mIndices = new unsigned int[3];
+                    face.mIndices[0] = ReadAttribute<uint32_t>(currentChildNode, anV1);
+                    face.mIndices[1] = ReadAttribute<uint32_t>(currentChildNode, anV2);
+                    face.mIndices[2] = ReadAttribute<uint32_t>(currentChildNode, anV3);
+                    /// @todo Support quads if Ogre even supports them in XML (I'm not sure but I doubt it)
+                    if (!quadWarned && XmlParser::hasAttribute(currentChildNode, anV4)) {
+                        ASSIMP_LOG_WARN("Submesh <face> has quads with <v4>, only triangles are supported at the moment!");
+                        quadWarned = true;
+                    }
+                    submesh->indexData->faces.push_back(face);
                 }
-
-                submesh->indexData->faces.push_back(face);
-
-                // Advance
-                NextNode();
             }
-
             if (submesh->indexData->faces.size() == submesh->indexData->faceCount) {
                 ASSIMP_LOG_VERBOSE_DEBUG_F("  - Faces ", submesh->indexData->faceCount);
             } else {
                 throw DeadlyImportError("Read only ", submesh->indexData->faces.size(), " faces when should have read ", submesh->indexData->faceCount);
             }
-        } else if (m_currentNodeName == nnGeometry) {
+        } else if (currentName == nnGeometry) {
             if (submesh->usesSharedVertexData) {
                 throw DeadlyImportError("Found <geometry> in <submesh> when use shared geometry is true. Invalid mesh file.");
             }
 
             submesh->vertexData = new VertexDataXml();
-            ReadGeometry(submesh->vertexData);
-        } else if (m_currentNodeName == nnBoneAssignments) {
-            ReadBoneAssignments(submesh->vertexData);
-        }
-        // Assimp incompatible/ignored nodes
-        else {
-            SkipCurrentNode();
+            ReadGeometry(currentNode, submesh->vertexData);
+        } else if (currentName == nnBoneAssignments) {
+            ReadBoneAssignments(currentNode, submesh->vertexData);
         }
     }
 
@@ -529,7 +418,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh) {
     mesh->subMeshes.push_back(submesh);
 }
 
-void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest) {
+void OgreXmlSerializer::ReadBoneAssignments(XmlNode &node, VertexDataXml *dest) {
     if (!dest) {
         throw DeadlyImportError("Cannot read bone assignments, vertex data is null.");
     }
@@ -539,18 +428,17 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest) {
     static const char *anWeight = "weight";
 
     std::set<uint32_t> influencedVertices;
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == nnVertexBoneAssignment) {
+            VertexBoneAssignment ba;
+            ba.vertexIndex = ReadAttribute<uint32_t>(currentNode, anVertexIndex);
+            ba.boneIndex = ReadAttribute<uint16_t>(currentNode, anBoneIndex);
+            ba.weight = ReadAttribute<float>(currentNode, anWeight);
 
-    NextNode();
-    while (m_currentNodeName == nnVertexBoneAssignment) {
-        VertexBoneAssignment ba;
-        ba.vertexIndex = ReadAttribute<uint32_t>(anVertexIndex);
-        ba.boneIndex = ReadAttribute<uint16_t>(anBoneIndex);
-        ba.weight = ReadAttribute<float>(anWeight);
-
-        dest->boneAssignments.push_back(ba);
-        influencedVertices.insert(ba.vertexIndex);
-
-        NextNode();
+            dest->boneAssignments.push_back(ba);
+            influencedVertices.insert(ba.vertexIndex);
+        }
     }
 
     /** Normalize bone weights.
@@ -593,41 +481,47 @@ bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *me
         mesh->skeletonRef = mesh->skeletonRef + ".xml";
     }
 
-    XmlReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
-    if (!reader.get())
+    XmlParserPtr xmlParser = OpenXmlParser(pIOHandler, mesh->skeletonRef);
+    if (!xmlParser.get())
         return false;
 
     Skeleton *skeleton = new Skeleton();
-    OgreXmlSerializer serializer(reader.get());
-    serializer.ReadSkeleton(skeleton);
+    OgreXmlSerializer serializer(xmlParser.get());
+    XmlNode root = xmlParser->getRootNode();
+    serializer.ReadSkeleton(root, skeleton);
     mesh->skeleton = skeleton;
     return true;
 }
 
 bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh) {
-    if (!mesh || mesh->skeletonRef.empty())
+    if (!mesh || mesh->skeletonRef.empty()) {
         return false;
+    }
 
-    XmlReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
-    if (!reader.get())
+    XmlParserPtr xmlParser = OpenXmlParser(pIOHandler, mesh->skeletonRef);
+    if (!xmlParser.get()) {
         return false;
+    }
 
     Skeleton *skeleton = new Skeleton();
-    OgreXmlSerializer serializer(reader.get());
-    serializer.ReadSkeleton(skeleton);
+    OgreXmlSerializer serializer(xmlParser.get());
+    XmlNode root = xmlParser->getRootNode();
+
+    serializer.ReadSkeleton(root, skeleton);
     mesh->skeleton = skeleton;
+
     return true;
 }
 
-XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename) {
+XmlParserPtr OgreXmlSerializer::OpenXmlParser(Assimp::IOSystem *pIOHandler, const std::string &filename) {
     if (!EndsWith(filename, ".skeleton.xml", false)) {
         ASSIMP_LOG_ERROR_F("Imported Mesh is referencing to unsupported '", filename, "' skeleton file.");
-        return XmlReaderPtr();
+        return XmlParserPtr();
     }
 
     if (!pIOHandler->Exists(filename)) {
         ASSIMP_LOG_ERROR_F("Failed to find skeleton file '", filename, "' that is referenced by imported Mesh.");
-        return XmlReaderPtr();
+        return XmlParserPtr();
     }
 
     std::unique_ptr<IOStream> file(pIOHandler->Open(filename));
@@ -635,146 +529,145 @@ XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const s
         throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 
-    std::unique_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
-    XmlReaderPtr reader = XmlReaderPtr(irr::io::createIrrXMLReader(stream.get()));
-    if (!reader.get()) {
-        throw DeadlyImportError("Failed to create XML reader for skeleton file ", filename);
+    XmlParserPtr xmlParser = XmlParserPtr(new XmlParser);
+    if (!xmlParser->parse(file.get())) {
+        throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
     }
-    return reader;
+    return xmlParser;
 }
 
-void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton) {
-    if (NextNode() != nnSkeleton) {
-        throw DeadlyImportError("Root node is <", m_currentNodeName, "> expecting <skeleton>");
+void OgreXmlSerializer::ReadSkeleton(XmlNode &node, Skeleton *skeleton) {
+    if (node.name() != nnSkeleton) {
+        throw DeadlyImportError("Root node is <" + std::string(node.name()) + "> expecting <skeleton>");
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Skeleton");
 
     // Optional blend mode from root node
-    if (HasAttribute("blendmode")) {
-        skeleton->blendMode = (ToLower(ReadAttribute<std::string>("blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
+    if (XmlParser::hasAttribute(node, "blendmode")) {
+        skeleton->blendMode = (ToLower(ReadAttribute<std::string>(node, "blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
     }
 
-    NextNode();
-
-    // Root level nodes
-    while (m_currentNodeName == nnBones ||
-            m_currentNodeName == nnBoneHierarchy ||
-            m_currentNodeName == nnAnimations ||
-            m_currentNodeName == nnAnimationLinks) {
-        if (m_currentNodeName == nnBones)
-            ReadBones(skeleton);
-        else if (m_currentNodeName == nnBoneHierarchy)
-            ReadBoneHierarchy(skeleton);
-        else if (m_currentNodeName == nnAnimations)
-            ReadAnimations(skeleton);
-        else
-            SkipCurrentNode();
+    for (XmlNode &currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == nnBones) {
+            ReadBones(currentNode, skeleton);
+        } else if (currentName == nnBoneHierarchy) {
+            ReadBoneHierarchy(currentNode, skeleton);
+        } else if (currentName == nnAnimations) {
+            ReadAnimations(currentNode, skeleton);
+        }
     }
 }
 
-void OgreXmlSerializer::ReadAnimations(Skeleton *skeleton) {
+void OgreXmlSerializer::ReadAnimations(XmlNode &node, Skeleton *skeleton) {
     if (skeleton->bones.empty()) {
         throw DeadlyImportError("Cannot read <animations> for a Skeleton without bones");
     }
 
     ASSIMP_LOG_VERBOSE_DEBUG("  - Animations");
 
-    NextNode();
-    while (m_currentNodeName == nnAnimation) {
-        Animation *anim = new Animation(skeleton);
-        anim->name = ReadAttribute<std::string>("name");
-        anim->length = ReadAttribute<float>("length");
-
-        if (NextNode() != nnTracks) {
-            throw DeadlyImportError("No <tracks> found in <animation> ", anim->name);
-        }
-
-        ReadAnimationTracks(anim);
-        skeleton->animations.push_back(anim);
-
-        ASSIMP_LOG_VERBOSE_DEBUG_F("    ", anim->name, " (", anim->length, " sec, ", anim->tracks.size(), " tracks)");
-    }
-}
-
-void OgreXmlSerializer::ReadAnimationTracks(Animation *dest) {
-    NextNode();
-    while (m_currentNodeName == nnTrack) {
-        VertexAnimationTrack track;
-        track.type = VertexAnimationTrack::VAT_TRANSFORM;
-        track.boneName = ReadAttribute<std::string>("bone");
-
-        if (NextNode() != nnKeyFrames) {
-            throw DeadlyImportError("No <keyframes> found in <track> ", dest->name);
-        }
-
-        ReadAnimationKeyFrames(dest, &track);
-
-        dest->tracks.push_back(track);
-    }
-}
-
-void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest) {
-    const aiVector3D zeroVec(0.f, 0.f, 0.f);
-
-    NextNode();
-    while (m_currentNodeName == nnKeyFrame) {
-        TransformKeyFrame keyframe;
-        keyframe.timePos = ReadAttribute<float>("time");
-
-        NextNode();
-        while (m_currentNodeName == nnTranslate || m_currentNodeName == nnRotate || m_currentNodeName == nnScale) {
-            if (m_currentNodeName == nnTranslate) {
-                keyframe.position.x = ReadAttribute<float>(anX);
-                keyframe.position.y = ReadAttribute<float>(anY);
-                keyframe.position.z = ReadAttribute<float>(anZ);
-            } else if (m_currentNodeName == nnRotate) {
-                float angle = ReadAttribute<float>("angle");
-
-                if (NextNode() != nnAxis) {
-                    throw DeadlyImportError("No axis specified for keyframe rotation in animation ", anim->name);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == nnAnimation) {
+            Animation *anim = new Animation(skeleton);
+            anim->name = ReadAttribute<std::string>(currentNode, "name");
+            anim->length = ReadAttribute<float>(currentNode, "length");
+            for (XmlNode &currentChildNode : currentNode.children()) {
+                const std::string currentChildName = currentNode.name();
+                if (currentChildName == nnTracks) {
+                    ReadAnimationTracks(currentChildNode, anim);
+                    skeleton->animations.push_back(anim);
+                } else {
+                    throw DeadlyImportError("No <tracks> found in <animation> ", anim->name);
                 }
-
-                aiVector3D axis;
-                axis.x = ReadAttribute<float>(anX);
-                axis.y = ReadAttribute<float>(anY);
-                axis.z = ReadAttribute<float>(anZ);
-                if (axis.Equal(zeroVec)) {
-                    axis.x = 1.0f;
-                    if (angle != 0) {
-                        ASSIMP_LOG_WARN_F("Found invalid a key frame with a zero rotation axis in animation: ", anim->name);
-                    }
-                }
-                keyframe.rotation = aiQuaternion(axis, angle);
-            } else if (m_currentNodeName == nnScale) {
-                keyframe.scale.x = ReadAttribute<float>(anX);
-                keyframe.scale.y = ReadAttribute<float>(anY);
-                keyframe.scale.z = ReadAttribute<float>(anZ);
             }
-
-            NextNode();
         }
+    }
+}
 
+void OgreXmlSerializer::ReadAnimationTracks(XmlNode &node, Animation *dest) {
+    for (XmlNode &currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == nnTrack) {
+            VertexAnimationTrack track;
+            track.type = VertexAnimationTrack::VAT_TRANSFORM;
+            track.boneName = ReadAttribute<std::string>(currentNode, "bone");
+            for (XmlNode &currentChildNode : currentNode.children()) {
+                const std::string currentChildName = currentNode.name();
+                if (currentChildName == nnKeyFrames) {
+                    ReadAnimationKeyFrames(currentChildNode, dest, &track);
+                    dest->tracks.push_back(track);
+                } else {
+                    throw DeadlyImportError("No <keyframes> found in <track> ", dest->name);
+                }
+            }
+        }
+    }
+}
+
+void OgreXmlSerializer::ReadAnimationKeyFrames(XmlNode &node, Animation *anim, VertexAnimationTrack *dest) {
+    const aiVector3D zeroVec(0.f, 0.f, 0.f);
+    for (XmlNode &currentNode : node.children()) {
+        TransformKeyFrame keyframe;
+        const std::string currentName = currentNode.name();
+        if (currentName == nnKeyFrame) {
+            keyframe.timePos = ReadAttribute<float>(currentNode, "time");
+            for (XmlNode &currentChildNode : currentNode.children()) {
+                const std::string currentChildName = currentNode.name();
+                if (currentChildName == nnTranslate) {
+                    keyframe.position.x = ReadAttribute<float>(currentChildNode, anX);
+                    keyframe.position.y = ReadAttribute<float>(currentChildNode, anY);
+                    keyframe.position.z = ReadAttribute<float>(currentChildNode, anZ);
+                } else if (currentChildName == nnRotate) {
+                    float angle = ReadAttribute<float>(currentChildNode, "angle");
+                    for (XmlNode &currentChildChildNode : currentNode.children()) {
+                        const std::string currentChildChildName = currentNode.name();
+                        if (currentChildChildName == nnAxis) {
+                            aiVector3D axis;
+                            axis.x = ReadAttribute<float>(currentChildChildNode, anX);
+                            axis.y = ReadAttribute<float>(currentChildChildNode, anY);
+                            axis.z = ReadAttribute<float>(currentChildChildNode, anZ);
+                            if (axis.Equal(zeroVec)) {
+                                axis.x = 1.0f;
+                                if (angle != 0) {
+                                    ASSIMP_LOG_WARN_F("Found invalid a key frame with a zero rotation axis in animation: ", anim->name);
+                                }
+                            }
+                            keyframe.rotation = aiQuaternion(axis, angle);
+                        }
+                    }
+                } else if (currentChildName == nnScale) {
+                    keyframe.scale.x = ReadAttribute<float>(currentChildNode, anX);
+                    keyframe.scale.y = ReadAttribute<float>(currentChildNode, anY);
+                    keyframe.scale.z = ReadAttribute<float>(currentChildNode, anZ);
+                }
+            }
+        }
         dest->transformKeyFrames.push_back(keyframe);
     }
 }
 
-void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton) {
+void OgreXmlSerializer::ReadBoneHierarchy(XmlNode &node, Skeleton *skeleton) {
     if (skeleton->bones.empty()) {
         throw DeadlyImportError("Cannot read <bonehierarchy> for a Skeleton without bones");
     }
 
-    while (NextNode() == nnBoneParent) {
-        const std::string name = ReadAttribute<std::string>("bone");
-        const std::string parentName = ReadAttribute<std::string>("parent");
+    for (XmlNode &currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == nnBoneParent) {
+            const std::string name = ReadAttribute<std::string>(currentNode, "bone");
+            const std::string parentName = ReadAttribute<std::string>(currentNode, "parent");
 
-        Bone *bone = skeleton->BoneByName(name);
-        Bone *parent = skeleton->BoneByName(parentName);
+            Bone *bone = skeleton->BoneByName(name);
+            Bone *parent = skeleton->BoneByName(parentName);
 
-        if (bone && parent)
-            parent->AddChild(bone);
-        else
-            throw DeadlyImportError("Failed to find bones for parenting: Child ", name, " for parent ", parentName);
+            if (bone && parent) {
+                parent->AddChild(bone);
+            } else {
+                throw DeadlyImportError("Failed to find bones for parenting: Child ", name, " for parent ", parentName);
+            }
+        }
     }
 
     // Calculate bone matrices for root bones. Recursively calculates their children.
@@ -792,55 +685,52 @@ static bool BoneCompare(Bone *a, Bone *b) {
     return (a->id < b->id);
 }
 
-void OgreXmlSerializer::ReadBones(Skeleton *skeleton) {
+void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
     ASSIMP_LOG_VERBOSE_DEBUG("  - Bones");
 
-    NextNode();
-    while (m_currentNodeName == nnBone) {
-        Bone *bone = new Bone();
-        bone->id = ReadAttribute<uint16_t>("id");
-        bone->name = ReadAttribute<std::string>("name");
+    for (XmlNode &currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == nnBone) {
+            Bone *bone = new Bone();
+            bone->id = ReadAttribute<uint16_t>(currentNode, "id");
+            bone->name = ReadAttribute<std::string>(currentNode, "name");
+            for (XmlNode &currentChildNode : currentNode.children()) {
+                const std::string currentChildName = currentNode.name();
+                if (currentChildName == nnRotation) {
+                    bone->position.x = ReadAttribute<float>(currentChildNode, anX);
+                    bone->position.y = ReadAttribute<float>(currentChildNode, anY);
+                    bone->position.z = ReadAttribute<float>(currentChildNode, anZ);
+                } else if (currentChildName == nnScale) {
+                    float angle = ReadAttribute<float>(currentChildNode, "angle");
+                    for (XmlNode currentChildChildNode : currentChildNode.children()) {
+                        const std::string &currentChildChildName = currentChildChildNode.name();
+                        if (currentChildChildName == nnAxis) {
+                            aiVector3D axis;
+                            axis.x = ReadAttribute<float>(currentChildChildNode, anX);
+                            axis.y = ReadAttribute<float>(currentChildChildNode, anY);
+                            axis.z = ReadAttribute<float>(currentChildChildNode, anZ);
 
-        NextNode();
-        while (m_currentNodeName == nnPosition ||
-                m_currentNodeName == nnRotation ||
-                m_currentNodeName == nnScale) {
-            if (m_currentNodeName == nnPosition) {
-                bone->position.x = ReadAttribute<float>(anX);
-                bone->position.y = ReadAttribute<float>(anY);
-                bone->position.z = ReadAttribute<float>(anZ);
-            } else if (m_currentNodeName == nnRotation) {
-                float angle = ReadAttribute<float>("angle");
-
-                if (NextNode() != nnAxis) {
-                    throw DeadlyImportError("No axis specified for bone rotation in bone ", bone->id);
-                }
-
-                aiVector3D axis;
-                axis.x = ReadAttribute<float>(anX);
-                axis.y = ReadAttribute<float>(anY);
-                axis.z = ReadAttribute<float>(anZ);
-
-                bone->rotation = aiQuaternion(axis, angle);
-            } else if (m_currentNodeName == nnScale) {
-                /// @todo Implement taking scale into account in matrix/pose calculations!
-                if (HasAttribute("factor")) {
-                    float factor = ReadAttribute<float>("factor");
-                    bone->scale.Set(factor, factor, factor);
-                } else {
-                    if (HasAttribute(anX))
-                        bone->scale.x = ReadAttribute<float>(anX);
-                    if (HasAttribute(anY))
-                        bone->scale.y = ReadAttribute<float>(anY);
-                    if (HasAttribute(anZ))
-                        bone->scale.z = ReadAttribute<float>(anZ);
+                            bone->rotation = aiQuaternion(axis, angle);
+                        } else {
+                            throw DeadlyImportError("No axis specified for bone rotation in bone ", bone->id);
+                        }
+                    }
+                } else if (currentChildName == nnScale) {
+                    if (XmlParser::hasAttribute(currentChildNode, "factor")) {
+                        float factor = ReadAttribute<float>(currentChildNode, "factor");
+                        bone->scale.Set(factor, factor, factor);
+                    } else {
+                        if (XmlParser::hasAttribute(currentChildNode, anX))
+                            bone->scale.x = ReadAttribute<float>(currentChildNode, anX);
+                        if (XmlParser::hasAttribute(currentChildNode, anY))
+                            bone->scale.y = ReadAttribute<float>(currentChildNode, anY);
+                        if (XmlParser::hasAttribute(currentChildNode, anZ))
+                            bone->scale.z = ReadAttribute<float>(currentChildNode, anZ);
+                    }
                 }
             }
-
-            NextNode();
+            skeleton->bones.push_back(bone);
         }
-
-        skeleton->bones.push_back(bone);
     }
 
     // Order bones by Id

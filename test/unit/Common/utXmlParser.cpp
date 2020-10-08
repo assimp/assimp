@@ -1,5 +1,4 @@
-/*
----------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -36,32 +35,54 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
-*/
-
+-------------------------------------------------------------------------*/
 #include "UnitTestPCH.h"
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include <assimp/XmlParser.h>
+#include <assimp/DefaultIOStream.h>
+#include <assimp/DefaultIOSystem.h>
 
 using namespace Assimp;
 
-TEST(ut3DImportExport, importBoxA) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box_a.3d", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
+class utXmlParser : public ::testing::Test {
+public:
+    utXmlParser() :
+            Test(),
+            mIoSystem() {
+        // empty
+    }
+
+protected:
+    DefaultIOSystem mIoSystem;
+};
+
+TEST_F(utXmlParser, parse_xml_test) {
+    XmlParser parser;
+    std::string filename = ASSIMP_TEST_MODELS_DIR "/X3D/ComputerKeyboard.x3d";
+    std::unique_ptr<IOStream> stream(mIoSystem.Open(filename.c_str(), "rb"));
+    EXPECT_NE(stream.get(), nullptr);
+    bool result = parser.parse(stream.get());
+    EXPECT_TRUE(result);
 }
 
+TEST_F(utXmlParser, parse_xml_and_traverse_test) {
+    XmlParser parser;
+    std::string filename = ASSIMP_TEST_MODELS_DIR "/X3D/ComputerKeyboard.x3d";
+    std::unique_ptr<IOStream> stream(mIoSystem.Open(filename.c_str(), "rb"));
+    EXPECT_NE(stream.get(), nullptr);
+    bool result = parser.parse(stream.get());
+    EXPECT_TRUE(result);
+    XmlNode root = parser.getRootNode();
 
-TEST(ut3DImportExport, importBoxD) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box_d.3d", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-
-TEST(ut3DImportExport, importBoxUC) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box.uc", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
+    XmlNodeIterator nodeIt(root);
+    EXPECT_TRUE(nodeIt.isEmpty());
+    nodeIt.collectChildrenPreOrder(root);
+    const size_t numNodes = nodeIt.size();
+    bool empty = nodeIt.isEmpty();
+    EXPECT_FALSE(empty);
+    EXPECT_NE(numNodes, 0U);
+    XmlNode node;
+    while (nodeIt.getNext(node)) {
+        const std::string nodeName = node.name();
+        EXPECT_FALSE(nodeName.empty());
+    }
 }

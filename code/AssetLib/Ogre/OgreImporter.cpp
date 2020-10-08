@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreImporter.h"
 #include "OgreBinarySerializer.h"
 #include "OgreXmlSerializer.h"
-#include <assimp/Importer.hpp>
 #include <assimp/importerdesc.h>
+#include <assimp/Importer.hpp>
 #include <memory>
 
 static const aiImporterDesc desc = {
@@ -61,42 +61,33 @@ static const aiImporterDesc desc = {
     "mesh mesh.xml"
 };
 
-namespace Assimp
-{
-namespace Ogre
-{
+namespace Assimp {
+namespace Ogre {
 
-const aiImporterDesc* OgreImporter::GetInfo() const
-{
+const aiImporterDesc *OgreImporter::GetInfo() const {
     return &desc;
 }
 
-void OgreImporter::SetupProperties(const Importer* pImp)
-{
+void OgreImporter::SetupProperties(const Importer *pImp) {
     m_userDefinedMaterialLibFile = pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
     m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
-bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const
-{
+bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const {
     if (!checkSig) {
         return EndsWith(pFile, ".mesh.xml", false) || EndsWith(pFile, ".mesh", false);
     }
 
-    if (EndsWith(pFile, ".mesh.xml", false))
-    {
-        const char* tokens[] = { "<mesh>" };
+    if (EndsWith(pFile, ".mesh.xml", false)) {
+        const char *tokens[] = { "<mesh>" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-    else
-    {
+    } else {
         /// @todo Read and validate first header chunk?
         return EndsWith(pFile, ".mesh", false);
     }
 }
 
-void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
-{
+void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler) {
     // Open source file
     IOStream *f = pIOHandler->Open(pFile, "rb");
     if (!f) {
@@ -104,8 +95,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
     }
 
     // Binary .mesh import
-    if (EndsWith(pFile, ".mesh", false))
-    {
+    if (EndsWith(pFile, ".mesh", false)) {
         /// @note MemoryStreamReader takes ownership of f.
         MemoryStreamReader reader(f);
 
@@ -122,15 +112,16 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
         mesh->ConvertToAssimpScene(pScene);
     }
     // XML .mesh.xml import
-    else
-    {
+    else {
         /// @note XmlReader does not take ownership of f, hence the scoped ptr.
         std::unique_ptr<IOStream> scopedFile(f);
-        std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
-        std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+        XmlParser xmlParser;
 
+        //std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
+        //std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+        xmlParser.parse(scopedFile.get());
         // Import mesh
-        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(reader.get()));
+        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(&xmlParser));
 
         // Import skeleton
         OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh.get());
@@ -143,7 +134,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
     }
 }
 
-} // Ogre
-} // Assimp
+} // namespace Ogre
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_OGRE_IMPORTER

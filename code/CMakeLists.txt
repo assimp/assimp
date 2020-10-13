@@ -862,11 +862,16 @@ SET( Extra_SRCS
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
 # pugixml
-SET( Pugixml_SRCS
-  ../contrib/pugixml/src/pugiconfig.hpp
-  ../contrib/pugixml/src/pugixml.hpp
-)
-SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
+IF(ASSIMP_HUNTER_ENABLED)
+  hunter_add_package(pugixml)
+  find_package(pugixml CONFIG REQUIRED)
+ELSE()
+  SET( Pugixml_SRCS
+    ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.hpp
+  )
+  SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
+ENDIF()
 
 # utf8
 IF(ASSIMP_HUNTER_ENABLED)
@@ -1026,6 +1031,7 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
   INCLUDE_DIRECTORIES( "../contrib" )
+  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
   ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
 ENDIF()
@@ -1136,6 +1142,7 @@ IF(ASSIMP_HUNTER_ENABLED)
       RapidJSON::rapidjson
       utf8cpp
       zip::zip
+      pugixml
   )
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )

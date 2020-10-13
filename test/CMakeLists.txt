@@ -48,6 +48,7 @@ if(NOT ASSIMP_HUNTER_ENABLED)
   INCLUDE_DIRECTORIES(
     ${Assimp_SOURCE_DIR}/contrib/gtest/include
     ${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/contrib/pugixml/src
   )
 endif()
 

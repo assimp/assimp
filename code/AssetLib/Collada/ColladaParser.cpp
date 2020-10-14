@@ -137,10 +137,12 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ColladaParser::~ColladaParser() {
-    for (NodeLibrary::iterator it = mNodeLibrary.begin(); it != mNodeLibrary.end(); ++it)
+    for (NodeLibrary::iterator it = mNodeLibrary.begin(); it != mNodeLibrary.end(); ++it) {
         delete it->second;
-    for (MeshLibrary::iterator it = mMeshLibrary.begin(); it != mMeshLibrary.end(); ++it)
+    }
+    for (MeshLibrary::iterator it = mMeshLibrary.begin(); it != mMeshLibrary.end(); ++it) {
         delete it->second;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1284,10 +1286,10 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
     if (node.empty()) {
         return;
     }
+
     XmlNodeIterator xmlIt(node);
     xmlIt.collectChildrenPreOrder(node);
     XmlNode currentNode;
-
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "surface") {
@@ -1313,6 +1315,11 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
             }
             pParam.mType = Param_Sampler;
             pParam.mReference = url.c_str() + 1;
+        } else if (currentName == "source") {
+            const char *source = currentNode.child_value();
+            if (nullptr != source) {
+                pParam.mReference = source;
+            }
         }
     }
 }

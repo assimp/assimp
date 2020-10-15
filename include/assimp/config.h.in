@@ -616,6 +616,15 @@ enum aiComponent
     "IMPORT_FBX_READ_ANIMATIONS"
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read weights.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_WEIGHTS \
+    "IMPORT_FBX_READ_WEIGHTS"
+
+// ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will act in strict mode in which only
  *    FBX 2013 is supported and any other sub formats are rejected. FBX 2013
  *    is the primary target for the importer, so this format is best

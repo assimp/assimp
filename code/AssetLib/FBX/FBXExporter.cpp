@@ -400,6 +400,65 @@ void FBXExporter::WriteHeaderExtension ()
     );
 }
 
+// WriteGlobalSettings helpers
+
+void WritePropInt(const aiScene* scene, FBX::Node& p, const std::string& key, int defaultValue)
+{
+    int value;
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
+        p.AddP70int(key, value);
+    } else {
+        p.AddP70int(key, defaultValue);
+    }
+}
+
+void WritePropDouble(const aiScene* scene, FBX::Node& p, const std::string& key, double defaultValue)
+{
+    double value;
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
+        p.AddP70double(key, value);
+    } else {
+        // fallback lookup float instead
+        float floatValue;
+        if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, floatValue)) {
+            p.AddP70double(key, (double)floatValue);
+        } else {
+            p.AddP70double(key, defaultValue);
+        }
+    }
+}
+
+void WritePropEnum(const aiScene* scene, FBX::Node& p, const std::string& key, int defaultValue)
+{
+    int value;
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
+        p.AddP70enum(key, value);
+    } else {
+        p.AddP70enum(key, defaultValue);
+    }
+}
+
+void WritePropColor(const aiScene* scene, FBX::Node& p, const std::string& key, const aiVector3D& defaultValue)
+{
+    aiVector3D value;
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
+        // ai_real can be float or double, cast to avoid warnings
+        p.AddP70color(key, (double)value.x, (double)value.y, (double)value.z);
+    } else {
+        p.AddP70color(key, (double)defaultValue.x, (double)defaultValue.y, (double)defaultValue.z);
+    }
+}
+
+void WritePropString(const aiScene* scene, FBX::Node& p, const std::string& key, const std::string& defaultValue)
+{
+    aiString value; // MetaData doesn't hold std::string
+    if (scene->mMetaData != nullptr && scene->mMetaData->Get(key, value)) {
+        p.AddP70string(key, value.C_Str());
+    } else {
+        p.AddP70string(key, defaultValue);
+    }
+}
+
 void FBXExporter::WriteGlobalSettings ()
 {
     if (!binary) {
@@ -409,26 +468,26 @@ void FBXExporter::WriteGlobalSettings ()
     gs.AddChild("Version", int32_t(1000));
 
     FBX::Node p("Properties70");
-    p.AddP70int("UpAxis", 1);
-    p.AddP70int("UpAxisSign", 1);
-    p.AddP70int("FrontAxis", 2);
-    p.AddP70int("FrontAxisSign", 1);
-    p.AddP70int("CoordAxis", 0);
-    p.AddP70int("CoordAxisSign", 1);
-    p.AddP70int("OriginalUpAxis", 1);
-    p.AddP70int("OriginalUpAxisSign", 1);
-    p.AddP70double("UnitScaleFactor", 1.0);
-    p.AddP70double("OriginalUnitScaleFactor", 1.0);
-    p.AddP70color("AmbientColor", 0.0, 0.0, 0.0);
-    p.AddP70string("DefaultCamera", "Producer Perspective");
-    p.AddP70enum("TimeMode", 11);
-    p.AddP70enum("TimeProtocol", 2);
-    p.AddP70enum("SnapOnFrameMode", 0);
+    WritePropInt(mScene, p, "UpAxis", 1);
+    WritePropInt(mScene, p, "UpAxisSign", 1);
+    WritePropInt(mScene, p, "FrontAxis", 2);
+    WritePropInt(mScene, p, "FrontAxisSign", 1);
+    WritePropInt(mScene, p, "CoordAxis", 0);
+    WritePropInt(mScene, p, "CoordAxisSign", 1);
+    WritePropInt(mScene, p, "OriginalUpAxis", 1);
+    WritePropInt(mScene, p, "OriginalUpAxisSign", 1);
+    WritePropDouble(mScene, p, "UnitScaleFactor", 1.0);
+    WritePropDouble(mScene, p, "OriginalUnitScaleFactor", 1.0);
+    WritePropColor(mScene, p, "AmbientColor", aiVector3D((ai_real)0.0, (ai_real)0.0, (ai_real)0.0));
+    WritePropString(mScene, p,"DefaultCamera", "Producer Perspective");
+    WritePropEnum(mScene, p, "TimeMode", 11);
+    WritePropEnum(mScene, p, "TimeProtocol", 2);
+    WritePropEnum(mScene, p, "SnapOnFrameMode", 0);
     p.AddP70time("TimeSpanStart", 0); // TODO: animation support
     p.AddP70time("TimeSpanStop", FBX::SECOND); // TODO: animation support
-    p.AddP70double("CustomFrameRate", -1.0);
+    WritePropDouble(mScene, p, "CustomFrameRate", -1.0);
     p.AddP70("TimeMarker", "Compound", "", ""); // not sure what this is
-    p.AddP70int("CurrentTimeMarker", -1);
+    WritePropInt(mScene, p, "CurrentTimeMarker", -1);
     gs.AddChild(p);
 
     gs.Dump(outfile, binary, 0);

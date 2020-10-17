@@ -57,10 +57,10 @@ namespace glTF {
 
 namespace {
 
-#ifdef _WIN32
+#if _MSC_VER
 #    pragma warning(push)
 #    pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 //
 // JSON Value reading helpers
@@ -235,15 +235,15 @@ Ref<T> LazyDict<T>::Get(const char *id) {
 
     // read it from the JSON object
     if (!mDict) {
-        throw DeadlyImportError("GLTF: Missing section \"" + std::string(mDictId) + "\"");
+        throw DeadlyImportError("GLTF: Missing section \"", mDictId, "\"");
     }
 
     Value::MemberIterator obj = mDict->FindMember(id);
     if (obj == mDict->MemberEnd()) {
-        throw DeadlyImportError("GLTF: Missing object with id \"" + std::string(id) + "\" in \"" + mDictId + "\"");
+        throw DeadlyImportError("GLTF: Missing object with id \"", id, "\" in \"", mDictId, "\"");
     }
     if (!obj->value.IsObject()) {
-        throw DeadlyImportError("GLTF: Object with id \"" + std::string(id) + "\" is not a JSON object");
+        throw DeadlyImportError("GLTF: Object with id \"", id, "\" is not a JSON object");
     }
 
     // create an instance of the given type
@@ -317,13 +317,13 @@ inline void Buffer::Read(Value &obj, Asset &r) {
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
-                                        " bytes, but found " + to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
+                                        " bytes, but found ", to_string(dataURI.dataLength));
             }
         } else { // assume raw data
             if (statedLength != dataURI.dataLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
-                                        " bytes, but found " + to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
+                                        " bytes, but found ", to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
@@ -339,9 +339,9 @@ inline void Buffer::Read(Value &obj, Asset &r) {
                 delete file;
 
                 if (!ok)
-                    throw DeadlyImportError("GLTF: error while reading referenced file \"" + std::string(uri) + "\"");
+                    throw DeadlyImportError("GLTF: error while reading referenced file \"", uri, "\"");
             } else {
-                throw DeadlyImportError("GLTF: could not open referenced file \"" + std::string(uri) + "\"");
+                throw DeadlyImportError("GLTF: could not open referenced file \"", uri, "\"");
             }
         }
     }
@@ -372,8 +372,8 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu", (long long)pOffset);
-        throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
+        ai_snprintf(val, val_size, AI_SIZEFMT, pOffset);
+        throw DeadlyImportError("GLTF: incorrect offset value (", val, ") for marking encoded region.");
     }
 
     // Check length
@@ -382,8 +382,8 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
-        throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
+        ai_snprintf(val, val_size, AI_SIZEFMT "/" AI_SIZEFMT, pOffset, pEncodedData_Length);
+        throw DeadlyImportError("GLTF: encoded region with offset/length (", val, ") is out of range.");
     }
 
     // Add new region
@@ -403,7 +403,7 @@ inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
         }
     }
 
-    throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
+    throw DeadlyImportError("GLTF: EncodedRegion with ID: \"", pID, "\" not found.");
 }
 
 inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t *pReplace_Data, const size_t pReplace_Count) {
@@ -836,8 +836,8 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
 
     if (json_extensions == nullptr) goto mr_skip_extensions;
 
-    for (Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++) {
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+    for (Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++) {
         if (it_memb->name.GetString() == std::string("Open3DGC-compression")) {
             // Search for compressed data.
             // Compressed data contain description of part of "buffer" which is encoded. This part must be decoded and
@@ -851,7 +851,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
 /************** Read data from JSON-document **************/
 #define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut)                                                  \
     if (!ReadMember(*comp_data, pFieldName, pOut)) {                                                       \
-        throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pFieldName + "\"."); \
+        throw DeadlyImportError("GLTF: \"compressedData\" must has \"", pFieldName, "\"."); \
     }
 
             const char *mode_str;
@@ -880,18 +880,18 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             else if (strcmp(mode_str, "ascii") == 0)
                 ext_o3dgc->Binary = false;
             else
-                throw DeadlyImportError(std::string("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"") + mode_str + "\".");
+                throw DeadlyImportError("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"", mode_str, "\".");
 
             /************************ Decoding ************************/
             Decode_O3DGC(*ext_o3dgc, pAsset_Root);
             Extension.push_back(ext_o3dgc); // store info in mesh extensions list.
         } // if(it_memb->name.GetString() == "Open3DGC-compression")
         else
-#endif
         {
-            throw DeadlyImportError(std::string("GLTF: Unknown mesh extension: \"") + it_memb->name.GetString() + "\".");
+            throw DeadlyImportError("GLTF: Unknown mesh extension: \"", it_memb->name.GetString(), "\".");
         }
     } // for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); json_extensions++)
+#endif
 
 mr_skip_extensions:
 
@@ -923,24 +923,24 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
     size_t size_coordindex = ifs.GetNCoordIndex() * 3; // See float attributes note.
 
     if (primitives[0].indices->count != size_coordindex)
-        throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (" + to_string(size_coordindex) +
-                                ") not equal to uncompressed (" + to_string(primitives[0].indices->count) + ").");
+        throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (", to_string(size_coordindex),
+                                ") not equal to uncompressed (", to_string(primitives[0].indices->count), ").");
 
     size_coordindex *= sizeof(IndicesType);
     // Coordinates
     size_t size_coord = ifs.GetNCoord(); // See float attributes note.
 
     if (primitives[0].attributes.position[0]->count != size_coord)
-        throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (" + to_string(size_coord) +
-                                ") not equal to uncompressed (" + to_string(primitives[0].attributes.position[0]->count) + ").");
+        throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (", to_string(size_coord),
+                                ") not equal to uncompressed (", to_string(primitives[0].attributes.position[0]->count), ").");
 
     size_coord *= 3 * sizeof(float);
     // Normals
     size_t size_normal = ifs.GetNNormal(); // See float attributes note.
 
     if (primitives[0].attributes.normal[0]->count != size_normal)
-        throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (" + to_string(size_normal) +
-                                ") not equal to uncompressed (" + to_string(primitives[0].attributes.normal[0]->count) + ").");
+        throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (", to_string(size_normal),
+                                ") not equal to uncompressed (", to_string(primitives[0].attributes.normal[0]->count), ").");
 
     size_normal *= 3 * sizeof(float);
     // Additional attributes.
@@ -961,8 +961,8 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
                 // Check situation when encoded data contain texture coordinates but primitive not.
                 if (idx_texcoord < primitives[0].attributes.texcoord.size()) {
                     if (primitives[0].attributes.texcoord[idx]->count != tval)
-                        throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (" + to_string(tval) +
-                                                ") not equal to uncompressed (" + to_string(primitives[0].attributes.texcoord[idx]->count) + ").");
+                        throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (", to_string(tval),
+                                                ") not equal to uncompressed (", to_string(primitives[0].attributes.texcoord[idx]->count), ").");
 
                     idx_texcoord++;
                 } else {
@@ -971,7 +971,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 
                 break;
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
         }
 
         tval *= ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real); // After checking count of objects we can get size of array.
@@ -990,7 +990,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
                 break;
 
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
         }
 
         tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long); // See float attributes note.
@@ -1025,7 +1025,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 
                 break;
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
         }
     }
 
@@ -1039,7 +1039,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 
             // ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
         }
     }
 
@@ -1060,7 +1060,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 inline void Camera::Read(Value &obj, Asset & /*r*/) {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
-    const char *subobjId = (type == Camera::Orthographic) ? "ortographic" : "perspective";
+    const char *subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 
     Value *it = FindObject(obj, subobjId);
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");
@@ -1071,10 +1071,10 @@ inline void Camera::Read(Value &obj, Asset & /*r*/) {
         perspective.zfar = MemberOrDefault(*it, "zfar", 100.f);
         perspective.znear = MemberOrDefault(*it, "znear", 0.01f);
     } else {
-        ortographic.xmag = MemberOrDefault(obj, "xmag", 1.f);
-        ortographic.ymag = MemberOrDefault(obj, "ymag", 1.f);
-        ortographic.zfar = MemberOrDefault(obj, "zfar", 100.f);
-        ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        ortographic.xmag = MemberOrDefault(*it, "xmag", 1.f);
+        ortographic.ymag = MemberOrDefault(*it, "ymag", 1.f);
+        ortographic.zfar = MemberOrDefault(*it, "zfar", 100.f);
+        ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 
@@ -1231,7 +1231,7 @@ inline void AssetMetadata::Read(Document &doc) {
     }
 
     if (version.empty() || version[0] != '1') {
-        throw DeadlyImportError("GLTF: Unsupported glTF version: " + version);
+        throw DeadlyImportError("GLTF: Unsupported glTF version: ", version);
     }
 }
 
@@ -1309,7 +1309,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     if (doc.HasParseError()) {
         char buffer[32];
         ai_snprintf(buffer, 32, "%d", static_cast<int>(doc.GetErrorOffset()));
-        throw DeadlyImportError(std::string("GLTF: JSON parse error, offset ") + buffer + ": " + GetParseError_En(doc.GetParseError()));
+        throw DeadlyImportError("GLTF: JSON parse error, offset ", buffer, ": ", GetParseError_En(doc.GetParseError()));
     }
 
     if (!doc.IsObject()) {
@@ -1412,8 +1412,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#ifdef _WIN32
+#if _MSC_VER
 #    pragma warning(pop)
-#endif // WIN32
+#endif // _MSC_VER
 
 } // namespace glTF

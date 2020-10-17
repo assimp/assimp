@@ -74,9 +74,9 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 namespace Assimp {
 
-#if _MSC_VER > 1920
+#ifdef _MSC_VER
 #    pragma warning( disable : 4800 )
-#endif // _WIN32
+#endif // _MSC_VER
 
 
 // PostStepRegistry.cpp
@@ -140,6 +140,8 @@ void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::E
 #endif
 
 static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporters) {
+	(void)exporters;
+
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 	exporters.push_back(Exporter::ExportFormatEntry("collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada));
 #endif
@@ -179,11 +181,14 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 			aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices));
 #endif
 
-#ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
+#if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_EXPORTER)
 	exporters.push_back(Exporter::ExportFormatEntry("gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
 			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
 	exporters.push_back(Exporter::ExportFormatEntry("glb2", "GL Transmission Format v. 2 (binary)", "glb", &ExportSceneGLB2,
 			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
+#endif
+
+#if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_EXPORTER)
 	exporters.push_back(Exporter::ExportFormatEntry("gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
 			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
 	exporters.push_back(Exporter::ExportFormatEntry("glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,

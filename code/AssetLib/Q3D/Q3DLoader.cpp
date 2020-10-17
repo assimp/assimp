@@ -110,13 +110,12 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
 
     // The header is 22 bytes large
     if (stream.GetRemainingSize() < 22)
-        throw DeadlyImportError("File is either empty or corrupt: " + pFile);
+        throw DeadlyImportError("File is either empty or corrupt: ", pFile);
 
     // Check the file's signature
     if (ASSIMP_strincmp((const char *)stream.GetPtr(), "quick3Do", 8) &&
             ASSIMP_strincmp((const char *)stream.GetPtr(), "quick3Ds", 8)) {
-        throw DeadlyImportError("Not a Quick3D file. Signature string is: " +
-                                std::string((const char *)stream.GetPtr(), 8));
+        throw DeadlyImportError("Not a Quick3D file. Signature string is: ", std::string((const char *)stream.GetPtr(), 8));
     }
 
     // Print the file format version

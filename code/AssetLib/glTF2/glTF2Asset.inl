@@ -269,21 +269,21 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
 
     // read it from the JSON object
     if (!mDict) {
-        throw DeadlyImportError("GLTF: Missing section \"" + std::string(mDictId) + "\"");
+        throw DeadlyImportError("GLTF: Missing section \"", mDictId, "\"");
     }
 
     if (!mDict->IsArray()) {
-        throw DeadlyImportError("GLTF: Field is not an array \"" + std::string(mDictId) + "\"");
+        throw DeadlyImportError("GLTF: Field is not an array \"", mDictId, "\"");
     }
 
     Value &obj = (*mDict)[i];
 
     if (!obj.IsObject()) {
-        throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" is not a JSON object");
+        throw DeadlyImportError("GLTF: Object at index \"", to_string(i), "\" is not a JSON object");
     }
 
     if (mRecursiveReferenceCheck.find(i) != mRecursiveReferenceCheck.end()) {
-        throw DeadlyImportError("GLTF: Object at index \"" + to_string(i) + "\" has recursive reference to itself");
+        throw DeadlyImportError("GLTF: Object at index \"", to_string(i), "\" has recursive reference to itself");
     }
     mRecursiveReferenceCheck.insert(i);
 
@@ -381,13 +381,13 @@ inline void Buffer::Read(Value &obj, Asset &r) {
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
-                                        " bytes, but found " + to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
+                                        " bytes, but found ", to_string(dataURI.dataLength));
             }
         } else { // assume raw data
             if (statedLength != dataURI.dataLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
-                                        " bytes, but found " + to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
+                                        " bytes, but found ", to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
@@ -403,9 +403,9 @@ inline void Buffer::Read(Value &obj, Asset &r) {
                 delete file;
 
                 if (!ok)
-                    throw DeadlyImportError("GLTF: error while reading referenced file \"" + std::string(uri) + "\"");
+                    throw DeadlyImportError("GLTF: error while reading referenced file \"", uri, "\"");
             } else {
-                throw DeadlyImportError("GLTF: could not open referenced file \"" + std::string(uri) + "\"");
+                throw DeadlyImportError("GLTF: could not open referenced file \"", uri, "\"");
             }
         }
     }
@@ -436,8 +436,8 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu", (long long)pOffset);
-        throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
+        ai_snprintf(val, val_size, AI_SIZEFMT, pOffset);
+        throw DeadlyImportError("GLTF: incorrect offset value (", val, ") for marking encoded region.");
     }
 
     // Check length
@@ -446,8 +446,8 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 
         char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
-        throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
+        ai_snprintf(val, val_size, AI_SIZEFMT "/" AI_SIZEFMT, pOffset, pEncodedData_Length);
+        throw DeadlyImportError("GLTF: encoded region with offset/length (", val, ") is out of range.");
     }
 
     // Add new region
@@ -467,7 +467,7 @@ inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
         }
     }
 
-    throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
+    throw DeadlyImportError("GLTF: EncodedRegion with ID: \"", pID, "\" not found.");
 }
 
 inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t *pReplace_Data, const size_t pReplace_Count) {
@@ -731,8 +731,14 @@ void Accessor::ExtractData(T *&outData) {
     const size_t stride = bufferView && bufferView->byteStride ? bufferView->byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
-    ai_assert(elemSize <= targetElemSize);
-    ai_assert(count * stride <= (bufferView ? bufferView->byteLength : sparse->data.size()));
+
+    if (elemSize > targetElemSize) {
+        throw DeadlyImportError("GLTF: elemSize > targetElemSize");
+    }
+
+    if (count*stride > (bufferView ? bufferView->byteLength : sparse->data.size())) {
+        throw DeadlyImportError("GLTF: count*stride out of range");
+    }
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {
@@ -1042,10 +1048,10 @@ inline int Compare(const char *attr, const char (&str)[N]) {
     return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
 }
 
-#ifdef _WIN32
+#if _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4706)
-#endif // _WIN32
+#endif // _MSC_VER
 
 inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
     if ((pos = Compare(attr, "POSITION"))) {
@@ -1458,7 +1464,7 @@ inline void AssetMetadata::Read(Document &doc) {
     }
 
     if (version.empty() || version[0] != '2') {
-        throw DeadlyImportError("GLTF: Unsupported glTF version: " + version);
+        throw DeadlyImportError("GLTF: Unsupported glTF version: ", version);
     }
 }
 
@@ -1570,7 +1576,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     if (doc.HasParseError()) {
         char buffer[32];
         ai_snprintf(buffer, 32, "%d", static_cast<int>(doc.GetErrorOffset()));
-        throw DeadlyImportError(std::string("GLTF: JSON parse error, offset ") + buffer + ": " + GetParseError_En(doc.GetParseError()));
+        throw DeadlyImportError("GLTF: JSON parse error, offset ", buffer, ": ", GetParseError_En(doc.GetParseError()));
     }
 
     if (!doc.IsObject()) {
@@ -1723,8 +1729,8 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     return id;
 }
 
-#ifdef _WIN32
-#pragma warning(pop)
-#endif // _WIN32
+#if _MSC_VER
+#   pragma warning(pop)
+#endif // _MSC_VER
 
 } // namespace glTF2

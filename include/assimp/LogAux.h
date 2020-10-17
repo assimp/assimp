@@ -61,9 +61,10 @@ template<class TDeriving>
 class LogFunctions {
 public:
     // ------------------------------------------------------------------------------------------------
-    static void ThrowException(const std::string& msg)
+    template<typename... T>
+    static void ThrowException(T&&... args)
     {
-        throw DeadlyImportError(Prefix()+msg);
+        throw DeadlyImportError(Prefix(), args...);
     }
 
     // ------------------------------------------------------------------------------------------------

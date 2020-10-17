@@ -149,7 +149,7 @@ bool isValidCustomDataType(const int cdtype) {
 
 bool readCustomData(std::shared_ptr<ElemBase> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
     if (!isValidCustomDataType(cdtype)) {
-        throw Error((Formatter::format(), "CustomData.type ", cdtype, " out of index"));
+        throw Error("CustomData.type ", cdtype, " out of index");
     }
 
     const CustomDataTypeDescription cdtd = customDataTypeDescriptions[cdtype];

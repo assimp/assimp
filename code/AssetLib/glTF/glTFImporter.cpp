@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
 
 #include "AssetLib/glTF/glTFImporter.h"
 #include "AssetLib/glTF/glTFAsset.h"
@@ -215,8 +215,8 @@ void glTFImporter::ImportMeshes(glTF::Asset &r) {
 
         // Check if mesh extensions is used
         if (mesh.Extension.size() > 0) {
-            for (Mesh::SExtension *cur_ext : mesh.Extension) {
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+            for (Mesh::SExtension *cur_ext : mesh.Extension) {
                 if (cur_ext->Type == Mesh::SExtension::EType::Compression_Open3DGC) {
                     // Limitations for meshes when using Open3DGC-compression.
                     // It's a current limitation of sp... Specification have not this part still - about mesh compression. Why only one primitive?
@@ -233,12 +233,12 @@ void glTFImporter::ImportMeshes(glTF::Asset &r) {
 
                     buf->EncodedRegion_SetCurrent(mesh.id);
                 } else
-#endif
                 {
-                    throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"" + to_string(cur_ext->Type) +
+                    throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"", to_string(cur_ext->Type),
                                             "\"), only Open3DGC is supported.");
                 }
             }
+#endif
         } // if(mesh.Extension.size() > 0)
 
         meshOffsets.push_back(k);

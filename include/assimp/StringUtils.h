@@ -52,6 +52,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdarg.h>
 #include <cstdlib>
+#include <algorithm> 
+#include <cctype>
+#include <locale>
+
+#ifdef _MSC_VER
+#   define AI_SIZEFMT "%Iu"
+#else
+#   define AI_SIZEFMT "%zu"
+#endif
 
 ///	@fn		ai_snprintf
 ///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.
@@ -87,6 +96,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		return count;
 	}
 
+#elif defined(__MINGW32__)
+#   define ai_snprintf __mingw_snprintf
 #else
 #   define ai_snprintf snprintf
 #endif
@@ -150,7 +161,7 @@ std::string DecimalToHexa( T toConvert ) {
 ///	@param	g   aiColor.g
 ///	@param	b   aiColor.b
 ///	@param	a   aiColor.a
-///	@param	with_head   # 
+///	@param	with_head   #
 ///	@return	The hexadecimal string, is empty in case of an error.
 AI_FORCE_INLINE std::string Rgba2Hex(int r, int g, int b, int a, bool with_head) {
 	std::stringstream ss;
@@ -158,8 +169,28 @@ AI_FORCE_INLINE std::string Rgba2Hex(int r, int g, int b, int a, bool with_head)
 		ss << "#";
     }
 	ss << std::hex << (r << 24 | g << 16 | b << 8 | a);
-	
+
     return ss.str();
+}
+
+// trim from start (in place)
+inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+inline void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
 }
 
 #endif // INCLUDED_AI_STRINGUTILS_H

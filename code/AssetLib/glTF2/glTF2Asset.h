@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
 
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
 #include <assimp/Exceptional.h>
 
@@ -62,18 +62,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 #if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
-
-#ifndef RAPIDJSON_NOMEMBERITERATORCLASS
-#define RAPIDJSON_NOMEMBERITERATORCLASS
-#endif 
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -202,7 +194,7 @@ inline unsigned int ComponentTypeSize(ComponentType t) {
     case ComponentType_UNSIGNED_BYTE:
         return 1;
     default:
-        throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
+        throw DeadlyImportError("GLTF: Unsupported Component Type ", to_string(t));
     }
 }
 
@@ -804,7 +796,7 @@ struct CustomExtension : public Object {
     Nullable<std::vector<CustomExtension>> mValues;
 
     operator bool() const {
-        return Size();
+        return Size() != 0;
     }
 
     size_t Size() const {

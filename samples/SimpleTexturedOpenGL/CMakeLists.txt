@@ -34,6 +34,8 @@ ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h
 )
 
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_simpletexturedogl)
+
 SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES( assimp_simpletexturedogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} )

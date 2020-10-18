@@ -74,7 +74,7 @@ public:
      */
     enum LogSeverity {
         NORMAL,     //!< Normal granularity of logging
-        DEBUG,      //!< Debug messages will be logged, but not verbose debug messages.
+        DEBUGING,      //!< Debug messages will be logged, but not verbose debug messages.
         VERBOSE     //!< All messages will be logged
     };
 

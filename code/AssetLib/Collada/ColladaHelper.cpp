@@ -1,5 +1,3 @@
-/** Helper structures for the Collada loader */
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
@@ -40,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+/** Helper structures for the Collada loader */
 
 #include "ColladaHelper.h"
 

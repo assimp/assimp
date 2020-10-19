@@ -117,10 +117,6 @@ OPTION ( ASSIMP_UBSAN
   "Enable Undefined Behavior sanitizer."
   OFF
 )
-OPTION ( ASSIMP_SYSTEM_IRRXML
-  "Use system installed Irrlicht/IrrXML library."
-  OFF
-)
 OPTION ( ASSIMP_BUILD_DOCS
   "Build documentation using Doxygen."
   OFF
@@ -214,7 +210,7 @@ IF(NOT GIT_COMMIT_HASH)
 ENDIF()
 
 IF(ASSIMP_DOUBLE_PRECISION)
-    ADD_DEFINITIONS(-DASSIMP_DOUBLE_PRECISION)
+  ADD_DEFINITIONS(-DASSIMP_DOUBLE_PRECISION)
 ENDIF()
 
 CONFIGURE_FILE(
@@ -357,7 +353,7 @@ ELSE()
 ENDIF()
 
 # Only generate this target if no higher-level project already has
-IF (NOT TARGET uninstall)
+IF (NOT TARGET uninstall AND ASSIMP_INSTALL)
   # add make uninstall capability
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
   ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
@@ -454,11 +450,6 @@ ENDIF()
 
 IF( ASSIMP_BUILD_DOCS )
   ADD_SUBDIRECTORY(doc)
-ENDIF()
-
-# Look for system installed irrXML
-IF ( ASSIMP_SYSTEM_IRRXML )
-  FIND_PACKAGE( IrrXML REQUIRED )
 ENDIF()
 
 # Search for external dependencies, and build them from source if not found
@@ -587,9 +578,9 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
-IF(NOT ASSIMP_HUNTER_ENABLED)
+#IF(NOT ASSIMP_HUNTER_ENABLED)
   ADD_SUBDIRECTORY(contrib)
-ENDIF()
+#ENDIF()
 
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )

@@ -48,6 +48,7 @@ if(NOT ASSIMP_HUNTER_ENABLED)
   INCLUDE_DIRECTORIES(
     ${Assimp_SOURCE_DIR}/contrib/gtest/include
     ${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/contrib/pugixml/src
   )
 endif()
 
@@ -94,6 +95,7 @@ SET( COMMON
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp
   unit/Common/utAssertHandler.cpp
+  unit/Common/utXmlParser.cpp
 )
 
 SET( IMPORTERS
@@ -210,7 +212,7 @@ add_executable( unit
 	${IMPORTERS}
 	${MATERIAL}
 	${MATH}
-    ${POST_PROCESSES}
+  ${POST_PROCESSES}
 )
 
 if(ASSIMP_HUNTER_ENABLED)

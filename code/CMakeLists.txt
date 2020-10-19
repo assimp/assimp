@@ -137,7 +137,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/XMLTools.h
   ${HEADER_PATH}/IOStreamBuffer.h
   ${HEADER_PATH}/CreateAnimMesh.h
-  ${HEADER_PATH}/irrXMLWrapper.h
+  ${HEADER_PATH}/XmlParser.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
@@ -744,9 +744,6 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
-
 ADD_ASSIMP_IMPORTER( Q3D
   AssetLib/Q3D/Q3DLoader.cpp
   AssetLib/Q3D/Q3DLoader.h
@@ -801,21 +798,6 @@ ADD_ASSIMP_IMPORTER( X
 ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter.cpp
   AssetLib/X3D/X3DImporter.hpp
-  AssetLib/X3D/X3DImporter_Geometry2D.cpp
-  AssetLib/X3D/X3DImporter_Geometry3D.cpp
-  AssetLib/X3D/X3DImporter_Group.cpp
-  AssetLib/X3D/X3DImporter_Light.cpp
-  AssetLib/X3D/X3DImporter_Macro.hpp
-  AssetLib/X3D/X3DImporter_Metadata.cpp
-  AssetLib/X3D/X3DImporter_Networking.cpp
-  AssetLib/X3D/X3DImporter_Node.hpp
-  AssetLib/X3D/X3DImporter_Postprocess.cpp
-  AssetLib/X3D/X3DImporter_Rendering.cpp
-  AssetLib/X3D/X3DImporter_Shape.cpp
-  AssetLib/X3D/X3DImporter_Texturing.cpp
-  AssetLib/X3D/FIReader.hpp
-  AssetLib/X3D/FIReader.cpp
-  AssetLib/X3D/X3DVocabulary.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -865,16 +847,6 @@ if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
 endif()
 
-#ADD_ASSIMP_IMPORTER( STEP
-#    Step/STEPFile.h
-#    Importer/StepFile/StepFileImporter.h
-#    Importer/StepFile/StepFileImporter.cpp
-#    Importer/StepFile/StepFileGen1.cpp
-#    Importer/StepFile/StepFileGen2.cpp
-#    Importer/StepFile/StepFileGen3.cpp
-#    Importer/StepFile/StepReaderGen.h
-#)
-
 if ((NOT ASSIMP_NO_EXPORT) OR (NOT ASSIMP_EXPORTERS_ENABLED STREQUAL ""))
 	SET( Exporter_SRCS
 	  Common/Exporter.cpp
@@ -889,12 +861,16 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-# irrXML
+# pugixml
 IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(irrXML)
-  find_package(irrXML CONFIG REQUIRED)
+  hunter_add_package(pugixml)
+  find_package(pugixml CONFIG REQUIRED)
 ELSE()
-  # irrXML already included in contrib directory by parent CMakeLists.txt.
+  SET( Pugixml_SRCS
+    ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.hpp
+  )
+  SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
 # utf8
@@ -1055,6 +1031,7 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
   INCLUDE_DIRECTORIES( "../contrib" )
+  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
   ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
 ENDIF()
@@ -1110,13 +1087,13 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  ${IrrXML_SRCS}
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Pugixml_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1158,7 +1135,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
       polyclipping::polyclipping
-      irrXML::irrXML
       openddlparser::openddl_parser
       poly2tri::poly2tri
       minizip::minizip
@@ -1166,9 +1142,10 @@ IF(ASSIMP_HUNTER_ENABLED)
       RapidJSON::rapidjson
       utf8cpp
       zip::zip
+      pugixml
   )
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
+  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)

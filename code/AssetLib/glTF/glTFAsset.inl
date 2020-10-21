@@ -1060,7 +1060,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 inline void Camera::Read(Value &obj, Asset & /*r*/) {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
 
-    const char *subobjId = (type == Camera::Orthographic) ? "ortographic" : "perspective";
+    const char *subobjId = (type == Camera::Orthographic) ? "orthographic" : "perspective";
 
     Value *it = FindObject(obj, subobjId);
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");
@@ -1071,10 +1071,10 @@ inline void Camera::Read(Value &obj, Asset & /*r*/) {
         perspective.zfar = MemberOrDefault(*it, "zfar", 100.f);
         perspective.znear = MemberOrDefault(*it, "znear", 0.01f);
     } else {
-        ortographic.xmag = MemberOrDefault(obj, "xmag", 1.f);
-        ortographic.ymag = MemberOrDefault(obj, "ymag", 1.f);
-        ortographic.zfar = MemberOrDefault(obj, "zfar", 100.f);
-        ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        ortographic.xmag = MemberOrDefault(*it, "xmag", 1.f);
+        ortographic.ymag = MemberOrDefault(*it, "ymag", 1.f);
+        ortographic.zfar = MemberOrDefault(*it, "zfar", 100.f);
+        ortographic.znear = MemberOrDefault(*it, "znear", 0.01f);
     }
 }
 

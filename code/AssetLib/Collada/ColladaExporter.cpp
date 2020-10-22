@@ -573,7 +573,7 @@ bool ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial &
             index_str = index_str.substr(1, std::string::npos);
 
             try {
-                index = (unsigned int)strtoul10_64(index_str.c_str());
+                index = (unsigned int)strtoul10_64<DeadlyExportError>(index_str.c_str());
             } catch (std::exception &error) {
                 throw DeadlyExportError(error.what());
             }

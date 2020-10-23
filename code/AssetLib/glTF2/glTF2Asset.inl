@@ -554,6 +554,16 @@ inline void BufferView::Read(Value &obj, Asset &r) {
     byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     byteLength = MemberOrDefault(obj, "byteLength", size_t(0));
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
+
+    // Check length
+    if ((byteOffset + byteLength) > buffer->byteLength) {
+        const uint8_t val_size = 64;
+
+        char val[val_size];
+
+        ai_snprintf(val, val_size, "%llu, %llu", (unsigned long long)byteOffset, (unsigned long long)byteLength);
+        throw DeadlyImportError("GLTF: Buffer view with offset/length (", val, ") is out of range.");
+    }
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
@@ -626,6 +636,17 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+
+    // Check length
+    unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
+    if ((byteOffset + byteLength) > bufferView->byteLength || (bufferView->byteOffset + byteOffset + byteLength) > bufferView->buffer->byteLength) {
+        const uint8_t val_size = 64;
+
+        char val[val_size];
+
+        ai_snprintf(val, val_size, "%llu, %llu", (unsigned long long)byteOffset, (unsigned long long)byteLength);
+        throw DeadlyImportError("GLTF: Accessor with offset/length (", val, ") is out of range.");
+    }
 
     if (Value *sparseValue = FindObject(obj, "sparse")) {
         sparse.reset(new Sparse);
@@ -1115,7 +1136,10 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     Mesh::AccessorList *vec = 0;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
-                        if ((*vec).size() <= idx) (*vec).resize(idx + 1);
+                        if ((*vec).size() != idx) {
+                            throw DeadlyImportError("GLTF: Invalid attribute: ", attr, ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
+                        }
+                        (*vec).resize(idx + 1);
                         (*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
                     }
                 }

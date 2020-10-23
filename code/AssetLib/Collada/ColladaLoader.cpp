@@ -55,12 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
-#include <math.h>
-#include <time.h>
-#include <algorithm>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
-#include <memory>
+
 #include <numeric>
 
 namespace Assimp {
@@ -331,13 +328,15 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Col
 // Resolve UV channels
 void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler &sampler, const Collada::SemanticMappingTable &table) {
     std::map<std::string, Collada::InputSemanticMapEntry>::const_iterator it = table.mMap.find(sampler.mUVChannel);
-    if (it != table.mMap.end()) {
-        if (it->second.mType != Collada::IT_Texcoord) {
-            ASSIMP_LOG_ERROR("Collada: Unexpected effect input mapping");
-        }
-
-        sampler.mUVId = it->second.mSet;
+    if (it == table.mMap.end()) {
+        return;
     }
+
+    if (it->second.mType != Collada::IT_Texcoord) {
+        ASSIMP_LOG_ERROR("Collada: Unexpected effect input mapping");
+    }
+
+    sampler.mUVId = it->second.mSet;
 }
 
 // ------------------------------------------------------------------------------------------------

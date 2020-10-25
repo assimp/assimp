@@ -106,51 +106,18 @@ class BlenderImporter : public BaseImporter, public LogFunctions<BlenderImporter
 public:
     BlenderImporter();
     ~BlenderImporter();
-
-public:
-
-    // --------------------
-    bool CanRead( const std::string& pFile,
-        IOSystem* pIOHandler,
-        bool checkSig
-    ) const;
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 protected:
-
-    // --------------------
     const aiImporterDesc* GetInfo () const;
-
-    // --------------------
     void GetExtensionList(std::set<std::string>& app);
-
-    // --------------------
     void SetupProperties(const Importer* pImp);
-
-    // --------------------
-    void InternReadFile( const std::string& pFile,
-        aiScene* pScene,
-        IOSystem* pIOHandler
-    );
-
-    // --------------------
-    void ParseBlendFile(Blender::FileDatabase& out,
-        std::shared_ptr<IOStream> stream
-    );
-
-    // --------------------
-    void ExtractScene(Blender::Scene& out,
-        const Blender::FileDatabase& file
-    );
-
-    // --------------------
-    void ConvertBlendFile(aiScene* out,
-        const Blender::Scene& in,
-        const Blender::FileDatabase& file
-    );
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    void ParseBlendFile(Blender::FileDatabase& out, std::shared_ptr<IOStream> stream);
+    void ExtractScene(Blender::Scene& out, const Blender::FileDatabase& file);
+    void ConvertBlendFile(aiScene* out, const Blender::Scene& in, const Blender::FileDatabase& file);
 
 private:
-
-    // --------------------
     aiNode* ConvertNode(const Blender::Scene& in,
         const Blender::Object* obj,
         Blender::ConversionData& conv_info,

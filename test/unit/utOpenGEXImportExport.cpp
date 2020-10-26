@@ -48,7 +48,7 @@ using namespace Assimp;
 
 class utOpenGEXImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0);
         return nullptr != scene;

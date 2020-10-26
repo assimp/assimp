@@ -100,7 +100,7 @@ static bool isUnsignedIntegerType(Value::ValueType integerType) {
 }
 
 static DDLNode *createDDLNode(Text *id, OpenDDLParser *parser) {
-    if (nullptr == id || nullptr == parser) {
+    if (nullptr == id || nullptr == parser || id->m_buffer == nullptr) {
         return nullptr;
     }
 
@@ -543,6 +543,9 @@ char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
 
     // ignore blanks
     in = lookForNextToken(in, end);
+    if (in == end) {
+        return in;
+    }
 
     // staring with a number is forbidden
     if (isNumeric<const char>(*in)) {
@@ -861,7 +864,7 @@ char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
     }
 
     in = lookForNextToken(in, end);
-    Text *id(nullptr);
+    Text *id = nullptr;
     in = parseIdentifier(in, end, &id);
     if (nullptr != id) {
         in = lookForNextToken(in, end);

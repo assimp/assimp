@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014-2015 Kim Kulling
+Copyright (c) 2014-2020 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,7 +38,7 @@ public:
     /// @brief  The class destructor, virtual.
     virtual ~StreamFormatterBase();
 
-    /// @brief  Will format the sring and return the new formatted result.
+    /// @brief  Will format the string and return the new formatted result.
     /// @param  statement   [in] The string to reformat.
     /// @return The reformatted result.
     virtual std::string format(const std::string &statement);
@@ -52,7 +52,7 @@ class DLL_ODDLPARSER_EXPORT IOStreamBase {
 public:
     /// @brief  The class constructor with the formatter.
     /// @param  formatter   [in] The formatter to use.
-    explicit IOStreamBase(StreamFormatterBase *formatter = ddl_nullptr);
+    explicit IOStreamBase(StreamFormatterBase *formatter = nullptr);
 
     /// @brief  The class destructor, virtual.
     virtual ~IOStreamBase();
@@ -74,7 +74,7 @@ public:
     /// @param  sizeToRead  [in] The size to read in bytes.
     /// @param  statement   [out] The read statements.
     /// @return The bytes read from the stream.
-    virtual size_t read( size_t sizeToRead, std::string &statement );
+    virtual size_t read(size_t sizeToRead, std::string &statement);
 
     /// @brief  Will write a string into the stream.
     /// @param  statement  [in] The string to write.

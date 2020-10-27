@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-// Actually just a dummy, used by the compiler to build the precompiled header.
+// Actually just a dummy, used by the compiler to build the pre-compiled header.
 
 #include "ScenePrivate.h"
 #include <assimp/scene.h>
@@ -51,13 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // --------------------------------------------------------------------------------
 // Legal information string - don't remove this.
 static const char *LEGAL_INFORMATION =
-
         "Open Asset Import Library (Assimp).\n"
         "A free C/C++ library to import various 3D file formats into applications\n\n"
-
         "(c) 2006-2020, assimp team\n"
         "License under the terms and conditions of the 3-clause BSD license\n"
-        "http://assimp.org\n";
+        "https://www.assimp.org\n";
 
 // ------------------------------------------------------------------------------------------------
 // Get legal string

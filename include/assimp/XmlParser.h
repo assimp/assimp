@@ -179,7 +179,7 @@ public:
         return true;
     }
 
-    static inline bool getFloatAttribute( XmlNode &xmlNode, const char *name, float &val ) {
+    static inline bool getFloatAttribute(XmlNode &xmlNode, const char *name, float &val ) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {
             return false;
@@ -188,6 +188,16 @@ public:
         val = attr.as_float();
         return true;
 
+    }
+
+    static inline bool getDoubleAttribute( XmlNode &xmlNode, const char *name, double &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+
+        val = attr.as_double();
+        return true;
     }
 
     static inline bool getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val) {

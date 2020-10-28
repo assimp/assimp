@@ -243,8 +243,6 @@ protected:
     void ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive);
 
 protected:
-    void ReportWarning(const char *msg, ...);
-
     /** Calculates the resulting transformation from all the given transform steps */
     aiMatrix4x4 CalculateResultTransform(const std::vector<Collada::Transform> &pTransforms) const;
 
@@ -260,56 +258,55 @@ protected:
     std::string mFileName;
 
     // XML reader, member for everyday use
-    //irr::io::IrrXMLReader *mReader;
     XmlParser mXmlParser;
 
     /** All data arrays found in the file by ID. Might be referred to by actually
          everyone. Collada, you are a steaming pile of indirection. */
-    typedef std::map<std::string, Collada::Data> DataLibrary;
+    using DataLibrary = std::map<std::string, Collada::Data> ;
     DataLibrary mDataLibrary;
 
     /** Same for accessors which define how the data in a data array is accessed. */
-    typedef std::map<std::string, Collada::Accessor> AccessorLibrary;
+    using AccessorLibrary = std::map<std::string, Collada::Accessor> ;
     AccessorLibrary mAccessorLibrary;
 
     /** Mesh library: mesh by ID */
-    typedef std::map<std::string, Collada::Mesh *> MeshLibrary;
+    using MeshLibrary = std::map<std::string, Collada::Mesh *>;
     MeshLibrary mMeshLibrary;
 
     /** node library: root node of the hierarchy part by ID */
-    typedef std::map<std::string, Collada::Node *> NodeLibrary;
+    using NodeLibrary = std::map<std::string, Collada::Node *>;
     NodeLibrary mNodeLibrary;
 
     /** Image library: stores texture properties by ID */
-    typedef std::map<std::string, Collada::Image> ImageLibrary;
+    using ImageLibrary = std::map<std::string, Collada::Image> ;
     ImageLibrary mImageLibrary;
 
     /** Effect library: surface attributes by ID */
-    typedef std::map<std::string, Collada::Effect> EffectLibrary;
+    using EffectLibrary = std::map<std::string, Collada::Effect> ;
     EffectLibrary mEffectLibrary;
 
     /** Material library: surface material by ID */
-    typedef std::map<std::string, Collada::Material> MaterialLibrary;
+    using MaterialLibrary = std::map<std::string, Collada::Material> ;
     MaterialLibrary mMaterialLibrary;
 
     /** Light library: surface light by ID */
-    typedef std::map<std::string, Collada::Light> LightLibrary;
+    using LightLibrary = std::map<std::string, Collada::Light> ;
     LightLibrary mLightLibrary;
 
     /** Camera library: surface material by ID */
-    typedef std::map<std::string, Collada::Camera> CameraLibrary;
+    using CameraLibrary = std::map<std::string, Collada::Camera> ;
     CameraLibrary mCameraLibrary;
 
     /** Controller library: joint controllers by ID */
-    typedef std::map<std::string, Collada::Controller> ControllerLibrary;
+    using ControllerLibrary = std::map<std::string, Collada::Controller> ;
     ControllerLibrary mControllerLibrary;
 
     /** Animation library: animation references by ID */
-    typedef std::map<std::string, Collada::Animation *> AnimationLibrary;
+    using AnimationLibrary = std::map<std::string, Collada::Animation *> ;
     AnimationLibrary mAnimationLibrary;
 
     /** Animation clip library: clip animation references by ID */
-    typedef std::vector<std::pair<std::string, std::vector<std::string>>> AnimationClipLibrary;
+    using AnimationClipLibrary = std::vector<std::pair<std::string, std::vector<std::string>>> ;
     AnimationClipLibrary mAnimationClipLibrary;
 
     /** Pointer to the root node. Don't delete, it just points to one of
@@ -333,13 +330,6 @@ protected:
     /** Collada file format version */
     Collada::FormatVersion mFormat;
 };
-
-// ------------------------------------------------------------------------------------------------
-// Check for element match
-/*inline bool ColladaParser::IsElement(const char *pName) const {
-    ai_assert(mReader->getNodeType() == irr::io::EXN_ELEMENT);
-    return ::strcmp(mReader->getNodeName(), pName) == 0;
-}*/
 
 // ------------------------------------------------------------------------------------------------
 // Finds the item in the given library by its reference, throws if not found

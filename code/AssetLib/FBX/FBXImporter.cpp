@@ -188,6 +188,11 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 		// size relative to cm
 		float size_relative_to_cm = doc.GlobalSettings().UnitScaleFactor();
+        if (size_relative_to_cm == 0.0)
+        {
+			// BaseImporter later asserts that fileScale is non-zero.
+			ThrowException("The UnitScaleFactor must be non-zero");
+        }
 
 		// Set FBX file scale is relative to CM must be converted to M for
 		// assimp universal format (M)

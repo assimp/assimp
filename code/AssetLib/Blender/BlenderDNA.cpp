@@ -139,7 +139,6 @@ void DNAParser::Parse() {
         dna.structures.push_back(Structure());
         Structure &s = dna.structures.back();
         s.name = types[n].name;
-        //s.index = dna.structures.size()-1;
 
         n = stream.GetI2();
         s.fields.reserve(n);

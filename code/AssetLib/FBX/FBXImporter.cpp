@@ -130,6 +130,7 @@ void FBXImporter::SetupProperties(const Importer *pImp) {
 	settings.readCameras = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_CAMERAS, true);
 	settings.readLights = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_LIGHTS, true);
 	settings.readAnimations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, true);
+	settings.readWeights = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_WEIGHTS, true);
 	settings.strictMode = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, false);
 	settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
 	settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);

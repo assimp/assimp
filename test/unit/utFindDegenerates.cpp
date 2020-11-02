@@ -203,6 +203,4 @@ TEST_F(FindDegeneratesProcessTest, meshRemoval) {
     EXPECT_EQ(scene->mMeshes[0], meshWhichSurvives);
     EXPECT_EQ(scene->mRootNode->mNumMeshes, 1);
     EXPECT_EQ(scene->mRootNode->mMeshes[0], 0);    
-
-    EXPECT_EQ(mMesh->mNumUVComponents[1] - 100, mMesh->mNumFaces);
 }

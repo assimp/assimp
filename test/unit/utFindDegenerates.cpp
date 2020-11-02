@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../include/assimp/scene.h"
 #include "PostProcessing/FindDegenerates.h"
 
+#include <memory>
+
 using namespace std;
 using namespace Assimp;
 
@@ -153,7 +155,7 @@ namespace
 {
     std::unique_ptr<aiMesh> getDegenerateMesh()
     {
-        std::unique_ptr<aiMesh> mesh = std::make_unique<aiMesh>();
+        std::unique_ptr<aiMesh> mesh(new aiMesh);
         mesh->mNumVertices = 2;
         mesh->mVertices = new aiVector3D[2];
         mesh->mVertices[0] = aiVector3D{ 0.0f, 0.0f, 0.0f };
@@ -174,7 +176,7 @@ TEST_F(FindDegeneratesProcessTest, meshRemoval) {
     mProcess->EnableInstantRemoval(true);
     mProcess->ExecuteOnMesh(mMesh);
 
-    std::unique_ptr<aiScene> scene = std::make_unique<aiScene>();
+    std::unique_ptr<aiScene> scene(new aiScene);
     scene->mNumMeshes = 5;
     scene->mMeshes = new aiMesh*[5];
 

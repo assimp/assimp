@@ -453,11 +453,16 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 aim->mNumAnimMeshes = (unsigned int)targets.size();
                 aim->mAnimMeshes = new aiAnimMesh *[aim->mNumAnimMeshes];
                 for (size_t i = 0; i < targets.size(); i++) {
-                    aim->mAnimMeshes[i] = aiCreateAnimMesh(aim);
+                    bool needPositions = targets[i].position.size() > 0;
+                    bool needNormals = targets[i].normal.size() > 0;
+                    bool needTangents = targets[i].tangent.size() > 0;
+                    // GLTF morph does not support colors and texCoords
+                    aim->mAnimMeshes[i] = aiCreateAnimMesh(aim,
+                            needPositions, needNormals, needTangents, false, false);
                     aiAnimMesh &aiAnimMesh = *(aim->mAnimMeshes[i]);
                     Mesh::Primitive::Target &target = targets[i];
 
-                    if (target.position.size() > 0) {
+                    if (needPositions) {
                         aiVector3D *positionDiff = nullptr;
                         target.position[0]->ExtractData(positionDiff);
                         for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
@@ -465,7 +470,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         }
                         delete[] positionDiff;
                     }
-                    if (target.normal.size() > 0) {
+                    if (needNormals) {
                         aiVector3D *normalDiff = nullptr;
                         target.normal[0]->ExtractData(normalDiff);
                         for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
@@ -473,7 +478,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         }
                         delete[] normalDiff;
                     }
-                    if (target.tangent.size() > 0) {
+                    if (needTangents) {
                         Tangent *tangent = nullptr;
                         attr.tangent[0]->ExtractData(tangent);
 

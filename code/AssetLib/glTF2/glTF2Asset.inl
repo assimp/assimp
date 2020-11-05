@@ -758,7 +758,7 @@ template <class T>
 void Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
     if (!data) {
-        throw DeadlyImportError("GLTF2: data is nullptr when extracting data from ", getContextForErrorMessages(id, name));
+        throw DeadlyImportError("GLTF2: data is null when extracting data from ", getContextForErrorMessages(id, name));
     }
 
     const size_t elemSize = GetElementSize();

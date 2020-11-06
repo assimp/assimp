@@ -835,9 +835,11 @@ template <class T>
 T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
     ai_assert(i * stride < accessor.bufferView->byteLength);
+    // Ensure that the memcpy doesn't overwrite the local.
+    const size_t sizeToCopy = std::min(elemSize, sizeof(T));
     T value = T();
-    memcpy(&value, data + i * stride, elemSize);
-    //value >>= 8 * (sizeof(T) - elemSize);
+    // Assume platform endianness matches GLTF binary data (which is little-endian).
+    memcpy(&value, data + i * stride, sizeToCopy);
     return value;
 }
 
@@ -866,6 +868,14 @@ inline void Image::Read(Value &obj, Asset &r) {
             }
         } else if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
             this->bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+            if (Value *mtype = FindString(obj, "mimeType")) {
+                this->mimeType = mtype->GetString();
+            }
+            if (!this->bufferView || this->mimeType.empty())
+            {
+                throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " does not have a URI, so it must have a valid bufferView and mimetype");
+            }
+
             Ref<Buffer> buffer = this->bufferView->buffer;
 
             this->mDataLength = this->bufferView->byteLength;
@@ -873,10 +883,10 @@ inline void Image::Read(Value &obj, Asset &r) {
 
             this->mData.reset(new uint8_t[this->mDataLength]);
             memcpy(this->mData.get(), buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
-
-            if (Value *mtype = FindString(obj, "mimeType")) {
-                this->mimeType = mtype->GetString();
-            }
+        }
+        else
+        {
+            throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " should have either a URI of a bufferView and mimetype" );
         }
     }
 }

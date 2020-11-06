@@ -638,8 +638,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
 
-    if (bufferView)
-    {
+    if (bufferView) {
         // Check length
         unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
         if ((byteOffset + byteLength) > bufferView->byteLength || (bufferView->byteOffset + byteOffset + byteLength) > bufferView->buffer->byteLength) {
@@ -742,11 +741,9 @@ inline void CopyData(size_t count,
     }
 }
 
-inline std::string getContextForErrorMessages(const std::string& id, const std::string& name)
-{
+inline std::string getContextForErrorMessages(const std::string& id, const std::string& name) {
     std::string context = id;
-    if (!name.empty())
-    {
+    if (!name.empty()) {
         context += " (\"" + name + "\")";
     }
     return context;

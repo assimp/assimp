@@ -352,7 +352,8 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
 
         if (positionBuffer.empty()) {
             pMesh->mNumFaces = 0;
-            ASSIMP_LOG_WARN("STL: mesh is empty or invalid; no data loaded");
+            throw DeadlyImportError("STL: mesh is empty or invalid; no data loaded");
+            //ASSIMP_LOG_WARN("STL: mesh is empty or invalid; no data loaded");
         }
         if (positionBuffer.size() % 3 != 0) {
             pMesh->mNumFaces = 0;

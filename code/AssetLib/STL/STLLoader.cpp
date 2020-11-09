@@ -353,7 +353,6 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         if (positionBuffer.empty()) {
             pMesh->mNumFaces = 0;
             throw DeadlyImportError("STL: mesh is empty or invalid; no data loaded");
-            //ASSIMP_LOG_WARN("STL: mesh is empty or invalid; no data loaded");
         }
         if (positionBuffer.size() % 3 != 0) {
             pMesh->mNumFaces = 0;
@@ -364,9 +363,9 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             throw DeadlyImportError("Normal buffer size does not match position buffer size");
         }
 
-        // only process positionbuffer when filled, else exception when accessing with index operator
+        // only process position buffer when filled, else exception when accessing with index operator
         // see line 353: only warning is triggered
-        // see line 373(now): access to empty positionbuffer with index operator forced exception
+        // see line 373(now): access to empty position buffer with index operator forced exception
         if (!positionBuffer.empty()) {
             pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
             pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());

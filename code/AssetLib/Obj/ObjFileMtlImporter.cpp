@@ -144,7 +144,7 @@ void ObjFileMtlImporter::load() {
                 } else if (*m_DataIt == 'r')  {
                     // Material transmission alpha value
                     ++m_DataIt;
-                    getFloatValue(&m_pModel->m_pCurrentMaterial->alpha);                    
+                    getFloatValue(m_pModel->m_pCurrentMaterial->alpha);                    
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;

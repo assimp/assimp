@@ -43,8 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AV_ANIMEVALUATOR_H_INCLUDED
 #define AV_ANIMEVALUATOR_H_INCLUDED
 
+#include <assimp/matrix4x4.h>
+
 #include <tuple>
 #include <vector>
+
+struct aiAnimation;
 
 namespace AssimpView {
 
@@ -74,7 +78,7 @@ public:
      * the aiAnimation. */
     const std::vector<aiMatrix4x4> &GetTransformations() const { return mTransforms; }
 
-protected:
+private:
     const aiAnimation *mAnim;
     double mLastTime;
     std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> mLastPositions;

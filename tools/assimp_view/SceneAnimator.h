@@ -47,7 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AV_SCENEANIMATOR_H_INCLUDED
 #define AV_SCENEANIMATOR_H_INCLUDED
 
+#include <assimp/scene.h>
+
 #include <map>
+#include <string>
 
 namespace AssimpView {
 
@@ -59,7 +62,7 @@ namespace AssimpView {
 struct SceneAnimNode {
     std::string mName;
     SceneAnimNode *mParent;
-    std::vector<SceneAnimNode *> mChildren;
+    std::vector<SceneAnimNode*> mChildren;
 
     //! most recently calculated local transform
     aiMatrix4x4 mLocalTransform;
@@ -72,13 +75,23 @@ struct SceneAnimNode {
 
     //! Default construction
     SceneAnimNode() :
-            mName(), mParent(nullptr), mChildren(), mLocalTransform(), mGlobalTransform(), mChannelIndex(-1) {
+            mName(),
+            mParent(nullptr),
+            mChildren(),
+            mLocalTransform(),
+            mGlobalTransform(),
+            mChannelIndex(-1) {
         // empty
     }
 
     //! Construction from a given name
     SceneAnimNode(const std::string &pName) :
-            mName(pName), mParent(nullptr), mChildren(), mLocalTransform(), mGlobalTransform(), mChannelIndex(-1) {
+            mName(pName),
+            mParent(nullptr),
+            mChildren(),
+            mLocalTransform(),
+            mGlobalTransform(),
+            mChannelIndex(-1) {
         // empty
     }
 
@@ -125,7 +138,7 @@ public:
 
     // ----------------------------------------------------------------------------
     /** Calculates the node transformations for the scene. Call this to get
-     * uptodate results before calling one of the getters.
+     * up-to-date results before calling one of the getters.
      * @param pTime Current time. Can be an arbitrary range.
      */
     void Calculate(double pTime);
@@ -136,7 +149,7 @@ public:
      * The returned matrix is in the node's parent's local space, just like the
      * original node's transformation matrix. If the node is not animated, the
      * node's original transformation is returned so that you can safely use or
-     * assign it to the node itsself. If there is no node with the given name,
+     * assign it to the node itself. If there is no node with the given name,
      * the identity matrix is returned. All transformations are updated whenever
      * Calculate() is called.
      * @param pNodeName Name of the node
@@ -151,7 +164,7 @@ public:
      * The returned matrix is in world space, which is the same coordinate space
      * as the transformation of the scene's root node. If the node is not animated,
      * the node's original transformation is returned so that you can safely use or
-     * assign it to the node itsself. If there is no node with the given name, the
+     * assign it to the node itself. If there is no node with the given name, the
      * identity matrix is returned. All transformations are updated whenever
      * Calculate() is called.
      * @param pNodeName Name of the node
@@ -190,7 +203,7 @@ public:
     /** @brief Get the current animation or NULL
      */
     aiAnimation *CurrentAnim() const {
-        return static_cast<unsigned int>(mCurrentAnimIndex) < mScene->mNumAnimations ? mScene->mAnimations[mCurrentAnimIndex] : NULL;
+        return static_cast<unsigned int>(mCurrentAnimIndex) < mScene->mNumAnimations ? mScene->mAnimations[mCurrentAnimIndex] : nullptr;
     }
 
 protected:

@@ -96,6 +96,7 @@ SET( COMMON
   unit/Common/utSpatialSort.cpp
   unit/Common/utAssertHandler.cpp
   unit/Common/utXmlParser.cpp
+  unit/Common/utPolyTools.cpp
 )
 
 SET( IMPORTERS

@@ -45,8 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_POLYTOOLS_H_INCLUDED
 #define AI_POLYTOOLS_H_INCLUDED
 
-#include <assimp/material.h>
 #include <assimp/ai_assert.h>
+#include <assimp/material.h>
+#include <assimp/vector3.h>
 
 namespace Assimp {
 
@@ -55,8 +56,7 @@ namespace Assimp {
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline double GetArea2D(const T& v1, const T& v2, const T& v3)
-{
+inline double GetArea2D(const T &v1, const T &v2, const T &v3) {
     return 0.5 * (v1.x * ((double)v3.y - v2.y) + v2.x * ((double)v1.y - v3.y) + v3.x * ((double)v2.y - v1.y));
 }
 
@@ -65,9 +65,8 @@ inline double GetArea2D(const T& v1, const T& v2, const T& v3)
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2)
-{
-    return GetArea2D(p0,p2,p1) > 0;
+inline bool OnLeftSideOfLine2D(const T &p0, const T &p1, const T &p2) {
+    return GetArea2D(p0, p2, p1) > 0;
 }
 
 // -------------------------------------------------------------------------------
@@ -75,8 +74,7 @@ inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2)
  * The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
-{
+inline bool PointInTriangle2D(const T &p0, const T &p1, const T &p2, const T &pp) {
     // Point in triangle test using baryzentric coordinates
     const aiVector2D v0 = p1 - p0;
     const aiVector2D v1 = p2 - p0;
@@ -95,7 +93,6 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
     return (dot11 > 0) && (dot00 > 0) && (dot11 + dot00 < 1);
 }
 
-
 // -------------------------------------------------------------------------------
 /** Check whether the winding order of a given polygon is counter-clockwise.
  *  The function accepts an unconstrained template parameter, but is intended
@@ -104,7 +101,7 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
  * @note Code taken from http://cgm.cs.mcgill.ca/~godfried/teaching/cg-projects/97/Ian/applet1.html and translated to C++
  */
 template <typename T>
-inline bool IsCCW(T* in, size_t npoints) {
+inline bool IsCCW(T *in, size_t npoints) {
     double aa, bb, cc, b, c, theta;
     double convex_turn;
     double convex_sum = 0;
@@ -112,44 +109,43 @@ inline bool IsCCW(T* in, size_t npoints) {
     ai_assert(npoints >= 3);
 
     for (size_t i = 0; i < npoints - 2; i++) {
-        aa = ((in[i+2].x - in[i].x) * (in[i+2].x - in[i].x)) +
-            ((-in[i+2].y + in[i].y) * (-in[i+2].y + in[i].y));
+        aa = ((in[i + 2].x - in[i].x) * (in[i + 2].x - in[i].x)) +
+             ((-in[i + 2].y + in[i].y) * (-in[i + 2].y + in[i].y));
 
-        bb = ((in[i+1].x - in[i].x) * (in[i+1].x - in[i].x)) +
-            ((-in[i+1].y + in[i].y) * (-in[i+1].y + in[i].y));
+        bb = ((in[i + 1].x - in[i].x) * (in[i + 1].x - in[i].x)) +
+             ((-in[i + 1].y + in[i].y) * (-in[i + 1].y + in[i].y));
 
-        cc = ((in[i+2].x - in[i+1].x) *
-            (in[i+2].x - in[i+1].x)) +
-            ((-in[i+2].y + in[i+1].y) *
-            (-in[i+2].y + in[i+1].y));
+        cc = ((in[i + 2].x - in[i + 1].x) *
+                     (in[i + 2].x - in[i + 1].x)) +
+             ((-in[i + 2].y + in[i + 1].y) *
+                     (-in[i + 2].y + in[i + 1].y));
 
         b = std::sqrt(bb);
         c = std::sqrt(cc);
         theta = std::acos((bb + cc - aa) / (2 * b * c));
 
-        if (OnLeftSideOfLine2D(in[i],in[i+2],in[i+1])) {
+        if (OnLeftSideOfLine2D(in[i], in[i + 2], in[i + 1])) {
             //  if (convex(in[i].x, in[i].y,
             //      in[i+1].x, in[i+1].y,
             //      in[i+2].x, in[i+2].y)) {
             convex_turn = AI_MATH_PI_F - theta;
             convex_sum += convex_turn;
-        }
-        else {
+        } else {
             convex_sum -= AI_MATH_PI_F - theta;
         }
     }
-    aa = ((in[1].x - in[npoints-2].x) *
-        (in[1].x - in[npoints-2].x)) +
-        ((-in[1].y + in[npoints-2].y) *
-        (-in[1].y + in[npoints-2].y));
+    aa = ((in[1].x - in[npoints - 2].x) *
+                 (in[1].x - in[npoints - 2].x)) +
+         ((-in[1].y + in[npoints - 2].y) *
+                 (-in[1].y + in[npoints - 2].y));
 
-    bb = ((in[0].x - in[npoints-2].x) *
-        (in[0].x - in[npoints-2].x)) +
-        ((-in[0].y + in[npoints-2].y) *
-        (-in[0].y + in[npoints-2].y));
+    bb = ((in[0].x - in[npoints - 2].x) *
+                 (in[0].x - in[npoints - 2].x)) +
+         ((-in[0].y + in[npoints - 2].y) *
+                 (-in[0].y + in[npoints - 2].y));
 
     cc = ((in[1].x - in[0].x) * (in[1].x - in[0].x)) +
-        ((-in[1].y + in[0].y) * (-in[1].y + in[0].y));
+         ((-in[1].y + in[0].y) * (-in[1].y + in[0].y));
 
     b = std::sqrt(bb);
     c = std::sqrt(cc);
@@ -158,17 +154,15 @@ inline bool IsCCW(T* in, size_t npoints) {
     //if (convex(in[npoints-2].x, in[npoints-2].y,
     //  in[0].x, in[0].y,
     //  in[1].x, in[1].y)) {
-    if (OnLeftSideOfLine2D(in[npoints-2],in[1],in[0])) {
+    if (OnLeftSideOfLine2D(in[npoints - 2], in[1], in[0])) {
         convex_turn = AI_MATH_PI_F - theta;
         convex_sum += convex_turn;
-    }
-    else {
+    } else {
         convex_sum -= AI_MATH_PI_F - theta;
     }
 
     return convex_sum >= (2 * AI_MATH_PI_F);
 }
-
 
 // -------------------------------------------------------------------------------
 /** Compute the normal of an arbitrary polygon in R3.
@@ -185,45 +179,50 @@ inline bool IsCCW(T* in, size_t npoints) {
  *  @note The data arrays must have storage for at least num+2 elements. Using
  *  this method is much faster than the 'other' NewellNormal()
  */
-template <int ofs_x, int ofs_y, int ofs_z, typename TReal>
-inline void NewellNormal (aiVector3t<TReal>& out, int num, TReal* x, TReal* y, TReal* z)
-{
+template <size_t ofs_x, size_t ofs_y, size_t ofs_z, typename TReal>
+inline void NewellNormal(aiVector3t<TReal> &out, size_t num, TReal *x, TReal *y, TReal *z, size_t bufferSize) {
+    ai_assert(bufferSize > num);
+
+    if (nullptr == x || nullptr == y || nullptr == z || 0 == bufferSize || 0 == num) {
+        return;
+    }
+
     // Duplicate the first two vertices at the end
-    x[(num+0)*ofs_x] = x[0];
-    x[(num+1)*ofs_x] = x[ofs_x];
+    x[(num + 0) * ofs_x] = x[0];
+    x[(num + 1) * ofs_x] = x[ofs_x];
 
-    y[(num+0)*ofs_y] = y[0];
-    y[(num+1)*ofs_y] = y[ofs_y];
+    y[(num + 0) * ofs_y] = y[0];
+    y[(num + 1) * ofs_y] = y[ofs_y];
 
-    z[(num+0)*ofs_z] = z[0];
-    z[(num+1)*ofs_z] = z[ofs_z];
+    z[(num + 0) * ofs_z] = z[0];
+    z[(num + 1) * ofs_z] = z[ofs_z];
 
     TReal sum_xy = 0.0, sum_yz = 0.0, sum_zx = 0.0;
 
-    TReal *xptr = x +ofs_x, *xlow = x, *xhigh = x + ofs_x*2;
-    TReal *yptr = y +ofs_y, *ylow = y, *yhigh = y + ofs_y*2;
-    TReal *zptr = z +ofs_z, *zlow = z, *zhigh = z + ofs_z*2;
+    TReal *xptr = x + ofs_x, *xlow = x, *xhigh = x + ofs_x * 2;
+    TReal *yptr = y + ofs_y, *ylow = y, *yhigh = y + ofs_y * 2;
+    TReal *zptr = z + ofs_z, *zlow = z, *zhigh = z + ofs_z * 2;
 
-    for (int tmp=0; tmp < num; tmp++) {
-        sum_xy += (*xptr) * ( (*yhigh) - (*ylow) );
-        sum_yz += (*yptr) * ( (*zhigh) - (*zlow) );
-        sum_zx += (*zptr) * ( (*xhigh) - (*xlow) );
+    for (size_t tmp = 0; tmp < num; ++tmp ) {
+        sum_xy += (*xptr) * ((*yhigh) - (*ylow));
+        sum_yz += (*yptr) * ((*zhigh) - (*zlow));
+        sum_zx += (*zptr) * ((*xhigh) - (*xlow));
 
-        xptr  += ofs_x;
-        xlow  += ofs_x;
+        xptr += ofs_x;
+        xlow += ofs_x;
         xhigh += ofs_x;
 
-        yptr  += ofs_y;
-        ylow  += ofs_y;
+        yptr += ofs_y;
+        ylow += ofs_y;
         yhigh += ofs_y;
 
-        zptr  += ofs_z;
-        zlow  += ofs_z;
+        zptr += ofs_z;
+        zlow += ofs_z;
         zhigh += ofs_z;
     }
-    out = aiVector3t<TReal>(sum_yz,sum_zx,sum_xy);
+    out = aiVector3t<TReal>(sum_yz, sum_zx, sum_xy);
 }
 
-} // ! Assimp
+} // namespace Assimp
 
 #endif

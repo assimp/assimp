@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiImporterDesc;
 
 namespace Assimp {
+
 class BatchLoader;
 class Importer;
 class IOSystem;
@@ -80,7 +81,7 @@ public:
 #define AI_LWS_MASK (0xffffffff >> 4u)
 
 // ---------------------------------------------------------------------------
-/** Represents a LWS scenegraph element
+/** Represents a LWS scene-graph element
  */
 struct NodeDesc {
     NodeDesc() :

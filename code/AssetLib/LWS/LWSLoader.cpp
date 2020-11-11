@@ -176,12 +176,10 @@ void LWSImporter::SetupProperties(const Importer *pImp) {
     configSpeedFlag = (0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED, 0));
 
     // AI_CONFIG_IMPORT_LWS_ANIM_START
-    first = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWS_ANIM_START,
-            150392 /* magic hack */);
+    first = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWS_ANIM_START, 150392 /* magic hack */);
 
     // AI_CONFIG_IMPORT_LWS_ANIM_END
-    last = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWS_ANIM_END,
-            150392 /* magic hack */);
+    last = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWS_ANIM_END, 150392 /* magic hack */);
 
     if (last < first) {
         std::swap(last, first);
@@ -750,12 +748,17 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         }
         // 'LightIntensity': set intensity of currently active light
         else if ((*it).tokens[0] == "LightIntensity" || (*it).tokens[0] == "LgtIntensity") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightIntensity\'");
-
-            else
-                fast_atoreal_move<float>(c, nodes.back().lightIntensity);
-
+            } else {
+                const std::string env = "(envelope)";
+                if (0 == strncmp(c, env.c_str(), env.size() )) {
+                    ASSIMP_LOG_ERROR("LWS: envelopes for  LightIntensity not supported, set to 1.0");
+                    nodes.back().lightIntensity = (ai_real) 1.0;
+                } else {
+                    fast_atoreal_move<float>(c, nodes.back().lightIntensity);
+                }
+            }
         }
         // 'LightType': set type of currently active light
         else if ((*it).tokens[0] == "LightType") {
@@ -778,7 +781,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         else if ((*it).tokens[0] == "LightConeAngle") {
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightConeAngle\'");
-
             else
                 nodes.back().lightConeAngle = fast_atof(c);
 
@@ -787,7 +789,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         else if ((*it).tokens[0] == "LightEdgeAngle") {
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightEdgeAngle\'");
-
             else
                 nodes.back().lightEdgeAngle = fast_atof(c);
 
@@ -796,7 +797,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         else if ((*it).tokens[0] == "LightColor") {
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightColor\'");
-
             else {
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.r);
                 SkipSpaces(&c);
@@ -912,7 +912,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (
                                                                               AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
                                                                       0));
-
     // Check flags
     if (!pScene->mNumMeshes || !pScene->mNumMaterials) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

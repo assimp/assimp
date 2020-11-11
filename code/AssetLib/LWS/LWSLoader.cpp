@@ -750,12 +750,17 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         }
         // 'LightIntensity': set intensity of currently active light
         else if ((*it).tokens[0] == "LightIntensity" || (*it).tokens[0] == "LgtIntensity") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightIntensity\'");
-
-            else
-                fast_atoreal_move<float>(c, nodes.back().lightIntensity);
-
+            } else {
+                const std::string env = "(envelope)";
+                if (0 == strncmp(c, env.c_str(), env.size())) {
+                    ASSIMP_LOG_ERROR("LWS: envelopes for  LightIntensity not supported, set to 1.0");
+                    nodes.back().lightIntensity = (ai_real)1.0;
+                } else {
+                    fast_atoreal_move<float>(c, nodes.back().lightIntensity);
+                }
+            }
         }
         // 'LightType': set type of currently active light
         else if ((*it).tokens[0] == "LightType") {

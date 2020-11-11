@@ -1074,9 +1074,11 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
         samplers.translation->output->ExtractData(values);
         anim->mNumPositionKeys = static_cast<uint32_t>(samplers.translation->input->count);
         anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+        unsigned int ii = (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
             anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-            anim->mPositionKeys[i].mValue = values[i];
+            anim->mPositionKeys[i].mValue = values[ii];
+            ii += (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
         }
         delete[] times;
         delete[] values;
@@ -1096,12 +1098,14 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
         samplers.rotation->output->ExtractData(values);
         anim->mNumRotationKeys = static_cast<uint32_t>(samplers.rotation->input->count);
         anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+        unsigned int ii = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
             anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-            anim->mRotationKeys[i].mValue.x = values[i].w;
-            anim->mRotationKeys[i].mValue.y = values[i].x;
-            anim->mRotationKeys[i].mValue.z = values[i].y;
-            anim->mRotationKeys[i].mValue.w = values[i].z;
+            anim->mRotationKeys[i].mValue.x = values[ii].w;
+            anim->mRotationKeys[i].mValue.y = values[ii].x;
+            anim->mRotationKeys[i].mValue.z = values[ii].y;
+            anim->mRotationKeys[i].mValue.w = values[ii].z;
+            ii += (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
         }
         delete[] times;
         delete[] values;
@@ -1122,9 +1126,11 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
         samplers.scale->output->ExtractData(values);
         anim->mNumScalingKeys = static_cast<uint32_t>(samplers.scale->input->count);
         anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
+        unsigned int ii = (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
             anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-            anim->mScalingKeys[i].mValue = values[i];
+            anim->mScalingKeys[i].mValue = values[ii];
+            ii += (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
         }
         delete[] times;
         delete[] values;
@@ -1153,11 +1159,14 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSampler
         samplers.weight->output->ExtractData(values);
         anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
 
-        const unsigned int numMorphs = (unsigned int)samplers.weight->output->count / anim->mNumKeys;
+        // for Interpolation_CUBICSPLINE can have more outputs
+        const unsigned int weightStride = (unsigned int)samplers.weight->output->count / anim->mNumKeys;
+        const unsigned int numMorphs = (samplers.weight->interpolation == Interpolation_CUBICSPLINE) ? weightStride - 2 : weightStride;
 
         anim->mKeys = new aiMeshMorphKey[anim->mNumKeys];
-        unsigned int k = 0u;
+        unsigned int ii = (samplers.weight->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0u; i < anim->mNumKeys; ++i) {
+            unsigned int k = weightStride * i + ii;
             anim->mKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
             anim->mKeys[i].mNumValuesAndWeights = numMorphs;
             anim->mKeys[i].mValues = new unsigned int[numMorphs];

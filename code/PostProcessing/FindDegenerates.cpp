@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,25 +43,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the FindDegenerates post-process step.
 */
 
-
-
-// internal headers
 #include "ProcessHelper.h"
 #include "FindDegenerates.h"
+
 #include <assimp/Exceptional.h>
 
 #include <unordered_map>
 
 using namespace Assimp;
 
-//correct node indices to meshes and remove references to deleted mesh
+// Correct node indices to meshes and remove references to deleted mesh
 static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned int, unsigned int>& meshMap);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-FindDegeneratesProcess::FindDegeneratesProcess()
-: mConfigRemoveDegenerates( false )
-, mConfigCheckAreaOfTriangle( false ){
+FindDegeneratesProcess::FindDegeneratesProcess() :
+        mConfigRemoveDegenerates( false ),
+        mConfigCheckAreaOfTriangle( false ){
     // empty
 }
 
@@ -91,21 +87,22 @@ void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
 // Executes the post processing step on the given imported data.
 void FindDegeneratesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess begin");
-
+    if ( null == pScene) {
+        return;
+    }
+    
     std::unordered_map<unsigned int, unsigned int> meshMap;
     meshMap.reserve(pScene->mNumMeshes);
 
     const unsigned int originalNumMeshes = pScene->mNumMeshes;
     unsigned int targetIndex = 0;
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-    {
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         // Do not process point cloud, ExecuteOnMesh works only with faces data
         if ((pScene->mMeshes[i]->mPrimitiveTypes != aiPrimitiveType::aiPrimitiveType_POINT) && ExecuteOnMesh(pScene->mMeshes[i])) {
             delete pScene->mMeshes[i];
             // Not strictly required, but clean:
             pScene->mMeshes[i] = nullptr;
-        }
-        else {
+        } else {
             meshMap[i] = targetIndex;
             pScene->mMeshes[targetIndex] = pScene->mMeshes[i];
             ++targetIndex;
@@ -113,8 +110,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene) {
     }
     pScene->mNumMeshes = targetIndex;
 
-    if (meshMap.size() < originalNumMeshes)
-    {
+    if (meshMap.size() < originalNumMeshes) {
         updateSceneGraph(pScene->mRootNode, meshMap);
     }
 
@@ -126,8 +122,7 @@ static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned in
     for (unsigned i = 0; i < pNode->mNumMeshes; ++i) {
         const unsigned int sourceMeshIndex = pNode->mMeshes[i];
         auto it = meshMap.find(sourceMeshIndex);
-        if (it != meshMap.end())
-        {
+        if (it != meshMap.end()) {
             pNode->mMeshes[targetIndex] = it->second;
             ++targetIndex;
         }

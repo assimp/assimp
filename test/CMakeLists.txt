@@ -232,6 +232,8 @@ SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 IF( WIN32 )
     SET( platform_libs )
+ELSEIF(ANDROID)
+    SET( platform_libs )
 ELSE()
     SET( platform_libs pthread )
 ENDIF()

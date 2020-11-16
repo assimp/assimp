@@ -260,7 +260,7 @@ void DefaultLogger::kill() {
 // ----------------------------------------------------------------------------------
 //  Debug message
 void DefaultLogger::OnDebug(const char *message) {
-    if (m_Severity < Logger::DEBUG) {
+    if (m_Severity < Logger::DEBUGGING) {
         return;
     }
 

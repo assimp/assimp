@@ -140,6 +140,8 @@ void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::E
 #endif
 
 static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporters) {
+	(void)exporters;
+
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 	exporters.push_back(Exporter::ExportFormatEntry("collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada));
 #endif

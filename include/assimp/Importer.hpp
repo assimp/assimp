@@ -496,6 +496,15 @@ public:
     const char *GetErrorString() const;
 
     // -------------------------------------------------------------------
+    /** Returns an exception if one occurred during import.
+     *
+     * @return The last exception which occurred.
+     *
+     * @note The returned value remains valid until one of the
+     * following methods is called: #ReadFile(), #FreeScene(). */
+    const std::exception_ptr& GetException() const;
+
+    // -------------------------------------------------------------------
     /** Returns the scene loaded by the last successful call to ReadFile()
      *
      * @return Current scene or nullptr if there is currently no scene loaded */

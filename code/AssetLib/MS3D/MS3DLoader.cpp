@@ -229,7 +229,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
     stream.CopyAndAdvance(head,10);
     stream >> version;
     if (strncmp(head,"MS3D000000",10)) {
-        throw DeadlyImportError("Not a MS3D file, magic string MS3D000000 not found: "+pFile);
+        throw DeadlyImportError("Not a MS3D file, magic string MS3D000000 not found: ", pFile);
     }
 
     if (version != 4) {

@@ -76,23 +76,30 @@ Property* ReadTypedProperty(const Element& element)
     ai_assert(element.KeyToken().StringContents() == "P");
 
     const TokenList& tok = element.Tokens();
-    ai_assert(tok.size() >= 5);
+    if (tok.size() < 2) {
+        return nullptr;
+    }
 
     const std::string& s = ParseTokenAsString(*tok[1]);
     const char* const cs = s.c_str();
     if (!strcmp(cs,"KString")) {
+        ai_assert(tok.size() >= 5);
         return new TypedProperty<std::string>(ParseTokenAsString(*tok[4]));
     }
     else if (!strcmp(cs,"bool") || !strcmp(cs,"Bool")) {
+        ai_assert(tok.size() >= 5);
         return new TypedProperty<bool>(ParseTokenAsInt(*tok[4]) != 0);
     }
     else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum")) {
+        ai_assert(tok.size() >= 5);
         return new TypedProperty<int>(ParseTokenAsInt(*tok[4]));
     }
     else if (!strcmp(cs, "ULongLong")) {
+        ai_assert(tok.size() >= 5);
         return new TypedProperty<uint64_t>(ParseTokenAsID(*tok[4]));
     }
     else if (!strcmp(cs, "KTime")) {
+        ai_assert(tok.size() >= 5);
         return new TypedProperty<int64_t>(ParseTokenAsInt64(*tok[4]));
     }
     else if (!strcmp(cs,"Vector3D") ||
@@ -103,6 +110,7 @@ Property* ReadTypedProperty(const Element& element)
         !strcmp(cs,"Lcl Rotation") ||
         !strcmp(cs,"Lcl Scaling")
         ) {
+        ai_assert(tok.size() >= 7);
         return new TypedProperty<aiVector3D>(aiVector3D(
             ParseTokenAsFloat(*tok[4]),
             ParseTokenAsFloat(*tok[5]),
@@ -110,6 +118,7 @@ Property* ReadTypedProperty(const Element& element)
         );
     }
     else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
+        ai_assert(tok.size() >= 5);
         return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
     }
     return nullptr;

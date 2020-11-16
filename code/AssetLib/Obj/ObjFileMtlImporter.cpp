@@ -137,10 +137,14 @@ void ObjFileMtlImporter::load() {
             } break;
             case 'T': {
                 ++m_DataIt;
-                if (*m_DataIt == 'f') // Material transmission
-                {
+                // Material transmission color
+                if (*m_DataIt == 'f')  {
                     ++m_DataIt;
                     getColorRGBA(&m_pModel->m_pCurrentMaterial->transparent);
+                } else if (*m_DataIt == 'r')  {
+                    // Material transmission alpha value
+                    ++m_DataIt;
+                    getFloatValue(m_pModel->m_pCurrentMaterial->alpha);                    
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;

@@ -39,12 +39,19 @@
 cmake_minimum_required( VERSION 3.0 )
 
 INCLUDE_DIRECTORIES(
-    ${Assimp_SOURCE_DIR}/contrib/gtest/include
-    ${Assimp_SOURCE_DIR}/contrib/gtest/
     ${Assimp_SOURCE_DIR}/test/unit
     ${Assimp_SOURCE_DIR}/include
     ${Assimp_SOURCE_DIR}/code
 )
+
+if(NOT ASSIMP_HUNTER_ENABLED)
+  INCLUDE_DIRECTORIES(
+    ${Assimp_SOURCE_DIR}/contrib/gtest/include
+    ${Assimp_SOURCE_DIR}/contrib/gtest/
+    ${Assimp_SOURCE_DIR}/contrib/pugixml/src
+  )
+endif()
+
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
 endif()
@@ -88,6 +95,7 @@ SET( COMMON
   unit/Common/utLineSplitter.cpp
   unit/Common/utSpatialSort.cpp
   unit/Common/utAssertHandler.cpp
+  unit/Common/utXmlParser.cpp
 )
 
 SET( IMPORTERS
@@ -197,7 +205,6 @@ SOURCE_GROUP( UnitTests\\Math         FILES  ${MATH} )
 SOURCE_GROUP( UnitTests\\PostProcess  FILES  ${POST_PROCESSES})
 
 add_executable( unit
-    ../contrib/gtest/src/gtest-all.cc
     unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Common/Version.cpp
@@ -205,8 +212,16 @@ add_executable( unit
 	${IMPORTERS}
 	${MATERIAL}
 	${MATH}
-    ${POST_PROCESSES}
+  ${POST_PROCESSES}
 )
+
+if(ASSIMP_HUNTER_ENABLED)
+    hunter_add_package(GTest)
+    find_package(GTest CONFIG REQUIRED)
+    target_link_libraries(unit GTest::gtest_main GTest::gmock)
+else()
+    target_sources(unit PUBLIC ../contrib/gtest/src/gtest-all.cc)
+endif()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 
@@ -217,12 +232,14 @@ SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 IF( WIN32 )
     SET( platform_libs )
+ELSEIF(ANDROID)
+    SET( platform_libs )
 ELSE()
     SET( platform_libs pthread )
 ENDIF()
 
 IF(MSVC)
-		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
 target_link_libraries( unit assimp ${platform_libs} )
@@ -230,4 +247,3 @@ target_link_libraries( unit assimp ${platform_libs} )
 add_subdirectory(headercheck)
 
 add_test( unittests unit )
-

@@ -3481,10 +3481,11 @@ void FBXConverter::ConvertOrphanedEmbeddedTextures() {
                 const char *obtype = key.begin();
                 const size_t length = static_cast<size_t>(key.end() - key.begin());
                 if (strncmp(obtype, "Texture", length) == 0) {
-                    const Texture *texture = static_cast<const Texture *>(object->Get());
-                    if (texture->Media() && texture->Media()->ContentLength() > 0) {
-                        realTexture = texture;
-                    }
+                    if (const Texture *texture = static_cast<const Texture *>(object->Get())) {
+                        if (texture->Media() && texture->Media()->ContentLength() > 0) {
+                            realTexture = texture;
+                        }
+                    }    
                 }
             } catch (...) {
                 // do nothing

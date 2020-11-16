@@ -748,9 +748,8 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
 void BlenderImporter::CheckActualType(const ElemBase *dt, const char *check) {
     ai_assert(dt);
     if (strcmp(dt->dna_type, check)) {
-        ThrowException((format(),
-                "Expected object at ", std::hex, dt, " to be of type `", check,
-                "`, but it claims to be a `", dt->dna_type, "`instead"));
+        ThrowException("Expected object at ", std::hex, dt, " to be of type `", check,
+                "`, but it claims to be a `", dt->dna_type, "`instead");
     }
 }
 

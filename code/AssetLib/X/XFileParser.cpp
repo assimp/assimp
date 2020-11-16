@@ -83,6 +83,17 @@ static void dummy_free(void * /*opaque*/, void *address) {
 #endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
 
 // ------------------------------------------------------------------------------------------------
+// Throws an exception with a line number and the given text.
+template<typename... T>
+AI_WONT_RETURN void XFileParser::ThrowException(T&&... args) {
+    if (mIsBinaryFormat) {
+        throw DeadlyImportError(args...);
+    } else {
+        throw DeadlyImportError("Line ", mLineNumber, ": ", args...);
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Constructor. Creates a data structure out of the XFile given in the memory block.
 XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         mMajorVersion(0), mMinorVersion(0), mIsBinaryFormat(false), mBinaryNumCount(0), mP(nullptr), mEnd(nullptr), mLineNumber(0), mScene(nullptr) {
@@ -122,13 +133,13 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         mIsBinaryFormat = true;
         compressed = true;
     } else
-        ThrowException(format() << "Unsupported xfile format '" << mP[8] << mP[9] << mP[10] << mP[11] << "'");
+        ThrowException("Unsupported xfile format '", mP[8], mP[9], mP[10], mP[11], "'");
 
     // float size
     mBinaryFloatSize = (unsigned int)(mP[12] - 48) * 1000 + (unsigned int)(mP[13] - 48) * 100 + (unsigned int)(mP[14] - 48) * 10 + (unsigned int)(mP[15] - 48);
 
     if (mBinaryFloatSize != 32 && mBinaryFloatSize != 64)
-        ThrowException(format() << "Unknown float size " << mBinaryFloatSize << " specified in xfile header.");
+        ThrowException("Unknown float size ", mBinaryFloatSize, " specified in xfile header.");
 
     // The x format specifies size in bits, but we work in bytes
     mBinaryFloatSize /= 8;
@@ -864,7 +875,7 @@ void XFileParser::ParseDataObjectAnimationKey(AnimBone *pAnimBone) {
         }
 
         default:
-            ThrowException(format() << "Unknown key type " << keyType << " in animation.");
+            ThrowException("Unknown key type ", keyType, " in animation.");
             break;
         } // end switch
 
@@ -1353,16 +1364,6 @@ aiColor3D XFileParser::ReadRGB() {
     TestForSeparator();
 
     return color;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Throws an exception with a line number and the given text.
-AI_WONT_RETURN void XFileParser::ThrowException(const std::string &pText) {
-    if (mIsBinaryFormat) {
-        throw DeadlyImportError(pText);
-    } else {
-        throw DeadlyImportError(format() << "Line " << mLineNumber << ": " << pText);
-    }
 }
 
 // ------------------------------------------------------------------------------------------------

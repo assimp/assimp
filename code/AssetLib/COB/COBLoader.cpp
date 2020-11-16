@@ -125,7 +125,7 @@ void COBImporter::SetupProperties(const Importer * /*pImp*/) {
 
 // ------------------------------------------------------------------------------------------------
 /*static*/ AI_WONT_RETURN void COBImporter::ThrowException(const std::string &msg) {
-    throw DeadlyImportError("COB: " + msg);
+    throw DeadlyImportError("COB: ", msg);
 }
 
 // ------------------------------------------------------------------------------------------------

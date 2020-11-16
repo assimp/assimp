@@ -1230,7 +1230,7 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
         Value *spot = FindObject(obj, "spot");
         if (!spot) throw DeadlyImportError("GLTF: Light missing its spot parameters");
         innerConeAngle = MemberOrDefault(*spot, "innerConeAngle", 0.0f);
-        outerConeAngle = MemberOrDefault(*spot, "outerConeAngle", M_PI / 4.0f);
+        outerConeAngle = MemberOrDefault(*spot, "outerConeAngle", static_cast<float>(M_PI / 4.0f));
     }
 }
 

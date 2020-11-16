@@ -87,7 +87,7 @@ void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
 // Executes the post processing step on the given imported data.
 void FindDegeneratesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess begin");
-    if ( null == pScene) {
+    if ( nullptr == pScene) {
         return;
     }
     

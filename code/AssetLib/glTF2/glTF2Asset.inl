@@ -289,7 +289,8 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
 
     // Unique ptr prevents memory leak in case of Read throws an exception
     auto inst = std::unique_ptr<T>(new T());
-    inst->id = std::string(mDictId) + "_" + to_string(i);
+    // Try to make this human readable so it can be used in error messages.
+    inst->id = std::string(mDictId) + "[" + to_string(i) + "]";
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
@@ -637,15 +638,17 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
 
-    // Check length
-    unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
-    if ((byteOffset + byteLength) > bufferView->byteLength || (bufferView->byteOffset + byteOffset + byteLength) > bufferView->buffer->byteLength) {
-        const uint8_t val_size = 64;
+    if (bufferView) {
+        // Check length
+        unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
+        if ((byteOffset + byteLength) > bufferView->byteLength || (bufferView->byteOffset + byteOffset + byteLength) > bufferView->buffer->byteLength) {
+            const uint8_t val_size = 64;
 
-        char val[val_size];
+            char val[val_size];
 
-        ai_snprintf(val, val_size, "%llu, %llu", (unsigned long long)byteOffset, (unsigned long long)byteLength);
-        throw DeadlyImportError("GLTF: Accessor with offset/length (", val, ") is out of range.");
+            ai_snprintf(val, val_size, "%llu, %llu", (unsigned long long)byteOffset, (unsigned long long)byteLength);
+            throw DeadlyImportError("GLTF: Accessor with offset/length (", val, ") is out of range.");
+        }
     }
 
     if (Value *sparseValue = FindObject(obj, "sparse")) {
@@ -737,13 +740,22 @@ inline void CopyData(size_t count,
         }
     }
 }
+
+inline std::string getContextForErrorMessages(const std::string& id, const std::string& name) {
+    std::string context = id;
+    if (!name.empty()) {
+        context += " (\"" + name + "\")";
+    }
+    return context;
+}
+
 } // namespace
 
 template <class T>
 void Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
     if (!data) {
-        throw DeadlyImportError("GLTF2: data is nullptr.");
+        throw DeadlyImportError("GLTF2: data is null when extracting data from ", getContextForErrorMessages(id, name));
     }
 
     const size_t elemSize = GetElementSize();
@@ -823,9 +835,11 @@ template <class T>
 T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
     ai_assert(i * stride < accessor.bufferView->byteLength);
+    // Ensure that the memcpy doesn't overwrite the local.
+    const size_t sizeToCopy = std::min(elemSize, sizeof(T));
     T value = T();
-    memcpy(&value, data + i * stride, elemSize);
-    //value >>= 8 * (sizeof(T) - elemSize);
+    // Assume platform endianness matches GLTF binary data (which is little-endian).
+    memcpy(&value, data + i * stride, sizeToCopy);
     return value;
 }
 
@@ -854,6 +868,14 @@ inline void Image::Read(Value &obj, Asset &r) {
             }
         } else if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
             this->bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
+            if (Value *mtype = FindString(obj, "mimeType")) {
+                this->mimeType = mtype->GetString();
+            }
+            if (!this->bufferView || this->mimeType.empty())
+            {
+                throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " does not have a URI, so it must have a valid bufferView and mimetype");
+            }
+
             Ref<Buffer> buffer = this->bufferView->buffer;
 
             this->mDataLength = this->bufferView->byteLength;
@@ -861,10 +883,10 @@ inline void Image::Read(Value &obj, Asset &r) {
 
             this->mData.reset(new uint8_t[this->mDataLength]);
             memcpy(this->mData.get(), buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
-
-            if (Value *mtype = FindString(obj, "mimeType")) {
-                this->mimeType = mtype->GetString();
-            }
+        }
+        else
+        {
+            throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " should have either a URI of a bufferView and mimetype" );
         }
     }
 }

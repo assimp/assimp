@@ -185,6 +185,16 @@ std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiN
     return unique_name;
 }
 
+/// This struct manages nodes which may or may not end up in the node hierarchy.
+/// When a node becomes a child of another node, that node becomes its owner and mOwnership should be released.
+struct FBXConverter::PotentialNode
+{
+    PotentialNode(std::unique_ptr<aiNode> uptr) : mNode(uptr.get()), mOwnership(std::move(uptr)) {}
+    aiNode* operator->() { return mNode; }
+    aiNode* mNode;
+    std::unique_ptr<aiNode> mOwnership;
+};
+
 /// todo: pre-build node hierarchy
 /// todo: get bone from stack
 /// todo: make map of aiBone* to aiNode*
@@ -192,137 +202,129 @@ std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiN
 void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) {
     const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 
-    std::vector<aiNode *> nodes;
+    std::vector<PotentialNode> nodes;
     nodes.reserve(conns.size());
 
-    std::vector<aiNode *> nodes_chain;
-    std::vector<aiNode *> post_nodes_chain;
+    std::vector<PotentialNode> nodes_chain;
+    std::vector<PotentialNode> post_nodes_chain;
 
-    try {
-        for (const Connection *con : conns) {
-            // ignore object-property links
-            if (con->PropertyName().length()) {
-                // really important we document why this is ignored.
-                FBXImporter::LogInfo("ignoring property link - no docs on why this is ignored");
-                continue; //?
+    for (const Connection *con : conns) {
+        // ignore object-property links
+        if (con->PropertyName().length()) {
+            // really important we document why this is ignored.
+            FBXImporter::LogInfo("ignoring property link - no docs on why this is ignored");
+            continue; //?
+        }
+
+        // convert connection source object into Object base class
+        const Object *const object = con->SourceObject();
+        if (nullptr == object) {
+            FBXImporter::LogError("failed to convert source object for Model link");
+            continue;
+        }
+
+        // FBX Model::Cube, Model::Bone001, etc elements
+        // This detects if we can cast the object into this model structure.
+        const Model *const model = dynamic_cast<const Model *>(object);
+
+        if (nullptr != model) {
+            nodes_chain.clear();
+            post_nodes_chain.clear();
+
+            aiMatrix4x4 new_abs_transform = parent->mTransformation;
+            std::string node_name = FixNodeName(model->Name());
+            // even though there is only a single input node, the design of
+            // assimp (or rather: the complicated transformation chain that
+            // is employed by fbx) means that we may need multiple aiNode's
+            // to represent a fbx node's transformation.
+
+            // generate node transforms - this includes pivot data
+            // if need_additional_node is true then you t
+            const bool need_additional_node = GenerateTransformationNodeChain(*model, node_name, nodes_chain, post_nodes_chain);
+
+            // assert that for the current node we must have at least a single transform
+            ai_assert(nodes_chain.size());
+
+            if (need_additional_node) {
+                nodes_chain.emplace_back(PotentialNode(std::unique_ptr<aiNode>(new aiNode(node_name))));
             }
 
-            // convert connection source object into Object base class
-            const Object *const object = con->SourceObject();
-            if (nullptr == object) {
-                FBXImporter::LogError("failed to convert source object for Model link");
-                continue;
-            }
+            //setup metadata on newest node
+            SetupNodeMetadata(*model, *nodes_chain.back().mNode);
 
-            // FBX Model::Cube, Model::Bone001, etc elements
-            // This detects if we can cast the object into this model structure.
-            const Model *const model = dynamic_cast<const Model *>(object);
+            // link all nodes in a row
+            aiNode *last_parent = parent;
+            for (PotentialNode& child : nodes_chain) {
+                ai_assert(child.mNode);
 
-            if (nullptr != model) {
-                nodes_chain.clear();
-                post_nodes_chain.clear();
-
-                aiMatrix4x4 new_abs_transform = parent->mTransformation;
-                std::string node_name = FixNodeName(model->Name());
-                // even though there is only a single input node, the design of
-                // assimp (or rather: the complicated transformation chain that
-                // is employed by fbx) means that we may need multiple aiNode's
-                // to represent a fbx node's transformation.
-
-                // generate node transforms - this includes pivot data
-                // if need_additional_node is true then you t
-                const bool need_additional_node = GenerateTransformationNodeChain(*model, node_name, nodes_chain, post_nodes_chain);
-
-                // assert that for the current node we must have at least a single transform
-                ai_assert(nodes_chain.size());
-
-                if (need_additional_node) {
-                    nodes_chain.push_back(new aiNode(node_name));
+                if (last_parent != parent) {
+                    last_parent->mNumChildren = 1;
+                    last_parent->mChildren = new aiNode *[1];
+                    last_parent->mChildren[0] = child.mOwnership.release();
                 }
 
-                //setup metadata on newest node
-                SetupNodeMetadata(*model, *nodes_chain.back());
+                child->mParent = last_parent;
+                last_parent = child.mNode;
 
-                // link all nodes in a row
-                aiNode *last_parent = parent;
-                for (aiNode *child : nodes_chain) {
-                    ai_assert(child);
+                new_abs_transform *= child->mTransformation;
+            }
+
+            // attach geometry
+            ConvertModel(*model, nodes_chain.back().mNode, root_node, new_abs_transform);
+
+            // check if there will be any child nodes
+            const std::vector<const Connection *> &child_conns = doc.GetConnectionsByDestinationSequenced(model->ID(), "Model");
+
+            // if so, link the geometric transform inverse nodes
+            // before we attach any child nodes
+            if (child_conns.size()) {
+                for (PotentialNode& postnode : post_nodes_chain) {
+                    ai_assert(postnode.mNode);
 
                     if (last_parent != parent) {
                         last_parent->mNumChildren = 1;
                         last_parent->mChildren = new aiNode *[1];
-                        last_parent->mChildren[0] = child;
+                        last_parent->mChildren[0] = postnode.mOwnership.release();
                     }
 
-                    child->mParent = last_parent;
-                    last_parent = child;
+                    postnode->mParent = last_parent;
+                    last_parent = postnode.mNode;
 
-                    new_abs_transform *= child->mTransformation;
+                    new_abs_transform *= postnode->mTransformation;
                 }
-
-                // attach geometry
-                ConvertModel(*model, nodes_chain.back(), root_node, new_abs_transform);
-
-                // check if there will be any child nodes
-                const std::vector<const Connection *> &child_conns = doc.GetConnectionsByDestinationSequenced(model->ID(), "Model");
-
-                // if so, link the geometric transform inverse nodes
-                // before we attach any child nodes
-                if (child_conns.size()) {
-                    for (aiNode *postnode : post_nodes_chain) {
-                        ai_assert(postnode);
-
-                        if (last_parent != parent) {
-                            last_parent->mNumChildren = 1;
-                            last_parent->mChildren = new aiNode *[1];
-                            last_parent->mChildren[0] = postnode;
-                        }
-
-                        postnode->mParent = last_parent;
-                        last_parent = postnode;
-
-                        new_abs_transform *= postnode->mTransformation;
-                    }
-                } else {
-                    // free the nodes we allocated as we don't need them
-                    Util::delete_fun<aiNode> deleter;
-                    std::for_each(
-                            post_nodes_chain.begin(),
-                            post_nodes_chain.end(),
-                            deleter);
-                }
-
-                // recursion call - child nodes
-                ConvertNodes(model->ID(), last_parent, root_node);
-
-                if (doc.Settings().readLights) {
-                    ConvertLights(*model, node_name);
-                }
-
-                if (doc.Settings().readCameras) {
-                    ConvertCameras(*model, node_name);
-                }
-
-                nodes.push_back(nodes_chain.front());
-                nodes_chain.clear();
+            } else {
+                // free the nodes we allocated as we don't need them
+                post_nodes_chain.clear();
             }
+
+            // recursion call - child nodes
+            ConvertNodes(model->ID(), last_parent, root_node);
+
+            if (doc.Settings().readLights) {
+                ConvertLights(*model, node_name);
+            }
+
+            if (doc.Settings().readCameras) {
+                ConvertCameras(*model, node_name);
+            }
+
+            nodes.push_back(std::move(nodes_chain.front()));
+            nodes_chain.clear();
         }
+    }
 
-        if (nodes.size()) {
-            parent->mChildren = new aiNode *[nodes.size()]();
-            parent->mNumChildren = static_cast<unsigned int>(nodes.size());
+    if (nodes.size()) {
+        parent->mChildren = new aiNode *[nodes.size()]();
+        parent->mNumChildren = static_cast<unsigned int>(nodes.size());
 
-            std::swap_ranges(nodes.begin(), nodes.end(), parent->mChildren);
-        } else {
-            parent->mNumChildren = 0;
-            parent->mChildren = nullptr;
+        for (int i = 0; i < nodes.size(); ++i)
+        {
+            parent->mChildren[i] = nodes[i].mOwnership.release();
         }
-
-    } catch (std::exception &) {
-        Util::delete_fun<aiNode> deleter;
-        std::for_each(nodes.begin(), nodes.end(), deleter);
-        std::for_each(nodes_chain.begin(), nodes_chain.end(), deleter);
-        std::for_each(post_nodes_chain.begin(), post_nodes_chain.end(), deleter);
+        nodes.clear();
+    } else {
+        parent->mNumChildren = 0;
+        parent->mChildren = nullptr;
     }
 }
 
@@ -681,8 +683,8 @@ std::string FBXConverter::NameTransformationChainNode(const std::string &name, T
     return name + std::string(MAGIC_NODE_TAG) + "_" + NameTransformationComp(comp);
 }
 
-bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std::string &name, std::vector<aiNode *> &output_nodes,
-        std::vector<aiNode *> &post_output_nodes) {
+bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std::string &name, std::vector<PotentialNode> &output_nodes,
+        std::vector<PotentialNode> &post_output_nodes) {
     const PropertyTable &props = model.Props();
     const Model::RotOrder rot = model.RotationOrder();
 
@@ -828,7 +830,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
                 chain[i] = chain[i].Inverse();
             }
 
-            aiNode *nd = new aiNode();
+            PotentialNode nd(std::unique_ptr<aiNode>(new aiNode()));
             nd->mName.Set(NameTransformationChainNode(name, comp));
             nd->mTransformation = chain[i];
 
@@ -836,9 +838,9 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
             if (comp == TransformationComp_GeometricScalingInverse ||
                     comp == TransformationComp_GeometricRotationInverse ||
                     comp == TransformationComp_GeometricTranslationInverse) {
-                post_output_nodes.push_back(nd);
+                post_output_nodes.emplace_back(std::move(nd));
             } else {
-                output_nodes.push_back(nd);
+                output_nodes.emplace_back(std::move(nd));
             }
         }
 
@@ -847,8 +849,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     }
 
     // else, we can just multiply the matrices together
-    aiNode *nd = new aiNode();
-    output_nodes.push_back(nd);
+    PotentialNode nd(std::unique_ptr<aiNode>(new aiNode()));
 
     // name passed to the method is already unique
     nd->mName.Set(name);
@@ -857,6 +858,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     for (unsigned int i = TransformationComp_Translation; i < TransformationComp_MAXIMUM; i++) {
       nd->mTransformation = nd->mTransformation * chain[i];
     }
+    output_nodes.push_back(std::move(nd));
     return false;
 }
   

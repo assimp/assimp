@@ -171,9 +171,10 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     /**
-    *  note: memory for output_nodes will be managed by the caller
+    *  note: memory for output_nodes is managed by the caller, via the PotentialNode struct.
     */
-    bool GenerateTransformationNodeChain(const Model& model, const std::string& name, std::vector<aiNode*>& output_nodes, std::vector<aiNode*>& post_output_nodes);
+    struct PotentialNode;
+    bool GenerateTransformationNodeChain(const Model& model, const std::string& name, std::vector<PotentialNode>& output_nodes, std::vector<PotentialNode>& post_output_nodes);
 
     // ------------------------------------------------------------------------------------------------
     void SetupNodeMetadata(const Model& model, aiNode& nd);

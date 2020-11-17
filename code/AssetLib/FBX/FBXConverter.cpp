@@ -189,10 +189,11 @@ std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiN
 /// When a node becomes a child of another node, that node becomes its owner and mOwnership should be released.
 struct FBXConverter::PotentialNode
 {
-    PotentialNode(std::unique_ptr<aiNode> uptr) : mNode(uptr.get()), mOwnership(std::move(uptr)) {}
+    PotentialNode() : mOwnership(new aiNode), mNode(mOwnership.get()) {}
+    PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {}
     aiNode* operator->() { return mNode; }
-    aiNode* mNode;
     std::unique_ptr<aiNode> mOwnership;
+    aiNode* mNode;
 };
 
 /// todo: pre-build node hierarchy
@@ -246,7 +247,7 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
             ai_assert(nodes_chain.size());
 
             if (need_additional_node) {
-                nodes_chain.emplace_back(PotentialNode(std::unique_ptr<aiNode>(new aiNode(node_name))));
+                nodes_chain.emplace_back(PotentialNode(node_name));
             }
 
             //setup metadata on newest node
@@ -830,7 +831,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
                 chain[i] = chain[i].Inverse();
             }
 
-            PotentialNode nd(std::unique_ptr<aiNode>(new aiNode()));
+            PotentialNode nd;
             nd->mName.Set(NameTransformationChainNode(name, comp));
             nd->mTransformation = chain[i];
 
@@ -849,7 +850,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     }
 
     // else, we can just multiply the matrices together
-    PotentialNode nd(std::unique_ptr<aiNode>(new aiNode()));
+    PotentialNode nd;
 
     // name passed to the method is already unique
     nd->mName.Set(name);

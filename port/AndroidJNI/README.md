@@ -14,6 +14,10 @@ To use this module please provide following cmake defines:
 
 "SOME_PATH" is a path to your cmake android toolchain script.
 
+
+The build script for this port is based on [android-cmake](https://github.com/taka-no-me/android-cmake).  
+See its documentation for more Android-specific cmake options (e.g. -DANDROID_ABI for the target ABI).
+
 ### Code ###
 A small example how to wrap assimp for Android:
 ```cpp

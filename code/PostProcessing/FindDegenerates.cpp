@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,25 +43,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the FindDegenerates post-process step.
 */
 
-
-
-// internal headers
 #include "ProcessHelper.h"
 #include "FindDegenerates.h"
+
 #include <assimp/Exceptional.h>
+
+#include <unordered_map>
 
 using namespace Assimp;
 
-//remove mesh at position 'index' from the scene
-static void removeMesh(aiScene* pScene, unsigned const index);
-//correct node indices to meshes and remove references to deleted mesh
-static void updateSceneGraph(aiNode* pNode, unsigned const index);
+// Correct node indices to meshes and remove references to deleted mesh
+static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned int, unsigned int>& meshMap);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-FindDegeneratesProcess::FindDegeneratesProcess()
-: mConfigRemoveDegenerates( false )
-, mConfigCheckAreaOfTriangle( false ){
+FindDegeneratesProcess::FindDegeneratesProcess() :
+        mConfigRemoveDegenerates( false ),
+        mConfigCheckAreaOfTriangle( false ){
     // empty
 }
 
@@ -91,50 +87,50 @@ void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
 // Executes the post processing step on the given imported data.
 void FindDegeneratesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess begin");
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-    {
-        //Do not process point cloud, ExecuteOnMesh works only with faces data
+    if ( nullptr == pScene) {
+        return;
+    }
+    
+    std::unordered_map<unsigned int, unsigned int> meshMap;
+    meshMap.reserve(pScene->mNumMeshes);
+
+    const unsigned int originalNumMeshes = pScene->mNumMeshes;
+    unsigned int targetIndex = 0;
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        // Do not process point cloud, ExecuteOnMesh works only with faces data
         if ((pScene->mMeshes[i]->mPrimitiveTypes != aiPrimitiveType::aiPrimitiveType_POINT) && ExecuteOnMesh(pScene->mMeshes[i])) {
-            removeMesh(pScene, i);
-            --i; //the current i is removed, do not skip the next one
+            delete pScene->mMeshes[i];
+            // Not strictly required, but clean:
+            pScene->mMeshes[i] = nullptr;
+        } else {
+            meshMap[i] = targetIndex;
+            pScene->mMeshes[targetIndex] = pScene->mMeshes[i];
+            ++targetIndex;
         }
     }
+    pScene->mNumMeshes = targetIndex;
+
+    if (meshMap.size() < originalNumMeshes) {
+        updateSceneGraph(pScene->mRootNode, meshMap);
+    }
+
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess finished");
 }
 
-static void removeMesh(aiScene* pScene, unsigned const index) {
-    //we start at index and copy the pointers one position forward
-    //save the mesh pointer to delete it later
-    auto delete_me = pScene->mMeshes[index];
-    for (unsigned i = index; i < pScene->mNumMeshes - 1; ++i) {
-        pScene->mMeshes[i] = pScene->mMeshes[i+1];
-    }
-    pScene->mMeshes[pScene->mNumMeshes - 1] = nullptr;
-    --(pScene->mNumMeshes);
-    delete delete_me;
-
-    //removing a mesh also requires updating all references to it in the scene graph
-    updateSceneGraph(pScene->mRootNode, index);
-}
-
-static void updateSceneGraph(aiNode* pNode, unsigned const index) {
+static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned int, unsigned int>& meshMap) {
+    unsigned int targetIndex = 0;
     for (unsigned i = 0; i < pNode->mNumMeshes; ++i) {
-        if (pNode->mMeshes[i] > index) {
-            --(pNode->mMeshes[i]);
-            continue;
-        }
-        if (pNode->mMeshes[i] == index) {
-            for (unsigned j = i; j < pNode->mNumMeshes -1; ++j) {
-                pNode->mMeshes[j] = pNode->mMeshes[j+1];
-            }
-            --(pNode->mNumMeshes);
-            --i;
-            continue;
+        const unsigned int sourceMeshIndex = pNode->mMeshes[i];
+        auto it = meshMap.find(sourceMeshIndex);
+        if (it != meshMap.end()) {
+            pNode->mMeshes[targetIndex] = it->second;
+            ++targetIndex;
         }
     }
+    pNode->mNumMeshes = targetIndex;
     //recurse to all children
     for (unsigned i = 0; i < pNode->mNumChildren; ++i) {
-        updateSceneGraph(pNode->mChildren[i], index);
+        updateSceneGraph(pNode->mChildren[i], meshMap);
     }
 }
 

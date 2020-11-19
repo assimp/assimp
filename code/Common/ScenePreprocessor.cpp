@@ -210,6 +210,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
 
                 // No rotation keys? Generate a dummy track
                 if (!channel->mNumRotationKeys) {
+                    if (channel->mRotationKeys) {
+                        delete[] channel->mRotationKeys;
+                        channel->mRotationKeys = NULL;
+                    }
                     ai_assert(!channel->mRotationKeys);
                     channel->mNumRotationKeys = 1;
                     channel->mRotationKeys = new aiQuatKey[1];
@@ -225,6 +229,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
 
                 // No scaling keys? Generate a dummy track
                 if (!channel->mNumScalingKeys) {
+                    if (channel->mScalingKeys) {
+                        delete[] channel->mScalingKeys;
+                        channel->mScalingKeys = NULL;
+                    }
                     ai_assert(!channel->mScalingKeys);
                     channel->mNumScalingKeys = 1;
                     channel->mScalingKeys = new aiVectorKey[1];
@@ -240,6 +248,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
 
                 // No position keys? Generate a dummy track
                 if (!channel->mNumPositionKeys) {
+                    if (channel->mPositionKeys) {
+                        delete[] channel->mPositionKeys;
+                        channel->mPositionKeys = NULL;
+                    }
                     ai_assert(!channel->mPositionKeys);
                     channel->mNumPositionKeys = 1;
                     channel->mPositionKeys = new aiVectorKey[1];

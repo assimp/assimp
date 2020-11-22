@@ -1400,6 +1400,11 @@ inline void Node::Read(Value &obj, Asset &r) {
 }
 
 inline void Scene::Read(Value &obj, Asset &r) {
+    if (Value *name = FindString(obj, "name")) {
+        if (name->IsString()) {
+            this->name = name->GetString();
+        }
+    }
     if (Value *array = FindArray(obj, "nodes")) {
         for (unsigned int i = 0; i < array->Size(); ++i) {
             if (!(*array)[i].IsUint()) continue;

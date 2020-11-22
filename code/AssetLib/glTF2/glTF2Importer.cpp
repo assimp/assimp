@@ -1386,6 +1386,7 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     // read the asset file
     glTF2::Asset asset(pIOHandler);
     asset.Load(pFile, GetExtension(pFile) == "glb");
+    pScene->mName = asset.scene->name;
 
     //
     // Copy the data out

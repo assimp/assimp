@@ -1400,9 +1400,9 @@ inline void Node::Read(Value &obj, Asset &r) {
 }
 
 inline void Scene::Read(Value &obj, Asset &r) {
-    if (Value *name = FindString(obj, "name")) {
-        if (name->IsString()) {
-            this->name = name->GetString();
+    if (Value *scene_name = FindString(obj, "name")) {
+        if (scene_name->IsString()) {
+            this->name = scene_name->GetString();
         }
     }
     if (Value *array = FindArray(obj, "nodes")) {

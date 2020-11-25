@@ -641,7 +641,11 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+        uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         const uint32_t count3 = count / 3;
         out.reserve(count3);
@@ -728,7 +732,11 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+        uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         const uint32_t count4 = count / 4;
         out.reserve(count4);
@@ -807,7 +815,11 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+        uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         const uint32_t count2 = count / 2;
         out.reserve(count2);
@@ -879,7 +891,11 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * 4);
+        uint64_t dataToRead = static_cast<uint64_t>(count) * 4;
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         out.reserve(count);
 
@@ -937,7 +953,11 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+        uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
@@ -998,7 +1018,11 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * 4);
+        uint64_t dataToRead = static_cast<uint64_t>(count) * 4;
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         out.reserve(count);
 
@@ -1063,7 +1087,11 @@ void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * 8);
+        uint64_t dataToRead = static_cast<uint64_t>(count) * 8;
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         out.reserve(count);
 
@@ -1121,7 +1149,11 @@ void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el)
         ReadBinaryDataArray(type, count, data, end, buff, el);
 
         ai_assert(data == end);
-        ai_assert(buff.size() == count * 8);
+        uint64_t dataToRead = static_cast<uint64_t>(count) * 8;
+        ai_assert(buff.size() == dataToRead);
+        if (dataToRead > buff.size()) {
+            ParseError("Invalid read size (binary)",&el);
+        }
 
         out.reserve(count);
 

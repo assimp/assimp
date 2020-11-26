@@ -863,6 +863,7 @@ struct Sampler : public Object {
 };
 
 struct Scene : public Object {
+    std::string name;
     std::vector<Ref<Node>> nodes;
 
     Scene() {}

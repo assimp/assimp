@@ -638,11 +638,6 @@ public:
         return ptr;
     }
 
-    bool operator<(const Video& other) const
-    {
-        return std::tie(type, relativeFileName, fileName) < std::tie(other.type, other.relativeFileName, other.fileName);
-    }
-
 private:
     std::string type;
     std::string relativeFileName;

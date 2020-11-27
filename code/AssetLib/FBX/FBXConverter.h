@@ -428,7 +428,7 @@ private:
     using MaterialMap = std::fbx_unordered_map<const Material*, unsigned int>;
     MaterialMap materials_converted;
 
-    using VideoMap = std::fbx_unordered_map<const Video, unsigned int>;
+    using VideoMap = std::fbx_unordered_map<const Video*, unsigned int>;
     VideoMap textures_converted;
 
     using MeshMap = std::fbx_unordered_map<const Geometry*, std::vector<unsigned int> >;

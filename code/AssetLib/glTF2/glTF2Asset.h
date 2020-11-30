@@ -1124,6 +1124,14 @@ private:
     IOStream *OpenFile(std::string path, const char *mode, bool absolute = false);
 };
 
+inline std::string getContextForErrorMessages(const std::string &id, const std::string &name) {
+    std::string context = id;
+    if (!name.empty()) {
+        context += " (\"" + name + "\")";
+    }
+    return context;
+}
+
 } // namespace glTF2
 
 // Include the implementation of the methods

@@ -273,17 +273,21 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     }
 
     if (!mDict->IsArray()) {
-        throw DeadlyImportError("GLTF: Field is not an array \"", mDictId, "\"");
+        throw DeadlyImportError("GLTF: Field \"", mDictId, "\"  is not an array");
+    }
+
+    if (i >= mDict->Size()) {
+        throw DeadlyImportError("GLTF: Array index ", i, " is out of bounds (", mDict->Size(), ") for \"", mDictId, "\"");
     }
 
     Value &obj = (*mDict)[i];
 
     if (!obj.IsObject()) {
-        throw DeadlyImportError("GLTF: Object at index \"", to_string(i), "\" is not a JSON object");
+        throw DeadlyImportError("GLTF: Object at index ", to_string(i), " is not a JSON object");
     }
 
     if (mRecursiveReferenceCheck.find(i) != mRecursiveReferenceCheck.end()) {
-        throw DeadlyImportError("GLTF: Object at index \"", to_string(i), "\" has recursive reference to itself");
+        throw DeadlyImportError("GLTF: Object at index ", to_string(i), " has recursive reference to itself");
     }
     mRecursiveReferenceCheck.insert(i);
 
@@ -741,14 +745,6 @@ inline void CopyData(size_t count,
     }
 }
 
-inline std::string getContextForErrorMessages(const std::string& id, const std::string& name) {
-    std::string context = id;
-    if (!name.empty()) {
-        context += " (\"" + name + "\")";
-    }
-    return context;
-}
-
 } // namespace
 
 template <class T>
@@ -766,11 +762,11 @@ void Accessor::ExtractData(T *&outData) {
     const size_t targetElemSize = sizeof(T);
 
     if (elemSize > targetElemSize) {
-        throw DeadlyImportError("GLTF: elemSize > targetElemSize");
+        throw DeadlyImportError("GLTF: elemSize ", elemSize, " > targetElemSize ", targetElemSize, " in ", getContextForErrorMessages(id, name));
     }
 
     if (count*stride > (bufferView ? bufferView->byteLength : sparse->data.size())) {
-        throw DeadlyImportError("GLTF: count*stride out of range");
+        throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > bufferView->byteLength ", bufferView->byteLength, " in ", getContextForErrorMessages(id, name));
     }
 
     outData = new T[count];

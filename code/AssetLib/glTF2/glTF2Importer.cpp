@@ -453,11 +453,16 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 aim->mNumAnimMeshes = (unsigned int)targets.size();
                 aim->mAnimMeshes = new aiAnimMesh *[aim->mNumAnimMeshes];
                 for (size_t i = 0; i < targets.size(); i++) {
-                    aim->mAnimMeshes[i] = aiCreateAnimMesh(aim);
+                    bool needPositions = targets[i].position.size() > 0;
+                    bool needNormals = targets[i].normal.size() > 0;
+                    bool needTangents = targets[i].tangent.size() > 0;
+                    // GLTF morph does not support colors and texCoords
+                    aim->mAnimMeshes[i] = aiCreateAnimMesh(aim,
+                            needPositions, needNormals, needTangents, false, false);
                     aiAnimMesh &aiAnimMesh = *(aim->mAnimMeshes[i]);
                     Mesh::Primitive::Target &target = targets[i];
 
-                    if (target.position.size() > 0) {
+                    if (needPositions) {
                         aiVector3D *positionDiff = nullptr;
                         target.position[0]->ExtractData(positionDiff);
                         for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
@@ -465,7 +470,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         }
                         delete[] positionDiff;
                     }
-                    if (target.normal.size() > 0) {
+                    if (needNormals) {
                         aiVector3D *normalDiff = nullptr;
                         target.normal[0]->ExtractData(normalDiff);
                         for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
@@ -473,7 +478,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         }
                         delete[] normalDiff;
                     }
-                    if (target.tangent.size() > 0) {
+                    if (needTangents) {
                         Tangent *tangent = nullptr;
                         attr.tangent[0]->ExtractData(tangent);
 
@@ -1069,9 +1074,11 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
         samplers.translation->output->ExtractData(values);
         anim->mNumPositionKeys = static_cast<uint32_t>(samplers.translation->input->count);
         anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+        unsigned int ii = (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
             anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-            anim->mPositionKeys[i].mValue = values[i];
+            anim->mPositionKeys[i].mValue = values[ii];
+            ii += (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
         }
         delete[] times;
         delete[] values;
@@ -1091,12 +1098,14 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
         samplers.rotation->output->ExtractData(values);
         anim->mNumRotationKeys = static_cast<uint32_t>(samplers.rotation->input->count);
         anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+        unsigned int ii = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
             anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-            anim->mRotationKeys[i].mValue.x = values[i].w;
-            anim->mRotationKeys[i].mValue.y = values[i].x;
-            anim->mRotationKeys[i].mValue.z = values[i].y;
-            anim->mRotationKeys[i].mValue.w = values[i].z;
+            anim->mRotationKeys[i].mValue.x = values[ii].w;
+            anim->mRotationKeys[i].mValue.y = values[ii].x;
+            anim->mRotationKeys[i].mValue.z = values[ii].y;
+            anim->mRotationKeys[i].mValue.w = values[ii].z;
+            ii += (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
         }
         delete[] times;
         delete[] values;
@@ -1117,9 +1126,11 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
         samplers.scale->output->ExtractData(values);
         anim->mNumScalingKeys = static_cast<uint32_t>(samplers.scale->input->count);
         anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
+        unsigned int ii = (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
             anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-            anim->mScalingKeys[i].mValue = values[i];
+            anim->mScalingKeys[i].mValue = values[ii];
+            ii += (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
         }
         delete[] times;
         delete[] values;
@@ -1148,11 +1159,14 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSampler
         samplers.weight->output->ExtractData(values);
         anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
 
-        const unsigned int numMorphs = (unsigned int)samplers.weight->output->count / anim->mNumKeys;
+        // for Interpolation_CUBICSPLINE can have more outputs
+        const unsigned int weightStride = (unsigned int)samplers.weight->output->count / anim->mNumKeys;
+        const unsigned int numMorphs = (samplers.weight->interpolation == Interpolation_CUBICSPLINE) ? weightStride - 2 : weightStride;
 
         anim->mKeys = new aiMeshMorphKey[anim->mNumKeys];
-        unsigned int k = 0u;
+        unsigned int ii = (samplers.weight->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
         for (unsigned int i = 0u; i < anim->mNumKeys; ++i) {
+            unsigned int k = weightStride * i + ii;
             anim->mKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
             anim->mKeys[i].mNumValuesAndWeights = numMorphs;
             anim->mKeys[i].mValues = new unsigned int[numMorphs];
@@ -1386,6 +1400,9 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     // read the asset file
     glTF2::Asset asset(pIOHandler);
     asset.Load(pFile, GetExtension(pFile) == "glb");
+    if (asset.scene) {
+        pScene->mName = asset.scene->name;
+    }
 
     //
     // Copy the data out

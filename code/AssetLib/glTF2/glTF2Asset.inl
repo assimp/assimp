@@ -283,11 +283,11 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     Value &obj = (*mDict)[i];
 
     if (!obj.IsObject()) {
-        throw DeadlyImportError("GLTF: Object at index ", to_string(i), " is not a JSON object");
+        throw DeadlyImportError("GLTF: Object at index ", i, " in array \"", mDictId, "\" is not a JSON object");
     }
 
     if (mRecursiveReferenceCheck.find(i) != mRecursiveReferenceCheck.end()) {
-        throw DeadlyImportError("GLTF: Object at index ", to_string(i), " has recursive reference to itself");
+        throw DeadlyImportError("GLTF: Object at index ", i, " in array \"", mDictId, "\" has recursive reference to itself");
     }
     mRecursiveReferenceCheck.insert(i);
 
@@ -765,8 +765,9 @@ void Accessor::ExtractData(T *&outData) {
         throw DeadlyImportError("GLTF: elemSize ", elemSize, " > targetElemSize ", targetElemSize, " in ", getContextForErrorMessages(id, name));
     }
 
-    if (count*stride > (bufferView ? bufferView->byteLength : sparse->data.size())) {
-        throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > bufferView->byteLength ", bufferView->byteLength, " in ", getContextForErrorMessages(id, name));
+    const size_t maxSize = (bufferView ? bufferView->byteLength : sparse->data.size());
+    if (count*stride > maxSize) {
+        throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
     }
 
     outData = new T[count];

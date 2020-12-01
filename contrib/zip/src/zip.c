@@ -18,8 +18,10 @@
 /* Win32, DOS, MSVC, MSVS */
 #include <direct.h>
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4706)
+#endif // _MSC_VER
 
 #define MKDIR(DIRNAME) _mkdir(DIRNAME)
 #define STRCLONE(STR) ((STR) ? _strdup(STR) : NULL)
@@ -968,4 +970,6 @@ out:
   return status;
 }
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER

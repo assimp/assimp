@@ -90,7 +90,7 @@ Property* ReadTypedProperty(const Element& element)
         ai_assert(tok.size() >= 5);
         return new TypedProperty<bool>(ParseTokenAsInt(*tok[4]) != 0);
     }
-    else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum")) {
+    else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum") || !strcmp(cs, "Integer")) {
         ai_assert(tok.size() >= 5);
         return new TypedProperty<int>(ParseTokenAsInt(*tok[4]));
     }
@@ -120,6 +120,16 @@ Property* ReadTypedProperty(const Element& element)
     else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
         ai_assert(tok.size() >= 5);
         return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
+    }
+    else if (!strcmp(cs, "ColorAndAlpha"))
+    {
+        ai_assert(tok.size() >= 8);
+        return new TypedProperty<aiColor4D>(aiColor4D(
+            ParseTokenAsFloat(*tok[4]),
+            ParseTokenAsFloat(*tok[5]),
+            ParseTokenAsFloat(*tok[6]),
+            ParseTokenAsFloat(*tok[7]))
+        );
     }
     return nullptr;
 }

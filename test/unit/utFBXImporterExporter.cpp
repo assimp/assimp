@@ -360,7 +360,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsMetalRoughness) {
 
     int useGlossiness;
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness), aiReturn_SUCCESS);
-    EXPECT_EQ(useGlossiness, 2); // AFAICT 1 = Roughness map is glossiness, 2 = Roughness map is roughness.
+    EXPECT_EQ(useGlossiness, 2); // 1 = Roughness map is glossiness, 2 = Roughness map is roughness.
 
     float bumpMapAmt; // Presumably amount.
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
@@ -413,7 +413,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
 
     int useGlossiness;
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness), aiReturn_SUCCESS);
-    EXPECT_EQ(useGlossiness, 1); // AFAICT 1 = Glossiness map is glossiness, 2 = Glossiness map is roughness.
+    EXPECT_EQ(useGlossiness, 1); // 1 = Glossiness map is glossiness, 2 = Glossiness map is roughness.
 
     float bumpMapAmt; // Presumably amount.
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);

@@ -2024,12 +2024,27 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "3dsMax|main|emit_color_map", aiTextureType_EMISSION_COLOR, mesh);
     TrySetTextureProperties(out_mat, _textures, "3dsMax|main|ao_map", aiTextureType_AMBIENT_OCCLUSION, mesh);
     TrySetTextureProperties(out_mat, _textures, "3dsMax|main|opacity_map", aiTextureType_OPACITY, mesh);
-    // Metalness/Roughness mode
+    // Metalness/Roughness material type
     TrySetTextureProperties(out_mat, _textures, "3dsMax|main|metalness_map", aiTextureType_METALNESS, mesh);
-    TrySetTextureProperties(out_mat, _textures, "3dsMax|main|roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
-    // Specular/Gloss mode
+    // Specular/Gloss material type
     TrySetTextureProperties(out_mat, _textures, "3dsMax|main|specular_map", aiTextureType_SPECULAR, mesh);
-    TrySetTextureProperties(out_mat, _textures, "3dsMax|main|glossiness_map", aiTextureType_SHININESS, mesh);
+
+    // Glossiness vs roughness in 3ds Max Pbr Materials
+    int useGlossiness;
+    if (out_mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness) == aiReturn_SUCCESS)
+    {
+        // These textures swap meaning if ((useGlossiness == 1) != (material type is Specular/Gloss))
+        if (useGlossiness == 1)
+        {
+            TrySetTextureProperties(out_mat, _textures, "3dsMax|main|roughness_map", aiTextureType_SHININESS, mesh);
+            TrySetTextureProperties(out_mat, _textures, "3dsMax|main|glossiness_map", aiTextureType_SHININESS, mesh);
+        }
+        else // useGlossiness == 2
+        {
+            TrySetTextureProperties(out_mat, _textures, "3dsMax|main|roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+            TrySetTextureProperties(out_mat, _textures, "3dsMax|main|glossiness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+        }
+    }
 }
 
 void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const LayeredTextureMap &layeredTextures, const MeshGeometry *const mesh) {

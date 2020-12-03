@@ -45,25 +45,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ColladaLoader.h"
 #include "ColladaParser.h"
-
 #include <assimp/ColladaMetaData.h>
+#include <assimp/CreateAnimMesh.h>
 #include <assimp/Defines.h>
+#include <assimp/ParsingUtils.h>
+#include <assimp/SkeletonMeshBuilder.h>
+#include <assimp/ZipArchiveIOSystem.h>
 #include <assimp/anim.h>
+#include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 
-#include <assimp/CreateAnimMesh.h>
-#include <assimp/ParsingUtils.h>
-#include <assimp/SkeletonMeshBuilder.h>
-#include <assimp/ZipArchiveIOSystem.h>
-#include <assimp/fast_atof.h>
-
-#include "math.h"
-#include "time.h"
-#include <algorithm>
-#include <memory>
 #include <numeric>
 
 namespace Assimp {
@@ -125,20 +119,17 @@ ColladaLoader::~ColladaLoader() {
 bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
     // check file extension
     const std::string extension = GetExtension(pFile);
-
-    bool readSig = checkSig && (pIOHandler != nullptr);
-
+    const bool readSig = checkSig && (pIOHandler != nullptr);
     if (!readSig) {
         if (extension == "dae" || extension == "zae") {
             return true;
         }
-    }
-
-    if (readSig) {
+    } else {
         // Look for a DAE file inside, but don't extract it
         ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
-        if (zip_archive.isOpen())
+        if (zip_archive.isOpen()) {
             return !ColladaParser::ReadZaeManifest(zip_archive).empty();
+        }
     }
 
     // XML - too generic, we need to open the file and search for typical keywords
@@ -337,13 +328,15 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Col
 // Resolve UV channels
 void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler &sampler, const Collada::SemanticMappingTable &table) {
     std::map<std::string, Collada::InputSemanticMapEntry>::const_iterator it = table.mMap.find(sampler.mUVChannel);
-    if (it != table.mMap.end()) {
-        if (it->second.mType != Collada::IT_Texcoord) {
-            ASSIMP_LOG_ERROR("Collada: Unexpected effect input mapping");
-        }
-
-        sampler.mUVId = it->second.mSet;
+    if (it == table.mMap.end()) {
+        return;
     }
+
+    if (it->second.mType != Collada::IT_Texcoord) {
+        ASSIMP_LOG_ERROR("Collada: Unexpected effect input mapping");
+    }
+
+    sampler.mUVId = it->second.mSet;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -390,7 +383,11 @@ void ColladaLoader::BuildLightsForNode(const ColladaParser &pParser, const Colla
                 if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
                     // Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
                     // epsilon chosen to be 0.1
-                    out->mAngleOuterCone = std::acos(std::pow(0.1f, 1.f / srcLight->mFalloffExponent)) +
+                    float f = 1.0f;
+                    if ( 0.0f != srcLight->mFalloffExponent ) {
+                        f = 1.f / srcLight->mFalloffExponent;
+                    }
+                    out->mAngleOuterCone = std::acos(std::pow(0.1f, f)) +
                                            out->mAngleInnerCone;
                 } else {
                     out->mAngleOuterCone = out->mAngleInnerCone + AI_DEG_TO_RAD(srcLight->mPenumbraAngle);
@@ -585,10 +582,10 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Colla
 // ------------------------------------------------------------------------------------------------
 // Find mesh from either meshes or morph target meshes
 aiMesh *ColladaLoader::findMesh(const std::string &meshid) {
-    if ( meshid.empty()) {
+    if (meshid.empty()) {
         return nullptr;
     }
-    
+
     for (unsigned int i = 0; i < mMeshes.size(); ++i) {
         if (std::string(mMeshes[i]->mName.data) == meshid) {
             return mMeshes[i];
@@ -1251,7 +1248,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
 
             // time count and value count must match
             if (e.mTimeAccessor->mCount != e.mValueAccessor->mCount)
-                throw DeadlyImportError(format() << "Time count / value count mismatch in animation channel \"" << e.mChannel->mTarget << "\".");
+                throw DeadlyImportError("Time count / value count mismatch in animation channel \"", e.mChannel->mTarget, "\".");
 
             if (e.mTimeAccessor->mCount > 0) {
                 // find bounding times
@@ -1377,9 +1374,9 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 double time = double(mat.d4); // remember? time is stored in mat.d4
                 mat.d4 = 1.0f;
 
-                dstAnim->mPositionKeys[a].mTime = time * kMillisecondsFromSeconds ;
-                dstAnim->mRotationKeys[a].mTime = time * kMillisecondsFromSeconds ;
-                dstAnim->mScalingKeys[a].mTime = time * kMillisecondsFromSeconds ;
+                dstAnim->mPositionKeys[a].mTime = time * kMillisecondsFromSeconds;
+                dstAnim->mRotationKeys[a].mTime = time * kMillisecondsFromSeconds;
+                dstAnim->mScalingKeys[a].mTime = time * kMillisecondsFromSeconds;
                 mat.Decompose(dstAnim->mScalingKeys[a].mValue, dstAnim->mRotationKeys[a].mValue, dstAnim->mPositionKeys[a].mValue);
             }
 
@@ -1400,7 +1397,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 if (e.mTargetId.find("morph-weights") != std::string::npos)
                     morphChannels.push_back(e);
             }
-            if (!morphChannels.empty() ) {
+            if (!morphChannels.empty()) {
                 // either 1) morph weight animation count should contain morph target count channels
                 // or     2) one channel with morph target count arrays
                 // assume first
@@ -1434,8 +1431,8 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                     morphAnim->mKeys[key].mValues = new unsigned int[morphChannels.size()];
                     morphAnim->mKeys[key].mWeights = new double[morphChannels.size()];
 
-                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime * kMillisecondsFromSeconds ;
-                    for (unsigned int valueIndex = 0; valueIndex < morphChannels.size(); ++valueIndex ) {
+                    morphAnim->mKeys[key].mTime = morphTimeValues[key].mTime * kMillisecondsFromSeconds;
+                    for (unsigned int valueIndex = 0; valueIndex < morphChannels.size(); ++valueIndex) {
                         morphAnim->mKeys[key].mValues[valueIndex] = valueIndex;
                         morphAnim->mKeys[key].mWeights[valueIndex] = getWeightAtKey(morphTimeValues, key, valueIndex);
                     }
@@ -1468,7 +1465,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
         for (size_t a = 0; a < morphAnims.size(); ++a) {
             anim->mDuration = std::max(anim->mDuration, morphAnims[a]->mKeys[morphAnims[a]->mNumKeys - 1].mTime);
         }
-        anim->mTicksPerSecond = 1;
+        anim->mTicksPerSecond = 1000.0;
         mAnims.push_back(anim);
     }
 }
@@ -1552,23 +1549,23 @@ void ColladaLoader::FillMaterials(const ColladaParser &pParser, aiScene * /*pSce
             shadeMode = aiShadingMode_Flat;
         } else {
             switch (effect.mShadeType) {
-                case Collada::Shade_Constant:
-                    shadeMode = aiShadingMode_NoShading;
-                    break;
-                case Collada::Shade_Lambert:
-                    shadeMode = aiShadingMode_Gouraud;
-                    break;
-                case Collada::Shade_Blinn:
-                    shadeMode = aiShadingMode_Blinn;
-                    break;
-                case Collada::Shade_Phong:
-                    shadeMode = aiShadingMode_Phong;
-                    break;
+            case Collada::Shade_Constant:
+                shadeMode = aiShadingMode_NoShading;
+                break;
+            case Collada::Shade_Lambert:
+                shadeMode = aiShadingMode_Gouraud;
+                break;
+            case Collada::Shade_Blinn:
+                shadeMode = aiShadingMode_Blinn;
+                break;
+            case Collada::Shade_Phong:
+                shadeMode = aiShadingMode_Phong;
+                break;
 
-                default:
-                    ASSIMP_LOG_WARN("Collada: Unrecognized shading mode, using gouraud shading");
-                    shadeMode = aiShadingMode_Gouraud;
-                    break;
+            default:
+                ASSIMP_LOG_WARN("Collada: Unrecognized shading mode, using gouraud shading");
+                shadeMode = aiShadingMode_Gouraud;
+                break;
             }
         }
         mat.AddProperty<int>(&shadeMode, 1, AI_MATKEY_SHADING_MODEL);
@@ -1658,7 +1655,7 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
         const Collada::Material &material = matIt->second;
         // a material is only a reference to an effect
         ColladaParser::EffectLibrary::iterator effIt = pParser.mEffectLibrary.find(material.mEffect);
-        if (effIt == pParser.mEffectLibrary.end())
+        if (effIt == pParser.mEffectLibrary.end())  
             continue;
         Collada::Effect &effect = effIt->second;
 
@@ -1734,7 +1731,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
         // and add this texture to the list
         mTextures.push_back(tex);
         return result;
-    } 
+    }
 
     if (imIt->second.mFileName.empty()) {
         throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");

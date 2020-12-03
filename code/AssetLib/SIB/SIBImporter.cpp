@@ -808,7 +808,7 @@ void SIBImporter::InternReadFile(const std::string &pFile,
 
     // We should have at least one chunk
     if (stream.GetRemainingSize() < 16)
-        throw DeadlyImportError("SIB file is either empty or corrupt: " + pFile);
+        throw DeadlyImportError("SIB file is either empty or corrupt: ", pFile);
 
     SIB sib;
 

@@ -73,9 +73,9 @@ public:
      *  @brief  Log severity to describe the granularity of logging.
      */
     enum LogSeverity {
-        NORMAL,     //!< Normal granularity of logging
-        DEBUG,      //!< Debug messages will be logged, but not verbose debug messages.
-        VERBOSE     //!< All messages will be logged
+        NORMAL,     ///< Normal granularity of logging
+        DEBUGGING,  ///< Debug messages will be logged, but not verbose debug messages.
+        VERBOSE     ///< All messages will be logged
     };
 
     // ----------------------------------------------------------------------

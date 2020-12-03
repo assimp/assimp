@@ -75,7 +75,9 @@ using namespace std;
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
 ObjFileImporter::ObjFileImporter() :
-        m_Buffer(), m_pRootObject(nullptr), m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
+        m_Buffer(),
+        m_pRootObject(nullptr),
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
@@ -107,9 +109,12 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
     // Read file into memory
     static const std::string mode = "rb";
-    std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, mode));
+    auto streamCloser = [&](IOStream *pStream) {
+        pIOHandler->Close(pStream);
+    };
+    std::unique_ptr<IOStream, decltype(streamCloser)> fileStream(pIOHandler->Open(file, mode), streamCloser);
     if (!fileStream.get()) {
-        throw DeadlyImportError("Failed to open file " + file + ".");
+        throw DeadlyImportError("Failed to open file ", file, ".");
     }
 
     // Get the file-size and validate it, throwing an exception when fails
@@ -589,18 +594,18 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         // convert illumination model
         int sm = 0;
         switch (pCurrentMaterial->illumination_model) {
-            case 0:
-                sm = aiShadingMode_NoShading;
-                break;
-            case 1:
-                sm = aiShadingMode_Gouraud;
-                break;
-            case 2:
-                sm = aiShadingMode_Phong;
-                break;
-            default:
-                sm = aiShadingMode_Gouraud;
-                ASSIMP_LOG_ERROR("OBJ: unexpected illumination model (0-2 recognized)");
+        case 0:
+            sm = aiShadingMode_NoShading;
+            break;
+        case 1:
+            sm = aiShadingMode_Gouraud;
+            break;
+        case 2:
+            sm = aiShadingMode_Phong;
+            break;
+        default:
+            sm = aiShadingMode_Gouraud;
+            ASSIMP_LOG_ERROR("OBJ: unexpected illumination model (0-2 recognized)");
         }
 
         mat->AddProperty<int>(&sm, 1, AI_MATKEY_SHADING_MODEL);

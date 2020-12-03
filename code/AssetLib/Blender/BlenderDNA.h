@@ -83,9 +83,9 @@ class ObjectCache;
  *  ancestry. */
 // -------------------------------------------------------------------------------
 struct Error : DeadlyImportError {
-    Error(const std::string &s) :
-            DeadlyImportError(s) {
-        // empty
+    template <typename... T>
+    explicit Error(T &&...args) :
+            DeadlyImportError(args...) {
     }
 };
 
@@ -186,7 +186,7 @@ struct Field {
 };
 
 // -------------------------------------------------------------------------------
-/** Range of possible behaviours for fields absend in the input file. Some are
+/** Range of possible behaviors for fields absence in the input file. Some are
  *  mission critical so we need them, while others can silently be default
  *  initialized and no animations are harmed. */
 // -------------------------------------------------------------------------------
@@ -394,7 +394,7 @@ private:
 
 // --------------------------------------------------------
 template <>
-struct Structure ::_defaultInitializer<ErrorPolicy_Warn> {
+struct Structure::_defaultInitializer<ErrorPolicy_Warn> {
 
     template <typename T>
     void operator()(T &out, const char *reason = "<add reason>") {
@@ -406,7 +406,7 @@ struct Structure ::_defaultInitializer<ErrorPolicy_Warn> {
 };
 
 template <>
-struct Structure ::_defaultInitializer<ErrorPolicy_Fail> {
+struct Structure::_defaultInitializer<ErrorPolicy_Fail> {
 
     template <typename T>
     void operator()(T & /*out*/, const char * = "") {

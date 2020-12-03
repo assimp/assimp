@@ -130,9 +130,7 @@ void DNAParser::Parse() {
 
         uint16_t n = stream.GetI2();
         if (n >= types.size()) {
-            throw DeadlyImportError((format(),
-                    "BlenderDNA: Invalid type index in structure name", n,
-                    " (there are only ", types.size(), " entries)"));
+            throw DeadlyImportError("BlenderDNA: Invalid type index in structure name", n, " (there are only ", types.size(), " entries)");
         }
 
         // maintain separate indexes
@@ -141,7 +139,6 @@ void DNAParser::Parse() {
         dna.structures.push_back(Structure());
         Structure &s = dna.structures.back();
         s.name = types[n].name;
-        //s.index = dna.structures.size()-1;
 
         n = stream.GetI2();
         s.fields.reserve(n);
@@ -151,9 +148,7 @@ void DNAParser::Parse() {
 
             uint16_t j = stream.GetI2();
             if (j >= types.size()) {
-                throw DeadlyImportError((format(),
-                        "BlenderDNA: Invalid type index in structure field ", j,
-                        " (there are only ", types.size(), " entries)"));
+                throw DeadlyImportError("BlenderDNA: Invalid type index in structure field ", j, " (there are only ", types.size(), " entries)");
             }
             s.fields.push_back(Field());
             Field &f = s.fields.back();
@@ -164,9 +159,7 @@ void DNAParser::Parse() {
 
             j = stream.GetI2();
             if (j >= names.size()) {
-                throw DeadlyImportError((format(),
-                        "BlenderDNA: Invalid name index in structure field ", j,
-                        " (there are only ", names.size(), " entries)"));
+                throw DeadlyImportError("BlenderDNA: Invalid name index in structure field ", j, " (there are only ", names.size(), " entries)");
             }
 
             f.name = names[j];
@@ -188,9 +181,7 @@ void DNAParser::Parse() {
             if (*f.name.rbegin() == ']') {
                 const std::string::size_type rb = f.name.find('[');
                 if (rb == std::string::npos) {
-                    throw DeadlyImportError((format(),
-                            "BlenderDNA: Encountered invalid array declaration ",
-                            f.name));
+                    throw DeadlyImportError("BlenderDNA: Encountered invalid array declaration ", f.name);
                 }
 
                 f.flags |= FieldFlag_Array;

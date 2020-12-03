@@ -3590,7 +3590,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                         case 4: f = (float)(*((float *)(data + 0))); break;
                         case 8: f = (float)(*((double *)(data + 0))); break;
                         }
-                        h->cmd[i].arg[k] = *((uint32_t *)&f);
+                        memcpy(&(h->cmd[i].arg[k]), &f, sizeof(uint32_t));
                         data += model->vc_s;
                         break;
                     case m3dcp_hi_t: data = _m3d_getidx(data, model->hi_s, &h->cmd[i].arg[k]); break;

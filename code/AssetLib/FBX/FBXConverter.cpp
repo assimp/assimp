@@ -2031,18 +2031,18 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
 
     // Glossiness vs roughness in 3ds Max Pbr Materials
     int useGlossiness;
-    if (out_mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness) == aiReturn_SUCCESS)
-    {
+    if (out_mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness) == aiReturn_SUCCESS) {
         // These textures swap meaning if ((useGlossiness == 1) != (material type is Specular/Gloss))
-        if (useGlossiness == 1)
-        {
+        if (useGlossiness == 1) {
             TrySetTextureProperties(out_mat, _textures, "3dsMax|main|roughness_map", aiTextureType_SHININESS, mesh);
             TrySetTextureProperties(out_mat, _textures, "3dsMax|main|glossiness_map", aiTextureType_SHININESS, mesh);
         }
-        else // useGlossiness == 2
-        {
+        else if (useGlossiness == 2) {
             TrySetTextureProperties(out_mat, _textures, "3dsMax|main|roughness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
             TrySetTextureProperties(out_mat, _textures, "3dsMax|main|glossiness_map", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+        }
+        else {
+            FBXImporter::LogWarn("A 3dsMax Pbr Material must have a useGlossiness value to correctly interpret roughness and glossiness textures.");
         }
     }
 }

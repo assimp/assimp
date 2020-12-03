@@ -638,20 +638,6 @@ public:
         return ptr;
     }
 
-    bool operator==(const Video& other) const
-    {
-        return (
-               type == other.type
-            && relativeFileName == other.relativeFileName
-            && fileName == other.fileName
-        );
-    }
-
-    bool operator<(const Video& other) const
-    {
-        return std::tie(type, relativeFileName, fileName) < std::tie(other.type, other.relativeFileName, other.fileName);
-    }
-
 private:
     std::string type;
     std::string relativeFileName;
@@ -1191,26 +1177,5 @@ private:
 
 } // Namespace FBX
 } // Namespace Assimp
-
-namespace std
-{
-    template <>
-    struct hash<const Assimp::FBX::Video>
-    {
-        std::size_t operator()(const Assimp::FBX::Video& video) const
-        {
-            using std::size_t;
-            using std::hash;
-            using std::string;
-
-            size_t res = 17;
-            res = res * 31 + hash<string>()(video.Name());
-            res = res * 31 + hash<string>()(video.RelativeFilename());
-            res = res * 31 + hash<string>()(video.Type());
-
-            return res;
-        }
-    };
-}
 
 #endif // INCLUDED_AI_FBX_DOCUMENT_H

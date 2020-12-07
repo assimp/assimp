@@ -96,8 +96,9 @@ void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
         if (!mesh->mTextureCoords[i]) {
             mesh->mNumUVComponents[i] = 0;
         } else {
-            if (!mesh->mNumUVComponents[i])
+            if (!mesh->mNumUVComponents[i]) {
                 mesh->mNumUVComponents[i] = 2;
+            }
 
             aiVector3D *p = mesh->mTextureCoords[i], *end = p + mesh->mNumVertices;
 
@@ -105,16 +106,19 @@ void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
             // as if they were 2D channels .. just in case an application doesn't handle
             // this case
             if (2 == mesh->mNumUVComponents[i]) {
-                for (; p != end; ++p)
+                for (; p != end; ++p) {
                     p->z = 0.f;
+                }
             } else if (1 == mesh->mNumUVComponents[i]) {
-                for (; p != end; ++p)
+                for (; p != end; ++p) {
                     p->z = p->y = 0.f;
+                }
             } else if (3 == mesh->mNumUVComponents[i]) {
                 // Really 3D coordinates? Check whether the third coordinate is != 0 for at least one element
                 for (; p != end; ++p) {
-                    if (p->z != 0)
+                    if (p->z != 0) {
                         break;
+                    }
                 }
                 if (p == end) {
                     ASSIMP_LOG_WARN("ScenePreprocessor: UVs are declared to be 3D but they're obviously not. Reverting to 2D.");
@@ -151,7 +155,6 @@ void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
 
     // If tangents and normals are given but no bitangents compute them
     if (mesh->mTangents && mesh->mNormals && !mesh->mBitangents) {
-
         mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             mesh->mBitangents[i] = mesh->mNormals[i] ^ mesh->mTangents[i];
@@ -165,11 +168,9 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
     for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
         aiNodeAnim *channel = anim->mChannels[i];
 
-        /*  If the exact duration of the animation is not given
-         *  compute it now.
-         */
+        //  If the exact duration of the animation is not given
+        //  compute it now.
         if (anim->mDuration == -1.) {
-
             // Position keys
             for (unsigned int j = 0; j < channel->mNumPositionKeys; ++j) {
                 aiVectorKey &key = channel->mPositionKeys[j];
@@ -192,11 +193,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
             }
         }
 
-        /*  Check whether the animation channel has no rotation
-         *  or position tracks. In this case we generate a dummy
-         *  track from the information we have in the transformation
-         *  matrix of the corresponding node.
-         */
+        // Check whether the animation channel has no rotation
+        // or position tracks. In this case we generate a dummy
+        // track from the information we have in the transformation
+        // matrix of the corresponding node.
         if (!channel->mNumRotationKeys || !channel->mNumPositionKeys || !channel->mNumScalingKeys) {
             // Find the node that belongs to this animation
             aiNode *node = scene->mRootNode->FindNode(channel->mNodeName);
@@ -210,6 +210,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
 
                 // No rotation keys? Generate a dummy track
                 if (!channel->mNumRotationKeys) {
+                    if (channel->mRotationKeys) {
+                        delete[] channel->mRotationKeys;
+                        channel->mRotationKeys = nullptr;
+                    }
                     ai_assert(!channel->mRotationKeys);
                     channel->mNumRotationKeys = 1;
                     channel->mRotationKeys = new aiQuatKey[1];
@@ -225,6 +229,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
 
                 // No scaling keys? Generate a dummy track
                 if (!channel->mNumScalingKeys) {
+                    if (channel->mScalingKeys) {
+                        delete[] channel->mScalingKeys;
+                        channel->mScalingKeys = nullptr;
+                    }
                     ai_assert(!channel->mScalingKeys);
                     channel->mNumScalingKeys = 1;
                     channel->mScalingKeys = new aiVectorKey[1];
@@ -240,6 +248,10 @@ void ScenePreprocessor::ProcessAnimation(aiAnimation *anim) {
 
                 // No position keys? Generate a dummy track
                 if (!channel->mNumPositionKeys) {
+                    if (channel->mPositionKeys) {
+                        delete[] channel->mPositionKeys;
+                        channel->mPositionKeys = nullptr;
+                    }
                     ai_assert(!channel->mPositionKeys);
                     channel->mNumPositionKeys = 1;
                     channel->mPositionKeys = new aiVectorKey[1];

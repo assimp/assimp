@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -65,7 +63,7 @@ public:
     }
 
 private:
-    void importerTest_HL1(Assimp::Importer* const importer) {
+    void importerTest_HL1(Assimp::Importer *const importer) {
         const aiScene *scene = importer->ReadFile(MDL_HL1_FILE_MAN, 0);
         EXPECT_NE(nullptr, scene);
 

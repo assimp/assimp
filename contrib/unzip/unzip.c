@@ -89,7 +89,10 @@ typedef unsigned long z_crc_t;
 #define SIZEZIPLOCALHEADER (0x1e)
 
 
-
+#ifdef _WIN32
+#    pragma warning(push)
+#    pragma warning(disable : 4131 4244 4189 4245)
+#endif // _WIN32
 
 const char unz_copyright[] =
    " unzip 1.01 Copyright 1998-2004 Gilles Vollant - http://www.winimage.com/zLibDll";
@@ -1551,7 +1554,6 @@ extern int ZEXPORT unzGetGlobalComment (file, szComment, uSizeBuf)
     char *szComment;
     uLong uSizeBuf;
 {
-    int err=UNZ_OK;
     unz_s* s;
     uLong uReadThis ;
     if (file==NULL)
@@ -1613,3 +1615,7 @@ extern int ZEXPORT unzSetOffset (file, pos)
     s->current_file_ok = (err == UNZ_OK);
     return err;
 }
+
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif // _WIN32

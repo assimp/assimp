@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,13 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Half-Life 1 MDL loader materials tests.
  */
 
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "AssetLib/MDL/HalfLife/HL1ImportDefinitions.h"
+#include "MDLHL1TestFiles.h"
+#include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
-#include "MDLHL1TestFiles.h"
-#include "MDL/HalfLife/HL1ImportDefinitions.h"
 
 using namespace Assimp;
 

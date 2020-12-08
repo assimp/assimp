@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,10 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-
 using namespace Assimp;
-
-
 
 TEST(utMD3Importer, importWatercan) {
     Assimp::Importer importer;
@@ -58,13 +53,11 @@ TEST(utMD3Importer, importWatercan) {
     ASSERT_NE(nullptr, scene);
 }
 
-
 TEST(utMD3Importer, importWatercan_dmg) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD3/watercan_dmg.md3", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
 
 TEST(utMD3Importer, importEuropean_fnt_v2) {
     Assimp::Importer importer;

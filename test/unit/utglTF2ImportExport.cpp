@@ -38,33 +38,35 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
+#include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <assimp/commonMetaData.h>
+#include <assimp/Exporter.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+
 
 #include <array>
 
 #include <assimp/pbrmaterial.h>
-
 using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
-            aiProcess_ValidateDataStructure);
-        EXPECT_NE( scene, nullptr );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
+                aiProcess_ValidateDataStructure);
+        EXPECT_NE(scene, nullptr);
         if (!scene) {
             return false;
         }
 
-        EXPECT_TRUE( scene->HasMaterials() );
+        EXPECT_TRUE(scene->HasMaterials());
         if (!scene->HasMaterials()) {
             return false;
         }
@@ -72,19 +74,19 @@ public:
 
         aiString path;
         aiTextureMapMode modes[2];
-        EXPECT_EQ( aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr,
-            nullptr, nullptr, modes) );
-        EXPECT_STREQ( path.C_Str(), "CesiumLogoFlat.png" );
-        EXPECT_EQ( modes[0], aiTextureMapMode_Mirror );
-        EXPECT_EQ( modes[1], aiTextureMapMode_Clamp );
+        EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr,
+                                            nullptr, nullptr, modes));
+        EXPECT_STREQ(path.C_Str(), "CesiumLogoFlat.png");
+        EXPECT_EQ(modes[0], aiTextureMapMode_Mirror);
+        EXPECT_EQ(modes[1], aiTextureMapMode_Clamp);
 
         return true;
     }
 
     virtual bool binaryImporterTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine.glb",
-            aiProcess_ValidateDataStructure);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine.glb",
+                aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 
@@ -92,23 +94,22 @@ public:
     virtual bool exporterTest() {
         Assimp::Importer importer;
         Assimp::Exporter exporter;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
-            aiProcess_ValidateDataStructure );
-        EXPECT_NE( nullptr, scene );
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.gltf" ) );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
+                aiProcess_ValidateDataStructure);
+        EXPECT_NE(nullptr, scene);
+        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.gltf"));
 
         return true;
     }
 #endif // ASSIMP_BUILD_NO_EXPORT
-
 };
 
-TEST_F( utglTF2ImportExport, importglTF2FromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utglTF2ImportExport, importglTF2FromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
-TEST_F( utglTF2ImportExport, importBinaryglTF2FromFileTest ) {
-    EXPECT_TRUE( binaryImporterTest() );
+TEST_F(utglTF2ImportExport, importBinaryglTF2FromFileTest) {
+    EXPECT_TRUE(binaryImporterTest());
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -116,7 +117,7 @@ TEST_F(utglTF2ImportExport, importglTF2AndExportToOBJ) {
     Assimp::Importer importer;
     Assimp::Exporter exporter;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
-        aiProcess_ValidateDataStructure);
+            aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.obj"));
 }
@@ -125,7 +126,7 @@ TEST_F(utglTF2ImportExport, importglTF2EmbeddedAndExportToOBJ) {
     Assimp::Importer importer;
     Assimp::Exporter exporter;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Embedded/BoxTextured.gltf",
-        aiProcess_ValidateDataStructure);
+            aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Embedded/BoxTextured_out.obj"));
 }
@@ -151,8 +152,8 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLinesWithoutIndices) {
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 8u);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2u);
-        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], i*2u);
-        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], i*2u + 1u);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], i * 2u);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], i * 2u + 1u);
     }
 }
 
@@ -163,7 +164,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLinesLoopWithoutIndices) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
 
-    std::array<unsigned int, 5> l1 = {{ 0u, 1u, 2u, 3u, 0u }};
+    std::array<unsigned int, 5> l1 = { { 0u, 1u, 2u, 3u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2u);
@@ -194,13 +195,13 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStripWithoutIndices
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 3> f1 = {{ 0u, 1u, 2u }};
+    std::array<unsigned int, 3> f1 = { { 0u, 1u, 2u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (unsigned int i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = {{ 2u, 1u, 3u }};
+    std::array<unsigned int, 3> f2 = { { 2u, 1u, 3u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
@@ -214,13 +215,13 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFanWithoutIndices) 
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 3> f1 = {{ 0u, 1u, 2u }};
+    std::array<unsigned int, 3> f1 = { { 0u, 1u, 2u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = {{ 0u, 2u, 3u }};
+    std::array<unsigned int, 3> f2 = { { 0u, 2u, 3u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
@@ -234,13 +235,13 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesWithoutIndices) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 6u);
-    std::array<unsigned int, 3> f1 = {{ 0u, 1u, 2u }};
+    std::array<unsigned int, 3> f1 = { { 0u, 1u, 2u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = {{ 3u, 4u, 5u }};
+    std::array<unsigned int, 3> f2 = { { 3u, 4u, 5u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
@@ -265,10 +266,9 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLines) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_08.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 5> l1 = {{ 0u, 3u, 2u, 1u, 0u }};
+    std::array<unsigned int, 5> l1 = { { 0u, 3u, 2u, 1u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
-    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
-    {
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
     }
@@ -280,12 +280,11 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineLoop) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_09.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 5> l1 = {{ 0, 3u, 2u, 1u, 0u }};
+    std::array<unsigned int, 5> l1 = { { 0, 3u, 2u, 1u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
-    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i)
-    {
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
-        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i+1]);
+        EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[1], l1[i + 1]);
     }
 }
 
@@ -295,7 +294,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineStrip) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_10.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 5> l1 = {{ 0u, 3u, 2u, 1u, 0u }};
+    std::array<unsigned int, 5> l1 = { { 0u, 3u, 2u, 1u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
@@ -310,13 +309,13 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStrip) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 3> f1 = {{ 0u, 3u, 1u }};
+    std::array<unsigned int, 3> f1 = { { 0u, 3u, 1u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = {{ 1u, 3u, 2u }};
+    std::array<unsigned int, 3> f2 = { { 1u, 3u, 2u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
@@ -330,23 +329,23 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
-    std::array<unsigned int, 3> f1 = {{ 0u, 3u, 2u }};
-    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u );
+    std::array<unsigned int, 3> f1 = { { 0u, 3u, 2u } };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = {{ 0u, 2u, 1u }};
-    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u );
+    std::array<unsigned int, 3> f2 = { { 0u, 2u, 1u } };
+    EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
     }
 }
 
-std::vector<char> ReadFile(const char* name) {
+std::vector<char> ReadFile(const char *name) {
     std::vector<char> ret;
 
-    FILE* p = ::fopen(name, "r");
+    FILE *p = ::fopen(name, "r");
     if (nullptr == p) {
         return ret;
     }
@@ -372,24 +371,24 @@ TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
     EXPECT_EQ( nullptr, Scene );*/
 }
 
-TEST_F( utglTF2ImportExport, bug_import_simple_skin ) {
+TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/simple_skin.gltf",
-        aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/simple_skin.gltf",
+            aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
 }
 
 TEST_F(utglTF2ImportExport, import_cameras) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/cameras/Cameras.gltf",
-        aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/cameras/Cameras.gltf",
+            aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 }
 
 TEST_F(utglTF2ImportExport, incorrect_vertex_arrays) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IncorrectVertexArrays/Cube.gltf",
-        aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IncorrectVertexArrays/Cube.gltf",
+            aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);
@@ -409,23 +408,23 @@ TEST_F(utglTF2ImportExport, incorrect_vertex_arrays) {
     EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
 }
 
-TEST_F( utglTF2ImportExport, texture_transform_test ) {
-	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/textureTransform/TextureTransformTest.gltf",
-			aiProcess_ValidateDataStructure);
-	EXPECT_NE(nullptr, scene);
+TEST_F(utglTF2ImportExport, texture_transform_test) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/textureTransform/TextureTransformTest.gltf",
+            aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
-    EXPECT_TRUE( exporterTest() );
+TEST_F(utglTF2ImportExport, exportglTF2FromFileTest) {
+    EXPECT_TRUE(exporterTest());
 }
 
-TEST_F( utglTF2ImportExport, crash_in_anim_mesh_destructor ) {
+TEST_F(utglTF2ImportExport, crash_in_anim_mesh_destructor) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube.gltf",
-        aiProcess_ValidateDataStructure);
-    ASSERT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube.gltf",
+            aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
     Assimp::Exporter exporter;
     ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube_out.glTF"));
 }
@@ -433,10 +432,35 @@ TEST_F( utglTF2ImportExport, crash_in_anim_mesh_destructor ) {
 TEST_F(utglTF2ImportExport, error_string_preserved) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/MissingBin/BoxTextured.gltf",
-        aiProcess_ValidateDataStructure);
+            aiProcess_ValidateDataStructure);
     ASSERT_EQ(nullptr, scene);
     std::string error = importer.GetErrorString();
     ASSERT_NE(error.find("BoxTextured0.bin"), std::string::npos) << "Error string should contain an error about missing .bin file";
+}
+
+TEST_F(utglTF2ImportExport, export_bad_accessor_bounds) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites.glb", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.glb"));
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.gltf"));
+}
+
+TEST_F(utglTF2ImportExport, export_normalized_normals) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals.glb", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals_out.glb"));
+
+    // load in again and ensure normal-length normals but no Nan's or Inf's introduced
+    scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals_out.glb", aiProcess_ValidateDataStructure);
+    for ( auto i = 0u; i < scene->mMeshes[0]->mNumVertices; ++i ) {
+        const auto length = scene->mMeshes[0]->mNormals[i].Length();
+        EXPECT_TRUE(abs(length) < 1e-6 || abs(length - 1) < 1e-6);
+    }
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT
@@ -444,7 +468,7 @@ TEST_F(utglTF2ImportExport, error_string_preserved) {
 TEST_F(utglTF2ImportExport, sceneMetadata) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
-        aiProcess_ValidateDataStructure);
+            aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
     ASSERT_NE(scene->mMetaData, nullptr);
     {
@@ -470,7 +494,7 @@ TEST_F(utglTF2ImportExport, sceneMetadata) {
 TEST_F(utglTF2ImportExport, texcoords) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf",
-        aiProcess_ValidateDataStructure);
+            aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
 
     ASSERT_TRUE(scene->HasMaterials());
@@ -479,7 +503,7 @@ TEST_F(utglTF2ImportExport, texcoords) {
     aiString path;
     aiTextureMapMode modes[2];
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr,
-        nullptr, nullptr, modes));
+                                        nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
 
     int uvIndex = -1;
@@ -492,4 +516,61 @@ TEST_F(utglTF2ImportExport, texcoords) {
     // ..., APPLY(AI_MATKEY_GLTF_TEXTURE_TEXCOORD, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE), ...
     EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_UNKNOWN, 0), &uvIndex), aiReturn_SUCCESS);
     EXPECT_EQ(uvIndex, 1);
+}
+
+TEST_F(utglTF2ImportExport, recursive_nodes) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/RecursiveNodes/RecursiveNodes.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utglTF2ImportExport, norootnode_noscene) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/NoScene.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+}
+
+TEST_F(utglTF2ImportExport, norootnode_scenewithoutnodes) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/SceneWithoutNodes.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+}
+
+// Shall not crash!
+TEST_F(utglTF2ImportExport, norootnode_issue_3269) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/issue_3269/texcoord_crash.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+}
+
+TEST_F(utglTF2ImportExport, indexOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+
+    struct LogObserver : Assimp::LogStream {
+        bool m_observedWarning = false;
+        void write(const char *message) override {
+            m_observedWarning = m_observedWarning || std::strstr(message, "faces were dropped");
+        }
+    };
+    LogObserver logObserver;
+    
+    DefaultLogger::get()->attachStream(&logObserver);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 11u);
+    DefaultLogger::get()->detachStream(&logObserver);
+    EXPECT_TRUE(logObserver.m_observedWarning);
+}
+
+TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/AllIndicesOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("Mesh \"Mesh\" has no faces"), std::string::npos);
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -335,12 +335,15 @@ struct aiScene
     /**
      *  @brief  The global metadata assigned to the scene itself.
      *
-     *  This data contains global metadata which belongs to the scene like 
-     *  unit-conversions, versions, vendors or other model-specific data. This 
+     *  This data contains global metadata which belongs to the scene like
+     *  unit-conversions, versions, vendors or other model-specific data. This
      *  can be used to store format-specific metadata as well.
      */
     C_STRUCT aiMetadata* mMetaData;
 
+    /** The name of the scene itself.
+     */
+    C_STRUCT aiString mName;
 
 #ifdef __cplusplus
 

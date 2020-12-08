@@ -918,7 +918,10 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
     if (!node.meshes.empty()) {
         // GLTF files contain at most 1 mesh per node.
-        assert(node.meshes.size() == 1);
+        if (node.meshes.size() > 1)
+        {
+            throw DeadlyImportError("GLTF: Invalid input, found ", node.meshes.size(), " meshes in ", getContextForErrorMessages(node.id, node.name), ", but only 1 mesh per node allowed.");
+        }
         int mesh_idx = node.meshes[0].GetIndex();
         int count = meshOffsets[mesh_idx + 1] - meshOffsets[mesh_idx];
 

@@ -1033,7 +1033,10 @@ ELSE()
   INCLUDE_DIRECTORIES( "../contrib" )
   INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
-  ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
+  if(NOT ANDROID)
+    # NDK r21d: avoid error "'Iterator' is a private member of 'rapidjson::GenericMemberIterator"
+    ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
+  endif()
 ENDIF()
 
 # VC2010 fixes

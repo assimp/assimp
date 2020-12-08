@@ -249,7 +249,10 @@ inline char EncodeCharBase64(uint8_t b) {
 }
 
 inline uint8_t DecodeCharBase64(char c) {
-    return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
+    if (c & 0x80) {
+        throw DeadlyImportError("Invalid base64 char value: ", size_t(c));
+    }
+    return DATA<true>::tableDecodeBase64[size_t(c & 0x7F)]; // TODO faster with lookup table or ifs?
 }
 
 size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out);

@@ -1126,7 +1126,7 @@ void glTF2Exporter::MergeMeshes()
                         unsigned int meshIndex = meshRef.GetIndex();
 
                         if (meshIndex == removedIndex) {
-                            node->meshes.erase(curNode->meshes.begin() + mm);
+                            curNode->meshes.erase(curNode->meshes.begin() + mm);
                         } else if (meshIndex > removedIndex) {
                             Ref<Mesh> newMeshRef = mAsset->meshes.Get(meshIndex - 1);
 

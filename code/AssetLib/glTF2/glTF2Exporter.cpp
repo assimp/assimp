@@ -1258,9 +1258,6 @@ inline Ref<Accessor> GetSamplerInputRef(Asset& asset, std::string& animId, Ref<B
 inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)
 {
     const unsigned int numKeyframes = nodeChannel->mNumPositionKeys;
-    if (numKeyframes == 0) {
-        return;
-    }
 
     std::vector<float> times(numKeyframes);
     std::vector<float> values(numKeyframes * 3);
@@ -1281,9 +1278,6 @@ inline void ExtractTranslationSampler(Asset& asset, std::string& animId, Ref<Buf
 inline void ExtractScaleSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)
 {
     const unsigned int numKeyframes = nodeChannel->mNumScalingKeys;
-    if (numKeyframes == 0) {
-        return;
-    }
 
     std::vector<float> times(numKeyframes);
     std::vector<float> values(numKeyframes * 3);
@@ -1304,9 +1298,6 @@ inline void ExtractScaleSampler(Asset& asset, std::string& animId, Ref<Buffer>& 
 inline void ExtractRotationSampler(Asset& asset, std::string& animId, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond, Animation::Sampler& sampler)
 {
     const unsigned int numKeyframes = nodeChannel->mNumRotationKeys;
-    if (numKeyframes == 0) {
-        return;
-    }
 
     std::vector<float> times(numKeyframes);
     std::vector<float> values(numKeyframes * 4);
@@ -1359,17 +1350,26 @@ void glTF2Exporter::ExportAnimations()
 
             Ref<Node> animNode = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
 
-            Animation::Sampler translationSampler;
-            ExtractTranslationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, translationSampler);
-            AddSampler(animRef, animNode, translationSampler, AnimationPath_TRANSLATION);
+            if (nodeChannel->mNumPositionKeys > 0)
+            {
+				Animation::Sampler translationSampler;
+				ExtractTranslationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, translationSampler);
+				AddSampler(animRef, animNode, translationSampler, AnimationPath_TRANSLATION);
+			}
 
-            Animation::Sampler rotationSampler;
-            ExtractRotationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, rotationSampler);
-            AddSampler(animRef, animNode, rotationSampler, AnimationPath_ROTATION);
+            if (nodeChannel->mNumRotationKeys > 0)
+            {
+				Animation::Sampler rotationSampler;
+				ExtractRotationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, rotationSampler);
+				AddSampler(animRef, animNode, rotationSampler, AnimationPath_ROTATION);
+			}
 
-            Animation::Sampler scaleSampler;
-            ExtractScaleSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, scaleSampler);
-            AddSampler(animRef, animNode, scaleSampler, AnimationPath_SCALE);
+            if (nodeChannel->mNumScalingKeys > 0)
+            {
+				Animation::Sampler scaleSampler;
+				ExtractScaleSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, scaleSampler);
+				AddSampler(animRef, animNode, scaleSampler, AnimationPath_SCALE);
+			}
         }
 
         // Assimp documentation staes this is not used (not implemented)

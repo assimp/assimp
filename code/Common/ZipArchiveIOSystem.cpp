@@ -146,7 +146,7 @@ int IOSystem2Unzip::testerror(voidpf /*opaque*/, voidpf /*stream*/) {
 zlib_filefunc_def IOSystem2Unzip::get(IOSystem *pIOHandler) {
     zlib_filefunc_def mapping;
 
-#ifdef ASSIMP_USE_HUNTER
+#if defined (ASSIMP_USE_HUNTER) || defined (__MINGW32__) // GH#3144
     mapping.zopen_file = (open_file_func)open;
     mapping.zread_file = (read_file_func)read;
     mapping.zwrite_file = (write_file_func)write;
@@ -335,7 +335,7 @@ ZipArchiveIOSystem::Implement::Implement(IOSystem *pIOHandler, const char *pFile
     if (pFilename[0] == 0 || nullptr == pMode) {
         return;
     }
-    
+
     zlib_filefunc_def mapping = IOSystem2Unzip::get(pIOHandler);
     m_ZipFileHandle = unzOpen2(pFilename, &mapping);
 }

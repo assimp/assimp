@@ -249,9 +249,15 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
-  SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-  SET(LIBSTDC++_LIBRARIES -lstdc++)
+  IF(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "mips64" )
+	SET(CMAKE_CXX_FLAGS "-mxgot -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+	SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+	SET(LIBSTDC++_LIBRARIES -lstdc++)
+  ELSE()
+	SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+	SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+	SET(LIBSTDC++_LIBRARIES -lstdc++)
+  ENDIF()
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   IF( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) # clang-cl

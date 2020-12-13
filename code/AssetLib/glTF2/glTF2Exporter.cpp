@@ -1338,38 +1338,36 @@ void glTF2Exporter::ExportAnimations()
         if (anim->mName.length > 0) {
             nameAnim = anim->mName.C_Str();
         }
+        Ref<Animation> animRef = mAsset->animations.Create(nameAnim);
 
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
 
-            // It appears that assimp stores this type of animation as multiple animations.
-            // where each aiNodeAnim in mChannels animates a specific node.
             std::string name = nameAnim + "_" + to_string(channelIndex);
             name = mAsset->FindUniqueID(name, "animation");
-            Ref<Animation> animRef = mAsset->animations.Create(name);
 
             Ref<Node> animNode = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
 
             if (nodeChannel->mNumPositionKeys > 0)
             {
-				Animation::Sampler translationSampler;
-				ExtractTranslationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, translationSampler);
-				AddSampler(animRef, animNode, translationSampler, AnimationPath_TRANSLATION);
-			}
+                Animation::Sampler translationSampler;
+                ExtractTranslationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, translationSampler);
+                AddSampler(animRef, animNode, translationSampler, AnimationPath_TRANSLATION);
+            }
 
             if (nodeChannel->mNumRotationKeys > 0)
             {
-				Animation::Sampler rotationSampler;
-				ExtractRotationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, rotationSampler);
-				AddSampler(animRef, animNode, rotationSampler, AnimationPath_ROTATION);
-			}
+                Animation::Sampler rotationSampler;
+                ExtractRotationSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, rotationSampler);
+                AddSampler(animRef, animNode, rotationSampler, AnimationPath_ROTATION);
+            }
 
             if (nodeChannel->mNumScalingKeys > 0)
             {
-				Animation::Sampler scaleSampler;
-				ExtractScaleSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, scaleSampler);
-				AddSampler(animRef, animNode, scaleSampler, AnimationPath_SCALE);
-			}
+                Animation::Sampler scaleSampler;
+                ExtractScaleSampler(*mAsset, name, bufferRef, nodeChannel, ticksPerSecond, scaleSampler);
+                AddSampler(animRef, animNode, scaleSampler, AnimationPath_SCALE);
+            }
         }
 
         // Assimp documentation staes this is not used (not implemented)

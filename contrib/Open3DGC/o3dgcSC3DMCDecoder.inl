@@ -27,10 +27,10 @@ THE SOFTWARE.
 #include "o3dgcArithmeticCodec.h"
 #include "o3dgcTimer.h"
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #    pragma warning(push)
 #    pragma warning( disable : 4456)
-#endif // _WIN32
+#endif // _MSC_VER
 
 //#define DEBUG_VERBOSE
 
@@ -852,9 +852,9 @@ namespace o3dgc
     }
 } // namespace o3dgc
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #    pragma warning( pop )
-#endif // _WIN32
+#endif // _MSC_VER
 
 #endif // O3DGC_SC3DMC_DECODER_INL
 

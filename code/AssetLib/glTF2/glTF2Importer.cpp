@@ -1084,7 +1084,7 @@ struct AnimationSamplers {
     Animation::Sampler *weight;
 };
 
-aiNodeAnim *CreateNodeAnim(glTF2::Asset &r, Node &node, AnimationSamplers &samplers) {
+aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &samplers) {
     aiNodeAnim *anim = new aiNodeAnim();
 
     try {

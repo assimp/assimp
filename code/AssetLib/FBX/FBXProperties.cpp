@@ -69,6 +69,20 @@ Property::~Property()
 
 namespace {
 
+void checkTokenCount(const TokenList& tok, unsigned int expectedCount)
+{
+    ai_assert(expectedCount >= 2);
+    if (tok.size() < expectedCount) {
+        const std::string& s = ParseTokenAsString(*tok[1]);
+        if (tok[1]->IsBinary()) {
+            throw DeadlyImportError("Not enough tokens for property of type ", s, " at offset ", tok[1]->Offset());
+        }
+        else {
+            throw DeadlyImportError("Not enough tokens for property of type ", s, " at line ", tok[1]->Line());
+        }
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 // read a typed property out of a FBX element. The return value is nullptr if the property cannot be read.
 Property* ReadTypedProperty(const Element& element)
@@ -83,23 +97,23 @@ Property* ReadTypedProperty(const Element& element)
     const std::string& s = ParseTokenAsString(*tok[1]);
     const char* const cs = s.c_str();
     if (!strcmp(cs,"KString")) {
-        ai_assert(tok.size() >= 5);
+        checkTokenCount(tok, 5);
         return new TypedProperty<std::string>(ParseTokenAsString(*tok[4]));
     }
     else if (!strcmp(cs,"bool") || !strcmp(cs,"Bool")) {
-        ai_assert(tok.size() >= 5);
+        checkTokenCount(tok, 5);
         return new TypedProperty<bool>(ParseTokenAsInt(*tok[4]) != 0);
     }
-    else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum")) {
-        ai_assert(tok.size() >= 5);
+    else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum") || !strcmp(cs, "Integer")) {
+        checkTokenCount(tok, 5);
         return new TypedProperty<int>(ParseTokenAsInt(*tok[4]));
     }
     else if (!strcmp(cs, "ULongLong")) {
-        ai_assert(tok.size() >= 5);
+        checkTokenCount(tok, 5);
         return new TypedProperty<uint64_t>(ParseTokenAsID(*tok[4]));
     }
     else if (!strcmp(cs, "KTime")) {
-        ai_assert(tok.size() >= 5);
+        checkTokenCount(tok, 5);
         return new TypedProperty<int64_t>(ParseTokenAsInt64(*tok[4]));
     }
     else if (!strcmp(cs,"Vector3D") ||
@@ -110,7 +124,7 @@ Property* ReadTypedProperty(const Element& element)
         !strcmp(cs,"Lcl Rotation") ||
         !strcmp(cs,"Lcl Scaling")
         ) {
-        ai_assert(tok.size() >= 7);
+        checkTokenCount(tok, 7);
         return new TypedProperty<aiVector3D>(aiVector3D(
             ParseTokenAsFloat(*tok[4]),
             ParseTokenAsFloat(*tok[5]),
@@ -118,8 +132,17 @@ Property* ReadTypedProperty(const Element& element)
         );
     }
     else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
-        ai_assert(tok.size() >= 5);
+        checkTokenCount(tok, 5);
         return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
+    }
+    else if (!strcmp(cs, "ColorAndAlpha")) {
+        checkTokenCount(tok, 8);
+        return new TypedProperty<aiColor4D>(aiColor4D(
+            ParseTokenAsFloat(*tok[4]),
+            ParseTokenAsFloat(*tok[5]),
+            ParseTokenAsFloat(*tok[6]),
+            ParseTokenAsFloat(*tok[7]))
+        );
     }
     return nullptr;
 }

@@ -517,7 +517,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 size_t count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
-                ai_assert(data.IsValid());
+                if (!data.IsValid()) {
+                    throw DeadlyImportError("GLTF: Invalid accessor without data in mesh ", getContextForErrorMessages(mesh.id, mesh.name));
+                }
 
                 switch (prim.mode) {
                     case PrimitiveMode_POINTS: {

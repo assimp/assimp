@@ -258,7 +258,7 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
     for( ;; ) {
         if ( continuationToken == m_cache[ m_cachePos ] && IsLineEnd( m_cache[ m_cachePos + 1 ] ) ) {
             ++m_cachePos;
-            while (m_cache[m_cachePos] != '\n') {
+            while ( m_cache[ m_cachePos ] != '\n' ) {
                 ++m_cachePos;
             }
             ++m_cachePos;

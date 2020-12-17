@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <typename TReal>
 AI_FORCE_INLINE
 aiQuaterniont<TReal> operator * (const aiMatrix4x4t<TReal>& pMatrix, const aiQuaterniont<TReal>& pQuaternion) {
-    aiQuaterniont res;
+    aiQuaterniont<TReal> res;
     res.x = pMatrix.a1 * pQuaternion.x + pMatrix.a2 * pQuaternion.y + pMatrix.a3 * pQuaternion.z + pMatrix.a4 * pQuaternion.w;
     res.y = pMatrix.b1 * pQuaternion.x + pMatrix.b2 * pQuaternion.y + pMatrix.b3 * pQuaternion.z + pMatrix.b4 * pQuaternion.w;
     res.z = pMatrix.c1 * pQuaternion.x + pMatrix.c2 * pQuaternion.y + pMatrix.c3 * pQuaternion.z + pMatrix.c4 * pQuaternion.w;

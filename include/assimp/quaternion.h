@@ -88,6 +88,9 @@ public:
     bool operator== (const aiQuaterniont& o) const;
     bool operator!= (const aiQuaterniont& o) const;
 
+    // transform vector by matrix
+    aiQuaterniont& operator *= (const aiMatrix4x4t<TReal>& mat);
+
     bool Equal(const aiQuaterniont& o, TReal epsilon = 1e-6) const;
 
 public:

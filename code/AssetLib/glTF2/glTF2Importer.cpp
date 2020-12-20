@@ -280,6 +280,16 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
     if (mat.unlit) {
         aimat->AddProperty(&mat.unlit, 1, AI_MATKEY_GLTF_UNLIT);
     }
+    //KHR_materials_sheen
+    if (mat.materialSheen.isPresent) {
+        MaterialSheen &sheen = mat.materialSheen.value;
+
+        aimat->AddProperty(&mat.materialSheen.isPresent, 1, AI_MATKEY_GLTF_MATERIALSHEEN);
+        SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_GLTF_MATERIALSHEEN_COLOR_FACTOR);
+        aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_GLTF_MATERIALSHEEN_ROUGHNESS_FACTOR);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_GLTF_MATERIALSHEEN_COLOR_TEXTURE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenRoughnessTexture, aimat, AI_MATKEY_GLTF_MATERIALSHEEN_ROUGHNESS_TEXTURE);
+    }
 
     return aimat;
 }

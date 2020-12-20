@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_pbrSpecularGlossiness full
  *   KHR_materials_unlit full
  *   KHR_lights_punctual full
+ *   KHR_materials_sheen full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -677,6 +678,7 @@ const vec4 defaultBaseColor = { 1, 1, 1, 1 };
 const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
+const vec3 defaultSheenFactor = { 0, 0, 0 };
 
 struct TextureInfo {
     Ref<Texture> texture;
@@ -718,6 +720,16 @@ struct PbrSpecularGlossiness {
     void SetDefaults();
 };
 
+struct MaterialSheen {
+    vec3 sheenColorFactor;
+    float sheenRoughnessFactor;
+    TextureInfo sheenColorTexture;
+    TextureInfo sheenRoughnessTexture;
+
+    MaterialSheen() { SetDefaults(); }
+    void SetDefaults();
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -734,6 +746,9 @@ struct Material : public Object {
 
     //extension: KHR_materials_pbrSpecularGlossiness
     Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
+
+    //extension: KHR_materials_sheen
+    Nullable<MaterialSheen> materialSheen;
 
     //extension: KHR_materials_unlit
     bool unlit;
@@ -1053,6 +1068,7 @@ public:
         bool KHR_materials_unlit;
         bool KHR_lights_punctual;
         bool KHR_texture_transform;
+        bool KHR_materials_sheen;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

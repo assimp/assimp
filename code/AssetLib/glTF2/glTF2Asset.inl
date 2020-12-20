@@ -1042,6 +1042,19 @@ inline void Material::Read(Value &material, Asset &r) {
         if (r.extensionsUsed.KHR_texture_transform) {
         }
 
+        if (r.extensionsUsed.KHR_materials_sheen) {
+            if (Value *curMaterialSheen = FindObject(*extensions, "KHR_materials_sheen")) {
+                MaterialSheen sheen;
+
+                ReadMember(*curMaterialSheen, "sheenColorFactor", sheen.sheenColorFactor);
+                ReadTextureProperty(r, *curMaterialSheen, "sheenColorTexture", sheen.sheenColorTexture);
+                ReadMember(*curMaterialSheen, "sheenRoughnessFactor", sheen.sheenRoughnessFactor);
+                ReadTextureProperty(r, *curMaterialSheen, "sheenRoughnessTexture", sheen.sheenRoughnessTexture);
+
+                this->materialSheen = Nullable<MaterialSheen>(sheen);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1079,6 +1092,12 @@ inline void PbrSpecularGlossiness::SetDefaults() {
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
     glossinessFactor = 1.0;
+}
+
+inline void MaterialSheen::SetDefaults() {
+    //KHR_materials_sheen properties
+    SetVector(sheenColorFactor, defaultSheenFactor);
+    sheenRoughnessFactor = 0.f;
 }
 
 namespace {
@@ -1731,6 +1750,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_unlit);
     CHECK_EXT(KHR_lights_punctual);
     CHECK_EXT(KHR_texture_transform);
+    CHECK_EXT(KHR_materials_sheen);
 
 #undef CHECK_EXT
 }

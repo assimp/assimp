@@ -417,6 +417,25 @@ namespace glTF2 {
           exts.AddMember("KHR_materials_unlit", unlit, w.mAl);
         }
 
+        if (m.materialSheen.isPresent) {
+            Value materialSheen(rapidjson::Type::kObjectType);
+
+            MaterialSheen &sheen = m.materialSheen.value;
+
+            WriteVec(materialSheen, sheen.sheenColorFactor, "sheenColorFactor", defaultSheenFactor, w.mAl);
+
+            if (sheen.sheenRoughnessFactor != 0.f) {
+                WriteFloat(materialSheen, sheen.sheenRoughnessFactor, "sheenRoughnessFactor", w.mAl);
+            }
+
+            WriteTex(materialSheen, sheen.sheenColorTexture, "sheenColorTexture", w.mAl);
+            WriteTex(materialSheen, sheen.sheenRoughnessTexture, "sheenRoughnessTexture", w.mAl);
+
+            if (!materialSheen.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_sheen", materialSheen, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -807,6 +826,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_unlit) {
               exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
+                exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
             }
         }
 

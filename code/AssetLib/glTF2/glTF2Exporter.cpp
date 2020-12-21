@@ -714,6 +714,22 @@ void glTF2Exporter::ExportMaterials()
             mAsset->extensionsUsed.KHR_materials_unlit = true;
             m->unlit = true;
         }
+
+        bool hasMaterialSheen = false;
+        mat->Get(AI_MATKEY_GLTF_MATERIAL_SHEEN, hasMaterialSheen);
+
+        if (hasMaterialSheen) {
+            mAsset->extensionsUsed.KHR_materials_sheen = true;
+
+            MaterialSheen sheen;
+
+            GetMatColor(mat, sheen.sheenColorFactor, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_FACTOR);
+            mat->Get(AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_FACTOR, sheen.sheenRoughnessFactor);
+            GetMatTex(mat, sheen.sheenColorTexture, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_TEXTURE);
+            GetMatTex(mat, sheen.sheenRoughnessTexture, AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_TEXTURE);
+
+            m->materialSheen = Nullable<MaterialSheen>(sheen);
+        }
     }
 }
 

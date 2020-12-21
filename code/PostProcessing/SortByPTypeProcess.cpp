@@ -243,6 +243,45 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                 }
             }
 
+            if (mesh->mNumAnimMeshes > 0 && mesh->mAnimMeshes) {
+                out->mNumAnimMeshes = mesh->mNumAnimMeshes;
+                out->mAnimMeshes = new aiAnimMesh *[out->mNumAnimMeshes];
+            }
+
+            for (unsigned int j = 0; j < mesh->mNumAnimMeshes; ++j) {
+                aiAnimMesh *animMesh = mesh->mAnimMeshes[j];
+                aiAnimMesh *outAnimMesh = out->mAnimMeshes[j] = new aiAnimMesh;
+                outAnimMesh->mNumVertices = out->mNumVertices;
+                if (animMesh->mVertices)
+                    outAnimMesh->mVertices = new aiVector3D[out->mNumVertices];
+                else
+                    outAnimMesh->mVertices = nullptr;
+                if (animMesh->mNormals)
+                    outAnimMesh->mNormals = new aiVector3D[out->mNumVertices];
+                else
+                    outAnimMesh->mNormals = nullptr;
+                if (animMesh->mTangents)
+                    outAnimMesh->mTangents = new aiVector3D[out->mNumVertices];
+                else
+                    outAnimMesh->mTangents = nullptr;
+                if (animMesh->mBitangents)
+                    outAnimMesh->mBitangents = new aiVector3D[out->mNumVertices];
+                else
+                    outAnimMesh->mBitangents = nullptr;
+                for (int jj = 0; jj < AI_MAX_NUMBER_OF_COLOR_SETS; ++jj) {
+                    if (animMesh->mColors[jj])
+                        outAnimMesh->mColors[jj] = new aiColor4D[out->mNumVertices];
+                    else
+                        outAnimMesh->mColors[jj] = nullptr;
+                }
+                for (int jj = 0; jj < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++jj) {
+                    if (animMesh->mTextureCoords[jj])
+                        outAnimMesh->mTextureCoords[jj] = new aiVector3D[out->mNumVertices];
+                    else
+                        outAnimMesh->mTextureCoords[jj] = nullptr;
+                }
+            }
+
             typedef std::vector<aiVertexWeight> TempBoneInfo;
             std::vector<TempBoneInfo> tempBones(mesh->mNumBones);
 
@@ -252,6 +291,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             }
 
             unsigned int outIdx = 0;
+            unsigned int amIdx = 0; // AnimMesh index
             for (unsigned int m = 0; m < mesh->mNumFaces; ++m) {
                 aiFace &in = mesh->mFaces[m];
                 if ((real == 3 && in.mNumIndices <= 3) || (real != 3 && in.mNumIndices != real + 1)) {
@@ -292,6 +332,30 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                         if (!cols[pp]) break;
                         *cols[pp]++ = mesh->mColors[pp][idx];
                     }
+
+                    unsigned int pp = 0;
+                    for (; pp < mesh->mNumAnimMeshes; ++pp) {
+                        aiAnimMesh *animMesh = mesh->mAnimMeshes[pp];
+                        aiAnimMesh *outAnimMesh = out->mAnimMeshes[pp];
+                        if (animMesh->mVertices)
+                            outAnimMesh->mVertices[amIdx] = animMesh->mVertices[idx];
+                        if (animMesh->mNormals)
+                            outAnimMesh->mNormals[amIdx] = animMesh->mNormals[idx];
+                        if (animMesh->mTangents)
+                            outAnimMesh->mTangents[amIdx] = animMesh->mTangents[idx];
+                        if (animMesh->mBitangents)
+                            outAnimMesh->mBitangents[amIdx] = animMesh->mBitangents[idx];
+                        for (int jj = 0; jj < AI_MAX_NUMBER_OF_COLOR_SETS; ++jj) {
+                            if (animMesh->mColors[jj])
+                                outAnimMesh->mColors[jj][amIdx] = animMesh->mColors[jj][idx];
+                        }
+                        for (int jj = 0; jj < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++jj) {
+                            if (animMesh->mTextureCoords[jj])
+                                outAnimMesh->mTextureCoords[jj][amIdx] = animMesh->mTextureCoords[jj][idx];
+                        }
+                    }
+                    if (pp == mesh->mNumAnimMeshes)
+                        amIdx++;
 
                     in.mIndices[q] = outIdx++;
                 }

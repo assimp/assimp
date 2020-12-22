@@ -1015,7 +1015,7 @@ ENDIF()
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
 FIND_PACKAGE(RT QUIET)
-IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR MSVC))
+IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR WIN32))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
 ELSE ()

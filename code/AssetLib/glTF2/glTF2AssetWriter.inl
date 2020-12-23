@@ -436,6 +436,28 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialClearcoat.isPresent) {
+            Value materialClearcoat(rapidjson::Type::kObjectType);
+
+            MaterialClearcoat &clearcoat = m.materialClearcoat.value;
+
+            if (clearcoat.clearcoatFactor != 0.f) {
+                WriteFloat(materialClearcoat, clearcoat.clearcoatFactor, "clearcoatFactor", w.mAl);
+            }
+
+            if (clearcoat.clearcoatRoughnessFactor != 0.f) {
+                WriteFloat(materialClearcoat, clearcoat.clearcoatRoughnessFactor, "clearcoatRoughnessFactor", w.mAl);
+            }
+
+            WriteTex(materialClearcoat, clearcoat.clearcoatTexture, "clearcoatTexture", w.mAl);
+            WriteTex(materialClearcoat, clearcoat.clearcoatRoughnessTexture, "clearcoatRoughnessTexture", w.mAl);
+            WriteTex(materialClearcoat, clearcoat.clearcoatNormalTexture, "clearcoatNormalTexture", w.mAl);
+                        
+            if (!materialClearcoat.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_clearcoat", materialClearcoat, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -830,6 +852,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
                 exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
+            }
+                        
+            if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
+                exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
             }
         }
 

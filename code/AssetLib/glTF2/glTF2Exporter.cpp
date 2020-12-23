@@ -747,6 +747,20 @@ void glTF2Exporter::ExportMaterials()
 
             m->materialClearcoat = Nullable<MaterialClearcoat>(clearcoat);
         }
+
+        bool hasMaterialTransmission = false;
+        mat->Get(AI_MATKEY_GLTF_MATERIAL_TRANSMISSION, hasMaterialTransmission);
+
+        if (hasMaterialTransmission) {
+            mAsset->extensionsUsed.KHR_materials_transmission = true;
+
+            MaterialTransmission transmission;
+
+            mat->Get(AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_FACTOR, transmission.transmissionFactor);
+            GetMatTex(mat, transmission.transmissionTexture, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_TEXTURE);
+
+            m->materialTransmission = Nullable<MaterialTransmission>(transmission);
+        }
     }
 }
 

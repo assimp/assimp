@@ -458,6 +458,22 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialTransmission.isPresent) {
+            Value materialTransmission(rapidjson::Type::kObjectType);
+
+            MaterialTransmission &transmission = m.materialTransmission.value;
+
+            if (transmission.transmissionFactor != 0.f) {
+                WriteFloat(materialTransmission, transmission.transmissionFactor, "transmissionFactor", w.mAl);
+            }
+
+            WriteTex(materialTransmission, transmission.transmissionTexture, "transmissionTexture", w.mAl);
+                                   
+            if (!materialTransmission.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_transmission", materialTransmission, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -856,6 +872,10 @@ namespace glTF2 {
                         
             if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
                 exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_transmission) {
+                exts.PushBack(StringRef("KHR_materials_transmission"), mAl);
             }
         }
 

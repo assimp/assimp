@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_unlit full
  *   KHR_lights_punctual full
  *   KHR_materials_sheen full
+ *   KHR_materials_clearcoat full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -730,6 +731,14 @@ struct MaterialSheen {
     void SetDefaults();
 };
 
+struct MaterialClearcoat {
+    float clearcoatFactor = 0.f;
+    float clearcoatRoughnessFactor = 0.f;
+    TextureInfo clearcoatTexture;
+    TextureInfo clearcoatRoughnessTexture;
+    NormalTextureInfo clearcoatNormalTexture;
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -749,6 +758,9 @@ struct Material : public Object {
 
     //extension: KHR_materials_sheen
     Nullable<MaterialSheen> materialSheen;
+
+    //extension: KHR_materials_clearcoat
+    Nullable<MaterialClearcoat> materialClearcoat;
 
     //extension: KHR_materials_unlit
     bool unlit;
@@ -1069,6 +1081,7 @@ public:
         bool KHR_lights_punctual;
         bool KHR_texture_transform;
         bool KHR_materials_sheen;
+        bool KHR_materials_clearcoat;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

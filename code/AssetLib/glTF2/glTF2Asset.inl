@@ -1055,6 +1055,20 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_clearcoat) {
+            if (Value *curMaterialClearcoat = FindObject(*extensions, "KHR_materials_clearcoat")) {
+                MaterialClearcoat clearcoat;
+
+                ReadMember(*curMaterialClearcoat, "clearcoatFactor", clearcoat.clearcoatFactor);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatTexture", clearcoat.clearcoatTexture);
+                ReadMember(*curMaterialClearcoat, "clearcoatRoughnessFactor", clearcoat.clearcoatRoughnessFactor);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatRoughnessTexture", clearcoat.clearcoatRoughnessTexture);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatNormalTexture", clearcoat.clearcoatNormalTexture);
+
+                this->materialClearcoat = Nullable<MaterialClearcoat>(clearcoat);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1751,6 +1765,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_lights_punctual);
     CHECK_EXT(KHR_texture_transform);
     CHECK_EXT(KHR_materials_sheen);
+    CHECK_EXT(KHR_materials_clearcoat);
 
 #undef CHECK_EXT
 }

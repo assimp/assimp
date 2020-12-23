@@ -290,6 +290,17 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_TEXTURE);
         SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenRoughnessTexture, aimat, AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_TEXTURE);
     }
+    //KHR_materials_clearcoat
+    if (mat.materialClearcoat.isPresent) {
+        MaterialClearcoat &clearcoat = mat.materialClearcoat.value;
+
+        aimat->AddProperty(&mat.materialClearcoat.isPresent, 1, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT);
+        aimat->AddProperty(&clearcoat.clearcoatFactor, 1, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_FACTOR);
+        aimat->AddProperty(&clearcoat.clearcoatRoughnessFactor, 1, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_FACTOR);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_TEXTURE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_TEXTURE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_NORMAL_TEXTURE);
+    }
 
     return aimat;
 }

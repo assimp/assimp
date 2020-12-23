@@ -364,15 +364,7 @@ void D3MFExporter::exportContentTyp(const std::string &filename) {
     const std::string entry = filename;
     const std::string &exportTxt(mContentOutput.str());
 
-    zipOpenNewFileInZip(m_zipArchive, filename.c_str(), nullptr,
-    nullptr, 0, // extrafield local
-    nullptr, 0, // extrafield global
-    nullptr, 0, // comment
-    6); // similar to the previous ZIP_DEFAULT_COMPRESSION_LEVEL value
-
-    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), exportTxt.size());
-
-    zipCloseFileInZip(m_zipArchive);
+    addFileInZip(entry, exportTxt);
 }
 
 void D3MFExporter::writeModelToArchive(const std::string &folder, const std::string &modelName) {
@@ -382,15 +374,7 @@ void D3MFExporter::writeModelToArchive(const std::string &folder, const std::str
     const std::string entry = folder + "/" + modelName;
     const std::string &exportTxt(mModelOutput.str());
 
-    zipOpenNewFileInZip(m_zipArchive, entry.c_str(), nullptr,
-    nullptr, 0, // extrafield local
-    nullptr, 0, // extrafield global
-    nullptr, 0, // comment
-    6); // similar to the previous ZIP_DEFAULT_COMPRESSION_LEVEL value
-
-    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), exportTxt.size());
-
-    zipCloseFileInZip(m_zipArchive);
+    addFileInZip(entry, exportTxt);
 }
 
 void D3MFExporter::writeRelInfoToFile(const std::string &folder, const std::string &relName) {
@@ -400,6 +384,11 @@ void D3MFExporter::writeRelInfoToFile(const std::string &folder, const std::stri
     const std::string entry = folder + "/" + relName;
     const std::string &exportTxt(mRelOutput.str());
 
+    addFileInZip(entry, exportTxt);
+}
+
+void D3MFExporter::addFileInZip(const std::string& entry, const std::string& exportTxt)
+{
     zipOpenNewFileInZip(m_zipArchive, entry.c_str(), nullptr,
     nullptr, 0, // extrafield local
     nullptr, 0, // extrafield global

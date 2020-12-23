@@ -85,6 +85,7 @@ protected:
     void exportContentTyp( const std::string &filename );
     void writeModelToArchive( const std::string &folder, const std::string &modelName );
     void writeRelInfoToFile( const std::string &folder, const std::string &relName );
+    void addFileInZip( const std::string& entry, const std::string& exportTxt );
 
 private:
     std::string mArchiveName;

@@ -109,7 +109,7 @@ bool D3MFExporter::validate() {
 bool D3MFExporter::exportArchive(const char *file) {
     bool ok(true);
 
-    m_zipArchive = zip_open(file, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+    m_zipArchive = (zip_t*)zipOpen(file, APPEND_STATUS_CREATE);
     if (nullptr == m_zipArchive) {
         return false;
     }
@@ -118,7 +118,7 @@ bool D3MFExporter::exportArchive(const char *file) {
     ok |= export3DModel();
     ok |= exportRelations();
 
-    zip_close(m_zipArchive);
+    zipClose(m_zipArchive, nullptr);
     m_zipArchive = nullptr;
 
     return ok;
@@ -362,12 +362,17 @@ void D3MFExporter::exportContentTyp(const std::string &filename) {
         throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
     }
     const std::string entry = filename;
-    zip_entry_open(m_zipArchive, entry.c_str());
-
     const std::string &exportTxt(mContentOutput.str());
-    zip_entry_write(m_zipArchive, exportTxt.c_str(), exportTxt.size());
 
-    zip_entry_close(m_zipArchive);
+    zipOpenNewFileInZip(m_zipArchive, filename.c_str(), nullptr,
+    nullptr, 0, // extrafield local
+    nullptr, 0, // extrafield global
+    nullptr, 0, // comment
+    6); // similar to the previous ZIP_DEFAULT_COMPRESSION_LEVEL value
+
+    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), exportTxt.size());
+
+    zipCloseFileInZip(m_zipArchive);
 }
 
 void D3MFExporter::writeModelToArchive(const std::string &folder, const std::string &modelName) {
@@ -375,12 +380,17 @@ void D3MFExporter::writeModelToArchive(const std::string &folder, const std::str
         throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
     }
     const std::string entry = folder + "/" + modelName;
-    zip_entry_open(m_zipArchive, entry.c_str());
-
     const std::string &exportTxt(mModelOutput.str());
-    zip_entry_write(m_zipArchive, exportTxt.c_str(), exportTxt.size());
 
-    zip_entry_close(m_zipArchive);
+    zipOpenNewFileInZip(m_zipArchive, entry.c_str(), nullptr,
+    nullptr, 0, // extrafield local
+    nullptr, 0, // extrafield global
+    nullptr, 0, // comment
+    6); // similar to the previous ZIP_DEFAULT_COMPRESSION_LEVEL value
+
+    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), exportTxt.size());
+
+    zipCloseFileInZip(m_zipArchive);
 }
 
 void D3MFExporter::writeRelInfoToFile(const std::string &folder, const std::string &relName) {
@@ -388,12 +398,17 @@ void D3MFExporter::writeRelInfoToFile(const std::string &folder, const std::stri
         throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
     }
     const std::string entry = folder + "/" + relName;
-    zip_entry_open(m_zipArchive, entry.c_str());
-
     const std::string &exportTxt(mRelOutput.str());
-    zip_entry_write(m_zipArchive, exportTxt.c_str(), exportTxt.size());
 
-    zip_entry_close(m_zipArchive);
+    zipOpenNewFileInZip(m_zipArchive, entry.c_str(), nullptr,
+    nullptr, 0, // extrafield local
+    nullptr, 0, // extrafield global
+    nullptr, 0, // comment
+    6); // similar to the previous ZIP_DEFAULT_COMPRESSION_LEVEL value
+
+    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), exportTxt.size());
+
+    zipCloseFileInZip(m_zipArchive);
 }
 
 } // Namespace D3MF

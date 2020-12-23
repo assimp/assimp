@@ -1069,6 +1069,17 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_transmission) {
+            if (Value *curMaterialTransmission = FindObject(*extensions, "KHR_materials_transmission")) {
+                MaterialTransmission transmission;
+
+                ReadMember(*curMaterialTransmission, "transmissionFactor", transmission.transmissionFactor);
+                ReadTextureProperty(r, *curMaterialTransmission, "transmissionTexture", transmission.transmissionTexture);
+
+                this->materialTransmission = Nullable<MaterialTransmission>(transmission);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1766,6 +1777,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_texture_transform);
     CHECK_EXT(KHR_materials_sheen);
     CHECK_EXT(KHR_materials_clearcoat);
+    CHECK_EXT(KHR_materials_transmission);
 
 #undef CHECK_EXT
 }

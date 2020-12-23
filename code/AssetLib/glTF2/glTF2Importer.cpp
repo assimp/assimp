@@ -301,6 +301,14 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_TEXTURE);
         SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_NORMAL_TEXTURE);
     }
+    //KHR_materials_transmission
+    if (mat.materialTransmission.isPresent) {
+        MaterialTransmission &transmission = mat.materialTransmission.value;
+
+        aimat->AddProperty(&mat.materialTransmission.isPresent, 1, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION);
+        aimat->AddProperty(&transmission.transmissionFactor, 1, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_FACTOR);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_TEXTURE);
+    }
 
     return aimat;
 }

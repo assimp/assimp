@@ -395,7 +395,8 @@ void D3MFExporter::addFileInZip(const std::string& entry, const std::string& exp
     nullptr, 0, // comment
     6); // similar to the previous ZIP_DEFAULT_COMPRESSION_LEVEL value
 
-    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), exportTxt.size());
+    uint32_t contentLength = static_cast<uint32_t>(exportTxt.size());
+    zipWriteInFileInZip(m_zipArchive, exportTxt.c_str(), contentLength);
 
     zipCloseFileInZip(m_zipArchive);
 }

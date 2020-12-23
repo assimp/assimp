@@ -45,6 +45,9 @@
 #  include "crypt.h"
 #endif
 
+// these warnings are considered as errors on VS
+#pragma warning(disable : 4100) 
+
 #define SIZEDATA_INDATABLOCK        (4096-(4*4))
 
 #define DISKHEADERMAGIC             (0x08074b50)

@@ -23,6 +23,9 @@
 
 #include "ioapi.h"
 
+// these warnings are considered as errors on VS
+#pragma warning(disable : 4100) 
+
 #if defined(_WIN32)
 #  define snprintf _snprintf
 #endif

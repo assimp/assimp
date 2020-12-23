@@ -46,6 +46,9 @@
 #  include "crypt.h"
 #endif
 
+// these warnings are considered as errors on VS
+#pragma warning(disable : 4244) 
+
 #define DISKHEADERMAGIC             (0x08074b50)
 #define LOCALHEADERMAGIC            (0x04034b50)
 #define CENTRALHEADERMAGIC          (0x02014b50)

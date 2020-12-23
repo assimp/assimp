@@ -42,6 +42,9 @@
 
 #include "crypt.h"
 
+// these warnings are considered as errors on VS
+#pragma warning(disable : 4244) 
+
 /***************************************************************************/
 
 #define CRC32(c, b) ((*(pcrc_32_tab+(((uint32_t)(c) ^ (b)) & 0xff))) ^ ((c) >> 8))

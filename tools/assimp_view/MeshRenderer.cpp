@@ -161,4 +161,4 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
 
     return 1;
 }
-};
+}

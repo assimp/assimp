@@ -218,16 +218,19 @@ ZipFile *ZipFileInfo::Extract(unzFile zip_handle) const {
     ZipFile *zip_file = new ZipFile(m_Size);
 
     // Unzip has a limit of UINT16_MAX bytes buffer
-    std::unique_ptr<uint8_t[]> unzipBuffer = std::unique_ptr<uint8_t[]>(new uint8_t[UINT16_MAX]);
+    uint16_t unzipBufferSize = zip_file->m_Size <= UINT16_MAX ? static_cast<uint16_t>(zip_file->m_Size) : UINT16_MAX;
+    std::unique_ptr<uint8_t[]> unzipBuffer = std::unique_ptr<uint8_t[]>(new uint8_t[unzipBufferSize]);
     size_t readCount = 0;
-    while (readCount < zip_file->m_Size) {
+    while (readCount < zip_file->m_Size)
+    {
         size_t bufferSize = zip_file->m_Size - readCount;
         if (bufferSize > UINT16_MAX) {
             bufferSize = UINT16_MAX;
         }
 
         int ret = unzReadCurrentFile(zip_handle, unzipBuffer.get(), static_cast<unsigned int>(bufferSize));
-        if (ret != static_cast<int>(bufferSize)) {
+        if (ret != static_cast<int>(bufferSize))
+        {
             // Failed, release the memory
             delete zip_file;
             zip_file = nullptr;

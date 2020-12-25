@@ -763,7 +763,7 @@ void cleanup()
 
 	if (g_hWnd)
 		KillGLWindow();
-};
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 						 UINT uMsg,				// Message for this Window

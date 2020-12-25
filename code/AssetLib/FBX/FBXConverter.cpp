@@ -79,7 +79,7 @@ using namespace Util;
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
 
-#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000LL
+#define CONVERT_FBX_TIME(time) (static_cast<double>(time) * 1000.0 / 46186158000LL)
 
 FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBones) :
         defaultMaterialIndex(),
@@ -2560,7 +2560,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
                     meshMorphAnim->mKeys[j].mNumValuesAndWeights = numValuesAndWeights;
                     meshMorphAnim->mKeys[j].mValues = new unsigned int[numValuesAndWeights];
                     meshMorphAnim->mKeys[j].mWeights = new double[numValuesAndWeights];
-                    meshMorphAnim->mKeys[j].mTime = CONVERT_FBX_TIME(animIt.first) * anim_fps;
+                    meshMorphAnim->mKeys[j].mTime = CONVERT_FBX_TIME(animIt.first);
                     for (unsigned int k = 0; k < numValuesAndWeights; k++) {
                         meshMorphAnim->mKeys[j].mValues[k] = keyData->values.at(k);
                         meshMorphAnim->mKeys[j].mWeights[k] = keyData->weights.at(k);
@@ -2578,8 +2578,8 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
         return;
     }
 
-    double start_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(start_time) * anim_fps) : min_time;
-    double stop_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(stop_time) * anim_fps) : max_time;
+    double start_time_fps = has_local_startstop ? CONVERT_FBX_TIME(start_time) : min_time;
+    double stop_time_fps = has_local_startstop ? CONVERT_FBX_TIME(stop_time) : max_time;
 
     // adjust relative timing for animation
     for (unsigned int c = 0; c < anim->mNumChannels; c++) {
@@ -3099,7 +3099,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         InterpolateKeys(outTranslations, keytimes, keyframeLists[TransformationComp_Translation], defTranslate, maxTime, minTime);
     } else {
         for (size_t i = 0; i < keyCount; ++i) {
-            outTranslations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
+            outTranslations[i].mTime = CONVERT_FBX_TIME(keytimes[i]);
             outTranslations[i].mValue = defTranslate;
         }
     }
@@ -3108,7 +3108,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], defRotation, maxTime, minTime, rotOrder);
     } else {
         for (size_t i = 0; i < keyCount; ++i) {
-            outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
+            outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]);
             outRotations[i].mValue = defQuat;
         }
     }
@@ -3117,7 +3117,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         InterpolateKeys(outScales, keytimes, keyframeLists[TransformationComp_Scaling], defScale, maxTime, minTime);
     } else {
         for (size_t i = 0; i < keyCount; ++i) {
-            outScales[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
+            outScales[i].mTime = CONVERT_FBX_TIME(keytimes[i]);
             outScales[i].mValue = defScale;
         }
     }
@@ -3306,7 +3306,7 @@ void FBXConverter::InterpolateKeys(aiVectorKey *valOut, const KeyTimeList &keys,
         }
 
         // magic value to convert fbx times to seconds
-        valOut->mTime = CONVERT_FBX_TIME(time) * anim_fps;
+        valOut->mTime = CONVERT_FBX_TIME(time);
 
         min_time = std::min(min_time, valOut->mTime);
         max_time = std::max(max_time, valOut->mTime);

@@ -68,14 +68,11 @@ namespace D3MF {
 
 class XmlSerializer {
 public:
-    using MatArray = std::vector<aiMaterial *>;
-    using MatId2MatArray = std::map<unsigned int, std::vector<unsigned int>>;
 
     XmlSerializer(XmlParser *xmlParser) :
             mMeshes(),
-            mMatArray(),
-            mActiveMatGroup(99999999),
-            mMatId2MatArray(),
+            mBasematerialsDictionnary(),
+            mMaterialCount(0),
             mXmlParser(xmlParser) {
         // empty
     }
@@ -131,10 +128,14 @@ public:
         std::copy(mMeshes.begin(), mMeshes.end(), scene->mMeshes);
 
         // import the materials
-        scene->mNumMaterials = static_cast<unsigned int>(mMatArray.size());
+        scene->mNumMaterials = static_cast<unsigned int>(mMaterialCount);
         if (0 != scene->mNumMaterials) {
             scene->mMaterials = new aiMaterial *[scene->mNumMaterials];
-            std::copy(mMatArray.begin(), mMatArray.end(), scene->mMaterials);
+            for (auto it = mBasematerialsDictionnary.begin(); it != mBasematerialsDictionnary.end(); it++) {
+                for (unsigned int i = 0; i < it->second.size(); ++i) {
+                    scene->mMaterials[it->second[i].first] = it->second[i].second;
+                }
+            }
         }
 
         // create the scene-graph
@@ -242,10 +243,13 @@ private:
             const std::string &currentName = currentNode.name();
             if (currentName == D3MF::XmlTag::triangle) {
                 faces.push_back(ReadTriangle(currentNode));
-                const char *pidToken = currentNode.attribute(D3MF::XmlTag::p1.c_str()).as_string();
-                if (nullptr != pidToken) {
-                    int matIdx(std::atoi(pidToken));
-                    mesh->mMaterialIndex = matIdx;
+                const char *pidToken = currentNode.attribute(D3MF::XmlTag::pid.c_str()).as_string();
+                const char *p1Token = currentNode.attribute(D3MF::XmlTag::p1.c_str()).as_string();
+                if (nullptr != pidToken && nullptr != p1Token) {
+                    int pid(std::atoi(pidToken));
+                    int p1(std::atoi(p1Token));
+                    mesh->mMaterialIndex = mBasematerialsDictionnary[pid][p1].first;
+                    // TODO: manage the separation into several meshes if the triangles of the mesh do not all refer to the same material
                 }
             }
         }
@@ -274,22 +278,18 @@ private:
         const char *baseMaterialId = node.attribute(D3MF::XmlTag::basematerials_id.c_str()).as_string();
         if (nullptr != baseMaterialId) {
             unsigned int id = std::atoi(baseMaterialId);
-            const size_t newMatIdx(mMatArray.size());
-            if (id != mActiveMatGroup) {
-                mActiveMatGroup = id;
-                MatId2MatArray::const_iterator it(mMatId2MatArray.find(id));
-                if (mMatId2MatArray.end() == it) {
-                    MatIdArray.clear();
-                    mMatId2MatArray[id] = MatIdArray;
-                } else {
-                    MatIdArray = it->second;
+            std::vector<std::pair<unsigned int, aiMaterial *> > materials;
+
+            for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling())
+            {
+                if (currentNode.name() == D3MF::XmlTag::basematerials_base) {
+                    materials.push_back(std::make_pair(mMaterialCount, readMaterialDef(currentNode, id)));
+                    mMaterialCount++;
                 }
             }
-            MatIdArray.push_back(static_cast<unsigned int>(newMatIdx));
-            mMatId2MatArray[mActiveMatGroup] = MatIdArray;
-        }
 
-        mMatArray.push_back(readMaterialDef(node));
+            mBasematerialsDictionnary.insert(std::make_pair(id, materials));
+        }
     }
 
     bool parseColor(const char *color, aiColor4D &diffuse) {
@@ -347,7 +347,7 @@ private:
         }
     }
 
-    aiMaterial *readMaterialDef(XmlNode &node) {
+    aiMaterial *readMaterialDef(XmlNode &node, unsigned int basematerialsId) {
         aiMaterial *mat(nullptr);
         const char *name(nullptr);
         const std::string nodeName = node.name();
@@ -355,14 +355,15 @@ private:
             name = node.attribute(D3MF::XmlTag::basematerials_name.c_str()).as_string();
             std::string stdMatName;
             aiString matName;
-            std::string strId(to_string(mActiveMatGroup));
+            std::string strId(to_string(basematerialsId));
             stdMatName += "id";
             stdMatName += strId;
             stdMatName += "_";
             if (nullptr != name) {
                 stdMatName += std::string(name);
             } else {
-                stdMatName += "basemat";
+                stdMatName += "basemat_";
+                stdMatName += to_string(mMaterialCount - basematerialsId);
             }
             matName.Set(stdMatName);
 
@@ -382,9 +383,8 @@ private:
     };
     std::vector<MetaEntry> mMetaData;
     std::vector<aiMesh *> mMeshes;
-    MatArray mMatArray;
-    unsigned int mActiveMatGroup;
-    MatId2MatArray mMatId2MatArray;
+    std::map<unsigned int, std::vector<std::pair<unsigned int, aiMaterial *>>> mBasematerialsDictionnary;
+    unsigned int mMaterialCount;
     XmlParser *mXmlParser;
 };
 

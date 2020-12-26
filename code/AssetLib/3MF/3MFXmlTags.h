@@ -67,6 +67,7 @@ namespace XmlTag {
     static const std::string v3 = "v3";
     static const std::string id = "id";
     static const std::string pid = "pid";
+    static const std::string pindex = "pindex";
     static const std::string p1 = "p1";
     static const std::string name = "name";
     static const std::string type = "type";

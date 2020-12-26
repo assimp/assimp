@@ -145,23 +145,34 @@ public:
     }
 
 private:
+
+    bool getNodeAttribute(const XmlNode& node, const std::string& attribute, std::string& value) {
+        pugi::xml_attribute objectAttribute = node.attribute(attribute.c_str());
+        if (!objectAttribute.empty()) {
+            value = objectAttribute.as_string();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     aiNode *ReadObject(XmlNode &node, aiScene *scene) {
         std::unique_ptr<aiNode> nodePtr(new aiNode());
 
         std::vector<unsigned long> meshIds;
 
-        std::string name, type;
-        pugi::xml_attribute attr = node.attribute(D3MF::XmlTag::id.c_str());
-        if (!attr.empty()) {
-            name = attr.as_string();
-        }
-        attr = node.attribute(D3MF::XmlTag::type.c_str());
-        if (!attr.empty()) {
-            type = attr.as_string();
+        std::string id, type, pid, pindex;
+        bool hasId = getNodeAttribute(node, D3MF::XmlTag::id, id);
+        //bool hasType = getNodeAttribute(node, D3MF::XmlTag::type, type); not used currently
+        bool hasPid = getNodeAttribute(node, D3MF::XmlTag::pid, pid);
+        bool hasPindex = getNodeAttribute(node, D3MF::XmlTag::pindex, pindex);
+
+        if (!hasId) {
+            return nullptr;
         }
 
         nodePtr->mParent = scene->mRootNode;
-        nodePtr->mName.Set(name);
+        nodePtr->mName.Set(id);
 
         size_t meshIdx = mMeshes.size();
 
@@ -169,7 +180,13 @@ private:
             const std::string &currentName = currentNode.name();
             if (currentName == D3MF::XmlTag::mesh) {
                 auto mesh = ReadMesh(currentNode);
-                mesh->mName.Set(name);
+                mesh->mName.Set(id);
+                if (hasPid && hasPindex && mBasematerialsDictionnary.find(atoi(pid.c_str())) != mBasematerialsDictionnary.end()) {
+                    int iPid = atoi(pid.c_str());
+                    int iPindex = atoi(pindex.c_str());
+                    mesh->mMaterialIndex = mBasematerialsDictionnary[iPid][iPindex].first;
+                    std::cout << "Set material " << mesh->mMaterialIndex << " from pid " << iPid << " and pindex " << iPindex << std::endl;
+                }
                 mMeshes.push_back(mesh);
                 meshIds.push_back(static_cast<unsigned long>(meshIdx));
                 ++meshIdx;
@@ -245,7 +262,7 @@ private:
                 faces.push_back(ReadTriangle(currentNode));
                 const char *pidToken = currentNode.attribute(D3MF::XmlTag::pid.c_str()).as_string();
                 const char *p1Token = currentNode.attribute(D3MF::XmlTag::p1.c_str()).as_string();
-                if (nullptr != pidToken && nullptr != p1Token) {
+                if (nullptr != pidToken && nullptr != p1Token && mBasematerialsDictionnary.find(std::atoi(pidToken)) != mBasematerialsDictionnary.end()) {
                     int pid(std::atoi(pidToken));
                     int p1(std::atoi(p1Token));
                     mesh->mMaterialIndex = mBasematerialsDictionnary[pid][p1].first;

@@ -185,7 +185,6 @@ private:
                     int iPid = atoi(pid.c_str());
                     int iPindex = atoi(pindex.c_str());
                     mesh->mMaterialIndex = mBasematerialsDictionnary[iPid][iPindex].first;
-                    std::cout << "Set material " << mesh->mMaterialIndex << " from pid " << iPid << " and pindex " << iPindex << std::endl;
                 }
                 mMeshes.push_back(mesh);
                 meshIds.push_back(static_cast<unsigned long>(meshIdx));

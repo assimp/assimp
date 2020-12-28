@@ -55,6 +55,8 @@ namespace XmlTag {
     static const std::string resources = "resources";
     static const std::string object = "object";
     static const std::string mesh = "mesh";
+    static const std::string components = "components";
+    static const std::string component = "component";
     static const std::string vertices = "vertices";
     static const std::string vertex = "vertex";
     static const std::string triangles = "triangles";

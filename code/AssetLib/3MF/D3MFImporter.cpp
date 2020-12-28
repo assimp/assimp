@@ -102,11 +102,16 @@ public:
     }
 };
 
+struct Component {
+    int mObjectId;
+    aiMatrix4x4 mTransformation;
+};
+
 class Object : public Resource {
 public:
     std::vector<aiMesh*> mMeshes;
     std::vector<unsigned int> mMeshIndex;
-    std::vector<int> mComponents;
+    std::vector<Component> mComponents;
 
     Object(int id) :
             Resource(id) {}
@@ -163,65 +168,19 @@ public:
             const std::string &currentNodeName = currentNode.name();
             if (currentNodeName == D3MF::XmlTag::item) {
                 int objectId = -1;
-                std::string transform;
+                std::string transformationMatrixStr;
+                aiMatrix4x4 transformationMatrix;
                 getNodeAttribute(currentNode, D3MF::XmlTag::objectid, objectId);
-                bool hasTransform = getNodeAttribute(currentNode, D3MF::XmlTag::transform, transform);
+                bool hasTransform = getNodeAttribute(currentNode, D3MF::XmlTag::transform, transformationMatrixStr);
 
-                aiNode *sceneNode = new aiNode("item");
                 auto it = mResourcesDictionnary.find(objectId);
                 if (it != mResourcesDictionnary.end() && it->second->getType() == ResourceType::RT_Object) {
                     Object *obj = static_cast<Object *>(it->second);
-                    std::vector<unsigned int> meshes;
-                    getMeshesList(obj, meshes);
-                    sceneNode->mNumMeshes = static_cast<unsigned int>(meshes.size());
-                    sceneNode->mMeshes = new unsigned int[sceneNode->mNumMeshes];
-                    std::copy(meshes.begin(), meshes.end(), sceneNode->mMeshes);
-
                     if (hasTransform) {
-                        // split the string
-                        std::vector<float> numbers;
-                        std::string currentNumber;
-                        for (size_t i = 0; i < transform.size(); ++i) {
-                            const char c = transform[i];
-                            if (c == ' ') {
-                                if (currentNumber.size() > 0) {
-                                    float f = std::stof(currentNumber);
-                                    numbers.push_back(f);
-                                    currentNumber.clear();
-                                }
-                            } else {
-                                currentNumber.push_back(c);
-                            }
-                        }
-                        if (currentNumber.size() > 0) {
-                            float f = std::stof(currentNumber);
-                            numbers.push_back(f);
-                        }
-
-                        aiMatrix4x4 transformMatrix;
-                        transformMatrix.a1 = numbers[0];
-                        transformMatrix.b1 = numbers[1];
-                        transformMatrix.c1 = numbers[2];
-                        transformMatrix.d1 = 0;
-
-                        transformMatrix.a2 = numbers[3];
-                        transformMatrix.b2 = numbers[4];
-                        transformMatrix.c2 = numbers[5];
-                        transformMatrix.d2 = 0;
-
-                        transformMatrix.a3 = numbers[6];
-                        transformMatrix.b3 = numbers[7];
-                        transformMatrix.c3 = numbers[8];
-                        transformMatrix.d3 = 0;
-
-                        transformMatrix.a4 = numbers[9];
-                        transformMatrix.b4 = numbers[10];
-                        transformMatrix.c4 = numbers[11];
-                        transformMatrix.d4 = 1;
-                        sceneNode->mTransformation = transformMatrix;
+                        transformationMatrix = parseTransformMatrix(transformationMatrixStr);
                     }
 
-                    scene->mRootNode->addChildren(1, &sceneNode);
+                    addObjectToNode(scene->mRootNode, obj, transformationMatrix);
                 }
             }
         }
@@ -259,6 +218,26 @@ public:
 
 private:
 
+    void addObjectToNode(aiNode* parent, Object* obj, aiMatrix4x4 nodeTransform) {
+        aiNode *sceneNode = new aiNode("item");
+        sceneNode->mNumMeshes = static_cast<unsigned int>(obj->mMeshes.size());
+        sceneNode->mMeshes = new unsigned int[sceneNode->mNumMeshes];
+        std::copy(obj->mMeshIndex.begin(), obj->mMeshIndex.end(), sceneNode->mMeshes);
+
+        sceneNode->mTransformation = nodeTransform;
+
+        parent->addChildren(1, &sceneNode);
+
+        for (size_t i = 0; i < obj->mComponents.size(); ++i) {
+            Component c = obj->mComponents[i];
+            auto it = mResourcesDictionnary.find(c.mObjectId);
+            if (it != mResourcesDictionnary.end() && it->second->getType() == ResourceType::RT_Object) {
+                addObjectToNode(sceneNode, static_cast<Object*>(it->second), c.mTransformation);
+            }
+            
+        }
+    }
+
     bool getNodeAttribute(const XmlNode& node, const std::string& attribute, std::string& value) {
         pugi::xml_attribute objectAttribute = node.attribute(attribute.c_str());
         if (!objectAttribute.empty()) {
@@ -280,16 +259,48 @@ private:
         }
     }
 
-    void getMeshesList(Object *obj, std::vector<unsigned int> &meshes) {
-        for (size_t i = 0; i < obj->mMeshIndex.size(); ++i) {
-            meshes.push_back(obj->mMeshIndex[i]);
+    aiMatrix4x4 parseTransformMatrix(std::string matrixStr) {
+        // split the string
+        std::vector<float> numbers;
+        std::string currentNumber;
+        for (size_t i = 0; i < matrixStr.size(); ++i) {
+            const char c = matrixStr[i];
+            if (c == ' ') {
+                if (currentNumber.size() > 0) {
+                    float f = std::stof(currentNumber);
+                    numbers.push_back(f);
+                    currentNumber.clear();
+                }
+            } else {
+                currentNumber.push_back(c);
+            }
         }
-        for (size_t i = 0; i < obj->mComponents.size(); ++i) {
-            int componentId = obj->mComponents[i];
-            auto it = mResourcesDictionnary.find(componentId);
-            if (it != mResourcesDictionnary.end() && it->second->getType() == ResourceType::RT_Object)
-                getMeshesList(static_cast<Object*>(it->second), meshes);
+        if (currentNumber.size() > 0) {
+            float f = std::stof(currentNumber);
+            numbers.push_back(f);
         }
+
+        aiMatrix4x4 transformMatrix;
+        transformMatrix.a1 = numbers[0];
+        transformMatrix.b1 = numbers[1];
+        transformMatrix.c1 = numbers[2];
+        transformMatrix.d1 = 0;
+
+        transformMatrix.a2 = numbers[3];
+        transformMatrix.b2 = numbers[4];
+        transformMatrix.c2 = numbers[5];
+        transformMatrix.d2 = 0;
+
+        transformMatrix.a3 = numbers[6];
+        transformMatrix.b3 = numbers[7];
+        transformMatrix.c3 = numbers[8];
+        transformMatrix.d3 = 0;
+
+        transformMatrix.a4 = numbers[9];
+        transformMatrix.b4 = numbers[10];
+        transformMatrix.c4 = numbers[11];
+        transformMatrix.d4 = 1;
+        return transformMatrix;
     }
 
     void ReadObject(XmlNode &node) {
@@ -329,8 +340,14 @@ private:
                 for (XmlNode currentSubNode = currentNode.first_child(); currentSubNode; currentSubNode = currentSubNode.next_sibling()) {
                     if (currentSubNode.name() == D3MF::XmlTag::component) {
                         int objectId = -1;
+                        std::string componentTransformStr;
+                        aiMatrix4x4 componentTransform;
+                        if (getNodeAttribute(currentSubNode, D3MF::XmlTag::transform, componentTransformStr)) {
+                            componentTransform = parseTransformMatrix(componentTransformStr);
+                        }
+
                         if (getNodeAttribute(currentSubNode, D3MF::XmlTag::objectid, objectId))
-                            obj->mComponents.push_back(objectId);
+                            obj->mComponents.push_back({ objectId, componentTransform });
                     }
                 }
             }
@@ -380,7 +397,6 @@ private:
 
         mesh->mNumVertices = static_cast<unsigned int>(vertices.size());
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-        mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
         std::copy(vertices.begin(), vertices.end(), mesh->mVertices);
     }
 

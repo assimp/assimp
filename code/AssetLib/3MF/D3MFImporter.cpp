@@ -112,9 +112,11 @@ public:
     std::vector<aiMesh*> mMeshes;
     std::vector<unsigned int> mMeshIndex;
     std::vector<Component> mComponents;
+    std::string mName;
 
     Object(int id) :
-            Resource(id) {}
+            Resource(id),
+            mName (std::string("Object_") + to_string(id)){}
 
     virtual ResourceType getType() {
         return ResourceType::RT_Object;
@@ -126,7 +128,6 @@ class XmlSerializer {
 public:
 
     XmlSerializer(XmlParser *xmlParser) :
-            mMeshes(),
             mResourcesDictionnary(),
             mMaterialCount(0),
             mMeshCount(0),
@@ -197,13 +198,23 @@ public:
         }
 
         // import the meshes
-        scene->mNumMeshes = static_cast<unsigned int>(mMeshes.size());
-        scene->mMeshes = new aiMesh *[scene->mNumMeshes]();
-        std::copy(mMeshes.begin(), mMeshes.end(), scene->mMeshes);
+        scene->mNumMeshes = static_cast<unsigned int>(mMeshCount);
+        if (scene->mNumMeshes != 0) {
+            scene->mMeshes = new aiMesh *[scene->mNumMeshes]();
+            for (auto it = mResourcesDictionnary.begin(); it != mResourcesDictionnary.end(); it++) {
+                if (it->second->getType() == ResourceType::RT_Object) {
+                    Object *obj = static_cast<Object*>(it->second);
+                    for (unsigned int i = 0; i < obj->mMeshes.size(); ++i) {
+                        scene->mMeshes[obj->mMeshIndex[i]] = obj->mMeshes[i];
+                    }
+                }
+            }
+        }
+        
 
         // import the materials
         scene->mNumMaterials = static_cast<unsigned int>(mMaterialCount);
-        if (0 != scene->mNumMaterials) {
+        if (scene->mNumMaterials != 0) {
             scene->mMaterials = new aiMaterial *[scene->mNumMaterials];
             for (auto it = mResourcesDictionnary.begin(); it != mResourcesDictionnary.end(); it++) {
                 if (it->second->getType() == ResourceType::RT_BaseMaterials) {
@@ -219,7 +230,7 @@ public:
 private:
 
     void addObjectToNode(aiNode* parent, Object* obj, aiMatrix4x4 nodeTransform) {
-        aiNode *sceneNode = new aiNode("item");
+        aiNode *sceneNode = new aiNode(obj->mName);
         sceneNode->mNumMeshes = static_cast<unsigned int>(obj->mMeshes.size());
         sceneNode->mMeshes = new unsigned int[sceneNode->mNumMeshes];
         std::copy(obj->mMeshIndex.begin(), obj->mMeshIndex.end(), sceneNode->mMeshes);
@@ -331,7 +342,6 @@ private:
                         mesh->mMaterialIndex = materials->mMaterialIndex[pindex];
                     }
                 }
-                mMeshes.push_back(mesh);
 
                 obj->mMeshes.push_back(mesh);
                 obj->mMeshIndex.push_back(mMeshCount);
@@ -546,7 +556,6 @@ private:
         std::string value;
     };
     std::vector<MetaEntry> mMetaData;
-    std::vector<aiMesh *> mMeshes;
     std::map<unsigned int, Resource*> mResourcesDictionnary;
     unsigned int mMaterialCount, mMeshCount;
     XmlParser *mXmlParser;

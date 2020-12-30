@@ -375,6 +375,11 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 
     // now come the individual properties
     const char* begin_cursor = cursor;
+
+    if ((begin_cursor + prop_length) > end) {
+        TokenizeError("property length out of bounds reading length ", input, cursor);
+    }
+
     for (unsigned int i = 0; i < prop_count; ++i) {
         ReadData(sbeg, send, input, cursor, begin_cursor + prop_length);
 

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MemoryIOWrapper.h>
 
 using namespace Assimp;
 
@@ -400,7 +401,10 @@ inline void Buffer::Read(Value &obj, Asset &r) {
         }
     } else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir) : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (
+                r.mCurrentAssetDir.back() == '/' ?
+                   r.mCurrentAssetDir : r.mCurrentAssetDir + '/'
+            ) : "";
 
             IOStream *file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -1590,8 +1594,10 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
     if (pos != int(std::string::npos)) */
 
-    mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
-
+    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+        mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
+    }
+    
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
         throw DeadlyImportError("GLTF: Could not open file for reading");

@@ -2143,7 +2143,7 @@ INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
         }
     return FALSE;
     }
-};
+}
 
 using namespace AssimpView;
 

@@ -254,25 +254,16 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
         }
     }
 
-    bool continuationFound( false );
     size_t i = 0;
     for( ;; ) {
-        if ( continuationToken == m_cache[ m_cachePos ] ) {
-            continuationFound = true;
+        if ( continuationToken == m_cache[ m_cachePos ] && IsLineEnd( m_cache[ m_cachePos + 1 ] ) ) {
             ++m_cachePos;
-        }
-        if ( IsLineEnd( m_cache[ m_cachePos ] ) ) {
-            if ( !continuationFound ) {
-                // the end of the data line
-                break;
-            } else {
-                // skip line end
-                while ( m_cache[m_cachePos] != '\n') {
-                    ++m_cachePos;
-                }
+            while ( m_cache[ m_cachePos ] != '\n' ) {
                 ++m_cachePos;
-                continuationFound = false;
             }
+            ++m_cachePos;
+        } else if ( IsLineEnd ( m_cache[ m_cachePos ] ) ) {
+            break;
         }
 
         buffer[ i ] = m_cache[ m_cachePos ];

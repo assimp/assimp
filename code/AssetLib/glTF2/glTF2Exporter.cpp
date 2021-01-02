@@ -714,6 +714,53 @@ void glTF2Exporter::ExportMaterials()
             mAsset->extensionsUsed.KHR_materials_unlit = true;
             m->unlit = true;
         }
+
+        bool hasMaterialSheen = false;
+        mat->Get(AI_MATKEY_GLTF_MATERIAL_SHEEN, hasMaterialSheen);
+
+        if (hasMaterialSheen) {
+            mAsset->extensionsUsed.KHR_materials_sheen = true;
+
+            MaterialSheen sheen;
+
+            GetMatColor(mat, sheen.sheenColorFactor, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_FACTOR);
+            mat->Get(AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_FACTOR, sheen.sheenRoughnessFactor);
+            GetMatTex(mat, sheen.sheenColorTexture, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_TEXTURE);
+            GetMatTex(mat, sheen.sheenRoughnessTexture, AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_TEXTURE);
+
+            m->materialSheen = Nullable<MaterialSheen>(sheen);
+        }
+
+        bool hasMaterialClearcoat = false;
+        mat->Get(AI_MATKEY_GLTF_MATERIAL_CLEARCOAT, hasMaterialClearcoat);
+
+        if (hasMaterialClearcoat) {
+            mAsset->extensionsUsed.KHR_materials_clearcoat= true;
+
+            MaterialClearcoat clearcoat;
+
+            mat->Get(AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_FACTOR, clearcoat.clearcoatFactor);
+            mat->Get(AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_FACTOR, clearcoat.clearcoatRoughnessFactor);
+            GetMatTex(mat, clearcoat.clearcoatTexture, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_TEXTURE);
+            GetMatTex(mat, clearcoat.clearcoatRoughnessTexture, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_TEXTURE);
+            GetMatTex(mat, clearcoat.clearcoatNormalTexture, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_NORMAL_TEXTURE);
+
+            m->materialClearcoat = Nullable<MaterialClearcoat>(clearcoat);
+        }
+
+        bool hasMaterialTransmission = false;
+        mat->Get(AI_MATKEY_GLTF_MATERIAL_TRANSMISSION, hasMaterialTransmission);
+
+        if (hasMaterialTransmission) {
+            mAsset->extensionsUsed.KHR_materials_transmission = true;
+
+            MaterialTransmission transmission;
+
+            mat->Get(AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_FACTOR, transmission.transmissionFactor);
+            GetMatTex(mat, transmission.transmissionTexture, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_TEXTURE);
+
+            m->materialTransmission = Nullable<MaterialTransmission>(transmission);
+        }
     }
 }
 

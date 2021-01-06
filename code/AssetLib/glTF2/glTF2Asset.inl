@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MemoryIOWrapper.h>
 
 using namespace Assimp;
 
@@ -400,7 +401,10 @@ inline void Buffer::Read(Value &obj, Asset &r) {
         }
     } else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir) : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (
+                r.mCurrentAssetDir.back() == '/' ?
+                   r.mCurrentAssetDir : r.mCurrentAssetDir + '/'
+            ) : "";
 
             IOStream *file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -1042,6 +1046,44 @@ inline void Material::Read(Value &material, Asset &r) {
         if (r.extensionsUsed.KHR_texture_transform) {
         }
 
+        if (r.extensionsUsed.KHR_materials_sheen) {
+            if (Value *curMaterialSheen = FindObject(*extensions, "KHR_materials_sheen")) {
+                MaterialSheen sheen;
+
+                ReadMember(*curMaterialSheen, "sheenColorFactor", sheen.sheenColorFactor);
+                ReadTextureProperty(r, *curMaterialSheen, "sheenColorTexture", sheen.sheenColorTexture);
+                ReadMember(*curMaterialSheen, "sheenRoughnessFactor", sheen.sheenRoughnessFactor);
+                ReadTextureProperty(r, *curMaterialSheen, "sheenRoughnessTexture", sheen.sheenRoughnessTexture);
+
+                this->materialSheen = Nullable<MaterialSheen>(sheen);
+            }
+        }
+
+        if (r.extensionsUsed.KHR_materials_clearcoat) {
+            if (Value *curMaterialClearcoat = FindObject(*extensions, "KHR_materials_clearcoat")) {
+                MaterialClearcoat clearcoat;
+
+                ReadMember(*curMaterialClearcoat, "clearcoatFactor", clearcoat.clearcoatFactor);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatTexture", clearcoat.clearcoatTexture);
+                ReadMember(*curMaterialClearcoat, "clearcoatRoughnessFactor", clearcoat.clearcoatRoughnessFactor);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatRoughnessTexture", clearcoat.clearcoatRoughnessTexture);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatNormalTexture", clearcoat.clearcoatNormalTexture);
+
+                this->materialClearcoat = Nullable<MaterialClearcoat>(clearcoat);
+            }
+        }
+
+        if (r.extensionsUsed.KHR_materials_transmission) {
+            if (Value *curMaterialTransmission = FindObject(*extensions, "KHR_materials_transmission")) {
+                MaterialTransmission transmission;
+
+                ReadMember(*curMaterialTransmission, "transmissionFactor", transmission.transmissionFactor);
+                ReadTextureProperty(r, *curMaterialTransmission, "transmissionTexture", transmission.transmissionTexture);
+
+                this->materialTransmission = Nullable<MaterialTransmission>(transmission);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1079,6 +1121,12 @@ inline void PbrSpecularGlossiness::SetDefaults() {
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
     glossinessFactor = 1.0;
+}
+
+inline void MaterialSheen::SetDefaults() {
+    //KHR_materials_sheen properties
+    SetVector(sheenColorFactor, defaultSheenFactor);
+    sheenRoughnessFactor = 0.f;
 }
 
 namespace {
@@ -1590,8 +1638,10 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
     if (pos != int(std::string::npos)) */
 
-    mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
-
+    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+        mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
+    }
+    
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
         throw DeadlyImportError("GLTF: Could not open file for reading");
@@ -1731,6 +1781,9 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_unlit);
     CHECK_EXT(KHR_lights_punctual);
     CHECK_EXT(KHR_texture_transform);
+    CHECK_EXT(KHR_materials_sheen);
+    CHECK_EXT(KHR_materials_clearcoat);
+    CHECK_EXT(KHR_materials_transmission);
 
 #undef CHECK_EXT
 }

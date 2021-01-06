@@ -121,7 +121,6 @@ public:
             return false;
         }
 
-        bool result = false;
         const size_t len = stream->FileSize();
         mData.resize(len + 1);
         memset(&mData[0], '\0', len + 1);
@@ -130,11 +129,11 @@ public:
         mDoc = new pugi::xml_document();
         pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
         if (parse_result.status == pugi::status_ok) {
+            return true;
+        } else {
             ASSIMP_LOG_DEBUG("Error while parse xml.");
-            result = true;
+            return false;
         }
-
-        return result;
     }
 
     pugi::xml_document *getDocument() const {

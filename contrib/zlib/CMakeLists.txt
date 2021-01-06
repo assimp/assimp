@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.4.4)
+cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 # CMake 3.0 changed the project command, setting policy CMP0048 reverts to the old behaviour.
@@ -197,3 +197,12 @@ if(MINGW)
 endif(MINGW)
 
 add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+
+IF(WIN32
+    INSTALL( TARGETS zlibstatic
+             EXPORT "${TARGETS_EXPORT_NAME}"
+             LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+             ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+             RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+ENDIF()
+         COMPONENT ${LIBASSIMP_COMPONENT})

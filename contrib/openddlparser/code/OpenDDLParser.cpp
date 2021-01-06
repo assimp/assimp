@@ -527,9 +527,7 @@ char *OpenDDLParser::parseName(char *in, char *end, Name **name) {
     in = parseIdentifier(in, end, &id);
     if (id) {
         currentName = new Name(ntype, id);
-        if (currentName) {
-            *name = currentName;
-        }
+        *name = currentName;
     }
 
     return in;

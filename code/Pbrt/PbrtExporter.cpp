@@ -38,43 +38,57 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+
+/* TODO:
+non-diffuse
+  metal?
+need to multiply texture by constant diffuse, etc color?
+bump mapping
+
+textures mirrored on bistro? (not paying attention to a uv mapping param?)
+
+figure out what to do about normal maps
+emissive textures
+use aiProcess_GenUVCoords if needed to handle spherical/planar uv mapping?
+don't build up a big string in memory but write directly to a file
+aiProcess_Triangulate meshes to get triangles only?
+output PLY for big meshes?
+animation
+ */
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
 
 #include "PbrtExporter.h"
 
-#include <assimp/version.h> // aiGetVersion
+#include <assimp/version.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/StreamWriter.h> // StreamWriterLE
-#include <assimp/Exceptional.h> // DeadlyExportError
-#include <assimp/material.h> // aiTextureType
+#include <assimp/StreamWriter.h>
+#include <assimp/Exceptional.h>
+#include <assimp/material.h>
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 
-// Header files, standard library.
-#include <memory> // shared_ptr
-#include <string>
-#include <sstream> // stringstream
-#include <ctime> // localtime, tm_*
-#include <map>
-#include <set>
-#include <vector>
-#include <array>
-#include <unordered_set>
-#include <numeric>
+#include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <fstream>
+#include <functional>
 #include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 using namespace Assimp;
 
-// some constants that we'll use for writing metadata
 namespace Assimp {
 
-// ---------------------------------------------------------------------
-// Worker function for exporting a scene to ascii pbrt.
-// Prototyped and registered in Exporter.cpp
 void ExportScenePbrt (
     const char* pFile,
     IOSystem* pIOSystem,
@@ -83,7 +97,7 @@ void ExportScenePbrt (
 ){
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-        
+
     // initialize the exporter
     PbrtExporter exporter(pScene, pIOSystem, path, file);
 }
@@ -99,40 +113,51 @@ PbrtExporter::PbrtExporter (
   mPath(path),
   mFile(file)
 {
-    std::unique_ptr<IOStream> outfile;
+    // Various warnings about unhandled things...
+    // TODO warn user if scene has animations
+    // TODO warn user if mScene->mFlags is nonzero
+    // TODO warn if a metadata defines the ambient term
 
-    // Open the indicated file for writing
-    outfile.reset(mIOSystem->Open(mPath,"wt"));
-    if (!outfile) {
-        throw DeadlyExportError(
-            "could not open output .pbrt file: " + std::string(mFile)
-        );
+    for (int i = 0; i < mScene->mNumTextures; ++i) {
+        aiTexture* tex = mScene->mTextures[i];
+        std::string fn = CleanTextureFilename(tex->mFilename, false);
+        std::cerr << "Writing embedded texture: " << tex->mFilename.C_Str() << " -> "
+                  << fn << "\n";
+
+        std::unique_ptr<IOStream> outfile(mIOSystem->Open(fn, "wt"));
+        if (!outfile) {
+            throw DeadlyExportError("could not open output texture file: " + fn);
+        }
+        if (tex->mHeight == 0) {
+            // It's binary data
+            outfile->Write(tex->pcData, tex->mWidth, 1);
+        } else {
+            std::cerr << fn << ": TODO handle uncompressed embedded textures.\n";
+        }
     }
 
-    // Write Header
-    WriteHeader();
+    std::function<void(aiNode*, int)> visitNode;
+    visitNode = [&](aiNode* node, int depth) {
+        for (int i = 0; i < depth; ++i) std::cerr << "    ";
+        std::cerr << node->mName.C_Str() << "\n";
+        for (int i = 0; i < node->mNumChildren; ++i)
+            visitNode(node->mChildren[i], depth + 1);
+    };
+    visitNode(mScene->mRootNode, 0);
 
-    // Write metadata to file
+    mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
+
+    // Write everything out
     WriteMetaData();
-
-    // Write scene-wide rendering options
-    WriteSceneWide();
-
-    // Write the Shapes
-    WriteShapes();
-
-    // Write World Description
+    WriteCameras();
     WriteWorldDefinition();
 
-    // Write out to file
-    outfile->Write(mOutput.str().c_str(), 
-            mOutput.str().length(), 1);
-    
-    // explicitly release file pointer,
-    // so we don't have to rely on class destruction.
-    outfile.reset();
-
-    // TODO Do Animation
+    // And write the file to disk...
+    std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath,"wt"));
+    if (!outfile) {
+        throw DeadlyExportError("could not open output .pbrt file: " + std::string(mFile));
+    }
+    outfile->Write(mOutput.str().c_str(), mOutput.str().length(), 1);
 }
 
 // Destructor
@@ -140,18 +165,10 @@ PbrtExporter::~PbrtExporter() {
     // Empty
 }
 
-void PbrtExporter::WriteHeader() {
-    // TODO
-
-    // TODO warn user if scene has animations
-    // TODO warn user if mScene->mFlags is nonzero
-    // TODO warn if a metadata defines the ambient term
-}
-
 void PbrtExporter::WriteMetaData() {
-    mOutput << "#############################" << std::endl;
-    mOutput << "# Writing out scene metadata:" << std::endl;
-    mOutput << "#############################" << std::endl;
+    mOutput << "#############################\n";
+    mOutput << "# Scene metadata:\n";
+
     aiMetadata* pMetaData = mScene->mMetaData;
     for (int i = 0; i < pMetaData->mNumProperties; i++) {
         mOutput << "# - ";
@@ -160,9 +177,9 @@ void PbrtExporter::WriteMetaData() {
             case AI_BOOL : {
                 mOutput << " ";
                 if (*static_cast<bool*>(pMetaData->mValues[i].mData))
-                    mOutput << "TRUE" << std::endl;
+                    mOutput << "TRUE\n";
                 else
-                    mOutput << "FALSE" << std::endl;
+                    mOutput << "FALSE\n";
                 break;
             }
             case AI_INT32 : {
@@ -170,7 +187,7 @@ void PbrtExporter::WriteMetaData() {
                     *static_cast<int32_t*>(pMetaData->mValues[i].mData) <<
                     std::endl;
                 break;
-            }    
+            }
             case AI_UINT64 :
                 mOutput << " " <<
                     *static_cast<uint64_t*>(pMetaData->mValues[i].mData) <<
@@ -187,11 +204,11 @@ void PbrtExporter::WriteMetaData() {
                     std::endl;
                 break;
             case AI_AISTRING : {
-                aiString* value = 
-                    static_cast<aiString*>(pMetaData->mValues[i].mData); 
+                aiString* value =
+                    static_cast<aiString*>(pMetaData->mValues[i].mData);
                 std::string svalue = value->C_Str();
                 std::size_t found = svalue.find_first_of("\n");
-                mOutput << std::endl;
+                mOutput << "\n";
                 while (found != std::string::npos) {
                     mOutput << "#     " << svalue.substr(0, found) << std::endl;
                     svalue = svalue.substr(found + 1);
@@ -202,234 +219,180 @@ void PbrtExporter::WriteMetaData() {
             }
             case AI_AIVECTOR3D :
                 // TODO
-                mOutput << " Vector3D (unable to print)" << std::endl;
+                mOutput << " Vector3D (unable to print)\n";
                 break;
             default:
                 // AI_META_MAX and FORCE_32BIT
-                mOutput << " META_MAX or FORCE_32Bit (unable to print)" << std::endl;
+                mOutput << " META_MAX or FORCE_32Bit (unable to print)\n";
                 break;
         }
     }
 }
 
-void PbrtExporter::WriteSceneWide() {
-    // If there are 0 cameras in the scene, it is purely geometric
-    //   Don't write any scene wide description
-    if (mScene->mNumCameras == 0)
-        return;
-    
-    // Cameras & Film
-    WriteCameras();
-
-    mOutput << std::endl;
-    mOutput << "#####################################################################" << std::endl;
-    mOutput << "# Assimp does not support explicit Sampler, Filter, Integrator, Accel" << std::endl;
-    mOutput << "#####################################################################" << std::endl;
-    mOutput << "# Setting to reasonable default values" << std::endl;
-
-    // Samplers
-    mOutput << "Sampler \"halton\" \"integer pixelsamples\" [16]" << std::endl;
-   
-    // Filters
-    mOutput << "PixelFilter \"box\"" << std::endl;
-
-    // Integrators
-    mOutput << "Integrator \"path\" \"integer maxdepth\" [5]" << std::endl;
-   
-    // Accelerators
-    mOutput << "Accelerator \"bvh\"" << std::endl;
-   
-    // Participating Media
-    // Assimp does not support participating media
-}
-
 void PbrtExporter::WriteCameras() {
-    mOutput << std::endl;
-    mOutput << "###############################" << std::endl;
-    mOutput << "# Writing Camera and Film data:" << std::endl;
-    mOutput << "###############################" << std::endl;
-    mOutput << "# - Number of Cameras found in scene: ";
-    mOutput << mScene->mNumCameras << std::endl;
-    
-    if (mScene->mNumCameras == 0){
-        mOutput << "# - No Cameras found in the scene" << std::endl;
+    mOutput << "\n";
+    mOutput << "###############################\n";
+    mOutput << "# Cameras (" << mScene->mNumCameras << ") total\n\n";
+
+    if (mScene->mNumCameras == 0) {
+        std::cerr << "Warning: No cameras found in scene file.\n";
         return;
     }
 
     if (mScene->mNumCameras > 1) {
-        mOutput << "# - Multiple Cameras found in scene" << std::endl;
-        mOutput << "#   - Defaulting to first Camera specified" << std::endl;
+        std::cerr << "Multiple cameras found in scene file; defaulting to first one specified.\n";
     }
-    
-    for(int i = 0; i < mScene->mNumCameras; i++){
+
+    for (int i = 0; i < mScene->mNumCameras; i++) {
         WriteCamera(i);
     }
 }
 
+aiMatrix4x4 PbrtExporter::GetNodeTransform(const aiString &name) const {
+    aiMatrix4x4 m;
+    auto node = mScene->mRootNode->FindNode(name);
+    if (!node) {
+        std::cerr << '"' << name.C_Str() << "\": node not found in scene tree.\n";
+        throw DeadlyExportError("Could not find node");
+    }
+    else {
+        while (node) {
+            m = node->mTransformation * m;
+            node = node->mParent;
+        }
+    }
+    return m;
+}
+
+std::string PbrtExporter::TransformString(const aiMatrix4x4 &m) {
+    // Transpose on the way out to match pbrt's expected layout (sanity
+    // check: the translation component should be the last 3 entries
+    // before a '1' as the final entry in the matrix, assuming it's
+    // non-projective.)
+    std::stringstream s;
+    s << m.a1 << " " << m.b1 << " " << m.c1 << " " << m.d1 << " "
+      << m.a2 << " " << m.b2 << " " << m.c2 << " " << m.d2 << " "
+      << m.a3 << " " << m.b3 << " " << m.c3 << " " << m.d3 << " "
+      << m.a4 << " " << m.b4 << " " << m.c4 << " " << m.d4;
+    return s.str();
+}
+
 void PbrtExporter::WriteCamera(int i) {
-    auto camera = mScene->mCameras[i]; 
+    auto camera = mScene->mCameras[i];
     bool cameraActive = i == 0;
 
-    mOutput << "# - Camera " << i+1  <<  ": "
+    mOutput << "# - Camera " << i+1 <<  ": "
         << camera->mName.C_Str() << std::endl;
 
     // Get camera aspect ratio
     float aspect = camera->mAspect;
-    if(aspect == 0){
+    if (aspect == 0) {
         aspect = 4.0/3.0;
-        mOutput << "#   - Aspect ratio : 1.33333 (no aspect found, defaulting to 4/3)" << std::endl;
+        mOutput << "#   - Aspect ratio : 1.33333 (no aspect found, defaulting to 4/3)\n";
     } else {
         mOutput << "#   - Aspect ratio : " << aspect << std::endl;
     }
 
-    // Get camera fov
-    float hfov = AI_RAD_TO_DEG(camera->mHorizontalFOV);
-    float fov;
-    mOutput << "#   - Horizontal fov : " << hfov << std::endl;
-    if (aspect >= 1.0)
-        fov = hfov;
-    else
-        fov = hfov * aspect;
-
     // Get Film xres and yres
-    int xres = 640;
-    int yres = (int)round(640/aspect);
+    int xres = 1920;
+    int yres = (int)round(xres/aspect);
 
     // Print Film for this camera
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "Film \"image\" \"string filename\" \""
-        << mFile << "_pbrt.exr\"" << std::endl;
+    mOutput << "Film \"rgb\" \"string filename\" \"" << mFile << ".exr\"\n";
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "    \"integer xresolution\" ["
-        << xres << "]" << std::endl;
+    mOutput << "    \"integer xresolution\" [" << xres << "]\n";
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "    \"integer yresolution\" ["
-        << yres << "]" << std::endl;
+    mOutput << "    \"integer yresolution\" [" << yres << "]\n";
+
+    // Get camera fov
+    float hfov = AI_RAD_TO_DEG(camera->mHorizontalFOV);
+    float fov = (aspect >= 1.0) ? hfov : (hfov * aspect);
+    if (fov < 5) {
+        std::cerr << fov << ": suspiciously low field of view specified by camera. Setting to 45 degrees.\n";
+        fov = 45;
+    }
 
     // Get camera transform
-    // Isn't optimally efficient, but is the simplest implementation
-    //   Get camera node
-    aiMatrix4x4 w2c;
-    auto cameraNode = mScene->mRootNode->FindNode(camera->mName);
-    if (!cameraNode) {
-        mOutput << "# ERROR: Camera declared but not found in scene tree" << std::endl;
-    }
-    else {
-        std::vector<aiMatrix4x4> matrixChain;
-        auto tempNode = cameraNode;
-        while(tempNode) {
-            matrixChain.insert(matrixChain.begin(), tempNode->mTransformation);
-            tempNode = tempNode->mParent;
-        }
+    aiMatrix4x4 worldFromCamera = GetNodeTransform(camera->mName);
 
-        w2c = matrixChain[0];
-        for(int i = 1; i < matrixChain.size(); i++){
-            w2c *= matrixChain[i];
-        }
-    }
-    
     // Print Camera LookAt
-    auto position = w2c * camera->mPosition;
-    auto lookAt = w2c * camera->mLookAt;
-    auto up = w2c * camera->mUp;
-    if  (!cameraActive)
+    auto position = worldFromCamera * camera->mPosition;
+    auto lookAt = worldFromCamera * (camera->mPosition + camera->mLookAt);
+    aiMatrix3x3 worldFromCamera3(worldFromCamera);
+    auto up = worldFromCamera3 * camera->mUp;
+    up.Normalize();
+
+    if (!cameraActive)
         mOutput << "# ";
     mOutput << "LookAt "
         << position.x << " " << position.y << " " << position.z << std::endl;
-    if  (!cameraActive)
+    if (!cameraActive)
         mOutput << "# ";
     mOutput << "       "
         << lookAt.x << " " << lookAt.y << " " << lookAt.z << std::endl;
-    if  (!cameraActive)
+    if (!cameraActive)
         mOutput << "# ";
     mOutput << "       "
         << up.x << " " << up.y << " " << up.z << std::endl;
-    
+
     // Print camera descriptor
-    if(!cameraActive)
+    if (!cameraActive)
         mOutput << "# ";
-    mOutput << "Camera \"perspective\" \"float fov\" " 
-        << "[" << fov << "]" << std::endl;
-}
-
-void PbrtExporter::WriteShapes() {
-    // - figure out if should all be in 1 file (no camera?)
-    // - if more than 1 file, place each geo in separate directory
-    // - NEED to figure out how meshes are/should be split up
-
-    // create geometry_<filename> folder
-    // bool mIOSystem->CreateDirectory(path)
-    
-    // TODO worry about sequestering geo later, after giant print
+    mOutput << "Camera \"perspective\" \"float fov\" " << "[" << fov << "]\n";
 }
 
 void PbrtExporter::WriteWorldDefinition() {
-    mOutput << std::endl;
-    mOutput << "############################" << std::endl;
-    mOutput << "# Writing World Definitiion:" << std::endl;
-    mOutput << "############################" << std::endl;
-    
-    // Print WorldBegin
-    mOutput << "WorldBegin" << std::endl;
-    
-    // Check to see if the scene has Embedded Textures
-    CheckEmbeddedTextures();
-    
-    // Print Textures
-    WriteTextures();
+    // Figure out which meshes are referenced multiple times; those will be
+    // emitted as object instances and the rest will be emitted directly.
+    std::map<int, int> meshUses;
+    std::function<void(aiNode*)> visitNode;
+    visitNode = [&](aiNode* node) {
+        for (int i = 0; i < node->mNumMeshes; ++i)
+            ++meshUses[node->mMeshes[i]];
+        for (int i = 0; i < node->mNumChildren; ++i)
+            visitNode(node->mChildren[i]);
+    };
+    visitNode(mScene->mRootNode);
+    int nInstanced = 0, nUnused = 0;
+    for (const auto &u : meshUses) {
+        if (u.second == 0) ++nUnused;
+        else if (u.second > 1) ++nInstanced;
+    }
+    std::cerr << nInstanced << " / " << mScene->mNumMeshes << " meshes instanced.\n";
+    if (nUnused)
+        std::cerr << nUnused << " meshes defined but not used in scene.\n";
 
-    // Print materials
+    mOutput << "WorldBegin\n";
+
+    WriteLights();
+    WriteTextures();
     WriteMaterials();
 
-    // Print Objects
-    // Both PBRT's `Shape` and `Object` are in Assimp's `aiMesh` class
-    WriteObjects();
+    // Object instance definitions
+    for (const auto &mu : meshUses) {
+        if (mu.second > 1) {
+            WriteInstanceDefinition(mu.first);
+        }
+    }
 
-    // Print Object Instancing (nodes)
-    WriteObjectInstances();
-
-    // Print Lights (w/o geometry)
-    WriteLights();
-
-    // Print Area Lights (w/ geometry)
-
-    // Print WorldEnd
-    mOutput << std::endl << "WorldEnd";
-}
-
-
-void PbrtExporter::CheckEmbeddedTextures() {
-    mOutput << std::endl;
-    mOutput << "###################" << std::endl;
-    mOutput << "# Checking Embededded Textures:" << std::endl;
-    mOutput << "###################" << std::endl;
-    mOutput << "# - Number of Embedded Textures found in scene: ";
-    mOutput << mScene->mNumTextures << std::endl;
-
-    if (mScene->mNumTextures == 0)
-        return;
-
-    mOutput << "# ERROR: PBRT does not support Embedded Textures" << std::endl;
+    aiMatrix4x4 worldFromObject;
+    WriteGeometricObjects(mScene->mRootNode, worldFromObject, meshUses);
 }
 
 void PbrtExporter::WriteTextures() {
-    mOutput << std::endl;
-    mOutput << "###################" << std::endl;
-    mOutput << "# Writing Textures:" << std::endl;
-    mOutput << "####################" << std::endl;
+    mOutput << "###################\n";
+    mOutput << "# Textures\n\n";
 
-    std::stringstream texStream;
-    int numTotalTextures = 0;
-        
     C_STRUCT aiString path;
     aiTextureMapping mapping;
-    unsigned int uvindex;
+    unsigned int uvIndex;
     ai_real blend;
     aiTextureOp op;
-    aiTextureMapMode mapmode[3];
+    aiTextureMapMode mapMode[3];
 
     // For every material in the scene,
     for (int m = 0 ; m < mScene->mNumMaterials; m++) {
@@ -441,61 +404,162 @@ void PbrtExporter::WriteTextures() {
             for (int t = 0; t < ttCount; t++) {
                 // TODO write out texture specifics
                 // TODO UV transforms may be material specific
-                //        so those may need to be baked into unique tex name  
-                material->GetTexture(
-                    aiTextureType(tt),
-                    t,
-                    &path,
-                    &mapping,
-                    &uvindex,
-                    &blend,
-                    &op,
-                    mapmode);
+                //        so those may need to be baked into unique tex name
+                if (material->GetTexture(aiTextureType(tt), t, &path, &mapping,
+                                         &uvIndex, &blend, &op, mapMode) != AI_SUCCESS) {
+                    std::cerr << "Error getting texture! " << m << " " << tt << " " << t << "\n";
+                    continue;
+                }
 
-                std::string spath = std::string(path.C_Str());
-                std::replace(spath.begin(), spath.end(), '\\', '/');
-                std::string name = GetTextureName(spath, tt);
+                std::string filename = CleanTextureFilename(path);
 
-                if (mTextureSet.find(name) == mTextureSet.end()) {
-                    numTotalTextures++;
-                    texStream << "Texture \"" << name << "\" \"spectrum\" "
-                        << "\"string filename\" \"" << spath << "\"" << std::endl;
+                if (uvIndex != 0)
+                    std::cerr << "Warning: texture \"" << filename << "\" uses uv set #" <<
+                        uvIndex << " but the pbrt converter only exports uv set 0.\n";
+#if 0
+                if (op != aiTextureOp_Multiply)
+                    std::cerr << "Warning: unexpected texture op " << (int)op <<
+                        " encountered for texture \"" <<
+                        filename << "\". The resulting scene may have issues...\n";
+                if (blend != 1)
+                    std::cerr << "Blend value of " << blend << " found for texture \"" << filename
+                              << "\" but not handled in converter.\n";
+#endif
+
+                std::string mappingString;
+#if 1
+                if (mapMode[0] != mapMode[1])
+                    std::cerr << "Different texture boundary mode for u and v for texture \"" <<
+                        filename << "\". Using u for both.\n";
+                switch (mapMode[0]) {
+                case aiTextureMapMode_Wrap:
+                    // pbrt's default
+                    break;
+                case aiTextureMapMode_Clamp:
+                    mappingString = "\"string wrap\" \"clamp\"";
+                    break;
+                case aiTextureMapMode_Decal:
+                    std::cerr << "Decal texture boundary mode not supported by pbrt for texture \"" <<
+                        filename << "\"\n";
+                    break;
+                case aiTextureMapMode_Mirror:
+                    std::cerr << "Mirror texture boundary mode not supported by pbrt for texture \"" <<
+                        filename << "\"\n";
+                    break;
+                default:
+                    std::cerr << "Unexpected map mode " << (int)mapMode[0] << " for texture \"" <<
+                        filename << "\"\n";
+                    //throw DeadlyExportError("Unexpected aiTextureMapMode");
+                }
+#endif
+
+#if 0
+                aiUVTransform uvTransform;
+                if (material->Get(AI_MATKEY_TEXTURE(tt, t), uvTransform) == AI_SUCCESS) {
+                    mOutput << "# UV transform " << uvTransform.mTranslation.x << " "
+                            << uvTransform.mTranslation.y << " " << uvTransform.mScaling.x << " "
+                            << uvTransform.mScaling.y << " " << uvTransform.mRotation << "\n";
+                }
+#endif
+
+                std::string texName, texType;
+                if (aiTextureType(tt) == aiTextureType_SHININESS ||
+                    aiTextureType(tt) == aiTextureType_OPACITY ||
+                    aiTextureType(tt) == aiTextureType_HEIGHT ||
+                    aiTextureType(tt) == aiTextureType_DISPLACEMENT ||
+                    aiTextureType(tt) == aiTextureType_METALNESS ||
+                    aiTextureType(tt) == aiTextureType_DIFFUSE_ROUGHNESS) {
+                    texType = "float";
+                    texName = std::string("float:") + filename;
+                } else {
+                    texType = "spectrum";
+                    texName = std::string("rgb:") + filename;
+                }
+
+                if (mTextureSet.find(texName) == mTextureSet.end()) {
+                    mOutput << "Texture \"" << texName << "\" \"" << texType << "\" \"imagemap\"\n"
+                            << "    \"string filename\" \"" << filename << "\" " << mappingString << '\n';
+                    mTextureSet.insert(texName);
+                }
+
+                // Also emit a float version for use with alpha testing...
+                if ((aiTextureType(tt) == aiTextureType_DIFFUSE ||
+                     aiTextureType(tt) == aiTextureType_BASE_COLOR) &&
+                    TextureHasAlphaMask(filename)) {
+                    texType = "float";
+                    texName = std::string("alpha:") + filename;
+                    if (mTextureSet.find(texName) == mTextureSet.end()) {
+                        mOutput << "Texture \"" << texName << "\" \"" << texType << "\" \"imagemap\"\n"
+                                << "    \"string filename\" \"" << filename << "\" " << mappingString << '\n';
+                        mTextureSet.insert(texName);
+                    }
                 }
             }
         }
     }
+}
 
-    // Write out to file
-    mOutput << "# - Number of Textures found in scene: ";
-    mOutput << numTotalTextures << std::endl;
-    mOutput << texStream.str();
+bool PbrtExporter::TextureHasAlphaMask(const std::string &filename) {
+    // TODO: STBIDEF int      stbi_info               (char const *filename,     int *x, int *y, int *comp);
+    // quick return if it's 3
+
+    int xSize, ySize, nComponents;
+    unsigned char *data = stbi_load(filename.c_str(), &xSize, &ySize, &nComponents, 0);
+    if (!data) {
+        std::cerr << filename << ": unable to load texture and check for alpha mask in texture. "
+        "Geometry will not be alpha masked with this texture.\n";
+        return false;
+    }
+
+    bool hasMask = false;
+    switch (nComponents) {
+    case 1:
+        for (int i = 0; i < xSize * ySize; ++i)
+            if (data[i] != 255) {
+                hasMask = true;
+                break;
+            }
+        break;
+    case 2:
+          for (int y = 0; y < ySize; ++y)
+              for (int x = 0; x < xSize; ++x)
+                  if (data[2 * (x + y * xSize) + 1] != 255) {
+                      hasMask = true;
+                      break;
+                  }
+        break;
+    case 3:
+        break;
+    case 4:
+          for (int y = 0; y < ySize; ++y)
+              for (int x = 0; x < xSize; ++x)
+                  if (data[4 * (x + y * xSize) + 3] != 255) {
+                      hasMask = true;
+                      break;
+                  }
+          break;
+    default:
+        std::cerr << filename << ": unexpected number of image channels, " <<
+            nComponents << ".\n";
+    }
+
+    stbi_image_free(data);
+    return hasMask;
 }
 
 void PbrtExporter::WriteMaterials() {
-    mOutput << std::endl;
-    mOutput << "####################" << std::endl;
-    mOutput << "# Writing Materials:" << std::endl;
-    mOutput << "####################" << std::endl;
-    mOutput << "# - Number of Materials found in scene: ";
-    mOutput << mScene->mNumMaterials << std::endl;
+    mOutput << "\n";
+    mOutput << "####################\n";
+    mOutput << "# Materials (" << mScene->mNumMaterials << ") total\n\n";
 
-    if (mScene->mNumMaterials == 0)
-        return;
-
-    // TODO remove default when numCameras == 0
-    //      For now, only on debug
-    mOutput << "# - Creating a default grey matte material" << std::endl;
-    mOutput << "Material \"matte\" \"rgb Kd\" [.8 .8 .8]" << std::endl; 
-
-    for (int i = 0 ; i < mScene->mNumMaterials; i++) {
+    for (int i = 0; i < mScene->mNumMaterials; i++) {
         WriteMaterial(i);
     }
-
 }
 
 void PbrtExporter::WriteMaterial(int m) {
-    auto material = mScene->mMaterials[m]; 
-    
+    aiMaterial* material = mScene->mMaterials[m];
+
     // get material name
     auto materialName = material->GetName();
     mOutput << std::endl << "# - Material " << m+1 <<  ": "
@@ -510,103 +574,232 @@ void PbrtExporter::WriteMaterial(int m) {
     for (int i = 1; i <= aiTextureType_UNKNOWN; i++) {
         textureCounts[i-1] = material->GetTextureCount(aiTextureType(i));
     }
-    mOutput << "#   - Texture Type Counts:" << std::endl;
+    mOutput << "#   - Texture Type Counts:\n";
     for (int tt = 1; tt <= aiTextureType_UNKNOWN; tt++) {
-        mOutput << "#     - " << TextureTypeToString(aiTextureType(tt)); 
+        mOutput << "#     - " << TextureTypeToString(aiTextureType(tt));
         mOutput << ": " <<  textureCounts[tt - 1] << std::endl;
     }
 
-    // Decide which material PBRT should set this to
-    //   if contains any PBR textures, then Disney
-    if(    textureCounts[aiTextureType_BASE_COLOR -1] > 0
-        || textureCounts[aiTextureType_NORMAL_CAMERA -1] > 0
-        || textureCounts[aiTextureType_EMISSION_COLOR -1] > 0
-        || textureCounts[aiTextureType_METALNESS -1] > 0
-        || textureCounts[aiTextureType_DIFFUSE_ROUGHNESS -1] > 0
-        || textureCounts[aiTextureType_AMBIENT_OCCLUSION -1] > 0) {
-        WriteDisneyMaterial(material);
-        return;
-    }
-    else {
-        WriteUberMaterial(material);
-        return;
+    auto White = [](aiColor3D c) { return c.r == 1 && c.g == 1 && c.b == 1; };
+    auto Black = [](aiColor3D c) { return c.r == 0 && c.g == 0 && c.b == 0; };
+
+    aiColor3D diffuse, specular, transparency;
+    bool constantDiffuse = (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS &&
+                            !White(diffuse));
+    bool constantSpecular = (material->Get(AI_MATKEY_COLOR_SPECULAR, specular) == AI_SUCCESS &&
+                             !White(specular));
+    bool constantTransparency = (material->Get(AI_MATKEY_COLOR_TRANSPARENT, transparency) == AI_SUCCESS &&
+                                 !Black(transparency));
+
+    float opacity, shininess, shininessStrength, eta;
+    bool constantOpacity = (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS &&
+                            opacity != 0);
+    bool constantShininess = material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS;
+    bool constantShininessStrength = material->Get(AI_MATKEY_SHININESS_STRENGTH, shininessStrength) == AI_SUCCESS;
+    bool constantEta = (material->Get(AI_MATKEY_REFRACTI, eta) == AI_SUCCESS &&
+                        eta != 1);
+
+    mOutput << "# Constants: diffuse " << constantDiffuse << " specular " << constantSpecular <<
+        " transprency " << constantTransparency << " opacity " << constantOpacity <<
+        " shininess " << constantShininess << " shininess strength " << constantShininessStrength <<
+        " eta " << constantEta << "\n";
+
+    if (constantShininess) {
+        // Assume plastic for now at least
+        float roughness = std::max(0.001f, 1.f - std::sqrt(shininess / 1000.f));
+        mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
+                << " \"string type\" \"coateddiffuse\"\n"
+                << "    \"float roughness\" " << roughness << "\n";
+    } else
+        // Diffuse
+        mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
+                << " \"string type\" \"diffuse\"\n";
+
+    aiString diffuseTexture;
+    if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), diffuseTexture) == AI_SUCCESS)
+        mOutput << "    \"texture reflectance\" \"rgb:" << CleanTextureFilename(diffuseTexture) << "\"\n";
+    else
+        mOutput << "    \"rgb reflectance\" [ " << diffuse.r << " " << diffuse.g <<
+            " " << diffuse.b << " ]\n";
+
+    aiString displacementTexture;
+    if (material->Get(AI_MATKEY_TEXTURE_HEIGHT(0), displacementTexture) == AI_SUCCESS)
+        mOutput << "    \"texture displacement\" \"float:" << CleanTextureFilename(displacementTexture) << "\"\n";
+    else if (material->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), displacementTexture) == AI_SUCCESS)
+        mOutput << "    \"texture displacement\" \"float:" << CleanTextureFilename(displacementTexture) << "\"\n";
+}
+
+std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteExtension) {
+    std::string fn = f.C_Str();
+    // Remove directory name
+    size_t offset = fn.find_last_of("/\\");
+    if (offset != std::string::npos) {
+        fn.erase(0, offset + 1);
     }
 
-    // TODO
-    //      - matte   (has only kd?)
-    //      - metal   (never? has only ks?)
-    //      - mirror  (has reflection)
-    //      - plastic (never?)
+    // Expect all textures in textures
+    fn = "textures/" + fn;
+
+    // Rewrite extension for unsupported file formats.
+    if (rewriteExtension) {
+        offset = fn.rfind('.');
+        if (offset != std::string::npos) {
+            std::string extension = fn;
+            extension.erase(0, offset + 1);
+            std::transform(extension.begin(), extension.end(), extension.begin(),
+                           [](unsigned char c){ return std::tolower(c); });
+
+            if (extension != "tga" && extension != "exr" && extension != "png" &&
+                extension != "pfm" && extension != "hdr") {
+                std::string orig = fn;
+                fn.erase(offset + 1);
+                fn += "png";
+
+                // Does it already exist? Warn if not.
+                std::ifstream f(fn);
+                if (!f.good())
+                    std::cerr << orig << ": must convert this texture to PNG.\n";
+            }
+        }
+    }
+
+    return fn;
 }
 
 
 void PbrtExporter::WriteLights() {
-    mOutput << std::endl;
-    mOutput << "#################" << std::endl;
-    mOutput << "# Writing Lights:" << std::endl;
-    mOutput << "#################" << std::endl;
-    mOutput << "# - Number of Lights found in scene: ";
-    mOutput << mScene->mNumLights << std::endl;
-    
-    // TODO remove default ambient term when numCameras == 0
-    //      For now, ambient may only be necessary for debug
-    mOutput << "# - Creating a default blueish ambient light source" << std::endl;
-    mOutput << "LightSource \"infinite\" \"rgb L\" [0.4 0.45 0.5]" << std::endl;
-    mOutput << "    \"integer samples\" [8]" << std::endl;
-}
+    mOutput << "\n";
+    mOutput << "#################\n";
+    mOutput << "# Lights\n\n";
+    if (mScene->mNumLights == 0) {
+        // Skip the default light if no cameras and this is flat up geometry
+        if (mScene->mNumCameras > 0) {
+            std::cerr << "No lights specified. Using default infinite light.\n";
 
-void PbrtExporter::WriteObjects() {
-    mOutput << std::endl;
-    mOutput << "#############################" << std::endl;
-    mOutput << "# Writing Object Definitions:" << std::endl;
-    mOutput << "#############################" << std::endl;
-    mOutput << "# - Number of Meshes found in scene: ";
-    mOutput << mScene->mNumMeshes << std::endl;
+            mOutput << "AttributeBegin\n";
+            mOutput << "    # default light\n";
+            mOutput << "    LightSource \"infinite\" \"blackbody L\" [6000 1]\n";
 
-    for (int i = 0 ; i < mScene->mNumMeshes; i++) {
-        WriteObject(i);
+            mOutput << "AttributeEnd\n\n";
+        }
+    } else {
+        for (int i = 0; i < mScene->mNumLights; ++i) {
+            const aiLight *light = mScene->mLights[i];
+
+            mOutput << "# Light " << light->mName.C_Str() << "\n";
+            mOutput << "AttributeBegin\n";
+
+            aiMatrix4x4 worldFromLight = GetNodeTransform(light->mName);
+            mOutput << "    Transform [ " << TransformString(worldFromLight) << " ]\n";
+
+            aiColor3D color = light->mColorDiffuse + light->mColorSpecular;
+            if (light->mAttenuationConstant != 0)
+                color = color * (1. / light->mAttenuationConstant);
+
+            switch (light->mType) {
+            case aiLightSource_DIRECTIONAL: {
+                mOutput << "    LightSource \"distant\"\n";
+                mOutput << "        \"point3 from\" [ " << light->mPosition.x << " " <<
+                    light->mPosition.y << " " << light->mPosition.z << " ]\n";
+                aiVector3D to = light->mPosition + light->mDirection;
+                mOutput << "        \"point3 to\" [ " << to.x << " " << to.y << " " << to.z << " ]\n";
+                mOutput << "        \"rgb L\" [ " << color.r << " " << color.g << " " << color.b << " ]\n";
+                break;
+            } case aiLightSource_POINT:
+                mOutput << "    LightSource \"distant\"\n";
+                mOutput << "        \"point3 from\" [ " << light->mPosition.x << " " <<
+                    light->mPosition.y << " " << light->mPosition.z << " ]\n";
+                mOutput << "        \"rgb L\" [ " << color.r << " " << color.g << " " << color.b << " ]\n";
+                break;
+            case aiLightSource_SPOT: {
+                mOutput << "    LightSource \"spot\"\n";
+                mOutput << "        \"point3 from\" [ " << light->mPosition.x << " " <<
+                    light->mPosition.y << " " << light->mPosition.z << " ]\n";
+                aiVector3D to = light->mPosition + light->mDirection;
+                mOutput << "        \"point3 to\" [ " << to.x << " " << to.y << " " << to.z << " ]\n";
+                mOutput << "        \"rgb L\" [ " << color.r << " " << color.g << " " << color.b << " ]\n";
+                mOutput << "        \"float coneangle\" [ " << AI_RAD_TO_DEG(light->mAngleOuterCone) << " ]\n";
+                mOutput << "        \"float conedeltaangle\" [ " << AI_RAD_TO_DEG(light->mAngleOuterCone -
+                                                                                  light->mAngleInnerCone) << " ]\n";
+                break;
+            } case aiLightSource_AMBIENT:
+                mOutput << "# ignored ambient light source\n";
+                break;
+            case aiLightSource_AREA: {
+                aiVector3D left = light->mDirection ^ light->mUp;
+                // rectangle. center at position, direction is normal vector
+                float dLeft = light->mSize.x / 2, dUp = light->mSize.y / 2;
+                aiVector3D vertices[4] = {
+                     light->mPosition - dLeft * left - dUp * light->mUp,
+                     light->mPosition + dLeft * left - dUp * light->mUp,
+                     light->mPosition - dLeft * left + dUp * light->mUp,
+                     light->mPosition + dLeft * left + dUp * light->mUp };
+                mOutput << "    AreaLightSource \"diffuse\"\n";
+                mOutput << "        \"rgb L\" [ " << color.r << " " << color.g << " " << color.b << " ]\n";
+                mOutput << "    Shape \"bilinearmesh\"\n";
+                mOutput << "        \"point3 p\" [ ";
+                for (int i = 0; i < 4; ++i)
+                    mOutput << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z;
+                mOutput << " ]\n";
+                mOutput << "        \"integer indices\" [ 0 1 2 3 ]\n";
+                break;
+            } default:
+                mOutput << "# ignored undefined light source type\n";
+                break;
+            }
+            mOutput << "AttributeEnd\n\n";
+        }
     }
 }
 
-void PbrtExporter::WriteObject(int i) {
-    auto mesh = mScene->mMeshes[i]; 
-    mOutput << "# - Mesh " << i+1  <<  ": ";
+void PbrtExporter::WriteMesh(aiMesh* mesh) {
+    mOutput << "# - Mesh: ";
     if (mesh->mName == aiString(""))
-        mOutput << "<No Name>" << std::endl;
+        mOutput << "<No Name>\n";
     else
-        mOutput << mesh->mName.C_Str() << std::endl;
-   
+        mOutput << mesh->mName.C_Str() << "\n";
+
+    mOutput << "AttributeBegin\n";
+    aiMaterial* material = mScene->mMaterials[mesh->mMaterialIndex];
+    mOutput << "    NamedMaterial \"" << material->GetName().C_Str() << "\"\n";
+
+    aiColor3D emission;
+    if (material->Get(AI_MATKEY_COLOR_EMISSIVE, emission) == AI_SUCCESS &&
+        (emission.r > 0 || emission.g > 0 || emission.b > 0))
+        mOutput << "    AreaLightSource \"diffuse\" \"rgb L\" [ " << emission.r <<
+            " " << emission.g << " " << emission.b << " ]\n";
+
     // Print out primitive types found
-    mOutput << "#   - Primitive Type(s):" << std::endl;
+    mOutput << "#   - Primitive Type(s):\n";
     if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
-        mOutput << "#     - POINT" << std::endl;
+        mOutput << "#     - POINT\n";
     if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
-        mOutput << "#     - LINE" << std::endl;
+        mOutput << "#     - LINE\n";
     if (mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)
-        mOutput << "#     - TRIANGLE" << std::endl;
+        mOutput << "#     - TRIANGLE\n";
     if (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)
-        mOutput << "#     - POLYGON" << std::endl;
-    
+        mOutput << "#     - POLYGON\n";
+
     // Check if any types other than tri
-    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT) 
+    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
         || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
         || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
-        mOutput << "# ERROR: PBRT Does not support POINT, LINE, POLY meshes" << std::endl;
+        mOutput << "# ERROR: PBRT Does not support POINT, LINE, POLY meshes\n";
     }
 
     // Check for Normals
     mOutput << "#   - Normals: ";
     if (mesh->mNormals)
-        mOutput << "TRUE" << std::endl;
+        mOutput << "TRUE\n";
     else
-        mOutput << "FALSE" << std::endl;
-    
+        mOutput << "FALSE\n";
+
     // Check for Tangents
     mOutput << "#   - Tangents: ";
     if (mesh->mTangents)
-        mOutput << "TRUE" << std::endl;
+        mOutput << "TRUE\n";
     else
-        mOutput << "FALSE" << std::endl;
+        mOutput << "FALSE\n";
 
     // Count number of texture coordinates
     int numTextureCoords = 0;
@@ -617,144 +810,131 @@ void PbrtExporter::WriteObject(int i) {
     mOutput << "#   - Number of Texture Coordinates: "
         << numTextureCoords << std::endl;
     if (numTextureCoords > 1) {
-        mOutput << "# - Multiple Texture Coordinates found in scene" << std::endl;
-        mOutput << "#   - Defaulting to first Texture Coordinate specified" << std::endl;
+        mOutput << "# - Multiple Texture Coordinates found in scene\n";
+        mOutput << "#   - Defaulting to first Texture Coordinate specified\n";
     }
 
-    // TODO Check for Alpha texture
-    mOutput << "#   - Alpha texture: " << std::endl;
+    std::string alpha;
+    aiString opacityTexture;
+    if (material->Get(AI_MATKEY_TEXTURE_OPACITY(0), opacityTexture) == AI_SUCCESS ||
+        material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), opacityTexture) == AI_SUCCESS) {
+        // material->Get(AI_MATKEY_TEXTURE_BASE_COLOR(0), opacityTexture) == AI_SUCCESS)
+        std::string texName = std::string("alpha:") + CleanTextureFilename(opacityTexture);
+        if (mTextureSet.find(texName) != mTextureSet.end())
+            alpha = std::string("    \"texture alpha\" \"") + texName + "\"\n";
+    } else {
+        float opacity = 1;
+        if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS && opacity < 1)
+            alpha = std::string("    \"float alpha\" [ ") + std::to_string(opacity) + " ]\n";
+    }
 
-    // Create ObjectBegin
-    mOutput << "ObjectBegin \"";
-    if (mesh->mName == aiString(""))
-        mOutput << "mesh_" << i+1 << "\"" << std::endl;
-    else
-        mOutput << mesh->mName.C_Str() << "_" << i+1 << "\"" << std::endl;
-
-    // Write Shapes
-    mOutput << "Shape \"trianglemesh\"" << std::endl
-        << "    \"integer indices\" [";
+    mOutput << "Shape \"trianglemesh\"\n" <<
+        alpha <<
+        "    \"integer indices\" [";
     //   Start with faces (which hold indices)
-    for(int i = 0; i < mesh->mNumFaces; i++) {
+    for (int i = 0; i < mesh->mNumFaces; i++) {
         auto face = mesh->mFaces[i];
-        for(int j = 0; j < face.mNumIndices; j++) {
+        if (face.mNumIndices != 3) throw DeadlyExportError("oh no not a tri!");
+
+        for (int j = 0; j < face.mNumIndices; j++) {
             mOutput << face.mIndices[j] << " ";
         }
+        if ((i % 7) == 6) mOutput << "\n    ";
     }
-    mOutput << "]" << std::endl;
+    mOutput << "]\n";
     //   Then go to vertices
-    mOutput << "    \"point P\" [";
+    mOutput << "    \"point3 P\" [";
     for(int i = 0; i < mesh->mNumVertices; i++) {
         auto vector = mesh->mVertices[i];
         mOutput << vector.x << " " << vector.y << " " << vector.z << "  ";
+        if ((i % 4) == 3) mOutput << "\n    ";
     }
-    mOutput << "]" << std::endl;
+    mOutput << "]\n";
     //   Normals (if present)
     if (mesh->mNormals) {
         mOutput << "    \"normal N\" [";
-        for(int i = 0; i < mesh->mNumVertices; i++) {
+        for (int i = 0; i < mesh->mNumVertices; i++) {
             auto normal = mesh->mNormals[i];
             mOutput << normal.x << " " << normal.y << " " << normal.z << "  ";
+            if ((i % 4) == 3) mOutput << "\n    ";
         }
-        mOutput << "]" << std::endl;
+        mOutput << "]\n";
     }
     //   Tangents (if present)
     if (mesh->mTangents) {
-        mOutput << "    \"vector S\" [";
-        for(int i = 0; i < mesh->mNumVertices; i++) {
+        mOutput << "    \"vector3 S\" [";
+        for (int i = 0; i < mesh->mNumVertices; i++) {
             auto tangent = mesh->mTangents[i];
             mOutput << tangent.x << " " << tangent.y << " " << tangent.z << "  ";
+            if ((i % 4) == 3) mOutput << "\n    ";
         }
-        mOutput << "]" << std::endl;
+        mOutput << "]\n";
     }
     //   Texture Coords (if present)
-    //   TODO comment out wrong ones, only choose 1st 2d texture coord
-
-
-    // Close ObjectBegin
-    mOutput << "ObjectEnd" << std::endl;
-}
-
-void PbrtExporter::WriteObjectInstances() {
-    mOutput << std::endl;
-    mOutput << "###########################" << std::endl;
-    mOutput << "# Writing Object Instances:" << std::endl;
-    mOutput << "###########################" << std::endl;
-
-    // Get root node of the scene
-    auto rootNode = mScene->mRootNode;
-
-    // Set base transform to identity
-    aiMatrix4x4 parentTransform;
-
-    // Recurse into root node
-    WriteObjectInstance(rootNode, parentTransform);
-}
-
-void PbrtExporter::WriteObjectInstance(aiNode* node, aiMatrix4x4 parent) {
-    auto w2o = parent * node->mTransformation;
-
-    // Print transformation for this node
-    if(node->mNumMeshes > 0) {
-        mOutput << "Transform ["
-            << w2o.a1 << " " << w2o.a2 << " " << w2o.a3 << " " << w2o.a4 << " "
-            << w2o.b1 << " " << w2o.b2 << " " << w2o.b3 << " " << w2o.b4 << " "
-            << w2o.c1 << " " << w2o.c2 << " " << w2o.c3 << " " << w2o.c4 << " "
-            << w2o.d1 << " " << w2o.d2 << " " << w2o.d3 << " " << w2o.d4
-            << "]" << std::endl;
+    // Find the first set of 2D texture coordinates..
+    for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+        if (mesh->mNumUVComponents[i] == 2) {
+            // assert(mesh->mTextureCoords[i] != nullptr);
+            aiVector3D* uv = mesh->mTextureCoords[i];
+            mOutput << "    \"point2 uv\" [";
+            for (int j = 0; j < mesh->mNumVertices; ++j) {
+                mOutput << uv[j].x << " " << uv[j].y << " ";
+                if ((j % 6) == 5) mOutput << "\n    ";
+            }
+            mOutput << "]\n";
+            break;
+        }
     }
+    // TODO: issue warning if there are additional UV sets?
 
-    // Loop over number of meshes in node
-    for(int i = 0; i < node->mNumMeshes; i++) {
-        // Print ObjectInstance
-        mOutput << "ObjectInstance \"";
-        auto mesh = mScene->mMeshes[node->mMeshes[i]];
-        if (mesh->mName == aiString(""))
-            mOutput << "mesh_" << node->mMeshes[i] + 1 << "\"" << std::endl;
-        else
-            mOutput << mesh->mName.C_Str() << "_" << node->mMeshes[i] + 1 << "\"" << std::endl;
+    mOutput << "AttributeEnd\n";
+}
+
+void PbrtExporter::WriteInstanceDefinition(int i) {
+    aiMesh* mesh = mScene->mMeshes[i];
+
+    mOutput << "ObjectBegin \"";
+    if (mesh->mName == aiString(""))
+        mOutput << "mesh_" << i+1 << "\"\n";
+    else
+        mOutput << mesh->mName.C_Str() << "_" << i+1 << "\"\n";
+
+    WriteMesh(mesh);
+
+    mOutput << "ObjectEnd\n";
+}
+
+void PbrtExporter::WriteGeometricObjects(aiNode* node, aiMatrix4x4 worldFromObject,
+                                         std::map<int, int> &meshUses) {
+    // Sometimes interior nodes have degenerate matrices??
+    if (node->mTransformation.Determinant() != 0)
+        worldFromObject = worldFromObject * node->mTransformation;
+
+    if (node->mNumMeshes > 0) {
+        mOutput << "AttributeBegin\n";
+
+        mOutput << "  Transform [ " << TransformString(worldFromObject) << "]\n";
+
+        for (int i = 0; i < node->mNumMeshes; i++) {
+            aiMesh* mesh = mScene->mMeshes[node->mMeshes[i]];
+            if (meshUses[node->mMeshes[i]] == 1) {
+                mOutput << "  # " << mesh->mName.C_Str();
+                WriteMesh(mesh);
+            } else {
+                mOutput << "  ObjectInstance \"";
+                if (mesh->mName == aiString(""))
+                    mOutput << "mesh_" << node->mMeshes[i] + 1 << "\"\n";
+                else
+                    mOutput << mesh->mName.C_Str() << "_" << node->mMeshes[i] + 1 << "\"\n";
+            }
+        }
+        mOutput << "AttributeEnd\n\n";
     }
 
     // Recurse through children
     for (int i = 0; i < node->mNumChildren; i++) {
-        WriteObjectInstance(node->mChildren[i], w2o);
+        WriteGeometricObjects(node->mChildren[i], worldFromObject, meshUses);
     }
-}
-
-std::string PbrtExporter::GetTextureName(
-    std::string spath, unsigned int textureType) {
-
-    std::stringstream name;
-    name << TextureTypeToString(aiTextureType(textureType));
-    name << ":" << spath;
-    return name.str();
-}
-
-void PbrtExporter::WriteDisneyMaterial(aiMaterial* material) {
-    auto materialName = material->GetName();
-
-    // Get texture type counts
-    int textureCounts[aiTextureType_UNKNOWN];
-    for (int i = 1; i <= aiTextureType_UNKNOWN; i++) {
-        textureCounts[i-1] = material->GetTextureCount(aiTextureType(i));
-    }
-
-    // Get diffuse
-    std::stringstream diffuse;
-
-    // Use MakeNamedMaterial to give variable names to materials
-    mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
-        << " \"string type\" \"disney\"" << std::endl;
-
-}
-
-void PbrtExporter::WriteUberMaterial(aiMaterial* material) {
-    auto materialName = material->GetName();
-
-    // Use MakeNamedMaterial to give variable names to materials
-    mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
-        << " \"string type\" \"uber\"" << std::endl;
-
 }
 
 #endif // ASSIMP_BUILD_NO_PBRT_EXPORTER

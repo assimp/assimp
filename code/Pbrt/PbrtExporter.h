@@ -49,19 +49,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 //#include <assimp/material.h>
-#include <assimp/StreamWriter.h> // StreamWriterLE
-#include <assimp/Exceptional.h> // DeadlyExportError
+#include <assimp/StreamWriter.h>
+#include <assimp/Exceptional.h>
 
-#include <vector>
 #include <map>
 #include <set>
-#include <unordered_set>
-#include <memory> // shared_ptr
-#include <sstream> // stringstream
+#include <string>
+#include <sstream>
 
 struct aiScene;
 struct aiNode;
 struct aiMaterial;
+struct aiMesh;
 
 namespace Assimp
 {
@@ -79,14 +78,14 @@ public:
     /// Constructor for a specific scene to export
     PbrtExporter(const aiScene* pScene, IOSystem* pIOSystem,
         const std::string path, const std::string file);
-    
+
     /// Destructor
     virtual ~PbrtExporter();
 
 private:
     // the scene to export
     const aiScene* mScene;
-    
+
     /// Stringstream to write all output into
     std::stringstream mOutput;
 
@@ -103,49 +102,31 @@ private:
     //  A private set to keep track of which textures have been declared
     std::set<std::string> mTextureSet;
 
-private:
-    // Writing the comment header
-    void WriteHeader();
+    aiMatrix4x4 GetNodeTransform(const aiString& name) const;
+    static std::string TransformString(const aiMatrix4x4& m);
 
-    // Writing the metadata into a comment
+    static std::string CleanTextureFilename(const aiString &f, bool rewriteExtension = true);
+
     void WriteMetaData();
 
-    // Writing the pbrt scene-wide rendering options
-    void WriteSceneWide();
-
-    // Writing the shapes to distinct files
-    void WriteShapes();
-
-    // Writing the pbrt world defintion
     void WriteWorldDefinition();
 
-    // Writing the Camera data
     void WriteCameras();
     void WriteCamera(int i);
-    
-    // Check for Embedded Texture data
-    void CheckEmbeddedTextures();
 
-    // Writing the Texture data
+    void WriteLights();
+
     void WriteTextures();
-    std::string GetTextureName(std::string path, unsigned int textureType);
+    static bool TextureHasAlphaMask(const std::string &filename);
 
-    // Writing the Material data
     void WriteMaterials();
     void WriteMaterial(int i);
-    void WriteDisneyMaterial(aiMaterial* material);
-    void WriteUberMaterial(aiMaterial* material);
 
-    // Writing the Light data
-    void WriteLights();
-    
-    // Writing the Object data
-    void WriteObjects();
-    void WriteObject(int i);
+    void WriteMesh(aiMesh* mesh);
 
-    // Writing the Object Instances
-    void WriteObjectInstances();
-    void WriteObjectInstance(aiNode* node, aiMatrix4x4 parentTransform);
+    void WriteInstanceDefinition(int i);
+    void WriteGeometricObjects(aiNode* node, aiMatrix4x4 parentTransform,
+                               std::map<int, int> &meshUses);
 };
 
 } // namespace Assimp

@@ -933,7 +933,7 @@ mz_bool mz_zip_writer_add_mem_ex(mz_zip_archive *pZip,
 // the disk file's modified time into the archive. level_and_flags - compression
 // level (0-10, see MZ_BEST_SPEED, MZ_BEST_COMPRESSION, etc.) logically OR'd
 // with zero or more mz_zip_flags, or just set to MZ_DEFAULT_COMPRESSION.
-mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name,
+mz_bool mz_zip_writer_add_file_(mz_zip_archive *pZip, const char *pArchive_name,
                                const char *pSrc_filename, const void *pComment,
                                mz_uint16 comment_size, mz_uint level_and_flags,
                                mz_uint32 ext_attributes);
@@ -6283,7 +6283,7 @@ mz_bool mz_zip_writer_add_mem_ex(mz_zip_archive *pZip,
 }
 
 #ifndef MINIZ_NO_STDIO
-mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name,
+mz_bool mz_zip_writer_add_file_(mz_zip_archive *pZip, const char *pArchive_name,
                                const char *pSrc_filename, const void *pComment,
                                mz_uint16 comment_size, mz_uint level_and_flags,
                                mz_uint32 ext_attributes) {

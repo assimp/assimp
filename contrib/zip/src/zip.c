@@ -824,7 +824,7 @@ int zip_create(const char *zipname, const char *filenames[], size_t len) {
     }
     ext_attributes |= (mz_uint32)((file_stat.st_mode & 0xFFFF) << 16);
 
-    if (!mz_zip_writer_add_file(&zip_archive, base_name(name), name, "", 0,
+    if (!mz_zip_writer_add_file_(&zip_archive, base_name(name), name, "", 0,
                                 ZIP_DEFAULT_COMPRESSION_LEVEL,
                                 ext_attributes)) {
       // Cannot add file to zip_archive

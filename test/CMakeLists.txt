@@ -220,7 +220,7 @@ if(ASSIMP_HUNTER_ENABLED)
     find_package(GTest CONFIG REQUIRED)
     target_link_libraries(unit GTest::gtest_main GTest::gmock)
 else()
-    target_sources(unit PUBLIC ../contrib/gtest/src/gtest-all.cc)
+    target_sources(unit PUBLIC ${Assimp_SOURCE_DIR}/contrib/gtest/src/gtest-all.cc)
 endif()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)

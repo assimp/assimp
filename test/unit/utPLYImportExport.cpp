@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -41,11 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
 #include "AbstractImportExportBase.h"
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Exporter.hpp>
+#include <assimp/Importer.hpp>
 
 using namespace ::Assimp;
 
@@ -53,15 +52,15 @@ class utPLYImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
-        EXPECT_EQ( 1u, scene->mNumMeshes );
-        EXPECT_NE( nullptr, scene->mMeshes[0] );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
+        EXPECT_EQ(1u, scene->mNumMeshes);
+        EXPECT_NE(nullptr, scene->mMeshes[0]);
         if (nullptr == scene->mMeshes[0]) {
             return false;
         }
-        EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
-        EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
-        
+        EXPECT_EQ(8u, scene->mMeshes[0]->mNumVertices);
+        EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
+
         return (nullptr != scene);
     }
 
@@ -78,13 +77,13 @@ public:
 #endif // ASSIMP_BUILD_NO_EXPORT
 };
 
-TEST_F( utPLYImportExport, importTest_Success ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utPLYImportExport, importTest_Success) {
+    EXPECT_TRUE(importerTest());
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-TEST_F(utPLYImportExport, exportTest_Success ) {
+TEST_F(utPLYImportExport, exportTest_Success) {
     EXPECT_TRUE(exporterTest());
 }
 
@@ -126,10 +125,10 @@ TEST_F(utPLYImportExport, importBinaryPLY) {
     EXPECT_EQ(12u, scene->mMeshes[0]->mNumFaces);
 }
 
-TEST_F( utPLYImportExport, vertexColorTest ) {
+TEST_F(utPLYImportExport, vertexColorTest) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", aiProcess_ValidateDataStructure);
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
     EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
     EXPECT_EQ(aiPrimitiveType_TRIANGLE, scene->mMeshes[0]->mPrimitiveTypes);
     EXPECT_EQ(true, scene->mMeshes[0]->HasVertexColors(0));
@@ -157,27 +156,27 @@ TEST_F(utPLYImportExport, pointcloudTest) {
 }
 
 static const char *test_file =
-    "ply\n"
-    "format ascii 1.0\n"
-    "element vertex 4\n"
-    "property float x\n"
-    "property float y\n"
-    "property float z\n"
-    "property uchar red\n"
-    "property uchar green\n"
-    "property uchar blue\n"
-    "property float nx\n"
-    "property float ny\n"
-    "property float nz\n"
-    "end_header\n"
-    "0.0 0.0 0.0 255 255 255 0.0 1.0 0.0\n"
-    "0.0 0.0 1.0 255 0 255 0.0 0.0 1.0\n"
-    "0.0 1.0 0.0 255 255 0 1.0 0.0 0.0\n"
-    "0.0 1.0 1.0 0 255 255 1.0 1.0 0.0\n";
+        "ply\n"
+        "format ascii 1.0\n"
+        "element vertex 4\n"
+        "property float x\n"
+        "property float y\n"
+        "property float z\n"
+        "property uchar red\n"
+        "property uchar green\n"
+        "property uchar blue\n"
+        "property float nx\n"
+        "property float ny\n"
+        "property float nz\n"
+        "end_header\n"
+        "0.0 0.0 0.0 255 255 255 0.0 1.0 0.0\n"
+        "0.0 0.0 1.0 255 0 255 0.0 0.0 1.0\n"
+        "0.0 1.0 0.0 255 255 0 1.0 0.0 0.0\n"
+        "0.0 1.0 1.0 0 255 255 1.0 1.0 0.0\n";
 
-TEST_F( utPLYImportExport, parseErrorTest ) {
+TEST_F(utPLYImportExport, parseErrorTest) {
     Assimp::Importer importer;
     //Could not use aiProcess_ValidateDataStructure since it's missing faces.
-    const aiScene *scene = importer.ReadFileFromMemory( test_file, strlen( test_file ), 0);
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFileFromMemory(test_file, strlen(test_file), 0);
+    EXPECT_NE(nullptr, scene);
 }

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -42,9 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include <assimp/scene.h>
-#include "PostProcessing/RemoveVCProcess.h"
 #include "Material/MaterialSystem.h"
+#include "PostProcessing/RemoveVCProcess.h"
+#include <assimp/scene.h>
 
 using namespace std;
 using namespace Assimp;
@@ -55,19 +53,18 @@ public:
     virtual void TearDown();
 
 protected:
-    RemoveVCProcess* piProcess;
-    aiScene* pScene;
+    RemoveVCProcess *piProcess;
+    aiScene *pScene;
 };
 
 // ------------------------------------------------------------------------------------------------
-void RemoveVCProcessTest::SetUp()
-{
+void RemoveVCProcessTest::SetUp() {
     // construct the process
     piProcess = new RemoveVCProcess();
     pScene = new aiScene();
 
     // fill the scene ..
-    pScene->mMeshes = new aiMesh*[pScene->mNumMeshes = 2];
+    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes = 2];
     pScene->mMeshes[0] = new aiMesh();
     pScene->mMeshes[1] = new aiMesh();
 
@@ -82,44 +79,35 @@ void RemoveVCProcessTest::SetUp()
     pScene->mMeshes[1]->mNumVertices = 120;
     pScene->mMeshes[1]->mVertices = new aiVector3D[120];
 
-    pScene->mAnimations    = new aiAnimation*[pScene->mNumAnimations = 2];
+    pScene->mAnimations = new aiAnimation *[pScene->mNumAnimations = 2];
     pScene->mAnimations[0] = new aiAnimation();
     pScene->mAnimations[1] = new aiAnimation();
 
-    pScene->mTextures = new aiTexture*[pScene->mNumTextures = 2];
+    pScene->mTextures = new aiTexture *[pScene->mNumTextures = 2];
     pScene->mTextures[0] = new aiTexture();
     pScene->mTextures[1] = new aiTexture();
 
-    pScene->mMaterials    = new aiMaterial*[pScene->mNumMaterials = 2];
+    pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials = 2];
     pScene->mMaterials[0] = new aiMaterial();
     pScene->mMaterials[1] = new aiMaterial();
 
-    pScene->mLights    = new aiLight*[pScene->mNumLights = 2];
+    pScene->mLights = new aiLight *[pScene->mNumLights = 2];
     pScene->mLights[0] = new aiLight();
     pScene->mLights[1] = new aiLight();
 
-    pScene->mCameras    = new aiCamera*[pScene->mNumCameras = 2];
+    pScene->mCameras = new aiCamera *[pScene->mNumCameras = 2];
     pScene->mCameras[0] = new aiCamera();
     pScene->mCameras[1] = new aiCamera();
-
-    // COMPILE TEST: aiMaterial may no add any extra members,
-    // so we don't need a virtual destructor
-    char check[sizeof(aiMaterial) == sizeof(aiMaterial) ? 10 : -1];
-    check[0] = 0;
-    // to remove compiler warning
-    EXPECT_EQ( 0, check[0] );
 }
 
 // ------------------------------------------------------------------------------------------------
-void RemoveVCProcessTest::TearDown()
-{
+void RemoveVCProcessTest::TearDown() {
     delete pScene;
     delete piProcess;
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testMeshRemove)
-{
+TEST_F(RemoveVCProcessTest, testMeshRemove) {
     piProcess->SetDeleteFlags(aiComponent_MESHES);
     piProcess->Execute(pScene);
 
@@ -129,8 +117,7 @@ TEST_F(RemoveVCProcessTest, testMeshRemove)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testAnimRemove)
-{
+TEST_F(RemoveVCProcessTest, testAnimRemove) {
     piProcess->SetDeleteFlags(aiComponent_ANIMATIONS);
     piProcess->Execute(pScene);
 
@@ -140,21 +127,19 @@ TEST_F(RemoveVCProcessTest, testAnimRemove)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testMaterialRemove)
-{
+TEST_F(RemoveVCProcessTest, testMaterialRemove) {
     piProcess->SetDeleteFlags(aiComponent_MATERIALS);
     piProcess->Execute(pScene);
 
     // there should be one default material now ...
     EXPECT_TRUE(1 == pScene->mNumMaterials &&
-        pScene->mMeshes[0]->mMaterialIndex == 0 &&
-        pScene->mMeshes[1]->mMaterialIndex == 0);
+                pScene->mMeshes[0]->mMaterialIndex == 0 &&
+                pScene->mMeshes[1]->mMaterialIndex == 0);
     EXPECT_EQ(0U, pScene->mFlags);
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testTextureRemove)
-{
+TEST_F(RemoveVCProcessTest, testTextureRemove) {
     piProcess->SetDeleteFlags(aiComponent_TEXTURES);
     piProcess->Execute(pScene);
 
@@ -164,8 +149,7 @@ TEST_F(RemoveVCProcessTest, testTextureRemove)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testCameraRemove)
-{
+TEST_F(RemoveVCProcessTest, testCameraRemove) {
     piProcess->SetDeleteFlags(aiComponent_CAMERAS);
     piProcess->Execute(pScene);
 
@@ -175,8 +159,7 @@ TEST_F(RemoveVCProcessTest, testCameraRemove)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testLightRemove)
-{
+TEST_F(RemoveVCProcessTest, testLightRemove) {
     piProcess->SetDeleteFlags(aiComponent_LIGHTS);
     piProcess->Execute(pScene);
 
@@ -186,37 +169,34 @@ TEST_F(RemoveVCProcessTest, testLightRemove)
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testMeshComponentsRemoveA)
-{
+TEST_F(RemoveVCProcessTest, testMeshComponentsRemoveA) {
     piProcess->SetDeleteFlags(aiComponent_TEXCOORDSn(1) | aiComponent_TEXCOORDSn(2) | aiComponent_TEXCOORDSn(3));
     piProcess->Execute(pScene);
 
     EXPECT_TRUE(pScene->mMeshes[0]->mTextureCoords[0] &&
-        !pScene->mMeshes[0]->mTextureCoords[1] &&
-        !pScene->mMeshes[0]->mTextureCoords[2] &&
-        !pScene->mMeshes[0]->mTextureCoords[3]);
+                !pScene->mMeshes[0]->mTextureCoords[1] &&
+                !pScene->mMeshes[0]->mTextureCoords[2] &&
+                !pScene->mMeshes[0]->mTextureCoords[3]);
     EXPECT_EQ(0U, pScene->mFlags);
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testMeshComponentsRemoveB)
-{
+TEST_F(RemoveVCProcessTest, testMeshComponentsRemoveB) {
     piProcess->SetDeleteFlags(aiComponent_TEXCOORDSn(1) | aiComponent_NORMALS);
     piProcess->Execute(pScene);
 
     EXPECT_TRUE(pScene->mMeshes[0]->mTextureCoords[0] &&
-        pScene->mMeshes[0]->mTextureCoords[1]  &&
-        pScene->mMeshes[0]->mTextureCoords[2]  &&     // shift forward ...
-        !pScene->mMeshes[0]->mTextureCoords[3] &&
-        !pScene->mMeshes[0]->mNormals);
+                pScene->mMeshes[0]->mTextureCoords[1] &&
+                pScene->mMeshes[0]->mTextureCoords[2] && // shift forward ...
+                !pScene->mMeshes[0]->mTextureCoords[3] &&
+                !pScene->mMeshes[0]->mNormals);
     EXPECT_EQ(0U, pScene->mFlags);
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(RemoveVCProcessTest, testRemoveEverything)
-{
+TEST_F(RemoveVCProcessTest, testRemoveEverything) {
     piProcess->SetDeleteFlags(aiComponent_LIGHTS | aiComponent_ANIMATIONS |
-        aiComponent_MATERIALS | aiComponent_MESHES | aiComponent_CAMERAS | aiComponent_TEXTURES);
+                              aiComponent_MATERIALS | aiComponent_MESHES | aiComponent_CAMERAS | aiComponent_TEXTURES);
     piProcess->Execute(pScene);
     EXPECT_EQ(0U, pScene->mNumAnimations);
     EXPECT_EQ(0U, pScene->mNumCameras);

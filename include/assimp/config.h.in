@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2018, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -616,6 +616,15 @@ enum aiComponent
     "IMPORT_FBX_READ_ANIMATIONS"
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read weights.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_WEIGHTS \
+    "IMPORT_FBX_READ_WEIGHTS"
+
+// ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will act in strict mode in which only
  *    FBX 2013 is supported and any other sub formats are rejected. FBX 2013
  *    is the primary target for the importer, so this format is best
@@ -694,6 +703,73 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_MDC_KEYFRAME       "IMPORT_MDC_KEYFRAME"
 #define AI_CONFIG_IMPORT_SMD_KEYFRAME       "IMPORT_SMD_KEYFRAME"
 #define AI_CONFIG_IMPORT_UNREAL_KEYFRAME    "IMPORT_UNREAL_KEYFRAME"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read animations.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS "IMPORT_MDL_HL1_READ_ANIMATIONS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read animation events.
+ * \note This property requires AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS to be set to true.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS "IMPORT_MDL_HL1_READ_ANIMATION_EVENTS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read blend controllers.
+ * \note This property requires AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS to be set to true.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_BLEND_CONTROLLERS "IMPORT_MDL_HL1_READ_BLEND_CONTROLLERS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read sequence transition graph.
+ * \note This property requires AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS to be set to true.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_SEQUENCE_TRANSITIONS "IMPORT_MDL_HL1_READ_SEQUENCE_TRANSITIONS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read attachments info.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_ATTACHMENTS "IMPORT_MDL_HL1_READ_ATTACHMENTS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read bone controllers info.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS "IMPORT_MDL_HL1_READ_BONE_CONTROLLERS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read hitboxes info.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES "IMPORT_MDL_HL1_READ_HITBOXES"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the MDL (HL1) importer will read miscellaneous global model info.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO "IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO"
 
 // ---------------------------------------------------------------------------
 /** Smd load multiple animations
@@ -963,10 +1039,10 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
 // ---------------------------------------------------------------------------
-/** @brief Specifies whether the Collada loader should use Collada names as node names.
+/** @brief Specifies whether the Collada loader should use Collada names.
  *
- * If this property is set to true, the Collada names will be used as the
- * node name. The default is to use the id tag (resp. sid tag, if no id tag is present)
+ * If this property is set to true, the Collada names will be used as the node and
+ * mesh names. The default is to use the id tag (resp. sid tag, if no id tag is present)
  * instead.
  * Property type: Bool. Default value: false.
  */

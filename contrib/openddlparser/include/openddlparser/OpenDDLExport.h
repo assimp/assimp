@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014-2015 Kim Kulling
+Copyright (c) 2014-2020 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -40,7 +40,7 @@ class IOStreamBase;
 class DLL_ODDLPARSER_EXPORT OpenDDLExport {
 public:
     ///	@brief  The class constructor
-    OpenDDLExport( IOStreamBase *stream = ddl_nullptr );
+    OpenDDLExport(IOStreamBase *stream = nullptr);
 
     ///	@brief  The class destructor.
     ~OpenDDLExport();
@@ -49,29 +49,29 @@ public:
     /// @param  ctx         [in] Pointer to the context.
     /// @param  filename    [in] The filename for the export.
     /// @return True in case of success, false in case of an error.
-    bool exportContext( Context *ctx, const std::string &filename );
+    bool exportContext(Context *ctx, const std::string &filename);
 
     ///	@brief  Handles a node export.
     /// @param  node        [in] The node to handle with.
     /// @return True in case of success, false in case of an error.
-    bool handleNode( DDLNode *node );
+    bool handleNode(DDLNode *node);
 
     ///	@brief  Writes the statement to the stream.
     /// @param  statement   [in]  The content to write.
     /// @return True in case of success, false in case of an error.
-    bool writeToStream( const std::string &statement );
+    bool writeToStream(const std::string &statement);
 
 protected:
-    bool writeNode( DDLNode *node, std::string &statement );
-    bool writeNodeHeader( DDLNode *node, std::string &statement );
-    bool writeProperties( DDLNode *node, std::string &statement );
-    bool writeValueType( Value::ValueType type, size_t numItems, std::string &statement );
-    bool writeValue( Value *val, std::string &statement );
-    bool writeValueArray( DataArrayList *al, std::string &statement );
+    bool writeNode(DDLNode *node, std::string &statement);
+    bool writeNodeHeader(DDLNode *node, std::string &statement);
+    bool writeProperties(DDLNode *node, std::string &statement);
+    bool writeValueType(Value::ValueType type, size_t numItems, std::string &statement);
+    bool writeValue(Value *val, std::string &statement);
+    bool writeValueArray(DataArrayList *al, std::string &statement);
 
 private:
-    OpenDDLExport( const OpenDDLExport & ) ddl_no_copy;
-    OpenDDLExport &operator = ( const OpenDDLExport  & ) ddl_no_copy;
+    OpenDDLExport(const OpenDDLExport &) ddl_no_copy;
+    OpenDDLExport &operator=(const OpenDDLExport &) ddl_no_copy;
 
 private:
     IOStreamBase *m_stream;

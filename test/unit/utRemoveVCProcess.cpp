@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,8 +38,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "PostProcessing/RemoveVCProcess.h"
+#include "UnitTestPCH.h"
 
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
@@ -52,27 +50,27 @@ class utRevmoveVCProcess : public ::testing::Test {
     // empty
 };
 
-TEST_F( utRevmoveVCProcess, createTest ) {
+TEST_F(utRevmoveVCProcess, createTest) {
     bool ok = true;
     try {
         RemoveVCProcess *process = new RemoveVCProcess;
         delete process;
-    } catch ( ... ) {
+    } catch (...) {
         ok = false;
     }
-    EXPECT_TRUE( ok );
+    EXPECT_TRUE(ok);
 }
 
-TEST_F( utRevmoveVCProcess, issue1266_ProcessMeshTest_NoCrash ) {
+TEST_F(utRevmoveVCProcess, issue1266_ProcessMeshTest_NoCrash) {
     aiScene *scene = new aiScene;
     scene->mNumMeshes = 1;
-    scene->mMeshes = new aiMesh*[ 1 ];
+    scene->mMeshes = new aiMesh *[1];
 
     aiMesh *mesh = new aiMesh;
     mesh->mNumVertices = 1;
-    mesh->mColors[ 0 ] = new aiColor4D[ 2 ];
-    scene->mMeshes[ 0 ] = mesh;
+    mesh->mColors[0] = new aiColor4D[2];
+    scene->mMeshes[0] = mesh;
     std::unique_ptr<RemoveVCProcess> process(new RemoveVCProcess);
-    process->Execute( scene );
+    process->Execute(scene);
     delete scene;
 }

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -41,10 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
-#include <assimp/Importer.hpp>
+#include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
@@ -52,12 +50,13 @@ class utMDCImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0);
+
+        //const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0);
+        static_cast<void>(importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/spider.mdc", 0));
         return true;
-        return nullptr != scene;
     }
 };
 
-TEST_F( utMDCImportExport, importMDCFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utMDCImportExport, importMDCFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }

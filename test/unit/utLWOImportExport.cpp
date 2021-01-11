@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,20 +38,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
-
 class utLWOImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/boxuv.lwo", aiProcess_ValidateDataStructure);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/boxuv.lwo", aiProcess_ValidateDataStructure);
 
         EXPECT_EQ(1u, scene->mNumMeshes);
         EXPECT_NE(nullptr, scene->mMeshes[0]);
@@ -68,8 +65,8 @@ public:
     }
 };
 
-TEST_F( utLWOImportExport, importLWObox_uv ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utLWOImportExport, importLWObox_uv) {
+    EXPECT_TRUE(importerTest());
 }
 
 TEST_F(utLWOImportExport, importLWOformatdetection) {
@@ -78,4 +75,3 @@ TEST_F(utLWOImportExport, importLWOformatdetection) {
 
     EXPECT_NE(nullptr, scene);
 }
-

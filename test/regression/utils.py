@@ -5,7 +5,7 @@
 # Open Asset Import Library (ASSIMP)
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) 2006-2010, ASSIMP Development Team
+# Copyright (c) 2006-2020, ASSIMP Development Team
 #
 # All rights reserved.
 #

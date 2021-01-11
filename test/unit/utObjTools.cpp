@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,9 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#include "AssetLib/Obj/ObjFileParser.h"
+#include "AssetLib/Obj/ObjTools.h"
 #include "UnitTestPCH.h"
-#include "Obj/ObjTools.h"
-#include "Obj/ObjFileParser.h"
 
 using namespace ::Assimp;
 
@@ -52,16 +50,17 @@ class utObjTools : public ::testing::Test {
 
 class TestObjFileParser : public ObjFileParser {
 public:
-    TestObjFileParser() : ObjFileParser(){
+    TestObjFileParser() :
+            ObjFileParser() {
         // empty
     }
 
     ~TestObjFileParser() {
         // empty
     }
-    
-    void testCopyNextWord( char *pBuffer, size_t length ) {
-        copyNextWord( pBuffer, length );
+
+    void testCopyNextWord(char *pBuffer, size_t length) {
+        copyNextWord(pBuffer, length);
     }
 
     size_t testGetNumComponentsInDataDefinition() {
@@ -69,49 +68,49 @@ public:
     }
 };
 
-TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
+TEST_F(utObjTools, skipDataLine_OneLine_Success) {
     std::vector<char> buffer;
-    std::string data( "v -0.5 -0.5 0.5\nend" );
-    buffer.resize( data.size() );
-    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
-    std::vector<char>::iterator itBegin( buffer.begin() ), itEnd( buffer.end() );
+    std::string data("v -0.5 -0.5 0.5\nend");
+    buffer.resize(data.size());
+    ::memcpy(&buffer[0], &data[0], data.size());
+    std::vector<char>::iterator itBegin(buffer.begin()), itEnd(buffer.end());
     unsigned int line = 0;
-    std::vector<char>::iterator current = skipLine<std::vector<char>::iterator>( itBegin, itEnd, line );
-    EXPECT_EQ( 'e', *current );
+    std::vector<char>::iterator current = skipLine<std::vector<char>::iterator>(itBegin, itEnd, line);
+    EXPECT_EQ('e', *current);
 }
 
-TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
+TEST_F(utObjTools, skipDataLine_TwoLines_Success) {
     TestObjFileParser test_parser;
-    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323" );
+    std::string data("vn -2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323");
     std::vector<char> buffer;
-    buffer.resize( data.size() );
-    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
-    test_parser.setBuffer( buffer );
+    buffer.resize(data.size());
+    ::memcpy(&buffer[0], &data[0], data.size());
+    test_parser.setBuffer(buffer);
     static const size_t Size = 4096UL;
-    char data_buffer[ Size ];
-    
-    test_parser.testCopyNextWord( data_buffer, Size );
-    EXPECT_EQ( 0, strncmp( data_buffer, "vn", 2 ) );
+    char data_buffer[Size];
 
-    test_parser.testCopyNextWord( data_buffer, Size );
-    EXPECT_EQ( data_buffer[0], '-' );
+    test_parser.testCopyNextWord(data_buffer, Size);
+    EXPECT_EQ(0, strncmp(data_buffer, "vn", 2));
 
-    test_parser.testCopyNextWord( data_buffer, Size );
-    EXPECT_EQ( data_buffer[0], '-' );
+    test_parser.testCopyNextWord(data_buffer, Size);
+    EXPECT_EQ(data_buffer[0], '-');
 
-    test_parser.testCopyNextWord( data_buffer, Size );
-    EXPECT_EQ( data_buffer[ 0 ], '-' );
+    test_parser.testCopyNextWord(data_buffer, Size);
+    EXPECT_EQ(data_buffer[0], '-');
+
+    test_parser.testCopyNextWord(data_buffer, Size);
+    EXPECT_EQ(data_buffer[0], '-');
 }
 
-TEST_F( utObjTools, countComponents_TwoLines_Success ) {
+TEST_F(utObjTools, countComponents_TwoLines_Success) {
     TestObjFileParser test_parser;
-    std::string data( "-2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323" );
+    std::string data("-2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323");
     std::vector<char> buffer;
-    buffer.resize( data.size() + 1 );
-    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
-    buffer[ buffer.size() - 1 ] = '\0';
-    test_parser.setBuffer( buffer );
+    buffer.resize(data.size() + 1);
+    ::memcpy(&buffer[0], &data[0], data.size());
+    buffer[buffer.size() - 1] = '\0';
+    test_parser.setBuffer(buffer);
 
     size_t numComps = test_parser.testGetNumComponentsInDataDefinition();
-    EXPECT_EQ( 3U, numComps );
+    EXPECT_EQ(3U, numComps);
 }

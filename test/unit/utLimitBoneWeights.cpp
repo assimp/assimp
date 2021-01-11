@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,18 +40,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include <assimp/scene.h>
 #include "PostProcessing/LimitBoneWeightsProcess.h"
+#include <assimp/scene.h>
 
 using namespace std;
 using namespace Assimp;
 
 class LimitBoneWeightsTest : public ::testing::Test {
 public:
-    LimitBoneWeightsTest()
-    : Test()
-    , mProcess(nullptr)
-    , mMesh(nullptr) {
+    LimitBoneWeightsTest() :
+            Test(), mProcess(nullptr), mMesh(nullptr) {
         // empty
     }
 
@@ -75,14 +73,14 @@ void LimitBoneWeightsTest::SetUp() {
     mMesh->mNumVertices = 500;
     mMesh->mVertices = new aiVector3D[500]; // uninit.
     mMesh->mNumBones = 30;
-    mMesh->mBones = new aiBone*[30];
+    mMesh->mBones = new aiBone *[30];
     unsigned int iCur = 0;
-    for (unsigned int i = 0; i < 30;++i) {
-        aiBone* pc = mMesh->mBones[i] = new aiBone();
+    for (unsigned int i = 0; i < 30; ++i) {
+        aiBone *pc = mMesh->mBones[i] = new aiBone();
         pc->mNumWeights = 250;
         pc->mWeights = new aiVertexWeight[pc->mNumWeights];
-        for (unsigned int qq = 0; qq < pc->mNumWeights;++qq) {
-            aiVertexWeight& v = pc->mWeights[qq];
+        for (unsigned int qq = 0; qq < pc->mNumWeights; ++qq) {
+            aiVertexWeight &v = pc->mWeights[qq];
             v.mVertexId = iCur++;
             if (500 == iCur) {
                 iCur = 0;
@@ -105,26 +103,26 @@ TEST_F(LimitBoneWeightsTest, testProcess) {
 
     // check whether everything is ok ...
     typedef std::vector<LimitBoneWeightsProcess::Weight> VertexWeightList;
-    VertexWeightList* asWeights = new VertexWeightList[mMesh->mNumVertices];
+    VertexWeightList *asWeights = new VertexWeightList[mMesh->mNumVertices];
 
     for (unsigned int i = 0; i < mMesh->mNumVertices; ++i) {
         asWeights[i].reserve(4);
     }
 
     // sort back as per-vertex lists
-    for (unsigned int i = 0; i < mMesh->mNumBones;++i) {
-        aiBone& pcBone = **(mMesh->mBones+i);
-        for (unsigned int q = 0; q < pcBone.mNumWeights;++q) {
+    for (unsigned int i = 0; i < mMesh->mNumBones; ++i) {
+        aiBone &pcBone = **(mMesh->mBones + i);
+        for (unsigned int q = 0; q < pcBone.mNumWeights; ++q) {
             aiVertexWeight weight = pcBone.mWeights[q];
-            asWeights[weight.mVertexId].push_back(LimitBoneWeightsProcess::Weight (i,weight.mWeight));
+            asWeights[weight.mVertexId].push_back(LimitBoneWeightsProcess::Weight(i, weight.mWeight));
         }
     }
 
     // now validate the size of the lists and check whether all weights sum to 1.0f
-    for (unsigned int i = 0; i < mMesh->mNumVertices;++i) {
+    for (unsigned int i = 0; i < mMesh->mNumVertices; ++i) {
         EXPECT_LE(asWeights[i].size(), 4U);
         float fSum = 0.0f;
-        for (VertexWeightList::const_iterator iter =  asWeights[i].begin(); iter != asWeights[i].end();++iter) {
+        for (VertexWeightList::const_iterator iter = asWeights[i].begin(); iter != asWeights[i].end(); ++iter) {
             fSum += (*iter).mWeight;
         }
         EXPECT_GE(fSum, 0.95F);

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -41,20 +39,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
 class ut3DSImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", aiProcess_ValidateDataStructure);
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
         return nullptr != scene;
 #else
@@ -63,14 +60,13 @@ public:
     }
 };
 
-TEST_F( ut3DSImportExport, import3DSFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(ut3DSImportExport, import3DSFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
-TEST_F( ut3DSImportExport, import3DSformatdetection) {
+TEST_F(ut3DSImportExport, import3DSformatdetection) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/testFormatDetection", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
 }
-

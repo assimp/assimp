@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -48,23 +47,23 @@ class utVector3 : public ::testing::Test {
 
 TEST_F(utVector3, CreationTest) {
     aiVector3D v0;
-    aiVector3D v1( 1.0f, 2.0f, 3.0f );
-    EXPECT_FLOAT_EQ (1.0f, v1[ 0 ] );
-    EXPECT_FLOAT_EQ( 2.0f, v1[ 1 ] );
-    EXPECT_FLOAT_EQ( 3.0f, v1[ 2 ] );
-    aiVector3D v2( 1 );
-    EXPECT_FLOAT_EQ( 1.0f, v2[ 0 ] );
-    EXPECT_FLOAT_EQ( 1.0f, v2[ 1 ] );
-    EXPECT_FLOAT_EQ( 1.0f, v2[ 2 ] );
-    aiVector3D v3( v1 );
-    EXPECT_FLOAT_EQ( v1[ 0 ], v3[ 0 ] );
-    EXPECT_FLOAT_EQ( v1[ 1 ], v3[ 1 ] );
-    EXPECT_FLOAT_EQ( v1[ 2 ], v3[ 2 ] );
+    aiVector3D v1(1.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(1.0f, v1[0]);
+    EXPECT_FLOAT_EQ(2.0f, v1[1]);
+    EXPECT_FLOAT_EQ(3.0f, v1[2]);
+    aiVector3D v2(1);
+    EXPECT_FLOAT_EQ(1.0f, v2[0]);
+    EXPECT_FLOAT_EQ(1.0f, v2[1]);
+    EXPECT_FLOAT_EQ(1.0f, v2[2]);
+    aiVector3D v3(v1);
+    EXPECT_FLOAT_EQ(v1[0], v3[0]);
+    EXPECT_FLOAT_EQ(v1[1], v3[1]);
+    EXPECT_FLOAT_EQ(v1[2], v3[2]);
 }
 
-TEST_F( utVector3, BracketOpTest ) {
+TEST_F(utVector3, BracketOpTest) {
     aiVector3D v(1.0f, 2.0f, 3.0f);
-    EXPECT_FLOAT_EQ( 1.0f, v[ 0 ] );
-    EXPECT_FLOAT_EQ( 2.0f, v[ 1 ] ); 
-    EXPECT_FLOAT_EQ( 3.0f, v[ 2 ] );
+    EXPECT_FLOAT_EQ(1.0f, v[0]);
+    EXPECT_FLOAT_EQ(2.0f, v[1]);
+    EXPECT_FLOAT_EQ(3.0f, v[2]);
 }

@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // Simple Assimp Directx11 Sample
 // This is a very basic sample and only reads diffuse texture
 // but this can load both embedded textures in fbx and non-embedded textures
@@ -14,19 +14,29 @@
 // ---------------------------------------------------------------------------
 
 #include <Windows.h>
+#include <shellapi.h>
+#include <stdexcept>
 #include <windowsx.h>
 #include <d3d11_1.h>
 #include <dxgi1_2.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include "ModelLoader.h"
+#include "UTFConverter.h"
+#include "SafeRelease.hpp"
 
+#ifdef _MSC_VER
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment (lib, "dxguid.lib")
+#endif // _MSC_VER
 
 using namespace DirectX;
+using namespace AssimpSamples::SharedCode;
+
+#define VERTEX_SHADER_FILE L"VertexShader.hlsl"
+#define PIXEL_SHADER_FILE L"PixelShader.hlsl"
 
 // ------------------------------------------------------------
 //                        Structs
@@ -45,29 +55,32 @@ struct ConstantBuffer {
 
 const char g_szClassName[] = "directxWindowClass";
 
+static std::string g_ModelPath;
 
 UINT width, height;
-HWND hwnd;
+HWND g_hwnd = nullptr;
 
 // ------------------------------------------------------------
 //                        DirectX Variables
 // ------------------------------------------------------------
 D3D_DRIVER_TYPE g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL g_featureLevel = D3D_FEATURE_LEVEL_11_0;
-ID3D11Device *dev;
-ID3D11Device1 *dev1;
-ID3D11DeviceContext *devcon;
-ID3D11DeviceContext1 *devcon1;
-IDXGISwapChain *swapchain;
-IDXGISwapChain1 *swapchain1;
-ID3D11RenderTargetView *backbuffer;
-ID3D11VertexShader *pVS;
-ID3D11PixelShader *pPS;
-ID3D11InputLayout *pLayout;
-ID3D11Buffer *pConstantBuffer;
-ID3D11Texture2D *g_pDepthStencil;
-ID3D11DepthStencilView *g_pDepthStencilView;
-ID3D11SamplerState *TexSamplerState;
+ID3D11Device *dev = nullptr;
+ID3D11Device1 *dev1 = nullptr;
+ID3D11DeviceContext *devcon = nullptr;
+ID3D11DeviceContext1 *devcon1 = nullptr;
+IDXGISwapChain *swapchain = nullptr;
+IDXGISwapChain1 *swapchain1 = nullptr;
+ID3D11RenderTargetView *backbuffer = nullptr;
+ID3D11VertexShader *pVS = nullptr;
+ID3D11PixelShader *pPS = nullptr;
+ID3D11InputLayout *pLayout = nullptr;
+ID3D11Buffer *pConstantBuffer = nullptr;
+ID3D11Texture2D *g_pDepthStencil = nullptr;
+ID3D11DepthStencilView *g_pDepthStencilView = nullptr;
+ID3D11SamplerState *TexSamplerState = nullptr;
+ID3D11RasterizerState *rasterstate = nullptr;
+ID3D11Debug* d3d11debug = nullptr;
 
 XMMATRIX m_World;
 XMMATRIX m_View;
@@ -91,7 +104,7 @@ void Throwanerror(LPCSTR errormessage);
 //                        Our Model
 // ------------------------------------------------------------
 
-ModelLoader *ourModel;
+ModelLoader *ourModel = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -109,9 +122,42 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPSTR lpCmdLine, int nCmdShow)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
+	LPWSTR /*lpCmdLine*/, int nCmdShow)
 {
+	int argc;
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (!argv) {
+		MessageBox(nullptr, 
+			TEXT("An error occured while reading command line arguments."),
+			TEXT("Error!"),
+			MB_ICONERROR | MB_OK);
+		return EXIT_FAILURE;
+	}
+
+	// Free memory allocated from CommandLineToArgvW.
+	auto free_command_line_allocated_memory = [&argv]() {
+		if (argv) {
+			LocalFree(argv);
+			argv = nullptr;
+		}
+	};
+
+	// Ensure that a model file has been specified.
+	if (argc < 2) {
+		MessageBox(nullptr, 
+			TEXT("No model file specified. The program will now close."), 
+			TEXT("Error!"),
+			MB_ICONERROR | MB_OK);
+		free_command_line_allocated_memory();
+		return EXIT_FAILURE;
+	}
+
+	// Retrieve the model file path.
+	g_ModelPath = UTFConverter(argv[1]).str();
+
+	free_command_line_allocated_memory();
+	
 	WNDCLASSEX wc;
 	MSG msg;
 
@@ -121,16 +167,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
+	wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hbrBackground = nullptr;
+	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = g_szClassName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
 
 	if (!RegisterClassEx(&wc))
 	{
-		MessageBox(NULL, "Window Registration Failed!", "Error!",
+		MessageBox(nullptr, "Window Registration Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
@@ -138,51 +184,60 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	RECT wr = { 0,0, SCREEN_WIDTH, SCREEN_HEIGHT };
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
-	hwnd = CreateWindowEx(
+	g_hwnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE,
 		g_szClassName,
 		" Simple Textured Directx11 Sample ",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top,
-		NULL, NULL, hInstance, NULL
+		nullptr, nullptr, hInstance, nullptr
 	);
 
-	if (hwnd == NULL)
+	if (g_hwnd == nullptr)
 	{
-		MessageBox(NULL, "Window Creation Failed!", "Error!",
+		MessageBox(nullptr, "Window Creation Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
 
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+	ShowWindow(g_hwnd, nCmdShow);
+	UpdateWindow(g_hwnd);
 
 	width = wr.right - wr.left;
 	height = wr.bottom - wr.top;
 
-	InitD3D(hInstance, hwnd);
+	try {
+		InitD3D(hInstance, g_hwnd);
 
-	while (true)
-	{
-
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		while (true)
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
 
-			if (msg.message == WM_QUIT)
-				break;
+			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+
+				if (msg.message == WM_QUIT)
+					break;
+			}
+
+			RenderFrame();
 		}
 
-		RenderFrame();
+		CleanD3D();
+		return static_cast<int>(msg.wParam);
+	} catch (const std::exception& e) {
+		MessageBox(g_hwnd, e.what(), TEXT("Error!"), MB_ICONERROR | MB_OK);
+		CleanD3D();
+		return EXIT_FAILURE;
+	} catch (...) {
+		MessageBox(g_hwnd, TEXT("Caught an unknown exception."), TEXT("Error!"), MB_ICONERROR | MB_OK);
+		CleanD3D();
+		return EXIT_FAILURE;
 	}
-
-	CleanD3D();
-
-	return msg.wParam;
 }
 
-void InitD3D(HINSTANCE hinstance, HWND hWnd)
+void InitD3D(HINSTANCE /*hinstance*/, HWND hWnd)
 {
 	HRESULT hr;
 
@@ -226,6 +281,12 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	}
 	if (FAILED(hr))
 		Throwanerror("Directx Device Creation Failed!");
+
+#if _DEBUG
+	hr = dev->QueryInterface(IID_PPV_ARGS(&d3d11debug));
+	if (FAILED(hr))
+		OutputDebugString(TEXT("Failed to retrieve DirectX 11 debug interface.\n"));
+#endif
 
 	UINT m4xMsaaQuality;
 	dev->CheckMultisampleQualityLevels(
@@ -303,7 +364,7 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	}
 
 	// Note this tutorial doesn't handle full-screen swapchains so we block the ALT+ENTER shortcut
-	dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+	dxgiFactory->MakeWindowAssociation(g_hwnd, DXGI_MWA_NO_ALT_ENTER);
 
 	dxgiFactory->Release();
 
@@ -313,7 +374,7 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	ID3D11Texture2D *pBackBuffer;
 	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	dev->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
+	dev->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
 	pBackBuffer->Release();
 
 	D3D11_TEXTURE2D_DESC descDepth;
@@ -348,7 +409,6 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	devcon->OMSetRenderTargets(1, &backbuffer, g_pDepthStencilView);
 
 	D3D11_RASTERIZER_DESC rasterDesc;
-	ID3D11RasterizerState *rasterState;
 	rasterDesc.AntialiasedLineEnable = false;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthBias = 0;
@@ -360,8 +420,8 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 	rasterDesc.ScissorEnable = false;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-	dev->CreateRasterizerState(&rasterDesc, &rasterState);
-	devcon->RSSetState(rasterState);
+	dev->CreateRasterizerState(&rasterDesc, &rasterstate);
+	devcon->RSSetState(rasterstate);
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -381,19 +441,38 @@ void InitD3D(HINSTANCE hinstance, HWND hWnd)
 
 void CleanD3D(void)
 {
-	swapchain->SetFullscreenState(FALSE, NULL);
+	if (swapchain)
+		swapchain->SetFullscreenState(FALSE, nullptr);
 
-	ourModel->Close();
-	g_pDepthStencil->Release();
-	g_pDepthStencilView->Release();
-	pLayout->Release();
-	pVS->Release();
-	pPS->Release();
-	pConstantBuffer->Release();
-	swapchain->Release();
-	backbuffer->Release();
-	dev->Release();
-	devcon->Release();
+	if (ourModel) {
+		ourModel->Close();
+		delete ourModel;
+		ourModel = nullptr;
+	}
+	SafeRelease(TexSamplerState);
+	SafeRelease(pConstantBuffer);
+	SafeRelease(pLayout);
+	SafeRelease(pVS);
+	SafeRelease(pPS);
+	SafeRelease(rasterstate);
+	SafeRelease(g_pDepthStencilView);
+	SafeRelease(g_pDepthStencil);
+	SafeRelease(backbuffer);
+	SafeRelease(swapchain);
+	SafeRelease(swapchain1);
+	SafeRelease(devcon1);
+	SafeRelease(dev1);
+	SafeRelease(devcon);
+#if _DEBUG
+	if (d3d11debug) {
+		OutputDebugString(TEXT("Dumping DirectX 11 live objects.\n"));
+		d3d11debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+		SafeRelease(d3d11debug);
+	} else {
+		OutputDebugString(TEXT("Unable to dump live objects: no DirectX 11 debug interface available.\n"));
+	}
+#endif
+	SafeRelease(dev);
 }
 
 void RenderFrame(void)
@@ -431,11 +510,13 @@ void RenderFrame(void)
 void InitPipeline()
 {
 	ID3DBlob *VS, *PS;
-	CompileShaderFromFile(L"VertexShader.hlsl", 0, "main", "vs_4_0", &VS);
-	CompileShaderFromFile(L"PixelShader.hlsl", 0, "main", "ps_4_0", &PS);
+	if(FAILED(CompileShaderFromFile(SHADER_PATH VERTEX_SHADER_FILE, 0, "main", "vs_4_0", &VS)))
+		Throwanerror(UTFConverter(L"Failed to compile shader from file " VERTEX_SHADER_FILE).c_str());
+	if(FAILED(CompileShaderFromFile(SHADER_PATH PIXEL_SHADER_FILE, 0, "main", "ps_4_0", &PS)))
+		Throwanerror(UTFConverter(L"Failed to compile shader from file " PIXEL_SHADER_FILE).c_str());
 
-	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
-	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
+	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), nullptr, &pVS);
+	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &pPS);
 
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
@@ -485,7 +566,7 @@ void InitGraphics()
 	m_View = XMMatrixLookAtLH(Eye, At, Up);
 
 	ourModel = new ModelLoader;
-	if (!ourModel->Load(hwnd, dev, devcon, "Models/myModel.fbx"))
+	if (!ourModel->Load(g_hwnd, dev, devcon, g_ModelPath))
 		Throwanerror("Model couldn't be loaded");
 }
 
@@ -497,16 +578,16 @@ HRESULT	CompileShaderFromFile(LPCWSTR pFileName, const D3D_SHADER_MACRO* pDefine
 	compileFlags |= D3DCOMPILE_DEBUG;
 #endif
 
-	ID3DBlob* pErrorBlob = NULL;
+	ID3DBlob* pErrorBlob = nullptr;
 
 	HRESULT result = D3DCompileFromFile(pFileName, pDefines, D3D_COMPILE_STANDARD_FILE_INCLUDE, pEntryPoint, pShaderModel, compileFlags, 0, ppBytecodeBlob, &pErrorBlob);
 	if (FAILED(result))
 	{
-		if (pErrorBlob != NULL)
+		if (pErrorBlob != nullptr)
 			OutputDebugStringA((LPCSTR)pErrorBlob->GetBufferPointer());
 	}
 
-	if (pErrorBlob != NULL)
+	if (pErrorBlob != nullptr)
 		pErrorBlob->Release();
 
 	return result;
@@ -514,5 +595,5 @@ HRESULT	CompileShaderFromFile(LPCWSTR pFileName, const D3D_SHADER_MACRO* pDefine
 
 void Throwanerror(LPCSTR errormessage)
 {
-	MessageBox(hwnd, errormessage, "Error!", MB_ICONERROR | MB_OK);
+	throw std::runtime_error(errormessage);
 }

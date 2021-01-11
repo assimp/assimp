@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,26 +38,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
-
 class utLWSImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/LWS/move_x.lws", aiProcess_ValidateDataStructure);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_x.lws", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utLWSImportExport, importLWSFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utLWSImportExport, importLWSFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
 TEST_F(utLWSImportExport, importLWSmove_x_post_linear) {
@@ -139,4 +136,3 @@ TEST_F(utLWSImportExport, importLWSmove_xz_spline) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_spline.lws", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 }
-

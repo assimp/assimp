@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -42,10 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-#include "SMD/SMDLoader.h"
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
 #include "AbstractImportExportBase.h"
+#include "AssetLib/SMD/SMDLoader.h"
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace ::Assimp;
 
@@ -53,28 +51,27 @@ class utSMDImporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SMD/triangle.smd", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/SMD/triangle.smd", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utSMDImporter, createTest ) {
-    bool ok( true );
+TEST_F(utSMDImporter, createTest) {
+    bool ok(true);
     try {
         SMDImporter myImporter;
-    }
-    catch ( ... ) {
+    } catch (...) {
         ok = false;
     }
-    EXPECT_TRUE( ok );
+    EXPECT_TRUE(ok);
 }
 
-TEST_F( utSMDImporter, importTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utSMDImporter, importTest) {
+    EXPECT_TRUE(importerTest());
 }
 
-TEST_F( utSMDImporter, issue_899_Texture_garbage_at_end_of_string_Test ) {
+TEST_F(utSMDImporter, issue_899_Texture_garbage_at_end_of_string_Test) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SMD/holy_grailref.smd", aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/SMD/holy_grailref.smd", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
 }

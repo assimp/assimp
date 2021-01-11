@@ -14,10 +14,13 @@ if sys.version_info >= (3,0):
     xrange = range
 
 
-try: import numpy
-except ImportError: numpy = None
+try: 
+    import numpy
+except ImportError: 
+    numpy = None
 import logging
 import ctypes
+from contextlib import contextmanager
 logger = logging.getLogger("pyassimp")
 # attach default null handler to logger so it doesn't complain
 # even if you don't attach another handler to logger
@@ -138,7 +141,7 @@ def _init(self, target = None, parent = None):
             logger.debug(str(self) + ": Added array " + str(getattr(target, name)) +  " as self." + name.lower())
             continue
 
-        if m.startswith('m'):
+        if m.startswith('m') and len(m) > 1 and m[1].upper() == m[1]:
 
             if name == "parent":
                 setattr(target, name, parent)
@@ -272,6 +275,13 @@ def recur_pythonize(node, scene):
     for c in node.children:
         recur_pythonize(c, scene)
 
+def release(scene):
+    '''
+    Release resources of a loaded scene.
+    '''
+    _assimp_lib.release(ctypes.pointer(scene))
+
+@contextmanager
 def load(filename,
          file_type  = None,
          processing = postprocess.aiProcess_Triangulate):
@@ -319,7 +329,10 @@ def load(filename,
         raise AssimpError('Could not import file!')
     scene = _init(model.contents)
     recur_pythonize(scene.rootnode, scene)
-    return scene
+    try:
+        yield scene
+    finally:
+        release(scene)
 
 def export(scene,
            filename,
@@ -372,9 +385,6 @@ def export_blob(scene,
     if exportBlobPtr == 0:
         raise AssimpError('Could not export scene to blob!')
     return exportBlobPtr
-
-def release(scene):
-    _assimp_lib.release(ctypes.pointer(scene))
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)

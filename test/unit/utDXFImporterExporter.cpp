@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -41,32 +39,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
 class utDXFImporterExporter : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/DXF/PinkEggFromLW.dxf", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/DXF/PinkEggFromLW.dxf", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utDXFImporterExporter, importDXFFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utDXFImporterExporter, importDXFFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
 
-TEST_F( utDXFImporterExporter, importerWithoutExtensionTest ) {
+TEST_F(utDXFImporterExporter, importerWithoutExtensionTest) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/DXF/lineTest", aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/DXF/lineTest", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
 }
 
 TEST_F(utDXFImporterExporter, issue2229) {

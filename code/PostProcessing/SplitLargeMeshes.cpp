@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -575,8 +575,9 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                 for (unsigned int k = 0; k < pMesh->mNumBones;++k) {
                     // check whether the bone is existing
                     BoneWeightList* pcWeightList;
-                    if ((pcWeightList = (BoneWeightList*)pcMesh->mBones[k])) {
-                        aiBone* pcOldBone = pMesh->mBones[k];
+                    pcWeightList = (BoneWeightList *)pcMesh->mBones[k];
+                    if (nullptr != pcWeightList) {
+                        aiBone *pcOldBone = pMesh->mBones[k];
                         aiBone* pcOut( nullptr );
                         *ppCurrent++ = pcOut = new aiBone();
                         pcOut->mName = aiString(pcOldBone->mName);

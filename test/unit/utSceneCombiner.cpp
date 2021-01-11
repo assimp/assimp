@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -51,29 +49,29 @@ class utSceneCombiner : public ::testing::Test {
     // empty
 };
 
-TEST_F( utSceneCombiner, MergeMeshes_ValidNames_Test ) {
-    std::vector<aiMesh*> merge_list;
+TEST_F(utSceneCombiner, MergeMeshes_ValidNames_Test) {
+    std::vector<aiMesh *> merge_list;
     aiMesh *mesh1 = new aiMesh;
-    mesh1->mName.Set( "mesh_1" );
-    merge_list.push_back( mesh1 );
+    mesh1->mName.Set("mesh_1");
+    merge_list.push_back(mesh1);
 
     aiMesh *mesh2 = new aiMesh;
-    mesh2->mName.Set( "mesh_2" );
-    merge_list.push_back( mesh2 );
+    mesh2->mName.Set("mesh_2");
+    merge_list.push_back(mesh2);
 
     aiMesh *mesh3 = new aiMesh;
-    mesh3->mName.Set( "mesh_3" );
-    merge_list.push_back( mesh3 );
+    mesh3->mName.Set("mesh_3");
+    merge_list.push_back(mesh3);
 
     std::unique_ptr<aiMesh> out;
-    aiMesh* ptr = nullptr;
-    SceneCombiner::MergeMeshes( &ptr, 0, merge_list.begin(), merge_list.end() );
+    aiMesh *ptr = nullptr;
+    SceneCombiner::MergeMeshes(&ptr, 0, merge_list.begin(), merge_list.end());
     out.reset(ptr);
     std::string outName = out->mName.C_Str();
-    EXPECT_EQ( "mesh_1.mesh_2.mesh_3", outName );
+    EXPECT_EQ("mesh_1.mesh_2.mesh_3", outName);
 }
 
-TEST_F( utSceneCombiner, CopySceneWithNullptr_AI_NO_EXCEPTion ) {
-    EXPECT_NO_THROW( SceneCombiner::CopyScene( nullptr, nullptr ) );
-    EXPECT_NO_THROW( SceneCombiner::CopySceneFlat( nullptr, nullptr ) );
+TEST_F(utSceneCombiner, CopySceneWithNullptr_AI_NO_EXCEPTion) {
+    EXPECT_NO_THROW(SceneCombiner::CopyScene(nullptr, nullptr));
+    EXPECT_NO_THROW(SceneCombiner::CopySceneFlat(nullptr, nullptr));
 }

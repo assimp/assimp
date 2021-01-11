@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -48,11 +48,8 @@ using namespace Assimp;
 
 class utGenBoundingBoxesProcess : public ::testing::Test {
 public:
-    utGenBoundingBoxesProcess()
-    : Test()
-    , mProcess(nullptr)
-    , mMesh(nullptr)
-    , mScene(nullptr) {
+    utGenBoundingBoxesProcess() :
+            Test(), mProcess(nullptr), mMesh(nullptr), mScene(nullptr) {
         // empty
     }
 
@@ -66,7 +63,7 @@ public:
         }
         mScene = new aiScene();
         mScene->mNumMeshes = 1;
-        mScene->mMeshes = new aiMesh*[1];
+        mScene->mMeshes = new aiMesh *[1];
         mScene->mMeshes[0] = mMesh;
     }
 
@@ -78,13 +75,13 @@ public:
 protected:
     GenBoundingBoxesProcess *mProcess;
     aiMesh *mMesh;
-    aiScene* mScene;
+    aiScene *mScene;
 };
 
 TEST_F(utGenBoundingBoxesProcess, executeTest) {
     mProcess->Execute(mScene);
 
-    aiMesh* mesh = mScene->mMeshes[0];
+    aiMesh *mesh = mScene->mMeshes[0];
     EXPECT_NE(nullptr, mesh);
     EXPECT_EQ(0, mesh->mAABB.mMin.x);
     EXPECT_EQ(0, mesh->mAABB.mMin.y);

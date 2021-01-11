@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -114,13 +114,32 @@ struct ImportData {
 	bool log;
 };
 
+/// \enum AssimpCmdError
+/// \brief General error codes used among assimp_cmd's utilities.
+enum AssimpCmdError {
+	Success = 0,
+	InvalidNumberOfArguments,
+	UnrecognizedCommand,
+	FailedToLoadInputFile,
+	FailedToOpenOutputFile,
+	NoFileFormatSpecified,
+	UnknownFileFormat,
+	NoFileExtensionSpecified,
+	UnknownFileExtension,
+	ExceptionWasRaised,
+
+	// Add new error codes here...
+
+	LastAssimpCmdError, // Must be last.
+};
+
 // ------------------------------------------------------------------------------
 /** Process standard arguments
  *
  *  @param fill Filled by function
  *  @param params Command line parameters to be processed
  *  @param num NUmber of params
- *  @return 0 for success */
+ *  @return An #AssimpCmdError value. */
 int ProcessStandardArguments(ImportData& fill, 
 	const char* const* params,
 	unsigned int num);
@@ -149,45 +168,90 @@ bool ExportModel(const aiScene* pOut,
 
 // ------------------------------------------------------------------------------
 /** assimp_dump utility
- *  @param params Command line parameters to 'assimp dumb'
+ *  @param params Command line parameters to 'assimp dump'
  *  @param Number of params
- *  @return 0 for success*/
+ *  @return An #AssimpCmdError value.*/
 int Assimp_Dump (
 	const char* const* params, 
 	unsigned int num);
+
+/// \enum AssimpCmdExportError
+/// \brief Error codes used by the 'Export' utility.
+enum AssimpCmdExportError {
+	FailedToImportModel = AssimpCmdError::LastAssimpCmdError,
+	FailedToExportModel,
+
+	// Add new error codes here...
+	
+	LastAssimpCmdExportError, // Must be last.
+};
 
 // ------------------------------------------------------------------------------
 /** assimp_export utility
  *  @param params Command line parameters to 'assimp export'
  *  @param Number of params
- *  @return 0 for success*/
+ *  @return Either an #AssimpCmdError or #AssimpCmdExportError value. */
 int Assimp_Export (
 	const char* const* params, 
 	unsigned int num);
+
+/// \enum AssimpCmdExtractError
+/// \brief Error codes used by the 'Image Extractor' utility.
+enum AssimpCmdExtractError {
+	TextureIndexIsOutOfRange = AssimpCmdError::LastAssimpCmdError,
+	NoAvailableTextureEncoderFound,
+	FailedToExportCompressedTexture,
+
+	// Add new error codes here...
+
+	LastAssimpCmdExtractError, // Must be last.
+};
 
 // ------------------------------------------------------------------------------
 /** assimp_extract utility
  *  @param params Command line parameters to 'assimp extract'
  *  @param Number of params
- *  @return 0 for success*/
+ *  @return Either an #AssimpCmdError or #AssimpCmdExtractError value. */
 int Assimp_Extract (
 	const char* const* params, 
 	unsigned int num);
+
+/// \enum AssimpCmdCompareDumpError
+/// \brief Error codes used by the 'Compare Dump' utility.
+enum AssimpCmdCompareDumpError {
+	FailedToLoadExpectedInputFile = AssimpCmdError::LastAssimpCmdError,
+	FileComparaisonFailure,
+	UnknownFailure,
+
+	// Add new error codes here...
+
+	LastAssimpCmdCompareDumpError, // Must be last.
+};
 
 // ------------------------------------------------------------------------------
 /** assimp_cmpdump utility
  *  @param params Command line parameters to 'assimp cmpdump'
  *  @param Number of params
- *  @return 0 for success*/
+ *  @return Either an #AssimpCmdError or #AssimpCmdCompareDumpError. */
 int Assimp_CompareDump (
 	const char* const* params, 
 	unsigned int num);
+
+/// \enum AssimpCmdInfoError
+/// \brief Error codes used by the 'Info' utility.
+enum AssimpCmdInfoError {
+	InvalidCombinaisonOfArguments = AssimpCmdError::LastAssimpCmdError,
+
+	// Add new error codes here...
+
+	LastAssimpCmdInfoError, // Must be last.
+};
 
 // ------------------------------------------------------------------------------
 /** @brief assimp info utility
  *  @param params Command line parameters to 'assimp info'
  *  @param Number of params
- *  @return 0 for success */
+ *  @return Either an #AssimpCmdError or #AssimpCmdInfoError value. */
 int Assimp_Info (
 	const char* const* params, 
 	unsigned int num);
@@ -196,7 +260,7 @@ int Assimp_Info (
 /** @brief assimp testbatchload utility
  *  @param params Command line parameters to 'assimp testbatchload'
  *  @param Number of params
- *  @return 0 for success */
+ *  @return An #AssimpCmdError value. */
 int Assimp_TestBatchLoad (
 	const char* const* params, 
 	unsigned int num);

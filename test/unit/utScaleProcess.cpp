@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -40,9 +38,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 #include "PostProcessing/ScaleProcess.h"
 #include "TestModelFactory.h"
+#include "UnitTestPCH.h"
 
 namespace Assimp {
 namespace UnitTest {
@@ -51,22 +49,22 @@ class utScaleProcess : public ::testing::Test {
     // empty
 };
 
-TEST_F( utScaleProcess, createTest ) {
+TEST_F(utScaleProcess, createTest) {
     bool ok = true;
     try {
         ScaleProcess process;
-    } catch ( ... ) {
+    } catch (...) {
         ok = false;
     }
-    EXPECT_TRUE( ok );
+    EXPECT_TRUE(ok);
 }
 
-TEST_F( utScaleProcess, accessScaleTest ) {
+TEST_F(utScaleProcess, accessScaleTest) {
     ScaleProcess process;
-    EXPECT_FLOAT_EQ( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT, process.getScale() );
+    EXPECT_FLOAT_EQ(AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT, process.getScale());
 
-    process.setScale( 2.0f );
-    EXPECT_FLOAT_EQ( 2.0f, process.getScale() );
+    process.setScale(2.0f);
+    EXPECT_FLOAT_EQ(2.0f, process.getScale());
 }
 
 } // Namespace UnitTest

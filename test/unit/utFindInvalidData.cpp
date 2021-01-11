@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -48,10 +48,8 @@ using namespace Assimp;
 
 class utFindInvalidDataProcess : public ::testing::Test {
 public:
-    utFindInvalidDataProcess()
-    : Test()
-    , mMesh(nullptr)
-    , mProcess(nullptr) {
+    utFindInvalidDataProcess() :
+            Test(), mMesh(nullptr), mProcess(nullptr) {
         // empty
     }
 
@@ -60,13 +58,13 @@ protected:
     virtual void TearDown();
 
 protected:
-    aiMesh* mMesh;
-    FindInvalidDataProcess* mProcess;
+    aiMesh *mMesh;
+    FindInvalidDataProcess *mProcess;
 };
 
 // ------------------------------------------------------------------------------------------------
 void utFindInvalidDataProcess::SetUp() {
-    ASSERT_TRUE( AI_MAX_NUMBER_OF_TEXTURECOORDS >= 3);
+    ASSERT_TRUE(AI_MAX_NUMBER_OF_TEXTURECOORDS >= 3);
 
     mProcess = new FindInvalidDataProcess();
     mMesh = new aiMesh();
@@ -92,7 +90,7 @@ void utFindInvalidDataProcess::SetUp() {
         mMesh->mBitangents[i] = aiVector3D((float)i);
     }
 
-    for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a) {
+    for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
         mMesh->mTextureCoords[a] = new aiVector3D[1000];
         for (unsigned int i = 0; i < 1000; ++i) {
             mMesh->mTextureCoords[a][i] = aiVector3D((float)i);
@@ -108,10 +106,12 @@ void utFindInvalidDataProcess::TearDown() {
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(utFindInvalidDataProcess, testStepNegativeResult) {
-    ::memset(mMesh->mNormals, 0, mMesh->mNumVertices*sizeof(aiVector3D) );
-    ::memset(mMesh->mBitangents, 0, mMesh->mNumVertices*sizeof(aiVector3D) );
+    for ( size_t i=0; i<mMesh->mNumVertices; ++i ) {
+        mMesh->mNormals[i].x = mMesh->mNormals[i].y = mMesh->mNormals[i].z =0;
+        mMesh->mBitangents[i].x = mMesh->mBitangents[i].y = mMesh->mBitangents[i].z = 0;
+    }
 
-    mMesh->mTextureCoords[2][455] = aiVector3D( std::numeric_limits<float>::quiet_NaN() );
+    mMesh->mTextureCoords[2][455] = aiVector3D(std::numeric_limits<float>::quiet_NaN());
 
     mProcess->ProcessMesh(mMesh);
 

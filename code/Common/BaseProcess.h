@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -44,12 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_BASEPROCESS_H
 #define INCLUDED_AI_BASEPROCESS_H
 
-#include <map>
 #include <assimp/GenericProperty.h>
+
+#include <map>
 
 struct aiScene;
 
-namespace Assimp    {
+namespace Assimp {
 
 class Importer;
 
@@ -60,64 +60,50 @@ class Importer;
  *  to provide additional information to other steps. This is primarily
  *  intended for cross-step optimizations.
  */
-class SharedPostProcessInfo
-{
+class SharedPostProcessInfo {
 public:
-
-    struct Base
-    {
-        virtual ~Base()
-        {}
+    struct Base {
+        virtual ~Base() {}
     };
 
     //! Represents data that is allocated on the heap, thus needs to be deleted
     template <typename T>
-    struct THeapData : public Base
-    {
-        explicit THeapData(T* in)
-            : data (in)
-        {}
+    struct THeapData : public Base {
+        explicit THeapData(T *in) :
+                data(in) {}
 
-        ~THeapData()
-        {
+        ~THeapData() {
             delete data;
         }
-        T* data;
+        T *data;
     };
 
     //! Represents static, by-value data not allocated on the heap
     template <typename T>
-    struct TStaticData : public Base
-    {
-        explicit TStaticData(T in)
-            : data (in)
-        {}
+    struct TStaticData : public Base {
+        explicit TStaticData(T in) :
+                data(in) {}
 
-        ~TStaticData()
-        {}
+        ~TStaticData() {}
 
         T data;
     };
 
     // some typedefs for cleaner code
     typedef unsigned int KeyType;
-    typedef std::map<KeyType, Base*>  PropertyMap;
+    typedef std::map<KeyType, Base *> PropertyMap;
 
 public:
-
     //! Destructor
-    ~SharedPostProcessInfo()
-    {
+    ~SharedPostProcessInfo() {
         Clean();
     }
 
     //! Remove all stored properties from the table
-    void Clean()
-    {
+    void Clean() {
         // invoke the virtual destructor for all stored properties
         for (PropertyMap::iterator it = pmap.begin(), end = pmap.end();
-             it != end; ++it)
-        {
+                it != end; ++it) {
             delete (*it).second;
         }
         pmap.clear();
@@ -125,25 +111,22 @@ public:
 
     //! Add a heap property to the list
     template <typename T>
-    void AddProperty( const char* name, T* in ){
-        AddProperty(name,(Base*)new THeapData<T>(in));
+    void AddProperty(const char *name, T *in) {
+        AddProperty(name, (Base *)new THeapData<T>(in));
     }
 
     //! Add a static by-value property to the list
     template <typename T>
-    void AddProperty( const char* name, T in ){
-        AddProperty(name,(Base*)new TStaticData<T>(in));
+    void AddProperty(const char *name, T in) {
+        AddProperty(name, (Base *)new TStaticData<T>(in));
     }
-
 
     //! Get a heap property
     template <typename T>
-    bool GetProperty( const char* name, T*& out ) const
-    {
-        THeapData<T>* t = (THeapData<T>*)GetPropertyInternal(name);
-        if(!t)
-        {
-            out = NULL;
+    bool GetProperty(const char *name, T *&out) const {
+        THeapData<T> *t = (THeapData<T> *)GetPropertyInternal(name);
+        if (!t) {
+            out = nullptr;
             return false;
         }
         out = t->data;
@@ -152,52 +135,33 @@ public:
 
     //! Get a static, by-value property
     template <typename T>
-    bool GetProperty( const char* name, T& out ) const
-    {
-        TStaticData<T>* t = (TStaticData<T>*)GetPropertyInternal(name);
-        if(!t)return false;
+    bool GetProperty(const char *name, T &out) const {
+        TStaticData<T> *t = (TStaticData<T> *)GetPropertyInternal(name);
+        if ( nullptr == t) {
+            return false;
+        }
         out = t->data;
         return true;
     }
 
     //! Remove a property of a specific type
-    void RemoveProperty( const char* name)  {
-        SetGenericPropertyPtr<Base>(pmap,name,NULL);
+    void RemoveProperty(const char *name) {
+        SetGenericPropertyPtr<Base>(pmap, name, nullptr );
     }
 
 private:
-
-    void AddProperty( const char* name, Base* data) {
-        SetGenericPropertyPtr<Base>(pmap,name,data);
+    void AddProperty(const char *name, Base *data) {
+        SetGenericPropertyPtr<Base>(pmap, name, data);
     }
 
-    Base* GetPropertyInternal( const char* name) const  {
-        return GetGenericProperty<Base*>(pmap,name,NULL);
+    Base *GetPropertyInternal(const char *name) const {
+        return GetGenericProperty<Base *>(pmap, name, nullptr );
     }
 
 private:
-
     //! Map of all stored properties
     PropertyMap pmap;
 };
-
-#if 0
-
-// ---------------------------------------------------------------------------
-/** @brief Represents a dependency table for a postprocessing steps.
- *
- *  For future use.
- */
- struct PPDependencyTable
- {
-     unsigned int execute_me_before_these;
-     unsigned int execute_me_after_these;
-     unsigned int only_if_these_are_not_specified;
-     unsigned int mutually_exclusive_with;
- };
-
-#endif
-
 
 #define AI_SPP_SPATIAL_SORT "$Spat"
 
@@ -228,7 +192,7 @@ public:
      * @return true if the process is present in this flag fields,
      *   false if not.
     */
-    virtual bool IsActive( unsigned int pFlags) const = 0;
+    virtual bool IsActive(unsigned int pFlags) const = 0;
 
     // -------------------------------------------------------------------
     /** Check whether this step expects its input vertex data to be
@@ -238,17 +202,17 @@ public:
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * The function deletes the scene if the postprocess step fails (
-    * the object pointer will be set to NULL).
+    * the object pointer will be set to nullptr).
     * @param pImp Importer instance (pImp->mScene must be valid)
     */
-    void ExecuteOnScene( Importer* pImp);
+    void ExecuteOnScene(Importer *pImp);
 
     // -------------------------------------------------------------------
     /** Called prior to ExecuteOnScene().
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
-    virtual void SetupProperties(const Importer* pImp);
+    virtual void SetupProperties(const Importer *pImp);
 
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
@@ -256,34 +220,31 @@ public:
     * This method must be implemented by deriving classes.
     * @param pScene The imported data to work at.
     */
-    virtual void Execute( aiScene* pScene) = 0;
-
+    virtual void Execute(aiScene *pScene) = 0;
 
     // -------------------------------------------------------------------
     /** Assign a new SharedPostProcessInfo to the step. This object
      *  allows multiple postprocess steps to share data.
-     * @param sh May be NULL
+     * @param sh May be nullptr
     */
-    inline void SetSharedData(SharedPostProcessInfo* sh)    {
+    inline void SetSharedData(SharedPostProcessInfo *sh) {
         shared = sh;
     }
 
     // -------------------------------------------------------------------
     /** Get the shared data that is assigned to the step.
     */
-    inline SharedPostProcessInfo* GetSharedData()   {
+    inline SharedPostProcessInfo *GetSharedData() {
         return shared;
     }
 
 protected:
-
     /** See the doc of #SharedPostProcessInfo for more details */
-    SharedPostProcessInfo* shared;
+    SharedPostProcessInfo *shared;
 
     /** Currently active progress handler */
-    ProgressHandler* progress;
+    ProgressHandler *progress;
 };
-
 
 } // end of namespace Assimp
 

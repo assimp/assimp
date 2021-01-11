@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -128,7 +128,8 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     auto oldTextures = pScene->mTextures;
     pScene->mTextures = new aiTexture*[pScene->mNumTextures];
     ::memmove(pScene->mTextures, oldTextures, sizeof(aiTexture*) * (pScene->mNumTextures - 1u));
-
+    delete [] oldTextures;
+    
     // Add the new texture
     auto pTexture = new aiTexture;
     pTexture->mHeight = 0; // Means that this is still compressed
@@ -136,7 +137,7 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     pTexture->pcData = imageContent;
 
     auto extension = path.substr(path.find_last_of('.') + 1u);
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    std::transform(extension.begin(), extension.end(), extension.begin(), ToLower<char> );
     if (extension == "jpeg") {
         extension = "jpg";
     }

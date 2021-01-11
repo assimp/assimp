@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -43,37 +41,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/cexport.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 class BlendImportAreaLight : public ::testing::Test {
 public:
-
-    virtual void SetUp()
-    {
+    void SetUp() override {
         im = new Assimp::Importer();
     }
 
-    virtual void TearDown()
-    {
+    void TearDown() override {
         delete im;
     }
 
 protected:
-
-    Assimp::Importer* im;
+    Assimp::Importer *im;
 };
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(BlendImportAreaLight, testImportLight)
-{
-    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/AreaLight_269.blend", aiProcess_ValidateDataStructure);
-    ASSERT_TRUE(pTest != NULL);
+TEST_F(BlendImportAreaLight, testImportLight) {
+    const aiScene *pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/AreaLight_269.blend", aiProcess_ValidateDataStructure);
+    ASSERT_TRUE(pTest != nullptr);
     ASSERT_TRUE(pTest->HasLights());
 
-    std::vector< std::pair<std::string, size_t> > lightNames;
+    std::vector<std::pair<std::string, size_t>> lightNames;
 
     for (size_t i = 0; i < pTest->mNumLights; i++) {
         lightNames.push_back(std::make_pair(pTest->mLights[i]->mName.C_Str(), i));

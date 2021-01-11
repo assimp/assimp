@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -123,7 +123,7 @@ corresponding preprocessor flag to selectively disable steps.
 #   include "PostProcessing/OptimizeGraph.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SPLITBYBONECOUNT_PROCESS
-#   include "Common/SplitByBoneCountProcess.h"
+#   include "PostProcessing/SplitByBoneCountProcess.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_DEBONE_PROCESS
 #   include "PostProcessing/DeboneProcess.h"

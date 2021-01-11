@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2017, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -43,7 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // We need to be sure to have the same STL settings as Assimp
 
 #include <assimp/cimport.h>
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable : 4389)
+#endif
 #include <gtest/gtest.h>
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 #include <memory>
 #include <math.h>
 #include "UTLogStream.h"

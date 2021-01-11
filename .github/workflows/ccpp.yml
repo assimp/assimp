@@ -1,0 +1,123 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  job:
+    name: ${{ matrix.name }}-build-and-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
+        include:
+          - name: windows-latest-cl.exe
+            os: windows-latest
+            cxx: cl.exe
+            cc: cl.exe
+          - name: ubuntu-latest-clang++
+            os: ubuntu-latest
+            cxx: clang++
+            cc: clang
+          - name: macos-latest-clang++
+            os: macos-latest
+            cxx: clang++
+            cc: clang
+          - name: ubuntu-latest-g++
+            os: ubuntu-latest
+            cxx: g++
+            cc: gcc
+          - name: ubuntu-gcc-hunter
+            os: ubuntu-latest
+            toolchain: ninja-gcc-cxx17-fpic
+          - name: macos-clang-hunter
+            os: macos-latest
+            toolchain: ninja-clang-cxx17-fpic
+          - name: windows-msvc-hunter
+            os: windows-latest
+            toolchain: ninja-vs-win64-cxx17
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: lukka/get-cmake@latest
+    
+    - uses: ilammy/msvc-dev-cmd@v1
+    
+    - name: Set Compiler Environment
+      if: "!endsWith(matrix.name, 'hunter')"
+      uses: lukka/set-shell-env@v1
+      with:
+        CXX: ${{ matrix.cxx }}
+        CC: ${{ matrix.cc }}
+
+    - name: Set Compiler Environment for Hunter on Windows
+      if: startsWith(matrix.name, 'windows') && endsWith(matrix.name, 'hunter')
+      uses: lukka/set-shell-env@v1
+      with:
+        VS160COMNTOOLS: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools
+
+    - name: Checkout Hunter toolchains
+      if: endsWith(matrix.name, 'hunter')
+      uses: actions/checkout@v2
+      with:
+        repository: cpp-pm/polly
+        path: cmake/polly     
+
+    - name: Cache DX SDK
+      id: dxcache
+      if: contains(matrix.name, 'windows')
+      uses: actions/cache@v2
+      with:
+        path: '${{ github.workspace }}/DX_SDK'
+        key: ${{ runner.os }}-DX_SDK
+        restore-keys: |
+          ${{ runner.os }}-DX_SDK
+
+    - name: Download DXSetup
+      if: contains(matrix.name, 'windows') && steps.dxcache.outputs.cache-hit != 'true'
+      run: |
+        curl -s -o DXSDK_Jun10.exe --location https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+        cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
+
+    - name: Set Windows specific CMake arguments
+      if: contains(matrix.name, 'windows')
+      id: windows_extra_cmake_args
+      run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1"
+    
+    - name: Set Hunter specific CMake arguments
+      if: contains(matrix.name, 'hunter')
+      id: hunter_extra_cmake_args
+      run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake"
+
+    - name: configure and build
+      uses: lukka/run-cmake@v3
+      env:
+        DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
+
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}'
+        buildWithCMakeArgs: '-- -v'
+        buildDirectory: '${{ github.workspace }}/build/'
+        
+    - name: Exclude certain tests in Hunter specific builds
+      if: contains(matrix.name, 'hunter')
+      id: hunter_extra_test_args
+      run: echo "::set-output name=args::--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest"
+
+    - name: test
+      run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
+      shell: bash
+
+    - uses: actions/upload-artifact@v2
+      if: matrix.name == 'windows-msvc'
+      with:
+        name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
+        path: build/bin

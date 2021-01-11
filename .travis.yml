@@ -30,6 +30,9 @@ env:
     - secure: "lZ7pHQvl5dpZWzBQAaIMf0wqrvtcZ4wiZKeIZjf83TEsflW8+z0uTpIuN30ZV6Glth/Sq1OhLnTP5+N57fZU/1ebA5twHdvP4bS5CIUUg71/CXQZNl36xeaqvxsG/xRrdpKOsPdjAOsQ9KPTQulsX43XDLS7CasMiLvYOpqKcPc="
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
 
+git:
+  depth: 1
+
 matrix:
   include:
     - os: linux

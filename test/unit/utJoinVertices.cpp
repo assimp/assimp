@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -49,10 +49,8 @@ using namespace Assimp;
 
 class utJoinVertices : public ::testing::Test {
 public:
-    utJoinVertices()
-    : Test()
-    , piProcess(nullptr)
-    , pcMesh(nullptr) {
+    utJoinVertices() :
+            Test(), piProcess(nullptr), pcMesh(nullptr) {
         // empty
     }
 
@@ -61,8 +59,8 @@ protected:
     virtual void TearDown();
 
 protected:
-    JoinVerticesProcess* piProcess;
-    aiMesh* pcMesh;
+    JoinVerticesProcess *piProcess;
+    aiMesh *pcMesh;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -75,20 +73,20 @@ void utJoinVertices::SetUp() {
     pcMesh = new aiMesh();
 
     pcMesh->mNumVertices = 900;
-    aiVector3D*& pv = pcMesh->mVertices = new aiVector3D[900];
-    for (unsigned int i = 0; i < 3;++i) {
-        const unsigned int base = i*300;
-        for (unsigned int a = 0; a < 300;++a) {
-            pv[base+a].x = pv[base+a].y = pv[base+a].z = (float)a;
+    aiVector3D *&pv = pcMesh->mVertices = new aiVector3D[900];
+    for (unsigned int i = 0; i < 3; ++i) {
+        const unsigned int base = i * 300;
+        for (unsigned int a = 0; a < 300; ++a) {
+            pv[base + a].x = pv[base + a].y = pv[base + a].z = (float)a;
         }
     }
 
     // generate faces - each vertex is referenced once
     pcMesh->mNumFaces = 300;
     pcMesh->mFaces = new aiFace[300];
-    for (unsigned int i = 0,p = 0; i < 300;++i) {
-        aiFace& face = pcMesh->mFaces[i];
-        face.mIndices = new unsigned int[ face.mNumIndices = 3 ];
+    for (unsigned int i = 0, p = 0; i < 300; ++i) {
+        aiFace &face = pcMesh->mFaces[i];
+        face.mIndices = new unsigned int[face.mNumIndices = 3];
         for (unsigned int a = 0; a < 3; ++a) {
             face.mIndices[a] = p++;
         }
@@ -118,21 +116,21 @@ void utJoinVertices::TearDown() {
 // ------------------------------------------------------------------------------------------------
 TEST_F(utJoinVertices, testProcess) {
     // execute the step on the given data
-    piProcess->ProcessMesh(pcMesh,0);
+    piProcess->ProcessMesh(pcMesh, 0);
 
     // the number of faces shouldn't change
     ASSERT_EQ(300U, pcMesh->mNumFaces);
     ASSERT_EQ(300U, pcMesh->mNumVertices);
 
-    ASSERT_TRUE( nullptr != pcMesh->mNormals);
-    ASSERT_TRUE( nullptr != pcMesh->mTangents);
-    ASSERT_TRUE( nullptr != pcMesh->mBitangents);
-    ASSERT_TRUE( nullptr != pcMesh->mTextureCoords[0]);
+    ASSERT_TRUE(nullptr != pcMesh->mNormals);
+    ASSERT_TRUE(nullptr != pcMesh->mTangents);
+    ASSERT_TRUE(nullptr != pcMesh->mBitangents);
+    ASSERT_TRUE(nullptr != pcMesh->mTextureCoords[0]);
 
     // the order doesn't care
     float fSum = 0.f;
     for (unsigned int i = 0; i < 300; ++i) {
-        aiVector3D& v = pcMesh->mVertices[i];
+        aiVector3D &v = pcMesh->mVertices[i];
         fSum += v.x + v.y + v.z;
 
         EXPECT_FALSE(pcMesh->mNormals[i].x);
@@ -140,5 +138,5 @@ TEST_F(utJoinVertices, testProcess) {
         EXPECT_FALSE(pcMesh->mBitangents[i].x);
         EXPECT_FALSE(pcMesh->mTextureCoords[0][i].x);
     }
-    EXPECT_EQ(150.f*299.f*3.f, fSum); // gaussian sum equation
+    EXPECT_EQ(150.f * 299.f * 3.f, fSum); // gaussian sum equation
 }

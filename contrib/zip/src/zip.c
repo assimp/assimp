@@ -18,6 +18,11 @@
 /* Win32, DOS, MSVC, MSVS */
 #include <direct.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4706)
+#endif // _MSC_VER
+
 #define MKDIR(DIRNAME) _mkdir(DIRNAME)
 #define STRCLONE(STR) ((STR) ? _strdup(STR) : NULL)
 #define HAS_DEVICE(P)                                                          \
@@ -220,6 +225,20 @@ void zip_close(struct zip_t *zip) {
 
     CLEANUP(zip);
   }
+}
+
+int zip_is64(struct zip_t *zip) {
+  if (!zip) {
+    // zip_t handler is not initialized
+    return -1;
+  }
+
+  if (!zip->archive.m_pState) {
+    // zip state is not initialized
+    return -1;
+  }
+
+  return (int)zip->archive.m_pState->m_zip64;
 }
 
 int zip_entry_open(struct zip_t *zip, const char *entryname) {
@@ -684,7 +703,10 @@ ssize_t zip_entry_noallocread(struct zip_t *zip, void *buf, size_t bufsize) {
 int zip_entry_fread(struct zip_t *zip, const char *filename) {
   mz_zip_archive *pzip = NULL;
   mz_uint idx;
+#if defined(_MSC_VER)
+#else
   mz_uint32 xattr = 0;
+#endif
   mz_zip_archive_file_stat info;
 
   if (!zip) {
@@ -794,7 +816,8 @@ int zip_create(const char *zipname, const char *filenames[], size_t len) {
 
     if (MZ_FILE_STAT(name, &file_stat) != 0) {
       // problem getting information - check errno
-      return -1;
+      status = -1;
+      break;
     }
 
     if ((file_stat.st_mode & 0200) == 0) {
@@ -826,7 +849,11 @@ int zip_extract(const char *zipname, const char *dir,
   mz_zip_archive zip_archive;
   mz_zip_archive_file_stat info;
   size_t dirlen = 0;
+#if defined(_MSC_VER)
+#else
   mz_uint32 xattr = 0;
+#endif
+
 
   memset(path, 0, sizeof(path));
   memset(symlink_to, 0, sizeof(symlink_to));
@@ -942,3 +969,7 @@ out:
 
   return status;
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER

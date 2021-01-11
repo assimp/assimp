@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 
@@ -88,10 +88,8 @@ bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
         }
     }
 
-    // ToDo!
-    return true;
     // materials
-    if ( expected->mNumMaterials != toCompare->mNumMaterials ) {
+    /*if ( expected->mNumMaterials != toCompare->mNumMaterials ) {
         std::stringstream stream;
         stream << "Number of materials not equal ( expected: " << expected->mNumMaterials << ", found : " << toCompare->mNumMaterials << " )\n";
         addDiff( stream.str() );
@@ -112,8 +110,9 @@ bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
             std::stringstream stream;
             stream << "Materials are not equal, index : " << i << "\n";
             addDiff( stream.str() );
+            return false;
         }
-    }
+    }*/
 
     return true;
 }

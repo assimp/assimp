@@ -3,7 +3,7 @@
 Open Asset Import Library - Java Binding (jassimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -56,109 +56,115 @@ package jassimp;
  * regardless which 3D tool they're using.
  */
 public enum AiTextureType {
-   /** 
-    * The texture is combined with the result of the diffuse
-    * lighting equation.
+    /** Dummy value.
+     *
+     *  No texture, but the value to be used as 'texture semantic'
+     *  (#aiMaterialProperty::mSemantic) for all material properties
+     *  *not* related to textures.
+     */
+    NONE(0),
+
+    /** LEGACY API MATERIALS 
+     * Legacy refers to materials which 
+     * Were originally implemented in the specifications around 2000.
+     * These must never be removed, as most engines support them.
+     */
+
+    /** The texture is combined with the result of the diffuse
+     *  lighting equation.
+     */
+    DIFFUSE(1),
+
+    /** The texture is combined with the result of the specular
+     *  lighting equation.
+     */
+    SPECULAR(2),
+
+    /** The texture is combined with the result of the ambient
+     *  lighting equation.
+     */
+    AMBIENT(3),
+
+    /** The texture is added to the result of the lighting
+     *  calculation. It isn't influenced by incoming light.
+     */
+    EMISSIVE(4),
+
+    /** The texture is a height map.
+     *
+     *  By convention, higher gray-scale values stand for
+     *  higher elevations from the base height.
+     */
+    HEIGHT(5),
+
+    /** The texture is a (tangent space) normal-map.
+     *
+     *  Again, there are several conventions for tangent-space
+     *  normal maps. Assimp does (intentionally) not
+     *  distinguish here.
+     */
+    NORMALS(6),
+
+    /** The texture defines the glossiness of the material.
+     *
+     *  The glossiness is in fact the exponent of the specular
+     *  (phong) lighting equation. Usually there is a conversion
+     *  function defined to map the linear color values in the
+     *  texture to a suitable exponent. Have fun.
     */
-   DIFFUSE(0x1),
+    SHININESS(7),
 
-           
-   /** 
-    * The texture is combined with the result of the specular
-    * lighting equation.
+    /** The texture defines per-pixel opacity.
+     *
+     *  Usually 'white' means opaque and 'black' means
+     *  'transparency'. Or quite the opposite. Have fun.
     */
-   SPECULAR(0x2),
+    OPACITY(8),
 
-   
-   /** 
-    * The texture is combined with the result of the ambient
-    * lighting equation.
+    /** Displacement texture
+     *
+     *  The exact purpose and format is application-dependent.
+     *  Higher color values stand for higher vertex displacements.
     */
-   AMBIENT(0x3),
+    DISPLACEMENT(9),
 
-   
-   /** 
-    * The texture is added to the result of the lighting
-    * calculation. It isn't influenced by incoming light.
+    /** Lightmap texture (aka Ambient Occlusion)
+     *
+     *  Both 'Lightmaps' and dedicated 'ambient occlusion maps' are
+     *  covered by this material property. The texture contains a
+     *  scaling value for the final color value of a pixel. Its
+     *  intensity is not affected by incoming light.
     */
-   EMISSIVE(0x4),
+    LIGHTMAP(10),
 
-   
-   /** 
-    * The texture is a height map.<p>
-    *
-    * By convention, higher gray-scale values stand for
-    * higher elevations from the base height.
+    /** Reflection texture
+     *
+     * Contains the color of a perfect mirror reflection.
+     * Rarely used, almost never for real-time applications.
     */
-   HEIGHT(0x5),
+    REFLECTION(11),
 
-   
-   /**
-    * The texture is a (tangent space) normal-map.<p>
-    *
-    * Again, there are several conventions for tangent-space
-    * normal maps. Assimp does (intentionally) not distinguish here.
+    /** PBR Materials
+     * PBR definitions from maya and other modelling packages now use this standard.
+     * This was originally introduced around 2012.
+     * Support for this is in game engines like Godot, Unreal or Unity3D.
+     * Modelling packages which use this are very common now.
+     */
+
+    BASE_COLOR(12),
+    NORMAL_CAMERA(13),
+    EMISSION_COLOR(14),
+    METALNESS(15),
+    DIFFUSE_ROUGHNESS(16),
+    AMBIENT_OCCLUSION(17),
+
+    /** Unknown texture
+     *
+     *  A texture reference that does not match any of the definitions
+     *  above is considered to be 'unknown'. It is still imported,
+     *  but is excluded from any further post-processing.
     */
-   NORMALS(0x6),
-
-   
-   /** 
-    * The texture defines the glossiness of the material.<p>
-    *
-    * The glossiness is in fact the exponent of the specular
-    * (phong) lighting equation. Usually there is a conversion
-    * function defined to map the linear color values in the
-    * texture to a suitable exponent. Have fun.
-   */
-   SHININESS(0x7),
-
-   
-   /** 
-    * The texture defines per-pixel opacity.<p>
-    *
-    * Usually 'white' means opaque and 'black' means 
-    * 'transparency'. Or quite the opposite. Have fun.
-   */
-   OPACITY(0x8),
-
-   
-   /** 
-    * Displacement texture.<p>
-    *
-    * The exact purpose and format is application-dependent.
-    * Higher color values stand for higher vertex displacements.
-   */
-   DISPLACEMENT(0x9),
-
-   
-   /** 
-    * Lightmap texture (aka Ambient Occlusion).<p>
-    *
-    * Both 'Lightmaps' and dedicated 'ambient occlusion maps' are
-    * covered by this material property. The texture contains a
-    * scaling value for the final color value of a pixel. Its
-    * intensity is not affected by incoming light.
-   */
-   LIGHTMAP(0xA),
-
-   
-   /**
-    * Reflection texture.<p>
-    *
-    * Contains the color of a perfect mirror reflection.
-    * Rarely used, almost never for real-time applications.
-   */
-   REFLECTION(0xB),
-
-   
-   /** 
-    * Unknown texture.<p>
-    *
-    * A texture reference that does not match any of the definitions 
-    * above is considered to be 'unknown'. It is still imported,
-    * but is excluded from any further postprocessing.
-   */
-   UNKNOWN(0xC);
+    UNKNOWN(18);
    
    
    /**

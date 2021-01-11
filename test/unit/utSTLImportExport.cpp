@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -41,14 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
-#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
+#include <assimp/Exporter.hpp>
+#include <assimp/Importer.hpp>
 
 #include <vector>
 
@@ -58,25 +55,24 @@ class utSTLImporterExporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F( utSTLImporterExporter, importSTLFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utSTLImporterExporter, importSTLFromFileTest) {
+    EXPECT_TRUE(importerTest());
 }
-
 
 TEST_F(utSTLImporterExporter, test_multiple) {
     // import same file twice, each with its own importer
     // must work both times and not crash
     Assimp::Importer importer1;
-    const aiScene *scene1 = importer1.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+    const aiScene *scene1 = importer1.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene1);
 
     Assimp::Importer importer2;
-    const aiScene *scene2 = importer2.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure );
+    const aiScene *scene2 = importer2.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene2);
 }
 
@@ -87,10 +83,10 @@ TEST_F(utSTLImporterExporter, importSTLformatdetection) {
     EXPECT_NE(nullptr, scene);
 }
 
-TEST_F( utSTLImporterExporter, test_with_two_solids ) {
+TEST_F(utSTLImporterExporter, test_with_two_solids) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", aiProcess_ValidateDataStructure );
-    EXPECT_NE( nullptr, scene );
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/triangle_with_two_solids.stl", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
 }
 
 TEST_F(utSTLImporterExporter, test_with_empty_solid) {
@@ -110,7 +106,7 @@ TEST_F(utSTLImporterExporter, exporterTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
 
     Assimp::Exporter mAiExporter;
-    mAiExporter.Export( scene, "stl", "spiderExport.stl" );
+    mAiExporter.Export(scene, "stl", "spiderExport.stl");
 
     const aiScene *scene2 = importer.ReadFile("spiderExport.stl", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene2);
@@ -133,11 +129,11 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
     aiScene scene;
     scene.mRootNode = new aiNode();
 
-    scene.mMeshes = new aiMesh*[1];
+    scene.mMeshes = new aiMesh *[1];
     scene.mMeshes[0] = nullptr;
     scene.mNumMeshes = 1;
 
-    scene.mMaterials = new aiMaterial*[1];
+    scene.mMaterials = new aiMaterial *[1];
     scene.mMaterials[0] = nullptr;
     scene.mNumMaterials = 1;
 
@@ -155,7 +151,7 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
     size_t numValidPoints = points.size();
 
     pMesh->mVertices = new aiVector3D[numValidPoints];
-    pMesh->mNumVertices = static_cast<unsigned int>( numValidPoints );
+    pMesh->mNumVertices = static_cast<unsigned int>(numValidPoints);
 
     int i = 0;
     for (XYZ &p : points) {
@@ -166,7 +162,7 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
     Assimp::Exporter mAiExporter;
     ExportProperties *properties = new ExportProperties;
     properties->SetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS, true);
-    mAiExporter.Export(&scene, "stl", "testExport.stl", 0, properties );
+    mAiExporter.Export(&scene, "stl", "testExport.stl", 0, properties);
 
     delete properties;
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 
 All rights reserved.
@@ -88,6 +88,9 @@ public:
         underlying << sin;
     }
 
+    basic_formatter(basic_formatter&& other)
+        : underlying(std::move(other.underlying)) {
+    }
 
     // The problem described here:
     // https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462

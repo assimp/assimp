@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -117,29 +117,29 @@ void CLogDisplay::OnRender() {
         sCopy.top       = sWndRect.top+1;
         sCopy.bottom    = sWndRect.bottom+1;
         sCopy.right     = sWndRect.right+1;
-        this->piFont->DrawText(NULL,szText ,
+        this->piFont->DrawText(nullptr,szText ,
             -1,&sCopy,DT_CENTER | DT_VCENTER,D3DCOLOR_ARGB(100,0x0,0x0,0x0));
         sCopy.left      = sWndRect.left+1;
         sCopy.top       = sWndRect.top+1;
         sCopy.bottom    = sWndRect.bottom-1;
         sCopy.right     = sWndRect.right-1;
-        this->piFont->DrawText(NULL,szText ,
+        this->piFont->DrawText(nullptr,szText ,
             -1,&sCopy,DT_CENTER | DT_VCENTER,D3DCOLOR_ARGB(100,0x0,0x0,0x0));
         sCopy.left      = sWndRect.left-1;
         sCopy.top       = sWndRect.top-1;
         sCopy.bottom    = sWndRect.bottom+1;
         sCopy.right     = sWndRect.right+1;
-        this->piFont->DrawText(NULL,szText ,
+        this->piFont->DrawText(nullptr,szText ,
             -1,&sCopy,DT_CENTER | DT_VCENTER,D3DCOLOR_ARGB(100,0x0,0x0,0x0));
         sCopy.left      = sWndRect.left-1;
         sCopy.top       = sWndRect.top-1;
         sCopy.bottom    = sWndRect.bottom-1;
         sCopy.right     = sWndRect.right-1;
-        this->piFont->DrawText(NULL,szText ,
+        this->piFont->DrawText(nullptr,szText ,
             -1,&sCopy,DT_CENTER | DT_VCENTER,D3DCOLOR_ARGB(100,0x0,0x0,0x0));
 
         // text
-        this->piFont->DrawText(NULL,szText ,
+        this->piFont->DrawText(nullptr,szText ,
             -1,&sWndRect,DT_CENTER | DT_VCENTER,D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF));
     }
 
@@ -176,7 +176,7 @@ void CLogDisplay::OnRender() {
             sCopy.top       = sRect.top+1;
             sCopy.bottom    = sRect.bottom+1;
             sCopy.right     = sRect.right+1;
-            this->piFont->DrawText(NULL,szText,
+            this->piFont->DrawText(nullptr,szText,
                 -1,&sCopy,DT_RIGHT | DT_TOP,D3DCOLOR_ARGB(
                 (unsigned char)(fAlpha * 100.0f),0x0,0x0,0x0));
 
@@ -184,7 +184,7 @@ void CLogDisplay::OnRender() {
             sCopy.top       = sRect.top-1;
             sCopy.bottom    = sRect.bottom-1;
             sCopy.right     = sRect.right-1;
-            this->piFont->DrawText(NULL,szText,
+            this->piFont->DrawText(nullptr,szText,
                 -1,&sCopy,DT_RIGHT | DT_TOP,D3DCOLOR_ARGB(
                 (unsigned char)(fAlpha * 100.0f),0x0,0x0,0x0));
 
@@ -192,7 +192,7 @@ void CLogDisplay::OnRender() {
             sCopy.top       = sRect.top-1;
             sCopy.bottom    = sRect.bottom+1;
             sCopy.right     = sRect.right+1;
-            this->piFont->DrawText(NULL,szText,
+            this->piFont->DrawText(nullptr,szText,
                 -1,&sCopy,DT_RIGHT | DT_TOP,D3DCOLOR_ARGB(
                 (unsigned char)(fAlpha * 100.0f),0x0,0x0,0x0));
 
@@ -200,12 +200,12 @@ void CLogDisplay::OnRender() {
             sCopy.top       = sRect.top+1;
             sCopy.bottom    = sRect.bottom-1;
             sCopy.right     = sRect.right-1;
-            this->piFont->DrawText(NULL,szText,
+            this->piFont->DrawText(nullptr,szText,
                 -1,&sCopy,DT_RIGHT | DT_TOP,D3DCOLOR_ARGB(
                 (unsigned char)(fAlpha * 100.0f),0x0,0x0,0x0));
 
             // draw the text itself
-            int iPX = this->piFont->DrawText(NULL,szText,
+            int iPX = this->piFont->DrawText(nullptr,szText,
                 -1,&sRect,DT_RIGHT | DT_TOP,clrColor);
 
             sRect.top += iPX;

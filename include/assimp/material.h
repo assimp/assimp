@@ -735,9 +735,9 @@ public:
      *    #GetTextureCount() can be used to determine the number of textures
      *    per texture type.
      *  @param path Receives the path to the texture.
-     *    If the texture is embedded, receives a '*' followed by the id of
-     *    the texture (for the textures stored in the corresponding scene) which
-     *    can be converted to an int using a function like atoi.
+     *    Use aiScene::GetEmbeddedTexture() method to determine if returned path
+     *    is an image file to be opened or a string key of embedded texture stored in the corresponding scene
+     *    (could be a '*' followed by the id of the texture in case of no name)
      *    NULL is a valid value.
      *  @param mapping The texture mapping.
      *    NULL is allowed as value.

@@ -94,7 +94,7 @@ void ExportScenePbrt (
     const char* pFile,
     IOSystem* pIOSystem,
     const aiScene* pScene,
-    const ExportProperties* pProperties
+    const ExportProperties* /*pProperties*/
 ){
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
@@ -118,7 +118,7 @@ PbrtExporter::PbrtExporter (
     if (mScene->mNumTextures > 0)
         if (!mIOSystem->CreateDirectory("textures"))
             throw DeadlyExportError("Could not create textures/ directory.");
-    for (int i = 0; i < mScene->mNumTextures; ++i) {
+    for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);
         std::cerr << "Writing embedded texture: " << tex->mFilename.C_Str() << " -> "
@@ -173,7 +173,7 @@ void PbrtExporter::WriteMetaData() {
     mOutput << "# Scene metadata:\n";
 
     aiMetadata* pMetaData = mScene->mMetaData;
-    for (int i = 0; i < pMetaData->mNumProperties; i++) {
+    for (unsigned int i = 0; i < pMetaData->mNumProperties; i++) {
         mOutput << "# - ";
         mOutput << pMetaData->mKeys[i].C_Str() << " :";
         switch(pMetaData->mValues[i].mType) {
@@ -246,7 +246,7 @@ void PbrtExporter::WriteCameras() {
         std::cerr << "Multiple cameras found in scene file; defaulting to first one specified.\n";
     }
 
-    for (int i = 0; i < mScene->mNumCameras; i++) {
+    for (unsigned int i = 0; i < mScene->mNumCameras; i++) {
         WriteCamera(i);
     }
 }
@@ -290,7 +290,7 @@ void PbrtExporter::WriteCamera(int i) {
     // Get camera aspect ratio
     float aspect = camera->mAspect;
     if (aspect == 0) {
-        aspect = 4.0/3.0;
+        aspect = 4.f/3.f;
         mOutput << "#   - Aspect ratio : 1.33333 (no aspect found, defaulting to 4/3)\n";
     } else {
         mOutput << "#   - Aspect ratio : " << aspect << "\n";
@@ -357,9 +357,9 @@ void PbrtExporter::WriteWorldDefinition() {
     std::map<int, int> meshUses;
     std::function<void(aiNode*)> visitNode;
     visitNode = [&](aiNode* node) {
-        for (int i = 0; i < node->mNumMeshes; ++i)
+        for (unsigned int i = 0; i < node->mNumMeshes; ++i)
             ++meshUses[node->mMeshes[i]];
-        for (int i = 0; i < node->mNumChildren; ++i)
+        for (unsigned int i = 0; i < node->mNumChildren; ++i)
             visitNode(node->mChildren[i]);
     };
     visitNode(mScene->mRootNode);
@@ -403,7 +403,7 @@ void PbrtExporter::WriteTextures() {
     aiTextureMapMode mapMode[3];
 
     // For every material in the scene,
-    for (int m = 0 ; m < mScene->mNumMaterials; m++) {
+    for (unsigned int m = 0 ; m < mScene->mNumMaterials; m++) {
         auto material = mScene->mMaterials[m];
         // Parse through all texture types,
         for (int tt = 1; tt <= aiTextureType_UNKNOWN; tt++) {
@@ -571,7 +571,7 @@ void PbrtExporter::WriteMaterials() {
     mOutput << "####################\n";
     mOutput << "# Materials (" << mScene->mNumMaterials << ") total\n\n";
 
-    for (int i = 0; i < mScene->mNumMaterials; i++) {
+    for (unsigned int i = 0; i < mScene->mNumMaterials; i++) {
         WriteMaterial(i);
     }
     mOutput << "\n\n";
@@ -674,7 +674,7 @@ std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteEx
             std::string extension = fn;
             extension.erase(0, offset + 1);
             std::transform(extension.begin(), extension.end(), extension.begin(),
-                           [](unsigned char c){ return std::tolower(c); });
+                           [](unsigned char c) { return (char)std::tolower(c); });
 
             if (extension != "tga" && extension != "exr" && extension != "png" &&
                 extension != "pfm" && extension != "hdr") {
@@ -683,8 +683,8 @@ std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteEx
                 fn += "png";
 
                 // Does it already exist? Warn if not.
-                std::ifstream f(fn);
-                if (!f.good())
+                std::ifstream filestream(fn);
+                if (!filestream.good())
                     std::cerr << orig << ": must convert this texture to PNG.\n";
             }
         }
@@ -716,7 +716,7 @@ void PbrtExporter::WriteLights() {
             mOutput << "AttributeEnd\n\n";
         }
     } else {
-        for (int i = 0; i < mScene->mNumLights; ++i) {
+        for (unsigned int i = 0; i < mScene->mNumLights; ++i) {
             const aiLight *light = mScene->mLights[i];
 
             mOutput << "# Light " << light->mName.C_Str() << "\n";
@@ -832,7 +832,7 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         "    \"integer indices\" [";
 
     // Start with faces (which hold indices)
-    for (int i = 0; i < mesh->mNumFaces; i++) {
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         auto face = mesh->mFaces[i];
         if (face.mNumIndices != 3) throw DeadlyExportError("oh no not a tri!");
 
@@ -845,7 +845,7 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
 
     // Then go to vertices
     mOutput << "    \"point3 P\" [";
-    for(int i = 0; i < mesh->mNumVertices; i++) {
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         auto vector = mesh->mVertices[i];
         mOutput << vector.x << " " << vector.y << " " << vector.z << "  ";
         if ((i % 4) == 3) mOutput << "\n    ";
@@ -855,7 +855,7 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
     // Normals (if present)
     if (mesh->mNormals) {
         mOutput << "    \"normal N\" [";
-        for (int i = 0; i < mesh->mNumVertices; i++) {
+        for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             auto normal = mesh->mNormals[i];
             mOutput << normal.x << " " << normal.y << " " << normal.z << "  ";
             if ((i % 4) == 3) mOutput << "\n    ";
@@ -866,7 +866,7 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
     // Tangents (if present)
     if (mesh->mTangents) {
         mOutput << "    \"vector3 S\" [";
-        for (int i = 0; i < mesh->mNumVertices; i++) {
+        for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             auto tangent = mesh->mTangents[i];
             mOutput << tangent.x << " " << tangent.y << " " << tangent.z << "  ";
             if ((i % 4) == 3) mOutput << "\n    ";
@@ -881,7 +881,7 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
             // assert(mesh->mTextureCoords[i] != nullptr);
             aiVector3D* uv = mesh->mTextureCoords[i];
             mOutput << "    \"point2 uv\" [";
-            for (int j = 0; j < mesh->mNumVertices; ++j) {
+            for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
                 mOutput << uv[j].x << " " << uv[j].y << " ";
                 if ((j % 6) == 5) mOutput << "\n    ";
             }
@@ -919,7 +919,7 @@ void PbrtExporter::WriteGeometricObjects(aiNode* node, aiMatrix4x4 worldFromObje
 
         mOutput << "  Transform [ " << TransformAsString(worldFromObject) << "]\n";
 
-        for (int i = 0; i < node->mNumMeshes; i++) {
+        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh* mesh = mScene->mMeshes[node->mMeshes[i]];
             if (meshUses[node->mMeshes[i]] == 1) {
                 // If it's only used once in the scene, emit it directly as
@@ -940,7 +940,7 @@ void PbrtExporter::WriteGeometricObjects(aiNode* node, aiMatrix4x4 worldFromObje
     }
 
     // Recurse through children
-    for (int i = 0; i < node->mNumChildren; i++) {
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
         WriteGeometricObjects(node->mChildren[i], worldFromObject, meshUses);
     }
 }

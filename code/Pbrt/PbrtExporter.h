@@ -103,9 +103,10 @@ private:
     std::set<std::string> mTextureSet;
 
     aiMatrix4x4 GetNodeTransform(const aiString& name) const;
-    static std::string TransformString(const aiMatrix4x4& m);
+    static std::string TransformAsString(const aiMatrix4x4& m);
 
-    static std::string CleanTextureFilename(const aiString &f, bool rewriteExtension = true);
+    static std::string RemoveSuffix(std::string filename);
+    std::string CleanTextureFilename(const aiString &f, bool rewriteExtension = true) const;
 
     void WriteMetaData();
 

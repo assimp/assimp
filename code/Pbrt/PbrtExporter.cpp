@@ -40,20 +40,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /* TODO:
-non-diffuse
-  metal?
-need to multiply texture by constant diffuse, etc color?
-bump mapping
 
-textures mirrored on bistro? (not paying attention to a uv mapping param?)
+Material improvements:
+- don't export embedded textures that we're not going to use
+- diffuse roughness
+- what is with the uv mapping, uv transform not coming through??
+- metal? glass? mirror?  detect these better?
+  - eta/k from RGB?
+- emissive textures: warn at least
 
-figure out what to do about normal maps
-emissive textures
-use aiProcess_GenUVCoords if needed to handle spherical/planar uv mapping?
-don't build up a big string in memory but write directly to a file
-aiProcess_Triangulate meshes to get triangles only?
-output PLY for big meshes?
-animation
+Other:
+- use aiProcess_GenUVCoords if needed to handle spherical/planar uv mapping?
+- don't build up a big string in memory but write directly to a file
+- aiProcess_Triangulate meshes to get triangles only?
+- animation (allow specifying a time)
+
  */
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -113,18 +114,17 @@ PbrtExporter::PbrtExporter (
   mPath(path),
   mFile(file)
 {
-    // Various warnings about unhandled things...
-    // TODO warn user if scene has animations
-    // TODO warn user if mScene->mFlags is nonzero
-    // TODO warn if a metadata defines the ambient term
-
+    // Export embedded textures.
+    if (mScene->mNumTextures > 0)
+        if (!mIOSystem->CreateDirectory("textures"))
+            throw DeadlyExportError("Could not create textures/ directory.");
     for (int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);
         std::cerr << "Writing embedded texture: " << tex->mFilename.C_Str() << " -> "
                   << fn << "\n";
 
-        std::unique_ptr<IOStream> outfile(mIOSystem->Open(fn, "wt"));
+        std::unique_ptr<IOStream> outfile(mIOSystem->Open(fn, "wb"));
         if (!outfile) {
             throw DeadlyExportError("could not open output texture file: " + fn);
         }
@@ -136,6 +136,8 @@ PbrtExporter::PbrtExporter (
         }
     }
 
+#if 0
+    // Debugging: print the full node hierarchy
     std::function<void(aiNode*, int)> visitNode;
     visitNode = [&](aiNode* node, int depth) {
         for (int i = 0; i < depth; ++i) std::cerr << "    ";
@@ -144,6 +146,7 @@ PbrtExporter::PbrtExporter (
             visitNode(node->mChildren[i], depth + 1);
     };
     visitNode(mScene->mRootNode, 0);
+#endif
 
     mOutput.precision(ASSIMP_AI_REAL_TEXT_PRECISION);
 
@@ -210,11 +213,11 @@ void PbrtExporter::WriteMetaData() {
                 std::size_t found = svalue.find_first_of("\n");
                 mOutput << "\n";
                 while (found != std::string::npos) {
-                    mOutput << "#     " << svalue.substr(0, found) << std::endl;
+                    mOutput << "#     " << svalue.substr(0, found) << "\n";
                     svalue = svalue.substr(found + 1);
                     found = svalue.find_first_of("\n");
                 }
-                mOutput << "#     " << svalue << std::endl;
+                mOutput << "#     " << svalue << "\n";
                 break;
             }
             case AI_AIVECTOR3D :
@@ -264,7 +267,7 @@ aiMatrix4x4 PbrtExporter::GetNodeTransform(const aiString &name) const {
     return m;
 }
 
-std::string PbrtExporter::TransformString(const aiMatrix4x4 &m) {
+std::string PbrtExporter::TransformAsString(const aiMatrix4x4 &m) {
     // Transpose on the way out to match pbrt's expected layout (sanity
     // check: the translation component should be the last 3 entries
     // before a '1' as the final entry in the matrix, assuming it's
@@ -282,7 +285,7 @@ void PbrtExporter::WriteCamera(int i) {
     bool cameraActive = i == 0;
 
     mOutput << "# - Camera " << i+1 <<  ": "
-        << camera->mName.C_Str() << std::endl;
+        << camera->mName.C_Str() << "\n";
 
     // Get camera aspect ratio
     float aspect = camera->mAspect;
@@ -290,7 +293,7 @@ void PbrtExporter::WriteCamera(int i) {
         aspect = 4.0/3.0;
         mOutput << "#   - Aspect ratio : 1.33333 (no aspect found, defaulting to 4/3)\n";
     } else {
-        mOutput << "#   - Aspect ratio : " << aspect << std::endl;
+        mOutput << "#   - Aspect ratio : " << aspect << "\n";
     }
 
     // Get Film xres and yres
@@ -328,21 +331,24 @@ void PbrtExporter::WriteCamera(int i) {
 
     if (!cameraActive)
         mOutput << "# ";
+    mOutput << "Scale -1 1 1\n";  // right handed -> left handed
+    if (!cameraActive)
+        mOutput << "# ";
     mOutput << "LookAt "
-        << position.x << " " << position.y << " " << position.z << std::endl;
+        << position.x << " " << position.y << " " << position.z << "\n";
     if (!cameraActive)
         mOutput << "# ";
     mOutput << "       "
-        << lookAt.x << " " << lookAt.y << " " << lookAt.z << std::endl;
+        << lookAt.x << " " << lookAt.y << " " << lookAt.z << "\n";
     if (!cameraActive)
         mOutput << "# ";
     mOutput << "       "
-        << up.x << " " << up.y << " " << up.z << std::endl;
+        << up.x << " " << up.y << " " << up.z << "\n";
 
     // Print camera descriptor
     if (!cameraActive)
         mOutput << "# ";
-    mOutput << "Camera \"perspective\" \"float fov\" " << "[" << fov << "]\n";
+    mOutput << "Camera \"perspective\" \"float fov\" " << "[" << fov << "]\n\n";
 }
 
 void PbrtExporter::WriteWorldDefinition() {
@@ -373,12 +379,14 @@ void PbrtExporter::WriteWorldDefinition() {
     WriteMaterials();
 
     // Object instance definitions
+    mOutput << "# Object instance definitions\n\n";
     for (const auto &mu : meshUses) {
         if (mu.second > 1) {
             WriteInstanceDefinition(mu.first);
         }
     }
 
+    mOutput << "# Geometry\n\n";
     aiMatrix4x4 worldFromObject;
     WriteGeometricObjects(mScene->mRootNode, worldFromObject, meshUses);
 }
@@ -427,7 +435,7 @@ void PbrtExporter::WriteTextures() {
 #endif
 
                 std::string mappingString;
-#if 1
+#if 0
                 if (mapMode[0] != mapMode[1])
                     std::cerr << "Different texture boundary mode for u and v for texture \"" <<
                         filename << "\". Using u for both.\n";
@@ -462,7 +470,7 @@ void PbrtExporter::WriteTextures() {
                 }
 #endif
 
-                std::string texName, texType;
+                std::string texName, texType, texOptions;
                 if (aiTextureType(tt) == aiTextureType_SHININESS ||
                     aiTextureType(tt) == aiTextureType_OPACITY ||
                     aiTextureType(tt) == aiTextureType_HEIGHT ||
@@ -470,14 +478,25 @@ void PbrtExporter::WriteTextures() {
                     aiTextureType(tt) == aiTextureType_METALNESS ||
                     aiTextureType(tt) == aiTextureType_DIFFUSE_ROUGHNESS) {
                     texType = "float";
-                    texName = std::string("float:") + filename;
-                } else {
+                    texName = std::string("float:") + RemoveSuffix(filename);
+
+                    if (aiTextureType(tt) == aiTextureType_SHININESS) {
+                        texOptions = "    \"bool invert\" true\n";
+                        texName += "_Roughness";
+                    }
+                } else if (aiTextureType(tt) == aiTextureType_DIFFUSE ||
+                           aiTextureType(tt) == aiTextureType_BASE_COLOR) {
                     texType = "spectrum";
-                    texName = std::string("rgb:") + filename;
+                    texName = std::string("rgb:") + RemoveSuffix(filename);
                 }
+
+                // Don't export textures we're not actually going to use...
+                if (texName.empty())
+                    continue;
 
                 if (mTextureSet.find(texName) == mTextureSet.end()) {
                     mOutput << "Texture \"" << texName << "\" \"" << texType << "\" \"imagemap\"\n"
+                            << texOptions
                             << "    \"string filename\" \"" << filename << "\" " << mappingString << '\n';
                     mTextureSet.insert(texName);
                 }
@@ -555,6 +574,7 @@ void PbrtExporter::WriteMaterials() {
     for (int i = 0; i < mScene->mNumMaterials; i++) {
         WriteMaterial(i);
     }
+    mOutput << "\n\n";
 }
 
 void PbrtExporter::WriteMaterial(int m) {
@@ -562,23 +582,19 @@ void PbrtExporter::WriteMaterial(int m) {
 
     // get material name
     auto materialName = material->GetName();
-    mOutput << std::endl << "# - Material " << m+1 <<  ": "
-        << materialName.C_Str() << std::endl;
+    mOutput << std::endl << "# - Material " << m+1 <<  ": " << materialName.C_Str() << "\n";
 
     // Print out number of properties
-    mOutput << "#   - Number of Material Properties: "
-        << material->mNumProperties << std::endl;
+    mOutput << "#   - Number of Material Properties: " << material->mNumProperties << "\n";
 
     // Print out texture type counts
-    int textureCounts[aiTextureType_UNKNOWN];
+    mOutput << "#   - Non-Zero Texture Type Counts: ";
     for (int i = 1; i <= aiTextureType_UNKNOWN; i++) {
-        textureCounts[i-1] = material->GetTextureCount(aiTextureType(i));
+        int count = material->GetTextureCount(aiTextureType(i));
+        if (count > 0)
+            mOutput << TextureTypeToString(aiTextureType(i)) << ": " <<  count << " ";
     }
-    mOutput << "#   - Texture Type Counts:\n";
-    for (int tt = 1; tt <= aiTextureType_UNKNOWN; tt++) {
-        mOutput << "#     - " << TextureTypeToString(aiTextureType(tt));
-        mOutput << ": " <<  textureCounts[tt - 1] << std::endl;
-    }
+    mOutput << "\n";
 
     auto White = [](aiColor3D c) { return c.r == 1 && c.g == 1 && c.b == 1; };
     auto Black = [](aiColor3D c) { return c.r == 0 && c.g == 0 && c.b == 0; };
@@ -599,14 +615,21 @@ void PbrtExporter::WriteMaterial(int m) {
     bool constantEta = (material->Get(AI_MATKEY_REFRACTI, eta) == AI_SUCCESS &&
                         eta != 1);
 
-    mOutput << "# Constants: diffuse " << constantDiffuse << " specular " << constantSpecular <<
+    mOutput << "#    - Constants: diffuse " << constantDiffuse << " specular " << constantSpecular <<
         " transprency " << constantTransparency << " opacity " << constantOpacity <<
         " shininess " << constantShininess << " shininess strength " << constantShininessStrength <<
         " eta " << constantEta << "\n";
 
-    if (constantShininess) {
+    aiString roughnessMap;
+    if (material->Get(AI_MATKEY_TEXTURE_SHININESS(0), roughnessMap) == AI_SUCCESS) {
+        std::string roughnessTexture = std::string("float:") +
+            RemoveSuffix(CleanTextureFilename(roughnessMap)) + "_Roughness";
+        mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
+                << " \"string type\" \"coateddiffuse\"\n"
+                << "    \"texture roughness\" \"" << roughnessTexture << "\"\n";
+    } else if (constantShininess) {
         // Assume plastic for now at least
-        float roughness = std::max(0.001f, 1.f - std::sqrt(shininess / 1000.f));
+        float roughness = std::max(0.f, 1.f - shininess);
         mOutput << "MakeNamedMaterial \"" << materialName.C_Str() << "\""
                 << " \"string type\" \"coateddiffuse\"\n"
                 << "    \"float roughness\" " << roughness << "\n";
@@ -617,19 +640,23 @@ void PbrtExporter::WriteMaterial(int m) {
 
     aiString diffuseTexture;
     if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), diffuseTexture) == AI_SUCCESS)
-        mOutput << "    \"texture reflectance\" \"rgb:" << CleanTextureFilename(diffuseTexture) << "\"\n";
+        mOutput << "    \"texture reflectance\" \"rgb:" << RemoveSuffix(CleanTextureFilename(diffuseTexture)) << "\"\n";
     else
         mOutput << "    \"rgb reflectance\" [ " << diffuse.r << " " << diffuse.g <<
             " " << diffuse.b << " ]\n";
 
-    aiString displacementTexture;
-    if (material->Get(AI_MATKEY_TEXTURE_HEIGHT(0), displacementTexture) == AI_SUCCESS)
-        mOutput << "    \"texture displacement\" \"float:" << CleanTextureFilename(displacementTexture) << "\"\n";
+    aiString displacementTexture, normalMap;
+    if (material->Get(AI_MATKEY_TEXTURE_NORMALS(0), displacementTexture) == AI_SUCCESS)
+        mOutput << "    \"string normalmap\" \"" << CleanTextureFilename(displacementTexture) << "\"\n";
+    else if (material->Get(AI_MATKEY_TEXTURE_HEIGHT(0), displacementTexture) == AI_SUCCESS)
+        mOutput << "    \"texture displacement\" \"float:" <<
+            RemoveSuffix(CleanTextureFilename(displacementTexture)) << "\"\n";
     else if (material->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), displacementTexture) == AI_SUCCESS)
-        mOutput << "    \"texture displacement\" \"float:" << CleanTextureFilename(displacementTexture) << "\"\n";
+        mOutput << "    \"texture displacement\" \"float:" <<
+            RemoveSuffix(CleanTextureFilename(displacementTexture)) << "\"\n";
 }
 
-std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteExtension) {
+std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteExtension) const {
     std::string fn = f.C_Str();
     // Remove directory name
     size_t offset = fn.find_last_of("/\\");
@@ -638,7 +665,7 @@ std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteEx
     }
 
     // Expect all textures in textures
-    fn = "textures/" + fn;
+    fn = std::string("textures") + mIOSystem->getOsSeparator() + fn;
 
     // Rewrite extension for unsupported file formats.
     if (rewriteExtension) {
@@ -666,6 +693,12 @@ std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteEx
     return fn;
 }
 
+std::string PbrtExporter::RemoveSuffix(std::string filename) {
+    size_t offset = filename.rfind('.');
+    if (offset != std::string::npos)
+        filename.erase(offset);
+    return filename;
+}
 
 void PbrtExporter::WriteLights() {
     mOutput << "\n";
@@ -690,7 +723,7 @@ void PbrtExporter::WriteLights() {
             mOutput << "AttributeBegin\n";
 
             aiMatrix4x4 worldFromLight = GetNodeTransform(light->mName);
-            mOutput << "    Transform [ " << TransformString(worldFromLight) << " ]\n";
+            mOutput << "    Transform [ " << TransformAsString(worldFromLight) << " ]\n";
 
             aiColor3D color = light->mColorDiffuse + light->mColorSpecular;
             if (light->mAttenuationConstant != 0)
@@ -763,57 +796,22 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
     aiMaterial* material = mScene->mMaterials[mesh->mMaterialIndex];
     mOutput << "    NamedMaterial \"" << material->GetName().C_Str() << "\"\n";
 
+    // Handle area lights
     aiColor3D emission;
     if (material->Get(AI_MATKEY_COLOR_EMISSIVE, emission) == AI_SUCCESS &&
         (emission.r > 0 || emission.g > 0 || emission.b > 0))
         mOutput << "    AreaLightSource \"diffuse\" \"rgb L\" [ " << emission.r <<
             " " << emission.g << " " << emission.b << " ]\n";
 
-    // Print out primitive types found
-    mOutput << "#   - Primitive Type(s):\n";
-    if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
-        mOutput << "#     - POINT\n";
-    if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
-        mOutput << "#     - LINE\n";
-    if (mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)
-        mOutput << "#     - TRIANGLE\n";
-    if (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)
-        mOutput << "#     - POLYGON\n";
-
     // Check if any types other than tri
     if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
         || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
         || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
-        mOutput << "# ERROR: PBRT Does not support POINT, LINE, POLY meshes\n";
+        std::cerr << "Error: ignoring point / line / polygon mesh " << mesh->mName.C_Str() << ".\n";
+        return;
     }
 
-    // Check for Normals
-    mOutput << "#   - Normals: ";
-    if (mesh->mNormals)
-        mOutput << "TRUE\n";
-    else
-        mOutput << "FALSE\n";
-
-    // Check for Tangents
-    mOutput << "#   - Tangents: ";
-    if (mesh->mTangents)
-        mOutput << "TRUE\n";
-    else
-        mOutput << "FALSE\n";
-
-    // Count number of texture coordinates
-    int numTextureCoords = 0;
-    for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++) {
-        if (mesh->mTextureCoords[i])
-            numTextureCoords++;
-    }
-    mOutput << "#   - Number of Texture Coordinates: "
-        << numTextureCoords << std::endl;
-    if (numTextureCoords > 1) {
-        mOutput << "# - Multiple Texture Coordinates found in scene\n";
-        mOutput << "#   - Defaulting to first Texture Coordinate specified\n";
-    }
-
+    // Alpha mask
     std::string alpha;
     aiString opacityTexture;
     if (material->Get(AI_MATKEY_TEXTURE_OPACITY(0), opacityTexture) == AI_SUCCESS ||
@@ -828,10 +826,12 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
             alpha = std::string("    \"float alpha\" [ ") + std::to_string(opacity) + " ]\n";
     }
 
+    // Output the shape specification
     mOutput << "Shape \"trianglemesh\"\n" <<
         alpha <<
         "    \"integer indices\" [";
-    //   Start with faces (which hold indices)
+
+    // Start with faces (which hold indices)
     for (int i = 0; i < mesh->mNumFaces; i++) {
         auto face = mesh->mFaces[i];
         if (face.mNumIndices != 3) throw DeadlyExportError("oh no not a tri!");
@@ -842,7 +842,8 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         if ((i % 7) == 6) mOutput << "\n    ";
     }
     mOutput << "]\n";
-    //   Then go to vertices
+
+    // Then go to vertices
     mOutput << "    \"point3 P\" [";
     for(int i = 0; i < mesh->mNumVertices; i++) {
         auto vector = mesh->mVertices[i];
@@ -850,7 +851,8 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         if ((i % 4) == 3) mOutput << "\n    ";
     }
     mOutput << "]\n";
-    //   Normals (if present)
+
+    // Normals (if present)
     if (mesh->mNormals) {
         mOutput << "    \"normal N\" [";
         for (int i = 0; i < mesh->mNumVertices; i++) {
@@ -860,7 +862,8 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         }
         mOutput << "]\n";
     }
-    //   Tangents (if present)
+
+    // Tangents (if present)
     if (mesh->mTangents) {
         mOutput << "    \"vector3 S\" [";
         for (int i = 0; i < mesh->mNumVertices; i++) {
@@ -870,7 +873,8 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         }
         mOutput << "]\n";
     }
-    //   Texture Coords (if present)
+
+    // Texture Coords (if present)
     // Find the first set of 2D texture coordinates..
     for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
         if (mesh->mNumUVComponents[i] == 2) {
@@ -913,14 +917,18 @@ void PbrtExporter::WriteGeometricObjects(aiNode* node, aiMatrix4x4 worldFromObje
     if (node->mNumMeshes > 0) {
         mOutput << "AttributeBegin\n";
 
-        mOutput << "  Transform [ " << TransformString(worldFromObject) << "]\n";
+        mOutput << "  Transform [ " << TransformAsString(worldFromObject) << "]\n";
 
         for (int i = 0; i < node->mNumMeshes; i++) {
             aiMesh* mesh = mScene->mMeshes[node->mMeshes[i]];
             if (meshUses[node->mMeshes[i]] == 1) {
+                // If it's only used once in the scene, emit it directly as
+                // a triangle mesh.
                 mOutput << "  # " << mesh->mName.C_Str();
                 WriteMesh(mesh);
             } else {
+                // If it's used multiple times, there will be an object
+                // instance for it, so emit a reference to that.
                 mOutput << "  ObjectInstance \"";
                 if (mesh->mName == aiString(""))
                     mOutput << "mesh_" << node->mMeshes[i] + 1 << "\"\n";

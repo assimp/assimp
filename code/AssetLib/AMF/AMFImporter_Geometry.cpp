@@ -61,12 +61,12 @@ namespace Assimp {
 void AMFImporter::ParseNode_Mesh(XmlNode &node) {
     AMFNodeElementBase *ne = nullptr;
 
-    // create new mesh object.
-    ne = new AMFMesh(mNodeElement_Cur);
     // Check for child nodes
     if (0 != ASSIMP_stricmp(node.name(), "mesh")) {
         return;
     }
+    // create new mesh object.
+    ne = new AMFMesh(mNodeElement_Cur);
     bool found_verts = false, found_volumes = false;
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);

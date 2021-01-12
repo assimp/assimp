@@ -727,7 +727,7 @@ void PbrtExporter::WriteLights() {
 
             aiColor3D color = light->mColorDiffuse + light->mColorSpecular;
             if (light->mAttenuationConstant != 0)
-                color = color * (1. / light->mAttenuationConstant);
+                color = color * (ai_real)(1. / light->mAttenuationConstant);
 
             switch (light->mType) {
             case aiLightSource_DIRECTIONAL: {
@@ -771,8 +771,8 @@ void PbrtExporter::WriteLights() {
                 mOutput << "        \"rgb L\" [ " << color.r << " " << color.g << " " << color.b << " ]\n";
                 mOutput << "    Shape \"bilinearmesh\"\n";
                 mOutput << "        \"point3 p\" [ ";
-                for (int i = 0; i < 4; ++i)
-                    mOutput << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z;
+                for (int j = 0; j < 4; ++j)
+                    mOutput << vertices[j].x << " " << vertices[j].y << " " << vertices[j].z;
                 mOutput << " ]\n";
                 mOutput << "        \"integer indices\" [ 0 1 2 3 ]\n";
                 break;

@@ -836,7 +836,7 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         auto face = mesh->mFaces[i];
         if (face.mNumIndices != 3) throw DeadlyExportError("oh no not a tri!");
 
-        for (int j = 0; j < face.mNumIndices; j++) {
+        for (unsigned int j = 0; j < face.mNumIndices; j++) {
             mOutput << face.mIndices[j] << " ";
         }
         if ((i % 7) == 6) mOutput << "\n    ";

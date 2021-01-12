@@ -6775,8 +6775,6 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
       stbi_uc *two_back = 0;
       stbi__gif g;
       int stride;
-      int out_size;
-      int delays_size;
       memset(&g, 0, sizeof(g));
       if (delays) {
          *delays = 0;
@@ -6793,7 +6791,7 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
             stride = g.w * g.h * 4;
 
             if (out) {
-               void *tmp = (stbi_uc*) STBI_REALLOC_SIZED( out, out_size, layers * stride );
+               void *tmp = (stbi_uc*) STBI_REALLOC( out, layers * stride );
                if (NULL == tmp) {
                   STBI_FREE(g.out);
                   STBI_FREE(g.history);
@@ -6802,21 +6800,16 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
                }
                else {
                    out = (stbi_uc*) tmp;
-                   out_size = layers * stride;
                }
 
                if (delays) {
-                  *delays = (int*) STBI_REALLOC_SIZED( *delays, delays_size, sizeof(int) * layers );
-                  delays_size = layers * sizeof(int);
+                  *delays = (int*) STBI_REALLOC( *delays, sizeof(int) * layers );
                }
             } else {
                out = (stbi_uc*)stbi__malloc( layers * stride );
-               out_size = layers * stride;
                if (delays) {
                   *delays = (int*) stbi__malloc( layers * sizeof(int) );
-                  delays_size = layers * sizeof(int);
-               } else
-                   delays_size = 0;
+               }
             }
             memcpy( out + ((layers - 1) * stride), u, stride );
             if (layers >= 2) {

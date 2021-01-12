@@ -46,11 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+
 
 #include <array>
 
 #include <assimp/pbrmaterial.h>
-
 using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
@@ -436,6 +438,31 @@ TEST_F(utglTF2ImportExport, error_string_preserved) {
     ASSERT_NE(error.find("BoxTextured0.bin"), std::string::npos) << "Error string should contain an error about missing .bin file";
 }
 
+TEST_F(utglTF2ImportExport, export_bad_accessor_bounds) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites.glb", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.glb"));
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.gltf"));
+}
+
+TEST_F(utglTF2ImportExport, export_normalized_normals) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals.glb", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals_out.glb"));
+
+    // load in again and ensure normal-length normals but no Nan's or Inf's introduced
+    scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals_out.glb", aiProcess_ValidateDataStructure);
+    for ( auto i = 0u; i < scene->mMeshes[0]->mNumVertices; ++i ) {
+        const auto length = scene->mMeshes[0]->mNormals[i].Length();
+        EXPECT_TRUE(abs(length) < 1e-6 || abs(length - 1) < 1e-6);
+    }
+}
+
 #endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utglTF2ImportExport, sceneMetadata) {
@@ -491,6 +518,12 @@ TEST_F(utglTF2ImportExport, texcoords) {
     EXPECT_EQ(uvIndex, 1);
 }
 
+TEST_F(utglTF2ImportExport, recursive_nodes) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/RecursiveNodes/RecursiveNodes.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+}
+
 TEST_F(utglTF2ImportExport, norootnode_noscene) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/NoScene.gltf", aiProcess_ValidateDataStructure);
@@ -502,4 +535,42 @@ TEST_F(utglTF2ImportExport, norootnode_scenewithoutnodes) {
     const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/TestNoRootNode/SceneWithoutNodes.gltf", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
     ASSERT_NE(scene->mRootNode, nullptr);
+}
+
+// Shall not crash!
+TEST_F(utglTF2ImportExport, norootnode_issue_3269) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/issue_3269/texcoord_crash.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+}
+
+TEST_F(utglTF2ImportExport, indexOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+
+    struct LogObserver : Assimp::LogStream {
+        bool m_observedWarning = false;
+        void write(const char *message) override {
+            m_observedWarning = m_observedWarning || std::strstr(message, "faces were dropped");
+        }
+    };
+    LogObserver logObserver;
+    
+    DefaultLogger::get()->attachStream(&logObserver);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mRootNode, nullptr);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 11u);
+    DefaultLogger::get()->detachStream(&logObserver);
+    EXPECT_TRUE(logObserver.m_observedWarning);
+}
+
+TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
+    // The contents of an asset should not lead to an assert.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/AllIndicesOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("Mesh \"Mesh\" has no faces"), std::string::npos);
 }

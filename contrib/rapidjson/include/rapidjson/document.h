@@ -17,6 +17,11 @@
 
 /*! \file document.h */
 
+#if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+
 #include "reader.h"
 #include "internal/meta.h"
 #include "internal/strfunc.h"
@@ -26,7 +31,7 @@
 #include <limits>
 
 RAPIDJSON_DIAG_PUSH
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !(__clang__)
 RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
 RAPIDJSON_DIAG_OFF(4244) // conversion from kXxxFlags to 'uint16_t', possible loss of data
 #endif
@@ -2609,5 +2614,9 @@ private:
 
 RAPIDJSON_NAMESPACE_END
 RAPIDJSON_DIAG_POP
+
+#if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
+#pragma GCC diagnostic pop
+#endif
 
 #endif // RAPIDJSON_DOCUMENT_H_

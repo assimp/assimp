@@ -52,9 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC system_header
 #endif
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable : 4351)
-#endif // _WIN32
+#endif // _MSC_VER
 
 #include <assimp/aabb.h>
 #include <assimp/types.h>
@@ -308,7 +308,10 @@ struct aiBone {
 
     //! Copy constructor
     aiBone(const aiBone &other) :
-            mName(other.mName), mNumWeights(other.mNumWeights), mWeights(nullptr), mOffsetMatrix(other.mOffsetMatrix) {
+            mName(other.mName),
+            mNumWeights(other.mNumWeights),
+            mWeights(nullptr),
+            mOffsetMatrix(other.mOffsetMatrix) {
         if (other.mWeights && other.mNumWeights) {
             mWeights = new aiVertexWeight[mNumWeights];
             ::memcpy(mWeights, other.mWeights, mNumWeights * sizeof(aiVertexWeight));
@@ -455,8 +458,8 @@ struct aiAnimMesh {
      */
     unsigned int mNumVertices;
 
-    /** 
-     * Weight of the AnimMesh. 
+    /**
+     * Weight of the AnimMesh.
      */
     float mWeight;
 
@@ -710,8 +713,8 @@ struct aiMesh {
      *  Note! Currently only works with Collada loader.*/
     C_STRUCT aiAnimMesh **mAnimMeshes;
 
-    /** 
-     *  Method of morphing when animeshes are specified. 
+    /**
+     *  Method of morphing when animeshes are specified.
      */
     unsigned int mMethod;
 

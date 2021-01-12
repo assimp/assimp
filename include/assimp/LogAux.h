@@ -61,9 +61,10 @@ template<class TDeriving>
 class LogFunctions {
 public:
     // ------------------------------------------------------------------------------------------------
-    static void ThrowException(const std::string& msg)
+    template<typename... T>
+    static void ThrowException(T&&... args)
     {
-        throw DeadlyImportError(Prefix()+msg);
+        throw DeadlyImportError(Prefix(), args...);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -91,6 +92,12 @@ public:
     static void LogDebug(const Formatter::format& message)  {
         if (!DefaultLogger::isNullLogger()) {
             ASSIMP_LOG_DEBUG(Prefix()+(std::string)message);
+        }
+    }
+
+    static void LogVerboseDebug(const Formatter::format& message)  {
+        if (!DefaultLogger::isNullLogger()) {
+            ASSIMP_LOG_VERBOSE_DEBUG(Prefix()+(std::string)message);
         }
     }
 
@@ -125,6 +132,12 @@ public:
         }
     }
 
+    // ------------------------------------------------------------------------------------------------
+    static void LogVerboseDebug  (const char* message) {
+        if (!DefaultLogger::isNullLogger()) {
+            LogVerboseDebug(Formatter::format(message));
+        }
+    }
 #endif
 
 private:

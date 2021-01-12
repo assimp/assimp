@@ -1626,7 +1626,7 @@ void xxxxImporter::InternReadFile( const std::string& pFile,
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {
-		throw DeadlyImportError( "Failed to open xxxx file " + pFile + ".");
+		throw DeadlyImportError( "Failed to open xxxx file ", pFile, ".");
 	}
 
 	// Your task: fill pScene

@@ -27,10 +27,10 @@ THE SOFTWARE.
 #include "o3dgcArithmeticCodec.h"
 #include "o3dgcTimer.h"
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #    pragma warning(push)
 #    pragma warning( disable : 4456)
-#endif // _WIN32
+#endif // _MSC_VER
 
 //#define DEBUG_VERBOSE
 
@@ -72,9 +72,12 @@ namespace o3dgc
         unsigned char mask = bstream.ReadUChar(m_iterator, m_streamType);
 
         ifs.SetCCW             ((mask & 1) == 1);
-        ifs.SetSolid           ((mask & 2) == 1);
-        ifs.SetConvex          ((mask & 4) == 1);
-        ifs.SetIsTriangularMesh((mask & 8) == 1);
+        // (mask & 2) == 1
+        ifs.SetSolid           (false);
+        // (mask & 4) == 1
+        ifs.SetConvex          (false);
+        // (mask & 8) == 1
+        ifs.SetIsTriangularMesh(false);
         //bool markerBit0 = (mask & 16 ) == 1;
         //bool markerBit1 = (mask & 32 ) == 1;
         //bool markerBit2 = (mask & 64 ) == 1;
@@ -849,9 +852,9 @@ namespace o3dgc
     }
 } // namespace o3dgc
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #    pragma warning( pop )
-#endif // _WIN32
+#endif // _MSC_VER
 
 #endif // O3DGC_SC3DMC_DECODER_INL
 

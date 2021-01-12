@@ -65,6 +65,10 @@ ADD_EXECUTABLE(  assimp_viewer WIN32
   SceneAnimator.cpp
   Shaders.cpp
   assimp_view.h
+  AnimEvaluator.h
+  SceneAnimator.h
+  MaterialManager.h
+  AssetHelper.h
   assimp_view.cpp
   stdafx.cpp
   assimp_view.rc
@@ -82,8 +86,9 @@ ADD_EXECUTABLE(  assimp_viewer WIN32
   txi.bmp
 )
 
-SET_PROPERTY(TARGET assimp_viewer PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_viewer)
 
+SET_PROPERTY(TARGET assimp_viewer PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 IF ( MSVC )
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )

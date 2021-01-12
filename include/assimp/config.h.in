@@ -616,6 +616,15 @@ enum aiComponent
     "IMPORT_FBX_READ_ANIMATIONS"
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read weights.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_WEIGHTS \
+    "IMPORT_FBX_READ_WEIGHTS"
+
+// ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will act in strict mode in which only
  *    FBX 2013 is supported and any other sub formats are rejected. FBX 2013
  *    is the primary target for the importer, so this format is best
@@ -1030,10 +1039,10 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
 // ---------------------------------------------------------------------------
-/** @brief Specifies whether the Collada loader should use Collada names as node names.
+/** @brief Specifies whether the Collada loader should use Collada names.
  *
- * If this property is set to true, the Collada names will be used as the
- * node name. The default is to use the id tag (resp. sid tag, if no id tag is present)
+ * If this property is set to true, the Collada names will be used as the node and
+ * mesh names. The default is to use the id tag (resp. sid tag, if no id tag is present)
  * instead.
  * Property type: Bool. Default value: false.
  */

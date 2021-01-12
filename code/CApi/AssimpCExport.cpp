@@ -48,108 +48,96 @@ Assimp C export interface. See Exporter.cpp for some notes.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 #include "CInterfaceIOWrapper.h"
-#include <assimp/SceneCombiner.h>
 #include "Common/ScenePrivate.h"
+#include <assimp/SceneCombiner.h>
 #include <assimp/Exporter.hpp>
 
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API size_t aiGetExportFormatCount(void)
-{
+ASSIMP_API size_t aiGetExportFormatCount(void) {
     return Exporter().GetExportFormatCount();
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t index)
-{
+ASSIMP_API const aiExportFormatDesc *aiGetExportFormatDescription(size_t index) {
     // Note: this is valid as the index always pertains to a built-in exporter,
     // for which the returned structure is guaranteed to be of static storage duration.
     Exporter exporter;
-    const aiExportFormatDesc* orig( exporter.GetExportFormatDescription( index ) );
-    if (NULL == orig) {
-        return NULL;
+    const aiExportFormatDesc *orig(exporter.GetExportFormatDescription(index));
+    if (nullptr == orig) {
+        return nullptr;
     }
 
     aiExportFormatDesc *desc = new aiExportFormatDesc;
-    desc->description = new char[ strlen( orig->description ) + 1 ]();
-    ::strncpy( (char*) desc->description, orig->description, strlen( orig->description ) );
-    desc->fileExtension = new char[ strlen( orig->fileExtension ) + 1 ]();
-    ::strncpy( ( char* ) desc->fileExtension, orig->fileExtension, strlen( orig->fileExtension ) );
-    desc->id = new char[ strlen( orig->id ) + 1 ]();
-    ::strncpy( ( char* ) desc->id, orig->id, strlen( orig->id ) );
+    desc->description = new char[strlen(orig->description) + 1]();
+    ::memcpy((char *)desc->description, orig->description, strlen(orig->description));
+    desc->fileExtension = new char[strlen(orig->fileExtension) + 1]();
+    ::memcpy((char *)desc->fileExtension, orig->fileExtension, strlen(orig->fileExtension));
+    desc->id = new char[strlen(orig->id) + 1]();
+    ::memcpy((char *)desc->id, orig->id, strlen(orig->id));
 
     return desc;
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiReleaseExportFormatDescription( const aiExportFormatDesc *desc ) {
-    if (NULL == desc) {
+ASSIMP_API void aiReleaseExportFormatDescription(const aiExportFormatDesc *desc) {
+    if (nullptr == desc) {
         return;
     }
 
-    delete [] desc->description;
-    delete [] desc->fileExtension;
-    delete [] desc->id;
+    delete[] desc->description;
+    delete[] desc->fileExtension;
+    delete[] desc->id;
     delete desc;
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
-{
+ASSIMP_API void aiCopyScene(const aiScene *pIn, aiScene **pOut) {
     if (!pOut || !pIn) {
         return;
     }
 
-    SceneCombiner::CopyScene(pOut,pIn,true);
+    SceneCombiner::CopyScene(pOut, pIn, true);
     ScenePriv(*pOut)->mIsCopy = true;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiFreeScene(const C_STRUCT aiScene* pIn)
-{
+ASSIMP_API void aiFreeScene(const C_STRUCT aiScene *pIn) {
     // note: aiReleaseImport() is also able to delete scene copies, but in addition
     // it also handles scenes with import metadata.
     delete pIn;
 }
 
-
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName, unsigned int pPreprocessing )
-{
-    return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL,pPreprocessing);
+ASSIMP_API aiReturn aiExportScene(const aiScene *pScene, const char *pFormatId, const char *pFileName, unsigned int pPreprocessing) {
+    return ::aiExportSceneEx(pScene, pFormatId, pFileName, nullptr, pPreprocessing);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatId, const char* pFileName, aiFileIO* pIO, unsigned int pPreprocessing )
-{
+ASSIMP_API aiReturn aiExportSceneEx(const aiScene *pScene, const char *pFormatId, const char *pFileName, aiFileIO *pIO, unsigned int pPreprocessing) {
     Exporter exp;
 
     if (pIO) {
         exp.SetIOHandler(new CIOSystemWrapper(pIO));
     }
-    return exp.Export(pScene,pFormatId,pFileName,pPreprocessing);
+    return exp.Export(pScene, pFormatId, pFileName, pPreprocessing);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing  )
-{
+ASSIMP_API const C_STRUCT aiExportDataBlob *aiExportSceneToBlob(const aiScene *pScene, const char *pFormatId, unsigned int pPreprocessing) {
     Exporter exp;
-    if (!exp.ExportToBlob(pScene,pFormatId,pPreprocessing)) {
-        return NULL;
+    if (!exp.ExportToBlob(pScene, pFormatId, pPreprocessing)) {
+        return nullptr;
     }
-    const aiExportDataBlob* blob = exp.GetOrphanedBlob();
+    const aiExportDataBlob *blob = exp.GetOrphanedBlob();
     ai_assert(blob);
 
     return blob;
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API C_STRUCT void aiReleaseExportBlob( const aiExportDataBlob* pData )
-{
+ASSIMP_API C_STRUCT void aiReleaseExportBlob(const aiExportDataBlob *pData) {
     delete pData;
 }
 

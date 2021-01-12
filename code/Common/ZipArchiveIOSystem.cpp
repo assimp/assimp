@@ -146,7 +146,6 @@ int IOSystem2Unzip::testerror(voidpf /*opaque*/, voidpf /*stream*/) {
 zlib_filefunc_def IOSystem2Unzip::get(IOSystem *pIOHandler) {
     zlib_filefunc_def mapping;
 
-#ifdef ASSIMP_USE_HUNTER
     mapping.zopen_file = (open_file_func)open;
     mapping.zread_file = (read_file_func)read;
     mapping.zwrite_file = (write_file_func)write;
@@ -154,15 +153,7 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem *pIOHandler) {
     mapping.zseek_file = (seek_file_func)seek;
     mapping.zclose_file = (close_file_func)close;
     mapping.zerror_file = (error_file_func)testerror;
-#else
-    mapping.zopen_file = open;
-    mapping.zread_file = read;
-    mapping.zwrite_file = write;
-    mapping.ztell_file = tell;
-    mapping.zseek_file = seek;
-    mapping.zclose_file = close;
-    mapping.zerror_file = testerror;
-#endif
+
     mapping.opaque = reinterpret_cast<voidpf>(pIOHandler);
 
     return mapping;
@@ -226,10 +217,28 @@ ZipFile *ZipFileInfo::Extract(unzFile zip_handle) const {
 
     ZipFile *zip_file = new ZipFile(m_Size);
 
-    if (unzReadCurrentFile(zip_handle, zip_file->m_Buffer.get(), static_cast<unsigned int>(m_Size)) != static_cast<int>(m_Size)) {
-        // Failed, release the memory
-        delete zip_file;
-        zip_file = nullptr;
+    // Unzip has a limit of UINT16_MAX bytes buffer
+    uint16_t unzipBufferSize = zip_file->m_Size <= UINT16_MAX ? static_cast<uint16_t>(zip_file->m_Size) : UINT16_MAX;
+    std::unique_ptr<uint8_t[]> unzipBuffer = std::unique_ptr<uint8_t[]>(new uint8_t[unzipBufferSize]);
+    size_t readCount = 0;
+    while (readCount < zip_file->m_Size)
+    {
+        size_t bufferSize = zip_file->m_Size - readCount;
+        if (bufferSize > UINT16_MAX) {
+            bufferSize = UINT16_MAX;
+        }
+
+        int ret = unzReadCurrentFile(zip_handle, unzipBuffer.get(), static_cast<unsigned int>(bufferSize));
+        if (ret != static_cast<int>(bufferSize))
+        {
+            // Failed, release the memory
+            delete zip_file;
+            zip_file = nullptr;
+            break;
+        }
+
+        std::memcpy(zip_file->m_Buffer.get() + readCount, unzipBuffer.get(), ret);
+        readCount += ret;
     }
 
     ai_assert(unzCloseCurrentFile(zip_handle) == UNZ_OK);
@@ -248,15 +257,18 @@ ZipFile::~ZipFile() {
 size_t ZipFile::Read(void *pvBuffer, size_t pSize, size_t pCount) {
     // Should be impossible
     ai_assert(m_Buffer != nullptr);
-    ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
+    ai_assert(nullptr != pvBuffer);
+    ai_assert(0 != pSize);
+    ai_assert(0 != pCount);
 
     // Clip down to file size
     size_t byteSize = pSize * pCount;
     if ((byteSize + m_SeekPtr) > m_Size) {
         pCount = (m_Size - m_SeekPtr) / pSize;
         byteSize = pSize * pCount;
-        if (byteSize == 0)
+        if (byteSize == 0) {
             return 0;
+        }
     }
 
     std::memcpy(pvBuffer, m_Buffer.get() + m_SeekPtr, byteSize);
@@ -332,7 +344,7 @@ ZipArchiveIOSystem::Implement::Implement(IOSystem *pIOHandler, const char *pFile
     if (pFilename[0] == 0 || nullptr == pMode) {
         return;
     }
-    
+
     zlib_filefunc_def mapping = IOSystem2Unzip::get(pIOHandler);
     m_ZipFileHandle = unzOpen2(pFilename, &mapping);
 }

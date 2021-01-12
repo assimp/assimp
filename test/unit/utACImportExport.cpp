@@ -101,6 +101,12 @@ TEST(utACImportExport, importWuson) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utACImportExport, importWusonACC) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/Wuson.acc", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
 TEST(utACImportExport, testFormatDetection) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/TestFormatDetection", aiProcess_ValidateDataStructure);

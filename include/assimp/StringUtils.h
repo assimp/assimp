@@ -44,14 +44,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_STRINGUTILS_H
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 #include <assimp/defs.h>
 
-#include <sstream>
 #include <stdarg.h>
+#include <algorithm>
+#include <cctype>
 #include <cstdlib>
+#include <locale>
+#include <sstream>
+
+#ifdef _MSC_VER
+#define AI_SIZEFMT "%Iu"
+#else
+#define AI_SIZEFMT "%zu"
+#endif
 
 ///	@fn		ai_snprintf
 ///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.
@@ -62,33 +71,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///	@return	The number of written characters if the buffer size was big enough. If an encoding error occurs, a negative number is returned.
 #if defined(_MSC_VER) && _MSC_VER < 1900
 
-    AI_FORCE_INLINE
-    int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap) {
-		int count(-1);
-		if (0 != size) {
-			count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
-		}
-		if (count == -1) {
-			count = _vscprintf(format, ap);
-		}
+AI_FORCE_INLINE
+int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap) {
+    int count(-1);
+    if (0 != size) {
+        count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+    }
+    if (count == -1) {
+        count = _vscprintf(format, ap);
+    }
 
-		return count;
-	}
+    return count;
+}
 
-    AI_FORCE_INLINE
-    int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
-		int count;
-		va_list ap;
+AI_FORCE_INLINE
+int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
+    int count;
+    va_list ap;
 
-		va_start(ap, format);
-		count = c99_ai_vsnprintf(outBuf, size, format, ap);
-		va_end(ap);
+    va_start(ap, format);
+    count = c99_ai_vsnprintf(outBuf, size, format, ap);
+    va_end(ap);
 
-		return count;
-	}
+    return count;
+}
 
+#elif defined(__MINGW32__)
+#define ai_snprintf __mingw_snprintf
 #else
-#   define ai_snprintf snprintf
+#define ai_snprintf snprintf
 #endif
 
 ///	@fn		to_string
@@ -96,8 +107,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///	@param	value   The value to write into the std::string.
 ///	@return	The value as a std::string
 template <typename T>
-AI_FORCE_INLINE
-std::string to_string( T value ) {
+AI_FORCE_INLINE std::string to_string(T value) {
     std::ostringstream os;
     os << value;
 
@@ -110,17 +120,17 @@ std::string to_string( T value ) {
 /// @param  end     The last character
 ///	@return	The float value, 0.0f in cas of an error.
 AI_FORCE_INLINE
-float ai_strtof( const char *begin, const char *end ) {
-    if ( nullptr == begin ) {
+float ai_strtof(const char *begin, const char *end) {
+    if (nullptr == begin) {
         return 0.0f;
     }
-    float val( 0.0f );
-    if ( nullptr == end ) {
-        val = static_cast< float >( ::atof( begin ) );
+    float val(0.0f);
+    if (nullptr == end) {
+        val = static_cast<float>(::atof(begin));
     } else {
-        std::string::size_type len( end - begin );
-        std::string token( begin, len );
-        val = static_cast< float >( ::atof( token.c_str() ) );
+        std::string::size_type len(end - begin);
+        std::string token(begin, len);
+        val = static_cast<float>(::atof(token.c_str()));
     }
 
     return val;
@@ -130,19 +140,56 @@ float ai_strtof( const char *begin, const char *end ) {
 ///	@brief	The portable to convert a decimal value into a hexadecimal string.
 ///	@param	toConvert   Value to convert
 ///	@return	The hexadecimal string, is empty in case of an error.
-template<class T>
-AI_FORCE_INLINE
-std::string DecimalToHexa( T toConvert ) {
+template <class T>
+AI_FORCE_INLINE std::string DecimalToHexa(T toConvert) {
     std::string result;
     std::stringstream ss;
     ss << std::hex << toConvert;
     ss >> result;
 
-    for ( size_t i = 0; i < result.size(); ++i ) {
-        result[ i ] = (char) toupper( result[ i ] );
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = (char)toupper(result[i]);
     }
 
     return result;
+}
+
+///	@brief	translate RGBA to String
+///	@param	r   aiColor.r
+///	@param	g   aiColor.g
+///	@param	b   aiColor.b
+///	@param	a   aiColor.a
+///	@param	with_head   #
+///	@return	The hexadecimal string, is empty in case of an error.
+AI_FORCE_INLINE std::string Rgba2Hex(int r, int g, int b, int a, bool with_head) {
+    std::stringstream ss;
+    if (with_head) {
+        ss << "#";
+    }
+    ss << std::hex << (r << 24 | g << 16 | b << 8 | a);
+
+    return ss.str();
+}
+
+// trim from start (in place)
+AI_FORCE_INLINE void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+AI_FORCE_INLINE void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(),
+            s.end());
+}
+
+// trim from both ends (in place)
+AI_FORCE_INLINE void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
 }
 
 #endif // INCLUDED_AI_STRINGUTILS_H

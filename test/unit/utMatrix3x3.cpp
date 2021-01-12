@@ -73,9 +73,21 @@ TEST_F(utMatrix3x3Test, FromToMatrixTest) {
 
     aiVector3D from, to;
 
+    auto random_ratio = []() -> float {
+        return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    };
+
     for (int i = 0; i < NUM_SAMPLES; ++i) {
-        from = aiVector3D(1.f * rand() / RAND_MAX, 1.f * rand() / RAND_MAX, 1.f * rand() / RAND_MAX).Normalize();
-        to = aiVector3D(1.f * rand() / RAND_MAX, 1.f * rand() / RAND_MAX, 1.f * rand() / RAND_MAX).Normalize();
+        from = aiVector3D(
+                1.f * random_ratio(),
+                1.f * random_ratio(),
+                1.f * random_ratio())
+                       .Normalize();
+        to = aiVector3D(
+                1.f * random_ratio(),
+                1.f * random_ratio(),
+                1.f * random_ratio())
+                     .Normalize();
 
         aiMatrix3x3::FromToMatrix(from, to, trafo);
         res = trafo * from;

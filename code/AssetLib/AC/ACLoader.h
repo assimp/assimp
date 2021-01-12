@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -117,7 +116,7 @@ public:
             Mask = 0xf,
         };
 
-        inline constexpr uint8_t GetType() const { return (flags & Mask); }
+        inline const uint8_t GetType() const { return (flags & Mask); }
     };
 
     // Represents an AC3D object

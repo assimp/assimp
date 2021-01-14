@@ -560,18 +560,17 @@ inline void BufferView::Read(Value &obj, Asset &r) {
         buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
 
+    if (!buffer) {
+        throw DeadlyImportError("GLTF: Buffer view without valid buffer.");
+    }
+
     byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     byteLength = MemberOrDefault(obj, "byteLength", size_t(0));
     byteStride = MemberOrDefault(obj, "byteStride", 0u);
 
     // Check length
     if ((byteOffset + byteLength) > buffer->byteLength) {
-        const uint8_t val_size = 64;
-
-        char val[val_size];
-
-        ai_snprintf(val, val_size, "%llu, %llu", (unsigned long long)byteOffset, (unsigned long long)byteLength);
-        throw DeadlyImportError("GLTF: Buffer view with offset/length (", val, ") is out of range.");
+        throw DeadlyImportError("GLTF: Buffer view with offset/length (", byteOffset, "/", byteLength, ") is out of range.");
     }
 }
 
@@ -649,13 +648,14 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     if (bufferView) {
         // Check length
         unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
+
+        // handle integer overflow
+        if (byteLength < count) {
+            throw DeadlyImportError("GLTF: Accessor with offset/count (", byteOffset, "/", count, ") is out of range.");
+        }
+
         if ((byteOffset + byteLength) > bufferView->byteLength || (bufferView->byteOffset + byteOffset + byteLength) > bufferView->buffer->byteLength) {
-            const uint8_t val_size = 64;
-
-            char val[val_size];
-
-            ai_snprintf(val, val_size, "%llu, %llu", (unsigned long long)byteOffset, (unsigned long long)byteLength);
-            throw DeadlyImportError("GLTF: Accessor with offset/length (", val, ") is out of range.");
+            throw DeadlyImportError("GLTF: Accessor with offset/length (", byteOffset, "/", byteLength, ") is out of range.");
         }
     }
 

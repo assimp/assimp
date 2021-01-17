@@ -154,6 +154,9 @@ const aiVector3t<TReal>& aiVector3t<TReal>::operator *= (TReal f) {
 template <typename TReal>
 AI_FORCE_INLINE
 const aiVector3t<TReal>& aiVector3t<TReal>::operator /= (TReal f) {
+    if ((T) f==0.0) {
+        return *this;
+    }
     const TReal invF = (TReal) 1.0 / f;
     x *= invF;
     y *= invF;

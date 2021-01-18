@@ -52,7 +52,7 @@ void ScenePreprocessor::ProcessScene() {
 
     // Process all meshes
     for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-        if (nullptr == scene->mMeshes[i] {
+        if (nullptr == scene->mMeshes[i]) {
             continue;
         }
         ProcessMesh(scene->mMeshes[i]);

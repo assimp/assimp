@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -52,8 +51,12 @@ void ScenePreprocessor::ProcessScene() {
     ai_assert(scene != nullptr);
 
     // Process all meshes
-    for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+    for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+        if (nullptr == scene->mMeshes[i]) {
+            continue;
+        }
         ProcessMesh(scene->mMeshes[i]);
+    }
 
     // - nothing to do for nodes for the moment
     // - nothing to do for textures for the moment
@@ -61,8 +64,12 @@ void ScenePreprocessor::ProcessScene() {
     // - nothing to do for cameras for the moment
 
     // Process all animations
-    for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
+    for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
+        if (nullptr == scene->mAnimations[i]) {
+            continue;
+        }
         ProcessAnimation(scene->mAnimations[i]);
+    }
 
     // Generate a default material if none was specified
     if (!scene->mNumMaterials && scene->mNumMeshes) {

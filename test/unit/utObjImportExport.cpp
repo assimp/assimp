@@ -477,3 +477,9 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
     EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
     EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
 }
+
+TEST_F(utObjImportExport, fuzzer_tests) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR"/OBJ/clusterfuzz-testcase-minimized-assimp_fuzzer-5912277674622976", 0);
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+}

@@ -75,7 +75,7 @@ static std::wstring Utf8ToWide(const char *in) {
     return out;
 }
 
-const std::wstring dummy;
+const std::string dummy;
 
 static std::string WideToUtf8(const wchar_t *in) {
     if (nullptr == in) {

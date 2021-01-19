@@ -117,7 +117,7 @@ IOStream *DefaultIOSystem::Open(const char *strFile, const char *strMode) {
     ai_assert(strMode != nullptr);
     FILE *file;
 #ifdef _WIN32
-    std::string name = Utf8ToWide(strFile);
+    std::wstring name = Utf8ToWide(strFile);
     if (name.empty()) {
         return nullptr;
     }

@@ -964,7 +964,9 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   IF ( NOT ASSIMP_BUILD_ZLIB )
     FIND_PACKAGE(ZLIB)
+    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
   ELSE()
+    MESSAGE(STATUS "compiling zlib from sources")
     SET( zlib_SRCS
       ../contrib/zlib/crc32.h
       ../contrib/zlib/deflate.h

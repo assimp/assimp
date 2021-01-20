@@ -951,6 +951,53 @@ ELSE()
   SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
 ENDIF()
 
+IF(ASSIMP_HUNTER_ENABLED)
+  hunter_add_package(ZLIB)
+  find_package(ZLIB CONFIG REQUIRED)
+
+  add_definitions(-DASSIMP_BUILD_NO_OWN_ZLIB)
+  set(ZLIB_FOUND TRUE)
+  set(ZLIB_LIBRARIES ZLIB::zlib)
+  set(ASSIMP_BUILD_MINIZIP TRUE)
+  SET(ZLIB_LIBRARIES_LINKED -lz)
+  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ELSE()
+  IF ( NOT ASSIMP_BUILD_ZLIB )
+    FIND_PACKAGE(ZLIB)
+  ELSE()
+    SET( zlib_SRCS
+      ../contrib/zlib/crc32.h
+      ../contrib/zlib/deflate.h
+      ../contrib/zlib/gzguts.h
+      ../contrib/zlib/inffast.h
+      ../contrib/zlib/inffixed.h
+      ../contrib/zlib/inflate.h
+      ../contrib/zlib/inftrees.h
+      ../contrib/zlib/trees.h
+      ../contrib/zlib/zutil.h
+      ../contrib/zlib/adler32.c
+      ../contrib/zlib/compress.c
+      ../contrib/zlib/crc32.c
+      ../contrib/zlib/deflate.c
+      ../contrib/zlib/gzclose.c
+      ../contrib/zlib/gzlib.c
+      ../contrib/zlib/gzread.c
+      ../contrib/zlib/gzwrite.c
+      ../contrib/zlib/inflate.c
+      ../contrib/zlib/infback.c
+      ../contrib/zlib/inftrees.c
+      ../contrib/zlib/inffast.c
+      ../contrib/zlib/trees.c
+      ../contrib/zlib/uncompr.c
+      ../contrib/zlib/zutil.c
+    )
+    INCLUDE_DIRECTORIES(../contrib/zlib/)
+    set( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+    set( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+    SOURCE_GROUP( zlib FILES ${zlib_SRCS} )
+  ENDIF()
+
+ENDIF()
 # openddlparser
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(openddlparser)
@@ -1098,6 +1145,7 @@ SET( assimp_src
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
   ${Pugixml_SRCS}
+  ${zlib_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}

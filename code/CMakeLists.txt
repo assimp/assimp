@@ -966,6 +966,9 @@ ELSE()
     FIND_PACKAGE(ZLIB)
     INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
   ELSE()
+    IF( BUILD_SHARED_LIBS)
+      ADD_DEFINITIONS(-DZLIB_DLL)
+    ENDIF()
     MESSAGE(STATUS "compiling zlib from sources")
     SET( zlib_SRCS
       ../contrib/zlib/crc32.h

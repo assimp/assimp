@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
 
 #include <assimp/types.h>
-//#include <assimp/material.h>
 #include <assimp/StreamWriter.h>
 #include <assimp/Exceptional.h>
 
@@ -62,8 +61,7 @@ struct aiNode;
 struct aiMaterial;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 class IOSystem;
 class IOStream;

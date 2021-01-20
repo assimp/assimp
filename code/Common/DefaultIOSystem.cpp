@@ -122,7 +122,7 @@ IOStream *DefaultIOSystem::Open(const char *strFile, const char *strMode) {
         return nullptr;
     }
     
-    file = ::_wfopen(, Utf8ToWide(strMode).c_str());
+    file = ::_wfopen(name.c_str(), Utf8ToWide(strMode).c_str());
 #else
     file = ::fopen(strFile, strMode);
 #endif

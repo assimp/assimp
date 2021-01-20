@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,71 +48,60 @@ using namespace Assimp;
 
 // CHAR_BIT seems to be defined under MVSC, but not under GCC. Pray that the correct value is 8.
 #ifndef CHAR_BIT
-#   define CHAR_BIT 8
+#define CHAR_BIT 8
 #endif
 
-#ifdef _WIN32
-#    pragma warning(disable : 4127)  
-#endif // _WIN32
+const aiVector3D PlaneInit(0.8523f, 0.34321f, 0.5736f);
 
 // ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
-SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions,
-    unsigned int pElementOffset)
-
-    // define the reference plane. We choose some arbitrary vector away from all basic axises
-    // in the hope that no model spreads all its vertices along this plane.
-    : mPlaneNormal(0.8523f, 0.34321f, 0.5736f)
-{
+// define the reference plane. We choose some arbitrary vector away from all basic axises
+// in the hope that no model spreads all its vertices along this plane.
+SpatialSort::SpatialSort(const aiVector3D *pPositions, unsigned int pNumPositions, unsigned int pElementOffset) :
+        mPlaneNormal(PlaneInit) {
     mPlaneNormal.Normalize();
-    Fill(pPositions,pNumPositions,pElementOffset);
+    Fill(pPositions, pNumPositions, pElementOffset);
 }
 
 // ------------------------------------------------------------------------------------------------
-SpatialSort :: SpatialSort()
-: mPlaneNormal(0.8523f, 0.34321f, 0.5736f)
-{
+SpatialSort::SpatialSort() :
+        mPlaneNormal(PlaneInit) {
     mPlaneNormal.Normalize();
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SpatialSort::~SpatialSort()
-{
-    // nothing to do here, everything destructs automatically
+SpatialSort::~SpatialSort() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions,
-    unsigned int pElementOffset,
-    bool pFinalize /*= true */)
-{
+void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,
+        unsigned int pElementOffset,
+        bool pFinalize /*= true */) {
     mPositions.clear();
-    Append(pPositions,pNumPositions,pElementOffset,pFinalize);
+    Append(pPositions, pNumPositions, pElementOffset, pFinalize);
 }
 
 // ------------------------------------------------------------------------------------------------
-void SpatialSort :: Finalize()
-{
-    std::sort( mPositions.begin(), mPositions.end());
+void SpatialSort::Finalize() {
+    std::sort(mPositions.begin(), mPositions.end());
 }
 
 // ------------------------------------------------------------------------------------------------
-void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositions,
-    unsigned int pElementOffset,
-    bool pFinalize /*= true */)
-{
+void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPositions,
+        unsigned int pElementOffset,
+        bool pFinalize /*= true */) {
     // store references to all given positions along with their distance to the reference plane
     const size_t initial = mPositions.size();
-    mPositions.reserve(initial + (pFinalize?pNumPositions:pNumPositions*2));
-    for( unsigned int a = 0; a < pNumPositions; a++)
-    {
-        const char* tempPointer = reinterpret_cast<const char*> (pPositions);
-        const aiVector3D* vec   = reinterpret_cast<const aiVector3D*> (tempPointer + a * pElementOffset);
+    mPositions.reserve(initial + (pFinalize ? pNumPositions : pNumPositions * 2));
+    for (unsigned int a = 0; a < pNumPositions; a++) {
+        const char *tempPointer = reinterpret_cast<const char *>(pPositions);
+        const aiVector3D *vec = reinterpret_cast<const aiVector3D *>(tempPointer + a * pElementOffset);
 
         // store position by index and distance
         ai_real distance = *vec * mPlaneNormal;
-        mPositions.push_back( Entry( static_cast<unsigned int>(a+initial), *vec, distance));
+        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec, distance));
     }
 
     if (pFinalize) {
@@ -125,9 +112,8 @@ void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositio
 
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
-void SpatialSort::FindPositions( const aiVector3D& pPosition,
-    ai_real pRadius, std::vector<unsigned int>& poResults) const
-{
+void SpatialSort::FindPositions(const aiVector3D &pPosition,
+        ai_real pRadius, std::vector<unsigned int> &poResults) const {
     const ai_real dist = pPosition * mPlaneNormal;
     const ai_real minDist = dist - pRadius, maxDist = dist + pRadius;
 
@@ -135,19 +121,18 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
     poResults.clear();
 
     // quick check for positions outside the range
-    if( mPositions.size() == 0)
+    if (mPositions.size() == 0)
         return;
-    if( maxDist < mPositions.front().mDistance)
+    if (maxDist < mPositions.front().mDistance)
         return;
-    if( minDist > mPositions.back().mDistance)
+    if (minDist > mPositions.back().mDistance)
         return;
 
     // do a binary search for the minimal distance to start the iteration there
     unsigned int index = (unsigned int)mPositions.size() / 2;
     unsigned int binaryStepSize = (unsigned int)mPositions.size() / 4;
-    while( binaryStepSize > 1)
-    {
-        if( mPositions[index].mDistance < minDist)
+    while (binaryStepSize > 1) {
+        if (mPositions[index].mDistance < minDist)
             index += binaryStepSize;
         else
             index -= binaryStepSize;
@@ -157,21 +142,20 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
 
     // depending on the direction of the last step we need to single step a bit back or forth
     // to find the actual beginning element of the range
-    while( index > 0 && mPositions[index].mDistance > minDist)
+    while (index > 0 && mPositions[index].mDistance > minDist)
         index--;
-    while( index < (mPositions.size() - 1) && mPositions[index].mDistance < minDist)
+    while (index < (mPositions.size() - 1) && mPositions[index].mDistance < minDist)
         index++;
 
     // Mow start iterating from there until the first position lays outside of the distance range.
     // Add all positions inside the distance range within the given radius to the result aray
     std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-    const ai_real pSquared = pRadius*pRadius;
-    while( it->mDistance < maxDist)
-    {
-        if( (it->mPosition - pPosition).SquareLength() < pSquared)
-            poResults.push_back( it->mIndex);
+    const ai_real pSquared = pRadius * pRadius;
+    while (it->mDistance < maxDist) {
+        if ((it->mPosition - pPosition).SquareLength() < pSquared)
+            poResults.push_back(it->mIndex);
         ++it;
-        if( it == mPositions.end())
+        if (it == mPositions.end())
             break;
     }
 
@@ -180,70 +164,71 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
 
 namespace {
 
-    // Binary, signed-integer representation of a single-precision floating-point value.
-    // IEEE 754 says: "If two floating-point numbers in the same format are ordered then they are
-    //  ordered the same way when their bits are reinterpreted as sign-magnitude integers."
-    // This allows us to convert all floating-point numbers to signed integers of arbitrary size
-    //  and then use them to work with ULPs (Units in the Last Place, for high-precision
-    //  computations) or to compare them (integer comparisons are faster than floating-point
-    //  comparisons on many platforms).
-    typedef ai_int BinFloat;
+// Binary, signed-integer representation of a single-precision floating-point value.
+// IEEE 754 says: "If two floating-point numbers in the same format are ordered then they are
+//  ordered the same way when their bits are reinterpreted as sign-magnitude integers."
+// This allows us to convert all floating-point numbers to signed integers of arbitrary size
+//  and then use them to work with ULPs (Units in the Last Place, for high-precision
+//  computations) or to compare them (integer comparisons are faster than floating-point
+//  comparisons on many platforms).
+typedef ai_int BinFloat;
 
-    // --------------------------------------------------------------------------------------------
-    // Converts the bit pattern of a floating-point number to its signed integer representation.
-    BinFloat ToBinary( const ai_real & pValue) {
+// --------------------------------------------------------------------------------------------
+// Converts the bit pattern of a floating-point number to its signed integer representation.
+BinFloat ToBinary(const ai_real &pValue) {
 
-        // If this assertion fails, signed int is not big enough to store a float on your platform.
-        //  Please correct the declaration of BinFloat a few lines above - but do it in a portable,
-        //  #ifdef'd manner!
-        static_assert( sizeof(BinFloat) >= sizeof(ai_real), "sizeof(BinFloat) >= sizeof(ai_real)");
+    // If this assertion fails, signed int is not big enough to store a float on your platform.
+    //  Please correct the declaration of BinFloat a few lines above - but do it in a portable,
+    //  #ifdef'd manner!
+    static_assert(sizeof(BinFloat) >= sizeof(ai_real), "sizeof(BinFloat) >= sizeof(ai_real)");
 
-        #if defined( _MSC_VER)
-            // If this assertion fails, Visual C++ has finally moved to ILP64. This means that this
-            //  code has just become legacy code! Find out the current value of _MSC_VER and modify
-            //  the #if above so it evaluates false on the current and all upcoming VC versions (or
-            //  on the current platform, if LP64 or LLP64 are still used on other platforms).
-            static_assert( sizeof(BinFloat) == sizeof(ai_real), "sizeof(BinFloat) == sizeof(ai_real)");
+#if defined(_MSC_VER)
+    // If this assertion fails, Visual C++ has finally moved to ILP64. This means that this
+    //  code has just become legacy code! Find out the current value of _MSC_VER and modify
+    //  the #if above so it evaluates false on the current and all upcoming VC versions (or
+    //  on the current platform, if LP64 or LLP64 are still used on other platforms).
+    static_assert(sizeof(BinFloat) == sizeof(ai_real), "sizeof(BinFloat) == sizeof(ai_real)");
 
-            // This works best on Visual C++, but other compilers have their problems with it.
-            const BinFloat binValue = reinterpret_cast<BinFloat const &>(pValue);
-        #else
-            // On many compilers, reinterpreting a float address as an integer causes aliasing
-            // problems. This is an ugly but more or less safe way of doing it.
-            union {
-                ai_real     asFloat;
-                BinFloat    asBin;
-            } conversion;
-            conversion.asBin    = 0; // zero empty space in case sizeof(BinFloat) > sizeof(float)
-            conversion.asFloat  = pValue;
-            const BinFloat binValue = conversion.asBin;
-        #endif
+    // This works best on Visual C++, but other compilers have their problems with it.
+    const BinFloat binValue = reinterpret_cast<BinFloat const &>(pValue);
+    //::memcpy(&binValue, &pValue, sizeof(pValue));
+    //return binValue;
+#else
+    // On many compilers, reinterpreting a float address as an integer causes aliasing
+    // problems. This is an ugly but more or less safe way of doing it.
+    union {
+        ai_real asFloat;
+        BinFloat asBin;
+    } conversion;
+    conversion.asBin = 0; // zero empty space in case sizeof(BinFloat) > sizeof(float)
+    conversion.asFloat = pValue;
+    const BinFloat binValue = conversion.asBin;
+#endif
 
-        // floating-point numbers are of sign-magnitude format, so find out what signed number
-        //  representation we must convert negative values to.
-        // See http://en.wikipedia.org/wiki/Signed_number_representations.
+    // floating-point numbers are of sign-magnitude format, so find out what signed number
+    //  representation we must convert negative values to.
+    // See http://en.wikipedia.org/wiki/Signed_number_representations.
+    const BinFloat mask = BinFloat(1) << (CHAR_BIT * sizeof(BinFloat) - 1);
 
-        // Two's complement?
-        if( (-42 == (~42 + 1)) && (binValue & 0x80000000))
-            return BinFloat(1 << (CHAR_BIT * sizeof(BinFloat) - 1)) - binValue;
-        // One's complement?
-        else if ( (-42 == ~42) && (binValue & 0x80000000))
-            return BinFloat(-0) - binValue;
-        // Sign-magnitude?
-        else if( (-42 == (42 | (-0))) && (binValue & 0x80000000)) // -0 = 1000... binary
-            return binValue;
-        else
-            return binValue;
-    }
+    // Two's complement?
+    const bool DefaultValue = ((-42 == (~42 + 1)) && (binValue & mask));
+    const bool OneComplement = ((-42 == ~42) && (binValue & mask));
+
+    if (DefaultValue)
+        return mask - binValue;
+    // One's complement?
+    else if (OneComplement)
+        return BinFloat(-0) - binValue;
+    // Sign-magnitude? -0 = 1000... binary
+    return binValue;
+}
 
 } // namespace
 
 // ------------------------------------------------------------------------------------------------
 // Fills an array with indices of all positions identical to the given position. In opposite to
 // FindPositions(), not an epsilon is used but a (very low) tolerance of four floating-point units.
-void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
-    std::vector<unsigned int>& poResults) const
-{
+void SpatialSort::FindIdenticalPositions(const aiVector3D &pPosition, std::vector<unsigned int> &poResults) const {
     // Epsilons have a huge disadvantage: they are of constant precision, while floating-point
     //  values are of log2 precision. If you apply e=0.01 to 100, the epsilon is rather small, but
     //  if you apply it to 0.001, it is enormous.
@@ -269,20 +254,19 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 
     // Convert the plane distance to its signed integer representation so the ULPs tolerance can be
     //  applied. For some reason, VC won't optimize two calls of the bit pattern conversion.
-    const BinFloat minDistBinary = ToBinary( pPosition * mPlaneNormal) - distanceToleranceInULPs;
+    const BinFloat minDistBinary = ToBinary(pPosition * mPlaneNormal) - distanceToleranceInULPs;
     const BinFloat maxDistBinary = minDistBinary + 2 * distanceToleranceInULPs;
 
     // clear the array in this strange fashion because a simple clear() would also deallocate
     // the array which we want to avoid
-    poResults.resize( 0 );
+    poResults.resize(0);
 
     // do a binary search for the minimal distance to start the iteration there
     unsigned int index = (unsigned int)mPositions.size() / 2;
     unsigned int binaryStepSize = (unsigned int)mPositions.size() / 4;
-    while( binaryStepSize > 1)
-    {
+    while (binaryStepSize > 1) {
         // Ugly, but conditional jumps are faster with integers than with floats
-        if( minDistBinary > ToBinary(mPositions[index].mDistance))
+        if (minDistBinary > ToBinary(mPositions[index].mDistance))
             index += binaryStepSize;
         else
             index -= binaryStepSize;
@@ -292,20 +276,19 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 
     // depending on the direction of the last step we need to single step a bit back or forth
     // to find the actual beginning element of the range
-    while( index > 0 && minDistBinary < ToBinary(mPositions[index].mDistance) )
+    while (index > 0 && minDistBinary < ToBinary(mPositions[index].mDistance))
         index--;
-    while( index < (mPositions.size() - 1) && minDistBinary > ToBinary(mPositions[index].mDistance))
+    while (index < (mPositions.size() - 1) && minDistBinary > ToBinary(mPositions[index].mDistance))
         index++;
 
     // Now start iterating from there until the first position lays outside of the distance range.
     // Add all positions inside the distance range within the tolerance to the result array
     std::vector<Entry>::const_iterator it = mPositions.begin() + index;
-    while( ToBinary(it->mDistance) < maxDistBinary)
-    {
-        if( distance3DToleranceInULPs >= ToBinary((it->mPosition - pPosition).SquareLength()))
+    while (ToBinary(it->mDistance) < maxDistBinary) {
+        if (distance3DToleranceInULPs >= ToBinary((it->mPosition - pPosition).SquareLength()))
             poResults.push_back(it->mIndex);
         ++it;
-        if( it == mPositions.end())
+        if (it == mPositions.end())
             break;
     }
 
@@ -313,22 +296,19 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill, ai_real pRadius) const
-{
-    fill.resize(mPositions.size(),UINT_MAX);
+unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int> &fill, ai_real pRadius) const {
+    fill.resize(mPositions.size(), UINT_MAX);
     ai_real dist, maxDist;
 
-    unsigned int t=0;
-    const ai_real pSquared = pRadius*pRadius;
+    unsigned int t = 0;
+    const ai_real pSquared = pRadius * pRadius;
     for (size_t i = 0; i < mPositions.size();) {
         dist = mPositions[i].mPosition * mPlaneNormal;
         maxDist = dist + pRadius;
 
         fill[mPositions[i].mIndex] = t;
-        const aiVector3D& oldpos = mPositions[i].mPosition;
-        for (++i; i < fill.size() && mPositions[i].mDistance < maxDist
-            && (mPositions[i].mPosition - oldpos).SquareLength() < pSquared; ++i)
-        {
+        const aiVector3D &oldpos = mPositions[i].mPosition;
+        for (++i; i < fill.size() && mPositions[i].mDistance < maxDist && (mPositions[i].mPosition - oldpos).SquareLength() < pSquared; ++i) {
             fill[mPositions[i].mIndex] = t;
         }
         ++t;
@@ -338,7 +318,7 @@ unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill, 
 
     // debug invariant: mPositions[i].mIndex values must range from 0 to mPositions.size()-1
     for (size_t i = 0; i < fill.size(); ++i) {
-        ai_assert(fill[i]<mPositions.size());
+        ai_assert(fill[i] < mPositions.size());
     }
 
 #endif

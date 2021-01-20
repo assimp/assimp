@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AbstractImportExportBase.h"
-#include "SceneDiffer.h"
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
@@ -50,7 +49,7 @@ using namespace Assimp;
 
 class utAMFImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test1.amf", aiProcess_ValidateDataStructure);
         return nullptr != scene;

@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 template <typename TReal> class aiVector3t;
 template <typename TReal> class aiMatrix3x3t;
+template <typename TReal> class aiMatrix4x4t;
 
 // ---------------------------------------------------------------------------
 /** Represents a quaternion in a 4D vector. */
@@ -88,6 +89,9 @@ public:
     bool operator== (const aiQuaterniont& o) const;
     bool operator!= (const aiQuaterniont& o) const;
 
+    // transform vector by matrix
+    aiQuaterniont& operator *= (const aiMatrix4x4t<TReal>& mat);
+
     bool Equal(const aiQuaterniont& o, TReal epsilon = 1e-6) const;
 
 public:
@@ -99,7 +103,7 @@ public:
     aiQuaterniont& Conjugate ();
 
     /** Rotate a point by this quaternion */
-    aiVector3t<TReal> Rotate (const aiVector3t<TReal>& in);
+    aiVector3t<TReal> Rotate (const aiVector3t<TReal>& in) const;
 
     /** Multiply two quaternions */
     aiQuaterniont operator* (const aiQuaterniont& two) const;

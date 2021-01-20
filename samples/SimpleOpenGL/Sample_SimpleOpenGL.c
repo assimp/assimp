@@ -15,15 +15,48 @@
 #include <stdio.h>
 
 #ifdef __APPLE__
-#include <glut.h>
+#include <freeglut.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
 
 /* assimp include files. These three are usually needed. */
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+#define COMMAND_USAGE "--usage"
+
+/* ---------------------------------------------------------------------------- */
+inline static void print_run_command(const char* command_name) {
+	printf("Run '%s %s' for more information.\n", 
+		PROJECT_NAME, command_name);
+}
+
+/* ---------------------------------------------------------------------------- */
+inline static void print_error(const char* msg) {
+	printf("ERROR: %s\n", msg);
+}
+
+#define NEW_LINE "\n"
+#define DOUBLE_NEW_LINE NEW_LINE NEW_LINE
+
+/* ---------------------------------------------------------------------------- */
+inline static void print_usage() {
+	static const char* usage_format = 
+		"Usage: "
+		PROJECT_NAME
+		" <file>"	 DOUBLE_NEW_LINE
+		"where:"	 DOUBLE_NEW_LINE
+		"  %-10s %s" DOUBLE_NEW_LINE
+		"options:"	 DOUBLE_NEW_LINE
+		"  %-10s %s" DOUBLE_NEW_LINE;
+	printf(usage_format,
+		// where
+		"file", "The input model file to load.",
+		// options
+		COMMAND_USAGE, "Display usage.");
+}
 
 /* the global Assimp scene object */
 const C_STRUCT aiScene* scene = NULL;
@@ -245,7 +278,7 @@ void do_motion (void)
 	static int frames = 0;
 
 	int time = glutGet(GLUT_ELAPSED_TIME);
-	angle += (time-prev_time)*0.01;
+	angle += (float)((time-prev_time)*0.01);
 	prev_time = time;
 
 	frames += 1;
@@ -324,12 +357,42 @@ int loadasset (const char* path)
 /* ---------------------------------------------------------------------------- */
 int main(int argc, char **argv)
 {
+	const char* model_file = NULL;
 	C_STRUCT aiLogStream stream;
+
+	if (argc < 2) {
+		print_error("No input model file specifed.");
+		print_run_command(COMMAND_USAGE);
+		return EXIT_FAILURE;
+	}
+
+	// Find and execute available commands entered by the user.
+	for (int i = 1; i < argc; ++i) {
+		if (!strncmp(argv[i], COMMAND_USAGE, strlen(COMMAND_USAGE))) {
+			print_usage();
+			return EXIT_SUCCESS;
+		}
+	}
+
+	// Check and validate the specified model file extension.
+	model_file = argv[1];
+	const char* extension = strrchr(model_file, '.');
+	if (!extension) {
+		print_error("Please provide a file with a valid extension.");
+		return EXIT_FAILURE;
+	}
+
+	if (AI_FALSE == aiIsExtensionSupported(extension)) {
+		print_error("The specified model file extension is currently "
+			"unsupported in Assimp " ASSIMP_VERSION ".");
+		return EXIT_FAILURE;
+	}
 
 	glutInitWindowSize(900,600);
 	glutInitWindowPosition(100,100);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInit(&argc, argv);
+	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
 	glutCreateWindow("Assimp - Very simple OpenGL sample");
 	glutDisplayFunc(display);
@@ -346,14 +409,11 @@ int main(int argc, char **argv)
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
 	aiAttachLogStream(&stream);
 
-	/* the model name can be specified on the command line. If none
-	  is specified, we try to locate one of the more expressive test
-	  models from the repository (/models-nonbsd may be missing in
-	  some distributions so we need a fallback from /models!). */
-	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models-nonbsd/X/dwarf.x")) {
-		if( argc != 1 || (0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X"))) {
-			return -1;
-		}
+	// Load the model file.
+	if(0 != loadasset(model_file)) {
+		print_error("Failed to load model. Please ensure that the specified file exists.");
+		aiDetachAllLogStreams();
+		return EXIT_FAILURE;
 	}
 
 	glClearColor(0.1f,0.1f,0.1f,1.f);
@@ -384,5 +444,5 @@ int main(int argc, char **argv)
 	   again. This will definitely release the last resources allocated
 	   by Assimp.*/
 	aiDetachAllLogStreams();
-	return 0;
+	return EXIT_SUCCESS;
 }

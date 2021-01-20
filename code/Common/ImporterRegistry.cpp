@@ -46,330 +46,330 @@ directly (unless you are adding new loaders), instead use the
 corresponding preprocessor flag to selectively disable formats.
 */
 
-#include <vector>
 #include <assimp/BaseImporter.h>
+#include <vector>
 
 // ------------------------------------------------------------------------------------------------
 // Importers
 // (include_new_importers_here)
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
-#   include "X/XFileImporter.h"
+#include "AssetLib/X/XFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
-#   include "AMF/AMFImporter.hpp"
+#include "AssetLib/AMF/AMFImporter.hpp"
 #endif
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
-#   include "3DS/3DSLoader.h"
+#include "AssetLib/3DS/3DSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
-#   include "MD3/MD3Loader.h"
+#include "AssetLib/MD3/MD3Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
-#   include "MDL/MDLLoader.h"
+#include "AssetLib/MDL/MDLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
-#   include "MD2/MD2Loader.h"
+#include "AssetLib/MD2/MD2Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
-#   include "Ply/PlyLoader.h"
+#include "AssetLib/Ply/PlyLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
-#   include "ASE/ASELoader.h"
+#include "AssetLib/ASE/ASELoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
-#   include "Obj/ObjFileImporter.h"
+#include "AssetLib/Obj/ObjFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
-#   include "HMP/HMPLoader.h"
+#include "AssetLib/HMP/HMPLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
-#   include "SMD/SMDLoader.h"
+#include "AssetLib/SMD/SMDLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
-#   include "MDC/MDCLoader.h"
+#include "AssetLib/MDC/MDCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
-#   include "MD5/MD5Loader.h"
+#include "AssetLib/MD5/MD5Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
-#   include "STL/STLLoader.h"
+#include "AssetLib/STL/STLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
-#   include "LWO/LWOLoader.h"
+#include "AssetLib/LWO/LWOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
-#   include "DXF/DXFLoader.h"
+#include "AssetLib/DXF/DXFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_NFF_IMPORTER
-#   include "NFF/NFFLoader.h"
+#include "AssetLib/NFF/NFFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
-#   include "Raw/RawLoader.h"
+#include "AssetLib/Raw/RawLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SIB_IMPORTER
-#   include "SIB/SIBImporter.h"
+#include "AssetLib/SIB/SIBImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
-#   include "OFF/OFFLoader.h"
+#include "AssetLib/OFF/OFFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
-#   include "AC/ACLoader.h"
+#include "AssetLib/AC/ACLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
-#   include "BVH/BVHLoader.h"
+#include "AssetLib/BVH/BVHLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-#   include "Irr/IRRMeshLoader.h"
+#include "AssetLib/Irr/IRRMeshLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
-#   include "Irr/IRRLoader.h"
+#include "AssetLib/Irr/IRRLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
-#   include "Q3D/Q3DLoader.h"
+#include "AssetLib/Q3D/Q3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
-#   include "B3D/B3DImporter.h"
+#include "AssetLib/B3D/B3DImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
-#   include "Collada/ColladaLoader.h"
+#include "AssetLib/Collada/ColladaLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
-#   include "Terragen/TerragenLoader.h"
+#include "AssetLib/Terragen/TerragenLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
-#   include "CSM/CSMLoader.h"
+#include "AssetLib/CSM/CSMLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_3D_IMPORTER
-#   include "Unreal/UnrealLoader.h"
+#include "AssetLib/Unreal/UnrealLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
-#   include "LWS/LWSLoader.h"
+#include "AssetLib/LWS/LWSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
-#   include "Ogre/OgreImporter.h"
+#include "AssetLib/Ogre/OgreImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
-#   include "OpenGEX/OpenGEXImporter.h"
+#include "AssetLib/OpenGEX/OpenGEXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
-#   include "MS3D/MS3DLoader.h"
+#include "AssetLib/MS3D/MS3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
-#   include "COB/COBLoader.h"
+#include "AssetLib/COB/COBLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
-#   include "Blender/BlenderLoader.h"
+#include "AssetLib/Blender/BlenderLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
-#   include "Q3BSP/Q3BSPFileImporter.h"
+#include "AssetLib/Q3BSP/Q3BSPFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
-#   include "NDO/NDOLoader.h"
+#include "AssetLib/NDO/NDOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#   include "Importer/IFC/IFCLoader.h"
+#include "AssetLib/IFC/IFCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
-#   include "XGL/XGLLoader.h"
+#include "AssetLib/XGL/XGLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
-#   include "FBX/FBXImporter.h"
+#include "AssetLib/FBX/FBXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
-#   include "Assbin/AssbinLoader.h"
+#include "AssetLib/Assbin/AssbinLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
-#   include "glTF/glTFImporter.h"
-#   include "glTF2/glTF2Importer.h"
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
+#include "AssetLib/glTF/glTFImporter.h"
+#endif
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
+#include "AssetLib/glTF2/glTF2Importer.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
-#   include "C4D/C4DImporter.h"
+#include "AssetLib/C4D/C4DImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
-#   include "3MF/D3MFImporter.h"
+#include "AssetLib/3MF/D3MFImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
-#   include "X3D/X3DImporter.hpp"
+#include "AssetLib/X3D/X3DImporter.hpp"
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
-#   include "MMD/MMDImporter.h"
+#include "AssetLib/MMD/MMDImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-#   include "M3D/M3DImporter.h"
+#include "AssetLib/M3D/M3DImporter.h"
 #endif
-//#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
-//#   include "Importer/StepFile/StepFileImporter.h"
-//#endif
 
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
-void GetImporterInstanceList(std::vector< BaseImporter* >& out)
-{
+void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
     // ----------------------------------------------------------------------------
     // Add an instance of each worker class here
     // (register_new_importers_here)
     // ----------------------------------------------------------------------------
     out.reserve(64);
 #if (!defined ASSIMP_BUILD_NO_X_IMPORTER)
-    out.push_back( new XFileImporter());
+    out.push_back(new XFileImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_OBJ_IMPORTER)
-    out.push_back( new ObjFileImporter());
+    out.push_back(new ObjFileImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
-	out.push_back( new AMFImporter() );
+    out.push_back(new AMFImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_3DS_IMPORTER)
-    out.push_back( new Discreet3DSImporter());
+    out.push_back(new Discreet3DSImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_M3D_IMPORTER)
-    out.push_back( new M3DImporter());
+    out.push_back(new M3DImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MD3_IMPORTER)
-    out.push_back( new MD3Importer());
+    out.push_back(new MD3Importer());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MD2_IMPORTER)
-    out.push_back( new MD2Importer());
+    out.push_back(new MD2Importer());
 #endif
 #if (!defined ASSIMP_BUILD_NO_PLY_IMPORTER)
-    out.push_back( new PLYImporter());
+    out.push_back(new PLYImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MDL_IMPORTER)
-    out.push_back( new MDLImporter());
+    out.push_back(new MDLImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_ASE_IMPORTER)
-  #if (!defined ASSIMP_BUILD_NO_3DS_IMPORTER)
-    out.push_back( new ASEImporter());
-#  endif
+#if (!defined ASSIMP_BUILD_NO_3DS_IMPORTER)
+    out.push_back(new ASEImporter());
+#endif
 #endif
 #if (!defined ASSIMP_BUILD_NO_HMP_IMPORTER)
-    out.push_back( new HMPImporter());
+    out.push_back(new HMPImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_SMD_IMPORTER)
-    out.push_back( new SMDImporter());
+    out.push_back(new SMDImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MDC_IMPORTER)
-    out.push_back( new MDCImporter());
+    out.push_back(new MDCImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MD5_IMPORTER)
-    out.push_back( new MD5Importer());
+    out.push_back(new MD5Importer());
 #endif
 #if (!defined ASSIMP_BUILD_NO_STL_IMPORTER)
-    out.push_back( new STLImporter());
+    out.push_back(new STLImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_LWO_IMPORTER)
-    out.push_back( new LWOImporter());
+    out.push_back(new LWOImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_DXF_IMPORTER)
-    out.push_back( new DXFImporter());
+    out.push_back(new DXFImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_NFF_IMPORTER)
-    out.push_back( new NFFImporter());
+    out.push_back(new NFFImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_RAW_IMPORTER)
-    out.push_back( new RAWImporter());
+    out.push_back(new RAWImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_SIB_IMPORTER)
-    out.push_back( new SIBImporter());
+    out.push_back(new SIBImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_OFF_IMPORTER)
-    out.push_back( new OFFImporter());
+    out.push_back(new OFFImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_AC_IMPORTER)
-    out.push_back( new AC3DImporter());
+    out.push_back(new AC3DImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_BVH_IMPORTER)
-    out.push_back( new BVHLoader());
+    out.push_back(new BVHLoader());
 #endif
 #if (!defined ASSIMP_BUILD_NO_IRRMESH_IMPORTER)
-    out.push_back( new IRRMeshImporter());
+    out.push_back(new IRRMeshImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_IRR_IMPORTER)
-    out.push_back( new IRRImporter());
+    out.push_back(new IRRImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_Q3D_IMPORTER)
-    out.push_back( new Q3DImporter());
+    out.push_back(new Q3DImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_B3D_IMPORTER)
-    out.push_back( new B3DImporter());
+    out.push_back(new B3DImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_COLLADA_IMPORTER)
-    out.push_back( new ColladaLoader());
+    out.push_back(new ColladaLoader());
 #endif
 #if (!defined ASSIMP_BUILD_NO_TERRAGEN_IMPORTER)
-    out.push_back( new TerragenImporter());
+    out.push_back(new TerragenImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_CSM_IMPORTER)
-    out.push_back( new CSMImporter());
+    out.push_back(new CSMImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_3D_IMPORTER)
-    out.push_back( new UnrealImporter());
+    out.push_back(new UnrealImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_LWS_IMPORTER)
-    out.push_back( new LWSImporter());
+    out.push_back(new LWSImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_OGRE_IMPORTER)
-    out.push_back( new Ogre::OgreImporter());
+    out.push_back(new Ogre::OgreImporter());
 #endif
-#if (!defined ASSIMP_BUILD_NO_OPENGEX_IMPORTER )
-    out.push_back( new OpenGEX::OpenGEXImporter() );
+#if (!defined ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
+    out.push_back(new OpenGEX::OpenGEXImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MS3D_IMPORTER)
-    out.push_back( new MS3DImporter());
+    out.push_back(new MS3DImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_COB_IMPORTER)
-    out.push_back( new COBImporter());
+    out.push_back(new COBImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_BLEND_IMPORTER)
-    out.push_back( new BlenderImporter());
+    out.push_back(new BlenderImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
-    out.push_back( new Q3BSPFileImporter() );
+    out.push_back(new Q3BSPFileImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_NDO_IMPORTER)
-    out.push_back( new NDOImporter() );
+    out.push_back(new NDOImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_IFC_IMPORTER)
-    out.push_back( new IFCImporter() );
+    out.push_back(new IFCImporter());
 #endif
-#if ( !defined ASSIMP_BUILD_NO_XGL_IMPORTER )
-    out.push_back( new XGLImporter() );
+#if (!defined ASSIMP_BUILD_NO_XGL_IMPORTER)
+    out.push_back(new XGLImporter());
 #endif
-#if ( !defined ASSIMP_BUILD_NO_FBX_IMPORTER )
-    out.push_back( new FBXImporter() );
+#if (!defined ASSIMP_BUILD_NO_FBX_IMPORTER)
+    out.push_back(new FBXImporter());
 #endif
-#if ( !defined ASSIMP_BUILD_NO_ASSBIN_IMPORTER )
-    out.push_back( new AssbinImporter() );
+#if (!defined ASSIMP_BUILD_NO_ASSBIN_IMPORTER)
+    out.push_back(new AssbinImporter());
 #endif
-#if ( !defined ASSIMP_BUILD_NO_GLTF_IMPORTER )
-    out.push_back( new glTFImporter() );
-    out.push_back( new glTF2Importer() );
+#if (!defined ASSIMP_BUILD_NO_GLTF_IMPORTER && !defined ASSIMP_BUILD_NO_GLTF1_IMPORTER)
+    out.push_back(new glTFImporter());
 #endif
-#if ( !defined ASSIMP_BUILD_NO_C4D_IMPORTER )
-    out.push_back( new C4DImporter() );
+#if (!defined ASSIMP_BUILD_NO_GLTF_IMPORTER && !defined ASSIMP_BUILD_NO_GLTF2_IMPORTER)
+    out.push_back(new glTF2Importer());
 #endif
-#if ( !defined ASSIMP_BUILD_NO_3MF_IMPORTER )
-    out.push_back( new D3MFImporter() );
+#if (!defined ASSIMP_BUILD_NO_C4D_IMPORTER)
+    out.push_back(new C4DImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_3MF_IMPORTER)
+    out.push_back(new D3MFImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
-    out.push_back( new X3DImporter() );
+    out.push_back(new X3DImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
-    out.push_back( new MMDImporter() );
+    out.push_back(new MMDImporter());
 #endif
-//#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
-//    out.push_back(new StepFile::StepFileImporter());
-//#endif
+    //#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
+    //    out.push_back(new StepFile::StepFileImporter());
+    //#endif
 }
 
 /** will delete all registered importers. */
-void DeleteImporterInstanceList(std::vector< BaseImporter* >& deleteList){
-	for(size_t i= 0; i<deleteList.size();++i){
-		delete deleteList[i];
-		deleteList[i]=nullptr;
-	}//for
+void DeleteImporterInstanceList(std::vector<BaseImporter *> &deleteList) {
+    for (size_t i = 0; i < deleteList.size(); ++i) {
+        delete deleteList[i];
+        deleteList[i] = nullptr;
+    } //for
 }
 
 } // namespace Assimp

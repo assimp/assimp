@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -91,7 +89,7 @@ ASSIMP_API unsigned int aiGetVersionMajor (void);
 ASSIMP_API unsigned int aiGetVersionRevision (void);
 
 // ---------------------------------------------------------------------------
-/** @brief Returns the branchname of the Assimp runtime.
+/** @brief Returns the branch-name of the Assimp runtime.
  *  @return The current branch name.
  */
 ASSIMP_API const char *aiGetBranchName();
@@ -107,12 +105,14 @@ ASSIMP_API const char *aiGetBranchName();
 #define ASSIMP_CFLAGS_NOBOOST           0x8
 //! Assimp was compiled with ASSIMP_BUILD_SINGLETHREADED defined
 #define ASSIMP_CFLAGS_SINGLETHREADED    0x10
+//! Assimp was compiled with ASSIMP_BUILD_SINGLETHREADED defined
+#define ASSIMP_CFLAGS_DOUBLE_SUPPORT 0x20
 
 // ---------------------------------------------------------------------------
 /** @brief Returns assimp's compile flags
  *  @return Any bitwise combination of the ASSIMP_CFLAGS_xxx constants.
  */
-ASSIMP_API unsigned int aiGetCompileFlags (void);
+ASSIMP_API unsigned int aiGetCompileFlags(void);
 
 #ifdef __cplusplus
 } // end extern "C"

@@ -54,18 +54,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_STRING_WORKERS_H
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
+#include <assimp/StringComparison.h>
 #include <assimp/ai_assert.h>
 #include <assimp/defs.h>
-#include <assimp/StringComparison.h>
 
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 #include <string>
 
-namespace Assimp    {
+namespace Assimp {
 
 // -------------------------------------------------------------------------------
 /** @brief itoa with a fixed base 10
@@ -79,12 +79,12 @@ namespace Assimp    {
  * @return Length of the output string, excluding the '\0'
  */
 AI_FORCE_INLINE
-unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number) {
-    ai_assert(NULL != out);
+unsigned int ASSIMP_itoa10(char *out, unsigned int max, int32_t number) {
+    ai_assert(nullptr != out);
 
     // write the unary minus to indicate we have a negative number
     unsigned int written = 1u;
-    if (number < 0 && written < max)    {
+    if (number < 0 && written < max) {
         *out++ = '-';
         ++written;
         number = -number;
@@ -93,17 +93,17 @@ unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number) {
     // We begin with the largest number that is not zero.
     int32_t cur = 1000000000; // 2147483648
     bool mustPrint = false;
-    while (written < max)   {
+    while (written < max) {
 
         const unsigned int digit = number / cur;
         if (mustPrint || digit > 0 || 1 == cur) {
             // print all future zeroe's from now
             mustPrint = true;
 
-            *out++ = '0'+static_cast<char>(digit);
+            *out++ = '0' + static_cast<char>(digit);
 
             ++written;
-            number -= digit*cur;
+            number -= digit * cur;
             if (1 == cur) {
                 break;
             }
@@ -113,7 +113,7 @@ unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number) {
 
     // append a terminal zero
     *out++ = '\0';
-    return written-1;
+    return written - 1;
 }
 
 // -------------------------------------------------------------------------------
@@ -122,9 +122,8 @@ unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number) {
  *  size of the array automatically.
  */
 template <size_t length>
-AI_FORCE_INLINE
-unsigned int ASSIMP_itoa10( char(& out)[length], int32_t number) {
-    return ASSIMP_itoa10(out,length,number);
+AI_FORCE_INLINE unsigned int ASSIMP_itoa10(char (&out)[length], int32_t number) {
+    return ASSIMP_itoa10(out, length, number);
 }
 
 // -------------------------------------------------------------------------------
@@ -140,23 +139,18 @@ unsigned int ASSIMP_itoa10( char(& out)[length], int32_t number) {
  */
 AI_FORCE_INLINE
 int ASSIMP_stricmp(const char *s1, const char *s2) {
-    ai_assert( NULL != s1 );
-    ai_assert( NULL != s2 );
+    ai_assert(nullptr != s1);
+    ai_assert(nullptr != s2);
 
 #if (defined _MSC_VER)
 
-    return ::_stricmp(s1,s2);
-#elif defined( __GNUC__ )
-
-    return ::strcasecmp(s1,s2);
+    return ::_stricmp(s1, s2);
 #else
-
     char c1, c2;
-    do  {
+    do {
         c1 = tolower(*s1++);
         c2 = tolower(*s2++);
-    }
-    while ( c1 && (c1 == c2) );
+    } while (c1 && (c1 == c2));
     return c1 - c2;
 #endif
 }
@@ -169,9 +163,9 @@ int ASSIMP_stricmp(const char *s1, const char *s2) {
  *  @return 0 if a == b
  */
 AI_FORCE_INLINE
-int ASSIMP_stricmp(const std::string& a, const std::string& b) {
-    int i = (int)b.length()-(int)a.length();
-    return (i ? i : ASSIMP_stricmp(a.c_str(),b.c_str()));
+int ASSIMP_stricmp(const std::string &a, const std::string &b) {
+    int i = (int)b.length() - (int)a.length();
+    return (i ? i : ASSIMP_stricmp(a.c_str(), b.c_str()));
 }
 
 // -------------------------------------------------------------------------------
@@ -188,35 +182,32 @@ int ASSIMP_stricmp(const std::string& a, const std::string& b) {
  */
 AI_FORCE_INLINE
 int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n) {
-    ai_assert( NULL != s1 );
-    ai_assert( NULL != s2 );
-    if ( !n ) {
+    ai_assert(nullptr != s1);
+    ai_assert(nullptr != s2);
+    if (!n) {
         return 0;
     }
 
 #if (defined _MSC_VER)
 
-    return ::_strnicmp(s1,s2,n);
+    return ::_strnicmp(s1, s2, n);
 
-#elif defined( __GNUC__ )
+#elif defined(__GNUC__)
 
-    return ::strncasecmp(s1,s2, n);
+    return ::strncasecmp(s1, s2, n);
 
 #else
     char c1, c2;
     unsigned int p = 0;
-    do
-    {
-        if (p++ >= n)return 0;
+    do {
+        if (p++ >= n) return 0;
         c1 = tolower(*s1++);
         c2 = tolower(*s2++);
-    }
-    while ( c1 && (c1 == c2) );
+    } while (c1 && (c1 == c2));
 
     return c1 - c2;
 #endif
 }
-
 
 // -------------------------------------------------------------------------------
 /** @brief Evaluates an integer power
@@ -224,15 +215,15 @@ int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n) {
  * todo: move somewhere where it fits better in than here
  */
 AI_FORCE_INLINE
-unsigned int integer_pow( unsigned int base, unsigned int power ) {
+unsigned int integer_pow(unsigned int base, unsigned int power) {
     unsigned int res = 1;
-    for ( unsigned int i = 0; i < power; ++i ) {
+    for (unsigned int i = 0; i < power; ++i) {
         res *= base;
     }
 
     return res;
 }
 
-} // end of namespace
+} // namespace Assimp
 
 #endif // !  AI_STRINGCOMPARISON_H_INC

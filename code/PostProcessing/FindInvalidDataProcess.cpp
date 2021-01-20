@@ -45,11 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
 
 // internal headers
-#    include "FindInvalidDataProcess.h"
-#    include "ProcessHelper.h"
+#include "FindInvalidDataProcess.h"
+#include "ProcessHelper.h"
 
-#    include <assimp/Exceptional.h>
-#    include <assimp/qnan.h>
+#include <assimp/Exceptional.h>
+#include <assimp/qnan.h>
 
 using namespace Assimp;
 
@@ -97,7 +97,7 @@ void UpdateMeshReferences(aiNode *node, const std::vector<unsigned int> &meshMap
         node->mNumMeshes = out;
         if (0 == out) {
             delete[] node->mMeshes;
-            node->mMeshes = NULL;
+            node->mMeshes = nullptr;
         }
     }
     // recursively update all children
@@ -124,9 +124,10 @@ void FindInvalidDataProcess::Execute(aiScene *pScene) {
         if (2 == result) {
             // remove this mesh
             delete pScene->mMeshes[a];
-            AI_DEBUG_INVALIDATE_PTR(pScene->mMeshes[a]);
+            pScene->mMeshes[a] = nullptr;
 
             meshMapping[a] = UINT_MAX;
+            out = true;
             continue;
         }
 
@@ -201,7 +202,7 @@ inline bool ProcessArray(T *&in, unsigned int num, const char *name,
     if (err) {
         ASSIMP_LOG_ERROR_F("FindInvalidDataProcess fails on mesh ", name, ": ", err);
         delete[] in;
-        in = NULL;
+        in = nullptr;
         return true;
     }
     return false;
@@ -345,7 +346,7 @@ int FindInvalidDataProcess::ProcessMesh(aiMesh *pMesh) {
                 // delete all subsequent texture coordinate sets.
                 for (unsigned int a = i + 1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
                     delete[] pMesh->mTextureCoords[a];
-                    pMesh->mTextureCoords[a] = NULL;
+                    pMesh->mTextureCoords[a] = nullptr;
                     pMesh->mNumUVComponents[a] = 0;
                 }
 
@@ -391,14 +392,14 @@ int FindInvalidDataProcess::ProcessMesh(aiMesh *pMesh) {
         // Process mesh tangents
         if (pMesh->mTangents && ProcessArray(pMesh->mTangents, pMesh->mNumVertices, "tangents", dirtyMask)) {
             delete[] pMesh->mBitangents;
-            pMesh->mBitangents = NULL;
+            pMesh->mBitangents = nullptr;
             ret = true;
         }
 
         // Process mesh bitangents
         if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents, pMesh->mNumVertices, "bitangents", dirtyMask)) {
             delete[] pMesh->mTangents;
-            pMesh->mTangents = NULL;
+            pMesh->mTangents = nullptr;
             ret = true;
         }
     }

@@ -197,9 +197,11 @@ TEST_F( utMetadata, copy_test ) {
     m_data->Set( 5, "aiString", strVal );
     aiVector3D vecVal( 1, 2, 3 );
     m_data->Set( 6, "aiVector3D", vecVal );
+    aiMetadata metaVal;
+    m_data->Set( 7, "aiMetadata", metaVal );
 
     aiMetadata copy( *m_data );
-    EXPECT_EQ( 7u, copy.mNumProperties );
+    EXPECT_EQ( 8u, copy.mNumProperties );
 
     // bool test
     {
@@ -250,5 +252,12 @@ TEST_F( utMetadata, copy_test ) {
         aiVector3D v;
         EXPECT_TRUE( copy.Get( "aiVector3D", v ) );
         EXPECT_EQ( vecVal, v );
+    }
+
+    // metadata test
+    {
+        aiMetadata v;
+        EXPECT_TRUE( copy.Get( "aiMetadata", v ) );
+        EXPECT_EQ( metaVal, v );
     }
 }

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -94,11 +93,15 @@ public:
     /** Post processing steps we can apply at the imported data. */
     std::vector< BaseProcess* > mPostProcessingSteps;
 
-    /** The imported data, if ReadFile() was successful, NULL otherwise. */
+    /** The imported data, if ReadFile() was successful, nullptr otherwise. */
     aiScene* mScene;
 
-    /** The error description, if there was one. */
+    /** The error description, if there was one. In the case of an exception,
+     *  mException will carry the full details. */
     std::string mErrorString;
+
+    /** Any exception which occurred */
+    std::exception_ptr mException;
 
     /** List of integer properties */
     IntPropertyMap mIntProperties;
@@ -124,25 +127,25 @@ public:
 };
 
 inline
-ImporterPimpl::ImporterPimpl() AI_NO_EXCEPT
-: mIOHandler( nullptr )
-, mIsDefaultHandler( false )
-, mProgressHandler( nullptr )
-, mIsDefaultProgressHandler( false )
-, mImporter()
-, mPostProcessingSteps()
-, mScene( nullptr )
-, mErrorString()
-, mIntProperties()
-, mFloatProperties()
-, mStringProperties()
-, mMatrixProperties()
-, bExtraVerbose( false )
-, mPPShared( nullptr ) {
+ImporterPimpl::ImporterPimpl() AI_NO_EXCEPT :
+        mIOHandler( nullptr ),
+        mIsDefaultHandler( false ),
+        mProgressHandler( nullptr ),
+        mIsDefaultProgressHandler( false ),
+        mImporter(),
+        mPostProcessingSteps(),
+        mScene( nullptr ),
+        mErrorString(),
+        mException(),
+        mIntProperties(),
+        mFloatProperties(),
+        mStringProperties(),
+        mMatrixProperties(),
+        bExtraVerbose( false ),
+        mPPShared( nullptr ) {
     // empty
 }
 //! @endcond
-
 
 struct BatchData;
 
@@ -154,17 +157,13 @@ struct BatchData;
  *  could, this has not yet been implemented at the moment).
  *
  *  @note The class may not be used by more than one thread*/
-class ASSIMP_API BatchLoader
-{
-    // friend of Importer
-
+class ASSIMP_API BatchLoader {
 public:
     //! @cond never
     // -------------------------------------------------------------------
     /** Wraps a full list of configuration properties for an importer.
      *  Properties can be set using SetGenericProperty */
-    struct PropertyMap
-    {
+    struct PropertyMap {
         ImporterPimpl::IntPropertyMap     ints;
         ImporterPimpl::FloatPropertyMap   floats;
         ImporterPimpl::StringPropertyMap  strings;
@@ -181,7 +180,6 @@ public:
     };
     //! @endcond
 
-public:
     // -------------------------------------------------------------------
     /** Construct a batch loader from a given IO system to be used
      *  to access external files 
@@ -216,7 +214,7 @@ public:
     unsigned int AddLoadRequest (
         const std::string& file,
         unsigned int steps = 0,
-        const PropertyMap* map = NULL
+            const PropertyMap *map = nullptr
         );
 
     // -------------------------------------------------------------------
@@ -226,7 +224,7 @@ public:
      *  can be called several times, too.
      *
      *  @param which LRWC returned by AddLoadRequest().
-     *  @return NULL if there is no scene with this file name
+     *  @return nullptr if there is no scene with this file name
      *  in the queue of the scene hasn't been loaded yet. */
     aiScene* GetImport(
         unsigned int which

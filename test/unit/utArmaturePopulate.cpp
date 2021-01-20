@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include "AbstractImportExportBase.h"
-#include "SceneDiffer.h"
 
 #include <assimp/material.h>
 #include <assimp/postprocess.h>

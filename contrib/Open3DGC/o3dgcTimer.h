@@ -28,7 +28,9 @@ THE SOFTWARE.
 
 #ifdef _WIN32
 /* Thank you, Microsoft, for file WinDef.h with min/max redefinition. */
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #elif __APPLE__
 #include <mach/clock.h>

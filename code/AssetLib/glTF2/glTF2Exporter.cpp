@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -1006,7 +1006,7 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
     node->name = name;
 
     if (!n->mTransformation.IsIdentity()) {
-		if (mScene->mNumAnimations > 0) {
+		if (mScene->mNumAnimations > 0 || (mProperties && mProperties->HasPropertyBool("GLTF2_NODE_IN_TRS"))) {
 			aiQuaternion quaternion;
 			n->mTransformation.Decompose(*reinterpret_cast<aiVector3D *>(&node->scale.value), quaternion, *reinterpret_cast<aiVector3D *>(&node->translation.value));
 

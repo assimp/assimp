@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -154,6 +152,9 @@ const aiVector3t<TReal>& aiVector3t<TReal>::operator *= (TReal f) {
 template <typename TReal>
 AI_FORCE_INLINE
 const aiVector3t<TReal>& aiVector3t<TReal>::operator /= (TReal f) {
+    if ( f == static_cast<TReal>(0.0)) {
+        return *this;
+    }
     const TReal invF = (TReal) 1.0 / f;
     x *= invF;
     y *= invF;

@@ -165,14 +165,14 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 	std::string type = node.attribute("type").as_string();
 	bool tiled = node.attribute("tiled").as_bool();
 
-	// create new texture object.
-    AMFNodeElementBase *ne = new AMFTexture(mNodeElement_Cur);
-
-	AMFTexture& als = *((AMFTexture*)ne);// alias for convenience
-
     if (node.empty()) {
 		return;
     }
+
+    // create new texture object.
+    AMFNodeElementBase *ne = new AMFTexture(mNodeElement_Cur);
+
+	AMFTexture& als = *((AMFTexture*)ne);// alias for convenience
 
     std::string enc64_data = node.value();
 	// Check for child nodes

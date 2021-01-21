@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StreamReader.h>
 #include <assimp/TinyFormatter.h>
 #ifdef ASSIMP_USE_HUNTER
-#include <utf8/utf8.h>
+#include <utf8.h>
 #else
 //#  include "../contrib/ConvertUTF/ConvertUTF.h"
 #include "../contrib/utf8cpp/source/utf8.h"
@@ -808,7 +808,7 @@ void SIBImporter::InternReadFile(const std::string &pFile,
 
     // We should have at least one chunk
     if (stream.GetRemainingSize() < 16)
-        throw DeadlyImportError("SIB file is either empty or corrupt: " + pFile);
+        throw DeadlyImportError("SIB file is either empty or corrupt: ", pFile);
 
     SIB sib;
 

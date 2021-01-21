@@ -52,8 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#define RAPIDJSON_HAS_STDSTRING 1
-#define RAPIDJSON_NOMEMBERITERATORCLASS
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
@@ -190,10 +188,10 @@ inline void CopyValue(const glTFCommon::mat4 &v, aiMatrix4x4 &o) {
     o.d4 = v[15];
 }
 
-#ifdef _WIN32
+#if _MSC_VER
 #    pragma warning(push)
 #    pragma warning(disable : 4310)
-#endif // _WIN32
+#endif // _MSC_VER
 
 inline std::string getCurrentAssetDir(const std::string &pFile) {
     std::string path = pFile;
@@ -204,9 +202,9 @@ inline std::string getCurrentAssetDir(const std::string &pFile) {
 
     return path;
 }
-#ifdef _WIN32
+#if _MSC_VER
 #    pragma warning(pop)
-#endif // _WIN32
+#endif // _MSC_VER
 
 namespace Util {
 
@@ -251,7 +249,10 @@ inline char EncodeCharBase64(uint8_t b) {
 }
 
 inline uint8_t DecodeCharBase64(char c) {
-    return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
+    if (c & 0x80) {
+        throw DeadlyImportError("Invalid base64 char value: ", size_t(c));
+    }
+    return DATA<true>::tableDecodeBase64[size_t(c & 0x7F)]; // TODO faster with lookup table or ifs?
 }
 
 size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out);

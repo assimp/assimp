@@ -522,8 +522,7 @@ namespace o3dgc
 
       buffer_size = max_code_bytes;                           // assign new memory
       delete [] new_buffer;                   // free anything previously assigned
-      if ((new_buffer = new unsigned char[buffer_size+16]) == 0) // 16 extra bytes
-        AC_Error("cannot assign memory for compressed data buffer");
+      new_buffer = new unsigned char[buffer_size+16];        // 16 extra bytes
       code_buffer = new_buffer;                  // set buffer for compressed data
     }
 
@@ -732,7 +731,6 @@ namespace o3dgc
           table_size = table_shift = 0;
           distribution = new unsigned[data_symbols];
         }
-        if (distribution == 0) AC_Error("cannot assign model memory");
       }
                                  // compute cumulative distribution, decoder table
       unsigned s = 0;
@@ -803,7 +801,6 @@ namespace o3dgc
           distribution = new unsigned[2*data_symbols];
         }
         symbol_count = distribution + data_symbols;
-        if (distribution == 0) AC_Error("cannot assign model memory");
       }
 
       reset();                                                 // initialize model

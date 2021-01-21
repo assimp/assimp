@@ -222,7 +222,7 @@ template <>
 struct MinMaxChooser<aiVertexWeight> {
     void operator()(aiVertexWeight &min, aiVertexWeight &max) {
         MinMaxChooser<unsigned int>()(min.mVertexId, max.mVertexId);
-        MinMaxChooser<float>()(min.mWeight, max.mWeight);
+        MinMaxChooser<ai_real>()(min.mWeight, max.mWeight);
     }
 };
 

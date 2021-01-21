@@ -84,8 +84,10 @@ typedef uint16_t M3D_INDEX;
 #ifndef M3D_BONEMAXLEVEL
 #define M3D_BONEMAXLEVEL 8
 #endif
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) || defined(__clang__)
+#ifndef _inline
 #define _inline __inline__
+#endif
 #define _pack __attribute__((packed))
 #define _unused __attribute__((unused))
 #else
@@ -99,13 +101,13 @@ typedef uint16_t M3D_INDEX;
 #define _register
 #endif
 
-#ifdef _WIN32
+#if _MSC_VER > 1920 && !defined(__clang__)
 #    pragma warning(push)
 #    pragma warning(disable : 4100 4127 4189 4505 4244 4403  4701 4703)
 #    if (_MSC_VER > 1800 )
 #        pragma warning(disable : 5573 5744)
 #    endif
-#endif // _WIN32
+#endif // _MSC_VER
 
 /*** File format structures ***/
 
@@ -684,7 +686,11 @@ typedef struct
 } _m3dstbi__result_info;
 
 #define STBI_ASSERT(v)
-#define STBI_NOTUSED(v) (void)sizeof(v)
+#ifdef _MSC_VER
+#define STBI_NOTUSED(v)  (void)(v)
+#else
+#define STBI_NOTUSED(v)  (void)sizeof(v)
+#endif
 #define STBI__BYTECAST(x) ((unsigned char)((x)&255))
 #define STBI_MALLOC(sz) M3D_MALLOC(sz)
 #define STBI_REALLOC(p, newsz) M3D_REALLOC(p, newsz)
@@ -695,10 +701,6 @@ _inline static unsigned char _m3dstbi__get8(_m3dstbi__context *s) {
     if (s->img_buffer < s->img_buffer_end)
         return *s->img_buffer++;
     return 0;
-}
-
-_inline static int _m3dstbi__at_eof(_m3dstbi__context *s) {
-    return s->img_buffer >= s->img_buffer_end;
 }
 
 static void _m3dstbi__skip(_m3dstbi__context *s, int n) {
@@ -819,7 +821,7 @@ static unsigned char *_m3dstbi__convert_format(unsigned char *data, int img_n, i
             break;
             STBI__CASE(4, 3) { dest[0] = src[0], dest[1] = src[1], dest[2] = src[2]; }
             break;
-            default: STBI_ASSERT(0);
+        default: STBI_ASSERT(0);
         }
 #undef STBI__CASE
     }
@@ -879,7 +881,7 @@ static _m3dstbi__uint16 *_m3dstbi__convert_format16(_m3dstbi__uint16 *data, int 
             break;
             STBI__CASE(4, 3) { dest[0] = src[0], dest[1] = src[1], dest[2] = src[2]; }
             break;
-            default: STBI_ASSERT(0);
+        default: STBI_ASSERT(0);
         }
 #undef STBI__CASE
     }
@@ -1356,13 +1358,13 @@ static int _m3dstbi__create_png_image_raw(_m3dstbi__png *a, unsigned char *raw, 
 
         for (k = 0; k < filter_bytes; ++k) {
             switch (filter) {
-                case STBI__F_none: cur[k] = raw[k]; break;
-                case STBI__F_sub: cur[k] = raw[k]; break;
-                case STBI__F_up: cur[k] = STBI__BYTECAST(raw[k] + prior[k]); break;
-                case STBI__F_avg: cur[k] = STBI__BYTECAST(raw[k] + (prior[k] >> 1)); break;
-                case STBI__F_paeth: cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(0, prior[k], 0)); break;
-                case STBI__F_avg_first: cur[k] = raw[k]; break;
-                case STBI__F_paeth_first: cur[k] = raw[k]; break;
+            case STBI__F_none: cur[k] = raw[k]; break;
+            case STBI__F_sub: cur[k] = raw[k]; break;
+            case STBI__F_up: cur[k] = STBI__BYTECAST(raw[k] + prior[k]); break;
+            case STBI__F_avg: cur[k] = STBI__BYTECAST(raw[k] + (prior[k] >> 1)); break;
+            case STBI__F_paeth: cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(0, prior[k], 0)); break;
+            case STBI__F_avg_first: cur[k] = raw[k]; break;
+            case STBI__F_paeth_first: cur[k] = raw[k]; break;
             }
         }
 
@@ -1392,21 +1394,21 @@ static int _m3dstbi__create_png_image_raw(_m3dstbi__png *a, unsigned char *raw, 
     case f:           \
         for (k = 0; k < nk; ++k)
             switch (filter) {
-                case STBI__F_none:
-                    memcpy(cur, raw, nk);
-                    break;
-                    STBI__CASE(STBI__F_sub) { cur[k] = STBI__BYTECAST(raw[k] + cur[k - filter_bytes]); }
-                    break;
-                    STBI__CASE(STBI__F_up) { cur[k] = STBI__BYTECAST(raw[k] + prior[k]); }
-                    break;
-                    STBI__CASE(STBI__F_avg) { cur[k] = STBI__BYTECAST(raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)); }
-                    break;
-                    STBI__CASE(STBI__F_paeth) { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); }
-                    break;
-                    STBI__CASE(STBI__F_avg_first) { cur[k] = STBI__BYTECAST(raw[k] + (cur[k - filter_bytes] >> 1)); }
-                    break;
-                    STBI__CASE(STBI__F_paeth_first) { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k - filter_bytes], 0, 0)); }
-                    break;
+            case STBI__F_none:
+                memcpy(cur, raw, nk);
+                break;
+                STBI__CASE(STBI__F_sub) { cur[k] = STBI__BYTECAST(raw[k] + cur[k - filter_bytes]); }
+                break;
+                STBI__CASE(STBI__F_up) { cur[k] = STBI__BYTECAST(raw[k] + prior[k]); }
+                break;
+                STBI__CASE(STBI__F_avg) { cur[k] = STBI__BYTECAST(raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)); }
+                break;
+                STBI__CASE(STBI__F_paeth) { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k - filter_bytes], prior[k], prior[k - filter_bytes])); }
+                break;
+                STBI__CASE(STBI__F_avg_first) { cur[k] = STBI__BYTECAST(raw[k] + (cur[k - filter_bytes] >> 1)); }
+                break;
+                STBI__CASE(STBI__F_paeth_first) { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k - filter_bytes], 0, 0)); }
+                break;
             }
 #undef STBI__CASE
             raw += nk;
@@ -1656,155 +1658,155 @@ static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp) {
     for (;;) {
         _m3dstbi__pngchunk c = _m3dstbi__get_chunk_header(s);
         switch (c.type) {
-            case STBI__PNG_TYPE('C', 'g', 'B', 'I'):
-                _m3dstbi__skip(s, c.length);
-                break;
-            case STBI__PNG_TYPE('I', 'H', 'D', 'R'): {
-                int comp, filter;
-                if (!first) return _m3dstbi__err("multiple IHDR", "Corrupt PNG");
-                first = 0;
-                if (c.length != 13) return _m3dstbi__err("bad IHDR len", "Corrupt PNG");
-                s->img_x = _m3dstbi__get32be(s);
-                if (s->img_x > (1 << 24)) return _m3dstbi__err("too large", "Very large image (corrupt?)");
-                s->img_y = _m3dstbi__get32be(s);
-                if (s->img_y > (1 << 24)) return _m3dstbi__err("too large", "Very large image (corrupt?)");
-                z->depth = _m3dstbi__get8(s);
-                if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16) return _m3dstbi__err("1/2/4/8/16-bit only", "PNG not supported: 1/2/4/8/16-bit only");
-                color = _m3dstbi__get8(s);
-                if (color > 6) return _m3dstbi__err("bad ctype", "Corrupt PNG");
-                if (color == 3 && z->depth == 16) return _m3dstbi__err("bad ctype", "Corrupt PNG");
-                if (color == 3)
-                    pal_img_n = 3;
-                else if (color & 1)
-                    return _m3dstbi__err("bad ctype", "Corrupt PNG");
-                comp = _m3dstbi__get8(s);
-                if (comp) return _m3dstbi__err("bad comp method", "Corrupt PNG");
-                filter = _m3dstbi__get8(s);
-                if (filter) return _m3dstbi__err("bad filter method", "Corrupt PNG");
-                interlace = _m3dstbi__get8(s);
-                if (interlace > 1) return _m3dstbi__err("bad interlace method", "Corrupt PNG");
-                if (!s->img_x || !s->img_y) return _m3dstbi__err("0-pixel image", "Corrupt PNG");
-                if (!pal_img_n) {
-                    s->img_n = (color & 2 ? 3 : 1) + (color & 4 ? 1 : 0);
-                    if ((1 << 30) / s->img_x / s->img_n < s->img_y) return _m3dstbi__err("too large", "Image too large to decode");
-                    if (scan == STBI__SCAN_header) return 1;
-                } else {
-                    s->img_n = 1;
-                    if ((1 << 30) / s->img_x / 4 < s->img_y) return _m3dstbi__err("too large", "Corrupt PNG");
-                }
-                break;
+        case STBI__PNG_TYPE('C', 'g', 'B', 'I'):
+            _m3dstbi__skip(s, c.length);
+            break;
+        case STBI__PNG_TYPE('I', 'H', 'D', 'R'): {
+            int comp, filter;
+            if (!first) return _m3dstbi__err("multiple IHDR", "Corrupt PNG");
+            first = 0;
+            if (c.length != 13) return _m3dstbi__err("bad IHDR len", "Corrupt PNG");
+            s->img_x = _m3dstbi__get32be(s);
+            if (s->img_x > (1 << 24)) return _m3dstbi__err("too large", "Very large image (corrupt?)");
+            s->img_y = _m3dstbi__get32be(s);
+            if (s->img_y > (1 << 24)) return _m3dstbi__err("too large", "Very large image (corrupt?)");
+            z->depth = _m3dstbi__get8(s);
+            if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16) return _m3dstbi__err("1/2/4/8/16-bit only", "PNG not supported: 1/2/4/8/16-bit only");
+            color = _m3dstbi__get8(s);
+            if (color > 6) return _m3dstbi__err("bad ctype", "Corrupt PNG");
+            if (color == 3 && z->depth == 16) return _m3dstbi__err("bad ctype", "Corrupt PNG");
+            if (color == 3)
+                pal_img_n = 3;
+            else if (color & 1)
+                return _m3dstbi__err("bad ctype", "Corrupt PNG");
+            comp = _m3dstbi__get8(s);
+            if (comp) return _m3dstbi__err("bad comp method", "Corrupt PNG");
+            filter = _m3dstbi__get8(s);
+            if (filter) return _m3dstbi__err("bad filter method", "Corrupt PNG");
+            interlace = _m3dstbi__get8(s);
+            if (interlace > 1) return _m3dstbi__err("bad interlace method", "Corrupt PNG");
+            if (!s->img_x || !s->img_y) return _m3dstbi__err("0-pixel image", "Corrupt PNG");
+            if (!pal_img_n) {
+                s->img_n = (color & 2 ? 3 : 1) + (color & 4 ? 1 : 0);
+                if ((1 << 30) / s->img_x / s->img_n < s->img_y) return _m3dstbi__err("too large", "Image too large to decode");
+                if (scan == STBI__SCAN_header) return 1;
+            } else {
+                s->img_n = 1;
+                if ((1 << 30) / s->img_x / 4 < s->img_y) return _m3dstbi__err("too large", "Corrupt PNG");
             }
+            break;
+        }
 
-            case STBI__PNG_TYPE('P', 'L', 'T', 'E'): {
-                if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
-                if (c.length > 256 * 3) return _m3dstbi__err("invalid PLTE", "Corrupt PNG");
-                pal_len = c.length / 3;
-                if (pal_len * 3 != c.length) return _m3dstbi__err("invalid PLTE", "Corrupt PNG");
-                for (i = 0; i < pal_len; ++i) {
-                    palette[i * 4 + 0] = _m3dstbi__get8(s);
-                    palette[i * 4 + 1] = _m3dstbi__get8(s);
-                    palette[i * 4 + 2] = _m3dstbi__get8(s);
-                    palette[i * 4 + 3] = 255;
-                }
-                break;
+        case STBI__PNG_TYPE('P', 'L', 'T', 'E'): {
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (c.length > 256 * 3) return _m3dstbi__err("invalid PLTE", "Corrupt PNG");
+            pal_len = c.length / 3;
+            if (pal_len * 3 != c.length) return _m3dstbi__err("invalid PLTE", "Corrupt PNG");
+            for (i = 0; i < pal_len; ++i) {
+                palette[i * 4 + 0] = _m3dstbi__get8(s);
+                palette[i * 4 + 1] = _m3dstbi__get8(s);
+                palette[i * 4 + 2] = _m3dstbi__get8(s);
+                palette[i * 4 + 3] = 255;
             }
+            break;
+        }
 
-            case STBI__PNG_TYPE('t', 'R', 'N', 'S'): {
-                if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
-                if (z->idata) return _m3dstbi__err("tRNS after IDAT", "Corrupt PNG");
-                if (pal_img_n) {
-                    if (scan == STBI__SCAN_header) {
-                        s->img_n = 4;
-                        return 1;
-                    }
-                    if (pal_len == 0) return _m3dstbi__err("tRNS before PLTE", "Corrupt PNG");
-                    if (c.length > pal_len) return _m3dstbi__err("bad tRNS len", "Corrupt PNG");
-                    pal_img_n = 4;
-                    for (i = 0; i < c.length; ++i)
-                        palette[i * 4 + 3] = _m3dstbi__get8(s);
-                } else {
-                    if (!(s->img_n & 1)) return _m3dstbi__err("tRNS with alpha", "Corrupt PNG");
-                    if (c.length != (_m3dstbi__uint32)s->img_n * 2) return _m3dstbi__err("bad tRNS len", "Corrupt PNG");
-                    has_trans = 1;
-                    if (z->depth == 16) {
-                        for (k = 0; k < s->img_n; ++k)
-                            tc16[k] = (_m3dstbi__uint16)_m3dstbi__get16be(s);
-                    } else {
-                        for (k = 0; k < s->img_n; ++k)
-                            tc[k] = (unsigned char)(_m3dstbi__get16be(s) & 255) * _m3dstbi__depth_scale_table[z->depth];
-                    }
-                }
-                break;
-            }
-
-            case STBI__PNG_TYPE('I', 'D', 'A', 'T'): {
-                if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
-                if (pal_img_n && !pal_len) return _m3dstbi__err("no PLTE", "Corrupt PNG");
+        case STBI__PNG_TYPE('t', 'R', 'N', 'S'): {
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (z->idata) return _m3dstbi__err("tRNS after IDAT", "Corrupt PNG");
+            if (pal_img_n) {
                 if (scan == STBI__SCAN_header) {
-                    s->img_n = pal_img_n;
+                    s->img_n = 4;
                     return 1;
                 }
-                if ((int)(ioff + c.length) < (int)ioff) return 0;
-                if (ioff + c.length > idata_limit) {
-                    _m3dstbi__uint32 idata_limit_old = idata_limit;
-                    unsigned char *p;
-                    if (idata_limit == 0) idata_limit = c.length > 4096 ? c.length : 4096;
-                    while (ioff + c.length > idata_limit)
-                        idata_limit *= 2;
-                    STBI_NOTUSED(idata_limit_old);
-                    p = (unsigned char *)STBI_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit);
-                    if (p == NULL) return _m3dstbi__err("outofmem", "Out of memory");
-                    z->idata = p;
+                if (pal_len == 0) return _m3dstbi__err("tRNS before PLTE", "Corrupt PNG");
+                if (c.length > pal_len) return _m3dstbi__err("bad tRNS len", "Corrupt PNG");
+                pal_img_n = 4;
+                for (i = 0; i < c.length; ++i)
+                    palette[i * 4 + 3] = _m3dstbi__get8(s);
+            } else {
+                if (!(s->img_n & 1)) return _m3dstbi__err("tRNS with alpha", "Corrupt PNG");
+                if (c.length != (_m3dstbi__uint32)s->img_n * 2) return _m3dstbi__err("bad tRNS len", "Corrupt PNG");
+                has_trans = 1;
+                if (z->depth == 16) {
+                    for (k = 0; k < s->img_n; ++k)
+                        tc16[k] = (_m3dstbi__uint16)_m3dstbi__get16be(s);
+                } else {
+                    for (k = 0; k < s->img_n; ++k)
+                        tc[k] = (unsigned char)(_m3dstbi__get16be(s) & 255) * _m3dstbi__depth_scale_table[z->depth];
                 }
-                if (!_m3dstbi__getn(s, z->idata + ioff, c.length)) return _m3dstbi__err("outofdata", "Corrupt PNG");
-                ioff += c.length;
-                break;
             }
+            break;
+        }
 
-            case STBI__PNG_TYPE('I', 'E', 'N', 'D'): {
-                _m3dstbi__uint32 raw_len, bpl;
-                if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
-                if (scan != STBI__SCAN_load) return 1;
-                if (z->idata == NULL) return _m3dstbi__err("no IDAT", "Corrupt PNG");
-                bpl = (s->img_x * z->depth + 7) / 8;
-                raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
-                z->expanded = (unsigned char *)_m3dstbi_zlib_decode_malloc_guesssize_headerflag((char *)z->idata, ioff, raw_len, (int *)&raw_len, 1);
-                if (z->expanded == NULL) return 0;
-                STBI_FREE(z->idata);
-                z->idata = NULL;
-                if ((req_comp == s->img_n + 1 && req_comp != 3 && !pal_img_n) || has_trans)
-                    s->img_out_n = s->img_n + 1;
-                else
-                    s->img_out_n = s->img_n;
-                if (!_m3dstbi__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, color, interlace)) return 0;
-                if (has_trans) {
-                    if (z->depth == 16) {
-                        if (!_m3dstbi__compute_transparency16(z, tc16, s->img_out_n)) return 0;
-                    } else {
-                        if (!_m3dstbi__compute_transparency(z, tc, s->img_out_n)) return 0;
-                    }
-                }
-                if (pal_img_n) {
-                    s->img_n = pal_img_n;
-                    s->img_out_n = pal_img_n;
-                    if (req_comp >= 3) s->img_out_n = req_comp;
-                    if (!_m3dstbi__expand_png_palette(z, palette, pal_len, s->img_out_n))
-                        return 0;
-                } else if (has_trans) {
-                    ++s->img_n;
-                }
-                STBI_FREE(z->expanded);
-                z->expanded = NULL;
+        case STBI__PNG_TYPE('I', 'D', 'A', 'T'): {
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (pal_img_n && !pal_len) return _m3dstbi__err("no PLTE", "Corrupt PNG");
+            if (scan == STBI__SCAN_header) {
+                s->img_n = pal_img_n;
                 return 1;
             }
+            if ((int)(ioff + c.length) < (int)ioff) return 0;
+            if (ioff + c.length > idata_limit) {
+                _m3dstbi__uint32 idata_limit_old = idata_limit;
+                unsigned char *p;
+                if (idata_limit == 0) idata_limit = c.length > 4096 ? c.length : 4096;
+                while (ioff + c.length > idata_limit)
+                    idata_limit *= 2;
+                STBI_NOTUSED(idata_limit_old);
+                p = (unsigned char *)STBI_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit);
+                if (p == NULL) return _m3dstbi__err("outofmem", "Out of memory");
+                z->idata = p;
+            }
+            if (!_m3dstbi__getn(s, z->idata + ioff, c.length)) return _m3dstbi__err("outofdata", "Corrupt PNG");
+            ioff += c.length;
+            break;
+        }
 
-            default:
-                if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
-                if ((c.type & (1 << 29)) == 0) {
-                    return _m3dstbi__err("invalid_chunk", "PNG not supported: unknown PNG chunk type");
+        case STBI__PNG_TYPE('I', 'E', 'N', 'D'): {
+            _m3dstbi__uint32 raw_len, bpl;
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if (scan != STBI__SCAN_load) return 1;
+            if (z->idata == NULL) return _m3dstbi__err("no IDAT", "Corrupt PNG");
+            bpl = (s->img_x * z->depth + 7) / 8;
+            raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
+            z->expanded = (unsigned char *)_m3dstbi_zlib_decode_malloc_guesssize_headerflag((char *)z->idata, ioff, raw_len, (int *)&raw_len, 1);
+            if (z->expanded == NULL) return 0;
+            STBI_FREE(z->idata);
+            z->idata = NULL;
+            if ((req_comp == s->img_n + 1 && req_comp != 3 && !pal_img_n) || has_trans)
+                s->img_out_n = s->img_n + 1;
+            else
+                s->img_out_n = s->img_n;
+            if (!_m3dstbi__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, color, interlace)) return 0;
+            if (has_trans) {
+                if (z->depth == 16) {
+                    if (!_m3dstbi__compute_transparency16(z, tc16, s->img_out_n)) return 0;
+                } else {
+                    if (!_m3dstbi__compute_transparency(z, tc, s->img_out_n)) return 0;
                 }
-                _m3dstbi__skip(s, c.length);
-                break;
+            }
+            if (pal_img_n) {
+                s->img_n = pal_img_n;
+                s->img_out_n = pal_img_n;
+                if (req_comp >= 3) s->img_out_n = req_comp;
+                if (!_m3dstbi__expand_png_palette(z, palette, pal_len, s->img_out_n))
+                    return 0;
+            } else if (has_trans) {
+                ++s->img_n;
+            }
+            STBI_FREE(z->expanded);
+            z->expanded = NULL;
+            return 1;
+        }
+
+        default:
+            if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
+            if ((c.type & (1 << 29)) == 0) {
+                return _m3dstbi__err("invalid_chunk", "PNG not supported: unknown PNG chunk type");
+            }
+            _m3dstbi__skip(s, c.length);
+            break;
         }
         _m3dstbi__get32be(s);
     }
@@ -2281,18 +2283,18 @@ void _m3d_getpr(m3d_t *model, _unused m3dread_t readfilecb, _unused m3dfree_t fr
     } while (0)
 _inline static unsigned char *_m3d_getidx(unsigned char *data, char type, M3D_INDEX *idx) {
     switch (type) {
-        case 1:
-            *idx = data[0] > 253 ? (int8_t)data[0] : data[0];
-            data++;
-            break;
-        case 2:
-            *idx = *((uint16_t *)data) > 65533 ? *((int16_t *)data) : *((uint16_t *)data);
-            data += 2;
-            break;
-        case 4:
-            *idx = *((int32_t *)data);
-            data += 4;
-            break;
+    case 1:
+        *idx = data[0] > 253 ? (int8_t)data[0] : data[0];
+        data++;
+        break;
+    case 2:
+        *idx = *((uint16_t *)data) > 65533 ? *((int16_t *)data) : *((uint16_t *)data);
+        data += 2;
+        break;
+    case 4:
+        *idx = *((int32_t *)data);
+        data += 4;
+        break;
     }
     return data;
 }
@@ -2680,27 +2682,27 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                         if (!m->prop) goto memerr;
                         m->prop[j].type = n + (k == m3dpf_map && n < 128 ? 128 : 0);
                         switch (k) {
-                            case m3dpf_color: ptr = _m3d_gethex(ptr, &m->prop[j].value.color); break;
-                            case m3dpf_uint8:
-                            case m3dpf_uint16:
-                            case m3dpf_uint32: ptr = _m3d_getint(ptr, &m->prop[j].value.num); break;
-                            case m3dpf_float: ptr = _m3d_getfloat(ptr, &m->prop[j].value.fnum); break;
-                            case m3dpf_map:
-                                pe = _m3d_safestr(ptr, 0);
-                                if (!pe || !*pe) goto asciiend;
-                                m->prop[j].value.textureid = _m3d_gettx(model, readfilecb, freecb, pe);
-                                if (model->errcode == M3D_ERR_ALLOC) {
-                                    M3D_FREE(pe);
-                                    goto memerr;
-                                }
-                                /* this error code only returned if readfilecb was specified */
-                                if (m->prop[j].value.textureid == M3D_UNDEF) {
-                                    M3D_LOG("Texture not found");
-                                    M3D_LOG(pe);
-                                    m->numprop--;
-                                }
+                        case m3dpf_color: ptr = _m3d_gethex(ptr, &m->prop[j].value.color); break;
+                        case m3dpf_uint8:
+                        case m3dpf_uint16:
+                        case m3dpf_uint32: ptr = _m3d_getint(ptr, &m->prop[j].value.num); break;
+                        case m3dpf_float: ptr = _m3d_getfloat(ptr, &m->prop[j].value.fnum); break;
+                        case m3dpf_map:
+                            pe = _m3d_safestr(ptr, 0);
+                            if (!pe || !*pe) goto asciiend;
+                            m->prop[j].value.textureid = _m3d_gettx(model, readfilecb, freecb, pe);
+                            if (model->errcode == M3D_ERR_ALLOC) {
                                 M3D_FREE(pe);
-                                break;
+                                goto memerr;
+                            }
+                            /* this error code only returned if readfilecb was specified */
+                            if (m->prop[j].value.textureid == M3D_UNDEF) {
+                                M3D_LOG("Texture not found");
+                                M3D_LOG(pe);
+                                m->numprop--;
+                            }
+                            M3D_FREE(pe);
+                            break;
                         }
                     } else {
                         M3D_LOG("Unknown material property in");
@@ -2833,48 +2835,48 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                             }
                             if (*ptr == ']' || *ptr == '\r' || *ptr == '\n') break;
                             switch (cd->a[((k - n) % (cd->p - n)) + n]) {
-                                case m3dcp_mi_t:
-                                    mi = M3D_UNDEF;
-                                    if (*ptr != '\r' && *ptr != '\n') {
-                                        pe = _m3d_safestr(ptr, 0);
-                                        if (!pe || !*pe) goto asciiend;
-                                        for (n = 0; n < model->nummaterial; n++)
-                                            if (!strcmp(pe, model->material[n].name)) {
-                                                mi = (M3D_INDEX)n;
-                                                break;
-                                            }
-                                        if (mi == M3D_UNDEF && !(model->flags & M3D_FLG_MTLLIB)) {
-                                            mi = model->nummaterial++;
-                                            model->material = (m3dm_t *)M3D_REALLOC(model->material,
-                                                    model->nummaterial * sizeof(m3dm_t));
-                                            if (!model->material) goto memerr;
-                                            model->material[mi].name = pe;
-                                            model->material[mi].numprop = 1;
-                                            model->material[mi].prop = NULL;
-                                        } else
-                                            M3D_FREE(pe);
-                                    }
-                                    h->cmd[j].arg[k] = mi;
-                                    break;
-                                case m3dcp_vc_t:
-                                    _m3d_getfloat(ptr, &w);
-                                    h->cmd[j].arg[k] = *((uint32_t *)&w);
-                                    break;
-                                case m3dcp_va_t:
-                                    ptr = _m3d_getint(ptr, &h->cmd[j].arg[k]);
-                                    n = k + 1;
-                                    l += (h->cmd[j].arg[k] - 1) * (cd->p - k - 1);
-                                    h->cmd[j].arg = (uint32_t *)M3D_REALLOC(h->cmd[j].arg, l * sizeof(uint32_t));
-                                    if (!h->cmd[j].arg) goto memerr;
-                                    memset(&h->cmd[j].arg[k + 1], 0, (l - k - 1) * sizeof(uint32_t));
-                                    break;
-                                case m3dcp_qi_t:
-                                    ptr = _m3d_getint(ptr, &h->cmd[j].arg[k]);
-                                    model->vertex[h->cmd[i].arg[k]].skinid = M3D_INDEXMAX;
-                                    break;
-                                default:
-                                    ptr = _m3d_getint(ptr, &h->cmd[j].arg[k]);
-                                    break;
+                            case m3dcp_mi_t:
+                                mi = M3D_UNDEF;
+                                if (*ptr != '\r' && *ptr != '\n') {
+                                    pe = _m3d_safestr(ptr, 0);
+                                    if (!pe || !*pe) goto asciiend;
+                                    for (n = 0; n < model->nummaterial; n++)
+                                        if (!strcmp(pe, model->material[n].name)) {
+                                            mi = (M3D_INDEX)n;
+                                            break;
+                                        }
+                                    if (mi == M3D_UNDEF && !(model->flags & M3D_FLG_MTLLIB)) {
+                                        mi = model->nummaterial++;
+                                        model->material = (m3dm_t *)M3D_REALLOC(model->material,
+                                                model->nummaterial * sizeof(m3dm_t));
+                                        if (!model->material) goto memerr;
+                                        model->material[mi].name = pe;
+                                        model->material[mi].numprop = 1;
+                                        model->material[mi].prop = NULL;
+                                    } else
+                                        M3D_FREE(pe);
+                                }
+                                h->cmd[j].arg[k] = mi;
+                                break;
+                            case m3dcp_vc_t:
+                                _m3d_getfloat(ptr, &w);
+                                h->cmd[j].arg[k] = *((uint32_t *)&w);
+                                break;
+                            case m3dcp_va_t:
+                                ptr = _m3d_getint(ptr, &h->cmd[j].arg[k]);
+                                n = k + 1;
+                                l += (h->cmd[j].arg[k] - 1) * (cd->p - k - 1);
+                                h->cmd[j].arg = (uint32_t *)M3D_REALLOC(h->cmd[j].arg, l * sizeof(uint32_t));
+                                if (!h->cmd[j].arg) goto memerr;
+                                memset(&h->cmd[j].arg[k + 1], 0, (l - k - 1) * sizeof(uint32_t));
+                                break;
+                            case m3dcp_qi_t:
+                                ptr = _m3d_getint(ptr, &h->cmd[j].arg[k]);
+                                model->vertex[h->cmd[i].arg[k]].skinid = M3D_INDEXMAX;
+                                break;
+                            default:
+                                ptr = _m3d_getint(ptr, &h->cmd[j].arg[k]);
+                                break;
                             }
                         }
                     } else {
@@ -3205,22 +3207,22 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
             if (!model->tmap) goto memerr;
             for (i = 0, data += sizeof(m3dchunk_t); data < chunk; i++) {
                 switch (model->vc_s) {
-                    case 1:
-                        model->tmap[i].u = (M3D_FLOAT)(data[0]) / (M3D_FLOAT)255.0;
-                        model->tmap[i].v = (M3D_FLOAT)(data[1]) / (M3D_FLOAT)255.0;
-                        break;
-                    case 2:
-                        model->tmap[i].u = (M3D_FLOAT)(*((int16_t *)(data + 0))) / (M3D_FLOAT)65535.0;
-                        model->tmap[i].v = (M3D_FLOAT)(*((int16_t *)(data + 2))) / (M3D_FLOAT)65535.0;
-                        break;
-                    case 4:
-                        model->tmap[i].u = (M3D_FLOAT)(*((float *)(data + 0)));
-                        model->tmap[i].v = (M3D_FLOAT)(*((float *)(data + 4)));
-                        break;
-                    case 8:
-                        model->tmap[i].u = (M3D_FLOAT)(*((double *)(data + 0)));
-                        model->tmap[i].v = (M3D_FLOAT)(*((double *)(data + 8)));
-                        break;
+                case 1:
+                    model->tmap[i].u = (M3D_FLOAT)(data[0]) / (M3D_FLOAT)255.0;
+                    model->tmap[i].v = (M3D_FLOAT)(data[1]) / (M3D_FLOAT)255.0;
+                    break;
+                case 2:
+                    model->tmap[i].u = (M3D_FLOAT)(*((int16_t *)(data + 0))) / (M3D_FLOAT)65535.0;
+                    model->tmap[i].v = (M3D_FLOAT)(*((int16_t *)(data + 2))) / (M3D_FLOAT)65535.0;
+                    break;
+                case 4:
+                    model->tmap[i].u = (M3D_FLOAT)(*((float *)(data + 0)));
+                    model->tmap[i].v = (M3D_FLOAT)(*((float *)(data + 4)));
+                    break;
+                case 8:
+                    model->tmap[i].u = (M3D_FLOAT)(*((double *)(data + 0)));
+                    model->tmap[i].v = (M3D_FLOAT)(*((double *)(data + 8)));
+                    break;
                 }
                 data += reclen;
             }
@@ -3241,49 +3243,49 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
             memset(model->vertex, 0, model->numvertex * sizeof(m3dv_t));
             for (i = 0, data += sizeof(m3dchunk_t); data < chunk && i < model->numvertex; i++) {
                 switch (model->vc_s) {
-                    case 1:
-                        model->vertex[i].x = (M3D_FLOAT)((int8_t)data[0]) / (M3D_FLOAT)127.0;
-                        model->vertex[i].y = (M3D_FLOAT)((int8_t)data[1]) / (M3D_FLOAT)127.0;
-                        model->vertex[i].z = (M3D_FLOAT)((int8_t)data[2]) / (M3D_FLOAT)127.0;
-                        model->vertex[i].w = (M3D_FLOAT)((int8_t)data[3]) / (M3D_FLOAT)127.0;
-                        data += 4;
-                        break;
-                    case 2:
-                        model->vertex[i].x = (M3D_FLOAT)(*((int16_t *)(data + 0))) / (M3D_FLOAT)32767.0;
-                        model->vertex[i].y = (M3D_FLOAT)(*((int16_t *)(data + 2))) / (M3D_FLOAT)32767.0;
-                        model->vertex[i].z = (M3D_FLOAT)(*((int16_t *)(data + 4))) / (M3D_FLOAT)32767.0;
-                        model->vertex[i].w = (M3D_FLOAT)(*((int16_t *)(data + 6))) / (M3D_FLOAT)32767.0;
-                        data += 8;
-                        break;
-                    case 4:
-                        model->vertex[i].x = (M3D_FLOAT)(*((float *)(data + 0)));
-                        model->vertex[i].y = (M3D_FLOAT)(*((float *)(data + 4)));
-                        model->vertex[i].z = (M3D_FLOAT)(*((float *)(data + 8)));
-                        model->vertex[i].w = (M3D_FLOAT)(*((float *)(data + 12)));
-                        data += 16;
-                        break;
-                    case 8:
-                        model->vertex[i].x = (M3D_FLOAT)(*((double *)(data + 0)));
-                        model->vertex[i].y = (M3D_FLOAT)(*((double *)(data + 8)));
-                        model->vertex[i].z = (M3D_FLOAT)(*((double *)(data + 16)));
-                        model->vertex[i].w = (M3D_FLOAT)(*((double *)(data + 24)));
-                        data += 32;
-                        break;
+                case 1:
+                    model->vertex[i].x = (M3D_FLOAT)((int8_t)data[0]) / (M3D_FLOAT)127.0;
+                    model->vertex[i].y = (M3D_FLOAT)((int8_t)data[1]) / (M3D_FLOAT)127.0;
+                    model->vertex[i].z = (M3D_FLOAT)((int8_t)data[2]) / (M3D_FLOAT)127.0;
+                    model->vertex[i].w = (M3D_FLOAT)((int8_t)data[3]) / (M3D_FLOAT)127.0;
+                    data += 4;
+                    break;
+                case 2:
+                    model->vertex[i].x = (M3D_FLOAT)(*((int16_t *)(data + 0))) / (M3D_FLOAT)32767.0;
+                    model->vertex[i].y = (M3D_FLOAT)(*((int16_t *)(data + 2))) / (M3D_FLOAT)32767.0;
+                    model->vertex[i].z = (M3D_FLOAT)(*((int16_t *)(data + 4))) / (M3D_FLOAT)32767.0;
+                    model->vertex[i].w = (M3D_FLOAT)(*((int16_t *)(data + 6))) / (M3D_FLOAT)32767.0;
+                    data += 8;
+                    break;
+                case 4:
+                    model->vertex[i].x = (M3D_FLOAT)(*((float *)(data + 0)));
+                    model->vertex[i].y = (M3D_FLOAT)(*((float *)(data + 4)));
+                    model->vertex[i].z = (M3D_FLOAT)(*((float *)(data + 8)));
+                    model->vertex[i].w = (M3D_FLOAT)(*((float *)(data + 12)));
+                    data += 16;
+                    break;
+                case 8:
+                    model->vertex[i].x = (M3D_FLOAT)(*((double *)(data + 0)));
+                    model->vertex[i].y = (M3D_FLOAT)(*((double *)(data + 8)));
+                    model->vertex[i].z = (M3D_FLOAT)(*((double *)(data + 16)));
+                    model->vertex[i].w = (M3D_FLOAT)(*((double *)(data + 24)));
+                    data += 32;
+                    break;
                 }
                 switch (model->ci_s) {
-                    case 1:
-                        model->vertex[i].color = model->cmap ? model->cmap[data[0]] : 0;
-                        data++;
-                        break;
-                    case 2:
-                        model->vertex[i].color = model->cmap ? model->cmap[*((uint16_t *)data)] : 0;
-                        data += 2;
-                        break;
-                    case 4:
-                        model->vertex[i].color = *((uint32_t *)data);
-                        data += 4;
-                        break;
-                        /* case 8: break; */
+                case 1:
+                    model->vertex[i].color = model->cmap ? model->cmap[data[0]] : 0;
+                    data++;
+                    break;
+                case 2:
+                    model->vertex[i].color = model->cmap ? model->cmap[*((uint16_t *)data)] : 0;
+                    data += 2;
+                    break;
+                case 4:
+                    model->vertex[i].color = *((uint32_t *)data);
+                    data += 4;
+                    break;
+                    /* case 8: break; */
                 }
                 model->vertex[i].skinid = M3D_UNDEF;
                 data = _m3d_getidx(data, model->sk_s, &model->vertex[i].skinid);
@@ -3412,55 +3414,55 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                             }
                     }
                     switch (k) {
-                        case m3dpf_color:
-                            switch (model->ci_s) {
-                                case 1:
-                                    m->prop[i].value.color = model->cmap ? model->cmap[data[0]] : 0;
-                                    data++;
-                                    break;
-                                case 2:
-                                    m->prop[i].value.color = model->cmap ? model->cmap[*((uint16_t *)data)] : 0;
-                                    data += 2;
-                                    break;
-                                case 4:
-                                    m->prop[i].value.color = *((uint32_t *)data);
-                                    data += 4;
-                                    break;
-                            }
+                    case m3dpf_color:
+                        switch (model->ci_s) {
+                        case 1:
+                            m->prop[i].value.color = model->cmap ? model->cmap[data[0]] : 0;
+                            data++;
                             break;
-
-                        case m3dpf_uint8: m->prop[i].value.num = *data++; break;
-                        case m3dpf_uint16:
-                            m->prop[i].value.num = *((uint16_t *)data);
+                        case 2:
+                            m->prop[i].value.color = model->cmap ? model->cmap[*((uint16_t *)data)] : 0;
                             data += 2;
                             break;
-                        case m3dpf_uint32:
-                            m->prop[i].value.num = *((uint32_t *)data);
+                        case 4:
+                            m->prop[i].value.color = *((uint32_t *)data);
                             data += 4;
                             break;
-                        case m3dpf_float:
-                            m->prop[i].value.fnum = *((float *)data);
-                            data += 4;
-                            break;
+                        }
+                        break;
 
-                        case m3dpf_map:
-                            M3D_GETSTR(name);
-                            m->prop[i].value.textureid = _m3d_gettx(model, readfilecb, freecb, name);
-                            if (model->errcode == M3D_ERR_ALLOC) goto memerr;
-                            /* this error code only returned if readfilecb was specified */
-                            if (m->prop[i].value.textureid == M3D_UNDEF) {
-                                M3D_LOG("Texture not found");
-                                M3D_LOG(m->name);
-                                m->numprop--;
-                            }
-                            break;
+                    case m3dpf_uint8: m->prop[i].value.num = *data++; break;
+                    case m3dpf_uint16:
+                        m->prop[i].value.num = *((uint16_t *)data);
+                        data += 2;
+                        break;
+                    case m3dpf_uint32:
+                        m->prop[i].value.num = *((uint32_t *)data);
+                        data += 4;
+                        break;
+                    case m3dpf_float:
+                        m->prop[i].value.fnum = *((float *)data);
+                        data += 4;
+                        break;
 
-                        default:
-                            M3D_LOG("Unknown material property in");
+                    case m3dpf_map:
+                        M3D_GETSTR(name);
+                        m->prop[i].value.textureid = _m3d_gettx(model, readfilecb, freecb, name);
+                        if (model->errcode == M3D_ERR_ALLOC) goto memerr;
+                        /* this error code only returned if readfilecb was specified */
+                        if (m->prop[i].value.textureid == M3D_UNDEF) {
+                            M3D_LOG("Texture not found");
                             M3D_LOG(m->name);
-                            model->errcode = M3D_ERR_UNKPROP;
-                            data = chunk;
-                            break;
+                            m->numprop--;
+                        }
+                        break;
+
+                    default:
+                        M3D_LOG("Unknown material property in");
+                        M3D_LOG(m->name);
+                        model->errcode = M3D_ERR_UNKPROP;
+                        data = chunk;
+                        break;
                     }
                 }
                 m->prop = (m3dp_t *)M3D_REALLOC(m->prop, m->numprop * sizeof(m3dp_t));
@@ -3568,45 +3570,45 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 memset(h->cmd[i].arg, 0, cd->p * sizeof(uint32_t));
                 for (k = n = 0, l = cd->p; k < l; k++)
                     switch (cd->a[((k - n) % (cd->p - n)) + n]) {
-                        case m3dcp_mi_t:
-                            h->cmd[i].arg[k] = M3D_NOTDEFINED;
-                            M3D_GETSTR(name);
-                            if (name) {
-                                for (n = 0; n < model->nummaterial; n++)
-                                    if (!strcmp(name, model->material[n].name)) {
-                                        h->cmd[i].arg[k] = n;
-                                        break;
-                                    }
-                                if (h->cmd[i].arg[k] == M3D_NOTDEFINED) model->errcode = M3D_ERR_MTRL;
-                            }
-                            break;
-                        case m3dcp_vc_t:
-                            f = 0.0f;
-                            switch (model->vc_s) {
-                                case 1: f = (float)((int8_t)data[0]) / 127; break;
-                                case 2: f = (float)(*((int16_t *)(data + 0))) / 32767; break;
-                                case 4: f = (float)(*((float *)(data + 0))); break;
-                                case 8: f = (float)(*((double *)(data + 0))); break;
-                            }
-                            h->cmd[i].arg[k] = *((uint32_t *)&f);
-                            data += model->vc_s;
-                            break;
-                        case m3dcp_hi_t: data = _m3d_getidx(data, model->hi_s, &h->cmd[i].arg[k]); break;
-                        case m3dcp_fi_t: data = _m3d_getidx(data, model->fi_s, &h->cmd[i].arg[k]); break;
-                        case m3dcp_ti_t: data = _m3d_getidx(data, model->ti_s, &h->cmd[i].arg[k]); break;
-                        case m3dcp_qi_t:
-                        case m3dcp_vi_t: data = _m3d_getidx(data, model->vi_s, &h->cmd[i].arg[k]); break;
-                        case m3dcp_i1_t: data = _m3d_getidx(data, 1, &h->cmd[i].arg[k]); break;
-                        case m3dcp_i2_t: data = _m3d_getidx(data, 2, &h->cmd[i].arg[k]); break;
-                        case m3dcp_i4_t: data = _m3d_getidx(data, 4, &h->cmd[i].arg[k]); break;
-                        case m3dcp_va_t:
-                            data = _m3d_getidx(data, 4, &h->cmd[i].arg[k]);
-                            n = k + 1;
-                            l += (h->cmd[i].arg[k] - 1) * (cd->p - k - 1);
-                            h->cmd[i].arg = (uint32_t *)M3D_REALLOC(h->cmd[i].arg, l * sizeof(uint32_t));
-                            if (!h->cmd[i].arg) goto memerr;
-                            memset(&h->cmd[i].arg[k + 1], 0, (l - k - 1) * sizeof(uint32_t));
-                            break;
+                    case m3dcp_mi_t:
+                        h->cmd[i].arg[k] = M3D_NOTDEFINED;
+                        M3D_GETSTR(name);
+                        if (name) {
+                            for (n = 0; n < model->nummaterial; n++)
+                                if (!strcmp(name, model->material[n].name)) {
+                                    h->cmd[i].arg[k] = n;
+                                    break;
+                                }
+                            if (h->cmd[i].arg[k] == M3D_NOTDEFINED) model->errcode = M3D_ERR_MTRL;
+                        }
+                        break;
+                    case m3dcp_vc_t:
+                        f = 0.0f;
+                        switch (model->vc_s) {
+                        case 1: f = (float)((int8_t)data[0]) / 127; break;
+                        case 2: f = (float)(*((int16_t *)(data + 0))) / 32767; break;
+                        case 4: f = (float)(*((float *)(data + 0))); break;
+                        case 8: f = (float)(*((double *)(data + 0))); break;
+                        }
+                        memcpy(&(h->cmd[i].arg[k]), &f, sizeof(uint32_t));
+                        data += model->vc_s;
+                        break;
+                    case m3dcp_hi_t: data = _m3d_getidx(data, model->hi_s, &h->cmd[i].arg[k]); break;
+                    case m3dcp_fi_t: data = _m3d_getidx(data, model->fi_s, &h->cmd[i].arg[k]); break;
+                    case m3dcp_ti_t: data = _m3d_getidx(data, model->ti_s, &h->cmd[i].arg[k]); break;
+                    case m3dcp_qi_t:
+                    case m3dcp_vi_t: data = _m3d_getidx(data, model->vi_s, &h->cmd[i].arg[k]); break;
+                    case m3dcp_i1_t: data = _m3d_getidx(data, 1, &h->cmd[i].arg[k]); break;
+                    case m3dcp_i2_t: data = _m3d_getidx(data, 2, &h->cmd[i].arg[k]); break;
+                    case m3dcp_i4_t: data = _m3d_getidx(data, 4, &h->cmd[i].arg[k]); break;
+                    case m3dcp_va_t:
+                        data = _m3d_getidx(data, 4, &h->cmd[i].arg[k]);
+                        n = k + 1;
+                        l += (h->cmd[i].arg[k] - 1) * (cd->p - k - 1);
+                        h->cmd[i].arg = (uint32_t *)M3D_REALLOC(h->cmd[i].arg, l * sizeof(uint32_t));
+                        if (!h->cmd[i].arg) goto memerr;
+                        memset(&h->cmd[i].arg[k + 1], 0, (l - k - 1) * sizeof(uint32_t));
+                        break;
                     }
             }
         } else
@@ -3625,19 +3627,19 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
             if (model->ci_s && model->ci_s < 4 && !model->cmap) model->errcode = M3D_ERR_CMAP;
             k = 0;
             switch (model->ci_s) {
-                case 1:
-                    k = model->cmap ? model->cmap[data[0]] : 0;
-                    data++;
-                    break;
-                case 2:
-                    k = model->cmap ? model->cmap[*((uint16_t *)data)] : 0;
-                    data += 2;
-                    break;
-                case 4:
-                    k = *((uint32_t *)data);
-                    data += 4;
-                    break;
-                    /* case 8: break; */
+            case 1:
+                k = model->cmap ? model->cmap[data[0]] : 0;
+                data++;
+                break;
+            case 2:
+                k = model->cmap ? model->cmap[*((uint16_t *)data)] : 0;
+                data += 2;
+                break;
+            case 4:
+                k = *((uint32_t *)data);
+                data += 4;
+                break;
+                /* case 8: break; */
             }
             reclen = model->vi_s + model->si_s;
             i = model->numlabel;
@@ -4265,16 +4267,16 @@ static uint32_t _m3d_cmapidx(uint32_t *cmap, uint32_t numcmap, uint32_t color) {
 /* add index to output */
 static unsigned char *_m3d_addidx(unsigned char *out, char type, uint32_t idx) {
     switch (type) {
-        case 1: *out++ = (uint8_t)(idx); break;
-        case 2:
-            *((uint16_t *)out) = (uint16_t)(idx);
-            out += 2;
-            break;
-        case 4:
-            *((uint32_t *)out) = (uint32_t)(idx);
-            out += 4;
-            break;
-            /* case 0: case 8: break; */
+    case 1: *out++ = (uint8_t)(idx); break;
+    case 2:
+        *((uint16_t *)out) = (uint16_t)(idx);
+        out += 2;
+        break;
+    case 4:
+        *((uint32_t *)out) = (uint32_t)(idx);
+        out += 4;
+        break;
+        /* case 0: case 8: break; */
     }
     return out;
 }
@@ -4286,26 +4288,26 @@ static void _m3d_round(int quality, m3dv_t *src, m3dv_t *dst) {
     if (src != dst) memcpy(dst, src, sizeof(m3dv_t));
     /* round according to quality */
     switch (quality) {
-        case M3D_EXP_INT8:
-            t = (int)(src->x * 127 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->x = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            t = (int)(src->y * 127 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->y = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            t = (int)(src->z * 127 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->z = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            t = (int)(src->w * 127 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->w = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
-            break;
-        case M3D_EXP_INT16:
-            t = (int)(src->x * 32767 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->x = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            t = (int)(src->y * 32767 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->y = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            t = (int)(src->z * 32767 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->z = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            t = (int)(src->w * 32767 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
-            dst->w = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
-            break;
+    case M3D_EXP_INT8:
+        t = (int)(src->x * 127 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->x = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+        t = (int)(src->y * 127 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->y = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+        t = (int)(src->z * 127 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->z = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+        t = (int)(src->w * 127 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->w = (M3D_FLOAT)t / (M3D_FLOAT)127.0;
+        break;
+    case M3D_EXP_INT16:
+        t = (int)(src->x * 32767 + (src->x >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->x = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+        t = (int)(src->y * 32767 + (src->y >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->y = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+        t = (int)(src->z * 32767 + (src->z >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->z = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+        t = (int)(src->w * 32767 + (src->w >= 0 ? (M3D_FLOAT)0.5 : (M3D_FLOAT)-0.5));
+        dst->w = (M3D_FLOAT)t / (M3D_FLOAT)32767.0;
+        break;
     }
     if (dst->x == (M3D_FLOAT)-0.0) dst->x = (M3D_FLOAT)0.0;
     if (dst->y == (M3D_FLOAT)-0.0) dst->y = (M3D_FLOAT)0.0;
@@ -4345,7 +4347,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s, fi_s;
     char *sn = NULL, *sl = NULL, *sa = NULL, *sd = NULL;
     unsigned char *out = NULL, *z = NULL, weights[M3D_NUMBONE], *norm = NULL;
-    unsigned int i, j, k, l, n, len, chunklen, *length;
+    unsigned int i = 0, j = 0, k = 0, l = 0, n = 0, len = 0, chunklen = 0, *length = NULL;
     M3D_FLOAT scale = (M3D_FLOAT)0.0, min_x, max_x, min_y, max_y, min_z, max_z;
     M3D_INDEX last, *vrtxidx = NULL, *mtrlidx = NULL, *tmapidx = NULL, *skinidx = NULL;
     uint32_t idx, numcmap = 0, *cmap = NULL, numvrtx = 0, maxvrtx = 0, numtmap = 0, maxtmap = 0, numproc = 0;
@@ -4482,23 +4484,23 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     cd = &m3d_commandtypes[cmd->type];
                     for (k = n = 0, l = cd->p; k < l; k++)
                         switch (cd->a[((k - n) % (cd->p - n)) + n]) {
-                            case m3dcp_mi_t:
-                                if (!(flags & M3D_EXP_NOMATERIAL) && cmd->arg[k] < model->nummaterial)
-                                    mtrlidx[cmd->arg[k]] = 0;
-                                break;
-                            case m3dcp_ti_t:
-                                if (!(flags & M3D_EXP_NOTXTCRD) && cmd->arg[k] < model->numtmap)
-                                    tmapidx[cmd->arg[k]] = 0;
-                                break;
-                            case m3dcp_qi_t:
-                            case m3dcp_vi_t:
-                                if (cmd->arg[k] < model->numvertex)
-                                    vrtxidx[cmd->arg[k]] = 0;
-                                break;
-                            case m3dcp_va_t:
-                                n = k + 1;
-                                l += (cmd->arg[k] - 1) * (cd->p - k - 1);
-                                break;
+                        case m3dcp_mi_t:
+                            if (!(flags & M3D_EXP_NOMATERIAL) && cmd->arg[k] < model->nummaterial)
+                                mtrlidx[cmd->arg[k]] = 0;
+                            break;
+                        case m3dcp_ti_t:
+                            if (!(flags & M3D_EXP_NOTXTCRD) && cmd->arg[k] < model->numtmap)
+                                tmapidx[cmd->arg[k]] = 0;
+                            break;
+                        case m3dcp_qi_t:
+                        case m3dcp_vi_t:
+                            if (cmd->arg[k] < model->numvertex)
+                                vrtxidx[cmd->arg[k]] = 0;
+                            break;
+                        case m3dcp_va_t:
+                            n = k + 1;
+                            l += (cmd->arg[k] - 1) * (cd->p - k - 1);
+                            break;
                         }
                 }
             }
@@ -4613,22 +4615,22 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         for (i = 0; i < model->numtmap; i++) {
             if (tmapidx[i] == M3D_UNDEF) continue;
             switch (quality) {
-                case M3D_EXP_INT8:
-                    l = (unsigned int)(model->tmap[i].u * 255);
-                    tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
-                    l = (unsigned int)(model->tmap[i].v * 255);
-                    tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
-                    break;
-                case M3D_EXP_INT16:
-                    l = (unsigned int)(model->tmap[i].u * 65535);
-                    tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
-                    l = (unsigned int)(model->tmap[i].v * 65535);
-                    tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
-                    break;
-                default:
-                    tcoord.data.u = model->tmap[i].u;
-                    tcoord.data.v = model->tmap[i].v;
-                    break;
+            case M3D_EXP_INT8:
+                l = (unsigned int)(model->tmap[i].u * 255);
+                tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
+                l = (unsigned int)(model->tmap[i].v * 255);
+                tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)255.0;
+                break;
+            case M3D_EXP_INT16:
+                l = (unsigned int)(model->tmap[i].u * 65535);
+                tcoord.data.u = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
+                l = (unsigned int)(model->tmap[i].v * 65535);
+                tcoord.data.v = (M3D_FLOAT)l / (M3D_FLOAT)65535.0;
+                break;
+            default:
+                tcoord.data.u = model->tmap[i].u;
+                tcoord.data.v = model->tmap[i].v;
+                break;
             }
             if (flags & M3D_EXP_FLIPTXTCRD)
                 tcoord.data.v = (M3D_FLOAT)1.0 - tcoord.data.v;
@@ -4957,26 +4959,26 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                             }
                     }
                     switch (k) {
-                        case m3dpf_color: ptr += sprintf(ptr, "%s #%08x\r\n", sn, m->prop[i].value.color); break;
-                        case m3dpf_uint8:
-                        case m3dpf_uint16:
-                        case m3dpf_uint32: ptr += sprintf(ptr, "%s %d\r\n", sn, m->prop[i].value.num); break;
-                        case m3dpf_float: ptr += sprintf(ptr, "%s %g\r\n", sn, m->prop[i].value.fnum); break;
-                        case m3dpf_map:
-                            if (m->prop[i].value.textureid < model->numtexture &&
-                                    model->texture[m->prop[i].value.textureid].name) {
-                                sl = _m3d_safestr(model->texture[m->prop[i].value.textureid].name, 0);
-                                if (!sl) {
-                                    setlocale(LC_NUMERIC, ol);
-                                    goto memerr;
-                                }
-                                if (*sl)
-                                    ptr += sprintf(ptr, "map_%s %s\r\n", sn, sl);
-                                M3D_FREE(sn);
-                                M3D_FREE(sl);
-                                sl = NULL;
+                    case m3dpf_color: ptr += sprintf(ptr, "%s #%08x\r\n", sn, m->prop[i].value.color); break;
+                    case m3dpf_uint8:
+                    case m3dpf_uint16:
+                    case m3dpf_uint32: ptr += sprintf(ptr, "%s %d\r\n", sn, m->prop[i].value.num); break;
+                    case m3dpf_float: ptr += sprintf(ptr, "%s %g\r\n", sn, m->prop[i].value.fnum); break;
+                    case m3dpf_map:
+                        if (m->prop[i].value.textureid < model->numtexture &&
+                                model->texture[m->prop[i].value.textureid].name) {
+                            sl = _m3d_safestr(model->texture[m->prop[i].value.textureid].name, 0);
+                            if (!sl) {
+                                setlocale(LC_NUMERIC, ol);
+                                goto memerr;
                             }
-                            break;
+                            if (*sl)
+                                ptr += sprintf(ptr, "map_%s %s\r\n", sn, sl);
+                            M3D_FREE(sn);
+                            M3D_FREE(sl);
+                            sl = NULL;
+                        }
+                        break;
                     }
                     sn = NULL;
                 }
@@ -5100,16 +5102,16 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     len = (unsigned int)((uintptr_t)ptr + (uintptr_t)strlen(cd->key) + (uintptr_t)3);
                     for (k = 0; k < cd->p; k++)
                         switch (cd->a[k]) {
-                            case m3dcp_mi_t:
-                                if (cmd->arg[k] != M3D_NOTDEFINED) {
-                                    len += (unsigned int)strlen(model->material[cmd->arg[k]].name) + 1;
-                                }
-                                break;
-                            case m3dcp_va_t:
-                                len += cmd->arg[k] * (cd->p - k - 1) * 16;
-                                k = cd->p;
-                                break;
-                            default: len += 16; break;
+                        case m3dcp_mi_t:
+                            if (cmd->arg[k] != M3D_NOTDEFINED) {
+                                len += (unsigned int)strlen(model->material[cmd->arg[k]].name) + 1;
+                            }
+                            break;
+                        case m3dcp_va_t:
+                            len += cmd->arg[k] * (cd->p - k - 1) * 16;
+                            k = cd->p;
+                            break;
+                        default: len += 16; break;
                         }
                     out = (unsigned char *)M3D_REALLOC(out, len);
                     ptr += (uintptr_t)out;
@@ -5120,25 +5122,25 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     ptr += sprintf(ptr, "%s", cd->key);
                     for (k = n = 0, l = cd->p; k < l; k++) {
                         switch (cd->a[((k - n) % (cd->p - n)) + n]) {
-                            case m3dcp_mi_t:
-                                if (cmd->arg[k] != M3D_NOTDEFINED) {
-                                    sn = _m3d_safestr(model->material[cmd->arg[k]].name, 0);
-                                    if (!sn) {
-                                        setlocale(LC_NUMERIC, ol);
-                                        goto memerr;
-                                    }
-                                    ptr += sprintf(ptr, " %s", sn);
-                                    M3D_FREE(sn);
-                                    sn = NULL;
+                        case m3dcp_mi_t:
+                            if (cmd->arg[k] != M3D_NOTDEFINED) {
+                                sn = _m3d_safestr(model->material[cmd->arg[k]].name, 0);
+                                if (!sn) {
+                                    setlocale(LC_NUMERIC, ol);
+                                    goto memerr;
                                 }
-                                break;
-                            case m3dcp_vc_t: ptr += sprintf(ptr, " %g", *((float *)&cmd->arg[k])); break;
-                            case m3dcp_va_t:
-                                ptr += sprintf(ptr, " %d[", cmd->arg[k]);
-                                n = k + 1;
-                                l += (cmd->arg[k] - 1) * (cd->p - k - 1);
-                                break;
-                            default: ptr += sprintf(ptr, " %d", cmd->arg[k]); break;
+                                ptr += sprintf(ptr, " %s", sn);
+                                M3D_FREE(sn);
+                                sn = NULL;
+                            }
+                            break;
+                        case m3dcp_vc_t: ptr += sprintf(ptr, " %g", *((float *)&cmd->arg[k])); break;
+                        case m3dcp_va_t:
+                            ptr += sprintf(ptr, " %d[", cmd->arg[k]);
+                            n = k + 1;
+                            l += (cmd->arg[k] - 1) * (cd->p - k - 1);
+                            break;
+                        default: ptr += sprintf(ptr, " %d", cmd->arg[k]); break;
                         }
                     }
                     ptr += sprintf(ptr, "%s\r\n", l > cd->p ? " ]" : "");
@@ -5382,28 +5384,28 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 if (tmap[i].newidx == last) continue;
                 last = tmap[i].newidx;
                 switch (vc_s) {
-                    case 1:
-                        *out++ = (uint8_t)(tmap[i].data.u * 255);
-                        *out++ = (uint8_t)(tmap[i].data.v * 255);
-                        break;
-                    case 2:
-                        *((uint16_t *)out) = (uint16_t)(tmap[i].data.u * 65535);
-                        out += 2;
-                        *((uint16_t *)out) = (uint16_t)(tmap[i].data.v * 65535);
-                        out += 2;
-                        break;
-                    case 4:
-                        *((float *)out) = tmap[i].data.u;
-                        out += 4;
-                        *((float *)out) = tmap[i].data.v;
-                        out += 4;
-                        break;
-                    case 8:
-                        *((double *)out) = tmap[i].data.u;
-                        out += 8;
-                        *((double *)out) = tmap[i].data.v;
-                        out += 8;
-                        break;
+                case 1:
+                    *out++ = (uint8_t)(tmap[i].data.u * 255);
+                    *out++ = (uint8_t)(tmap[i].data.v * 255);
+                    break;
+                case 2:
+                    *((uint16_t *)out) = (uint16_t)(tmap[i].data.u * 65535);
+                    out += 2;
+                    *((uint16_t *)out) = (uint16_t)(tmap[i].data.v * 65535);
+                    out += 2;
+                    break;
+                case 4:
+                    *((float *)out) = tmap[i].data.u;
+                    out += 4;
+                    *((float *)out) = tmap[i].data.v;
+                    out += 4;
+                    break;
+                case 8:
+                    *((double *)out) = tmap[i].data.u;
+                    out += 8;
+                    *((double *)out) = tmap[i].data.v;
+                    out += 8;
+                    break;
                 }
             }
             *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
@@ -5423,54 +5425,54 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 if (vrtx[i].newidx == last) continue;
                 last = vrtx[i].newidx;
                 switch (vc_s) {
-                    case 1:
-                        *out++ = (int8_t)(vrtx[i].data.x * 127);
-                        *out++ = (int8_t)(vrtx[i].data.y * 127);
-                        *out++ = (int8_t)(vrtx[i].data.z * 127);
-                        *out++ = (int8_t)(vrtx[i].data.w * 127);
-                        break;
-                    case 2:
-                        *((int16_t *)out) = (int16_t)(vrtx[i].data.x * 32767);
-                        out += 2;
-                        *((int16_t *)out) = (int16_t)(vrtx[i].data.y * 32767);
-                        out += 2;
-                        *((int16_t *)out) = (int16_t)(vrtx[i].data.z * 32767);
-                        out += 2;
-                        *((int16_t *)out) = (int16_t)(vrtx[i].data.w * 32767);
-                        out += 2;
-                        break;
-                    case 4:
-                        memcpy(out, &vrtx[i].data.x, sizeof(float));
-                        out += 4;
-                        memcpy(out, &vrtx[i].data.y, sizeof(float));
-                        out += 4;
-                        memcpy(out, &vrtx[i].data.z, sizeof(float));
-                        out += 4;
-                        memcpy(out, &vrtx[i].data.w, sizeof(float));
-                        out += 4;
-                        break;
-                    case 8:
-                        *((double *)out) = vrtx[i].data.x;
-                        out += 8;
-                        *((double *)out) = vrtx[i].data.y;
-                        out += 8;
-                        *((double *)out) = vrtx[i].data.z;
-                        out += 8;
-                        *((double *)out) = vrtx[i].data.w;
-                        out += 8;
-                        break;
+                case 1:
+                    *out++ = (int8_t)(vrtx[i].data.x * 127);
+                    *out++ = (int8_t)(vrtx[i].data.y * 127);
+                    *out++ = (int8_t)(vrtx[i].data.z * 127);
+                    *out++ = (int8_t)(vrtx[i].data.w * 127);
+                    break;
+                case 2:
+                    *((int16_t *)out) = (int16_t)(vrtx[i].data.x * 32767);
+                    out += 2;
+                    *((int16_t *)out) = (int16_t)(vrtx[i].data.y * 32767);
+                    out += 2;
+                    *((int16_t *)out) = (int16_t)(vrtx[i].data.z * 32767);
+                    out += 2;
+                    *((int16_t *)out) = (int16_t)(vrtx[i].data.w * 32767);
+                    out += 2;
+                    break;
+                case 4:
+                    memcpy(out, &vrtx[i].data.x, sizeof(float));
+                    out += 4;
+                    memcpy(out, &vrtx[i].data.y, sizeof(float));
+                    out += 4;
+                    memcpy(out, &vrtx[i].data.z, sizeof(float));
+                    out += 4;
+                    memcpy(out, &vrtx[i].data.w, sizeof(float));
+                    out += 4;
+                    break;
+                case 8:
+                    *((double *)out) = vrtx[i].data.x;
+                    out += 8;
+                    *((double *)out) = vrtx[i].data.y;
+                    out += 8;
+                    *((double *)out) = vrtx[i].data.z;
+                    out += 8;
+                    *((double *)out) = vrtx[i].data.w;
+                    out += 8;
+                    break;
                 }
                 idx = _m3d_cmapidx(cmap, numcmap, vrtx[i].data.color);
                 switch (ci_s) {
-                    case 1: *out++ = (uint8_t)(idx); break;
-                    case 2:
-                        *((uint16_t *)out) = (uint16_t)(idx);
-                        out += 2;
-                        break;
-                    case 4:
-                        *((uint32_t *)out) = vrtx[i].data.color;
-                        out += 4;
-                        break;
+                case 1: *out++ = (uint8_t)(idx); break;
+                case 2:
+                    *((uint16_t *)out) = (uint16_t)(idx);
+                    out += 2;
+                    break;
+                case 4:
+                    *((uint32_t *)out) = vrtx[i].data.color;
+                    out += 4;
+                    break;
                 }
                 out = _m3d_addidx(out, sk_s, vrtx[i].data.skinid);
             }
@@ -5508,19 +5510,19 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                             j++)
                         weights[j] = (uint8_t)(skin[i].data.weight[j] * 255);
                     switch (nb_s) {
-                        case 1: weights[0] = 255; break;
-                        case 2:
-                            *((uint16_t *)out) = *((uint16_t *)&weights[0]);
-                            out += 2;
-                            break;
-                        case 4:
-                            *((uint32_t *)out) = *((uint32_t *)&weights[0]);
-                            out += 4;
-                            break;
-                        case 8:
-                            *((uint64_t *)out) = *((uint64_t *)&weights[0]);
-                            out += 8;
-                            break;
+                    case 1: weights[0] = 255; break;
+                    case 2:
+                        *((uint16_t *)out) = *((uint16_t *)&weights[0]);
+                        out += 2;
+                        break;
+                    case 4:
+                        *((uint32_t *)out) = *((uint32_t *)&weights[0]);
+                        out += 4;
+                        break;
+                    case 8:
+                        *((uint64_t *)out) = *((uint64_t *)&weights[0]);
+                        out += 8;
+                        break;
                     }
                     for (j = 0; j < (uint32_t)nb_s && skin[i].data.boneid[j] != M3D_UNDEF && weights[j]; j++) {
                         out = _m3d_addidx(out, bi_s, skin[i].data.boneid[j]);
@@ -5559,41 +5561,41 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     if (k == 256) continue;
                     *out++ = m->prop[i].type;
                     switch (k) {
-                        case m3dpf_color:
-                            if (!(flags & M3D_EXP_NOCMAP)) {
-                                idx = _m3d_cmapidx(cmap, numcmap, m->prop[i].value.color);
-                                switch (ci_s) {
-                                    case 1: *out++ = (uint8_t)(idx); break;
-                                    case 2:
-                                        *((uint16_t *)out) = (uint16_t)(idx);
-                                        out += 2;
-                                        break;
-                                    case 4:
-                                        *((uint32_t *)out) = (uint32_t)(m->prop[i].value.color);
-                                        out += 4;
-                                        break;
-                                }
-                            } else
-                                out--;
-                            break;
-                        case m3dpf_uint8: *out++ = m->prop[i].value.num; break;
-                        case m3dpf_uint16:
-                            *((uint16_t *)out) = m->prop[i].value.num;
-                            out += 2;
-                            break;
-                        case m3dpf_uint32:
-                            *((uint32_t *)out) = m->prop[i].value.num;
-                            out += 4;
-                            break;
-                        case m3dpf_float:
-                            *((float *)out) = m->prop[i].value.fnum;
-                            out += 4;
-                            break;
+                    case m3dpf_color:
+                        if (!(flags & M3D_EXP_NOCMAP)) {
+                            idx = _m3d_cmapidx(cmap, numcmap, m->prop[i].value.color);
+                            switch (ci_s) {
+                            case 1: *out++ = (uint8_t)(idx); break;
+                            case 2:
+                                *((uint16_t *)out) = (uint16_t)(idx);
+                                out += 2;
+                                break;
+                            case 4:
+                                *((uint32_t *)out) = (uint32_t)(m->prop[i].value.color);
+                                out += 4;
+                                break;
+                            }
+                        } else
+                            out--;
+                        break;
+                    case m3dpf_uint8: *out++ = (uint8_t)m->prop[i].value.num; break;
+                    case m3dpf_uint16:
+                        *((uint16_t *)out) = (uint16_t)m->prop[i].value.num;
+                        out += 2;
+                        break;
+                    case m3dpf_uint32:
+                        *((uint32_t *)out) = m->prop[i].value.num;
+                        out += 4;
+                        break;
+                    case m3dpf_float:
+                        *((float *)out) = m->prop[i].value.fnum;
+                        out += 4;
+                        break;
 
-                        case m3dpf_map:
-                            idx = _m3d_stridx(str, numstr, model->texture[m->prop[i].value.textureid].name);
-                            out = _m3d_addidx(out, si_s, idx);
-                            break;
+                    case m3dpf_map:
+                        idx = _m3d_stridx(str, numstr, model->texture[m->prop[i].value.textureid].name);
+                        out = _m3d_addidx(out, si_s, idx);
+                        break;
                     }
                 }
                 *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
@@ -5653,7 +5655,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                              face[i].data.normal[1] == M3D_UNDEF || face[i].data.normal[2] == M3D_UNDEF) ?
                                     0 :
                                     2);
-                *out++ = k;
+                *out++ = (uint8_t)k;
                 for (j = 0; j < 3; j++) {
                     out = _m3d_addidx(out, vi_s, vrtxidx[face[i].data.vertex[j]]);
                     if (k & 1)
@@ -5687,40 +5689,40 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     if (cmd->type > 127) *out++ = (cmd->type >> 7) & 0xff;
                     for (k = n = 0, l = cd->p; k < l; k++) {
                         switch (cd->a[((k - n) % (cd->p - n)) + n]) {
-                            case m3dcp_mi_t:
-                                out = _m3d_addidx(out, si_s, cmd->arg[k] < model->nummaterial ? _m3d_stridx(str, numstr, model->material[cmd->arg[k]].name) : 0);
+                        case m3dcp_mi_t:
+                            out = _m3d_addidx(out, si_s, cmd->arg[k] < model->nummaterial ? _m3d_stridx(str, numstr, model->material[cmd->arg[k]].name) : 0);
+                            break;
+                        case m3dcp_vc_t:
+                            min_x = *((float *)&cmd->arg[k]);
+                            switch (vc_s) {
+                            case 1: *out++ = (int8_t)(min_x * 127); break;
+                            case 2:
+                                *((int16_t *)out) = (int16_t)(min_x * 32767);
+                                out += 2;
                                 break;
-                            case m3dcp_vc_t:
-                                min_x = *((float *)&cmd->arg[k]);
-                                switch (vc_s) {
-                                    case 1: *out++ = (int8_t)(min_x * 127); break;
-                                    case 2:
-                                        *((int16_t *)out) = (int16_t)(min_x * 32767);
-                                        out += 2;
-                                        break;
-                                    case 4:
-                                        *((float *)out) = min_x;
-                                        out += 4;
-                                        break;
-                                    case 8:
-                                        *((double *)out) = min_x;
-                                        out += 8;
-                                        break;
-                                }
+                            case 4:
+                                *((float *)out) = min_x;
+                                out += 4;
                                 break;
-                            case m3dcp_hi_t: out = _m3d_addidx(out, hi_s, cmd->arg[k]); break;
-                            case m3dcp_fi_t: out = _m3d_addidx(out, fi_s, cmd->arg[k]); break;
-                            case m3dcp_ti_t: out = _m3d_addidx(out, ti_s, cmd->arg[k]); break;
-                            case m3dcp_qi_t:
-                            case m3dcp_vi_t: out = _m3d_addidx(out, vi_s, cmd->arg[k]); break;
-                            case m3dcp_i1_t: out = _m3d_addidx(out, 1, cmd->arg[k]); break;
-                            case m3dcp_i2_t: out = _m3d_addidx(out, 2, cmd->arg[k]); break;
-                            case m3dcp_i4_t: out = _m3d_addidx(out, 4, cmd->arg[k]); break;
-                            case m3dcp_va_t:
-                                out = _m3d_addidx(out, 4, cmd->arg[k]);
-                                n = k + 1;
-                                l += (cmd->arg[k] - 1) * (cd->p - k - 1);
+                            case 8:
+                                *((double *)out) = min_x;
+                                out += 8;
                                 break;
+                            }
+                            break;
+                        case m3dcp_hi_t: out = _m3d_addidx(out, hi_s, cmd->arg[k]); break;
+                        case m3dcp_fi_t: out = _m3d_addidx(out, fi_s, cmd->arg[k]); break;
+                        case m3dcp_ti_t: out = _m3d_addidx(out, ti_s, cmd->arg[k]); break;
+                        case m3dcp_qi_t:
+                        case m3dcp_vi_t: out = _m3d_addidx(out, vi_s, cmd->arg[k]); break;
+                        case m3dcp_i1_t: out = _m3d_addidx(out, 1, cmd->arg[k]); break;
+                        case m3dcp_i2_t: out = _m3d_addidx(out, 2, cmd->arg[k]); break;
+                        case m3dcp_i4_t: out = _m3d_addidx(out, 4, cmd->arg[k]); break;
+                        case m3dcp_va_t:
+                            out = _m3d_addidx(out, 4, cmd->arg[k]);
+                            n = k + 1;
+                            l += (cmd->arg[k] - 1) * (cd->p - k - 1);
+                            break;
                         }
                     }
                 }
@@ -5754,15 +5756,15 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->label[l].lang));
                     idx = _m3d_cmapidx(cmap, numcmap, model->label[i].color);
                     switch (ci_s) {
-                        case 1: *out++ = (uint8_t)(idx); break;
-                        case 2:
-                            *((uint16_t *)out) = (uint16_t)(idx);
-                            out += 2;
-                            break;
-                        case 4:
-                            *((uint32_t *)out) = model->label[i].color;
-                            out += 4;
-                            break;
+                    case 1: *out++ = (uint8_t)(idx); break;
+                    case 2:
+                        *((uint16_t *)out) = (uint16_t)(idx);
+                        out += 2;
+                        break;
+                    case 4:
+                        *((uint32_t *)out) = model->label[i].color;
+                        out += 4;
+                        break;
                     }
                 }
                 out = _m3d_addidx(out, vi_s, vrtxidx[model->label[i].vertexid]);
@@ -5887,7 +5889,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
 }
 #endif
 
-#endif
+#endif /* M3D_IMPLEMENTATION */
 
 #ifdef __cplusplus
 }
@@ -6145,11 +6147,11 @@ public:
 #endif /* impl */
 } // namespace M3D
 
-#ifdef _WIN32
-#    pragma warning(pop)
-#endif // _WIN32
+#endif /* M3D_CPPWRAPPER */
 
-#endif
+#if _MSC_VER > 1920 && !defined(__clang__)
+#    pragma warning(pop)
+#endif /* _MSC_VER */
 
 #endif /* __cplusplus */
 

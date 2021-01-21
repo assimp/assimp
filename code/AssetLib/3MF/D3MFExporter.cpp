@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -138,7 +137,7 @@ bool D3MFExporter::exportContentTypes() {
     mContentOutput << std::endl;
     mContentOutput << "</Types>";
     mContentOutput << std::endl;
-    exportContentTyp(XmlTag::CONTENT_TYPES_ARCHIVE);
+    zipContentType(XmlTag::CONTENT_TYPES_ARCHIVE);
 
     return true;
 }
@@ -163,7 +162,7 @@ bool D3MFExporter::exportRelations() {
     mRelOutput << "</Relationships>";
     mRelOutput << std::endl;
 
-    writeRelInfoToFile("_rels", ".rels");
+    zipRelInfo("_rels", ".rels");
     mRelOutput.flush();
 
     return true;
@@ -197,7 +196,7 @@ bool D3MFExporter::export3DModel() {
     info->type = XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;
     mRelations.push_back(info);
 
-    writeModelToArchive("3D", "3DModel.model");
+    zipModel("3D", "3DModel.model");
     mModelOutput.flush();
 
     return true;
@@ -358,42 +357,27 @@ void D3MFExporter::writeBuild() {
     mModelOutput << std::endl;
 }
 
-void D3MFExporter::exportContentTyp(const std::string &filename) {
-    if (nullptr == m_zipArchive) {
-        throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
-    }
-    const std::string entry = filename;
-    zip_entry_open(m_zipArchive, entry.c_str());
-
-    const std::string &exportTxt(mContentOutput.str());
-    zip_entry_write(m_zipArchive, exportTxt.c_str(), exportTxt.size());
-
-    zip_entry_close(m_zipArchive);
+void D3MFExporter::zipContentType(const std::string &filename) {
+    addFileInZip(filename, mContentOutput.str());
 }
 
-void D3MFExporter::writeModelToArchive(const std::string &folder, const std::string &modelName) {
-    if (nullptr == m_zipArchive) {
-        throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
-    }
+void D3MFExporter::zipModel(const std::string &folder, const std::string &modelName) {
     const std::string entry = folder + "/" + modelName;
-    zip_entry_open(m_zipArchive, entry.c_str());
-
-    const std::string &exportTxt(mModelOutput.str());
-    zip_entry_write(m_zipArchive, exportTxt.c_str(), exportTxt.size());
-
-    zip_entry_close(m_zipArchive);
+    addFileInZip(entry, mModelOutput.str());
 }
 
-void D3MFExporter::writeRelInfoToFile(const std::string &folder, const std::string &relName) {
+void D3MFExporter::zipRelInfo(const std::string &folder, const std::string &relName) {
+    const std::string entry = folder + "/" + relName;
+    addFileInZip(entry, mRelOutput.str());
+}
+
+void D3MFExporter::addFileInZip(const std::string& entry, const std::string& content) {
     if (nullptr == m_zipArchive) {
         throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
     }
-    const std::string entry = folder + "/" + relName;
+
     zip_entry_open(m_zipArchive, entry.c_str());
-
-    const std::string &exportTxt(mRelOutput.str());
-    zip_entry_write(m_zipArchive, exportTxt.c_str(), exportTxt.size());
-
+    zip_entry_write(m_zipArchive, content.c_str(), content.size());
     zip_entry_close(m_zipArchive);
 }
 

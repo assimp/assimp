@@ -167,7 +167,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
 
     // Check whether we can read from the file
     if (file.get() == nullptr) {
-        throw DeadlyImportError("Failed to open MDL file " + pFile + ".");
+        throw DeadlyImportError("Failed to open MDL file ", pFile, ".");
     }
 
     // This should work for all other types of MDL files, too ...
@@ -251,8 +251,8 @@ void MDLImporter::InternReadFile(const std::string &pFile,
             }
         } else {
             // print the magic word to the log file
-            throw DeadlyImportError("Unknown MDL subformat " + pFile +
-                                    ". Magic word (" + std::string((char *)&iMagicWord, 4) + ") is not known");
+            throw DeadlyImportError("Unknown MDL subformat ", pFile,
+                                    ". Magic word (", std::string((char *)&iMagicWord, 4), ") is not known");
         }
 
         // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system

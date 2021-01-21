@@ -25,10 +25,12 @@
 #include "UTFConverter.h"
 #include "SafeRelease.hpp"
 
+#ifdef _MSC_VER
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment (lib, "dxguid.lib")
+#endif // _MSC_VER
 
 using namespace DirectX;
 using namespace AssimpSamples::SharedCode;

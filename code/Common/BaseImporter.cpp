@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -130,10 +128,11 @@ aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSyst
         // passes scale into ScaleProcess
         UpdateImporterScale(pImp);
 
-    } catch (const std::exception &err) {
+    } catch( const std::exception &err ) {
         // extract error description
         m_ErrorText = err.what();
-        ASSIMP_LOG_ERROR(m_ErrorText);
+        ASSIMP_LOG_ERROR(err.what());
+        m_Exception = std::current_exception();
         return nullptr;
     }
 
@@ -343,7 +342,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
 }
 
 #ifdef ASSIMP_USE_HUNTER
-#include <utf8/utf8.h>
+#include <utf8.h>
 #else
 #include "../contrib/utf8cpp/source/utf8.h"
 #endif

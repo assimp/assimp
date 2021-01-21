@@ -4,8 +4,6 @@ A library to import and export various 3d-model-formats including scene-post-pro
 ### Current project status ###
 [![Financial Contributors on Open Collective](https://opencollective.com/assimp/all/badge.svg?label=financial+contributors)](https://opencollective.com/assimp) 
 ![C/C++ CI](https://github.com/assimp/assimp/workflows/C/C++%20CI/badge.svg)
-[![Linux Build Status](https://travis-ci.org/assimp/assimp.svg)](https://travis-ci.org/assimp/assimp)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
 <a href="https://scan.coverity.com/projects/5607">
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
@@ -18,13 +16,16 @@ A library to import and export various 3d-model-formats including scene-post-pro
 <br>
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
-
-[Check the latest doc](https://assimp-docs.readthedocs.io/en/latest/).
-
 Additionally, assimp features various __mesh post processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
-This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
+### Latest Doc's ###
+Please check the latest documents at [Asset-Importer-Lib-Doc](https://assimp-docs.readthedocs.io/en/latest/). 
 
+### Get involved ###
+This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
+<br>
+You find a bug in the docs? Use [Doc-Repo](https://github.com/assimp/assimp-docs).
+<br>
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
@@ -72,7 +73,7 @@ The source code is organized in the following way:
 For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
 (CHMs for Windows are included in some release packages and should be located right here in the root folder).
 
-If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
+If the docs don't solve your problem, ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
 
 For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
   [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions)

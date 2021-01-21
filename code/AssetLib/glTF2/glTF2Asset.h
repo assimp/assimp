@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -46,11 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_pbrSpecularGlossiness full
  *   KHR_materials_unlit full
  *   KHR_lights_punctual full
+ *   KHR_materials_sheen full
+ *   KHR_materials_clearcoat full
+ *   KHR_materials_transmission full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
 
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
 #include <assimp/Exceptional.h>
 
@@ -62,18 +65,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 #if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
-
-#ifndef RAPIDJSON_NOMEMBERITERATORCLASS
-#define RAPIDJSON_NOMEMBERITERATORCLASS
-#endif 
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -202,7 +197,7 @@ inline unsigned int ComponentTypeSize(ComponentType t) {
     case ComponentType_UNSIGNED_BYTE:
         return 1;
     default:
-        throw DeadlyImportError("GLTF: Unsupported Component Type " + to_string(t));
+        throw DeadlyImportError("GLTF: Unsupported Component Type ", to_string(t));
     }
 }
 
@@ -406,6 +401,8 @@ struct Accessor : public Object {
     void ExtractData(T *&outData);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
+    void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
+    void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
 
     //! Helper class to iterate the data
     class Indexer {
@@ -683,6 +680,7 @@ const vec4 defaultBaseColor = { 1, 1, 1, 1 };
 const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
+const vec3 defaultSheenFactor = { 0, 0, 0 };
 
 struct TextureInfo {
     Ref<Texture> texture;
@@ -724,6 +722,29 @@ struct PbrSpecularGlossiness {
     void SetDefaults();
 };
 
+struct MaterialSheen {
+    vec3 sheenColorFactor;
+    float sheenRoughnessFactor;
+    TextureInfo sheenColorTexture;
+    TextureInfo sheenRoughnessTexture;
+
+    MaterialSheen() { SetDefaults(); }
+    void SetDefaults();
+};
+
+struct MaterialClearcoat {
+    float clearcoatFactor = 0.f;
+    float clearcoatRoughnessFactor = 0.f;
+    TextureInfo clearcoatTexture;
+    TextureInfo clearcoatRoughnessTexture;
+    NormalTextureInfo clearcoatNormalTexture;
+};
+
+struct MaterialTransmission {
+    TextureInfo transmissionTexture;
+    float transmissionFactor = 0.f;
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -740,6 +761,15 @@ struct Material : public Object {
 
     //extension: KHR_materials_pbrSpecularGlossiness
     Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
+
+    //extension: KHR_materials_sheen
+    Nullable<MaterialSheen> materialSheen;
+
+    //extension: KHR_materials_clearcoat
+    Nullable<MaterialClearcoat> materialClearcoat;
+
+    //extension: KHR_materials_transmission
+    Nullable<MaterialTransmission> materialTransmission;
 
     //extension: KHR_materials_unlit
     bool unlit;
@@ -802,7 +832,7 @@ struct CustomExtension : public Object {
     Nullable<std::vector<CustomExtension>> mValues;
 
     operator bool() const {
-        return Size();
+        return Size() != 0;
     }
 
     size_t Size() const {
@@ -869,6 +899,7 @@ struct Sampler : public Object {
 };
 
 struct Scene : public Object {
+    std::string name;
     std::vector<Ref<Node>> nodes;
 
     Scene() {}
@@ -1058,6 +1089,9 @@ public:
         bool KHR_materials_unlit;
         bool KHR_lights_punctual;
         bool KHR_texture_transform;
+        bool KHR_materials_sheen;
+        bool KHR_materials_clearcoat;
+        bool KHR_materials_transmission;
     } extensionsUsed;
 
     //! Keeps info about the required extensions
@@ -1066,6 +1100,7 @@ public:
     } extensionsRequired;
 
     AssetMetadata asset;
+    Value* extras = nullptr;
 
     // Dictionaries for each type of object
 
@@ -1127,6 +1162,14 @@ private:
 
     IOStream *OpenFile(std::string path, const char *mode, bool absolute = false);
 };
+
+inline std::string getContextForErrorMessages(const std::string &id, const std::string &name) {
+    std::string context = id;
+    if (!name.empty()) {
+        context += " (\"" + name + "\")";
+    }
+    return context;
+}
 
 } // namespace glTF2
 

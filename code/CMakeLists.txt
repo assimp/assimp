@@ -137,7 +137,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/XMLTools.h
   ${HEADER_PATH}/IOStreamBuffer.h
   ${HEADER_PATH}/CreateAnimMesh.h
-  ${HEADER_PATH}/irrXMLWrapper.h
+  ${HEADER_PATH}/XmlParser.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
@@ -200,6 +200,7 @@ SET( Common_SRCS
   Common/simd.cpp
   Common/material.cpp
   Common/AssertHandler.cpp
+  Common/Exceptional.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -743,9 +744,6 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
-
 ADD_ASSIMP_IMPORTER( Q3D
   AssetLib/Q3D/Q3DLoader.cpp
   AssetLib/Q3D/Q3DLoader.h
@@ -800,21 +798,6 @@ ADD_ASSIMP_IMPORTER( X
 ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter.cpp
   AssetLib/X3D/X3DImporter.hpp
-  AssetLib/X3D/X3DImporter_Geometry2D.cpp
-  AssetLib/X3D/X3DImporter_Geometry3D.cpp
-  AssetLib/X3D/X3DImporter_Group.cpp
-  AssetLib/X3D/X3DImporter_Light.cpp
-  AssetLib/X3D/X3DImporter_Macro.hpp
-  AssetLib/X3D/X3DImporter_Metadata.cpp
-  AssetLib/X3D/X3DImporter_Networking.cpp
-  AssetLib/X3D/X3DImporter_Node.hpp
-  AssetLib/X3D/X3DImporter_Postprocess.cpp
-  AssetLib/X3D/X3DImporter_Rendering.cpp
-  AssetLib/X3D/X3DImporter_Shape.cpp
-  AssetLib/X3D/X3DImporter_Texturing.cpp
-  AssetLib/X3D/FIReader.hpp
-  AssetLib/X3D/FIReader.cpp
-  AssetLib/X3D/X3DVocabulary.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -864,16 +847,6 @@ if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
 endif()
 
-#ADD_ASSIMP_IMPORTER( STEP
-#    Step/STEPFile.h
-#    Importer/StepFile/StepFileImporter.h
-#    Importer/StepFile/StepFileImporter.cpp
-#    Importer/StepFile/StepFileGen1.cpp
-#    Importer/StepFile/StepFileGen2.cpp
-#    Importer/StepFile/StepFileGen3.cpp
-#    Importer/StepFile/StepReaderGen.h
-#)
-
 if ((NOT ASSIMP_NO_EXPORT) OR (NOT ASSIMP_EXPORTERS_ENABLED STREQUAL ""))
 	SET( Exporter_SRCS
 	  Common/Exporter.cpp
@@ -888,18 +861,22 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-# irrXML
+# pugixml
 IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(irrXML)
-  find_package(irrXML CONFIG REQUIRED)
+  hunter_add_package(pugixml)
+  find_package(pugixml CONFIG REQUIRED)
 ELSE()
-  # irrXML already included in contrib directory by parent CMakeLists.txt.
+  SET( Pugixml_SRCS
+    ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.hpp
+  )
+  SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
 # utf8
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
-  find_package(utf8 CONFIG REQUIRED)
+  find_package(utf8cpp CONFIG REQUIRED)
 ELSE()
   # utf8 is header-only, so Assimp doesn't need to do anything.
 ENDIF()
@@ -943,6 +920,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
   SET( unzip_SRCS
+    ../contrib/unzip/crypt.c
     ../contrib/unzip/crypt.h
     ../contrib/unzip/ioapi.c
     ../contrib/unzip/ioapi.h
@@ -1038,7 +1016,7 @@ ENDIF()
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
 FIND_PACKAGE(RT QUIET)
-IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR MSVC))
+IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR WIN32))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
 ELSE ()
@@ -1054,6 +1032,12 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
   INCLUDE_DIRECTORIES( "../contrib" )
+  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
+  option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
+  if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
+    ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
+  endif()
 ENDIF()
 
 # VC2010 fixes
@@ -1066,7 +1050,7 @@ endif()
 
 ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
 
-if ( MSVC )
+IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
@@ -1107,13 +1091,13 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  ${IrrXML_SRCS}
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Pugixml_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1136,6 +1120,8 @@ ENDIF ()
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+
 # enable warnings as errors ########################################
 IF (MSVC)
   TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
@@ -1153,17 +1139,17 @@ IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
       polyclipping::polyclipping
-      irrXML::irrXML
       openddlparser::openddl_parser
       poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
-      utf8::utf8
+      utf8cpp
       zip::zip
+      pugixml
   )
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
+  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -1256,23 +1242,16 @@ IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
 ENDIF ()
 
-IF(ASSIMP_HUNTER_ENABLED)
-  INSTALL( TARGETS assimp
-    EXPORT "${TARGETS_EXPORT_NAME}"
-    LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
-    FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    COMPONENT ${LIBASSIMP_COMPONENT}
-    INCLUDES DESTINATION "include")
-ELSE()
+
 INSTALL( TARGETS assimp
-    LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
-    FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    COMPONENT ${LIBASSIMP_COMPONENT})
-ENDIF()
+  EXPORT "${TARGETS_EXPORT_NAME}"
+  LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  COMPONENT ${LIBASSIMP_COMPONENT}
+  INCLUDES DESTINATION include
+)
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
 

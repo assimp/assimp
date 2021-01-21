@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exceptional.h>
 #include <assimp/ByteSwapper.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/StringUtils.h>
 
 namespace Assimp {
 namespace FBX {
@@ -126,7 +127,7 @@ namespace {
 AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset) AI_WONT_RETURN_SUFFIX;
 AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset)
 {
-    throw DeadlyImportError(Util::AddOffset("FBX-Tokenize",message,offset));
+    throw DeadlyImportError("FBX-Tokenize", Util::GetOffsetText(offset), message);
 }
 
 
@@ -374,6 +375,11 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 
     // now come the individual properties
     const char* begin_cursor = cursor;
+
+    if ((begin_cursor + prop_length) > end) {
+        TokenizeError("property length out of bounds reading length ", input, cursor);
+    }
+
     for (unsigned int i = 0; i < prop_count; ++i) {
         ReadData(sbeg, send, input, cursor, begin_cursor + prop_length);
 
@@ -456,10 +462,20 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
 	ASSIMP_LOG_DEBUG_F("FBX version: ", version);
 	const bool is64bits = version >= 7500;
     const char *end = input + length;
-    while (cursor < end ) {
-		if (!ReadScope(output_tokens, input, cursor, input + length, is64bits)) {
-            break;
+    try
+    {
+        while (cursor < end ) {
+		    if (!ReadScope(output_tokens, input, cursor, input + length, is64bits)) {
+                break;
+            }
         }
+    }
+    catch (const DeadlyImportError& e)
+    {
+        if (!is64bits && (length > std::numeric_limits<std::uint32_t>::max())) {
+            throw DeadlyImportError("The FBX file is invalid. This may be because the content is too big for this older version (", to_string(version), ") of the FBX format. (", e.what(), ")");
+        }
+        throw;
     }
 }
 

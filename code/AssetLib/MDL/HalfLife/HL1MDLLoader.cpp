@@ -68,9 +68,9 @@ namespace Assimp {
 namespace MDL {
 namespace HalfLife {
 
-#ifdef _WIN32
-#    pragma warning(disable : 4706) 
-#endif // _WIN32
+#ifdef _MSC_VER
+#    pragma warning(disable : 4706)
+#endif // _MSC_VER
 
 // ------------------------------------------------------------------------------------------------
 HL1MDLLoader::HL1MDLLoader(
@@ -829,7 +829,7 @@ void HL1MDLLoader::read_meshes() {
                         }
                     } else {
                         for (int faceIdx = 0; faceIdx < num_faces; ++faceIdx) {
-                            if (i & 1) {
+                            if (faceIdx & 1) {
                                 // Preserve winding order.
                                 mesh_faces.push_back(HL1MeshFace{
                                         tricmds[faceIdx + 1],

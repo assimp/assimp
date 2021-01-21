@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -107,21 +107,47 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Accessor& a, AssetWriter& w)
     {
-        obj.AddMember("bufferView", a.bufferView->index, w.mAl);
-        obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
+        if (a.bufferView) {
+            obj.AddMember("bufferView", a.bufferView->index, w.mAl);
+            obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
+            Value vTmpMax, vTmpMin;
+            if (a.componentType == ComponentType_FLOAT) {
+                obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+                obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+            } else {
+                obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
+                obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
+            }
+        }
 
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
 
-        Value vTmpMax, vTmpMin;
-		if (a.componentType == ComponentType_FLOAT) {
-			obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
-			obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
-		} else {
-			obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
-			obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
-		}
+        if (a.sparse) {
+            Value sparseValue;
+            sparseValue.SetObject();
+
+            //count
+            sparseValue.AddMember("count", (unsigned int)a.sparse->count, w.mAl);
+
+            //indices
+            Value indices;
+            indices.SetObject();
+            indices.AddMember("bufferView", a.sparse->indices->index, w.mAl);
+            indices.AddMember("byteOffset", (unsigned int)a.sparse->indicesByteOffset, w.mAl);
+            indices.AddMember("componentType", int(a.sparse->indicesType), w.mAl);
+            sparseValue.AddMember("indices", indices, w.mAl);
+
+            //values
+            Value values;
+            values.SetObject();
+            values.AddMember("bufferView", a.sparse->values->index, w.mAl);
+            values.AddMember("byteOffset", (unsigned int)a.sparse->valuesByteOffset, w.mAl);
+            sparseValue.AddMember("values", values, w.mAl);
+
+            obj.AddMember("sparse", sparseValue, w.mAl);
+        }
     }
 
     inline void Write(Value& obj, Animation& a, AssetWriter& w)
@@ -391,6 +417,63 @@ namespace glTF2 {
           exts.AddMember("KHR_materials_unlit", unlit, w.mAl);
         }
 
+        if (m.materialSheen.isPresent) {
+            Value materialSheen(rapidjson::Type::kObjectType);
+
+            MaterialSheen &sheen = m.materialSheen.value;
+
+            WriteVec(materialSheen, sheen.sheenColorFactor, "sheenColorFactor", defaultSheenFactor, w.mAl);
+
+            if (sheen.sheenRoughnessFactor != 0.f) {
+                WriteFloat(materialSheen, sheen.sheenRoughnessFactor, "sheenRoughnessFactor", w.mAl);
+            }
+
+            WriteTex(materialSheen, sheen.sheenColorTexture, "sheenColorTexture", w.mAl);
+            WriteTex(materialSheen, sheen.sheenRoughnessTexture, "sheenRoughnessTexture", w.mAl);
+
+            if (!materialSheen.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_sheen", materialSheen, w.mAl);
+            }
+        }
+
+        if (m.materialClearcoat.isPresent) {
+            Value materialClearcoat(rapidjson::Type::kObjectType);
+
+            MaterialClearcoat &clearcoat = m.materialClearcoat.value;
+
+            if (clearcoat.clearcoatFactor != 0.f) {
+                WriteFloat(materialClearcoat, clearcoat.clearcoatFactor, "clearcoatFactor", w.mAl);
+            }
+
+            if (clearcoat.clearcoatRoughnessFactor != 0.f) {
+                WriteFloat(materialClearcoat, clearcoat.clearcoatRoughnessFactor, "clearcoatRoughnessFactor", w.mAl);
+            }
+
+            WriteTex(materialClearcoat, clearcoat.clearcoatTexture, "clearcoatTexture", w.mAl);
+            WriteTex(materialClearcoat, clearcoat.clearcoatRoughnessTexture, "clearcoatRoughnessTexture", w.mAl);
+            WriteTex(materialClearcoat, clearcoat.clearcoatNormalTexture, "clearcoatNormalTexture", w.mAl);
+                        
+            if (!materialClearcoat.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_clearcoat", materialClearcoat, w.mAl);
+            }
+        }
+
+        if (m.materialTransmission.isPresent) {
+            Value materialTransmission(rapidjson::Type::kObjectType);
+
+            MaterialTransmission &transmission = m.materialTransmission.value;
+
+            if (transmission.transmissionFactor != 0.f) {
+                WriteFloat(materialTransmission, transmission.transmissionFactor, "transmissionFactor", w.mAl);
+            }
+
+            WriteTex(materialTransmission, transmission.transmissionTexture, "transmissionTexture", w.mAl);
+                                   
+            if (!materialTransmission.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_transmission", materialTransmission, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -616,6 +699,10 @@ namespace glTF2 {
         if (mAsset.scene) {
             mDoc.AddMember("scene", mAsset.scene->index, mAl);
         }
+        
+        if(mAsset.extras) {
+            mDoc.AddMember("extras", *mAsset.extras, mAl);
+        }
     }
 
     inline void AssetWriter::WriteFile(const char* path)
@@ -709,10 +796,13 @@ namespace glTF2 {
         // Binary chunk
         //
 
+        int GLB_Chunk_count = 1;
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
             binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
-            //auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
+            
+            auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
+            ++GLB_Chunk_count;
 
             GLB_Chunk binaryChunk;
             binaryChunk.chunkLength = binaryChunkLength;
@@ -727,7 +817,7 @@ namespace glTF2 {
             if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
                 throw DeadlyExportError("Failed to write body data!");
             }
-            if (paddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+            if (curPaddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
                 throw DeadlyExportError("Failed to write body data padding!");
             }
         }
@@ -742,7 +832,7 @@ namespace glTF2 {
         header.version = 2;
         AI_SWAP4(header.version);
 
-        header.length = uint32_t(sizeof(GLB_Header) + 2 * sizeof(GLB_Chunk) + jsonChunkLength + binaryChunkLength);
+        header.length = uint32_t(sizeof(GLB_Header) + GLB_Chunk_count * sizeof(GLB_Chunk) + jsonChunkLength + binaryChunkLength);
         AI_SWAP4(header.length);
 
         outfile->Seek(0, aiOrigin_SET);
@@ -774,6 +864,18 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_unlit) {
               exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
+                exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
+            }
+                        
+            if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
+                exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_transmission) {
+                exts.PushBack(StringRef("KHR_materials_transmission"), mAl);
             }
         }
 

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2020, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -56,6 +55,8 @@ namespace XmlTag {
     static const std::string resources = "resources";
     static const std::string object = "object";
     static const std::string mesh = "mesh";
+    static const std::string components = "components";
+    static const std::string component = "component";
     static const std::string vertices = "vertices";
     static const std::string vertex = "vertex";
     static const std::string triangles = "triangles";
@@ -68,6 +69,7 @@ namespace XmlTag {
     static const std::string v3 = "v3";
     static const std::string id = "id";
     static const std::string pid = "pid";
+    static const std::string pindex = "pindex";
     static const std::string p1 = "p1";
     static const std::string name = "name";
     static const std::string type = "type";

@@ -121,7 +121,7 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
 
     // Check whether we can read from the file
     if (file == nullptr)
-        throw DeadlyImportError("Failed to open TERRAGEN TERRAIN file " + pFile + ".");
+        throw DeadlyImportError("Failed to open TERRAGEN TERRAIN file ", pFile, ".");
 
     // Construct a stream reader to read all data in the correct endianness
     StreamReaderLE reader(file);

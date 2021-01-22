@@ -383,6 +383,22 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 }
 #endif // ASSIMP_BUILD_DEBUG
 
+template<typename T>
+aiColor4D* GetVertexColorsForType(glTF2::Ref<glTF2::Accessor> input) {
+    float max = std::numeric_limits<T>::max();
+    aiColor4t<T>* colors;
+    input->ExtractData(colors);
+    auto output = new aiColor4D[input->count];
+    for (size_t i = 0; i < input->count; i++) {
+        output[i] = aiColor4D(
+            colors[i].r / max, colors[i].g / max,
+            colors[i].b / max, colors[i].a / max
+        );
+    }
+    delete[] colors;
+    return output;
+}
+
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
     ASSIMP_LOG_DEBUG_F("Importing ", r.meshes.Size(), " meshes");
     std::vector<std::unique_ptr<aiMesh>> meshes;
@@ -463,7 +479,17 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                                                "\" does not match the vertex count");
                     continue;
                 }
-                attr.color[c]->ExtractData(aim->mColors[c]);
+                
+                auto componentType = attr.color[c]->componentType;
+                if (componentType == glTF2::ComponentType_FLOAT) {
+                    attr.color[c]->ExtractData(aim->mColors[c]);
+                } else {
+                    if (componentType == glTF2::ComponentType_UNSIGNED_BYTE) {
+                        aim->mColors[c] = GetVertexColorsForType<unsigned char>(attr.color[c]);
+                    } else if (componentType == glTF2::ComponentType_UNSIGNED_SHORT) {
+                        aim->mColors[c] = GetVertexColorsForType<unsigned short>(attr.color[c]);
+                    }
+                }
             }
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 if (!attr.texcoord[tc]) {

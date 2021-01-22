@@ -570,6 +570,54 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
+OPTION ( ASSIMP_BUILD_DRACO "If the Draco libraries are to be built. Primarily for glTF" ON )
+IF ( ASSIMP_BUILD_DRACO )
+  # Primarily for glTF v2
+  # Enable Draco glTF feature set
+  set(DRACO_GLTF ON CACHE BOOL "" FORCE)
+  # Disable unnecessary or omitted components
+  set(DRACO_JS_GLUE OFF CACHE BOOL "" FORCE)
+  set(DRACO_WASM OFF CACHE BOOL "" FORCE)
+  set(DRACO_MAYA_PLUGIN OFF CACHE BOOL "" FORCE)
+  set(DRACO_UNITY_PLUGIN OFF CACHE BOOL "" FORCE)
+  set(DRACO_TESTS OFF CACHE BOOL "" FORCE)
+  
+  IF(ASSIMP_HUNTER_ENABLED)
+    # hunter is untested
+    hunter_add_package(draco)
+    find_package(draco CONFIG REQUIRED)
+  ELSE()
+    # Draco 1.4.1 has several nasty warnings and will not build with /WX
+    IF(MSVC)
+      set(DRACO_CXX_FLAGS "/W0")
+    ENDIF()
+    ADD_SUBDIRECTORY( "contrib/draco" )
+    
+    # Don't build the draco command-line tools by default
+    set_target_properties(draco_encoder draco_decoder PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    set_target_properties(draco_encoder draco_decoder PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+    
+    TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco)
+    TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)
+    TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_decoder)
+    
+    set(draco_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/draco/src")
+    
+    # This is probably wrong
+    INSTALL( TARGETS draco
+      EXPORT "${TARGETS_EXPORT_NAME}"
+      LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+      FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+      COMPONENT ${LIBASSIMP_COMPONENT}
+      INCLUDES DESTINATION include
+  )
+
+  ENDIF()
+ENDIF()
+
+# Main assimp code
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only

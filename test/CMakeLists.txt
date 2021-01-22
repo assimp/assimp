@@ -223,6 +223,10 @@ else()
     target_sources(unit PUBLIC ${Assimp_SOURCE_DIR}/contrib/gtest/src/gtest-all.cc)
 endif()
 
+IF (ASSIMP_BUILD_DRACO)
+  ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
+ENDIF()
+
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")

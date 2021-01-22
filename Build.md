@@ -1,6 +1,6 @@
-# Build Instructions
+# Build / Install Instructions
 
-## Build on all platforms using vcpkg
+## Install on all platforms using vcpkg
 You can download and install assimp using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
 ```bash
     git clone https://github.com/Microsoft/vcpkg.git
@@ -10,6 +10,18 @@ You can download and install assimp using the [vcpkg](https://github.com/Microso
     vcpkg install assimp
 ```
 The assimp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
+## Install on Ubuntu
+You can install the Asset-Importer-Lib via apt:
+```
+sudo apt-get install assimp
+```
+
+## Install pyassimp
+You need to have pip installed:
+```
+pip install pyassimp
+```
 
 ## Manual build instructions
 
@@ -23,6 +35,12 @@ sudo apt-get install cmake
 Make sure you have a working git-installation. Open a command prompt and clone the Asset-Importer-Lib via:
 ```bash
 git clone https://github.com/assimp/assimp.git
+```
+### Build from source:
+```bash
+cd assimp
+cmake CMakeLists.txt 
+cmake --build .
 ```
 
 ### Build instructions for Windows with Visual-Studio

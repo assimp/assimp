@@ -147,7 +147,7 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
         for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
             WriteMesh(pScene->mMeshes[ i ]);
         }
-        mOutput << EndSolidToken << name << endl;
+        mOutput << EndSolidToken << " " << name << endl;
     }
 }
 

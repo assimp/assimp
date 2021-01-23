@@ -557,7 +557,12 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Colla
                 faceStart += submesh.mNumFaces;
 
                 // assign the material index
-                dstMesh->mMaterialIndex = matIdx;
+                std::map<std::string, size_t>::const_iterator matIt = mMaterialIndexByName.find(submesh.mMaterial);
+                if (matIt != mMaterialIndexByName.end()) {
+                    dstMesh->mMaterialIndex = matIt->second;
+                } else {
+                    dstMesh->mMaterialIndex = matIdx;
+                }
                 if (dstMesh->mName.length == 0) {
                     dstMesh->mName = mid.mMeshOrController;
                 }

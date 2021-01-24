@@ -334,7 +334,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
         const std::string &currentName = currentNode.name();
         if (currentName == "unit") {
             mUnitSize = 1.f;
-            XmlParser::getFloatAttribute(node, "meter", mUnitSize);
+            XmlParser::getFloatAttribute(currentNode, "meter", mUnitSize);
         } else if (currentName == "up_axis") {
             std::string v;
             if (!XmlParser::getValueAsString(currentNode, v)) {

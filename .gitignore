@@ -18,6 +18,9 @@ build
 *.VC.db-wal
 *.VC.opendb
 *.ipch
+.vs/
+out/
+CMakeSettings.json
 
 # Output
 bin/

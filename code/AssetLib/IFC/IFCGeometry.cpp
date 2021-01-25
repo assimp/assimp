@@ -656,7 +656,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         }
     }
 
-    if( openings && ((sides_with_openings == 1 && sides_with_openings) || (sides_with_v_openings == 2 && sides_with_v_openings)) ) {
+    if( openings && (sides_with_openings == 1 || sides_with_v_openings == 2 ) ) {
         IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
     }
 

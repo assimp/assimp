@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
+
 #include "AssetLib/COB/COBLoader.h"
 #include "AssetLib/COB/COBScene.h"
 #include "PostProcessing/ConvertToLHProcess.h"
@@ -90,11 +91,15 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-COBImporter::COBImporter() {}
+COBImporter::COBImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-COBImporter::~COBImporter() {}
+COBImporter::~COBImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -466,8 +471,9 @@ void COBImporter::UnsupportedChunk_Ascii(LineSplitter &splitter, const ChunkInfo
         // missing the next line.
         splitter.get_stream().IncPtr(nfo.size);
         splitter.swallow_next_increment();
-    } else
+    } else {
         ThrowException(error);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -790,25 +796,12 @@ void COBImporter::ReadBitM_Ascii(Scene & /*out*/, LineSplitter &splitter, const 
     if (nfo.version > 1) {
         return UnsupportedChunk_Ascii(splitter, nfo, "BitM");
     }
-    /*
-    "\nThumbNailHdrSize %ld"
-    "\nThumbHeader: %02hx 02hx %02hx "
-    "\nColorBufSize %ld"
-    "\nColorBufZipSize %ld"
-    "\nZippedThumbnail: %02hx 02hx %02hx "
-*/
 
     const unsigned int head = strtoul10((++splitter)[1]);
     if (head != sizeof(Bitmap::BitmapHeader)) {
         ASSIMP_LOG_WARN("Unexpected ThumbNailHdrSize, skipping this chunk");
         return;
     }
-
-    /*union {
-        Bitmap::BitmapHeader data;
-        char opaq[sizeof Bitmap::BitmapHeader()];
-    };*/
-    //  ReadHexOctets(opaq,head,(++splitter)[1]);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -884,7 +877,10 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
 
     while (1) {
         std::string type;
-        type += reader->GetI1(), type += reader->GetI1(), type += reader->GetI1(), type += reader->GetI1();
+        type += reader->GetI1();
+        type += reader->GetI1();
+        type += reader->GetI1(); 
+        type += reader->GetI1();
 
         ChunkInfo nfo;
         nfo.version = reader->GetI2() * 10;
@@ -906,14 +902,7 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
             ReadCame_Binary(out, *reader, nfo);
         } else if (type == "Mat1") {
             ReadMat1_Binary(out, *reader, nfo);
-        }
-        /*  else if (type == "Bone") {
-            ReadBone_Binary(out,*reader,nfo);
-        }
-        else if (type == "Chan") {
-            ReadChan_Binary(out,*reader,nfo);
-        }*/
-        else if (type == "Unit") {
+        } else if (type == "Unit") {
             ReadUnit_Binary(out, *reader, nfo);
         } else if (type == "OLay") {
             // ignore layer index silently.
@@ -923,8 +912,9 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
                 return UnsupportedChunk_Binary(*reader, nfo, type.c_str());
         } else if (type == "END ") {
             return;
-        } else
+        } else {
             UnsupportedChunk_Binary(*reader, nfo, type.c_str());
+        }
     }
 }
 

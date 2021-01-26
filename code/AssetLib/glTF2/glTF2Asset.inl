@@ -209,7 +209,7 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
     // Create a decoded Index buffer (if there is one)
     size_t componentBytes = prim.indices->GetBytesPerComponent();
 
-    auto decodedIndexBuffer = std::make_unique<Buffer>();
+    std::unique_ptr<Buffer> decodedIndexBuffer(new Buffer());
     decodedIndexBuffer->Grow(dracoMesh.num_faces() * 3 * componentBytes);
 
     // If accessor uses the same size as draco implementation, copy the draco buffer directly
@@ -257,7 +257,7 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
 
     size_t componentBytes = accessor.GetBytesPerComponent();
 
-    auto decodedAttribBuffer = std::make_unique<Buffer>();
+    std::unique_ptr<Buffer> decodedAttribBuffer(new Buffer());
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
     switch(accessor.componentType)

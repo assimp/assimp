@@ -557,9 +557,9 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Colla
                 faceStart += submesh.mNumFaces;
 
                 // assign the material index
-                std::map<std::string, size_t>::const_iterator matIt = mMaterialIndexByName.find(submesh.mMaterial);
-                if (matIt != mMaterialIndexByName.end()) {
-                    dstMesh->mMaterialIndex = static_cast<unsigned int>(matIt->second);
+                std::map<std::string, size_t>::const_iterator subMatIt = mMaterialIndexByName.find(submesh.mMaterial);
+                if (subMatIt != mMaterialIndexByName.end()) {
+                    dstMesh->mMaterialIndex = static_cast<unsigned int>(subMatIt->second);
                 } else {
                     dstMesh->mMaterialIndex = matIdx;
                 }

@@ -1174,7 +1174,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 ENDIF ()
 
 IF (ASSIMP_BUILD_DRACO)
-  target_link_libraries(assimp draco)
+  target_link_libraries(assimp ${draco_LIBRARIES})
 ENDIF()
 
 if( MSVC )

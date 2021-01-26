@@ -578,7 +578,7 @@ IF ( ASSIMP_BUILD_DRACO )
   set(DRACO_MAYA_PLUGIN OFF CACHE BOOL "" FORCE)
   set(DRACO_UNITY_PLUGIN OFF CACHE BOOL "" FORCE)
   set(DRACO_TESTS OFF CACHE BOOL "" FORCE)
-  
+   
   IF(ASSIMP_HUNTER_ENABLED)
     # hunter is untested
     hunter_add_package(draco)
@@ -589,19 +589,29 @@ IF ( ASSIMP_BUILD_DRACO )
       set(DRACO_CXX_FLAGS "/W0")
     ENDIF()
     ADD_SUBDIRECTORY( "contrib/draco" )
+
+    if(MSVC OR WIN32)
+      set(draco_LIBRARIES "draco")
+    else()
+      if(BUILD_SHARED_LIBS)
+        set(draco_LIBRARIES "draco_shared")
+      else()
+        set(draco_LIBRARIES "draco_static")
+      endif()
+    endif()
     
     # Don't build the draco command-line tools by default
     set_target_properties(draco_encoder draco_decoder PROPERTIES EXCLUDE_FROM_ALL TRUE)
     set_target_properties(draco_encoder draco_decoder PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
     
-    TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco)
+    TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})
     TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)
     TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_decoder)
     
     set(draco_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/draco/src")
     
     # This is probably wrong
-    INSTALL( TARGETS draco
+    INSTALL( TARGETS ${draco_LIBRARIES}
       EXPORT "${TARGETS_EXPORT_NAME}"
       LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
       ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}

@@ -559,7 +559,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Colla
                 // assign the material index
                 std::map<std::string, size_t>::const_iterator matIt = mMaterialIndexByName.find(submesh.mMaterial);
                 if (matIt != mMaterialIndexByName.end()) {
-                    dstMesh->mMaterialIndex = matIt->second;
+                    dstMesh->mMaterialIndex = static_cast<unsigned int>(matIt->second);
                 } else {
                     dstMesh->mMaterialIndex = matIdx;
                 }

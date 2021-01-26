@@ -61,7 +61,6 @@ OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
   ON
 )
-
 OPTION( ASSIMP_BUILD_FRAMEWORK
   "Build package as Mac OS X Framework bundle."
   OFF
@@ -133,9 +132,22 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
 )
 
 IF ( WIN32 )
-    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
-      "If the Assimp view tool is built. (requires DirectX)"
-      OFF )
+  # Use subset of Windows.h
+  ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
+
+  OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
+    "If the Assimp view tool is built. (requires DirectX)"
+    OFF )
+
+  IF(MSVC)
+    OPTION( ASSIMP_INSTALL_PDB
+      "Install MSVC debug files."
+      ON )
+    IF(NOT (MSVC_VERSION LESS 1900))
+      # Multibyte character set is deprecated since at least MSVC2015 (possibly earlier)
+      ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
+    ENDIF()
+  ENDIF()
 ENDIF()
 
 IF (IOS AND NOT ASSIMP_HUNTER_ENABLED)
@@ -145,21 +157,6 @@ IF (IOS AND NOT ASSIMP_HUNTER_ENABLED)
   ADD_DEFINITIONS(-DENABLE_BITCODE)
 ENDIF ()
 
-# Use subset of Windows.h
-if (WIN32)
-  ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
-endif()
-
-IF(MSVC)
-  OPTION( ASSIMP_INSTALL_PDB
-    "Install MSVC debug files."
-    ON
-  )
-  IF(NOT (MSVC_VERSION LESS 1900))
-    # Multibyte character set is deprecated since at least MSVC2015 (possibly earlier)
-    ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
-  ENDIF()
-ENDIF()
 
 IF (ASSIMP_BUILD_FRAMEWORK)
   SET (BUILD_SHARED_LIBS ON)

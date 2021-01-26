@@ -665,6 +665,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/3MF/D3MFExporter.h
     AssetLib/3MF/D3MFExporter.cpp)
 
+  ADD_ASSIMP_EXPORTER( PBRT
+    Pbrt/PbrtExporter.h
+    Pbrt/PbrtExporter.cpp)
+
   ADD_ASSIMP_EXPORTER( ASSJSON
     AssetLib/Assjson/cencode.c
     AssetLib/Assjson/cencode.h

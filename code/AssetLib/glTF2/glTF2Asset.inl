@@ -49,6 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_ENABLE_DRACO
 #include "draco/compression/decode.h"
 #include "draco/core/decoder_buffer.h"
+#include "draco/draco_features.h"
+#ifndef DRACO_MESH_COMPRESSION_SUPPORTED
+#error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
+#endif
 #endif
 
 using namespace Assimp;

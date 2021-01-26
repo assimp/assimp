@@ -46,6 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/MemoryIOWrapper.h>
 
+#ifdef ASSIMP_ENABLE_DRACO
+#include "draco/compression/decode.h"
+#include "draco/core/decoder_buffer.h"
+#endif
+
 using namespace Assimp;
 
 namespace glTF2 {
@@ -174,6 +179,102 @@ inline Value *FindObject(Value &val, const char *id) {
     return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
 }
 } // namespace
+
+#ifdef ASSIMP_ENABLE_DRACO
+// Google draco library headers spew many warnings. Bad Google, no cookie
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4018)  // Signed/unsigned mismatch
+#pragma warning(disable: 4804)  // Unsafe use of type 'bool'
+#endif
+
+template <typename T>
+inline void CopyFaceIndex_Draco(Buffer &decodedIndexBuffer, const draco::Mesh &draco_mesh) {
+    const size_t faceStride = sizeof(T) * 3;
+    for (draco::FaceIndex f(0); f < draco_mesh.num_faces(); ++f) {
+        const draco::Mesh::Face &face = draco_mesh.face(f);
+        T indices[3] = { static_cast<T>(face[0].value()), static_cast<T>(face[1].value()), static_cast<T>(face[2].value()) };
+        memcpy(decodedIndexBuffer.GetPointer() + (f.value() * faceStride), &indices[0], faceStride);
+    }
+}
+
+inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Primitive &prim) {
+    if (!prim.indices || dracoMesh.num_faces() == 0)
+        return;
+
+    // Create a decoded Index buffer (if there is one)
+    size_t componentBytes = prim.indices->GetBytesPerComponent();
+
+    auto decodedIndexBuffer = std::make_unique<Buffer>();
+    decodedIndexBuffer->Grow(dracoMesh.num_faces() * 3 * componentBytes);
+
+    // If accessor uses the same size as draco implementation, copy the draco buffer directly
+
+    // Usually uint32_t but shouldn't assume
+    if (sizeof(dracoMesh.face(draco::FaceIndex(0))[0]) == componentBytes) {
+        memcpy(decodedIndexBuffer->GetPointer(), &dracoMesh.face(draco::FaceIndex(0))[0], decodedIndexBuffer->byteLength);
+        return;
+    }
+
+    // Not same size, convert
+    switch (componentBytes) {
+    case sizeof(uint32_t): CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); break;
+    case sizeof(uint16_t): CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); break;
+    case sizeof(uint8_t): CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); break;
+    }
+
+    // Assign this alternate data buffer to the accessor
+    prim.indices->decodedBuffer.swap(decodedIndexBuffer);
+}
+
+template <typename T>
+static bool GetAttributeForAllPoints(const draco::Mesh &dracoMesh,
+                                     const draco::PointAttribute &dracoAttribute,
+                                     Buffer &outBuffer) {
+  size_t byteOffset = 0;
+  T values[4] = {0, 0, 0, 0};
+  for (draco::PointIndex i(0); i < dracoMesh.num_points(); ++i) {
+    const draco::AttributeValueIndex val_index = dracoAttribute.mapped_index(i);
+    if (!dracoAttribute.ConvertValue<T>(val_index, dracoAttribute.num_components(), values))
+      return false;
+
+    memcpy(outBuffer.GetPointer() + byteOffset, &values[0], sizeof(T) * dracoAttribute.num_components());
+    byteOffset += sizeof(T) * dracoAttribute.num_components();
+  }
+
+  return true;
+}
+
+inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32_t dracoAttribId, Accessor &accessor) {
+    // Create decoded buffer
+    const draco::PointAttribute *pDracoAttribute = dracoMesh.GetAttributeByUniqueId(dracoAttribId);
+    if (pDracoAttribute == nullptr)
+        throw DeadlyImportError("GLTF: Invalid draco attribute id: ", dracoAttribId);
+
+    size_t componentBytes = accessor.GetBytesPerComponent();
+
+    auto decodedAttribBuffer = std::make_unique<Buffer>();
+    decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
+
+    switch(accessor.componentType)
+    {
+    case ComponentType_BYTE: GetAttributeForAllPoints<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_UNSIGNED_BYTE: GetAttributeForAllPoints<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_SHORT : GetAttributeForAllPoints<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_UNSIGNED_SHORT: GetAttributeForAllPoints<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_UNSIGNED_INT: GetAttributeForAllPoints<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_FLOAT : GetAttributeForAllPoints<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    }
+
+    // Assign this alternate data buffer to the accessor
+    accessor.decodedBuffer.swap(decodedAttribBuffer);
+}
+
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
+#endif
 
 //
 // LazyDict methods
@@ -709,6 +810,9 @@ inline unsigned int Accessor::GetElementSize() {
 }
 
 inline uint8_t *Accessor::GetPointer() {
+    if (decodedBuffer)
+        return decodedBuffer->GetPointer();
+
     if (sparse)
         return sparse->data.data();
 
@@ -728,6 +832,24 @@ inline uint8_t *Accessor::GetPointer() {
     }
 
     return basePtr + offset;
+}
+
+inline size_t Accessor::GetStride()
+{
+  // Decoded buffer is always packed
+  if (decodedBuffer)
+    return GetElementSize();
+  
+  // Sparse and normal bufferView
+  return (bufferView && bufferView->byteStride ? bufferView->byteStride : GetElementSize());
+}
+
+inline size_t Accessor::GetMaxByteSize()
+{
+  if (decodedBuffer)
+    return decodedBuffer->byteLength;
+
+  return (bufferView ? bufferView->byteLength : sparse->data.size());
 }
 
 namespace {
@@ -761,7 +883,7 @@ void Accessor::ExtractData(T *&outData) {
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
 
-    const size_t stride = bufferView && bufferView->byteStride ? bufferView->byteStride : elemSize;
+    const size_t stride = GetStride();
 
     const size_t targetElemSize = sizeof(T);
 
@@ -769,7 +891,7 @@ void Accessor::ExtractData(T *&outData) {
         throw DeadlyImportError("GLTF: elemSize ", elemSize, " > targetElemSize ", targetElemSize, " in ", getContextForErrorMessages(id, name));
     }
 
-    const size_t maxSize = (bufferView ? bufferView->byteLength : sparse->data.size());
+    const size_t maxSize = GetMaxByteSize();
     if (count*stride > maxSize) {
         throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
     }
@@ -828,14 +950,14 @@ inline Accessor::Indexer::Indexer(Accessor &acc) :
         accessor(acc),
         data(acc.GetPointer()),
         elemSize(acc.GetElementSize()),
-        stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
+        stride(acc.GetStride()) {
 }
 
 //! Accesses the i-th value as defined by the accessor
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
-    ai_assert(i * stride < accessor.bufferView->byteLength);
+    ai_assert(i * stride < accessor.GetMaxByteSize());
     // Ensure that the memcpy doesn't overwrite the local.
     const size_t sizeToCopy = std::min(elemSize, sizeof(T));
     T value = T();
@@ -1192,6 +1314,14 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             Primitive &prim = this->primitives[i];
             prim.mode = MemberOrDefault(primitive, "mode", PrimitiveMode_TRIANGLES);
 
+            if (Value *indices = FindUInt(primitive, "indices")) {
+                prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
+            }
+
+            if (Value *material = FindUInt(primitive, "material")) {
+                prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
+            }
+
             if (Value *attrs = FindObject(primitive, "attributes")) {
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
                     if (!it->value.IsUint()) continue;
@@ -1200,17 +1330,77 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
                     int undPos = 0;
-                    Mesh::AccessorList *vec = 0;
+                    Mesh::AccessorList *vec = nullptr;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() != idx) {
-                            throw DeadlyImportError("GLTF: Invalid attribute: ", attr, ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
+                            throw DeadlyImportError("GLTF: Invalid attribute in mesh: ", name, " primitive: ", i,"attrib: ", attr, ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
                         }
                         (*vec).resize(idx + 1);
                         (*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
                     }
                 }
             }
+
+#ifdef ASSIMP_ENABLE_DRACO
+            // KHR_draco_mesh_compression spec: Draco can only be used for glTF Triangles or Triangle Strips
+            if (pAsset_Root.extensionsUsed.KHR_draco_mesh_compression && (prim.mode == PrimitiveMode_TRIANGLES || prim.mode == PrimitiveMode_TRIANGLE_STRIP)) {
+                // Look for draco mesh compression extension and bufferView
+                // Skip if any missing
+                if (Value *exts = FindObject(primitive, "extensions")) {
+                    if (Value *dracoExt = FindObject(*exts, "KHR_draco_mesh_compression")) {
+                        if (Value *bufView = FindUInt(*dracoExt, "bufferView")) {
+                            // Attempt to load indices and attributes using draco compression
+                            auto bufferView = pAsset_Root.bufferViews.Retrieve(bufView->GetUint());
+                            // Attempt to perform the draco decode on the buffer data
+                            const char *bufferViewData = reinterpret_cast<const char *>(bufferView->buffer->GetPointer() + bufferView->byteOffset);
+                            draco::DecoderBuffer decoderBuffer;
+                            decoderBuffer.Init(bufferViewData, bufferView->byteLength);
+                            draco::Decoder decoder;
+                            auto decodeResult = decoder.DecodeMeshFromBuffer(&decoderBuffer);
+                            if (!decodeResult.ok()) {
+                                // A corrupt Draco isn't actually fatal if the primitive data is also provided in a standard buffer, but does anyone do that?
+                                throw DeadlyImportError("GLTF: Invalid Draco mesh compression in mesh ", name, " primitive ", i, ": ", decodeResult.status().error_msg_string());
+                            }
+
+                            // Now we have a draco mesh
+                            const std::unique_ptr<draco::Mesh> &pDracoMesh = decodeResult.value();
+
+                            // Redirect the accessors to the decoded data
+
+                            // Indices
+                            SetDecodedIndexBuffer_Draco(*pDracoMesh, prim);
+
+                            // Vertex attributes
+                            if (Value *attrs = FindObject(*dracoExt, "attributes")) {
+                                for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
+                                    if (!it->value.IsUint()) continue;
+                                    const char *attr = it->name.GetString();
+
+                                    int undPos = 0;
+                                    Mesh::AccessorList *vec = nullptr;
+                                    if (GetAttribVector(prim, attr, vec, undPos)) {
+                                        size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
+                                        if (idx >= (*vec).size()) {
+                                            throw DeadlyImportError("GLTF: Invalid draco attribute in mesh: ", name, " primitive: ", i, " attrib: ", attr, ". "
+                                              "All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
+                                        }
+
+                                        Accessor &attribAccessor = *(*vec)[idx];
+                                        if (attribAccessor.count == 0)
+                                          throw DeadlyImportError("GLTF: Invalid draco attribute in mesh: ", name, " primitive: ", i, " attrib: ", attr);
+
+                                        // Redirect this accessor to the appropriate Draco vertex attribute data
+                                        const uint32_t dracoAttribId = it->value.GetUint();
+                                        SetDecodedAttributeBuffer_Draco(*pDracoMesh, dracoAttribId, attribAccessor);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+#endif
 
             Value *targetsArray = FindArray(primitive, "targets");
             if (nullptr != targetsArray) {
@@ -1237,14 +1427,6 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                         }
                     }
                 }
-            }
-
-            if (Value *indices = FindUInt(primitive, "indices")) {
-                prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
-            }
-
-            if (Value *material = FindUInt(primitive, "material")) {
-                prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
             }
         }
     }
@@ -1693,10 +1875,12 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     ReadExtensionsUsed(doc);
     ReadExtensionsRequired(doc);
 
-    // Currently Draco is not supported
+#ifndef ASSIMP_ENABLE_DRACO
+    // Is Draco supported?
     if (extensionsRequired.KHR_draco_mesh_compression) {
-        throw DeadlyImportError("GLTF: Draco mesh compression not currently supported.");
+        throw DeadlyImportError("GLTF: Draco mesh compression not supported.");
     }
+#endif
 
     // Prepare the dictionaries
     for (size_t i = 0; i < mDicts.size(); ++i) {
@@ -1784,6 +1968,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_sheen);
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
+    CHECK_EXT(KHR_draco_mesh_compression);
 
 #undef CHECK_EXT
 }

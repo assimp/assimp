@@ -586,7 +586,7 @@ IF ( ASSIMP_BUILD_DRACO )
   ELSE()
     # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
     # See https://github.com/google/draco/issues/672
-    # and 
+    # and https://github.com/google/draco/issues/673
     IF(MSVC)
       set(DRACO_CXX_FLAGS "/W0")
     ELSE()
@@ -612,8 +612,10 @@ IF ( ASSIMP_BUILD_DRACO )
     endif()
     
     # Don't build the draco command-line tools by default
-    set_target_properties(draco_encoder draco_decoder PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    set_target_properties(draco_encoder draco_decoder PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+    set_target_properties(draco_encoder draco_decoder PROPERTIES
+      EXCLUDE_FROM_ALL TRUE
+      EXCLUDE_FROM_DEFAULT_BUILD TRUE
+      )
     
     TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})
     TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)

@@ -305,9 +305,9 @@ struct aiString {
 
     /** Copy a const char* to the aiString */
     void Set(const char *sz) {
-        const ai_int32 len = (ai_uint32)::strlen(sz);
+        ai_int32 len = (ai_uint32)::strlen(sz);
         if (len > (ai_int32)MAXLEN - 1) {
-            return;
+            len = (ai_int32) MAXLEN - 1;
         }
         length = len;
         memcpy(data, sz, len);
@@ -321,7 +321,10 @@ struct aiString {
         }
 
         length = rOther.length;
-        ;
+        if (length >(MAXLEN - 1)) {
+            length = (ai_int32) MAXLEN - 1;
+        }
+
         memcpy(data, rOther.data, length);
         data[length] = '\0';
         return *this;

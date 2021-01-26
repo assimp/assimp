@@ -266,6 +266,7 @@ void Discreet3DSImporter::ParseMainChunk() {
 
     case Discreet3DS::CHUNK_PRJ:
         bIsPrj = true;
+        break;
     case Discreet3DS::CHUNK_MAIN:
         ParseEditorChunk();
         break;

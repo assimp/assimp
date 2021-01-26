@@ -963,7 +963,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ELSE()
   IF ( NOT ASSIMP_BUILD_ZLIB )
-    FIND_PACKAGE(ZLIB)
+    FIND_PACKAGE(ZLIB CONFIG REQUIRED)
     INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
   ELSE()
     IF( BUILD_SHARED_LIBS)
@@ -997,12 +997,12 @@ ELSE()
       ../contrib/zlib/zutil.c
     )
     INCLUDE_DIRECTORIES(../contrib/zlib/)
-    set( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
-    set( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+    SET( ASM686 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
+    SET( AMD64 FALSE CACHE INTERNAL "Override ZLIB flag to turn off assembly" FORCE )
     SOURCE_GROUP( zlib FILES ${zlib_SRCS} )
   ENDIF()
-
 ENDIF()
+
 # openddlparser
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(openddlparser)
@@ -1294,7 +1294,6 @@ ENDIF()
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
 ENDIF ()
-
 
 INSTALL( TARGETS assimp
   EXPORT "${TARGETS_EXPORT_NAME}"

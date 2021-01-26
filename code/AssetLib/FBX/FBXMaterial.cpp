@@ -60,12 +60,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-Material::Material(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: Object(id,element,name)
-{
+Material::Material(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
+        Object(id,element,name) {
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const ShadingModel = sc["ShadingModel"];
@@ -77,8 +76,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     if(ShadingModel) {
         shading = ParseTokenAsString(GetRequiredToken(*ShadingModel,0));
-    }
-    else {
+    } else {
         DOMWarning("shading mode not specified, assuming phong",&element);
         shading = "phong";
     }
@@ -86,7 +84,9 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
     std::string templateName;
 
     // lower-case shading because Blender (for example) writes "Phong"
-    std::transform(shading.data(), shading.data() + shading.size(), std::addressof(shading[0]), Assimp::ToLower<char>);
+    for (size_t i = 0; i < shading.length(); ++i) {
+        shading[i] = tolower(shading[i]);
+    }
     if(shading == "phong") {
         templateName = "Material.FbxSurfacePhong";
     }

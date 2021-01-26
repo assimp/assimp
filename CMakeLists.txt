@@ -584,10 +584,21 @@ IF ( ASSIMP_BUILD_DRACO )
     hunter_add_package(draco)
     find_package(draco CONFIG REQUIRED)
   ELSE()
-    # Draco 1.4.1 has several nasty warnings and will not build with /WX
+    # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
+    # See https://github.com/google/draco/issues/672
+    # and 
     IF(MSVC)
       set(DRACO_CXX_FLAGS "/W0")
+    ELSE()
+      list(APPEND DRACO_CXX_FLAGS
+        "-Wno-bool-compare"
+        "-Wno-comment"
+        "-Wno-maybe-uninitialized"
+        "-Wno-sign-compare"
+        "-Wno-unused-local-typedefs"
+      )
     ENDIF()
+    
     ADD_SUBDIRECTORY( "contrib/draco" )
 
     if(MSVC OR WIN32)

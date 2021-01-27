@@ -47,8 +47,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #ifdef ASSIMP_ENABLE_DRACO
+
+// Google draco library headers spew many warnings. Bad Google, no cookie
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4018) // Signed/unsigned mismatch
+#pragma warning(disable : 4804) // Unsafe use of type 'bool'
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbool-compare"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
 #include "draco/compression/decode.h"
 #include "draco/core/decoder_buffer.h"
+
+#if _MSC_VER
+#pragma warning(pop)
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #ifndef DRACO_MESH_COMPRESSION_SUPPORTED
 #error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
 #endif
@@ -193,20 +216,6 @@ inline Value *FindExtension(Value &val, const char *extensionId) {
 } // namespace
 
 #ifdef ASSIMP_ENABLE_DRACO
-// Google draco library headers spew many warnings. Bad Google, no cookie
-#if _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4018) // Signed/unsigned mismatch
-#pragma warning(disable : 4804) // Unsafe use of type 'bool'
-#elif defined(__clang__)
-#pragma diagnostic push
-#pragma clang diagnostic ignored "-Wbool-compare"
-#pragma clang diagnostic ignored "-Wsign-compare"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbool-compare"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
 
 template <typename T>
 inline void CopyFaceIndex_Draco(Buffer &decodedIndexBuffer, const draco::Mesh &draco_mesh) {
@@ -288,14 +297,6 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     // Assign this alternate data buffer to the accessor
     accessor.decodedBuffer.swap(decodedAttribBuffer);
 }
-
-#if _MSC_VER
-#pragma warning(pop)
-#elif defined(__clang__)
-#pragma diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
 #endif // ASSIMP_ENABLE_DRACO
 

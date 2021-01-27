@@ -567,73 +567,79 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
-OPTION ( ASSIMP_BUILD_DRACO "If the Draco libraries are to be built. Primarily for glTF" ON )
-IF ( ASSIMP_BUILD_DRACO )
-  # Primarily for glTF v2
-  # Enable Draco glTF feature set
-  set(DRACO_GLTF ON CACHE BOOL "" FORCE)
-  # Disable unnecessary or omitted components
-  set(DRACO_JS_GLUE OFF CACHE BOOL "" FORCE)
-  set(DRACO_WASM OFF CACHE BOOL "" FORCE)
-  set(DRACO_MAYA_PLUGIN OFF CACHE BOOL "" FORCE)
-  set(DRACO_UNITY_PLUGIN OFF CACHE BOOL "" FORCE)
-  set(DRACO_TESTS OFF CACHE BOOL "" FORCE)
-   
-  IF(ASSIMP_HUNTER_ENABLED)
-    # hunter is untested
-    hunter_add_package(draco)
-    find_package(draco CONFIG REQUIRED)
-  ELSE()
-    # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
-    # See https://github.com/google/draco/issues/672
-    # and https://github.com/google/draco/issues/673
-    IF(MSVC)
-      set(DRACO_CXX_FLAGS "/W0")
+# Draco requires cmake 3.12
+IF (DEFINED CMAKE_VERSION AND "${CMAKE_VERSION}" VERSION_LESS "3.12")
+  message(NOTICE "draco requires cmake 3.12 or newer, cmake is ${CMAKE_VERSION} . Draco is disabled")
+  SET ( ASSIMP_BUILD_DRACO OFF CACHE BOOL "Disabled: Draco requires newer cmake" FORCE )
+ELSE()
+  OPTION ( ASSIMP_BUILD_DRACO "If the Draco libraries are to be built. Primarily for glTF" ON )
+  IF ( ASSIMP_BUILD_DRACO )
+    # Primarily for glTF v2
+    # Enable Draco glTF feature set
+    set(DRACO_GLTF ON CACHE BOOL "" FORCE)
+    # Disable unnecessary or omitted components
+    set(DRACO_JS_GLUE OFF CACHE BOOL "" FORCE)
+    set(DRACO_WASM OFF CACHE BOOL "" FORCE)
+    set(DRACO_MAYA_PLUGIN OFF CACHE BOOL "" FORCE)
+    set(DRACO_UNITY_PLUGIN OFF CACHE BOOL "" FORCE)
+    set(DRACO_TESTS OFF CACHE BOOL "" FORCE)
+     
+    IF(ASSIMP_HUNTER_ENABLED)
+      # hunter is untested
+      hunter_add_package(draco)
+      find_package(draco CONFIG REQUIRED)
     ELSE()
-      list(APPEND DRACO_CXX_FLAGS
-        "-Wno-bool-compare"
-        "-Wno-comment"
-        "-Wno-maybe-uninitialized"
-        "-Wno-sign-compare"
-        "-Wno-unused-local-typedefs"
-      )
-    ENDIF()
-    
-    ADD_SUBDIRECTORY( "contrib/draco" )
+      # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
+      # See https://github.com/google/draco/issues/672
+      # and https://github.com/google/draco/issues/673
+      IF(MSVC)
+        set(DRACO_CXX_FLAGS "/W0")
+      ELSE()
+        list(APPEND DRACO_CXX_FLAGS
+          "-Wno-bool-compare"
+          "-Wno-comment"
+          "-Wno-maybe-uninitialized"
+          "-Wno-sign-compare"
+          "-Wno-unused-local-typedefs"
+        )
+      ENDIF()
+      
+      ADD_SUBDIRECTORY( "contrib/draco" )
 
-    if(MSVC OR WIN32)
-      set(draco_LIBRARIES "draco")
-    else()
-      if(BUILD_SHARED_LIBS)
-        set(draco_LIBRARIES "draco_shared")
+      if(MSVC OR WIN32)
+        set(draco_LIBRARIES "draco")
       else()
-        set(draco_LIBRARIES "draco_static")
+        if(BUILD_SHARED_LIBS)
+          set(draco_LIBRARIES "draco_shared")
+        else()
+          set(draco_LIBRARIES "draco_static")
+        endif()
       endif()
-    endif()
-    
-    # Don't build the draco command-line tools by default
-    set_target_properties(draco_encoder draco_decoder PROPERTIES
-      EXCLUDE_FROM_ALL TRUE
-      EXCLUDE_FROM_DEFAULT_BUILD TRUE
-      )
-    
-    TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})
-    TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)
-    TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_decoder)
-    
-    set(draco_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/draco/src")
-    
-    # This is probably wrong
-    INSTALL( TARGETS ${draco_LIBRARIES}
-      EXPORT "${TARGETS_EXPORT_NAME}"
-      LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
-      FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      COMPONENT ${LIBASSIMP_COMPONENT}
-      INCLUDES DESTINATION include
-  )
+      
+      # Don't build the draco command-line tools by default
+      set_target_properties(draco_encoder draco_decoder PROPERTIES
+        EXCLUDE_FROM_ALL TRUE
+        EXCLUDE_FROM_DEFAULT_BUILD TRUE
+        )
+      
+      TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})
+      TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)
+      TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_decoder)
+      
+      set(draco_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/draco/src")
+      
+      # This is probably wrong
+      INSTALL( TARGETS ${draco_LIBRARIES}
+        EXPORT "${TARGETS_EXPORT_NAME}"
+        LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+        FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        COMPONENT ${LIBASSIMP_COMPONENT}
+        INCLUDES DESTINATION include
+    )
 
+    ENDIF()
   ENDIF()
 ENDIF()
 

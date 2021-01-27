@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/MemoryIOWrapper.h>
 
 #ifdef ASSIMP_ENABLE_DRACO
+#include "draco/draco_features.h"
 #include "draco/compression/decode.h"
 #include "draco/core/decoder_buffer.h"
-#include "draco/draco_features.h"
 #ifndef DRACO_MESH_COMPRESSION_SUPPORTED
 #error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
 #endif
@@ -190,6 +190,14 @@ inline Value *FindObject(Value &val, const char *id) {
 #pragma warning(push)
 #pragma warning(disable: 4018)  // Signed/unsigned mismatch
 #pragma warning(disable: 4804)  // Unsafe use of type 'bool'
+#elif defined(__clang__)
+#pragma diagnostic push
+#pragma clang diagnostic ignored "-Wbool-compare"
+#pragma clang diagnostic ignored "-Wsign-compare"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbool-compare"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
 template <typename T>
@@ -276,9 +284,13 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
 
 #if _MSC_VER
 #pragma warning(pop)
+#elif defined(__clang__)
+#pragma diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
 
-#endif
+#endif // ASSIMP_ENABLE_DRACO
 
 //
 // LazyDict methods

@@ -570,7 +570,7 @@ struct Accessor : public Object {
         }
 
         inline bool IsValid() const {
-            return data != 0;
+            return data != nullptr;
         }
     };
 
@@ -1126,7 +1126,7 @@ public:
     Ref<Scene> scene;
 
 public:
-    Asset(IOSystem *io = 0) :
+    Asset(IOSystem *io = nullptr) :
             mIOSystem(io),
             asset(),
             accessors(*this, "accessors"),

@@ -322,7 +322,7 @@ inline LazyDict<T>::~LazyDict() {
 
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
-    Value *container = 0;
+    Value *container = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
@@ -339,7 +339,7 @@ inline void LazyDict<T>::AttachToDocument(Document &doc) {
 
 template <class T>
 inline void LazyDict<T>::DetachFromDocument() {
-    mDict = 0;
+    mDict = nullptr;
 }
 
 template <class T>
@@ -507,7 +507,7 @@ inline void Buffer::Read(Value &obj, Asset &r) {
     glTFCommon::Util::DataURI dataURI;
     if (ParseDataURI(uri, it->GetStringLength(), dataURI)) {
         if (dataURI.base64) {
-            uint8_t *data = 0;
+            uint8_t *data = nullptr;
             this->byteLength = glTFCommon::Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
@@ -697,9 +697,9 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
-    if (!buffer) return 0;
+    if (!buffer) return nullptr;
     uint8_t *basePtr = buffer->GetPointer();
-    if (!basePtr) return 0;
+    if (!basePtr) return nullptr;
 
     size_t offset = accOffset + byteOffset;
     if (buffer->EncodedRegion_Current != nullptr) {
@@ -837,9 +837,9 @@ inline uint8_t *Accessor::GetPointer() {
     if (sparse)
         return sparse->data.data();
 
-    if (!bufferView || !bufferView->buffer) return 0;
+    if (!bufferView || !bufferView->buffer) return nullptr;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
-    if (!basePtr) return 0;
+    if (!basePtr) return nullptr;
 
     size_t offset = byteOffset + bufferView->byteOffset;
 
@@ -1241,12 +1241,12 @@ void SetVector(vec3 &v, const float (&in)[3]) {
 inline void Material::SetDefaults() {
     //pbr materials
     SetVector(pbrMetallicRoughness.baseColorFactor, defaultBaseColor);
-    pbrMetallicRoughness.metallicFactor = 1.0;
-    pbrMetallicRoughness.roughnessFactor = 1.0;
+    pbrMetallicRoughness.metallicFactor = 1.0f;
+    pbrMetallicRoughness.roughnessFactor = 1.0f;
 
     SetVector(emissiveFactor, defaultEmissiveFactor);
     alphaMode = "OPAQUE";
-    alphaCutoff = 0.5;
+    alphaCutoff = 0.5f;
     doubleSided = false;
     unlit = false;
 }
@@ -1255,7 +1255,7 @@ inline void PbrSpecularGlossiness::SetDefaults() {
     //pbrSpecularGlossiness properties
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
-    glossinessFactor = 1.0;
+    glossinessFactor = 1.0f;
 }
 
 inline void MaterialSheen::SetDefaults() {
@@ -1434,7 +1434,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                         const char *attr = it->name.GetString();
                         // Valid attribute semantics include POSITION, NORMAL, TANGENT
                         int undPos = 0;
-                        Mesh::AccessorList *vec = 0;
+                        Mesh::AccessorList *vec = nullptr;
                         if (GetAttribTargetVector(prim, j, attr, vec, undPos)) {
                             size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                             if ((*vec).size() <= idx) {
@@ -1989,12 +1989,12 @@ inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool /*abso
 #ifdef ASSIMP_API
     return mIOSystem->Open(path, mode);
 #else
-    if (path.size() < 2) return 0;
+    if (path.size() < 2) return nullptr;
     if (!absolute && path[1] != ':' && path[0] != '/') { // relative?
         path = mCurrentAssetDir + path;
     }
     FILE *f = fopen(path.c_str(), mode);
-    return f ? new IOStream(f) : 0;
+    return f ? new IOStream(f) : nullptr;
 #endif
 }
 

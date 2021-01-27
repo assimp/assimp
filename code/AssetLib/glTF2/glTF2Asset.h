@@ -513,7 +513,6 @@ struct BufferView : public Object {
     uint8_t *GetPointer(size_t accOffset);
 };
 
-
 //! A typed view into a BufferView. A BufferView contains raw binary data.
 //! An accessor provides a typed view into a BufferView or a subset of a BufferView
 //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
@@ -850,7 +849,7 @@ struct CustomExtension : public Object {
 
     CustomExtension() = default;
 
-    CustomExtension(const CustomExtension& other)
+    CustomExtension(const CustomExtension &other)
         : Object(other)
         , mStringValue(other.mStringValue)
         , mDoubleValue(other.mDoubleValue)
@@ -1105,7 +1104,7 @@ public:
     } extensionsRequired;
 
     AssetMetadata asset;
-    Value* extras = nullptr;
+    Value *extras = nullptr;
 
     // Dictionaries for each type of object
 

@@ -42,12 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/glTF/glTFCommon.h"
 
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/MemoryIOWrapper.h>
 
 #ifdef ASSIMP_ENABLE_DRACO
-#include "draco/draco_features.h"
 #include "draco/compression/decode.h"
 #include "draco/core/decoder_buffer.h"
 #ifndef DRACO_MESH_COMPRESSION_SUPPORTED
@@ -184,12 +183,12 @@ inline Value *FindObject(Value &val, const char *id) {
 }
 
 inline Value *FindExtension(Value &val, const char *extensionId) {
-  if (Value* extensionList = FindObject(val, "extensions")) {
-    if (Value* extension = FindObject(*extensionList, extensionId)) {
-      return extension;
+    if (Value *extensionList = FindObject(val, "extensions")) {
+        if (Value *extension = FindObject(*extensionList, extensionId)) {
+            return extension;
+        }
     }
-  }
-  return nullptr;
+    return nullptr;
 }
 } // namespace
 
@@ -197,8 +196,8 @@ inline Value *FindExtension(Value &val, const char *extensionId) {
 // Google draco library headers spew many warnings. Bad Google, no cookie
 #if _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4018)  // Signed/unsigned mismatch
-#pragma warning(disable: 4804)  // Unsafe use of type 'bool'
+#pragma warning(disable : 4018) // Signed/unsigned mismatch
+#pragma warning(disable : 4804) // Unsafe use of type 'bool'
 #elif defined(__clang__)
 #pragma diagnostic push
 #pragma clang diagnostic ignored "-Wbool-compare"
@@ -250,20 +249,20 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
 
 template <typename T>
 static bool GetAttributeForAllPoints_Draco(const draco::Mesh &dracoMesh,
-                                     const draco::PointAttribute &dracoAttribute,
-                                     Buffer &outBuffer) {
-  size_t byteOffset = 0;
-  T values[4] = {0, 0, 0, 0};
-  for (draco::PointIndex i(0); i < dracoMesh.num_points(); ++i) {
-    const draco::AttributeValueIndex val_index = dracoAttribute.mapped_index(i);
-    if (!dracoAttribute.ConvertValue<T>(val_index, dracoAttribute.num_components(), values))
-      return false;
+        const draco::PointAttribute &dracoAttribute,
+        Buffer &outBuffer) {
+    size_t byteOffset = 0;
+    T values[4] = { 0, 0, 0, 0 };
+    for (draco::PointIndex i(0); i < dracoMesh.num_points(); ++i) {
+        const draco::AttributeValueIndex val_index = dracoAttribute.mapped_index(i);
+        if (!dracoAttribute.ConvertValue<T>(val_index, dracoAttribute.num_components(), values))
+            return false;
 
-    memcpy(outBuffer.GetPointer() + byteOffset, &values[0], sizeof(T) * dracoAttribute.num_components());
-    byteOffset += sizeof(T) * dracoAttribute.num_components();
-  }
+        memcpy(outBuffer.GetPointer() + byteOffset, &values[0], sizeof(T) * dracoAttribute.num_components());
+        byteOffset += sizeof(T) * dracoAttribute.num_components();
+    }
 
-  return true;
+    return true;
 }
 
 inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32_t dracoAttribId, Accessor &accessor) {
@@ -277,14 +276,13 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     std::unique_ptr<Buffer> decodedAttribBuffer(new Buffer());
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
-    switch(accessor.componentType)
-    {
+    switch (accessor.componentType) {
     case ComponentType_BYTE: GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
     case ComponentType_UNSIGNED_BYTE: GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_SHORT : GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_SHORT: GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
     case ComponentType_UNSIGNED_SHORT: GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
     case ComponentType_UNSIGNED_INT: GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_FLOAT : GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+    case ComponentType_FLOAT: GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
     }
 
     // Assign this alternate data buffer to the accessor
@@ -514,12 +512,12 @@ inline void Buffer::Read(Value &obj, Asset &r) {
 
             if (statedLength > 0 && this->byteLength != statedLength) {
                 throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                                        " bytes, but found ", to_string(dataURI.dataLength));
+                        " bytes, but found ", to_string(dataURI.dataLength));
             }
         } else { // assume raw data
             if (statedLength != dataURI.dataLength) {
                 throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                                        " bytes, but found ", to_string(dataURI.dataLength));
+                        " bytes, but found ", to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
@@ -527,10 +525,7 @@ inline void Buffer::Read(Value &obj, Asset &r) {
         }
     } else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (
-                r.mCurrentAssetDir.back() == '/' ?
-                   r.mCurrentAssetDir : r.mCurrentAssetDir + '/'
-            ) : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir.back() == '/' ? r.mCurrentAssetDir : r.mCurrentAssetDir + '/') : "";
 
             IOStream *file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -859,22 +854,20 @@ inline uint8_t *Accessor::GetPointer() {
     return basePtr + offset;
 }
 
-inline size_t Accessor::GetStride()
-{
-  // Decoded buffer is always packed
-  if (decodedBuffer)
-    return GetElementSize();
-  
-  // Sparse and normal bufferView
-  return (bufferView && bufferView->byteStride ? bufferView->byteStride : GetElementSize());
+inline size_t Accessor::GetStride() {
+    // Decoded buffer is always packed
+    if (decodedBuffer)
+        return GetElementSize();
+
+    // Sparse and normal bufferView
+    return (bufferView && bufferView->byteStride ? bufferView->byteStride : GetElementSize());
 }
 
-inline size_t Accessor::GetMaxByteSize()
-{
-  if (decodedBuffer)
-    return decodedBuffer->byteLength;
+inline size_t Accessor::GetMaxByteSize() {
+    if (decodedBuffer)
+        return decodedBuffer->byteLength;
 
-  return (bufferView ? bufferView->byteLength : sparse->data.size());
+    return (bufferView ? bufferView->byteLength : sparse->data.size());
 }
 
 namespace {
@@ -917,7 +910,7 @@ void Accessor::ExtractData(T *&outData) {
     }
 
     const size_t maxSize = GetMaxByteSize();
-    if (count*stride > maxSize) {
+    if (count * stride > maxSize) {
         throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
     }
 
@@ -1019,8 +1012,7 @@ inline void Image::Read(Value &obj, Asset &r) {
             if (Value *mtype = FindString(obj, "mimeType")) {
                 this->mimeType = mtype->GetString();
             }
-            if (!this->bufferView || this->mimeType.empty())
-            {
+            if (!this->bufferView || this->mimeType.empty()) {
                 throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " does not have a URI, so it must have a valid bufferView and mimetype");
             }
 
@@ -1031,10 +1023,8 @@ inline void Image::Read(Value &obj, Asset &r) {
 
             this->mData.reset(new uint8_t[this->mDataLength]);
             memcpy(this->mData.get(), buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
-        }
-        else
-        {
-            throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " should have either a URI of a bufferView and mimetype" );
+        } else {
+            throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " should have either a URI of a bufferView and mimetype");
         }
     }
 }
@@ -1356,7 +1346,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() != idx) {
-                            throw DeadlyImportError("GLTF: Invalid attribute in mesh: ", name, " primitive: ", i,"attrib: ", attr,
+                            throw DeadlyImportError("GLTF: Invalid attribute in mesh: ", name, " primitive: ", i, "attrib: ", attr,
                                     ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
                         }
                         (*vec).resize(idx + 1);
@@ -1539,25 +1529,22 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
-inline CustomExtension ReadExtensions(const char *name, Value& obj) {
+inline CustomExtension ReadExtensions(const char *name, Value &obj) {
     CustomExtension ret;
     ret.name = name;
     if (obj.IsObject()) {
         ret.mValues.isPresent = true;
         for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto& val = it->value;
+            auto &val = it->value;
             ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
         }
-    }
-    else if (obj.IsArray()) {
+    } else if (obj.IsArray()) {
         ret.mValues.value.reserve(obj.Size());
         ret.mValues.isPresent = true;
-        for (unsigned int i = 0; i < obj.Size(); ++i)
-        {
+        for (unsigned int i = 0; i < obj.Size(); ++i) {
             ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
         }
-    }
-    else if (obj.IsNumber()) {
+    } else if (obj.IsNumber()) {
         if (obj.IsUint64()) {
             ret.mUint64Value.value = obj.GetUint64();
             ret.mUint64Value.isPresent = true;
@@ -1568,12 +1555,10 @@ inline CustomExtension ReadExtensions(const char *name, Value& obj) {
             ret.mDoubleValue.value = obj.GetDouble();
             ret.mDoubleValue.isPresent = true;
         }
-    }
-    else if (obj.IsString()) {
+    } else if (obj.IsString()) {
         ReadValue(obj, ret.mStringValue);
         ret.mStringValue.isPresent = true;
-    }
-    else if (obj.IsBool()) {
+    } else if (obj.IsBool()) {
         ret.mBoolValue.value = obj.GetBool();
         ret.mBoolValue.isPresent = true;
     }
@@ -1619,7 +1604,7 @@ inline void Node::Read(Value &obj, Asset &r) {
         }
     }
 
-	// Do not retrieve a skin here, just take a reference, to avoid infinite recursion
+    // Do not retrieve a skin here, just take a reference, to avoid infinite recursion
     // Skins will be properly loaded later
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
@@ -1849,7 +1834,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
         mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
     }
-    
+
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
         throw DeadlyImportError("GLTF: Could not open file for reading");
@@ -2042,7 +2027,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #if _MSC_VER
-#   pragma warning(pop)
+#pragma warning(pop)
 #endif // _MSC_VER
 
 } // namespace glTF2

@@ -577,12 +577,15 @@ TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
 
 /////////////////////////////////
 // Draco decoding
-#ifdef ASSIMP_ENABLE_DRACO
 
 TEST_F(utglTF2ImportExport, import_dracoEncoded) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/draco/2CylinderEngine.gltf",
             aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_ENABLE_DRACO
+    // No draco support, scene should not load
+    ASSERT_EQ(scene, nullptr);
+#else
     ASSERT_NE(scene, nullptr);
     ASSERT_NE(scene->mMetaData, nullptr);
     {
@@ -603,6 +606,6 @@ TEST_F(utglTF2ImportExport, import_dracoEncoded) {
         ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator));
         ASSERT_EQ(strcmp(generator.C_Str(), "COLLADA2GLTF"), 0);
     }
+#endif
 }
 
-#endif

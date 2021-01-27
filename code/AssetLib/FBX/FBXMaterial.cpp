@@ -85,7 +85,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     // lower-case shading because Blender (for example) writes "Phong"
     for (size_t i = 0; i < shading.length(); ++i) {
-        shading[i] = tolower(shading[i]);
+        shading[i] = sttaic_cast<char>(tolower(shading[i]);
     }
     if(shading == "phong") {
         templateName = "Material.FbxSurfacePhong";

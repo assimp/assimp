@@ -974,7 +974,7 @@ ELSE()
       ADD_DEFINITIONS(-DZLIB_DLL)
     ENDIF()
     MESSAGE(STATUS "compiling zlib from sources")
-    configure_file(../contrib/zlib/zconf.h.cmakein ${CMAKE_CURRENT_BINARY_DIR}/zconf.h @ONLY)
+    configure_file(../contrib/zlib/zconf.h.cmakein ../contrib/zlib/zconf.h @ONLY)
     SET( zlib_SRCS
       ../contrib/zlib/crc32.h
       ../contrib/zlib/deflate.h

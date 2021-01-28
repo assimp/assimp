@@ -597,7 +597,7 @@ namespace glTF2 {
             obj.AddMember("mesh", n.meshes[0]->index, w.mAl);
         }
 
-        AddRefsVector(obj, "skeleton", n.skeletons, w.mAl);
+        //AddRefsVector(obj, "skeleton", n.skeletons, w.mAl);
 
         if (n.skin) {
             obj.AddMember("skin", n.skin->index, w.mAl);
@@ -607,7 +607,7 @@ namespace glTF2 {
           obj.AddMember("jointName", n.jointName, w.mAl);
         }
     }
-
+	
     inline void Write(Value& /*obj*/, Program& /*b*/, AssetWriter& /*w*/)
     {
 

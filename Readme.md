@@ -105,12 +105,6 @@ Become a financial contributor and help us sustain our community. [[Contribute](
 Monthly donations via Patreon:
 <br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
 
-<br>
-
-One-off donations via PayPal:
-<br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
-
-<br>
 
 #### Organizations
 

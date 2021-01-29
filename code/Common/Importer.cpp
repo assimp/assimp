@@ -78,6 +78,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Profiler.h>
 #include <assimp/commonMetaData.h>
 
+#include <exception>
 #include <set>
 #include <memory>
 #include <cctype>

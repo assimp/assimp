@@ -587,6 +587,7 @@ ELSE()
     IF(ASSIMP_HUNTER_ENABLED)
       hunter_add_package(draco)
       find_package(draco CONFIG REQUIRED)
+      set(draco_LIBRARIES draco::draco)
     ELSE()
       # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
       # See https://github.com/google/draco/issues/672

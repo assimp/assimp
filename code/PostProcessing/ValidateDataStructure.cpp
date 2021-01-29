@@ -844,7 +844,8 @@ void ValidateDSProcess::Validate(const aiAnimation *pAnimation,
     Validate(&pMeshMorphAnim->mName);
 
     if (!pMeshMorphAnim->mNumKeys) {
-        ReportError("Empty mesh morph animation channel");
+        ReportWarning("Empty mesh morph animation channel");
+        return;
     }
 
     // otherwise check whether one of the keys exceeds the total duration of the animation

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_IMPORTER_H
 #define INCLUDED_AI_IMPORTER_H
 
+#include <exception>
 #include <map>
 #include <vector>
 #include <string>

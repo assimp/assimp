@@ -46,7 +46,7 @@ TEST_F( utStandardShapes, testMakeMesh ) {
     Assimp::StandardShapes::MakeSphere(1, positions);
 
     // Make mesh
-    const auto numIndicesPerPrimitive = 3;
+    const auto numIndicesPerPrimitive = 3u;
     aiMesh *aiMeshPtr = Assimp::StandardShapes::MakeMesh(positions, numIndicesPerPrimitive);
 
     // The mNumIndices member of the second face is now incorrect

@@ -59,6 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Public ASSIMP data structures
 #include <assimp/types.h>
 
+#include <exception>
+
 namespace Assimp {
 // =======================================================================
 // Public interface to Assimp

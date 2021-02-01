@@ -46,8 +46,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.269.tar.gz"
-    SHA1 "64024b7b95b4c86d50ae05b926814448c93a70a0"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.293.tar.gz"
+    SHA1 "e8e5470652db77149d9b38656db2a6c0b7642693"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
@@ -583,11 +583,11 @@ ELSE()
     set(DRACO_MAYA_PLUGIN OFF CACHE BOOL "" FORCE)
     set(DRACO_UNITY_PLUGIN OFF CACHE BOOL "" FORCE)
     set(DRACO_TESTS OFF CACHE BOOL "" FORCE)
-     
+
     IF(ASSIMP_HUNTER_ENABLED)
-      # hunter is untested
       hunter_add_package(draco)
       find_package(draco CONFIG REQUIRED)
+      set(draco_LIBRARIES draco::draco)
     ELSE()
       # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
       # See https://github.com/google/draco/issues/672
@@ -607,7 +607,7 @@ ELSE()
           "-fvisibility=default"
         )
       ENDIF()
-      
+
       ADD_SUBDIRECTORY( "contrib/draco" )
 
       if(MSVC OR WIN32)
@@ -619,19 +619,19 @@ ELSE()
           set(draco_LIBRARIES "draco_static")
         endif()
       endif()
-      
+
       # Don't build the draco command-line tools by default
       set_target_properties(draco_encoder draco_decoder PROPERTIES
         EXCLUDE_FROM_ALL TRUE
         EXCLUDE_FROM_DEFAULT_BUILD TRUE
         )
-      
+
       TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})
       TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)
       TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_decoder)
-      
+
       set(draco_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/draco/src")
-      
+
       # This is probably wrong
       INSTALL( TARGETS ${draco_LIBRARIES}
         EXPORT "${TARGETS_EXPORT_NAME}"
@@ -661,7 +661,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ()
 
-IF ( ASSIMP_BUILD_SAMPLES)
+IF ( ASSIMP_BUILD_SAMPLES )
   SET( SAMPLES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples )
   SET( SAMPLES_SHARED_CODE_DIR ${SAMPLES_DIR}/SharedCode )
   IF ( WIN32 )

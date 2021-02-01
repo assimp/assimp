@@ -1157,8 +1157,15 @@ IF(ASSIMP_HUNTER_ENABLED)
       zip::zip
       pugixml
   )
+  
+  if (ASSIMP_BUILD_DRACO)
+    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+  endif()
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
+  if (ASSIMP_BUILD_DRACO)
+    target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -1172,10 +1179,6 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   TARGET_LINK_LIBRARIES(assimp debug ${C4D_DEBUG_LIBRARIES})
   TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
 ENDIF ()
-
-IF (ASSIMP_BUILD_DRACO)
-  target_link_libraries(assimp ${draco_LIBRARIES})
-ENDIF()
 
 if( MSVC )
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix

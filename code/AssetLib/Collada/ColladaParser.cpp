@@ -127,7 +127,7 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
     // Determine type
     std::string extension = BaseImporter::GetExtension(pFile);
     if (extension != "dae") {
-        zip_archive = std::make_unique<ZipArchiveIOSystem>(pIOHandler, pFile);
+        zip_archive.reset(new ZipArchiveIOSystem(pIOHandler, pFile));
     }
 
     if (zip_archive && zip_archive->isOpen()) {

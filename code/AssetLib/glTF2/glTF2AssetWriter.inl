@@ -571,7 +571,6 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Node& n, AssetWriter& w)
     {
-
         if (n.matrix.isPresent) {
             Value val;
             obj.AddMember("matrix", MakeValue(val, n.matrix.value, w.mAl).Move(), w.mAl);
@@ -597,14 +596,13 @@ namespace glTF2 {
             obj.AddMember("mesh", n.meshes[0]->index, w.mAl);
         }
 
-        AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
-
         if (n.skin) {
             obj.AddMember("skin", n.skin->index, w.mAl);
         }
-
-        if (!n.jointName.empty()) {
-          obj.AddMember("jointName", n.jointName, w.mAl);
+        
+        //gltf2 spec does not support "skeletons" under node
+        if(n.skeletons.size()) {
+            AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
         }
     }
 

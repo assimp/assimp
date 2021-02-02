@@ -327,7 +327,7 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Col
 // ------------------------------------------------------------------------------------------------
 // Resolve UV channels
 void ColladaLoader::ApplyVertexToEffectSemanticMapping(Collada::Sampler &sampler, const Collada::SemanticMappingTable &table) {
-    std::map<std::string, Collada::InputSemanticMapEntry>::const_iterator it = table.mMap.find(sampler.mUVChannel);
+    Collada::SemanticMappingTable::InputSemanticMap::const_iterator it = table.mMap.find(sampler.mUVChannel);
     if (it == table.mMap.end()) {
         return;
     }
@@ -692,6 +692,9 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Collada::M
     for (std::map<std::string, Collada::Controller>::const_iterator it = pParser.mControllerLibrary.begin();
             it != pParser.mControllerLibrary.end(); ++it) {
         const Collada::Controller &c = it->second;
+        /*if (c.mMeshId.empty()) {
+            continue;
+        }*/
         const Collada::Mesh *baseMesh = pParser.ResolveLibraryReference(pParser.mMeshLibrary, c.mMeshId);
 
         if (c.mType == Collada::Morph && baseMesh->mName == pSrcMesh->mName) {

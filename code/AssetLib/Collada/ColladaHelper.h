@@ -206,7 +206,8 @@ struct SemanticMappingTable {
     std::string mMatName;
 
     /// List of semantic map commands, grouped by effect semantic name
-    std::map<std::string, InputSemanticMapEntry> mMap;
+    using InputSemanticMap = std::map<std::string, InputSemanticMapEntry>;
+    InputSemanticMap mMap;
 
     /// For std::find
     bool operator==(const std::string &s) const {

@@ -5,7 +5,7 @@ include_directories(./../../)
 add_library( # Defines the name of the library.
              android_jniiosystem 
 
-             # Implements a shared library.
+             # Implements a static library.
              STATIC 
 
              # relative path to source file(s).

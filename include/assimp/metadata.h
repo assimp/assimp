@@ -350,6 +350,10 @@ struct aiMetadata {
         } else if (nullptr != mValues[index].mData && AI_AIMETADATA == mValues[index].mType) {
             *static_cast<T *>(mValues[index].mData) = value;
         } else {
+            if (nullptr != mValues[index].mData) {
+                delete mValues[index].mData;
+                mValues[index].mData = nullptr;
+            }
             mValues[index].mData = new T(value);
         }
 

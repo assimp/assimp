@@ -82,25 +82,24 @@ struct ColladaMeshIndex {
 */
 class ColladaLoader : public BaseImporter {
 public:
+    /// The class constructor.
     ColladaLoader();
+
+    /// The class destructor.
     ~ColladaLoader() override;
 
-public:
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details. */
+    /// Returns whether the class can handle the format of the given file.
+    /// @see BaseImporter::CanRead() for more details.
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details
-     */
+    /// See #BaseImporter::GetInfo for the details
     const aiImporterDesc *GetInfo() const override;
 
+    /// See #BaseImporter::SetupProperties for the details
     void SetupProperties(const Importer *pImp) override;
 
-    /** Imports the given file into the given scene structure.
-     * See BaseImporter::InternReadFile() for details
-     */
+    /// See #BaseImporter::InternReadFile for the details
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
     /** Recursively constructs a scene node for the given parser node and returns it. */

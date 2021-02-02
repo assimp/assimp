@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/mesh.h>
 
-#include <stdint.h>
+#include <cstdint>
 #include <map>
 #include <set>
 #include <vector>

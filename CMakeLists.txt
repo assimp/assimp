@@ -608,7 +608,8 @@ ELSE()
         )
       ENDIF()
 
-      ADD_SUBDIRECTORY( "contrib/draco" )
+      # Don't build or install all of Draco by default
+      ADD_SUBDIRECTORY( "contrib/draco" EXCLUDE_FROM_ALL )
 
       if(MSVC OR WIN32)
         set(draco_LIBRARIES "draco")
@@ -624,6 +625,12 @@ ELSE()
       set_target_properties(draco_encoder draco_decoder PROPERTIES
         EXCLUDE_FROM_ALL TRUE
         EXCLUDE_FROM_DEFAULT_BUILD TRUE
+        )
+
+      # Do build the draco shared library
+      set_target_properties(${draco_LIBRARIES} PROPERTIES
+        EXCLUDE_FROM_ALL FALSE
+        EXCLUDE_FROM_DEFAULT_BUILD FALSE
         )
 
       TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})

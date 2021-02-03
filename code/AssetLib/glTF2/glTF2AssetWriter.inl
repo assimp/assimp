@@ -110,19 +110,18 @@ namespace glTF2 {
         if (a.bufferView) {
             obj.AddMember("bufferView", a.bufferView->index, w.mAl);
             obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
-            Value vTmpMax, vTmpMin;
-            if (a.componentType == ComponentType_FLOAT) {
-                obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
-                obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
-            } else {
-                obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
-                obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
-            }
         }
-
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+        Value vTmpMax, vTmpMin;
+        if (a.componentType == ComponentType_FLOAT) {
+            obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+            obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+        } else {
+            obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
+            obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
+        }
 
         if (a.sparse) {
             Value sparseValue;

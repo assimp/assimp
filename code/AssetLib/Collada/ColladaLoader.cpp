@@ -1538,9 +1538,9 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = sampler.mUVId;
     } else {
         map = -1;
-        for (auto it : sampler.mUVChannel) {
-            if (IsNumeric(it)) {
-                map = strtoul10(&it);
+        for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
+            if (IsNumeric(*it)) {
+                map = strtoul10(&(*it));
                 break;
             }
         }

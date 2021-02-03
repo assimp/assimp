@@ -652,6 +652,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
             XmlParser::getValueAsString(currentNode, v);
             const char *content = v.c_str();
             for (unsigned int a = 0; a < 16; a++) {
+                SkipSpacesAndLineEnd(&content);
                 // read a number
                 content = fast_atoreal_move<ai_real>(content, controller.mBindShapeMatrix[a]);
                 // skip whitespace after it

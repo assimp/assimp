@@ -302,6 +302,10 @@ void StepExporter::WriteFile()
             dv23.Normalize();
             dv31.Normalize();
             dv13.Normalize();
+            
+            aiVector3D dvY = dv12;
+            aiVector3D dvX = dvY ^ dv13;
+            dvX.Normalize();
 
             int pid1 = uniqueVerts.find(v1)->second;
             int pid2 = uniqueVerts.find(v2)->second;
@@ -337,8 +341,8 @@ void StepExporter::WriteFile()
             mOutput << "#" << sid+9 << "=PLANE('',#" << sid+10 << ")" << endstr;
             mOutput << "#" << sid+10 << "=AXIS2_PLACEMENT_3D('',#" << pid1 << ", #" << sid+11 << ",#" << sid+12 << ")" << endstr;
 
-            mOutput << "#" << sid+11 << "=DIRECTION('',(" << dv12.x << "," << dv12.y << "," << dv12.z << "))" << endstr;
-            mOutput << "#" << sid+12 << "=DIRECTION('',(" << dv13.x << "," << dv13.y << "," << dv13.z << "))" << endstr;
+            mOutput << "#" << sid + 11 << "=DIRECTION('',(" << dvX.x << "," << dvX.y << "," << dvX.z << "))" << endstr;
+            mOutput << "#" << sid + 12 << "=DIRECTION('',(" << dvY.x << "," << dvY.y << "," << dvY.z << "))" << endstr;
 
             mOutput << "#" << sid+13 << "=FACE_BOUND('',#" << sid+14 << ",.T.)" << endstr;
             mOutput << "#" << sid+14 << "=EDGE_LOOP('',(#" << sid+15 << ",#" << sid+16 << ",#" << sid+17 << "))" << endstr;

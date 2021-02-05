@@ -53,9 +53,8 @@ class utglTFImportExport : public AbstractImportExportBase {
 public:
     bool importerTest() override {
         Assimp::Importer importer;
-        //const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", aiProcess_ValidateDataStructure);
-        //return nullptr != scene;
-        return true;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", aiProcess_ValidateDataStructure);
+        return nullptr != scene;
     }
 };
 

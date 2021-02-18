@@ -41,11 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractImportExportBase.h"
 #include "SceneDiffer.h"
-#include "UnitTestPCH.h"
+#include <assimp/DefaultIOStream.h>
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 
 using namespace Assimp;
 
@@ -478,8 +479,20 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
     EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
 }
 
+void readBufferFromFile(const std::string &filename, std::vector<char> &buffer) {
+    DefaultIOSystem ioSystem;
+    IOStream *stream = ioSystem.Open(filename.c_str());
+    size_t size = stream->FileSize();
+    buffer.resize(size);
+    stream->Read(&buffer[0], sizeof(char), 1);
+    ioSystem.Close(stream);
+}
+
 TEST_F(utObjImportExport, fuzzer_tests) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR"/OBJ/clusterfuzz-testcase-minimized-assimp_fuzzer-5912277674622976", 0);
-    EXPECT_EQ(scene->mNumMeshes, 1U);
+    const std::string filename = ASSIMP_TEST_MODELS_DIR "/OBJ/clusterfuzz-testcase-minimized-assimp_fuzzer-5912277674622976";
+    std::vector<char> buffer;
+    readBufferFromFile(filename, buffer);
+    const aiScene *scene = importer.ReadFileFromMemory(&buffer[0], buffer.size(), aiProcessPreset_TargetRealtime_Quality, nullptr);
+    EXPECT_EQ(scene->mNumMeshes, 0U);
 }

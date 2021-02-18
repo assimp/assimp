@@ -66,7 +66,11 @@ public:
     bool exporterTest() override {
 		Assimp::Importer importer;
 		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
-		Exporter exporter;
+        if (nullptr == scene) {
+            return nullptr;
+        }
+
+        Exporter exporter;
 		aiReturn ret = exporter.Export(scene, "m3d", ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals_out.m3d");
 		return ret == AI_SUCCESS;
     }

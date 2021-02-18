@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+
 #include <memory>
 
 static const aiImporterDesc desc = {
@@ -77,7 +78,9 @@ using namespace std;
 ObjFileImporter::ObjFileImporter() :
         m_Buffer(),
         m_pRootObject(nullptr),
-        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
@@ -88,15 +91,15 @@ ObjFileImporter::~ObjFileImporter() {
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an obj file.
-bool ObjFileImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
+bool ObjFileImporter::CanRead(const std::string &file, IOSystem *ioHandler, bool checkSig) const {
     if (!checkSig) {
         //Check File Extension
-        return SimpleExtensionCheck(pFile, "obj");
-    } else {
-        // Check file Header
-        static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9, 200, false, true);
-    }
+        return SimpleExtensionCheck(file, "obj");
+    } 
+
+    // Check file Header
+    static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
+    return BaseImporter::SearchFileHeaderForToken(ioHandler, file, pTokens, 9, 1024, false, true);    
 }
 
 // ------------------------------------------------------------------------------------------------

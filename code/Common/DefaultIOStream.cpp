@@ -60,8 +60,6 @@ template <size_t sizeOfPointer>
 inline int select_fseek(FILE *file, int64_t offset, int origin) {
     return ::fseek(file, static_cast<long>(offset), origin);
 }
-
-
     
 #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
 template <>

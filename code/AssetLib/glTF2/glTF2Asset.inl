@@ -247,9 +247,18 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
 
     // Not same size, convert
     switch (componentBytes) {
-    case sizeof(uint32_t): CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); break;
-    case sizeof(uint16_t): CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); break;
-    case sizeof(uint8_t): CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); break;
+        case sizeof(uint32_t): 
+            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); 
+            break;
+        case sizeof(uint16_t): 
+            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); 
+            break;
+        case sizeof(uint8_t): 
+            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); 
+            break;
+        default:
+            ai_assert(false);
+            break;
     }
 
     // Assign this alternate data buffer to the accessor
@@ -264,8 +273,9 @@ static bool GetAttributeForAllPoints_Draco(const draco::Mesh &dracoMesh,
     T values[4] = { 0, 0, 0, 0 };
     for (draco::PointIndex i(0); i < dracoMesh.num_points(); ++i) {
         const draco::AttributeValueIndex val_index = dracoAttribute.mapped_index(i);
-        if (!dracoAttribute.ConvertValue<T>(val_index, dracoAttribute.num_components(), values))
+        if (!dracoAttribute.ConvertValue<T>(val_index, dracoAttribute.num_components(), values)) {
             return false;
+        }
 
         memcpy(outBuffer.GetPointer() + byteOffset, &values[0], sizeof(T) * dracoAttribute.num_components());
         byteOffset += sizeof(T) * dracoAttribute.num_components();
@@ -277,8 +287,9 @@ static bool GetAttributeForAllPoints_Draco(const draco::Mesh &dracoMesh,
 inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32_t dracoAttribId, Accessor &accessor) {
     // Create decoded buffer
     const draco::PointAttribute *pDracoAttribute = dracoMesh.GetAttributeByUniqueId(dracoAttribId);
-    if (pDracoAttribute == nullptr)
+    if (pDracoAttribute == nullptr) {
         throw DeadlyImportError("GLTF: Invalid draco attribute id: ", dracoAttribId);
+    }
 
     size_t componentBytes = accessor.GetBytesPerComponent();
 
@@ -286,12 +297,27 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
     switch (accessor.componentType) {
-    case ComponentType_BYTE: GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_UNSIGNED_BYTE: GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_SHORT: GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_UNSIGNED_SHORT: GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_UNSIGNED_INT: GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
-    case ComponentType_FLOAT: GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); break;
+        case ComponentType_BYTE: 
+            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_UNSIGNED_BYTE:
+            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_SHORT:
+            GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+            break;
+        case ComponentType_UNSIGNED_SHORT: 
+            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_UNSIGNED_INT: 
+            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_FLOAT: 
+            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        default:
+            ai_assert(false);
+            break;
     }
 
     // Assign this alternate data buffer to the accessor

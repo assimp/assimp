@@ -107,7 +107,6 @@ public:
             f(file) {}
     ~IOStream() {
         fclose(f);
-        f = 0;
     }
 
     size_t Read(void *b, size_t sz, size_t n) { return fread(b, sz, n, f); }

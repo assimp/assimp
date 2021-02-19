@@ -452,6 +452,12 @@ IF(ASSIMP_HUNTER_ENABLED)
   set(ZLIB_LIBRARIES ZLIB::zlib)
   set(ASSIMP_BUILD_MINIZIP TRUE)
 ELSE()
+  # If the zlib is already found outside, add an export in case assimpTargets can't find it.
+  IF( ZLIB_FOUND )
+    INSTALL( TARGETS zlib
+        EXPORT "${TARGETS_EXPORT_NAME}")
+  ENDIF()
+
   IF ( NOT ASSIMP_BUILD_ZLIB )
     FIND_PACKAGE(ZLIB)
   ENDIF()

@@ -427,7 +427,7 @@ private:
                 aiFace face = ReadTriangle(currentNode);
                 faces.push_back(face);
 
-                int pid, p1;
+                int pid = 0, p1;
                 bool hasPid = getNodeAttribute(currentNode, D3MF::XmlTag::pid, pid);
                 bool hasP1 = getNodeAttribute(currentNode, D3MF::XmlTag::p1, p1);
 

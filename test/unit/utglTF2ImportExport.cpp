@@ -574,3 +574,38 @@ TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
     std::string error = importer.GetErrorString();
     ASSERT_NE(error.find("Mesh \"Mesh\" has no faces"), std::string::npos);
 }
+
+/////////////////////////////////
+// Draco decoding
+
+TEST_F(utglTF2ImportExport, import_dracoEncoded) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/draco/2CylinderEngine.gltf",
+            aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_ENABLE_DRACO
+    // No draco support, scene should not load
+    ASSERT_EQ(scene, nullptr);
+#else
+    ASSERT_NE(scene, nullptr);
+    ASSERT_NE(scene->mMetaData, nullptr);
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT));
+        aiString format;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, format));
+        ASSERT_EQ(strcmp(format.C_Str(), "glTF2 Importer"), 0);
+    }
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT_VERSION));
+        aiString version;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT_VERSION, version));
+        ASSERT_EQ(strcmp(version.C_Str(), "2.0"), 0);
+    }
+    {
+        ASSERT_TRUE(scene->mMetaData->HasKey(AI_METADATA_SOURCE_GENERATOR));
+        aiString generator;
+        ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator));
+        ASSERT_EQ(strcmp(generator.C_Str(), "COLLADA2GLTF"), 0);
+    }
+#endif
+}
+

@@ -982,7 +982,7 @@ void ColladaLoader::StoreAnimations(aiScene *pScene, const ColladaParser &pParse
             animTargets.insert(templateAnim->mChannels[0]->mNodeName.C_Str());
             bool collectedAnimationsHaveDifferentChannels = true;
             for (unsigned long long collectedAnimIndice : collectedAnimIndices) {
-                aiAnimation *srcAnimation = mAnims[collectedAnimIndice];
+                aiAnimation *srcAnimation = mAnims[(int)collectedAnimIndice];
                 std::string channelName = std::string(srcAnimation->mChannels[0]->mNodeName.C_Str());
                 if (animTargets.find(channelName) == animTargets.end()) {
                     animTargets.insert(channelName);

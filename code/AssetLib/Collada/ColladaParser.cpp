@@ -529,17 +529,17 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
                 // have it read into a channel
                 ChannelMap::iterator newChannel = channels.insert(std::make_pair(id, AnimationChannel())).first;
                 ReadAnimationSampler(currentNode, newChannel->second);
-            } else if (currentName == "channel") {
-                std::string source_name, target;
-                XmlParser::getStdStrAttribute(currentNode, "source", source_name);
-                XmlParser::getStdStrAttribute(currentNode, "target", target);
-                if (source_name[0] == '#') {
-                    source_name = source_name.substr(1, source_name.size() - 1);
-                }
-                ChannelMap::iterator cit = channels.find(source_name);
-                if (cit != channels.end()) {
-                    cit->second.mTarget = target;
-                }
+            } 
+        } else if (currentName == "channel") {
+            std::string source_name, target;
+            XmlParser::getStdStrAttribute(currentNode, "source", source_name);
+            XmlParser::getStdStrAttribute(currentNode, "target", target);
+            if (source_name[0] == '#') {
+                source_name = source_name.substr(1, source_name.size() - 1);
+            }
+            ChannelMap::iterator cit = channels.find(source_name);
+            if (cit != channels.end()) {
+                cit->second.mTarget = target;
             }
         }
     }

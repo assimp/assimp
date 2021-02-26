@@ -240,7 +240,7 @@ struct AMFVertices : public AMFNodeElementBase {
 /// Structure that define volume node.
 struct AMFVolume : public AMFNodeElementBase {
 	std::string MaterialID; ///< Which material to use.
-	std::string Type; ///< What this volume describes can be “region” or “support”. If none specified, “object” is assumed.
+	std::string Type; ///< What this volume describes can be "region" or "support". If none specified, "object" is assumed.
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.

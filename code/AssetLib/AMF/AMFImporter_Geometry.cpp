@@ -194,7 +194,7 @@ void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
 
 // <volume
 // materialid="" - Which material to use.
-// type=""       - What this volume describes can be “region” or “support”. If none specified, “object” is assumed. If support, then the geometric
+// type=""       - What this volume describes can be "region" or "support". If none specified, "object" is assumed. If support, then the geometric
 //                 requirements 1-8 listed in section 5 do not need to be maintained.
 // >
 // </volume>

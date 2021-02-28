@@ -761,7 +761,7 @@ void PbrtExporter::WriteLights() {
             case aiLightSource_AREA: {
                 aiVector3D left = light->mDirection ^ light->mUp;
                 // rectangle. center at position, direction is normal vector
-                float dLeft = light->mSize.x / 2, dUp = light->mSize.y / 2;
+                ai_real dLeft = light->mSize.x / 2, dUp = light->mSize.y / 2;
                 aiVector3D vertices[4] = {
                      light->mPosition - dLeft * left - dUp * light->mUp,
                      light->mPosition + dLeft * left - dUp * light->mUp,

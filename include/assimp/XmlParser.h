@@ -178,6 +178,26 @@ public:
         return true;
     }
 
+#ifdef ASSIMP_DOUBLE_PRECISION
+    static inline bool getRealAttribute( XmlNode &xmlNode, const char *name, ai_real &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+        val = attr.as_double();
+        return true;
+    }
+#else
+    static inline bool getRealAttribute(XmlNode &xmlNode, const char *name, ai_real &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+        val = attr.as_float();
+        return true;
+    }
+#endif
+
     static inline bool getFloatAttribute(XmlNode &xmlNode, const char *name, float &val ) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {

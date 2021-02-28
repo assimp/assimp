@@ -42,9 +42,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/glTF/glTFCommon.h"
 
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/MemoryIOWrapper.h>
+
+#ifdef ASSIMP_ENABLE_DRACO
+
+// Google draco library headers spew many warnings. Bad Google, no cookie
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4018) // Signed/unsigned mismatch
+#pragma warning(disable : 4804) // Unsafe use of type 'bool'
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbool-compare"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
+#include "draco/compression/decode.h"
+#include "draco/core/decoder_buffer.h"
+
+#if _MSC_VER
+#pragma warning(pop)
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+#ifndef DRACO_MESH_COMPRESSION_SUPPORTED
+#error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
+#endif
+#endif
 
 using namespace Assimp;
 
@@ -146,34 +177,154 @@ inline static T MemberOrDefault(Value &obj, const char *id, T defaultValue) {
 
 inline Value *FindMember(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd()) ? &it->value : 0;
+    return (it != val.MemberEnd()) ? &it->value : nullptr;
 }
 
 inline Value *FindString(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : nullptr;
 }
 
 inline Value *FindNumber(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : nullptr;
 }
 
 inline Value *FindUInt(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsUint()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsUint()) ? &it->value : nullptr;
 }
 
 inline Value *FindArray(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : nullptr;
 }
 
 inline Value *FindObject(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : nullptr;
+}
+
+inline Value *FindExtension(Value &val, const char *extensionId) {
+    if (Value *extensionList = FindObject(val, "extensions")) {
+        if (Value *extension = FindObject(*extensionList, extensionId)) {
+            return extension;
+        }
+    }
+    return nullptr;
 }
 } // namespace
+
+#ifdef ASSIMP_ENABLE_DRACO
+
+template <typename T>
+inline void CopyFaceIndex_Draco(Buffer &decodedIndexBuffer, const draco::Mesh &draco_mesh) {
+    const size_t faceStride = sizeof(T) * 3;
+    for (draco::FaceIndex f(0); f < draco_mesh.num_faces(); ++f) {
+        const draco::Mesh::Face &face = draco_mesh.face(f);
+        T indices[3] = { static_cast<T>(face[0].value()), static_cast<T>(face[1].value()), static_cast<T>(face[2].value()) };
+        memcpy(decodedIndexBuffer.GetPointer() + (f.value() * faceStride), &indices[0], faceStride);
+    }
+}
+
+inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Primitive &prim) {
+    if (!prim.indices || dracoMesh.num_faces() == 0)
+        return;
+
+    // Create a decoded Index buffer (if there is one)
+    size_t componentBytes = prim.indices->GetBytesPerComponent();
+
+    std::unique_ptr<Buffer> decodedIndexBuffer(new Buffer());
+    decodedIndexBuffer->Grow(dracoMesh.num_faces() * 3 * componentBytes);
+
+    // If accessor uses the same size as draco implementation, copy the draco buffer directly
+
+    // Usually uint32_t but shouldn't assume
+    if (sizeof(dracoMesh.face(draco::FaceIndex(0))[0]) == componentBytes) {
+        memcpy(decodedIndexBuffer->GetPointer(), &dracoMesh.face(draco::FaceIndex(0))[0], decodedIndexBuffer->byteLength);
+        return;
+    }
+
+    // Not same size, convert
+    switch (componentBytes) {
+        case sizeof(uint32_t): 
+            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); 
+            break;
+        case sizeof(uint16_t): 
+            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); 
+            break;
+        case sizeof(uint8_t): 
+            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); 
+            break;
+        default:
+            ai_assert(false);
+            break;
+    }
+
+    // Assign this alternate data buffer to the accessor
+    prim.indices->decodedBuffer.swap(decodedIndexBuffer);
+}
+
+template <typename T>
+static bool GetAttributeForAllPoints_Draco(const draco::Mesh &dracoMesh,
+        const draco::PointAttribute &dracoAttribute,
+        Buffer &outBuffer) {
+    size_t byteOffset = 0;
+    T values[4] = { 0, 0, 0, 0 };
+    for (draco::PointIndex i(0); i < dracoMesh.num_points(); ++i) {
+        const draco::AttributeValueIndex val_index = dracoAttribute.mapped_index(i);
+        if (!dracoAttribute.ConvertValue<T>(val_index, dracoAttribute.num_components(), values)) {
+            return false;
+        }
+
+        memcpy(outBuffer.GetPointer() + byteOffset, &values[0], sizeof(T) * dracoAttribute.num_components());
+        byteOffset += sizeof(T) * dracoAttribute.num_components();
+    }
+
+    return true;
+}
+
+inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32_t dracoAttribId, Accessor &accessor) {
+    // Create decoded buffer
+    const draco::PointAttribute *pDracoAttribute = dracoMesh.GetAttributeByUniqueId(dracoAttribId);
+    if (pDracoAttribute == nullptr) {
+        throw DeadlyImportError("GLTF: Invalid draco attribute id: ", dracoAttribId);
+    }
+
+    size_t componentBytes = accessor.GetBytesPerComponent();
+
+    std::unique_ptr<Buffer> decodedAttribBuffer(new Buffer());
+    decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
+
+    switch (accessor.componentType) {
+        case ComponentType_BYTE: 
+            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_UNSIGNED_BYTE:
+            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_SHORT:
+            GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+            break;
+        case ComponentType_UNSIGNED_SHORT: 
+            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_UNSIGNED_INT: 
+            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        case ComponentType_FLOAT: 
+            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            break;
+        default:
+            ai_assert(false);
+            break;
+    }
+
+    // Assign this alternate data buffer to the accessor
+    accessor.decodedBuffer.swap(decodedAttribBuffer);
+}
+
+#endif // ASSIMP_ENABLE_DRACO
 
 //
 // LazyDict methods
@@ -197,7 +348,7 @@ inline LazyDict<T>::~LazyDict() {
 
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
-    Value *container = 0;
+    Value *container = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
@@ -214,7 +365,7 @@ inline void LazyDict<T>::AttachToDocument(Document &doc) {
 
 template <class T>
 inline void LazyDict<T>::DetachFromDocument() {
-    mDict = 0;
+    mDict = nullptr;
 }
 
 template <class T>
@@ -382,18 +533,18 @@ inline void Buffer::Read(Value &obj, Asset &r) {
     glTFCommon::Util::DataURI dataURI;
     if (ParseDataURI(uri, it->GetStringLength(), dataURI)) {
         if (dataURI.base64) {
-            uint8_t *data = 0;
+            uint8_t *data = nullptr;
             this->byteLength = glTFCommon::Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
                 throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                                        " bytes, but found ", to_string(dataURI.dataLength));
+                        " bytes, but found ", to_string(dataURI.dataLength));
             }
         } else { // assume raw data
             if (statedLength != dataURI.dataLength) {
                 throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                                        " bytes, but found ", to_string(dataURI.dataLength));
+                        " bytes, but found ", to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
@@ -401,10 +552,7 @@ inline void Buffer::Read(Value &obj, Asset &r) {
         }
     } else { // Local file
         if (byteLength > 0) {
-            std::string dir = !r.mCurrentAssetDir.empty() ? (
-                r.mCurrentAssetDir.back() == '/' ?
-                   r.mCurrentAssetDir : r.mCurrentAssetDir + '/'
-            ) : "";
+            std::string dir = !r.mCurrentAssetDir.empty() ? (r.mCurrentAssetDir.back() == '/' ? r.mCurrentAssetDir : r.mCurrentAssetDir + '/') : "";
 
             IOStream *file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -575,9 +723,9 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
-    if (!buffer) return 0;
+    if (!buffer) return nullptr;
     uint8_t *basePtr = buffer->GetPointer();
-    if (!basePtr) return 0;
+    if (!basePtr) return nullptr;
 
     size_t offset = accOffset + byteOffset;
     if (buffer->EncodedRegion_Current != nullptr) {
@@ -709,12 +857,15 @@ inline unsigned int Accessor::GetElementSize() {
 }
 
 inline uint8_t *Accessor::GetPointer() {
+    if (decodedBuffer)
+        return decodedBuffer->GetPointer();
+
     if (sparse)
         return sparse->data.data();
 
-    if (!bufferView || !bufferView->buffer) return 0;
+    if (!bufferView || !bufferView->buffer) return nullptr;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
-    if (!basePtr) return 0;
+    if (!basePtr) return nullptr;
 
     size_t offset = byteOffset + bufferView->byteOffset;
 
@@ -728,6 +879,22 @@ inline uint8_t *Accessor::GetPointer() {
     }
 
     return basePtr + offset;
+}
+
+inline size_t Accessor::GetStride() {
+    // Decoded buffer is always packed
+    if (decodedBuffer)
+        return GetElementSize();
+
+    // Sparse and normal bufferView
+    return (bufferView && bufferView->byteStride ? bufferView->byteStride : GetElementSize());
+}
+
+inline size_t Accessor::GetMaxByteSize() {
+    if (decodedBuffer)
+        return decodedBuffer->byteLength;
+
+    return (bufferView ? bufferView->byteLength : sparse->data.size());
 }
 
 namespace {
@@ -761,7 +928,7 @@ void Accessor::ExtractData(T *&outData) {
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
 
-    const size_t stride = bufferView && bufferView->byteStride ? bufferView->byteStride : elemSize;
+    const size_t stride = GetStride();
 
     const size_t targetElemSize = sizeof(T);
 
@@ -769,8 +936,8 @@ void Accessor::ExtractData(T *&outData) {
         throw DeadlyImportError("GLTF: elemSize ", elemSize, " > targetElemSize ", targetElemSize, " in ", getContextForErrorMessages(id, name));
     }
 
-    const size_t maxSize = (bufferView ? bufferView->byteLength : sparse->data.size());
-    if (count*stride > maxSize) {
+    const size_t maxSize = GetMaxByteSize();
+    if (count * stride > maxSize) {
         throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
     }
 
@@ -828,14 +995,14 @@ inline Accessor::Indexer::Indexer(Accessor &acc) :
         accessor(acc),
         data(acc.GetPointer()),
         elemSize(acc.GetElementSize()),
-        stride(acc.bufferView && acc.bufferView->byteStride ? acc.bufferView->byteStride : elemSize) {
+        stride(acc.GetStride()) {
 }
 
 //! Accesses the i-th value as defined by the accessor
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
-    ai_assert(i * stride < accessor.bufferView->byteLength);
+    ai_assert(i * stride < accessor.GetMaxByteSize());
     // Ensure that the memcpy doesn't overwrite the local.
     const size_t sizeToCopy = std::min(elemSize, sizeof(T));
     T value = T();
@@ -872,8 +1039,7 @@ inline void Image::Read(Value &obj, Asset &r) {
             if (Value *mtype = FindString(obj, "mimeType")) {
                 this->mimeType = mtype->GetString();
             }
-            if (!this->bufferView || this->mimeType.empty())
-            {
+            if (!this->bufferView || this->mimeType.empty()) {
                 throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " does not have a URI, so it must have a valid bufferView and mimetype");
             }
 
@@ -884,10 +1050,8 @@ inline void Image::Read(Value &obj, Asset &r) {
 
             this->mData.reset(new uint8_t[this->mDataLength]);
             memcpy(this->mData.get(), buffer->GetPointer() + this->bufferView->byteOffset, this->mDataLength);
-        }
-        else
-        {
-            throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " should have either a URI of a bufferView and mimetype" );
+        } else {
+            throw DeadlyImportError("GLTF2: ", getContextForErrorMessages(id, name), " should have either a URI of a bufferView and mimetype");
         }
     }
 }
@@ -946,28 +1110,26 @@ inline void Texture::Read(Value &obj, Asset &r) {
 namespace {
 inline void SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
     if (r.extensionsUsed.KHR_texture_transform) {
-        if (Value *extensions = FindObject(*prop, "extensions")) {
+        if (Value *pKHR_texture_transform = FindExtension(*prop, "KHR_texture_transform")) {
             out.textureTransformSupported = true;
-            if (Value *pKHR_texture_transform = FindObject(*extensions, "KHR_texture_transform")) {
-                if (Value *array = FindArray(*pKHR_texture_transform, "offset")) {
-                    out.TextureTransformExt_t.offset[0] = (*array)[0].GetFloat();
-                    out.TextureTransformExt_t.offset[1] = (*array)[1].GetFloat();
-                } else {
-                    out.TextureTransformExt_t.offset[0] = 0;
-                    out.TextureTransformExt_t.offset[1] = 0;
-                }
+            if (Value *array = FindArray(*pKHR_texture_transform, "offset")) {
+                out.TextureTransformExt_t.offset[0] = (*array)[0].GetFloat();
+                out.TextureTransformExt_t.offset[1] = (*array)[1].GetFloat();
+            } else {
+                out.TextureTransformExt_t.offset[0] = 0;
+                out.TextureTransformExt_t.offset[1] = 0;
+            }
 
-                if (!ReadMember(*pKHR_texture_transform, "rotation", out.TextureTransformExt_t.rotation)) {
-                    out.TextureTransformExt_t.rotation = 0;
-                }
+            if (!ReadMember(*pKHR_texture_transform, "rotation", out.TextureTransformExt_t.rotation)) {
+                out.TextureTransformExt_t.rotation = 0;
+            }
 
-                if (Value *array = FindArray(*pKHR_texture_transform, "scale")) {
-                    out.TextureTransformExt_t.scale[0] = (*array)[0].GetFloat();
-                    out.TextureTransformExt_t.scale[1] = (*array)[1].GetFloat();
-                } else {
-                    out.TextureTransformExt_t.scale[0] = 1;
-                    out.TextureTransformExt_t.scale[1] = 1;
-                }
+            if (Value *array = FindArray(*pKHR_texture_transform, "scale")) {
+                out.TextureTransformExt_t.scale[0] = (*array)[0].GetFloat();
+                out.TextureTransformExt_t.scale[1] = (*array)[1].GetFloat();
+            } else {
+                out.TextureTransformExt_t.scale[0] = 1;
+                out.TextureTransformExt_t.scale[1] = 1;
             }
         }
     }
@@ -1043,8 +1205,7 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
-        if (r.extensionsUsed.KHR_texture_transform) {
-        }
+        // Extension KHR_texture_transform is handled in ReadTextureProperty
 
         if (r.extensionsUsed.KHR_materials_sheen) {
             if (Value *curMaterialSheen = FindObject(*extensions, "KHR_materials_sheen")) {
@@ -1106,12 +1267,12 @@ void SetVector(vec3 &v, const float (&in)[3]) {
 inline void Material::SetDefaults() {
     //pbr materials
     SetVector(pbrMetallicRoughness.baseColorFactor, defaultBaseColor);
-    pbrMetallicRoughness.metallicFactor = 1.0;
-    pbrMetallicRoughness.roughnessFactor = 1.0;
+    pbrMetallicRoughness.metallicFactor = 1.0f;
+    pbrMetallicRoughness.roughnessFactor = 1.0f;
 
     SetVector(emissiveFactor, defaultEmissiveFactor);
     alphaMode = "OPAQUE";
-    alphaCutoff = 0.5;
+    alphaCutoff = 0.5f;
     doubleSided = false;
     unlit = false;
 }
@@ -1120,7 +1281,7 @@ inline void PbrSpecularGlossiness::SetDefaults() {
     //pbrSpecularGlossiness properties
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
-    glossinessFactor = 1.0;
+    glossinessFactor = 1.0f;
 }
 
 inline void MaterialSheen::SetDefaults() {
@@ -1192,6 +1353,14 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             Primitive &prim = this->primitives[i];
             prim.mode = MemberOrDefault(primitive, "mode", PrimitiveMode_TRIANGLES);
 
+            if (Value *indices = FindUInt(primitive, "indices")) {
+                prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
+            }
+
+            if (Value *material = FindUInt(primitive, "material")) {
+                prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
+            }
+
             if (Value *attrs = FindObject(primitive, "attributes")) {
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
                     if (!it->value.IsUint()) continue;
@@ -1200,17 +1369,81 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
                     int undPos = 0;
-                    Mesh::AccessorList *vec = 0;
+                    Mesh::AccessorList *vec = nullptr;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() != idx) {
-                            throw DeadlyImportError("GLTF: Invalid attribute: ", attr, ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
+                            throw DeadlyImportError("GLTF: Invalid attribute in mesh: ", name, " primitive: ", i, "attrib: ", attr,
+                                    ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
                         }
                         (*vec).resize(idx + 1);
                         (*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
                     }
                 }
             }
+
+#ifdef ASSIMP_ENABLE_DRACO
+            // KHR_draco_mesh_compression spec: Draco can only be used for glTF Triangles or Triangle Strips
+            if (pAsset_Root.extensionsUsed.KHR_draco_mesh_compression && (prim.mode == PrimitiveMode_TRIANGLES || prim.mode == PrimitiveMode_TRIANGLE_STRIP)) {
+                // Look for draco mesh compression extension and bufferView
+                // Skip if any missing
+                if (Value *dracoExt = FindExtension(primitive, "KHR_draco_mesh_compression")) {
+                    if (Value *bufView = FindUInt(*dracoExt, "bufferView")) {
+                        // Attempt to load indices and attributes using draco compression
+                        auto bufferView = pAsset_Root.bufferViews.Retrieve(bufView->GetUint());
+                        // Attempt to perform the draco decode on the buffer data
+                        const char *bufferViewData = reinterpret_cast<const char *>(bufferView->buffer->GetPointer() + bufferView->byteOffset);
+                        draco::DecoderBuffer decoderBuffer;
+                        decoderBuffer.Init(bufferViewData, bufferView->byteLength);
+                        draco::Decoder decoder;
+                        auto decodeResult = decoder.DecodeMeshFromBuffer(&decoderBuffer);
+                        if (!decodeResult.ok()) {
+                            // A corrupt Draco isn't actually fatal if the primitive data is also provided in a standard buffer, but does anyone do that?
+                            throw DeadlyImportError("GLTF: Invalid Draco mesh compression in mesh: ", name, " primitive: ", i, ": ", decodeResult.status().error_msg_string());
+                        }
+
+                        // Now we have a draco mesh
+                        const std::unique_ptr<draco::Mesh> &pDracoMesh = decodeResult.value();
+
+                        // Redirect the accessors to the decoded data
+
+                        // Indices
+                        SetDecodedIndexBuffer_Draco(*pDracoMesh, prim);
+
+                        // Vertex attributes
+                        if (Value *attrs = FindObject(*dracoExt, "attributes")) {
+                            for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
+                                if (!it->value.IsUint()) continue;
+                                const char *attr = it->name.GetString();
+
+                                int undPos = 0;
+                                Mesh::AccessorList *vec = nullptr;
+                                if (GetAttribVector(prim, attr, vec, undPos)) {
+                                    size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
+                                    if (idx >= (*vec).size()) {
+                                        throw DeadlyImportError("GLTF: Invalid draco attribute in mesh: ", name, " primitive: ", i, " attrib: ", attr,
+                                                ". All indices for indexed attribute semantics must start with 0 and be continuous positive integers: TEXCOORD_0, TEXCOORD_1, etc.");
+                                    }
+
+                                    if (!(*vec)[idx]) {
+                                        throw DeadlyImportError("GLTF: Invalid draco attribute in mesh: ", name, " primitive: ", i, " attrib: ", attr,
+                                                ". All draco-encoded attributes must also define an accessor.");
+                                    }
+
+                                    Accessor &attribAccessor = *(*vec)[idx];
+                                    if (attribAccessor.count == 0)
+                                        throw DeadlyImportError("GLTF: Invalid draco attribute in mesh: ", name, " primitive: ", i, " attrib: ", attr);
+
+                                    // Redirect this accessor to the appropriate Draco vertex attribute data
+                                    const uint32_t dracoAttribId = it->value.GetUint();
+                                    SetDecodedAttributeBuffer_Draco(*pDracoMesh, dracoAttribId, attribAccessor);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+#endif
 
             Value *targetsArray = FindArray(primitive, "targets");
             if (nullptr != targetsArray) {
@@ -1227,7 +1460,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                         const char *attr = it->name.GetString();
                         // Valid attribute semantics include POSITION, NORMAL, TANGENT
                         int undPos = 0;
-                        Mesh::AccessorList *vec = 0;
+                        Mesh::AccessorList *vec = nullptr;
                         if (GetAttribTargetVector(prim, j, attr, vec, undPos)) {
                             size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                             if ((*vec).size() <= idx) {
@@ -1237,14 +1470,6 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                         }
                     }
                 }
-            }
-
-            if (Value *indices = FindUInt(primitive, "indices")) {
-                prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
-            }
-
-            if (Value *material = FindUInt(primitive, "material")) {
-                prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
             }
         }
     }
@@ -1331,25 +1556,22 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
-inline CustomExtension ReadExtensions(const char *name, Value& obj) {
+inline CustomExtension ReadExtensions(const char *name, Value &obj) {
     CustomExtension ret;
     ret.name = name;
     if (obj.IsObject()) {
         ret.mValues.isPresent = true;
         for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto& val = it->value;
+            auto &val = it->value;
             ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
         }
-    }
-    else if (obj.IsArray()) {
+    } else if (obj.IsArray()) {
         ret.mValues.value.reserve(obj.Size());
         ret.mValues.isPresent = true;
-        for (unsigned int i = 0; i < obj.Size(); ++i)
-        {
+        for (unsigned int i = 0; i < obj.Size(); ++i) {
             ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
         }
-    }
-    else if (obj.IsNumber()) {
+    } else if (obj.IsNumber()) {
         if (obj.IsUint64()) {
             ret.mUint64Value.value = obj.GetUint64();
             ret.mUint64Value.isPresent = true;
@@ -1360,12 +1582,10 @@ inline CustomExtension ReadExtensions(const char *name, Value& obj) {
             ret.mDoubleValue.value = obj.GetDouble();
             ret.mDoubleValue.isPresent = true;
         }
-    }
-    else if (obj.IsString()) {
+    } else if (obj.IsString()) {
         ReadValue(obj, ret.mStringValue);
         ret.mStringValue.isPresent = true;
-    }
-    else if (obj.IsBool()) {
+    } else if (obj.IsBool()) {
         ret.mBoolValue.value = obj.GetBool();
         ret.mBoolValue.isPresent = true;
     }
@@ -1411,7 +1631,7 @@ inline void Node::Read(Value &obj, Asset &r) {
         }
     }
 
-	// Do not retrieve a skin here, just take a reference, to avoid infinite recursion
+    // Do not retrieve a skin here, just take a reference, to avoid infinite recursion
     // Skins will be properly loaded later
     Value *curSkin = FindUInt(obj, "skin");
     if (nullptr != curSkin) {
@@ -1641,7 +1861,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
         mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
     }
-    
+
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
         throw DeadlyImportError("GLTF: Could not open file for reading");
@@ -1693,10 +1913,12 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     ReadExtensionsUsed(doc);
     ReadExtensionsRequired(doc);
 
-    // Currently Draco is not supported
+#ifndef ASSIMP_ENABLE_DRACO
+    // Is Draco required?
     if (extensionsRequired.KHR_draco_mesh_compression) {
-        throw DeadlyImportError("GLTF: Draco mesh compression not currently supported.");
+        throw DeadlyImportError("GLTF: Draco mesh compression not supported.");
     }
+#endif
 
     // Prepare the dictionaries
     for (size_t i = 0; i < mDicts.size(); ++i) {
@@ -1784,6 +2006,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_sheen);
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
+    CHECK_EXT(KHR_draco_mesh_compression);
 
 #undef CHECK_EXT
 }
@@ -1792,12 +2015,12 @@ inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool /*abso
 #ifdef ASSIMP_API
     return mIOSystem->Open(path, mode);
 #else
-    if (path.size() < 2) return 0;
+    if (path.size() < 2) return nullptr;
     if (!absolute && path[1] != ':' && path[0] != '/') { // relative?
         path = mCurrentAssetDir + path;
     }
     FILE *f = fopen(path.c_str(), mode);
-    return f ? new IOStream(f) : 0;
+    return f ? new IOStream(f) : nullptr;
 #endif
 }
 
@@ -1831,7 +2054,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #if _MSC_VER
-#   pragma warning(pop)
+#pragma warning(pop)
 #endif // _MSC_VER
 
 } // namespace glTF2

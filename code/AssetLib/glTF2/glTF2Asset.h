@@ -376,87 +376,6 @@ struct Object {
 // Classes for each glTF top-level object type
 //
 
-//! A typed view into a BufferView. A BufferView contains raw binary data.
-//! An accessor provides a typed view into a BufferView or a subset of a BufferView
-//! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
-struct Accessor : public Object {
-    struct Sparse;
-
-    Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
-    size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
-    ComponentType componentType; //!< The datatype of components in the attribute. (required)
-    size_t count; //!< The number of attributes referenced by this accessor. (required)
-    AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-    std::vector<double> max; //!< Maximum value of each component in this attribute.
-    std::vector<double> min; //!< Minimum value of each component in this attribute.
-    std::unique_ptr<Sparse> sparse;
-
-    unsigned int GetNumComponents();
-    unsigned int GetBytesPerComponent();
-    unsigned int GetElementSize();
-
-    inline uint8_t *GetPointer();
-
-    template <class T>
-    void ExtractData(T *&outData);
-
-    void WriteData(size_t count, const void *src_buffer, size_t src_stride);
-    void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
-    void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
-
-    //! Helper class to iterate the data
-    class Indexer {
-        friend struct Accessor;
-
-        // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
-        // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
-    protected:
-        Accessor &accessor;
-
-    private:
-        uint8_t *data;
-        size_t elemSize, stride;
-
-        Indexer(Accessor &acc);
-
-    public:
-        //! Accesses the i-th value as defined by the accessor
-        template <class T>
-        T GetValue(int i);
-
-        //! Accesses the i-th value as defined by the accessor
-        inline unsigned int GetUInt(int i) {
-            return GetValue<unsigned int>(i);
-        }
-
-        inline bool IsValid() const {
-            return data != 0;
-        }
-    };
-
-    inline Indexer GetIndexer() {
-        return Indexer(*this);
-    }
-
-    Accessor() {}
-    void Read(Value &obj, Asset &r);
-
-    //sparse
-    struct Sparse {
-        size_t count;
-        ComponentType indicesType;
-        Ref<BufferView> indices;
-        size_t indicesByteOffset;
-        Ref<BufferView> values;
-        size_t valuesByteOffset;
-
-        std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
-
-        void PopulateData(size_t numBytes, uint8_t *bytes);
-        void PatchData(unsigned int elementSize);
-    };
-};
-
 //! A buffer points to binary geometry, animation, or skins.
 struct Buffer : public Object {
     /********************* Types *********************/
@@ -592,6 +511,90 @@ struct BufferView : public Object {
 
     void Read(Value &obj, Asset &r);
     uint8_t *GetPointer(size_t accOffset);
+};
+
+//! A typed view into a BufferView. A BufferView contains raw binary data.
+//! An accessor provides a typed view into a BufferView or a subset of a BufferView
+//! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
+struct Accessor : public Object {
+    struct Sparse;
+
+    Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
+    size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
+    ComponentType componentType; //!< The datatype of components in the attribute. (required)
+    size_t count; //!< The number of attributes referenced by this accessor. (required)
+    AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
+    std::vector<double> max; //!< Maximum value of each component in this attribute.
+    std::vector<double> min; //!< Minimum value of each component in this attribute.
+    std::unique_ptr<Sparse> sparse;
+    std::unique_ptr<Buffer> decodedBuffer; // Packed decoded data, returned instead of original bufferView if present
+
+    unsigned int GetNumComponents();
+    unsigned int GetBytesPerComponent();
+    unsigned int GetElementSize();
+
+    inline uint8_t *GetPointer();
+    inline size_t GetStride();
+    inline size_t GetMaxByteSize();
+
+    template <class T>
+    void ExtractData(T *&outData);
+
+    void WriteData(size_t count, const void *src_buffer, size_t src_stride);
+    void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
+    void WriteSparseIndices(size_t count, const void *src_idx, size_t src_idxStride);
+
+    //! Helper class to iterate the data
+    class Indexer {
+        friend struct Accessor;
+
+        // This field is reported as not used, making it protectd is the easiest way to work around it without going to the bottom of what the problem is:
+        // ../code/glTF2/glTF2Asset.h:392:19: error: private field 'accessor' is not used [-Werror,-Wunused-private-field]
+    protected:
+        Accessor &accessor;
+
+    private:
+        uint8_t *data;
+        size_t elemSize, stride;
+
+        Indexer(Accessor &acc);
+
+    public:
+        //! Accesses the i-th value as defined by the accessor
+        template <class T>
+        T GetValue(int i);
+
+        //! Accesses the i-th value as defined by the accessor
+        inline unsigned int GetUInt(int i) {
+            return GetValue<unsigned int>(i);
+        }
+
+        inline bool IsValid() const {
+            return data != nullptr;
+        }
+    };
+
+    inline Indexer GetIndexer() {
+        return Indexer(*this);
+    }
+
+    Accessor() {}
+    void Read(Value &obj, Asset &r);
+
+    //sparse
+    struct Sparse {
+        size_t count;
+        ComponentType indicesType;
+        Ref<BufferView> indices;
+        size_t indicesByteOffset;
+        Ref<BufferView> values;
+        size_t valuesByteOffset;
+
+        std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
+
+        void PopulateData(size_t numBytes, uint8_t *bytes);
+        void PatchData(unsigned int elementSize);
+    };
 };
 
 struct Camera : public Object {
@@ -846,7 +849,7 @@ struct CustomExtension : public Object {
 
     CustomExtension() = default;
 
-    CustomExtension(const CustomExtension& other)
+    CustomExtension(const CustomExtension &other)
         : Object(other)
         , mStringValue(other.mStringValue)
         , mDoubleValue(other.mDoubleValue)
@@ -1092,6 +1095,7 @@ public:
         bool KHR_materials_sheen;
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
+        bool KHR_draco_mesh_compression;
     } extensionsUsed;
 
     //! Keeps info about the required extensions
@@ -1100,7 +1104,7 @@ public:
     } extensionsRequired;
 
     AssetMetadata asset;
-    Value* extras = nullptr;
+    Value *extras = nullptr;
 
     // Dictionaries for each type of object
 
@@ -1122,7 +1126,7 @@ public:
     Ref<Scene> scene;
 
 public:
-    Asset(IOSystem *io = 0) :
+    Asset(IOSystem *io = nullptr) :
             mIOSystem(io),
             asset(),
             accessors(*this, "accessors"),

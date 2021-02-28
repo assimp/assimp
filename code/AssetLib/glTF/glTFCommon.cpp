@@ -54,7 +54,7 @@ size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out) {
     }
 
     if (inLength < 4) {
-        out = 0;
+        out = nullptr;
         return 0;
     }
 

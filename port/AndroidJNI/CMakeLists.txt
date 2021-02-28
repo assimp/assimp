@@ -13,3 +13,4 @@ add_library( # Defines the name of the library.
              BundledAssetIOSystem.cpp
 )
 TARGET_LINK_LIBRARIES(android_jniiosystem android log)
+INSTALL(TARGETS android_jniiosystem EXPORT "${TARGETS_EXPORT_NAME}")

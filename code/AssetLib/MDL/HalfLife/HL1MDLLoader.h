@@ -132,7 +132,7 @@ private:
     * \param[in,out] value The decompressed anim value at \p frame.
     */
     void extract_anim_value(const AnimValue_HL1 *panimvalue,
-            int frame, float bone_scale, float &value);
+            int frame, float bone_scale, ai_real &value);
 
     /**
      *  \brief Given the number of blend animations, determine the number of blend controllers.

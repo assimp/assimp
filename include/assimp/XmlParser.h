@@ -178,6 +178,19 @@ public:
         return true;
     }
 
+    static inline bool getRealAttribute( XmlNode &xmlNode, const char *name, ai_real &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+#ifdef ASSIMP_DOUBLE_PRECISION
+        val = attr.as_double();
+#else
+        val = attr.as_float();
+#endif
+        return true;
+    }
+
     static inline bool getFloatAttribute(XmlNode &xmlNode, const char *name, float &val ) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {

@@ -21,6 +21,10 @@
    NOCRYPT and NOUNCRYPT.
 */
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+    #define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

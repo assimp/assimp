@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -110,19 +110,18 @@ namespace glTF2 {
         if (a.bufferView) {
             obj.AddMember("bufferView", a.bufferView->index, w.mAl);
             obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
-            Value vTmpMax, vTmpMin;
-            if (a.componentType == ComponentType_FLOAT) {
-                obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
-                obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
-            } else {
-                obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
-                obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
-            }
         }
-
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+        Value vTmpMax, vTmpMin;
+        if (a.componentType == ComponentType_FLOAT) {
+            obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+            obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+        } else {
+            obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
+            obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
+        }
 
         if (a.sparse) {
             Value sparseValue;
@@ -571,7 +570,6 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Node& n, AssetWriter& w)
     {
-
         if (n.matrix.isPresent) {
             Value val;
             obj.AddMember("matrix", MakeValue(val, n.matrix.value, w.mAl).Move(), w.mAl);
@@ -597,14 +595,13 @@ namespace glTF2 {
             obj.AddMember("mesh", n.meshes[0]->index, w.mAl);
         }
 
-        AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
-
         if (n.skin) {
             obj.AddMember("skin", n.skin->index, w.mAl);
         }
-
-        if (!n.jointName.empty()) {
-          obj.AddMember("jointName", n.jointName, w.mAl);
+        
+        //gltf2 spec does not support "skeletons" under node
+        if(n.skeletons.size()) {
+            AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
         }
     }
 

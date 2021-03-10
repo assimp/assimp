@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -175,6 +175,19 @@ public:
         }
 
         val = attr.as_int();
+        return true;
+    }
+
+    static inline bool getRealAttribute( XmlNode &xmlNode, const char *name, ai_real &val ) {
+        pugi::xml_attribute attr = xmlNode.attribute(name);
+        if (attr.empty()) {
+            return false;
+        }
+#ifdef ASSIMP_DOUBLE_PRECISION
+        val = attr.as_double();
+#else
+        val = attr.as_float();
+#endif
         return true;
     }
 

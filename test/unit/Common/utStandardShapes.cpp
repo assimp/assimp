@@ -1,7 +1,7 @@
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 All rights reserved.
 Redistribution and use of this software in source and binary forms,
 with or without modification, are permitted provided that the
@@ -46,7 +46,7 @@ TEST_F( utStandardShapes, testMakeMesh ) {
     Assimp::StandardShapes::MakeSphere(1, positions);
 
     // Make mesh
-    const auto numIndicesPerPrimitive = 3;
+    const auto numIndicesPerPrimitive = 3u;
     aiMesh *aiMeshPtr = Assimp::StandardShapes::MakeMesh(positions, numIndicesPerPrimitive);
 
     // The mNumIndices member of the second face is now incorrect

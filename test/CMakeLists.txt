@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2020, assimp team
+# Copyright (c) 2006-2021, assimp team
 #
 # All rights reserved.
 #
@@ -222,6 +222,10 @@ if(ASSIMP_HUNTER_ENABLED)
 else()
     target_sources(unit PUBLIC ${Assimp_SOURCE_DIR}/contrib/gtest/src/gtest-all.cc)
 endif()
+
+IF (ASSIMP_BUILD_DRACO)
+  ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
+ENDIF()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 

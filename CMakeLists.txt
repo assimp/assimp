@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2020, assimp team
+# Copyright (c) 2006-2021, assimp team
 #
 # All rights reserved.
 #
@@ -46,8 +46,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.269.tar.gz"
-    SHA1 "64024b7b95b4c86d50ae05b926814448c93a70a0"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.293.tar.gz"
+    SHA1 "e8e5470652db77149d9b38656db2a6c0b7642693"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
@@ -452,6 +452,12 @@ IF(ASSIMP_HUNTER_ENABLED)
   set(ZLIB_LIBRARIES ZLIB::zlib)
   set(ASSIMP_BUILD_MINIZIP TRUE)
 ELSE()
+  # If the zlib is already found outside, add an export in case assimpTargets can't find it.
+  IF( ZLIB_FOUND )
+    INSTALL( TARGETS zlib
+        EXPORT "${TARGETS_EXPORT_NAME}")
+  ENDIF()
+
   IF ( NOT ASSIMP_BUILD_ZLIB )
     FIND_PACKAGE(ZLIB)
   ENDIF()
@@ -567,6 +573,94 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
+# Draco requires cmake 3.12
+IF (DEFINED CMAKE_VERSION AND "${CMAKE_VERSION}" VERSION_LESS "3.12")
+  message(NOTICE "draco requires cmake 3.12 or newer, cmake is ${CMAKE_VERSION} . Draco is disabled")
+  SET ( ASSIMP_BUILD_DRACO OFF CACHE BOOL "Disabled: Draco requires newer cmake" FORCE )
+ELSE()
+  OPTION ( ASSIMP_BUILD_DRACO "If the Draco libraries are to be built. Primarily for glTF" OFF )
+  IF ( ASSIMP_BUILD_DRACO )
+    # Primarily for glTF v2
+    # Enable Draco glTF feature set
+    set(DRACO_GLTF ON CACHE BOOL "" FORCE)
+    # Disable unnecessary or omitted components
+    set(DRACO_JS_GLUE OFF CACHE BOOL "" FORCE)
+    set(DRACO_WASM OFF CACHE BOOL "" FORCE)
+    set(DRACO_MAYA_PLUGIN OFF CACHE BOOL "" FORCE)
+    set(DRACO_UNITY_PLUGIN OFF CACHE BOOL "" FORCE)
+    set(DRACO_TESTS OFF CACHE BOOL "" FORCE)
+
+    IF(ASSIMP_HUNTER_ENABLED)
+      hunter_add_package(draco)
+      find_package(draco CONFIG REQUIRED)
+      set(draco_LIBRARIES draco::draco)
+    ELSE()
+      # Draco 1.4.1 has many warnings and will not build with /WX or -Werror
+      # See https://github.com/google/draco/issues/672
+      # and https://github.com/google/draco/issues/673
+      IF(MSVC)
+        set(DRACO_CXX_FLAGS "/W0")
+      ELSE()
+        list(APPEND DRACO_CXX_FLAGS
+          "-Wno-bool-compare"
+          "-Wno-comment"
+          "-Wno-maybe-uninitialized"
+          "-Wno-sign-compare"
+          "-Wno-unused-local-typedefs"
+        )
+        # Draco 1.4.1 does not explicitly export any symbols under GCC/clang
+        list(APPEND DRACO_CXX_FLAGS
+          "-fvisibility=default"
+        )
+      ENDIF()
+
+      # Don't build or install all of Draco by default
+      ADD_SUBDIRECTORY( "contrib/draco" EXCLUDE_FROM_ALL )
+
+      if(MSVC OR WIN32)
+        set(draco_LIBRARIES "draco")
+      else()
+        if(BUILD_SHARED_LIBS)
+          set(draco_LIBRARIES "draco_shared")
+        else()
+          set(draco_LIBRARIES "draco_static")
+        endif()
+      endif()
+
+      # Don't build the draco command-line tools by default
+      set_target_properties(draco_encoder draco_decoder PROPERTIES
+        EXCLUDE_FROM_ALL TRUE
+        EXCLUDE_FROM_DEFAULT_BUILD TRUE
+        )
+
+      # Do build the draco shared library
+      set_target_properties(${draco_LIBRARIES} PROPERTIES
+        EXCLUDE_FROM_ALL FALSE
+        EXCLUDE_FROM_DEFAULT_BUILD FALSE
+        )
+
+      TARGET_USE_COMMON_OUTPUT_DIRECTORY(${draco_LIBRARIES})
+      TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_encoder)
+      TARGET_USE_COMMON_OUTPUT_DIRECTORY(draco_decoder)
+
+      set(draco_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/draco/src")
+
+      # This is probably wrong
+      INSTALL( TARGETS ${draco_LIBRARIES}
+        EXPORT "${TARGETS_EXPORT_NAME}"
+        LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+        FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        COMPONENT ${LIBASSIMP_COMPONENT}
+        INCLUDES DESTINATION include
+    )
+
+    ENDIF()
+  ENDIF()
+ENDIF()
+
+# Main assimp code
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
@@ -580,7 +674,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ()
 
-IF ( ASSIMP_BUILD_SAMPLES)
+IF ( ASSIMP_BUILD_SAMPLES )
   SET( SAMPLES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples )
   SET( SAMPLES_SHARED_CODE_DIR ${SAMPLES_DIR}/SharedCode )
   IF ( WIN32 )

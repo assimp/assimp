@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -107,7 +107,6 @@ public:
             f(file) {}
     ~IOStream() {
         fclose(f);
-        f = 0;
     }
 
     size_t Read(void *b, size_t sz, size_t n) { return fread(b, sz, n, f); }

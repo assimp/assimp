@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -201,8 +201,8 @@ TEST_F(FindDegeneratesProcessTest, meshRemoval) {
 
     mProcess->Execute(scene.get());    
 
-    EXPECT_EQ(scene->mNumMeshes, 1);
+    EXPECT_EQ(scene->mNumMeshes, 1u);
     EXPECT_EQ(scene->mMeshes[0], meshWhichSurvives);
-    EXPECT_EQ(scene->mRootNode->mNumMeshes, 1);
-    EXPECT_EQ(scene->mRootNode->mMeshes[0], 0);    
+    EXPECT_EQ(scene->mRootNode->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mRootNode->mMeshes[0], 0u);    
 }

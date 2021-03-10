@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -1095,6 +1095,7 @@ void glTF2Exporter::ExportMeshes()
     //----------------------------------------
     // Finish the skin
     // Create the Accessor for skinRef->inverseBindMatrices
+    bool bAddCustomizedProperty = this->mProperties->HasPropertyBool("GLTF2_CUSTOMIZE_PROPERTY");
     if (createSkin) {
         mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
         for ( unsigned int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
@@ -1110,7 +1111,7 @@ void glTF2Exporter::ExportMeshes()
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
-        skinRef->bindShapeMatrix.isPresent = true;
+        skinRef->bindShapeMatrix.isPresent = bAddCustomizedProperty;
         IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
         // Find nodes that contain a mesh with bones and add "skeletons" and "skin" attributes to those nodes.
@@ -1131,7 +1132,8 @@ void glTF2Exporter::ExportMeshes()
             std::string meshID = mesh->id;
             FindMeshNode(rootNode, meshNode, meshID);
             Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
-            meshNode->skeletons.push_back(rootJoint);
+            if(bAddCustomizedProperty)
+                meshNode->skeletons.push_back(rootJoint);
             meshNode->skin = skinRef;
         }
         delete[] invBindMatrixData;
@@ -1386,6 +1388,7 @@ void glTF2Exporter::ExportAnimations()
             nameAnim = anim->mName.C_Str();
         }
         Ref<Animation> animRef = mAsset->animations.Create(nameAnim);
+        animRef->name = nameAnim;
 
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];

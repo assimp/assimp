@@ -208,8 +208,8 @@ AI_FORCE_INLINE void ai_trim_right(std::string &s) {
 // ---------------------------------------------------------------------------------
 AI_FORCE_INLINE std::string ai_trim(std::string &s) {
     std::string out(s);
-    ai_trim_left(s);
-    ai_trim_right(s);
+    ai_trim_left(out);
+    ai_trim_right(out);
 
     return out;
 }
@@ -227,6 +227,8 @@ AI_FORCE_INLINE char_t ai_tolower(char_t in) {
 // ---------------------------------------------------------------------------------
 AI_FORCE_INLINE std::string ai_str_tolower(const std::string &in) {
     std::string out(in);
+    ai_trim_left(out);
+    ai_trim_right(out);
     std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) { return ai_tolower(c); });
     return out;
 }

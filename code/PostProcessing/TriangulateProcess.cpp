@@ -217,9 +217,20 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         // if it's a simple point,line or triangle: just copy it
         if( face.mNumIndices <= 3)
         {
+            // ngon encoding: making sure that triangles are not recognized as false ngons.
+            // To do so, we make sure the first indice is not the same as previous triangle emitted.
+            unsigned int prev_first_indice = (unsigned int)-1;
+            if (curOut != out) prev_first_indice = (curOut - 1)->mIndices[0];
+
             aiFace& nface = *curOut++;
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
+
+            if (nface.mIndices[0] == prev_first_indice) {
+                // rotate indices to avoid ngon encoding false ngons
+                std::swap(nface.mIndices[0], nface.mIndices[2]);
+                std::swap(nface.mIndices[1], nface.mIndices[2]);
+            }
 
             face.mIndices = nullptr;
             continue;

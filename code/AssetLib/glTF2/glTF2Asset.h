@@ -1108,6 +1108,7 @@ public:
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
         bool KHR_draco_mesh_compression;
+        bool FB_ngon_encoding;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

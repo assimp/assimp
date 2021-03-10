@@ -507,6 +507,19 @@ namespace glTF2 {
             Mesh::Primitive& p = m.primitives[i];
             Value prim;
             prim.SetObject();
+
+            // Extensions
+            {
+                Value exts;
+                exts.SetObject();
+
+                Value FB_ngon_encoding;
+                FB_ngon_encoding.SetObject();
+
+                exts.AddMember(StringRef("FB_ngon_encoding"), FB_ngon_encoding, w.mAl);
+                prim.AddMember("extensions", exts, w.mAl);
+            }
+
             {
                 prim.AddMember("mode", Value(int(p.mode)).Move(), w.mAl);
 
@@ -873,6 +886,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_transmission) {
                 exts.PushBack(StringRef("KHR_materials_transmission"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.FB_ngon_encoding) {
+                exts.PushBack(StringRef("FB_ngon_encoding"), mAl);
             }
         }
 

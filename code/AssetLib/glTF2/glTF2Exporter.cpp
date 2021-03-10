@@ -97,6 +97,9 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     mAsset.reset( new Asset( pIOSystem ) );
 
+    // Always on as our triangulation process is aware of this type of encoding
+    mAsset->extensionsUsed.FB_ngon_encoding = true;
+
     if (isBinary) {
         mAsset->SetAsBinary();
     }

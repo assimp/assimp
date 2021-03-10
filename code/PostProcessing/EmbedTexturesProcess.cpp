@@ -137,7 +137,7 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     pTexture->pcData = imageContent;
 
     auto extension = path.substr(path.find_last_of('.') + 1u);
-    std::transform(extension.begin(), extension.end(), extension.begin(), ToLower<char> );
+    extension = ai_str_tolower(extension);
     if (extension == "jpeg") {
         extension = "jpg";
     }

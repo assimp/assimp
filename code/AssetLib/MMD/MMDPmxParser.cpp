@@ -524,7 +524,7 @@ namespace pmx
 		if (version != 2.0f && version != 2.1f)
 		{
 			std::cerr << "this is not ver2.0 or ver2.1 but " << version << "." << std::endl;
-            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but ", to_string(version));
+            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but ", ai_to_string(version));
     }
 		this->setting.Read(stream);
 

@@ -237,7 +237,7 @@ void D3MFExporter::writeBaseMaterials() {
         aiMaterial *mat = mScene->mMaterials[i];
         aiString name;
         if (mat->Get(AI_MATKEY_NAME, name) != aiReturn_SUCCESS) {
-            strName = "basemat_" + to_string(i);
+            strName = "basemat_" + ai_to_string(i);
         } else {
             strName = name.C_Str();
         }
@@ -248,7 +248,7 @@ void D3MFExporter::writeBaseMaterials() {
             // rgbs %
             if (color.r <= 1 && color.g <= 1 && color.b <= 1 && color.a <= 1) {
 
-                hexDiffuseColor = Rgba2Hex(
+                hexDiffuseColor = ai_rgba2hex(
                         (int)((ai_real)color.r) * 255,
                         (int)((ai_real)color.g) * 255,
                         (int)((ai_real)color.b) * 255,
@@ -257,13 +257,13 @@ void D3MFExporter::writeBaseMaterials() {
 
             } else {
                 hexDiffuseColor = "#";
-                tmp = DecimalToHexa((ai_real)color.r);
+                tmp = ai_decimal_to_hexa((ai_real)color.r);
                 hexDiffuseColor += tmp;
-                tmp = DecimalToHexa((ai_real)color.g);
+                tmp = ai_decimal_to_hexa((ai_real)color.g);
                 hexDiffuseColor += tmp;
-                tmp = DecimalToHexa((ai_real)color.b);
+                tmp = ai_decimal_to_hexa((ai_real)color.b);
                 hexDiffuseColor += tmp;
-                tmp = DecimalToHexa((ai_real)color.a);
+                tmp = ai_decimal_to_hexa((ai_real)color.a);
                 hexDiffuseColor += tmp;
             }
         } else {
@@ -339,7 +339,7 @@ void D3MFExporter::writeFaces(aiMesh *mesh, unsigned int matIdx) {
         aiFace &currentFace = mesh->mFaces[i];
         mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[0] << "\" v2=\""
                      << currentFace.mIndices[1] << "\" v3=\"" << currentFace.mIndices[2]
-                     << "\" pid=\"1\" p1=\"" + to_string(matIdx) + "\" />";
+                     << "\" pid=\"1\" p1=\"" + ai_to_string(matIdx) + "\" />";
         mModelOutput << std::endl;
     }
     mModelOutput << "</" << XmlTag::triangles << ">";

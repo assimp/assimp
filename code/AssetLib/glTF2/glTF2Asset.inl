@@ -446,7 +446,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     // Unique ptr prevents memory leak in case of Read throws an exception
     auto inst = std::unique_ptr<T>(new T());
     // Try to make this human readable so it can be used in error messages.
-    inst->id = std::string(mDictId) + "[" + to_string(i) + "]";
+    inst->id = std::string(mDictId) + "[" + ai_to_string(i) + "]";
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
@@ -538,13 +538,13 @@ inline void Buffer::Read(Value &obj, Asset &r) {
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                        " bytes, but found ", to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", ai_to_string(statedLength),
+                        " bytes, but found ", ai_to_string(dataURI.dataLength));
             }
         } else { // assume raw data
             if (statedLength != dataURI.dataLength) {
-                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                        " bytes, but found ", to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", ai_to_string(statedLength),
+                        " bytes, but found ", ai_to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
@@ -1800,7 +1800,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     }
 
     AI_SWAP4(header.version);
-    asset.version = to_string(header.version);
+    asset.version = ai_to_string(header.version);
     if (header.version != 2) {
         throw DeadlyImportError("GLTF: Unsupported binary glTF version");
     }

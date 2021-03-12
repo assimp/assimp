@@ -116,7 +116,7 @@ public:
             Mask = 0xf,
         };
 
-        inline const uint8_t GetType() const { return (flags & Mask); }
+        inline uint8_t GetType() const { return (flags & Mask); }
     };
 
     // Represents an AC3D object

@@ -351,7 +351,7 @@ struct aiMetadata {
             *static_cast<T *>(mValues[index].mData) = value;
         } else {
             if (nullptr != mValues[index].mData) {
-                delete mValues[index].mData;
+                delete static_cast<T *>(mValues[index].mData);
                 mValues[index].mData = nullptr;
             }
             mValues[index].mData = new T(value);

@@ -324,7 +324,7 @@ void Discreet3DSImporter::ParseObjectChunk() {
     case Discreet3DS::CHUNK_MAT_MATERIAL:
 
         // Add a new material to the list
-        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + to_string(mScene->mMaterials.size()))));
+        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + ai_to_string(mScene->mMaterials.size()))));
         ParseMaterialChunk();
         break;
 

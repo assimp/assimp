@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/fast_atof.h>
+#include <assimp/StringUtils.h>
 
 // Header files, stdlib.
 #include <memory>
@@ -306,7 +307,8 @@ void AMFImporter::ParseNode_Root() {
         throw DeadlyImportError("Root node \"amf\" not found.");
     }
     XmlNode node = *root;
-    mUnit = node.attribute("unit").as_string();
+    mUnit = ai_str_tolower(std::string(node.attribute("unit").as_string()));
+    
     mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.

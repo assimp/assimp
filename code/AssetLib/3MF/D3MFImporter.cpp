@@ -116,7 +116,7 @@ public:
 
     Object(int id) :
             Resource(id),
-            mName (std::string("Object_") + to_string(id)){}
+            mName(std::string("Object_") + ai_to_string(id)) {}
 
     virtual ResourceType getType() {
         return ResourceType::RT_Object;
@@ -321,7 +321,7 @@ private:
         bool hasPid = getNodeAttribute(node, D3MF::XmlTag::pid, pid);
         bool hasPindex = getNodeAttribute(node, D3MF::XmlTag::pindex, pindex);
 
-        std::string idStr = to_string(id);
+        std::string idStr = ai_to_string(id);
 
         if (!hasId) {
             return;
@@ -531,7 +531,7 @@ private:
         bool hasName = getNodeAttribute(node, D3MF::XmlTag::basematerials_name, name);
 
         std::string stdMaterialName;
-        std::string strId(to_string(basematerialsId));
+        std::string strId(ai_to_string(basematerialsId));
         stdMaterialName += "id";
         stdMaterialName += strId;
         stdMaterialName += "_";
@@ -539,7 +539,7 @@ private:
             stdMaterialName += std::string(name);
         } else {
             stdMaterialName += "basemat_";
-            stdMaterialName += to_string(mMaterialCount - basematerialsId);
+            stdMaterialName += ai_to_string(mMaterialCount - basematerialsId);
         }
 
         aiString assimpMaterialName(stdMaterialName);

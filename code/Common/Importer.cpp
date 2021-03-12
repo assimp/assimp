@@ -975,15 +975,14 @@ size_t Importer::GetImporterIndex (const char* szExtension) const {
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
-    // skip over wildcard and dot characters at string head --
+    // skip over wild-card and dot characters at string head --
     for ( ; *szExtension == '*' || *szExtension == '.'; ++szExtension );
 
     std::string ext(szExtension);
     if (ext.empty()) {
         return static_cast<size_t>(-1);
     }
-    std::transform( ext.begin(), ext.end(), ext.begin(), ToLower<char> );
-
+    ext = ai_str_tolower(ext);
     std::set<std::string> str;
     for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)  {
         str.clear();

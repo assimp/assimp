@@ -502,7 +502,6 @@ int ProcessStandardArguments(
 			fill.verbose = true;
 		}
 		else if (!strncmp(params[i], "-rx=", 4) || !strncmp(params[i], "--rotation-x=", 13)) {
-            printf("%s", params[i]);
             std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
             fill.rot.x = std::stof(value);
 		} 

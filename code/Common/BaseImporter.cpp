@@ -276,7 +276,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
 
     // thanks to Andy Maloney for the hint
     std::string ret = file.substr(pos + 1);
-    std::transform(ret.begin(), ret.end(), ret.begin(), ToLower<char>);
+    ret = ai_str_tolower(ret);
 
     return ret;
 }

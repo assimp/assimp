@@ -3440,7 +3440,7 @@ void FBXConverter::ConvertGlobalSettings() {
     mSceneOut->mMetaData->Set(12, "TimeSpanStart", doc.GlobalSettings().TimeSpanStart());
     mSceneOut->mMetaData->Set(13, "TimeSpanStop", doc.GlobalSettings().TimeSpanStop());
     mSceneOut->mMetaData->Set(14, "CustomFrameRate", doc.GlobalSettings().CustomFrameRate());
-    mSceneOut->mMetaData->Set(15, AI_METADATA_SOURCE_FORMAT_VERSION, aiString(to_string(doc.FBXVersion())));
+    mSceneOut->mMetaData->Set(15, AI_METADATA_SOURCE_FORMAT_VERSION, aiString(ai_to_string(doc.FBXVersion())));
     if (hasGenerator) {
         mSceneOut->mMetaData->Set(16, AI_METADATA_SOURCE_GENERATOR, aiString(doc.Creator()));
     }
@@ -3454,42 +3454,42 @@ void FBXConverter::TransferDataToScene() {
     // many C++ users seem to know this, so pointing it out to avoid
     // confusion why this code works.
 
-    if (mMeshes.size()) {
+    if (!mMeshes.empty()) {
         mSceneOut->mMeshes = new aiMesh *[mMeshes.size()]();
         mSceneOut->mNumMeshes = static_cast<unsigned int>(mMeshes.size());
 
         std::swap_ranges(mMeshes.begin(), mMeshes.end(), mSceneOut->mMeshes);
     }
 
-    if (materials.size()) {
+    if (!materials.empty()) {
         mSceneOut->mMaterials = new aiMaterial *[materials.size()]();
         mSceneOut->mNumMaterials = static_cast<unsigned int>(materials.size());
 
         std::swap_ranges(materials.begin(), materials.end(), mSceneOut->mMaterials);
     }
 
-    if (animations.size()) {
+    if (!animations.empty()) {
         mSceneOut->mAnimations = new aiAnimation *[animations.size()]();
         mSceneOut->mNumAnimations = static_cast<unsigned int>(animations.size());
 
         std::swap_ranges(animations.begin(), animations.end(), mSceneOut->mAnimations);
     }
 
-    if (lights.size()) {
+    if (!lights.empty()) {
         mSceneOut->mLights = new aiLight *[lights.size()]();
         mSceneOut->mNumLights = static_cast<unsigned int>(lights.size());
 
         std::swap_ranges(lights.begin(), lights.end(), mSceneOut->mLights);
     }
 
-    if (cameras.size()) {
+    if (!cameras.empty()) {
         mSceneOut->mCameras = new aiCamera *[cameras.size()]();
         mSceneOut->mNumCameras = static_cast<unsigned int>(cameras.size());
 
         std::swap_ranges(cameras.begin(), cameras.end(), mSceneOut->mCameras);
     }
 
-    if (textures.size()) {
+    if (!textures.empty()) {
         mSceneOut->mTextures = new aiTexture *[textures.size()]();
         mSceneOut->mNumTextures = static_cast<unsigned int>(textures.size());
 

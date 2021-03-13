@@ -873,7 +873,7 @@ nl_clean_loop:
         pScene->mNumMaterials = static_cast<unsigned int>(mTexture_Converted.size());
         pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
         for (const SPP_Texture &tex_convd : mTexture_Converted) {
-            const aiString texture_id(AI_EMBEDDED_TEXNAME_PREFIX + to_string(idx));
+            const aiString texture_id(AI_EMBEDDED_TEXNAME_PREFIX + ai_to_string(idx));
             const int mode = aiTextureOp_Multiply;
             const int repeat = tex_convd.Tiled ? 1 : 0;
 

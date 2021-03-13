@@ -45,10 +45,10 @@ class utStringUtils : public ::testing::Test {
 };
 
 TEST_F( utStringUtils, to_string_Test ) {
-    std::string res = to_string( 1 );
+    std::string res = ai_to_string( 1 );
     EXPECT_EQ( res, "1" );
 
-    res = to_string( 1.0f );
+    res = ai_to_string( 1.0f );
     EXPECT_EQ( res, "1" );
 }
 

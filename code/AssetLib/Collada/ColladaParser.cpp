@@ -372,7 +372,7 @@ void ColladaParser::ReadMetaDataItem(XmlNode &node, StringMetaData &metadata) {
         return;
     }
 
-    trim(v);
+    v = ai_trim(v);
     aiString aistr;
     aistr.Set(v);
 
@@ -397,7 +397,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
     std::string animName;
     if (!XmlParser::getStdStrAttribute(node, "name", animName)) {
         if (!XmlParser::getStdStrAttribute( node, "id", animName )) {
-            animName = std::string("animation_") + to_string(mAnimationClipLibrary.size());
+            animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
         }
     }
 
@@ -1415,7 +1415,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
     XmlParser::getUIntAttribute(node, "count", count);
     std::string v;
     XmlParser::getValueAsString(node, v);
-    trim(v);
+    v = ai_trim(v);
     const char *content = v.c_str();
 
     // read values and store inside an array in the data library

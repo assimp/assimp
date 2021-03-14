@@ -234,7 +234,7 @@ void glTFImporter::ImportMeshes(glTF::Asset &r) {
                     buf->EncodedRegion_SetCurrent(mesh.id);
                 } else
                 {
-                    throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"", to_string(cur_ext->Type),
+                    throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"", ai_to_string(cur_ext->Type),
                                             "\"), only Open3DGC is supported.");
                 }
             }

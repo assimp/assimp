@@ -266,7 +266,7 @@ int Assimp_Extract(const char *const *params, unsigned int num) {
 #endif
     }
 
-    std::transform(extension.begin(), extension.end(), extension.begin(), Assimp::ToLower<char>);
+    std::transform(extension.begin(), extension.end(), extension.begin(), ai_tolower<char>);
 
     if (out[0] == '-') {
         // take file name from input file

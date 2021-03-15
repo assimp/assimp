@@ -185,7 +185,7 @@ inline void throwUnexpectedTypeError(const char (&expectedTypeName)[N], const ch
     std::string fullContext = context;
     if (extraContext && (strlen(extraContext) > 0))
     {
-        fullContext += " (", extraContext, ")";
+        fullContext = fullContext + " (" + extraContext + ")";
     }
     throw DeadlyImportError("Member \"", memberId, "\" was not of type \"", expectedTypeName, "\" when reading ", fullContext);
 }

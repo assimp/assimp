@@ -609,3 +609,27 @@ TEST_F(utglTF2ImportExport, import_dracoEncoded) {
 #endif
 }
 
+TEST_F(utglTF2ImportExport, wrongTypes) {
+    // Deliberately broken version of the BoxTextured.gltf asset.
+    std::vector<std::tuple<std::string, std::string, std::string>> wrongTypes = {
+        { "/glTF2/wrongTypes/badArray.gltf", "array", "meshes[0]" },
+        { "/glTF2/wrongTypes/badString.gltf", "string", "scenes[0]" },
+        { "/glTF2/wrongTypes/badUint.gltf", "uint", "materials[0]" },
+        { "/glTF2/wrongTypes/badNumber.gltf", "number", "materials[0]" },
+        { "/glTF2/wrongTypes/badObject.gltf", "object", "materials[0]" },
+        { "/glTF2/wrongTypes/badExtension.gltf", "object", "materials[0]" }
+    };
+    for (const auto& tuple : wrongTypes)
+    {
+        const auto& file = std::get<0>(tuple);
+        const auto& type = std::get<1>(tuple);
+        const auto& context = std::get<2>(tuple);
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR + file , aiProcess_ValidateDataStructure);
+        ASSERT_EQ(scene, nullptr);
+        const std::string error = importer.GetErrorString();
+        EXPECT_FALSE(error.empty());
+        EXPECT_NE(error.find(std::string("was not of type \"") + type + "\" when reading " + context), std::string::npos);
+    }
+}
+

@@ -249,7 +249,7 @@ inline Value *FindObjectInContext(Value &val, const char *memberId, const char* 
 
 inline Value *FindExtensionInContext(Value &val, const char *extensionId, const char* context, const char* extraContext = nullptr) {
     if (Value *extensionList = FindObjectInContext(val, "extensions", context, extraContext)) {
-        if (Value *extension = FindObjectInContext(*extensionList, extensionId, "extensions")) {
+        if (Value *extension = FindObjectInContext(*extensionList, extensionId, context, extraContext)) {
             return extension;
         }
     }
@@ -1857,14 +1857,7 @@ inline void AssetMetadata::Read(Document &doc) {
 
         if (Value *versionString = FindStringInContext(*obj, "version", "\"asset\"")) {
             version = versionString->GetString();
-        } else if (Value *versionNumber = FindNumberInContext(*obj, "version", "\"asset\"")) {
-            char buf[4];
-
-            ai_snprintf(buf, 4, "%.1f", versionNumber->GetDouble());
-
-            version = buf;
         }
-
         Value *curProfile = FindObjectInContext(*obj, "profile", "\"asset\"");
         if (nullptr != curProfile) {
             ReadMember(*curProfile, "api", this->profile.api);

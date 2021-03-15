@@ -370,6 +370,13 @@ struct Object {
 
     //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
     static const char *TranslateId(Asset & /*r*/, const char *id) { return id; }
+
+    inline Value *FindString(Value &val, const char *id);
+    inline Value *FindNumber(Value &val, const char *id);
+    inline Value *FindUInt(Value &val, const char *id);
+    inline Value *FindArray(Value &val, const char *id);
+    inline Value *FindObject(Value &val, const char *id);
+    inline Value *FindExtension(Value &val, const char *extensionId);
 };
 
 //
@@ -780,6 +787,11 @@ struct Material : public Object {
     Material() { SetDefaults(); }
     void Read(Value &obj, Asset &r);
     void SetDefaults();
+
+    inline void SetTextureProperties(Asset &r, Value *prop, TextureInfo &out);
+    inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, TextureInfo &out);
+    inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, NormalTextureInfo &out);
+    inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, OcclusionTextureInfo &out);
 };
 
 //! A set of primitives to be rendered. A node can contain one or more meshes. A node's transform places the mesh in the scene.

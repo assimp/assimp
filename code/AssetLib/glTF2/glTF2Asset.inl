@@ -180,40 +180,132 @@ inline Value *FindMember(Value &val, const char *id) {
     return (it != val.MemberEnd()) ? &it->value : nullptr;
 }
 
-inline Value *FindString(Value &val, const char *id) {
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : nullptr;
+template<int N>
+inline void throwUnexpectedTypeError(const char (&expectedTypeName)[N], const char* memberId, const char* context, const char* extraContext) {
+    std::string fullContext = context;
+    if (extraContext && (strlen(extraContext) > 0))
+    {
+        fullContext += " (", extraContext, ")";
+    }
+    throw DeadlyImportError("Member \"", memberId, "\" was not of type \"", expectedTypeName, "\" when reading ", fullContext);
 }
 
-inline Value *FindNumber(Value &val, const char *id) {
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : nullptr;
+// Look-up functions with type checks. Context and extra context help the user identify the problem if there's an error.
+
+inline Value *FindStringInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsString()) {
+        throwUnexpectedTypeError("string", memberId, context, extraContext);
+    }
+    return &it->value;
 }
 
-inline Value *FindUInt(Value &val, const char *id) {
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsUint()) ? &it->value : nullptr;
+inline Value *FindNumberInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsNumber()) {
+        throwUnexpectedTypeError("number", memberId, context, extraContext);
+    }
+    return &it->value;
 }
 
-inline Value *FindArray(Value &val, const char *id) {
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : nullptr;
+inline Value *FindUIntInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsUint()) {
+        throwUnexpectedTypeError("uint", memberId, context, extraContext);
+    }
+    return &it->value;
 }
 
-inline Value *FindObject(Value &val, const char *id) {
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : nullptr;
+inline Value *FindArrayInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsArray()) {
+        throwUnexpectedTypeError("array", memberId, context, extraContext);
+    }
+    return &it->value;
 }
 
-inline Value *FindExtension(Value &val, const char *extensionId) {
-    if (Value *extensionList = FindObject(val, "extensions")) {
-        if (Value *extension = FindObject(*extensionList, extensionId)) {
+inline Value *FindObjectInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsObject()) {
+        throwUnexpectedTypeError("object", memberId, context, extraContext);
+    }
+    return &it->value;
+}
+
+inline Value *FindExtensionInContext(Value &val, const char *extensionId, const char* context, const char* extraContext = nullptr) {
+    if (Value *extensionList = FindObjectInContext(val, "extensions", context, extraContext)) {
+        if (Value *extension = FindObjectInContext(*extensionList, extensionId, "extensions")) {
             return extension;
         }
     }
     return nullptr;
 }
+
+// Overloads when the value is the document.
+
+inline Value *FindString(Document &doc, const char *memberId) {
+    return FindStringInContext(doc, memberId, "the document");
+}
+
+inline Value *FindNumber(Document &doc, const char *memberId) {
+    return FindNumberInContext(doc, memberId, "the document");
+}
+
+inline Value *FindUInt(Document &doc, const char *memberId) {
+    return FindUIntInContext(doc, memberId, "the document");
+}
+
+inline Value *FindArray(Document &val, const char *memberId) {
+    return FindArrayInContext(val, memberId, "the document");
+}
+
+inline Value *FindObject(Document &doc, const char *memberId) {
+    return FindObjectInContext(doc, memberId, "the document");
+}
+
+inline Value *FindExtension(Value &val, const char *extensionId) {
+    return FindExtensionInContext(val, extensionId, "the document");
+}
 } // namespace
+
+inline Value *Object::FindString(Value &val, const char *memberId) {
+    return FindStringInContext(val, memberId, id.c_str(), name.c_str());
+}
+
+inline Value *Object::FindNumber(Value &val, const char *memberId) {
+    return FindNumberInContext(val, memberId, id.c_str(), name.c_str());
+}
+
+inline Value *Object::FindUInt(Value &val, const char *memberId) {
+    return FindUIntInContext(val, memberId, id.c_str(), name.c_str());
+}
+
+inline Value *Object::FindArray(Value &val, const char *memberId) {
+    return FindArrayInContext(val, memberId, id.c_str(), name.c_str());
+}
+
+inline Value *Object::FindObject(Value &val, const char *memberId) {
+    return FindObjectInContext(val, memberId, id.c_str(), name.c_str());
+}
+
+inline Value *Object::FindExtension(Value &val, const char *extensionId) {
+    return FindExtensionInContext(val, extensionId, id.c_str(), name.c_str());
+}
 
 #ifdef ASSIMP_ENABLE_DRACO
 
@@ -349,17 +441,20 @@ inline LazyDict<T>::~LazyDict() {
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
     Value *container = nullptr;
+    const char* context = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
-            container = FindObject(*exts, mExtId);
+            container = FindObjectInContext(*exts, mExtId, "extensions");
+            context = mExtId;
         }
     } else {
         container = &doc;
+        context = "the document";
     }
 
     if (container) {
-        mDict = FindArray(*container, mDictId);
+        mDict = FindArrayInContext(*container, mDictId, context);
     }
 }
 
@@ -1107,8 +1202,7 @@ inline void Texture::Read(Value &obj, Asset &r) {
     }
 }
 
-namespace {
-inline void SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
+void Material::SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
     if (r.extensionsUsed.KHR_texture_transform) {
         if (Value *pKHR_texture_transform = FindExtension(*prop, "KHR_texture_transform")) {
             out.textureTransformSupported = true;
@@ -1134,8 +1228,8 @@ inline void SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
         }
     }
 
-    if (Value *index = FindUInt(*prop, "index")) {
-        out.texture = r.textures.Retrieve(index->GetUint());
+    if (Value *indexProp = FindUInt(*prop, "index")) {
+        out.texture = r.textures.Retrieve(indexProp->GetUint());
     }
 
     if (Value *texcoord = FindUInt(*prop, "texCoord")) {
@@ -1143,13 +1237,13 @@ inline void SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
     }
 }
 
-inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, TextureInfo &out) {
+inline void Material::ReadTextureProperty(Asset &r, Value &vals, const char *propName, TextureInfo &out) {
     if (Value *prop = FindMember(vals, propName)) {
         SetTextureProperties(r, prop, out);
     }
 }
 
-inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, NormalTextureInfo &out) {
+inline void Material::ReadTextureProperty(Asset &r, Value &vals, const char *propName, NormalTextureInfo &out) {
     if (Value *prop = FindMember(vals, propName)) {
         SetTextureProperties(r, prop, out);
 
@@ -1159,7 +1253,7 @@ inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, Nor
     }
 }
 
-inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, OcclusionTextureInfo &out) {
+inline void Material::ReadTextureProperty(Asset &r, Value &vals, const char *propName, OcclusionTextureInfo &out) {
     if (Value *prop = FindMember(vals, propName)) {
         SetTextureProperties(r, prop, out);
 
@@ -1168,7 +1262,6 @@ inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, Occ
         }
     }
 }
-} // namespace
 
 inline void Material::Read(Value &material, Asset &r) {
     SetDefaults();
@@ -1762,9 +1855,9 @@ inline void AssetMetadata::Read(Document &doc) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
-        if (Value *versionString = FindString(*obj, "version")) {
+        if (Value *versionString = FindStringInContext(*obj, "version", "\"asset\"")) {
             version = versionString->GetString();
-        } else if (Value *versionNumber = FindNumber(*obj, "version")) {
+        } else if (Value *versionNumber = FindNumberInContext(*obj, "version", "\"asset\"")) {
             char buf[4];
 
             ai_snprintf(buf, 4, "%.1f", versionNumber->GetDouble());
@@ -1772,7 +1865,7 @@ inline void AssetMetadata::Read(Document &doc) {
             version = buf;
         }
 
-        Value *curProfile = FindObject(*obj, "profile");
+        Value *curProfile = FindObjectInContext(*obj, "profile", "\"asset\"");
         if (nullptr != curProfile) {
             ReadMember(*curProfile, "api", this->profile.api);
             ReadMember(*curProfile, "version", this->profile.version);

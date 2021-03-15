@@ -886,6 +886,7 @@ namespace glTF2 {
         if (d.mObjs.empty()) return;
 
         Value* container = &mDoc;
+		const char* context = "Document";
 
         if (d.mExtId) {
             Value* exts = FindObject(mDoc, "extensions");
@@ -894,17 +895,18 @@ namespace glTF2 {
                 exts = FindObject(mDoc, "extensions");
             }
 
-            container = FindObject(*exts, d.mExtId);
+            container = FindObjectInContext(*exts, d.mExtId, "extensions");
             if (nullptr != container) {
                 exts->AddMember(StringRef(d.mExtId), Value().SetObject().Move(), mDoc.GetAllocator());
-                container = FindObject(*exts, d.mExtId);
+                container = FindObjectInContext(*exts, d.mExtId, "extensions");
+                context = d.mExtId;
             }
         }
 
-        Value *dict = FindArray(*container, d.mDictId);
+        Value *dict = FindArrayInContext(*container, d.mDictId, context);
         if (nullptr == dict) {
             container->AddMember(StringRef(d.mDictId), Value().SetArray().Move(), mDoc.GetAllocator());
-            dict = FindArray(*container, d.mDictId);
+            dict = FindArrayInContext(*container, d.mDictId, context);
             if (nullptr == dict) {
                 return;
             }

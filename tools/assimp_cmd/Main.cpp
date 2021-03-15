@@ -327,8 +327,8 @@ bool ExportModel(const aiScene* pOut,
 
 	aiMatrix4x4 rx, ry, rz;
     aiMatrix4x4::RotationX(imp.rot.x, rx);
-    aiMatrix4x4::RotationX(imp.rot.y, ry);
-    aiMatrix4x4::RotationX(imp.rot.z, rz);
+    aiMatrix4x4::RotationY(imp.rot.y, ry);
+    aiMatrix4x4::RotationZ(imp.rot.z, rz);
 	pOut->mRootNode->mTransformation *= rx;
     pOut->mRootNode->mTransformation *= ry;
     pOut->mRootNode->mTransformation *= rz;

@@ -883,7 +883,14 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
-    count = MemberOrDefault(obj, "count", size_t(0));
+    {
+        const Value* countValue = FindUInt(obj, "count");
+        if (!countValue || countValue->GetInt() < 1)
+        {
+            throw DeadlyImportError("A strictly positive count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+        }
+        count = countValue->GetUint();
+    }
 
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;

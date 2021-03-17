@@ -75,6 +75,10 @@ public:
     template<typename... T>
     explicit DeadlyImportError(T&&... args) :
             DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
+
+#if defined(_MSC_VER) && defined(__clang__)
+    DeadlyImportError(DeadlyImportError& other) = delete;
+#endif
 };
 
 class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
@@ -83,6 +87,10 @@ public:
     template<typename... T>
     explicit DeadlyExportError(T&&... args) :
             DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
+
+#if defined(_MSC_VER) && defined(__clang__)
+    DeadlyExportError(DeadlyExportError& other) = delete;
+#endif
 };
 
 #ifdef _MSC_VER

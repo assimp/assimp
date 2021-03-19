@@ -383,6 +383,7 @@ unsigned int LazyDict<T>::Remove(const char *id) {
     mAsset.mUsedIds[id] = false;
     mObjsById.erase(id);
     mObjsByOIndex.erase(index);
+    delete mObjs[index];
     mObjs.erase(mObjs.begin() + index);
 
     //update index of object in mObjs;

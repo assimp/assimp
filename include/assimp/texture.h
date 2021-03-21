@@ -80,8 +80,6 @@ extern "C" {
 #   define AI_MAKE_EMBEDDED_TEXNAME(_n_) AI_EMBEDDED_TEXNAME_PREFIX # _n_
 #endif
 
-#include "./Compiler/pushpack1.h"
-
 // --------------------------------------------------------------------------------
 /** @brief Helper structure to represent a texel in a ARGB8888 format
 *
@@ -113,8 +111,6 @@ struct aiTexel {
 #endif // __cplusplus
 
 } PACK_STRUCT;
-
-#include "./Compiler/poppack1.h"
 
 #define HINTMAXTEXTURELEN 9
 

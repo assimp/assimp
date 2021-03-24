@@ -536,35 +536,47 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     Mesh::Primitive::Target &target = targets[i];
 
                     if (needPositions) {
-                        aiVector3D *positionDiff = nullptr;
-                        target.position[0]->ExtractData(positionDiff);
-                        for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
-                            aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
+                        if (target.position[0]->count != aim->mNumVertices) {
+                            DefaultLogger::get()->warn("Positions of target in mesh \"" + mesh.name + "\" does not match the vertex count");
+                        } else {
+                            aiVector3D *positionDiff = nullptr;
+                            target.position[0]->ExtractData(positionDiff);
+                            for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                                aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
+                            }
+                            delete[] positionDiff;
                         }
-                        delete[] positionDiff;
                     }
                     if (needNormals) {
-                        aiVector3D *normalDiff = nullptr;
-                        target.normal[0]->ExtractData(normalDiff);
-                        for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
-                            aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
+                        if (target.normal[0]->count != aim->mNumVertices) {
+                            DefaultLogger::get()->warn("Normals of target in mesh \"" + mesh.name + "\" does not match the vertex count");
+                        } else {
+                            aiVector3D *normalDiff = nullptr;
+                            target.normal[0]->ExtractData(normalDiff);
+                            for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                                aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
+                            }
+                            delete[] normalDiff;
                         }
-                        delete[] normalDiff;
                     }
                     if (needTangents) {
-                        Tangent *tangent = nullptr;
-                        attr.tangent[0]->ExtractData(tangent);
+                        if (target.tangent[0]->count != aim->mNumVertices) {
+                            DefaultLogger::get()->warn("Tangents of target in mesh \"" + mesh.name + "\" does not match the vertex count");
+                        } else {
+                            Tangent *tangent = nullptr;
+                            attr.tangent[0]->ExtractData(tangent);
 
-                        aiVector3D *tangentDiff = nullptr;
-                        target.tangent[0]->ExtractData(tangentDiff);
+                            aiVector3D *tangentDiff = nullptr;
+                            target.tangent[0]->ExtractData(tangentDiff);
 
-                        for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
-                            tangent[vertexId].xyz += tangentDiff[vertexId];
-                            aiAnimMesh.mTangents[vertexId] = tangent[vertexId].xyz;
-                            aiAnimMesh.mBitangents[vertexId] = (aiAnimMesh.mNormals[vertexId] ^ tangent[vertexId].xyz) * tangent[vertexId].w;
+                            for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
+                                tangent[vertexId].xyz += tangentDiff[vertexId];
+                                aiAnimMesh.mTangents[vertexId] = tangent[vertexId].xyz;
+                                aiAnimMesh.mBitangents[vertexId] = (aiAnimMesh.mNormals[vertexId] ^ tangent[vertexId].xyz) * tangent[vertexId].w;
+                            }
+                            delete[] tangent;
+                            delete[] tangentDiff;
                         }
-                        delete[] tangent;
-                        delete[] tangentDiff;
                     }
                     if (mesh.weights.size() > i) {
                         aiAnimMesh.mWeight = mesh.weights[i];

@@ -527,8 +527,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 std::fill(aim->mAnimMeshes, aim->mAnimMeshes + aim->mNumAnimMeshes, nullptr);
                 for (size_t i = 0; i < targets.size(); i++) {
                     bool needPositions = targets[i].position.size() > 0;
-                    bool needNormals = targets[i].normal.size() > 0;
-                    bool needTangents = targets[i].tangent.size() > 0;
+                    bool needNormals = (targets[i].normal.size() > 0) && aim->HasNormals();
+                    bool needTangents = (targets[i].tangent.size() > 0) && aim->HasTangentsAndBitangents();
                     // GLTF morph does not support colors and texCoords
                     aim->mAnimMeshes[i] = aiCreateAnimMesh(aim,
                             needPositions, needNormals, needTangents, false, false);
@@ -537,7 +537,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                     if (needPositions) {
                         if (target.position[0]->count != aim->mNumVertices) {
-                            DefaultLogger::get()->warn("Positions of target in mesh \"" + mesh.name + "\" does not match the vertex count");
+                            ASSIMP_LOG_WARN_F("Positions of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *positionDiff = nullptr;
                             target.position[0]->ExtractData(positionDiff);
@@ -549,7 +549,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     }
                     if (needNormals) {
                         if (target.normal[0]->count != aim->mNumVertices) {
-                            DefaultLogger::get()->warn("Normals of target in mesh \"" + mesh.name + "\" does not match the vertex count");
+                            ASSIMP_LOG_WARN_F("Normals of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *normalDiff = nullptr;
                             target.normal[0]->ExtractData(normalDiff);
@@ -561,7 +561,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     }
                     if (needTangents) {
                         if (target.tangent[0]->count != aim->mNumVertices) {
-                            DefaultLogger::get()->warn("Tangents of target in mesh \"" + mesh.name + "\" does not match the vertex count");
+                            ASSIMP_LOG_WARN_F("Tangents of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             Tangent *tangent = nullptr;
                             attr.tangent[0]->ExtractData(tangent);

@@ -509,6 +509,7 @@ namespace glTF2 {
             prim.SetObject();
 
             // Extensions
+            if (p.ngonEncoded)
             {
                 Value exts;
                 exts.SetObject();

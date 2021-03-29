@@ -195,6 +195,13 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
     const aiVector3D* verts = pMesh->mVertices;
 
+    // NGON encoding note: making sure that triangles are not recognized as false ngons.
+    // To do so, we make sure the first indice of the new emitted triangle is not the same as previous one.
+    unsigned int prev_first_indice = (unsigned int)-1;
+
+    // The mesh becomes NGON encoded now, during the triangulation process.
+    pMesh->mPrimitiveTypes |= aiPrimitiveType_NGONEncodingFlag;
+
     // use std::unique_ptr to avoid slow std::vector<bool> specialiations
     std::unique_ptr<bool[]> done(new bool[max_out]);
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
@@ -214,24 +221,12 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
         aiFace* const last_face = curOut;
 
-        // ngon encoding: making sure that triangles are not recognized as false ngons.
-        // To do so, we make sure the first indice is not the same as previous triangle emitted.
-        unsigned int prev_first_indice = (unsigned int)-1;
-        if (curOut != out) prev_first_indice = (curOut - 1)->mIndices[0];
-
         // if it's a simple point,line or triangle: just copy it
         if( face.mNumIndices <= 3)
         {
             aiFace& nface = *curOut++;
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
-
-            if (nface.mIndices[0] == prev_first_indice) {
-                // rotate indices to avoid ngon encoding false ngons
-                std::swap(nface.mIndices[0], nface.mIndices[2]);
-                std::swap(nface.mIndices[1], nface.mIndices[2]);
-            }
-
             face.mIndices = nullptr;
             continue;
         }
@@ -242,7 +237,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // this vertex (if it exists) and start tri-fanning from
             // it.
             //
-            // Due to ngon encoding, if this concave vertex is the same as the previously
+            // Due to NGON encoding, if this concave vertex is the same as the previously
             // emitted triangle, we use the opposite vertex which also happens to work
             // for tri-fanning a concave quad.
             // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
@@ -265,7 +260,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
                 const float angle = std::acos(left*diag) + std::acos(right*diag);
                 if (angle > AI_MATH_PI_F) {
-                    // i is the concave point
+                    // this is the concave point
                     start_vertex = i;
                     break;
                 }
@@ -306,11 +301,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // modeling suite to make extensive use of highly concave, monster polygons ...
             // so we need to apply the full 'ear cutting' algorithm to get it right.
 
-            // RERQUIREMENT: polygon is expected to be simple and *nearly* planar.
+            // REQUIREMENT: polygon is expected to be simple and *nearly* planar.
             // We project it onto a plane to get a 2d triangle.
 
             // Collect all vertices of of the polygon.
-           for (tmp = 0; tmp < max; ++tmp) {
+            for (tmp = 0; tmp < max; ++tmp) {
                 temp_verts3d[tmp] = verts[idx[tmp]];
             }
 
@@ -530,6 +525,17 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             i[0] = idx[i[0]];
             i[1] = idx[i[1]];
             i[2] = idx[i[2]];
+
+            // NGON encoding: only quads are supported. 
+            // For everything else, we make sure we don't emit 'false' ngons. We thus avoid having 
+            // 2 consecutive triangles with their first index identical.
+            if (face.mNumIndices != 4 && i[0] == prev_first_indice) {
+                // rotate indices
+                std::swap(i[0], i[2]);
+                std::swap(i[1], i[2]);
+            }
+
+            prev_first_indice = i[0];
             ++f;
         }
 
